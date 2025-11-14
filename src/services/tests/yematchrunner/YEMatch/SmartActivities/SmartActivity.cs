@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using YEMatch.YEMatch.Activities;
+using YEMatch.Activities;
 
-namespace YEMatch.YEMatch.SmartActivities;
+namespace YEMatch.SmartActivities;
 
 #pragma warning disable CS1998
 
@@ -28,7 +28,6 @@ public class SmartActivity : IActivity
 
     public async Task<Outcome> Execute()
     {
-        Console.WriteLine($"SMART>         {name} {Command}  - start at: {DateTime.Now}");
         Stopwatch stopwatch = new();
         stopwatch.Start();
         Outcome outcome = await _func(_client, name, Command);

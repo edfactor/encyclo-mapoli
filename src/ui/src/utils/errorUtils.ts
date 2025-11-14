@@ -14,10 +14,14 @@ export const createValidationErrorsMessage = (message: ServiceErrorResponse): st
       // Add field name
       fieldErrorsStr += `\n${field}:`;
 
-      // Add indented messages
-      messages.forEach((message) => {
-        fieldErrorsStr += `\n  • ${message}`;
-      });
+      // Add indented messages if messages is an array
+      if (Array.isArray(messages)) {
+        messages.forEach((message) => {
+          fieldErrorsStr += `\n  • ${message}`;
+        });
+      } else {
+        fieldErrorsStr += `\n  • ${messages}`;
+      }
     });
 
     if (fieldErrorsStr) {

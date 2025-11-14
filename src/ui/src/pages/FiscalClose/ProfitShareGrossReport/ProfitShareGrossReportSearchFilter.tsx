@@ -1,13 +1,12 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { setGrossWagesReportQueryParams } from "reduxstore/slices/yearsEndSlice";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { profitYearValidator } from "../../../utils/FormValidators";
 
 interface GrossReportParams {
@@ -34,7 +33,7 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
     formState: { errors, isValid },
     reset
   } = useForm<GrossReportParams>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<GrossReportParams>,
     defaultValues: {
       profitYear: fiscalCloseProfitYear,
       gross: 50000
@@ -48,7 +47,7 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
         {
           profitYear: data.profitYear,
           minGrossAmount: data.gross,
-          pagination: { skip: 0, take: 25 }
+          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
         },
         false
       ).unwrap();
@@ -81,7 +80,7 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="profitYear"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                 value={field.value ? new Date(field.value, 0) : null}

@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services;
+
 internal sealed class MissiveService : IMissiveService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -86,7 +87,7 @@ internal sealed class MissiveService : IMissiveService
                 {
                     if (balanceMap.TryGetValue(empl.d.Ssn, out var memberBalance) && memberBalance is { YearsInPlan: >= 2 and <= 7 })
                     {
-                        var hasVesting = empl.pp.CurrentHoursYear + empl.pp.HoursExecutive > minHours &&
+                        var hasVesting = empl.pp.TotalHours > minHours &&
                                           empl.pp.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
                         if (hasVesting)
                         {
@@ -120,8 +121,6 @@ internal sealed class MissiveService : IMissiveService
 
                     result[ssn] = missives;
                 }
-
-                return Task.FromResult(true);
             }, cancellation);
             return result;
         }

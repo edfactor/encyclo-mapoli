@@ -1,151 +1,155 @@
-# Termination Feature - Technical Implementation Guide
+# Termination Feature - Technical Summary
 
 ## Overview
 
-The Termination feature is a December year-end activity that allows users to process forfeitures for terminated employees. It implements a master-detail grid pattern with inline editing, bulk save operations, comprehensive state management, financial summaries, and real-time validation.
+The Termination feature is part of the December Activities workflow in the Smart Profit Sharing application. It enables users to search for terminated employees within a date range and manage their profit-sharing account forfeitures by adjusting suggested forfeit amounts. The feature provides inline editing capabilities, bulk operations, and comprehensive filtering options.
 
-**Purpose**: Process profit-sharing forfeitures for employees who have been terminated within a specified date range during the year-end closing process.
+**Location**: `src/ui/src/pages/DecemberActivities/Termination/`
 
-**Location**: `/src/ui/src/pages/DecemberActivities/Termination/`
+**Primary Pattern**: Search-Filter-Grid with inline editable cells and bulk operations
 
----
+**Key Capabilities**:
 
-## Architecture Summary
-
-### Component Hierarchy
-
-```
-Termination.tsx (Page Container)
-├── ApiMessageAlert (Error/success messages with scroll-to-top)
-├── DSMAccordion (Collapsible filter section)
-│   └── TerminationSearchFilter
-│       ├── DsmDatePicker (Begin Date)
-│       ├── DsmDatePicker (End Date)
-│       ├── DuplicateSsnGuard (Prerequisite validation)
-│       └── SearchAndReset (Action buttons with loading state)
-└── TerminationGrid
-    ├── ReportSummary (Total record counts)
-    ├── TotalsGrid × 4 (Financial summaries - sticky header)
-    │   ├── Amount in Profit Sharing
-    │   ├── Vested Amount
-    │   ├── Total Forfeitures
-    │   └── Total Beneficiary Allocations
-    ├── DSMGrid (AG Grid wrapper)
-    │   ├── Expansion column (►/▼)
-    │   ├── Main row columns (badge, name)
-    │   └── Detail row columns (12 columns with inline editing)
-    └── Pagination
-```
-
-### Key Design Patterns
-
-1. **Master-Detail Grid**: Employees (master) expand to show profit year records (detail)
-2. **Inline Editing**: Direct cell editing for "Suggested Forfeit" amounts
-3. **Bulk Operations**: Select multiple rows and save them simultaneously
-4. **Shared Components**: Uses refactored shared components from `/src/ui/src/components/ForfeitActivities/`
-5. **State Lifting**: Loading states lifted from grid hook to parent for search button feedback
-6. **Read-Only Mode**: Comprehensive support for read-only navigation contexts
+- Search terminated employees by date range with fiscal year constraints
+- Filter by vested balance with comparison operators (=, <, <=, >, >=)
+- Inline editing of suggested forfeit amounts
+- Individual and bulk save operations
+- Archive mode for completed records
+- Read-only mode support
+- Unsaved changes protection
 
 ---
 
-## File Structure
+## Directory Structure
 
-### 1. **Termination.tsx** (Page Container - 117 lines)
+```
+Termination/
+├── Termination.tsx                              # Main page container (122 lines)
+├── TerminationSearchFilter.tsx                  # Search/filter form component (315 lines)
+├── TerminationGrid.tsx                          # Data grid component (182 lines)
+├── TerminationGridColumns.tsx                   # Main grid columns: PSN, Name (16 lines)
+├── TerminationDetailsGridColumns.tsx            # Detail columns with editable fields (168 lines)
+├── TerminationHeaderComponent.tsx               # Bulk save header component (23 lines)
+├── hooks/
+│   ├── useTerminationState.ts                   # State management hook (157 lines)
+│   └── useTerminationGrid.ts                    # Grid logic and API integration (616 lines)
+├── __test__/
+│   ├── Termination.test.tsx                     # Main page tests
+│   ├── TerminationSearchFilter.test.tsx         # Filter form tests
+│   └── useTerminationState.test.tsx             # State hook tests
+└── Claude.md                                     # Existing architecture documentation
+```
 
-**Purpose**: Main orchestrator for the Termination feature
+**Total Lines of Code**: ~1,599 lines (excluding tests and documentation)
+
+---
+
+## File Descriptions
+
+### 1. Termination.tsx (Main Container)
+
+**Purpose**: Top-level orchestrator component that manages the overall page layout and coordinates between filter, grid, and state management.
 
 **Key Responsibilities**:
 
-- Page layout and structure using `Page` component from smart-ui-library
-- Fiscal calendar data fetching
-- Status change handling via `StatusDropdownActionNode`
-- Error message display with automatic scroll-to-top
-- Navigation guard for unsaved changes
-- Loading state management for search button feedback
+- Provides `Page` wrapper from smart-ui-library with title and status dropdown
+- Fetches fiscal calendar data via `useLazyGetAccountingRangeToCurrent(6)`
+- Manages centralized state through `useTerminationState()` custom hook
+- Implements unsaved changes guard to prevent navigation with unsaved edits
+- Handles error scroll-to-top behavior for validation messages
+- Global event listener for `dsmMessage` events to trigger scroll on errors
 
 **State Management**:
 
 ```typescript
+// Local state
+const [isFetching, setIsFetching] = useState(false);
+
+// Custom hook state from useTerminationState()
 const { state, actions } = useTerminationState();
-// state.searchParams - Current search parameters
-// state.hasUnsavedChanges - Tracks pending edits
-// state.initialSearchLoaded - Whether first search performed
-// state.resetPageFlag - Triggers pagination reset
-// state.shouldArchive - Archive mode flag
+// state: { hasUnsavedChanges, initialSearchLoaded, searchParams,
+//          resetPageFlag, shouldArchive }
+// actions: { handleSearch, handleStatusChange, handleUnsavedChanges,
+//            setInitialSearchLoaded, handleArchiveHandled }
 ```
 
-**Key Hooks Used**:
+**Layout Structure**:
 
-- `useLazyGetAccountingRangeToCurrent(6)` - Fetches fiscal calendar data
-- `useTerminationState()` - Page-level state management
-- `useUnsavedChangesGuard()` - Blocks navigation with unsaved changes
+```jsx
+<Page
+  label="TERMINATIONS"
+  actionNode={<StatusDropdownActionNode />}>
+  <ApiMessageAlert commonKey="TerminationSave" />
+  <DSMAccordion title="Filter">
+    <TerminationSearchFilter
+      fiscalData={fiscalData}
+      onSearch={actions.handleSearch}
+      setInitialSearchLoaded={actions.setInitialSearchLoaded}
+      hasUnsavedChanges={state.hasUnsavedChanges}
+      isFetching={isFetching}
+    />
+  </DSMAccordion>
+  <TerminationGrid
+    initialSearchLoaded={state.initialSearchLoaded}
+    setInitialSearchLoaded={actions.setInitialSearchLoaded}
+    searchParams={state.searchParams}
+    resetPageFlag={state.resetPageFlag}
+    onUnsavedChanges={actions.handleUnsavedChanges}
+    hasUnsavedChanges={state.hasUnsavedChanges}
+    fiscalData={fiscalData}
+    shouldArchive={state.shouldArchive}
+    onArchiveHandled={actions.handleArchiveHandled}
+    onErrorOccurred={scrollToTop}
+    onLoadingChange={setIsFetching}
+  />
+</Page>
+```
 
-**Error Scroll-to-Top Pattern**:
+**Unsaved Changes Guard**:
+
+```typescript
+useUnsavedChangesGuard(state.hasUnsavedChanges);
+// Prevents navigation when hasUnsavedChanges is true
+// Shows browser confirmation dialog: "You have unsaved changes"
+```
+
+**Error Scroll Behavior**:
 
 ```typescript
 useEffect(() => {
   const handleMessageEvent = (event: Event) => {
     const customEvent = event as CustomEvent;
     if (customEvent.detail?.key === "TerminationSave" && customEvent.detail?.message?.type === "error") {
-      scrollToTop();
+      scrollToTop(); // Smooth scroll to top to show error message
     }
   };
-
   window.addEventListener("dsmMessage", handleMessageEvent);
   return () => window.removeEventListener("dsmMessage", handleMessageEvent);
 }, [scrollToTop]);
 ```
 
-**Loading State Flow**:
-
-- Parent component tracks `isFetching` state via `useState`
-- Passes `setIsFetching` to `TerminationGrid` via `onLoadingChange` prop
-- Passes `isFetching` to `TerminationSearchFilter` for button state
-
-**Props Flow**:
-
-```typescript
-// To TerminationSearchFilter
-<TerminationSearchFilter
-  fiscalData={fiscalData}
-  onSearch={actions.handleSearch}
-  setInitialSearchLoaded={actions.setInitialSearchLoaded}
-  hasUnsavedChanges={state.hasUnsavedChanges}
-  isFetching={isFetching} // Disables search button
-/>
-
-// To TerminationGrid
-<TerminationGrid
-  initialSearchLoaded={state.initialSearchLoaded}
-  searchParams={state.searchParams}
-  resetPageFlag={state.resetPageFlag}
-  onUnsavedChanges={actions.handleUnsavedChanges}
-  hasUnsavedChanges={state.hasUnsavedChanges}
-  fiscalData={fiscalData}
-  shouldArchive={state.shouldArchive}
-  onArchiveHandled={actions.handleArchiveHandled}
-  onErrorOccurred={scrollToTop}
-  onLoadingChange={setIsFetching} // Receives loading state
-/>
-```
+**Lines**: 122
 
 ---
 
-### 2. **TerminationSearchFilter.tsx** (Search Form - 203 lines)
+### 2. TerminationSearchFilter.tsx (Filter Form)
 
-**Purpose**: Date-based search filter with validation
+**Purpose**: Provides comprehensive search form with date range selection, vested balance filtering, and data quality options.
 
 **Key Features**:
 
-- Date range selection (begin/end dates within fiscal year)
-- Form validation using React Hook Form + Yup
-- Duplicate SSN prerequisite check via `DuplicateSsnGuard`
-- Loading state feedback on search button
+- **React Hook Form** integration with **Yup** validation
+- Date range inputs (Begin Date, End Date) constrained to fiscal calendar bounds
+- **Vested Balance Filter** with operator dropdown (=, <, <=, >, >=) and amount field
+- Checkbox: "Exclude members with: $0 Ending Balance, 100% Vested, or Forfeited"
+- Redux integration for persisting search state across sessions
+- `DuplicateSsnGuard` integration (warning mode) for data quality checks
+- Prevents search when unsaved changes exist
 
 **Validation Schema**:
 
 ```typescript
-const schema = yup.object().shape({
+yup.object().shape({
   beginningDate: dateStringValidator(2000, 2099, "Beginning Date").required(),
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
@@ -153,77 +157,163 @@ const schema = yup.object().shape({
     "Ending date must be the same or after the beginning date"
   ).required(),
   forfeitureStatus: yup.string().required(),
-  profitYear: profitYearValidator(2015, 2099)
+  pagination: yup
+    .object({
+      skip: yup.number().required(),
+      take: yup.number().required(),
+      sortBy: yup.string().required(),
+      isSortDescending: yup.boolean().required()
+    })
+    .required(),
+  profitYear: profitYearValidator(2015, 2099),
+  excludeZeroAndFullyVested: yup.boolean(),
+  vestedBalanceValue: yup
+    .number()
+    .nullable()
+    .min(0, "Vested Balance must be 0 or greater")
+    .transform((value, originalValue) => (originalValue === "" ? null : value)),
+  vestedBalanceOperator: yup
+    .number()
+    .nullable()
+    .when("vestedBalanceValue", {
+      is: (val: number | null | undefined) => val !== null && val !== undefined,
+      then: (schema) => schema.required("Operator is required when Vested Balance is provided"),
+      otherwise: (schema) => schema.nullable()
+    })
 });
 ```
 
-**Date Range Constraints**:
-
-- Begin Date: Min = fiscal begin, Max = fiscal end
-- End Date: Min = max(begin date, fiscal begin), Max = fiscal end
-- Both dates use `DsmDatePicker` with `disableFuture`
-
-**Duplicate SSN Guard Pattern**:
+**Vested Balance Filter UI** (Lines 224-277):
 
 ```typescript
-<DuplicateSsnGuard mode="warning">
-  {({ prerequisitesComplete }) => (
-    <SearchAndReset
-      handleReset={handleReset}
-      handleSearch={validateAndSearch}
-      isFetching={isFetching}
-      disabled={!isValid || !prerequisitesComplete || isFetching}
+<Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
+  <InputLabel sx={{ mb: 1 }}>Vested Balance</InputLabel>
+  <Box sx={{ display: "flex", gap: 1 }}>
+    {/* Operator Dropdown */}
+    <TextField select fullWidth value={field.value ?? ""}>
+      <MenuItem value="">-</MenuItem>        {/* Empty/no filter */}
+      <MenuItem value={0}>=</MenuItem>       {/* Equals */}
+      <MenuItem value={1}>&lt;</MenuItem>    {/* Less Than */}
+      <MenuItem value={2}>&lt;=</MenuItem>   {/* Less Than Or Equal */}
+      <MenuItem value={3}>&gt;</MenuItem>    {/* Greater Than */}
+      <MenuItem value={4}>&gt;=</MenuItem>   {/* Greater Than Or Equal */}
+    </TextField>
+
+    {/* Amount Field */}
+    <TextField
+      fullWidth
+      type="number"
+      placeholder="Amount"
+      value={field.value ?? ""}
+      inputProps={{ min: 0, step: 1 }}
     />
-  )}
-</DuplicateSsnGuard>
+  </Box>
+</Grid>
 ```
 
-**Purpose**: Ensures no duplicate SSNs exist before allowing search. Critical for data integrity during financial processing.
+**Default Values**:
 
-**Validation and Submit**:
+```typescript
+{
+  beginningDate: fiscalData?.fiscalBeginDate || "",
+  endingDate: fiscalData?.fiscalEndDate || "",
+  forfeitureStatus: "showAll",
+  pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
+  profitYear: selectedProfitYear,
+  excludeZeroAndFullyVested: false,
+  vestedBalanceValue: null,
+  vestedBalanceOperator: null
+}
+```
+
+**Vested Balance Filter Logic** (Lines 118-122):
 
 ```typescript
 const validateAndSubmit = async (data: TerminationSearchRequest) => {
-  if (hasUnsavedChanges) {
-    alert("Please save your changes.");
-    return;
+  const params = { ...data, profitYear: selectedProfitYear, ... };
+
+  // Only include vested balance fields if both are provided
+  if (data.vestedBalanceValue === null || data.vestedBalanceOperator === null) {
+    delete params.vestedBalanceValue;
+    delete params.vestedBalanceOperator;
   }
 
-  const params = {
-    ...data,
-    profitYear: selectedProfitYear,
-    beginningDate: mmDDYYFormat(data.beginningDate),
-    endingDate: mmDDYYFormat(data.endingDate)
-  };
-
-  onSearch(params); // Triggers state update in parent
+  onSearch(params);
   setInitialSearchLoaded(true);
 };
 ```
 
-**Reset Functionality**:
+**Unsaved Changes Protection** (Lines 104-107):
 
-- Clears all form fields
-- Resets to fiscal year defaults
-- Clears Redux termination state
-- Marks search as not loaded
+```typescript
+if (hasUnsavedChanges) {
+  alert("Please save your changes.");
+  return;
+}
+```
+
+**Redux Integration**:
+
+- Reads `termination` state from `yearsEnd` slice for persisted begin/end dates
+- Dispatches `clearTermination()` on reset
+
+**Lines**: 315
 
 ---
 
-### 3. **TerminationGrid.tsx** (Grid Display - 252 lines)
+### 3. TerminationGrid.tsx (Data Grid)
 
-**Purpose**: Master-detail grid with financial summaries and inline editing
+**Purpose**: Renders AG Grid with termination data, summary totals, pagination, and coordinates all grid interactions.
 
 **Key Features**:
 
-- Dynamic grid height calculation
-- Master-detail row expansion/collapse
-- Four sticky financial summary grids
-- Read-only mode support
-- Inline editing for current year only
-- Pagination
+- Displays four summary totals in `TotalsGrid` components:
+  - Amount in Profit Sharing
+  - Vested Amount
+  - Total Forfeitures
+  - Total Beneficiary Allocations
+- Report summary section via `ReportSummary` component
+- Dynamic grid height calculation via `useDynamicGridHeight()` hook
+- Read-only mode detection via `useReadOnlyNavigation()` hook
+- Combines main columns (PSN, Name) with 14 detail columns
 
-**Financial Summary Totals** (Sticky Header):
+**Hook Dependencies**:
+
+```typescript
+const gridMaxHeight = useDynamicGridHeight(); // Viewport-based height
+const isReadOnly = useReadOnlyNavigation(); // Permission check
+const {
+  pageNumber,
+  pageSize,
+  gridData,
+  isFetching,
+  termination,
+  selectedProfitYear,
+  selectionState,
+  handleSave,
+  handleBulkSave,
+  sortEventHandler,
+  onGridReady,
+  paginationHandlers,
+  gridRef,
+  gridContext
+} = useTerminationGrid({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  searchParams,
+  resetPageFlag,
+  onUnsavedChanges,
+  hasUnsavedChanges,
+  fiscalData,
+  shouldArchive,
+  onArchiveHandled,
+  onErrorOccurred,
+  onLoadingChange,
+  isReadOnly
+});
+```
+
+**Summary Totals** (Lines 120-137):
 
 ```typescript
 <div className="sticky top-0 z-10 flex bg-white">
@@ -246,114 +336,100 @@ const validateAndSubmit = async (data: TerminationSearchRequest) => {
 </div>
 ```
 
-**Purpose**: Provides real-time financial oversight. Users can verify individual forfeitures sum to displayed totals.
-
-**Hook Integration**:
+**Grid Configuration** (Lines 139-164):
 
 ```typescript
-const {
-  pageNumber,
-  pageSize,
-  gridData,
-  termination,
-  selectedProfitYear,
-  selectionState,
-  handleSave,
-  handleBulkSave,
-  handleRowExpansion,
-  sortEventHandler,
-  onGridReady,
-  paginationHandlers,
-  gridRef,
-  gridContext
-} = useTerminationGrid({
-  initialSearchLoaded,
-  setInitialSearchLoaded,
-  searchParams,
-  resetPageFlag,
-  onUnsavedChanges,
-  hasUnsavedChanges,
-  fiscalData,
-  shouldArchive,
-  onArchiveHandled,
-  onErrorOccurred,
-  onLoadingChange // NEW: Notifies parent of loading state
-});
+<DSMGrid
+  preferenceKey={"TERMINATION"}              // Saves user column preferences
+  handleSortChanged={sortEventHandler}
+  maxHeight={gridMaxHeight}
+  isLoading={isFetching}
+  providedOptions={{
+    onGridReady: (params) => {
+      gridRef.current = params;
+      onGridReady(params);
+    },
+    rowData: gridData,
+    columnDefs: columnDefs,                  // Combined main + detail columns
+    rowSelection: {
+      mode: "multiRow",
+      checkboxes: false,                     // Checkboxes in save button column
+      headerCheckbox: false,
+      enableClickSelection: false
+    },
+    rowHeight: 40,
+    suppressMultiSort: true,
+    defaultColDef: { resizable: true },
+    context: gridContext                     // Shared state for cell renderers
+  }}
+/>
 ```
 
-**Master-Detail Column Composition**:
+**Column Assembly** (Lines 88-112):
 
 ```typescript
+const mainColumns = useMemo(() => GetTerminationColumns(), []);
+const detailColumns = useMemo(
+  () =>
+    GetDetailColumns(
+      selectionState.addRowToSelection,
+      selectionState.removeRowFromSelection,
+      selectedProfitYear,
+      handleSave,
+      handleBulkSave,
+      isReadOnly
+    ),
+  [selectionState, selectedProfitYear, handleSave, handleBulkSave, isReadOnly]
+);
+
 const columnDefs = useMemo(() => {
-  // Expansion column (►/▼)
-  const expansionColumn = { ... };
-
-  // Main columns: Hide content for detail rows (unless shared)
-  const visibleColumns = mainColumns.map(column => ({
-    ...column,
-    cellRenderer: (params) => {
-      if (params.data?.isDetail) {
-        const hideInDetails = !detailColumns.some(
-          col => col.field === column.field
-        );
-        if (hideInDetails) return "";
-      }
-      return /* render value */;
-    }
-  }));
-
-  // Detail-only columns: Only visible for detail rows
-  const detailOnlyColumns = detailColumns
-    .filter(col => !mainColumns.some(mainCol => mainCol.field === col.field))
-    .map(column => ({
-      ...column,
-      cellRenderer: (params) => !params.data?.isDetail ? "" : /* value */
-    }));
-
-  return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
-}, [mainColumns, detailColumns, handleRowExpansion]);
+  return [...mainColumns, ...detailColumns];
+}, [mainColumns, detailColumns]);
 ```
 
-**Row Styling**:
+**Read-Only Cell Refresh** (Lines 79-85):
 
 ```typescript
-const getRowClass = (params: { data: { isDetail: boolean } }) => {
-  return params.data.isDetail ? "bg-gray-100" : "";
-};
+// Refresh grid cells when read-only status changes
+// Forces cell renderers to re-read isReadOnly from context
+useEffect(() => {
+  if (gridRef.current?.api) {
+    gridRef.current.api.refreshCells({ force: true });
+  }
+}, [isReadOnly]);
 ```
 
-Detail rows have gray background (`bg-gray-100` Tailwind class) for visual distinction.
-
-**Grid Context** (Shared State):
+**Pagination** (Lines 166-174):
 
 ```typescript
-context: {
-  editedValues: Record<string, { value: number, hasError?: boolean }>,
-  loadingRowIds: Set<string>
-}
+{!!termination && termination.response.results.length > 0 && (
+  <Pagination
+    pageNumber={pageNumber}
+    setPageNumber={paginationHandlers.setPageNumber}
+    pageSize={pageSize}
+    setPageSize={paginationHandlers.setPageSize}
+    recordCount={termination.response.total || 0}
+  />
+)}
 ```
 
-Allows cell renderers to access:
-
-- Currently edited values (before save)
-- Loading state for individual rows
-- Validation errors
+**Lines**: 182
 
 ---
 
-### 4. **TerminationGridColumns.tsx** (Main Columns - 15 lines)
+### 4. TerminationGridColumns.tsx (Main Columns)
 
-**Purpose**: Column definitions for master (employee summary) rows
+**Purpose**: Defines the two primary identification columns displayed at the left of the grid.
 
-**Minimal Master Columns** (Design Decision):
-Unlike UnForfeit, Termination only shows badge and name in master rows. All financial details are in detail rows for cleaner presentation.
+**Columns**:
 
 ```typescript
 export const GetTerminationColumns = (): ColDef[] => {
   return [
     createBadgeColumn({
-      headerName: "Badge",
-      psnSuffix: true // Shows Person Number identifier
+      headerName: "PSN",
+      field: "psn",
+      psnSuffix: false // PSN already combined with suffix
     }),
     createNameColumn({
       field: "name"
@@ -362,85 +438,148 @@ export const GetTerminationColumns = (): ColDef[] => {
 };
 ```
 
-**Column Factories** (from `/src/ui/src/utils/gridColumnFactory`):
+**Column Definitions**:
 
-- `createBadgeColumn()` - Badge number with PSN suffix, navigation support
-- `createNameColumn()` - Employee full name
+1. **PSN (Profit Sharing Number)**:
 
-**PSN Suffix**: Additional person identifier displayed after badge number when available.
+   - Factory: `createBadgeColumn()` from `utils/gridColumnFactory`
+   - Displays employee/beneficiary identification number
+   - No suffix needed (PSN format: `1234567` for employees, `1234567-1` for beneficiaries)
+
+2. **Name**:
+   - Factory: `createNameColumn()` from grid factory
+   - Displays full name (Last, First format)
+   - Left-aligned text
+
+**Purpose of Separation**: Separates main identification columns from detail columns for modularity. Main columns remain visible while scrolling horizontally through detail columns.
+
+**Lines**: 16
 
 ---
 
-### 5. **TerminationDetailsGridColumns.tsx** (Detail Columns - 162 lines)
+### 5. TerminationDetailsGridColumns.tsx (Detail Columns)
 
-**Purpose**: Column definitions for detail (profit year) rows with inline editing
+**Purpose**: Defines 14 detail columns including the editable "Suggested Forfeit" field and save button column.
 
-**Column Structure** (12 total columns):
+**Complete Column List**:
 
-| Column                 | Field                   | Type     | Editable  | Description               |
-| ---------------------- | ----------------------- | -------- | --------- | ------------------------- |
-| Profit Year            | `profitYear`            | Year     | No        | Year of profit record     |
-| Beginning Balance      | `beginningBalance`      | Currency | No        | Balance at year start     |
-| Beneficiary Allocation | `beneficiaryAllocation` | Currency | No        | Beneficiary distributions |
-| Distribution Amount    | `distributionAmount`    | Currency | No        | Amount distributed        |
-| Forfeit Amount         | `forfeit`               | Currency | No        | Previously forfeited      |
-| Ending Balance         | `endingBalance`         | Currency | No        | Balance at year end       |
-| Vested Balance         | `vestedBalance`         | Currency | No        | Vested portion            |
-| Vested %               | `vestedPercent`         | Percent  | No        | Vested percentage         |
-| Term Date              | `dateTerm`              | Date     | No        | Termination date          |
-| YTD PS Hours           | `ytdPsHours`            | Hours    | No        | Year-to-date hours        |
-| Age                    | `age`                   | Number   | No        | Age at termination        |
-| Forfeited              | `hasForfeited`          | Yes/No   | No        | Forfeiture processed      |
-| **Suggested Forfeit**  | `suggestedForfeit`      | Currency | **Yes\*** | Forfeit amount (editable) |
-| Save Button            | (special)               | Action   | N/A       | Checkbox + Save           |
+1. **Profit Year**: Year column (non-sortable)
+2. **Beginning Balance**: Currency column
+3. **Beneficiary Allocation**: Currency column
+4. **Distribution Amount**: Currency column
+5. **Forfeit Amount**: Currency column
+6. **Ending Balance**: Currency column
+7. **Vested Balance**: Currency column
+8. **Vested %**: Percentage column (formatted as `XX%`)
+9. **Term Date**: Date column (MM/DD/YYYY format)
+10. **YTD PS Hours**: Hours column with comma separators
+11. **Age**: Age column (max width 70px)
+12. **Forfeited**: Yes/No column
+13. **Suggested Forfeit**: **Editable currency column** (pinned right)
+14. **Save Button**: Action column with individual/bulk save (pinned right)
 
-**\*Editable only for current year**: `node.data.profitYear === selectedProfitYear`
-
-**Suggested Forfeit Column** (Inline Editing):
+**Editable Column - Suggested Forfeit** (Lines 92-129):
 
 ```typescript
 {
   headerName: "Suggested Forfeit",
   field: "suggestedForfeit",
+  colId: "suggestedForfeit",
+  minWidth: 150,
   pinned: "right",
-  editable: ({ node }) =>
-    node.data.isDetail && node.data.profitYear === selectedProfitYear,
-  cellEditor: SuggestedForfeitEditor,
-  cellRenderer: (params) => SuggestedForfeitCellRenderer(
-    { ...params, selectedProfitYear },
-    true,  // isTermination = true
-    false  // isUnforfeit = false
-  ),
-  valueGetter: (params) => {
-    if (!params.data.isDetail) return params.data.suggestedForfeit;
-    const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
-    const editedValue = params.context?.editedValues?.[rowKey]?.value;
-    return editedValue ?? params.data.suggestedForfeit ?? 0;
-  },
+  type: "rightAligned",
+  resizable: true,
+  sortable: false,
+
+  // Cell styling with error highlighting
   cellClass: (params) => {
-    if (!params.data.isDetail) return "";
+    if (params.data.suggestedForfeit === null) return "";
     const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
     const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-    return hasError ? "bg-red-50" : ""; // Error highlighting
+    return hasError ? "bg-blue-50" : "";  // Blue background for validation errors
+  },
+
+  // Only editable if suggestedForfeit is not null
+  editable: ({ node }) => node.data.suggestedForfeit !== null,
+
+  // Custom editor and renderer
+  flex: 1,
+  cellEditor: SuggestedForfeitEditor,
+  cellRenderer: (params: ICellRendererParams) => {
+    // Beneficiaries (PSN > 7 chars) don't show suggested forfeit
+    if (params.data.suggestedForfeit === null ||
+        params.data.psn.length > MAX_EMPLOYEE_BADGE_LENGTH) {
+      return null;
+    }
+    return SuggestedForfeitCellRenderer(
+      { ...params, selectedProfitYear },
+      true,   // showEditIcon
+      false   // isReadOnly
+    );
+  },
+
+  // Format display value as currency
+  valueFormatter: (params) =>
+    params.value !== null ? numberToCurrency(params.value) : "",
+
+  // Get value from edited context or original data
+  valueGetter: (params) => {
+    const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+    const editedValue = params.context?.editedValues?.[rowKey]?.value;
+    return editedValue ?? params.data.suggestedForfeit;
   }
 }
 ```
 
-**Row Key Pattern**: `${badgeNumber}-${profitYear}` (Composite key)
+**Key Mechanisms**:
 
-- Unique identifier for each detail row
-- Used to track edited values before save
-- Different from UnForfeit (which uses `profitDetailId`)
+- **Row Key Pattern**: `${badgeNumber}-${profitYear}` for unique row identification
+- **Context-Based Editing**: Uses AG Grid `context` to track in-memory edits (not persisted until save)
+- **Error Highlighting**: `bg-blue-50` CSS class for validation errors
+- **Null Handling**: Non-editable cells render as empty (null values)
+- **Beneficiary Handling**: PSN length > 7 indicates beneficiary (no suggested forfeit)
 
-**Save Button Column** (Refactored):
+**Save Button Column** (Lines 131-165):
 
 ```typescript
 {
   headerName: "Save Button",
   field: "saveButton",
+  colId: "saveButton",
+  minWidth: 130,
+  width: 130,
   pinned: "right",
   lockPinned: true,
-  headerComponent: HeaderComponent, // Bulk save checkbox
+  resizable: false,
+  sortable: false,
+  cellStyle: { backgroundColor: "#E8E8E8" },
+
+  // Bulk save header component
+  headerComponent: HeaderComponent,
+  headerComponentParams: {
+    addRowToSelectedRows,
+    removeRowFromSelectedRows,
+    onBulkSave,
+    isReadOnly
+  },
+
+  // Value getter combines current value, loading state, and selection state
+  // This triggers cell refresh when any of these change
+  valueGetter: (params) => {
+    const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+    const editedValue = params.context?.editedValues?.[rowKey]?.value;
+    const currentValue = editedValue ?? params.data.suggestedForfeit ?? 0;
+    return `${currentValue}-${params.context?.loadingRowIds?.has(params.data.psn)}-${params.node?.isSelected()}`;
+  },
+
+  // Cell renderer params for individual save
+  cellRendererParams: {
+    addRowToSelectedRows,
+    removeRowFromSelectedRows,
+    onSave
+  },
+
+  // Custom cell renderer
   cellRenderer: createSaveButtonCellRenderer({
     activityType: "termination",
     selectedProfitYear,
@@ -449,286 +588,99 @@ export const GetTerminationColumns = (): ColDef[] => {
 }
 ```
 
-**Uses Shared Component**: `createSaveButtonCellRenderer` from `/src/ui/src/components/ForfeitActivities/`
+**Factory Functions Used**:
 
-**Features**:
+- `createYearColumn()` - Year with right alignment
+- `createCurrencyColumn()` - Currency with $ formatting
+- `createDateColumn()` - Date with MM/DD/YYYY format
+- `createHoursColumn()` - Hours with comma separators
+- `createAgeColumn()` - Age with max 70px width
+- `createYesOrNoColumn()` - Boolean as Yes/No text
+- `createSaveButtonCellRenderer()` - Save button with loading states
 
-- Checkbox for bulk selection
-- Individual save button with loading spinner
-- Disabled when value is zero, invalid, or read-only
-- Tooltips for disabled states
+**Lines**: 168
 
 ---
 
-### 6. **TerminationHeaderComponent.tsx** (Bulk Save Header - 22 lines)
+### 6. TerminationHeaderComponent.tsx (Bulk Save Header)
 
-**Purpose**: Custom header for save button column with bulk save functionality
+**Purpose**: Renders bulk save controls in the "Save Button" column header, enabling multi-row operations.
 
-**Refactored Implementation** (Uses Shared Component):
+**Implementation**: Thin wrapper around `SharedForfeitHeaderComponent` configured for "termination" activity type.
 
 ```typescript
 export const HeaderComponent: React.FC<HeaderComponentProps> = (params) => {
   return (
     <SharedForfeitHeaderComponent
       {...params}
-      config={{
-        activityType: "termination"
-      }}
+      config={{ activityType: "termination" }}
     />
   );
 };
 ```
 
-**Uses**: `SharedForfeitHeaderComponent` from `/src/ui/src/components/ForfeitActivities/`
-
-**Shared Component Handles**:
-
-- Bulk save checkbox rendering
-- Row eligibility determination (`isNodeEligible`)
-- Payload creation (`createUpdatePayload`)
-- Loading state tracking (`hasSavingInProgress`)
-
-**Activity-Specific Behavior** (Termination):
-
-- **Row Key**: Composite `${badgeNumber}-${profitYear}`
-- **Value Transformation**: No negation (sent as-is to API)
-- **Eligibility**: Only current year detail rows with non-zero values
-- **No `offsettingProfitDetailId`**: Not needed for new forfeitures
-
----
-
-## Data Flow
-
-### Search Flow
-
-```
-User clicks "SEARCH"
-    ↓
-TerminationSearchFilter validates form (React Hook Form + Yup)
-    ↓
-actions.handleSearch(params) called
-    ↓
-useTerminationState reducer updates searchParams and toggles resetPageFlag
-    ↓
-TerminationGrid receives new searchParams via props
-    ↓
-useTerminationGrid detects searchParams change
-    ↓
-useEffect triggers triggerSearch() (RTK Query lazy query)
-    ↓
-API request to /api/terminations
-    ↓
-Response cached by RTK Query
-    ↓
-flattenMasterDetailData() transforms hierarchical data to flat structure
-    ↓
-Grid displays master rows (badge, name)
-    ↓
-User clicks expansion arrow (►)
-    ↓
-handleRowExpansion() updates expandedRows state
-    ↓
-flattenMasterDetailData() re-runs with updated expansion state
-    ↓
-Detail rows inserted after master row
-    ↓
-Grid displays detail rows (profit years with gray background)
-```
-
-### Save Flow (Individual)
-
-```
-User edits "Suggested Forfeit" cell
-    ↓
-SuggestedForfeitEditor captures value
-    ↓
-editedValues context updated: editedValues[rowKey] = { value: newValue }
-    ↓
-onUnsavedChanges(true) - Enables navigation guard
-    ↓
-Cell re-renders with edited value (from context)
-    ↓
-User clicks individual save button
-    ↓
-handleSave() called from useTerminationGrid
-    ↓
-prepareSaveRequest() creates ForfeitureAdjustmentUpdateRequest
-    ↓
-Value NOT negated (termination sends positive values)
-    ↓
-updateForfeiture mutation (RTK Query)
-    ↓
-API request to /api/forfeiture-adjustments
-    ↓
-Success:
-  - generateSaveSuccessMessage() creates message
-  - Remove edited value from context
-  - Trigger data refresh (re-fetch)
-  - Clear row selection
-  - Display success message via ApiMessageAlert
-  - onUnsavedChanges(false)
-    ↓
-Error:
-  - Display error message via ApiMessageAlert
-  - Scroll to top (via window event listener)
-  - Keep edited value in context
-  - Row remains selected
-  - onUnsavedChanges remains true
-```
-
-### Bulk Save Flow
-
-```
-User edits multiple cells
-    ↓
-Each edit tracked in editedValues context
-    ↓
-User clicks checkboxes for rows to save
-    ↓
-selectedRowIds Set updated via selectionState
-    ↓
-User clicks bulk save checkbox in header
-    ↓
-handleBulkSave() called from useTerminationGrid
-    ↓
-Filter selected rows using isNodeEligible():
-  - Must be detail row (isDetail === true)
-  - Must be current year (profitYear === selectedProfitYear)
-  - Must have non-zero value
-    ↓
-Create payloads using createUpdatePayload() for each eligible row
-    ↓
-Execute saves with handleBatchOperations() (batches of 5)
-    ↓
-For each row in batch:
-  - Mark as loading (add badgeNumber to loadingRowIds)
-  - Call updateForfeiture mutation
-  - Handle success/error individually
-  - Remove from loading set
-    ↓
-After all complete:
-  - Display summary message (X succeeded, Y failed)
-  - Refresh grid data
-  - Clear all selections
-  - Clear all edited values
-  - onUnsavedChanges(false)
-```
-
-### Archive Flow
-
-```
-User changes status to "Complete"
-    ↓
-StatusDropdownActionNode calls handleStatusChange("complete", "Complete")
-    ↓
-useTerminationState reducer:
-  - Detects status contains "complete"
-  - Sets archiveMode = true
-  - Sets shouldArchive = true
-  - Adds archive: true to searchParams
-  - Toggles resetPageFlag
-    ↓
-TerminationGrid detects searchParams change
-    ↓
-Search executes with archive flag
-    ↓
-API returns archived (historical) data
-    ↓
-Grid displays archived termination records
-    ↓
-User changes status away from "Complete"
-    ↓
-useTerminationState reducer:
-  - Removes archive flag from searchParams
-  - Sets archiveMode = false
-  - Toggles resetPageFlag
-    ↓
-Search re-executes without archive flag
-    ↓
-Grid displays current (non-archived) data
-```
-
-### Loading State Flow (NEW)
-
-```
-User clicks "SEARCH" button
-    ↓
-TerminationSearchFilter triggers validateAndSearch()
-    ↓
-actions.handleSearch(params) called
-    ↓
-TerminationGrid receives searchParams update
-    ↓
-useTerminationGrid triggers triggerSearch()
-    ↓
-isFetching becomes true (RTK Query state)
-    ↓
-useEffect in useTerminationGrid detects isFetching change
-    ↓
-onLoadingChange(true) called
-    ↓
-setIsFetching(true) in Termination.tsx parent component
-    ↓
-isFetching prop passed to TerminationSearchFilter
-    ↓
-SearchAndReset component:
-  - Disables search button
-  - Shows spinner
-    ↓
-API request completes
-    ↓
-isFetching becomes false
-    ↓
-useEffect triggers onLoadingChange(false)
-    ↓
-setIsFetching(false)
-    ↓
-SearchAndReset component:
-  - Enables search button
-  - Hides spinner
-```
-
----
-
-## State Management
-
-### Local Component State (Termination.tsx)
+**Props Interface**:
 
 ```typescript
-const [isFetching, setIsFetching] = useState(false);
-```
-
-**Purpose**: Track search loading state for button feedback
-**Updated by**: `TerminationGrid` via `onLoadingChange` callback
-**Used by**: `TerminationSearchFilter` to disable/enable search button
-
-### Page-Level State (useTerminationState)
-
-**Hook Location**: `/src/ui/src/hooks/useTerminationState.ts`
-
-**State Structure**:
-
-```typescript
-interface TerminationState {
-  searchParams: TerminationSearchRequest | null;
-  initialSearchLoaded: boolean;
-  hasUnsavedChanges: boolean;
-  resetPageFlag: boolean;
-  currentStatus: string | null;
-  archiveMode: boolean;
-  shouldArchive: boolean;
+interface HeaderComponentProps extends IHeaderParams {
+  addRowToSelectedRows: (id: number) => void;
+  removeRowFromSelectedRows: (id: number) => void;
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>;
+  isBulkSaving?: boolean;
+  isReadOnly?: boolean;
 }
 ```
 
-**Actions**:
+**Functionality**:
 
-- `handleSearch(params)` - Update search params, toggle reset flag
-- `handleUnsavedChanges(hasChanges)` - Track unsaved edits
-- `handleStatusChange(status, statusName)` - Handle status change, trigger archive
-- `handleArchiveHandled()` - Clear archive flag after processing
-- `setInitialSearchLoaded(loaded)` - Mark search as performed
+- Displays checkbox for "select all" functionality
+- Shows bulk save button when rows are selected
+- Displays count of selected rows
+- Automatically disabled in read-only mode
+- Shares common implementation with other forfeit activities (UnForfeit, etc.)
 
-**Archive Mode Logic**:
+**Visual Behavior**:
+
+- **No selections**: Shows empty checkbox
+- **Some selections**: Shows checkbox with count badge
+- **Has selections**: Shows "Save Selected" button
+
+**Lines**: 23
+
+---
+
+### 7. hooks/useTerminationState.ts (State Management Hook)
+
+**Purpose**: Encapsulates all page-level state management using `useReducer` pattern for complex state transitions.
+
+**State Interface**:
+
+```typescript
+interface TerminationState {
+  searchParams: TerminationSearchRequest | null; // Current search parameters
+  initialSearchLoaded: boolean; // Has initial search been performed
+  hasUnsavedChanges: boolean; // Are there unsaved grid edits
+  resetPageFlag: boolean; // Toggles to trigger pagination reset
+  currentStatus: string | null; // Current page status from dropdown
+  archiveMode: boolean; // Is archive mode active
+  shouldArchive: boolean; // Should next search use archive=true
+}
+```
+
+**Action Types**:
+
+```typescript
+type TerminationAction =
+  | { type: "SET_SEARCH_PARAMS"; payload: TerminationSearchRequest }
+  | { type: "SET_INITIAL_SEARCH_LOADED"; payload: boolean }
+  | { type: "SET_UNSAVED_CHANGES"; payload: boolean }
+  | { type: "TOGGLE_RESET_PAGE_FLAG" }
+  | { type: "SET_STATUS_CHANGE"; payload: { status: string; statusName?: string } }
+  | { type: "SET_ARCHIVE_HANDLED" }
+  | { type: "RESET_STATE" };
+```
+
+**Key Reducer Logic - Status Change** (Lines 61-100):
 
 ```typescript
 case "SET_STATUS_CHANGE": {
@@ -737,7 +689,7 @@ case "SET_STATUS_CHANGE": {
   const isChangingToComplete = isCompleteLike && state.currentStatus !== statusName;
 
   if (isChangingToComplete) {
-    // Add archive flag to search params
+    // Transitioning to Complete status -> Enable archive mode
     const updatedSearchParams = state.searchParams
       ? { ...state.searchParams, archive: true }
       : null;
@@ -746,108 +698,705 @@ case "SET_STATUS_CHANGE": {
       ...state,
       currentStatus: statusName || null,
       archiveMode: true,
-      shouldArchive: true,
+      shouldArchive: true,                   // Flag for grid to trigger archive search
       searchParams: updatedSearchParams,
-      resetPageFlag: !state.resetPageFlag
+      resetPageFlag: !state.resetPageFlag    // Reset pagination
+    };
+  } else {
+    // Leaving Complete status -> Disable archive mode
+    const shouldResetArchive = !isCompleteLike;
+    const wasInArchiveMode = state.archiveMode;
+    const isLeavingArchiveMode = wasInArchiveMode && shouldResetArchive;
+
+    let updatedSearchParams = state.searchParams;
+    if (shouldResetArchive && state.searchParams) {
+      const { ...paramsWithoutArchive } = state.searchParams;
+      updatedSearchParams = paramsWithoutArchive as TerminationSearchRequest;
+    }
+
+    return {
+      ...state,
+      currentStatus: statusName || null,
+      archiveMode: shouldResetArchive ? false : state.archiveMode,
+      searchParams: shouldResetArchive ? updatedSearchParams : state.searchParams,
+      resetPageFlag: isLeavingArchiveMode ? !state.resetPageFlag : state.resetPageFlag
     };
   }
-  // ... handle other cases
 }
 ```
 
-### Grid State (useTerminationGrid)
-
-**Hook Location**: `/src/ui/src/hooks/useTerminationGrid.ts`
-
-**Key State Variables**:
+**Exported Actions**:
 
 ```typescript
-// Expansion state
-const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+return {
+  state,
+  actions: {
+    handleSearch: (params) => {
+      const searchParamsWithArchive = {
+        ...params,
+        ...(state.archiveMode && { archive: true })
+      };
+      dispatch({ type: "SET_SEARCH_PARAMS", payload: searchParamsWithArchive });
+    },
+    handleUnsavedChanges: (hasChanges) => dispatch({ type: "SET_UNSAVED_CHANGES", payload: hasChanges }),
+    handleStatusChange: (newStatus, statusName) =>
+      dispatch({ type: "SET_STATUS_CHANGE", payload: { status: newStatus, statusName } }),
+    handleArchiveHandled: () => dispatch({ type: "SET_ARCHIVE_HANDLED" }),
+    setInitialSearchLoaded: (loaded) => dispatch({ type: "SET_INITIAL_SEARCH_LOADED", payload: loaded })
+  }
+};
+```
 
-// Message pending state
-const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
-const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
-const [isBulkSaveInProgress, setIsBulkSaveInProgress] = useState<boolean>(false);
+**Archive Mode Flow**:
 
-// RTK Query state
-const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
+1. User changes status dropdown to "Complete" → `archiveMode = true`, `shouldArchive = true`
+2. Next search automatically includes `archive: true` parameter
+3. After search completes → `shouldArchive = false` (via `handleArchiveHandled`)
+4. Archived records persist until status changes away from "Complete"
 
-// Edit state (from useEditState hook)
-editState: {
-  editedValues: Record<string, { value: number, hasError?: boolean }>,
-  loadingRowIds: Set<string>
-}
+**Lines**: 157
 
-// Selection state (from useRowSelection hook)
-selectionState: {
-  selectedRowIds: Set<number>,
-  addRowToSelection: (id: number) => void,
-  removeRowFromSelection: (id: number) => void,
-  clearSelections: () => void
-}
+---
 
-// Pagination state (from useGridPagination hook)
-{
-  pageNumber: number,
-  pageSize: number,
-  sortParams: SortParams,
-  setPageNumber: (page: number) => void,
-  setPageSize: (size: number) => void
+### 8. hooks/useTerminationGrid.ts (Grid Logic Hook)
+
+**Purpose**: Encapsulates all grid-related logic including data fetching, pagination, sorting, editing, and save operations.
+
+**Configuration**:
+
+```typescript
+interface TerminationGridConfig {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+  searchParams: TerminationSearchRequest | null;
+  resetPageFlag: boolean;
+  onUnsavedChanges: (hasChanges: boolean) => void;
+  hasUnsavedChanges: boolean;
+  fiscalData: CalendarResponseDto | null;
+  shouldArchive?: boolean;
+  onArchiveHandled?: () => void;
+  onErrorOccurred?: () => void;
+  onLoadingChange?: (isLoading: boolean) => void;
+  isReadOnly: boolean;
 }
 ```
 
-**Composite Hooks Pattern**:
-The grid hook composes multiple smaller hooks for separation of concerns:
+**API Hooks**:
 
-- `useEditState()` - Inline editing and validation
-- `useRowSelection()` - Checkbox selection tracking
-- `useGridPagination()` - Pagination and sorting
+```typescript
+const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
+const [updateForfeitureAdjustmentBulk] = useUpdateForfeitureAdjustmentBulkMutation();
+const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+```
 
-### Redux State (yearsEndSlice)
+**Custom Hooks Integration**:
+
+```typescript
+const editState = useEditState(); // Tracks edited values and loading rows
+const selectionState = useRowSelection(); // Tracks selected rows for bulk operations
+const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+  useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "name",
+    initialSortDescending: false,
+    onPaginationChange: async (pageNum, pageSz, sortPrms) => {
+      // Trigger search with updated pagination
+    }
+  });
+```
+
+**Grid Data Assembly** (Lines 528-560):
+
+```typescript
+const gridData = useMemo(() => {
+  if (!termination?.response?.results) return [];
+
+  // Flatten: create one row per employee combining master data with yearDetail
+  return termination.response.results
+    .map((masterRow) => {
+      const badgeNumber = masterRow.psn;
+
+      // Find the yearDetail that matches the selected profit year
+      const matchingDetail = masterRow.yearDetails?.find((detail) => detail.profitYear === selectedProfitYear);
+
+      // Skip this employee if no matching year detail found
+      if (!matchingDetail) return null;
+
+      return {
+        // Master row fields
+        psn: masterRow.psn,
+        name: masterRow.name,
+        badgeNumber,
+
+        // Current year detail fields (spread all fields from matchingDetail)
+        ...matchingDetail,
+
+        // Metadata (mark as detail row for shared components)
+        isDetail: true,
+        parentId: badgeNumber,
+        index: 0
+      };
+    })
+    .filter((row) => row !== null); // Remove null entries
+}, [termination, selectedProfitYear]);
+```
+
+**Individual Save Handler** (Lines 309-406):
+
+```typescript
+const handleSave = useCallback(
+  async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
+    const rowId = request.badgeNumber;
+    const actualCurrentPage = currentPageNumberRef.current;  // Avoid stale closure
+
+    editState.addLoadingRow(rowId);  // Show loading spinner
+
+    try {
+      // Transform request using shared helper
+      const transformedRequest = prepareSaveRequest(ACTIVITY_CONFIG, request);
+      await updateForfeitureAdjustment(transformedRequest);
+
+      // Remove from edited values
+      const rowKey = generateRowKey(ACTIVITY_CONFIG.rowKeyConfig, {
+        badgeNumber: request.badgeNumber,
+        profitYear: request.profitYear
+      });
+      editState.removeEditedValue(rowKey);
+
+      // Check for remaining edits
+      const remainingEdits = Object.keys(editState.editedValues)
+        .filter((key) => key !== rowKey).length > 0;
+      onUnsavedChanges(remainingEdits);
+
+      // Generate success message
+      const successMessage = generateSaveSuccessMessage(
+        ACTIVITY_CONFIG.activityType,
+        name || "the selected employee",
+        request.forfeitureAmount
+      );
+
+      // Refresh grid and show success message after data loads
+      if (searchParams) {
+        const skip = actualCurrentPage * pageSize;
+        const params = createRequest(skip, sortParams.sortBy,
+                                      sortParams.isSortDescending,
+                                      selectedProfitYear, pageSize);
+        if (params) {
+          await triggerSearch(params, false);
+          handlePaginationChange(actualCurrentPage, pageSize);  // Stay on same page
+          setPendingSuccessMessage(successMessage);
+        }
+      } else {
+        // Show message immediately if no search params
+        dispatch(setMessage({ ...Messages.TerminationSaveSuccess, ... }));
+      }
+    } catch (error) {
+      console.error("Failed to save forfeiture adjustment:", error);
+      const errorMessage = formatApiError(error,
+        getErrorMessage(ACTIVITY_CONFIG.activityType, "save"));
+      dispatch(setMessage({ key: "TerminationSave", message: {
+        message: errorMessage, type: "error"
+      }}));
+      if (onErrorOccurred) onErrorOccurred();  // Scroll to top
+    } finally {
+      editState.removeLoadingRow(rowId);
+    }
+  },
+  [updateForfeitureAdjustment, editState, onUnsavedChanges, searchParams,
+   pageSize, sortParams, selectedProfitYear, createRequest, triggerSearch,
+   handlePaginationChange, dispatch, onErrorOccurred]
+);
+```
+
+**Bulk Save Handler** (Lines 408-501):
+
+```typescript
+const handleBulkSave = useCallback(
+  async (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => {
+    const badgeNumbers = requests.map((request) => request.badgeNumber);
+    editState.addLoadingRows(badgeNumbers); // Show loading spinners
+
+    const actualCurrentPage = currentPageNumberRef.current;
+    setIsBulkSaveInProgress(true); // Prevent pagination reset
+
+    try {
+      // Transform all requests using shared helper
+      const transformedRequests = prepareBulkSaveRequests(ACTIVITY_CONFIG, requests);
+      await updateForfeitureAdjustmentBulk(transformedRequests);
+
+      // Generate row keys using shared helper
+      const rowKeys = getRowKeysForRequests(ACTIVITY_CONFIG, requests);
+      editState.clearEditedValues(rowKeys);
+      selectionState.clearSelection();
+
+      // Clear selections in grid
+      clearGridSelectionsForBadges(gridRef.current?.api, badgeNumbers);
+
+      // Check for remaining edits
+      const remainingEditKeys = Object.keys(editState.editedValues).filter((key) => !rowKeys.includes(key));
+      onUnsavedChanges(remainingEditKeys.length > 0);
+
+      // Generate bulk success message
+      const employeeNames = names.map((name) => name || "Unknown Employee");
+      const bulkSuccessMessage = generateBulkSaveSuccessMessage(
+        ACTIVITY_CONFIG.activityType,
+        requests.length,
+        employeeNames
+      );
+
+      if (searchParams) {
+        const skip = actualCurrentPage * pageSize;
+        const request = createRequest(
+          skip,
+          sortParams.sortBy,
+          sortParams.isSortDescending,
+          selectedProfitYear,
+          pageSize
+        );
+        if (request) {
+          await triggerSearch(request, false);
+          handlePaginationChange(actualCurrentPage, pageSize); // Stay on same page
+          setPendingSuccessMessage(bulkSuccessMessage);
+          setIsPendingBulkMessage(true);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save forfeiture adjustments:", error);
+      const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "bulkSave"));
+      dispatch(
+        setMessage({
+          key: "TerminationSave",
+          message: {
+            message: errorMessage,
+            type: "error"
+          }
+        })
+      );
+      if (onErrorOccurred) onErrorOccurred();
+    } finally {
+      editState.removeLoadingRows(badgeNumbers);
+      setTimeout(() => setIsBulkSaveInProgress(false), 100); // Reset after Redux update
+    }
+  },
+  [
+    updateForfeitureAdjustmentBulk,
+    editState,
+    selectionState,
+    onUnsavedChanges,
+    searchParams,
+    pageSize,
+    sortParams,
+    selectedProfitYear,
+    createRequest,
+    triggerSearch,
+    handlePaginationChange,
+    dispatch,
+    onErrorOccurred
+  ]
+);
+```
+
+**Pagination Handlers** (Lines 562-579):
+
+```typescript
+const paginationHandlers = {
+  setPageNumber: (value: number) => {
+    if (hasUnsavedChanges) {
+      alert("Please save your changes.");
+      return;
+    }
+    handlePaginationChange(value - 1, pageSize); // Convert 1-based to 0-based
+    setInitialSearchLoaded(true);
+  },
+  setPageSize: (value: number) => {
+    if (hasUnsavedChanges) {
+      alert("Please save your changes.");
+      return;
+    }
+    handlePaginationChange(0, value); // Reset to page 0
+    setInitialSearchLoaded(true);
+  }
+};
+```
+
+**Grid Context** (Lines 608-613):
+
+```typescript
+gridContext: {
+  editedValues: editState.editedValues,        // In-memory edits by rowKey
+  updateEditedValue: editState.updateEditedValue,
+  loadingRowIds: editState.loadingRowIds,      // Set of loading rows
+  isReadOnly                                    // Read-only permission flag
+}
+```
+
+**Returned Interface**:
+
+```typescript
+return {
+  // State
+  pageNumber,
+  pageSize,
+  sortParams,
+  gridData,
+  isFetching,
+  termination,
+  selectedProfitYear,
+
+  // Edit and selection state
+  editState,
+  selectionState,
+
+  // Handlers
+  handleSave,
+  handleBulkSave,
+  sortEventHandler,
+  onGridReady,
+
+  // Pagination
+  paginationHandlers,
+
+  // Refs
+  gridRef,
+
+  // Grid context
+  gridContext
+};
+```
+
+**Lines**: 616
+
+---
+
+## Data Flow
+
+### Search Flow
+
+```
+1. User fills filter form (dates, vested balance, checkboxes)
+   ↓
+2. TerminationSearchFilter validates via Yup schema
+   ↓
+3. onSearch callback → Termination.tsx → actions.handleSearch()
+   ↓
+4. useTerminationState reducer: SET_SEARCH_PARAMS action
+   - Sets searchParams
+   - Sets initialSearchLoaded = true
+   - Toggles resetPageFlag (triggers pagination reset)
+   - Adds archive flag if archiveMode is true
+   ↓
+5. TerminationGrid.tsx receives searchParams via props
+   ↓
+6. useTerminationGrid hook detects searchParams change
+   ↓
+7. useEffect (lines 244-301) calls createRequest() and triggerSearch()
+   - Builds FilterableStartAndEndDateRequest with pagination/sort
+   - Includes vestedBalanceValue and vestedBalanceOperator if both set
+   - Includes archive flag if shouldArchive is true
+   ↓
+8. RTK Query: useLazyGetTerminationReportQuery() sends API request
+   ↓
+9. Backend returns TerminationReportResponse
+   - response.results: Array of TerminatedEmployee with yearDetails
+   - response.total: Total record count
+   - totalEndingBalance, totalVested, totalForfeit, totalBeneficiaryAllocation
+   ↓
+10. Redux slice updates: yearsEnd.termination state
+   ↓
+11. useTerminationGrid assembles gridData:
+    - Flattens results: one row per employee
+    - Matches yearDetail to selectedProfitYear
+    - Combines master fields (psn, name) with detail fields
+   ↓
+12. Grid renders with:
+    - Summary totals (TotalsGrid components)
+    - Flattened row data
+    - Pagination controls
+```
+
+### Edit Flow (Suggested Forfeit)
+
+```
+1. User clicks editable "Suggested Forfeit" cell
+   ↓
+2. AG Grid invokes SuggestedForfeitEditor (custom cell editor)
+   - Renders currency input with validation
+   ↓
+3. User enters new value (e.g., 5000.00)
+   ↓
+4. On blur/enter, editor calls context.updateEditedValue()
+   ↓
+5. useEditState hook updates editState.editedValues:
+   {
+     "1234567-2024": { value: 5000, hasError: false }
+   }
+   ↓
+6. Cell re-renders with new value from context:
+   - valueGetter reads from editedValues[rowKey] first
+   - cellClass applies "bg-blue-50" if hasError is true
+   - Cell shows edit indicator (pencil icon)
+   ↓
+7. useTerminationGrid tracks editState.hasAnyEdits
+   ↓
+8. onUnsavedChanges(true) called → hasUnsavedChanges = true
+   ↓
+9. Navigation guard prevents page navigation
+   Search button shows warning: "Please save your changes."
+   ↓
+10. User clicks individual "SAVE" button OR selects rows + "SAVE SELECTED"
+```
+
+### Individual Save Flow
+
+```
+1. User clicks "SAVE" button in save button column
+   ↓
+2. Cell renderer calls onSave callback with request and name
+   ↓
+3. useTerminationGrid.handleSave() executes:
+
+   a. Add row to loadingRowIds set
+      ↓
+   b. Call prepareSaveRequest() to transform request
+      ↓
+   c. API: updateForfeitureAdjustment(transformedRequest)
+      ↓
+   d. On success:
+      - Generate row key: "badgeNumber-profitYear"
+      - Remove from editedValues
+      - Check for remaining edits
+      - Update hasUnsavedChanges
+      - Generate success message
+      - Refresh grid data (stay on same page)
+      - Show success message after grid loads
+      ↓
+   e. On error:
+      - Format error message
+      - Dispatch error message to Redux
+      - Call onErrorOccurred() to scroll to top
+      ↓
+   f. Finally: Remove row from loadingRowIds
+```
+
+### Bulk Save Flow
+
+```
+1. User clicks checkboxes in save button column to select multiple rows
+   ↓
+2. Header component shows "SAVE SELECTED (n)" button
+   ↓
+3. User clicks "SAVE SELECTED"
+   ↓
+4. Header calls onBulkSave callback with array of requests and names
+   ↓
+5. useTerminationGrid.handleBulkSave() executes:
+
+   a. Add all badge numbers to loadingRowIds
+      Set isBulkSaveInProgress = true (prevents pagination reset)
+      ↓
+   b. Call prepareBulkSaveRequests() to transform all requests
+      ↓
+   c. API: updateForfeitureAdjustmentBulk(transformedRequests)
+      ↓
+   d. On success:
+      - Generate row keys for all requests
+      - Clear all edited values for these rows
+      - Clear selection state
+      - Clear grid row selections
+      - Check for remaining edits
+      - Update hasUnsavedChanges
+      - Generate bulk success message (lists all names)
+      - Refresh grid data (stay on same page)
+      - Show success message after grid loads
+      ↓
+   e. On error:
+      - Format error message
+      - Dispatch error message to Redux
+      - Call onErrorOccurred() to scroll to top
+      ↓
+   f. Finally:
+      - Remove all rows from loadingRowIds
+      - Reset isBulkSaveInProgress (after delay for Redux update)
+```
+
+---
+
+## State Management
+
+### Redux State (yearsEnd slice)
 
 ```typescript
 termination: {
-  startDate: string,
-  endDate: string,
+  startDate: string | null,                // Persisted begin date
+  endDate: string | null,                  // Persisted end date
   response: {
-    results: TerminationMasterDto[],
-    total: number
+    results: TerminatedEmployee[],         // Array of employee records
+    total: number                          // Total record count for pagination
   },
-  totalEndingBalance: number,
-  totalVested: number,
-  totalForfeit: number,
-  totalBeneficiaryAllocation: number
+  totalEndingBalance: number,              // Sum of all ending balances
+  totalVested: number,                     // Sum of all vested amounts
+  totalForfeit: number,                    // Sum of all forfeitures
+  totalBeneficiaryAllocation: number       // Sum of all beneficiary allocations
 }
 ```
 
-**Actions**:
+### Local State (useTerminationState hook)
 
-- `clearTermination()` - Clear termination search results
+```typescript
+state: {
+  hasUnsavedChanges: boolean,              // Are there unsaved grid edits?
+  initialSearchLoaded: boolean,            // Has initial search been performed?
+  searchParams: TerminationSearchRequest | null,  // Current search parameters
+  resetPageFlag: boolean,                  // Toggles to trigger pagination reset
+  currentStatus: string | null,            // Current page status (In Progress, Complete, etc.)
+  archiveMode: boolean,                    // Is archive mode currently active?
+  shouldArchive: boolean                   // Should next search use archive=true?
+}
 
-**Why Store in Redux?**
+actions: {
+  handleSearch: (params: TerminationSearchRequest) => void,
+  handleStatusChange: (status: string, statusName?: string) => void,
+  handleUnsavedChanges: (hasChanges: boolean) => void,
+  setInitialSearchLoaded: (loaded: boolean) => void,
+  handleArchiveHandled: () => void
+}
+```
 
-- Persist search results across component re-renders
-- Support browser refresh without losing context
-- Share financial totals across components
+### Grid Context (AG Grid)
+
+```typescript
+context: {
+  editedValues: Record<string, { value: number, hasError: boolean }>,
+  // Key: "badgeNumber-profitYear"
+  // Value: { value: edited forfeit amount, hasError: validation error flag }
+
+  updateEditedValue: (rowKey: string, value: number, hasError: boolean) => void,
+
+  loadingRowIds: Set<string>,
+  // Set of badge numbers currently saving
+
+  isReadOnly: boolean
+  // Global read-only permission flag
+}
+```
+
+### Edit State (useEditState hook)
+
+```typescript
+editState: {
+  editedValues: Record<string, { value: number, hasError: boolean }>,
+  loadingRowIds: Set<string>,
+  hasAnyEdits: boolean,                    // Computed: editedValues has entries
+
+  updateEditedValue: (rowKey: string, value: number, hasError: boolean) => void,
+  removeEditedValue: (rowKey: string) => void,
+  clearEditedValues: (rowKeys: string[]) => void,
+  addLoadingRow: (badgeNumber: string) => void,
+  removeLoadingRow: (badgeNumber: string) => void,
+  addLoadingRows: (badgeNumbers: string[]) => void,
+  removeLoadingRows: (badgeNumbers: string[]) => void
+}
+```
+
+### Selection State (useRowSelection hook)
+
+```typescript
+selectionState: {
+  selectedRows: Set<string>,               // Set of selected badge numbers
+
+  addRowToSelection: (badgeNumber: string) => void,
+  removeRowFromSelection: (badgeNumber: string) => void,
+  clearSelection: () => void,
+  isRowSelected: (badgeNumber: string) => boolean
+}
+```
+
+---
+
+## Key Dependencies
+
+### Custom Hooks
+
+- **useLazyGetAccountingRangeToCurrent(6)** - Fetches fiscal calendar dates (6 months range)
+- **useTerminationState()** - Centralized state management with useReducer
+- **useTerminationGrid()** - Grid state, API integration, save operations
+- **useUnsavedChangesGuard()** - Navigation guard for unsaved changes
+- **useDynamicGridHeight()** - Calculates optimal grid height based on viewport
+- **useReadOnlyNavigation()** - Detects read-only mode from navigation permissions
+- **useDecemberFlowProfitYear()** - Gets current profit year for December activities
+- **useEditState()** - Tracks edited values and loading rows
+- **useRowSelection()** - Tracks selected rows for bulk operations
+- **useGridPagination()** - Pagination and sorting state
+
+### Shared Components
+
+- **StatusDropdownActionNode** - Page status dropdown in header
+- **DSMDatePicker** - Date picker with fiscal year constraints
+- **DuplicateSsnGuard** - Data quality validation guard (warning mode)
+- **SuggestedForfeitEditor** - Custom cell editor for forfeit amounts
+- **SuggestedForfeitCellRenderer** - Custom cell renderer with edit icon
+- **SharedForfeitHeaderComponent** - Reusable bulk save header (used across forfeit activities)
+- **createSaveButtonCellRenderer()** - Save button cell renderer factory
+
+### External Libraries
+
+- **react-hook-form** - Form state management and validation
+- **yup** - Form validation schema builder
+- **@hookform/resolvers/yup** - Yup resolver for react-hook-form
+- **ag-grid-community** - Enterprise-grade data grid
+- **smart-ui-library** - UI component library (Page, DSMGrid, DSMAccordion, TotalsGrid, etc.)
+- **@mui/material** - Material-UI components (Grid, Button, Checkbox, TextField, MenuItem, etc.)
+- **react-redux** - Redux bindings for React
+- **@reduxjs/toolkit** - Redux Toolkit with RTK Query
 
 ---
 
 ## API Integration
 
-### Search Endpoint
+### RTK Query Hooks
 
-**RTK Query Hook**: `useLazyGetTerminationReportQuery()`
-
-**Request**:
+**Search Query**:
 
 ```typescript
-interface TerminationSearchRequest {
-  beginningDate: string; // Format: "MM/DD/YYYY"
-  endingDate: string; // Format: "MM/DD/YYYY"
-  forfeitureStatus: string; // "showAll", "forfeited", "notForfeited"
+useLazyGetTerminationReportQuery();
+// Endpoint: GET /api/years-end/termination-report
+// Request: FilterableStartAndEndDateRequest & { archive?: boolean }
+// Response: TerminationReportResponse
+```
+
+**Individual Save Mutation**:
+
+```typescript
+useUpdateForfeitureAdjustmentMutation();
+// Endpoint: PUT /api/years-end/forfeiture-adjustment
+// Request: ForfeitureAdjustmentUpdateRequest
+// Response: Success/Error
+```
+
+**Bulk Save Mutation**:
+
+```typescript
+useUpdateForfeitureAdjustmentBulkMutation();
+// Endpoint: PUT /api/years-end/forfeiture-adjustment/bulk
+// Request: ForfeitureAdjustmentUpdateRequest[]
+// Response: Success/Error
+```
+
+### Request Types
+
+**TerminationSearchRequest**:
+
+```typescript
+interface TerminationSearchRequest extends StartAndEndDateRequest {
+  beginningDate: string; // MM/DD/YYYY format
+  endingDate: string; // MM/DD/YYYY format
   profitYear: number;
-  archive?: boolean; // Include archived data
+  forfeitureStatus: string; // "showAll"
+  excludeZeroBalance?: boolean;
+  excludeZeroAndFullyVested?: boolean;
+  vestedBalanceValue?: number | null; // Filter amount
+  vestedBalanceOperator?: number | null; // 0=Equals, 1=LessThan, 2=LessThanOrEqual, 3=GreaterThan, 4=GreaterThanOrEqual
+  archive?: boolean; // Include archived records
   pagination: {
     skip: number;
     take: number;
@@ -857,458 +1406,25 @@ interface TerminationSearchRequest {
 }
 ```
 
-**Response**:
-
-```typescript
-interface TerminationResponse {
-  response: {
-    results: TerminationMasterDto[];
-    total: number;
-  };
-  totalEndingBalance: number; // Sum of all ending balances
-  totalVested: number; // Sum of vested balances
-  totalForfeit: number; // Sum of forfeitures
-  totalBeneficiaryAllocation: number; // Sum of beneficiary distributions
-}
-
-interface TerminationMasterDto {
-  badgeNumber: number;
-  name: string;
-  profitYears: TerminationDetailDto[];
-}
-
-interface TerminationDetailDto {
-  profitYear: number;
-  beginningBalance: number;
-  beneficiaryAllocation: number;
-  distributionAmount: number;
-  forfeit: number;
-  endingBalance: number;
-  vestedBalance: number;
-  vestedPercent: number;
-  dateTerm: string;
-  ytdPsHours: number;
-  age: number;
-  hasForfeited: boolean;
-  suggestedForfeit: number;
-}
-```
-
-### Update Endpoint
-
-**RTK Query Hook**: `useUpdateForfeitureAdjustmentMutation()`
-
-**Request**:
+**ForfeitureAdjustmentUpdateRequest**:
 
 ```typescript
 interface ForfeitureAdjustmentUpdateRequest {
-  badgeNumber: number;
+  badgeNumber: string;
   profitYear: number;
-  forfeitureAmount: number; // NOT negated for termination
-  classAction: boolean; // Always false for manual operations
-  offsettingProfitDetailId?: number; // Undefined for termination
-}
-```
-
-**Critical**: Termination does NOT negate the value. The amount is sent as entered by the user.
-
-**Response**: Success/error status
-
-### Bulk Update Endpoint
-
-**RTK Query Hook**: `useUpdateForfeitureAdjustmentBulkMutation()`
-
-**Request**: Array of `ForfeitureAdjustmentUpdateRequest`
-
-**Response**: Success/error status
-
----
-
-## Key Features
-
-### 1. Financial Summary Totals (Sticky Header)
-
-**Display**: Four `TotalsGrid` components above main grid showing:
-
-- Amount in Profit Sharing (total ending balance)
-- Vested Amount (total vested balance)
-- Total Forfeitures (sum of forfeitures)
-- Total Beneficiary Allocations (sum of distributions to beneficiaries)
-
-**Styling**: `sticky top-0 z-10` - Remains visible when scrolling
-
-**Purpose**:
-
-- Financial oversight and validation
-- Users can verify individual forfeitures sum to displayed totals
-- Real-time updates as data changes
-
-### 2. Inline Editing (Current Year Only)
-
-**Editable Column**: "Suggested Forfeit"
-
-**Editable Criteria**:
-
-```typescript
-editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear;
-```
-
-**Implementation**:
-
-- Uses `SuggestedForfeitEditor` component
-- Values stored in grid context: `editedValues[rowKey] = { value }`
-- `valueGetter` checks context first, then original data
-- Changes trigger `onUnsavedChanges(true)`
-
-**Validation**:
-
-- Cannot save zero values
-- Cannot edit in read-only mode
-- Error highlighting: `bg-red-50` class for cells with errors
-
-**Persistence**:
-
-- Edited values persist across pagination
-- Cleared on successful save
-- Cleared on reset
-
-### 3. Bulk Operations
-
-**Selection Mechanism**:
-
-- Checkboxes in save button column (detail rows only)
-- Bulk checkbox in column header
-- Selection tracked in `selectedRowIds` Set
-
-**Eligibility Criteria**:
-
-```typescript
-isNodeEligible: (nodeData) => {
-  if (!nodeData.isDetail || nodeData.profitYear !== selectedProfitYear) return false;
-  const currentValue = getCurrentValue(nodeData, context);
-  return (currentValue || 0) !== 0;
-};
-```
-
-**Batch Processing**:
-
-- Processes in batches of 5 (configurable)
-- Sequential execution with `Promise.allSettled()`
-- Individual row loading indicators
-- Summary message after completion
-
-**Progress Tracking**:
-
-- `loadingRowIds` Set tracks currently saving rows
-- Save buttons show `CircularProgress` spinner
-- Bulk checkbox disabled during operation
-
-### 4. Value Transformation (Critical)
-
-**Termination Pattern**: **No negation**
-
-```typescript
-// User enters: 2000.00
-// API receives: 2000.00 (no transformation)
-
-transformForfeitureValue("termination", 2000.0); // Returns: 2000.00
-```
-
-**Why?**
-
-- Forfeitures are positive values representing money leaving employee accounts
-- UnForfeit negates (reverses) forfeitures with negative offsetting entries
-- Termination creates new forfeitures, so values stay positive
-
-**Contrast with UnForfeit**:
-
-```typescript
-transformForfeitureValue("unforfeit", 1000.0); // Returns: -1000.00
-```
-
-### 5. Row Keys and Tracking
-
-**Termination uses composite row key**: `${badgeNumber}-${profitYear}`
-
-```typescript
-generateRowKey(
-  { type: "termination" },
-  {
-    badgeNumber: 12345,
-    profitYear: 2024
-  }
-);
-// Returns: "12345-2024"
-```
-
-**Why Composite Key?**
-
-- Each employee can have multiple profit years
-- Badge number alone not unique across years
-- Composite key uniquely identifies each detail row
-
-**No `offsettingProfitDetailId`**: Not needed for new forfeitures (only for reversals)
-
-**Usage**:
-
-```typescript
-// In editedValues context
-const rowKey = `${badgeNumber}-${profitYear}`;
-context.editedValues[rowKey] = { value: 2000.00 };
-
-// In API request
-{
-  badgeNumber: 12345,
-  profitYear: 2024,
-  forfeitureAmount: 2000.00,
-  classAction: false
-  // No offsettingProfitDetailId
-}
-```
-
-### 6. Read-Only Mode
-
-**Hook**: `useReadOnlyNavigation()`
-
-**Returns**: `boolean` - True if current navigation requires read-only access
-
-**Effects when read-only**:
-
-- ✗ Editing disabled (`editable` returns false)
-- ✗ Checkboxes disabled
-- ✗ Save buttons disabled
-- ✗ Tooltips explain read-only mode
-- ✗ Status dropdown disabled
-
-**Implementation**:
-
-```typescript
-const isReadOnly = useReadOnlyNavigation();
-
-// In column definitions
-editable: ({ node }) =>
-  node.data.isDetail &&
-  node.data.profitYear === selectedProfitYear &&
-  !isReadOnly
-
-// In cell renderer
-<IconButton disabled={isDisabled || isReadOnly}>
-  {isLoading ? <CircularProgress /> : <SaveOutlined />}
-</IconButton>
-```
-
-### 7. Unsaved Changes Guard
-
-**Hook**: `useUnsavedChangesGuard(hasUnsavedChanges)`
-
-**Behavior**:
-
-- Blocks navigation when `hasUnsavedChanges === true`
-- Shows browser confirmation: "You have unsaved changes. Are you sure you want to leave?"
-- Applies to:
-  - React Router navigation
-  - Browser back/forward buttons
-  - Browser refresh
-  - Tab close
-
-**Tracking**:
-
-```typescript
-// Set when user edits any value
-onUnsavedChanges(true);
-
-// Cleared when:
-// 1. Successful save (individual or bulk)
-onUnsavedChanges(false);
-
-// 2. User clicks reset
-handleReset() => setInitialSearchLoaded(false);
-
-// 3. User confirms navigation via browser dialog
-```
-
-### 8. Archive Mode
-
-**Trigger**: Status change to "Complete" (or any status name containing "complete")
-
-**Flow**:
-
-1. User changes status via `StatusDropdownActionNode`
-2. `handleStatusChange()` detects "complete" status
-3. Reducer adds `archive: true` to searchParams
-4. Toggles `resetPageFlag` to trigger search
-5. Search executes with archive flag
-6. Grid displays archived (historical) data
-
-**Purpose**: View historical termination data when page marked complete. Allows reviewing past terminations without affecting current processing.
-
-**Exiting Archive Mode**: When status changes away from "Complete", archive flag removed and search re-executes.
-
-### 9. Duplicate SSN Guard
-
-**Component**: `DuplicateSsnGuard` in TerminationSearchFilter
-
-**Purpose**: Prevent searching when duplicate SSNs exist in system
-
-**Implementation**:
-
-```typescript
-<DuplicateSsnGuard mode="warning">
-  {({ prerequisitesComplete }) => (
-    <SearchAndReset
-      disabled={!isValid || !prerequisitesComplete || isFetching}
-    />
-  )}
-</DuplicateSsnGuard>
-```
-
-**Behavior**:
-
-- Checks for duplicate SSNs on mount
-- Disables search button if duplicates found
-- Displays warning message with details
-- Must be resolved before terminations can be processed
-
-**Data Integrity**: Critical safeguard before processing financial transactions
-
-### 10. Error Scroll-to-Top
-
-**Implementation**: Custom window event listener in `Termination.tsx`
-
-```typescript
-useEffect(() => {
-  const handleMessageEvent = (event: Event) => {
-    const customEvent = event as CustomEvent;
-    if (customEvent.detail?.key === "TerminationSave" && customEvent.detail?.message?.type === "error") {
-      scrollToTop();
-    }
-  };
-
-  window.addEventListener("dsmMessage", handleMessageEvent);
-  return () => window.removeEventListener("dsmMessage", handleMessageEvent);
-}, [scrollToTop]);
-```
-
-**Purpose**: When save fails, error message appears at top via `ApiMessageAlert`. Listener ensures user sees error by scrolling to top.
-
-**Event Type**: Uses `dsmMessage` custom event dispatched by message system
-
-### 11. Loading State Feedback (NEW)
-
-**Feature**: Search button disables and shows spinner during data fetch
-
-**Implementation**:
-
-- State lifted from `useTerminationGrid` hook to parent component
-- Parent tracks `isFetching` via `useState`
-- `useEffect` in hook calls `onLoadingChange(isFetching)`
-- State passed down to search filter
-- `SearchAndReset` component consumes state
-
-**User Experience**:
-
-- Button disabled during search
-- Spinner appears on button
-- Cannot trigger multiple simultaneous searches
-- Matches UnForfeit behavior
-
----
-
-## Shared Components
-
-The Termination feature uses shared components from `/src/ui/src/components/ForfeitActivities/` to maintain consistency with UnForfeit.
-
-### 1. SharedForfeitHeaderComponent
-
-**Purpose**: Generic bulk save header for forfeit activities
-
-**Usage in Termination**:
-
-```typescript
-<SharedForfeitHeaderComponent
-  {...params}
-  config={{
-    activityType: "termination"
-  }}
-/>
-```
-
-**Activity-Specific Behavior**:
-
-- Row key generation: Composite `${badgeNumber}-${profitYear}`
-- Value transformation: No negation
-- Eligibility: Current year only, non-zero values
-- No `offsettingProfitDetailId`
-
-### 2. createSaveButtonCellRenderer
-
-**Purpose**: Factory function for save button cell renderers
-
-**Usage in Termination**:
-
-```typescript
-cellRenderer: createSaveButtonCellRenderer({
-  activityType: "termination",
-  selectedProfitYear,
-  isReadOnly
-});
-```
-
-**Features**:
-
-- Checkbox for bulk selection
-- Individual save button with spinner
-- Tooltips for disabled states
-- Activity-specific payload creation
-- Loading state management
-
-### Benefits of Shared Components
-
-1. **Consistency**: Termination and UnForfeit stay in sync
-2. **Maintainability**: Changes in one place affect both features
-3. **Type Safety**: Shared components fully typed
-4. **Testability**: Can unit test utilities independently
-5. **DRY Principle**: Eliminated ~148 lines of duplicated code
-
----
-
-## Type Definitions
-
-### Request Types
-
-```typescript
-interface TerminationSearchRequest extends StartAndEndDateRequest {
-  forfeitureStatus: string; // "showAll" | "forfeited" | "notForfeited"
-  archive?: boolean;
-}
-
-interface StartAndEndDateRequest {
-  beginningDate: string; // "MM/DD/YYYY"
-  endingDate: string; // "MM/DD/YYYY"
-  profitYear?: number;
-  pagination?: {
-    skip: number;
-    take: number;
-    sortBy: string;
-    isSortDescending: boolean;
-  };
-}
-
-interface ForfeitureAdjustmentUpdateRequest {
-  badgeNumber: number;
-  profitYear: number;
-  forfeitureAmount: number; // NOT negated for termination
-  classAction: boolean;
-  offsettingProfitDetailId?: number; // Undefined for termination
+  forfeitureAmount: number; // New suggested forfeit amount
+  // ... other fields populated by shared helpers
 }
 ```
 
 ### Response Types
 
+**TerminationReportResponse**:
+
 ```typescript
-interface TerminationResponse {
+interface TerminationReportResponse {
   response: {
-    results: TerminationMasterDto[];
+    results: TerminatedEmployee[];
     total: number;
   };
   totalEndingBalance: number;
@@ -1317,13 +1433,13 @@ interface TerminationResponse {
   totalBeneficiaryAllocation: number;
 }
 
-interface TerminationMasterDto {
-  badgeNumber: number;
-  name: string;
-  profitYears: TerminationDetailDto[];
+interface TerminatedEmployee {
+  psn: string; // "1234567" or "1234567-1"
+  name: string; // "Last, First"
+  yearDetails: YearDetail[];
 }
 
-interface TerminationDetailDto {
+interface YearDetail {
   profitYear: number;
   beginningBalance: number;
   beneficiaryAllocation: number;
@@ -1332,184 +1448,56 @@ interface TerminationDetailDto {
   endingBalance: number;
   vestedBalance: number;
   vestedPercent: number;
-  dateTerm: string;
+  dateTerm: string; // MM/DD/YYYY
   ytdPsHours: number;
   age: number;
   hasForfeited: boolean;
-  suggestedForfeit: number;
-}
-```
-
-### Grid Types
-
-```typescript
-interface MasterRow {
-  badgeNumber: number;
-  name: string;
-  isExpandable: boolean;
-  isExpanded: boolean;
-  isDetail: false;
-}
-
-interface DetailRow {
-  badgeNumber: number;
-  name: string; // Copied from master
-  profitYear: number;
-  beginningBalance: number;
-  beneficiaryAllocation: number;
-  distributionAmount: number;
-  forfeit: number;
-  endingBalance: number;
-  vestedBalance: number;
-  vestedPercent: number;
-  dateTerm: string;
-  ytdPsHours: number;
-  age: number;
-  hasForfeited: boolean;
-  suggestedForfeit: number;
-  isDetail: true;
+  suggestedForfeit: number | null; // null for beneficiaries
 }
 ```
 
 ---
 
-## Common Patterns
+## Design Patterns
 
-### 1. Error Handling
+### 1. Search-Filter-Grid Pattern
 
-**Pattern**: All errors displayed via `ApiMessageAlert` with common key
+Standard pattern for data exploration pages with collapsible filter section.
 
-```typescript
-// In component
-<ApiMessageAlert commonKey="TerminationSave" />
+### 2. Custom Hook State Management
 
-// In hook
-try {
-  await updateForfeiture(request).unwrap();
-} catch (error) {
-  setMessage(dispatch, {
-    commonKey: "TerminationSave",
-    type: "error",
-    message: `Failed to save forfeiture for ${name}`,
-    description: error.message || "Unknown error"
-  });
-}
-```
+Encapsulates complex state logic in reusable hooks (`useTerminationState`, `useTerminationGrid`).
 
-**Scroll-to-Top**: Window event listener ensures user sees error at page top
+### 3. Factory Functions
 
-### 2. Loading States
+Standardized column definitions via grid factory functions ensure consistency.
 
-**Pattern**: Multiple loading indicators for different operations
+### 4. Context-Based Editing
 
-```typescript
-// Global search loading
-const [isFetching, setIsFetching] = useState(false);
+Uses AG Grid context to track in-memory edits before persistence, avoiding premature API calls.
 
-// Individual row loading
-const [loadingRowIds, setLoadingRowIds] = useState<Set<string>>(new Set());
+### 5. Bulk Operations
 
-// Mutation loading
-const { isLoading } = useUpdateForfeitureAdjustmentMutation();
-```
+Shared header component enables multi-row operations with consistent UX.
 
-**Display**:
+### 6. Read-Only Mode
 
-- Search: Disable button, show spinner
-- Individual save: Show `CircularProgress` in button
-- Bulk save: Disable checkbox, show progress per row
+Centralized read-only detection disables editing across all components.
 
-### 3. Memoization
+### 7. Unsaved Changes Guard
 
-**Pattern**: Memoize expensive computations and callbacks
+Prevents navigation and search when unsaved changes exist, ensuring data integrity.
 
-```typescript
-// Column definitions
-const mainColumns = useMemo(() => GetTerminationColumns(), []);
-const detailColumns = useMemo(
-  () => GetDetailColumns(/* ... */),
-  [
-    /* dependencies */
-  ]
-);
+### 8. Error Highlighting
 
-// Callbacks
-const handleSave = useCallback(
-  async (request, name) => {
-    /* ... */
-  },
-  [
-    /* dependencies */
-  ]
-);
-```
+Visual feedback (blue background) for validation errors in editable cells.
 
-**Benefits**:
+### 9. Archive Mode Integration
 
-- Prevent unnecessary re-renders
-- Improve performance with large datasets
-- Stable references for child components
+Status dropdown integration automatically filters records based on completion status.
 
-### 4. Conditional Rendering
+### 10. Shared Utility Helpers
 
-**Pattern**: Progressive disclosure based on state
-
-```typescript
-// Wait for fiscal data
-{!isCalendarDataLoaded ? (
-  <CircularProgress />
-) : (
-  <>
-    <TerminationSearchFilter />
-    <TerminationGrid />
-  </>
-)}
-
-// Show grid only after search
-{termination?.response && (
-  <TerminationGrid data={termination.response} />
-)}
-```
-
-**Benefits**:
-
-- Better UX (show loading states)
-- Avoid errors from missing data
-- Clear visual hierarchy
-
-### 5. Context for Grid State
-
-**Pattern**: Use grid context to share state across cell renderers
-
-```typescript
-// Define context
-const gridContext = useMemo(() => ({
-  editedValues: editedValuesRef.current,
-  loadingRowIds: loadingRowIds
-}), [loadingRowIds]);
-
-// Pass to grid
-<DSMGrid
-  providedOptions={{
-    context: gridContext,
-    // ... other options
-  }}
-/>
-
-// Access in cell renderer
-cellRenderer: (params) => {
-  const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
-  const currentValue = params.context?.editedValues?.[rowKey]?.value;
-  const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-  const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
-  // ...
-}
-```
-
-**Benefits**:
-
-- Share state without prop drilling
-- Update cell renderers reactively
-- Centralized state management
+Common functions for row key generation, request transformation, message generation ensure consistency across forfeit activities.
 
 ---

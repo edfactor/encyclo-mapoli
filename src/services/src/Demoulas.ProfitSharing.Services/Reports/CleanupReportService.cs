@@ -220,7 +220,7 @@ public class CleanupReportService : ICleanupReportService
                     .Select(g => new
                     {
                         DistributionTotal = g.Sum(x => x.DistributionAmount),
-                        StateTaxTotal = g.Sum(x => x.StateTax),
+                        StateTaxTotal = g.Where(x => !string.IsNullOrEmpty(x.State)).Sum(x => x.StateTax),
                         FederalTaxTotal = g.Sum(x => x.FederalTax),
                         ForfeitureTotal = g.Sum(x => x.ForfeitAmount),
                         // MAIN-2170: Breakdown forfeitures by type
@@ -253,60 +253,75 @@ public class CleanupReportService : ICleanupReportService
                     };
 
                 // Calculate state tax totals by state
-                var stateTaxTotals = await query
+                var allStateTaxRecords = await query
                     .Where(s => s.StateTax > 0)
+                    .ToListAsync(cancellationToken: cancellationToken);
+
+                // Separate unattributed (NULL state) records
+                var unattributedRecords = allStateTaxRecords
+                    .Where(r => string.IsNullOrEmpty(r.State))
+                    .ToList();
+
+                var unattributedTotals = new UnattributedTotals
+                {
+                    Count = unattributedRecords.Count,
+                    FederalTax = unattributedRecords.Sum(x => x.FederalTax),
+                    StateTax = unattributedRecords.Sum(x => x.StateTax),
+                    NetProceeds = unattributedRecords.Sum(x => x.DistributionAmount) // Net proceeds from distribution amount
+                };
+
+                // Build state tax totals, excluding NULL states (will be tracked separately)
+                var stateTaxTotals = allStateTaxRecords
+                    .Where(s => !string.IsNullOrEmpty(s.State))
                     .GroupBy(x => x.State)
-                    .Select(g => new { State = g.Key, Total = g.Sum(x => x.StateTax) })
-                    .ToDictionaryAsync(x => x.State ?? string.Empty, x => x.Total, cancellationToken);
+                    .ToDictionary(g => g.Key, g => g.Sum(x => x.StateTax));
 
                 //// Check if sorting by Age - if so, we need to handle pagination manually since Age can't be calculated in SQL
-                PaginatedResponseDto<DistributionsAndForfeitureResponse> paginatedResponse;
 
-                
+
                 var sortReq = req;
-                if (req.SortBy !=null && "Age".Equals(req.SortBy, StringComparison.OrdinalIgnoreCase))
+                if (req.SortBy != null && "Age".Equals(req.SortBy, StringComparison.OrdinalIgnoreCase))
                 {
                     sortReq = req with { SortBy = "DateOfBirth" };
                 }
-                    // Normal database-level pagination for other sort fields
-                    var paginated = await query.ToPaginationResultsAsync(sortReq, cancellationToken);
+                // Normal database-level pagination for other sort fields
+                var paginated = await query.ToPaginationResultsAsync(sortReq, cancellationToken);
 
-                    var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
-                    {
-                        BadgeNumber = pd.BadgeNumber,
-                        PsnSuffix = pd.PsnSuffix,
-                        Ssn = pd.Ssn.MaskSsn(),
-                        EmployeeName = pd.EmployeeName,
-                        DistributionAmount = pd.DistributionAmount,
-                        TaxCode = pd.TaxCode,
-                        StateTax = pd.StateTax,
-                        State = pd.State,
-                        FederalTax = pd.FederalTax,
-                        ForfeitAmount = pd.ForfeitAmount,
-                        ForfeitType = pd.ForfeitAmount != 0
-                            ? (pd.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
-                               (pd.Remark != null && pd.Remark.Contains("ADMINISTRATIVE")))
-                                ? 'A'
-                                : (pd.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
-                                   (pd.Remark != null && (pd.Remark.Contains("FORFEIT CA") || pd.Remark.Contains("UN-FORFEIT CA"))))
-                                    ? 'C'
-                                    : (char?)null
-                            : null,
-                        Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
-                        Age = (byte)(pd.MonthToDate is > 0 and < 13
-                            ? pd.DateOfBirth.Age(
-                                new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
-                            : pd.DateOfBirth.Age(endDate.ToDateTime(TimeOnly.MinValue))),
-                        HasForfeited = pd.HasForfeited,
-                        IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
-                    });
+                var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
+                {
+                    BadgeNumber = pd.BadgeNumber,
+                    PsnSuffix = pd.PsnSuffix,
+                    Ssn = pd.Ssn.MaskSsn(),
+                    EmployeeName = pd.EmployeeName,
+                    DistributionAmount = pd.DistributionAmount,
+                    TaxCode = pd.TaxCode,
+                    StateTax = pd.StateTax,
+                    State = pd.State,
+                    FederalTax = pd.FederalTax,
+                    ForfeitAmount = pd.ForfeitAmount,
+                    ForfeitType = pd.ForfeitAmount != 0
+                        ? (pd.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
+                           (pd.Remark != null && pd.Remark.Contains("ADMINISTRATIVE")))
+                            ? 'A'
+                            : (pd.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
+                               (pd.Remark != null && (pd.Remark.Contains("FORFEIT CA") || pd.Remark.Contains("UN-FORFEIT CA"))))
+                                ? 'C'
+                                : null
+                        : null,
+                    Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
+                    Age = (byte)(pd.MonthToDate is > 0 and < 13
+                        ? pd.DateOfBirth.Age(
+                            new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
+                        : pd.DateOfBirth.Age(endDate.ToDateTime(TimeOnly.MinValue))),
+                    HasForfeited = pd.HasForfeited,
+                    IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
+                });
 
-                    paginatedResponse = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
-                    {
-                        Results = apiResponse.ToList(),
-                        Total = paginated.Total
-                    };
-                //}
+                PaginatedResponseDto<DistributionsAndForfeitureResponse> paginatedResponse = new(req)
+                {
+                    Results = apiResponse.ToList(),
+                    Total = paginated.Total
+                };
 
                 var response = new DistributionsAndForfeitureTotalsResponse()
                 {
@@ -322,8 +337,20 @@ public class CleanupReportService : ICleanupReportService
                     ForfeitureAdministrativeTotal = totals.ForfeitureAdministrative,
                     ForfeitureClassActionTotal = totals.ForfeitureClassAction,
                     StateTaxTotals = stateTaxTotals,
+                    UnattributedTotals = unattributedTotals.Count > 0 ? unattributedTotals : null,
+                    HasUnattributedRecords = unattributedTotals.Count > 0,
                     Response = paginatedResponse
                 };
+
+                // Log unattributed records as business metric (PS-2031)
+                if (unattributedTotals.Count > 0)
+                {
+                    _logger.LogWarning(
+                        "Unattributed state records detected in GetDistributionsAndForfeitureAsync: {UnattributedCount} records with taxes but no state code. " +
+                        "Total unattributed state taxes: {UnattributedStateTax}. This indicates data quality issues in state extraction (PS-2031).",
+                        unattributedTotals.Count,
+                        unattributedTotals.StateTax);
+                }
 
                 return Result<DistributionsAndForfeitureTotalsResponse>.Success(response);
             }, cancellationToken);

@@ -1,6 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
-import { createCurrencyColumn, createPointsColumn } from "../../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createHoursColumn, createPointsColumn } from "../../../../utils/gridColumnFactory";
 
 export const GetProfitSummaryGridColumns = (): ColDef[] => {
   return [
@@ -9,9 +9,12 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       field: "lineItemTitle",
       colId: "lineItemTitle",
       minWidth: 400,
+      sortable: false,
       headerClass: "left-align",
-      cellClass: "left-align",
+      cellClass:
+        "left-align h-5 normal-case underline decoration-blue-600 !outline-none !border-none focus:outline-none focus:border-none",
       resizable: true,
+      //suppressCellFocus: true,
       valueFormatter: (params) => {
         return params.data.lineItemPrefix ? `${params.data.lineItemPrefix}. ${params.value}` : params.value;
       }
@@ -19,12 +22,14 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
     createPointsColumn({
       headerName: "EMPS",
       field: "numberOfMembers",
+      sortable: false,
       valueFormatter: (params) => formatNumberWithComma(params.value)
     }),
     createCurrencyColumn({
       headerName: "Total Wages",
       field: "totalWages",
       minWidth: 180,
+      sortable: false,
       valueFormatter: (params) => {
         if (typeof params.value === "string" && params.value.includes("X")) {
           return params.value;
@@ -36,11 +41,36 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       headerName: "Total Balance",
       field: "totalBalance",
       minWidth: 180,
+      sortable: false,
       valueFormatter: (params) => {
         if (typeof params.value === "string" && params.value.includes("X")) {
           return params.value;
         }
         return numberToCurrency(params.value);
+      }
+    }),
+    createHoursColumn({
+      headerName: "Hours",
+      field: "totalHours",
+      minWidth: 80,
+      sortable: false,
+      valueFormatter: (params) => {
+        if (params.value === null || params.value === undefined) {
+          return "";
+        }
+        return formatNumberWithComma(params.value);
+      }
+    }),
+    createPointsColumn({
+      headerName: "Points",
+      field: "totalPoints",
+      minWidth: 100,
+      sortable: false,
+      valueFormatter: (params) => {
+        if (params.value === null || params.value === undefined) {
+          return "";
+        }
+        return formatNumberWithComma(params.value);
       }
     })
   ];

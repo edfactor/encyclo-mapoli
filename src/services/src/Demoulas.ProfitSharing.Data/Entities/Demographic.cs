@@ -24,7 +24,7 @@ public sealed class Demographic : Member
     /// Gets or sets the Social Security Number (SSN) associated with the demographic entity.
     /// </summary>
     /// <remarks>
-    /// Changing the value of this property will automatically record the change in the 
+    /// Changing the value of this property will automatically record the change in the
     /// <see cref="DemographicSsnChangeHistory"/> collection, capturing the old and new SSN values
     /// along with the timestamp of the change.
     /// </remarks>
@@ -107,7 +107,7 @@ public sealed class Demographic : Member
     /// <c>true</c> if the historical data of the two <see cref="Demographic"/> objects is equivalent; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
-    /// This method compares key properties of the <see cref="Demographic"/> objects, excluding SSN due to potential inconsistencies 
+    /// This method compares key properties of the <see cref="Demographic"/> objects, excluding SSN due to potential inconsistencies
     /// in the Oracle HCM process. It is used to determine whether a new history record should be created.
     /// </remarks>
     public static bool DemographicHistoryEqual(Demographic demo1, Demographic demo2)

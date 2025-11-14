@@ -12,7 +12,7 @@ interface UseBeneficiarySearchConfig {
 /**
  * Return type for useBeneficiarySearch hook
  */
-interface UseBeneficiarySearchReturn {
+export interface UseBeneficiarySearchReturn {
   // State
   pageNumber: number;
   pageSize: number;

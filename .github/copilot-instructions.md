@@ -26,6 +26,86 @@
 - **Identifiers**: `OracleHcmId` is authoritative; fall back to `(Ssn,BadgeNumber)` only when Oracle id missing
 - **Entity updates**: Use helper methods like `UpdateEntityValues`; avoid scattered per-field assignments
 
+## Security Requirements (MANDATORY - OWASP Top 10 2021 Aligned)
+
+**ALL NEW CODE must follow these security patterns. Deviations require security review and PR justification.**
+
+### Authentication & Authorization (A01/A07)
+- **Server-side validation ALWAYS**: Never trust client-provided roles or user context. Re-validate on every endpoint:
+  ```csharp
+  // WRONG: Trust header blindly
+  var roles = req.Headers["x-impersonating-roles"];
+  
+  // RIGHT: Always re-validate against authenticated user
+  var allowedRoles = GetUserAllowedImpersonationRoles(userId);
+  if (!requestedRoles.All(r => allowedRoles.Contains(r)))
+      throw new UnauthorizedAccessException();
+  ```
+- **No client-side storage for auth state**: Never use `localStorage` for roles/tokens that determine access. Okta JWT tokens (from secure auth flow) are OK; role elevation via localStorage is NOT
+- **Centralized role validation**: Use `PolicyRoleMap.cs` (single source of truth) for all authorization decisions
+- **Principle of least privilege**: Users get minimum required roles; audit role assignments quarterly
+
+### Input Validation & SQL Injection (A03/A09)
+- **Validate ALL inputs server-side**: Client validation is UX only, never security
+- **Use parameterized queries**: EF Core does this automatically; NEVER construct SQL strings
+- **Boundary checks**: Numeric ranges, string lengths, collection sizes must be validated
+  ```csharp
+  if (pageSize < 1 || pageSize > 1000)
+      throw new ValidationException("PageSize must be 1-1000");
+  ```
+- **Degenerate query guards**: Prevent queries that scan entire tables
+  ```csharp
+  // WRONG: This will load all demographics if badge == 0 is common
+  if (badge == 0) throw new ValidationException("Badge cannot be zero");
+  ```
+  See `VALIDATION_PATTERNS.md` (`.github/`) for complete patterns
+
+### PII Protection & Data Exposure (A01/A09)
+- **Mask PII in logs**: SSN, email, phone, bank account numbers MUST be masked. Use `GetMaskedUserId()` pattern from `TelemetryMiddleware.cs`
+- **Minimize claims used**: Only extract 'sub' (subject) from Okta JWT; avoid extracting unmasked email/identity claims into logs
+- **Secure database access**: Use read-only contexts (`UseReadOnlyContext()`) for queries; principle of least privilege for service accounts
+- **Avoid composite keys with SSN**: When building dictionaries from Demographics, use `(Ssn, OracleHcmId)` not just `Ssn` alone (SSN not unique)
+
+### Transport Security (A02/A05)
+- **HTTPS enforcement**: All production endpoints MUST use HTTPS. Use `UseHttpsRedirection()` + `UseHsts()` middleware
+- **Security headers**: Endpoints MUST return:
+  - `X-Frame-Options: DENY` (prevent clickjacking)
+  - `X-Content-Type-Options: nosniff` (prevent MIME sniffing)
+  - `Content-Security-Policy: default-src 'self'` (prevent XSS)
+  - `Strict-Transport-Security: max-age=31536000` (enforce HTTPS 1 year)
+  - See `NetEscapades.AspNetCore.SecurityHeaders` middleware for implementation
+- **CORS restrictions**: In dev, allow only `localhost:3100` / `127.0.0.1:3100`; in prod, allow only specific domains (never `AllowAnyOrigin()`)
+
+### Error Handling (A01/A10)
+- **No sensitive data in error messages**: Never expose stack traces, SQL queries, or PII in HTTP responses
+- **Structured error codes**: Use domain errors (e.g., `Error.CalendarYearNotFound`) instead of raw exceptions
+- **Consistent error responses**: All endpoints return `ProblemHttpResult` with standard structure (status, title, detail)
+- **Log exceptions with correlation IDs**: Tie errors to audit trails for security incidents
+
+### Telemetry & Logging (A01)
+- **Comprehensive telemetry required**: All endpoints MUST use `ExecuteWithTelemetry` extension or record metrics manually
+- **Declare sensitive fields**: List fields accessed (e.g., `"Ssn", "Email"`) in telemetry calls for security auditing
+- **Correlation IDs**: Generated automatically by middleware; tie logs/metrics together for traceability
+- **Business metrics**: Record operation counts (e.g., year-end runs, report generations) for anomaly detection
+
+### Session & Credential Management
+- **No hardcoded secrets**: Use Azure Key Vault or environment variables
+- **Token expiration**: Okta JWT tokens auto-expire; no custom token storage in `localStorage`
+- **Re-authentication for sensitive ops**: Year-end processing, member updates should require re-auth confirmation
+
+### Dependency Security
+- **Keep packages patched**: Run `dotnet list package --outdated` monthly; address critical CVEs within 48 hours
+- **No dev dependencies in production**: Exclude test packages from prod builds (already configured)
+- **Analyze new packages**: Check GitHub stars, maintenance, known vulnerabilities before adding
+
+### Related Tickets
+- **PS-2021**: Remove localStorage impersonation (privilege escalation fix)
+- **PS-2022**: Add server-side role validation (defense-in-depth)
+- **PS-2023**: Security headers middleware (XSS/clickjacking prevention)
+- **PS-2024**: HTTPS + HSTS enforcement (transport security)
+- **PS-2025**: CORS localhost restriction (MITM prevention in dev)
+- **PS-2026**: Telemetry PII masking audit (data exposure prevention)
+
 ## Endpoint Results Pattern (MANDATORY)
 All FastEndpoints MUST return typed minimal API union results AND use domain `Result<T>` record (`Demoulas.ProfitSharing.Common.Contracts.Result<T>`) for service outcomes.
 
@@ -90,6 +170,34 @@ var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
 **Projection**: Select only needed columns for DTOs
 **Lookups**: Pre-compute `ToDictionary`/`ToLookup` before loops
 **Degenerate guard**: Validate inputs (e.g., prevent all-zero badge numbers)
+
+### Dictionary Keys with Demographic (CRITICAL)
+**SSN is NOT unique** in the `Demographic` entity. When building dictionaries/lookups from Demographics:
+- **WRONG**: `demographics.ToDictionary(d => d.Ssn)` — will throw duplicate key exception
+- **CORRECT**: Use a composite key combining SSN with a unique identifier:
+  - `(d.Ssn, d.OracleHcmId)` — **preferred** (most reliable across systems)
+  - `(d.Ssn, d.BadgeNumber)` — when OracleHcmId unavailable
+  - `(d.Ssn, d.Id)` — when badge/HCM unavailable (database ID)
+
+**Examples**:
+```csharp
+// Best: Use OracleHcmId
+var demographicsByKey = demographics
+    .ToDictionary(d => (d.Ssn, d.OracleHcmId), d => d);
+
+// Fallback: Use badge when HCM ID missing
+var demographicsByKey = demographics
+    .Where(d => d.OracleHcmId != 0) // Guard against missing identifiers
+    .ToDictionary(d => (d.Ssn, d.OracleHcmId), d => d);
+
+// For lookups (one-to-many): Use ToLookup to avoid duplicates entirely
+var demographicsByKey = demographics
+    .ToLookup(d => (d.Ssn, d.OracleHcmId));
+    
+// Access: var matches = demographicsByKey[(ssn, hcmId)];
+```
+
+**Why**: Historical data, data feeds, and migrations can create SSN duplicates (same employee with multiple records). Always pair SSN with a unique identifier when creating dictionaries.
 
 ### Critical Rules
 - Services only—NO DbContext in endpoints
@@ -271,6 +379,7 @@ When creating new documentation:
 
 ## When Extending
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root.
+- **NEW ENDPOINT CHECKLIST**: Use the [RESTful API Guidelines Instructions](instructions/restful-api-guidelines.instructions.md#new-endpoint-checklist) to verify design, implementation, documentation, and security before submitting PR
 - ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section).
 - Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.).
 - Declare all sensitive fields accessed in telemetry calls for security auditing.
@@ -307,6 +416,7 @@ git push -u origin feature/PS-1720-add-reporting-view
 For comprehensive implementation details, see these dedicated guides:
 
 ### Core Patterns (read when needed)
+- RESTFUL_API_GUIDELINES.INSTRUCTIONS.md (`.github/instructions/`) - Zalando RESTful API guidelines, endpoint design, HTTP semantics, URL patterns, pagination
 - DISTRIBUTED_CACHING_PATTERNS.md (`.github/`) - IDistributedCache patterns, version-based invalidation, unit testing
 - VALIDATION_PATTERNS.md (`.github/`) - Server & client validation, FluentValidation examples, boundary checks
 - BRANCHING_AND_WORKFLOW.md (`.github/`) - Git branching, Jira workflow, PR guidelines, deny list
@@ -337,6 +447,21 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 ```
 
 ## Do NOT
+
+### Security - CRITICAL
+- **Trust client-provided roles/headers for authorization**: Always re-validate server-side. Remove `localStorage` role elevation code (PS-2021). Never bypass `PolicyRoleMap.cs` validation.
+- **Store secrets in code**: Use Azure Key Vault or environment variables. Never hardcode connection strings, API keys, or credentials.
+- **Expose PII in logs/responses**: SSN, email, phone, bank accounts must be masked. Use `GetMaskedUserId()` pattern. Never log unmasked identity claims.
+- **Skip input validation**: All user inputs must be validated server-side (ranges, lengths, enum values, degenerate cases). Client validation is UX only.
+- **Build SQL strings by concatenation**: Always use EF Core parameterized queries. NEVER string-concatenate SQL.
+- **Return sensitive data in error messages**: Never expose stack traces, SQL queries, file paths, or PII in HTTP error responses.
+- **Implement authentication client-side only**: Use Okta OIDC server-side flow. Never rely on localStorage for auth state.
+- **Deploy without security headers**: All endpoints must return HSTS, CSP, X-Frame-Options, etc. (See PS-2023, PS-2024 tickets).
+- **Use `AllowAnyOrigin()` in production CORS**: Restrict to specific domains. In dev, allow only `localhost:3100` (See PS-2025).
+- **Skip telemetry on sensitive operations**: Year-end processing, member termination, report generation MUST have telemetry with sensitive fields declared (See PS-2026).
+- **Skip re-validation when handling impersonation**: Always re-check that authenticated user is allowed to assume requested roles (PS-2022).
+
+### Architecture & Data Access
 - Bypass history tracking for mutable audited entities.
 - Introduce raw SQL without parameters.
 - Duplicate mapping logic already covered by Mapperly profiles.
@@ -348,6 +473,8 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 - Load entities into memory for bulk updates/deletes—use `ExecuteUpdateAsync`/`ExecuteDeleteAsync` for efficiency.
 - Skip input validation that could cause degenerate queries (e.g., allow all-zero badge numbers that would scan entire tables).
 - Manually add `.AsNoTracking()` to queries when using `UseReadOnlyContext()`—it's already applied automatically by `UseReadOnlyContext()`.
+
+### Observability & Quality
 - Create endpoints without comprehensive telemetry using `TelemetryExtensions` patterns.
 - Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods.
 - Access sensitive fields without declaring them in telemetry calls (security requirement).

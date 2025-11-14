@@ -91,3 +91,19 @@ export const EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES = {
     description: "The search did not return any results. Please try a different search criteria."
   } as MissiveResponse
 };
+
+export const BENEFICIARY_INQUIRY_MESSAGES = {
+  MEMBER_NOT_FOUND: {
+    id: 920,
+    severity: "Error" as const,
+    message: "Member Not Found",
+    description: "The member you are searching for does not exist in the system."
+  } as MissiveResponse,
+
+  NO_RESULTS_FOUND: {
+    id: 921,
+    severity: "Error" as const,
+    message: "No Results Found",
+    description: "The search did not return any results. Please try a different search criteria."
+  } as MissiveResponse
+};

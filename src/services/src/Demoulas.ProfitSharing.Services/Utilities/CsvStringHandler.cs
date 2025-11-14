@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Demoulas.ProfitSharing.Services.Utilities;
@@ -13,7 +13,7 @@ namespace Demoulas.ProfitSharing.Services.Utilities;
 /// - Null values should be replaced with empty strings
 /// - Numeric values use InvariantCulture formatting
 /// - Memory allocations are minimized
-/// 
+///
 /// Usage:
 /// <code>
 /// var csv = new CsvStringHandler(5); // 5 fields
@@ -29,7 +29,6 @@ namespace Demoulas.ProfitSharing.Services.Utilities;
 public ref struct CsvStringHandler
 {
     private DefaultInterpolatedStringHandler _handler;
-    private int _fieldCount;
     private int _currentField;
 
     /// <summary>
@@ -43,7 +42,6 @@ public ref struct CsvStringHandler
         // Account for semicolons between fields
         var separatorLength = fieldCount > 0 ? fieldCount - 1 : 0;
         _handler = new DefaultInterpolatedStringHandler(literalLength + separatorLength, formattedCount, CultureInfo.InvariantCulture);
-        _fieldCount = fieldCount;
         _currentField = 0;
     }
 
@@ -55,7 +53,6 @@ public ref struct CsvStringHandler
     {
         // Estimate 20 chars per field average
         _handler = new DefaultInterpolatedStringHandler(fieldCount * 20, fieldCount, CultureInfo.InvariantCulture);
-        _fieldCount = fieldCount;
         _currentField = 0;
     }
 

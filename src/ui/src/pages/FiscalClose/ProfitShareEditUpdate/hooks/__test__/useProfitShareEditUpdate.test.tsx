@@ -44,7 +44,7 @@ vi.mock("../../../../../hooks/useFiscalCloseProfitYear", () => ({
   default: mockUseFiscalCloseProfitYear
 }));
 
-vi.mock("../../../../../hooks/useChecksumValidation", () => ({
+vi.mock("../useChecksumValidation", () => ({
   useChecksumValidation: mockUseChecksumValidation
 }));
 
@@ -87,20 +87,16 @@ interface ValidationFieldResult {
   hasError: boolean;
 }
 
-interface ChecksumValidationResult {
-  validationData: null;
-  getFieldValidation: ReturnType<typeof vi.fn>;
-}
-
 describe("useProfitShareEditUpdate", () => {
   const createStore = (preloadedState?: Partial<MockedRootState>) => {
-    return configureStore({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return configureStore<any>({
       reducer: {
         yearsEnd: yearsEndReducer,
         security: securityReducer,
         yearsEndApi: () => ({ queries: {}, mutations: {}, provided: [], arg: [] })
       },
-      preloadedState: preloadedState as Partial<MockedRootState>
+      preloadedState
     });
   };
 
@@ -149,7 +145,7 @@ describe("useProfitShareEditUpdate", () => {
     mockUseChecksumValidation.mockReturnValue({
       validationData: null,
       getFieldValidation: mockGetFieldValidation
-    } as ChecksumValidationResult);
+    });
 
     mockGetFieldValidation.mockReturnValue({ hasError: false });
 
@@ -768,10 +764,12 @@ describe("useProfitShareEditUpdate", () => {
   describe("Validation Data Integration", () => {
     it("should integrate with useChecksumValidation hook", () => {
       mockGetFieldValidation.mockReturnValue({ hasError: false } as ValidationFieldResult);
+
       mockUseChecksumValidation.mockReturnValue({
-        validationData: { field1: { hasError: false } },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        validationData: { field1: { hasError: false } } as any,
         getFieldValidation: mockGetFieldValidation
-      } as ChecksumValidationResult);
+      });
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 

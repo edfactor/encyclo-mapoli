@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 
@@ -20,7 +20,7 @@ public interface IArchivedValueService
     /// <param name="profitYear">The profit year to retrieve archived values for</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>
-    /// Result containing dictionary of archived values keyed by "ReportCode.FieldName", 
+    /// Result containing dictionary of archived values keyed by "ReportCode.FieldName",
     /// or null if no archived values found for the specified year.
     /// </returns>
     Task<Result<Dictionary<string, decimal>?>> GetMasterUpdateArchivedValuesAsync(

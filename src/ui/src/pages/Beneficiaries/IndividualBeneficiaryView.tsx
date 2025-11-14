@@ -15,6 +15,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({ s
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
   const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
   const [change, setChange] = useState<number>(0);
+  const [existingBeneficiaries, setExistingBeneficiaries] = useState<BeneficiaryDto[]>([]);
 
   const handleClose = () => {
     setOpenCreateDialog(false);
@@ -31,6 +32,10 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({ s
     setChange((prev) => prev + 1);
   };
 
+  const handleBeneficiariesChange = (beneficiaries: BeneficiaryDto[]) => {
+    setExistingBeneficiaries(beneficiaries);
+  };
+
   return (
     <>
       <CreateBeneficiaryDialog
@@ -42,6 +47,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({ s
         badgeNumber={selectedMember?.badgeNumber ?? 0}
         psnSuffix={selectedMember?.psnSuffix ?? 0}
         onSaveSuccess={onBeneficiarySaveSuccess}
+        existingBeneficiaries={existingBeneficiaries}
       />
       <MemberDetailsPanel
         selectedMember={selectedMember}
@@ -66,6 +72,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({ s
         count={change}
         selectedMember={selectedMember}
         onEditBeneficiary={createOrUpdateBeneficiary}
+        onBeneficiariesChange={handleBeneficiariesChange}
       />
     </>
   );

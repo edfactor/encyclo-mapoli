@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { MasterUpdateCrossReferenceValidationResponse } from "smart-ui-library";
+import { MasterUpdateCrossReferenceValidationResponse } from "@/types/validation/cross-reference-validation";
 import { prepareHeaders, url } from "./api";
 
 /**
@@ -13,6 +13,9 @@ export const validationApi = createApi({
     prepareHeaders
   }),
   tagTypes: ["MasterUpdateValidation"],
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     /**
      * Get Master Update cross-reference validation data for a specific profit year.
@@ -28,7 +31,7 @@ export const validationApi = createApi({
      */
     getMasterUpdateValidation: builder.query<MasterUpdateCrossReferenceValidationResponse, number>({
       query: (profitYear) => `checksum/master-update/${profitYear}`,
-      providesTags: (result, error, profitYear) => [{ type: "MasterUpdateValidation", id: profitYear }]
+      providesTags: (_result, _error, profitYear) => [{ type: "MasterUpdateValidation", id: profitYear }]
     })
   })
 });

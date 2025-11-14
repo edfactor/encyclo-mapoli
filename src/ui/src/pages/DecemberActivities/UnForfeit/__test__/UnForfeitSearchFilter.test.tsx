@@ -77,6 +77,21 @@ vi.mock("../../../utils/FormValidators", async () => {
 });
 
 vi.mock("smart-ui-library", () => ({
+  DSMDatePicker: vi.fn(({ label, onChange, value, disabled, required }) => (
+    <div>
+      <label>{label}</label>
+      <input
+        data-testid={`date-picker-${label}`}
+        aria-label={label}
+        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={value ? new Date(value).toISOString().split("T")[0] : ""}
+        placeholder={label}
+        type="date"
+        disabled={disabled}
+        required={required}
+      />
+    </div>
+  )),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
     <section aria-label="search and reset">
       <button
@@ -90,7 +105,13 @@ vi.mock("smart-ui-library", () => ({
         onClick={handleReset}>
         Reset
       </button>
-      {isFetching && <span role="status" aria-label="loading">Loading...</span>}
+      {isFetching && (
+        <span
+          role="status"
+          aria-label="loading">
+          Loading...
+        </span>
+      )}
     </section>
   ))
 }));
@@ -224,9 +245,9 @@ describe("UnForfeitSearchFilter", () => {
         expect(screen.getByText("Rehire Ending Date")).toBeInTheDocument();
       });
 
-      // Verify that date inputs exist (even if not yet populated)
-      const inputs = screen.getAllByRole("textbox");
-      expect(inputs.length).toBeGreaterThanOrEqual(2);
+      // Verify that date inputs exist using accessible labels
+      expect(screen.getByLabelText("Rehire Begin Date")).toBeInTheDocument();
+      expect(screen.getByLabelText("Rehire Ending Date")).toBeInTheDocument();
     });
 
     it("should support date input interaction", async () => {
@@ -248,13 +269,15 @@ describe("UnForfeitSearchFilter", () => {
       });
 
       // Date inputs should be present and interactive
-      const inputs = screen.getAllByRole("textbox");
-      expect(inputs.length).toBeGreaterThanOrEqual(2);
+      const beginDateInput = screen.getByLabelText("Rehire Begin Date");
+      const endDateInput = screen.getByLabelText("Rehire Ending Date");
+
+      expect(beginDateInput).toBeInTheDocument();
+      expect(endDateInput).toBeInTheDocument();
 
       // Verify inputs are not disabled
-      inputs.forEach(input => {
-        expect(input).not.toBeDisabled();
-      });
+      expect(beginDateInput).not.toBeDisabled();
+      expect(endDateInput).not.toBeDisabled();
     });
   });
 
@@ -299,9 +322,8 @@ describe("UnForfeitSearchFilter", () => {
       });
     });
 
-    it("should show alert when search clicked with unsaved changes", async () => {
+    it("should show dialog when search clicked with unsaved changes", async () => {
       const user = userEvent.setup();
-      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
       render(
         <UnForfeitSearchFilter
@@ -323,17 +345,15 @@ describe("UnForfeitSearchFilter", () => {
       const searchButton = screen.getByLabelText("search button");
       await user.click(searchButton);
 
-      // Verify alert was shown with appropriate message
+      // Verify dialog was shown with appropriate message
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith("Please save your changes.");
+        expect(screen.getByText("Unsaved Changes")).toBeInTheDocument();
+        expect(screen.getByText("Please save your changes before performing a new search.")).toBeInTheDocument();
       });
-
-      alertSpy.mockRestore();
     });
 
     it("should not call onSearch when there are unsaved changes", async () => {
       const user = userEvent.setup();
-      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
       render(
         <UnForfeitSearchFilter
@@ -355,12 +375,10 @@ describe("UnForfeitSearchFilter", () => {
       const searchButton = screen.getByLabelText("search button");
       await user.click(searchButton);
 
-      // Verify onSearch was NOT called (alert prevents execution)
+      // Verify onSearch was NOT called (dialog prevents execution)
       await waitFor(() => {
         expect(mockOnSearch).not.toHaveBeenCalled();
       });
-
-      alertSpy.mockRestore();
     });
   });
 

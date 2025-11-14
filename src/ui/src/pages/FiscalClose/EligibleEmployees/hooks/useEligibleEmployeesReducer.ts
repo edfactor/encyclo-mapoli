@@ -1,5 +1,5 @@
 import { ISortParams } from "smart-ui-library";
-import { EligibleEmployee, PagedReportResponse } from "../../../../reduxstore/types";
+import { EligibleEmployeeResponseDto } from "../../../../reduxstore/types";
 
 export interface PaginationState {
   pageNumber: number;
@@ -14,14 +14,14 @@ export interface SearchState {
 }
 
 export interface EligibleEmployeesState {
-  data: PagedReportResponse<EligibleEmployee> | null;
+  data: EligibleEmployeeResponseDto | null;
   pagination: PaginationState;
   search: SearchState;
 }
 
 export type EligibleEmployeesAction =
   | { type: "SEARCH_START"; payload: { profitYear: number } }
-  | { type: "SEARCH_SUCCESS"; payload: PagedReportResponse<EligibleEmployee> }
+  | { type: "SEARCH_SUCCESS"; payload: EligibleEmployeeResponseDto }
   | { type: "SEARCH_ERROR" }
   | { type: "SET_PAGINATION"; payload: Partial<PaginationState> }
   | { type: "RESET_PAGINATION" }

@@ -1,4 +1,4 @@
-﻿namespace YEMatch.YEMatch;
+﻿namespace YEMatch;
 
 public static class ActivityToReports
 {
@@ -19,7 +19,7 @@ public static class ActivityToReports
         // ["R12"] =  PROF-LOAD-YREND-DEMO-PROFSHARE
 
         ["R15"] = "12228",
-        ["R17"] = "12278",
+        ["R17"] = "18182",
         ["R18"] = "24515",
         ["R19"] = "3719",
         ["R20"] = "7670",
@@ -39,7 +39,7 @@ public static class ActivityToReports
         // These are names of generated reports.  Then end with a unix process id.  This keeps the reports
         // unique in a directory of reports.     We use this map to figure out for a given activity, like R22 which has
         // a single specific unix id assigned at run time, what file or files to go grab on the remote server.
-        
+
         "ETVA-LESS-THAN-ZERO-13604.csv",
         "DUPLICATE-PAYPROF-SSNS-13604.csv",
         "DUPLICATE-DEM-SSNS-13604.csv",
@@ -93,10 +93,11 @@ public static class ActivityToReports
     {
         if (!_processIdByActivity.ContainsKey(activityName))
         {
-            return new();
+            return new List<(string, string)>();
         }
 
         string referenceProcessId = _processIdByActivity[activityName];
-        return _referenceLogfiles.Where(r => r.Contains(referenceProcessId)).Select(r => (r.Replace(referenceProcessId, processId), r.Replace("-" + referenceProcessId, ""))).ToList();
+        return _referenceLogfiles.Where(r => r.Contains(referenceProcessId)).Select(r => (r.Replace(referenceProcessId, processId), r.Replace("-" + referenceProcessId, "")))
+            .ToList();
     }
 }

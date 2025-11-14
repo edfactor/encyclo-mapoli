@@ -29,18 +29,6 @@ vi.mock("../../../../reduxstore/api/LookupsApi", () => ({
   ])
 }));
 
-vi.mock("../../../../components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, disabled }) =>
-    React.createElement("input", {
-      "aria-label": label,
-      onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
-      disabled: disabled,
-      placeholder: label,
-      type: "text"
-    })
-  )
-}));
-
 vi.mock("../../../../components/DuplicateSsnGuard", () => ({
   default: vi.fn(({ children }) => children({ prerequisitesComplete: true }))
 }));
@@ -68,6 +56,20 @@ vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
 }));
 
 vi.mock("smart-ui-library", () => ({
+  DSMDatePicker: vi.fn(({ label, onChange, disabled, value }) =>
+    React.createElement("div", {},
+      React.createElement("label", {}, label),
+      React.createElement("input", {
+        "aria-label": label,
+        "data-testid": `date-picker-${label}`,
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value ? new Date(e.target.value) : null),
+        disabled: disabled,
+        placeholder: label,
+        type: "date",
+        value: value ? new Date(value).toISOString().split("T")[0] : ""
+      })
+    )
+  ),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
     React.createElement(
       "section",
@@ -273,8 +275,7 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
       });
     });
 
-    it("should show alert when search clicked with unsaved changes", async () => {
-      const mockAlert = vi.spyOn(window, "alert").mockImplementation(() => {});
+    it("should show dialog when search clicked with unsaved changes", async () => {
       const user = userEvent.setup();
 
       render(
@@ -290,20 +291,19 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
 
       const searchButton = screen.getByRole("button", { name: /search/i });
 
-      // Button should not be disabled (just shows alert when clicked)
+      // Button should not be disabled (just shows dialog when clicked)
       await waitFor(() => {
         expect(searchButton).not.toBeDisabled();
       });
 
       await user.click(searchButton);
 
-      // Should show alert instead of calling onSearch
+      // Should show dialog instead of calling onSearch
       await waitFor(() => {
-        expect(mockAlert).toHaveBeenCalledWith("Please save your changes.");
+        expect(screen.getByText("Unsaved Changes")).toBeInTheDocument();
+        expect(screen.getByText("Please save your changes before performing a new search.")).toBeInTheDocument();
         expect(mockOnSearch).not.toHaveBeenCalled();
       });
-
-      mockAlert.mockRestore();
     });
 
     it("should disable search button during fetch", () => {

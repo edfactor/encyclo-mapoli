@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
-import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
+import { SortParams } from "../../../../hooks/useGridPagination";
+import { usePersistedGridPagination } from "../../../../hooks/usePersistedGridPagination";
 import { useLazyPayBenReportQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import { PayBenReportRequest } from "../../../../types";
@@ -41,7 +42,7 @@ const usePayBenReport = () => {
     [hasToken, triggerReport]
   );
 
-  const pagination = useGridPagination({
+  const pagination = usePersistedGridPagination({
     initialPageSize: 25,
     initialSortBy: "ssn",
     initialSortDescending: true,
@@ -74,7 +75,7 @@ const usePayBenReport = () => {
   useEffect(() => {
     if (!state.data && hasToken && !state.search.isLoading && !hasInitiallySearched.current) {
       hasInitiallySearched.current = true;
-      executeSearch("auto-initial");
+      executeSearch();
     }
   }, [state.data, hasToken, state.search.isLoading, executeSearch]);
 

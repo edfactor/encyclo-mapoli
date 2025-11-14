@@ -101,7 +101,7 @@ const createWrapper = (initialState?: Partial<MockRootState>) => {
       navigation: navigationReducer,
       message: messageSlice
     },
-    preloadedState: initialState as Partial<MockRootState>
+    preloadedState: initialState as MockRootState
   });
 
   return ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>;
@@ -136,8 +136,8 @@ describe("usePayMasterUpdate", () => {
     // Mock mutation with unwrap method
     const mockMutationPromise = Promise.resolve({
       data: { success: true }
-    });
-    (mockMutationPromise as Record<string, unknown>).unwrap = () => Promise.resolve({ success: true });
+    }) as Promise<{ data: { success: true } }> & { unwrap: () => Promise<{ success: true }> };
+    mockMutationPromise.unwrap = () => Promise.resolve({ success: true });
     mockUpdateEnrollment.mockReturnValue(
       mockMutationPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]
     );
@@ -474,7 +474,7 @@ describe("usePayMasterUpdate", () => {
       });
 
       expect(mockUpdateEnrollment).toHaveBeenCalledWith({
-        ProfitYearRequest: 2024
+        profitYear: 2024
       });
       expect(result.current.isModalOpen).toBe(false);
     });
@@ -498,9 +498,13 @@ describe("usePayMasterUpdate", () => {
     });
 
     it("should handle update errors", async () => {
-      const mockErrorPromise = Promise.reject(new Error("Update failed"));
-      (mockErrorPromise as Record<string, unknown>).unwrap = () => Promise.reject(new Error("Update failed"));
-      mockUpdateEnrollment.mockReturnValue(mockErrorPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]);
+      const mockErrorPromise = Promise.reject(new Error("Update failed")) as Promise<never> & {
+        unwrap: () => Promise<never>;
+      };
+      mockErrorPromise.unwrap = () => Promise.reject(new Error("Update failed"));
+      mockUpdateEnrollment.mockReturnValue(
+        mockErrorPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]
+      );
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
@@ -668,10 +672,23 @@ describe("usePayMasterUpdate", () => {
       // Setup mock to return data with searchCompleted flag
       const mockData = createMockUpdateSummaryResponse([
         {
-          id: 1,
           badgeNumber: 12345,
-          employeeName: "John Doe",
-          participationStatus: "Active"
+          storeNumber: 1,
+          psnSuffix: 0,
+          name: "John Doe",
+          isEmployee: true,
+          before: {
+            profitSharingAmount: 1000,
+            vestedProfitSharingAmount: 800,
+            yearsInPlan: 5,
+            enrollmentId: 1
+          },
+          after: {
+            profitSharingAmount: 1200,
+            vestedProfitSharingAmount: 1000,
+            yearsInPlan: 5,
+            enrollmentId: 1
+          }
         }
       ]);
 
@@ -713,10 +730,23 @@ describe("usePayMasterUpdate", () => {
       // Setup mock to return data
       const mockData = createMockUpdateSummaryResponse([
         {
-          id: 1,
           badgeNumber: 12345,
-          employeeName: "John Doe",
-          participationStatus: "Active"
+          storeNumber: 1,
+          psnSuffix: 0,
+          name: "John Doe",
+          isEmployee: true,
+          before: {
+            profitSharingAmount: 1000,
+            vestedProfitSharingAmount: 800,
+            yearsInPlan: 5,
+            enrollmentId: 1
+          },
+          after: {
+            profitSharingAmount: 1200,
+            vestedProfitSharingAmount: 1000,
+            yearsInPlan: 5,
+            enrollmentId: 1
+          }
         }
       ]);
 
@@ -774,9 +804,13 @@ describe("usePayMasterUpdate", () => {
     });
 
     it("should handle enrollment update with unknown error", async () => {
-      const mockErrorPromise = Promise.reject("Unknown error");
-      (mockErrorPromise as Record<string, unknown>).unwrap = () => Promise.reject("Unknown error");
-      mockUpdateEnrollment.mockReturnValue(mockErrorPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]);
+      const mockErrorPromise = Promise.reject("Unknown error") as Promise<never> & {
+        unwrap: () => Promise<never>;
+      };
+      mockErrorPromise.unwrap = () => Promise.reject("Unknown error");
+      mockUpdateEnrollment.mockReturnValue(
+        mockErrorPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]
+      );
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()

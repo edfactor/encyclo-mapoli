@@ -1,11 +1,12 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Shouldly;
-using YEMatch.YEMatch.SmartActivities;
 
-namespace YEMatch.YEMatch.AssertActivities;
+namespace YEMatch.AssertActivities;
 
 public class UpdateNavigation : BaseActivity
 {
+    public required ApiClient ApiClient { get; init; }
+
     public override async Task<Outcome> Execute()
     {
         await MarkComplete(Navigation.Constants.CleanupReports);
@@ -22,7 +23,7 @@ public class UpdateNavigation : BaseActivity
 
     private async Task MarkComplete(short page)
     {
-        ApiClient apiClient = SmartActivityFactory.Client!;
+        ApiClient apiClient = ApiClient;
         UpdateNavigationRequestDto req = new() { NavigationId = page, StatusId = 4 /* Complete */ };
         UpdateNavigationStatusResponseDto res = await apiClient.NavigationsUpdateNavigationStatusEndpointAsync(null, req);
         res.IsSuccessful.ShouldBeTrue();

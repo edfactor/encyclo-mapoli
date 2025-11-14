@@ -4,7 +4,6 @@ import {
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
-  createPSNColumn,
   createSSNColumn,
   createStateColumn,
   createZipColumn
@@ -12,12 +11,7 @@ import {
 
 export const GetBeneficiaryOfGridColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({}),
-    createPSNColumn({
-      headerName: "Psn Suffix",
-      field: "psnSuffix",
-      enableLinking: false
-    }),
+    createBadgeColumn({ headerName: "Badge/Psn", psnSuffix: true }),
     createNameColumn({
       field: "fullName",
       valueFormatter: (params) => {

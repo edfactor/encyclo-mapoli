@@ -24,6 +24,7 @@ public record UpdateBeneficiaryContactResponse : INameParts, IFullNameProperty, 
     [MaskSensitive] public string? PhoneNumber { get; set; }
     [MaskSensitive] public string? MobileNumber { get; set; }
     [MaskSensitive] public string? EmailAddress { get; set; }
+    public DateTimeOffset? ModifiedAtUtc { get; set; }
 
     public static UpdateBeneficiaryContactResponse SampleResponse()
     {

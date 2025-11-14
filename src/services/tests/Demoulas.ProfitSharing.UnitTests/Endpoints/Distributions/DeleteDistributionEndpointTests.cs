@@ -16,6 +16,7 @@ using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Distributions;
 
+[Collection("Distribution Tests")]
 public class DeleteDistributionEndpointTests : ApiTestBase<Api.Program>
 {
     public DeleteDistributionEndpointTests(ITestOutputHelper testOutputHelper)

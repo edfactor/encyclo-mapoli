@@ -1039,7 +1039,7 @@ clearAlerts();
 ### Alert Display
 
 ```typescript
-{missiveAlerts.length > 0 && <MissiveAlerts />}
+{<MissiveAlerts />
 ```
 
 **Location**: Displays at top of page (in search filter accordion area) and at bottom of member details.

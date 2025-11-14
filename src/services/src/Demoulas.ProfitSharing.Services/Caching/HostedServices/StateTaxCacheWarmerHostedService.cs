@@ -35,7 +35,7 @@ public sealed class StateTaxCacheWarmerHostedService : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to warm up StateTaxCache on startup");
-            throw; // Fail fast on startup if cache warmup fails
+            throw new InvalidOperationException("StateTaxCache warmup failed - application startup aborted", ex);
         }
     }
 }

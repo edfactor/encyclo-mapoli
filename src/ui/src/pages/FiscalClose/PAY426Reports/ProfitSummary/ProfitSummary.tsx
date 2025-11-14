@@ -1,18 +1,19 @@
-import { CAPTIONS } from "@/constants.ts";
 import { Button, Divider, Grid, Typography } from "@mui/material";
+import { RowClickedEvent } from "ag-grid-community";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   useFinalizeReportMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery
 } from "reduxstore/api/YearsEndApi";
-import { FilterParams, YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
+import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, Page } from "smart-ui-library";
+import { CAPTIONS, ROUTES } from "../../../../constants";
 import { RootState } from "../../../../reduxstore/store";
 import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
-import presets from "../PAY426N/presets";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 
 /**
@@ -23,10 +24,13 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
   {
     subgroup: "ACTIVE AND INACTIVE",
     lineItemPrefix: "1",
-    lineItemTitle: "AGE 18-20 WITH >= 1000 PS HOURS",
+    lineItemTitle: "AGE 18-20 WITH >= 1000 PS HOUR",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   },
   {
     subgroup: "ACTIVE AND INACTIVE",
@@ -34,7 +38,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
     lineItemTitle: ">= AGE 21 WITH >= 1000 PS HOURS",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   },
   {
     subgroup: "ACTIVE AND INACTIVE",
@@ -42,7 +49,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
     lineItemTitle: "<  AGE 18",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   },
   {
     subgroup: "ACTIVE AND INACTIVE",
@@ -50,7 +60,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
     lineItemTitle: ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   },
   {
     subgroup: "ACTIVE AND INACTIVE",
@@ -58,23 +71,25 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
     lineItemTitle: ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   }
 ];
 
 interface ProfitSummaryProps {
-  onPresetParamsChange?: (params: FilterParams | null) => void;
   frozenData: boolean;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, frozenData }) => {
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
-  const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
   const [shouldArchive, setShouldArchive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
+  const navigate = useNavigate();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
   const handleCommit = async () => {
@@ -92,14 +107,14 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
     setIsModalOpen(false);
   };
 
-  const handleStatusChange = (newStatus: string, statusName?: string) => {
+  const handleStatusChange = (_newStatus: string, statusName?: string) => {
     // Only set shouldArchive to true when transitioning TO "Complete" status
     if (statusName === "Complete") {
       setShouldArchive(true);
     }
   };
 
-  const getPresetForLineItem = (lineItemPrefix: string): FilterParams | null => {
+  const getPresetNumberForLineItem = (lineItemPrefix: string): string | null => {
     const presetMap: { [key: string]: string } = {
       "1": "1",
       "2": "2",
@@ -113,24 +128,18 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
       N: "10"
     };
 
-    const presetId = presetMap[lineItemPrefix];
-    return presets.find((preset) => preset.id === presetId)?.params || null;
+    return presetMap[lineItemPrefix] || null;
   };
 
-  const handleRowClick = (event: { data: YearEndProfitSharingReportSummaryLineItem }) => {
+  const handleRowClick = (event: RowClickedEvent<YearEndProfitSharingReportSummaryLineItem>) => {
     const rowData = event.data;
+    if (!rowData) return;
     const clickedLineItem = rowData.lineItemPrefix;
+    const presetNumber = getPresetNumberForLineItem(clickedLineItem);
 
-    // Toggle selection
-    const newSelected = selectedLineItem === clickedLineItem ? null : clickedLineItem;
-    setSelectedLineItem(newSelected);
-
-    // Update parent component's preset params based on new selection
-    if (newSelected) {
-      const params = getPresetForLineItem(newSelected);
-      onPresetParamsChange?.(params);
-    } else {
-      onPresetParamsChange?.(null);
+    if (presetNumber) {
+      // Navigate to PAY426N with the preset number
+      navigate(`/${ROUTES.PAY426N_LIVE}/${presetNumber}`);
     }
   };
 
@@ -200,10 +209,22 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
   const getActiveAndInactiveTotals = useMemo(() => {
     if (!activeAndInactiveRowData) return [];
 
+    // Helper to sum nullable values - returns null if all values are null, otherwise sums them
+    const sumNullable = (field: keyof YearEndProfitSharingReportSummaryLineItem) => {
+      const values = activeAndInactiveRowData.map((row) => row[field]);
+      const hasAnyValue = values.some((v) => v !== null && v !== undefined);
+      if (!hasAnyValue) return null;
+      return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
+    };
+
     return [
       {
         lineItemTitle: "TOTAL",
-        numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0)
+        numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+        totalWages: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
+        totalBalance: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
+        totalHours: sumNullable("totalHours"),
+        totalPoints: sumNullable("totalPoints")
       }
     ];
   }, [activeAndInactiveRowData]);
@@ -211,17 +232,28 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
   const getTerminatedTotals = useMemo(() => {
     if (!terminatedRowData) return [];
 
+    // Helper to sum nullable values - returns null if all values are null, otherwise sums them
+    const sumNullable = (field: keyof YearEndProfitSharingReportSummaryLineItem) => {
+      const values = terminatedRowData.map((row) => row[field]);
+      const hasAnyValue = values.some((v) => v !== null && v !== undefined);
+      if (!hasAnyValue) return null;
+      return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
+    };
+
     return [
       {
         lineItemTitle: "TOTAL",
-        numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0)
+        numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+        totalWages: terminatedRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
+        totalBalance: terminatedRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
+        totalHours: sumNullable("totalHours"),
+        totalPoints: sumNullable("totalPoints")
       }
     ];
   }, [terminatedRowData]);
 
-  //const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
-
   return (
+    // Do not remove the label, as that also removes the buttons
     <Page
       label={CAPTIONS.PAY426_SUMMARY}
       actionNode={renderActionNode()}>
@@ -246,7 +278,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
               rowData: activeAndInactiveRowData,
               pinnedTopRowData: getActiveAndInactiveTotals,
               columnDefs: columnDefs,
-              onRowClicked: handleRowClick
+              onRowClicked: handleRowClick as (event: unknown) => void
             }}
           />
         </Grid>
@@ -265,7 +297,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
               rowData: terminatedRowData,
               pinnedTopRowData: getTerminatedTotals,
               columnDefs: columnDefs,
-              onRowClicked: handleRowClick
+              onRowClicked: handleRowClick as (event: unknown) => void
             }}
           />
         </Grid>

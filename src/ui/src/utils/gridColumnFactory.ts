@@ -3,6 +3,7 @@ import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "sma
 import {
   AlignableColumnOptions,
   BadgeColumnOptions,
+  BadgeOrPSNOptions,
   BaseColumnOptions,
   CityColumnOptions,
   CommentColumnOptions,
@@ -147,7 +148,7 @@ export const createYesOrNoColumn = (options: YesOrNoColumnOptions): ColDef => {
     sortable = true,
     resizable = true,
     useWords = false,
-    valueFormatter
+    cellRenderer
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -161,14 +162,14 @@ export const createYesOrNoColumn = (options: YesOrNoColumnOptions): ColDef => {
     cellClass: alignmentClass,
     resizable,
     sortable,
-    valueFormatter
+    cellRenderer
   };
 
-  if (!valueFormatter) {
+  if (!cellRenderer) {
     if (useWords) {
-      column.valueFormatter = (params) => (params.value ? "Yes" : "No");
+      column.cellRenderer = (params: ICellRendererParams) => (params.value ? "Yes" : "No");
     } else {
-      column.valueFormatter = (params) => (params.value ? "Y" : "N");
+      column.cellRenderer = (params: ICellRendererParams) => (params.value ? "Y" : "N");
     }
   }
 
@@ -946,7 +947,7 @@ export const createCityColumn = (options: CityColumnOptions = {}): ColDef => {
     minWidth = 120,
     maxWidth,
     alignment = "left",
-    sortable = false,
+    sortable = true,
     resizable = true,
     nestedPath,
     valueGetter,
@@ -1151,6 +1152,60 @@ export const createPSNColumn = (options: PSNColumnOptions = {}): ColDef => {
       } else {
         // Simple PSN linking
         return viewBadgeLinkRenderer(params.data[field]);
+      }
+    };
+  } else if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  }
+
+  return column;
+};
+
+export const createBadgeOrPSNColumn = (
+  options: BadgeOrPSNOptions = {
+    badgeField: "",
+    psnField: ""
+  }
+): ColDef => {
+  const {
+    headerName = "Badge/PSN",
+    field = "psn",
+    colId = field,
+    badgeField = "badgeNumber",
+    psnField = "psn",
+    minWidth = 80,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+    enableLinking = false,
+    navigateFunction,
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (enableLinking && navigateFunction) {
+    column.cellRenderer = (params: ICellRendererParams) => {
+      if (params.data[badgeField]) {
+        return viewBadgeLinkRenderer(params.data[badgeField]);
+      } else {
+        return viewBadgeLinkRenderer(params.data[psnField]);
       }
     };
   } else if (valueFormatter) {

@@ -38,14 +38,14 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         _demographicReaderService = demographicReaderService;
     }
 
-    public async Task<IQueryable<MasterInquiryItem>> GetEmployeeInquiryQueryAsync(
+    public Task<IQueryable<MasterInquiryItem>> GetEmployeeInquiryQueryAsync(
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Building employee inquiry query. EndProfitYear: {EndProfitYear}, PaymentType: {PaymentType}, BadgeNumber: {BadgeNumber}",
             req?.EndProfitYear, req?.PaymentType, req?.BadgeNumber);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             return await GetEmployeeInquiryQueryAsync(ctx, req, cancellationToken);
         }, cancellationToken);
@@ -95,6 +95,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }
 
         _logger.LogInformation("TRACE: About to build query with Include");
+#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
         var query = profitDetailsQuery
             .Include(pd => pd.ProfitCode)
             .Include(pd => pd.ZeroContributionReason)
@@ -136,6 +137,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                             .FirstOrDefault()
                     }
                 });
+#pragma warning restore AsyncFixer02 // Long-running or blocking operations inside an async method
 
         _logger.LogInformation("TRACE: Query built, returning");
         return query;
@@ -160,7 +162,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 .Include(d => d.TerminationCode)
                 .Include(d => d.PayClassification)
                 .Include(d => d.Gender)
-                .Where(d => d.Id == id)
+                .Where(d => (d.Id == id || d.BadgeNumber == id))
                 .Select(d => new
                 {
                     d.Id,
@@ -293,7 +295,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }, cancellationToken);
     }
 
-    public async Task<PaginatedResponseDto<MemberDetails>> GetEmployeeDetailsForSsnsAsync(
+    public Task<PaginatedResponseDto<MemberDetails>> GetEmployeeDetailsForSsnsAsync(
         MasterInquiryRequest req,
         ISet<int> ssns,
         short currentYear,
@@ -304,7 +306,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         _logger.LogDebug("Getting paginated employee details for {SsnCount} SSNs. BadgeNumber: {BadgeNumber}, CurrentYear: {CurrentYear}",
             ssns.Count, req.BadgeNumber, currentYear);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
@@ -454,7 +456,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }, cancellationToken);
     }
 
-    public async Task<List<MemberDetails>> GetAllEmployeeDetailsForSsnsAsync(
+    public Task<List<MemberDetails>> GetAllEmployeeDetailsForSsnsAsync(
         ISet<int> ssns,
         short currentYear,
         short previousYear,
@@ -464,7 +466,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         _logger.LogDebug("Getting all employee details for {SsnCount} SSNs (non-paginated). CurrentYear: {CurrentYear}",
             ssns.Count, currentYear);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
@@ -599,13 +601,13 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }, cancellationToken);
     }
 
-    public async Task<int> FindEmployeeSsnByBadgeAsync(
+    public Task<int> FindEmployeeSsnByBadgeAsync(
         int badgeNumber,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Finding employee SSN by badge number: {BadgeNumber}", badgeNumber);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             // ReadOnlyDbContext automatically handles AsNoTracking

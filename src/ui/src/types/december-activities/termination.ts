@@ -4,6 +4,7 @@ export interface TerminationDetail {
   psn: number;
   name: string | null;
   yearDetails: TerminationYearDetail[];
+  [key: string]: unknown;
 }
 
 export interface TerminationYearDetail {
@@ -20,6 +21,7 @@ export interface TerminationYearDetail {
   suggestedForfeiture: number | null;
   age: number | null;
   enrollmentCode: number | null;
+  [key: string]: unknown;
 }
 
 export interface TerminationResponse extends PagedReportResponse<TerminationDetail> {

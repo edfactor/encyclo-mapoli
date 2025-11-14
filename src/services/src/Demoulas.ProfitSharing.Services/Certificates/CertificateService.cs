@@ -11,6 +11,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Certificates;
+
 public sealed class CertificateService : ICertificateService
 {
     private readonly IBreakdownService _breakdownService;
@@ -87,7 +88,7 @@ public sealed class CertificateService : ICertificateService
             sb.AppendFormat(member.EndingBalance.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14));
             sb.Append(spaces_3);
             sb.AppendFormat(member.VestedAmount.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14).TrimEnd());
-            sb.AppendFormat("\r\n");
+            sb.Append("\r\n");
             #endregion
 
             #region Spacing
@@ -190,7 +191,7 @@ public sealed class CertificateService : ICertificateService
             var age = (byte)cert.DateOfBirth.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MaxValue));
             if (age < 67)
             {
-                age = (byte)67;
+                age = 67;
             }
 
             annuityRates.TryGetValue(age, out var annuityRate);
@@ -250,7 +251,7 @@ public sealed class CertificateService : ICertificateService
         };
     }
 
-    private async Task<ReportResponseBase<MemberYearSummaryDto>> GetCertificateData(CerficatePrintRequest request, CancellationToken token)
+    private Task<ReportResponseBase<MemberYearSummaryDto>> GetCertificateData(CerficatePrintRequest request, CancellationToken token)
     {
         var breakdownRequest = new BreakdownByStoreRequest
         {
@@ -260,15 +261,16 @@ public sealed class CertificateService : ICertificateService
             SortBy = ReferenceData.CertificateSort,
         };
 
-        return await _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, request.BadgeNumbers ?? Array.Empty<int>(), token);
+        return _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, request.BadgeNumbers ?? Array.Empty<int>(), token);
     }
 
-    private async Task<Dictionary<byte, AnnuityRate>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)
+    private Task<Dictionary<byte, AnnuityRate>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            return await ctx.AnnuityRates
-                .Where(x => x.Year == request.ProfitYear).ToDictionaryAsync(x => x.Age, x => x, token);
+            return ctx.AnnuityRates
+                .Where(x => x.Year == request.ProfitYear)
+                .ToDictionaryAsync(x => x.Age, x => x, token);
         }, token);
     }
 }

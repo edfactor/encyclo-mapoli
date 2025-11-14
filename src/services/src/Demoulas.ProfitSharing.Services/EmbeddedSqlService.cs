@@ -142,8 +142,8 @@ employees AS (
     /* 2️⃣  One row per employee / beneficiary for this year */
     SELECT  d.ssn,
             /* same formulas the LINQ uses */
-            pp.current_income_year + pp.income_executive   AS wages,
-            pp.current_hours_year  + pp.hours_executive    AS hours,
+            pp.total_income   AS wages,
+            pp.total_hours    AS hours,
             pp.points_earned                                 points_earned,
             d.employment_status_id                          emp_status,
             d.termination_date                              term_date,
@@ -207,8 +207,9 @@ SELECT pd.SSN Ssn   ,
        Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationClassActionFund} THEN pd.EARNINGS ELSE 0 END) CLASS_ACTION_FUND_TOTAL,
        Sum(CASE WHEN (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id})) 
                   OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingXferBeneficiary.Id})) THEN pd.FORFEITURE ELSE 0 END) PAID_ALLOCATIONS_TOTAL,
-       Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id},{ProfitCode.Constants.OutgoingDirectPayments.Id}) 
-                  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id}))) THEN pd.FORFEITURE ELSE 0 END) DISTRIBUTIONS_TOTAL,
+       -- This is the distributions total as used on PAY443, it is not used elsewhere.
+       Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id},{ProfitCode.Constants.OutgoingDirectPayments.Id})
+                  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID NOT IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id}) OR pd.COMMENT_TYPE_ID IS NULL)) THEN pd.FORFEITURE ELSE 0 END) DISTRIBUTIONS_TOTAL,
        Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION ELSE 0 END) ALLOCATIONS_TOTAL,
        Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingForfeitures.Id} THEN pd.FORFEITURE ELSE 0 END) FORFEITS_TOTAL
 FROM PROFIT_DETAIL pd
@@ -250,7 +251,7 @@ SELECT
     {
         var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
         var birthDate65 = asOfDate.AddYears(-65);
-        var yearsOfCreditQuery = GetYearsOfServiceQuery((short)profitYear, asOfDate);
+        var yearsOfCreditQuery = GetYearsOfServiceQuery(profitYear, asOfDate);
         var initialContributionYearQuery = GetInitialContributionYearQuery();
 
         var query = @$"
@@ -299,7 +300,7 @@ FROM (
         string query = @$"
 SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
                + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
-                  AND ( NVL(pp.HOURS_EXECUTIVE, 0)  + NVL(pp.CURRENT_HOURS_YEAR, 0) >= {ReferenceData.MinimumHoursForContribution()} 
+                  AND ( NVL(pp.TOTAL_HOURS, 0) >= {ReferenceData.MinimumHoursForContribution()} 
                         AND d.DATE_OF_BIRTH <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
                THEN 1 ELSE 0 END
                  AS YEARS
@@ -307,7 +308,7 @@ SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
            INNER JOIN DEMOGRAPHIC d ON pd.SSN = d.SSN
        LEFT JOIN PAY_PROFIT pp ON pp.DEMOGRAPHIC_ID = d.ID AND pp.PROFIT_YEAR = {profitYear}
            WHERE pd.PROFIT_YEAR <= {profitYear}
-        GROUP BY d.ID, pd.SSN, pp.CURRENT_HOURS_YEAR, pp.HOURS_EXECUTIVE, d.DATE_OF_BIRTH
+        GROUP BY d.ID, pd.SSN, pp.TOTAL_HOURS, d.DATE_OF_BIRTH
 ";
         return query;
     }

@@ -44,12 +44,34 @@ vi.mock("../DemographicBadgesNotInPayprofitGridColumns", () => ({
 
 describe("DemographicBadgesNotInPayprofitGrid", () => {
   const mockData = {
+    reportName: "Demographic Badges Not In Payprofit",
+    reportDate: "2024-01-15",
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    dataSource: "Test Data",
     response: {
       results: [
-        { badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" },
-        { badgeNumber: 12346, storeName: "Store 2", employeeName: "Jane Smith" }
+        {
+          badgeNumber: 12345,
+          ssn: 123456789,
+          employeeName: "John Doe",
+          store: 1,
+          status: "Active",
+          statusName: "Active"
+        },
+        {
+          badgeNumber: 12346,
+          ssn: 123456790,
+          employeeName: "Jane Smith",
+          store: 2,
+          status: "Active",
+          statusName: "Active"
+        }
       ],
-      total: 2
+      total: 2,
+      totalPages: 1,
+      pageSize: 25,
+      currentPage: 0
     }
   };
 
@@ -60,14 +82,15 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     handlePaginationChange: vi.fn(),
     handleSortChange: vi.fn(),
     setPageNumber: vi.fn(),
-    setPageSize: vi.fn()
+    setPageSize: vi.fn(),
+    resetPagination: vi.fn()
   };
 
   const mockRef = { current: null };
 
   const defaultProps = {
     innerRef: mockRef,
-    data: mockData,
+    data: mockData as unknown as Parameters<typeof DemographicBadgesNotInPayprofitGrid>[0]["data"],
     isLoading: false,
     showData: true,
     hasResults: true,
@@ -212,9 +235,17 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
   describe("Empty states", () => {
     it("should render grid with empty data array", () => {
       const emptyData = {
+        reportName: "Demographic Badges Not In Payprofit",
+        reportDate: "2024-01-15",
+        startDate: "2024-01-01",
+        endDate: "2024-12-31",
+        dataSource: "Test Data",
         response: {
           results: [],
-          total: 0
+          total: 0,
+          totalPages: 0,
+          pageSize: 25,
+          currentPage: 0
         }
       };
 
@@ -281,13 +312,24 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
   describe("Edge cases", () => {
     it("should handle very large record counts", () => {
       const largeData = {
+        reportName: "Demographic Badges Not In Payprofit",
+        reportDate: "2024-01-15",
+        startDate: "2024-01-01",
+        endDate: "2024-12-31",
+        dataSource: "Test Data",
         response: {
           results: Array.from({ length: 25 }, (_, i) => ({
             badgeNumber: 10000 + i,
-            storeName: `Store ${i}`,
-            employeeName: `Employee ${i}`
+            ssn: 100000000 + i,
+            employeeName: `Employee ${i}`,
+            store: i + 1,
+            status: "Active",
+            statusName: "Active"
           })),
-          total: 100000
+          total: 100000,
+          totalPages: 4000,
+          pageSize: 25,
+          currentPage: 0
         }
       };
 
@@ -303,9 +345,19 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
 
     it("should handle single record", () => {
       const singleData = {
+        reportName: "Demographic Badges Not In Payprofit",
+        reportDate: "2024-01-15",
+        startDate: "2024-01-01",
+        endDate: "2024-12-31",
+        dataSource: "Test Data",
         response: {
-          results: [{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }],
-          total: 1
+          results: [
+            { badgeNumber: 1, ssn: 100000000, employeeName: "Name", store: 1, status: "Active", statusName: "Active" }
+          ],
+          total: 1,
+          totalPages: 1,
+          pageSize: 25,
+          currentPage: 0
         }
       };
 

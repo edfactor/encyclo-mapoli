@@ -4,28 +4,21 @@ import { useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
-import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { RootState } from "../../reduxstore/store";
 import MasterInquiryDetailsGrid from "./MasterInquiry/MasterInquiryDetailsGrid";
 import StandaloneMemberDetails from "./MasterInquiry/StandaloneMemberDetails";
 import { useAdjustments } from "./hooks/useAdjustments";
 
 const Adjustments = memo(() => {
-  const { missiveAlerts } = useMissiveAlerts();
   const [sourceSSN, setSourceSSN] = useState("");
   const [destinationSSN, setDestinationSSN] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Get member details and profit details from Redux
-  const {
-    masterInquiryMemberDetails,
-    masterInquiryMemberDetailsSecondary,
-    masterInquiryProfitDetails,
-    masterInquiryProfitDetailsSecondary,
-    isLoadingProfitDetails,
-    isLoadingProfitDetailsSecondary
-  } = useSelector((state: RootState) => state.inquiry);
+  // Get member details from Redux
+  const { masterInquiryMemberDetails, masterInquiryMemberDetailsSecondary } = useSelector(
+    (state: RootState) => state.inquiry
+  );
 
   const {
     isSearching,
@@ -45,16 +38,16 @@ const Adjustments = memo(() => {
   useEffect(() => {
     if (masterInquiryMemberDetails && hasSearched) {
       console.log("Fetching profit details for source member:", masterInquiryMemberDetails);
-      fetchProfitDetailsForMember(masterInquiryMemberDetails, profitYear);
+      fetchProfitDetailsForMember(masterInquiryMemberDetails, false);
     }
-  }, [masterInquiryMemberDetails, hasSearched, fetchProfitDetailsForMember, profitYear]);
+  }, [masterInquiryMemberDetails, hasSearched, fetchProfitDetailsForMember]);
 
   useEffect(() => {
     if (masterInquiryMemberDetailsSecondary && hasSearched) {
       console.log("Fetching profit details for destination member:", masterInquiryMemberDetailsSecondary);
-      fetchProfitDetailsForMember(masterInquiryMemberDetailsSecondary, profitYear);
+      fetchProfitDetailsForMember(masterInquiryMemberDetailsSecondary, true);
     }
-  }, [masterInquiryMemberDetailsSecondary, hasSearched, fetchProfitDetailsForMember, profitYear]);
+  }, [masterInquiryMemberDetailsSecondary, hasSearched, fetchProfitDetailsForMember]);
 
   const handleSearch = async () => {
     if (!sourceSSN.trim()) return;
@@ -106,11 +99,9 @@ const Adjustments = memo(() => {
   console.log("Adjustments render - State:", {
     masterInquiryMemberDetails,
     masterInquiryMemberDetailsSecondary,
-    masterInquiryProfitDetails,
-    masterInquiryProfitDetailsSecondary,
     hasSearched,
-    isLoadingProfitDetails,
-    isLoadingProfitDetailsSecondary
+    isSearching,
+    isLoading
   });
 
   return (
@@ -120,7 +111,7 @@ const Adjustments = memo(() => {
         width={"100%"}>
         <Divider />
       </Grid>
-      {missiveAlerts.length > 0 && <MissiveAlerts />}
+      <MissiveAlerts />
       <Grid
         size={{ xs: 12 }}
         width={"100%"}>
@@ -239,7 +230,7 @@ const Adjustments = memo(() => {
                   <Box>
                     <DSMAccordion title="Profit Details">
                       <Box sx={{ p: 1, maxHeight: "400px", overflow: "auto" }}>
-                        {isLoadingProfitDetails ? (
+                        {isSearching ? (
                           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
                             <CircularProgress />
                             <FormLabel sx={{ ml: 2 }}>Loading profit details...</FormLabel>
@@ -252,7 +243,7 @@ const Adjustments = memo(() => {
                                 results: profitDetailsResponseSource.results.slice(0, 5),
                                 total: Math.min(5, profitDetailsResponseSource.results.length)
                               }}
-                              isLoading={isLoadingProfitDetails || isLoading || isSearching}
+                              isLoading={isSearching || isLoading || isSearching}
                             />
                           </Box>
                         ) : masterInquiryMemberDetails ? (
@@ -292,7 +283,7 @@ const Adjustments = memo(() => {
                   <Box>
                     <DSMAccordion title="Profit Details">
                       <Box sx={{ p: 1, maxHeight: "400px", overflow: "auto" }}>
-                        {isLoadingProfitDetailsSecondary ? (
+                        {isSearching ? (
                           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
                             <CircularProgress />
                             <FormLabel sx={{ ml: 2 }}>Loading profit details...</FormLabel>
@@ -306,7 +297,7 @@ const Adjustments = memo(() => {
                                 results: profitDetailsResponseDestination.results.slice(0, 5),
                                 total: Math.min(5, profitDetailsResponseDestination.results.length)
                               }}
-                              isLoading={isLoadingProfitDetailsSecondary || isLoading || isSearching}
+                              isLoading={isSearching || isLoading}
                             />
                           </Box>
                         ) : masterInquiryMemberDetailsSecondary ? (

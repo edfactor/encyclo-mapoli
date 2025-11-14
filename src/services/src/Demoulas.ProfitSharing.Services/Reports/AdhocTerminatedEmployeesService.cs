@@ -41,11 +41,19 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                          {
                              BadgeNumber = d.BadgeNumber,
                              FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : string.Empty,
+                             FirstName = d.ContactInfo.FirstName,
+                             LastName = d.ContactInfo.LastName,
+                             MiddleInitial = !string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? d.ContactInfo.MiddleName[0].ToString() : string.Empty,
                              Ssn = d.Ssn.MaskSsn(),
                              TerminationDate = d.TerminationDate!.Value,
                              TerminationCodeId = d.TerminationCodeId,
                              TerminationCode = d.TerminationCode != null ? d.TerminationCode.Name : string.Empty,
-                             IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
+                             IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                             Address = d.Address.Street,
+                             Address2 = !string.IsNullOrEmpty(d.Address.Street2) ? d.Address.Street2 : string.Empty,
+                             City = !string.IsNullOrEmpty(d.Address.City) ? d.Address.City : string.Empty,
+                             State = !string.IsNullOrEmpty(d.Address.State) ? d.Address.State : string.Empty,
+                             PostalCode = !string.IsNullOrEmpty(d.Address.PostalCode) ? d.Address.PostalCode : string.Empty
                          }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
             return await query;
@@ -61,7 +69,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         };
     }
 
-    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
+    public Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         // Convert to TerminatedLettersRequest and delegate to the more flexible overload
         var terminatedLettersRequest = new TerminatedLettersRequest
@@ -76,7 +84,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             BadgeNumbers = null // No badge filtering for the original method
         };
 
-        return await GetTerminatedEmployeesNeedingFormLetter(terminatedLettersRequest, cancellationToken);
+        return GetTerminatedEmployeesNeedingFormLetter(terminatedLettersRequest, cancellationToken);
     }
 
     public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(TerminatedLettersRequest req, CancellationToken cancellationToken)
@@ -95,7 +103,8 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                             && d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
                             && d.TerminationCodeId != TerminationCode.Constants.Retired
                             && (req.BadgeNumbers == null || !req.BadgeNumbers.Any() || req.BadgeNumbers.Contains(d.BadgeNumber))
-                         /*TODO : Exclude employees who have already been sent a letter?*/
+#pragma warning disable S1135 // Track: Exclude employees who have already been sent a letter
+#pragma warning restore S1135
                          /*Filter for employees who are not fully vested, and probably have a balance */
                          select new AdhocTerminatedEmployeeResponse
                          {

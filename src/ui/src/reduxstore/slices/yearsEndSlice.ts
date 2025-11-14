@@ -38,6 +38,7 @@ import {
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
+  ProfitSharingUnder21ReportResponse,
   ProfitYearRequest,
   RecentlyTerminatedResponse,
   ReportsByAgeParams,
@@ -126,6 +127,7 @@ export interface YearsEndState {
   profitSharingMaster: ProfitShareMasterResponse | null;
   profitSharingRevert: ProfitShareMasterResponse | null;
   profitSharingUpdateAdjustmentSummary: ProfitShareAdjustmentSummary | null;
+  profitSharingUnder21Report: ProfitSharingUnder21ReportResponse | null;
   termination: TerminationResponse | null;
   recentlyTerminated: RecentlyTerminatedResponse | null;
   recentlyTerminatedQueryParams: StartAndEndDateRequest | null;
@@ -229,6 +231,7 @@ const initialState: YearsEndState = {
   profitSharingMaster: null,
   profitSharingRevert: null,
   profitSharingUpdateAdjustmentSummary: null,
+  profitSharingUnder21Report: null,
   profitEditUpdateChangesAvailable: false,
   profitEditUpdateRevertChangesAvailable: false,
   termination: null,
@@ -292,6 +295,12 @@ export const yearsEndSlice = createSlice({
     setProfitSharingUpdateAdjustmentSummary: (state, action: PayloadAction<ProfitShareAdjustmentSummary>) => {
       state.profitSharingUpdateAdjustmentSummary = action.payload;
     },
+    clearProfitSharingUnder21Report: (state) => {
+      state.profitSharingUnder21Report = null;
+    },
+    setProfitSharingUnder21Report: (state, action: PayloadAction<ProfitSharingUnder21ReportResponse>) => {
+      state.profitSharingUnder21Report = action.payload;
+    },
     addBadgeNumberToUpdateAdjustmentSummary: (state, action: PayloadAction<number>) => {
       if (state.profitSharingUpdateAdjustmentSummary) {
         state.profitSharingUpdateAdjustmentSummary.badgeNumber = action.payload;
@@ -348,11 +357,9 @@ export const yearsEndSlice = createSlice({
       // on another year
 
       // Distributions And Forfeitures
-      if (
-        state.distributionsAndForfeituresQueryParams?.profitYear &&
-        state.distributionsAndForfeituresQueryParams?.profitYear !== action.payload
-      ) {
-        state.distributionsAndForfeituresQueryParams.profitYear = action.payload;
+      // DistributionsAndForfeituresQueryParams uses date ranges, not profitYear
+      // Clear the data when the year changes
+      if (state.distributionsAndForfeituresQueryParams) {
         state.distributionsAndForfeitures = null;
       }
 
@@ -394,9 +401,9 @@ export const yearsEndSlice = createSlice({
       }
 
       // Military and Rehire Profit Summary
-      // StartAndEndDateRequest does not have profitYear, so just clear the data if the year changes
+      // StartAndEndDateRequest does not have profitYear, so just clear the query params if the year changes
       if (state.rehireProfitSummaryQueryParams) {
-        state.rehire = null;
+        state.rehireProfitSummaryQueryParams = null;
       }
 
       // Year End Profit Sharing Report
@@ -405,7 +412,7 @@ export const yearsEndSlice = createSlice({
         state.yearEndProfitSharingReportQueryParams?.profitYear !== action.payload
       ) {
         state.yearEndProfitSharingReportQueryParams.profitYear = action.payload;
-        state.yearEndProfitSharingReport = null;
+        state.yearEndProfitSharingReportLive = null;
       }
 
       // Termination
@@ -1103,7 +1110,6 @@ export const {
   setGrossWagesReportQueryParams,
   setUnForfeitsDetails,
   setUnForfeitsQueryParams,
-  setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
   setProfitMasterRevert,
@@ -1151,6 +1157,8 @@ export const {
   clearProfitSharingEditQueryParams,
   updateProfitSharingEditQueryParam,
   setProfitSharingUpdateAdjustmentSummary,
+  clearProfitSharingUnder21Report,
+  setProfitSharingUnder21Report,
   addBadgeNumberToUpdateAdjustmentSummary,
   clearExecutiveHoursAndDollarsAddQueryParams,
   setExecutiveHoursAndDollarsAddQueryParams,

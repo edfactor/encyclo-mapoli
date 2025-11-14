@@ -13,9 +13,9 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { NavigationDto, NavigationResponseDto } from "../../../../reduxstore/types";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../reduxstore/store";
+import { NavigationDto, NavigationResponseDto } from "../../../types";
 import { DrawerConfig } from "../models";
 import { containsActivePath } from "../utils";
 
@@ -270,8 +270,8 @@ export const useDrawerViewModel = (
 
   return {
     // State
-    isOpen,
-    activeSubmenu,
+    isOpen: isOpen ?? false,
+    activeSubmenu: activeSubmenu ?? null,
     drawerItems,
     currentPath,
     drawerTitle: drawerRootItem?.subTitle || config.rootNavigationTitle, // Use subtitle from L0 item, fallback to title
@@ -283,7 +283,7 @@ export const useDrawerViewModel = (
     goBackToMainMenu,
 
     // Computed
-    activeTopLevelItem,
+    activeTopLevelItem: activeTopLevelItem ?? null,
     visibleItems,
     isInSubmenuView,
 

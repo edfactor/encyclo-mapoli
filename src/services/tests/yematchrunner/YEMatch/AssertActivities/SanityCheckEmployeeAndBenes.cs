@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Oracle.ManagedDataAccess.Client;
 using Shouldly;
+
 #pragma warning disable CS0162 // Unreachable code detected
 
-namespace YEMatch.YEMatch.AssertActivities;
+namespace YEMatch.AssertActivities;
 
 [SuppressMessage("Minor Code Smell", "S1199:Nested code blocks should not be used")]
 public class SanityCheckEmployeeAndBenes : BaseSqlActivity
@@ -31,35 +32,36 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
         }
 
         // Check the rehire guy - we are switching years, so these people have moved along.
-        if (false){
-            var smrtRehire = await SmtQuery(
+        if (false)
+        {
+            Table? smrtRehire = await SmtQuery(
                 """
-                    select * from (
-                            select 'live' system, EMPLOYMENT_STATUS_ID, TO_NUMBER(TO_CHAR(TERMINATION_DATE, 'YYYYMMDD')) TERMINATION_DATE, TERMINATION_CODE_ID, ssn from demographic
-                        union  
-                            -- This sql joins demographics and demographics_history using
-                             -- frozen_state to help select the active history
-                            SELECT
-                            'frzn',
-                            d.EMPLOYMENT_STATUS_ID,
-                            TO_NUMBER(TO_CHAR(d.TERMINATION_DATE, 'YYYYMMDD')) TERMINATION_DATE,
-                            d.TERMINATION_CODE_ID,
-                            demo.ssn
-                                FROM DEMOGRAPHIC_HISTORY d
-                            INNER JOIN DEMOGRAPHIC demo
-                            ON d.DEMOGRAPHIC_ID = demo.ID
-                            INNER JOIN FROZEN_STATE f
-                            ON f.PROFIT_YEAR = 2024
-                            AND f.IS_ACTIVE <> 0
-                            AND f.AS_OF_DATETIME >= d.VALID_FROM
-                            AND f.AS_OF_DATETIME < d.VALID_TO
-                        )
-                    WHERE SSN in (700007178, 700009305)
-                    order by system, ssn
-                    """
+                select * from (
+                        select 'live' system, EMPLOYMENT_STATUS_ID, TO_NUMBER(TO_CHAR(TERMINATION_DATE, 'YYYYMMDD')) TERMINATION_DATE, TERMINATION_CODE_ID, ssn from demographic
+                    union  
+                        -- This sql joins demographics and demographics_history using
+                         -- frozen_state to help select the active history
+                        SELECT
+                        'frzn',
+                        d.EMPLOYMENT_STATUS_ID,
+                        TO_NUMBER(TO_CHAR(d.TERMINATION_DATE, 'YYYYMMDD')) TERMINATION_DATE,
+                        d.TERMINATION_CODE_ID,
+                        demo.ssn
+                            FROM DEMOGRAPHIC_HISTORY d
+                        INNER JOIN DEMOGRAPHIC demo
+                        ON d.DEMOGRAPHIC_ID = demo.ID
+                        INNER JOIN FROZEN_STATE f
+                        ON f.PROFIT_YEAR = 2024
+                        AND f.IS_ACTIVE <> 0
+                        AND f.AS_OF_DATETIME >= d.VALID_FROM
+                        AND f.AS_OF_DATETIME < d.VALID_TO
+                    )
+                WHERE SSN in (700007178, 700009305)
+                order by system, ssn
+                """
             );
 
-            var readyRehire = await RdyQuery(
+            Table? readyRehire = await RdyQuery(
                 """
                         select * from (
                             select 'live' system, lower(PY_SCOD) EMPLOYMENT_STATUS_ID, NULLIF(PY_TERM_DT,0) TERMINATION_DATE, NULLIF(PY_TERM,' ') TERMINATION_CODE_ID, dem_ssn SSN from demographics
@@ -73,6 +75,7 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
             {
                 Console.WriteLine($"smart\n{smrtRehire}\n ready\n{readyRehire}\n");
             }
+
             smrtRehire.ShouldBeEquivalentTo(readyRehire);
         }
 
@@ -87,6 +90,7 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
         await conn.OpenAsync();
         return await Query(conn, sql);
     }
+
     public async Task<Table> RdyQuery(string sql)
     {
         await using OracleConnection conn = new(ReadyConnString);
@@ -96,16 +100,16 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
 
     public static async Task<Table> Query(OracleConnection connection, string sql)
     {
-        await using var command = connection.CreateCommand();
+        await using OracleCommand? command = connection.CreateCommand();
         command.CommandText = sql;
 
-        await using var reader = await command.ExecuteReaderAsync();
+        await using OracleDataReader? reader = await command.ExecuteReaderAsync();
 
-        var rows = new List<Row>();
+        List<Row> rows = new();
 
         while (await reader.ReadAsync())
         {
-            var values = new Dictionary<string, object?>(reader.FieldCount, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, object?> values = new(reader.FieldCount, StringComparer.OrdinalIgnoreCase);
 
             for (int i = 0; i < reader.FieldCount; i++)
             {

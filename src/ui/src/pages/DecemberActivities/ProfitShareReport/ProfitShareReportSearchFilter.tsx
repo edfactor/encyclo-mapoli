@@ -24,7 +24,7 @@ const schema = yup.object().shape({
 
 interface SearchParams {
   [key: string]: unknown;
-  reportId?: number;
+  reportId: number;
   badgeNumber?: number;
   profitYear?: number;
   pagination?: {
@@ -72,7 +72,7 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
   const validateAndSearch = handleSubmit((data) => {
     const request = {
       ...presetParams,
-      badgeNumber: data.badgeNumber,
+      badgeNumber: data.badgeNumber ?? undefined,
       profitYear: profitYear,
       pagination: {
         skip: 0,

@@ -18,8 +18,8 @@ UnForfeit.tsx (Page Container)
 ├── FrozenYearWarning (Conditional - shown if year is frozen)
 ├── DSMAccordion (Collapsible filter section)
 │   └── UnForfeitSearchFilter
-│       ├── DsmDatePicker (Rehire Begin Date)
-│       ├── DsmDatePicker (Rehire End Date)
+│       ├── DSMDatePicker (Rehire Begin Date)
+│       ├── DSMDatePicker (Rehire End Date)
 │       ├── Checkbox (Exclude zero balance employees)
 │       └── SearchAndReset (Action buttons with loading state)
 └── UnForfeitGrid
@@ -162,7 +162,7 @@ const schema = yup.object().shape({
 
 - Rehire Begin Date: Min = fiscal begin, Max = fiscal end
 - Rehire End Date: Min = max(begin date, fiscal begin), Max = fiscal end
-- Both dates use `DsmDatePicker` with `disableFuture`
+- Both dates use `DSMDatePicker` with `disableFuture`
 
 **Exclude Zero Balance Checkbox**:
 

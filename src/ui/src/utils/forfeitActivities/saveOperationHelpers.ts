@@ -4,7 +4,7 @@
  */
 
 import { GridApi } from "ag-grid-community";
-import { ActivityType, generateRowKey, RowKeyConfig, transformForfeitureValue } from "./gridDataHelpers";
+import { ActivityType, generateRowKey, RowKeyConfig } from "./gridDataHelpers";
 
 /**
  * Base request structure for forfeiture adjustments
@@ -26,56 +26,47 @@ export interface ActivityConfig {
 }
 
 /**
- * Prepare a single save request with activity-specific transformations
+ * Prepare a single save request (pass-through for consistency)
  *
- * @param config - Activity configuration
+ * Note: Value transformation happens before this function is called.
+ * For unforfeit, the sign has already been flipped to negative.
+ *
  * @param request - Base request data
- * @returns Transformed request ready for API
+ * @returns Request ready for API
  *
  * @example
- * // UnForfeit: negates the value
  * const request = prepareSaveRequest(
- *   { activityType: "unforfeit", rowKeyConfig: { type: "unforfeit" } },
  *   { badgeNumber: 123, profitYear: 2025, forfeitureAmount: 1500, classAction: false }
  * );
- * // Returns: { ...request, forfeitureAmount: -1500 }
- *
- * @example
- * // Termination: keeps value as-is
- * const request = prepareSaveRequest(
- *   { activityType: "termination", rowKeyConfig: { type: "termination" } },
- *   { badgeNumber: 123, profitYear: 2025, forfeitureAmount: 1500, classAction: false }
- * );
- * // Returns: { ...request, forfeitureAmount: 1500 }
+ * // Returns: { ...request }
  */
 export function prepareSaveRequest(
-  config: ActivityConfig,
   request: ForfeitureAdjustmentUpdateRequest
 ): ForfeitureAdjustmentUpdateRequest {
   return {
     ...request,
-    forfeitureAmount: transformForfeitureValue(config.activityType, request.forfeitureAmount)
+    forfeitureAmount: request.forfeitureAmount
   };
 }
 
 /**
- * Prepare multiple save requests with transformations
+ * Prepare multiple save requests (pass-through for consistency)
  *
- * @param config - Activity configuration
+ * Note: Value transformation happens before this function is called.
+ *
  * @param requests - Array of base request data
- * @returns Array of transformed requests ready for API
+ * @returns Array of requests ready for API
  *
  * @example
- * const requests = prepareBulkSaveRequests(config, [
+ * const requests = prepareBulkSaveRequests([
  *   { badgeNumber: 123, profitYear: 2025, forfeitureAmount: 1500, classAction: false },
  *   { badgeNumber: 456, profitYear: 2025, forfeitureAmount: 2000, classAction: false }
  * ]);
  */
 export function prepareBulkSaveRequests(
-  config: ActivityConfig,
   requests: ForfeitureAdjustmentUpdateRequest[]
 ): ForfeitureAdjustmentUpdateRequest[] {
-  return requests.map((req) => prepareSaveRequest(config, req));
+  return requests.map((req) => prepareSaveRequest(req));
 }
 
 /**

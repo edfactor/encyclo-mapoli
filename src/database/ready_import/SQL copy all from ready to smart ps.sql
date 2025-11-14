@@ -325,14 +325,14 @@ BEGIN
         PY_PH AS CURRENT_HOURS_YEAR,
         PY_PD AS CURRENT_INCOME_YEAR,
         PY_WEEKS_WORK AS WEEKS_WORKED_YEAR,
-        null as PS_CERTIFICATE_ISSUED_DATE,
+        null as PS_CERTIFICATE_ISSUED_DATE, -- Presuming an import is happening in year without a completed YE, so we use null 
         PY_PS_ENROLLED AS ENROLLMENT_ID,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
         PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, 
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        0 as POINTS_EARNED,
+        PY_PROF_POINTS AS POINTS_EARNED, -- Leaving the points here helps the PAY426 reports match identically.
         PY_PS_ETVA as ETVA
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
     where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
@@ -359,7 +359,10 @@ BEGIN
         PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- Pull the prior year hours as "last year"
         PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- Pull the prior year income as "last year"
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
-        NULL AS PS_CERTIFICATE_ISSUED_DATE,
+        CASE -- pull in the cert as the prior year's cert.  We use a DATE in SMART, but READY only has a boolean so we fudge it here.
+            WHEN PY_PROF_CERT = '1' THEN TO_DATE('12/31/' || last_year, 'MM/DD/YYYY')
+            ELSE NULL
+        END as PS_CERTIFICATE_ISSUED_DATE,
         -- We will recompute this in RebuildEnrollmentAndZeroContService for most employees when we first run.
         -- We leave it as a default as RebuildEnrollmentAndZeroContService might not recompute every employee
         PY_PS_ENROLLED, 
@@ -371,7 +374,7 @@ BEGIN
         PY_PROF_ZEROCONT, 
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        0 AS POINTS_EARNED,
+        PY_PROF_POINTS AS POINTS_EARNED,
         PY_PRIOR_ETVA as ETVA 
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
@@ -897,66 +900,119 @@ SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS
     WHERE REMARK LIKE 'CLASS-ACTION'
        OR REMARK LIKE 'CLASS ACTION';
 
+-- ============================================================
+-- STATE EXTRACTION ENHANCEMENTS (PS-2031)
+-- Extracted state codes from remark field with improved error handling
+-- ============================================================
+
 --Voided VOIDED 012257 MA
     UPDATE PROFIT_DETAIL pd
     SET COMMENT_TYPE_ID = 9,
         COMMENT_RELATED_CHECK_NUMBER = CASE WHEN LENGTH(TRIM(pd.REMARK)) > 14 THEN SUBSTR(pd.REMARK, 8, 6) ELSE NULL END,
         COMMENT_IS_PARTIAL_TRANSACTION = CASE WHEN SUBSTR(pd.REMARK,14,1) = '+' THEN 1 ELSE 0 END,
-        COMMENT_RELATED_STATE = SUBSTR(pd.REMARK,15,2)
-    WHERE REMARK LIKE 'VOIDED%';
+        COMMENT_RELATED_STATE = 
+          CASE 
+            WHEN CAST(pd.REMARK AS VARCHAR2(500)) IS NULL THEN NULL
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) >= 16 AND REGEXP_LIKE(SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2), '^[A-Z]{2}$') 
+                 THEN SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2)
+            ELSE NULL
+          END
+    WHERE CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'VOIDED%';
 
 --Hardship HRDSHP 021103 MA
     UPDATE PROFIT_DETAIL pd
     SET COMMENT_TYPE_ID = 10,
         COMMENT_RELATED_CHECK_NUMBER = CASE WHEN LENGTH(TRIM(pd.REMARK)) > 14 THEN SUBSTR(pd.REMARK, 8, 6) ELSE NULL END,
         COMMENT_IS_PARTIAL_TRANSACTION = CASE WHEN SUBSTR(pd.REMARK,14,1) = '+' THEN 1 ELSE 0 END,
-        COMMENT_RELATED_STATE = SUBSTR(pd.REMARK,15,2)
-    WHERE REMARK LIKE 'HRDSHP%'
-       OR REMARK LIKE 'HARDSHIP%';
+        COMMENT_RELATED_STATE = 
+          CASE 
+            WHEN CAST(pd.REMARK AS VARCHAR2(500)) IS NULL THEN NULL
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) >= 16 AND REGEXP_LIKE(SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2), '^[A-Z]{2}$') 
+                 THEN SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2)
+            ELSE NULL
+          END
+    WHERE CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'HRDSHP%'
+       OR CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'HARDSHIP%';
 
---Distribution
+--Distribution (standard format)
     UPDATE PROFIT_DETAIL pd
     SET COMMENT_TYPE_ID = 11,
         COMMENT_RELATED_CHECK_NUMBER = CASE WHEN LENGTH(TRIM(pd.REMARK)) > 14 THEN SUBSTR(pd.REMARK, 8, 6) ELSE NULL END,
         COMMENT_IS_PARTIAL_TRANSACTION = CASE WHEN SUBSTR(pd.REMARK,14,1) = '+' THEN 1 ELSE 0 END,
-        COMMENT_RELATED_STATE = SUBSTR(pd.REMARK,15,2)
-    WHERE REMARK LIKE 'DISTRB%';
+        COMMENT_RELATED_STATE = 
+          CASE 
+            WHEN CAST(pd.REMARK AS VARCHAR2(500)) IS NULL THEN NULL
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) >= 16 AND REGEXP_LIKE(SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2), '^[A-Z]{2}$') 
+                 THEN SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2)
+            ELSE NULL
+          END
+    WHERE CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'DISTRB%';
 
+--Distribution (typo variant: DISTIBUTION instead of DISTRIBUTION)
     UPDATE PROFIT_DETAIL pd
-    SET COMMENT_TYPE_ID = 11
-    WHERE REMARK LIKE 'DIST%IBUTION%';
+    SET COMMENT_TYPE_ID = 11,
+        COMMENT_RELATED_CHECK_NUMBER = CASE WHEN LENGTH(TRIM(pd.REMARK)) > 14 THEN SUBSTR(pd.REMARK, 8, 6) ELSE NULL END,
+        COMMENT_IS_PARTIAL_TRANSACTION = CASE WHEN SUBSTR(pd.REMARK,14,1) = '+' THEN 1 ELSE 0 END,
+        COMMENT_RELATED_STATE = 
+          CASE 
+            WHEN CAST(pd.REMARK AS VARCHAR2(500)) IS NULL THEN NULL
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) >= 16 AND REGEXP_LIKE(SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2), '^[A-Z]{2}$') 
+                 THEN SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2)
+            ELSE NULL
+          END
+    WHERE CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'DIST%IBUTION%';
 
 --Payoff
     UPDATE PROFIT_DETAIL pd
     SET COMMENT_TYPE_ID = 12
-    WHERE REMARK LIKE 'PAYOFF'
-       OR REMARK LIKE 'PAY OFF';
+    WHERE CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'PAYOFF'
+       OR CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'PAY OFF';
 
---DirPay DIRPAY 048465+MA
+--DirPay DIRPAY 048465+MA (standard format - positions 15-16)
     UPDATE PROFIT_DETAIL pd
     SET COMMENT_TYPE_ID = 13,
         COMMENT_RELATED_CHECK_NUMBER = CASE WHEN LENGTH(TRIM(pd.REMARK)) > 14 THEN SUBSTR(pd.REMARK, 8, 6) ELSE NULL END,
         COMMENT_IS_PARTIAL_TRANSACTION = CASE WHEN SUBSTR(pd.REMARK,14,1) = '+' THEN 1 ELSE 0 END,
-        COMMENT_RELATED_STATE = SUBSTR(pd.REMARK,15,2)
-    WHERE REMARK LIKE 'DIRPAY%'
-       OR REMARK LIKE 'DIRECT PAY%';
+        COMMENT_RELATED_STATE = 
+          CASE 
+            WHEN CAST(pd.REMARK AS VARCHAR2(500)) IS NULL THEN NULL
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) >= 16 AND REGEXP_LIKE(SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2), '^[A-Z]{2}$') 
+                 THEN SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2)
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) = 10 AND CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'DIRECT PAY%' 
+                 THEN NULL  -- Too short for extraction (exactly 10 chars), state not available
+            ELSE NULL
+          END
+    WHERE CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'DIRPAY%'
+       OR CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'DIRECT PAY%';
 
 --Rollover ROLOVR 029663 NH
     UPDATE PROFIT_DETAIL pd
     SET COMMENT_TYPE_ID = 14,
         COMMENT_RELATED_CHECK_NUMBER = CASE WHEN LENGTH(TRIM(pd.REMARK)) > 14 THEN SUBSTR(pd.REMARK, 8, 6) ELSE NULL END,
         COMMENT_IS_PARTIAL_TRANSACTION = CASE WHEN SUBSTR(pd.REMARK,14,1) = '+' THEN 1 ELSE 0 END,
-        COMMENT_RELATED_STATE = SUBSTR(pd.REMARK,15,2)
-    WHERE REMARK LIKE 'ROLOVR%'
-       OR REMARK LIKE 'ROLLOVER%';
+        COMMENT_RELATED_STATE = 
+          CASE 
+            WHEN CAST(pd.REMARK AS VARCHAR2(500)) IS NULL THEN NULL
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) >= 16 AND REGEXP_LIKE(SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2), '^[A-Z]{2}$') 
+                 THEN SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2)
+            ELSE NULL
+          END
+    WHERE CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'ROLOVR%'
+       OR CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'ROLLOVER%';
 
 --Rollover ROTHIR 053087+FL
     UPDATE PROFIT_DETAIL pd
     SET COMMENT_TYPE_ID = 15,
         COMMENT_RELATED_CHECK_NUMBER = CASE WHEN LENGTH(TRIM(pd.REMARK)) > 14 THEN SUBSTR(pd.REMARK, 8, 6) ELSE NULL END,
         COMMENT_IS_PARTIAL_TRANSACTION = CASE WHEN SUBSTR(pd.REMARK,14,1) = '+' THEN 1 ELSE 0 END,
-        COMMENT_RELATED_STATE = SUBSTR(pd.REMARK,15,2)
-    WHERE REMARK LIKE 'ROTHIR%';
+        COMMENT_RELATED_STATE = 
+          CASE 
+            WHEN CAST(pd.REMARK AS VARCHAR2(500)) IS NULL THEN NULL
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) >= 16 AND REGEXP_LIKE(SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2), '^[A-Z]{2}$') 
+                 THEN SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2)
+            ELSE NULL
+          END
+    WHERE CAST(pd.REMARK AS VARCHAR2(500)) LIKE 'ROTHIR%';
 
 --Over 64, years vested
     UPDATE PROFIT_DETAIL pd
@@ -1396,35 +1452,22 @@ INSERT ALL
 -- get rid of any history of YE Updates, as all the data is wiped
 delete from ye_update_status;
 
-------------  These are users in the scramble, their ssn's do not in PROD
+------------  These are bad members (benes) in the scramble, their ssn's are not present UAT/PROD
     
+-- We remove benes who are "not complete", namely either
+--     1) their PAYBEN balance does not match their PROFIT_DETAIL rows
+--     2) they are a bene w/o no employee side - but have profit code = 0 transactions which means they were an employee
+--    
+--  | SSN       | Name           | Type             | PAYBEN Balance | Has Code 0?  | Details                                                    |
+--  |-----------|----------------|------------------|----------------|--------------|------------------------------------------------------------|
+--  | 700010556 | BEIL, AUTUMN   | BENEFICIARY ONLY | $96,719.52     | NO           | Legitimate QDRO (Code 6) beneficiary                       |
+--  | 700010521 | MILLS, KRYSTAL | BENEFICIARY ONLY | $0.00          | YES          | SCRAMBLED: 19 employee contributions (2004-2024, $29,655)  |
+--  | 700010561 | RHODES, CRUZ   | BENEFICIARY ONLY | $0.00          | YES          | SCRAMBLED: 28 employee contributions (1992-2024, $101,536) |
+
 --  Bad Beneficiaries, See https://demoulas.atlassian.net/browse/PS-1268
-delete from profit_detail where ssn IN ( 700010556, 700010596 );
-delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010596));
-delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010596 );
-
--- 700007178 rehired   20250306
--- 700009305 rehired   20250204
-
--- first change the current history to have a start time, lets use their rehire date
-UPDATE DEMOGRAPHIC_HISTORY dh SET dh.VALID_FROM = DATE '2025-03-06' WHERE dh.demographic_id = (select id from demographic where ssn = 700007178);
-UPDATE DEMOGRAPHIC_HISTORY dh SET dh.VALID_FROM = DATE '2025-03-06' WHERE dh.demographic_id = (select id from demographic where ssn = 700009305);
-
--- now insert the history row from time 0 up to rehire date, in this time range the employee is term.
-INSERT INTO DEMOGRAPHIC_HISTORY (DEMOGRAPHIC_ID, VALID_FROM,            VALID_TO,      ORACLE_HCM_ID,     BADGE_NUMBER, STORE_NUMBER,    PAY_CLASSIFICATION_ID,    DATE_OF_BIRTH,    HIRE_DATE,    REHIRE_DATE, TERMINATION_DATE, DEPARTMENT,    EMPLOYMENT_TYPE_ID,    PAY_FREQUENCY_ID,    TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
-SELECT                           d.ID          , DATE '1900-01-01', DATE '2025-03-06', dh.ORACLE_HCM_ID, d.badge_number,    dh.STORE_NUMBER, dh.PAY_CLASSIFICATION_ID, dh.DATE_OF_BIRTH, dh.HIRE_DATE, NULL,        DATE '2024-12-06',        dh.DEPARTMENT, dh.EMPLOYMENT_TYPE_ID, dh.PAY_FREQUENCY_ID, 'A'                , 't'                 , dh.CREATED_DATETIME
-FROM DEMOGRAPHIC_HISTORY dh JOIN DEMOGRAPHIC d ON dh.DEMOGRAPHIC_ID = d.ID
-WHERE d.ssn = 700007178;
-
--- now insert the history row from time 0 up to rehire date, in this time range the employee is term.
-INSERT INTO DEMOGRAPHIC_HISTORY (DEMOGRAPHIC_ID, VALID_FROM,            VALID_TO,      ORACLE_HCM_ID,     BADGE_NUMBER, STORE_NUMBER,    PAY_CLASSIFICATION_ID,    DATE_OF_BIRTH,    HIRE_DATE,    REHIRE_DATE, TERMINATION_DATE, DEPARTMENT,    EMPLOYMENT_TYPE_ID,    PAY_FREQUENCY_ID,    TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
-SELECT                           d.ID          , DATE '1900-01-01', DATE '2025-02-04', dh.ORACLE_HCM_ID, d.badge_number,dh.STORE_NUMBER, dh.PAY_CLASSIFICATION_ID, dh.DATE_OF_BIRTH, dh.HIRE_DATE, NULL,        DATE '2024-12-06',        dh.DEPARTMENT, dh.EMPLOYMENT_TYPE_ID, dh.PAY_FREQUENCY_ID, 'A'                , 't'                 , dh.CREATED_DATETIME
-FROM DEMOGRAPHIC_HISTORY dh JOIN DEMOGRAPHIC d ON dh.DEMOGRAPHIC_ID = d.ID
-WHERE d.ssn = 700009305;
-
-
---Set Zero Contribution Reason to 2 - (Terminated Employee)
-UPDATE PAY_PROFIT SET ZERO_CONTRIBUTION_REASON_ID = 2 WHERE PROFIT_YEAR = 2024 and demographic_id in (select id from demographic where ssn in (700007178,700009305));
+delete from profit_detail where ssn IN ( 700010556, 700010521, 700010561 );
+delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561));
+delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561 );
 
 END;
 COMMIT ;

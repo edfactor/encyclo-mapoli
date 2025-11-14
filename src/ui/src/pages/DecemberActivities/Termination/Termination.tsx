@@ -1,27 +1,32 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 
 import { CircularProgress, Divider, Grid } from "@mui/material";
 
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
-import { useTerminationState } from "../../../hooks/useTerminationState";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
+import { useTerminationState } from "./hooks/useTerminationState";
 import TerminationGrid from "./TerminationGrid";
 import TerminationSearchFilter from "./TerminationSearchFilter";
 
 export interface TerminationSearchRequest extends StartAndEndDateRequest {
   forfeitureStatus: string;
   archive?: boolean;
+  excludeZeroBalance?: boolean;
   excludeZeroAndFullyVested?: boolean;
+  vestedBalanceValue?: number | null;
+  vestedBalanceOperator?: number | null;
 }
 
 const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
   const [isFetching, setIsFetching] = useState(false);
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
 
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
@@ -90,6 +95,7 @@ const Termination = () => {
                     onSearch={actions.handleSearch}
                     setInitialSearchLoaded={actions.setInitialSearchLoaded}
                     hasUnsavedChanges={state.hasUnsavedChanges}
+                    setHasUnsavedChanges={actions.handleUnsavedChanges}
                     isFetching={isFetching}
                   />
                 </DSMAccordion>
@@ -107,12 +113,20 @@ const Termination = () => {
                   onArchiveHandled={actions.handleArchiveHandled}
                   onErrorOccurred={scrollToTop}
                   onLoadingChange={setIsFetching}
+                  onShowUnsavedChangesDialog={() => setShowUnsavedChangesDialog(true)}
                 />
               </Grid>
             </>
           )}
         </Grid>
       </div>
+
+      <ConfirmationDialog
+        open={showUnsavedChangesDialog}
+        title="Unsaved Changes"
+        description="Please save your changes before changing pages."
+        onClose={() => setShowUnsavedChangesDialog(false)}
+      />
     </Page>
   );
 };

@@ -29,7 +29,7 @@ public class Pay443Tests : PristineBaseTest
 
         // Get a hot response from SMART
         ForfeituresAndPointsForYearResponseWithTotals actualResponse =
-            await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(new FrozenProfitYearRequest { ProfitYear = 2024, Take = int.MaxValue });
+            await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(new FrozenProfitYearRequest { ProfitYear = 2025, Take = int.MaxValue });
 
         // We do not test that the order is identical.
         HashSet<ForfeituresAndPointsForYearResponse> actualRows = actualResponse.Response.Results.ToHashSet();
@@ -79,10 +79,4 @@ public class Pay443Tests : PristineBaseTest
         actualResponse.ShouldBeEquivalentTo(expectedResponse);
     }
 
-    public static string ReadEmbeddedResource(string resourceName)
-    {
-        using Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
-        using StreamReader reader = new(stream!);
-        return reader.ReadToEnd();
-    }
 }

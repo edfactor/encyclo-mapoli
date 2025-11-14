@@ -1,9 +1,8 @@
 import { FormControl, FormLabel, MenuItem, Select } from "@mui/material";
 import { Grid } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 
 export interface QPAY066BFilterParams {
   qpay066Presets: string;
@@ -84,12 +83,13 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
               name="startDate"
               control={control}
               render={({ field }) => (
-                <DsmDatePicker
+                <DSMDatePicker
                   id="startDate"
                   onChange={field.onChange}
                   value={field.value || null}
                   label="Start Date"
                   disableFuture
+                  required={false}
                 />
               )}
             />
@@ -99,12 +99,13 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
               name="endDate"
               control={control}
               render={({ field }) => (
-                <DsmDatePicker
+                <DSMDatePicker
                   id="endDate"
                   onChange={field.onChange}
                   value={field.value || null}
                   label="End Date"
                   disableFuture
+                  required={false}
                 />
               )}
             />

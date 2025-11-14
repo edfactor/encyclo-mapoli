@@ -11,6 +11,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
 
+[Collection("IT Operations Tests")]
 public class GetActiveFrozenDemographicEndpointTests : ApiTestBase<Program>
 {
     [Fact]

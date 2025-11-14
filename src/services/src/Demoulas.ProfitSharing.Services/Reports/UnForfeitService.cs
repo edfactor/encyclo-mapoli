@@ -15,6 +15,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Dynamic.Core;
+using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -47,10 +48,15 @@ public sealed class UnforfeitService : IUnforfeitService
         {
             rehiredEmployees = await _dataContextFactory.UseReadOnlyContext(async context =>
             {
-                short profitYear = (short)req.EndingDate.Year;
+                // Unforfeit is always for the current year.  Ths page is used in December flow - so we should be using member financials (pay_profit row)
+                // from the wall clock year.
+                // If someone is using this service in Jan/Feb/March - then we may have trouble in the Suggested Forfeit, because those transactions will be in the current year
+                // and not the "openProfitYear" (aka wall clock year - 1)
+                var today = DateTime.Today.ToDateOnly();
+                short profitYear = (short) today.Year;
 
-                IQueryable<ParticipantTotalYear>? yearsOfServiceQuery = _totalService.GetYearsOfService(context, profitYear, req.EndingDate);
-                IQueryable<ParticipantTotalVestingBalance>? vestingServiceQuery = _totalService.TotalVestingBalance(context, profitYear, req.EndingDate);
+                IQueryable<ParticipantTotalYear>? yearsOfServiceQuery = _totalService.GetYearsOfService(context, profitYear, today);
+                IQueryable<ParticipantTotalVestingBalance>? vestingServiceQuery = _totalService.TotalVestingBalance(context, profitYear, today);
                 IQueryable<Demographic>? demo = await _demographicReaderService.BuildDemographicQuery(context);
 
                 // PERFORMANCE: Pre-filter demographics to reduce join volume
@@ -67,7 +73,7 @@ public sealed class UnforfeitService : IUnforfeitService
                     from pd in forfeitureTransactions
                     join d in activeDemographics on pd.Ssn equals d.Ssn
                     join ppYE in context.PayProfits
-                        on new { d.Id, ProfitYear = profitYear } equals new { Id = ppYE.DemographicId, ProfitYear = ppYE.ProfitYear }
+                        on new { d.Id, ProfitYear = profitYear } equals new { Id = ppYE.DemographicId, ppYE.ProfitYear }
                     join enrollment in context.Enrollments
                         on ppYE.EnrollmentId equals enrollment.Id
                     join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp
@@ -90,8 +96,8 @@ public sealed class UnforfeitService : IUnforfeitService
                         d.PayFrequencyId,
                         ppYE.EnrollmentId,
                         EnrollmentName = enrollment.Name,
-                        HoursProfitYear = ppYE.HoursExecutive + ppYE.CurrentHoursYear,
-                        WagesProfitYear = ppYE.IncomeExecutive + ppYE.CurrentIncomeYear
+                        HoursProfitYear = ppYE.TotalHours,
+                        WagesProfitYear = ppYE.TotalIncome
                     };
 
                 // Apply pagination to main query
@@ -99,6 +105,7 @@ public sealed class UnforfeitService : IUnforfeitService
                 {
                     "rehireddate" => "RehireDate",
                     "companycontributionyears" => "YearsOfService",
+                    "" => "badgenumber",
                     _ => (req.SortBy ?? "badgenumber")
                 };
 
@@ -147,7 +154,7 @@ public sealed class UnforfeitService : IUnforfeitService
                         pd.ProfitCodeId,
                         pd.CommentType,
                         HoursTransactionYear = pp != null ? (decimal?)pp.CurrentHoursYear : null,
-                        WagesTransactionYear = pp != null ? (decimal?)(pp.CurrentIncomeYear + pp.IncomeExecutive) : null
+                        WagesTransactionYear = pp != null ? (decimal?)(pp.TotalIncome) : null
                     };
 
                 var allDetails = await detailsQuery.ToListAsync(cancellationToken);
@@ -161,7 +168,7 @@ public sealed class UnforfeitService : IUnforfeitService
                 var responses = paginatedMain.Select(main =>
                 {
                     detailsBySsn.TryGetValue(main.Ssn, out var details);
-                    var maxProfitDetailId = (details?.Any() ?? false) ? details.Max(d => (int)d.Id) : 0;
+                    var maxProfitDetailId = (details?.Any() ?? false) ? details.Max(d => d.Id) : 0;
 
                     return new UnforfeituresResponse
                     {

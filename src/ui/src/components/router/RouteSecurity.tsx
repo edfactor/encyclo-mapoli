@@ -15,7 +15,6 @@ interface RouteSecurityProps {
   children?: ReactNode;
 }
 
-//@ts-expect-error we do not have types for this
 const RouteSecurity: React.FC<RouteSecurityProps> = ({ oktaEnabled, children }) => {
   const [oktaAuth, setOktaAuth] = useState<OktaAuth | null>(null);
   const navigate = useNavigate();

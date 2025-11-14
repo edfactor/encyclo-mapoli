@@ -21,31 +21,19 @@ definitions:
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
 
-        # Check if .NET 9 SDK is installed
-        - echo "Checking installed .NET SDK versions..."
-        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\.(\d+)\.(\d+)"
-        - if ($dotnetSdkInstalled) {
-              $isSdkValid = $false;
-              foreach ($sdk in $dotnetSdkInstalled) {
-                if ($sdk -match "^9\.(\d+)\.(\d+)") {
-                  $minor = [int]$matches[1];
-                  $patch = [int]$matches[2];
-                  if ($minor -gt 0 -or $patch -ge 306) {
-                    $isSdkValid = $true;
-                    break;
-                  }
-                }
-              }
-              if ($isSdkValid) {
-                Write-Output ".NET SDK 9.0.306 or higher is installed.";
-              } else {
-                Write-Output ".NET SDK 9.0.306 or higher is NOT installed.";
-                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.306/dotnet-sdk-9.0.306-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.306-win-x64.exe";
-                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.306-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
-              }
-            } else {
-              Write-Output "No .NET 9.x SDK installed.";
-            }
+        # Verify required .NET SDK is available (do not attempt installation)
+        - echo "Checking for required .NET SDK version..."
+        - |
+          $dotnetSdkList = dotnet --list-sdks;
+          Write-Output "Installed .NET SDKs:";
+          Write-Output $dotnetSdkList;
+          
+          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+          if (-not $dotnetSdkRequired) {
+              Write-Error "FAILED: .NET 10 SDK is required but not available.";
+              Write-Error "Please ensure .NET 10 SDK is installed on the build agent.";
+              exit 1;
+          }
 
         # Clean any previous build artifacts to ensure deterministic builds
         - echo "Cleaning previous build artifacts..."
@@ -175,6 +163,28 @@ definitions:
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
         
+        # Update package.json version from .buildinfo.json
+        - |
+          if [ -f ../../.buildinfo.json ]; then
+            BUILD_NUMBER=$(grep -o '"buildNumber":"[^"]*"' ../../.buildinfo.json | cut -d'"' -f4)
+            BUILD_ID=$(grep -o '"buildId":[0-9]*' ../../.buildinfo.json | cut -d':' -f2)
+            if [ -n "$BUILD_NUMBER" ] && [ -n "$BUILD_ID" ]; then
+              # Parse BUILD_NUMBER as YYYYmmDD and convert to YYYY.mmDD
+              if [ ${#BUILD_NUMBER} -eq 8 ]; then
+                YEAR="${BUILD_NUMBER:0:4}"
+                MONTH="${BUILD_NUMBER:4:2}"
+                DAY="${BUILD_NUMBER:6:2}"
+                SEMANTIC_VERSION="${YEAR}.${MONTH}${DAY}.${BUILD_ID}"
+              else
+                # Fallback if format is unexpected
+                SEMANTIC_VERSION="${BUILD_NUMBER}.${BUILD_ID}"
+              fi
+              node -e "const pkg=require('./package.json'); pkg.version='${SEMANTIC_VERSION}'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');"
+              echo "✓ Updated package.json version to $SEMANTIC_VERSION"
+              grep '"version"' package.json
+            fi
+          fi
+        
         # Copy buildinfo.json from artifact to public directory
         - echo "Copying .buildinfo.json from artifact..."
         - cp ../../.buildinfo.json ./public/.buildinfo.json
@@ -220,6 +230,28 @@ definitions:
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
+        
+        # Update package.json version from .buildinfo.json
+        - |
+          if [ -f ../../.buildinfo.json ]; then
+            BUILD_NUMBER=$(grep -o '"buildNumber":"[^"]*"' ../../.buildinfo.json | cut -d'"' -f4)
+            BUILD_ID=$(grep -o '"buildId":[0-9]*' ../../.buildinfo.json | cut -d':' -f2)
+            if [ -n "$BUILD_NUMBER" ] && [ -n "$BUILD_ID" ]; then
+              # Parse BUILD_NUMBER as YYYYmmDD and convert to YYYY.mmDD
+              if [ ${#BUILD_NUMBER} -eq 8 ]; then
+                YEAR="${BUILD_NUMBER:0:4}"
+                MONTH="${BUILD_NUMBER:4:2}"
+                DAY="${BUILD_NUMBER:6:2}"
+                SEMANTIC_VERSION="${YEAR}.${MONTH}${DAY}.${BUILD_ID}"
+              else
+                # Fallback if format is unexpected
+                SEMANTIC_VERSION="${BUILD_NUMBER}.${BUILD_ID}"
+              fi
+              node -e "const pkg=require('./package.json'); pkg.version='${SEMANTIC_VERSION}'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');"
+              echo "✓ Updated package.json version to $SEMANTIC_VERSION"
+              grep '"version"' package.json
+            fi
+          fi
         
         # Copy buildinfo.json from artifact to public directory
         - echo "Copying .buildinfo.json from artifact..."

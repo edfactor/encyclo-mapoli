@@ -904,7 +904,7 @@ public class FrozenReportService : IFrozenReportService
                                  join lBal in _totalService.GetQuoteLoansUnQuote(ctx, req.ProfitYear) on d.Ssn equals lBal.Ssn into
                                      lBal_tmp
                                  from lBal_lj in lBal_tmp.DefaultIfEmpty()
-                                 where pp != null && (pp.CurrentIncomeYear + pp.IncomeExecutive) >= req.MinGrossAmount
+                                 where pp != null && (pp.TotalIncome) >= req.MinGrossAmount
                                  orderby d.ContactInfo.FullName
                                  select new
                                  {
@@ -915,7 +915,7 @@ public class FrozenReportService : IFrozenReportService
                                      Forfeitures = fBal_lj != null ? fBal_lj.TotalAmount : (decimal?)null,
                                      Loans = lBal_lj != null ? lBal_lj.TotalAmount : (decimal?)null,
                                      ProfitSharingAmount = psBal != null ? psBal.TotalAmount : (decimal?)null,
-                                     GrossWages = pp != null ? pp.CurrentIncomeYear + pp.IncomeExecutive : 0m,
+                                     GrossWages = pp != null ? pp.TotalIncome : 0m,
                                      EnrollmentId = pp != null ? pp.EnrollmentId : (byte?)null,
                                      d.PayFrequencyId,
                                  });
@@ -940,7 +940,7 @@ public class FrozenReportService : IFrozenReportService
                         Loans = x.Loans ?? 0,
                         ProfitSharingAmount = x.ProfitSharingAmount ?? 0,
                         GrossWages = x.GrossWages,
-                        EnrollmentId = (byte)(x.EnrollmentId ?? 0),
+                        EnrollmentId = (x.EnrollmentId ?? 0),
                         IsExecutive = x.PayFrequencyId == PayFrequency.Constants.Monthly,
                     }).ToList(),
                     Total = pagedData.Total

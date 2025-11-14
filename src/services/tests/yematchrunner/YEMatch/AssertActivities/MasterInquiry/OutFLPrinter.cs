@@ -1,4 +1,4 @@
-﻿namespace YEMatch.YEMatch.AssertActivities.MasterInquiry;
+﻿namespace YEMatch.AssertActivities.MasterInquiry;
 
 /* A  Markdown printer for OutFL rows.  Highlights conflicting rows. */
 public static class OutFLPrinter

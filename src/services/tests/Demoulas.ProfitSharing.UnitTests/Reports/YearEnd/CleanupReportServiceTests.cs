@@ -22,6 +22,7 @@ using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
+[Collection("SharedGlobalState")]
 public class CleanupReportServiceTests : ApiTestBase<Program>
 {
     private readonly ITestOutputHelper _testOutputHelper;
@@ -227,6 +228,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             payProfit.ProfitYear = profitYear;
             payProfit.CurrentHoursYear = testHours;
             payProfit.HoursExecutive = 0;
+            payProfit.TotalHours = payProfit.CurrentHoursYear + payProfit.HoursExecutive;
 
             var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp.Ssn).ToListAsync(CancellationToken.None);
             foreach (var pd in profitDetails.Skip(2))
@@ -285,6 +287,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
             payProfit.CurrentHoursYear = 50;
+            payProfit.TotalHours = payProfit.CurrentHoursYear + payProfit.HoursExecutive;
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 

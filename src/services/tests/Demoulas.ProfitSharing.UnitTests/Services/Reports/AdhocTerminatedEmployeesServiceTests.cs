@@ -10,6 +10,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services.Reports;
 
+[Collection("SharedGlobalState")]
 public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
 {
     private IAdhocTerminatedEmployeesService Service => ServiceProvider?.GetRequiredService<IAdhocTerminatedEmployeesService>()!;

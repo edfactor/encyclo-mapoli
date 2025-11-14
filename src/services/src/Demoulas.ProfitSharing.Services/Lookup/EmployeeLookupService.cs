@@ -7,9 +7,9 @@ namespace Demoulas.ProfitSharing.Services.Lookup;
 
 public sealed class EmployeeLookupService(IProfitSharingDataContextFactory factory, IDemographicReaderService demographicReaderService) : IEmployeeLookupService
 {
-    public async Task<bool> BadgeExistsAsync(int badgeNumber, CancellationToken cancellationToken = default)
+    public Task<bool> BadgeExistsAsync(int badgeNumber, CancellationToken cancellationToken = default)
     {
-        return await factory.UseReadOnlyContext(async ctx =>
+        return factory.UseReadOnlyContext(async ctx =>
         {
 #pragma warning disable DSMPS001
             return await ctx.Demographics.AnyAsync(d => d.BadgeNumber == badgeNumber, cancellationToken);
@@ -17,9 +17,9 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
         }, cancellationToken);
     }
 
-    public async Task<DateOnly?> GetEarliestHireDateAsync(int badgeNumber, CancellationToken cancellationToken = default)
+    public Task<DateOnly?> GetEarliestHireDateAsync(int badgeNumber, CancellationToken cancellationToken = default)
     {
-        return await factory.UseReadOnlyContext(async ctx =>
+        return factory.UseReadOnlyContext(async ctx =>
         {
 #pragma warning disable DSMPS001
             var demo = await ctx.Demographics
@@ -45,9 +45,9 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
         }, cancellationToken);
     }
 
-    public async Task<DateOnly?> GetDateOfBirthAsync(int badgeNumber, CancellationToken cancellationToken = default)
+    public Task<DateOnly?> GetDateOfBirthAsync(int badgeNumber, CancellationToken cancellationToken = default)
     {
-        return await factory.UseReadOnlyContext(async ctx =>
+        return factory.UseReadOnlyContext(async ctx =>
         {
 #pragma warning disable DSMPS001
             var dob = await ctx.Demographics
@@ -59,9 +59,9 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
         }, cancellationToken);
     }
 
-    public async Task<char?> GetEmploymentStatusIdAsOfAsync(int badgeNumber, DateOnly asOfDate, CancellationToken cancellationToken = default)
+    public Task<char?> GetEmploymentStatusIdAsOfAsync(int badgeNumber, DateOnly asOfDate, CancellationToken cancellationToken = default)
     {
-        return await factory.UseReadOnlyContext(async ctx =>
+        return factory.UseReadOnlyContext(async ctx =>
         {
             var asOfTimestamp = new DateTimeOffset(asOfDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
             var demoQuery = demographicReaderService.BuildDemographicQueryAsOf(ctx, asOfTimestamp);

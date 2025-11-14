@@ -46,18 +46,18 @@ public sealed class PayService : IPayService
     /// <param name="employmentType">Employment type (P=Part-time, H/G/F=Full-time variants)</param>
     /// <param name="cancellationToken">Cancellation token for async operation</param>
     /// <returns>Result containing paginated pay services data aggregated by years since hire</returns>
-    public async Task<Result<PayServicesResponse>> GetPayServices(
-        PayServicesRequest request, 
-        char employmentType, 
+    public Task<Result<PayServicesResponse>> GetPayServices(
+        PayServicesRequest request,
+        char employmentType,
         CancellationToken cancellationToken = default)
     {
-        return await _dataContextFactory.UseReadOnlyContext<Result<PayServicesResponse>>(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext<Result<PayServicesResponse>>(async ctx =>
         {
             try
             {
                 // Get fiscal year end date for years calculation
                 var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(
-                    request.ProfitYear, 
+                    request.ProfitYear,
                     cancellationToken);
 
                 // Build demographics query with frozen/live data selection
@@ -72,7 +72,7 @@ public sealed class PayService : IPayService
                     from d in demographics
                     where d.EmploymentStatusId == EmploymentStatus.Constants.Active
                         && d.EmploymentTypeId == employmentType
-                    join pp in ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear) 
+                    join pp in ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
                         on d.Id equals pp.DemographicId into payProfitGroup
                     from payProfit in payProfitGroup.DefaultIfEmpty()
                     select new
@@ -86,24 +86,24 @@ public sealed class PayService : IPayService
                 .TagWith($"PayServices-RawData-{request.ProfitYear}-EmpType-{employmentType}")
                 .ToListAsync(cancellationToken);
 
-            // STEP 2: Calculate years since hire and perform grouping/aggregation in memory
-            // Oracle EF provider cannot translate the GROUP BY calculation, so we do this client-side
-            var aggregatedData = rawData
-                .GroupBy(x => ((fiscalEndYear - x.HireYear != 0 ? fiscalEndYear - x.HireYear : x.HireMonth < 7 ? -2 : -1)) )
-                    .Select(g => new
-                    {
-                        YearsSinceHire = g.Key,
-                        Employees = g.Select(x => x.DemographicId).Distinct().Count(),
-                        TotalWages = g.Sum(x => x.Wages)
-                    })
-                    .OrderBy(x => x.YearsSinceHire)
-                    .ToList();
+                // STEP 2: Calculate years since hire and perform grouping/aggregation in memory
+                // Oracle EF provider cannot translate the GROUP BY calculation, so we do this client-side
+                var aggregatedData = rawData
+                    .GroupBy(x => fiscalEndYear - x.HireYear != 0 ? fiscalEndYear - x.HireYear : x.HireMonth < 7 ? -2 : -1)
+                        .Select(g => new
+                        {
+                            YearsSinceHire = g.Key,
+                            Employees = g.Select(x => x.DemographicId).Distinct().Count(),
+                            TotalWages = g.Sum(x => x.Wages)
+                        })
+                        .OrderBy(x => x.YearsSinceHire)
+                        .ToList();
 
                 // Map to DTOs with weekly pay calculation
                 var payServicesDtos = aggregatedData.Select(s => new PayServicesDto
                 {
                     Employees = s.Employees,
-                    YearsOfServiceLabel = s.YearsSinceHire != -1 && s.YearsSinceHire != -2 ? $"{s.YearsSinceHire}" : 
+                    YearsOfServiceLabel = s.YearsSinceHire != -1 && s.YearsSinceHire != -2 ? $"{s.YearsSinceHire}" :
                         (s.YearsSinceHire == -1 ? "> 6 mos" : "< 6 mos"),
                     YearsOfService = s.YearsSinceHire,
                     YearsWages = s.TotalWages
@@ -130,17 +130,17 @@ public sealed class PayService : IPayService
 
                 return Result<PayServicesResponse>.Success(response);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
-                _logger.LogWarning(
+                _logger.LogWarning(ex,
                     "GetPayServices operation cancelled for EmploymentType: {EmploymentType}, ProfitYear: {ProfitYear}",
                     employmentType, request.ProfitYear);
                 return Result<PayServicesResponse>.Failure(Error.Unexpected($"Operation cancelled."));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, 
-                    "Error retrieving pay services for EmploymentType: {EmploymentType}, ProfitYear: {ProfitYear}", 
+                _logger.LogError(ex,
+                    "Error retrieving pay services for EmploymentType: {EmploymentType}, ProfitYear: {ProfitYear}",
                     employmentType, request.ProfitYear);
                 return Result<PayServicesResponse>.Failure(
                     Error.Unexpected($"Failed to retrieve pay services: {ex.Message}"));

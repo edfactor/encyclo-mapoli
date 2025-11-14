@@ -30,7 +30,7 @@ const DSMCollapsedAccordion: React.FC<DSMCollapsedAccordionProps> = ({
 }) => {
   const [expanded, setExpanded] = useState(!isCollapsedOnRender);
 
-  const handleChange = (event: React.SyntheticEvent, isExpanded: boolean) => {
+  const handleChange = (_event: React.SyntheticEvent, isExpanded: boolean) => {
     if (expandable) {
       setExpanded(isExpanded);
     }

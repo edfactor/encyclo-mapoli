@@ -3,17 +3,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetUpdateSummaryQuery, useUpdateEnrollmentMutation } from "reduxstore/api/YearsEndApi";
 import { setMessage } from "reduxstore/slices/messageSlice";
 import { RootState } from "reduxstore/store";
-import { UpdateSummaryResponse } from "reduxstore/types";
+import { NavigationDto, UpdateSummaryResponse } from "reduxstore/types";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { ServiceErrorResponse } from "../../../../types/errors/errors";
-
-interface NavigationItem {
-  id: number;
-  statusName?: string;
-  items?: NavigationItem[];
-  [key: string]: unknown;
-}
 
 interface PayMasterUpdateState {
   search: {
@@ -171,9 +164,9 @@ export const usePayMasterUpdate = () => {
     const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
 
     const getNavigationObjectBasedOnId = (
-      navigationArray: NavigationItem[] | undefined,
+      navigationArray: NavigationDto[] | undefined,
       id: number | undefined
-    ): NavigationItem | undefined => {
+    ): NavigationDto | undefined => {
       if (navigationArray) {
         for (const item of navigationArray) {
           if (item.id === id) {
@@ -292,7 +285,7 @@ export const usePayMasterUpdate = () => {
   const handleUpdate = useCallback(async () => {
     try {
       await updateEnrollment({
-        ProfitYearRequest: fiscalCloseProfitYear ?? 0
+        profitYear: fiscalCloseProfitYear ?? 0
       }).unwrap();
       reduxDispatch(
         setMessage({

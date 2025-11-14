@@ -27,6 +27,17 @@ public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBa
 
     public required Dictionary<string, decimal> StateTaxTotals { get; init; }
 
+    /// <summary>
+    /// Records with state taxes but no state code attribution.
+    /// These represent data quality issues in state extraction (PS-2031).
+    /// </summary>
+    public UnattributedTotals? UnattributedTotals { get; init; }
+
+    /// <summary>
+    /// Indicates if any unattributed records were found during this query.
+    /// </summary>
+    public bool HasUnattributedRecords { get; init; }
+
     public static DistributionsAndForfeitureTotalsResponse ResponseExample()
     {
         return new DistributionsAndForfeitureTotalsResponse

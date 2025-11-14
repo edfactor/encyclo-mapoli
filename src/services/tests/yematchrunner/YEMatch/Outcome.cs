@@ -1,4 +1,4 @@
-﻿namespace YEMatch.YEMatch;
+﻿namespace YEMatch;
 
 public enum OutcomeStatus
 {

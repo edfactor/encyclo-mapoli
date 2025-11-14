@@ -10,6 +10,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 
+[Collection("Lookup Tests")]
 public class StateListEndpointTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "StateList - Should return all states")]

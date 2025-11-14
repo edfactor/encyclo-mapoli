@@ -402,10 +402,10 @@ const Documentation: React.FC = () => {
         let processedLine = line;
 
         // Replace `code` with styled text
-        processedLine = processedLine.replace(/`([^`]+)`/g, (match, code) => `[CODE]${code}[/CODE]`);
+        processedLine = processedLine.replace(/`([^`]+)`/g, (_match, code) => `[CODE]${code}[/CODE]`);
 
         // Replace **bold** with styled text
-        processedLine = processedLine.replace(/\*\*([^*]+)\*\*/g, (match, bold) => `[BOLD]${bold}[/BOLD]`);
+        processedLine = processedLine.replace(/\*\*([^*]+)\*\*/g, (_match, bold) => `[BOLD]${bold}[/BOLD]`);
 
         // Split and render with styles
         const parts = processedLine.split(/(\[CODE\][^[\]]+\[\/CODE\]|\[BOLD\][^[\]]+\[\/BOLD\])/);

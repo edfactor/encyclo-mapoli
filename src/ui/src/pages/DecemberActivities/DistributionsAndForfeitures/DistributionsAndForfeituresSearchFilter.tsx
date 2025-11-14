@@ -1,6 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CircularProgress, FormControl, FormHelperText, FormLabel, Grid, MenuItem, TextField } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { format } from "date-fns";
 import { useEffect } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
@@ -13,7 +12,7 @@ import {
   setDistributionsAndForfeituresQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear.ts";
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils.ts";
@@ -148,7 +147,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
             name="startDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="startDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value);
@@ -164,7 +163,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                   return month > endOfNextMonth;
                 }}
                 error={errors.startDate?.message}
-                views={["year", "month", "day"]}
               />
             )}
           />
@@ -175,7 +173,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
             name="endDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="endDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value);
@@ -191,7 +189,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                   return month > endOfNextMonth;
                 }}
                 error={errors.endDate?.message}
-                views={["year", "month", "day"]}
               />
             )}
           />

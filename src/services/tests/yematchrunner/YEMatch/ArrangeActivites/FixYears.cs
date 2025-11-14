@@ -1,6 +1,6 @@
-﻿using YEMatch.YEMatch.AssertActivities;
+﻿using YEMatch.AssertActivities;
 
-namespace YEMatch.YEMatch.ArrangeActivites;
+namespace YEMatch.ArrangeActivites;
 
 // Updates the READY Years to match the computed values by SMART
 // a work around for ensuring the systems calculate the same amount.
@@ -20,7 +20,7 @@ public class FixYears : BaseSqlActivity
             .Where(parts => parts.Length > 3)
             .ToDictionary(parts => parts[1], parts => parts[4]);
 
-        foreach (var (badge, years) in dict)
+        foreach ((string badge, string years) in dict)
         {
             await RdySql($"update payprofit set PY_PS_YEARS = {years} where payprof_badge = {badge}");
         }

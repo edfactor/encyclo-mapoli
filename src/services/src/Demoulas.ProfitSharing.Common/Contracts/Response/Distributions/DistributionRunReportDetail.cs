@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 public sealed record DistributionRunReportDetail
 {
-    public int BadgeNumber { get; set; }    
+    public int BadgeNumber { get; set; }
     public byte DepartmentId { get; set; }
     public required string DepartmentName { get; set; }
     public required string PayClassificationId { get; set; }
@@ -12,7 +12,7 @@ public sealed record DistributionRunReportDetail
     public required string EmployeeName { get; set; }
     public char EmploymentTypeId { get; set; }
     public required string EmploymentTypeName { get; set; }
-    public DateOnly HireDate { get; set; }  
+    public DateOnly HireDate { get; set; }
     public DateOnly? FullTimeDate { get; set; }
     public DateOnly DateOfBirth { get; set; }
     public int Age { get; set; }
@@ -38,26 +38,26 @@ public sealed record DistributionRunReportDetail
 
     public static DistributionRunReportDetail SampleResponse()
     {
-        return new DistributionRunReportDetail() 
-        { 
-            DepartmentId = 1, 
+        return new DistributionRunReportDetail()
+        {
+            DepartmentId = 1,
             BadgeNumber = 701001,
-            DepartmentName = "Grocery", 
-            PayClassificationId = "1", 
-            PayClassificationName = "Manager", 
-            StoreNumber = 123, 
+            DepartmentName = "Grocery",
+            PayClassificationId = "1",
+            PayClassificationName = "Manager",
+            StoreNumber = 123,
             TaxCodeId = 'F',
-            TaxCodeName = "Charitable gift annuity", 
-            EmployeeName = "Doe, John", 
+            TaxCodeName = "Charitable gift annuity",
+            EmployeeName = "Doe, John",
             EmploymentTypeId = 'F',
-            EmploymentTypeName = "Full Time", 
-            HireDate = new DateOnly(2010, 5, 1), 
-            DateOfBirth = new DateOnly(1985, 3, 15), 
-            GrossAmount = 2000.00M, 
-            StateTaxAmount = 100.00M, 
-            FederalTaxAmount = 200.00M, 
-            CheckAmount = 1700.00M, 
-            IsDesceased = false 
+            EmploymentTypeName = "Full Time",
+            HireDate = new DateOnly(2010, 5, 1),
+            DateOfBirth = new DateOnly(1985, 3, 15),
+            GrossAmount = 2000.00M,
+            StateTaxAmount = 100.00M,
+            FederalTaxAmount = 200.00M,
+            CheckAmount = 1700.00M,
+            IsDesceased = false
         };
     }
 }

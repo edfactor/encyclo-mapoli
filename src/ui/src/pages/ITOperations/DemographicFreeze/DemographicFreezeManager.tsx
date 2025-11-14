@@ -2,8 +2,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Button, FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
+import { DSMDatePicker } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useFreezeDemographicsMutation } from "../../../reduxstore/api/ItOperationsApi";
 import { profitYearValidator } from "../../../utils/FormValidators";
@@ -136,7 +136,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 name="profitYear"
                 control={control}
                 render={({ field }) => (
-                  <DsmDatePicker
+                  <DSMDatePicker
                     id="profitYear"
                     onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                     value={field.value ? new Date(field.value, 0) : null}
@@ -159,9 +159,9 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 name="asOfDate"
                 control={control}
                 render={({ field }) => (
-                  <DsmDatePicker
+                  <DSMDatePicker
                     id="asOfDate"
-                    onChange={(date) => field.onChange(date)}
+                    onChange={(date: Date | null) => field.onChange(date)}
                     value={field.value}
                     required={true}
                     label="As of Date"

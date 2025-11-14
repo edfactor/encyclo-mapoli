@@ -1,3 +1,4 @@
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "@/constants";
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
@@ -31,12 +32,15 @@ interface RowData {
 
 /**
  * Generate row key based on activity type
+ * Must match the key used in column definitions (valueGetter)
  */
 function generateRowKey(activityType: ActivityType, data: RowData): string {
   if (activityType === "unforfeit") {
     return data.profitDetailId?.toString() || "";
   }
-  return String(data.psn);
+  // For termination: use composite key (badgeNumber-profitYear)
+  // badgeNumber is always set in grid data (see useTerminationGrid)
+  return `${data.badgeNumber}-${data.profitYear}`;
 }
 
 /**
@@ -62,24 +66,19 @@ function transformForfeitureValue(activityType: ActivityType, value: number): nu
 }
 
 /**
- * Check if transaction is editable based on activity type
+ * Check if we should show controls for this row (regardless of read-only status)
  */
-function isTransactionEditable(
-  activityType: ActivityType,
-  params: SaveButtonCellParams,
-  selectedProfitYear: number,
-  isReadOnly: boolean
-): boolean {
-  if (!params.data.isDetail || isReadOnly) {
+function shouldShowControls(activityType: ActivityType, params: SaveButtonCellParams): boolean {
+  if (!params.data.isDetail) {
     return false;
   }
 
   if (activityType === "termination") {
-    // Termination: if backend gives us a value, then we allow it
-    return params.data.suggestedForfeit != null;
+    // Termination: only show if backend gives us a non-null, non-zero value
+    return params.data.suggestedForfeit != null && params.data.suggestedForfeit !== 0;
   } else {
-    // UnForfeit: all rows with non-null suggestedUnforfeiture are editable
-    return params.data.suggestedUnforfeiture != null;
+    // UnForfeit: only show if backend gives us a non-null, non-zero value
+    return params.data.suggestedUnforfeiture != null && params.data.suggestedUnforfeiture !== 0;
   }
 }
 
@@ -89,9 +88,12 @@ function isTransactionEditable(
  */
 export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
   return (params: SaveButtonCellParams) => {
-    const { activityType, selectedProfitYear, isReadOnly } = config;
+    const { activityType, selectedProfitYear } = config;
+    // Read isReadOnly from context for reactivity when status changes
+    const isReadOnly = params.context?.isReadOnly ?? config.isReadOnly;
 
-    if (!isTransactionEditable(activityType, params, selectedProfitYear, isReadOnly)) {
+    // If psn is too long (beneficiary) or not editable, return empty
+    if (!shouldShowControls(activityType, params) || params?.data?.psn?.length > MAX_EMPLOYEE_BADGE_LENGTH) {
       return "";
     }
 

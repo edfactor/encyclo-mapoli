@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 import { SmartModal } from "smart-ui-library";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 
 interface AddUnforfeitModalProps {
   open: boolean;
@@ -18,39 +19,44 @@ interface ErrorResponse {
   };
 }
 
-const handleResponseError = (error: ErrorResponse) => {
+const getErrorDialogContent = (error: ErrorResponse): { title: string; message: string } => {
   const title = error?.data?.title;
 
   if (typeof title === "string") {
     if (title.includes("Employee with badge number")) {
-      alert("Badge Number not found");
+      return { title: "Badge Number Not Found", message: "The specified badge number could not be found in the system." };
     } else if (title.includes("Invalid badge number")) {
-      alert("Invalid Badge Number");
+      return { title: "Invalid Badge Number", message: "The badge number you entered is not valid." };
     } else if (title.includes("Forfeiture amount cannot be zero")) {
-      alert("Unforfeit amount cannot be zero");
+      return { title: "Invalid Amount", message: "Unforfeit amount cannot be zero. Please enter a non-zero value." };
     } else if (title.includes("Validation Error")) {
-      alert("The submission contains data format errors.");
+      return { title: "Validation Error", message: "The submission contains data format errors. Please check your input and try again." };
     } else {
-      alert("An unexpected error occurred. Please try again.");
+      return { title: "Error", message: "An unexpected error occurred. Please try again." };
     }
-  } else {
-    alert("An unexpected error occurred. Please try again.");
   }
+  return { title: "Error", message: "An unexpected error occurred. Please try again." };
 };
 
 const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, onSave, suggestedForfeitResponse }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    badgeNumber: number;
+    forfeitureAmount: number;
+    suggestedForfeitAmount: number | null;
+    classAction: boolean;
+  }>({
     badgeNumber: 0,
     forfeitureAmount: 0,
     suggestedForfeitAmount: null,
     classAction: false
   });
+  const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
   const [updateForfeiture, { isLoading }] = useUpdateForfeitureAdjustmentMutation();
   const profitYear = useFiscalCloseProfitYear();
 
   useEffect(() => {
     if (!open) {
-      setFormData({ badgeNumber: 0, forfeitureAmount: 0, classAction: false });
+      setFormData({ badgeNumber: 0, forfeitureAmount: 0, suggestedForfeitAmount: null, classAction: false });
       return;
     }
 
@@ -59,7 +65,7 @@ const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, on
         ...prev,
         badgeNumber: suggestedForfeitResponse.badgeNumber,
         suggestedForfeitAmount: suggestedForfeitResponse.suggestedForfeitAmount,
-        forfeitureAmount: Math.abs(suggestedForfeitResponse.suggestedForfeitAmount) // Use absolute value for unforfeit
+        forfeitureAmount: Math.abs(suggestedForfeitResponse.suggestedForfeitAmount ?? 0) // Use absolute value for unforfeit
       }));
     }
   }, [suggestedForfeitResponse, open]);
@@ -102,7 +108,8 @@ const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, on
       const result = await updateForfeiture(request);
 
       if (result.error) {
-        handleResponseError(result.error);
+        const errorContent = getErrorDialogContent(result.error as unknown as ErrorResponse);
+        setErrorDialog(errorContent);
         return;
       }
 
@@ -113,7 +120,8 @@ const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, on
 
       onClose();
     } catch (error) {
-      handleResponseError(error);
+      const errorContent = getErrorDialogContent(error as unknown as ErrorResponse);
+      setErrorDialog(errorContent);
     }
   };
 
@@ -175,6 +183,13 @@ const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, on
           />
         </Grid>
       </Grid>
+
+      <ConfirmationDialog
+        open={!!errorDialog}
+        title={errorDialog?.title || "Error"}
+        description={errorDialog?.message || "An error occurred"}
+        onClose={() => setErrorDialog(null)}
+      />
     </SmartModal>
   );
 };

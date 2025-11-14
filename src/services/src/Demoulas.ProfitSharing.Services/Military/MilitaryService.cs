@@ -22,7 +22,7 @@ public class MilitaryService : IMilitaryService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger<MilitaryService> _logger;
     private readonly ICalendarService _calendarService;
-    
+
     public MilitaryService(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
@@ -192,7 +192,7 @@ public class MilitaryService : IMilitaryService
             if (profitYearsMap.ContainsKey(contributions.ContributionDate.Year))
             {
                 contributions.ContributionDate = profitYearsMap.GetValueOrDefault(contributions.ContributionDate.Year);
-            } 
+            }
             else
             {
                 var dates = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)contributions.ContributionDate.Year, cancellationToken);

@@ -1,9 +1,9 @@
 import { Button, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, TextField, Typography } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryApi";
 import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxstore/types";
+import { DSMDatePicker } from "smart-ui-library";
 import { ServiceErrorResponse } from "../../../types/errors/errors";
 
 interface FormData {
@@ -93,6 +93,12 @@ const MilitaryContributionForm = ({
                 );
               } else if (error.reason.includes("profit year differs from contribution year")) {
                 errorMessages.push("- When profit year differs from contribution year, it must be supplemental.");
+              } else if (error.reason.includes("not active") || error.reason.includes("Employee is not active")) {
+                errorMessages.push(
+                  "- Employee is no longer active as of the contribution date. " +
+                    "Regular contributions require active employee status. " +
+                    "Please check the 'Supplemental' box to add this contribution for an inactive or separated employee."
+                );
               } else {
                 console.warn("Backend error message:", error.reason);
                 errorMessages.push(`- ${error.reason}`);
@@ -128,7 +134,7 @@ const MilitaryContributionForm = ({
             control={control}
             rules={{ required: "Date is required" }}
             render={({ field, fieldState: { error } }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="contributionDate"
                 label="Contribution Year"
                 onChange={(value: Date | null) => field.onChange(value)}

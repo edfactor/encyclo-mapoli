@@ -149,7 +149,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                     enrollmentUpdates.Count);
 
                 // Mark year end as completed.    
-                YearEndUpdateStatus? yeus = ctx.YearEndUpdateStatuses.FirstOrDefault(yeStatus => yeStatus.ProfitYear == profitYear);
+                YearEndUpdateStatus? yeus = await ctx.YearEndUpdateStatuses.FirstOrDefaultAsync(yeStatus => yeStatus.ProfitYear == profitYear);
                 if (yeus != null)
                 {
                     yeus.IsYearEndCompleted = true;

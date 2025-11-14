@@ -1,5 +1,5 @@
+import { Box, Typography } from "@mui/material";
 import React from "react";
-import { Typography, Box } from "@mui/material";
 import { Under21TotalsResponse } from "reduxstore/types";
 import { TotalsGrid } from "smart-ui-library";
 
@@ -12,7 +12,7 @@ interface Under21SummaryProps {
 const Under21Summary: React.FC<Under21SummaryProps> = ({
   totals,
   isLoading,
-  title = "UNDER 21 REPORT (QPAY066-UNDR21)"
+  title = "UNDER 21 REPORT (QPAY066TA-UNDR21)"
 }) => {
   if (!totals && !isLoading) return null;
 

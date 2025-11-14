@@ -10,19 +10,7 @@ import {
 
 export const GetMemberResultsGridColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ minWidth: 120 }),
-    {
-      headerName: "PSN Suffix",
-      field: "psnSuffix",
-      colId: "psnSuffix",
-      flex: 1,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.psnSuffix}`;
-      }
-    },
+    createBadgeColumn({ headerName: "Badge/Psn", minWidth: 120, psnSuffix: true }),
     createNameColumn({
       field: "name"
     }),

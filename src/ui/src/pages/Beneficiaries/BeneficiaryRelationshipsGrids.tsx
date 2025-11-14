@@ -1,28 +1,35 @@
-import { Delete, Edit } from "@mui/icons-material";
-import { Button, TextField, Typography } from "@mui/material";
-import { FocusEvent, JSX, useCallback, useMemo, useState } from "react";
+import { TextField, Typography } from "@mui/material";
+import { FocusEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
+import { setDistributionHome } from "reduxstore/slices/distributionSlice";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS, ROUTES } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
 import { GetBeneficiariesListGridColumns } from "./BeneficiariesListGridColumns";
+import { BeneficiaryActionHandlers } from "./BeneficiaryActions";
 import { GetBeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
 import DeleteBeneficiaryDialog from "./DeleteBeneficiaryDialog";
-import { useBeneficiaryRelationshipData } from "./hooks/useBeneficiaryRelationshipData";
 import { useBeneficiaryPercentageUpdate } from "./hooks/useBeneficiaryPercentageUpdate";
+import { useBeneficiaryRelationshipData } from "./hooks/useBeneficiaryRelationshipData";
 
 interface BeneficiaryRelationshipsProps {
   selectedMember: BeneficiaryDetail | null;
   count: number;
   onEditBeneficiary: (selectedMember: BeneficiaryDto | undefined) => void;
+  onBeneficiariesChange?: (beneficiaries: BeneficiaryDto[]) => void;
 }
 
 const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = ({
   selectedMember,
   count,
-  onEditBeneficiary
+  onEditBeneficiary,
+  onBeneficiariesChange
 }) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
   const [deleteBeneficiaryId, setDeleteBeneficiaryId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
@@ -47,6 +54,13 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     relationships.refresh();
   });
 
+  // Notify parent component when beneficiaries change
+  useEffect(() => {
+    if (onBeneficiariesChange && relationships.beneficiaryList?.results) {
+      onBeneficiariesChange(relationships.beneficiaryList.results);
+    }
+  }, [relationships.beneficiaryList?.results, onBeneficiariesChange]);
+
   const sortEventHandler = (update: SortParams) => {
     if (update.sortBy === "") {
       update.sortBy = "psnSuffix";
@@ -54,10 +68,11 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     }
     handleSortChange(update);
   };
-  const deleteBeneficiary = (id: number) => {
+
+  const deleteBeneficiary = useCallback((id: number) => {
     setDeleteBeneficiaryId(id);
     setOpenDeleteConfirmationDialog(true);
-  };
+  }, []);
 
   const handleDeleteConfirmationDialog = (del: boolean) => {
     if (del) {
@@ -85,26 +100,34 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     }
   };
 
-  const actionButtons = (data: BeneficiaryDto): JSX.Element => {
-    return (
-      <>
-        <Button
-          onClick={() => {
-            onEditBeneficiary(data);
-          }}
-          size="small"
-          color="primary">
-          <Edit fontSize="small" />
-        </Button>
-        <Button
-          onClick={() => deleteBeneficiary(data.id)}
-          size="small"
-          color="error">
-          <Delete fontSize="small" />
-        </Button>
-      </>
-    );
-  };
+  // Handler functions for Action column
+  const handleNewBeneficiaryDistribution = useCallback(
+    (beneficiary: BeneficiaryDto) => {
+      const psnNumber = String(beneficiary.badgeNumber) + String(beneficiary.psnSuffix);
+      const memberType = 2; // Hardcoded memberType for beneficiaries
+
+      // Set distribution home to beneficiary inquiry page
+      dispatch(setDistributionHome(ROUTES.BENEFICIARY_INQUIRY));
+
+      // Navigate to add distribution page
+      navigate(`/${ROUTES.ADD_DISTRIBUTION}/${psnNumber}/${memberType}`);
+    },
+    [dispatch, navigate]
+  );
+
+  const handleEditBeneficiary = useCallback(
+    (beneficiary: BeneficiaryDto) => {
+      onEditBeneficiary(beneficiary);
+    },
+    [onEditBeneficiary]
+  );
+
+  const handleDeleteBeneficiary = useCallback(
+    (beneficiary: BeneficiaryDto) => {
+      deleteBeneficiary(beneficiary.id);
+    },
+    [deleteBeneficiary]
+  );
 
   const validatePercentageOfBeneficiaries = useCallback(
     async (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>, id: number) => {
@@ -124,24 +147,35 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     [relationships.beneficiaryList, percentageUpdate]
   );
 
-  const percentageFieldRenderer = (percentage: number, id: number) => {
-    return (
-      <>
-        <TextField
-          type="number"
-          defaultValue={percentage}
-          onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}></TextField>
-      </>
-    );
-  };
+  const percentageFieldRenderer = useCallback(
+    (percentage: number, id: number) => {
+      return (
+        <>
+          <TextField
+            type="number"
+            defaultValue={percentage}
+            onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}></TextField>
+        </>
+      );
+    },
+    [validatePercentageOfBeneficiaries]
+  );
 
   const beneficiaryOfColumnDefs = useMemo(() => GetBeneficiaryOfGridColumns(), []);
 
+  const actionHandlers: BeneficiaryActionHandlers = useMemo(
+    () => ({
+      onNewDistribution: handleNewBeneficiaryDistribution,
+      onEdit: handleEditBeneficiary,
+      onDelete: handleDeleteBeneficiary
+    }),
+    [handleNewBeneficiaryDistribution, handleEditBeneficiary, handleDeleteBeneficiary]
+  );
+
   const columnDefs = useMemo(() => {
-    const columns = GetBeneficiariesListGridColumns(percentageFieldRenderer);
+    const columns = GetBeneficiariesListGridColumns(percentageFieldRenderer, actionHandlers);
     return [...columns];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionButtons]);
+  }, [percentageFieldRenderer, actionHandlers]);
 
   return (
     <>

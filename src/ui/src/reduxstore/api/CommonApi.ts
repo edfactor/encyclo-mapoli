@@ -13,12 +13,15 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const CommonApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "commonApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getAppVersion: builder.query<AppVersionInfo, void>({
       query: () => ({
         url: "/common/app-version-info"
       }),
-      async onQueryStarted(val: void, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_val: void, { dispatch, queryFulfilled }) {
         const { data } = await queryFulfilled;
         dispatch(setVersionInfo(data));
       }

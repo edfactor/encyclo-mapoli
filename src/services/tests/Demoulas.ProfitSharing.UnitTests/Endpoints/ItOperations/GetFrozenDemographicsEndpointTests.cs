@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
+
+[Collection("IT Operations Tests")]
 public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
 {
     [Fact]

@@ -20,6 +20,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Services;
 /// and data aggregation scenarios to ensure 80%+ code coverage.
 /// PS-868: PayService comprehensive service layer tests
 /// </summary>
+[Collection("SharedGlobalState")]
 [Description("PS-868 : PayService unit tests")]
 public sealed class PayServiceTests : ApiTestBase<Api.Program>
 {
@@ -49,14 +50,14 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
+
         // Should be successful or have valid error (not forbidden/unauthorized)
         var isValidResponse = response.Response.StatusCode == HttpStatusCode.OK ||
                              response.Response.StatusCode == HttpStatusCode.NotFound ||
                              response.Response.StatusCode == HttpStatusCode.BadRequest;
-        
+
         isValidResponse.ShouldBeTrue($"Expected valid response but got {response.Response.StatusCode}");
-        
+
         if (response.Response.StatusCode == HttpStatusCode.OK && response.Result is not null)
         {
             response.Result.ProfitYear.ShouldBe(ValidProfitYear);
@@ -88,7 +89,7 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
+
         if (response.Response.StatusCode == HttpStatusCode.OK && response.Result is not null)
         {
             response.Result.PayServicesForYear.ShouldNotBeNull();
@@ -128,7 +129,7 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
         response.ShouldNotBeNull();
         response.Response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden);
         response.Response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized);
-        
+
         if (response.Response.StatusCode == HttpStatusCode.OK && response.Result is not null)
         {
             response.Result.ProfitYear.ShouldBe(profitYear);
@@ -161,13 +162,13 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
+
         var isValidResponse = response.Response.StatusCode == HttpStatusCode.OK ||
                              response.Response.StatusCode == HttpStatusCode.NotFound ||
                              response.Response.StatusCode == HttpStatusCode.BadRequest;
-        
+
         isValidResponse.ShouldBeTrue($"Expected valid response but got {response.Response.StatusCode}");
-        
+
         if (response.Response.StatusCode == HttpStatusCode.OK && response.Result is not null)
         {
             response.Result.ProfitYear.ShouldBe(ValidProfitYear);
@@ -200,11 +201,11 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
+
         var isValidResponse = response.Response.StatusCode == HttpStatusCode.OK ||
                              response.Response.StatusCode == HttpStatusCode.NotFound ||
                              response.Response.StatusCode == HttpStatusCode.BadRequest;
-        
+
         isValidResponse.ShouldBeTrue($"Expected valid response but got {response.Response.StatusCode}");
     }
 
@@ -234,11 +235,11 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
+
         var isValidResponse = response.Response.StatusCode == HttpStatusCode.OK ||
                              response.Response.StatusCode == HttpStatusCode.NotFound ||
                              response.Response.StatusCode == HttpStatusCode.BadRequest;
-        
+
         isValidResponse.ShouldBeTrue($"Expected valid response but got {response.Response.StatusCode}");
     }
 
@@ -511,14 +512,14 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
+
         if (response.Response.StatusCode == HttpStatusCode.OK && response.Result is not null)
         {
             response.Result.ProfitYear.ShouldBe(ValidProfitYear);
             response.Result.PayServicesForYear.ShouldNotBeNull();
             response.Result.Description.ShouldNotBeNullOrEmpty();
             response.Result.TotalEmployeeNumber.ShouldBeGreaterThanOrEqualTo(0);
-            
+
             // If there are results, validate DTO structure
             if (response.Result.PayServicesForYear.Results?.Any() == true)
             {
@@ -554,10 +555,10 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
-        if (response.Response.StatusCode == HttpStatusCode.OK && 
-            response.Result is not null && 
-            response.Result.PayServicesForYear?.Results is not null && 
+
+        if (response.Response.StatusCode == HttpStatusCode.OK &&
+            response.Result is not null &&
+            response.Result.PayServicesForYear?.Results is not null &&
             response.Result.PayServicesForYear.Results.Any())
         {
             foreach (var dto in response.Result.PayServicesForYear.Results)
@@ -601,10 +602,10 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
-        if (response.Response.StatusCode == HttpStatusCode.OK && 
-            response.Result is not null && 
-            response.Result.PayServicesForYear?.Results is not null && 
+
+        if (response.Response.StatusCode == HttpStatusCode.OK &&
+            response.Result is not null &&
+            response.Result.PayServicesForYear?.Results is not null &&
             response.Result.PayServicesForYear.Results.Any())
         {
             var sumOfEmployees = response.Result.PayServicesForYear.Results.Sum(r => r.Employees);
@@ -643,7 +644,7 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
+
         if (response.Response.StatusCode == HttpStatusCode.OK && response.Result is not null)
         {
             response.Result.PayServicesForYear.ShouldNotBeNull();
@@ -690,7 +691,7 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
         // Assert
         firstPageResponse.ShouldNotBeNull();
         secondPageResponse.ShouldNotBeNull();
-        
+
         if (firstPageResponse.Response.StatusCode == HttpStatusCode.OK &&
             secondPageResponse.Response.StatusCode == HttpStatusCode.OK &&
             firstPageResponse.Result is not null &&
@@ -704,7 +705,7 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
                 .Select(r => r.YearsOfService).ToList();
             var secondPageYears = secondPageResponse.Result.PayServicesForYear.Results
                 .Select(r => r.YearsOfService).ToList();
-            
+
             // Pages should not have overlapping years (assuming ordered results)
             firstPageYears.ShouldNotBe(secondPageYears);
         }
@@ -720,7 +721,7 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        
+
         var request1 = new PayServicesRequest { ProfitYear = 2022, Skip = 0, Take = 25 };
         var request2 = new PayServicesRequest { ProfitYear = 2023, Skip = 0, Take = 25 };
         var request3 = new PayServicesRequest { ProfitYear = 2024, Skip = 0, Take = 25 };
@@ -809,14 +810,14 @@ public sealed class PayServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
+
         // Should be either OK with empty results or BadRequest (future year validation)
         var isValidResponse = response.Response.StatusCode == HttpStatusCode.OK ||
                              response.Response.StatusCode == HttpStatusCode.NotFound ||
                              response.Response.StatusCode == HttpStatusCode.BadRequest;
-        
+
         isValidResponse.ShouldBeTrue($"Expected valid response but got {response.Response.StatusCode}");
-        
+
         if (response.Response.StatusCode == HttpStatusCode.OK && response.Result is not null)
         {
             response.Result.PayServicesForYear.ShouldNotBeNull();

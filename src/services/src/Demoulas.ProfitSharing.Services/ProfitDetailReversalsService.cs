@@ -162,7 +162,8 @@ public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
                             ? $"UN-REV {currentDate:MM/yy}  "
                             : $"REV    {currentDate:MM/yy}  ") + state).Trim(),
 
-                        ZeroContributionReasonId = null
+                        ZeroContributionReasonId = null,
+                        CommentRelatedState = pd.CommentRelatedState
                     };
 
                     ctx.ProfitDetails.Add(reverseProfitDetail);

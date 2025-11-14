@@ -1,14 +1,14 @@
 import { Grid } from "@mui/material";
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
-import { useUnForfeitGrid } from "../../../hooks/useUnForfeitGrid";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { UnForfeitGridColumns } from "./UnForfeitGridColumns";
 import { GetProfitDetailColumns } from "./UnForfeitProfitDetailGridColumns";
+import { useUnForfeitGrid } from "./useUnForfeitGrid";
 
 interface UnForfeitGridSearchProps {
   initialSearchLoaded: boolean;
@@ -20,6 +20,8 @@ interface UnForfeitGridSearchProps {
   onArchiveHandled?: () => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   fiscalCalendarYear: CalendarResponseDto | null;
+  onShowUnsavedChangesDialog?: () => void;
+  onShowErrorDialog?: (title: string, message: string) => void;
 }
 
 const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
@@ -31,7 +33,9 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
   shouldArchive,
   onArchiveHandled,
   setHasUnsavedChanges,
-  fiscalCalendarYear
+  fiscalCalendarYear,
+  onShowUnsavedChangesDialog,
+  onShowErrorDialog
 }) => {
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
@@ -66,8 +70,21 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     shouldArchive,
     onArchiveHandled,
     setHasUnsavedChanges,
-    fiscalCalendarYear
+    fiscalCalendarYear,
+    isReadOnly,
+    onShowUnsavedChangesDialog,
+    onShowErrorDialog
   });
+
+  // Refresh grid cells when read-only status changes
+  // This forces cell renderers to re-read isReadOnly from context
+  useEffect(() => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.refreshCells({ force: true });
+    }
+    // gridRef is a ref and doesn't need to be in the dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReadOnly]);
 
   // Get the main and detail columns
   const mainColumns = useMemo(() => UnForfeitGridColumns(), []);
@@ -193,7 +210,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
-              getRowClass: (params: { data: { isDetail: boolean } }) => (params.data.isDetail ? "detail-row" : ""),
+              getRowClass: (params) => ((params.data as { isDetail?: boolean })?.isDetail ? "detail-row" : ""),
               rowSelection: {
                 mode: "multiRow",
                 checkboxes: false,

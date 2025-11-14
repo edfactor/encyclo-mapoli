@@ -4,7 +4,7 @@
  * Helper functions for working with navigation data in the drawer.
  */
 
-import { NavigationDto } from "../../reduxstore/types";
+import { NavigationDto } from "../../../types";
 
 /**
  * Find a navigation item by ID in a recursive tree structure

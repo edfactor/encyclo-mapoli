@@ -7,7 +7,7 @@ import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetAssociatesColumns } from "./AssociatesGridColumns";
 
 interface AssociatesGridProps {

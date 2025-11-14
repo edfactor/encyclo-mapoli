@@ -77,7 +77,7 @@ DECLARE
     -- ADHOC_BENEFICIARIES_REPORT CONSTANT NUMBER := 135; -- REMOVED (was under FISCAL_CLOSE)
     -- TERMINATED_LETTERS CONSTANT NUMBER := 136; -- REMOVED (was under FISCAL_CLOSE)
     -- QPAY600 CONSTANT NUMBER := 137; -- REMOVED (was under FISCAL_CLOSE)
-    -- PAY426N_LIVE CONSTANT NUMBER := 138; -- REMOVED (was under FISCAL_CLOSE)
+    PAY426N_DECEMBER CONSTANT NUMBER := 138;
     -- PROFIT_SUMMARY CONSTANT NUMBER := 139; -- REMOVED (was under FISCAL_CLOSE)
     -- PAY426_2 CONSTANT NUMBER := 140; -- REMOVED (was under FISCAL_CLOSE)
     -- PAY426_3 CONSTANT NUMBER := 141; -- REMOVED (was under FISCAL_CLOSE)
@@ -234,7 +234,8 @@ BEGIN
     insert_navigation_item(FORFEITURES, DECEMBER_ACTIVITIES, 'Forfeitures', '008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_AND_FORFEITURES, DECEMBER_ACTIVITIES, 'Distributions and Forfeitures', 'QPAY129', 'distributions-and-forfeitures', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, DECEMBER_ACTIVITIES, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Share Report', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Share Report', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY426N_DECEMBER, DECEMBER_ACTIVITIES, 'Profit Sharing Report', 'PAY426N', 'pay426n', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
 
 -- Adhoc Reports Group
     insert_navigation_item(ADHOC_GROUP, INQUIRIES_MENU, 'Adhoc Reports', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
@@ -327,6 +328,8 @@ BEGIN
     assign_navigation_role(DISTRIBUTIONS_AND_FORFEITURES, FINANCE_MANAGER);
     assign_navigation_role(PROFIT_SHARE_REPORT, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_SHARE_REPORT, FINANCE_MANAGER);
+    assign_navigation_role(PAY426N_DECEMBER, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PAY426N_DECEMBER, FINANCE_MANAGER);
 
 -- FISCAL_CLOSE role assignments - REMOVED
     -- assign_navigation_role(PROFIT_SHARE_REPORT_FINAL_RUN, SYSTEM_ADMINISTRATOR);
@@ -461,6 +464,7 @@ BEGIN
     assign_navigation_role(FORFEITURES, IT_DEVOPS);
     assign_navigation_role(DISTRIBUTIONS_AND_FORFEITURES, IT_DEVOPS);
     assign_navigation_role(PROFIT_SHARE_REPORT, IT_DEVOPS);
+    assign_navigation_role(PAY426N_DECEMBER, IT_DEVOPS);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, IT_DEVOPS);
 
     -- Adhoc Reports IT_DEVOPS role assignments

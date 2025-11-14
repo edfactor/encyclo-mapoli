@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+using System.Diagnostics;
+using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
@@ -155,6 +156,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             .Returns(mockDatabaseFacade.Object);
 
 
+        var dataGenTimer = Stopwatch.StartNew();
         List<Country>? countries = new CountryFaker().Generate(10);
         Mock<DbSet<Country>> mockCountry = countries.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
@@ -263,7 +265,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Constants.ProfitShareTotals = (new List<ProfitShareTotal>() { profitShareTotal }).BuildMockDbSet();
 
 
-
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
         List<NavigationTracking>? navigationTrackings = new NavigationTrackingFaker().Generate(1);
 
@@ -275,11 +276,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
-
-        List<Beneficiary>? beneficiaryList = new BeneficiaryListFaker().GetDummyBeneficiary();
-        Mock<DbSet<Beneficiary>> mockBeneficiaryList = beneficiaryList.BuildMockDbSet();
-        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaryList.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaryList.Object);
 
         Mock<DbSet<PayProfit>> mockProfits = BuildMockDbSetWithBackingList(profits);
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
@@ -445,7 +441,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<DistributionStatus>()).Returns(mockDistributionStatuses.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<CommentType>()).Returns(mockCommentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<TaxCode>()).Returns(mockTaxCodesList.Object);
-
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()

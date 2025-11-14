@@ -19,7 +19,10 @@ describe("MasterInquiryMemberGrid - Badge Link Styling", { timeout: 40000 }, () 
   const mockPagination = {
     pageNumber: 1,
     pageSize: 25,
-    sortParams: null
+    sortParams: {
+      sortBy: "badgeNumber",
+      isSortDescending: false
+    }
   };
 
   const mockOnMemberSelect = vi.fn();

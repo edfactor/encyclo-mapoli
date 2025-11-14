@@ -266,7 +266,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             onCellValueChanged: processEditedRow,
             getRowStyle: (params) => {
               // Rows with unsaved changes will have yellow color
-              if (!isModal && isRowStagedToSave(params.node.data.badgeNumber)) {
+              if (!isModal && params.node.data && isRowStagedToSave((params.node.data as ExecutiveHoursAndDollars).badgeNumber)) {
                 return { background: "lemonchiffon" };
               } else {
                 return { background: "white" };
@@ -279,20 +279,14 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
         <Pagination
           pageNumber={currentPagination.pageNumber}
           setPageNumber={(value: number) =>
-            currentPagination.handlePaginationChange(
-              value - 1,
-              currentPagination.pageSize,
-              currentPagination.sortParams
-            )
+            currentPagination.handlePaginationChange(value - 1, currentPagination.pageSize)
           }
           pageSize={currentPagination.pageSize}
-          setPageSize={(value: number) =>
-            currentPagination.handlePaginationChange(0, value, currentPagination.sortParams)
-          }
+          setPageSize={(value: number) => currentPagination.handlePaginationChange(0, value)}
           recordCount={currentData?.response.total ?? 0}
         />
       )}
-      {!isModal && (
+      {!isModal && modalGridPagination && (
         <SmartModal
           open={isModalOpen}
           onClose={closeModal}>

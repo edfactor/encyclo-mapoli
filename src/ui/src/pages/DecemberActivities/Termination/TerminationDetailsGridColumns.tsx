@@ -1,7 +1,8 @@
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "@/constants";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { numberToCurrency } from "smart-ui-library";
-import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
 import { createSaveButtonCellRenderer } from "../../../components/ForfeitActivities";
+import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
 import { ForfeitureAdjustmentUpdateRequest } from "../../../types";
 import {
   createAgeColumn,
@@ -98,16 +99,24 @@ export const GetDetailColumns = (
       resizable: true,
       sortable: false,
       cellClass: (params) => {
-        if (!params.data.isDetail || params.data.suggestedForfeit === null) return "";
-        const rowKey = String(params.data.psn);
+        if (params.data.suggestedForfeit === null) return "";
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         return hasError ? "bg-blue-50" : "";
       },
-      editable: ({ node }) => node.data.isDetail && node.data.suggestedForfeit !== null,
+      editable: ({ node }) => node.data.suggestedForfeit !== null,
       flex: 1,
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) => {
-        if (params.data.suggestedForfeit === null) {
+        // If the psn is longer than 7 chars, it is a beneficiary and should not have a suggested forfeit
+        if (params.data.suggestedForfeit === null || params.data.psn.length > MAX_EMPLOYEE_BADGE_LENGTH) {
+          return null;
+        }
+        // If value is 0, show blank
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const editedValue = params.context?.editedValues?.[rowKey]?.value;
+        const currentValue = editedValue ?? params.data.suggestedForfeit;
+        if (currentValue === 0) {
           return null;
         }
         return SuggestedForfeitCellRenderer(
@@ -119,10 +128,9 @@ export const GetDetailColumns = (
           false
         );
       },
-      valueFormatter: (params) => (params.value !== null ? numberToCurrency(params.value) : null),
+      valueFormatter: (params) => (params.value !== null && params.value !== 0 ? numberToCurrency(params.value) : ""),
       valueGetter: (params) => {
-        if (!params.data.isDetail) return null;
-        const rowKey = String(params.data.psn);
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const editedValue = params.context?.editedValues?.[rowKey]?.value;
         return editedValue ?? params.data.suggestedForfeit;
       }
@@ -131,7 +139,8 @@ export const GetDetailColumns = (
       headerName: "Save Button",
       field: "saveButton",
       colId: "saveButton",
-      minWidth: 100,
+      minWidth: 130,
+      width: 130,
       pinned: "right",
       lockPinned: true,
       resizable: false,
@@ -139,8 +148,7 @@ export const GetDetailColumns = (
       cellStyle: { backgroundColor: "#E8E8E8" },
       headerComponent: HeaderComponent,
       valueGetter: (params) => {
-        if (!params.data.isDetail) return "";
-        const rowKey = String(params.data.psn);
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const editedValue = params.context?.editedValues?.[rowKey]?.value;
         const currentValue = editedValue ?? params.data.suggestedForfeit ?? 0;
         return `${currentValue}-${params.context?.loadingRowIds?.has(params.data.psn)}-${params.node?.isSelected()}`;

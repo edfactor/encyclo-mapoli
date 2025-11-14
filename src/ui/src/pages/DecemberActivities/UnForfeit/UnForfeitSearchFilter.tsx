@@ -1,11 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
-import { useEffect } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useLazyGetUnForfeitsQuery } from "../../../reduxstore/api/YearsEndApi";
 import {
@@ -61,12 +61,13 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetUnForfeitsQuery();
   const { unForfeitsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
 
   const selectedProfitYear = useDecemberFlowProfitYear();
 
   const validateAndSubmit = (data: StartAndEndDateRequest) => {
     if (hasUnsavedChanges) {
-      alert("Please save your changes.");
+      setShowUnsavedChangesDialog(true);
       return;
     }
 
@@ -95,7 +96,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
     trigger,
     clearErrors
   } = useForm<StartAndEndDateRequest>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<StartAndEndDateRequest>,
     defaultValues: {
       beginningDate:
         unForfeitsQueryParams?.beginningDate ||
@@ -119,7 +120,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
   }, [fiscalData.fiscalBeginDate, fiscalData.fiscalEndDate, trigger]);
 
   // Effect to fetch fiscal data when profit year changes
-  const validateAndSearch = handleSubmit(validateAndSubmit);
+  const validateAndSearch = handleSubmit(validateAndSubmit as (data: StartAndEndDateRequest) => void);
 
   const handleReset = () => {
     setHasUnsavedChanges(false);
@@ -151,7 +152,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
             control={control}
             render={({ field }) => (
               <>
-                <DsmDatePicker
+                <DSMDatePicker
                   id="beginningDate"
                   onChange={(value: Date | null) => {
                     field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -189,7 +190,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
 
               return (
                 <>
-                  <DsmDatePicker
+                  <DSMDatePicker
                     id="endingDate"
                     onChange={(value: Date | null) => {
                       field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -240,6 +241,13 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
           disabled={!isValid || isFetching}
         />
       </Grid>
+
+      <ConfirmationDialog
+        open={showUnsavedChangesDialog}
+        title="Unsaved Changes"
+        description="Please save your changes before performing a new search."
+        onClose={() => setShowUnsavedChangesDialog(false)}
+      />
     </form>
   );
 };

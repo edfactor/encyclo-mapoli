@@ -20,6 +20,9 @@ export const ItOperationsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "itOperationsApi",
   tagTypes: ["FrozenState"],
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({
@@ -27,7 +30,7 @@ export const ItOperationsApi = createApi({
         method: "GET"
       }),
       providesTags: ["FrozenState"],
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setFrozenStateResponse(data));
@@ -49,7 +52,7 @@ export const ItOperationsApi = createApi({
         }
       }),
       providesTags: ["FrozenState"],
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setFrozenStateCollectionResponse(data));
@@ -70,7 +73,7 @@ export const ItOperationsApi = createApi({
           isSortDescending: params.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitYearSelectorData(data));

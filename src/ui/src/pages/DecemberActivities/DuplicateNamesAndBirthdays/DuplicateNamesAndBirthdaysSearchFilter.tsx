@@ -10,9 +10,8 @@ import {
   setDuplicateNamesAndBirthdaysQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { profitYearValidator } from "../../../utils/FormValidators";
 
 interface DuplicateNamesAndBirthdaysSearch {
@@ -87,7 +86,7 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="profitYear"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                 value={field.value ? new Date(field.value, 0) : null}

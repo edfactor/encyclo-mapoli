@@ -36,12 +36,12 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
     }
 
 
-    public async Task<ForfeituresAndPointsForYearResponseWithTotals> GetForfeituresAndPointsForYearAsync(FrozenProfitYearRequest request,
+    public Task<ForfeituresAndPointsForYearResponseWithTotals> GetForfeituresAndPointsForYearAsync(FrozenProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            short currentYear = request.ProfitYear;
+            short currentYear = req.ProfitYear;
             short lastYear = (short)(currentYear - 1);
 
             // Validate no duplicate SSNs exist
@@ -54,19 +54,19 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             // Execute queries sequentially (DbContext is not thread-safe)
             // Query 1: Last year total balance - aggregate in database
             decimal? lastYearTotal = await _totalService.TotalVestingBalance(ctx, lastYear, DateOnly.MaxValue)
-                
+
                 .TagWith($"ForfeituresReport-LastYearTotal-{lastYear}")
                 .SumAsync(ptvb => ptvb.CurrentBalance, cancellationToken);
 
             // Query 2: Current year transactions (reused for totals and member details)
             var transactionsInCurrentYear = await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear)
-                
+
                 .TagWith($"ForfeituresReport-Transactions-{currentYear}")
                 .ToListAsync(cancellationToken);
 
             // Query 3: Current year balances with projection (only load needed fields)
             var currentBalances = await _totalService.TotalVestingBalance(ctx, currentYear, DateOnly.MaxValue)
-                
+
                 .TagWith($"ForfeituresReport-CurrentBalances-{currentYear}")
                 .Select(b => new { b.Ssn, b.Id, b.CurrentBalance })
                 .ToListAsync(cancellationToken);
@@ -81,12 +81,12 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
                 {
                     // Demographic fields
                     DemographicId = demo.Id,
-                    Ssn = demo.Ssn,
-                    BadgeNumber = demo.BadgeNumber,
-                    FullName = demo.ContactInfo.FullName,
-                    PayFrequencyId = demo.PayFrequencyId,
+                    demo.Ssn,
+                    demo.BadgeNumber,
+                    demo.ContactInfo.FullName,
+                    demo.PayFrequencyId,
                     // PayProfit fields
-                    PointsEarned = pp.PointsEarned
+                    pp.PointsEarned
                 })
                 .TagWith($"ForfeituresReport-EmployeeData-{currentYear}")
                 .ToListAsync(cancellationToken);
@@ -100,8 +100,8 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
                     ContactSsn = b.Contact!.Ssn,
                     ContactId = b.Contact!.Id,
                     ContactFullName = b.Contact.ContactInfo.FullName,
-                    BadgeNumber = b.BadgeNumber,
-                    PsnSuffix = b.PsnSuffix
+                    b.BadgeNumber,
+                    b.PsnSuffix
                 })
                 .ToListAsync(cancellationToken);
 
@@ -143,24 +143,21 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             }
 
             // Add beneficiaries (excluding employees)
-            foreach (var bene in beneficiaries)
+            foreach (var bene in beneficiaries.Where(b => !employeeSsns.Contains(b.ContactSsn)))
             {
-                if (!employeeSsns.Contains(bene.ContactSsn))
+                var balance = balancesByKey.GetValueOrDefault((bene.ContactSsn, bene.ContactId));
+
+                var member = ToBeneficiaryMemberDetails(
+                    bene.ContactFullName!,
+                    bene.ContactSsn,
+                    bene.BadgeNumber,
+                    bene.PsnSuffix,
+                    balance?.CurrentBalance);
+
+                // Filter immediately
+                if (member.EarningPoints != 0)
                 {
-                    var balance = balancesByKey.GetValueOrDefault((bene.ContactSsn, bene.ContactId));
-
-                    var member = ToBeneficiaryMemberDetails(
-                        bene.ContactFullName!,
-                        bene.ContactSsn,
-                        bene.BadgeNumber,
-                        bene.PsnSuffix,
-                        balance?.CurrentBalance);
-
-                    // Filter immediately
-                    if (member.EarningPoints != 0)
-                    {
-                        members.Add(member);
-                    }
+                    members.Add(member);
                 }
             }
 
@@ -175,7 +172,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
 
             // Apply pagination
             PaginatedResponseDto<ForfeituresAndPointsForYearResponse> paginatedData =
-                await members.AsQueryable().ToPaginationResultsAsync(request, cancellationToken);
+                await members.AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
 
             return new ForfeituresAndPointsForYearResponseWithTotals
             {
@@ -221,41 +218,6 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
         };
     }
 
-    private static ForfeituresAndPointsForYearResponse ToMemberDetails(Demographic d, ParticipantTotalVestingBalance? ptvb, PayProfit pp,
-        ProfitDetailRollup? singleYearNumbers
-    )
-    {
-        decimal balanceConsideredForEarnings = (ptvb?.CurrentBalance ?? 0) - (singleYearNumbers?.MilitaryTotal ?? 0) - (singleYearNumbers?.ClassActionFundTotal ?? 0);
-        int earningsPoints = (int)Math.Round(balanceConsideredForEarnings / 100, MidpointRounding.AwayFromZero);
-        decimal forfeitures = singleYearNumbers == null ? 0.00m : -1 * singleYearNumbers.TotalForfeitures;
-
-        return new ForfeituresAndPointsForYearResponse
-        {
-            EmployeeName = d.ContactInfo.FullName!,
-            BadgeNumber = d.BadgeNumber,
-            Ssn = d.Ssn.MaskSsn(),
-            Forfeitures = forfeitures,
-            ContForfeitPoints = (short)(pp.PointsEarned ?? 0), // Yea, PointsEarned is not EarningPoints
-            EarningPoints = earningsPoints,
-            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
-        };
-    }
-
-    private static ForfeituresAndPointsForYearResponse ToMemberDetails(Beneficiary b, ParticipantTotalVestingBalance? ptvb)
-    {
-        short earningsPoints = ptvb != null ? (short)Math.Round((ptvb.CurrentBalance ?? 0) / 100, MidpointRounding.AwayFromZero) : (short)0;
-        return new ForfeituresAndPointsForYearResponse
-        {
-            EmployeeName = b.Contact!.ContactInfo.FullName!,
-            BadgeNumber = 0,
-            Ssn = b.Contact!.Ssn.MaskSsn(),
-            Forfeitures = 0.00m,
-            ContForfeitPoints = 0,
-            EarningPoints = earningsPoints,
-            BeneficiaryPsn = "0" + b.Psn,
-            IsExecutive = false,
-        };
-    }
 
     // Optimized helper for beneficiaries when using projection
     private static ForfeituresAndPointsForYearResponse ToBeneficiaryMemberDetails(string fullName, int ssn, int badgeNumber, short psnSuffix, decimal? currentBalance)

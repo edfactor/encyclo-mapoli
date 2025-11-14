@@ -22,9 +22,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
         short profitSharingYear = 2025;
-        DateOnly startDate = new(2025, 01, 4);
+        DateOnly startDate = new(2018, 12, 31);
         DateOnly endDate = new(2025, 12, 27);
-        DateOnly effectiveDateOfTestData = new(2025, 10, 24);
+        DateOnly effectiveDateOfTestData = new(2025, 11, 11);
 
         ILoggerFactory _loggerFactory = LoggerFactory.Create(builder =>
         {
@@ -34,10 +34,10 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         });
 
         TerminatedEmployeeService mockService =
-            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory.CreateLogger<TerminatedEmployeeReportService>(), CalendarService, YearEndService);
+            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory, CalendarService, YearEndService);
 
         TerminatedEmployeeAndBeneficiaryResponse data = await mockService.GetReportAsync(
-            new StartAndEndDateRequest { SortBy = "Name", BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue },
+            new FilterableStartAndEndDateRequest { SortBy = "Name", BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue },
             CancellationToken.None);
 
         // READY sorts with "Mc" coming after "MC"
@@ -120,11 +120,6 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     [Fact]
     public async Task EnsureSmartReportMatchesReadyReport()
     {
-        // Fetch Master Inquiry Data
-        string content = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.MasterInquiry.22Oct2025.outfl");
-        List<OutFL> outties = OutFLParser.ParseStringIntoRecords(content);
-        Dictionary<long, OutFL> outtieBySsn = outties.ToDictionary(o => long.Parse(o.OUT_SSN), o => o);
-
         Stopwatch stopwatch = Stopwatch.StartNew();
         string actualText = await CreateTextReport();
         TestOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds} To create SMART QPAY066 report");
@@ -139,7 +134,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         // Uncomment to for the Visual diff
         // ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText)
-        
+
         Dictionary<long, QPay066Record> expectedMap = AsDict(QPay066ReportParser.ParseRecords(expectedText));
         Dictionary<long, QPay066Record> actualMap = AsDict(QPay066ReportParser.ParseRecords(actualText));
         actualMap.Keys.ShouldBe(expectedMap.Keys, true);
@@ -153,14 +148,6 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         // Query READY pscalcview2 for authoritative vested balance and percent
         Dictionary<int, (decimal VestedBalance, decimal VestedPercent)> readyVestingData =
             await GetReadyVestedBalancesByBadge(employeeBadges, DbFactory.ConnectionString);
-
-#if false
-        // Alternative: Use MasterInquiry OutFL data (currently commented out - suspected data issues)
-        Dictionary<int, int> badgeToSsn = await DbFactory.UseReadOnlyContext(async ctx =>
-            await ctx.Demographics
-                .Where(d => employeeBadges.Contains(d.BadgeNumber))
-                .ToDictionaryAsync(d => d.BadgeNumber, d => d.Ssn));
-#endif
 
         // Compare the values for each matching key
         List<string> differences = new();
@@ -298,13 +285,6 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                 qp => qp);
     }
 
-    public static string ReadEmbeddedResource(string resourceName)
-    {
-        using Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
-        using StreamReader reader = new(stream!);
-        return reader.ReadToEnd();
-    }
-
     /// <summary>
     ///     Queries the READY schema's pscalcview2 view to get vested balances and vested percent for a set of badge numbers.
     /// </summary>
@@ -322,23 +302,32 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         await using OracleConnection connection = new(connectionString);
         await connection.OpenAsync();
 
-        string query = @"
-            SELECT d.DEM_BADGE, v.VESTED_BALANCE, v.VESTED_PERCENT
-            FROM tbherrmann.pscalcview2 v
-            INNER JOIN tbherrmann.DEMOGRAPHICS d ON v.SSN = d.DEM_SSN
-            WHERE d.DEM_BADGE IN (" + string.Join(",", badges) + ")";
-
         Dictionary<int, (decimal, decimal)> result = new();
 
-        await using OracleCommand command = new(query, connection);
-        await using OracleDataReader? reader = await command.ExecuteReaderAsync();
+        // Oracle has a limit of 1000 items in an IN clause, so batch the queries
+        const int batchSize = 1000;
+        var badgeList = badges.ToList();
 
-        while (await reader.ReadAsync())
+        for (int i = 0; i < badgeList.Count; i += batchSize)
         {
-            int badge = reader.GetInt32(0);
-            decimal vestedBalance = reader.GetDecimal(1);
-            decimal vestedPercent = reader.GetDecimal(2);
-            result[badge] = (vestedBalance, vestedPercent);
+            var batch = badgeList.Skip(i).Take(batchSize);
+
+            string query = @"
+                SELECT d.DEM_BADGE, v.VESTED_BALANCE, v.VESTED_PERCENT
+                FROM tbherrmann.pscalcview2 v
+                INNER JOIN tbherrmann.DEMOGRAPHICS d ON v.SSN = d.DEM_SSN
+                WHERE d.DEM_BADGE IN (" + string.Join(",", batch) + ")";
+
+            await using OracleCommand command = new(query, connection);
+            await using OracleDataReader? reader = await command.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                int badge = reader.GetInt32(0);
+                decimal vestedBalance = reader.GetDecimal(1);
+                decimal vestedPercent = reader.GetDecimal(2);
+                result[badge] = (vestedBalance, vestedPercent);
+            }
         }
 
         return result;

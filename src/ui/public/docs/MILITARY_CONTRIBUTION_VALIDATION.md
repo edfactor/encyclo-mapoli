@@ -140,7 +140,66 @@ IF PY-FREQ = "2"
 - If employee is weekly-paid (PY-FREQ = 1), no restriction
 - This has been replaced with application-level role-based access control
 
-### 5. Duplicate Prevention (Regular Contributions Only)
+### 5. Active Status Check (Regular Contributions Only)
+
+**Rule**: Regular contributions require the employee to be ACTIVE as of the contribution date. Supplemental contributions bypass this check.
+
+**Rationale**: 
+- Regular contributions provide Years of Service (YOS) credit and require the employee to be actively employed
+- Supplemental contributions are for edge cases: separated employees, inactive on current roster but eligible for historical service recognition
+- This mirrors the original COBOL business logic intent (Proj 19567 comments reference "separated employee" scenarios)
+
+**Employee Status Values**:
+- `Active ('a')`: Currently employed and eligible for regular contributions
+- `Inactive ('i')`: Not currently on payroll (leave, furlough, etc.)
+- `Terminated ('t')`: Employment ended (can only receive supplemental)
+- `Deleted ('d')`: Record marked for deletion
+
+**C# Implementation**:
+```csharp
+private async Task<bool> ValidateEmploymentStatus(CreateMilitaryContributionRequest req, CancellationToken token)
+{
+    // Supplemental contributions bypass employment status check
+    if (req.IsSupplementalContribution)
+    {
+        return true;
+    }
+
+    // Regular contributions require active employee status as of contribution date
+    var isActive = await _employeeLookup.IsActiveAsOfAsync(req.BadgeNumber, req.ContributionDate, token);
+    
+    if (isActive is null)
+    {
+        return TrackFailure("EmploymentStatusMissing");
+    }
+    
+    return isActive.Value || TrackFailure("EmployeeNotActive");
+}
+```
+
+**Validation Rule Integration**:
+```csharp
+.MustAsync((request, _, ct) => ValidateEmploymentStatus(request, ct))
+.WithMessage(request => $"Employee is not active as of the contribution date {request.ContributionDate:yyyy-MM-dd}. " +
+                         $"Regular contributions require active employee status. " +
+                         $"Mark as Supplemental to allow contributions for inactive/separated employees.")
+```
+
+**Frontend User Message**:
+```
+Employee is no longer active as of the contribution date. Regular contributions require active employee status. Please check the 'Supplemental' box to add this contribution for an inactive or separated employee.
+```
+
+**Test Scenarios**:
+- ✅ Employee active on 2024-06-01, marked as regular contribution
+- ✅ Employee inactive on 2024-06-01, marked as supplemental contribution
+- ✅ Employee terminated on 2024-06-01, marked as supplemental contribution (historical service)
+- ❌ Employee inactive on 2024-06-01, marked as regular contribution (should require supplemental)
+- ❌ Employee terminated on 2024-06-01, marked as regular contribution (should require supplemental)
+
+**Related Jira Issue**: PS-1824 - "Military Contributions - should allow supplemental even if not active"
+
+### 6. Duplicate Prevention (Regular Contributions Only)
 
 **Rule**: No duplicate regular contributions allowed for the same year. Supplemental contributions bypass this check.
 
@@ -188,7 +247,7 @@ private async Task<bool> ValidateContributionDate(CreateMilitaryContributionRequ
 - ✅ Existing regular contribution for 2024, add supplemental contribution for 2024
 - ❌ Existing regular contribution for 2024, add another regular for 2024
 
-### 6. Year/Date Consistency (Supplemental Flag)
+### 7. Year/Date Consistency (Supplemental Flag)
 
 **Rule**: When profit year differs from contribution date year, the contribution MUST be marked supplemental.
 
@@ -214,7 +273,7 @@ RuleFor(r => r.IsSupplementalContribution)
 - ✅ Profit year 2025, contribution date 2024-06-01, marked supplemental
 - ❌ Profit year 2025, contribution date 2024-06-01, marked regular (YOS mismatch)
 
-### 7. Amount Validation
+### 8. Amount Validation
 
 **Rule**: Contribution amount must be greater than zero.
 
@@ -238,7 +297,7 @@ RuleFor(r => r.ContributionAmount)
 - ❌ Amount = 0.00
 - ❌ Amount = -500.00
 
-### 8. Date Format Validation
+### 9. Date Format Validation
 
 **Rule**: Month must be 1-12 or 20 (special code for year-only entry).
 
@@ -253,7 +312,7 @@ ELSE
 
 **Note**: The C# API uses standard `DateTime` format, so month validation is handled by .NET framework. The special "20" month code from COBOL is not exposed in the modern API.
 
-### 9. Screen Duplicate Check
+### 10. Screen Duplicate Check
 
 **Rule**: Same contribution date cannot appear multiple times on the entry screen.
 
@@ -266,7 +325,7 @@ IF XU-CONT-DATE(1) = XU-CONT-DATE(2)
 
 **Note**: This validation was specific to the COBOL screen-based entry form where 5 contributions could be entered at once. The modern API processes one contribution at a time, so this validation is not applicable.
 
-### 10. Original Entry Requirement
+### 11. Original Entry Requirement
 
 **Rule**: For month-specific entries (MMYY format with months 1-12), the year.0 (original) record must exist first. The year.0 record uses month code "20".
 
@@ -287,7 +346,8 @@ IF XU-CONT-DATE(1) = XU-CONT-DATE(2)
 | `WS-XU-CONT-YR` year check | `ProfitYear` + 5-year lookback | Expanded from 3 to 5 years (Proj 19567) |
 | `WS-AGE >= 21` | `ValidateAtLeast21OnContribution()` | Federal eligibility rule |
 | `DEM-SSN`, `DEM-BADGE` lookup | `_employeeLookup.BadgeExistsAsync()` | Oracle HCM integration |
-| `PY-FREQ = "2"` check | `IsActiveAsOfAsync()` | Simplified to general Active status |
+| `PY-FREQ = "2"` monthly check (access control intent) | `IsActiveAsOfAsync()` + supplemental bypass | Employment status validation (PS-1824) |
+| Active status (implicit in READY) | `ValidateEmploymentStatus()` | Regular contributions require active; supplemental bypasses |
 | `PROFIT-YEAR` duplicate check | `ValidateContributionDate()` | Regular vs supplemental distinction |
 | `XU-CL-AMOUNT > 0` | `ContributionAmount > 0` | Positive amount required |
 | `WS-XU-CONT-MO = 20` or `1-12` | `IsSupplementalContribution` flag | Boolean instead of month code |

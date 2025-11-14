@@ -13,7 +13,7 @@ export interface RowData {
   isDetail: boolean;
   profitYear: number;
   badgeNumber: string;
-  psn: number;
+  psn?: number;
   enrollmentId?: string;
   suggestedForfeit?: number;
   suggestedUnforfeiture?: number;
@@ -41,12 +41,15 @@ interface HeaderComponentProps extends IHeaderParams {
 
 /**
  * Generate row key based on activity type
+ * Must match the key used in column definitions and editor
  */
 function generateRowKey(activityType: ActivityType, nodeData: RowData): string {
   if (activityType === "unforfeit") {
     return nodeData.profitDetailId?.toString() || "";
   }
-  return String(nodeData.psn);
+  // For termination: use composite key (badgeNumber-profitYear)
+  // badgeNumber is always set in grid data
+  return `${nodeData.badgeNumber}-${nodeData.profitYear}`;
 }
 
 /**
@@ -83,9 +86,21 @@ export const SharedForfeitHeaderComponent: React.FC<HeaderComponentProps> = (par
   const activityType = params.config.activityType;
 
   const isNodeEligible = (nodeData: RowData, context: GridContext): boolean => {
-    // For termination: only current year detail rows
-    // For unforfeit: all detail rows
+    // For termination: only current year detail rows with non-null, non-zero values
+    // For unforfeit: all detail rows with non-null, non-zero values
     if (!nodeData.isDetail) return false;
+
+    if (activityType === "termination") {
+      // Check if original suggested forfeit value is non-null and non-zero
+      if (nodeData.suggestedForfeit == null || nodeData.suggestedForfeit === 0) {
+        return false;
+      }
+    } else {
+      // Check if original suggested unforfeiture value is non-null and non-zero
+      if (nodeData.suggestedUnforfeiture == null || nodeData.suggestedUnforfeiture === 0) {
+        return false;
+      }
+    }
 
     const currentValue = getCurrentValue(activityType, nodeData, context);
     return (currentValue || 0) !== 0;
@@ -96,7 +111,7 @@ export const SharedForfeitHeaderComponent: React.FC<HeaderComponentProps> = (par
     const transformedValue = transformForfeitureValue(activityType, currentValue || 0);
 
     const basePayload: ForfeitureAdjustmentUpdateRequest = {
-      badgeNumber: activityType === "unforfeit" ? Number(nodeData.badgeNumber) : nodeData.psn,
+      badgeNumber: activityType === "unforfeit" ? Number(nodeData.badgeNumber) : nodeData.psn || 0,
       profitYear: selectedProfitYear,
       forfeitureAmount: transformedValue,
       classAction: false

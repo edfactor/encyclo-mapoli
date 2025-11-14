@@ -21,6 +21,9 @@ public class MilitaryContributionRequestValidatorTests
         employeeLookupMock
             .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new DateOnly((short)DateTime.Today.Year - 30, 1, 1));
+        employeeLookupMock
+            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);  // Default: employee is active
 
         var militaryServiceMock = new Mock<IMilitaryService>(MockBehavior.Strict);
         // Default: return success with empty results for GetMilitaryServiceRecordAsync
@@ -279,5 +282,86 @@ public class MilitaryContributionRequestValidatorTests
         var reqSupp = reqNotSupp with { IsSupplementalContribution = true };
         var result2 = await validator.ValidateAsync(reqSupp);
         Assert.True(result2.IsValid, string.Join(" | ", result2.Errors.Select(e => e.ErrorMessage)));
+    }
+
+    [Fact]
+    [Description("PS-1824 : Regular contribution rejects inactive employee")]
+    public async Task Regular_contribution_rejects_inactive_employee()
+    {
+        var (validator, employeeLookupMock, militaryServiceMock) = CreateValidator();
+
+        employeeLookupMock.Reset();
+        employeeLookupMock
+            .Setup(x => x.BadgeExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        employeeLookupMock
+            .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly(2020, 1, 1));
+        employeeLookupMock
+            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly(1980, 1, 1));
+        employeeLookupMock
+            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);  // Employee is INACTIVE
+
+        militaryServiceMock.Reset();
+        militaryServiceMock
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.GetMilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(
+                new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse> { Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>() }));
+
+        var req = ValidRequest() with
+        {
+            BadgeNumber = 1234567,
+            ContributionDate = new DateTime(2024, 6, 15, 0, 0, 0, DateTimeKind.Utc),
+            ProfitYear = 2024,
+            IsSupplementalContribution = false  // Regular contribution
+        };
+
+        var result = await validator.ValidateAsync(req);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e =>
+            e.ErrorMessage.Contains("not active", StringComparison.OrdinalIgnoreCase) ||
+            e.ErrorMessage.Contains("supplemental", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    [Description("PS-1824 : Supplemental contribution allows inactive employee")]
+    public async Task Supplemental_contribution_allows_inactive_employee()
+    {
+        var (validator, employeeLookupMock, militaryServiceMock) = CreateValidator();
+
+        employeeLookupMock.Reset();
+        employeeLookupMock
+            .Setup(x => x.BadgeExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        employeeLookupMock
+            .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly(2020, 1, 1));
+        employeeLookupMock
+            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly(1980, 1, 1));
+        employeeLookupMock
+            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);  // Employee is INACTIVE
+
+        militaryServiceMock.Reset();
+        militaryServiceMock
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.GetMilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(
+                new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse> { Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>() }));
+
+        var req = ValidRequest() with
+        {
+            BadgeNumber = 1234567,
+            ContributionDate = new DateTime(2024, 6, 15, 0, 0, 0, DateTimeKind.Utc),
+            ProfitYear = 2024,
+            IsSupplementalContribution = true  // Supplemental contribution
+        };
+
+        var result = await validator.ValidateAsync(req);
+
+        Assert.True(result.IsValid, string.Join(" | ", result.Errors.Select(e => e.ErrorMessage)));
     }
 }

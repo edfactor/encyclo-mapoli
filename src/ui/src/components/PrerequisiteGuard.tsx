@@ -8,7 +8,7 @@ import { Messages } from "../utils/messageDictonary";
 interface MessageUpdateLike {
   key: string;
   message: {
-    type: "success" | "error" | "warning";
+    type: "success" | "error";
     title: string;
     message?: string;
   };

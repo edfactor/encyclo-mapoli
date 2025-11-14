@@ -60,6 +60,9 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
             ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
             ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay
             ))
+        .RuleFor(pc => pc.IncomeExecutive, f => f.Finance.Amount(min: 100, max: 500_000, decimals: 2))
+        .RuleFor(pc => pc.TotalHours, (f, o) => o.CurrentHoursYear + o.HoursExecutive)
+        .RuleFor(pc => pc.TotalIncome, (f, o) => o.CurrentIncomeYear + o.IncomeExecutive)
         .UseSeed(100);
     }
 }

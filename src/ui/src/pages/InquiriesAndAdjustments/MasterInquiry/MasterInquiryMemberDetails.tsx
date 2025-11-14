@@ -37,8 +37,7 @@ in the React memo stuff at the bottom and are important for edge cases like thes
   - The component could show stale data for wrong member
 */
 const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = memo(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ({ memberType, id, profitYear, memberDetails, isLoading }) => {
+  ({ memberType: _memberType, id: _id, profitYear, memberDetails, isLoading }) => {
     const { missiveAlerts } = useMissiveAlerts();
 
     // Memoized enrollment status
@@ -145,8 +144,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         isEmployee,
         yearToDateProfitSharingHours,
         yearsInPlan,
-        percentageVested,
-        receivedContributionsLastYear
+        percentageVested
       } = memberDetails;
 
       const yearLabel = profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
@@ -181,11 +179,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
           ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }]
           : []),
         ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
-        { label: "Vested Percent", value: formatPercentage(percentageVested) },
-        {
-          label: "Contributions in Last Year",
-          value: receivedContributionsLastYear == null ? "N/A" : receivedContributionsLastYear ? "Y" : "N"
-        }
+        { label: "Vested Percent", value: formatPercentage(percentageVested) }
       ];
     }, [memberDetails, profitYear]);
 
