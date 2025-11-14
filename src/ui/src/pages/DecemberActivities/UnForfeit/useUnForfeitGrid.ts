@@ -37,6 +37,8 @@ interface UnForfeitGridConfig {
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   fiscalCalendarYear: CalendarResponseDto | null;
   isReadOnly: boolean;
+  onShowUnsavedChangesDialog?: () => void;
+  onShowErrorDialog?: (title: string, message: string) => void;
 }
 
 // Configuration for shared utilities
@@ -55,7 +57,9 @@ export const useUnForfeitGrid = ({
   onArchiveHandled,
   setHasUnsavedChanges,
   fiscalCalendarYear,
-  isReadOnly
+  isReadOnly,
+  onShowUnsavedChangesDialog,
+  onShowErrorDialog
 }: UnForfeitGridConfig) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -196,12 +200,15 @@ export const useUnForfeitGrid = ({
       editState.addLoadingRow(rowId);
 
       try {
-        // Transform request using shared helper (negates the value for unforfeit)
-        const transformedRequest = prepareSaveRequest(ACTIVITY_CONFIG, request);
+        // Transform request using shared helper
+        const transformedRequest = prepareSaveRequest(request);
         const result = await updateForfeitureAdjustment({ ...transformedRequest, suppressAllToastErrors: true });
 
         if (result?.error) {
-          alert("Save failed. One or more unforfeits were related to a class action forfeit.");
+          onShowErrorDialog?.(
+            "Class Action Forfeit",
+            "Save failed. One or more unforfeits were related to a class action forfeit."
+          );
         } else {
           // Generate row key using shared helper (uses profitDetailId for unforfeit)
           const rowKey = generateRowKey(ACTIVITY_CONFIG.rowKeyConfig, {
@@ -235,7 +242,7 @@ export const useUnForfeitGrid = ({
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
         const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "save"));
-        alert(errorMessage);
+        onShowErrorDialog?.("Save Failed", errorMessage);
       } finally {
         editState.removeLoadingRow(rowId);
       }
@@ -250,7 +257,8 @@ export const useUnForfeitGrid = ({
       createRequest,
       triggerSearch,
       handlePaginationChange,
-      gridApi
+      gridApi,
+      onShowErrorDialog
     ]
   );
 
@@ -276,8 +284,8 @@ export const useUnForfeitGrid = ({
       setIsBulkSaveInProgress(true);
 
       try {
-        // Transform all requests using shared helper (negates values for unforfeit)
-        const transformedRequests = prepareBulkSaveRequests(ACTIVITY_CONFIG, requests);
+        // Transform all requests using shared helper
+        const transformedRequests = prepareBulkSaveRequests(requests);
         await updateForfeitureAdjustmentBulk(transformedRequests);
 
         // Generate row keys using shared helper (uses profitDetailId for unforfeit)
@@ -314,7 +322,7 @@ export const useUnForfeitGrid = ({
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
         const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "bulkSave"));
-        alert(errorMessage);
+        onShowErrorDialog?.("Bulk Save Failed", errorMessage);
       } finally {
         editState.removeLoadingRows(badgeNumbers);
         pageNumberAtBulkSaveRef.current = null;
@@ -332,7 +340,8 @@ export const useUnForfeitGrid = ({
       createRequest,
       triggerSearch,
       handlePaginationChange,
-      gridApi
+      gridApi,
+      onShowErrorDialog
     ]
   );
 
@@ -461,7 +470,7 @@ export const useUnForfeitGrid = ({
     () => ({
       setPageNumber: async (value: number) => {
         if (hasUnsavedChanges) {
-          alert("Please save your changes.");
+          onShowUnsavedChangesDialog?.();
           return;
         }
 
@@ -492,7 +501,7 @@ export const useUnForfeitGrid = ({
       },
       setPageSize: async (value: number) => {
         if (hasUnsavedChanges) {
-          alert("Please save your changes.");
+          onShowUnsavedChangesDialog?.();
           return;
         }
         isPaginationChangeRef.current = true;
@@ -513,6 +522,7 @@ export const useUnForfeitGrid = ({
     }),
     [
       hasUnsavedChanges,
+      onShowUnsavedChangesDialog,
       handlePaginationChange,
       performSearch,
       sortParams.sortBy,

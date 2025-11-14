@@ -65,9 +65,17 @@ export const GetProfitDetailColumns = (
       editable: (params: EditableCallbackParams) => isTransactionEditable(params, isReadOnly),
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) => {
+        // If value is 0, show blank
+        const rowKey = params.data.profitDetailId?.toString();
+        const editedValue = params.context?.editedValues?.[rowKey]?.value;
+        const currentValue = editedValue ?? params.data.suggestedUnforfeiture;
+        if (currentValue === 0) {
+          return null;
+        }
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
       },
-      valueFormatter: (params) => numberToCurrency(params.data.suggestedUnforfeiture)
+      valueFormatter: (params) =>
+        params.data.suggestedUnforfeiture !== 0 ? numberToCurrency(params.data.suggestedUnforfeiture) : ""
     },
 
     createCommentColumn({

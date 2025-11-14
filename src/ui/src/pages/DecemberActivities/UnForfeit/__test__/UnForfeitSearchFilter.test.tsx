@@ -322,9 +322,8 @@ describe("UnForfeitSearchFilter", () => {
       });
     });
 
-    it("should show alert when search clicked with unsaved changes", async () => {
+    it("should show dialog when search clicked with unsaved changes", async () => {
       const user = userEvent.setup();
-      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
       render(
         <UnForfeitSearchFilter
@@ -346,17 +345,15 @@ describe("UnForfeitSearchFilter", () => {
       const searchButton = screen.getByLabelText("search button");
       await user.click(searchButton);
 
-      // Verify alert was shown with appropriate message
+      // Verify dialog was shown with appropriate message
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith("Please save your changes.");
+        expect(screen.getByText("Unsaved Changes")).toBeInTheDocument();
+        expect(screen.getByText("Please save your changes before performing a new search.")).toBeInTheDocument();
       });
-
-      alertSpy.mockRestore();
     });
 
     it("should not call onSearch when there are unsaved changes", async () => {
       const user = userEvent.setup();
-      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
       render(
         <UnForfeitSearchFilter
@@ -378,12 +375,10 @@ describe("UnForfeitSearchFilter", () => {
       const searchButton = screen.getByLabelText("search button");
       await user.click(searchButton);
 
-      // Verify onSearch was NOT called (alert prevents execution)
+      // Verify onSearch was NOT called (dialog prevents execution)
       await waitFor(() => {
         expect(mockOnSearch).not.toHaveBeenCalled();
       });
-
-      alertSpy.mockRestore();
     });
   });
 

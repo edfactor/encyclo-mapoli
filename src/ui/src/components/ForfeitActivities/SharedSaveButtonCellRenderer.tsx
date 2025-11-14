@@ -32,13 +32,15 @@ interface RowData {
 
 /**
  * Generate row key based on activity type
+ * Must match the key used in column definitions (valueGetter)
  */
 function generateRowKey(activityType: ActivityType, data: RowData): string {
   if (activityType === "unforfeit") {
     return data.profitDetailId?.toString() || "";
   }
   // For termination: use composite key (badgeNumber-profitYear)
-  return `${data.badgeNumber || data.psn}-${data.profitYear}`;
+  // badgeNumber is always set in grid data (see useTerminationGrid)
+  return `${data.badgeNumber}-${data.profitYear}`;
 }
 
 /**
@@ -75,8 +77,8 @@ function shouldShowControls(activityType: ActivityType, params: SaveButtonCellPa
     // Termination: only show if backend gives us a non-null, non-zero value
     return params.data.suggestedForfeit != null && params.data.suggestedForfeit !== 0;
   } else {
-    // UnForfeit: all rows with non-null suggestedUnforfeiture get controls
-    return params.data.suggestedUnforfeiture != null;
+    // UnForfeit: only show if backend gives us a non-null, non-zero value
+    return params.data.suggestedUnforfeiture != null && params.data.suggestedUnforfeiture !== 0;
   }
 }
 

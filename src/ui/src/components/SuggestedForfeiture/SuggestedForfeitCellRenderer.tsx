@@ -24,7 +24,8 @@ export function SuggestedForfeitCellRenderer(
     if (typeof params.data.suggestedForfeit === "string" && isNaN(Number(params.data.suggestedForfeit))) {
       return <span>{params.data.suggestedForfeit}</span>;
     }
-    rowKey = String(params.data.psn);
+    // Must match the composite key used in editor and column definitions
+    rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
     currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
   } else {
     // only allow Unforfeit on last transaction.
@@ -38,7 +39,7 @@ export function SuggestedForfeitCellRenderer(
     if (typeof params.data.suggestedUnforfeiture === "string" && isNaN(Number(params.data.suggestedUnforfeiture))) {
       return <span>{params.data.suggestedUnforfeiture}</span>;
     }
-    rowKey = params.data.profitDetailId;
+    rowKey = params.data.profitDetailId?.toString();
     currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedUnforfeiture;
   }
 

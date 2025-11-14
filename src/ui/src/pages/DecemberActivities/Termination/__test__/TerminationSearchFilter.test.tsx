@@ -275,8 +275,7 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
       });
     });
 
-    it("should show alert when search clicked with unsaved changes", async () => {
-      const mockAlert = vi.spyOn(window, "alert").mockImplementation(() => {});
+    it("should show dialog when search clicked with unsaved changes", async () => {
       const user = userEvent.setup();
 
       render(
@@ -292,20 +291,19 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
 
       const searchButton = screen.getByRole("button", { name: /search/i });
 
-      // Button should not be disabled (just shows alert when clicked)
+      // Button should not be disabled (just shows dialog when clicked)
       await waitFor(() => {
         expect(searchButton).not.toBeDisabled();
       });
 
       await user.click(searchButton);
 
-      // Should show alert instead of calling onSearch
+      // Should show dialog instead of calling onSearch
       await waitFor(() => {
-        expect(mockAlert).toHaveBeenCalledWith("Please save your changes.");
+        expect(screen.getByText("Unsaved Changes")).toBeInTheDocument();
+        expect(screen.getByText("Please save your changes before performing a new search.")).toBeInTheDocument();
         expect(mockOnSearch).not.toHaveBeenCalled();
       });
-
-      mockAlert.mockRestore();
     });
 
     it("should disable search button during fetch", () => {

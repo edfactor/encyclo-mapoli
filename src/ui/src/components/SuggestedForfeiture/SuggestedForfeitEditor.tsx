@@ -32,12 +32,17 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
     const newError = validateSuggestedForfeit(numericValue, Math.abs(forfeitValue));
     setError(newError);
 
-    let rowKey = props.data.profitDetailId
-      ? props.data.profitDetailId
-      : `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ""}-${props.node?.id || "unknown"}`;
-    const isTerminations = props.data.suggestedForfeit != null;
-    if (isTerminations) {
-      rowKey = String(props.data.psn);
+    // Generate row key consistent with column definitions and SharedSaveButtonCellRenderer
+    let rowKey: string;
+    const isTermination = props.data.suggestedForfeit != null;
+
+    if (isTermination) {
+      // Termination: use composite key (badgeNumber-profitYear)
+      // Must match the key used in TerminationDetailsGridColumns valueGetter
+      rowKey = `${props.data.badgeNumber}-${props.data.profitYear}`;
+    } else {
+      // UnForfeit: use profitDetailId
+      rowKey = props.data.profitDetailId?.toString() || "";
     }
 
     props.context?.updateEditedValue?.(rowKey, numericValue, !!newError);

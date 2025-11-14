@@ -17,111 +17,63 @@ import {
 
 describe("saveOperationHelpers", () => {
   describe("prepareSaveRequest", () => {
-    describe("unforfeit activity type", () => {
-      const config: ActivityConfig = {
-        activityType: "unforfeit",
-        rowKeyConfig: { type: "unforfeit" }
+    it("should preserve forfeitureAmount (FE already handles transformations)", () => {
+      const request: ForfeitureAdjustmentUpdateRequest = {
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: -1500, // FE already negated this
+        classAction: false
       };
+      const result = prepareSaveRequest(request);
 
-      it("should preserve forfeitureAmount for unforfeit (FE already negated)", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: -1500, // FE already negated this
-          classAction: false
-        };
-        const result = prepareSaveRequest(config, request);
-
-        expect(result).toEqual({
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: -1500, // Should remain negated
-          classAction: false
-        });
-      });
-
-      it("should preserve positive forfeitureAmount for unforfeit", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: 1500,
-          classAction: false
-        };
-        const result = prepareSaveRequest(config, request);
-
-        expect(result.forfeitureAmount).toBe(1500);
-      });
-
-      it("should preserve other fields for unforfeit", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: -1500, // FE already negated this
-          classAction: true,
-          offsettingProfitDetailId: 789
-        };
-        const result = prepareSaveRequest(config, request);
-
-        expect(result).toEqual({
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: -1500, // Should remain negated
-          classAction: true,
-          offsettingProfitDetailId: 789
-        });
+      expect(result).toEqual({
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: -1500, // Should remain as-is
+        classAction: false
       });
     });
 
-    describe("termination activity type", () => {
-      const config: ActivityConfig = {
-        activityType: "termination",
-        rowKeyConfig: { type: "termination" }
+    it("should preserve positive forfeitureAmount", () => {
+      const request: ForfeitureAdjustmentUpdateRequest = {
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: 1500,
+        classAction: false
       };
+      const result = prepareSaveRequest(request);
 
-      it("should keep forfeitureAmount unchanged for termination", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: 1500,
-          classAction: false
-        };
-        const result = prepareSaveRequest(config, request);
+      expect(result.forfeitureAmount).toBe(1500);
+    });
 
-        expect(result).toEqual({
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: 1500,
-          classAction: false
-        });
-      });
+    it("should preserve all fields in request", () => {
+      const request: ForfeitureAdjustmentUpdateRequest = {
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: -1500,
+        classAction: true,
+        offsettingProfitDetailId: 789
+      };
+      const result = prepareSaveRequest(request);
 
-      it("should preserve negative forfeitureAmount for termination", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: -1500,
-          classAction: false
-        };
-        const result = prepareSaveRequest(config, request);
-
-        expect(result.forfeitureAmount).toBe(-1500);
+      expect(result).toEqual({
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: -1500,
+        classAction: true,
+        offsettingProfitDetailId: 789
       });
     });
   });
 
   describe("prepareBulkSaveRequests", () => {
-    const config: ActivityConfig = {
-      activityType: "unforfeit",
-      rowKeyConfig: { type: "unforfeit" }
-    };
-
-    it("should preserve all requests in the array (FE already negated)", () => {
+    it("should preserve all requests in the array", () => {
       const requests: ForfeitureAdjustmentUpdateRequest[] = [
-        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: -1500, classAction: false }, // FE already negated
-        { badgeNumber: 789012, profitYear: 2025, forfeitureAmount: -2000, classAction: false } // FE already negated
+        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: -1500, classAction: false },
+        { badgeNumber: 789012, profitYear: 2025, forfeitureAmount: -2000, classAction: false }
       ];
 
-      const result = prepareBulkSaveRequests(config, requests);
+      const result = prepareBulkSaveRequests(requests);
 
       expect(result).toHaveLength(2);
       expect(result[0].forfeitureAmount).toBe(-1500);
@@ -129,16 +81,16 @@ describe("saveOperationHelpers", () => {
     });
 
     it("should handle empty array", () => {
-      const result = prepareBulkSaveRequests(config, []);
+      const result = prepareBulkSaveRequests([]);
       expect(result).toEqual([]);
     });
 
     it("should handle single request", () => {
       const requests: ForfeitureAdjustmentUpdateRequest[] = [
-        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: -1500, classAction: false } // FE already negated
+        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: -1500, classAction: false }
       ];
 
-      const result = prepareBulkSaveRequests(config, requests);
+      const result = prepareBulkSaveRequests(requests);
 
       expect(result).toHaveLength(1);
       expect(result[0].forfeitureAmount).toBe(-1500);

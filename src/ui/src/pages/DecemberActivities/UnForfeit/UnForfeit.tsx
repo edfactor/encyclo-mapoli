@@ -1,6 +1,7 @@
 import { CircularProgress, Divider, Grid } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import FrozenYearWarning from "../../../components/FrozenYearWarning";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
@@ -17,6 +18,8 @@ const UnForfeit = () => {
   const [fetchAccountingRange, { data: fiscalCalendarYear }] = useLazyGetAccountingRangeToCurrent(6);
   const profitYear = useDecemberFlowProfitYear();
   const isFrozen = useIsProfitYearFrozen(profitYear);
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
+  const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
 
   // Use the navigation guard hook
   useUnsavedChangesGuard(state.hasUnsavedChanges);
@@ -87,11 +90,27 @@ const UnForfeit = () => {
                 onArchiveHandled={actions.handleArchiveHandled}
                 setHasUnsavedChanges={actions.handleUnsavedChanges}
                 fiscalCalendarYear={fiscalCalendarYear}
+                onShowUnsavedChangesDialog={() => setShowUnsavedChangesDialog(true)}
+                onShowErrorDialog={(title, message) => setErrorDialog({ title, message })}
               />
             </Grid>
           </>
         )}
       </Grid>
+
+      <ConfirmationDialog
+        open={showUnsavedChangesDialog}
+        title="Unsaved Changes"
+        description="Please save your changes before changing pages."
+        onClose={() => setShowUnsavedChangesDialog(false)}
+      />
+
+      <ConfirmationDialog
+        open={!!errorDialog}
+        title={errorDialog?.title || "Error"}
+        description={errorDialog?.message || "An error occurred"}
+        onClose={() => setErrorDialog(null)}
+      />
     </Page>
   );
 };

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SortParams, GridPaginationState, GridPaginationActions, UseGridPaginationConfig } from "../../../../hooks/useGridPagination";
+import { GridPaginationActions, GridPaginationState, SortParams, UseGridPaginationConfig } from "./useGridPagination";
 
 const STORAGE_KEY = "payBenReport_gridState";
 
@@ -44,18 +44,16 @@ export const usePersistedGridPagination = ({
 
   // Initialize state from persisted data or defaults
   const persistedState = loadPersistedState();
-  
+
   // Debug logging for development
   if (persistedState) {
     console.log("PayBenReport: Loaded persisted grid state:", persistedState);
   }
-  
+
   const [pageNumber, setPageNumber] = useState(persistedState?.pageNumber ?? 0);
   const [pageSize, setPageSize] = useState(persistedState?.pageSize ?? initialPageSize);
   const [sortBy, setSortBy] = useState(persistedState?.sortBy ?? initialSortBy);
-  const [isSortDescending, setIsSortDescending] = useState(
-    persistedState?.isSortDescending ?? initialSortDescending
-  );
+  const [isSortDescending, setIsSortDescending] = useState(persistedState?.isSortDescending ?? initialSortDescending);
 
   // Store the callback in a ref to make it stable
   const callbackRef = useRef(onPaginationChange);
@@ -136,7 +134,7 @@ export const usePersistedGridPagination = ({
     setPageSize(initialPageSize);
     setSortBy(initialSortBy);
     setIsSortDescending(initialSortDescending);
-    
+
     // Clear persisted state when resetting
     try {
       sessionStorage.removeItem(STORAGE_KEY);

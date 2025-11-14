@@ -15,6 +15,7 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMDatePicker, SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
@@ -66,6 +67,7 @@ interface TerminationSearchFilterProps {
   fiscalData: CalendarResponseDto | null;
   onSearch: (params: TerminationSearchRequest) => void;
   hasUnsavedChanges?: boolean;
+  setHasUnsavedChanges?: (hasChanges: boolean) => void;
   isFetching?: boolean;
 }
 
@@ -74,9 +76,11 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   fiscalData,
   onSearch,
   hasUnsavedChanges,
+  setHasUnsavedChanges,
   isFetching = false
 }) => {
   const [openErrorModal, setOpenErrorModal] = useState(!fiscalData === false);
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
   const dispatch = useDispatch();
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
@@ -102,7 +106,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
   const validateAndSubmit = async (data: TerminationSearchRequest) => {
     if (hasUnsavedChanges) {
-      alert("Please save your changes.");
+      setShowUnsavedChangesDialog(true);
       return;
     }
 
@@ -129,6 +133,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const validateAndSearch = handleSubmit(validateAndSubmit as (data: TerminationSearchRequest) => Promise<void>);
 
   const handleReset = async () => {
+    setHasUnsavedChanges?.(false);
     setInitialSearchLoaded(false);
     reset({
       beginningDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "",
@@ -307,6 +312,13 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
           )}
         </DuplicateSsnGuard>
       </Grid>
+
+      <ConfirmationDialog
+        open={showUnsavedChangesDialog}
+        title="Unsaved Changes"
+        description="Please save your changes before performing a new search."
+        onClose={() => setShowUnsavedChangesDialog(false)}
+      />
     </form>
   );
 };

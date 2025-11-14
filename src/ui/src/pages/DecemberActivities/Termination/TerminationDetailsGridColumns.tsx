@@ -112,6 +112,13 @@ export const GetDetailColumns = (
         if (params.data.suggestedForfeit === null || params.data.psn.length > MAX_EMPLOYEE_BADGE_LENGTH) {
           return null;
         }
+        // If value is 0, show blank
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const editedValue = params.context?.editedValues?.[rowKey]?.value;
+        const currentValue = editedValue ?? params.data.suggestedForfeit;
+        if (currentValue === 0) {
+          return null;
+        }
         return SuggestedForfeitCellRenderer(
           {
             ...params,
@@ -121,7 +128,7 @@ export const GetDetailColumns = (
           false
         );
       },
-      valueFormatter: (params) => (params.value !== null ? numberToCurrency(params.value) : ""),
+      valueFormatter: (params) => (params.value !== null && params.value !== 0 ? numberToCurrency(params.value) : ""),
       valueGetter: (params) => {
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const editedValue = params.context?.editedValues?.[rowKey]?.value;

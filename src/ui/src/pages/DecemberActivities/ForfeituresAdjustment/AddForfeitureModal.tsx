@@ -5,6 +5,7 @@ import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndAp
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 import { SmartModal } from "smart-ui-library";
 import { ServiceErrorResponse } from "@/types/errors/errors";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 
 interface AddForfeitureModalProps {
   open: boolean;
@@ -13,24 +14,23 @@ interface AddForfeitureModalProps {
   suggestedForfeitResponse?: SuggestedForfeitResponse | null;
 }
 
-const handleResponseError = (error: ServiceErrorResponse) => {
+const getErrorDialogContent = (error: ServiceErrorResponse): { title: string; message: string } => {
   const title = error?.data?.title;
 
   if (title) {
     if (title.includes("Employee with badge number")) {
-      alert("Badge Number not found");
+      return { title: "Badge Number Not Found", message: "The specified badge number could not be found in the system." };
     } else if (title.includes("Invalid badge number")) {
-      alert("Invalid Badge Number");
+      return { title: "Invalid Badge Number", message: "The badge number you entered is not valid." };
     } else if (title.includes("Forfeiture amount cannot be zero")) {
-      alert("Forfeiture amount cannot be zero");
+      return { title: "Invalid Amount", message: "Forfeiture amount cannot be zero. Please enter a non-zero value." };
     } else if (title.includes("Validation Error")) {
-      alert("The submission contains data format errors.");
+      return { title: "Validation Error", message: "The submission contains data format errors. Please check your input and try again." };
     } else {
-      alert("An unexpected error occurred. Please try again.");
+      return { title: "Error", message: "An unexpected error occurred. Please try again." };
     }
-  } else {
-    alert("An unexpected error occurred. Please try again.");
   }
+  return { title: "Error", message: "An unexpected error occurred. Please try again." };
 };
 
 const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, onSave, suggestedForfeitResponse }) => {
@@ -45,6 +45,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
     suggestedForfeitAmount: null,
     classAction: false
   });
+  const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
   const [updateForfeiture, { isLoading }] = useUpdateForfeitureAdjustmentMutation();
   const profitYear = useFiscalCloseProfitYear();
 
@@ -104,7 +105,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
       // If the response has an error block, handle it
       if (result.error) {
-        handleResponseError(result.error as ServiceErrorResponse);
+        const errorContent = getErrorDialogContent(result.error as ServiceErrorResponse);
+        setErrorDialog(errorContent);
         return;
       }
 
@@ -117,7 +119,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       onClose();
     } catch (_error) {
       // This needs to be called with a blank set of properties to satisfy the type
-      handleResponseError({} as ServiceErrorResponse);
+      const errorContent = getErrorDialogContent({} as ServiceErrorResponse);
+      setErrorDialog(errorContent);
     }
   };
 
@@ -179,6 +182,13 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
           />
         </Grid>
       </Grid>
+
+      <ConfirmationDialog
+        open={!!errorDialog}
+        title={errorDialog?.title || "Error"}
+        description={errorDialog?.message || "An error occurred"}
+        onClose={() => setErrorDialog(null)}
+      />
     </SmartModal>
   );
 };
