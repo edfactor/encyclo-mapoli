@@ -948,15 +948,6 @@ pipelines:
               Write-Host "Force Reinstall: $env:ForceReinstall" -ForegroundColor Yellow
               Write-Host ""
 
-              # Verify target server is reachable
-              Write-Host "Verifying connectivity to $targetServer..." -ForegroundColor Cyan
-              if (-not (Test-Connection -ComputerName $targetServer -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
-                  Write-Error "Cannot reach server: $targetServer"
-                  exit 1
-              }
-              Write-Host "[OK] Server is reachable" -ForegroundColor Green
-              Write-Host ""
-
               # Execute operation
               switch ($env:Operation) {
                   "install-hosting-bundle" {
@@ -988,7 +979,7 @@ pipelines:
 
                       # Create remote session (similar to webDeploy.ps1 approach)
                       try {
-                          $session = New-PSSession -ComputerName $targetServer
+                          $session = New-PSSession $targetServer
                           
                           # Copy and execute gzip configuration script on remote machine
                           Invoke-Command -Session $session -ScriptBlock {
