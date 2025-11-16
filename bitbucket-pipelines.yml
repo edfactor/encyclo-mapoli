@@ -938,9 +938,9 @@ pipelines:
                   }
               }
 
-              Write-Host "╔════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-              Write-Host "║  Infrastructure as Code Operation                             ║" -ForegroundColor Cyan
-              Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+              Write-Host "================================================================" -ForegroundColor Cyan
+              Write-Host "  Infrastructure as Code Operation" -ForegroundColor Cyan
+              Write-Host "================================================================" -ForegroundColor Cyan
               Write-Host ""
               Write-Host "Environment: $env:ServerEnvironment" -ForegroundColor Yellow
               Write-Host "Target Server: $targetServer" -ForegroundColor Yellow
@@ -954,7 +954,7 @@ pipelines:
                   Write-Error "Cannot reach server: $targetServer"
                   exit 1
               }
-              Write-Host "✓ Server is reachable" -ForegroundColor Green
+              Write-Host "[OK] Server is reachable" -ForegroundColor Green
               Write-Host ""
 
               # Execute operation
@@ -975,7 +975,7 @@ pipelines:
                           exit $LASTEXITCODE
                       }
                       Write-Host ""
-                      Write-Host "✓ .NET 10 Hosting Bundle installation completed" -ForegroundColor Green
+                      Write-Host "[OK] .NET 10 Hosting Bundle installation completed" -ForegroundColor Green
                   }
                   "configure-gzip-compression" {
                       Write-Host "Configuring IIS Gzip Compression on $targetServer..." -ForegroundColor Cyan
@@ -1008,7 +1008,7 @@ pipelines:
                               exit 1
                           }
                           Write-Host ""
-                          Write-Host "✓ IIS Gzip Compression configuration completed" -ForegroundColor Green
+                          Write-Host "[OK] IIS Gzip Compression configuration completed" -ForegroundColor Green
                       }
                       finally {
                           Remove-PSSession -Session $session -ErrorAction SilentlyContinue
