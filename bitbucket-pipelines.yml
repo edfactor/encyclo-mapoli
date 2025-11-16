@@ -6,6 +6,11 @@
 # ------------------------------------------------------------------------
 
 definitions:
+  # Centralized server variables
+  servers:
+    qa_app_server: &qa_app_server "appt23d"
+    uat_app_server: &uat_app_server "appt24d"
+
   steps:
     build-and-test-backend: &build-and-test-backend
       name: Build and Test Backend API
@@ -761,7 +766,7 @@ pipelines:
           trigger: "manual"
           script:
             - $env:ENV = "QA"
-            - $env:API_SERVER_QA = "appt23d"
+            - $env:API_SERVER_QA = *qa_app_server
             - |
               try {
                 pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
@@ -792,7 +797,7 @@ pipelines:
             - self.hosted
           script:
             - |
-              $env:API_SERVER_QA = "appt23d"
+              $env:API_SERVER_QA = *qa_app_server
               try {
                 pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
                 Write-Host "API health check passed" -ForegroundColor Green
@@ -849,7 +854,7 @@ pipelines:
                 - |
                   try {
                     Write-Host "Deploying application to UAT (reusing API artifact from Stage 2)..." -ForegroundColor Cyan
-                    $env:API_SERVER_UAT = "appt24d"
+                    $env:API_SERVER_UAT = *uat_app_server
                     $env:ENV = "UAT"
                     pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
                     pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
@@ -899,6 +904,127 @@ pipelines:
           - step: *secret-scan
   
   custom:
+    infrastructure_as_code:
+      - variables:
+          - name: ServerEnvironment
+            default: QA
+            allowed-values:
+              - QA
+              - UAT
+          - name: Operation
+            default: install-hosting-bundle
+            allowed-values:
+              - install-hosting-bundle
+              - configure-gzip-compression
+          - name: ForceReinstall
+            default: 'false'
+            allowed-values:
+              - 'true'
+              - 'false'
+      - step:
+          name: Execute IaC Operation
+          runs-on:
+            - windows
+            - self.hosted
+          script:
+            - |
+              # Server mapping from centralized definitions (keep in sync with definitions.servers)
+              $targetServer = switch ($env:ServerEnvironment) {
+                  "QA"  { "appt23d" }
+                  "UAT" { "appt24d" }
+                  default {
+                      Write-Error "Unknown ServerEnvironment: $env:ServerEnvironment (allowed: QA, UAT)"
+                      exit 1
+                  }
+              }
+
+              Write-Host "╔════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+              Write-Host "║  Infrastructure as Code Operation                             ║" -ForegroundColor Cyan
+              Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+              Write-Host ""
+              Write-Host "Environment: $env:ServerEnvironment" -ForegroundColor Yellow
+              Write-Host "Target Server: $targetServer" -ForegroundColor Yellow
+              Write-Host "Operation: $env:Operation" -ForegroundColor Yellow
+              Write-Host "Force Reinstall: $env:ForceReinstall" -ForegroundColor Yellow
+              Write-Host ""
+
+              # Verify target server is reachable
+              Write-Host "Verifying connectivity to $targetServer..." -ForegroundColor Cyan
+              if (-not (Test-Connection -ComputerName $targetServer -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
+                  Write-Error "Cannot reach server: $targetServer"
+                  exit 1
+              }
+              Write-Host "✓ Server is reachable" -ForegroundColor Green
+              Write-Host ""
+
+              # Execute operation
+              switch ($env:Operation) {
+                  "install-hosting-bundle" {
+                      Write-Host "Installing .NET 10 Hosting Bundle on $targetServer..." -ForegroundColor Cyan
+                      $forceFlag = if ($env:ForceReinstall -eq 'true') { "-Force" } else { "" }
+                      
+                      $scriptPath = ".\scripts\IaC\Install-DotNetHostingBundle.ps1"
+                      if (-not (Test-Path $scriptPath)) {
+                          Write-Error "Script not found: $scriptPath"
+                          exit 1
+                      }
+
+                      & $scriptPath -ComputerName $targetServer $forceFlag
+                      if ($LASTEXITCODE -ne 0) {
+                          Write-Error "Hosting bundle installation failed with exit code: $LASTEXITCODE"
+                          exit $LASTEXITCODE
+                      }
+                      Write-Host ""
+                      Write-Host "✓ .NET 10 Hosting Bundle installation completed" -ForegroundColor Green
+                  }
+                  "configure-gzip-compression" {
+                      Write-Host "Configuring IIS Gzip Compression on $targetServer..." -ForegroundColor Cyan
+                      
+                      $scriptPath = ".\scripts\IaC\IISGzipConfiguration.ps1"
+                      if (-not (Test-Path $scriptPath)) {
+                          Write-Error "Script not found: $scriptPath"
+                          exit 1
+                      }
+
+                      # Create remote session (similar to webDeploy.ps1 approach)
+                      try {
+                          $session = New-PSSession -ComputerName $targetServer
+                          
+                          # Copy and execute gzip configuration script on remote machine
+                          Invoke-Command -Session $session -ScriptBlock {
+                              # Source the script on remote machine
+                              . $using:scriptPath
+                              
+                              # Run initialization
+                              Initialize-IISGzipCompression
+                              
+                              # Display status
+                              Write-Host ""
+                              Test-IISGzipConfigurationHealth
+                          }
+                          
+                          if ($LASTEXITCODE -ne 0) {
+                              Write-Error "Gzip compression configuration failed"
+                              exit 1
+                          }
+                          Write-Host ""
+                          Write-Host "✓ IIS Gzip Compression configuration completed" -ForegroundColor Green
+                      }
+                      finally {
+                          Remove-PSSession -Session $session -ErrorAction SilentlyContinue
+                      }
+                  }
+                  default {
+                      Write-Error "Unknown operation: $env:Operation"
+                      exit 1
+                  }
+              }
+
+              Write-Host ""
+              Write-Host "════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+              Write-Host "✓ IaC operation completed successfully" -ForegroundColor Green
+              Write-Host "════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
