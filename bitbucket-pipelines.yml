@@ -977,15 +977,12 @@ pipelines:
                           $result = Invoke-Command -Session $session -ScriptBlock {
                               param($Force)
                               
-                              # Run the installer script locally on remote machine
-                              $params = @{
-                                  ComputerName = "localhost"
-                              }
+                              # Run the installer script locally (no ComputerName since we're already on the remote machine)
                               if ($Force) {
-                                  $params['Force'] = $true
+                                  & C:\temp\Install-DotNetHostingBundle.ps1 -Force
+                              } else {
+                                  & C:\temp\Install-DotNetHostingBundle.ps1
                               }
-                              
-                              & C:\temp\Install-DotNetHostingBundle.ps1 @params
                               
                               # Cleanup
                               Remove-Item -Path C:\temp\Install-DotNetHostingBundle.ps1 -Force -ErrorAction SilentlyContinue

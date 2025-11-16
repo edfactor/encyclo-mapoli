@@ -69,9 +69,9 @@ function Write-Header {
     param([string]$Title)
     
     Write-Host ""
-    Write-Host "=================================================================╗" -ForegroundColor Cyan
+    Write-Host "==================================================================" -ForegroundColor Cyan
     Write-Host "|  $($Title.PadRight(62))  |" -ForegroundColor Cyan
-    Write-Host "=================================================================╝" -ForegroundColor Cyan
+    Write-Host "==================================================================" -ForegroundColor Cyan
     Write-Host ""
 }
 
