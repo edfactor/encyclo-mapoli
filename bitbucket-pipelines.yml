@@ -959,36 +959,95 @@ pipelines:
                           exit 1
                       }
 
+                      # Download the installer locally first (runner has internet access)
+                      $downloadUrl = "https://builds.dotnet.microsoft.com/dotnet/aspnetcore/Runtime/10.0.0/dotnet-hosting-10.0.0-win.exe"
+                      $localInstallerPath = "$env:TEMP\dotnet-hosting-10.0.0-win.exe"
+                      
+                      Write-Host "Downloading .NET 10 Hosting Bundle locally..." -ForegroundColor Cyan
+                      try {
+                          Invoke-WebRequest -Uri $downloadUrl -OutFile $localInstallerPath -ErrorAction Stop
+                          $fileSize = (Get-Item $localInstallerPath).Length / 1MB
+                          Write-Host "[OK] Downloaded $('{0:N2}' -f $fileSize) MB" -ForegroundColor Green
+                      }
+                      catch {
+                          Write-Error "Failed to download installer: $_"
+                          exit 1
+                      }
+
                       # Create remote session (similar to webDeploy.ps1 approach)
                       try {
                           $session = New-PSSession $targetServer
                           
-                          # Copy script to remote server temp location
-                          $remoteTempPath = "C:\temp\Install-DotNetHostingBundle.ps1"
+                          # Copy installer and script to remote server temp location
+                          $remoteInstallerPath = "C:\temp\dotnet-hosting-10.0.0-win.exe"
+                          $remoteScriptPath = "C:\temp\Install-DotNetHostingBundle.ps1"
+                          
                           Invoke-Command -Session $session -ScriptBlock {
                               if (-not (Test-Path "C:\temp")) {
                                   New-Item -ItemType Directory -Path "C:\temp" -Force | Out-Null
                               }
                           }
-                          Copy-Item -ToSession $session -Path $scriptPath -Destination $remoteTempPath -Force
+                          
+                          Write-Host "Copying files to remote server..." -ForegroundColor Cyan
+                          Copy-Item -ToSession $session -Path $localInstallerPath -Destination $remoteInstallerPath -Force
+                          Copy-Item -ToSession $session -Path $scriptPath -Destination $remoteScriptPath -Force
+                          Write-Host "[OK] Files copied to remote server" -ForegroundColor Green
                           
                           # Execute hosting bundle installation on remote machine
                           $forceFlag = ($env:ForceReinstall -eq 'true')
                           $result = Invoke-Command -Session $session -ScriptBlock {
-                              param($Force)
+                              param($Force, $InstallerPath)
                               
-                              # Run the installer script locally (no ComputerName since we're already on the remote machine)
-                              if ($Force) {
-                                  & C:\temp\Install-DotNetHostingBundle.ps1 -Force
-                              } else {
-                                  & C:\temp\Install-DotNetHostingBundle.ps1
+                              # Run the installer directly (skip download since we already have the file)
+                              Write-Host ""
+                              Write-Host "Running .NET 10 Hosting Bundle installer..." -ForegroundColor Cyan
+                              
+                              try {
+                                  $process = Start-Process -FilePath $InstallerPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -PassThru
+                                  
+                                  if ($process.ExitCode -eq 0) {
+                                      Write-Host "[OK] Installation completed successfully (exit code: 0)" -ForegroundColor Green
+                                      
+                                      # Verify installation
+                                      Write-Host ""
+                                      Write-Host "Verifying installation..." -ForegroundColor Cyan
+                                      $dotnetInfo = & dotnet --info 2>&1 | Out-String
+                                      
+                                      $hasAspNetCore = $dotnetInfo -match "Microsoft\.AspNetCore\.App 10\.0\.0"
+                                      $hasNETCore = $dotnetInfo -match "Microsoft\.NETCore\.App 10\.0\.0"
+                                      
+                                      if ($hasAspNetCore -and $hasNETCore) {
+                                          Write-Host "[OK] .NET 10.0.0 Runtime verified" -ForegroundColor Green
+                                          Write-Host "  - Microsoft.AspNetCore.App 10.0.0: Found" -ForegroundColor Green
+                                          Write-Host "  - Microsoft.NETCore.App 10.0.0: Found" -ForegroundColor Green
+                                      } else {
+                                          Write-Host "[!] Verification incomplete" -ForegroundColor Yellow
+                                          if ($hasAspNetCore) { Write-Host "  - Microsoft.AspNetCore.App 10.0.0: Found" -ForegroundColor Yellow }
+                                          if ($hasNETCore) { Write-Host "  - Microsoft.NETCore.App 10.0.0: Found" -ForegroundColor Yellow }
+                                      }
+                                      
+                                      # Restart IIS
+                                      Write-Host ""
+                                      Write-Host "Restarting IIS..." -ForegroundColor Cyan
+                                      iisreset /restart | Out-Null
+                                      Write-Host "[OK] IIS restarted" -ForegroundColor Green
+                                      
+                                      return 0
+                                  } else {
+                                      Write-Host "[X] Installation failed with exit code: $($process.ExitCode)" -ForegroundColor Red
+                                      return $process.ExitCode
+                                  }
                               }
-                              
-                              # Cleanup
-                              Remove-Item -Path C:\temp\Install-DotNetHostingBundle.ps1 -Force -ErrorAction SilentlyContinue
-                              
-                              return $LASTEXITCODE
-                          } -ArgumentList $forceFlag
+                              catch {
+                                  Write-Host "[X] Installation error: $_" -ForegroundColor Red
+                                  return 1
+                              }
+                              finally {
+                                  # Cleanup
+                                  Remove-Item -Path $InstallerPath -Force -ErrorAction SilentlyContinue
+                                  Remove-Item -Path C:\temp\Install-DotNetHostingBundle.ps1 -Force -ErrorAction SilentlyContinue
+                              }
+                          } -ArgumentList $forceFlag, $remoteInstallerPath
                           
                           if ($result -ne 0) {
                               Write-Error "Hosting bundle installation failed with exit code: $result"
@@ -998,6 +1057,8 @@ pipelines:
                           Write-Host "[OK] .NET 10 Hosting Bundle installation completed" -ForegroundColor Green
                       }
                       finally {
+                          # Cleanup local file
+                          Remove-Item -Path $localInstallerPath -Force -ErrorAction SilentlyContinue
                           Remove-PSSession -Session $session -ErrorAction SilentlyContinue
                       }
                   }
