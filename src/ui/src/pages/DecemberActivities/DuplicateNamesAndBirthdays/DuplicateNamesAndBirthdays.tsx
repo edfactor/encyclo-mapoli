@@ -1,5 +1,5 @@
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { Alert, Box, Button, Chip, CircularProgress, Divider, Grid } from "@mui/material";
+import { Alert, Box, Button, Chip, CircularProgress, Divider, FormControlLabel, Grid, Switch } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useRef, useState } from "react";
 import { Page } from "smart-ui-library";
@@ -10,7 +10,8 @@ import useDuplicateNamesAndBirthdays from "./hooks/useDuplicateNamesAndBirthdays
 
 const DuplicateNamesAndBirthdays = () => {
   const componentRef = useRef<HTMLDivElement>(null);
-  const { searchResults, isSearching, pagination, showData, hasResults } = useDuplicateNamesAndBirthdays();
+  const [includeFictionalSsnPairs, setIncludeFictionalSsnPairs] = useState(false);
+  const { searchResults, isSearching, pagination, showData, hasResults } = useDuplicateNamesAndBirthdays(includeFictionalSsnPairs);
   const [refreshCache, { isLoading: isRefreshing }] = useRefreshDuplicateNamesAndBirthdaysCacheMutation();
   const [refreshMessage, setRefreshMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -28,6 +29,11 @@ const DuplicateNamesAndBirthdays = () => {
         text: "Failed to request cache refresh. Please try again later."
       });
     }
+  };
+
+  const handleToggleFictionalSsn = (_event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    setIncludeFictionalSsnPairs(checked);
+    pagination.resetPagination();
   };
 
   const renderActionNode = () => {
@@ -64,14 +70,28 @@ const DuplicateNamesAndBirthdays = () => {
               className="bg-dsm-grey-hover"
             />
           </Box>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<RefreshIcon />}
-            onClick={handleRefreshCache}
-            disabled={isRefreshing}>
-            {isRefreshing ? "Refreshing..." : "Refresh Cache"}
-          </Button>
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={2}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={includeFictionalSsnPairs}
+                  onChange={handleToggleFictionalSsn}
+                />
+              }
+              label="Include Fictional SSN Pairs"
+            />
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<RefreshIcon />}
+              onClick={handleRefreshCache}
+              disabled={isRefreshing}>
+              {isRefreshing ? "Refreshing..." : "Refresh Cache"}
+            </Button>
+          </Box>
         </Grid>
 
         {/* Refresh Message */}

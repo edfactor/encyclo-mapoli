@@ -47,6 +47,7 @@ export interface DuplicateSSNsRequestDto extends ProfitYearRequest {
 
 export interface DuplicateNameAndBirthdayRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
+  includeFictionalSsnPairs?: boolean;
 }
 
 export interface DuplicateNameBirthdayAddress {
