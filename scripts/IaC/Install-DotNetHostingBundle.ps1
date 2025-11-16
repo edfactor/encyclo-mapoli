@@ -69,9 +69,9 @@ function Write-Header {
     param([string]$Title)
     
     Write-Host ""
-    Write-Host "╔════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║  $($Title.PadRight(62))  ║" -ForegroundColor Cyan
-    Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "=================================================================╗" -ForegroundColor Cyan
+    Write-Host "|  $($Title.PadRight(62))  |" -ForegroundColor Cyan
+    Write-Host "=================================================================╝" -ForegroundColor Cyan
     Write-Host ""
 }
 
@@ -79,28 +79,28 @@ function Write-Step {
     [CmdletBinding()]
     param([string]$Message)
     
-    Write-Host "▶ $Message" -ForegroundColor Yellow
+    Write-Host "> $Message" -ForegroundColor Yellow
 }
 
 function Write-Success {
     [CmdletBinding()]
     param([string]$Message)
     
-    Write-Host "✓ $Message" -ForegroundColor Green
+    Write-Host "[OK] $Message" -ForegroundColor Green
 }
 
 function Write-Warning-Custom {
     [CmdletBinding()]
     param([string]$Message)
     
-    Write-Host "⚠ $Message" -ForegroundColor Yellow
+    Write-Host "[!] $Message" -ForegroundColor Yellow
 }
 
 function Write-Error-Custom {
     [CmdletBinding()]
     param([string]$Message)
     
-    Write-Host "✗ $Message" -ForegroundColor Red
+    Write-Host "[X] $Message" -ForegroundColor Red
 }
 
 function Test-AdminPrivileges {
@@ -239,7 +239,7 @@ function Install-HostingBundleRemote {
         }
         
         try {
-            Write-Host "  → Downloading to $InstallPath on $env:COMPUTERNAME" -ForegroundColor Yellow
+            Write-Host "  -> Downloading to $InstallPath on $env:COMPUTERNAME" -ForegroundColor Yellow
             $ProgressPreference = 'SilentlyContinue'
             Invoke-WebRequest -Uri $Url -OutFile $InstallPath -ErrorAction Stop
             
@@ -247,19 +247,19 @@ function Install-HostingBundleRemote {
                 throw "Downloaded file not found"
             }
             
-            Write-Host "  ✓ Download complete, starting installation" -ForegroundColor Green
+            Write-Host "  [OK] Download complete, starting installation" -ForegroundColor Green
             
             $process = Start-Process -FilePath $InstallPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -PassThru
             
             if ($process.ExitCode -eq 0) {
-                Write-Host "  ✓ Installation completed successfully" -ForegroundColor Green
+                Write-Host "  [OK] Installation completed successfully" -ForegroundColor Green
                 return $true
             } else {
                 throw "Installer exited with code $($process.ExitCode)"
             }
         }
         catch {
-            Write-Host "  ✗ Error: $_" -ForegroundColor Red
+            Write-Host "  [X] Error: $_" -ForegroundColor Red
             return $false
         }
     }
@@ -344,20 +344,20 @@ function Restart-IIS {
     
     $scriptBlock = {
         try {
-            Write-Host "  → Stopping IIS" -ForegroundColor Yellow
+            Write-Host "  -> Stopping IIS" -ForegroundColor Yellow
             Stop-WebAppPool -Name "*" -ErrorAction SilentlyContinue
             iisreset /stop | Out-Null
             
             Start-Sleep -Seconds 2
             
-            Write-Host "  → Starting IIS" -ForegroundColor Yellow
+            Write-Host "  -> Starting IIS" -ForegroundColor Yellow
             iisreset /start | Out-Null
             
-            Write-Host "  ✓ IIS restarted successfully" -ForegroundColor Green
+            Write-Host "  [OK] IIS restarted successfully" -ForegroundColor Green
             return $true
         }
         catch {
-            Write-Host "  ✗ Error restarting IIS: $_" -ForegroundColor Red
+            Write-Host "  [X] Error restarting IIS: $_" -ForegroundColor Red
             return $false
         }
     }
@@ -467,7 +467,7 @@ if (-not (Restart-IIS -ComputerName $ComputerName -Credential $Credential)) {
 
 # Summary
 Write-Host ""
-Write-Host "═════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Success ".NET 10 Hosting Bundle installation completed successfully!"
 Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor Cyan
@@ -476,5 +476,5 @@ Write-Host "  2. Create or update your ASP.NET Core application in IIS" -Foregro
 Write-Host "  3. Test your application endpoints" -ForegroundColor White
 Write-Host ""
 Write-Host "Documentation: https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/" -ForegroundColor Cyan
-Write-Host "═════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""

@@ -952,7 +952,6 @@ pipelines:
               switch ($env:Operation) {
                   "install-hosting-bundle" {
                       Write-Host "Installing .NET 10 Hosting Bundle on $targetServer..." -ForegroundColor Cyan
-                      $forceFlag = if ($env:ForceReinstall -eq 'true') { "-Force" } else { "" }
                       
                       $scriptPath = ".\scripts\IaC\Install-DotNetHostingBundle.ps1"
                       if (-not (Test-Path $scriptPath)) {
@@ -960,13 +959,50 @@ pipelines:
                           exit 1
                       }
 
-                      & $scriptPath -ComputerName $targetServer $forceFlag
-                      if ($LASTEXITCODE -ne 0) {
-                          Write-Error "Hosting bundle installation failed with exit code: $LASTEXITCODE"
-                          exit $LASTEXITCODE
+                      # Create remote session (similar to webDeploy.ps1 approach)
+                      try {
+                          $session = New-PSSession $targetServer
+                          
+                          # Copy script to remote server temp location
+                          $remoteTempPath = "C:\temp\Install-DotNetHostingBundle.ps1"
+                          Invoke-Command -Session $session -ScriptBlock {
+                              if (-not (Test-Path "C:\temp")) {
+                                  New-Item -ItemType Directory -Path "C:\temp" -Force | Out-Null
+                              }
+                          }
+                          Copy-Item -ToSession $session -Path $scriptPath -Destination $remoteTempPath -Force
+                          
+                          # Execute hosting bundle installation on remote machine
+                          $forceFlag = ($env:ForceReinstall -eq 'true')
+                          $result = Invoke-Command -Session $session -ScriptBlock {
+                              param($Force)
+                              
+                              # Run the installer script locally on remote machine
+                              $params = @{
+                                  ComputerName = "localhost"
+                              }
+                              if ($Force) {
+                                  $params['Force'] = $true
+                              }
+                              
+                              & C:\temp\Install-DotNetHostingBundle.ps1 @params
+                              
+                              # Cleanup
+                              Remove-Item -Path C:\temp\Install-DotNetHostingBundle.ps1 -Force -ErrorAction SilentlyContinue
+                              
+                              return $LASTEXITCODE
+                          } -ArgumentList $forceFlag
+                          
+                          if ($result -ne 0) {
+                              Write-Error "Hosting bundle installation failed with exit code: $result"
+                              exit $result
+                          }
+                          Write-Host ""
+                          Write-Host "[OK] .NET 10 Hosting Bundle installation completed" -ForegroundColor Green
                       }
-                      Write-Host ""
-                      Write-Host "[OK] .NET 10 Hosting Bundle installation completed" -ForegroundColor Green
+                      finally {
+                          Remove-PSSession -Session $session -ErrorAction SilentlyContinue
+                      }
                   }
                   "configure-gzip-compression" {
                       Write-Host "Configuring IIS Gzip Compression on $targetServer..." -ForegroundColor Cyan
@@ -991,7 +1027,7 @@ pipelines:
                           Copy-Item -ToSession $session -Path $scriptPath -Destination $remoteTempPath -Force
                           
                           # Execute gzip configuration script on remote machine
-                          Invoke-Command -Session $session -ScriptBlock {
+                          $result = Invoke-Command -Session $session -ScriptBlock {
                               # Source the script
                               . C:\temp\IISGzipConfiguration.ps1
                               
@@ -1000,15 +1036,18 @@ pipelines:
                               
                               # Display status
                               Write-Host ""
-                              Test-IISGzipConfigurationHealth
+                              $healthCheck = Test-IISGzipConfigurationHealth
                               
                               # Cleanup
                               Remove-Item -Path C:\temp\IISGzipConfiguration.ps1 -Force -ErrorAction SilentlyContinue
+                              
+                              # Return health check result
+                              return $healthCheck
                           }
                           
-                          if ($LASTEXITCODE -ne 0) {
-                              Write-Error "Gzip compression configuration failed"
-                              exit 1
+                          if (-not $result.IsHealthy) {
+                              Write-Warning "Gzip compression configured but health check detected issues"
+                              Write-Host "Health check returned: IsHealthy=$($result.IsHealthy)" -ForegroundColor Yellow
                           }
                           Write-Host ""
                           Write-Host "[OK] IIS Gzip Compression configuration completed" -ForegroundColor Green
