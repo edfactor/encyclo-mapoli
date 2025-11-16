@@ -981,10 +981,19 @@ pipelines:
                       try {
                           $session = New-PSSession $targetServer
                           
-                          # Copy and execute gzip configuration script on remote machine
+                          # Copy script to remote server temp location
+                          $remoteTempPath = "C:\temp\IISGzipConfiguration.ps1"
                           Invoke-Command -Session $session -ScriptBlock {
-                              # Source the script on remote machine
-                              . $using:scriptPath
+                              if (-not (Test-Path "C:\temp")) {
+                                  New-Item -ItemType Directory -Path "C:\temp" -Force | Out-Null
+                              }
+                          }
+                          Copy-Item -ToSession $session -Path $scriptPath -Destination $remoteTempPath -Force
+                          
+                          # Execute gzip configuration script on remote machine
+                          Invoke-Command -Session $session -ScriptBlock {
+                              # Source the script
+                              . C:\temp\IISGzipConfiguration.ps1
                               
                               # Run initialization
                               Initialize-IISGzipCompression
@@ -992,6 +1001,9 @@ pipelines:
                               # Display status
                               Write-Host ""
                               Test-IISGzipConfigurationHealth
+                              
+                              # Cleanup
+                              Remove-Item -Path C:\temp\IISGzipConfiguration.ps1 -Force -ErrorAction SilentlyContinue
                           }
                           
                           if ($LASTEXITCODE -ne 0) {
