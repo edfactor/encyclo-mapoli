@@ -1021,9 +1021,9 @@ pipelines:
               }
 
               Write-Host ""
-              Write-Host "════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-              Write-Host "✓ IaC operation completed successfully" -ForegroundColor Green
-              Write-Host "════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+              Write-Host "================================================================" -ForegroundColor Cyan
+              Write-Host "[OK] IaC operation completed successfully" -ForegroundColor Green
+              Write-Host "================================================================" -ForegroundColor Cyan
 
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
