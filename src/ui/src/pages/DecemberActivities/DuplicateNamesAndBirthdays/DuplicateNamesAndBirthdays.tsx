@@ -1,9 +1,10 @@
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Alert, Box, Button, Chip, CircularProgress, Divider, FormControlLabel, Grid, Switch } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useRefreshDuplicateNamesAndBirthdaysCacheMutation } from "../../../reduxstore/api/YearsEndApi";
 import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
 import useDuplicateNamesAndBirthdays from "./hooks/useDuplicateNamesAndBirthdays";
@@ -11,7 +12,9 @@ import useDuplicateNamesAndBirthdays from "./hooks/useDuplicateNamesAndBirthdays
 const DuplicateNamesAndBirthdays = () => {
   const componentRef = useRef<HTMLDivElement>(null);
   const [includeFictionalSsnPairs, setIncludeFictionalSsnPairs] = useState(false);
-  const { searchResults, isSearching, pagination, showData, hasResults } = useDuplicateNamesAndBirthdays(includeFictionalSsnPairs);
+  const { searchResults, isSearching, pagination, showData, hasResults, executeSearch } =
+    useDuplicateNamesAndBirthdays(includeFictionalSsnPairs);
+  const profitYear = useDecemberFlowProfitYear();
   const [refreshCache, { isLoading: isRefreshing }] = useRefreshDuplicateNamesAndBirthdaysCacheMutation();
   const [refreshMessage, setRefreshMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -35,6 +38,20 @@ const DuplicateNamesAndBirthdays = () => {
     setIncludeFictionalSsnPairs(checked);
     pagination.resetPagination();
   };
+
+  // When the toggle changes, trigger a new search with the updated filter
+  useEffect(() => {
+    if (profitYear) {
+      executeSearch(
+        {
+          profitYear,
+          includeFictionalSsnPairs
+        },
+        "toggle"
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [includeFictionalSsnPairs]);
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
