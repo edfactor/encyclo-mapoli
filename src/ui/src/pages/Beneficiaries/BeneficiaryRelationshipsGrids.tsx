@@ -1,4 +1,4 @@
-import { TextField, Typography } from "@mui/material";
+import { Alert, Snackbar, TextField, Typography } from "@mui/material";
 import { FocusEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -34,6 +34,11 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const [deleteBeneficiaryId, setDeleteBeneficiaryId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
   const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
+  
+  // Snackbar state for percentage update feedback
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "warning">("success");
 
   // Use custom hooks for data fetching and percentage update
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
@@ -139,9 +144,26 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
 
       const result = await percentageUpdate.validateAndUpdate(id, currentValue, relationships.beneficiaryList.results);
 
-      if (!result.success && e.target.value) {
+      if (!result.success) {
+        // Show error message
+        setSnackbarMessage(result.error || "Failed to update percentage");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        
         // Restore previous value on validation failure
-        e.target.value = result.previousValue?.toString() || "";
+        if (e.target.value) {
+          e.target.value = result.previousValue?.toString() || "";
+        }
+      } else {
+        // Show success message (or warning if sum doesn't equal 100%)
+        if (result.warning) {
+          setSnackbarMessage(result.warning);
+          setSnackbarSeverity("warning");
+        } else {
+          setSnackbarMessage("Percentage updated successfully");
+          setSnackbarSeverity("success");
+        }
+        setSnackbarOpen(true);
       }
     },
     [relationships.beneficiaryList, percentageUpdate]
@@ -154,7 +176,14 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
           <TextField
             type="number"
             defaultValue={percentage}
-            onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}></TextField>
+            onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}
+            inputProps={{
+              min: 0,
+              max: 100,
+              step: 1
+            }}
+            size="small"
+          />
         </>
       );
     },
@@ -241,6 +270,20 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
             recordCount={relationships.beneficiaryList?.total}
           />
         )}
+      
+      {/* Snackbar for percentage update feedback */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
