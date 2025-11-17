@@ -72,7 +72,17 @@ public sealed class AuditService : IAuditService
         string reportJson = JsonSerializer.Serialize(response, JsonSerializerOptions.Web);
         string userName = _appUser?.UserName ?? "Unknown";
 
-        var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = reportJson } };
+        // Create archived data payload with type metadata
+        // Parse the JSON to get a JsonElement so RawData is an object, not an escaped string
+        var reportJsonElement = JsonSerializer.Deserialize<JsonElement>(reportJson);
+        var archivedPayload = new ArchivedDataPayload
+        {
+            TypeName = typeof(TResponse).AssemblyQualifiedName ?? typeof(TResponse).FullName ?? typeof(TResponse).Name,
+            RawData = reportJsonElement
+        };
+        string archivedPayloadJson = JsonSerializer.Serialize(archivedPayload, JsonSerializerOptions.Web);
+
+        var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = archivedPayloadJson } };
         var auditEvent = new AuditEvent { TableName = reportName, Operation = "Archive", UserName = userName, ChangesJson = entries };
 
         ReportChecksum checksum = new ReportChecksum
