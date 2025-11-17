@@ -2,12 +2,18 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Audit;
 
@@ -103,6 +109,69 @@ public sealed class AuditService : IAuditService
         }, cancellationToken);
 
         return response;
+    }
+
+    public Task<PaginatedResponseDto<AuditEventDto>> SearchAuditEventsAsync(
+        AuditSearchRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            var query = context.AuditEvents
+                .TagWith($"AuditSearch-GetEvents-Filters-Table:{request.TableName}-Operation:{request.Operation}-User:{request.UserName}")
+                .AsQueryable();
+
+            // Apply LIKE filters for string fields
+            if (!string.IsNullOrWhiteSpace(request.TableName))
+            {
+                query = query.Where(e => EF.Functions.Like(e.TableName ?? "", $"%{request.TableName}%"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Operation))
+            {
+                query = query.Where(e => EF.Functions.Like(e.Operation, $"%{request.Operation}%"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.UserName))
+            {
+                query = query.Where(e => EF.Functions.Like(e.UserName, $"%{request.UserName}%"));
+            }
+
+            // Apply date range filters
+            if (request.StartTime.HasValue)
+            {
+                query = query.Where(e => e.CreatedAt >= request.StartTime.Value);
+            }
+
+            if (request.EndTime.HasValue)
+            {
+                query = query.Where(e => e.CreatedAt <= request.EndTime.Value);
+            }
+
+            // Project to DTO
+            var dtoQuery = query.Select(e => new AuditEventDto
+            {
+                AuditEventId = e.Id,
+                TableName = e.TableName,
+                Operation = e.Operation,
+                PrimaryKey = e.PrimaryKey,
+                UserName = e.UserName,
+                CreatedAt = e.CreatedAt,
+                // Only include ChangesJson when TableName is "NAVIGATION"
+                ChangesJson = e.TableName == "NAVIGATION"
+                    ? e.ChangesJson!.Select(c => new AuditChangeEntryDto
+                    {
+                        Id = c.Id,
+                        ColumnName = c.ColumnName,
+                        OriginalValue = c.OriginalValue,
+                        NewValue = c.NewValue
+                    }).ToList()
+                    : null
+            });
+
+            // Apply pagination and sorting
+            return await dtoQuery.ToPaginationResultsAsync(request, cancellationToken);
+        }, cancellationToken);
     }
 
     public static IEnumerable<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> ToKeyValuePairs<TReport>(TReport obj)
