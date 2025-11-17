@@ -70,11 +70,8 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
                 {
                     _logger.LogWarning(2, "Outside the test environment");
                     string dupQuery =
-                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER
-                              FROM DEMOGRAPHIC
-                              WHERE NOT EXISTS (SELECT /*+ INDEX(fs) */ 1
-                                                FROM FAKE_SSNS fs
-                                                WHERE fs.SSN = DEMOGRAPHIC.SSN))
+                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER, SSN
+                              FROM DEMOGRAPHIC)
 SELECT /*+ USE_HASH(p1 p2) */ p1.FULL_NAME as FullName, p2.BADGE_NUMBER MatchedId
 FROM FILTERED_DEMOGRAPHIC p1
          JOIN FILTERED_DEMOGRAPHIC p2
@@ -142,6 +139,30 @@ FROM FILTERED_DEMOGRAPHIC p1
                 _logger.LogWarning(5, "Calling ToPaginationResultsAsync");
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             }, cancellationToken);
+
+            // Load fake SSNs and SSNs with change history before projection (so we can mark before masking)
+            // Treat changed SSNs the same as fake SSNs - they typically indicate a fake SSN was assigned upstream
+            var ssnsToExclude = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                // Get all fake SSNs
+                var fakeSsns = await ctx.FakeSsns
+                    .TagWith("GetFakeSsns-DuplicateNamesAndBirthdays")
+                    .Select(f => f.Ssn)
+                    .ToHashSetAsync(cancellationToken);
+
+                // Get all SSNs that have change history (treat as fake/problematic)
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var changedSsns = await demographics
+                    .TagWith("GetChangedSsns-DuplicateNamesAndBirthdays")
+                    .Where(d => d.DemographicSsnChangeHistories.Any())
+                    .Select(d => d.Ssn)
+                    .ToHashSetAsync(cancellationToken);
+
+                fakeSsns.UnionWith(changedSsns);
+                return fakeSsns;
+            }, cancellationToken);
+
+            // Project and mark IsFakeSsn BEFORE masking SSN
             var projectedResults = results.Results.Select(r => new DuplicateNamesAndBirthdaysResponse
             {
                 BadgeNumber = r.BadgeNumber,
@@ -163,7 +184,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                 HoursCurrentYear = r.HoursCurrentYear,
                 IncomeCurrentYear = r.IncomeCurrentYear,
                 EmploymentStatusName = r.EmploymentStatusName ?? "",
-                IsExecutive = r.PayFrequencyId == PayFrequency.Constants.Monthly
+                IsExecutive = r.PayFrequencyId == PayFrequency.Constants.Monthly,
+                IsFakeSsn = ssnsToExclude.Contains(r.Ssn) // Mark based on unmasked SSN (includes fake and changed SSNs)
             }).ToList();
 
             foreach (var r in projectedResults)
@@ -226,12 +248,20 @@ FROM FILTERED_DEMOGRAPHIC p1
                 return null;
             }
 
+            // Filter out fake SSN pairs if this is a DuplicateNamesAndBirthdaysRequest with filtering requested
+            var results = cachedResponse.Data.Results;
+            if (request is DuplicateNamesAndBirthdaysRequest dRequest && !dRequest.IncludeFictionalSsnPairs)
+            {
+                results = results.Where(r => !r.IsFakeSsn).ToList();
+                _logger.LogInformation("Filtered cached results to exclude {FilteredCount} records with fictional SSNs",
+                    cachedResponse.Data.Results.Count() - results.Count());
+            }
 
             // Apply pagination to the sorted data
             var skip = request.Skip ?? 0;
             var take = request.Take ?? byte.MaxValue; // Default to byte.MaxValue if not specified
 
-            var paginatedResults = await cachedResponse.Data.Results.AsQueryable().ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
+            var paginatedResults = await results.AsQueryable().ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
 
             return new DuplicateNamesAndBirthdaysCachedResponse
             {
