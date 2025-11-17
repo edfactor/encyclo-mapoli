@@ -52,5 +52,9 @@ public sealed class AuditEventMap : IEntityTypeConfiguration<AuditEvent>
                 (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
                 c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                 c => c == null ? null : c.ToList()));
+
+        _ = builder.Property(e => e.ChangesHash)
+            .HasMaxLength(64)
+            .HasColumnName("CHANGES_HASH");
     }
 }
