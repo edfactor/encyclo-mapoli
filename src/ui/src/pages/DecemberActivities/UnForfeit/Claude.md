@@ -146,7 +146,7 @@ const schema = yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
+    "Date must be equal to or greater than begin date"
   )
     .required()
     .test("is-too-early", "Insufficient data for dates before 2024", (value) => {
