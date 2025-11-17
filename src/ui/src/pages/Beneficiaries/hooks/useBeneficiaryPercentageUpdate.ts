@@ -97,7 +97,7 @@ export const useBeneficiaryPercentageUpdate = (onUpdateSuccess?: () => void): Us
         return {
           success: false,
           previousValue,
-          error: "Percentage cannot exceed 100%."
+          error: `Percentage cannot exceed 100%. You entered ${newPercentage}%.`
         };
       }
 
