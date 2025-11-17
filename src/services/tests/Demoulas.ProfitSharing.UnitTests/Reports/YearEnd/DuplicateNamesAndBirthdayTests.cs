@@ -17,7 +17,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
 {
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly ProfitYearRequest _defaultRequest = new() { ProfitYear = 2023, Skip = 0, Take = byte.MaxValue };
+    private readonly DuplicateNamesAndBirthdaysRequest _defaultRequest = new() { ProfitYear = 2023, Skip = 0, Take = byte.MaxValue, IncludeFictionalSsnPairs = false };
     private const byte DuplicateRowCount = 5;
 
     public DuplicateNamesAndBirthdayTests(ITestOutputHelper testOutputHelper)
@@ -30,10 +30,10 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-152 : Detects exact name and birthday matches")]
     public async Task GetDuplicateNamesAndBirthdays_ExactMatches_ReturnsResults()
     {
-        var request = new ProfitYearRequest { ProfitYear = _defaultRequest.ProfitYear, Take = 1000, Skip = 0 };
+        var request = new DuplicateNamesAndBirthdaysRequest { ProfitYear = _defaultRequest.ProfitYear, Take = 1000, Skip = 0, IncludeFictionalSsnPairs = false };
         await CreateExactDuplicateRecords();
 
-        var response = await ApiClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, ProfitYearRequest, ReportResponseBase<DuplicateNamesAndBirthdaysResponse>>(request);
+        var response = await ApiClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, DuplicateNamesAndBirthdaysRequest, ReportResponseBase<DuplicateNamesAndBirthdaysResponse>>(request);
 
         response.Result.ShouldNotBeNull();
         response.Result.Response.Results.Count().ShouldBeGreaterThanOrEqualTo(DuplicateRowCount);
@@ -43,10 +43,10 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-152 : Detects similar names with same birthdays")]
     public async Task GetDuplicateNamesAndBirthdays_SimilarNames_ReturnsResults()
     {
-        var request = new ProfitYearRequest { ProfitYear = _defaultRequest.ProfitYear, Take = 1000, Skip = 0 };
+        var request = new DuplicateNamesAndBirthdaysRequest { ProfitYear = _defaultRequest.ProfitYear, Take = 1000, Skip = 0, IncludeFictionalSsnPairs = false };
         await CreateSimilarNameRecords();
 
-        var response = await ApiClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, ProfitYearRequest, ReportResponseBase<DuplicateNamesAndBirthdaysResponse>>(request);
+        var response = await ApiClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, DuplicateNamesAndBirthdaysRequest, ReportResponseBase<DuplicateNamesAndBirthdaysResponse>>(request);
 
         response.Result.ShouldNotBeNull();
         response.Result.Response.Results.Count().ShouldBeGreaterThanOrEqualTo(2);
@@ -56,10 +56,10 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-152 : Detects matches with close birth dates")]
     public async Task GetDuplicateNamesAndBirthdays_CloseBirthDates_ReturnsResults()
     {
-        var request = new ProfitYearRequest { ProfitYear = _defaultRequest.ProfitYear, Take = 1000, Skip = 0 };
+        var request = new DuplicateNamesAndBirthdaysRequest { ProfitYear = _defaultRequest.ProfitYear, Take = 1000, Skip = 0, IncludeFictionalSsnPairs = false };
         await CreateCloseBirthDateRecords();
 
-        var response = await ApiClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, ProfitYearRequest, ReportResponseBase<DuplicateNamesAndBirthdaysResponse>>(request);
+        var response = await ApiClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, DuplicateNamesAndBirthdaysRequest, ReportResponseBase<DuplicateNamesAndBirthdaysResponse>>(request);
 
         response.Result.ShouldNotBeNull();
         response.Result.Response.Results.Count().ShouldBeGreaterThanOrEqualTo(2);
@@ -70,9 +70,9 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
     public async Task GetDuplicateNamesAndBirthdays_WithPagination_ReturnsSingleResult()
     {
         await CreateExactDuplicateRecords();
-        var request = new ProfitYearRequest { ProfitYear = _defaultRequest.ProfitYear, Skip = 0, Take = 1 };
+        var request = new DuplicateNamesAndBirthdaysRequest { ProfitYear = _defaultRequest.ProfitYear, Skip = 0, Take = 1, IncludeFictionalSsnPairs = false };
 
-        var response = await ApiClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, ProfitYearRequest, ReportResponseBase<DuplicateNamesAndBirthdaysResponse>>(request);
+        var response = await ApiClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, DuplicateNamesAndBirthdaysRequest, ReportResponseBase<DuplicateNamesAndBirthdaysResponse>>(request);
 
         response.Result.ShouldNotBeNull();
         response.Result.Response.Results.Count().ShouldBe(1);
@@ -104,7 +104,7 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
 
             await context.SaveChangesAsync(CancellationToken.None);
 
-            var response = await DownloadClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, ProfitYearRequest, DuplicateNamesAndBirthdaysResponse>(_defaultRequest);
+            var response = await DownloadClient.GETAsync<DuplicateNamesAndBirthdaysEndpoint, DuplicateNamesAndBirthdaysRequest, DuplicateNamesAndBirthdaysResponse>(_defaultRequest);
 
             string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             content.ShouldNotBeNullOrEmpty();
