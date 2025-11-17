@@ -121,20 +121,20 @@ public sealed class AuditService : IAuditService
                 .TagWith($"AuditSearch-GetEvents-Filters-Table:{request.TableName}-Operation:{request.Operation}-User:{request.UserName}")
                 .AsQueryable();
 
-            // Apply LIKE filters for string fields
+            // Apply LIKE filters for string fields (using Contains for testability)
             if (!string.IsNullOrWhiteSpace(request.TableName))
             {
-                query = query.Where(e => EF.Functions.Like(e.TableName ?? "", $"%{request.TableName}%"));
+                query = query.Where(e => e.TableName != null && e.TableName.Contains(request.TableName));
             }
 
             if (!string.IsNullOrWhiteSpace(request.Operation))
             {
-                query = query.Where(e => EF.Functions.Like(e.Operation, $"%{request.Operation}%"));
+                query = query.Where(e => e.Operation.Contains(request.Operation));
             }
 
             if (!string.IsNullOrWhiteSpace(request.UserName))
             {
-                query = query.Where(e => EF.Functions.Like(e.UserName, $"%{request.UserName}%"));
+                query = query.Where(e => e.UserName.Contains(request.UserName));
             }
 
             // Apply date range filters
