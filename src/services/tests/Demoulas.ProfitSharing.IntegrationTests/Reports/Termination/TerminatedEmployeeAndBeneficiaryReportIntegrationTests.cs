@@ -126,7 +126,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         actualText.ShouldNotBeNullOrEmpty();
         QPay066Report a = new(actualText);
 
-        string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        string expectedText = ReadEmbeddedResource(".golden.R3-QPAY066");
         QPay066Report e = new(expectedText);
 
         // Lets check the totals.

@@ -756,6 +756,7 @@ public class FrozenReportService : IFrozenReportService
                     IsEmployee = true,
                     x.StoreNumber,
                     x.PayFrequencyId,
+                    x.EmploymentStatusId,
                 });
             var beneficiaryBase = ctx.BeneficiaryContacts
 #pragma warning disable DSMPS001
@@ -772,6 +773,7 @@ public class FrozenReportService : IFrozenReportService
                     IsEmployee = false,
                     StoreNumber = (short)0,
                     PayFrequencyId = (byte)0,
+                    EmploymentStatusId = (char)0,
                 });
             var
                 members = demoBase.Union(
@@ -784,8 +786,8 @@ public class FrozenReportService : IFrozenReportService
                     on m.Ssn equals bal.Ssn into balTmp
                 from bal in balTmp.DefaultIfEmpty()
 
-                    // ToBeDone: This should be using the frozen for year "lastYear"
-                join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastYear /*Transactions Up To*/, lyStartEnd.FiscalBeginDate)
+                // Get "before" balance at END of last year
+                join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastYear /*Transactions Up To*/, lyStartEnd.FiscalEndDate)
                     on m.Ssn equals lyBalTbl.Ssn into lyBalTmp
                 from lyBal in lyBalTmp.DefaultIfEmpty()
 
@@ -797,6 +799,19 @@ public class FrozenReportService : IFrozenReportService
                     on m.DemographicId equals ppTbl.DemographicId into ppTmp
                 from pp in ppTmp.DefaultIfEmpty()
 
+                // COBOL PAY450 only processes employees with PayProfit rows, which are created
+                // when there's actual profit sharing activity (contributions, years, balance).
+                // SMART creates PayProfit rows eagerly for all demographics synced from Oracle HCM.
+                // To match READY behavior, filter to only employees with actual profit sharing history.
+                // Additionally, COBOL requires PAYPROFIT record exists for employees (WS-NOT-ON-FILE check at line 678).
+                // Beneficiaries don't have PayProfit records, so they only need balance history.
+                // COBOL iterates through PROFIT_DETAIL records (line 645-662), so only SSNs with PROFIT_DETAIL are processed.
+                where bal != null &&
+                      (!m.IsEmployee || (pp != null && lyPp != null)) &&
+                      (bal.YearsInPlan > 0 || bal.CurrentBalance != 0 ||
+                       (lyBal != null && (lyBal.YearsInPlan > 0 || lyBal.CurrentBalance != 0))) &&
+                      ctx.ProfitDetails.Any(pd => pd.Ssn == m.Ssn && pd.ProfitYear <= req.ProfitYear)
+
                 select new
                 {
                     m.BadgeNumber,
@@ -806,7 +821,7 @@ public class FrozenReportService : IFrozenReportService
                     m.IsEmployee,
                     IsExecutive = m.PayFrequencyId == PayFrequency.Constants.Monthly,
 
-                    BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : 0,
+                    BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : (m.IsEmployee ? 0 : 4),
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
                     BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : (byte)0,
@@ -818,6 +833,27 @@ public class FrozenReportService : IFrozenReportService
                 }
             ).ToListAsync(
                 cancellationToken); //Have to materialize. Something in this query seems to be unable to render as an expression with the current version of the oracle provider.
+
+            // Filter to match COBOL PAY450 logic: only include records where values CHANGED
+            // COBOL checks: IF WS-OLD-PSAMT NOT EQUAL WS-PY-PS-AMT or WS-OLD-PSVAMT NOT EQUAL WS-PY-PS-VAMT
+            //                  or WS-OLD-PSYEARS NOT EQUAL WS-PY-PS-YEARS or WS-OLD-ENROLLED NOT EQUAL WS-PY-PS-ENROLLED
+            // CRITICAL: COBOL only shows records with meaningful changes. Exclude administrative-only changes where:
+            // 1. All amounts are zero (no balances or vested amounts)
+            // 2. EITHER:
+            //    a) Enrollment-only change (e.g., 2→4 forfeitures with no balance), OR
+            //    b) Years decrease (recalculation correction) with no enrollment change
+            // These are administrative status changes that don't represent actual profit sharing activity.
+            baseQuery = baseQuery.Where(x =>
+                // Has amount changes (keep if any amount changed)
+                x.BeforeProfitSharingAmount != x.AfterProfitSharingAmount ||
+                x.BeforeVestedProfitSharingAmount != x.AfterVestedProfitSharingAmount ||
+                // Has years increase (keep if years went up)
+                x.BeforeYearsInPlan < x.AfterYearsInPlan ||
+                // Has enrollment change with non-zero amounts (keep meaningful enrollment changes)
+                (x.BeforeEnrollmentId != x.AfterEnrollmentId &&
+                 (x.BeforeProfitSharingAmount != 0 || x.AfterProfitSharingAmount != 0 ||
+                  x.BeforeVestedProfitSharingAmount != 0 || x.AfterVestedProfitSharingAmount != 0))
+            ).ToList();
 
             var totals = baseQuery.GroupBy(x => true).Select(x => new
             {

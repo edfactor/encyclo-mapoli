@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
@@ -13,8 +12,6 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
 
-[SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
-[SuppressMessage("Major Code Smell", "S1144:Unused private types or members should be removed")]
 public class UpdateSummaryTests : PristineBaseTest
 {
     private readonly FrozenReportService _frozenReportService;
@@ -26,53 +23,6 @@ public class UpdateSummaryTests : PristineBaseTest
     }
 
     [Fact]
-    public async Task CheckVesting()
-    {
-
-        short profitYear = 2023;
-        var calendarInfo = await CalendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, CancellationToken.None);
-
-        await DbFactory.UseReadOnlyContext(async ctx =>
-        {
-            var employeeData = await (await DemographicReaderService.BuildDemographicQuery(ctx))
-                .Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
-                .Join(TotalService.GetYearsOfService(ctx, profitYear, calendarInfo.FiscalEndDate), b => b.d.Ssn, yos => yos.Ssn, (b, pty) => new { b.d, b.pp, pty.Years })
-                .Where(b => b.pp.ProfitYear == profitYear && b.d.BadgeNumber == 700036)
-                .SingleAsync(CancellationToken.None);
-
-            int age = calendarInfo.FiscalEndDate.Year - employeeData.d.DateOfBirth.Year;
-            if (calendarInfo.FiscalEndDate < employeeData.d.DateOfBirth)
-            {
-                age--;
-            }
-            TestOutputHelper.WriteLine($"Date Of Birth: {employeeData.d.DateOfBirth} Age: {age}");
-            TestOutputHelper.WriteLine($"Termination Date: {employeeData.d.TerminationDate}");
-            TestOutputHelper.WriteLine($"Termination Code Id: {employeeData.d.TerminationCodeId}");
-
-            TestOutputHelper.WriteLine($"Enrollment Id: {employeeData.pp.EnrollmentId}");
-            TestOutputHelper.WriteLine($"ZeroContributionReasonId: {employeeData.pp.ZeroContributionReasonId}");
-            TestOutputHelper.WriteLine($"Total Hours {employeeData.pp.CurrentHoursYear + employeeData.pp.HoursExecutive}");
-
-            TestOutputHelper.WriteLine($"YEARS = " + employeeData.Years);
-
-            var rslt = await TotalService.TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
-                .Where(d => d.Ssn == employeeData.d.Ssn)
-                .FirstOrDefaultAsync();
-            TestOutputHelper.WriteLine($"Current Balance {rslt!.CurrentBalance}");
-            TestOutputHelper.WriteLine($"Vested  Balance {rslt.VestedBalance}");
-
-            // When everything is correctly arranged... aka 2023 Enrollment and ZeroContribution Rebuilt.
-            rslt.CurrentBalance.ShouldBe(3817.03m);
-            rslt.VestedBalance.ShouldBe(763.406m);
-
-            return true;
-        });
-
-        "".ShouldBe("");
-    }
-
-
-    [Fact]
     public async Task ValidateReport2()
     {
         List<Pay450Record> ready = GetReadyRecords();
@@ -82,14 +32,10 @@ public class UpdateSummaryTests : PristineBaseTest
         CountBreakdown("Ready", ready);
         CountBreakdown("Smart", smart);
 
-        // smart = smart.Where(s=>Interesting(s)).ToList()
-        smart = smart.Where(s => s.BadgeAndStore.Contains(" ") || s.BeforeAmount != 0 || s.AfterAmount != 0).ToList();
-
         List<Pay450Record> smartOnly = smart.ExceptBy(ready.Select(r => r.BadgeAndStore), r => r.BadgeAndStore).ToList();
         List<Pay450Record> readyOnly = ready.ExceptBy(smart.Select(r => r.BadgeAndStore), r => r.BadgeAndStore).ToList();
         List<Pay450Record> intersection = smart.IntersectBy(ready.Select(r => r.BadgeAndStore), r => r.BadgeAndStore).ToList();
         Dictionary<string, Pay450Record> readyByBadgeAndStore = ready.ToDictionary(k => k.BadgeAndStore, v => v);
-
 
         List<(Pay450Record Actual, Pay450Record Expected)> comparisons = new();
 
@@ -99,89 +45,87 @@ public class UpdateSummaryTests : PristineBaseTest
             Pay450Record readyIntNorm = Normalize(readyInt);
             Pay450Record smartIntNorm = Normalize(smartInt);
 
-            if (readyIntNorm.BeforeEnroll != smartIntNorm.BeforeEnroll)
-            {
-                Pay450Record readyNoBeforEnroll = readyIntNorm with { BeforeEnroll = 0 };
-                Pay450Record smartNoBeforEnroll = readyIntNorm with { BeforeEnroll = 0 };
-
-                // If everything but the before enroll is different, then lets ignore the before enroll - for now. 
-                if (readyNoBeforEnroll == smartNoBeforEnroll)
-                {
-                    readyIntNorm = readyNoBeforEnroll;
-                    smartIntNorm = smartNoBeforEnroll;
-                }
-            }
-
-            if (smartIntNorm.AfterYears == 1 && readyIntNorm.AfterYears == 1 && readyIntNorm.AfterAmount == 0 && smartIntNorm.AfterAmount == 0 && readyIntNorm.AfterEnroll == 2)
-            {
-                smartIntNorm = smartIntNorm with { AfterEnroll = 2 }; // Lazy Ready.
-            }
-
-            // These are all small amounts that are part of year 1 that involve class action amounts.
-            // I think READY has bug where it returns zero, where SMART is correct and returns a value.
-            // I think READY sees 1 year and says you have nada, where SMART digs deeper and figures out 
-            // the right amount.   Would an employee with bene money and 1 year of service who leaves see nothing?   probably only effects people with just profit code 8 and 0,
-            // having a 6 (bene amount) would cause the correct vested amount to be shown.
-            if (readyIntNorm.BeforeVested == 0 && smartIntNorm.BeforeVested != 0)
-            {
-                decimal oneHunderdedPercentAmount = await computeOneHundredPercentInterestAndClassActionAmount(ExtractBadge(smartIntNorm.BadgeAndStore), 2023);
-                if (oneHunderdedPercentAmount == smartIntNorm.BeforeVested)
-                {
-                    // Suppress displaying vesting % when the forefeit amount matches a class action amount and 100% interest. (see comment above)
-#if true
-                    smartIntNorm = smartIntNorm with { BeforeVested = 0 };
-#endif
-                }
-            }
-
             if (readyIntNorm != smartIntNorm)
             {
                 comparisons.Add((readyIntNorm, smartIntNorm));
             }
         }
 
-        int deathSkipped = 0;
         TestOutputHelper.WriteLine($"Discrepancy Count {comparisons.Count}");
-        TestOutputHelper.WriteLine(Pay450Comparisons.ToComparisonHeader() + GetHeader1());
-        int c = 0;
-        foreach ((Pay450Record readyIntNorm, Pay450Record smartIntNorm) in comparisons)
-        {
-            string beforeStatus = await VestDetailsBadgeSimple(ExtractBadge(smartIntNorm.BadgeAndStore), 2024);
-            // Skip death.
-            if (beforeStatus.Contains( /*"Z"*/ TerminationCode.Constants.Deceased))
-            {
-                deathSkipped++;
-                continue;
-            }
 
-            TestOutputHelper.WriteLine(Pay450Comparisons.ToComparisonString(readyIntNorm, smartIntNorm) + "   " + beforeStatus);
-            TestOutputHelper.WriteLine(
-                "                                                                                                                                                                                                    " +
-                await VestDetailsBadgeSimple(ExtractBadge(smartIntNorm.BadgeAndStore), 2023));
-            c++;
-            if (c > 500)
+        // Categorize discrepancies
+        var categorized = CategorizeDiscrepancies(comparisons);
+
+        TestOutputHelper.WriteLine("\n=== DISCREPANCY SUMMARY ===");
+        TestOutputHelper.WriteLine($"Total Discrepancies: {comparisons.Count}");
+        TestOutputHelper.WriteLine($"  Years of Service Mismatches: {categorized.YearsOfServiceMismatches.Count}");
+        TestOutputHelper.WriteLine($"  Negative Vested Amount Issues: {categorized.NegativeVestedIssues.Count}");
+        TestOutputHelper.WriteLine($"  Vesting Calculation Issues: {categorized.VestingCalculationIssues.Count}");
+        TestOutputHelper.WriteLine($"  Enrollment Mismatches: {categorized.EnrollmentMismatches.Count}");
+        TestOutputHelper.WriteLine($"  Other Mismatches: {categorized.OtherMismatches.Count}");
+
+        if (categorized.YearsOfServiceMismatches.Count > 0)
+        {
+            TestOutputHelper.WriteLine("\n--- Years of Service Mismatches ---");
+            foreach (var (actual, expected) in categorized.YearsOfServiceMismatches.Take(5))
             {
-                break;
+                TestOutputHelper.WriteLine($"  {expected.BadgeAndStore} {expected.Name}: " +
+                    $"Before: {expected.BeforeYears} vs {actual.BeforeYears}, " +
+                    $"After: {expected.AfterYears} vs {actual.AfterYears}");
+            }
+            if (categorized.YearsOfServiceMismatches.Count > 5)
+                TestOutputHelper.WriteLine($"  ... and {categorized.YearsOfServiceMismatches.Count - 5} more");
+        }
+
+        if (categorized.NegativeVestedIssues.Count > 0)
+        {
+            TestOutputHelper.WriteLine("\n--- Negative Vested Amount Issues ---");
+            foreach (var (actual, expected) in categorized.NegativeVestedIssues.Take(5))
+            {
+                TestOutputHelper.WriteLine($"  {expected.BadgeAndStore} {expected.Name}: " +
+                    $"Before: Expected {expected.BeforeVested:C} vs Actual {actual.BeforeVested:C}, " +
+                    $"After: Expected {expected.AfterVested:C} vs Actual {actual.AfterVested:C}");
+            }
+            if (categorized.NegativeVestedIssues.Count > 5)
+                TestOutputHelper.WriteLine($"  ... and {categorized.NegativeVestedIssues.Count - 5} more");
+        }
+
+        if (categorized.VestingCalculationIssues.Count > 0)
+        {
+            TestOutputHelper.WriteLine("\n--- Vesting Calculation Issues ---");
+            foreach (var (actual, expected) in categorized.VestingCalculationIssues)
+            {
+                TestOutputHelper.WriteLine($"  {expected.BadgeAndStore} {expected.Name}:");
+                TestOutputHelper.WriteLine($"    Before: Amt={expected.BeforeAmount:C}, Vested Expected={expected.BeforeVested:C} vs Actual={actual.BeforeVested:C}");
+                TestOutputHelper.WriteLine($"    After:  Amt={expected.AfterAmount:C}, Vested Expected={expected.AfterVested:C} vs Actual={actual.AfterVested:C}");
             }
         }
 
-        TestOutputHelper.WriteLine("Death skipped " + deathSkipped);
-
-
-        true.ShouldBeTrue();
-    }
-
-    private async Task<decimal> computeOneHundredPercentInterestAndClassActionAmount(long badgeNumber, int profitYear)
-    {
-        return await DbFactory.UseReadOnlyContext(async ctx =>
+        if (categorized.EnrollmentMismatches.Count > 0)
         {
-            Demographic? d = await ctx.Demographics.Where(d => d.BadgeNumber == badgeNumber).FirstOrDefaultAsync();
-            decimal earningsSum = await ctx.ProfitDetails
-                .Where(pd => pd.ProfitYear <= profitYear && pd.Ssn == d!.Ssn &&
-                             (pd.CommentType == CommentType.Constants.ClassAction || pd.CommentType == CommentType.Constants.OneHundredPercentEarnings))
-                .SumAsync(pd => pd.Earnings, CancellationToken.None);
-            return earningsSum;
-        });
+            TestOutputHelper.WriteLine("\n--- Enrollment Mismatches ---");
+            foreach (var (actual, expected) in categorized.EnrollmentMismatches.Take(5))
+            {
+                TestOutputHelper.WriteLine($"  {expected.BadgeAndStore} {expected.Name}: " +
+                    $"Before: {expected.BeforeEnroll} vs {actual.BeforeEnroll}, " +
+                    $"After: {expected.AfterEnroll} vs {actual.AfterEnroll}");
+            }
+            if (categorized.EnrollmentMismatches.Count > 5)
+                TestOutputHelper.WriteLine($"  ... and {categorized.EnrollmentMismatches.Count - 5} more");
+        }
+
+        int cnt = 0;
+        TestOutputHelper.WriteLine("\n=== DETAILED DISCREPANCIES (first 100) ===");
+        foreach ((Pay450Record actual, Pay450Record expected) in comparisons)
+        {
+            TestOutputHelper.WriteLine("Expect "+expected.ToString());
+            TestOutputHelper.WriteLine("Actual "+actual.ToString());
+            TestOutputHelper.WriteLine("");
+            if (cnt++ > 100)
+                break;
+        }
+
+        comparisons.Count.ShouldBe(0);
     }
 
     private Pay450Record Normalize(Pay450Record p)
@@ -191,7 +135,7 @@ public class UpdateSummaryTests : PristineBaseTest
             BeforeAmount = Math.Round(p.BeforeAmount, 2),
             BeforeVested = Math.Round(p.BeforeVested, 2),
             BeforeYears = IfNullThenZero(p.BeforeYears),
-            BeforeEnroll = IfNullThenZero(p.BeforeEnroll), //  BOBH : Why do I think it is ok to ignore this ?
+            BeforeEnroll = IfNullThenZero(p.BeforeEnroll),
 
             AfterAmount = Math.Round(p.AfterAmount, 2),
             AfterVested = Math.Round(p.AfterVested, 2),
@@ -205,18 +149,7 @@ public class UpdateSummaryTests : PristineBaseTest
     {
         return x ?? 0;
     }
-
-    private static long ExtractBadge(string smartIntBadgeAndStore)
-    {
-        int space = smartIntBadgeAndStore.IndexOf(" ");
-        if (space == -1)
-        {
-            return long.Parse(smartIntBadgeAndStore);
-        }
-
-        return long.Parse(smartIntBadgeAndStore.Substring(0, space));
-    }
-
+    
     private void CountBreakdown(string system, List<Pay450Record> p1)
     {
         int bene = 0;
@@ -239,7 +172,7 @@ public class UpdateSummaryTests : PristineBaseTest
 
     private async Task<List<Pay450Record>> GetSmartRecords()
     {
-        ProfitYearRequest pyr = new() { ProfitYear = 2024, Take = int.MaxValue, Skip = 0 };
+        ProfitYearRequest pyr = new() { ProfitYear = TestConstants.OpenProfitYear, Take = int.MaxValue, Skip = 0 };
         UpdateSummaryReportResponse r = await _frozenReportService.GetUpdateSummaryReport(pyr, CancellationToken.None);
 
         List<Pay450Record> records = [];
@@ -267,7 +200,7 @@ public class UpdateSummaryTests : PristineBaseTest
 
     public static List<Pay450Record> GetReadyRecords()
     {
-        string expectedReport = Pay443Tests.ReadEmbeddedResource("golden.R24-PAY450");
+        string expectedReport = Pay443Tests.ReadEmbeddedResource(".golden.R24-PAY450");
 
         List<string> lines = expectedReport.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Skip(1).ToList();
 
@@ -335,13 +268,7 @@ public class UpdateSummaryTests : PristineBaseTest
             return e.Message;
         }
     }
-
-    private static string GetHeader1()
-    {
-        return
-            "    ClSum         Year Age EnrollmentId Hours   EHours   TermDate   TermCode Years ZeroCont InitYear   ETVA        SSN";
-    }
-
+    
     private static string GetRow(
         decimal has2021ClassActionSum, int profitYear, int age, int enrollmentId, decimal currentHoursYear,
         decimal hoursExecutive, DateOnly? terminationDate, string terminationCodeId, int years,
@@ -363,5 +290,62 @@ public class UpdateSummaryTests : PristineBaseTest
             etva,
             ssn
         );
+    }
+
+    private static DiscrepancyCategories CategorizeDiscrepancies(List<(Pay450Record Actual, Pay450Record Expected)> comparisons)
+    {
+        var result = new DiscrepancyCategories();
+
+        foreach (var (actual, expected) in comparisons)
+        {
+            bool hasYearsMismatch = actual.BeforeYears != expected.BeforeYears || actual.AfterYears != expected.AfterYears;
+            bool hasEnrollmentMismatch = actual.BeforeEnroll != expected.BeforeEnroll || actual.AfterEnroll != expected.AfterEnroll;
+
+            // Negative vested or small vested amount clamping issues
+            bool hasNegativeVestedIssue =
+                (expected.BeforeVested < 0 && actual.BeforeVested >= 0) ||
+                (expected.AfterVested < 0 && actual.AfterVested >= 0) ||
+                (expected.BeforeVested > 0 && expected.BeforeVested < 100 && actual.BeforeVested == 0) ||
+                (expected.AfterVested > 0 && expected.AfterVested < 100 && actual.AfterVested == 0);
+
+            // Complex vesting calculation issues (large discrepancies in vested amounts)
+            bool hasVestingCalculationIssue =
+                !hasNegativeVestedIssue &&
+                (Math.Abs(expected.BeforeVested - actual.BeforeVested) > 100 ||
+                 Math.Abs(expected.AfterVested - actual.AfterVested) > 100);
+
+            // Categorize
+            if (hasYearsMismatch && !hasNegativeVestedIssue && !hasVestingCalculationIssue)
+            {
+                result.YearsOfServiceMismatches.Add((actual, expected));
+            }
+            else if (hasNegativeVestedIssue)
+            {
+                result.NegativeVestedIssues.Add((actual, expected));
+            }
+            else if (hasVestingCalculationIssue)
+            {
+                result.VestingCalculationIssues.Add((actual, expected));
+            }
+            else if (hasEnrollmentMismatch)
+            {
+                result.EnrollmentMismatches.Add((actual, expected));
+            }
+            else
+            {
+                result.OtherMismatches.Add((actual, expected));
+            }
+        }
+
+        return result;
+    }
+
+    private sealed class DiscrepancyCategories
+    {
+        public List<(Pay450Record Actual, Pay450Record Expected)> YearsOfServiceMismatches { get; } = new();
+        public List<(Pay450Record Actual, Pay450Record Expected)> NegativeVestedIssues { get; } = new();
+        public List<(Pay450Record Actual, Pay450Record Expected)> VestingCalculationIssues { get; } = new();
+        public List<(Pay450Record Actual, Pay450Record Expected)> EnrollmentMismatches { get; } = new();
+        public List<(Pay450Record Actual, Pay450Record Expected)> OtherMismatches { get; } = new();
     }
 }

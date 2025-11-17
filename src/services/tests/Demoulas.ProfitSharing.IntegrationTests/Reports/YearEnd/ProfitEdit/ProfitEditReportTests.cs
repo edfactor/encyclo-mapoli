@@ -23,6 +23,7 @@ public record Pay477Entry(
     string Name
 );
 
+// PAY447 Testing
 public class ProfitEditReportTests : PristineBaseTest
 {
     public ProfitEditReportTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
@@ -33,7 +34,7 @@ public class ProfitEditReportTests : PristineBaseTest
     public async Task UpdateTest()
     {
         // Arrange
-        const short profitYear = 2024;
+        const short profitYear = 2025;
         ProfitShareUpdateService psu = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
         ProfitShareEditService profitShareEditService = new(psu, CalendarService);
         ProfitShareUpdateRequest req = new()
@@ -43,10 +44,10 @@ public class ProfitEditReportTests : PristineBaseTest
             SortBy = "Psn",
             ProfitYear = profitYear,
             ContributionPercent = 15,
-            IncomingForfeitPercent = 4,
-            EarningsPercent = 5,
+            IncomingForfeitPercent = 0.876678m,
+            EarningsPercent = 9.280136m,
             SecondaryEarningsPercent = 0,
-            MaxAllowedContributions = 76_500,
+            MaxAllowedContributions = 57_000,
             BadgeToAdjust = 0,
             BadgeToAdjust2 = 0,
             AdjustContributionAmount = 0,
@@ -54,7 +55,7 @@ public class ProfitEditReportTests : PristineBaseTest
             AdjustIncomingForfeitAmount = 0,
             AdjustEarningsSecondaryAmount = 0
         };
-        List<Pay477Entry> readyResults = LoadReadyResults(LoadExpectedReport("pay447.txt"));
+        List<Pay477Entry> readyResults = LoadReadyResults(ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R22-PAY447"));
 
         // Act
         Stopwatch sw = Stopwatch.StartNew();
@@ -93,15 +94,23 @@ public class ProfitEditReportTests : PristineBaseTest
         for (int i = 0; i < onlyReady.Count; i++)
         {
             TestOutputHelper.WriteLine($"ONLY READY PAY447 {onlyReady[i]}");
+            if (i > 5)
+            {
+                break;
+            }
         }
 
         for (int i = 0; i < onlySmart.Count; i++)
         {
             TestOutputHelper.WriteLine($"ONLY SMART PAY447 {onlySmart[i]}");
+            if (i > 5)
+            {
+                break;
+            }
         }
 
         onlyReady.Count.ShouldBe(0);
-        onlySmart.Count.ShouldBeLessThanOrEqualTo(2);
+        onlySmart.Count.ShouldBeLessThanOrEqualTo(0);
     }
 
     private static List<Pay477Entry> LoadReadyResults(string rawPay447Report)
