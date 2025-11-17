@@ -27,7 +27,7 @@ const schema = yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
+    "Date must be equal to or greater than begin date"
   ).required("Ending Date is required"),
   // Pagination is handled separately, not part of form validation
   pagination: yup
@@ -169,7 +169,11 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
                   minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) ?? undefined}
                   maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
                 />
-                <FormHelperText error>{errors.beginningDate?.message || " "}</FormHelperText>
+                <FormHelperText
+                  error
+                  sx={{ minHeight: "20px", visibility: errors.beginningDate ? "visible" : "hidden" }}>
+                  {errors.beginningDate?.message || "\u00A0"}
+                </FormHelperText>
               </>
             )}
           />
@@ -204,7 +208,11 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
                     minDate={effectiveMinDate}
                     maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
                   />
-                  <FormHelperText error>{errors.endingDate?.message || " "}</FormHelperText>
+                  <FormHelperText
+                    error
+                    sx={{ minHeight: "20px", visibility: errors.endingDate ? "visible" : "hidden" }}>
+                    {errors.endingDate?.message || "\u00A0"}
+                  </FormHelperText>
                 </>
               );
             }}
@@ -225,7 +233,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
                   }
                   label="Exclude employees with no current or vested balance"
                 />
-                <FormHelperText> </FormHelperText>
+                <FormHelperText sx={{ minHeight: "20px" }}>{"\u00A0"}</FormHelperText>
               </>
             )}
           />
