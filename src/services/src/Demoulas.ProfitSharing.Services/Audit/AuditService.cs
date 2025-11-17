@@ -148,8 +148,17 @@ public sealed class AuditService : IAuditService
                 query = query.Where(e => e.CreatedAt <= request.EndTime.Value);
             }
 
-            // Project to DTO
-            var dtoQuery = query.Select(e => new AuditEventDto
+            // Get total count before pagination
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            // Apply pagination and get raw entities (without DTO projection)
+            var pagedEntities = await query
+                .Skip(request.Skip ?? 0)
+                .Take(request.Take ?? 50)
+                .ToListAsync(cancellationToken);
+
+            // Project to DTOs in memory after materialization
+            var dtos = pagedEntities.Select(e => new AuditEventDto
             {
                 AuditEventId = e.Id,
                 TableName = e.TableName,
@@ -159,7 +168,7 @@ public sealed class AuditService : IAuditService
                 CreatedAt = e.CreatedAt,
                 // Only include ChangesJson when TableName is "NAVIGATION"
                 ChangesJson = e.TableName == "NAVIGATION"
-                    ? e.ChangesJson!.Select(c => new AuditChangeEntryDto
+                    ? e.ChangesJson?.Select(c => new AuditChangeEntryDto
                     {
                         Id = c.Id,
                         ColumnName = c.ColumnName,
@@ -167,10 +176,14 @@ public sealed class AuditService : IAuditService
                         NewValue = c.NewValue
                     }).ToList()
                     : null
-            });
+            }).ToList();
 
-            // Apply pagination and sorting
-            return await dtoQuery.ToPaginationResultsAsync(request, cancellationToken);
+            // Return paginated response
+            return new PaginatedResponseDto<AuditEventDto>
+            {
+                Results = dtos,
+                Total = totalCount
+            };
         }, cancellationToken);
     }
 
