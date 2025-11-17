@@ -116,7 +116,8 @@ describe("UnForfeit", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     const storeAndWrapper = createMockStoreAndWrapper({
-      yearsEnd: { selectedProfitYear: 2024 }
+      yearsEnd: { selectedProfitYear: 2024 },
+      general: { isDrawerOpen: false }
     });
     wrapper = storeAndWrapper.wrapper;
   });
