@@ -34,7 +34,7 @@ const schema = yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
+    "Date must be equal to or greater than begin date"
   ).required("Ending Date is required"),
   forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
@@ -201,7 +201,11 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
-          {errors.beginningDate && <FormHelperText error>{errors.beginningDate.message}</FormHelperText>}
+          <FormHelperText
+            error
+            sx={{ minHeight: "20px", visibility: errors.beginningDate ? "visible" : "hidden" }}>
+            {errors.beginningDate?.message || "\u00A0"}
+          </FormHelperText>
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
           <Controller
@@ -224,7 +228,11 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
-          {errors.endingDate && <FormHelperText error>{errors.endingDate.message}</FormHelperText>}
+          <FormHelperText
+            error
+            sx={{ minHeight: "20px", visibility: errors.endingDate ? "visible" : "hidden" }}>
+            {errors.endingDate?.message || "\u00A0"}
+          </FormHelperText>
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
           <InputLabel sx={{ mb: 1 }}>Vested Balance</InputLabel>
@@ -243,7 +251,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                   }}
                   onBlur={field.onBlur}
                   name={field.name}
-                  inputRef={field.ref}>
+                  inputRef={field.ref}
+                  error={!!errors.vestedBalanceOperator}>
                   <MenuItem value=""></MenuItem>
                   <MenuItem value={0}>=</MenuItem>
                   <MenuItem value={1}>&lt;</MenuItem>
@@ -274,26 +283,33 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                     step: 1
                   }}
                   error={!!errors.vestedBalanceValue}
-                  helperText={errors.vestedBalanceValue?.message}
                 />
               )}
             />
           </Box>
+          <FormHelperText
+            error
+            sx={{ minHeight: "20px", visibility: errors.vestedBalanceValue || errors.vestedBalanceOperator ? "visible" : "hidden" }}>
+            {errors.vestedBalanceOperator?.message || errors.vestedBalanceValue?.message || "\u00A0"}
+          </FormHelperText>
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 6 }}>
           <Controller
             name="excludeZeroAndFullyVested"
             control={control}
             render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={field.value || false}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  />
-                }
-                label="Exclude members with: $0 Ending Balance, 100% Vested, or Forfeited"
-              />
+              <>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field.value || false}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label="Exclude members with: $0 Ending Balance, 100% Vested, or Forfeited"
+                />
+                <FormHelperText sx={{ minHeight: "20px" }}>{"\u00A0"}</FormHelperText>
+              </>
             )}
           />
         </Grid>

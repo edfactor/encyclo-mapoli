@@ -154,7 +154,7 @@ yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
+    "Date must be equal to or greater than begin date"
   ).required(),
   forfeitureStatus: yup.string().required(),
   pagination: yup
