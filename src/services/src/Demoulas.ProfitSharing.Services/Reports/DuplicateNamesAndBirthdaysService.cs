@@ -140,13 +140,26 @@ FROM FILTERED_DEMOGRAPHIC p1
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             }, cancellationToken);
 
-            // Load fake SSNs before projection (so we can mark before masking)
-            var fakeSsns = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            // Load fake SSNs and SSNs with change history before projection (so we can mark before masking)
+            // Treat changed SSNs the same as fake SSNs - they typically indicate a fake SSN was assigned upstream
+            var ssnsToExclude = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                return await ctx.FakeSsns
+                // Get all fake SSNs
+                var fakeSsns = await ctx.FakeSsns
                     .TagWith("GetFakeSsns-DuplicateNamesAndBirthdays")
                     .Select(f => f.Ssn)
                     .ToHashSetAsync(cancellationToken);
+
+                // Get all SSNs that have change history (treat as fake/problematic)
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var changedSsns = await demographics
+                    .TagWith("GetChangedSsns-DuplicateNamesAndBirthdays")
+                    .Where(d => d.DemographicSsnChangeHistories.Any())
+                    .Select(d => d.Ssn)
+                    .ToHashSetAsync(cancellationToken);
+
+                fakeSsns.UnionWith(changedSsns);
+                return fakeSsns;
             }, cancellationToken);
 
             // Project and mark IsFakeSsn BEFORE masking SSN
@@ -172,7 +185,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 IncomeCurrentYear = r.IncomeCurrentYear,
                 EmploymentStatusName = r.EmploymentStatusName ?? "",
                 IsExecutive = r.PayFrequencyId == PayFrequency.Constants.Monthly,
-                IsFakeSsn = fakeSsns.Contains(r.Ssn) // Mark based on unmasked SSN before MaskSsn() is applied
+                IsFakeSsn = ssnsToExclude.Contains(r.Ssn) // Mark based on unmasked SSN (includes fake and changed SSNs)
             }).ToList();
 
             foreach (var r in projectedResults)
