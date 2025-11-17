@@ -23,7 +23,7 @@ DECLARE
 
 
     -- These are the secondary drawer top-level menus
-    -- FISCAL_CLOSE CONSTANT NUMBER := 8; -- REMOVED
+    FISCAL_CLOSE CONSTANT NUMBER := 8;
     DECEMBER_ACTIVITIES CONSTANT NUMBER := 9;
     
     -- Third-level under December Activities
@@ -44,12 +44,12 @@ DECLARE
     DEMOGRAPHIC_FREEZE_PAGE CONSTANT NUMBER := 102;
     -- DISTRIBUTION_INQUIRY_PAGE CONSTANT NUMBER := 103; -- REMOVED
     MANAGE_EXECUTIVE_HOURS_PAGE CONSTANT NUMBER := 104;
-    -- YTD_WAGES_EXTRACT CONSTANT NUMBER := 105; -- REMOVED (was under FISCAL_CLOSE)
+    YTD_WAGES_EXTRACT CONSTANT NUMBER := 105;
     FORFEITURES CONSTANT NUMBER := 106;
     DISTRIBUTIONS_AND_FORFEITURES CONSTANT NUMBER := 107;
     PROFIT_SHARE_REPORT CONSTANT NUMBER := 108;
-    -- GET_ELIGIBLE_EMPLOYEES CONSTANT NUMBER := 109; -- REMOVED (was under FISCAL_CLOSE)
-    -- PROFIT_SHARE_FORFEIT CONSTANT NUMBER := 110; -- REMOVED (was under FISCAL_CLOSE)
+    GET_ELIGIBLE_EMPLOYEES CONSTANT NUMBER := 109;
+    PROFIT_SHARE_FORFEIT CONSTANT NUMBER := 110;
     -- MASTER_UPDATE CONSTANT NUMBER := 111; -- REMOVED (was under FISCAL_CLOSE)
     -- PROFIT_MASTER_UPDATE CONSTANT NUMBER := 112; -- REMOVED (was under FISCAL_CLOSE)
     -- PAYMASTER_UPDATE CONSTANT NUMBER := 113; -- REMOVED (was under FISCAL_CLOSE)
@@ -78,9 +78,9 @@ DECLARE
     -- TERMINATED_LETTERS CONSTANT NUMBER := 136; -- REMOVED (was under FISCAL_CLOSE)
     -- QPAY600 CONSTANT NUMBER := 137; -- REMOVED (was under FISCAL_CLOSE)
     PAY426N_DECEMBER CONSTANT NUMBER := 138;
-    -- PROFIT_SUMMARY CONSTANT NUMBER := 139; -- REMOVED (was under FISCAL_CLOSE)
-    -- PAY426_2 CONSTANT NUMBER := 140; -- REMOVED (was under FISCAL_CLOSE)
-    -- PAY426_3 CONSTANT NUMBER := 141; -- REMOVED (was under FISCAL_CLOSE)
+    PROFIT_SUMMARY CONSTANT NUMBER := 139;
+    -- PAY426_2 CONSTANT NUMBER := 140;
+    -- PAY426_3 CONSTANT NUMBER := 141;
     DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT CONSTANT NUMBER := 142;
     DUPLICATE_SSNS_DEMOGRAPHICS CONSTANT NUMBER := 143;
     NEGATIVE_ETVA CONSTANT NUMBER := 144;
@@ -88,6 +88,8 @@ DECLARE
     DUPLICATE_NAMES_BIRTHDAYS CONSTANT NUMBER := 146;
     MILITARY_CONTRIBUTIONS CONSTANT NUMBER := 147;
     UNFORFEIT CONSTANT NUMBER := 148;
+    MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE CONSTANT NUMBER := 162;
+    PAY426N_FISCAL_CLOSE CONSTANT NUMBER := 153;
 
     -- PROFIT_SHARE_REPORT_FINAL_RUN CONSTANT NUMBER := 149; -- REMOVED (was under FISCAL_CLOSE)
     -- PRINT_PROFIT_CERTS CONSTANT NUMBER := 150; -- REMOVED (was under FISCAL_CLOSE)
@@ -246,7 +248,17 @@ BEGIN
     insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
 
--- FISCAL_CLOSE and all children REMOVED
+-- Fiscal Close
+    insert_navigation_item(FISCAL_CLOSE, YEAR_END_MENU, 'Fiscal Close', '', 'fiscal-close', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, FISCAL_CLOSE, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(YTD_WAGES_EXTRACT, FISCAL_CLOSE, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT', 'ytd-wages-extract', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+
+-- Profit Summary (PAY426 summary)
+    insert_navigation_item(PROFIT_SUMMARY, FISCAL_CLOSE, 'Profit Summary (PAY426 summary)', '', 'pay426-9', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY426N_FISCAL_CLOSE, FISCAL_CLOSE, 'Profit Sharing Report', 'PAY426N', 'pay426n', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+
+    insert_navigation_item(GET_ELIGIBLE_EMPLOYEES, FISCAL_CLOSE, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS', 'eligible-employees', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARE_FORFEIT, FISCAL_CLOSE, 'Profit Share Forfeit', 'PAY443', 'forfeit', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
 
 -- Inserting value for IT Operation for role management
 --  NOTE: IT-DevOps navigation should be accessible only to members of the IT-DevOps role (role id 6).
@@ -331,21 +343,21 @@ BEGIN
     assign_navigation_role(PAY426N_DECEMBER, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PAY426N_DECEMBER, FINANCE_MANAGER);
 
--- FISCAL_CLOSE role assignments - REMOVED
-    -- assign_navigation_role(PROFIT_SHARE_REPORT_FINAL_RUN, SYSTEM_ADMINISTRATOR);
-    -- assign_navigation_role(PROFIT_SHARE_REPORT_FINAL_RUN, FINANCE_MANAGER);
-    -- assign_navigation_role(PROFIT_SHARE_REPORT_EDIT_RUN, SYSTEM_ADMINISTRATOR);
-    -- assign_navigation_role(PROFIT_SHARE_REPORT_EDIT_RUN, FINANCE_MANAGER);
-    -- assign_navigation_role(PRINT_PROFIT_CERTS, SYSTEM_ADMINISTRATOR);
-    -- assign_navigation_role(PRINT_PROFIT_CERTS, FINANCE_MANAGER);
-    -- assign_navigation_role(FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);
-    -- assign_navigation_role(FISCAL_CLOSE, FINANCE_MANAGER);
-    -- assign_navigation_role(YTD_WAGES_EXTRACT, SYSTEM_ADMINISTRATOR);
-    -- assign_navigation_role(YTD_WAGES_EXTRACT, FINANCE_MANAGER);   
-    -- assign_navigation_role(GET_ELIGIBLE_EMPLOYEES, SYSTEM_ADMINISTRATOR);
-    -- assign_navigation_role(GET_ELIGIBLE_EMPLOYEES, FINANCE_MANAGER);
-    -- assign_navigation_role(PROFIT_SHARE_FORFEIT, SYSTEM_ADMINISTRATOR);
-    -- assign_navigation_role(PROFIT_SHARE_FORFEIT, FINANCE_MANAGER);
+-- FISCAL_CLOSE role assignments
+    assign_navigation_role(FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(FISCAL_CLOSE, FINANCE_MANAGER);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, FINANCE_MANAGER);
+    assign_navigation_role(YTD_WAGES_EXTRACT, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(YTD_WAGES_EXTRACT, FINANCE_MANAGER);
+    assign_navigation_role(GET_ELIGIBLE_EMPLOYEES, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(GET_ELIGIBLE_EMPLOYEES, FINANCE_MANAGER);
+    assign_navigation_role(PROFIT_SHARE_FORFEIT, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_SHARE_FORFEIT, FINANCE_MANAGER);
+    assign_navigation_role(PROFIT_SUMMARY, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_SUMMARY, FINANCE_MANAGER);
+    assign_navigation_role(PAY426N_FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PAY426N_FISCAL_CLOSE, FINANCE_MANAGER);
     -- assign_navigation_role(PAYMASTER_UPDATE, SYSTEM_ADMINISTRATOR);
     -- assign_navigation_role(PAYMASTER_UPDATE, FINANCE_MANAGER);
     -- assign_navigation_role(PROF_SHARE_REPORT_BY_AGE, SYSTEM_ADMINISTRATOR);
@@ -466,6 +478,15 @@ BEGIN
     assign_navigation_role(PROFIT_SHARE_REPORT, IT_DEVOPS);
     assign_navigation_role(PAY426N_DECEMBER, IT_DEVOPS);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, IT_DEVOPS);
+
+    -- Fiscal Close IT_DEVOPS role assignments
+    assign_navigation_role(FISCAL_CLOSE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, IT_DEVOPS);
+    assign_navigation_role(YTD_WAGES_EXTRACT, IT_DEVOPS);
+    assign_navigation_role(GET_ELIGIBLE_EMPLOYEES, IT_DEVOPS);
+    assign_navigation_role(PROFIT_SHARE_FORFEIT, IT_DEVOPS);
+    assign_navigation_role(PROFIT_SUMMARY, IT_DEVOPS);
+    assign_navigation_role(PAY426N_FISCAL_CLOSE, IT_DEVOPS);
 
     -- Adhoc Reports IT_DEVOPS role assignments
     assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
