@@ -5,17 +5,18 @@ import { SortParams, useGridPagination } from "../../../../hooks/useGridPaginati
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import {
-  duplicateNamesAndBirthdaysReducer,
-  initialState,
-  selectHasResults,
-  selectShowData
+    duplicateNamesAndBirthdaysReducer,
+    initialState,
+    selectHasResults,
+    selectShowData
 } from "./useDuplicateNamesAndBirthdaysReducer";
 
 export interface DuplicateNamesAndBirthdaysSearchParams {
   profitYear: number;
+  includeFictionalSsnPairs?: boolean;
 }
 
-const useDuplicateNamesAndBirthdays = () => {
+const useDuplicateNamesAndBirthdays = (includeFictionalSsnPairs: boolean = false) => {
   const [state, dispatch] = useReducer(duplicateNamesAndBirthdaysReducer, initialState);
 
   const [triggerSearch, { isFetching: isSearching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
@@ -28,6 +29,7 @@ const useDuplicateNamesAndBirthdays = () => {
         try {
           const request = {
             profitYear: decemberFlowProfitYear,
+            includeFictionalSsnPairs,
             pagination: {
               skip: pageNumber * pageSize,
               take: pageSize,
@@ -52,7 +54,7 @@ const useDuplicateNamesAndBirthdays = () => {
         }
       }
     },
-    [decemberFlowProfitYear, hasToken, triggerSearch]
+    [decemberFlowProfitYear, hasToken, triggerSearch, includeFictionalSsnPairs]
   );
 
   const pagination = useGridPagination({
@@ -71,6 +73,7 @@ const useDuplicateNamesAndBirthdays = () => {
       try {
         const request = {
           profitYear: searchParams.profitYear,
+          includeFictionalSsnPairs: searchParams.includeFictionalSsnPairs ?? includeFictionalSsnPairs,
           pagination: {
             skip: pagination.pageNumber * pagination.pageSize,
             take: pagination.pageSize,
@@ -87,7 +90,7 @@ const useDuplicateNamesAndBirthdays = () => {
         dispatch({ type: "SEARCH_ERROR" });
       }
     },
-    [hasToken, pagination, triggerSearch]
+    [hasToken, pagination, triggerSearch, includeFictionalSsnPairs]
   );
 
   const hasInitiallySearched = useRef(false);

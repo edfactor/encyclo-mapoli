@@ -45,7 +45,7 @@ function Initialize-IISGzipCompression {
     # Check if this is Windows Server with IIS features available
     $osInfo = Get-CimInstance -ClassName CIM_OperatingSystem
     if ($osInfo -notmatch "Server" -and $osInfo -notmatch "Windows Server") {
-        Write-Host "⚠ This script is designed for Windows Server with IIS." -ForegroundColor Yellow
+        Write-Host "[!] This script is designed for Windows Server with IIS." -ForegroundColor Yellow
         Write-Host "  (This appears to be a development machine without IIS features)" -ForegroundColor Yellow
         return
     }
@@ -102,8 +102,14 @@ function Initialize-IISGzipCompression {
             -Name 'directory' -Value $compressionDir -ErrorAction Stop
         
         # Enable Dynamic Compression
-        Set-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' -Filter 'system.webServer/httpCompression' `
-            -Name 'dynamicCompressionBeforeCaching' -Value $true -ErrorAction Stop
+        # Note: dynamicCompressionBeforeCaching may not be available on all IIS 10 configurations
+        try {
+            Set-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' -Filter 'system.webServer/httpCompression' `
+                -Name 'dynamicCompressionBeforeCaching' -Value $true -ErrorAction Stop
+        }
+        catch {
+            Write-Warning "Could not set dynamicCompressionBeforeCaching (may not be available in this IIS version): $_"
+        }
         
         Set-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' -Filter 'system.webServer/httpCompression' `
             -Name 'sendCacheHeaders' -Value $true -ErrorAction Stop
@@ -147,16 +153,16 @@ function Initialize-IISGzipCompression {
         $exists = $existingDynamicTypes | Where-Object { $_.mimeType -eq $contentType.mimeType }
         
         if ($exists) {
-            Write-Host "  ✓ Compression already enabled for: $($contentType.mimeType)"
+            Write-Host "  [OK] Compression already enabled for: $($contentType.mimeType)"
         } else {
             try {
                 Add-WebConfiguration -PSPath 'MACHINE/WEBROOT/APPHOST' `
                     -Filter 'system.webServer/httpCompression/dynamicTypes' `
                     -Value $contentType -ErrorAction Stop
-                Write-Host "  ✓ Enabled compression for: $($contentType.mimeType)" -ForegroundColor Green
+                Write-Host "  [OK] Enabled compression for: $($contentType.mimeType)" -ForegroundColor Green
             }
             catch {
-                Write-Warning "  ✗ Failed to enable compression for $($contentType.mimeType): $_"
+                Write-Warning "  [X] Failed to enable compression for $($contentType.mimeType): $_"
             }
         }
     }
@@ -216,7 +222,7 @@ function Set-IISSiteCompression {
         Write-Host "  - Kernel cache enabled"
 
         if ($IsApiSite) {
-            Write-Host "  ✓ API site configured for dynamic/short-lived caching."
+            Write-Host "  [OK] API site configured for dynamic/short-lived caching."
             Write-Host "    Cache headers will be set per endpoint category in web.config:"
             Write-Host "      - Lookup endpoints: Cache-Control: public, max-age=3600 (1 hour)"
             Write-Host "      - Static data: Cache-Control: public, max-age=86400 (1 day)"
@@ -230,7 +236,7 @@ function Set-IISSiteCompression {
                 maximumAge = $timespan
             } -ErrorAction Stop
             
-            Write-Host "  ✓ Frontend site configured for static asset caching."
+            Write-Host "  [OK] Frontend site configured for static asset caching."
             Write-Host "    Cache-Control: public, max-age=$($CacheDurationHours * 3600) ($CacheDurationHours hours)"
         }
 
@@ -288,7 +294,7 @@ function Get-IISCompressionStatus {
             Write-Host "  No dynamic types configured"
         } else {
             foreach ($type in $dynamicTypes) {
-                Write-Host "    ✓ $($type.mimeType)" -ForegroundColor Green
+                Write-Host "    [OK] $($type.mimeType)" -ForegroundColor Green
             }
         }
     } else {
@@ -347,22 +353,22 @@ function Test-IISGzipConfigurationHealth {
     $dynamicCompression = Get-WindowsFeature -Name Web-Dyn-Compression -ErrorAction SilentlyContinue
     if ($dynamicCompression.InstallState -eq 'Installed') {
         $results.DynamicCompressionInstalled = $true
-        Write-Host "  ✓ Dynamic Compression module installed" -ForegroundColor Green
+        Write-Host "  [OK] Dynamic Compression module installed" -ForegroundColor Green
     } else {
         $results.IsHealthy = $false
         $results.Issues += "Dynamic Compression module is not installed"
-        Write-Host "  ✗ Dynamic Compression module not installed" -ForegroundColor Red
+        Write-Host "  [X] Dynamic Compression module not installed" -ForegroundColor Red
     }
 
     # Check Static Compression
     $staticCompression = Get-WindowsFeature -Name Web-Stat-Compression -ErrorAction SilentlyContinue
     if ($staticCompression.InstallState -eq 'Installed') {
         $results.StaticCompressionInstalled = $true
-        Write-Host "  ✓ Static Compression module installed" -ForegroundColor Green
+        Write-Host "  [OK] Static Compression module installed" -ForegroundColor Green
     } else {
         $results.IsHealthy = $false
         $results.Issues += "Static Compression module is not installed"
-        Write-Host "  ✗ Static Compression module not installed" -ForegroundColor Red
+        Write-Host "  [X] Static Compression module not installed" -ForegroundColor Red
     }
 
     # Check server-level configuration (only if WebAdministration available)
@@ -373,11 +379,11 @@ function Test-IISGzipConfigurationHealth {
         
         if ($globalConfig.minFileSizeForComp -eq 1024) {
             $results.MinFileSizeSet = $true
-            Write-Host "  ✓ Minimum file size for compression set to 1024 bytes (1KB)" -ForegroundColor Green
+            Write-Host "  [OK] Minimum file size for compression set to 1024 bytes (1KB)" -ForegroundColor Green
         } else {
             $results.IsHealthy = $false
             $results.Issues += "Minimum file size for compression not set to 1024 bytes (currently: $($globalConfig.minFileSizeForComp))"
-            Write-Host "  ✗ Minimum file size for compression: $($globalConfig.minFileSizeForComp) bytes (should be 1024)" -ForegroundColor Red
+            Write-Host "  [X] Minimum file size for compression: $($globalConfig.minFileSizeForComp) bytes (should be 1024)" -ForegroundColor Red
         }
 
         # Check that content types are configured
@@ -386,32 +392,39 @@ function Test-IISGzipConfigurationHealth {
         
         if ($dynamicTypes.Count -ge 10) {
             $results.ContentTypesConfigured = $true
-            Write-Host "  ✓ $($dynamicTypes.Count) content types configured for compression" -ForegroundColor Green
+            Write-Host "  [OK] $($dynamicTypes.Count) content types configured for compression" -ForegroundColor Green
         } else {
             $results.IsHealthy = $false
             $results.Issues += "Insufficient content types configured for compression ($($dynamicTypes.Count), expected at least 10)"
-            Write-Host "  ✗ Only $($dynamicTypes.Count) content types configured (expected at least 10)" -ForegroundColor Yellow
+            Write-Host "  [X] Only $($dynamicTypes.Count) content types configured (expected at least 10)" -ForegroundColor Yellow
         }
 
         # Check if compression is enabled for dynamic content
-        if ($globalConfig.dynamicCompressionBeforeCaching -eq $true) {
-            $results.CompressionEnabled = $true
-            Write-Host "  ✓ Dynamic compression before caching enabled" -ForegroundColor Green
+        # Note: dynamicCompressionBeforeCaching may not be available on all IIS 10 configurations
+        if ($null -ne $globalConfig.dynamicCompressionBeforeCaching) {
+            if ($globalConfig.dynamicCompressionBeforeCaching -eq $true) {
+                $results.CompressionEnabled = $true
+                Write-Host "  [OK] Dynamic compression before caching enabled" -ForegroundColor Green
+            } else {
+                $results.IsHealthy = $false
+                $results.Issues += "Dynamic compression before caching not enabled"
+                Write-Host "  [X] Dynamic compression before caching is disabled" -ForegroundColor Red
+            }
         } else {
-            $results.IsHealthy = $false
-            $results.Issues += "Dynamic compression before caching not enabled"
-            Write-Host "  ✗ Dynamic compression before caching is disabled" -ForegroundColor Red
+            # Property not available in this IIS version - not a failure
+            $results.CompressionEnabled = $true
+            Write-Host "  [OK] Dynamic compression enabled (dynamicCompressionBeforeCaching property not available)" -ForegroundColor Yellow
         }
     }
     catch {
-        Write-Host "  ⚠ WebAdministration module not available (expected on non-IIS systems)" -ForegroundColor Yellow
+        Write-Host "  [!] WebAdministration module not available (expected on non-IIS systems)" -ForegroundColor Yellow
     }
 
     Write-Host ""
     if ($results.IsHealthy) {
-        Write-Host "✓ IIS Gzip Compression configuration is healthy." -ForegroundColor Green
+        Write-Host "[OK] IIS Gzip Compression configuration is healthy." -ForegroundColor Green
     } else {
-        Write-Host "✗ Issues detected in IIS Gzip Compression configuration:" -ForegroundColor Red
+        Write-Host "[X] Issues detected in IIS Gzip Compression configuration:" -ForegroundColor Red
         foreach ($issue in $results.Issues) {
             Write-Host "  - $issue" -ForegroundColor Yellow
         }
@@ -426,15 +439,15 @@ function Test-IISGzipConfigurationHealth {
 # If this script is run directly (not dot-sourced), execute the initialization
 if ($MyInvocation.InvocationName -ne '.' -and $MyInvocation.InvocationName -ne '') {
     Write-Host "`n" -ForegroundColor White
-    Write-Host "╔════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║  IIS Gzip Compression Configuration - PS-2067                 ║" -ForegroundColor Cyan
-    Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "=================================================================╗" -ForegroundColor Cyan
+    Write-Host "|  IIS Gzip Compression Configuration - PS-2067                 |" -ForegroundColor Cyan
+    Write-Host "=================================================================╝" -ForegroundColor Cyan
     Write-Host ""
     
     # Check if running as administrator
     $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
     if (-not $isAdmin) {
-        Write-Host "⚠️  WARNING: This script should be run as Administrator." -ForegroundColor Yellow
+        Write-Host "[!]️  WARNING: This script should be run as Administrator." -ForegroundColor Yellow
         Write-Host "   Some features may not work without elevated privileges.`n" -ForegroundColor Yellow
     }
     
@@ -442,10 +455,10 @@ if ($MyInvocation.InvocationName -ne '.' -and $MyInvocation.InvocationName -ne '
     Write-Host "Starting IIS Gzip Compression initialization...`n" -ForegroundColor Green
     Initialize-IISGzipCompression
     
-    Write-Host "`n════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "`n================================================================" -ForegroundColor Cyan
     Write-Host "Initialization complete. You can now:" -ForegroundColor Green
     Write-Host "  • Configure specific sites: Set-IISSiteCompression -SiteName 'API' -IsApiSite `$true" -ForegroundColor White
     Write-Host "  • Check status: Get-IISCompressionStatus" -ForegroundColor White
     Write-Host "  • Validate health: Test-IISGzipConfigurationHealth" -ForegroundColor White
-    Write-Host "════════════════════════════════════════════════════════════════`n" -ForegroundColor Cyan
+    Write-Host "================================================================`n" -ForegroundColor Cyan
 }

@@ -135,13 +135,16 @@ const RouterSubAssembly: React.FC = () => {
     }
   }, [location.search, hasImpersonationRole, impersonating, dispatch, navigate, location.pathname]);
 
+  const isFullscreen = useSelector((state: RootState) => state.general.isFullscreen);
+
   const renderMenu = () => {
     return isSuccess && data ? (
       <>
-        <MenuBar
-          menuInfo={MenuData(data)}
-          navigationData={data}
-          impersonationMultiSelect={
+        {!isFullscreen && (
+          <MenuBar
+            menuInfo={MenuData(data)}
+            navigationData={data}
+            impersonationMultiSelect={
             showImpersonation ? (
               <ImpersonationMultiSelect
                 impersonationRoles={[
@@ -199,34 +202,37 @@ const RouterSubAssembly: React.FC = () => {
               <></>
             )
           }
-        />
+          />
+        )}
         <Box
           id="TopSubAssemblyRouterBox"
-          sx={{ marginTop: "56px", position: "relative", zIndex: 1 }}>
+          sx={{ marginTop: isFullscreen ? "0px" : "56px", position: "relative", zIndex: 1 }}>
           <Box
             id="SecondSubAssemblyRouterBox"
             sx={{
               height: "100%",
-              width: isDrawerOpen ? `calc(100% - ${drawerOpenWidth}px)` : `calc(100% - ${drawerClosedWidth}px)`,
-              marginLeft: isDrawerOpen ? `${drawerOpenWidth}px` : `${drawerClosedWidth}px`,
+              width: isFullscreen ? "100%" : (isDrawerOpen ? `calc(100% - ${drawerOpenWidth}px)` : `calc(100% - ${drawerClosedWidth}px)`),
+              marginLeft: isFullscreen ? "0px" : (isDrawerOpen ? `${drawerOpenWidth}px` : `${drawerClosedWidth}px`),
 
               transition: "all 225ms"
             }}>
             <Box
               id="ThirdSubAssemblyRouterBox"
               sx={{ position: "relative" }}>
-              <Box
-                id="Breadcrumbs-Box"
-                sx={{
-                  paddingTop: "24px",
-                  paddingBottom: "8px",
-                  marginLeft: "24px",
-                  marginRight: "24px",
-                  minHeight: "32px" // Reserve minimum space for consistent layout
-                }}>
-                <DSMDynamicBreadcrumbs />
-              </Box>
-              <SmartPSDrawer navigationData={data} />
+              {!isFullscreen && (
+                <Box
+                  id="Breadcrumbs-Box"
+                  sx={{
+                    paddingTop: "24px",
+                    paddingBottom: "8px",
+                    marginLeft: "24px",
+                    marginRight: "24px",
+                    minHeight: "32px" // Reserve minimum space for consistent layout
+                  }}>
+                  <DSMDynamicBreadcrumbs />
+                </Box>
+              )}
+              {!isFullscreen && <SmartPSDrawer navigationData={data} />}
               <Routes>
                 <Route
                   path="/unauthorized"

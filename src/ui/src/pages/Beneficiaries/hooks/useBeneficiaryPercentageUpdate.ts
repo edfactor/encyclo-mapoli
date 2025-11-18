@@ -9,6 +9,7 @@ interface ValidateAndUpdateResult {
   success: boolean;
   previousValue?: number;
   error?: string;
+  warning?: string;
 }
 
 /**
@@ -82,13 +83,39 @@ export const useBeneficiaryPercentageUpdate = (onUpdateSuccess?: () => void): Us
         }
       }
 
-      // Validation: Sum must not exceed 100%
+      // Validation 1: Percentage cannot be negative
+      if (newPercentage < 0) {
+        return {
+          success: false,
+          previousValue,
+          error: "Percentage cannot be negative. Please enter a value between 0 and 100."
+        };
+      }
+
+      // Validation 2: Percentage cannot exceed 100
+      if (newPercentage > 100) {
+        return {
+          success: false,
+          previousValue,
+          error: `Percentage cannot exceed 100%. You entered ${newPercentage}%.`
+        };
+      }
+
+      // Validation 3: Sum must not exceed 100%
       if (sum > 100) {
         return {
           success: false,
           previousValue,
-          error: `Total percentage would be ${sum}%. Beneficiary percentages must sum to 100% or less.`
+          error: `Total percentage would be ${sum}%. The sum of all beneficiary percentages cannot exceed 100%.`
         };
+      }
+
+      // Validation 4: If there are multiple beneficiaries, sum should equal 100%
+      // Allow interim states where sum < 100 to enable users to adjust multiple beneficiaries
+      // Only enforce the 100% requirement if they're trying to go below what's needed
+      if (currentList.length > 1 && sum < 100) {
+        // Show a warning but allow the update - they might be adjusting multiple beneficiaries
+        console.warn(`Total percentage is ${sum}%. Remember to adjust other beneficiaries so the total equals 100%.`);
       }
 
       // Valid - proceed with API update
@@ -100,7 +127,12 @@ export const useBeneficiaryPercentageUpdate = (onUpdateSuccess?: () => void): Us
         // Call success callback if provided (typically to refresh data)
         onUpdateSuccess?.();
 
-        return { success: true };
+        // Return success with optional warning message
+        const warningMessage = currentList.length > 1 && sum !== 100 
+          ? `Percentage updated to ${newPercentage}%. Total is now ${sum}%. ${sum < 100 ? 'Please ensure all percentages sum to 100%.' : ''}` 
+          : undefined;
+
+        return { success: true, warning: warningMessage };
       } catch (error) {
         console.error("Failed to update beneficiary percentage:", error);
         return {
