@@ -72,7 +72,9 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       const numericValue = parseFloat(value) || 0;
       setFormData({
         ...formData,
-        forfeitureAmount: numericValue
+        forfeitureAmount: numericValue,
+        // Disable class action if amount is negative
+        classAction: numericValue < 0 ? false : formData.classAction
       });
     } else if (name === "classAction") {
       setFormData({
@@ -158,6 +160,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
                 checked={formData.classAction}
                 onChange={handleChange}
                 color="primary"
+                disabled={formData.forfeitureAmount < 0}
               />
             }
             label="Class Action"

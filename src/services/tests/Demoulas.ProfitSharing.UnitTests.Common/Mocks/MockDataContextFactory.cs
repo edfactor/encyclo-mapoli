@@ -289,6 +289,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
 
+        // Setup FakeSsns - used to exclude fake SSNs from duplicate detection
+        List<FakeSsn>? fakeSsns = new List<FakeSsn>();
+        Mock<DbSet<FakeSsn>> mockFakeSsns = fakeSsns.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.FakeSsns).Returns(mockFakeSsns.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.FakeSsns).Returns(mockFakeSsns.Object);
+
         Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.ToList().BuildMockDbSet();
         _profitSharingReadOnlyDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
 

@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
 public sealed record DuplicateNamesAndBirthdaysResponse : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
@@ -25,4 +26,5 @@ public sealed record DuplicateNamesAndBirthdaysResponse : IIsExecutive
     public required decimal? IncomeCurrentYear { get; set; }
     public required string EmploymentStatusName { get; set; }
     public required bool IsExecutive { get; set; }
+    public bool IsFakeSsn { get; set; }
 }
