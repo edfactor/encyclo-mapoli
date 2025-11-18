@@ -51,9 +51,9 @@ const schema: yup.ObjectSchema<MasterInquirySearch> = yup.object().shape({
   name: yup
     .string()
     .nullable()
-    .test("min-length", "Name must have at least 3 characters", function (value) {
+    .test("min-length", "Name must have at least 2 characters", function (value) {
       if (!value) return true; // Allow empty/null
-      return value.length >= 3;
+      return value.length >= 2;
     }),
   badgeNumber: badgeNumberOrPSNValidator,
   comment: yup.string().nullable(),
