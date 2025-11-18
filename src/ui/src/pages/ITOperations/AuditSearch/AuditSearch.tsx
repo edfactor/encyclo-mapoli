@@ -1,8 +1,9 @@
 import { Divider, Grid } from "@mui/material";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Page } from "smart-ui-library";
 import { SortParams } from "../../../hooks/useGridPagination";
 import { useLazySearchAuditQuery } from "../../../reduxstore/api/ItOperationsApi";
+import { useLazyGetNavigationStatusQuery } from "../../../reduxstore/api/NavigationStatusApi";
 import AuditSearchGrid from "./AuditSearchGrid";
 import AuditSearchManager from "./AuditSearchManager";
 
@@ -16,6 +17,7 @@ interface AuditSearchFilters {
 
 const AuditSearch = () => {
   const [triggerSearch, { data, isFetching }] = useLazySearchAuditQuery();
+  const [triggerGetNavigationStatus, { data: navigationStatusData }] = useLazyGetNavigationStatusQuery();
   const [currentFilters, setCurrentFilters] = useState<AuditSearchFilters>({
     tableName: "",
     operation: "",
@@ -23,6 +25,10 @@ const AuditSearch = () => {
     startDate: null,
     endDate: null
   });
+
+  useEffect(() => {
+    triggerGetNavigationStatus({});
+  }, [triggerGetNavigationStatus]);
   const [, setCurrentPageNumber] = useState(0);
   const [currentPageSize, setCurrentPageSize] = useState(25);
   const [currentSortParams, setCurrentSortParams] = useState<SortParams>({
@@ -89,6 +95,7 @@ const AuditSearch = () => {
             total={data?.total || 0}
             isLoading={isFetching}
             onPaginationChange={handlePaginationChange}
+            navigationStatusList={navigationStatusData?.navigationStatusList || []}
           />
         </Grid>
       </Grid>

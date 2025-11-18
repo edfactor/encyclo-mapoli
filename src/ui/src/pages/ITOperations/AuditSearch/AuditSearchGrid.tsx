@@ -2,7 +2,7 @@ import { Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
-import { AuditEventDto } from "../../../types";
+import { AuditEventDto, NavigationStatusDto } from "../../../types";
 import { GetAuditSearchColumns } from "./AuditSearchGridColumns";
 
 interface AuditSearchGridProps {
@@ -10,9 +10,16 @@ interface AuditSearchGridProps {
   total: number;
   isLoading: boolean;
   onPaginationChange: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
+  navigationStatusList: NavigationStatusDto[];
 }
 
-const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({ data, total, isLoading, onPaginationChange }) => {
+const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({
+  data,
+  total,
+  isLoading,
+  onPaginationChange,
+  navigationStatusList
+}) => {
   const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "createdAt",
@@ -25,7 +32,7 @@ const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({ data, total, isLoadin
     )
   });
 
-  const columnDefs = useMemo(() => GetAuditSearchColumns(), []);
+  const columnDefs = useMemo(() => GetAuditSearchColumns(navigationStatusList), [navigationStatusList]);
 
   return (
     <>
