@@ -1,4 +1,4 @@
-import { CircularProgress, Divider, Grid } from "@mui/material";
+import { CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
@@ -68,6 +68,15 @@ const MasterInquiryContent = memo(() => {
           size={{ xs: 12 }}
           sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
           <CircularProgress />
+        </Grid>
+      )}
+
+      {/* No Results Message */}
+      {searchResults && searchResults.total === 0 && !isSearching && !isFetchingMembers && (
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ padding: "24px" }}>
+          <Typography variant="body1">No results found.</Typography>
         </Grid>
       )}
 
