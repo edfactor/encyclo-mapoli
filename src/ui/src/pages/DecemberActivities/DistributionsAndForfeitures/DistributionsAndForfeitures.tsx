@@ -5,13 +5,14 @@ import StatusDropdownActionNode from "../../../components/StatusDropdownActionNo
 import { CAPTIONS } from "../../../constants";
 import DistributionsAndForfeituresGrid from "./DistributionsAndForfeituresGrid";
 import DistributionsAndForfeituresSearchFilter from "./DistributionsAndForfeituresSearchFilter";
+import { useDistributionsAndForfeituresState } from "./useDistributionsAndForfeituresState";
 
 const DistributionsAndForfeitures = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const { state, actions } = useDistributionsAndForfeituresState();
   const [isFetching, setIsFetching] = useState(false);
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
   };
 
   return (
@@ -27,7 +28,7 @@ const DistributionsAndForfeitures = () => {
         <Grid width={"100%"}>
           <DSMAccordion title="Filter">
             <DistributionsAndForfeituresSearchFilter
-              setInitialSearchLoaded={setInitialSearchLoaded}
+              setInitialSearchLoaded={actions.setInitialSearchLoaded}
               isFetching={isFetching}
             />
           </DSMAccordion>
@@ -35,8 +36,10 @@ const DistributionsAndForfeitures = () => {
 
         <Grid width="100%">
           <DistributionsAndForfeituresGrid
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            initialSearchLoaded={initialSearchLoaded}
+            setInitialSearchLoaded={actions.setInitialSearchLoaded}
+            initialSearchLoaded={state.initialSearchLoaded}
+            shouldArchive={state.shouldArchive}
+            onArchiveHandled={actions.handleArchiveHandled}
             onLoadingChange={setIsFetching}
           />
         </Grid>
