@@ -228,6 +228,7 @@ BEGIN
     insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(QPAY066B, ADHOC_GROUP, 'QPAY066B', '', 'qpay066b', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
 
 --beneficiary items
     insert_navigation_item(BENEFICIARY_INQUIRY_PAGE, BENEFICIARIES_MENU, 'Beneficiary Inquiry', '', 'beneficiary', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -322,7 +323,6 @@ BEGIN
     --insert_navigation_item(UNDER_21_REPORT, PROF_SHARE_BY_STORE, 'Under-21 Report', '', 'under-21-report', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     
     insert_navigation_item(QPAY066TA_UNDR21, PROF_SHARE_BY_STORE, 'QPAY066TA-UNDR21', '', 'qpay066ta-under21', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    --insert_navigation_item(QPAY066B, PROF_SHARE_BY_STORE, 'QPAY066B', '', 'qpay066b', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066TA, PROF_SHARE_BY_STORE, 'Breakdown Report', 'QPAY066TA', 'qpay066ta', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(NEWPSLABELS_REPORT, PROF_SHARE_BY_STORE, 'NEWPSLABELS Report', '', '', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(LABELS, PROF_SHARE_BY_STORE, 'LABELS', '', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
