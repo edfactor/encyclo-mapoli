@@ -47,7 +47,7 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
     }
 
     public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(
-        ProfitYearRequest req,
+        DuplicateNamesAndBirthdaysRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
@@ -70,11 +70,8 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
                 {
                     _logger.LogWarning(2, "Outside the test environment");
                     string dupQuery =
-                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER
-                              FROM DEMOGRAPHIC
-                              WHERE NOT EXISTS (SELECT /*+ INDEX(fs) */ 1
-                                                FROM FAKE_SSNS fs
-                                                WHERE fs.SSN = DEMOGRAPHIC.SSN))
+                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER, SSN
+                              FROM DEMOGRAPHIC)
 SELECT /*+ USE_HASH(p1 p2) */ p1.FULL_NAME as FullName, p2.BADGE_NUMBER MatchedId
 FROM FILTERED_DEMOGRAPHIC p1
          JOIN FILTERED_DEMOGRAPHIC p2
@@ -142,6 +139,30 @@ FROM FILTERED_DEMOGRAPHIC p1
                 _logger.LogWarning(5, "Calling ToPaginationResultsAsync");
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             }, cancellationToken);
+
+            // Load fake SSNs and SSNs with change history before projection (so we can mark before masking)
+            // Treat changed SSNs the same as fake SSNs - they typically indicate a fake SSN was assigned upstream
+            var ssnsToExclude = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                // Get all fake SSNs
+                var fakeSsns = await ctx.FakeSsns
+                    .TagWith("GetFakeSsns-DuplicateNamesAndBirthdays")
+                    .Select(f => f.Ssn)
+                    .ToHashSetAsync(cancellationToken);
+
+                // Get all SSNs that have change history (treat as fake/problematic)
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var changedSsns = await demographics
+                    .TagWith("GetChangedSsns-DuplicateNamesAndBirthdays")
+                    .Where(d => d.DemographicSsnChangeHistories.Any())
+                    .Select(d => d.Ssn)
+                    .ToHashSetAsync(cancellationToken);
+
+                fakeSsns.UnionWith(changedSsns);
+                return fakeSsns;
+            }, cancellationToken);
+
+            // Project and mark IsFakeSsn BEFORE masking SSN
             var projectedResults = results.Results.Select(r => new DuplicateNamesAndBirthdaysResponse
             {
                 BadgeNumber = r.BadgeNumber,
@@ -163,7 +184,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                 HoursCurrentYear = r.HoursCurrentYear,
                 IncomeCurrentYear = r.IncomeCurrentYear,
                 EmploymentStatusName = r.EmploymentStatusName ?? "",
-                IsExecutive = r.PayFrequencyId == PayFrequency.Constants.Monthly
+                IsExecutive = r.PayFrequencyId == PayFrequency.Constants.Monthly,
+                IsFakeSsn = ssnsToExclude.Contains(r.Ssn) // Mark based on unmasked SSN (includes fake and changed SSNs)
             }).ToList();
 
             foreach (var r in projectedResults)
@@ -189,20 +211,35 @@ FROM FILTERED_DEMOGRAPHIC p1
     }
 
     public async Task<DuplicateNamesAndBirthdaysCachedResponse?> GetCachedDuplicateNamesAndBirthdaysAsync(
-        ProfitYearRequest request, CancellationToken cancellationToken = default)
+        DuplicateNamesAndBirthdaysRequest request, CancellationToken cancellationToken = default)
     {
         if (_host.IsTestEnvironment())
         {
-            var testData = await GetDuplicateNamesAndBirthdaysAsync(request, cancellationToken);
-            return new DuplicateNamesAndBirthdaysCachedResponse
+            try
             {
-                AsOfDate = DateTimeOffset.UtcNow,
-                Data = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>
+                var testData = await GetDuplicateNamesAndBirthdaysAsync(request, cancellationToken);
+
+                if (testData?.Response == null)
                 {
-                    Total = testData.Response.Total,
-                    Results = testData.Response.Results
+                    _logger.LogWarning("Test data returned null response");
+                    return null;
                 }
-            };
+
+                return new DuplicateNamesAndBirthdaysCachedResponse
+                {
+                    AsOfDate = DateTimeOffset.UtcNow,
+                    Data = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>
+                    {
+                        Total = testData.Response.Total,
+                        Results = testData.Response.Results
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing test data for duplicate names and birthdays - returning null");
+                return null;
+            }
         }
 
 
@@ -221,22 +258,18 @@ FROM FILTERED_DEMOGRAPHIC p1
             var allCachedData = await cacheService.GetAllAsync(cancellationToken);
             var cachedResponse = allCachedData.FirstOrDefault();
 
-            if (cachedResponse == null)
+            if (cachedResponse == null || cachedResponse.Data == null)
             {
                 return null;
             }
 
-
-            // Apply pagination to the sorted data
-            var skip = request.Skip ?? 0;
-            var take = request.Take ?? byte.MaxValue; // Default to byte.MaxValue if not specified
-
-            var paginatedResults = await cachedResponse.Data.Results.AsQueryable().ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
+            // Get results from cached response - ensure Results is not null
+            var results = cachedResponse.Data.Results?.ToList() ?? new List<DuplicateNamesAndBirthdaysResponse>();
 
             return new DuplicateNamesAndBirthdaysCachedResponse
             {
                 AsOfDate = cachedResponse.AsOfDate,
-                Data = paginatedResults
+                Data = await results.ToPaginationResultsAsync(request, cancellationToken)
             };
         }
         catch (Exception ex)
