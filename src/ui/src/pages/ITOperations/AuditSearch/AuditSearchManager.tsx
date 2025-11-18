@@ -9,7 +9,9 @@ interface AuditSearchFilters {
   operation: string;
   userName: string;
   startDate: Date | null;
+  startTime: string;
   endDate: Date | null;
+  endTime: string;
 }
 
 const schema = yup.object().shape({
@@ -23,6 +25,7 @@ const schema = yup.object().shape({
       if (!value) return true;
       return value <= new Date();
     }),
+  startTime: yup.string(),
   endDate: yup
     .date()
     .nullable()
@@ -34,7 +37,8 @@ const schema = yup.object().shape({
       const { startDate } = this.parent;
       if (!value || !startDate) return true;
       return value >= startDate;
-    })
+    }),
+  endTime: yup.string()
 });
 
 interface AuditSearchManagerProps {
@@ -55,7 +59,9 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoa
       operation: "",
       userName: "",
       startDate: null,
-      endDate: null
+      startTime: "00:00",
+      endDate: null,
+      endTime: "23:59"
     },
     mode: "onChange"
   });
@@ -70,14 +76,18 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoa
       operation: "",
       userName: "",
       startDate: null,
-      endDate: null
+      startTime: "00:00",
+      endDate: null,
+      endTime: "23:59"
     });
     onSearch({
       tableName: "",
       operation: "",
       userName: "",
       startDate: null,
-      endDate: null
+      startTime: "00:00",
+      endDate: null,
+      endTime: "23:59"
     });
   };
 
@@ -88,7 +98,8 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoa
           container
           spacing={2}
           alignItems="flex-end">
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+          {/* First row: Text filters and buttons */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Controller
               name="tableName"
               control={control}
@@ -104,7 +115,7 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoa
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Controller
               name="operation"
               control={control}
@@ -120,7 +131,7 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoa
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Controller
               name="userName"
               control={control}
@@ -136,7 +147,27 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoa
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={isLoading}>
+                Search
+              </Button>
+              <Button
+                type="button"
+                variant="outlined"
+                onClick={handleReset}
+                disabled={isLoading}>
+                Reset
+              </Button>
+            </Box>
+          </Grid>
+
+          {/* Second row: Date and time filters */}
+          <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
             <Controller
               name="startDate"
               control={control}
@@ -154,7 +185,30 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoa
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
+            <Controller
+              name="startTime"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Start Time"
+                  type="time"
+                  fullWidth
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                  inputProps={{
+                    step: 60
+                  }}
+                  error={!!errors.startTime}
+                  helperText={errors.startTime?.message}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
             <Controller
               name="endDate"
               control={control}
@@ -172,23 +226,27 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoa
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={isLoading}>
-                Search
-              </Button>
-              <Button
-                type="button"
-                variant="outlined"
-                onClick={handleReset}
-                disabled={isLoading}>
-                Reset
-              </Button>
-            </Box>
+          <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
+            <Controller
+              name="endTime"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="End Time"
+                  type="time"
+                  fullWidth
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                  inputProps={{
+                    step: 60
+                  }}
+                  error={!!errors.endTime}
+                  helperText={errors.endTime?.message}
+                />
+              )}
+            />
           </Grid>
         </Grid>
       </Box>

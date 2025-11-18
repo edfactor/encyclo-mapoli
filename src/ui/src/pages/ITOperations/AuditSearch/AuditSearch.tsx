@@ -12,7 +12,9 @@ interface AuditSearchFilters {
   operation: string;
   userName: string;
   startDate: Date | null;
+  startTime: string;
   endDate: Date | null;
+  endTime: string;
 }
 
 const AuditSearch = () => {
@@ -23,12 +25,24 @@ const AuditSearch = () => {
     operation: "",
     userName: "",
     startDate: null,
-    endDate: null
+    startTime: "00:00",
+    endDate: null,
+    endTime: "23:59"
   });
 
   useEffect(() => {
     triggerGetNavigationStatus({});
   }, [triggerGetNavigationStatus]);
+
+  // Helper function to combine date and time
+  const combineDateAndTime = (date: Date | null, time: string): Date | null => {
+    if (!date) return null;
+    const [hours, minutes] = time.split(":").map(Number);
+    const combined = new Date(date);
+    combined.setHours(hours, minutes, 0, 0);
+    return combined;
+  };
+
   const [, setCurrentPageNumber] = useState(0);
   const [currentPageSize, setCurrentPageSize] = useState(25);
   const [currentSortParams, setCurrentSortParams] = useState<SortParams>({
@@ -38,12 +52,15 @@ const AuditSearch = () => {
 
   const executeSearch = useCallback(
     (filters: AuditSearchFilters, pageNumber: number, pageSize: number, sortParams: SortParams) => {
+      const startDateTime = combineDateAndTime(filters.startDate, filters.startTime);
+      const endDateTime = combineDateAndTime(filters.endDate, filters.endTime);
+
       triggerSearch({
         tableName: filters.tableName || undefined,
         operation: filters.operation || undefined,
         userName: filters.userName || undefined,
-        startTime: filters.startDate ? filters.startDate.toISOString() : undefined,
-        endTime: filters.endDate ? filters.endDate.toISOString() : undefined,
+        startTime: startDateTime ? startDateTime.toISOString() : undefined,
+        endTime: endDateTime ? endDateTime.toISOString() : undefined,
         skip: pageNumber * pageSize,
         take: pageSize,
         sortBy: sortParams.sortBy,
