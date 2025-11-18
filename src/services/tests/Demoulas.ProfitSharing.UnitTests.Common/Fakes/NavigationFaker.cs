@@ -67,6 +67,7 @@ public class NavigationFaker
 
             // IT Operations
             new Navigation { Id = 102, ParentId = 7, Title = "Demographic Freeze", SubTitle = "", Url = "demographic-freeze", StatusId = 1, OrderNumber = 1, Icon = "", Disabled = false, IsNavigable = true, RequiredRoles = new List<NavigationRole>(rolesFreeze), NavigationStatus = notStarted },
+            new Navigation { Id = 166, ParentId = 7, Title = "Audit Search", SubTitle = "", Url = "audit-search", StatusId = 1, OrderNumber = 3, Icon = "", Disabled = false, IsNavigable = true, RequiredRoles = new List<NavigationRole>(rolesItDevOpsTop), NavigationStatus = notStarted },
 
             // December Activities
             new Navigation { Id = 9, ParentId = 6, Title = "December Activities", SubTitle = "", Url = "december-process-accordion", StatusId = 1, OrderNumber = 1, Icon = "", Disabled = false, IsNavigable = true, RequiredRoles = new List<NavigationRole>(rolesYearEnd), NavigationStatus = notStarted },

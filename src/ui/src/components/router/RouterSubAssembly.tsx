@@ -48,6 +48,7 @@ import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/rol
 
 import PayMasterUpdateSummary from "@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary";
 import ProfitSharingControlSheet from "@/pages/FiscalClose/PaymasterUpdate/ProfitSharingControlSheet";
+import AuditSearch from "@/pages/ITOperations/AuditSearch/AuditSearch";
 import { ImpersonationMultiSelect } from "../../components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
 import DistributionInquiry from "../../pages//Distributions/DistributionInquiry/DistributionInquiry";
@@ -390,6 +391,19 @@ const RouterSubAssembly: React.FC = () => {
                   element={
                     <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
                       <DemographicFreeze />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.AUDIT_SEARCH}
+                  element={
+                    <ProtectedRoute
+                      requiredRoles={[
+                        ImpersonationRoles.ItDevOps,
+                        ImpersonationRoles.Auditor,
+                        ImpersonationRoles.ProfitSharingAdministrator
+                      ]}>
+                      <AuditSearch />
                     </ProtectedRoute>
                   }
                 />
