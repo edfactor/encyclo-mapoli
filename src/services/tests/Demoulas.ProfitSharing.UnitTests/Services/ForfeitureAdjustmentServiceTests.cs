@@ -85,7 +85,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
     #region GetSuggestedForfeitureAmount Tests
 
     [Fact]
-    [Description("PS-XXXX : Employee not found returns failure")]
+    [Description("PS-1331 : Employee not found returns failure")]
     public async Task GetSuggestedForfeitureAmount_EmployeeNotFound_ReturnsFailure()
     {
         // Arrange
