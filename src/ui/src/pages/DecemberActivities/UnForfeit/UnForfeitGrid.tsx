@@ -1,4 +1,6 @@
-import { Grid } from "@mui/material";
+import { Grid, IconButton } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import React, { useEffect, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
@@ -20,6 +22,9 @@ interface UnForfeitGridSearchProps {
   onArchiveHandled?: () => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   fiscalCalendarYear: CalendarResponseDto | null;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
+  onCloseLeftPane?: () => void;
   onShowUnsavedChangesDialog?: () => void;
   onShowErrorDialog?: (title: string, message: string) => void;
 }
@@ -34,11 +39,16 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
   onArchiveHandled,
   setHasUnsavedChanges,
   fiscalCalendarYear,
+  isGridExpanded = false,
+  onToggleExpand,
+  onCloseLeftPane: _onCloseLeftPane,
   onShowUnsavedChangesDialog,
   onShowErrorDialog
 }) => {
   // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  const gridMaxHeight = useDynamicGridHeight({
+    heightPercentage: isGridExpanded ? 0.85 : 0.4
+  });
 
   // Check if current navigation should be read-only
   const isReadOnly = useReadOnlyNavigation();
@@ -199,6 +209,16 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             marginBottom={2}>
             <Grid>
               <ReportSummary report={unForfeits} />
+            </Grid>
+            <Grid style={{ display: 'flex', gap: 8 }}>
+              {/* Remove left pane close button, only show expand/collapse */}
+              {onToggleExpand && (
+                <IconButton
+                  onClick={onToggleExpand}
+                  sx={{ zIndex: 1 }}>
+                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              )}
             </Grid>
           </Grid>
 

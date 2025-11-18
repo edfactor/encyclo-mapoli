@@ -93,6 +93,11 @@ interface MockRootState {
     missives?: unknown[];
     [key: string]: unknown;
   };
+  general?: {
+    isDrawerOpen?: boolean;
+    isFullscreen?: boolean;
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 }
 
@@ -149,6 +154,10 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
     },
     lookups: {
       missives: []
+    },
+    general: {
+      isDrawerOpen: false,
+      isFullscreen: false
     }
   };
 
@@ -174,7 +183,8 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
     yearsEnd: { ...defaultState.yearsEnd, ...preloadedState?.yearsEnd },
     distribution: { ...defaultState.distribution, ...preloadedState?.distribution },
     inquiry: { ...defaultState.inquiry, ...preloadedState?.inquiry },
-    lookups: { ...defaultState.lookups, ...preloadedState?.lookups }
+    lookups: { ...defaultState.lookups, ...preloadedState?.lookups },
+    general: { ...defaultState.general, ...preloadedState?.general }
   };
 
   const baseReducers = {
@@ -184,7 +194,8 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
     yearsEnd: createSliceReducer(mergedState.yearsEnd),
     distribution: createSliceReducer(mergedState.distribution),
     inquiry: createSliceReducer(mergedState.inquiry),
-    lookups: createSliceReducer(mergedState.lookups)
+    lookups: createSliceReducer(mergedState.lookups),
+    general: createSliceReducer(mergedState.general)
   };
 
   // Add RTK Query API reducers that tests commonly mock
