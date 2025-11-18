@@ -300,15 +300,20 @@ FROM (
         string query = @$"
 SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
                + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
-                  AND ( NVL(pp.TOTAL_HOURS, 0) >= {ReferenceData.MinimumHoursForContribution()} 
-                        AND d.DATE_OF_BIRTH <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
+                  AND ( NVL(MAX(pp.TOTAL_HOURS), 0) >= {ReferenceData.MinimumHoursForContribution()} 
+                        AND MAX(d.DATE_OF_BIRTH) <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
                THEN 1 ELSE 0 END
                  AS YEARS
             FROM PROFIT_DETAIL pd
            INNER JOIN DEMOGRAPHIC d ON pd.SSN = d.SSN
        LEFT JOIN PAY_PROFIT pp ON pp.DEMOGRAPHIC_ID = d.ID AND pp.PROFIT_YEAR = {profitYear}
            WHERE pd.PROFIT_YEAR <= {profitYear}
-        GROUP BY d.ID, pd.SSN, pp.TOTAL_HOURS, d.DATE_OF_BIRTH
+        GROUP BY d.ID, pd.SSN
+        /* MAX() is used for pp.TOTAL_HOURS and d.DATE_OF_BIRTH to satisfy Oracle's GROUP BY requirements.
+           Since the JOIN on PAY_PROFIT uses DEMOGRAPHIC_ID + PROFIT_YEAR (which form a unique key per year),
+           and each DEMOGRAPHIC.ID has exactly one DATE_OF_BIRTH, MAX() will always return a single value
+           per group and does not alter the query logic. This approach avoids including these columns in the
+           GROUP BY clause, which would incorrectly create separate groups for each distinct value. */
 ";
         return query;
     }

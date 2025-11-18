@@ -98,7 +98,7 @@ public sealed class JwtTokenService : IJwtTokenService
 
         // Combine to create JWT
         string jwtToken = $"{signatureInput}.{signatureEncoded}";
-        _logger.LogDebug("JWT Token (first 100 chars): {JwtToken}...", jwtToken.Substring(0, Math.Min(100, jwtToken.Length)));
+        _logger.LogDebug("JWT Token (first 100 chars): {JwtToken}...", jwtToken[..Math.Min(100, jwtToken.Length)]);
 
         return jwtToken;
     }
