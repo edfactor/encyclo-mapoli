@@ -1,5 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { NavigationStatusDto } from "../../../types";
+import { createCountColumn, createDateColumn, createNameColumn } from "../../../utils/gridColumnFactory";
 
 interface ChangesCellRendererProps extends ICellRendererParams {
   navigationStatusLookup: Map<number, string>;
@@ -60,47 +61,41 @@ export const GetAuditSearchColumns = (navigationStatusList: NavigationStatusDto[
   });
 
   return [
-    {
+    createCountColumn({
       headerName: "Audit Event ID",
       field: "auditEventId",
-      sortable: true,
-      filter: "agNumberColumnFilter",
-      width: 150
-    },
-    {
+      minWidth: 150,
+      alignment: "center"
+    }),
+    createNameColumn({
       headerName: "Table Name",
       field: "tableName",
-      sortable: true,
-      filter: "agTextColumnFilter",
-      width: 200
-    },
-    {
+      minWidth: 200,
+      alignment: "left"
+    }),
+    createNameColumn({
       headerName: "Operation",
       field: "operation",
-      sortable: true,
-      filter: "agTextColumnFilter",
-      width: 150
-    },
-    {
+      minWidth: 150,
+      alignment: "left"
+    }),
+    createNameColumn({
       headerName: "Primary Key",
       field: "primaryKey",
-      sortable: true,
-      filter: "agTextColumnFilter",
-      width: 150
-    },
-    {
+      minWidth: 150,
+      alignment: "left"
+    }),
+    createNameColumn({
       headerName: "User Name",
       field: "userName",
-      sortable: true,
-      filter: "agTextColumnFilter",
-      width: 200
-    },
-    {
+      minWidth: 200,
+      alignment: "left"
+    }),
+    createDateColumn({
       headerName: "Created At",
       field: "createdAt",
-      sortable: true,
-      filter: "agDateColumnFilter",
-      width: 200,
+      minWidth: 200,
+      alignment: "center",
       valueFormatter: (params) => {
         if (!params.value) return "";
         const date = new Date(params.value);
@@ -114,7 +109,7 @@ export const GetAuditSearchColumns = (navigationStatusList: NavigationStatusDto[
           hour12: true
         });
       }
-    },
+    }),
     {
       headerName: "Changes",
       field: "changesJson",

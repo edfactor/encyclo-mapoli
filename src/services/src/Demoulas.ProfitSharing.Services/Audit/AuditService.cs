@@ -148,17 +148,19 @@ public sealed class AuditService : IAuditService
                 query = query.Where(e => e.CreatedAt <= request.EndTime.Value);
             }
 
-            // Get total count before pagination
-            var totalCount = await query.CountAsync(cancellationToken);
+            var sortReq = request with { 
+                SortBy = request.SortBy switch 
+                {
+                    "auditEventId" => "Id",
+                    "" => "Id",
+                    null => "Id",
+                    _ => request.SortBy
+                }
+            };
+            var paginatedResults = await query.ToPaginationResultsAsync(sortReq, cancellationToken);
 
-            // Apply pagination and get raw entities (without DTO projection)
-            var pagedEntities = await query
-                .Skip(request.Skip ?? 0)
-                .Take(request.Take ?? 50)
-                .ToListAsync(cancellationToken);
-
-            // Project to DTOs in memory after materialization
-            var dtos = pagedEntities.Select(e => new AuditEventDto
+            // Project to DTOs with ChangesJson handling after materialization
+            var dtos = paginatedResults.Results.Select(e => new AuditEventDto
             {
                 AuditEventId = e.Id,
                 TableName = e.TableName,
@@ -178,11 +180,10 @@ public sealed class AuditService : IAuditService
                     : null
             }).ToList();
 
-            // Return paginated response
             return new PaginatedResponseDto<AuditEventDto>
             {
                 Results = dtos,
-                Total = totalCount
+                Total = paginatedResults.Total
             };
         }, cancellationToken);
     }
