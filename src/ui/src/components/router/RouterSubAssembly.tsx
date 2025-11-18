@@ -71,6 +71,7 @@ import QPAY066AdHocReports from "../../pages/Reports/QPAY066AdHocReports/QPAY066
 import QPAY600 from "../../pages/Reports/QPAY600/QPAY600";
 import RecentlyTerminated from "../../pages/Reports/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/Reports/TerminatedLetters/TerminatedLetters";
+import { isSafePath } from "../../utils/pathValidation";
 import LandingPage from "./LandingPage";
 
 const RouterSubAssembly: React.FC = () => {
@@ -122,14 +123,8 @@ const RouterSubAssembly: React.FC = () => {
       const newSearch = params.toString();
 
       // Validate pathname to prevent open redirect attacks
-      // Only allow navigation to known routes, otherwise redirect to "/"
-      const knownRoutes = Object.values(ROUTES) as string[];
-      const isValidPath =
-        location.pathname.startsWith("/") &&
-        !location.pathname.includes("://") &&
-        (knownRoutes.map(String).includes(location.pathname) || location.pathname === "/");
-
-      const safePath = isValidPath ? location.pathname : "/";
+      // Use centralized path validation utility
+      const safePath = isSafePath(location.pathname) ? location.pathname : "/";
 
       navigate(`${safePath}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
     }
@@ -145,63 +140,63 @@ const RouterSubAssembly: React.FC = () => {
             menuInfo={MenuData(data)}
             navigationData={data}
             impersonationMultiSelect={
-            showImpersonation ? (
-              <ImpersonationMultiSelect
-                impersonationRoles={[
-                  ImpersonationRoles.Auditor,
-                  ImpersonationRoles.DistributionsClerk,
-                  ImpersonationRoles.ExecutiveAdministrator,
-                  ImpersonationRoles.FinanceManager,
-                  ImpersonationRoles.HardshipAdministrator,
-                  ImpersonationRoles.ItDevOps,
-                  ImpersonationRoles.ItOperations,
-                  ImpersonationRoles.ProfitSharingAdministrator
-                ]}
-                currentRoles={impersonating || []}
-                setCurrentRoles={(value: string[]) => {
-                  if (value.length === 0) {
-                    // Clear all roles
-                    localStorage.removeItem("impersonatingRoles");
-                    dispatch(setImpersonating([]));
-                    return;
-                  }
+              showImpersonation ? (
+                <ImpersonationMultiSelect
+                  impersonationRoles={[
+                    ImpersonationRoles.Auditor,
+                    ImpersonationRoles.DistributionsClerk,
+                    ImpersonationRoles.ExecutiveAdministrator,
+                    ImpersonationRoles.FinanceManager,
+                    ImpersonationRoles.HardshipAdministrator,
+                    ImpersonationRoles.ItDevOps,
+                    ImpersonationRoles.ItOperations,
+                    ImpersonationRoles.ProfitSharingAdministrator
+                  ]}
+                  currentRoles={impersonating || []}
+                  setCurrentRoles={(value: string[]) => {
+                    if (value.length === 0) {
+                      // Clear all roles
+                      localStorage.removeItem("impersonatingRoles");
+                      dispatch(setImpersonating([]));
+                      return;
+                    }
 
-                  const currentRoles = (impersonating || []) as ImpersonationRoles[];
-                  const newRoles = value.map((role) => role as ImpersonationRoles);
+                    const currentRoles = (impersonating || []) as ImpersonationRoles[];
+                    const newRoles = value.map((role) => role as ImpersonationRoles);
 
-                  // Determine if roles were added or removed
-                  let validatedRoles: ImpersonationRoles[];
+                    // Determine if roles were added or removed
+                    let validatedRoles: ImpersonationRoles[];
 
-                  if (newRoles.length > currentRoles.length) {
-                    // Role was added - find which one and validate
-                    const addedRole = newRoles.find((role) => !currentRoles.includes(role));
-                    if (addedRole) {
-                      validatedRoles = validateImpersonationRoles(currentRoles, addedRole);
+                    if (newRoles.length > currentRoles.length) {
+                      // Role was added - find which one and validate
+                      const addedRole = newRoles.find((role) => !currentRoles.includes(role));
+                      if (addedRole) {
+                        validatedRoles = validateImpersonationRoles(currentRoles, addedRole);
+                      } else {
+                        validatedRoles = newRoles;
+                      }
+                    } else if (newRoles.length < currentRoles.length) {
+                      // Role was removed - find which one and validate
+                      const removedRole = currentRoles.find((role) => !newRoles.includes(role));
+                      if (removedRole) {
+                        validatedRoles = validateRoleRemoval(currentRoles, removedRole);
+                      } else {
+                        validatedRoles = newRoles;
+                      }
                     } else {
+                      // Same length but different roles (shouldn't happen with multi-select, but handle it)
                       validatedRoles = newRoles;
                     }
-                  } else if (newRoles.length < currentRoles.length) {
-                    // Role was removed - find which one and validate
-                    const removedRole = currentRoles.find((role) => !newRoles.includes(role));
-                    if (removedRole) {
-                      validatedRoles = validateRoleRemoval(currentRoles, removedRole);
-                    } else {
-                      validatedRoles = newRoles;
-                    }
-                  } else {
-                    // Same length but different roles (shouldn't happen with multi-select, but handle it)
-                    validatedRoles = newRoles;
-                  }
 
-                  // Update state and localStorage with validated roles
-                  localStorage.setItem("impersonatingRoles", JSON.stringify(validatedRoles));
-                  dispatch(setImpersonating(validatedRoles));
-                }}
-              />
-            ) : (
-              <></>
-            )
-          }
+                    // Update state and localStorage with validated roles
+                    localStorage.setItem("impersonatingRoles", JSON.stringify(validatedRoles));
+                    dispatch(setImpersonating(validatedRoles));
+                  }}
+                />
+              ) : (
+                <></>
+              )
+            }
           />
         )}
         <Box
@@ -211,8 +206,12 @@ const RouterSubAssembly: React.FC = () => {
             id="SecondSubAssemblyRouterBox"
             sx={{
               height: "100%",
-              width: isFullscreen ? "100%" : (isDrawerOpen ? `calc(100% - ${drawerOpenWidth}px)` : `calc(100% - ${drawerClosedWidth}px)`),
-              marginLeft: isFullscreen ? "0px" : (isDrawerOpen ? `${drawerOpenWidth}px` : `${drawerClosedWidth}px`),
+              width: isFullscreen
+                ? "100%"
+                : isDrawerOpen
+                  ? `calc(100% - ${drawerOpenWidth}px)`
+                  : `calc(100% - ${drawerClosedWidth}px)`,
+              marginLeft: isFullscreen ? "0px" : isDrawerOpen ? `${drawerOpenWidth}px` : `${drawerClosedWidth}px`,
 
               transition: "all 225ms"
             }}>

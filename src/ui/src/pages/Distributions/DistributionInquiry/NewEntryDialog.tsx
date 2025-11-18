@@ -15,6 +15,7 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../constants";
+import { encodePathParameter, isSafePath } from "../../../utils/pathValidation";
 
 interface NewEntryDialogProps {
   open: boolean;
@@ -64,9 +65,16 @@ const NewEntryDialog = ({ open, onClose }: NewEntryDialogProps) => {
       const badge = badgeNumber.trim();
       const cleanSSN = ssn.replace(/-/g, "");
       // Navigate to add distribution page with badge number (or SSN if no badge), and member type
-      const identifier = badge || cleanSSN;
-      navigate(`/${ROUTES.ADD_DISTRIBUTION}/${identifier}/${memberType}`);
-      handleClose();
+      // Encode parameters to prevent injection attacks
+      const identifier = encodePathParameter(badge || cleanSSN);
+      const encodedMemberType = encodePathParameter(memberType.toString());
+      const path = `/${ROUTES.ADD_DISTRIBUTION}/${identifier}/${encodedMemberType}`;
+
+      // Validate constructed path before navigation
+      if (isSafePath(path)) {
+        navigate(path);
+        handleClose();
+      }
     }
   };
 

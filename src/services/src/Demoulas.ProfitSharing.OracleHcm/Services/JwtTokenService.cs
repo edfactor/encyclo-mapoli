@@ -168,8 +168,8 @@ public sealed class JwtTokenService : IJwtTokenService
 #pragma warning disable CA5350 // Do not use weak cryptographic algorithms - Oracle HCM requirement
     private static string CalculateThumbprint(X509Certificate2 certificate)
     {
-        using var sha1 = SHA1.Create();
-        byte[] thumbprintBytes = sha1.ComputeHash(certificate.RawData);
+        using var sha256 = SHA256.Create();
+        byte[] thumbprintBytes = sha256.ComputeHash(certificate.RawData);
         return Base64UrlEncode(thumbprintBytes);
     }
 #pragma warning restore CA5350
