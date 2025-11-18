@@ -272,7 +272,8 @@ export const YearsEndApi = createApi({
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          includeFictionalSsnPairs: params.includeFictionalSsnPairs ?? false
         }
       }),
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {

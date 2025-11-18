@@ -6,6 +6,11 @@
 # ------------------------------------------------------------------------
 
 definitions:
+  # Centralized server variables
+  servers:
+    qa_app_server: &qa_app_server "appt23d"
+    uat_app_server: &uat_app_server "appt24d"
+
   steps:
     build-and-test-backend: &build-and-test-backend
       name: Build and Test Backend API
@@ -899,6 +904,227 @@ pipelines:
           - step: *secret-scan
   
   custom:
+    infrastructure_as_code:
+      - variables:
+          - name: ServerEnvironment
+            default: QA
+            allowed-values:
+              - QA
+              - UAT
+          - name: Operation
+            default: install-hosting-bundle
+            allowed-values:
+              - install-hosting-bundle
+              - configure-gzip-compression
+          - name: ForceReinstall
+            default: 'false'
+            allowed-values:
+              - 'true'
+              - 'false'
+      - step:
+          name: Execute IaC Operation
+          runs-on:
+            - windows
+            - self.hosted
+          script:
+            - |
+              # Server mapping from centralized definitions (keep in sync with definitions.servers)
+              $targetServer = switch ($env:ServerEnvironment) {
+                  "QA"  { "appt23d" }
+                  "UAT" { "appt24d" }
+                  default {
+                      Write-Error "Unknown ServerEnvironment: $env:ServerEnvironment (allowed: QA, UAT)"
+                      exit 1
+                  }
+              }
+
+              Write-Host "================================================================" -ForegroundColor Cyan
+              Write-Host "  Infrastructure as Code Operation" -ForegroundColor Cyan
+              Write-Host "================================================================" -ForegroundColor Cyan
+              Write-Host ""
+              Write-Host "Environment: $env:ServerEnvironment" -ForegroundColor Yellow
+              Write-Host "Target Server: $targetServer" -ForegroundColor Yellow
+              Write-Host "Operation: $env:Operation" -ForegroundColor Yellow
+              Write-Host "Force Reinstall: $env:ForceReinstall" -ForegroundColor Yellow
+              Write-Host ""
+
+              # Execute operation
+              switch ($env:Operation) {
+                  "install-hosting-bundle" {
+                      Write-Host "Installing .NET 10 Hosting Bundle on $targetServer..." -ForegroundColor Cyan
+                      
+                      $scriptPath = ".\scripts\IaC\Install-DotNetHostingBundle.ps1"
+                      if (-not (Test-Path $scriptPath)) {
+                          Write-Error "Script not found: $scriptPath"
+                          exit 1
+                      }
+
+                      # Download the installer locally first (runner has internet access)
+                      $downloadUrl = "https://builds.dotnet.microsoft.com/dotnet/aspnetcore/Runtime/10.0.0/dotnet-hosting-10.0.0-win.exe"
+                      $localInstallerPath = "$env:TEMP\dotnet-hosting-10.0.0-win.exe"
+                      
+                      Write-Host "Downloading .NET 10 Hosting Bundle locally..." -ForegroundColor Cyan
+                      try {
+                          Invoke-WebRequest -Uri $downloadUrl -OutFile $localInstallerPath -ErrorAction Stop
+                          $fileSize = (Get-Item $localInstallerPath).Length / 1MB
+                          Write-Host "[OK] Downloaded $('{0:N2}' -f $fileSize) MB" -ForegroundColor Green
+                      }
+                      catch {
+                          Write-Error "Failed to download installer: $_"
+                          exit 1
+                      }
+
+                      # Create remote session (similar to webDeploy.ps1 approach)
+                      try {
+                          $session = New-PSSession $targetServer
+                          
+                          # Copy installer and script to remote server temp location
+                          $remoteInstallerPath = "C:\temp\dotnet-hosting-10.0.0-win.exe"
+                          $remoteScriptPath = "C:\temp\Install-DotNetHostingBundle.ps1"
+                          
+                          Invoke-Command -Session $session -ScriptBlock {
+                              if (-not (Test-Path "C:\temp")) {
+                                  New-Item -ItemType Directory -Path "C:\temp" -Force | Out-Null
+                              }
+                          }
+                          
+                          Write-Host "Copying files to remote server..." -ForegroundColor Cyan
+                          Copy-Item -ToSession $session -Path $localInstallerPath -Destination $remoteInstallerPath -Force
+                          Copy-Item -ToSession $session -Path $scriptPath -Destination $remoteScriptPath -Force
+                          Write-Host "[OK] Files copied to remote server" -ForegroundColor Green
+                          
+                          # Execute hosting bundle installation on remote machine
+                          $forceFlag = ($env:ForceReinstall -eq 'true')
+                          $result = Invoke-Command -Session $session -ScriptBlock {
+                              param($Force, $InstallerPath)
+                              
+                              # Run the installer directly (skip download since we already have the file)
+                              Write-Host ""
+                              Write-Host "Running .NET 10 Hosting Bundle installer..." -ForegroundColor Cyan
+                              
+                              try {
+                                  $process = Start-Process -FilePath $InstallerPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -PassThru
+                                  
+                                  if ($process.ExitCode -eq 0) {
+                                      Write-Host "[OK] Installation completed successfully (exit code: 0)" -ForegroundColor Green
+                                      
+                                      # Verify installation
+                                      Write-Host ""
+                                      Write-Host "Verifying installation..." -ForegroundColor Cyan
+                                      $dotnetInfo = & dotnet --info 2>&1 | Out-String
+                                      
+                                      $hasAspNetCore = $dotnetInfo -match "Microsoft\.AspNetCore\.App 10\.0\.0"
+                                      $hasNETCore = $dotnetInfo -match "Microsoft\.NETCore\.App 10\.0\.0"
+                                      
+                                      if ($hasAspNetCore -and $hasNETCore) {
+                                          Write-Host "[OK] .NET 10.0.0 Runtime verified" -ForegroundColor Green
+                                          Write-Host "  - Microsoft.AspNetCore.App 10.0.0: Found" -ForegroundColor Green
+                                          Write-Host "  - Microsoft.NETCore.App 10.0.0: Found" -ForegroundColor Green
+                                      } else {
+                                          Write-Host "[!] Verification incomplete" -ForegroundColor Yellow
+                                          if ($hasAspNetCore) { Write-Host "  - Microsoft.AspNetCore.App 10.0.0: Found" -ForegroundColor Yellow }
+                                          if ($hasNETCore) { Write-Host "  - Microsoft.NETCore.App 10.0.0: Found" -ForegroundColor Yellow }
+                                      }
+                                      
+                                      # Restart IIS
+                                      Write-Host ""
+                                      Write-Host "Restarting IIS..." -ForegroundColor Cyan
+                                      iisreset /restart | Out-Null
+                                      Write-Host "[OK] IIS restarted" -ForegroundColor Green
+                                      
+                                      return 0
+                                  } else {
+                                      Write-Host "[X] Installation failed with exit code: $($process.ExitCode)" -ForegroundColor Red
+                                      return $process.ExitCode
+                                  }
+                              }
+                              catch {
+                                  Write-Host "[X] Installation error: $_" -ForegroundColor Red
+                                  return 1
+                              }
+                              finally {
+                                  # Cleanup
+                                  Remove-Item -Path $InstallerPath -Force -ErrorAction SilentlyContinue
+                                  Remove-Item -Path C:\temp\Install-DotNetHostingBundle.ps1 -Force -ErrorAction SilentlyContinue
+                              }
+                          } -ArgumentList $forceFlag, $remoteInstallerPath
+                          
+                          if ($result -ne 0) {
+                              Write-Error "Hosting bundle installation failed with exit code: $result"
+                              exit $result
+                          }
+                          Write-Host ""
+                          Write-Host "[OK] .NET 10 Hosting Bundle installation completed" -ForegroundColor Green
+                      }
+                      finally {
+                          # Cleanup local file
+                          Remove-Item -Path $localInstallerPath -Force -ErrorAction SilentlyContinue
+                          Remove-PSSession -Session $session -ErrorAction SilentlyContinue
+                      }
+                  }
+                  "configure-gzip-compression" {
+                      Write-Host "Configuring IIS Gzip Compression on $targetServer..." -ForegroundColor Cyan
+                      
+                      $scriptPath = ".\scripts\IaC\IISGzipConfiguration.ps1"
+                      if (-not (Test-Path $scriptPath)) {
+                          Write-Error "Script not found: $scriptPath"
+                          exit 1
+                      }
+
+                      # Create remote session (similar to webDeploy.ps1 approach)
+                      try {
+                          $session = New-PSSession $targetServer
+                          
+                          # Copy script to remote server temp location
+                          $remoteTempPath = "C:\temp\IISGzipConfiguration.ps1"
+                          Invoke-Command -Session $session -ScriptBlock {
+                              if (-not (Test-Path "C:\temp")) {
+                                  New-Item -ItemType Directory -Path "C:\temp" -Force | Out-Null
+                              }
+                          }
+                          Copy-Item -ToSession $session -Path $scriptPath -Destination $remoteTempPath -Force
+                          
+                          # Execute gzip configuration script on remote machine
+                          $result = Invoke-Command -Session $session -ScriptBlock {
+                              # Source the script
+                              . C:\temp\IISGzipConfiguration.ps1
+                              
+                              # Run initialization
+                              Initialize-IISGzipCompression
+                              
+                              # Display status
+                              Write-Host ""
+                              $healthCheck = Test-IISGzipConfigurationHealth
+                              
+                              # Cleanup
+                              Remove-Item -Path C:\temp\IISGzipConfiguration.ps1 -Force -ErrorAction SilentlyContinue
+                              
+                              # Return health check result
+                              return $healthCheck
+                          }
+                          
+                          if (-not $result.IsHealthy) {
+                              Write-Warning "Gzip compression configured but health check detected issues"
+                              Write-Host "Health check returned: IsHealthy=$($result.IsHealthy)" -ForegroundColor Yellow
+                          }
+                          Write-Host ""
+                          Write-Host "[OK] IIS Gzip Compression configuration completed" -ForegroundColor Green
+                      }
+                      finally {
+                          Remove-PSSession -Session $session -ErrorAction SilentlyContinue
+                      }
+                  }
+                  default {
+                      Write-Error "Unknown operation: $env:Operation"
+                      exit 1
+                  }
+              }
+
+              Write-Host ""
+              Write-Host "================================================================" -ForegroundColor Cyan
+              Write-Host "[OK] IaC operation completed successfully" -ForegroundColor Green
+              Write-Host "================================================================" -ForegroundColor Cyan
+
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment

@@ -223,8 +223,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
                             .Select(g => g.First())
                             .ToList();
 
-                    // Apply sorting based on request
-                    var sortedResults = await ApplySorting(allResults.AsQueryable(), req).ToListAsync();
+                    // Apply sorting based on request (in-memory sorting for already-materialized results)
+#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
+#pragma warning disable S6966 // Awaitable method should be used
+                    var sortedResults = allResults.Count > 1 ? ApplySorting(allResults.AsQueryable(), req).ToList() : allResults;
+#pragma warning restore S6966 // Awaitable method should be used
+#pragma warning restore AsyncFixer02 // Long-running or blocking operations inside an async method
 
                     // Apply pagination to the final deduplicated result set
                     int skip = req.Skip ?? 0;
@@ -652,7 +656,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             {
                 // Single query to get both employees and beneficiaries
                 var badgeNumbers = employeePartnerIds.Concat(beneficiaryPartnerKeys.Select(k => k.OracleHcmId)).Distinct().ToList();
-                
+
                 var allPartnerInfo = await (
                     from d in demographics
                     where badgeNumbers.Contains(d.OracleHcmId)
@@ -663,9 +667,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         d.ContactInfo!.FullName,
                         // Left join to beneficiaries - will be null for employees
                         Beneficiaries = (from b in ctx.Beneficiaries
-                                       join bc in ctx.BeneficiaryContacts on b.BeneficiaryContactId equals bc.Id
-                                       where b.DemographicId == d.Id
-                                       select new { b.PsnSuffix, bc.ContactInfo.FullName }).ToList()
+                                         join bc in ctx.BeneficiaryContacts on b.BeneficiaryContactId equals bc.Id
+                                         where b.DemographicId == d.Id
+                                         select new { b.PsnSuffix, bc.ContactInfo.FullName }).ToList()
                     }
                 ).ToListAsync(cancellationToken);
 

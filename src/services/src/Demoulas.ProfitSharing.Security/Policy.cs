@@ -44,4 +44,5 @@ public static class Policy
     /// Can reverse profit detail entries (corrections).
     /// </summary>
     public static readonly string CanReverseProfitDetails = "CAN_REVERSE_PROFIT_DETAILS";
+    public static readonly string CanViewAudits = "CAN_VIEW_AUDITS";
 }

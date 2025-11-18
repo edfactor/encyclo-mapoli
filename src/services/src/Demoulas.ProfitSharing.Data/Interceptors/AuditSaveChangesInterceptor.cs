@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+﻿using System.Security.Cryptography;
+using System.Text.Json;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit; // Add for IDoNotAudit
 using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
@@ -6,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Demoulas.ProfitSharing.Data.Interceptors;
+
 public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
     private readonly DataConfig _config;
@@ -44,20 +47,23 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         {
             var primaryKey = GetPrimaryKeyString(entry);
 
+            var changesJson = entry.Properties
+                .Where(p => p.IsModified || entry.State == EntityState.Added || entry.State == EntityState.Deleted)
+                .Select(p => new AuditChangeEntry
+                {
+                    ColumnName = p.Metadata.Name,
+                    OriginalValue = p.OriginalValue?.ToString(),
+                    NewValue = p.CurrentValue?.ToString()
+                }).ToList();
+
             var auditEvent = new AuditEvent
             {
                 TableName = entry.Metadata.GetTableName(),
                 Operation = entry.State.ToString(),
                 UserName = _appUser?.UserName ?? "System",
                 PrimaryKey = primaryKey,
-                ChangesJson = entry.Properties
-                    .Where(p => p.IsModified || entry.State == EntityState.Added || entry.State == EntityState.Deleted)
-                    .Select(p => new AuditChangeEntry
-                    {
-                        ColumnName = p.Metadata.Name,
-                        OriginalValue = p.OriginalValue?.ToString(),
-                        NewValue = p.CurrentValue?.ToString()
-                    }).ToList()
+                ChangesJson = changesJson,
+                ChangesHash = CalculateChangesHash(changesJson)
             };
 
             events.Add(auditEvent);
@@ -93,5 +99,44 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 
         // Join key-value pairs with '+' delimiter, maintaining the existing format
         return string.Join("+", keyPairs);
+    }
+
+    /// <summary>
+    /// Calculates a SHA256 hash of the ChangesJson list for tamper detection.
+    /// </summary>
+    /// <param name="changesJson">The list of audit change entries to hash</param>
+    /// <returns>A hexadecimal string representation of the SHA256 hash, or null if input is null</returns>
+    public static string? CalculateChangesHash(List<AuditChangeEntry>? changesJson)
+    {
+        if (changesJson == null)
+        {
+            return null;
+        }
+
+        var json = JsonSerializer.Serialize(changesJson, JsonSerializerOptions.Web);
+        var hashBytes = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(json));
+        return Convert.ToHexString(hashBytes);
+    }
+
+    /// <summary>
+    /// Verifies the integrity of an audit event by comparing the stored hash with a recalculated hash.
+    /// </summary>
+    /// <param name="auditEvent">The audit event to verify</param>
+    /// <returns>True if the hash matches (record is intact), false if tampered or hash is missing</returns>
+    public static bool VerifyAuditEventIntegrity(AuditEvent auditEvent)
+    {
+        if (auditEvent == null)
+        {
+            throw new ArgumentNullException(nameof(auditEvent));
+        }
+
+        if (string.IsNullOrEmpty(auditEvent.ChangesHash))
+        {
+            // No hash stored - cannot verify (legacy records or hash not enabled)
+            return false;
+        }
+
+        var calculatedHash = CalculateChangesHash(auditEvent.ChangesJson);
+        return string.Equals(auditEvent.ChangesHash, calculatedHash, StringComparison.OrdinalIgnoreCase);
     }
 }

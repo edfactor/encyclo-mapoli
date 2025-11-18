@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 public sealed record DistributionSearchResponse : IIsExecutive
@@ -7,6 +8,7 @@ public sealed record DistributionSearchResponse : IIsExecutive
     public required int PaymentSequence { get; set; }
     public required string Ssn { get; set; }
     public int? BadgeNumber { get; set; }
+    [MaskSensitive]
     public required string FullName { get; set; }
     public bool IsExecutive { get; set; }
     public bool IsEmployee { get; set; }

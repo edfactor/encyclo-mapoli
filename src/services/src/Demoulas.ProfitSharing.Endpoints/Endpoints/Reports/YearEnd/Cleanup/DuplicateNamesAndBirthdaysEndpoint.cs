@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
-public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYearRequest, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
+public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateNamesAndBirthdaysRequest, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
 {
     private readonly IDuplicateNamesAndBirthdaysService _duplicateNamesAndBirthdaysService;
     private readonly ILogger<DuplicateNamesAndBirthdaysEndpoint> _logger;
@@ -85,7 +85,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
 
     public override string ReportFileName => "duplicate-names-and-birthdays";
 
-    public override async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(DuplicateNamesAndBirthdaysRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -93,18 +93,21 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            // Get cached data only
-            _logger.LogInformation("Fetching duplicate names and birthdays data from cache");
+            _logger.LogInformation("Fetching duplicate names and birthdays data (ProfitYear: {ProfitYear})",
+                req.ProfitYear);
+
+            // Get cached data with filtering applied by service
             var cachedResponse = await _duplicateNamesAndBirthdaysService.GetCachedDuplicateNamesAndBirthdaysAsync(req, ct);
 
-            ReportResponseBase<DuplicateNamesAndBirthdaysResponse> result;
+            ReportResponseBase<DuplicateNamesAndBirthdaysResponse> reportResult;
 
             if (cachedResponse != null)
             {
-                _logger.LogInformation("Using cached duplicate names and birthdays data (AsOfDate: {AsOfDate})", cachedResponse.AsOfDate);
+                _logger.LogInformation("Using cached duplicate names and birthdays data (AsOfDate: {AsOfDate})",
+                    cachedResponse.AsOfDate);
 
                 // Convert cached response to ReportResponseBase
-                result = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
+                reportResult = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
                 {
                     ReportName = ReportFileName,
                     ReportDate = cachedResponse.AsOfDate,
@@ -126,7 +129,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                 // Return empty result if cache is not available
                 _logger.LogWarning("Cache not available, returning empty result. Cache will be populated by background service.");
 
-                result = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
+                reportResult = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
                 {
                     ReportName = ReportFileName,
                     StartDate = DateOnly.FromDateTime(DateTime.Today),
@@ -143,7 +146,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                     new("data_source", "cache-miss"));
             }
 
-            var resultCount = result.Response?.Results?.Count() ?? 0;
+            var resultCount = reportResult.Response?.Results?.Count() ?? 0;
             EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
                 new("record_type", "duplicate-names-birthdays-cleanup"),
                 new("endpoint", "DuplicateNamesAndBirthdaysEndpoint"));
@@ -151,8 +154,8 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
             _logger.LogInformation("Year-end cleanup report for duplicate names and birthdays returned {Count} records (correlation: {CorrelationId})",
                 resultCount, HttpContext.TraceIdentifier);
 
-            this.RecordResponseMetrics(HttpContext, _logger, result);
-            return result;
+            this.RecordResponseMetrics(HttpContext, _logger, reportResult);
+            return reportResult;
         }
         catch (Exception ex)
         {

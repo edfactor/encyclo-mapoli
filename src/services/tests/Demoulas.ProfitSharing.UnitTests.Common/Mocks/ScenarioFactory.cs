@@ -3,6 +3,7 @@ using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,7 @@ public sealed class ScenarioFactory
     public List<FrozenState> FrozenStates { get; set; } = [];
     public List<DemographicHistory> DemographicHistories { get; set; } = [];
     public List<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; } = [];
+    public List<AuditEvent> AuditEvents { get; set; } = [];
 
     // populate ProfitCode dictionary object from the Constants
     public List<ProfitCode> ProfitCodes { get; set; } = typeof(ProfitCode.Constants)
@@ -256,6 +258,11 @@ public sealed class ScenarioFactory
         Mock<DbSet<YearEndUpdateStatus>> mockYearEndUpdateStatuses = YearEndUpdateStatuses.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
+
+        // AuditEvents
+        Mock<DbSet<AuditEvent>> mockAuditEvents = AuditEvents.BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.AuditEvents).Returns(mockAuditEvents.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.AuditEvents).Returns(mockAuditEvents.Object);
 
 
         return _sdb;

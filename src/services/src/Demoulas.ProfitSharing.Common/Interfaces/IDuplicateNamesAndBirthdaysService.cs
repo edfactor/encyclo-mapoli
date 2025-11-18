@@ -7,11 +7,11 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IDuplicateNamesAndBirthdaysService
 {
     Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(
-        ProfitYearRequest req,
+        DuplicateNamesAndBirthdaysRequest req,
         CancellationToken cancellationToken = default);
 
     Task<DuplicateNamesAndBirthdaysCachedResponse?> GetCachedDuplicateNamesAndBirthdaysAsync(
-        ProfitYearRequest request, CancellationToken cancellationToken = default);
+        DuplicateNamesAndBirthdaysRequest request, CancellationToken cancellationToken = default);
 
     Task ForceRefreshCacheAsync(CancellationToken cancellationToken = default);
 }

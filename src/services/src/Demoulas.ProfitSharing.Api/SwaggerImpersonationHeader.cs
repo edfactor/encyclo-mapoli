@@ -5,6 +5,7 @@ using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
 namespace Demoulas.ProfitSharing.Api;
+
 public class SwaggerImpersonationHeader : IOperationProcessor
 {
     public bool Process(OperationProcessorContext context)
