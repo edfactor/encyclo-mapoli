@@ -113,15 +113,13 @@ public class PostFrozenService : IPostFrozenService
             }, cancellationToken);
         });
 
-        var activePartiallyVestedTask = Task.Run(async () =>
-        {
-            return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+        var activePartiallyVestedTask = _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var baseQuery = await buildBaseQuery(ctx);
                 var activeQuery = baseQuery.Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate);
                 return await activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
             }, cancellationToken);
-        });
+        
 
         var activePartiallyVestedButLessThanThreeYearsTask = Task.Run(async () =>
         {
