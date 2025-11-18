@@ -175,8 +175,8 @@ public sealed class AuditService : IAuditService
                     {
                         Id = c.Id,
                         ColumnName = c.ColumnName,
-                        OriginalValue = ParseJsonValue(c.OriginalValue),
-                        NewValue = ParseJsonValue(c.NewValue)
+                        OriginalValue = SerializeJsonValue(c.OriginalValue),
+                        NewValue = SerializeJsonValue(c.NewValue)
                     }).ToList()
                     : null
             }).ToList();
@@ -208,13 +208,13 @@ public sealed class AuditService : IAuditService
             {
                 Id = c.Id,
                 ColumnName = c.ColumnName,
-                OriginalValue = ParseJsonValue(c.OriginalValue),
-                NewValue = ParseJsonValue(c.NewValue)
+                OriginalValue = SerializeJsonValue(c.OriginalValue),
+                NewValue = SerializeJsonValue(c.NewValue)
             }).ToList();
         }, cancellationToken);
     }
 
-    private static JsonElement? ParseJsonValue(string? value)
+    private static string? SerializeJsonValue(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -223,12 +223,14 @@ public sealed class AuditService : IAuditService
 
         try
         {
-            return JsonSerializer.Deserialize<JsonElement>(value);
+            var jsonElement = JsonSerializer.Deserialize<JsonElement>(value);
+            // Serialize with indentation for better readability
+            return JsonSerializer.Serialize(jsonElement, new JsonSerializerOptions { WriteIndented = true });
         }
         catch (JsonException)
         {
-            // If it's not valid JSON, treat it as a string value
-            return JsonSerializer.Deserialize<JsonElement>($"\"{value}\"");
+            // If it's not valid JSON, return as-is (it's a plain string value)
+            return value;
         }
     }
 

@@ -39,8 +39,8 @@ public sealed class GetAuditChangeEntryEndpoint : ProfitSharingEndpoint<GetAudit
                         {
                             Id = 1,
                             ColumnName = "StatusId",
-                            OriginalValue = JsonSerializer.Deserialize<JsonElement>("1"),
-                            NewValue = JsonSerializer.Deserialize<JsonElement>("2")
+                            OriginalValue = "1",
+                            NewValue = "2"
                         }
                     }
                 }

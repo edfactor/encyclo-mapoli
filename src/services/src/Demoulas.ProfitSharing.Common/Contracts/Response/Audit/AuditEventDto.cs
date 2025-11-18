@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
 
 /// <summary>
@@ -18,14 +16,14 @@ public sealed record AuditChangeEntryDto
     public required string ColumnName { get; init; }
 
     /// <summary>
-    /// The original value before the change as a JSON object.
+    /// The original value before the change as a JSON string.
     /// </summary>
-    public JsonElement? OriginalValue { get; init; }
+    public string? OriginalValue { get; init; }
 
     /// <summary>
-    /// The new value after the change as a JSON object.
+    /// The new value after the change as a JSON string.
     /// </summary>
-    public JsonElement? NewValue { get; init; }
+    public string? NewValue { get; init; }
 }
 
 /// <summary>
