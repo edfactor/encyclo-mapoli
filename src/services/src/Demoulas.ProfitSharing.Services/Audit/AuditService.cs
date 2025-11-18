@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +23,7 @@ public sealed class AuditService : IAuditService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IAppUser? _appUser;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly JsonSerializerOptions _maskingOptions;
 
     public AuditService(IProfitSharingDataContextFactory dataContextFactory,
         IAppUser? appUser,
@@ -30,6 +32,10 @@ public sealed class AuditService : IAuditService
         _dataContextFactory = dataContextFactory;
         _appUser = appUser;
         _httpContextAccessor = httpContextAccessor;
+
+        // Initialize masking serializer options
+        _maskingOptions = new JsonSerializerOptions(JsonSerializerOptions.Web);
+        _maskingOptions.Converters.Add(new MaskingJsonConverterFactory());
     }
 
     public Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
@@ -75,7 +81,7 @@ public sealed class AuditService : IAuditService
         }
 
         string requestJson = JsonSerializer.Serialize(request, JsonSerializerOptions.Web);
-        string reportJson = JsonSerializer.Serialize(response, JsonSerializerOptions.Web);
+        string reportJson = JsonSerializer.Serialize(response, _maskingOptions);
         string userName = _appUser?.UserName ?? "Unknown";
 
         // Create archived data payload with type metadata
@@ -208,10 +214,49 @@ public sealed class AuditService : IAuditService
             {
                 Id = c.Id,
                 ColumnName = c.ColumnName,
-                OriginalValue = SerializeJsonValue(c.OriginalValue),
-                NewValue = SerializeJsonValue(c.NewValue)
+                OriginalValue = DeserializeArchivedPayload(c.OriginalValue),
+                NewValue = DeserializeArchivedPayload(c.NewValue)
             }).ToList();
         }, cancellationToken);
+    }
+
+    private string? DeserializeArchivedPayload(string? jsonValue)
+    {
+        if (string.IsNullOrWhiteSpace(jsonValue))
+        {
+            return null;
+        }
+
+        try
+        {
+            // Try to deserialize as ArchivedDataPayload
+            var payload = JsonSerializer.Deserialize<ArchivedDataPayload>(jsonValue, JsonSerializerOptions.Web);
+            
+            if (payload == null)
+            {
+                return jsonValue;
+            }
+
+            // Get the Type from TypeName
+            var type = Type.GetType(payload.TypeName);
+            
+            if (type == null)
+            {
+                // If type can't be resolved, return the RawData as formatted JSON with masking
+                return JsonSerializer.Serialize(payload.RawData, _maskingOptions);
+            }
+
+            // Deserialize RawData as the actual type
+            var deserializedObject = JsonSerializer.Deserialize(payload.RawData.GetRawText(), type, JsonSerializerOptions.Web);
+            
+            // Serialize back with masking options for proper role-based masking
+            return JsonSerializer.Serialize(deserializedObject, _maskingOptions);
+        }
+        catch (JsonException)
+        {
+            // If it's not a valid ArchivedDataPayload, try to format as generic JSON
+            return SerializeJsonValue(jsonValue);
+        }
     }
 
     private static string? SerializeJsonValue(string? value)
