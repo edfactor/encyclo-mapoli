@@ -53,7 +53,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<DistributionFrequency> DistributionFrequencies { get; set; }
     public virtual DbSet<DistributionStatus> DistributionStatuses { get; set; }
     public virtual DbSet<DistributionPayee> DistributionPayees { get; set; }
-    public DbSet<FakeSsn> FakeSsns { get; set; }
+    public virtual DbSet<FakeSsn> FakeSsns { get; set; }
     public virtual DbSet<CommentType> CommentTypes { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public virtual DbSet<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; }
