@@ -106,6 +106,10 @@ DECLARE
     NEWPSLABELS_REPORT CONSTANT NUMBER := 163;
     LABELS CONSTANT NUMBER := 164;
     LABELS_NEW CONSTANT NUMBER := 165;
+    VESTING_REPORTS_GROUP CONSTANT NUMBER := 166;
+    FORFEITURE_ADJUSTMENT_PAGE CONSTANT NUMBER := 167;
+    MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE CONSTANT NUMBER := 168;
+    MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE CONSTANT NUMBER := 169;
 
 
 
@@ -210,16 +214,20 @@ BEGIN
     insert_navigation_item(MASTER_INQUIRY_PAGE, INQUIRIES_GROUP, 'MASTER INQUIRY', '', 'master-inquiry', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     
     insert_navigation_item(ADJUSTMENTS_GROUP, INQUIRIES_MENU, 'Adjustments', '', '', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(ADJUSTMENTS_PAGE, ADJUSTMENTS_GROUP, 'ADJUSTMENTS', '', 'adjustments', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ADJUSTMENTS_PAGE, ADJUSTMENTS_GROUP, 'Employee Merge', '', 'adjustments', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Military Contribution', '008-13', 'military-contribution', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(FORFEITURE_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Forfeiture Adjustment', 'TPR008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
     insert_navigation_item(ADHOC_GROUP, INQUIRIES_MENU, 'Adhoc Reports', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     --insert_navigation_item(PAY_BEN_REPORT, ADHOC_GROUP, 'Pay Ben Report', '', 'payben-report', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(VESTING_REPORTS_GROUP, ADHOC_GROUP, 'Vesting Reports', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(TERMINATED_LETTERS, VESTING_REPORTS_GROUP, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(RECENTLY_TERMINATED, VESTING_REPORTS_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY600, ADHOC_GROUP, 'QPAY600', '', 'qpay600', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(TERMINATED_LETTERS, ADHOC_GROUP, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
 
 --beneficiary items
     insert_navigation_item(BENEFICIARY_INQUIRY_PAGE, BENEFICIARIES_MENU, 'Beneficiary Inquiry', '', 'beneficiary', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -314,7 +322,7 @@ BEGIN
     --insert_navigation_item(UNDER_21_REPORT, PROF_SHARE_BY_STORE, 'Under-21 Report', '', 'under-21-report', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     
     insert_navigation_item(QPAY066TA_UNDR21, PROF_SHARE_BY_STORE, 'QPAY066TA-UNDR21', '', 'qpay066ta-under21', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(QPAY066B, PROF_SHARE_BY_STORE, 'QPAY066B', '', 'qpay066b', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    --insert_navigation_item(QPAY066B, PROF_SHARE_BY_STORE, 'QPAY066B', '', 'qpay066b', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066TA, PROF_SHARE_BY_STORE, 'Breakdown Report', 'QPAY066TA', 'qpay066ta', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(NEWPSLABELS_REPORT, PROF_SHARE_BY_STORE, 'NEWPSLABELS Report', '', '', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(LABELS, PROF_SHARE_BY_STORE, 'LABELS', '', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
@@ -451,6 +459,22 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADJUSTMENTS_PAGE, FINANCE_MANAGER);
     assign_navigation_role(ADJUSTMENTS_PAGE, DISTRIBUTIONS_CLERK);
 
+-- Assign roles for Military Contribution Adjustment
+    assign_navigation_role(MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE, FINANCE_MANAGER);
+
+-- Assign roles for Forfeiture Adjustment
+    assign_navigation_role(FORFEITURE_ADJUSTMENT_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(FORFEITURE_ADJUSTMENT_PAGE, FINANCE_MANAGER);
+
+-- Assign roles for Manage Executive Hours Adjustment
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, FINANCE_MANAGER);
+
+-- Assign roles for Vesting Reports Group
+    assign_navigation_role(VESTING_REPORTS_GROUP, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(VESTING_REPORTS_GROUP, FINANCE_MANAGER);
+
     assign_navigation_role(DECEMBER_ACTIVITIES, SYSTEM_ADMINISTRATOR);  
     assign_navigation_role(DECEMBER_ACTIVITIES, FINANCE_MANAGER);
     assign_navigation_role(CLEANUP_REPORTS, SYSTEM_ADMINISTRATOR);
@@ -571,7 +595,11 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(INQUIRIES_MENU, IT_DEVOPS);
     assign_navigation_role(INQUIRIES_GROUP, IT_DEVOPS);
     assign_navigation_role(ADJUSTMENTS_GROUP, IT_DEVOPS);
+    assign_navigation_role(MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE, IT_DEVOPS);
+    assign_navigation_role(FORFEITURE_ADJUSTMENT_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, IT_DEVOPS);
     assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
+    assign_navigation_role(VESTING_REPORTS_GROUP, IT_DEVOPS);
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
