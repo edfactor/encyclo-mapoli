@@ -6,6 +6,9 @@ export * from "./common/shared";
 // Auth types
 export * from "./auth/security";
 
+// Audit types
+export * from "./audit/audit";
+
 // Employee types
 export * from "./employee/employee";
 
