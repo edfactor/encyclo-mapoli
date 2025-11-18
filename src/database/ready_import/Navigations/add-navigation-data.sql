@@ -106,6 +106,7 @@ DECLARE
     NEWPSLABELS_REPORT CONSTANT NUMBER := 163;
     LABELS CONSTANT NUMBER := 164;
     LABELS_NEW CONSTANT NUMBER := 165;
+    AUDIT_SEARCH_PAGE CONSTANT NUMBER := 166;
 
 
 
@@ -234,6 +235,7 @@ BEGIN
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(AUDIT_SEARCH_PAGE, IT_DEVOPS_MENU, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -573,6 +575,9 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADJUSTMENTS_GROUP, IT_DEVOPS);
     assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
+    assign_navigation_role(AUDIT_SEARCH_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(AUDIT_SEARCH_PAGE, FINANCE_MANAGER);
+    assign_navigation_role(AUDIT_SEARCH_PAGE, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, IT_DEVOPS);

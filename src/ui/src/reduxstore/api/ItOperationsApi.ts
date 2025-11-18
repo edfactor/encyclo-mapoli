@@ -7,6 +7,8 @@ import {
   setProfitYearSelectorData
 } from "../../reduxstore/slices/frozenSlice";
 import {
+  AuditEventDto,
+  AuditSearchRequestDto,
   CurrentUserResponseDto,
   FreezeDemographicsRequest,
   FrozenStateResponse,
@@ -102,6 +104,23 @@ export const ItOperationsApi = createApi({
         url: `common/current-user`,
         method: "GET"
       })
+    }),
+    searchAudit: builder.query<Paged<AuditEventDto>, AuditSearchRequestDto>({
+      query: (params) => ({
+        url: "audit/search",
+        method: "GET",
+        params: {
+          tableName: params.tableName,
+          operation: params.operation,
+          userName: params.userName,
+          startTime: params.startTime,
+          endTime: params.endTime,
+          take: params.take,
+          skip: params.skip,
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
+      })
     })
   })
 });
@@ -112,5 +131,6 @@ export const {
   useLazyGetProfitYearSelectorFrozenDataQuery,
   useFreezeDemographicsMutation,
   useLazyGetMetadataQuery,
-  useLazyGetCurrentUserQuery
+  useLazyGetCurrentUserQuery,
+  useLazySearchAuditQuery
 } = ItOperationsApi;
