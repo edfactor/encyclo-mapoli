@@ -68,8 +68,8 @@ import {
   BadgeNumberRequest,
   BalanceByAge,
   BalanceByYears,
+  BreakdownByStoreEmployee,
   BreakdownByStoreRequest,
-  BreakdownByStoreResponse,
   BreakdownByStoreTotals,
   CertificateDownloadRequest,
   CertificatePrintRequest,
@@ -895,79 +895,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getBreakdownByStore: builder.query<BreakdownByStoreResponse, BreakdownByStoreRequest>({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
 
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
-      query: (params) => ({
-        url: `yearend/breakdown-by-store/${params.storeNumber}/totals`,
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          dispatch(clearBreakdownByStoreTotals());
-          const { data } = await queryFulfilled;
-          dispatch(setBreakdownByStoreTotals(data));
-        } catch (err) {
-          console.log("Err: " + err);
-          dispatch(clearBreakdownByStoreTotals());
-        }
-      }
-    }),
-    getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
-      query: (params) => ({
-        url: `yearend/breakdown-by-store/totals`,
-        method: "GET",
-        params: {
-          profitYear: params.profitYear
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          dispatch(clearBreakdownByStoreTotals());
-          const { data } = await queryFulfilled;
-          dispatch(setBreakdownGrandTotals(data));
-        } catch (err) {
-          console.log("Err: " + err);
-          dispatch(clearBreakdownGrandTotals());
-        }
-      }
-    }),
     getUnder21BreakdownByStore: builder.query<Under21BreakdownByStoreResponse, Under21BreakdownByStoreRequest>({
       query: (params) => ({
         url: "yearend/post-frozen/under-21-breakdown-by-store",
@@ -1397,22 +1325,6 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getQPAY066BTerminatedWithVestedBalance: builder.query<
-      QPAY066BTerminatedWithVestedBalanceResponse,
-      QPAY066BTerminatedWithVestedBalanceRequest
-    >({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          skip: params.pagination.skip,
-          take: params.pagination.take,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      })
-    }),
     getCertificatesReport: builder.query<CertificatesReportResponse, CertificatePrintRequest>({
       query: (params) => ({
         url: "yearend/post-frozen/certificates",
@@ -1447,6 +1359,102 @@ export const YearsEndApi = createApi({
           ssns: params.ssns
         },
         responseHandler: (response) => response.blob()
+      })
+    }),
+    // **************************
+    // Breakdown By Store Queries
+    //.  with PagedReportResponse<BreakdownByStoreEmployee>
+    // **************************
+    // 1. Get Breakdown By Store
+
+    getBreakdownByStore: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: `yearend/breakdown-by-store/${params.storeNumber}/totals`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStoreTotals());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownByStoreTotals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownByStoreTotals());
+        }
+      }
+    }),
+    getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
+      query: (params) => ({
+        url: `yearend/breakdown-by-store/totals`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        }
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStoreTotals());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownGrandTotals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownGrandTotals());
+        }
+      }
+    }),
+    getQPAY066BTerminatedWithVestedBalance: builder.query<
+      QPAY066BTerminatedWithVestedBalanceResponse,
+      QPAY066BTerminatedWithVestedBalanceRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          skip: params.pagination.skip,
+          take: params.pagination.take,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
       })
     })
   })
