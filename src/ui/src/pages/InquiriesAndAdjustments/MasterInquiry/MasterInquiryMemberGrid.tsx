@@ -1,9 +1,10 @@
+import { useDynamicGridHeight } from "@/hooks/useDynamicGridHeight";
 import { Box, Typography } from "@mui/material";
 import { RowClickedEvent } from "ag-grid-community";
 import React, { memo, useMemo } from "react";
-import { DSMGrid, formatNumberWithComma, Pagination, ISortParams } from "smart-ui-library";
-import { EmployeeDetails } from "../../../reduxstore/types";
+import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
 import { SortParams } from "../../../hooks/useGridPagination";
+import { EmployeeDetails } from "../../../reduxstore/types";
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface SearchResponse {
@@ -42,6 +43,18 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     isLoading = false
   }: MasterInquiryMemberGridProps) => {
     const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
+
+    // Calculate height based on pageSize: [5, 10, 50, 100]
+    // Use square root scaling for better spread at all page sizes
+    // 5 rows -> 200px (min), 10 rows -> 338px, 50 rows -> 613px, 100 rows -> 800px (max)
+    const normalized = (memberGridPagination.pageSize - 5) / 95; // 0 to 1
+    const heightRatio = Math.sqrt(normalized); // Square root curve for even distribution
+    const maxHeightPixels = 200 + heightRatio * 600; // 200px minimum, 800px maximum
+
+    const gridMaxHeight = useDynamicGridHeight({
+      heightPercentage: 0.5,
+      maxHeight: Math.round(maxHeightPixels)
+    });
 
     const handleMemberClick = (member: EmployeeDetails) => {
       onMemberSelect({
@@ -88,8 +101,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
           preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
           handleSortChanged={handleSortChange}
           isLoading={isLoading}
+          maxHeight={gridMaxHeight}
           providedOptions={{
-            rowData: searchResults.results,
+            rowData: searchResults.results.filter((row) => row && Object.keys(row).length > 0),
             columnDefs: columns,
             context: { onBadgeClick: handleMemberClick },
             onRowClicked: ((event: RowClickedEvent<EmployeeDetails>) => {
@@ -100,7 +114,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
           }}
         />
         <Pagination
-          rowsPerPageOptions={[5, 10, 50]}
+          rowsPerPageOptions={[5, 10, 50, 100]}
           pageNumber={memberGridPagination.pageNumber}
           setPageNumber={(value: number) => {
             handlePaginationChange(value - 1, memberGridPagination.pageSize);

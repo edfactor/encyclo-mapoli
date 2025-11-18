@@ -113,15 +113,13 @@ public class PostFrozenService : IPostFrozenService
             }, cancellationToken);
         });
 
-        var activePartiallyVestedTask = Task.Run(async () =>
-        {
-            return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+        var activePartiallyVestedTask = _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var baseQuery = await buildBaseQuery(ctx);
                 var activeQuery = baseQuery.Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate);
                 return await activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
             }, cancellationToken);
-        });
+        
 
         var activePartiallyVestedButLessThanThreeYearsTask = Task.Run(async () =>
         {
@@ -249,26 +247,27 @@ public class PostFrozenService : IPostFrozenService
                 return new PaginatedResponseDto<ProfitSharingUnder21ReportDetail>(request)
                 {
                     Total = rawPagedData.Total,
-                    Results = rawPagedData.Results.Select(x => new ProfitSharingUnder21ReportDetail(
-                        x.StoreNumber,
-                        x.BadgeNumber,
-                        x.FirstName,
-                        x.LastName,
-                        x.Ssn.MaskSsn(), // SSN masking after database query
-                        x.YearsInPlan,
-                        x.IsNewLastYear,
-                        x.CurrentYearHours,
-                        x.LastYearHours,
-                        x.HireDate,
-                        x.FullTimeDate,
-                        x.TerminationDate,
-                        x.DateOfBirth,
-                        x.DateOfBirth.Age(), // Age calculation after database query
-                        x.EmploymentStatusId,
-                        x.CurrentBalance,
-                        x.EnrollmentId
-                    )
-                    { IsExecutive = x.IsExecutive })
+                    Results = rawPagedData.Results.Select(x => new ProfitSharingUnder21ReportDetail
+                    {
+                        StoreNumber = x.StoreNumber,
+                        BadgeNumber = x.BadgeNumber,
+                        FirstName = x.FirstName,
+                        LastName = x.LastName,
+                        Ssn = x.Ssn.MaskSsn(), // SSN masking after database query
+                        ProfitSharingYears = x.YearsInPlan,
+                        IsNew = x.IsNewLastYear,
+                        ThisYearHours = x.CurrentYearHours,
+                        LastYearHours = x.LastYearHours,
+                        HireDate = x.HireDate,
+                        FullTimeDate = x.FullTimeDate,
+                        TerminationDate = x.TerminationDate,
+                        DateOfBirth = x.DateOfBirth,
+                        Age = x.DateOfBirth.Age(), // Age calculation after database query
+                        EmploymentStatusId = x.EmploymentStatusId,
+                        CurrentBalance = x.CurrentBalance,
+                        EnrollmentId = x.EnrollmentId,
+                        IsExecutive = x.IsExecutive
+                    })
                 };
             }, cancellationToken);
         });

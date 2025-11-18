@@ -26,10 +26,9 @@ public sealed record ProfitSharingUnder21ReportResponse : ReportResponseBase<Pro
             TotalUnder21 = 45,
             StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
             EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
-            Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<ProfitSharingUnder21ReportDetail>()
+            Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<ProfitSharingUnder21ReportDetail>
             {
-                Total = 1,
-                Results = new List<ProfitSharingUnder21ReportDetail>() { ProfitSharingUnder21ReportDetail.ResponseExample() }
+                Total = 1
             }
         };
     }

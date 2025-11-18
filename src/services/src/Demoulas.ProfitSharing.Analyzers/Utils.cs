@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 
 namespace Demoulas.ProfitSharing.Analyzers;
+
 internal static class Utils
 {
     internal static bool IsFastEndpoint(INamedTypeSymbol symbol)
