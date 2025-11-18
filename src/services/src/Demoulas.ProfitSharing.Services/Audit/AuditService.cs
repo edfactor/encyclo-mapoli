@@ -148,8 +148,9 @@ public sealed class AuditService : IAuditService
                 query = query.Where(e => e.CreatedAt <= request.EndTime.Value);
             }
 
-            var sortReq = request with { 
-                SortBy = request.SortBy switch 
+            var sortReq = request with
+            {
+                SortBy = request.SortBy switch
                 {
                     "auditEventId" => "Id",
                     "" => "Id",
@@ -174,8 +175,8 @@ public sealed class AuditService : IAuditService
                     {
                         Id = c.Id,
                         ColumnName = c.ColumnName,
-                        OriginalValue = c.OriginalValue,
-                        NewValue = c.NewValue
+                        OriginalValue = ParseJsonValue(c.OriginalValue),
+                        NewValue = ParseJsonValue(c.NewValue)
                     }).ToList()
                     : null
             }).ToList();
@@ -186,6 +187,49 @@ public sealed class AuditService : IAuditService
                 Total = paginatedResults.Total
             };
         }, cancellationToken);
+    }
+
+    public Task<List<AuditChangeEntryDto>> GetAuditChangeEntriesAsync(
+        int auditEventId,
+        CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            var auditEvent = await context.AuditEvents
+                .TagWith($"AuditSearch-GetChangeEntries-EventId:{auditEventId}")
+                .FirstOrDefaultAsync(e => e.Id == auditEventId, cancellationToken);
+
+            if (auditEvent == null || auditEvent.ChangesJson == null)
+            {
+                return new List<AuditChangeEntryDto>();
+            }
+
+            return auditEvent.ChangesJson.Select(c => new AuditChangeEntryDto
+            {
+                Id = c.Id,
+                ColumnName = c.ColumnName,
+                OriginalValue = ParseJsonValue(c.OriginalValue),
+                NewValue = ParseJsonValue(c.NewValue)
+            }).ToList();
+        }, cancellationToken);
+    }
+
+    private static JsonElement? ParseJsonValue(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<JsonElement>(value);
+        }
+        catch (JsonException)
+        {
+            // If it's not valid JSON, treat it as a string value
+            return JsonSerializer.Deserialize<JsonElement>($"\"{value}\"");
+        }
     }
 
     public static IEnumerable<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> ToKeyValuePairs<TReport>(TReport obj)
