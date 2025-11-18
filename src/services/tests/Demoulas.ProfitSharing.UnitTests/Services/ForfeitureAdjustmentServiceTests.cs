@@ -177,6 +177,66 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         result.Value.BadgeNumber.ShouldBe(_demographic1.BadgeNumber);
     }
 
+    [Fact]
+    [Description("PS-XXXX : Class action forfeiture is excluded from last transaction lookup")]
+    public async Task GetSuggestedForfeitureAmount_ExcludesClassActionForfeiture_CalculatesBasedOnVesting()
+    {
+        // Arrange
+        // Create a class action forfeiture record (should be ignored)
+        var classActionProfitDetail = new ProfitDetailFaker([_demographic1, _demographic2]).UseSeed(10).Generate();
+        classActionProfitDetail.Id = 100;
+        classActionProfitDetail.Ssn = _demographic1.Ssn;
+        classActionProfitDetail.ProfitYear = 2025;
+        classActionProfitDetail.ProfitCodeId = 2; // Forfeiture code
+        classActionProfitDetail.Forfeiture = 1000m; // Positive forfeit amount
+        classActionProfitDetail.CommentTypeId = CommentType.Constants.ForfeitClassAction; // Class action - should be excluded
+
+        ScenarioDataContextFactory mockDbContextFactory = (ScenarioDataContextFactory)new ScenarioFactory
+        {
+            Demographics = [_demographic1, _demographic2],
+            PayProfits = [_payProfit1, _payProfit2],
+            ProfitDetails = [_profitDetail1, _profitDetail2, classActionProfitDetail]
+        }.BuildMocks();
+
+        var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
+        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FrozenStateResponse
+            {
+                Id = 1,
+                ProfitYear = 2025,
+                IsActive = true,
+                AsOfDateTime = DateTimeOffset.UtcNow,
+                CreatedDateTime = DateTimeOffset.UtcNow
+            });
+
+        var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
+        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+            .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
+
+        var service = new ForfeitureAdjustmentService(
+            mockDbContextFactory,
+            _totalService,
+            frozenServiceMock.Object,
+            demographicReaderMock.Object
+        );
+
+        var request = new SuggestedForfeitureAdjustmentRequest
+        {
+            Badge = _demographic1.BadgeNumber
+        };
+
+        // Act
+        var result = await service.GetSuggestedForfeitureAmount(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.BadgeNumber.ShouldBe(_demographic1.BadgeNumber);
+        // The suggested amount should NOT be the negative of the class action forfeiture
+        // It should be calculated based on vesting instead (or be 0 if no other forfeitures exist)
+        result.Value.SuggestedForfeitAmount.ShouldNotBe(-1000m);
+    }
+
     #endregion
 
     #region UpdateForfeitureAdjustmentAsync Tests
