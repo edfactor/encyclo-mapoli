@@ -3,11 +3,11 @@ using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 
-internal sealed class PayProfitFaker : Faker<PayProfit>
+public sealed class PayProfitFaker : Faker<PayProfit>
 {
     private readonly HashSet<(long OracleHcmId, short ProfitYear)> _existingCombinations = new HashSet<(long, short)>();
 
-    internal PayProfitFaker(IList<Demographic> demographicFakes)
+    public PayProfitFaker(IList<Demographic> demographicFakes)
     {
         var demographicQueue = new Queue<Demographic>(demographicFakes);
         Demographic currentDemographic = demographicQueue.Peek();
