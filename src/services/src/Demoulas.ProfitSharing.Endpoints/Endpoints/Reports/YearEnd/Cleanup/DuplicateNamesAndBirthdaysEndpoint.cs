@@ -93,8 +93,8 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateN
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            _logger.LogInformation("Fetching duplicate names and birthdays data (IncludeFictionalSsnPairs: {IncludeFictionalSsnPairs})",
-                req.IncludeFictionalSsnPairs);
+            _logger.LogInformation("Fetching duplicate names and birthdays data (ProfitYear: {ProfitYear})",
+                req.ProfitYear);
 
             // Get cached data with filtering applied by service
             var cachedResponse = await _duplicateNamesAndBirthdaysService.GetCachedDuplicateNamesAndBirthdaysAsync(req, ct);
@@ -103,8 +103,8 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateN
 
             if (cachedResponse != null)
             {
-                _logger.LogInformation("Using cached duplicate names and birthdays data (AsOfDate: {AsOfDate}, IncludeFictionalSsnPairs: {IncludeFictionalSsnPairs})",
-                    cachedResponse.AsOfDate, req.IncludeFictionalSsnPairs);
+                _logger.LogInformation("Using cached duplicate names and birthdays data (AsOfDate: {AsOfDate})",
+                    cachedResponse.AsOfDate);
 
                 // Convert cached response to ReportResponseBase
                 reportResult = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>

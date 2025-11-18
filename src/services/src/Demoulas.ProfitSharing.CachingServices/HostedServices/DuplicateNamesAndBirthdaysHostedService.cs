@@ -48,7 +48,7 @@ public sealed class DuplicateNamesAndBirthdaysHostedService : BaseCacheHostedSer
             // Get the current calendar year
             var currentYear = (short)DateTime.UtcNow.Year;
 
-            var request = new ProfitYearRequest
+            var request = new DuplicateNamesAndBirthdaysRequest
             {
                 ProfitYear = currentYear
             };

@@ -47,7 +47,7 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
     }
 
     public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(
-        ProfitYearRequest req,
+        DuplicateNamesAndBirthdaysRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
@@ -211,20 +211,35 @@ FROM FILTERED_DEMOGRAPHIC p1
     }
 
     public async Task<DuplicateNamesAndBirthdaysCachedResponse?> GetCachedDuplicateNamesAndBirthdaysAsync(
-        ProfitYearRequest request, CancellationToken cancellationToken = default)
+        DuplicateNamesAndBirthdaysRequest request, CancellationToken cancellationToken = default)
     {
         if (_host.IsTestEnvironment())
         {
-            var testData = await GetDuplicateNamesAndBirthdaysAsync(request, cancellationToken);
-            return new DuplicateNamesAndBirthdaysCachedResponse
+            try
             {
-                AsOfDate = DateTimeOffset.UtcNow,
-                Data = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>
+                var testData = await GetDuplicateNamesAndBirthdaysAsync(request, cancellationToken);
+
+                if (testData?.Response == null)
                 {
-                    Total = testData.Response.Total,
-                    Results = testData.Response.Results
+                    _logger.LogWarning("Test data returned null response");
+                    return null;
                 }
-            };
+
+                return new DuplicateNamesAndBirthdaysCachedResponse
+                {
+                    AsOfDate = DateTimeOffset.UtcNow,
+                    Data = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>
+                    {
+                        Total = testData.Response.Total,
+                        Results = testData.Response.Results
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing test data for duplicate names and birthdays - returning null");
+                return null;
+            }
         }
 
 
@@ -243,30 +258,18 @@ FROM FILTERED_DEMOGRAPHIC p1
             var allCachedData = await cacheService.GetAllAsync(cancellationToken);
             var cachedResponse = allCachedData.FirstOrDefault();
 
-            if (cachedResponse == null)
+            if (cachedResponse == null || cachedResponse.Data == null)
             {
                 return null;
             }
 
-            // Filter out fake SSN pairs if this is a DuplicateNamesAndBirthdaysRequest with filtering requested
-            var results = cachedResponse.Data.Results;
-            if (request is DuplicateNamesAndBirthdaysRequest dRequest && !dRequest.IncludeFictionalSsnPairs)
-            {
-                results = results.Where(r => !r.IsFakeSsn).ToList();
-                _logger.LogInformation("Filtered cached results to exclude {FilteredCount} records with fictional SSNs",
-                    cachedResponse.Data.Results.Count() - results.Count());
-            }
-
-            // Apply pagination to the sorted data
-            var skip = request.Skip ?? 0;
-            var take = request.Take ?? byte.MaxValue; // Default to byte.MaxValue if not specified
-
-            var paginatedResults = await results.AsQueryable().ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
+            // Get results from cached response - ensure Results is not null
+            var results = cachedResponse.Data.Results?.ToList() ?? new List<DuplicateNamesAndBirthdaysResponse>();
 
             return new DuplicateNamesAndBirthdaysCachedResponse
             {
                 AsOfDate = cachedResponse.AsOfDate,
-                Data = paginatedResults
+                Data = await results.ToPaginationResultsAsync(request, cancellationToken)
             };
         }
         catch (Exception ex)
