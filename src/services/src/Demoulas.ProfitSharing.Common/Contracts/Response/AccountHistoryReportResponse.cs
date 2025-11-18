@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -17,6 +18,7 @@ public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullName
     /// <summary>
     /// Full name of the member.
     /// </summary>
+    [MaskSensitive]
     public string FullName { get; set; } = string.Empty;
 
     /// <summary>

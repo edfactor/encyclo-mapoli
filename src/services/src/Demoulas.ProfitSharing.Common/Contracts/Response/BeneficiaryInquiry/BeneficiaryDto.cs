@@ -23,12 +23,18 @@ public partial record BeneficiaryDto : IdRequest, INameParts, IFullNameProperty,
     public required string? State { get; init; }
     public required string? PostalCode { get; init; }
     public required string CountryIso { get; init; }
+    [MaskSensitive]
     public string? FullName { get; init; }
+    [MaskSensitive]
     public required string LastName { get; init; }
+    [MaskSensitive]
     public required string FirstName { get; init; }
+    [MaskSensitive]
     public string? MiddleName { get; init; }
     public string? PhoneNumber { get; init; }
+    [MaskSensitive]
     public string? MobileNumber { get; init; }
+    [MaskSensitive]
     public string? EmailAddress { get; init; }
 
     public DateOnly CreatedDate { get; set; }

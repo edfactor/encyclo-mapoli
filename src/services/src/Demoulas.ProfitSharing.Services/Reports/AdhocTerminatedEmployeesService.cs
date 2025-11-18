@@ -166,10 +166,10 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         }
 
         var letter = new System.Text.StringBuilder();
-        var space_7 = new string(' ', 7);
+        var space7 = new string(' ', 7);
         _ = new string(' ', 11);
         _ = new string(' ', 24);
-        var space_25 = new string(' ', 25);
+        var space25 = new string(' ', 25);
         _ = new string(' ', 27);
 
         foreach (var emp in report.Response.Results)
@@ -192,9 +192,9 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Member information
-            letter.AppendLine($"{space_7}{emp.FirstName}{(emp.MiddleInitial != string.Empty ? " " : "")}{emp.MiddleInitial} {emp.LastName}");
-            letter.AppendLine($"{space_7}{emp.Address}");
-            letter.AppendLine($"{space_7}{emp.City}, {emp.State} {emp.PostalCode}");
+            letter.AppendLine($"{space7}{emp.FirstName}{(emp.MiddleInitial != string.Empty ? " " : "")}{emp.MiddleInitial} {emp.LastName}");
+            letter.AppendLine($"{space7}{emp.Address}");
+            letter.AppendLine($"{space7}{emp.City}, {emp.State} {emp.PostalCode}");
             #endregion
 
             #region Spacing
@@ -205,7 +205,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Salutation
-            letter.AppendLine($"{space_7}Dear {emp.FirstName}:");
+            letter.AppendLine($"{space7}Dear {emp.FirstName}:");
             #endregion
 
             #region Spacing
@@ -214,8 +214,8 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Body of letter
-            letter.AppendLine($"{space_7}Attached are the necessary forms needed to be completed by you in order for you to");
-            letter.AppendLine($"{space_7}begin receiving your vested interest in the Demoulas Profit Sharing Plan and Trust.");
+            letter.AppendLine($"{space7}Attached are the necessary forms needed to be completed by you in order for you to");
+            letter.AppendLine($"{space7}begin receiving your vested interest in the Demoulas Profit Sharing Plan and Trust.");
             #endregion
 
             #region Spacing
@@ -224,7 +224,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Instructions
-            letter.AppendLine($"{space_7}Please return the completed forms to the attention of:");
+            letter.AppendLine($"{space7}Please return the completed forms to the attention of:");
             #endregion
 
             #region Spacing
@@ -233,9 +233,9 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Remittance address
-            letter.AppendLine($"{space_25}Demoulas Profit Sharing Plan and Trust");
-            letter.AppendLine($"{space_25}875 East Street");
-            letter.AppendLine($"{space_25}Tewksbury, MA  01876");
+            letter.AppendLine($"{space25}Demoulas Profit Sharing Plan and Trust");
+            letter.AppendLine($"{space25}875 East Street");
+            letter.AppendLine($"{space25}Tewksbury, MA  01876");
             #endregion
 
             #region Spacing
@@ -244,7 +244,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Questions
-            letter.AppendLine($"{space_7}If you have any questions please do not hesitate to call (978) 851-8000.");
+            letter.AppendLine($"{space7}If you have any questions please do not hesitate to call (978) 851-8000.");
             #endregion
 
             #region Spacing
@@ -253,7 +253,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Closing
-            letter.AppendLine($"{space_7}Sincerely,");
+            letter.AppendLine($"{space7}Sincerely,");
             #endregion
 
             #region Spacing
@@ -263,7 +263,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Signature
-            letter.AppendLine($"{space_7}DEMOULAS PROFIT SHARING PLAN & TRUST");
+            letter.AppendLine($"{space7}DEMOULAS PROFIT SHARING PLAN & TRUST");
             #endregion
 
             #region Printer Control
