@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,8 +30,6 @@ public sealed class StateService : IStateService
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            ctx.UseReadOnlyContext();
-
             // Get distinct states from ProfitDetail.COMMENT_RELATED_STATE
             var profitDetailStates = await ctx.ProfitDetails
                 .TagWith("GetStates-FromProfitDetail")

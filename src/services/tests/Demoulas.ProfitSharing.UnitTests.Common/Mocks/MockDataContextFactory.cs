@@ -255,6 +255,17 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
 
         var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 5);
+        
+        // Add COMMENT_RELATED_STATE values to some profit details for state lookup testing
+        var statesToAssign = new[] { "MA", "NH", "ME", "CT", "RI", "VT", "NY", "CA", "TX" };
+        for (int i = 0; i < profitDetails.Count; i++)
+        {
+            if (i % 7 == 0) // Assign state to approximately 1 in 7 records
+            {
+                profitDetails[i].CommentRelatedState = statesToAssign[i % statesToAssign.Length];
+            }
+        }
+        
         var mockProfitDetails = BuildMockDbSetWithBackingList(profitDetails);
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
