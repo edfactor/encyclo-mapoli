@@ -498,7 +498,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             2 => await GetBeneficiaryDetails(req.Id, cancellationToken),
             _ => throw new ValidationException("Invalid MemberType provided")
         };
-        Dictionary<int, MemberDetails> memberDetailsMap = new Dictionary<int, MemberDetails> { { members.ssn, members.memberDetails ?? new MemberDetails { Id = 0 } } };
+        Dictionary<int, MemberDetails> memberDetailsMap = new Dictionary<int, MemberDetails> { { members.ssn, members.memberDetails ?? new MemberDetails { Id = 0, FirstName = "", MiddleName = "", LastName = "" } } };
 
         var details = await GetVestingDetails(memberDetailsMap, currentYear, previousYear, cancellationToken);
         return details.FirstOrDefault();
@@ -786,6 +786,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 IsEmployee = memberData.IsEmployee,
                 Id = memberData.Id,
                 FirstName = memberData.FirstName,
+                MiddleName = memberData.MiddleName,
                 LastName = memberData.LastName,
                 AddressCity = memberData.AddressCity,
                 AddressState = memberData.AddressState,
