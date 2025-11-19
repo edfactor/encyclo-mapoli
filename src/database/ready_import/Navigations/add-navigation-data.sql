@@ -115,7 +115,6 @@ DECLARE
 
 
 
-
     --- These are the role IDs from the ROLES table
     SYSTEM_ADMINISTRATOR CONSTANT NUMBER := 1;
     FINANCE_MANAGER CONSTANT NUMBER := 2;
