@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -58,7 +58,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         result.Response.ShouldNotBeNull();
         result.Response.Results.ShouldNotBeNull();
 
-        if (result.Response.Results.Count > 1)
+        if (result.Response.Results.Count() > 1)
         {
             // All records should have the same ID (represents the member/demographic record)
             var ids = result.Response.Results.Select(r => r.Id).Distinct().ToList();
@@ -86,7 +86,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotBeNull();
-        if (result.Response.Results.Count > 0)
+        if (result.Response.Results.Any())
         {
             result.Response.Results.FirstOrDefault()?.BadgeNumber.ShouldBe(badgeNumber);
         }
@@ -136,9 +136,9 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotBeNull();
-        if (result.Response.Results.Count > 0)
+        if (result.Response.Results.Any())
         {
-            result.Response.Results.Count.ShouldBeLessThanOrEqualTo(10);
+            result.Response.Results.Count().ShouldBeLessThanOrEqualTo(10);
         }
     }
 
@@ -191,12 +191,12 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotBeNull();
-        if (result.Response.Results.Count > 1)
+        if (result.Response.Results.Count() > 1)
         {
             // Verify descending sort: first profit year >= last profit year
             var firstYear = result.Response.Results.First().ProfitYear;
             var lastYear = result.Response.Results.Last().ProfitYear;
-            firstYear.ShouldBeGreaterThanOrEqualTo(lastYear);
+            ((int)firstYear).ShouldBeGreaterThanOrEqualTo((int)lastYear);
         }
     }
 
@@ -222,8 +222,8 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         result.ShouldNotBeNull();
         result.ReportName.ShouldNotBeNullOrEmpty();
         result.ReportDate.ShouldNotBe(default);
-        result.StartDate.ShouldBe(startDate: new DateOnly(2007, 1, 1));
-        result.EndDate.ShouldBe(endDate: new DateOnly(2024, 12, 31));
+        result.StartDate.ShouldBe(new DateOnly(2007, 1, 1));
+        result.EndDate.ShouldBe(new DateOnly(2024, 12, 31));
     }
 
     [Description("PS-2160 : Account history report handles date range filtering correctly")]
@@ -249,14 +249,14 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotBeNull();
-        if (result.Response.Results.Count > 0)
+        if (result.Response.Results.Any())
         {
             // All profit years should be within the specified range
-            result.Response.Results.ForEach(r =>
+            foreach (var r in result.Response.Results)
             {
-                r.ProfitYear.ShouldBeGreaterThanOrEqualTo(startDate.Year);
-                r.ProfitYear.ShouldBeLessThanOrEqualTo(endDate.Year);
-            });
+                ((int)r.ProfitYear).ShouldBeGreaterThanOrEqualTo(startDate.Year);
+                ((int)r.ProfitYear).ShouldBeLessThanOrEqualTo(endDate.Year);
+            }
         }
     }
 
@@ -305,7 +305,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotBeNull();
-        if (result.Response.Results.Count > 0)
+        if (result.Response.Results.Any())
         {
             var record = result.Response.Results.First();
             record.Id.ShouldBeGreaterThan(0);
