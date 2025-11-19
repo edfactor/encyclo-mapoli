@@ -68,6 +68,7 @@ import {
   BadgeNumberRequest,
   BalanceByAge,
   BalanceByYears,
+  BreakdownByStoreAndDateRangeRequest,
   BreakdownByStoreEmployee,
   BreakdownByStoreRequest,
   BreakdownByStoreTotals,
@@ -1376,6 +1377,257 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           storeNumber: params.storeNumber,
           storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getBreakdownByStoreInactive: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/inactive",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreInactiveWithVestedBalance: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/inactive/withvestedbalance",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTerminatedVestedBalance: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreAndDateRangeRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withvestedbalance",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          startDate: params.startDate,
+          endDate: params.endDate,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTerminatedBalanceNotVested: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreAndDateRangeRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          startDate: params.startDate,
+          endDate: params.endDate,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTerminatedWithBenAllocations: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreAndDateRangeRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withbeneficiaryallocation",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          startDate: params.startDate,
+          endDate: params.endDate,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTerminatedWithBalanceActivity: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreAndDateRangeRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withbalanceactivity",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          startDate: params.startDate,
+          endDate: params.endDate,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreRetiredWithBalanceActivity: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreAndDateRangeRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/retired/withbalanceactivity",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          startDate: params.startDate,
+          endDate: params.endDate,
           employeeName: params.employeeName,
           badgeNumber: params.badgeNumber,
           take: params.pagination.take,

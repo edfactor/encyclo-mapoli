@@ -8,6 +8,11 @@ export interface BreakdownByStoreRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
+export interface BreakdownByStoreAndDateRangeRequest extends BreakdownByStoreRequest {
+  startDate: string;
+  endDate: string;
+}
+
 export interface BreakdownByStoreEmployee {
   badgeNumber: number;
   beginningBalance: number;
