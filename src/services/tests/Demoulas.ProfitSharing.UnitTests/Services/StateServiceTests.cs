@@ -24,7 +24,7 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateService - Should return states from database")]
-    [Description("PS-XXXX : Retrieves distinct states from COMMENT_RELATED_STATE")]
+    [Description("PS-2161 : Retrieves distinct states from COMMENT_RELATED_STATE")]
     public async Task GetStatesAsync_ShouldReturnStatesFromDatabase()
     {
         // Act
@@ -37,7 +37,7 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateService - Should return StateListResponse objects")]
-    [Description("PS-XXXX : Verifies correct DTO structure")]
+    [Description("PS-2161 : Verifies correct DTO structure")]
     public async Task GetStatesAsync_ShouldReturnCorrectDtoStructure()
     {
         // Act
@@ -51,7 +51,7 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateService - Should return states with 2-character abbreviations")]
-    [Description("PS-XXXX : Validates state abbreviation format")]
+    [Description("PS-2161 : Validates state abbreviation format")]
     public async Task GetStatesAsync_ShouldReturnValidStateAbbreviations()
     {
         // Act
@@ -62,7 +62,7 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateService - Should return states ordered alphabetically")]
-    [Description("PS-XXXX : Verifies result ordering by abbreviation")]
+    [Description("PS-2161 : Verifies result ordering by abbreviation")]
     public async Task GetStatesAsync_ShouldReturnStatesOrderedAlphabetically()
     {
         // Act
@@ -75,7 +75,7 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateService - Should have non-empty state names")]
-    [Description("PS-XXXX : Validates state names are populated")]
+    [Description("PS-2161 : Validates state names are populated")]
     public async Task GetStatesAsync_ShouldHaveNonEmptyStateNames()
     {
         // Act
@@ -85,8 +85,8 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
         result.ShouldAllBe(state => !string.IsNullOrWhiteSpace(state.Name));
     }
 
-    [Fact(DisplayName = "StateService - Should return ICollection type")]
-    [Description("PS-XXXX : Verifies return type is ICollection")]
+    [Fact(DisplayName = "StateService - Should return ICollection result")]
+    [Description("PS-2161 : Verifies return type is ICollection")]
     public async Task GetStatesAsync_ShouldReturnICollectionType()
     {
         // Act
@@ -96,8 +96,8 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
         result.ShouldBeAssignableTo<ICollection<StateListResponse>>();
     }
 
-    [Fact(DisplayName = "StateService - Should handle cancellation token")]
-    [Description("PS-XXXX : Verifies cancellation token support")]
+    [Fact(DisplayName = "StateService - Should support cancellation token")]
+    [Description("PS-2161 : Verifies cancellation token support")]
     public async Task GetStatesAsync_ShouldHandleCancellationToken()
     {
         // Arrange
@@ -143,7 +143,7 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateService - Should map state names correctly")]
-    [Description("PS-XXXX : Verifies abbreviation to name mapping")]
+    [Description("PS-2161 : Verifies abbreviation to name mapping")]
     public async Task GetStatesAsync_ShouldMapStateNamesCorrectly()
     {
         // Act
@@ -169,7 +169,7 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateService - Should not contain duplicate abbreviations")]
-    [Description("PS-XXXX : Verifies distinct abbreviations")]
+    [Description("PS-2161 : Verifies distinct abbreviations")]
     public async Task GetStatesAsync_ShouldNotContainDuplicates()
     {
         // Act
@@ -180,8 +180,8 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
         abbreviations.Distinct().Count().ShouldBe(abbreviations.Count);
     }
 
-    [Fact(DisplayName = "StateService - Should not return null or empty abbreviations")]
-    [Description("PS-XXXX : Validates abbreviation field quality")]
+    [Fact(DisplayName = "StateService - Should not include null or empty abbreviations")]
+    [Description("PS-2161 : Validates abbreviation field quality")]
     public async Task GetStatesAsync_ShouldNotReturnNullOrEmptyAbbreviations()
     {
         // Act

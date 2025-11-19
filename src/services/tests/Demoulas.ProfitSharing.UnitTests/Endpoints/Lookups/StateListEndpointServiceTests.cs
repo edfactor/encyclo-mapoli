@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 public sealed class StateListEndpointServiceTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "StateListEndpoint - Should return all states")]
-    [Description("PS-XXXX : Verifies endpoint retrieves all states from service")]
+    [Description("PS-2161 : Verifies endpoint retrieves all states from service")]
     public async Task Get_ReturnsAllStatesFromService()
     {
         // Arrange
@@ -35,7 +35,7 @@ public sealed class StateListEndpointServiceTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateListEndpoint - Should return states with correct structure")]
-    [Description("PS-XXXX : Validates StateListResponse DTO structure")]
+    [Description("PS-2161 : Validates StateListResponse DTO structure")]
     public async Task Get_ReturnsCorrectResponseStructure()
     {
         // Arrange
