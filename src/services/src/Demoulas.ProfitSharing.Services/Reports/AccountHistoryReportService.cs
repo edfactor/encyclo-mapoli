@@ -104,6 +104,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
                 reportData.Add(new AccountHistoryReportResponse
                 {
+                    Id = demographic.Id,
                     BadgeNumber = demographic.BadgeNumber,
                     FullName = demographic.ContactInfo.FullName ?? string.Empty,
                     Ssn = demographic.Ssn.MaskSsn(),
