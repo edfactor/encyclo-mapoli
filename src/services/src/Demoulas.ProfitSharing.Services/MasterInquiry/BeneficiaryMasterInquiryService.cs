@@ -141,6 +141,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                 {
                     b.Id,
                     b.Contact!.ContactInfo.FirstName,
+                    b.Contact!.ContactInfo.MiddleName,
                     b.Contact.ContactInfo.LastName,
                     b.Contact.ContactInfo.PhoneNumber,
                     b.Contact.Address.City,
@@ -157,7 +158,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
 
             if (memberData == null)
             {
-                return (0, new MemberDetails { Id = 0 });
+                return (0, new MemberDetails { Id = 0, FirstName = "", MiddleName = "", LastName = ""});
             }
 
             return (memberData.Ssn, new MemberDetails
@@ -165,6 +166,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                 IsEmployee = false,
                 Id = memberData.Id,
                 FirstName = memberData.FirstName,
+                MiddleName = memberData.MiddleName,
                 LastName = memberData.LastName,
                 PhoneNumber = memberData.PhoneNumber,
                 AddressCity = memberData.City!,
@@ -211,6 +213,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                     b.Id,
                     b.Contact!.ContactInfo.FullName,
                     b.Contact!.ContactInfo.FirstName,
+                    b.Contact!.ContactInfo.MiddleName,
                     b.Contact.ContactInfo.LastName,
                     b.Contact.ContactInfo.PhoneNumber,
                     b.Contact.Address.City,
@@ -229,6 +232,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                 Id = memberData.Id,
                 IsEmployee = false,
                 FirstName = memberData.FirstName,
+                MiddleName = memberData.MiddleName,
                 LastName = memberData.LastName,
                 PhoneNumber = memberData.PhoneNumber,
                 AddressCity = memberData.City!,
@@ -263,6 +267,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                 {
                     b.Id,
                     b.Contact!.ContactInfo.FirstName,
+                    b.Contact!.ContactInfo.MiddleName,
                     b.Contact.ContactInfo.LastName,
                     b.Contact.ContactInfo.PhoneNumber,
                     b.Contact.Address.City,
@@ -285,6 +290,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                     Id = memberData.Id,
                     IsEmployee = false,
                     FirstName = memberData.FirstName,
+                    MiddleName = memberData.MiddleName,
                     LastName = memberData.LastName,
                     PhoneNumber = memberData.PhoneNumber,
                     AddressCity = memberData.City!,

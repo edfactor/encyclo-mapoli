@@ -47,6 +47,7 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
                         PsnSuffix = 1,
                         Ssn = "123456789",
                         FirstName = "John",
+                        MiddleName = "J",
                         LastName = "Doe",
                         Address = "123 Main St",
                         AddressCity = "Lowell",

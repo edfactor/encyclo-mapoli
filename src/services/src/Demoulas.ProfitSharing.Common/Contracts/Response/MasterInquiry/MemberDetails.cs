@@ -14,9 +14,9 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     public bool IsExecutive { get; set; }
     public string Ssn { get; init; } = string.Empty;
 
-    [MaskSensitive] public string FirstName { get; init; } = string.Empty;
-    [MaskSensitive] public string LastName { get; init; } = string.Empty;
-    [MaskSensitive] public string? MiddleName { get; init; } = null;
+    [MaskSensitive] public required string FirstName { get; init; } = string.Empty;
+    [MaskSensitive] public required string LastName { get; init; } = string.Empty;
+    [MaskSensitive] public required string? MiddleName { get; init; } = null;
     [MaskSensitive]
     public string FullName => string.IsNullOrEmpty(MiddleName)
         ? $"{LastName}, {FirstName}"

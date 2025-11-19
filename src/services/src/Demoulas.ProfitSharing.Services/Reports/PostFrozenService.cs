@@ -3,6 +3,7 @@ using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -80,11 +81,11 @@ public class PostFrozenService : IPostFrozenService
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             return from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
-                join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals balTbl.Ssn into balTmp
-                from bal in balTmp.DefaultIfEmpty()
-                join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
-                from lyBal in lyBalTmp.DefaultIfEmpty()
-                select new Under21IntermediaryResult() { d = d, bal = bal, lyBal = lyBal, };
+                   join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals balTbl.Ssn into balTmp
+                   from bal in balTmp.DefaultIfEmpty()
+                   join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
+                   from lyBal in lyBalTmp.DefaultIfEmpty()
+                   select new Under21IntermediaryResult() { d = d, bal = bal, lyBal = lyBal, };
         };
 
         // Execute all counts in parallel using separate contexts
@@ -336,7 +337,7 @@ public class PostFrozenService : IPostFrozenService
                 {
                     StoreNumber = d.StoreNumber,
                     BadgeNumber = d.BadgeNumber,
-                    FullName = $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName}",
+                    FullName = string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName}" : $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName} {d.ContactInfo.MiddleName![0]}",
                     BeginningBalance = lyTot.TotalAmount ?? 0,
                     Earnings = tyPdGrp.Earnings,
                     Contributions = tyPdGrp.Contributions,
@@ -440,12 +441,12 @@ public class PostFrozenService : IPostFrozenService
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
 
             var rootQuery = from d in demographicQuery.Where(x => x.DateOfBirth >= age21)
-                join pp in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
-                select new { d, pp };
+                            join pp in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
+                            select new { d, pp };
             var baseQuery = from r in rootQuery
-                join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on r.d.Ssn equals bal.Ssn
-                where bal.YearsInPlan > 0 || bal.VestedBalance > 0
-                select new { r.d, r.pp, bal };
+                            join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on r.d.Ssn equals bal.Ssn
+                            where bal.YearsInPlan > 0 || bal.VestedBalance > 0
+                            select new { r.d, r.pp, bal };
 
             rslt.NumberOfEmployees = await baseQuery.CountAsync(cancellationToken);
             rslt.NumberOfActiveUnder21With1to2Years = await baseQuery.CountAsync(x =>
@@ -647,7 +648,7 @@ public class PostFrozenService : IPostFrozenService
                         DepartmentName = pp.Demographic.Department!.Name,
                         pp.Demographic.BadgeNumber,
                         pp.Demographic.Ssn,
-                        EmployeeName = pp.Demographic.ContactInfo.FirstName + " " + pp.Demographic.ContactInfo.LastName,
+                        EmployeeName = string.IsNullOrEmpty(pp.Demographic.ContactInfo.MiddleName) ? pp.Demographic.ContactInfo.FirstName + " " + pp.Demographic.ContactInfo.LastName : pp.Demographic.ContactInfo.FirstName + " " + pp.Demographic.ContactInfo.MiddleName[0] + " " + pp.Demographic.ContactInfo.LastName,
                         EmployeeTypeId = pp.Demographic.EmploymentTypeId,
                         EmployeeTypeName = pp.Demographic.EmploymentType!.Name,
                         Hours = pp.CurrentHoursYear,
@@ -749,6 +750,7 @@ public class PostFrozenService : IPostFrozenService
                         d.BadgeNumber,
                         d.ContactInfo.FirstName,
                         d.ContactInfo.LastName,
+                        d.ContactInfo.MiddleName,
                         Address1 = d.Address.Street,
                         d.Address.City,
                         State = d.Address.Street,
@@ -772,6 +774,7 @@ public class PostFrozenService : IPostFrozenService
                         b.BadgeNumber,
                         bc.ContactInfo.FirstName,
                         bc.ContactInfo.LastName,
+                        bc.ContactInfo.MiddleName,
                         Address1 = bc.Address.Street,
                         bc.Address.City,
                         bc.Address.State,
@@ -796,7 +799,7 @@ public class PostFrozenService : IPostFrozenService
                         DepartmentId = d.DepartmentId,
                         DepartmentName = dp.Name,
                         BadgeNumber = d.BadgeNumber,
-                        EmployeeName = d.FirstName + " " + d.LastName,
+                        EmployeeName = string.IsNullOrEmpty(d.MiddleName) ? d.FirstName + " " + d.LastName : d.FirstName + " " + d.MiddleName[0] + " " + d.LastName,
                         FirstName = d.FirstName,
                         Address1 = d.Address1,
                         City = d.City,

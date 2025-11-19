@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -11,6 +12,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Beneficiaries;
+
 public class BeneficiaryService : IBeneficiaryService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -66,7 +68,7 @@ public class BeneficiaryService : IBeneficiaryService
                 var existingPrimaryBeneficiary = await ctx.Beneficiaries
                     .Where(b => b.DemographicId == demographic.Id && b.KindId == BeneficiaryKind.Constants.Primary)
                     .FirstOrDefaultAsync(cancellationToken);
-                
+
                 if (existingPrimaryBeneficiary != null)
                 {
                     throw new ValidationException("Employee already has a primary beneficiary. Only one primary beneficiary is allowed per employee.");
@@ -142,7 +144,7 @@ public class BeneficiaryService : IBeneficiaryService
                 },
                 ContactInfo = new ContactInfo()
                 {
-                    FullName = $"{req.LastName}, {req.FirstName}",
+                    FullName = DtoCommonExtensions.ComputeFullNameWithInitial(req.LastName, req.FirstName, req.MiddleName),
                     FirstName = req.FirstName,
                     LastName = req.LastName,
                     MiddleName = req.MiddleName,
@@ -347,12 +349,12 @@ public class BeneficiaryService : IBeneficiaryService
         if (!string.IsNullOrEmpty(req.FirstName))
         {
             contact.ContactInfo!.FirstName = req.FirstName.Trim();
-            contact.ContactInfo!.FullName = $"{contact.ContactInfo!.LastName}, {req.FirstName}";
+            contact.ContactInfo!.FullName = DtoCommonExtensions.ComputeFullNameWithInitial(contact.ContactInfo!.LastName, req.FirstName, contact.ContactInfo!.MiddleName);
         }
         if (!string.IsNullOrEmpty(req.LastName))
         {
             contact.ContactInfo!.LastName = req.LastName.Trim();
-            contact.ContactInfo!.FullName = $"{req.LastName}, {contact.ContactInfo!.FirstName}";
+            contact.ContactInfo!.FullName = DtoCommonExtensions.ComputeFullNameWithInitial(req.LastName, contact.ContactInfo!.FirstName, contact.ContactInfo!.MiddleName);
         }
         if (req.MiddleName != null)
         {
@@ -364,6 +366,8 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 req.MiddleName = req.MiddleName.Trim();
             }
+            contact.ContactInfo!.MiddleName = req.MiddleName;
+            contact.ContactInfo!.FullName = DtoCommonExtensions.ComputeFullNameWithInitial(contact.ContactInfo!.LastName, contact.ContactInfo!.FirstName, req.MiddleName);
         }
         if (req.PhoneNumber != null)
         {
@@ -469,7 +473,7 @@ public class BeneficiaryService : IBeneficiaryService
                 .Include(beneficiaryContact => beneficiaryContact.Address)
                 .Include(beneficiaryContact => beneficiaryContact.ContactInfo)
                 .SingleAsync(x => x.Id == id, cancellation);
-            
+
             var deleteContact = true;
             Beneficiary? beneficiaryToDelete = null;
             if (contactToDelete.Beneficiaries?.Count == 1) //If contact is only associated with one beneficiary, check to see if we can delete it.
