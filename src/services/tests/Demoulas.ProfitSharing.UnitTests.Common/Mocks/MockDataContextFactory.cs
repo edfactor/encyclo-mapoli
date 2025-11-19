@@ -238,6 +238,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             new State() { Abbreviation = "TX", Name = "Texas" }
         };
         var mockStates = states.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.States).Returns(mockStates.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.States).Returns(mockStates.Object);
 
         var employmentTypes = new List<EmploymentType>()
@@ -255,7 +256,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
 
         var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 5);
-        
+
         // Add COMMENT_RELATED_STATE values to some profit details for state lookup testing
         var statesToAssign = new[] { "MA", "NH", "ME", "CT", "RI", "VT", "NY", "CA", "TX" };
         for (int i = 0; i < profitDetails.Count; i++)
@@ -265,7 +266,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
                 profitDetails[i].CommentRelatedState = statesToAssign[i % statesToAssign.Length];
             }
         }
-        
+
         var mockProfitDetails = BuildMockDbSetWithBackingList(profitDetails);
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
