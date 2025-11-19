@@ -213,7 +213,7 @@ public class PostFrozenService : IPostFrozenService
 
                 // First get anonymous type from database query (no Age() or MaskSsn() calls in query)
                 var rawPagedData = await (
-                    from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
+                    from d in demographics.Include(d=> d.EmploymentStatus).Where(x => x.DateOfBirth >= birthDate21)
                     join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals bal.Ssn
                     join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear - 1) on d.Id equals lyPpTbl.DemographicId into lyPpTmp
                     from lyPp in lyPpTmp.DefaultIfEmpty()
@@ -236,7 +236,7 @@ public class PostFrozenService : IPostFrozenService
                         d.FullTimeDate,
                         d.TerminationDate,
                         d.DateOfBirth, // Raw birth date - age will be calculated after query
-                        d.EmploymentStatusId,
+                        EmploymentStatusId = d.EmploymentStatus!.Name,
                         CurrentBalance = (bal.CurrentBalance ?? 0),
                         EnrollmentId = tyPp != null ? tyPp.EnrollmentId : (byte)0,
                         IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
