@@ -12,6 +12,7 @@ public record MasterInquiryRequest : MasterInquiryMemberRequest
     public decimal? PaymentAmount { get; set; }
     public string? Name { get; set; }
     public byte? PaymentType { get; set; }
+    public bool? Voids { get; set; }
 #pragma warning disable DSM001
     public int Ssn { get; set; }
 #pragma warning restore DSM001
