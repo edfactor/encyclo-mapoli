@@ -128,7 +128,12 @@ const useMasterInquiry = () => {
           startProfitMonth: params.startProfitMonth,
           endProfitMonth: params.endProfitMonth,
           memberType: params.memberType,
-          paymentType: params.paymentType
+          paymentType: params.paymentType,
+          contributionAmount: params.contributionAmount,
+          earningsAmount: params.earningsAmount,
+          forfeitureAmount: params.forfeitureAmount,
+          paymentAmount: params.paymentAmount,
+          voids: params.voids
         });
 
         // Skip if same params and already searching
