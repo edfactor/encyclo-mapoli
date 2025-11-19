@@ -4,11 +4,11 @@ import React, { useState } from "react";
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import FilterSection from "./FilterSection";
-import presets from "./presets";
-import ReportGrid from "./ReportGrid";
+import reports from "./availableQPAY066xReports";
+import QPAY066xAdHocReportsGrid from "./QPAY066xAdHocReportsGrid";
+import QPAY066xAdHocSearchFilter from "./QPAY066xAdHocSearchFilter";
 
-const QPAY066AdHocReports: React.FC = () => {
+const QPAY066xAdHocReports: React.FC = () => {
   const [currentPreset, setCurrentPreset] = useState<ReportPreset | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [storeNumber, setStoreNumber] = useState<string>("");
@@ -45,8 +45,8 @@ const QPAY066AdHocReports: React.FC = () => {
         </Grid>
         <Grid width={"100%"}>
           <DSMAccordion title="Filter">
-            <FilterSection
-              presets={presets}
+            <QPAY066xAdHocSearchFilter
+              presets={reports}
               currentPreset={currentPreset}
               onPresetChange={handlePresetChange}
               onReset={handleReset}
@@ -58,7 +58,7 @@ const QPAY066AdHocReports: React.FC = () => {
 
         <Grid width="100%">
           {currentPreset && storeNumber.trim() && (
-            <ReportGrid
+            <QPAY066xAdHocReportsGrid
               params={currentPreset.params}
               storeNumber={parseInt(storeNumber)}
               onLoadingChange={handleLoadingChange}
@@ -70,4 +70,4 @@ const QPAY066AdHocReports: React.FC = () => {
   );
 };
 
-export default QPAY066AdHocReports;
+export default QPAY066xAdHocReports;

@@ -1,6 +1,6 @@
 import { ReportPreset } from "reduxstore/types";
 
-const presets: ReportPreset[] = [
+const reports: ReportPreset[] = [
   {
     id: "QPAY066A",
     name: "QPAY066A",
@@ -75,4 +75,4 @@ const presets: ReportPreset[] = [
   }
 ];
 
-export default presets;
+export default reports;

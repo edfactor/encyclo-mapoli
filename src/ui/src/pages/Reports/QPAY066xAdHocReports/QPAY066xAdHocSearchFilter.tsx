@@ -7,7 +7,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { positiveNumberValidator } from "../../../utils/FormValidators";
 
-interface FilterSectionProps {
+interface QPAY066xAdHocSearchFilterProps {
   presets: ReportPreset[];
   currentPreset: ReportPreset | null;
   onPresetChange: (preset: ReportPreset | null) => void;
@@ -16,7 +16,7 @@ interface FilterSectionProps {
   isLoading?: boolean;
 }
 
-interface FilterFormData {
+interface QPAY066xAdHocSearchFilterFormData {
   storeNumber: number | null;
   startDate: Date | null;
   endDate: Date | null;
@@ -34,7 +34,7 @@ const schema = yup.object().shape({
   employeeStatus: yup.string().default("")
 });
 
-const FilterSection: React.FC<FilterSectionProps> = ({
+const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
   presets,
   currentPreset,
   onPresetChange,
@@ -48,7 +48,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     reset,
     watch,
     formState: { errors, isValid }
-  } = useForm<FilterFormData>({
+  } = useForm<QPAY066xAdHocSearchFilterFormData>({
     resolver: yupResolver(schema),
     defaultValues: {
       storeNumber: null,
@@ -175,4 +175,4 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   );
 };
 
-export default FilterSection;
+export default QPAY066xAdHocSearchFilter;

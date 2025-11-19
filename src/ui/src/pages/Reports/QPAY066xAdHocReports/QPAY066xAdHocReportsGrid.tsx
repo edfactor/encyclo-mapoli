@@ -17,10 +17,10 @@ import { RootState } from "reduxstore/store";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
-import presets from "./presets";
-import { GetQPAY066AdHocGridColumns } from "./QPAY066AdHocGridColumns";
+import reports from "./availableQPAY066xReports";
+import { GetQPAY066xAdHocGridColumns } from "./QPAY066xAdHocGridColumns";
 
-interface ReportGridProps {
+interface QPAY066xAdHocReportsGridProps {
   params: FilterParams;
   storeNumber: number;
   onLoadingChange?: (isLoading: boolean) => void;
@@ -90,7 +90,11 @@ const dummyData = [
   }
 ];
 
-const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingChange }) => {
+const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
+  params,
+  storeNumber,
+  onLoadingChange
+}) => {
   const [fetchBreakdownByStore, { isFetching: isBreakdownFetching }] = useLazyGetBreakdownByStoreQuery();
   const [fetchBreakdownByStoreTotals, { isFetching: isTotalsFetching }] = useLazyGetBreakdownByStoreTotalsQuery();
 
@@ -143,7 +147,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
   }, [isBreakdownFetching, isTotalsFetching, onLoadingChange]);
 
   const getReportTitle = () => {
-    const matchingPreset = presets.find((preset) => preset.params.reportId === params.reportId);
+    const matchingPreset = reports.find((preset) => preset.params.reportId === params.reportId);
 
     if (matchingPreset) {
       return matchingPreset.description.toUpperCase();
@@ -180,7 +184,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
   }, [isQPAY066MReport, breakdownByStoreTotals]);
 
   const columnDefs = useMemo(() => {
-    return GetQPAY066AdHocGridColumns();
+    return GetQPAY066xAdHocGridColumns();
   }, []);
 
   const rowData = useMemo(() => {
@@ -282,4 +286,4 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
   );
 };
 
-export default ReportGrid;
+export default QPAY066xAdHocReportsGrid;

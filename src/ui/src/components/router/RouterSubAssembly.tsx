@@ -68,7 +68,7 @@ import Adjustments from "../../pages/InquiriesAndAdjustments/Adjustments";
 import AccountHistoryReport from "../../pages/Reports/AccountHistoryReport/AccountHistoryReport";
 import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
-import QPAY066AdHocReports from "../../pages/Reports/QPAY066AdHocReports/QPAY066AdHocReports";
+import QPAY066xAdHocReports from "../../pages/Reports/QPAY066xAdHocReports/QPAY066xAdHocReports";
 import QPAY600 from "../../pages/Reports/QPAY600/QPAY600";
 import RecentlyTerminated from "../../pages/Reports/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/Reports/TerminatedLetters/TerminatedLetters";
@@ -426,7 +426,7 @@ const RouterSubAssembly: React.FC = () => {
 
                 <Route
                   path={ROUTES.QPAY066_ADHOC}
-                  element={<QPAY066AdHocReports />}
+                  element={<QPAY066xAdHocReports />}
                 />
                 <Route
                   path={ROUTES.QPAY066B}
