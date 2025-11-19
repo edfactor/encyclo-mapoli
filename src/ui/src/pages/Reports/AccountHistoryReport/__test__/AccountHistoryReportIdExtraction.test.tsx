@@ -120,7 +120,7 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
           total: 0,
           isPartialResult: false,
           timeoutOccurred: false,
-          results: undefined as any
+          results: undefined as unknown as AccountHistoryReportResponse[]
         }
       };
 
@@ -304,7 +304,7 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
       ];
 
       // Act & Assert
-      testCases.forEach(({ data, expectedId, description }) => {
+      testCases.forEach(({ data, expectedId, _description }) => {
         const reportId = data?.response?.results?.[0]?.id ?? 0;
         expect(reportId).toBe(expectedId);
       });
