@@ -1,16 +1,18 @@
-import { Button, CircularProgress, FormLabel, Grid, MenuItem, Select } from "@mui/material";
+import { Button, Checkbox, CircularProgress, FormControlLabel, FormLabel, Grid, MenuItem, Select } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { YTDWagesSearchParams } from "./hooks/useYTDWages";
 
 interface YTDWagesSearchFilterProps {
   onSearch: (params: YTDWagesSearchParams) => void;
   isSearching?: boolean;
+  defaultUseFrozenData?: boolean;
 }
 
-const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ onSearch, isSearching = false }) => {
+const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ onSearch, isSearching = false, defaultUseFrozenData = true }) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+  const [useFrozenData, setUseFrozenData] = useState(defaultUseFrozenData);
 
   const { handleSubmit } = useForm({
     defaultValues: {
@@ -22,10 +24,10 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ onSearch, i
     // call the form submit handler returned by handleSubmit
     handleSubmit(() => {
       if (fiscalCloseProfitYear) {
-        onSearch({ profitYear: fiscalCloseProfitYear });
+        onSearch({ profitYear: fiscalCloseProfitYear, useFrozenData });
       }
     })();
-  }, [handleSubmit, fiscalCloseProfitYear, onSearch]);
+  }, [handleSubmit, fiscalCloseProfitYear, useFrozenData, onSearch]);
 
   return (
     <form onSubmit={doSearch}>
@@ -42,6 +44,17 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ onSearch, i
             fullWidth>
             <MenuItem value={fiscalCloseProfitYear || ""}>{fiscalCloseProfitYear}</MenuItem>
           </Select>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={useFrozenData}
+                onChange={(e) => setUseFrozenData(e.target.checked)}
+              />
+            }
+            label="Use Frozen Data"
+          />
         </Grid>
       </Grid>
       <Grid

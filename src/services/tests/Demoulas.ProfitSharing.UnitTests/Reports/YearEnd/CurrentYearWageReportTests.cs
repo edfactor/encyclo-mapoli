@@ -64,7 +64,8 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         // Act
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
         var response =
-            await ApiClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(new ProfitYearRequest { ProfitYear = 2023 });
+            await ApiClient.GETAsync<CurrentYearWagesEndpoint, WagesCurrentYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(
+                new WagesCurrentYearRequest { ProfitYear = 2023, UseFrozenData = false });
 
         // Assert
         response.Result.ReportName.ShouldBe(expectedResponse.ReportName);
@@ -78,7 +79,8 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     {
         // Act
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, StreamContent>(new ProfitYearRequest { ProfitYear = 2023 });
+        var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, WagesCurrentYearRequest, StreamContent>(
+            new WagesCurrentYearRequest { ProfitYear = 2023, UseFrozenData = false });
         response.Response.Content.ShouldNotBeNull();
 
         string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
@@ -106,6 +108,21 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         headers.ShouldNotBeNull();
         headers.ShouldBe(new[] { "", "", "BADGE", "HOURS YR", "DOLLARS YR" });
 
+    }
+    
+    [Fact(DisplayName = "PS-351: Get current year wages with frozen data (JSON) - Archive mode")]
+    public async Task GetResponse_Should_ReturnArchiveReportResponse_WhenCalledWithFrozenData()
+    {
+        // Act
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
+        var response =
+            await ApiClient.GETAsync<CurrentYearWagesEndpoint, WagesCurrentYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(
+                new WagesCurrentYearRequest { ProfitYear = 2023, UseFrozenData = true });
+
+        // Assert
+        response.Result.ReportName.ShouldContain("Archive");
+        response.Result.ReportName.ShouldBe($"YTD Wages Extract (PROF-DOLLAR-EXTRACT) - 2023 - Archive");
+        response.Result.Response.Results.ShouldBeAssignableTo<List<WagesCurrentYearResponse>>();
     }
 
     [Fact(DisplayName = "PS-351: Check to ensure unauthorized")]
@@ -137,8 +154,8 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         
         // Act
-        var response = await ApiClient.GETAsync<CurrentYearWagesEndpoint, FrozenProfitYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(
-            new FrozenProfitYearRequest { ProfitYear = 2023, UseFrozenData = true });
+        var response = await ApiClient.GETAsync<CurrentYearWagesEndpoint, WagesCurrentYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(
+            new WagesCurrentYearRequest { ProfitYear = 2023, UseFrozenData = true });
         
         // Assert
         response.Response.Headers.TryGetValues(DemographicHeaders.Source, out var sourceValues).ShouldBeTrue();
