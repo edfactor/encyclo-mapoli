@@ -225,6 +225,21 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
 
+        var states = new List<State>()
+        {
+            new State() { Abbreviation = "MA", Name = "Massachusetts" },
+            new State() { Abbreviation = "NH", Name = "New Hampshire" },
+            new State() { Abbreviation = "ME", Name = "Maine" },
+            new State() { Abbreviation = "CT", Name = "Connecticut" },
+            new State() { Abbreviation = "RI", Name = "Rhode Island" },
+            new State() { Abbreviation = "VT", Name = "Vermont" },
+            new State() { Abbreviation = "NY", Name = "New York" },
+            new State() { Abbreviation = "CA", Name = "California" },
+            new State() { Abbreviation = "TX", Name = "Texas" }
+        };
+        var mockStates = states.BuildMockDbSet();
+        _profitSharingReadOnlyDbContext.Setup(m => m.States).Returns(mockStates.Object);
+
         var employmentTypes = new List<EmploymentType>()
         {
             new EmploymentType() {Id=EmploymentType.Constants.FullTimeAccruedPaidHolidays,Name=EmploymentType.Constants.FullTimeAccruedPaidHolidays.ToString() },
@@ -447,6 +462,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<DistributionStatus>()).Returns(mockDistributionStatuses.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<CommentType>()).Returns(mockCommentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<TaxCode>()).Returns(mockTaxCodesList.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Set<State>()).Returns(mockStates.Object);
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()
