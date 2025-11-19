@@ -8,6 +8,7 @@ export interface AccountHistoryReportRequest {
 }
 
 export interface AccountHistoryReportResponse {
+  id: number;
   badgeNumber: number;
   fullName: string;
   ssn: string; // Masked for security

@@ -10,6 +10,8 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 /// </summary>
 public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullNameProperty
 {
+    public required int Id { get; set; }
+
     /// <summary>
     /// Employee badge number (identifier in payroll system).
     /// </summary>
