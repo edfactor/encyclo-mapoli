@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -86,7 +86,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotBeNull();
-        if (result.Response.Results.Count() > 0)
+        if (result.Response.Results.Any())
         {
             result.Response.Results.FirstOrDefault()?.BadgeNumber.ShouldBe(badgeNumber);
         }
@@ -136,7 +136,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotBeNull();
-        if (result.Response.Results.Count() > 0)
+        if (result.Response.Results.Any())
         {
             result.Response.Results.Count().ShouldBeLessThanOrEqualTo(10);
         }
@@ -249,13 +249,13 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotBeNull();
-        if (result.Response.Results.Count() > 0)
+        if (result.Response.Results.Any())
         {
             // All profit years should be within the specified range
             foreach (var r in result.Response.Results)
             {
-                r.ProfitYear.ShouldBeGreaterThanOrEqualTo(startDate.Year);
-                r.ProfitYear.ShouldBeLessThanOrEqualTo(endDate.Year);
+                ((int)r.ProfitYear).ShouldBeGreaterThanOrEqualTo(startDate.Year);
+                ((int)r.ProfitYear).ShouldBeLessThanOrEqualTo(endDate.Year);
             }
         }
     }
@@ -305,7 +305,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotBeNull();
-        if (result.Response.Results.Count > 0)
+        if (result.Response.Results.Any())
         {
             var record = result.Response.Results.First();
             record.Id.ShouldBeGreaterThan(0);
