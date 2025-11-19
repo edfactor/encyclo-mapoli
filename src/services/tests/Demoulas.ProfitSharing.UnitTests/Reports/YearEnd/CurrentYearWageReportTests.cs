@@ -7,10 +7,13 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
@@ -19,6 +22,7 @@ using FastEndpoints;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Moq;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -32,7 +36,14 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     {
         var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
         var logger = ServiceProvider!.GetRequiredService<ILogger<CurrentYearWagesEndpoint>>();
-        WagesService mockService = new WagesService(MockDbContextFactory, calendarService);
+
+        // Mock IDemographicReaderService to return live demographics
+        var mockDemographicReader = new Mock<IDemographicReaderService>();
+        mockDemographicReader
+            .Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+            .ReturnsAsync((IProfitSharingDbContext ctx, bool useFrozen) => ctx.Demographics);
+
+        WagesService mockService = new WagesService(MockDbContextFactory, calendarService, mockDemographicReader.Object);
         _endpoint = new CurrentYearWagesEndpoint(mockService, logger);
     }
 
@@ -117,5 +128,20 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
 
         // Assert
         reportFileName.ShouldBe("YTD Wages Extract (PROF-DOLLAR-EXTRACT)");
+    }
+
+    [Fact(DisplayName = "PS-351: Verify X-Demographic-Data-Source header is set to Frozen")]
+    public async Task GetResponse_Should_SetFrozenHeader_WhenUsingFrozenData()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        
+        // Act
+        var response = await ApiClient.GETAsync<CurrentYearWagesEndpoint, FrozenProfitYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(
+            new FrozenProfitYearRequest { ProfitYear = 2023, UseFrozenData = true });
+        
+        // Assert
+        response.Response.Headers.TryGetValues(DemographicHeaders.Source, out var sourceValues).ShouldBeTrue();
+        sourceValues!.Single().ShouldBe("Frozen");
     }
 }
