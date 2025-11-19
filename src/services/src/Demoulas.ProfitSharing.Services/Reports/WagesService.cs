@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -12,41 +13,49 @@ public class WagesService : IWagesService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
     public WagesService(IProfitSharingDataContextFactory dataContextFactory,
-        ICalendarService calendarService)
+        ICalendarService calendarService,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
+        _demographicReaderService = demographicReaderService;
     }
 
     public async Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesReportAsync(ProfitYearRequest request, CancellationToken cancellationToken)
     {
-        var result = _dataContextFactory.UseReadOnlyContext(c =>
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+        
+        var result = await _dataContextFactory.UseReadOnlyContext(async c =>
         {
-            return c.PayProfits
-                .Include(p => p.Demographic)
-                .Where(p => p.CurrentIncomeYear != 0 && p.ProfitYear == request.ProfitYear)
-                .Select(p => new WagesCurrentYearResponse
-                {
-                    BadgeNumber = p.Demographic!.BadgeNumber,
-                    HoursCurrentYear = p.CurrentHoursYear,
-                    IncomeCurrentYear = p.CurrentIncomeYear,
-                    StoreNumber = p.Demographic.StoreNumber,
-                    IsExecutive = p.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
-                })
-                .ToPaginationResultsAsync(request, cancellationToken);
+            // Get demographics query (currently uses live data, but structured to support frozen data in future)
+            var demographics = await _demographicReaderService.BuildDemographicQuery(c, useFrozenData: true);
 
+            // Join demographics with PayProfits to get wage data
+            var query = from d in demographics
+                        join pp in c.PayProfits.Where(p => p.CurrentIncomeYear != 0 && p.ProfitYear == request.ProfitYear)
+                            on d.Id equals pp.DemographicId
+                        select new WagesCurrentYearResponse
+                        {
+                            BadgeNumber = d.BadgeNumber,
+                            HoursCurrentYear = pp.CurrentHoursYear,
+                            IncomeCurrentYear = pp.CurrentIncomeYear,
+                            StoreNumber = d.StoreNumber,
+                            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
+                        };
+
+            return await query.ToPaginationResultsAsync(request, cancellationToken);
         }, cancellationToken);
 
-        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         return new ReportResponseBase<WagesCurrentYearResponse>
         {
             ReportName = $"YTD Wages Extract (PROF-DOLLAR-EXTRACT) - {request.ProfitYear}",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = calInfo.FiscalBeginDate,
             EndDate = calInfo.FiscalEndDate,
-            Response = await result
+            Response = result
         };
     }
 }
