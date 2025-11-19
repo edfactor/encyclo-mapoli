@@ -101,6 +101,12 @@ public static class MasterInquiryHelpers
                 (x.ProfitDetail == null || x.ProfitDetail.Forfeiture == req.PaymentAmount));
         }
 
+        // Filter for void records (comment type = Voided)
+        if (req.Voids.HasValue && req.Voids.Value)
+        {
+            query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.CommentTypeId == CommentType.Constants.Voided.Id);
+        }
+
         return query;
     }
 
