@@ -50,8 +50,8 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
 
     return (
       <>
-        <div style={{ width: "100%" }}>
-          <div style={{ padding: "0 24px 0 24px" }}>
+        <div className="w-full">
+          <div className="px-6">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
