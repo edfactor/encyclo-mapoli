@@ -6,7 +6,6 @@ import {
   BalanceByYears,
   BreakdownByStoreEmployee,
   BreakdownByStoreRequest,
-  BreakdownByStoreResponse,
   BreakdownByStoreTotals,
   CertificatesReportResponse,
   ContributionsByAge,
@@ -144,7 +143,7 @@ export interface YearsEndState {
   breakdownByStore: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreMangement: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreTotals: BreakdownByStoreTotals | null;
-  storeManagementBreakdown: BreakdownByStoreResponse | null;
+  storeManagementBreakdown: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreQueryParams: BreakdownByStoreRequest | null;
   under21BreakdownByStore: Under21BreakdownByStoreResponse | null;
   under21BreakdownByStoreQueryParams: Under21BreakdownByStoreRequest | null;
@@ -1050,7 +1049,7 @@ export const yearsEndSlice = createSlice({
       state.controlSheet = null;
     }
   },
-  // In yearsEndSlice.ts - find the extraReducers section
+
   extraReducers: (builder) => {
     // Your existing matchers
 

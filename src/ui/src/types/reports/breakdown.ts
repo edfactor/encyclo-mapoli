@@ -5,6 +5,8 @@ export interface BreakdownByStoreRequest extends ProfitYearRequest {
   storeManagement?: boolean;
   badgeNumber?: number;
   employeeName?: string;
+  startDate?: string;
+  endDate?: string;
   pagination: SortedPaginationRequestDto;
 }
 

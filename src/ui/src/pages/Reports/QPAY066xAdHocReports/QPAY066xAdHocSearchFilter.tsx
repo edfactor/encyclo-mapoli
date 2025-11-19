@@ -11,9 +11,9 @@ import {
   SelectChangeEvent,
   TextField
 } from "@mui/material";
+import { QPAY066xAdHocReportPreset } from "@/types";
 import React from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { ReportPreset } from "reduxstore/types";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
@@ -24,9 +24,9 @@ import {
 } from "../../../utils/FormValidators";
 
 interface QPAY066xAdHocSearchFilterProps {
-  presets: ReportPreset[];
-  currentPreset: ReportPreset | null;
-  onPresetChange: (preset: ReportPreset | null) => void;
+  presets: QPAY066xAdHocReportPreset[];
+  currentPreset: QPAY066xAdHocReportPreset | null;
+  onPresetChange: (preset: QPAY066xAdHocReportPreset | null) => void;
   onReset: () => void;
   onStoreNumberChange: (storeNumber: string) => void;
   onBadgeNumberChange: (badgeNumber: string) => void;
@@ -53,7 +53,11 @@ const createSchema = (requiresDateRange: boolean) =>
       ? dateStringValidator(2000, 2099, "Start Date").required("Start Date is required")
       : yup.string().default(""),
     endDate: requiresDateRange
-      ? endDateStringAfterStartDateValidator("startDate", tryddmmyyyyToDate, "End Date must be equal to or greater than Start Date").required("End Date is required")
+      ? endDateStringAfterStartDateValidator(
+          "startDate",
+          tryddmmyyyyToDate,
+          "End Date must be equal to or greater than Start Date"
+        ).required("End Date is required")
       : yup.string().default(""),
     badgeNumber: yup
       .string()
@@ -267,7 +271,9 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
                     type="text"
                     disabled={isBadgeNumberDisabled}
                     error={!!errors.badgeNumber}
-                    helperText={errors.badgeNumber?.message || getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)}
+                    helperText={
+                      errors.badgeNumber?.message || getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)
+                    }
                     onChange={(e) => {
                       const value = e.target.value;
                       // Only allow numeric input, max 11 digits
