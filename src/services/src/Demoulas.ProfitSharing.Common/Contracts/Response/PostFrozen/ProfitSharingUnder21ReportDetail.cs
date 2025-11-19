@@ -26,5 +26,5 @@ public record ProfitSharingUnder21ReportDetail : IIsExecutive, IFirstName, ILast
     public short Age { get; init; }
     public required string EmploymentStatusId { get; init; }
     public decimal CurrentBalance { get; init; }
-    public byte EnrollmentId { get; init; }
+    public required string EnrollmentId { get; init; }
 }
