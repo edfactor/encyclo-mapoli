@@ -57,7 +57,7 @@ const useYTDWages = (options?: UseYTDWagesOptions) => {
         }
       }
     },
-    [fiscalCloseProfitYear, hasToken, triggerSearch, reduxDispatch, state.search.useFrozenData]
+    [fiscalCloseProfitYear, hasToken, triggerSearch, reduxDispatch, state.search.useFrozenData, defaultUseFrozenData]
   );
 
   const pagination = useGridPagination({

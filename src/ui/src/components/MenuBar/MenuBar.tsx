@@ -59,8 +59,7 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
 
   return (
     <div
-      className="menubar"
-      style={{ position: "fixed", width: "100%", overflow: "visible", zIndex: 2 }}>
+      className="menubar fixed w-full overflow-visible z-[2]">
       <div className="navbuttons ml-2">
         <NavButton
           isUnderlined={homeTabSelected}
