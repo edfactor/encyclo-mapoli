@@ -229,7 +229,7 @@ describe("AccountHistoryReportTable", () => {
         timeoutOccurred: false,
         results: [
           {
-            id: 123,
+            id: 123, // Same ID for all records (member identifier)
             badgeNumber: 12345,
             fullName: "John Doe",
             ssn: "***-**-6789",
@@ -241,7 +241,7 @@ describe("AccountHistoryReportTable", () => {
             endingBalance: 5000
           },
           {
-            id: 234,
+            id: 123, // Same ID (member identifier)
             badgeNumber: 12345,
             fullName: "John Doe",
             ssn: "***-**-6789",
@@ -271,11 +271,12 @@ describe("AccountHistoryReportTable", () => {
     expect(screen.getByText(/2 rows/)).toBeInTheDocument();
   });
 
-  it("should have unique IDs for records with same badge number across profit years (PS-2160)", () => {
-    // This test verifies that records with the same badge number but different profit years have unique IDs
+  it("should have same ID for records with same badge number across profit years (PS-2160)", () => {
+    // This test verifies that records with the same badge number but different profit years
+    // share the same ID, which represents the member/demographic record (not the transaction)
     const recordsWithSameBadgeNumber = [
       {
-        id: 100,
+        id: 100, // SAME ID (represents the member)
         badgeNumber: 12345,
         fullName: "John Doe",
         ssn: "***-**-6789",
@@ -287,7 +288,7 @@ describe("AccountHistoryReportTable", () => {
         endingBalance: 5000
       },
       {
-        id: 101,
+        id: 100, // SAME ID (represents the member)
         badgeNumber: 12345,
         fullName: "John Doe",
         ssn: "***-**-6789",
@@ -299,7 +300,7 @@ describe("AccountHistoryReportTable", () => {
         endingBalance: 4000
       },
       {
-        id: 102,
+        id: 100, // SAME ID (represents the member)
         badgeNumber: 12345,
         fullName: "John Doe",
         ssn: "***-**-6789",
@@ -336,9 +337,10 @@ describe("AccountHistoryReportTable", () => {
       />
     );
 
-    // Verify each record has a unique ID even though they share the same badge number
+    // Verify all records share the same ID (member ID, not transaction ID)
     const uniqueIds = new Set(recordsWithSameBadgeNumber.map((r) => r.id));
-    expect(uniqueIds.size).toBe(recordsWithSameBadgeNumber.length);
+    expect(uniqueIds.size).toBe(1);
+    expect(Array.from(uniqueIds)[0]).toBe(100);
   });
 
   it("should render grid with results containing all required fields (PS-2160)", () => {

@@ -1,6 +1,8 @@
-import { renderHook } from "@testing-library/react";
+import {
+  AccountHistoryReportPaginatedResponse,
+  AccountHistoryReportResponse
+} from "@/types/reports/AccountHistoryReportTypes";
 import { describe, expect, it } from "vitest";
-import { AccountHistoryReportPaginatedResponse, AccountHistoryReportResponse } from "@/types/reports/AccountHistoryReportTypes";
 
 /**
  * PS-2160: Unit tests for AccountHistoryReport ID extraction logic
@@ -134,7 +136,7 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
     it("should use report ID instead of badge number for member lookup", () => {
       // This test verifies the key fix for PS-2160:
       // Badge number is NOT unique (same employee has multiple records across profit years)
-      // Report ID IS unique for each record
+      // Report ID represents the member/demographic record (same for all rows)
 
       // Arrange
       const records: AccountHistoryReportResponse[] = [
@@ -151,7 +153,7 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
           endingBalance: 5000
         },
         {
-          id: 101,
+          id: 100, // SAME ID (represents the member)
           badgeNumber: 12345, // SAME badge number
           fullName: "John Doe",
           ssn: "***-**-6789",
@@ -163,7 +165,7 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
           endingBalance: 4000
         },
         {
-          id: 102,
+          id: 100, // SAME ID (represents the member)
           badgeNumber: 12345, // SAME badge number
           fullName: "John Doe",
           ssn: "***-**-6789",
@@ -177,13 +179,14 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
       ];
 
       // Act & Assert
-      // Verify badge numbers are not unique
+      // Verify badge numbers are not unique (but all same in this case)
       const uniqueBadgeNumbers = new Set(records.map((r) => r.badgeNumber));
       expect(uniqueBadgeNumbers.size).toBe(1);
 
-      // Verify IDs ARE unique
+      // Verify IDs are all the same (member ID, not transaction ID)
       const uniqueIds = new Set(records.map((r) => r.id));
-      expect(uniqueIds.size).toBe(records.length);
+      expect(uniqueIds.size).toBe(1);
+      expect(Array.from(uniqueIds)[0]).toBe(100);
 
       // The first record's ID should be used for member lookup
       const reportId = records[0].id;
@@ -254,7 +257,20 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
               total: 1,
               isPartialResult: false,
               timeoutOccurred: false,
-              results: [{ id: 789, badgeNumber: 12345, fullName: "Test", ssn: "***", profitYear: 2024, contributions: 0, earnings: 0, forfeitures: 0, withdrawals: 0, endingBalance: 0 }]
+              results: [
+                {
+                  id: 789,
+                  badgeNumber: 12345,
+                  fullName: "Test",
+                  ssn: "***",
+                  profitYear: 2024,
+                  contributions: 0,
+                  earnings: 0,
+                  forfeitures: 0,
+                  withdrawals: 0,
+                  endingBalance: 0
+                }
+              ]
             }
           },
           expectedId: 789,

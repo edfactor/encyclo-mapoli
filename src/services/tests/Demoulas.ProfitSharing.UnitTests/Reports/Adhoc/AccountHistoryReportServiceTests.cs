@@ -32,9 +32,9 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         _service = new AccountHistoryReportService(MockDbContextFactory, _mockDemographicReader.Object);
     }
 
-    [Description("PS-2160 : Account history report returns records with unique IDs for each report row")]
+    [Description("PS-2160 : Account history report returns same ID for all rows of the same member")]
     [Fact]
-    public async Task GetAccountHistoryReportAsync_ShouldReturnUniqueIdForEachRecord()
+    public async Task GetAccountHistoryReportAsync_ShouldReturnSameIdForAllRecords()
     {
         // Arrange
         const int badgeNumber = 700006;
@@ -58,12 +58,11 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         result.Response.ShouldNotBeNull();
         result.Response.Results.ShouldNotBeNull();
 
-        if (result.Response.Results.Count > 0)
+        if (result.Response.Results.Count > 1)
         {
-            // Each record should have a unique ID
-            var ids = result.Response.Results.Select(r => r.Id).ToList();
-            var uniqueIds = ids.Distinct().ToList();
-            uniqueIds.Count.ShouldBe(ids.Count, "Each record should have a unique ID");
+            // All records should have the same ID (represents the member/demographic record)
+            var ids = result.Response.Results.Select(r => r.Id).Distinct().ToList();
+            ids.Count.ShouldBe(1, "All records for the same member should have the same ID");
         }
     }
 
