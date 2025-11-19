@@ -1,13 +1,14 @@
-import { ReportPreset } from "reduxstore/types";
+import { QPAY066xAdHocReportPreset } from "@/types";
 
-const reports: ReportPreset[] = [
+const reports: QPAY066xAdHocReportPreset[] = [
   {
     id: "QPAY066A",
     name: "QPAY066A",
     description: "Less than 20% Vested",
     params: {
       reportId: 1
-    }
+    },
+    requiresDateRange: true
   },
   {
     id: "QPAY066A-1",
@@ -15,7 +16,8 @@ const reports: ReportPreset[] = [
     description: "Less than 20% Vested (Variation 1)",
     params: {
       reportId: 2
-    }
+    },
+    requiresDateRange: true
   },
   {
     id: "QPAY066AF",
@@ -23,7 +25,8 @@ const reports: ReportPreset[] = [
     description: "QPAY066AF Name",
     params: {
       reportId: 3
-    }
+    },
+    requiresDateRange: false
   },
   {
     id: "QPAY066-AGE70",
@@ -31,15 +34,18 @@ const reports: ReportPreset[] = [
     description: "Aged 70 and Over",
     params: {
       reportId: 4
-    }
+    },
+    requiresDateRange: false
   },
   {
+    // ok
     id: "QPAY066I",
     name: "QPAY066I",
     description: "Inactive Employees",
     params: {
       reportId: 5
-    }
+    },
+    requiresDateRange: false
   },
   {
     id: "QPAY066B",
@@ -47,7 +53,8 @@ const reports: ReportPreset[] = [
     description: "Beneficiaries Report",
     params: {
       reportId: 6
-    }
+    },
+    requiresDateRange: false
   },
   {
     id: "QPAY066D",
@@ -55,7 +62,8 @@ const reports: ReportPreset[] = [
     description: "Disabled Employees",
     params: {
       reportId: 7
-    }
+    },
+    requiresDateRange: false
   },
   {
     id: "QPAY066M",
@@ -63,7 +71,8 @@ const reports: ReportPreset[] = [
     description: "QPAY066M",
     params: {
       reportId: 8
-    }
+    },
+    requiresDateRange: false
   },
   {
     id: "QPAY066W",
@@ -71,7 +80,8 @@ const reports: ReportPreset[] = [
     description: "Employees with Wages",
     params: {
       reportId: 9
-    }
+    },
+    requiresDateRange: false
   }
 ];
 

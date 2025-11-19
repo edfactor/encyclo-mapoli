@@ -12,6 +12,11 @@ const QPAY066xAdHocReports: React.FC = () => {
   const [currentPreset, setCurrentPreset] = useState<ReportPreset | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [storeNumber, setStoreNumber] = useState<string>("");
+  const [badgeNumber, setBadgeNumber] = useState<string>("");
+  const [employeeName, setEmployeeName] = useState<string>("");
+  const [storeManagement, setStoreManagement] = useState<boolean>(false);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   const handlePresetChange = (preset: ReportPreset | null) => {
     setCurrentPreset(preset);
@@ -19,10 +24,35 @@ const QPAY066xAdHocReports: React.FC = () => {
 
   const handleReset = () => {
     setCurrentPreset(null);
+    setBadgeNumber("");
+    setEmployeeName("");
+    setStoreManagement(false);
+    setStartDate("");
+    setEndDate("");
   };
 
   const handleStoreNumberChange = (storeNumber: string) => {
     setStoreNumber(storeNumber);
+  };
+
+  const handleBadgeNumberChange = (badgeNumber: string) => {
+    setBadgeNumber(badgeNumber);
+  };
+
+  const handleEmployeeNameChange = (employeeName: string) => {
+    setEmployeeName(employeeName);
+  };
+
+  const handleStoreManagementChange = (storeManagement: boolean) => {
+    setStoreManagement(storeManagement);
+  };
+
+  const handleStartDateChange = (startDate: string) => {
+    setStartDate(startDate);
+  };
+
+  const handleEndDateChange = (endDate: string) => {
+    setEndDate(endDate);
   };
 
   const handleLoadingChange = (loading: boolean) => {
@@ -51,6 +81,11 @@ const QPAY066xAdHocReports: React.FC = () => {
               onPresetChange={handlePresetChange}
               onReset={handleReset}
               onStoreNumberChange={handleStoreNumberChange}
+              onBadgeNumberChange={handleBadgeNumberChange}
+              onEmployeeNameChange={handleEmployeeNameChange}
+              onStoreManagementChange={handleStoreManagementChange}
+              onStartDateChange={handleStartDateChange}
+              onEndDateChange={handleEndDateChange}
               isLoading={isLoading}
             />
           </DSMAccordion>
@@ -61,6 +96,11 @@ const QPAY066xAdHocReports: React.FC = () => {
             <QPAY066xAdHocReportsGrid
               params={currentPreset.params}
               storeNumber={parseInt(storeNumber)}
+              badgeNumber={badgeNumber ? parseInt(badgeNumber) : undefined}
+              employeeName={employeeName || undefined}
+              storeManagement={storeManagement}
+              startDate={startDate || undefined}
+              endDate={endDate || undefined}
               onLoadingChange={handleLoadingChange}
             />
           )}

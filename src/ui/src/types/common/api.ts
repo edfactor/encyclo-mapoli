@@ -72,3 +72,11 @@ export interface ReportPreset {
     priorProfitShare?: string;
   };
 }
+
+export interface QPAY066xAdHocReportPreset {
+  id: string;
+  name: string;
+  description: string;
+  params: FilterParams;
+  requiresDateRange: boolean;
+}

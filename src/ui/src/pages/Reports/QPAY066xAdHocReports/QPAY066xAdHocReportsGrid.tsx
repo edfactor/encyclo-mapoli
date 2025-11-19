@@ -23,6 +23,11 @@ import { GetQPAY066xAdHocGridColumns } from "./QPAY066xAdHocGridColumns";
 interface QPAY066xAdHocReportsGridProps {
   params: FilterParams;
   storeNumber: number;
+  badgeNumber?: number;
+  employeeName?: string;
+  storeManagement: boolean;
+  startDate?: string;
+  endDate?: string;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
@@ -93,6 +98,11 @@ const dummyData = [
 const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
   params,
   storeNumber,
+  badgeNumber,
+  employeeName,
+  storeManagement,
+  startDate,
+  endDate,
   onLoadingChange
 }) => {
   const [fetchBreakdownByStore, { isFetching: isBreakdownFetching }] = useLazyGetBreakdownByStoreQuery();
@@ -116,7 +126,11 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
       fetchBreakdownByStore({
         profitYear: profitYear,
         storeNumber: storeNumber,
-        storeManagement: true,
+        storeManagement: storeManagement,
+        badgeNumber: badgeNumber,
+        employeeName: employeeName,
+        startDate: startDate,
+        endDate: endDate,
         pagination: {
           skip: 0,
           take: 255,
@@ -129,7 +143,11 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
       fetchBreakdownByStoreTotals({
         profitYear: profitYear,
         storeNumber: storeNumber,
-        storeManagement: true,
+        storeManagement: storeManagement,
+        badgeNumber: badgeNumber,
+        employeeName: employeeName,
+        startDate: startDate,
+        endDate: endDate,
         pagination: {
           skip: 0,
           take: 255,
@@ -138,7 +156,7 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
         }
       });
     }
-  }, [isQPAY066MReport, hasToken, profitYear, storeNumber, fetchBreakdownByStore, fetchBreakdownByStoreTotals]);
+  }, [isQPAY066MReport, hasToken, profitYear, storeNumber, badgeNumber, employeeName, storeManagement, startDate, endDate, fetchBreakdownByStore, fetchBreakdownByStoreTotals]);
 
   useEffect(() => {
     if (onLoadingChange) {
