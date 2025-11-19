@@ -61,7 +61,14 @@ const schema: yup.ObjectSchema<MasterInquirySearch> = yup.object().shape({
   contribution: yup.number().nullable().typeError("Contribution must be a valid number"),
   earnings: yup.number().nullable().typeError("Earnings must be a valid number"),
   forfeiture: yup.number().nullable().typeError("Forfeiture must be a valid number"),
-  payment: yup.number().nullable().typeError("Payment must be a valid number"),
+  payment: yup
+    .number()
+    .nullable()
+    .typeError("Payment must be a valid number")
+    .test("is-positive", "Payment must be a positive number", function (value) {
+      if (value === null || value === undefined) return true;
+      return value >= 0;
+    }),
   voids: yup.boolean().default(false).required(),
   pagination: yup
     .object({
@@ -355,8 +362,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                   }
 
                   // For dollar amount fields, only allow 0-9, ., and - characters
-                  if (name === "contribution" || name === "earnings" || name === "forfeiture" || name === "payment") {
+                  if (name === "contribution" || name === "earnings" || name === "forfeiture") {
+                    // Allow negative numbers for contribution, earnings, and forfeiture
                     if (value !== "" && !/^-?\d*\.?\d*$/.test(value)) {
+                      return;
+                    }
+                  } else if (name === "payment") {
+                    // Only allow positive numbers for payment (no minus sign)
+                    if (value !== "" && !/^\d*\.?\d*$/.test(value)) {
                       return;
                     }
                   }
@@ -375,11 +388,17 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
 
                   if (value === "") {
                     parsedValue = null;
-                  } else if (name === "contribution" || name === "earnings" || name === "forfeiture" || name === "payment") {
-                    // For dollar fields, keep as string while typing (intermediate states)
+                  } else if (name === "contribution" || name === "earnings" || name === "forfeiture") {
+                    // For dollar fields that allow negative, keep as string while typing (intermediate states)
                     // Only convert to number when it's a complete valid number
                     const endsWithPeriod = value.endsWith(".");
                     const isIntermediateState = value === "-" || value === "." || value === "-." || endsWithPeriod;
+                    const isValidNumber = !isIntermediateState && !isNaN(Number(value));
+                    parsedValue = isValidNumber ? Number(value) : value;
+                  } else if (name === "payment") {
+                    // For payment field (positive only), keep as string while typing (intermediate states)
+                    const endsWithPeriod = value.endsWith(".");
+                    const isIntermediateState = value === "." || endsWithPeriod;
                     const isValidNumber = !isIntermediateState && !isNaN(Number(value));
                     parsedValue = isValidNumber ? Number(value) : value;
                   } else if (type === "number") {

@@ -27,6 +27,7 @@ export const transformSearchParams = (data: MasterInquirySearch, profitYear: num
     ...(typeof data.earnings === "number" && !isNaN(data.earnings) && { earningsAmount: data.earnings }),
     ...(typeof data.forfeiture === "number" && !isNaN(data.forfeiture) && { forfeitureAmount: data.forfeiture }),
     ...(typeof data.payment === "number" && !isNaN(data.payment) && { paymentAmount: data.payment }),
+    voids: data.voids ?? false,
     _timestamp: Date.now()
   };
 };
