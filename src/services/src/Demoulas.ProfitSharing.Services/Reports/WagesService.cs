@@ -24,14 +24,14 @@ public class WagesService : IWagesService
         _demographicReaderService = demographicReaderService;
     }
 
-    public async Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesReportAsync(ProfitYearRequest request, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesReportAsync(WagesCurrentYearRequest request, CancellationToken cancellationToken)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         
         var result = await _dataContextFactory.UseReadOnlyContext(async c =>
         {
-            // Get demographics query (currently uses live data, but structured to support frozen data in future)
-            var demographics = await _demographicReaderService.BuildDemographicQuery(c, useFrozenData: true);
+            // Get demographics query (uses frozen data if UseFrozenData flag is true)
+            var demographics = await _demographicReaderService.BuildDemographicQuery(c, useFrozenData: request.UseFrozenData);
 
             // Join demographics with PayProfits to get wage data
             var query = from d in demographics
@@ -49,9 +49,12 @@ public class WagesService : IWagesService
             return await query.ToPaginationResultsAsync(request, cancellationToken);
         }, cancellationToken);
 
+        // Add " - Archive" suffix when using frozen data
+        var reportNameSuffix = request.UseFrozenData ? " - Archive" : string.Empty;
+        
         return new ReportResponseBase<WagesCurrentYearResponse>
         {
-            ReportName = $"YTD Wages Extract (PROF-DOLLAR-EXTRACT) - {request.ProfitYear}",
+            ReportName = $"YTD Wages Extract (PROF-DOLLAR-EXTRACT) - {request.ProfitYear}{reportNameSuffix}",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = calInfo.FiscalBeginDate,
             EndDate = calInfo.FiscalEndDate,

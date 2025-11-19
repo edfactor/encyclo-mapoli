@@ -36,6 +36,7 @@ import DistributionByAge from "../../pages/FiscalClose/AgeReports/DistributionsB
 import ForfeituresByAge from "../../pages/FiscalClose/AgeReports/ForfeituresByAge/ForfeituresByAge";
 import ProfitShareEditUpdate from "../../pages/FiscalClose/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import YTDWages from "../../pages/FiscalClose/YTDWagesExtract/YTDWages";
+import YTDWagesLive from "../../pages/DecemberActivities/YTDWagesExtractLive/YTDWagesLive";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 import Unauthorized from "../../pages/Unauthorized/Unauthorized";
 import { useGetNavigationQuery } from "../../reduxstore/api/NavigationApi";
@@ -286,6 +287,9 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.YTD_WAGES_EXTRACT}
                   element={<YTDWages />}></Route>
+                <Route
+                  path={ROUTES.YTD_WAGES_EXTRACT_LIVE}
+                  element={<YTDWagesLive />}></Route>
                 <Route
                   path={`${ROUTES.MASTER_INQUIRY}/:badgeNumber?`}
                   element={<MasterInquiry />}></Route>

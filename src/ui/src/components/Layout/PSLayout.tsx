@@ -29,12 +29,7 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
       {!isFullscreen && (
         <div
           id="environment-banner"
-          style={{
-            position: "fixed",
-            width: "100%",
-            top: 0,
-            zIndex: 1000
-          }}>
+          className="fixed w-full top-0 z-[1000]">
           <EnvironmentBanner
             data-testid="environment-banner"
             id="environment-banner"
@@ -48,20 +43,19 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
       <Grid
         id="top-level-all-contentbit-alert-container"
         container
-        style={{
+        sx={{
           marginTop: isFullscreen ? "0px" : "110px"
         }}>
         {!isFullscreen && (
           <Grid
             id="app-banner-and-right-side-avatar-grid-container"
             size={12}
-            style={{
+            sx={{
               position: "fixed",
               zIndex: 1000
             }}>
             <div
-              className="app-banner"
-              style={{ width: "100%", position: "fixed", top: "52px", backgroundColor: "white" }}>
+              className="app-banner w-full fixed top-[52px] bg-white">
               <div className="text">{appTitle}</div>
               <WelcomeDisplay {...welcomeDisplayProps} />
             </div>
