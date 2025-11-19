@@ -312,7 +312,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
             record.BadgeNumber.ShouldBe(badgeNumber);
             record.FullName.ShouldNotBeNullOrEmpty();
             record.Ssn.ShouldNotBeNullOrEmpty();
-            record.ProfitYear.ShouldBeGreaterThan(0);
+            ((int)record.ProfitYear).ShouldBeGreaterThan(0);
             record.Contributions.ShouldBeGreaterThanOrEqualTo(0);
             record.Earnings.ShouldBeGreaterThanOrEqualTo(0);
             record.Forfeitures.ShouldBeGreaterThanOrEqualTo(0);
