@@ -13,7 +13,7 @@ import { createDataSourceAwareBaseQuery } from "./api";
 // In-flight request tracking to prevent duplicate API calls
 const inFlightRequests = new Map<string, Promise<unknown>>();
 
-const baseQuery = createDataSourceAwareBaseQuery();
+const baseQuery = createDataSourceAwareBaseQuery(15000); // 15 second timeout for user-facing searches
 export const InquiryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "inquiryApi",

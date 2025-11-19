@@ -48,7 +48,13 @@ const schema: yup.ObjectSchema<MasterInquirySearch> = yup.object().shape({
   startProfitMonth: monthValidator,
   endProfitMonth: monthValidator.min(yup.ref("startProfitMonth"), "End month must be after start month"),
   socialSecurity: ssnValidator,
-  name: yup.string().nullable(),
+  name: yup
+    .string()
+    .nullable()
+    .test("min-length", "Name must have at least 2 characters", function (value) {
+      if (!value) return true; // Allow empty/null
+      return value.length >= 2;
+    }),
   badgeNumber: badgeNumberOrPSNValidator,
   comment: yup.string().nullable(),
   paymentType: yup.string().oneOf(["all", "hardship", "payoffs", "rollovers"]).default("all").required(),
