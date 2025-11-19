@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Demoulas.ProfitSharing.Data.Entities;
 
 /// <summary>
@@ -7,7 +9,8 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 public class State
 {
     /// <summary>
-    /// Two-character state or territory abbreviation (e.g., "MA", "NH", "GU", "PR")
+    /// Two-character state or territory abbreviation (e.g., "MA", "NH", "GU", "PR").
+    /// Primary key for the State entity.
     /// </summary>
     public required string Abbreviation { get; set; }
 
