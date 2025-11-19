@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -153,10 +153,25 @@ public class Pay426NTests : PristineBaseTest
                         TestOutputHelper.WriteLine($"SMART: {smart}");
 
                         // Field-by-field comparison
-                        if (ready.DateOfBirth != smart.DateOfBirth) TestOutputHelper.WriteLine($"  DateOfBirth: READY={ready.DateOfBirth}, SMART={smart.DateOfBirth}");
-                        if (ready.Age != smart.Age) TestOutputHelper.WriteLine($"  Age: READY={ready.Age}, SMART={smart.Age}");
-                        if (ready.Wages != smart.Wages) TestOutputHelper.WriteLine($"  Wages: READY={ready.Wages}, SMART={smart.Wages}");
-                        if (ready.Balance != smart.Balance) TestOutputHelper.WriteLine($"  Balance: READY={ready.Balance}, SMART={smart.Balance}");
+                        if (ready.DateOfBirth != smart.DateOfBirth)
+                        {
+                            TestOutputHelper.WriteLine($"  DateOfBirth: READY={ready.DateOfBirth}, SMART={smart.DateOfBirth}");
+                        }
+
+                        if (ready.Age != smart.Age)
+                        {
+                            TestOutputHelper.WriteLine($"  Age: READY={ready.Age}, SMART={smart.Age}");
+                        }
+
+                        if (ready.Wages != smart.Wages)
+                        {
+                            TestOutputHelper.WriteLine($"  Wages: READY={ready.Wages}, SMART={smart.Wages}");
+                        }
+
+                        if (ready.Balance != smart.Balance)
+                        {
+                            TestOutputHelper.WriteLine($"  Balance: READY={ready.Balance}, SMART={smart.Balance}");
+                        }
                     }
                 }
 

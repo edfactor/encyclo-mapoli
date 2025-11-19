@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
@@ -184,13 +184,19 @@ public sealed class StateListEndpointServiceTests : ApiTestBase<Api.Program>
         var statesByAbbr = response.Result.Items.ToDictionary(s => s.Abbreviation, s => s.Name);
 
         if (statesByAbbr.ContainsKey("MA"))
+        {
             statesByAbbr["MA"].ShouldBe("Massachusetts");
+        }
 
         if (statesByAbbr.ContainsKey("NH"))
+        {
             statesByAbbr["NH"].ShouldBe("New Hampshire");
+        }
 
         if (statesByAbbr.ContainsKey("CA"))
+        {
             statesByAbbr["CA"].ShouldBe("California");
+        }
     }
 
     [Fact(DisplayName = "StateListEndpoint - Should handle multiple requests")]

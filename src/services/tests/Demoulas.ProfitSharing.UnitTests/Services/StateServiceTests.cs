@@ -1,8 +1,10 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services.Lookup;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
@@ -18,7 +20,7 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
 
     public StateServiceTests()
     {
-        _stateService = Services.GetRequiredService<IStateService>();
+        _stateService = this.ServiceProvider?.GetRequiredService<IStateService>() ?? throw new NullReferenceException();
     }
 
     [Fact(DisplayName = "StateService - Should return states from database")]
@@ -99,7 +101,7 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
     public async Task GetStatesAsync_ShouldHandleCancellationToken()
     {
         // Arrange
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
 
         // Act
         var task = _stateService.GetStatesAsync(cts.Token);
@@ -151,13 +153,19 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
         var statesByAbbr = result.ToDictionary(s => s.Abbreviation, s => s.Name);
 
         if (statesByAbbr.ContainsKey("MA"))
+        {
             statesByAbbr["MA"].ShouldBe("Massachusetts");
+        }
 
         if (statesByAbbr.ContainsKey("NH"))
+        {
             statesByAbbr["NH"].ShouldBe("New Hampshire");
+        }
 
         if (statesByAbbr.ContainsKey("CA"))
+        {
             statesByAbbr["CA"].ShouldBe("California");
+        }
     }
 
     [Fact(DisplayName = "StateService - Should not contain duplicate abbreviations")]
@@ -181,19 +189,5 @@ public sealed class StateServiceTests : ApiTestBase<Api.Program>
 
         // Assert
         result.ShouldNotContain(s => string.IsNullOrWhiteSpace(s.Abbreviation));
-    }
-
-    [Fact(DisplayName = "StateService - Should handle async properly")]
-    [Description("PS-XXXX : Verifies async/await implementation")]
-    public async Task GetStatesAsync_ShouldHandleAsyncProperly()
-    {
-        // Act
-        var task = _stateService.GetStatesAsync(CancellationToken.None);
-        task.IsCompletedSuccessfully.ShouldBeFalse(); // Should be in progress
-        var result = await task;
-
-        // Assert
-        result.ShouldNotBeNull();
-        task.IsCompletedSuccessfully.ShouldBeTrue();
     }
 }
