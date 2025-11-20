@@ -185,7 +185,18 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                 // Try to parse as a generic JsonElement to see the full structure
                 try
                 {
-                    var doc = System.Text.Json.JsonDocument.Parse(readerCopy.ValueSequence.IsEmpty ? readerCopy.ValueSpan : readerCopy.ValueSequence);
+                    System.Text.Json.JsonDocument doc;
+                    if (readerCopy.ValueSpan.Length > 0)
+                    {
+                        doc = System.Text.Json.JsonDocument.Parse(readerCopy.ValueSpan);
+                    }
+                    else
+                    {
+                        // For ValueSequence, we need to convert to a byte array or use a different approach
+                        var sequenceBytes = readerCopy.ValueSequence.ToArray();
+                        doc = System.Text.Json.JsonDocument.Parse(sequenceBytes);
+                    }
+                    
                     buffer.AppendLine($"  Full JSON: {doc.RootElement.GetRawText()}");
                     
                     // If we have a path, try to navigate to it and show that value
@@ -197,8 +208,8 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                         
                         foreach (var segment in pathSegments)
                         {
-                            if (segment.StartsWith("$"))
-                                continue;
+                            if (segment.StartsWith('$'))
+                            {continue;}
                             
                             // Remove array indices like [0]
                             string cleanSegment = System.Text.RegularExpressions.Regex.Replace(segment, @"\[\d+\]", "");
