@@ -17,6 +17,7 @@ import QPAY066xAdHocSearchFilter from "./QPAY066xAdHocSearchFilter";
 import reports from "./availableQPAY066xReports";
 
 const QPAY066xAdHocReports: React.FC = () => {
+  const dispatch = useDispatch();
   const [currentPreset, setCurrentPreset] = useState<QPAY066xAdHocReportPreset | null>(null);
   const [storeNumber, setStoreNumber] = useState<string>("");
   const [badgeNumber, setBadgeNumber] = useState<string>("");
@@ -96,6 +97,11 @@ const QPAY066xAdHocReports: React.FC = () => {
     if (!currentPreset) {
       return;
     }
+
+    // Clear previous grid data before new search
+    dispatch(clearBreakdownByStore());
+    dispatch(clearBreakdownByStoreManagement());
+    dispatch(clearBreakdownByStoreTotals());
 
     // Reset pagination to first page on new search
     gridPagination.resetPagination();
