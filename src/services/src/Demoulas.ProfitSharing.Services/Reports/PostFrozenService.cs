@@ -403,6 +403,7 @@ public class PostFrozenService : IPostFrozenService
                     BadgeNumber = d.BadgeNumber,
                     LastName = d.ContactInfo.LastName,
                     FirstName = d.ContactInfo.FirstName,
+                    FullName = d.ContactInfo.FullName ?? string.Empty,
                     BirthDate = d.DateOfBirth,
                     HireDate = d.HireDate,
                     TerminationDate = d.TerminationDate,
