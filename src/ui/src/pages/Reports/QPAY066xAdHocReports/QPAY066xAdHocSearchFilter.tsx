@@ -1,3 +1,4 @@
+import { QPAY066xAdHocReportPreset } from "@/types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Checkbox,
@@ -11,7 +12,6 @@ import {
   SelectChangeEvent,
   TextField
 } from "@mui/material";
-import { QPAY066xAdHocReportPreset } from "@/types";
 import React from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
@@ -46,6 +46,25 @@ interface QPAY066xAdHocSearchFilterFormData {
   storeManagement: boolean;
 }
 
+/*
+
+    getBreakdownByStore: 
+
+    getBreakdownByStoreInactive: 
+
+    getBreakdownByStoreInactiveWithVestedBalance: 
+
+    getBreakdownByStoreTerminatedVestedBalance: 
+
+    getBreakdownByStoreTerminatedBalanceNotVested: 
+
+    getBreakdownByStoreTerminatedWithBenAllocations: 
+
+    getBreakdownByStoreTerminatedWithBalanceActivity: 
+
+    getBreakdownByStoreRetiredWithBalanceActivity
+
+*/
 const createSchema = (requiresDateRange: boolean) =>
   yup.object().shape({
     storeNumber: positiveNumberValidator("Store Number is required").nullable().default(null),
@@ -143,7 +162,7 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
     onPresetChange(selected);
   };
 
-  const handleFilter = (data: unknown) => {
+  const handleFormSubmit = (data: unknown) => {
     // @D
     console.log("Filter data:", data);
   };
@@ -152,34 +171,9 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
     reset();
     onReset();
   };
-  /*
-  const vestedPercentageOptions = [
-    { value: "", label: "All" },
-    { value: "<20", label: "< 20%" },
-    { value: "20-50", label: "20-50%" },
-    { value: "50-80", label: "50-80%" },
-    { value: ">80", label: "> 80%" },
-    { value: "100", label: "100%" }
-  ];
-  
-  const ageOptions = [
-    { value: "", label: "All" },
-    { value: "<18", label: "< 18" },
-    { value: "18-21", label: "18-21" },
-    { value: "21-65", label: "21-65" },
-    { value: ">65", label: "> 65" },
-    { value: ">70", label: "> 70" }
-  ];
 
-  const employeeStatusOptions = [
-    { value: "", label: "All" },
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-    { value: "terminated", label: "Terminated" }
-  ];
-*/
   return (
-    <form onSubmit={handleSubmit(handleFilter)}>
+    <form onSubmit={handleSubmit(handleFormSubmit)}>
       <Grid
         container
         paddingX="24px">
@@ -397,7 +391,7 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
         paddingY="16px">
         <SearchAndReset
           handleReset={handleResetForm}
-          handleSearch={handleSubmit(handleFilter)}
+          handleSearch={handleSubmit(handleFormSubmit)}
           isFetching={isLoading}
           disabled={!currentPreset || isLoading || !isValid}
           searchButtonText="Search"
