@@ -2,6 +2,7 @@
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -42,7 +43,9 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                     b.Relationship,
                     b.BadgeNumber,
                     ContactSsn = b.Contact!.Ssn,
-                    ContactFullName = b.Contact.ContactInfo!.FullName,
+                    ContactLastName = b.Contact.ContactInfo!.LastName,
+                    ContactFirstName = b.Contact.ContactInfo!.FirstName,
+                    ContactMiddleName = b.Contact.ContactInfo!.MiddleName,
                     DemographicPayFrequencyId = b.Demographic != null ? b.Demographic.PayFrequencyId : (int?)null
                 });
 
@@ -83,7 +86,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
 
                 return new BeneficiaryReportDto(
                     b.PsnSuffix,
-                    b.ContactFullName ?? string.Empty,
+                    DtoCommonExtensions.ComputeFullNameWithInitial(b.ContactLastName ?? string.Empty, b.ContactFirstName ?? string.Empty, b.ContactMiddleName),
                     b.ContactSsn.MaskSsn(),
                     b.Relationship,
                     totalBalance?.TotalAmount ?? 0,
