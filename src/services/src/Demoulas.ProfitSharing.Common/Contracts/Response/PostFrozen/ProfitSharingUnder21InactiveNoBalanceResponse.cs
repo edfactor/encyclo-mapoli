@@ -30,6 +30,7 @@ public sealed record ProfitSharingUnder21InactiveNoBalanceResponse : IIsExecutiv
             BadgeNumber = 700312,
             LastName = "Methers",
             FirstName = "Patricia",
+            FullName = "Methers, Patricia",
             BirthDate = new DateOnly(2007, 4, 29),
             HireDate = new DateOnly(2025, 5, 10),
             TerminationDate = new DateOnly(2025, 7, 11),
