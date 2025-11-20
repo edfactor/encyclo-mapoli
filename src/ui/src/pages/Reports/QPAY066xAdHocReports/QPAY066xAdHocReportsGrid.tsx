@@ -108,7 +108,7 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
   const [fetchBreakdownByStore, { isFetching: isBreakdownFetching }] = useLazyGetBreakdownByStoreQuery();
   const [fetchBreakdownByStoreTotals, { isFetching: isTotalsFetching }] = useLazyGetBreakdownByStoreTotalsQuery();
 
-  const breakdownByStoreManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreMangement);
+  const breakdownByStoreManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreManagement);
   const breakdownByStoreTotals = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreTotals);
   const hasToken = useSelector((state: RootState) => state.security.token);
 
@@ -156,7 +156,19 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
         }
       });
     }
-  }, [isQPAY066MReport, hasToken, profitYear, storeNumber, badgeNumber, employeeName, storeManagement, startDate, endDate, fetchBreakdownByStore, fetchBreakdownByStoreTotals]);
+  }, [
+    isQPAY066MReport,
+    hasToken,
+    profitYear,
+    storeNumber,
+    badgeNumber,
+    employeeName,
+    storeManagement,
+    startDate,
+    endDate,
+    fetchBreakdownByStore,
+    fetchBreakdownByStoreTotals
+  ]);
 
   useEffect(() => {
     if (onLoadingChange) {

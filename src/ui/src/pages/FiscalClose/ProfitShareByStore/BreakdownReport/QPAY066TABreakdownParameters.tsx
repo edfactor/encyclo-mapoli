@@ -5,7 +5,7 @@ import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import {
   clearBreakdownByStore,
-  clearBreakdownByStoreMangement,
+  clearBreakdownByStoreManagement,
   clearBreakdownByStoreTotals,
   clearBreakdownGrandTotals,
   setBreakdownByStoreQueryParams
@@ -132,7 +132,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
       isSortDescending: true
     });
     dispatch(clearBreakdownByStore());
-    dispatch(clearBreakdownByStoreMangement());
+    dispatch(clearBreakdownByStoreManagement());
     dispatch(clearBreakdownByStoreTotals());
     dispatch(clearBreakdownGrandTotals());
 

@@ -141,7 +141,7 @@ export interface YearsEndState {
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReportTotals: YearEndProfitSharingReportTotalsResponse | null;
   breakdownByStore: PagedReportResponse<BreakdownByStoreEmployee> | null;
-  breakdownByStoreMangement: PagedReportResponse<BreakdownByStoreEmployee> | null;
+  breakdownByStoreManagement: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreTotals: BreakdownByStoreTotals | null;
   storeManagementBreakdown: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreQueryParams: BreakdownByStoreRequest | null;
@@ -243,7 +243,7 @@ const initialState: YearsEndState = {
   yearEndProfitSharingReportQueryParams: null,
   yearEndProfitSharingReportTotals: null,
   breakdownByStore: null,
-  breakdownByStoreMangement: null,
+  breakdownByStoreManagement: null,
   breakdownByStoreTotals: null,
   storeManagementBreakdown: null,
   breakdownByStoreQueryParams: null,
@@ -964,11 +964,11 @@ export const yearsEndSlice = createSlice({
     clearBreakdownByStore: (state) => {
       state.breakdownByStore = null;
     },
-    setBreakdownByStoreMangement: (state, action: PayloadAction<PagedReportResponse<BreakdownByStoreEmployee>>) => {
-      state.breakdownByStoreMangement = action.payload;
+    setBreakdownByStoreManagement: (state, action: PayloadAction<PagedReportResponse<BreakdownByStoreEmployee>>) => {
+      state.breakdownByStoreManagement = action.payload;
     },
-    clearBreakdownByStoreMangement: (state) => {
-      state.breakdownByStoreMangement = null;
+    clearBreakdownByStoreManagement: (state) => {
+      state.breakdownByStoreManagement = null;
     },
 
     //
@@ -1131,8 +1131,8 @@ export const {
   updateExecutiveHoursAndDollarsGridRow,
   setBreakdownByStore,
   clearBreakdownByStore,
-  setBreakdownByStoreMangement,
-  clearBreakdownByStoreMangement,
+  setBreakdownByStoreManagement,
+  clearBreakdownByStoreManagement,
   setBreakdownByStoreTotals,
   clearBreakdownByStoreTotals,
   setBreakdownGrandTotals,

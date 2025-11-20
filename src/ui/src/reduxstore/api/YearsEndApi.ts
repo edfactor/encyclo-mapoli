@@ -22,7 +22,7 @@ import {
   setBalanceByAge,
   setBalanceByYears,
   setBreakdownByStore,
-  setBreakdownByStoreMangement,
+  setBreakdownByStoreManagement,
   setBreakdownByStoreTotals,
   setBreakdownGrandTotals,
   setCertificates,
@@ -1391,7 +1391,7 @@ export const YearsEndApi = createApi({
 
           // Use the storeManagement flag to determine where to store the data
           if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
+            dispatch(setBreakdownByStoreManagement(data));
           } else {
             dispatch(setBreakdownByStore(data));
           }
@@ -1422,7 +1422,7 @@ export const YearsEndApi = createApi({
 
           // Use the storeManagement flag to determine where to store the data
           if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
+            dispatch(setBreakdownByStoreManagement(data));
           } else {
             dispatch(setBreakdownByStore(data));
           }
@@ -1457,7 +1457,7 @@ export const YearsEndApi = createApi({
 
           // Use the storeManagement flag to determine where to store the data
           if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
+            dispatch(setBreakdownByStoreManagement(data));
           } else {
             dispatch(setBreakdownByStore(data));
           }
@@ -1494,7 +1494,7 @@ export const YearsEndApi = createApi({
 
           // Use the storeManagement flag to determine where to store the data
           if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
+            dispatch(setBreakdownByStoreManagement(data));
           } else {
             dispatch(setBreakdownByStore(data));
           }
@@ -1531,7 +1531,7 @@ export const YearsEndApi = createApi({
 
           // Use the storeManagement flag to determine where to store the data
           if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
+            dispatch(setBreakdownByStoreManagement(data));
           } else {
             dispatch(setBreakdownByStore(data));
           }
@@ -1568,7 +1568,7 @@ export const YearsEndApi = createApi({
 
           // Use the storeManagement flag to determine where to store the data
           if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
+            dispatch(setBreakdownByStoreManagement(data));
           } else {
             dispatch(setBreakdownByStore(data));
           }
@@ -1605,7 +1605,7 @@ export const YearsEndApi = createApi({
 
           // Use the storeManagement flag to determine where to store the data
           if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
+            dispatch(setBreakdownByStoreManagement(data));
           } else {
             dispatch(setBreakdownByStore(data));
           }
@@ -1642,7 +1642,7 @@ export const YearsEndApi = createApi({
 
           // Use the storeManagement flag to determine where to store the data
           if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
+            dispatch(setBreakdownByStoreManagement(data));
           } else {
             dispatch(setBreakdownByStore(data));
           }
