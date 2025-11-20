@@ -26,7 +26,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 type: "VARCHAR2(128)",
                 maxLength: 128,
                 nullable: true,
-                computedColumnSql: "LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END",
+                computedColumnSql: "LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END",
                 stored: true,
                 comment: "Automatically computed from LastName, FirstName, and MiddleName with middle initial",
                 oldClrType: typeof(string),
@@ -40,7 +40,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 type: "VARCHAR2(128)",
                 maxLength: 128,
                 nullable: true,
-                computedColumnSql: "LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END",
+                computedColumnSql: "LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END",
                 stored: true,
                 comment: "Automatically computed from LastName, FirstName, and MiddleName with middle initial",
                 oldClrType: typeof(string),
@@ -74,7 +74,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 oldType: "VARCHAR2(128)",
                 oldMaxLength: 128,
                 oldNullable: true,
-                oldComputedColumnSql: "LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END",
+                oldComputedColumnSql: "LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END",
                 oldComment: "Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
             migrationBuilder.AlterColumn<string>(
@@ -89,7 +89,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 oldType: "VARCHAR2(128)",
                 oldMaxLength: 128,
                 oldNullable: true,
-                oldComputedColumnSql: "LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END",
+                oldComputedColumnSql: "LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END",
                 oldComment: "Automatically computed from LastName, FirstName, and MiddleName with middle initial");
         }
     }

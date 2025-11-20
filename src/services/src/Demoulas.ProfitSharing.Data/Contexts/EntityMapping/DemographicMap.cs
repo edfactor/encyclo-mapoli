@@ -144,7 +144,7 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
             _ = contact.Property(e => e.FullName)
                 .HasColumnType("VARCHAR2(128)")
                 .HasComputedColumnSql(
-                    "LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END",
+                    "LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END",
                     stored: true)
                 .HasMaxLength(128)
                 .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial")
