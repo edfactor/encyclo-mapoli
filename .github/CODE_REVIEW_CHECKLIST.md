@@ -85,31 +85,41 @@ Review: **All sections** including documentation and branching
 
 ### PII Protection & Data Exposure (A01/A09)
 
-- [ ] **PII masked in logs**: SSN, email, phone, bank accounts MUST be masked
+- [x] **PII masked in logs**: SSN, email, phone, bank accounts automatically masked ✅ (Implemented via shared common library with custom masking operators)
+
   ```csharp
-  // Use GetMaskedUserId() pattern
-  var maskedSsn = TelemetryExtensions.MaskSensitiveValue(ssn, "Ssn");
-  _logger.LogInformation("Processing SSN: {MaskedSsn}", maskedSsn);
+  // Automatic masking via LoggingConfig in Program.cs
+  LoggingConfig logConfig = new();
+  builder.Configuration.Bind("SmartLogging", logConfig);
+
+  logConfig.MaskingOperators = [
+      new UnformattedSocialSecurityNumberMaskingOperator(),
+      new SensitiveValueMaskingOperator()
+  ];
+
+  // Custom masking operators can be added as needed
+  // Telemetry still uses MaskSensitiveValue() for explicit masking
   ```
+
 - [ ] **Minimal claims extraction**: Only extract 'sub' (subject) from Okta JWT
 - [ ] **Read-only contexts used**: Use `UseReadOnlyContext()` for query-only operations
 - [ ] **No SSN-only composite keys**: Use `(Ssn, OracleHcmId)` not just `Ssn`
 - [ ] **No sensitive data in error messages**: Never expose PII in HTTP responses
 
-**Related Ticket:** PS-2026
+**Related Ticket:** ~~PS-2026~~ (✅ PII masking via shared library)
 
 ### Transport Security (A02/A05)
 
-- [ ] **HTTPS enforcement**: `UseHttpsRedirection()` + `UseHsts()` present
-- [ ] **Security headers present**:
+- [x] **HTTPS enforcement**: HTTPS handled at load balancer; `UseHsts()` enabled via shared common library ✅ (PS-2024)
+- [x] **Security headers present** ✅ (Implemented via shared common library):
   - `X-Frame-Options: DENY`
   - `X-Content-Type-Options: nosniff`
   - `Content-Security-Policy: default-src 'self'`
   - `Strict-Transport-Security: max-age=31536000`
-- [ ] **CORS restrictions**: Dev allows only `localhost:3100`; prod has specific domains only
-- [ ] **No `AllowAnyOrigin()`**: Never used in CORS configuration
+- [x] **CORS restrictions**: Dev allows only `localhost:3100`; prod has specific domains only ✅ (PS-2025 completed)
+- [x] **No `AllowAnyOrigin()`**: Never used in CORS configuration ✅ (PS-2025 completed)
 
-**Related Tickets:** PS-2023, PS-2024, PS-2025
+**Related Tickets:** ~~PS-2025~~ (✅ Completed), ~~PS-2023~~ (✅ Headers via shared library), ~~PS-2024~~ (✅ HSTS via shared library, HTTPS at load balancer)
 
 ### Error Handling & Secrets
 
@@ -684,10 +694,10 @@ aspire run
 
 - **PS-2021**: Remove localStorage impersonation
 - **PS-2022**: Server-side role validation
-- **PS-2023**: Security headers middleware
-- **PS-2024**: HTTPS + HSTS enforcement
-- **PS-2025**: CORS restrictions
-- **PS-2026**: Telemetry PII masking audit
+- **PS-2023**: ✅ Security headers middleware (Implemented via shared common library)
+- **PS-2024**: ✅ HTTPS + HSTS enforcement (HSTS via shared library, HTTPS at load balancer)
+- **PS-2025**: ✅ CORS restrictions (Completed - localhost-only in dev)
+- **PS-2026**: ✅ Telemetry PII masking (Implemented via shared library with custom masking operators)
 
 ---
 
