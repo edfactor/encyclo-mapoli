@@ -248,7 +248,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         });
     }
 
-    [Fact(DisplayName = "PS-1829: FullName should be formatted with middle initial")]
+    [Fact(DisplayName = "PS-2162: FullName should be formatted with middle initial")]
     public Task GetResponse_Should_Format_FullName_With_Middle_Initial()
     {
         return MockDbContextFactory.UseWritableContext(async c =>
@@ -296,7 +296,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         });
     }
 
-    [Fact(DisplayName = "PS-1829: FullName should be formatted without middle initial when no middle name")]
+    [Fact(DisplayName = "PS-2162: FullName should be formatted without middle initial when no middle name")]
     public Task GetResponse_Should_Format_FullName_Without_Middle_Initial()
     {
         return MockDbContextFactory.UseWritableContext(async c =>
