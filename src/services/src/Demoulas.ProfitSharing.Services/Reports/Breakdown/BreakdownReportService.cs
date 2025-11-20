@@ -743,9 +743,7 @@ public sealed class BreakdownReportService : IBreakdownService
                         11
                      ) : 0,
                 /* ── plain columns ───────────────────────────────────────────── */
-                FullName = (d.ContactInfo.MiddleName ?? string.Empty).Length > 0
-                    ? $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName} {(d.ContactInfo.MiddleName ?? string.Empty)[0]}"
-                    : $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName}",
+                FullName = d.ContactInfo.FullName ?? string.Empty,
                 Ssn = d.Ssn,
                 DateOfBirth = d.DateOfBirth,
                 PayClassificationId = d.PayClassificationId,

@@ -16,7 +16,11 @@ public sealed record ProfitSharingUnder21InactiveNoBalanceResponse : IIsExecutiv
     public byte Age { get; set; }
     public byte EnrollmentId { get; set; }
     public bool IsExecutive { get; set; }
-    [MaskSensitive] public string FullName => string.IsNullOrEmpty(MiddleName) ? $"{LastName}, {FirstName}" : $"{LastName}, {FirstName} {MiddleName[0]}";
+    /// <summary>
+    /// FullName is computed by the database from LastName, FirstName, and MiddleName.
+    /// Format: "LastName, FirstName" or "LastName, FirstName M" (with middle initial if present)
+    /// </summary>
+    [MaskSensitive] public required string FullName { get; set; }
 
     public const string REPORT_NAME = "Inactive/Terminated Under 21";
     public static ProfitSharingUnder21InactiveNoBalanceResponse SampleResponse()

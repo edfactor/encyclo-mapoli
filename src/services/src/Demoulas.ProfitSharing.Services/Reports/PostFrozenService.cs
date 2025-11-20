@@ -337,7 +337,7 @@ public class PostFrozenService : IPostFrozenService
                 {
                     StoreNumber = d.StoreNumber,
                     BadgeNumber = d.BadgeNumber,
-                    FullName = string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName}" : $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName} {d.ContactInfo.MiddleName![0]}",
+                    FullName = d.ContactInfo.FullName ?? string.Empty,
                     BeginningBalance = lyTot.TotalAmount ?? 0,
                     Earnings = tyPdGrp.Earnings,
                     Contributions = tyPdGrp.Contributions,
