@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251120013532_AddFullNameComputedColumn")]
+    partial class AddFullNameComputedColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31810,12 +31813,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("FirstName");
 
                             b1.Property<string>("FullName")
-                                .ValueGeneratedOnAddOrUpdate()
+                                .IsRequired()
                                 .HasMaxLength(84)
                                 .HasColumnType("NVARCHAR2(84)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComputedColumnSql("LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END", true)
-                                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
+                                .HasComment("FullName");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()
@@ -32187,12 +32189,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("FirstName");
 
                             b1.Property<string>("FullName")
-                                .ValueGeneratedOnAddOrUpdate()
+                                .IsRequired()
                                 .HasMaxLength(84)
                                 .HasColumnType("NVARCHAR2(84)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComputedColumnSql("LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END", true)
-                                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
+                                .HasComment("FullName");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()

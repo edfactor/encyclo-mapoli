@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
+
 public sealed class BeneficiaryContactArchiveMap : IEntityTypeConfiguration<BeneficiaryContactArchive>
 {
     public void Configure(EntityTypeBuilder<BeneficiaryContactArchive> builder)
@@ -46,10 +47,13 @@ public sealed class BeneficiaryContactArchiveMap : IEntityTypeConfiguration<Bene
         builder.OwnsOne(e => e.ContactInfo, contact =>
         {
             _ = contact.Property(e => e.FullName)
-                .HasMaxLength(84)
-                .HasComment("FullName")
-                .HasColumnName("FULL_NAME")
-                .IsRequired();
+                .HasColumnType("VARCHAR2(128)")
+                .HasComputedColumnSql(
+                    "LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END",
+                    stored: true)
+                .HasMaxLength(128)
+                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial")
+                .HasColumnName("FULL_NAME");
 
             _ = contact.Property(e => e.LastName)
                 .HasMaxLength(30)

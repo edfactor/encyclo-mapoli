@@ -743,7 +743,7 @@ public sealed class BreakdownReportService : IBreakdownService
                         11
                      ) : 0,
                 /* ── plain columns ───────────────────────────────────────────── */
-                FullName = d.ContactInfo.FullName!,
+                FullName = d.ContactInfo.FullName ?? string.Empty,
                 Ssn = d.Ssn,
                 DateOfBirth = d.DateOfBirth,
                 PayClassificationId = d.PayClassificationId,

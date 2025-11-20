@@ -99,7 +99,8 @@ builder.Services.AddCors(options =>
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
     // Insert masking converter at index 0 to ensure highest precedence
-    o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory());
+    // Pass the host environment to the converter so it can check IsTestEnvironment()
+    o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory(builder.Environment));
 
     // Add source-generated JSON serializer context for compile-time serialization
     // This reduces reflection overhead and improves startup time

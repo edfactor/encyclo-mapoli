@@ -14,6 +14,7 @@ export interface EmployeeDetails {
   isEmployee: boolean;
   firstName: string;
   lastName: string;
+  fullName: string;
   address: string;
   addressCity: string;
   addressState: string;
