@@ -5,12 +5,46 @@ import {
   createCurrencyColumn,
   createDateColumn,
   createHoursColumn,
-  createNameColumn
+  createNameColumn,
+  createPercentageColumn
 } from "../../../utils/gridColumnFactory";
+
+export interface BreakdownByStoreEmployee {
+  badgeNumber: number;
+  beginningBalance: number;
+  certificateSort: number;
+  city: string;
+  contributions: number;
+  dateOfBirth: string;
+  departmentId: number;
+  distributions: number;
+  earnings: number;
+  employmentStatusId: string;
+  endingBalance: number;
+  enrollmentId: number;
+  forfeitures: number;
+  fullName: string;
+  hireDate: string;
+  isExecutive: boolean;
+  payClassificationId: string; // changed from number to string to match backend refactor
+  payClassificationName: string;
+  payFrequencyId: number;
+  postalCode: string;
+  profitShareHours: number;
+  ssn: string;
+  state: string;
+  storeNumber: number;
+  street1: string;
+  terminationDate: string;
+  vestedAmount: number;
+  vestedPercentage: number;
+}
 
 export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
   createBadgeColumn({}),
-  createNameColumn({}),
+  createNameColumn({
+    field: "fullName"
+  }),
   createCurrencyColumn({
     headerName: "Beginning Balance",
     field: "beginningBalance"
@@ -33,27 +67,41 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
   }),
   createCurrencyColumn({
     headerName: "Vesting Balance",
-    field: "vestingBalance"
+    field: "vestedAmount"
   }),
   createDateColumn({
-    headerName: "Date Term",
-    field: "dateTerm",
+    headerName: "Term Date",
+    field: "terminationDate",
     minWidth: 100
   }),
   createHoursColumn({
     headerName: "YTD Hours",
-    field: "ytdHours",
+    field: "profitShareHours",
     minWidth: 90
   }),
-  {
-    headerName: "Years",
-    field: "years",
-    minWidth: 70
-  },
-  {
+  createPercentageColumn({
     headerName: "Vested",
-    field: "vested",
-    minWidth: 80
-  },
-  createAgeColumn({})
+    field: "vestedPercentage"
+  }),
+  // This is the person's age calculated from dateOfBirth
+  createAgeColumn({
+    field: "dateOfBirth"
+  }),
+  // This is the age at termination
+  createAgeColumn({
+    headerName: "Age at Term",
+    valueGetter: (params) => {
+      const dob = params.data?.["dateOfBirth"];
+      const termDate = params.data?.["terminationDate"];
+      if (!dob || !termDate) return 0;
+      const birthDate = new Date(dob);
+      const terminationDate = new Date(termDate);
+      let age = terminationDate.getFullYear() - birthDate.getFullYear();
+      const m = terminationDate.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && terminationDate.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+  })
 ];
