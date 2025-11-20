@@ -280,7 +280,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             await c.SaveChangesAsync(CancellationToken.None);
 
             ExecutiveHoursAndDollarsRequest request = new() { ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10 };
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
             // Act
             TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
@@ -328,7 +328,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             await c.SaveChangesAsync(CancellationToken.None);
 
             ExecutiveHoursAndDollarsRequest request = new() { ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10 };
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
             // Act
             TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
