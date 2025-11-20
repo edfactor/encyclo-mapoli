@@ -79,4 +79,5 @@ export interface QPAY066xAdHocReportPreset {
   description: string;
   params: FilterParams;
   requiresDateRange: boolean;
+  apiEndpoint?: string;
 }
