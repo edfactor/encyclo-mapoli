@@ -101,6 +101,32 @@ Review: **All sections** including documentation and branching
   // Telemetry still uses MaskSensitiveValue() for explicit masking
   ```
 
+- [ ] **Names masked in logs/telemetry**: First name, last name, full name MUST be masked when logged
+
+  ```csharp
+  // ❌ WRONG: Logging unmasked names
+  _logger.LogInformation("Processing employee: {Name}", employee.FullName);
+
+  // ✅ RIGHT: Mask names before logging
+  var maskedName = TelemetryExtensions.MaskSensitiveValue(employee.FullName, "FullName");
+  _logger.LogInformation("Processing employee: {MaskedName}", maskedName);
+  ```
+
+- [ ] **Standardized name properties in DTOs**: Use consistent naming conventions for name fields
+
+  ```csharp
+  // ✅ RIGHT: Standard property names
+  public string FirstName { get; set; }
+  public string LastName { get; set; }
+  public string FullName { get; set; }  // Computed: FirstName + LastName
+
+  // ❌ WRONG: Custom variations
+  public string Name { get; set; }           // Too generic
+  public string EmployeeName { get; set; }   // Non-standard
+  public string MemberName { get; set; }     // Non-standard
+  public string DisplayName { get; set; }    // Ambiguous
+  ```
+
 - [ ] **Minimal claims extraction**: Only extract 'sub' (subject) from Okta JWT
 - [ ] **Read-only contexts used**: Use `UseReadOnlyContext()` for query-only operations
 - [ ] **No SSN-only composite keys**: Use `(Ssn, OracleHcmId)` not just `Ssn`
@@ -383,7 +409,7 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
           new("endpoint", nameof(MyEndpoint)));
 
       return result;
-  }, "Ssn", "OracleHcmId"); // Sensitive fields declared
+  }, "Ssn", "OracleHcmId", "FirstName", "LastName"); // ALL sensitive fields declared
   ```
 
 - [ ] **Logger injected**: `ILogger<TEndpoint>` in constructor
@@ -392,7 +418,7 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **Request metrics recorded**: `RecordRequestMetrics()` called
 - [ ] **Response metrics recorded**: `RecordResponseMetrics()` called
 - [ ] **Exceptions recorded**: `RecordException()` with correlation ID
-- [ ] **Sensitive fields declared**: List all PII fields accessed (e.g., `"Ssn", "Email"`)
+- [ ] **Sensitive fields declared**: List ALL PII fields accessed including names (e.g., `"Ssn", "Email", "FirstName", "LastName", "FullName"`)
 
 ### Business Metrics
 
@@ -413,10 +439,10 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 
 ### PII Protection in Telemetry
 
-- [ ] **PII masked**: Actual SSN/email/phone values NEVER logged
-- [ ] **Masking function used**: `MaskSensitiveValue()` for any PII logging
+- [ ] **PII masked**: Actual SSN/email/phone/name values NEVER logged
+- [ ] **Masking function used**: `MaskSensitiveValue()` for any PII logging (SSN, email, names)
 - [ ] **Correlation IDs used**: For debugging without exposing PII
-- [ ] **Sensitive field tracking**: Declared in telemetry calls (security requirement)
+- [ ] **Sensitive field tracking**: Declared in telemetry calls (security requirement) - include `FirstName`, `LastName`, `FullName` when accessed
 
 ### Telemetry Testing
 
@@ -628,7 +654,8 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - **Missing telemetry**: All endpoints require comprehensive telemetry
 - **DbContext in endpoints**: Move to service layer
 - **Client-side auth**: Re-validate server-side
-- **PII in logs**: Use masking functions
+- **PII in logs**: Use masking functions for SSN, email, phone, names
+- **Non-standard DTO property names**: Use `FirstName`, `LastName`, `FullName` not `Name`, `EmployeeName`, etc.
 - **Synchronous EF methods**: Use async variants
 - **Hardcoded secrets**: Move to user secrets
 - **Missing validation**: Server-side validation required
