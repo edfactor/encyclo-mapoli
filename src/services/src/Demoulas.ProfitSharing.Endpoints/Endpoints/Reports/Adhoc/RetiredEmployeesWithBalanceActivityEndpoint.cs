@@ -37,7 +37,7 @@ public sealed class RetiredEmployeesWithBalanceActivityEndpoint : EndpointWithCs
         Get("/breakdown-by-store/retired/withbalanceactivity");
         Summary(s =>
         {
-            s.Summary = "Breakdown retired managers and associates for all stores who have had balance activity";
+            s.Summary = "QPAY066W: Breakdown retired managers and associates for all stores who have had balance activity";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();

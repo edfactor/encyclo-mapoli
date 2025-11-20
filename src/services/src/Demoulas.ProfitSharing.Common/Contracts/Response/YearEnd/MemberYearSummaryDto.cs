@@ -18,6 +18,7 @@ public record MemberYearSummaryDto : IIsExecutive
     public decimal Forfeitures { get; init; }
     public decimal Distributions { get; init; }
     public decimal EndingBalance { get; init; }
+    public decimal BeneficiaryAllocation { get; init; }
     public decimal VestedAmount { get; init; }
     public byte VestedPercent { get; init; }
     [MaskSensitive] public DateOnly DateOfBirth { get; init; }
