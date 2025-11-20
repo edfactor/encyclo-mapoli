@@ -32,7 +32,7 @@ public sealed class TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint : End
         Get("/breakdown-by-store/terminated/withcurrentbalance/notvested");
         Summary(s =>
         {
-            s.Summary = "Breakdown terminated managers and associates for all stores who have a balance";
+            s.Summary = "QPAY066C: Breakdown terminated managers and associates for all stores who have a balance but is not vested";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();

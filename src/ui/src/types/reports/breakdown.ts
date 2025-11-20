@@ -5,28 +5,45 @@ export interface BreakdownByStoreRequest extends ProfitYearRequest {
   storeManagement?: boolean;
   badgeNumber?: number;
   employeeName?: string;
+  startDate?: string;
+  endDate?: string;
   pagination: SortedPaginationRequestDto;
 }
 
+export interface BreakdownByStoreAndDateRangeRequest extends BreakdownByStoreRequest {
+  startDate: string;
+  endDate: string;
+}
+
 export interface BreakdownByStoreEmployee {
-  storeNumber: number;
-  enrollmentId: number;
   badgeNumber: number;
-  ssn: string;
-  fullName: string;
-  payFrequencyId: number;
-  departmentId: number;
-  payClassificationId: string; // changed from number to string to match backend refactor
   beginningBalance: number;
-  earnings: number;
+  certificateSort: number;
+  city: string;
   contributions: number;
-  forfeitures: number;
+  dateOfBirth: string;
+  departmentId: number;
   distributions: number;
+  earnings: number;
+  employmentStatusId: string;
   endingBalance: number;
+  enrollmentId: number;
+  forfeitures: number;
+  fullName: string;
+  hireDate: string;
+  isExecutive: boolean;
+  payClassificationId: string; // changed from number to string to match backend refactor
+  payClassificationName: string;
+  payFrequencyId: number;
+  postalCode: string;
+  profitShareHours: number;
+  ssn: string;
+  state: string;
+  storeNumber: number;
+  street1: string;
+  terminationDate: string;
   vestedAmount: number;
   vestedPercentage: number;
-  employmentStatusId: string;
-  payClassificationName: string;
 }
 
 export interface BreakdownByStoreTotals {
