@@ -12,6 +12,7 @@ import {
 export interface BreakdownByStoreEmployee {
   badgeNumber: number;
   beginningBalance: number;
+  beneficiaryAllocation: number;
   certificateSort: number;
   city: string;
   contributions: number;
@@ -47,7 +48,8 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
   }),
   createCurrencyColumn({
     headerName: "Beginning Balance",
-    field: "beginningBalance"
+    field: "beginningBalance",
+    minWidth: 130
   }),
   createCurrencyColumn({
     headerName: "Beneficiary Allocation",
@@ -55,11 +57,11 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
   }),
   createCurrencyColumn({
     headerName: "Distribution Amount",
-    field: "distributionAmount"
+    field: "distributions"
   }),
   createCurrencyColumn({
     headerName: "Forfeit",
-    field: "forfeit"
+    field: "forfeitures"
   }),
   createCurrencyColumn({
     headerName: "Ending Balance",

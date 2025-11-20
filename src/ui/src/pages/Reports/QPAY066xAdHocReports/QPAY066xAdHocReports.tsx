@@ -1,25 +1,61 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { QPAY066xAdHocReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import reports from "./availableQPAY066xReports";
+import { useGridPagination } from "../../../hooks/useGridPagination";
+import {
+  clearBreakdownByStore,
+  clearBreakdownByStoreManagement,
+  clearBreakdownByStoreTotals
+} from "../../../reduxstore/slices/yearsEndSlice";
+import { useQPAY066xAdHocReports } from "./hooks/useQPAY066xAdHocReports";
 import QPAY066xAdHocReportsGrid from "./QPAY066xAdHocReportsGrid";
 import QPAY066xAdHocSearchFilter from "./QPAY066xAdHocSearchFilter";
+import reports from "./availableQPAY066xReports";
 
 const QPAY066xAdHocReports: React.FC = () => {
   const [currentPreset, setCurrentPreset] = useState<QPAY066xAdHocReportPreset | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [storeNumber, setStoreNumber] = useState<string>("");
   const [badgeNumber, setBadgeNumber] = useState<string>("");
   const [employeeName, setEmployeeName] = useState<string>("");
   const [storeManagement, setStoreManagement] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const gridPagination = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: (pageNumber, pageSize, sortParams) => {
+      if (currentPreset) {
+        executeSearch({
+          reportId: currentPreset.id,
+          storeNumber: storeNumber ? parseInt(storeNumber) : undefined,
+          badgeNumber: badgeNumber ? parseInt(badgeNumber) : undefined,
+          employeeName: employeeName || undefined,
+          storeManagement,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        });
+      }
+    }
+  });
+
+  const { executeSearch, isLoading, currentReportId, getReportTitle } = useQPAY066xAdHocReports();
 
   const handlePresetChange = (preset: QPAY066xAdHocReportPreset | null) => {
     setCurrentPreset(preset);
+    setHasSearched(false);
   };
 
   const handleReset = () => {
@@ -29,6 +65,7 @@ const QPAY066xAdHocReports: React.FC = () => {
     setStoreManagement(false);
     setStartDate("");
     setEndDate("");
+    setHasSearched(false);
   };
 
   const handleStoreNumberChange = (storeNumber: string) => {
@@ -55,8 +92,31 @@ const QPAY066xAdHocReports: React.FC = () => {
     setEndDate(endDate);
   };
 
-  const handleLoadingChange = (loading: boolean) => {
-    setIsLoading(loading);
+  const handleSearch = () => {
+    if (!currentPreset) {
+      return;
+    }
+
+    // Reset pagination to first page on new search
+    gridPagination.resetPagination();
+
+    executeSearch({
+      reportId: currentPreset.id,
+      storeNumber: storeNumber ? parseInt(storeNumber) : undefined,
+      badgeNumber: badgeNumber ? parseInt(badgeNumber) : undefined,
+      employeeName: employeeName || undefined,
+      storeManagement,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+      pagination: {
+        skip: 0,
+        take: gridPagination.pageSize,
+        sortBy: gridPagination.sortParams.sortBy,
+        isSortDescending: gridPagination.sortParams.isSortDescending
+      }
+    });
+
+    setHasSearched(true);
   };
 
   const renderActionNode = () => {
@@ -86,22 +146,19 @@ const QPAY066xAdHocReports: React.FC = () => {
               onStoreManagementChange={handleStoreManagementChange}
               onStartDateChange={handleStartDateChange}
               onEndDateChange={handleEndDateChange}
+              onSearch={handleSearch}
               isLoading={isLoading}
             />
           </DSMAccordion>
         </Grid>
 
         <Grid width="100%">
-          {currentPreset && storeNumber.trim() && (
+          {hasSearched && currentReportId && (
             <QPAY066xAdHocReportsGrid
-              params={currentPreset.params}
-              storeNumber={parseInt(storeNumber)}
-              badgeNumber={badgeNumber ? parseInt(badgeNumber) : undefined}
-              employeeName={employeeName || undefined}
-              storeManagement={storeManagement}
-              startDate={startDate || undefined}
-              endDate={endDate || undefined}
-              onLoadingChange={handleLoadingChange}
+              reportTitle={getReportTitle(currentReportId)}
+              isLoading={isLoading}
+              storeNumber={storeNumber}
+              gridPagination={gridPagination}
             />
           )}
         </Grid>

@@ -17,11 +17,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
-import {
-  dateStringValidator,
-  endDateStringAfterStartDateValidator,
-  positiveNumberValidator
-} from "../../../utils/FormValidators";
+import { dateStringValidator, endDateStringAfterStartDateValidator } from "../../../utils/FormValidators";
 
 interface QPAY066xAdHocSearchFilterProps {
   presets: QPAY066xAdHocReportPreset[];
@@ -34,6 +30,7 @@ interface QPAY066xAdHocSearchFilterProps {
   onStoreManagementChange: (storeManagement: boolean) => void;
   onStartDateChange: (startDate: string) => void;
   onEndDateChange: (endDate: string) => void;
+  onSearch: () => void;
   isLoading?: boolean;
 }
 
@@ -67,7 +64,14 @@ interface QPAY066xAdHocSearchFilterFormData {
 */
 const createSchema = (requiresDateRange: boolean) =>
   yup.object().shape({
-    storeNumber: positiveNumberValidator("Store Number is required").nullable().default(null),
+    storeNumber: yup
+      .number()
+      .nullable()
+      .default(null)
+      .test("is-positive", "Store Number must be a positive number", function (value) {
+        if (value === null || value === undefined) return true; // Allow empty
+        return value > 0;
+      }),
     startDate: requiresDateRange
       ? dateStringValidator(2000, 2099, "Start Date").required("Start Date is required")
       : yup.string().default(""),
@@ -101,6 +105,7 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
   onStoreManagementChange,
   onStartDateChange,
   onEndDateChange,
+  onSearch,
   isLoading = false
 }) => {
   const requiresDateRange = currentPreset?.requiresDateRange || false;
@@ -162,8 +167,8 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
     onPresetChange(selected);
   };
 
-  const handleFormSubmit = (data: unknown) => {
-    console.log("Filter data:", data);
+  const handleFormSubmit = () => {
+    onSearch();
   };
 
   const handleResetForm = () => {
@@ -230,13 +235,12 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
               control={control}
               render={({ field }) => (
                 <>
-                  <FormLabel required>Store Number</FormLabel>
+                  <FormLabel>Store Number</FormLabel>
                   <TextField
                     {...field}
                     value={field.value ?? ""}
                     fullWidth
                     size="small"
-                    required
                     error={!!errors.storeNumber}
                     helperText={errors.storeNumber?.message}
                     onChange={(e) => {

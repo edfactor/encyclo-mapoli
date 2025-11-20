@@ -9,186 +9,53 @@ import {
   TableRow,
   Typography
 } from "@mui/material";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetBreakdownByStoreQuery, useLazyGetBreakdownByStoreTotalsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { FilterParams } from "reduxstore/types";
-import { DSMGrid, numberToCurrency } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
-import reports from "./availableQPAY066xReports";
 import { GetQPAY066xAdHocGridColumns } from "./QPAY066xAdHocGridColumns";
 
 interface QPAY066xAdHocReportsGridProps {
-  params: FilterParams;
-  storeNumber: number;
-  badgeNumber?: number;
-  employeeName?: string;
-  storeManagement: boolean;
-  startDate?: string;
-  endDate?: string;
-  onLoadingChange?: (isLoading: boolean) => void;
+  reportTitle: string;
+  isLoading: boolean;
+  storeNumber: string;
+  gridPagination: ReturnType<typeof useGridPagination>;
 }
 
-// Dummy data for demonstration
-const dummyData = [
-  {
-    badgeNumber: 47425,
-    employeeName: "Wilkins, A...",
-    beginningBalance: 4781.67,
-    beneficiaryAllocation: 0.0,
-    distributionAmount: 0.0,
-    forfeit: 0.0,
-    endingBalance: 4781.67,
-    vestingBalance: 4781.67,
-    dateTerm: "XX/XX/X...",
-    ytdHours: 427,
-    years: "XX",
-    vested: "XX%",
-    age: "XX"
-  },
-  {
-    badgeNumber: 82424,
-    employeeName: "Potts, Aria",
-    beginningBalance: 2221.96,
-    beneficiaryAllocation: 0.0,
-    distributionAmount: 500.0,
-    forfeit: 0.0,
-    endingBalance: 1721.96,
-    vestingBalance: 1721.96,
-    dateTerm: "XX/XX/X...",
-    ytdHours: 241,
-    years: "XX",
-    vested: "XX%",
-    age: "XX"
-  },
-  {
-    badgeNumber: 85744,
-    employeeName: "Lewis, Ami...",
-    beginningBalance: 1801.33,
-    beneficiaryAllocation: 0.0,
-    distributionAmount: 0.0,
-    forfeit: 0.0,
-    endingBalance: 1801.33,
-    vestingBalance: 1801.33,
-    dateTerm: "XX/XX/X...",
-    ytdHours: 1788,
-    years: "XX",
-    vested: "XX%",
-    age: "XX"
-  },
-  {
-    badgeNumber: 94861,
-    employeeName: "Curtis, John",
-    beginningBalance: 2922.24,
-    beneficiaryAllocation: 0.0,
-    distributionAmount: 0.0,
-    forfeit: 0.0,
-    endingBalance: 2922.24,
-    vestingBalance: 2922.24,
-    dateTerm: "XX/XX/X...",
-    ytdHours: 232.25,
-    years: "XX",
-    vested: "XX%",
-    age: "XX"
-  }
-];
-
 const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
-  params,
+  reportTitle,
+  isLoading,
   storeNumber,
-  badgeNumber,
-  employeeName,
-  storeManagement,
-  startDate,
-  endDate,
-  onLoadingChange
+  gridPagination
 }) => {
-  const [fetchBreakdownByStore, { isFetching: isBreakdownFetching }] = useLazyGetBreakdownByStoreQuery();
-  const [fetchBreakdownByStoreTotals, { isFetching: isTotalsFetching }] = useLazyGetBreakdownByStoreTotalsQuery();
+  const { pageNumber, pageSize, handlePaginationChange } = gridPagination;
 
   const breakdownByStoreManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreManagement);
+  const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
   const breakdownByStoreTotals = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreTotals);
-  const hasToken = useSelector((state: RootState) => state.security.token);
-
-  const profitYear = useDecemberFlowProfitYear();
-
-  const isQPAY066MReport = params.reportId === 8;
-
-  const isLoadingQPAY066MData = isQPAY066MReport && (isBreakdownFetching || isTotalsFetching);
 
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
 
-  useEffect(() => {
-    if (isQPAY066MReport && hasToken && profitYear && storeNumber) {
-      fetchBreakdownByStore({
-        profitYear: profitYear,
-        storeNumber: storeNumber,
-        storeManagement: storeManagement,
-        badgeNumber: badgeNumber,
-        employeeName: employeeName,
-        startDate: startDate,
-        endDate: endDate,
-        pagination: {
-          skip: 0,
-          take: 255,
-          sortBy: "badgeNumber",
-          isSortDescending: false
-        }
-      });
+  // Check if storeNumber is provided to determine if totals should be shown
+  const showTotals = storeNumber && storeNumber.trim() !== "";
 
-      // Fetch totals data
-      fetchBreakdownByStoreTotals({
-        profitYear: profitYear,
-        storeNumber: storeNumber,
-        storeManagement: storeManagement,
-        badgeNumber: badgeNumber,
-        employeeName: employeeName,
-        startDate: startDate,
-        endDate: endDate,
-        pagination: {
-          skip: 0,
-          take: 255,
-          sortBy: "",
-          isSortDescending: false
-        }
-      });
+  // Get total count from Redux state
+  const totalRecords = useMemo(() => {
+    if (breakdownByStoreManagement?.response?.total) {
+      return breakdownByStoreManagement.response.total;
     }
-  }, [
-    isQPAY066MReport,
-    hasToken,
-    profitYear,
-    storeNumber,
-    badgeNumber,
-    employeeName,
-    storeManagement,
-    startDate,
-    endDate,
-    fetchBreakdownByStore,
-    fetchBreakdownByStoreTotals
-  ]);
-
-  useEffect(() => {
-    if (onLoadingChange) {
-      onLoadingChange(isBreakdownFetching || isTotalsFetching);
+    if (breakdownByStore?.response?.total) {
+      return breakdownByStore.response.total;
     }
-  }, [isBreakdownFetching, isTotalsFetching, onLoadingChange]);
-
-  const getReportTitle = () => {
-    const matchingPreset = reports.find((preset) => preset.params.reportId === params.reportId);
-
-    if (matchingPreset) {
-      return matchingPreset.description.toUpperCase();
-    }
-
-    return "N/A";
-  };
+    return 0;
+  }, [breakdownByStoreManagement, breakdownByStore]);
 
   // Calculate summary data
   const summaryData = useMemo(() => {
-    if (isQPAY066MReport && breakdownByStoreTotals) {
+    if (breakdownByStoreTotals) {
       return {
         amountInProfitSharing: numberToCurrency(breakdownByStoreTotals.totalBeginningBalances),
         vestedAmount: numberToCurrency(breakdownByStoreTotals.totalVestedBalance),
@@ -196,115 +63,106 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
         totalLoans: numberToCurrency(0), // Not provided in the API response
         totalBeneficiaryAllocations: numberToCurrency(0) // Not provided in the API response
       };
-    } else {
-      const totalBeginningBalance = dummyData.reduce((sum, row) => sum + row.beginningBalance, 0);
-      const totalVestedAmount = dummyData.reduce((sum, row) => sum + row.vestingBalance, 0);
-      const totalForfeitures = dummyData.reduce((sum, row) => sum + row.forfeit, 0);
-      const totalLoans = 0; // No loan data in dummy data
-      const totalBeneficiaryAllocations = dummyData.reduce((sum, row) => sum + row.beneficiaryAllocation, 0);
-
-      return {
-        amountInProfitSharing: numberToCurrency(totalBeginningBalance),
-        vestedAmount: numberToCurrency(totalVestedAmount),
-        totalForfeitures: numberToCurrency(totalForfeitures),
-        totalLoans: numberToCurrency(totalLoans),
-        totalBeneficiaryAllocations: numberToCurrency(totalBeneficiaryAllocations)
-      };
     }
-  }, [isQPAY066MReport, breakdownByStoreTotals]);
+    return {
+      amountInProfitSharing: numberToCurrency(0),
+      vestedAmount: numberToCurrency(0),
+      totalForfeitures: numberToCurrency(0),
+      totalLoans: numberToCurrency(0),
+      totalBeneficiaryAllocations: numberToCurrency(0)
+    };
+  }, [breakdownByStoreTotals]);
 
   const columnDefs = useMemo(() => {
     return GetQPAY066xAdHocGridColumns();
   }, []);
 
   const rowData = useMemo(() => {
-    if (isQPAY066MReport && breakdownByStoreManagement?.response?.results) {
+    // Check both locations - data location depends on storeManagement flag
+    if (breakdownByStoreManagement?.response?.results) {
       return breakdownByStoreManagement.response.results;
     }
-    return dummyData;
-  }, [isQPAY066MReport, breakdownByStoreManagement]);
-
-  /*
-  const recordCount = useMemo(() => {
-    if (isQPAY066MReport && breakdownByStoreManagement?.response?.total) {
-      return breakdownByStoreManagement.response.total;
+    if (breakdownByStore?.response?.results) {
+      return breakdownByStore.response.results;
     }
-    return dummyData.length;
-  }, [isQPAY066MReport, breakdownByStoreManagement]);
-*/
+    return [];
+  }, [breakdownByStoreManagement, breakdownByStore]);
+
   return (
     <Grid
       container
       spacing={3}>
-      {/* Summary Section */}
+      {/* Summary Section - Only show if storeNumber is provided */}
       <Grid size={{ xs: 12 }}>
         <div style={{ padding: "0 24px" }}>
           <Typography
             variant="h2"
             sx={{ color: "#0258A5", marginBottom: "16px" }}>
-            {getReportTitle()}
+            {reportTitle}
           </Typography>
         </div>
-        <div style={{ padding: "0 24px" }}>
-          <TableContainer sx={{ mb: 4.5 }}>
-            <Table size="small">
-              <TableBody>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
-                    Amount In Profit Sharing
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
-                    Vested Amount
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
-                    Total Forfeitures
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
-                    Total Loans
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
-                    Total Beneficiary Allocations
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  {isLoadingQPAY066MData ? (
-                    <TableCell
-                      colSpan={5}
-                      sx={{ textAlign: "center", py: 3 }}>
-                      <Box
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                        gap={2}>
-                        <CircularProgress size={20} />
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"></Typography>
-                      </Box>
+        {showTotals && (
+          <div style={{ padding: "0 24px" }}>
+            <TableContainer sx={{ mb: 4.5 }}>
+              <Table size="small">
+                <TableBody>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
+                      Amount In Profit Sharing
                     </TableCell>
-                  ) : (
-                    <>
-                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.amountInProfitSharing}</TableCell>
-                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.vestedAmount}</TableCell>
-                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.totalForfeitures}</TableCell>
-                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.totalLoans}</TableCell>
-                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>
-                        {summaryData.totalBeneficiaryAllocations}
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
+                      Vested Amount
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
+                      Total Forfeitures
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
+                      Total Loans
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
+                      Total Beneficiary Allocations
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    {isLoading ? (
+                      <TableCell
+                        colSpan={5}
+                        sx={{ textAlign: "center", py: 3 }}>
+                        <Box
+                          display="flex"
+                          justifyContent="center"
+                          alignItems="center"
+                          gap={2}>
+                          <CircularProgress size={20} />
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"></Typography>
+                        </Box>
                       </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
+                    ) : (
+                      <>
+                        <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.amountInProfitSharing}</TableCell>
+                        <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.vestedAmount}</TableCell>
+                        <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.totalForfeitures}</TableCell>
+                        <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.totalLoans}</TableCell>
+                        <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>
+                          {summaryData.totalBeneficiaryAllocations}
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+        )}
       </Grid>
 
       {/* Grid Section */}
       <Grid size={{ xs: 12 }}>
         <DSMGrid
           preferenceKey="QPAY066_ADHOC_REPORT"
-          isLoading={isBreakdownFetching || isTotalsFetching}
+          isLoading={isLoading}
           maxHeight={gridMaxHeight}
           providedOptions={{
             rowData: rowData,
@@ -312,6 +170,23 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
           }}
         />
       </Grid>
+
+      {/* Pagination */}
+      {rowData && rowData.length > 0 && (
+        <Grid size={{ xs: 12 }}>
+          <Pagination
+            pageNumber={pageNumber}
+            setPageNumber={(value: number) => {
+              handlePaginationChange(value - 1, pageSize);
+            }}
+            pageSize={pageSize}
+            setPageSize={(value: number) => {
+              handlePaginationChange(0, value);
+            }}
+            recordCount={totalRecords}
+          />
+        </Grid>
+      )}
     </Grid>
   );
 };

@@ -1,4 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+import { convertToISODateString } from "../../utils/dateUtils";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
@@ -1517,8 +1518,9 @@ export const YearsEndApi = createApi({
           storeManagement: params.storeManagement,
           employeeName: params.employeeName,
           badgeNumber: params.badgeNumber,
-          startDate: params.startDate,
-          endDate: params.endDate,
+          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
+          startDate: convertToISODateString(params.startDate),
+          endDate: convertToISODateString(params.endDate),
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -1543,7 +1545,7 @@ export const YearsEndApi = createApi({
 
     getBreakdownByStoreTerminatedWithBenAllocations: builder.query<
       PagedReportResponse<BreakdownByStoreEmployee>,
-      BreakdownByStoreAndDateRangeRequest
+      BreakdownByStoreRequest
     >({
       query: (params) => ({
         url: "yearend/breakdown-by-store/terminated/withbeneficiaryallocation",
@@ -1552,8 +1554,9 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           storeNumber: params.storeNumber,
           storeManagement: params.storeManagement,
-          startDate: params.startDate,
-          endDate: params.endDate,
+          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
+          startDate: convertToISODateString(params.startDate),
+          endDate: convertToISODateString(params.endDate),
           employeeName: params.employeeName,
           badgeNumber: params.badgeNumber,
           take: params.pagination.take,
@@ -1617,7 +1620,7 @@ export const YearsEndApi = createApi({
 
     getBreakdownByStoreRetiredWithBalanceActivity: builder.query<
       PagedReportResponse<BreakdownByStoreEmployee>,
-      BreakdownByStoreAndDateRangeRequest
+      BreakdownByStoreRequest
     >({
       query: (params) => ({
         url: "yearend/breakdown-by-store/retired/withbalanceactivity",
@@ -1626,8 +1629,9 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           storeNumber: params.storeNumber,
           storeManagement: params.storeManagement,
-          startDate: params.startDate,
-          endDate: params.endDate,
+          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
+          startDate: convertToISODateString(params.startDate),
+          endDate: convertToISODateString(params.endDate),
           employeeName: params.employeeName,
           badgeNumber: params.badgeNumber,
           take: params.pagination.take,
@@ -1727,6 +1731,7 @@ export const {
   useLazyGetBreakdownByStoreInactiveQuery,
   useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery,
   useLazyGetBreakdownByStoreTerminatedVestedBalanceQuery,
+  useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery,
   useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery,
   useLazyGetBreakdownByStoreTerminatedWithBalanceActivityQuery,
   useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery,
