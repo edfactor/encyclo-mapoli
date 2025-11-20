@@ -3,6 +3,7 @@ using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -81,7 +82,10 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                 .Select(p => new ExecutiveHoursAndDollarsResponse
                 {
                     BadgeNumber = p.Demographic!.BadgeNumber,
-                    FullName = p.Demographic.ContactInfo.FullName,
+                    FullName = DtoCommonExtensions.ComputeFullNameWithInitial(
+                        p.Demographic.ContactInfo.LastName,
+                        p.Demographic.ContactInfo.FirstName,
+                        p.Demographic.ContactInfo.MiddleName),
                     StoreNumber = p.Demographic.StoreNumber,
                     Ssn = p.Demographic.Ssn.ToString(), // Keep unmasked for sorting
                     HoursExecutive = p.HoursExecutive,
