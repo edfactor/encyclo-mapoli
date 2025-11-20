@@ -110,11 +110,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
                 // PERFORMANCE FIX: Materialize SSN list first (needed for exact match handling and duplicate detection)
                 // This replaces the expensive CountAsync that added 0.5-1s latency
-                // ORACLE FIX: Use ToListAsync() then ToHashSet() instead of ToHashSetAsync() to avoid ORA-12704 (character set mismatch)
-                // The Oracle provider has issues with nested Select + Distinct + ToHashSetAsync translation
                 _logger.LogInformation("TRACE: Materializing SSN list");
-                var ssnListTemp = await ssnQuery.ToListAsync(timeoutToken).ConfigureAwait(false);
-                var ssnList = new HashSet<int>(ssnListTemp);
+                var ssnList = await ssnQuery.ToHashSetAsync(timeoutToken).ConfigureAwait(false);
                 _logger.LogInformation("TRACE: SSN list materialized, count={Count}", ssnList.Count);
 
                 // Safety check: Log warning if SSN set is very large (for monitoring)
