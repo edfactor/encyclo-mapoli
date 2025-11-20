@@ -72,6 +72,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
 
     public virtual DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
     public virtual DbSet<StateTax> StateTaxes { get; set; }
+    public virtual DbSet<State> States { get; set; }
 
     public virtual DbSet<HealthCheckStatusHistory> HealthCheckStatusHistories { get; set; }
 
