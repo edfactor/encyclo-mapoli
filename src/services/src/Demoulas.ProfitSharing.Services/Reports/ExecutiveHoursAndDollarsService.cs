@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -109,7 +110,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
 
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
 
-        return new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
+        var finalResponse = new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
         {
             ReportName = $"Executive Hours and Dollars for Year {request.ProfitYear}",
             ReportDate = DateTimeOffset.UtcNow,
@@ -117,6 +118,22 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             EndDate = calInfo.FiscalEndDate,
             Response = result
         };
+
+        // DEBUG: Validate the response data before serialization
+        if (result?.Results?.Any() == true)
+        {
+            foreach (var record in result.Results)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ExecutiveHoursAndDollars] Badge {record.BadgeNumber}:");
+                System.Diagnostics.Debug.WriteLine($"  HoursExecutive: {record.HoursExecutive}");
+                System.Diagnostics.Debug.WriteLine($"  IncomeExecutive: {record.IncomeExecutive}");
+                System.Diagnostics.Debug.WriteLine($"  CurrentHoursYear: {record.CurrentHoursYear}");
+                System.Diagnostics.Debug.WriteLine($"  CurrentIncomeYear: {record.CurrentIncomeYear}");
+                System.Diagnostics.Debug.WriteLine($"  FullName: {record.FullName}");
+            }
+        }
+
+        return finalResponse;
 
     }
 
