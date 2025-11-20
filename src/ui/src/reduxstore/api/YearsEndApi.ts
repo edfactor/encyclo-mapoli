@@ -159,8 +159,6 @@ type TerminationRequestWithArchive = StartAndEndDateRequest & {
 import {
   clearForfeitureAdjustmentData,
   setForfeitureAdjustmentData
-  clearForfeitureAdjustmentData,
-  setForfeitureAdjustmentData
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 /* Use the centralized data source aware base query 
