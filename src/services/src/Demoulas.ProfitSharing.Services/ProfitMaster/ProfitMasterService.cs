@@ -84,7 +84,7 @@ public class ProfitMasterService : IProfitMasterService
 
         return await _dbFactory.UseWritableContext(async ctx =>
         {
-            var (openProfitYear, etvaHotProfitYear) = await TemporalValidation(profitShareUpdateRequest.ProfitYear, ct);
+            var (openProfitYear, etvaHotProfitYear) = await TemporalValidation( profitShareUpdateRequest.ProfitYear, ct);
 
             // Ensure records have not already been inserted for "openProfitYear"
             await EnsureYearEndStatusNotExists(ctx, openProfitYear, ct);
