@@ -144,7 +144,6 @@ public class BeneficiaryService : IBeneficiaryService
                 },
                 ContactInfo = new ContactInfo()
                 {
-                    FullName = DtoCommonExtensions.ComputeFullNameWithInitial(req.LastName, req.FirstName, req.MiddleName),
                     FirstName = req.FirstName,
                     LastName = req.LastName,
                     MiddleName = req.MiddleName,
@@ -349,12 +348,10 @@ public class BeneficiaryService : IBeneficiaryService
         if (!string.IsNullOrEmpty(req.FirstName))
         {
             contact.ContactInfo!.FirstName = req.FirstName.Trim();
-            contact.ContactInfo!.FullName = DtoCommonExtensions.ComputeFullNameWithInitial(contact.ContactInfo!.LastName, req.FirstName, contact.ContactInfo!.MiddleName);
         }
         if (!string.IsNullOrEmpty(req.LastName))
         {
             contact.ContactInfo!.LastName = req.LastName.Trim();
-            contact.ContactInfo!.FullName = DtoCommonExtensions.ComputeFullNameWithInitial(req.LastName, contact.ContactInfo!.FirstName, contact.ContactInfo!.MiddleName);
         }
         if (req.MiddleName != null)
         {
@@ -367,7 +364,6 @@ public class BeneficiaryService : IBeneficiaryService
                 req.MiddleName = req.MiddleName.Trim();
             }
             contact.ContactInfo!.MiddleName = req.MiddleName;
-            contact.ContactInfo!.FullName = DtoCommonExtensions.ComputeFullNameWithInitial(contact.ContactInfo!.LastName, contact.ContactInfo!.FirstName, req.MiddleName);
         }
         if (req.PhoneNumber != null)
         {

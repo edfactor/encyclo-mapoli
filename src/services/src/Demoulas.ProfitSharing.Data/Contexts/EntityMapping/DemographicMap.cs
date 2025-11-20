@@ -142,10 +142,13 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         {
             contact.HasIndex(e => e.FullName, "IX_FULL_NAME");
             _ = contact.Property(e => e.FullName)
-                .HasMaxLength(84)
-                .HasComment("FullName")
-                .HasColumnName("FULL_NAME")
-                .IsRequired();
+                .HasColumnType("VARCHAR2(128)")
+                .HasComputedColumnSql(
+                    "LAST_NAME || UNISTR(', ') || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN UNISTR(' ') || SUBSTR(MIDDLE_NAME,1,1) ELSE UNISTR('') END",
+                    stored: true)
+                .HasMaxLength(128)
+                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial")
+                .HasColumnName("FULL_NAME");
 
             _ = contact.Property(e => e.LastName)
                 .HasMaxLength(30)

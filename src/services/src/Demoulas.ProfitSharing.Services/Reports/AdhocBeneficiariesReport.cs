@@ -43,9 +43,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                     b.Relationship,
                     b.BadgeNumber,
                     ContactSsn = b.Contact!.Ssn,
-                    ContactLastName = b.Contact.ContactInfo!.LastName,
-                    ContactFirstName = b.Contact.ContactInfo!.FirstName,
-                    ContactMiddleName = b.Contact.ContactInfo!.MiddleName,
+                    ContactFullName = b.Contact.ContactInfo!.FullName,
                     DemographicPayFrequencyId = b.Demographic != null ? b.Demographic.PayFrequencyId : (int?)null
                 });
 
@@ -86,7 +84,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
 
                 return new BeneficiaryReportDto(
                     b.PsnSuffix,
-                    DtoCommonExtensions.ComputeFullNameWithInitial(b.ContactLastName ?? string.Empty, b.ContactFirstName ?? string.Empty, b.ContactMiddleName),
+                    b.ContactFullName ?? string.Empty,
                     b.ContactSsn.MaskSsn(),
                     b.Relationship,
                     totalBalance?.TotalAmount ?? 0,

@@ -82,10 +82,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                 .Select(p => new ExecutiveHoursAndDollarsResponse
                 {
                     BadgeNumber = p.Demographic!.BadgeNumber,
-                    FullName = DtoCommonExtensions.ComputeFullNameWithInitial(
-                        p.Demographic.ContactInfo.LastName,
-                        p.Demographic.ContactInfo.FirstName,
-                        p.Demographic.ContactInfo.MiddleName),
+                    FullName = p.Demographic.ContactInfo.FullName ?? string.Empty,
                     StoreNumber = p.Demographic.StoreNumber,
                     Ssn = p.Demographic.Ssn.ToString(), // Keep unmasked for sorting
                     HoursExecutive = p.HoursExecutive,

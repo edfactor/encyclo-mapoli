@@ -62,9 +62,11 @@ public sealed class DistributionService : IDistributionService
                             DemLastName = dem != null ? dem.ContactInfo.LastName : null,
                             DemFirstName = dem != null ? dem.ContactInfo.FirstName : null,
                             DemMiddleName = dem != null ? dem.ContactInfo.MiddleName : null,
+                            DemFullName = dem != null ? dem.ContactInfo.FullName : null,
                             BeneLastName = ben != null ? ben.Contact!.ContactInfo.LastName : null,
                             BeneFirstName = ben != null ? ben.Contact!.ContactInfo.FirstName : null,
                             BeneMiddleName = ben != null ? ben.Contact!.ContactInfo.MiddleName : null,
+                            BeneFullName = ben != null ? ben.Contact!.ContactInfo.FullName : null,
                             dist.FrequencyId,
                             Frequency = freq,
                             dist.StatusId,
@@ -198,10 +200,10 @@ public sealed class DistributionService : IDistributionService
                 PaymentSequence = d.PaymentSequence,
                 Ssn = d.Ssn.MaskSsn(),
                 BadgeNumber = d.BadgeNumber,
-                FullName = !string.IsNullOrWhiteSpace(d.DemLastName)
-                    ? DtoCommonExtensions.ComputeFullNameWithInitial(d.DemLastName, d.DemFirstName ?? string.Empty, d.DemMiddleName)
-                    : (!string.IsNullOrWhiteSpace(d.BeneLastName)
-                        ? DtoCommonExtensions.ComputeFullNameWithInitial(d.BeneLastName, d.BeneFirstName ?? string.Empty, d.BeneMiddleName)
+                FullName = !string.IsNullOrWhiteSpace(d.DemFullName)
+                    ? d.DemFullName
+                    : (!string.IsNullOrWhiteSpace(d.BeneFullName)
+                        ? d.BeneFullName
                         : string.Empty),
                 FrequencyId = d.FrequencyId,
                 FrequencyName = d.Frequency!.Name,

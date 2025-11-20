@@ -416,10 +416,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
                     .Select(x => new BeneficiaryDetailResponse
                     {
-                        FullName = DtoCommonExtensions.ComputeFullNameWithInitial(
-                            x.Contact!.ContactInfo!.LastName,
-                            x.Contact!.ContactInfo!.FirstName,
-                            x.Contact!.ContactInfo!.MiddleName),
+                        FullName = x.Contact!.ContactInfo!.FullName ?? string.Empty,
                         BadgeNumber = x.BadgeNumber,
                         City = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.City : null,
                         DateOfBirth = x.Contact!.DateOfBirth,
