@@ -163,7 +163,6 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
   };
 
   const handleFormSubmit = (data: unknown) => {
-    // @D
     console.log("Filter data:", data);
   };
 
