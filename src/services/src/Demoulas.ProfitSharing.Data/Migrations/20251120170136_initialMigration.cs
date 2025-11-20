@@ -67,7 +67,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PRIMARY_KEY = table.Column<string>(type: "NVARCHAR2(512)", maxLength: 512, nullable: true),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: false, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
                     CREATED_AT = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
-                    CHANGES_JSON = table.Column<string>(type: "CLOB", nullable: true)
+                    CHANGES_JSON = table.Column<string>(type: "CLOB", nullable: true),
+                    CHANGES_HASH = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -541,6 +542,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "STATE",
+                columns: table => new
+                {
+                    ABBREVIATION = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_STATE", x => x.ABBREVIATION);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "STATE_TAX",
                 columns: table => new
                 {
@@ -637,7 +650,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
                     COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
-                    FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
+                    FULL_NAME = table.Column<string>(type: "VARCHAR2(128)", maxLength: 128, nullable: true, computedColumnSql: "LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", stored: true, comment: "Automatically computed from LastName, FirstName, and MiddleName with middle initial"),
                     LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
                     FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
                     MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
@@ -676,7 +689,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
                     COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
-                    FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
+                    FULL_NAME = table.Column<string>(type: "VARCHAR2(128)", maxLength: 128, nullable: true, computedColumnSql: "LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", stored: true, comment: "Automatically computed from LastName, FirstName, and MiddleName with middle initial"),
                     LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
                     FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
                     MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
@@ -845,7 +858,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
                     STORE_NUMBER = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false, comment: "StoreNumber"),
                     PAY_CLASSIFICATION_ID = table.Column<string>(type: "NVARCHAR2(4)", maxLength: 4, nullable: false, comment: "PayClassification"),
-                    FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
+                    FULL_NAME = table.Column<string>(type: "VARCHAR2(128)", maxLength: 128, nullable: true, computedColumnSql: "LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", stored: true, comment: "Automatically computed from LastName, FirstName, and MiddleName with middle initial"),
                     LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
                     FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
                     MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
@@ -915,7 +928,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalTable: "PAY_FREQUENCY",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHIC_TERMINATIONCODE_TERMINATIONCODEID",
+                        name: "FK_DEMOGRAPHIC_TERMINATIONCODES_TERMINATIONCODEID",
                         column: x => x.TERMINATION_CODE_ID,
                         principalTable: "TERMINATION_CODE",
                         principalColumn: "ID");
@@ -948,7 +961,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     COMMENT_RELATED_ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(19)", nullable: true),
                     COMMENT_RELATED_PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", nullable: true),
                     COMMENT_IS_PARTIAL_TRANSACTION = table.Column<bool>(type: "NUMBER(1)", nullable: true),
-                    YEARS_OF_SERVICE_CREDIT = table.Column<byte>(type: "NUMBER(3)", nullable: false, defaultValue: (byte)0),
+                    YEARS_OF_SERVICE_CREDIT = table.Column<short>(type: "NUMBER(3)", nullable: false, defaultValue: (short)0),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
                     MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
@@ -1028,6 +1041,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     MEMO = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: true),
                     ROTH_IRA = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     THIRD_PARTY_PAYEE_ACCOUNT = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
+                    MANUAL_CHECK_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
                     MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
@@ -1266,6 +1280,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     HOURS_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
                     INCOME_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     POINTS_EARNED = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    TOTAL_HOURS = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false, computedColumnSql: "HOURS_EXECUTIVE + CURRENT_HOURS_YEAR", stored: true),
+                    TOTAL_INCOME = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false, computedColumnSql: "INCOME_EXECUTIVE + CURRENT_INCOME_YEAR", stored: true),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
                     MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
@@ -2804,7 +2820,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)22, "Unrev" },
                     { (byte)23, "100% Earnings" },
                     { (byte)24, ">64 & >5 100%" },
-                    { (byte)25, "Forfeit Class Action" }
+                    { (byte)25, "Forfeit Class Action" },
+                    { (byte)26, "Forfeit Administrative" }
                 });
 
             migrationBuilder.InsertData(
@@ -3409,6 +3426,70 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "STATE",
+                columns: new[] { "ABBREVIATION", "NAME" },
+                values: new object[,]
+                {
+                    { "AK", "Alaska" },
+                    { "AL", "Alabama" },
+                    { "AR", "Arkansas" },
+                    { "AS", "American Samoa" },
+                    { "AZ", "Arizona" },
+                    { "CA", "California" },
+                    { "CO", "Colorado" },
+                    { "CT", "Connecticut" },
+                    { "DC", "District of Columbia" },
+                    { "DE", "Delaware" },
+                    { "FL", "Florida" },
+                    { "GA", "Georgia" },
+                    { "GU", "Guam" },
+                    { "HI", "Hawaii" },
+                    { "IA", "Iowa" },
+                    { "ID", "Idaho" },
+                    { "IL", "Illinois" },
+                    { "IN", "Indiana" },
+                    { "KS", "Kansas" },
+                    { "KY", "Kentucky" },
+                    { "LA", "Louisiana" },
+                    { "MA", "Massachusetts" },
+                    { "MD", "Maryland" },
+                    { "ME", "Maine" },
+                    { "MI", "Michigan" },
+                    { "MN", "Minnesota" },
+                    { "MO", "Missouri" },
+                    { "MP", "Northern Mariana Islands" },
+                    { "MS", "Mississippi" },
+                    { "MT", "Montana" },
+                    { "NC", "North Carolina" },
+                    { "ND", "North Dakota" },
+                    { "NE", "Nebraska" },
+                    { "NH", "New Hampshire" },
+                    { "NJ", "New Jersey" },
+                    { "NM", "New Mexico" },
+                    { "NV", "Nevada" },
+                    { "NY", "New York" },
+                    { "OH", "Ohio" },
+                    { "OK", "Oklahoma" },
+                    { "OR", "Oregon" },
+                    { "PA", "Pennsylvania" },
+                    { "PR", "Puerto Rico" },
+                    { "RI", "Rhode Island" },
+                    { "SC", "South Carolina" },
+                    { "SD", "South Dakota" },
+                    { "TN", "Tennessee" },
+                    { "TX", "Texas" },
+                    { "UM", "United States Minor Outlying Islands" },
+                    { "UT", "Utah" },
+                    { "VA", "Virginia" },
+                    { "VI", "Virgin Islands" },
+                    { "VT", "Vermont" },
+                    { "WA", "Washington" },
+                    { "WI", "Wisconsin" },
+                    { "WV", "West Virginia" },
+                    { "WY", "Wyoming" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "TAX_CODE",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
@@ -3652,6 +3733,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "DEMOGRAPHIC_ID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_HISTORY_VALIDFROM_VALIDTO_DEMOGRAPHICID",
+                table: "DEMOGRAPHIC_HISTORY",
+                columns: new[] { "VALID_FROM", "VALID_TO", "DEMOGRAPHIC_ID" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_SSN_CHANGE_HISTORY_DEMOGRAPHICID",
                 table: "DEMOGRAPHIC_SSN_CHANGE_HISTORY",
                 column: "DEMOGRAPHIC_ID");
@@ -3819,6 +3905,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: new[] { "PROFIT_YEAR", "DEMOGRAPHIC_ID" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_PAY_PROFIT_PROFITYEAR_TOTALHOURS",
+                table: "PAY_PROFIT",
+                columns: new[] { "PROFIT_YEAR", "TOTAL_HOURS" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PAY_PROFIT_ZEROCONTRIBUTIONREASONID",
                 table: "PAY_PROFIT",
                 column: "ZERO_CONTRIBUTION_REASON_ID");
@@ -3842,6 +3933,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_PROFIT_DETAIL_PROFITYEAR_PROFITCODEID",
                 table: "PROFIT_DETAIL",
                 columns: new[] { "PROFIT_YEAR", "PROFIT_CODE_ID" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_DETAIL_PROFITYEAR_SSN",
+                table: "PROFIT_DETAIL",
+                columns: new[] { "PROFIT_YEAR", "SSN" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PROFIT_DETAIL_SSN",
@@ -3987,6 +4083,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "REPORT_CHECKSUM");
+
+            migrationBuilder.DropTable(
+                name: "STATE");
 
             migrationBuilder.DropTable(
                 name: "STATE_TAX");

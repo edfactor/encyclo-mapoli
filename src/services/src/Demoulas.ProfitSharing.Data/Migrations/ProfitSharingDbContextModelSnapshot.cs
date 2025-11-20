@@ -31811,10 +31811,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.Property<string>("FullName")
                                 .ValueGeneratedOnAddOrUpdate()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
+                                .HasMaxLength(128)
+                                .HasColumnType("VARCHAR2(128)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComputedColumnSql("LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END", true)
+                                .HasComputedColumnSql("LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", true)
                                 .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
                             b1.Property<string>("LastName")
@@ -31984,10 +31984,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.Property<string>("FullName")
                                 .ValueGeneratedOnAddOrUpdate()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
+                                .HasMaxLength(128)
+                                .HasColumnType("VARCHAR2(128)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComputedColumnSql("LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END", true)
+                                .HasComputedColumnSql("LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", true)
                                 .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
                             b1.Property<string>("LastName")
@@ -32188,10 +32188,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.Property<string>("FullName")
                                 .ValueGeneratedOnAddOrUpdate()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
+                                .HasMaxLength(128)
+                                .HasColumnType("VARCHAR2(128)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComputedColumnSql("LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END", true)
+                                .HasComputedColumnSql("LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", true)
                                 .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
                             b1.Property<string>("LastName")
