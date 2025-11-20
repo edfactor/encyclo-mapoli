@@ -265,7 +265,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             demo.ContactInfo.LastName = "Smith";
             demo.ContactInfo.FirstName = "John";
             demo.ContactInfo.MiddleName = "Michael"; // Has middle name
-            demo.ContactInfo.FullName = "Smith, John Michael"; // This might be incorrectly stored
+            demo.ContactInfo.FullName = "Smith, John M"; // Matches computed column format: LastName, FirstName + initial
             demo.StoreNumber = 1;
             pp.IncomeExecutive = 100m;
             pp.HoursExecutive = 10;
