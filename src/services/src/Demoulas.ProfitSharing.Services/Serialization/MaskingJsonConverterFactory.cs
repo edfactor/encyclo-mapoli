@@ -185,17 +185,9 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                 // Try to parse as a generic JsonElement to see the full structure
                 try
                 {
-                    System.Text.Json.JsonDocument doc;
-                    if (readerCopy.ValueSpan.Length > 0)
-                    {
-                        doc = System.Text.Json.JsonDocument.Parse(readerCopy.ValueSpan);
-                    }
-                    else
-                    {
-                        // For ValueSequence, we need to convert to a byte array or use a different approach
-                        var sequenceBytes = readerCopy.ValueSequence.ToArray();
-                        doc = System.Text.Json.JsonDocument.Parse(sequenceBytes);
-                    }
+                    // Convert ValueSpan to byte array for JsonDocument.Parse
+                    byte[] jsonBytes = readerCopy.ValueSpan.ToArray();
+                    System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(jsonBytes);
                     
                     buffer.AppendLine($"  Full JSON: {doc.RootElement.GetRawText()}");
                     
