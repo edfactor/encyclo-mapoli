@@ -75,6 +75,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new NavigationStatusMap());
         modelBuilder.ApplyConfiguration(new NavigationTrackingMap());
         modelBuilder.ApplyConfiguration(new NavigationRoleMap());
+        modelBuilder.ApplyConfiguration(new StateMap());
 
         modelBuilder.HasSequence<int>("FAKE_SSN_SEQ").StartsAt(666000000)
             .IncrementsBy(1)

@@ -1,4 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+
+using Demoulas.ProfitSharing.Common.Attributes;
 using Shared;
 public record UpdateBeneficiaryContactRequest : IdRequest, INameParts, IPhoneNumber, IEmailAddress, ICity
 {
@@ -12,11 +14,21 @@ public record UpdateBeneficiaryContactRequest : IdRequest, INameParts, IPhoneNum
     public string? State { get; set; }
     public string? PostalCode { get; set; }
     public string? CountryIso { get; set; }
+
+    [MaskSensitive]
     public string FirstName { get; set; } = null!;
+
+    [MaskSensitive]
     public string LastName { get; set; } = null!;
+
+    [MaskSensitive]
     public string? MiddleName { get; set; }
     public string? PhoneNumber { get; set; }
+
+    [MaskSensitive]
     public string? MobileNumber { get; set; }
+
+    [MaskSensitive]
     public string? EmailAddress { get; set; }
 
     public static UpdateBeneficiaryContactRequest SampleRequest()

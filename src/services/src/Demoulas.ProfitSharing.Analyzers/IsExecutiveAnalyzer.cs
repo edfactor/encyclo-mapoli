@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Demoulas.ProfitSharing.Analyzers;
+
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class IsExecutiveAnalyzer : DiagnosticAnalyzer
 {

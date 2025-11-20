@@ -1,4 +1,6 @@
 ﻿
+using Demoulas.ProfitSharing.Common.Attributes;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 // This set of totals reflects the effect of running PAY444 with a user selected set of parameters (ie, contribution = 11.5%, ...)
@@ -17,7 +19,10 @@ public record ProfitShareUpdateTotals
     public decimal PaidAllocations { get; set; }
     public decimal ClassActionFund { get; set; }
 
+    [MaskSensitive]
     public long ContributionPoints { get; set; }
+
+    [MaskSensitive]
     public long EarningPoints { get; set; }
 
     public decimal MaxOverTotal { get; set; }

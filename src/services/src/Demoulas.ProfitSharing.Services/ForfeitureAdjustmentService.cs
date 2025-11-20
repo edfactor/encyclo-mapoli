@@ -47,7 +47,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // Get the most recent PROFIT_CODE = 2 (forfeiture) transaction for this employee
             var lastForfeitureTransaction = await context.ProfitDetails
-                .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitCodeId == 2)
+                .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitCodeId == 2 && pd.CommentTypeId != CommentType.Constants.ForfeitClassAction)
                 .OrderByDescending(pd => pd.ProfitYear)
                 .ThenByDescending(pd => pd.CreatedAtUtc)
                 .FirstOrDefaultAsync(cancellationToken);

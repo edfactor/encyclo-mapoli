@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -9,6 +10,8 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 /// </summary>
 public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullNameProperty
 {
+    public required int Id { get; set; }
+
     /// <summary>
     /// Employee badge number (identifier in payroll system).
     /// </summary>
@@ -17,6 +20,7 @@ public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullName
     /// <summary>
     /// Full name of the member.
     /// </summary>
+    [MaskSensitive]
     public string FullName { get; set; } = string.Empty;
 
     /// <summary>

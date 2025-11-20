@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 public sealed record DistributionRunReportDetail
 {
     public int BadgeNumber { get; set; }
@@ -9,17 +11,21 @@ public sealed record DistributionRunReportDetail
     public int StoreNumber { get; set; }
     public char TaxCodeId { get; set;}
     public required string TaxCodeName { get; set; }
+    [MaskSensitive]
     public required string EmployeeName { get; set; }
     public char EmploymentTypeId { get; set; }
     public required string EmploymentTypeName { get; set; }
     public DateOnly HireDate { get; set; }
     public DateOnly? FullTimeDate { get; set; }
+    [MaskSensitive]
     public DateOnly DateOfBirth { get; set; }
     public int Age { get; set; }
     public decimal GrossAmount { get; set; }
     public decimal StateTaxAmount { get; set; }
     public decimal FederalTaxAmount { get; set; }
     public decimal CheckAmount { get; set; }
+
+    [MaskSensitive]
     public string? PayeeName { get; set; }
     public string? PayeeAddress { get; set; }
     public string? PayeeCity { get; set; }

@@ -17,7 +17,10 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     [MaskSensitive] public string FirstName { get; init; } = string.Empty;
     [MaskSensitive] public string LastName { get; init; } = string.Empty;
     [MaskSensitive] public string? MiddleName { get; init; } = null;
-    [MaskSensitive] public string FullName => $"{LastName}, {FirstName}";
+    [MaskSensitive]
+    public string FullName => string.IsNullOrEmpty(MiddleName)
+        ? $"{LastName}, {FirstName}"
+        : $"{LastName}, {FirstName} {MiddleName[0]}";
     [MaskSensitive] public string Address { get; init; } = string.Empty;
     public string AddressCity { get; init; } = string.Empty;
     public string AddressState { get; init; } = string.Empty;

@@ -225,6 +225,22 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
 
+        var states = new List<State>()
+        {
+            new State() { Abbreviation = "MA", Name = "Massachusetts" },
+            new State() { Abbreviation = "NH", Name = "New Hampshire" },
+            new State() { Abbreviation = "ME", Name = "Maine" },
+            new State() { Abbreviation = "CT", Name = "Connecticut" },
+            new State() { Abbreviation = "RI", Name = "Rhode Island" },
+            new State() { Abbreviation = "VT", Name = "Vermont" },
+            new State() { Abbreviation = "NY", Name = "New York" },
+            new State() { Abbreviation = "CA", Name = "California" },
+            new State() { Abbreviation = "TX", Name = "Texas" }
+        };
+        var mockStates = states.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.States).Returns(mockStates.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.States).Returns(mockStates.Object);
+
         var employmentTypes = new List<EmploymentType>()
         {
             new EmploymentType() {Id=EmploymentType.Constants.FullTimeAccruedPaidHolidays,Name=EmploymentType.Constants.FullTimeAccruedPaidHolidays.ToString() },
@@ -240,6 +256,17 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
 
         var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 5);
+
+        // Add COMMENT_RELATED_STATE values to some profit details for state lookup testing
+        var statesToAssign = new[] { "MA", "NH", "ME", "CT", "RI", "VT", "NY", "CA", "TX" };
+        for (int i = 0; i < profitDetails.Count; i++)
+        {
+            if (i % 7 == 0) // Assign state to approximately 1 in 7 records
+            {
+                profitDetails[i].CommentRelatedState = statesToAssign[i % statesToAssign.Length];
+            }
+        }
+
         var mockProfitDetails = BuildMockDbSetWithBackingList(profitDetails);
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
@@ -288,6 +315,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<DemographicHistory>> mockDemographicHistories = demographicHistories.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
+
+        // Setup FakeSsns - used to exclude fake SSNs from duplicate detection
+        List<FakeSsn>? fakeSsns = new List<FakeSsn>();
+        Mock<DbSet<FakeSsn>> mockFakeSsns = fakeSsns.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.FakeSsns).Returns(mockFakeSsns.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.FakeSsns).Returns(mockFakeSsns.Object);
 
         Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.ToList().BuildMockDbSet();
         _profitSharingReadOnlyDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
@@ -441,6 +474,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<DistributionStatus>()).Returns(mockDistributionStatuses.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<CommentType>()).Returns(mockCommentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<TaxCode>()).Returns(mockTaxCodesList.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Set<State>()).Returns(mockStates.Object);
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()

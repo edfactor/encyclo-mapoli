@@ -14,6 +14,7 @@ import { useDeleteDistributionMutation } from "../../../reduxstore/api/Distribut
 import { setCurrentDistribution } from "../../../reduxstore/slices/distributionSlice";
 import { RootState } from "../../../reduxstore/store";
 import { ServiceErrorResponse } from "../../../types/errors/errors";
+import { isSafePath, isValidRouteParams } from "../../../utils/pathValidation";
 import MasterInquiryMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/MasterInquiryMemberDetails";
 import DeleteDistributionModal from "../DistributionInquiry/DeleteDistributionModal";
 import DisbursementsHistory from "./DisbursementsHistory";
@@ -56,12 +57,18 @@ const ViewDistributionContent = () => {
 
   const handleEdit = () => {
     // Navigate to edit page using URL parameters
-    if (memberId && memberType) {
+    // Validate parameters to prevent injection attacks
+    if (isValidRouteParams(memberId, memberType)) {
       // Set current distribution if available
       if (currentDistribution) {
         dispatch(setCurrentDistribution(currentDistribution));
       }
-      navigate(`/${ROUTES.EDIT_DISTRIBUTION}/${memberId}/${memberType}`);
+      const path = `/${ROUTES.EDIT_DISTRIBUTION}/${memberId}/${memberType}`;
+
+      // Final path validation before navigation
+      if (isSafePath(path)) {
+        navigate(path);
+      }
     }
   };
 

@@ -53,7 +53,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<DistributionFrequency> DistributionFrequencies { get; set; }
     public virtual DbSet<DistributionStatus> DistributionStatuses { get; set; }
     public virtual DbSet<DistributionPayee> DistributionPayees { get; set; }
-    public DbSet<FakeSsn> FakeSsns { get; set; }
+    public virtual DbSet<FakeSsn> FakeSsns { get; set; }
     public virtual DbSet<CommentType> CommentTypes { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public virtual DbSet<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; }
@@ -72,6 +72,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }
     public virtual DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
     public virtual DbSet<StateTax> StateTaxes { get; set; }
+    public virtual DbSet<State> States { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

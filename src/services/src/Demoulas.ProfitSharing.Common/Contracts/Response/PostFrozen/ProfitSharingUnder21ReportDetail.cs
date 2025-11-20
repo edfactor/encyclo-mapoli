@@ -1,31 +1,30 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 
 
-public record ProfitSharingUnder21ReportDetail(
-    short StoreNumber,
-    int BadgeNumber,
-    string FirstName,
-    string LastName,
-    string Ssn,
-    byte ProfitSharingYears,
-    bool IsNew,
-    decimal ThisYearHours,
-    decimal LastYearHours,
-    DateOnly HireDate,
-    DateOnly? FullTimeDate,
-    DateOnly? TerminationDate,
-    DateOnly DateOfBirth,
-    short Age,
-    char EmploymentStatusId,
-    decimal CurrentBalance,
-    byte EnrollmentId) : IIsExecutive
+public record ProfitSharingUnder21ReportDetail : IIsExecutive, IFirstName, ILastName
 {
-    public static ProfitSharingUnder21ReportDetail ResponseExample()
-    {
-        return new ProfitSharingUnder21ReportDetail(44, 700312, "Wendy", "Johnson", "xxx-xx-4002", 2, false, 1500, 1402, new DateOnly(2023, 4, 1), null, null, new DateOnly(1991, 9, 24), 20, 'a', 14002, 2);
-    }
-
     public bool IsExecutive { get; set; }
-};
+    public short StoreNumber { get; init; }
+    public int BadgeNumber { get; init; }
+    [MaskSensitive] public required string FirstName { get; init; }
+    [MaskSensitive] public required string LastName { get; init; }
+    public required string Ssn { get; init; }
+    public byte ProfitSharingYears { get; init; }
+    public bool IsNew { get; init; }
+    public decimal ThisYearHours { get; init; }
+    public decimal LastYearHours { get; init; }
+    public DateOnly HireDate { get; init; }
+    public DateOnly? FullTimeDate { get; init; }
+    public DateOnly? TerminationDate { get; init; }
+
+    [MaskSensitive]
+    public DateOnly DateOfBirth { get; init; }
+    public short Age { get; init; }
+    public required string EmploymentStatusId { get; init; }
+    public decimal CurrentBalance { get; init; }
+    public required string EnrollmentId { get; init; }
+}

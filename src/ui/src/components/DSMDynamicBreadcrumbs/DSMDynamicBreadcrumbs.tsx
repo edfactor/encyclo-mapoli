@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Location, useLocation, useNavigate } from "react-router-dom";
 import { RootState } from "../../reduxstore/store";
 import { getReadablePathName } from "../../utils/getReadablePathName";
+import { sanitizePath } from "../../utils/pathValidation";
 import { BreadcrumbItem } from "./DSMBreadcrumbItem";
 
 interface NavigationItem {
@@ -41,24 +42,12 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
 
   const handleClick = (path: string, index: number) => {
     if (path !== location.pathname) {
-      // Sanitize path to prevent open redirect - only allow internal paths
-      let sanitizedPath = "/";
-      if (
-        typeof path === "string" &&
-        path.startsWith("/") &&
-        !path.startsWith("//") &&
-        !path.includes("://") &&
-        !path.includes("\\") &&
-        !path.includes("..") &&
-        !path.includes("%2f") &&
-        !path.includes("%5c")
-      ) {
-        sanitizedPath = path;
-      }
+      // Use centralized path validation utility to prevent open redirect
+      const safePath = sanitizePath(path);
 
       const newHistory = navigationHistory.slice(0, index + 1);
       setNavigationHistory(newHistory);
-      navigate(sanitizedPath);
+      navigate(safePath);
     }
   };
   //build breadcrumb items from navigation history

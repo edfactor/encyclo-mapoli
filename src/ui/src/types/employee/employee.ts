@@ -64,6 +64,7 @@ export interface EmployeeWagesForYear {
 
 export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
+  useFrozenData?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

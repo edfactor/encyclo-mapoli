@@ -68,7 +68,7 @@ public class ReportRunnerService : IReportRunnerService
             ["duplicateNamesAndBirthdays"] = async ct => await InvokeReport("duplicateNamesAndBirthdays", async () =>
             {
                 ReportResponseBase<DuplicateNamesAndBirthdaysResponse> r =
-                    await _duplicateNamesAndBirthdaysService.GetDuplicateNamesAndBirthdaysAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
+                    await _duplicateNamesAndBirthdaysService.GetDuplicateNamesAndBirthdaysAsync(new DuplicateNamesAndBirthdaysRequest { ProfitYear = wallClockYear }, ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
             ["negativeEtvaReportService"] = async ct => await InvokeReport("negativeEtvaReportService", async () =>

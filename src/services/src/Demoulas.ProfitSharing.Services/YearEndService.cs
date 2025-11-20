@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -15,6 +16,7 @@ public record YearEndChange
 {
     public required int IsNew { get; init; }
     public required byte ZeroCont { get; init; }
+    [MaskSensitive]
     public required decimal EarnPoints { get; init; }
     public required DateOnly? PsCertificateIssuedDate { get; init; }
 

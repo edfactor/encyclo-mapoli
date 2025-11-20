@@ -380,7 +380,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             if (req.ReportId == YearEndProfitSharingReportId.NonEmployeeBeneficiaries)
             {
                 // Report 10: filteredDetails is in-memory, use synchronous LINQ
-                var filteredList = await filteredDetails.ToListAsync(cancellationToken);
+#pragma warning disable S6966 // Awaitable method should be used
+#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
+                var filteredList = filteredDetails.ToList();
+#pragma warning restore AsyncFixer02 // Long-running or blocking operations inside an async method
+#pragma warning restore S6966 // Awaitable method should be used
                 totals = new ProfitShareTotal
                 {
                     WagesTotal = filteredList.Sum(x => x.Wages),

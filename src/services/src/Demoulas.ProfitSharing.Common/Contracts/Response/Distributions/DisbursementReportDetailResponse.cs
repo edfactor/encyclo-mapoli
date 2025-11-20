@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 public sealed record DisbursementReportDetailResponse
@@ -11,6 +12,8 @@ public sealed record DisbursementReportDetailResponse
     public required string DistributionFrequencyName { get; set; }
     public required string Ssn { get; set; }
     public int BadgeNumber { get; set; }
+
+    [MaskSensitive]
     public required string EmployeeName { get; set; }
     public decimal VestedBalance { get; set; }
     public decimal OriginalAmount { get; set; }
