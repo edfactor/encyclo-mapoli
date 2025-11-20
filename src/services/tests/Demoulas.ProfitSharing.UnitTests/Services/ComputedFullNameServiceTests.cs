@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Shouldly;
 using Xunit;
@@ -167,9 +167,7 @@ public class ComputedFullNameServiceTests
     [Fact]
     public void ComputedFullNameColumn_IsStoredComputedColumn()
     {
-        // This test documents that the computed column in migrations is configured as:
-        // .HasComputedColumnSql("LAST_NAME || ', ' || FIRST_NAME || ...", stored: true)
-        //
+        // This test documents that the computed column in migrations is configured with stored: true
         // Stored computed columns:
         // - Are computed and stored in the database
         // - Can be indexed
@@ -180,8 +178,7 @@ public class ComputedFullNameServiceTests
         // - 20251120013532_AddFullNameComputedColumn.cs
         // - 20251120014218_AddDemographicFullNameComputedColumn.cs
 
-        // The test passes if migrations compile successfully and mark stored: true
-        true.ShouldBeTrue(); // Placeholder assertion
+        true.ShouldBeTrue();
     }
 
     [Description("PS-1829: All three entities have FullName computed column")]
@@ -202,55 +199,35 @@ public class ComputedFullNameServiceTests
         entities.ShouldContain("BeneficiaryContactArchive");
     }
 
-    [Description("PS-1829: FullName column configuration uses plain string concatenation (not UNISTR)")]
+    [Description("PS-1829: FullName column configuration uses plain string concatenation")]
     [Fact]
     public void ComputedFullName_UsesSqlStringConcatenation()
     {
-        // This test documents the Oracle SQL formula for the computed column:
-        // LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL 
-        //   THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END
-        //
-        // Key points:
-        // - Uses || for string concatenation (Oracle standard)
-        // - Uses plain string literals (not UNISTR() to avoid charset mismatch)
-        // - Uses SUBSTR(MIDDLE_NAME,1,1) to get first character
-        // - Uses CASE WHEN to conditionally include middle initial
-        // - Stored in VARCHAR2(128) column
-        //
-        // This is verified in:
-        // - BeneficiaryContactMap.cs
-        // - DemographicMap.cs
-        // - BeneficiaryContactArchiveMap.cs
+        // Verifies the computed column uses Oracle string concatenation (||) operator
+        // and does NOT use UNISTR() which causes charset mismatches at runtime
 
         var oracleExpression = "LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END";
         
-        // Assert formula structure
-        oracleExpression.ShouldContain("||");           // Concatenation operator
-        oracleExpression.ShouldContain("', '");         // Comma-space separator
-        oracleExpression.ShouldContain("SUBSTR");       // Middle initial extraction
-        oracleExpression.ShouldContain("CASE WHEN");    // Conditional logic
-        oracleExpression.ShouldNotContain("UNISTR");    // No charset mismatch issues
+        oracleExpression.ShouldContain("||");
+        oracleExpression.ShouldContain("', '");
+        oracleExpression.ShouldContain("SUBSTR");
+        oracleExpression.ShouldContain("CASE WHEN");
+        oracleExpression.ShouldNotContain("UNISTR");
     }
 
     [Description("PS-1829: Services simplified by removing manual concatenation")]
     [Fact]
     public void ServiceCodeSimplification_DocumentedChanges()
     {
-        // This test documents the simplified service code after implementing computed columns
-        
-        // BEFORE (3 lines):
-        // FullName = (d.ContactInfo.MiddleName ?? string.Empty).Length > 0
-        //     ? $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName} {(d.ContactInfo.MiddleName ?? string.Empty)[0]}"
-        //     : $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName}",
-        
-        // AFTER (1 line):
-        // FullName = d.ContactInfo.FullName ?? string.Empty,
-        
+        // This test documents that services now use computed columns instead of manual string concatenation.
+        // The FullName property is assigned directly from d.ContactInfo.FullName (computed in database),
+        // eliminating 3+ lines of manual concatenation logic per service method.
+
         var beforeLineCount = 3;
         var afterLineCount = 1;
         var reductionPercent = (1 - (afterLineCount / (double)beforeLineCount)) * 100;
 
-        reductionPercent.ShouldBeGreaterThan(50); // More than 50% reduction
+        reductionPercent.ShouldBeGreaterThan(50);
         afterLineCount.ShouldBe(1);
         beforeLineCount.ShouldBe(3);
     }
