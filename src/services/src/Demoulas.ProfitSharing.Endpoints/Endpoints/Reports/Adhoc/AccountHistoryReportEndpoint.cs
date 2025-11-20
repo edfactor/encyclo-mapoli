@@ -59,6 +59,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                             {
                                 new AccountHistoryReportResponse
                                 {
+                                    Id = 123,
                                     BadgeNumber = 700006,
                                     FullName = "John Doe",
                                     Ssn = "***-**-6789",
@@ -71,6 +72,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                                 },
                                 new AccountHistoryReportResponse
                                 {
+                                    Id = 234,
                                     BadgeNumber = 700006,
                                     FullName = "John Doe",
                                     Ssn = "***-**-6789",

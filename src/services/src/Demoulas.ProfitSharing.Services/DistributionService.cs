@@ -585,7 +585,7 @@ public sealed class DistributionService : IDistributionService
             groupedResults.AddRange(manualAndOnHoldDistributions);
             groupedResults.AddRange(missingStatuses);
 
-            groupedResults.Sort((a, b) => a.DistributionTypeName.CompareTo(b.DistributionTypeName));
+            groupedResults.Sort((a, b) => a.DistributionTypeName.CompareTo(b.DistributionTypeName, StringComparison.OrdinalIgnoreCase));
 
             return Result<DistributionRunReportSummaryResponse[]>.Success(groupedResults.ToArray());
         }, cancellationToken);

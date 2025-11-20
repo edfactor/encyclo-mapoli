@@ -159,6 +159,8 @@ type TerminationRequestWithArchive = StartAndEndDateRequest & {
 import {
   clearForfeitureAdjustmentData,
   setForfeitureAdjustmentData
+  clearForfeitureAdjustmentData,
+  setForfeitureAdjustmentData
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 /* Use the centralized data source aware base query 
@@ -416,6 +418,7 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
+          useFrozenData: params.useFrozenData !== undefined ? params.useFrozenData : true,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
