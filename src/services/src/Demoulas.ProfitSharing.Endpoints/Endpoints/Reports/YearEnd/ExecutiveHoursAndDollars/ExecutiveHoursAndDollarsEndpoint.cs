@@ -95,6 +95,30 @@ public class ExecutiveHoursAndDollarsEndpoint :
             if (result != null)
             {
                 this.RecordResponseMetrics(HttpContext, _logger, result);
+                
+                // DEBUG: Before returning, validate each record can be serialized
+                if (result.Response?.Results?.Any() == true)
+                {
+                    var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase };
+                    foreach (var record in result.Response.Results)
+                    {
+#pragma warning disable S2139 // Exceptions should be either logged or rethrown but not both
+                        try
+                        {
+                            // Try to serialize each record to catch which one fails
+                            var json = System.Text.Json.JsonSerializer.Serialize(record, jsonOptions);
+                            _logger.LogDebug("Badge {Badge} serialized successfully: {JsonLength} bytes", record.BadgeNumber, json.Length);
+                        }
+                        catch (Exception serEx)
+                        {
+                            _logger.LogError(serEx, "Badge {Badge} FAILED to serialize. FullName: {FullName}, HoursExecutive: {Hours}, IncomeExecutive: {Income}, CurrentHoursYear: {CurHours}, CurrentIncomeYear: {CurIncome}",
+                                record.BadgeNumber, record.FullName, record.HoursExecutive, record.IncomeExecutive, record.CurrentHoursYear, record.CurrentIncomeYear);
+                            throw;
+                        }
+#pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
+                    }
+                }
+                
                 return result;
             }
 

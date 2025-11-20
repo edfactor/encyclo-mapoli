@@ -156,87 +156,43 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
 
         public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            // Pass-through (no masking on read)
+            // IMPORTANT: This converter is designed for SERIALIZATION (Write) only, for masking sensitive fields.
+            // For DESERIALIZATION (Read), we must NOT interfere - just use the default behavior.
+            // We cannot safely call JsonSerializer.Deserialize here because the reader may be consumed
+            // or in an invalid state. Instead, we use JsonNode for a safe roundtrip approach.
             try
             {
-                return JsonSerializer.Deserialize<T>(ref reader, _unmaskedOptions);
+                // Use JsonNode to safely read the current token, then deserialize without our factory
+                using var doc = System.Text.Json.JsonDocument.ParseValue(ref reader);
+                var json = doc.RootElement.GetRawText();
+
+                // DEBUG: Log the JSON for inspection
+                System.Diagnostics.Debug.WriteLine($"[MaskingConverter.Read] Full JSON for {typeToConvert.Name}:\n{json}");
+
+                // Create options WITHOUT the MaskingJsonConverterFactory to avoid recursion
+                var safeOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = options.PropertyNamingPolicy,
+                    WriteIndented = options.WriteIndented,
+                    DefaultIgnoreCondition = options.DefaultIgnoreCondition,
+                    PropertyNameCaseInsensitive = options.PropertyNameCaseInsensitive,
+                    AllowTrailingCommas = options.AllowTrailingCommas,
+                    ReadCommentHandling = options.ReadCommentHandling
+                };
+
+                // Copy all converters EXCEPT MaskingJsonConverterFactory
+                foreach (var converter in options.Converters.Where(c => c is not MaskingJsonConverterFactory))
+                {
+                    safeOptions.Converters.Add(converter);
+                }
+
+                return JsonSerializer.Deserialize<T>(json, safeOptions);
             }
-            catch (JsonException ex)
+            catch (Exception ex)
             {
-                // For better debugging, try to deserialize to JsonElement first to capture the full JSON
-                string fullJsonDebug = TryExtractFullJsonDocument(ref reader, ex);
-                System.Diagnostics.Debug.WriteLine($"[MaskingConverter.Read] Deserialization failed for type {typeToConvert.Name}");
-                System.Diagnostics.Debug.WriteLine($"  Path: {ex.Path}");
-                System.Diagnostics.Debug.WriteLine($"  LineNumber: {ex.LineNumber}, BytePositionInLine: {ex.BytePositionInLine}");
-                System.Diagnostics.Debug.WriteLine($"  Inner exception: {ex.InnerException?.Message}");
-                System.Diagnostics.Debug.WriteLine(fullJsonDebug);
+                System.Diagnostics.Debug.WriteLine($"[MaskingConverter.Read] Failed to deserialize {typeToConvert.Name}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[MaskingConverter.Read] Exception details: {ex}");
                 throw;
-            }
-        }
-
-        private static string TryExtractFullJsonDocument(ref Utf8JsonReader reader, JsonException ex)
-        {
-            try
-            {
-                var readerCopy = reader;
-                var buffer = new System.Text.StringBuilder();
-                buffer.AppendLine("  === Full JSON Context ===");
-
-                // Try to parse as a generic JsonElement to see the full structure
-                try
-                {
-                    // Convert ValueSpan to byte array for JsonDocument.Parse
-                    byte[] jsonBytes = readerCopy.ValueSpan.ToArray();
-                    System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(jsonBytes);
-                    
-                    buffer.AppendLine($"  Full JSON: {doc.RootElement.GetRawText()}");
-                    
-                    // If we have a path, try to navigate to it and show that value
-                    if (!string.IsNullOrEmpty(ex.Path))
-                    {
-                        buffer.AppendLine($"  Problem at path '{ex.Path}':");
-                        string[] pathSegments = ex.Path.Split(new[] { '.' }, System.StringSplitOptions.RemoveEmptyEntries);
-                        var current = doc.RootElement;
-                        
-                        foreach (var segment in pathSegments)
-                        {
-                            if (segment.StartsWith('$'))
-                            {continue;}
-                            
-                            // Remove array indices like [0]
-                            string cleanSegment = System.Text.RegularExpressions.Regex.Replace(segment, @"\[\d+\]", "");
-                            
-                            if (current.TryGetProperty(cleanSegment, out var prop))
-                            {
-                                buffer.AppendLine($"    {cleanSegment}: {prop.GetRawText()}");
-                                current = prop;
-                            }
-                        }
-                    }
-                }
-                catch (Exception parseEx)
-                {
-                    buffer.AppendLine($"  Could not parse as JsonDocument: {parseEx.Message}");
-                    buffer.AppendLine($"  Trying to extract raw bytes from reader...");
-                    
-                    // Fallback: try to show raw bytes
-                    try
-                    {
-                        byte[] bytes = readerCopy.ValueSpan.ToArray();
-                        string rawText = System.Text.Encoding.UTF8.GetString(bytes);
-                        buffer.AppendLine($"  Raw value (first 500 chars): {rawText.Substring(0, Math.Min(500, rawText.Length))}");
-                    }
-                    catch (Exception bytesEx)
-                    {
-                        buffer.AppendLine($"  Could not extract raw bytes: {bytesEx.Message}");
-                    }
-                }
-
-                return buffer.ToString();
-            }
-            catch (Exception debugEx)
-            {
-                return $"  === Debug extraction failed: {debugEx.Message} ===";
             }
         }
 
