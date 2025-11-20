@@ -65,7 +65,7 @@ const AddDistributionContent = () => {
   useEffect(() => {
     if (submissionSuccess && memberData) {
       // Get member name
-      const memberName = `${memberData.firstName} ${memberData.lastName}`;
+      const memberName = memberData.fullName;
 
       // Navigate to distributions inquiry page with success message
       navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`, {
