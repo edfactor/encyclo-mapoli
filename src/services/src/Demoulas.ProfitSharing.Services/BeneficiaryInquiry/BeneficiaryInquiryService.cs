@@ -3,6 +3,7 @@ using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
@@ -415,7 +416,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
                     .Select(x => new BeneficiaryDetailResponse
                     {
-                        Name = x.Contact!.ContactInfo!.FullName,
+                        FullName = x.Contact!.ContactInfo!.FullName ?? string.Empty,
                         BadgeNumber = x.BadgeNumber,
                         City = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.City : null,
                         DateOfBirth = x.Contact!.DateOfBirth,
@@ -442,7 +443,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
             result = memberDetail.Results.Select(x => new BeneficiaryDetailResponse
             {
-                Name = x.FullName,
+                FullName = x.FullName,
                 BadgeNumber = x.BadgeNumber,
                 City = x.AddressCity,
                 DateOfBirth = x.DateOfBirth,

@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { configureStore } from "@reduxjs/toolkit";
 import { renderHook } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import securityReducer, { type SecurityState } from "../../../../../reduxstore/slices/securitySlice";
 import yearsEndReducer, { type YearsEndState } from "../../../../../reduxstore/slices/yearsEndSlice";
 
@@ -131,7 +131,7 @@ function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreStat
       yearEndProfitSharingReportQueryParams: null,
       yearEndProfitSharingReportTotals: null,
       breakdownByStore: null,
-      breakdownByStoreMangement: null,
+      breakdownByStoreManagement: null,
       breakdownByStoreTotals: null,
       storeManagementBreakdown: null,
       breakdownByStoreQueryParams: null,
@@ -259,7 +259,7 @@ const defaultYearsEndState: YearsEndState = {
   yearEndProfitSharingReportQueryParams: null,
   yearEndProfitSharingReportTotals: null,
   breakdownByStore: null,
-  breakdownByStoreMangement: null,
+  breakdownByStoreManagement: null,
   breakdownByStoreTotals: null,
   storeManagementBreakdown: null,
   breakdownByStoreQueryParams: null,
@@ -462,7 +462,7 @@ describe("useDuplicateNamesAndBirthdays", () => {
       yearEndProfitSharingReportQueryParams: null,
       yearEndProfitSharingReportTotals: null,
       breakdownByStore: null,
-      breakdownByStoreMangement: null,
+      breakdownByStoreManagement: null,
       breakdownByStoreTotals: null,
       storeManagementBreakdown: null,
       breakdownByStoreQueryParams: null,

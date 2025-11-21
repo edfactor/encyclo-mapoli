@@ -70,7 +70,7 @@ export interface BeneficiaryDetailAPIRequest extends SortedPaginationRequestDto 
 export interface BeneficiaryDetail {
   badgeNumber: number;
   psnSuffix: number;
-  name?: string | null;
+  fullName?: string | null;
   ssn?: string | null;
   street?: string | null;
   city?: string | null;

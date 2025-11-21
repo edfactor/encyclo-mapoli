@@ -41,8 +41,8 @@ public class TestMasterInquiry : BaseSqlActivity
     {
         // TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
 
-        string path; //  = Path.Combine(AppContext.BaseDirectory, "OUTFL");
-        path = "/Users/robertherrmann/prj/yerunner/src/services/tests/yematchrunner/YEMatch/Resources/MTPR.OUTFL";
+        string path = //  = Path.Combine(AppContext.BaseDirectory, "OUTFL");
+            "/Users/robertherrmann/prj/yerunner/src/services/tests/yematchrunner/YEMatch/Resources/MTPR.OUTFL";
         string content = await File.ReadAllTextAsync(path);
         List<OutFL> outties = OutFLParser.ParseStringIntoRecords(content);
 

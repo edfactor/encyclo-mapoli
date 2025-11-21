@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20251119221127_addStates")]
-    partial class addStates
+    [Migration("20251120170136_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31813,11 +31813,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("FirstName");
 
                             b1.Property<string>("FullName")
-                                .IsRequired()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasMaxLength(128)
+                                .HasColumnType("VARCHAR2(128)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComment("FullName");
+                                .HasComputedColumnSql("LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", true)
+                                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()
@@ -31985,11 +31986,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("FirstName");
 
                             b1.Property<string>("FullName")
-                                .IsRequired()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasMaxLength(128)
+                                .HasColumnType("VARCHAR2(128)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComment("FullName");
+                                .HasComputedColumnSql("LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", true)
+                                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()
@@ -32188,11 +32190,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("FirstName");
 
                             b1.Property<string>("FullName")
-                                .IsRequired()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasMaxLength(128)
+                                .HasColumnType("VARCHAR2(128)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComment("FullName");
+                                .HasComputedColumnSql("LAST_NAME || q'[, ]' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN q'[ ]' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", true)
+                                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()

@@ -134,7 +134,7 @@ const EditDistributionContent = () => {
   // Handle successful submission
   useEffect(() => {
     if (submissionSuccess && memberData) {
-      const memberName = `${memberData.firstName} ${memberData.lastName}`;
+      const memberName = memberData.fullName;
 
       navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`, {
         state: {

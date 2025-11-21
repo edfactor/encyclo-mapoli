@@ -54,8 +54,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
     const summarySection = useMemo(() => {
       if (!memberDetails) return [];
       const {
-        firstName,
-        lastName,
+        fullName,
         address,
         addressCity,
         addressState,
@@ -73,7 +72,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         [formattedCity, formattedState].filter(Boolean).join(", ") + (formattedZip ? ` ${formattedZip}` : "");
 
       return [
-        { label: "Name", value: `${lastName}, ${firstName}` },
+        { label: "Name", value: fullName },
         { label: "Address", value: `${address}` },
         { label: "", value: cityStateZip },
         { label: "Phone #", value: formatPhoneNumber(phoneNumber) },

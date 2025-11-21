@@ -3,6 +3,8 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.Util.Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Services.Serialization;
 
@@ -15,6 +17,12 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
 {
     private static readonly Type _stringType = typeof(string);
     private static readonly ConcurrentDictionary<Type, TypeMetadata> _typeMetadataCache = new();
+    private readonly IHostEnvironment? _hostEnvironment;
+
+    public MaskingJsonConverterFactory(IHostEnvironment? hostEnvironment = null)
+    {
+        _hostEnvironment = hostEnvironment;
+    }
 
     public override bool CanConvert(Type typeToConvert)
     {
@@ -47,7 +55,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
     {
         TypeMetadata meta = _typeMetadataCache.GetOrAdd(typeToConvert, BuildMetadata);
         Type concrete = typeof(MaskingConverter<>).MakeGenericType(typeToConvert);
-        return (JsonConverter)Activator.CreateInstance(concrete, meta, options)!;
+        return (JsonConverter)Activator.CreateInstance(concrete, meta, options, _hostEnvironment)!;
     }
 
     private static TypeMetadata BuildMetadata(Type t)
@@ -136,13 +144,15 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
         private readonly TypeMetadata _meta;
         private readonly JsonSerializerOptions _originalOptions;
         private readonly JsonSerializerOptions _unmaskedOptions;
+        private readonly IHostEnvironment? _hostEnvironment;
 
         // Constructor is used via reflection in CreateConverter (Activator.CreateInstance)
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used via reflection in CreateConverter")]
-        public MaskingConverter(TypeMetadata meta, JsonSerializerOptions original)
+        public MaskingConverter(TypeMetadata meta, JsonSerializerOptions original, IHostEnvironment? hostEnvironment = null)
         {
             _meta = meta;
             _originalOptions = original;
+            _hostEnvironment = hostEnvironment;
             // Clone options minus this factory to avoid recursion during pass-through deserialization
             _unmaskedOptions = new JsonSerializerOptions(original);
             for (int i = _unmaskedOptions.Converters.Count - 1; i >= 0; i--)
@@ -156,8 +166,69 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
 
         public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            // Pass-through (no masking on read)
-            return JsonSerializer.Deserialize<T>(ref reader, _unmaskedOptions);
+            // IMPORTANT: This converter is designed for SERIALIZATION (Write) only, for masking sensitive fields.
+            // For DESERIALIZATION (Read), we must NOT interfere - just use the default behavior.
+            // We cannot safely call JsonSerializer.Deserialize here because the reader may be consumed
+            // or in an invalid state. Instead, we use JsonNode for a safe roundtrip approach.
+            try
+            {
+                // Use JsonNode to safely read the current token, then deserialize without our factory
+                using var doc = System.Text.Json.JsonDocument.ParseValue(ref reader);
+                var json = doc.RootElement.GetRawText();
+
+                // DEBUG: Log the JSON for inspection
+                System.Diagnostics.Debug.WriteLine($"[MaskingConverter.Read] Full JSON for {typeToConvert.Name}:\n{json}");
+
+                // Create options WITHOUT the MaskingJsonConverterFactory to avoid recursion
+                var safeOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = options.PropertyNamingPolicy,
+                    WriteIndented = options.WriteIndented,
+                    DefaultIgnoreCondition = options.DefaultIgnoreCondition,
+                    PropertyNameCaseInsensitive = options.PropertyNameCaseInsensitive,
+                    AllowTrailingCommas = options.AllowTrailingCommas,
+                    ReadCommentHandling = options.ReadCommentHandling
+                };
+
+                // Copy all converters EXCEPT MaskingJsonConverterFactory
+                foreach (var converter in options.Converters.Where(c => c is not MaskingJsonConverterFactory))
+                {
+                    safeOptions.Converters.Add(converter);
+                }
+
+                return JsonSerializer.Deserialize<T>(json, safeOptions);
+            }
+            catch (JsonException ex) when (ex.InnerException is InvalidOperationException { Message: var msg } && msg.Contains("Cannot get the value of a token type 'String' as a number"))
+            {
+                // This occurs when trying to deserialize masked decimal values (e.g., "XX", "XXX")
+                // Provide user-friendly error message about permissions/masking
+                bool isTestEnv = _hostEnvironment?.IsTestEnvironment() ?? false;
+
+                if (isTestEnv)
+                {
+                    throw new InvalidOperationException(
+                        $"Unable to deserialize response for type '{typeToConvert.Name}'. " +
+                        $"This occurs when sensitive numeric fields are masked (e.g., hours, income values returned as 'XX' or 'XXX'). " +
+                        $"Verify that:\n" +
+                        $"1. You have the appropriate user role permissions for this endpoint\n" +
+                        $"2. The requesting user has rights to view unmasked data\n" +
+                        $"3. Consider using a role with higher permissions (e.g., ADMINISTRATOR) if you need to see actual values",
+                        ex);
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"Insufficient permissions to view this data. Sensitive fields are masked based on your user role. " +
+                        $"Contact your administrator if you need access to unmasked values.",
+                        ex);
+                }
+            }
+            catch (JsonException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MaskingConverter.Read] Failed to deserialize {typeToConvert.Name}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[MaskingConverter.Read] Exception details: {ex}");
+                throw;
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)

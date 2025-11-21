@@ -57,7 +57,6 @@ BEGIN
     (ORACLE_HCM_ID,
      SSN,
      BADGE_NUMBER,
-     FULL_NAME,
      LAST_NAME,
      FIRST_NAME,
      MIDDLE_NAME,
@@ -84,7 +83,6 @@ BEGIN
         ROWNUM AS ORACLEHCMID,
                 DEM_SSN,
                 DEM_BADGE,
-                PY_NAM,
                 PY_LNAME,
                 PY_FNAME,
                 PY_MNAME,
@@ -221,7 +219,6 @@ BEGIN
     (SSN,
      FIRST_NAME,
      LAST_NAME,
-     FULL_NAME,
      DATE_OF_BIRTH,
      STREET,
      CITY,
@@ -234,7 +231,6 @@ BEGIN
         PYBEN.PYBEN_PAYSSN AS SSN,
         TRIM(SUBSTR(PYBEN.PYBEN_NAME, INSTR(PYBEN.PYBEN_NAME, ', ') + 2)) AS FIRSTNAME,
         TRIM(SUBSTR(PYBEN.PYBEN_NAME, 1, INSTR(PYBEN.PYBEN_NAME, ',') - 1)) AS LASTNAME,
-        TRIM(PYBEN.PYBEN_NAME) AS FULL_NAME,
         CASE
             WHEN LENGTH(PYBEN.PYBEN_DOBIRTH) = 8
                 AND TO_NUMBER(SUBSTR(PYBEN.PYBEN_DOBIRTH, 5, 2)) BETWEEN 1 AND 12
