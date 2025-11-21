@@ -71,10 +71,7 @@ const MilitaryContributionContent = () => {
     contributionYear: number;
     isSupplementalContribution: boolean;
   }) => {
-    const employeeName =
-      masterInquiryMemberDetails?.firstName && masterInquiryMemberDetails?.lastName
-        ? `${masterInquiryMemberDetails.firstName} ${masterInquiryMemberDetails.lastName}`
-        : "the selected employee";
+    const employeeName = masterInquiryMemberDetails?.fullName || "the selected employee";
 
     const contributionType = contribution.isSupplementalContribution ? "supplemental" : "regular";
     const successMessage = `The ${contributionType} military contribution of $${formatNumberWithComma(contribution.contributionAmount)} for year ${contribution.contributionYear} for ${employeeName} saved successfully`;

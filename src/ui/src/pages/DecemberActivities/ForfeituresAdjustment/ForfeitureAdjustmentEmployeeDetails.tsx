@@ -1,5 +1,4 @@
-import { Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import LabelValueSection from "components/LabelValueSection";
 import React from "react";
 import { EmployeeDetails } from "reduxstore/types";

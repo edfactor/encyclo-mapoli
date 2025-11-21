@@ -13,10 +13,7 @@ export const GetBeneficiaryOfGridColumns = (): ColDef[] => {
   return [
     createBadgeColumn({ headerName: "Badge/Psn", psnSuffix: true }),
     createNameColumn({
-      field: "fullName",
-      valueFormatter: (params) => {
-        return `${params.data.lastName}, ${params.data.firstName}`;
-      }
+      field: "fullName"
     }),
     createSSNColumn({}),
     createDateColumn({ headerName: "Date of Birth", field: "dateOfBirth" }),

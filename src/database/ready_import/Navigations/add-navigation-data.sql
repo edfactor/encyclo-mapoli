@@ -111,6 +111,7 @@ DECLARE
     FORFEITURE_ADJUSTMENT_PAGE CONSTANT NUMBER := 168;
     MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE CONSTANT NUMBER := 169;
     MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE CONSTANT NUMBER := 170;
+    YTD_WAGES_EXTRACT_UNFROZEN CONSTANT NUMBER := 171;
 
 
 
@@ -264,7 +265,8 @@ BEGIN
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, DECEMBER_ACTIVITIES, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Sharing Summmary', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PAY426N_DECEMBER, DECEMBER_ACTIVITIES, 'Profit Sharing Report', 'PAY426N', 'pay426n', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
-                          
+    insert_navigation_item(YTD_WAGES_EXTRACT_UNFROZEN, DECEMBER_ACTIVITIES, 'YTD Extract', 'PROF-DOLLAR-EXTRACT', 'ytd-wages-extract-live', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
+                       
 -- Profit Share Totals (Year End)
     insert_navigation_item(FISCAL_CLOSE, YEAR_END_MENU, 'Fiscal Close', '', 'fiscal-close', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);    
     insert_navigation_item(PROF_SHARE_BY_STORE, YEAR_END_MENU, 'Prof Share by Store', 'QPAY066TA', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
@@ -349,6 +351,10 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     -- assign_navigation_role(PAY_BEN_REPORT, FINANCE_MANAGER); -- COMMENTED OUT - navigation item doesn't exist
     -- assign_navigation_role(PAY_BEN_REPORT, DISTRIBUTIONS_CLERK); -- COMMENTED OUT - navigation item doesn't exist
 
+ -- YTD WAGES EXTRACT UNFROZEN
+    assign_navigation_role(YTD_WAGES_EXTRACT_UNFROZEN, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(YTD_WAGES_EXTRACT_UNFROZEN, FINANCE_MANAGER);
+    assign_navigation_role(YTD_WAGES_EXTRACT_UNFROZEN, DISTRIBUTIONS_CLERK);
 
  -- LABELS NEW REPORT
     assign_navigation_role(LABELS_NEW, SYSTEM_ADMINISTRATOR);

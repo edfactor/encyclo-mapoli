@@ -9,7 +9,7 @@ interface MemberDetailsPanelProps {
 
 const MemberDetailsPanel: React.FC<MemberDetailsPanelProps> = ({ selectedMember, memberType }) => {
   const nameAddressSection = [
-    { label: "Name", value: selectedMember.name },
+    { label: "Name", value: selectedMember.fullName },
     { label: "Address", value: selectedMember.street },
     { label: "City", value: selectedMember.city },
     { label: "State", value: selectedMember.state },

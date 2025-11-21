@@ -1,145 +1,147 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+import { convertToISODateString } from "../../utils/dateUtils";
 
 import {
-    addBadgeNumberToUpdateAdjustmentSummary,
-    clearBreakdownByStoreTotals,
-    clearBreakdownGrandTotals,
-    clearCertificates,
-    clearProfitMasterApply,
-    clearProfitMasterRevert,
-    clearProfitMasterStatus,
-    clearProfitSharingEdit,
-    clearProfitSharingLabels,
-    clearProfitSharingUnder21Report,
-    clearProfitSharingUpdate,
-    clearUnder21BreakdownByStore,
-    clearUnder21Inactive,
-    clearUnder21Totals,
-    clearYearEndProfitSharingReportFrozen,
-    clearYearEndProfitSharingReportLive,
-    clearYearEndProfitSharingReportTotals,
-    setAdditionalExecutivesGrid,
-    setBalanceByAge,
-    setBalanceByYears,
-    setBreakdownByStore,
-    setBreakdownByStoreMangement,
-    setBreakdownByStoreTotals,
-    setBreakdownGrandTotals,
-    setCertificates,
-    setContributionsByAge,
-    setControlSheet,
-    setDemographicBadgesNotInPayprofitData,
-    setDistributionsAndForfeitures,
-    setDistributionsByAge,
-    setDuplicateNamesAndBirthdays,
-    setDuplicateSSNsData,
-    setEligibleEmployees,
-    setEmployeeWagesForYear,
-    setExecutiveHoursAndDollars,
-    setForfeituresAndPoints,
-    setForfeituresByAge,
-    setGrossWagesReport,
-    setNegativeEtvaForSSNsOnPayprofit,
-    setProfitMasterApply,
-    setProfitMasterRevert,
-    setProfitMasterStatus,
-    setProfitShareSummaryReport,
-    setProfitSharingEdit,
-    setProfitSharingLabels,
-    setProfitSharingUnder21Report,
-    setProfitSharingUpdate,
-    setProfitSharingUpdateAdjustmentSummary,
-    setRecentlyTerminated,
-    setTerminatedLetters,
-    setTermination,
-    setUnder21BreakdownByStore,
-    setUnder21Inactive,
-    setUnder21Totals,
-    setUnForfeitsDetails,
-    setUpdateSummary,
-    setVestedAmountsByAge,
-    setYearEndProfitSharingReportFrozen,
-    setYearEndProfitSharingReportLive,
-    setYearEndProfitSharingReportTotals
+  addBadgeNumberToUpdateAdjustmentSummary,
+  clearBreakdownByStoreTotals,
+  clearBreakdownGrandTotals,
+  clearCertificates,
+  clearProfitMasterApply,
+  clearProfitMasterRevert,
+  clearProfitMasterStatus,
+  clearProfitSharingEdit,
+  clearProfitSharingLabels,
+  clearProfitSharingUnder21Report,
+  clearProfitSharingUpdate,
+  clearUnder21BreakdownByStore,
+  clearUnder21Inactive,
+  clearUnder21Totals,
+  clearYearEndProfitSharingReportFrozen,
+  clearYearEndProfitSharingReportLive,
+  clearYearEndProfitSharingReportTotals,
+  setAdditionalExecutivesGrid,
+  setBalanceByAge,
+  setBalanceByYears,
+  setBreakdownByStore,
+  setBreakdownByStoreManagement,
+  setBreakdownByStoreTotals,
+  setBreakdownGrandTotals,
+  setCertificates,
+  setContributionsByAge,
+  setControlSheet,
+  setDemographicBadgesNotInPayprofitData,
+  setDistributionsAndForfeitures,
+  setDistributionsByAge,
+  setDuplicateNamesAndBirthdays,
+  setDuplicateSSNsData,
+  setEligibleEmployees,
+  setEmployeeWagesForYear,
+  setExecutiveHoursAndDollars,
+  setForfeituresAndPoints,
+  setForfeituresByAge,
+  setGrossWagesReport,
+  setNegativeEtvaForSSNsOnPayprofit,
+  setProfitMasterApply,
+  setProfitMasterRevert,
+  setProfitMasterStatus,
+  setProfitShareSummaryReport,
+  setProfitSharingEdit,
+  setProfitSharingLabels,
+  setProfitSharingUnder21Report,
+  setProfitSharingUpdate,
+  setProfitSharingUpdateAdjustmentSummary,
+  setRecentlyTerminated,
+  setTerminatedLetters,
+  setTermination,
+  setUnder21BreakdownByStore,
+  setUnder21Inactive,
+  setUnder21Totals,
+  setUnForfeitsDetails,
+  setUpdateSummary,
+  setVestedAmountsByAge,
+  setYearEndProfitSharingReportFrozen,
+  setYearEndProfitSharingReportLive,
+  setYearEndProfitSharingReportTotals
 } from "reduxstore/slices/yearsEndSlice";
 import {
-    AdhocBeneficiariesReportRequest,
-    adhocBeneficiariesReportResponse,
-    BadgeNumberRequest,
-    BalanceByAge,
-    BalanceByYears,
-    BreakdownByStoreRequest,
-    BreakdownByStoreResponse,
-    BreakdownByStoreTotals,
-    CertificateDownloadRequest,
-    CertificatePrintRequest,
-    CertificatesReportResponse,
-    ContributionsByAge,
-    ControlSheetRequest,
-    ControlSheetResponse,
-    DemographicBadgesNotInPayprofitRequestDto,
-    DemographicBadgesNotInPayprofitResponse,
-    DistributionsAndForfeituresRequestDto,
-    DistributionsAndForfeitureTotalsResponse,
-    DuplicateNameAndBirthday,
-    DuplicateNameAndBirthdayRequestDto,
-    DuplicateSSNDetail,
-    DuplicateSSNsRequestDto,
-    EligibleEmployeeResponseDto,
-    EligibleEmployeesRequestDto,
-    EmployeeWagesForYear,
-    EmployeeWagesForYearRequestDto,
-    ExecutiveHoursAndDollars,
-    ExecutiveHoursAndDollarsRequestDto,
-    ForfeitureAdjustmentDetail,
-    ForfeitureAdjustmentUpdateRequest,
-    ForfeituresAndPointsResponse,
-    ForfeituresByAge,
-    FrozenReportsByAgeRequest,
-    FrozenReportsForfeituresAndPointsRequest,
-    GrandTotalsByStoreResponseDto,
-    GrossWagesReportDto,
-    GrossWagesReportResponse,
-    NegativeEtvaForSSNsOnPayProfit,
-    NegativeEtvaForSSNsOnPayprofitRequestDto,
-    PagedReportResponse,
-    PayBenReportRequest,
-    PayBenReportResponse,
-    ProfitMasterStatus,
-    ProfitShareEditResponse,
-    ProfitShareMasterApplyRequest,
-    ProfitShareMasterResponse,
-    ProfitShareUpdateRequest,
-    ProfitShareUpdateResponse,
-    ProfitSharingDistributionsByAge,
-    ProfitSharingLabel,
-    ProfitSharingLabelsRequest,
-    ProfitSharingUnder21ReportRequest,
-    ProfitSharingUnder21ReportResponse,
-    ProfitYearRequest,
-    QPAY066BTerminatedWithVestedBalanceRequest,
-    QPAY066BTerminatedWithVestedBalanceResponse,
-    RecentlyTerminatedResponse,
-    StartAndEndDateRequest,
-    SuggestedForfeitResponse,
-    SuggestForfeitureAdjustmentRequest,
-    TerminatedLettersRequest,
-    TerminatedLettersResponse,
-    TerminationResponse,
-    Under21BreakdownByStoreRequest,
-    Under21BreakdownByStoreResponse,
-    Under21InactiveRequest,
-    Under21InactiveResponse,
-    Under21TotalsRequest,
-    Under21TotalsResponse,
-    UnForfeit,
-    UpdateSummaryRequest,
-    UpdateSummaryResponse,
-    VestedAmountsByAge,
-    YearEndProfitSharingReportRequest,
-    YearEndProfitSharingReportResponse,
-    YearEndProfitSharingReportSummaryResponse,
-    YearEndProfitSharingReportTotalsResponse
+  AdhocBeneficiariesReportRequest,
+  adhocBeneficiariesReportResponse,
+  BadgeNumberRequest,
+  BalanceByAge,
+  BalanceByYears,
+  BreakdownByStoreAndDateRangeRequest,
+  BreakdownByStoreEmployee,
+  BreakdownByStoreRequest,
+  BreakdownByStoreTotals,
+  CertificateDownloadRequest,
+  CertificatePrintRequest,
+  CertificatesReportResponse,
+  ContributionsByAge,
+  ControlSheetRequest,
+  ControlSheetResponse,
+  DemographicBadgesNotInPayprofitRequestDto,
+  DemographicBadgesNotInPayprofitResponse,
+  DistributionsAndForfeituresRequestDto,
+  DistributionsAndForfeitureTotalsResponse,
+  DuplicateNameAndBirthday,
+  DuplicateNameAndBirthdayRequestDto,
+  DuplicateSSNDetail,
+  DuplicateSSNsRequestDto,
+  EligibleEmployeeResponseDto,
+  EligibleEmployeesRequestDto,
+  EmployeeWagesForYear,
+  EmployeeWagesForYearRequestDto,
+  ExecutiveHoursAndDollars,
+  ExecutiveHoursAndDollarsRequestDto,
+  ForfeitureAdjustmentDetail,
+  ForfeitureAdjustmentUpdateRequest,
+  ForfeituresAndPointsResponse,
+  ForfeituresByAge,
+  FrozenReportsByAgeRequest,
+  FrozenReportsForfeituresAndPointsRequest,
+  GrandTotalsByStoreResponseDto,
+  GrossWagesReportDto,
+  GrossWagesReportResponse,
+  NegativeEtvaForSSNsOnPayProfit,
+  NegativeEtvaForSSNsOnPayprofitRequestDto,
+  PagedReportResponse,
+  PayBenReportRequest,
+  PayBenReportResponse,
+  ProfitMasterStatus,
+  ProfitShareEditResponse,
+  ProfitShareMasterApplyRequest,
+  ProfitShareMasterResponse,
+  ProfitShareUpdateRequest,
+  ProfitShareUpdateResponse,
+  ProfitSharingDistributionsByAge,
+  ProfitSharingLabel,
+  ProfitSharingLabelsRequest,
+  ProfitSharingUnder21ReportRequest,
+  ProfitSharingUnder21ReportResponse,
+  ProfitYearRequest,
+  QPAY066BTerminatedWithVestedBalanceRequest,
+  QPAY066BTerminatedWithVestedBalanceResponse,
+  RecentlyTerminatedResponse,
+  StartAndEndDateRequest,
+  SuggestedForfeitResponse,
+  SuggestForfeitureAdjustmentRequest,
+  TerminatedLettersRequest,
+  TerminatedLettersResponse,
+  TerminationResponse,
+  Under21BreakdownByStoreRequest,
+  Under21BreakdownByStoreResponse,
+  Under21InactiveRequest,
+  Under21InactiveResponse,
+  Under21TotalsRequest,
+  Under21TotalsResponse,
+  UnForfeit,
+  UpdateSummaryRequest,
+  UpdateSummaryResponse,
+  VestedAmountsByAge,
+  YearEndProfitSharingReportRequest,
+  YearEndProfitSharingReportResponse,
+  YearEndProfitSharingReportSummaryResponse,
+  YearEndProfitSharingReportTotalsResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { createDataSourceAwareBaseQuery } from "./api";
@@ -155,8 +157,8 @@ type TerminationRequestWithArchive = StartAndEndDateRequest & {
 };
 
 import {
-    clearForfeitureAdjustmentData,
-    setForfeitureAdjustmentData
+  clearForfeitureAdjustmentData,
+  setForfeitureAdjustmentData
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 /* Use the centralized data source aware base query 
@@ -414,6 +416,7 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
+          useFrozenData: params.useFrozenData !== undefined ? params.useFrozenData : true,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -896,79 +899,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getBreakdownByStore: builder.query<BreakdownByStoreResponse, BreakdownByStoreRequest>({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
 
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreMangement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
-      query: (params) => ({
-        url: `yearend/breakdown-by-store/${params.storeNumber}/totals`,
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          dispatch(clearBreakdownByStoreTotals());
-          const { data } = await queryFulfilled;
-          dispatch(setBreakdownByStoreTotals(data));
-        } catch (err) {
-          console.log("Err: " + err);
-          dispatch(clearBreakdownByStoreTotals());
-        }
-      }
-    }),
-    getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
-      query: (params) => ({
-        url: `yearend/breakdown-by-store/totals`,
-        method: "GET",
-        params: {
-          profitYear: params.profitYear
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          dispatch(clearBreakdownByStoreTotals());
-          const { data } = await queryFulfilled;
-          dispatch(setBreakdownGrandTotals(data));
-        } catch (err) {
-          console.log("Err: " + err);
-          dispatch(clearBreakdownGrandTotals());
-        }
-      }
-    }),
     getUnder21BreakdownByStore: builder.query<Under21BreakdownByStoreResponse, Under21BreakdownByStoreRequest>({
       query: (params) => ({
         url: "yearend/post-frozen/under-21-breakdown-by-store",
@@ -1398,22 +1329,6 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getQPAY066BTerminatedWithVestedBalance: builder.query<
-      QPAY066BTerminatedWithVestedBalanceResponse,
-      QPAY066BTerminatedWithVestedBalanceRequest
-    >({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          skip: params.pagination.skip,
-          take: params.pagination.take,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      })
-    }),
     getCertificatesReport: builder.query<CertificatesReportResponse, CertificatePrintRequest>({
       query: (params) => ({
         url: "yearend/post-frozen/certificates",
@@ -1449,63 +1364,421 @@ export const YearsEndApi = createApi({
         },
         responseHandler: (response) => response.blob()
       })
+    }),
+    // **************************
+    // Breakdown By Store Queries
+    //.  with PagedReportResponse<BreakdownByStoreEmployee>
+    // **************************
+    // 1. Get Breakdown By Store
+
+    getBreakdownByStore: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreManagement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getBreakdownByStoreInactive: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/inactive",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreManagement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreInactiveWithVestedBalance: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/inactive/withvestedbalance",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreManagement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTerminatedVestedBalance: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreAndDateRangeRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withvestedbalance",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          startDate: params.startDate,
+          endDate: params.endDate,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreManagement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTerminatedBalanceNotVested: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreAndDateRangeRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
+          startDate: convertToISODateString(params.startDate),
+          endDate: convertToISODateString(params.endDate),
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreManagement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTerminatedWithBenAllocations: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withbeneficiaryallocation",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
+          startDate: convertToISODateString(params.startDate),
+          endDate: convertToISODateString(params.endDate),
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreManagement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTerminatedWithBalanceActivity: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreAndDateRangeRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withbalanceactivity",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          startDate: params.startDate,
+          endDate: params.endDate,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreManagement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreRetiredWithBalanceActivity: builder.query<
+      PagedReportResponse<BreakdownByStoreEmployee>,
+      BreakdownByStoreRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/retired/withbalanceactivity",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          storeManagement: params.storeManagement,
+          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
+          startDate: convertToISODateString(params.startDate),
+          endDate: convertToISODateString(params.endDate),
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreManagement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
+    getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: `yearend/breakdown-by-store/${params.storeNumber}/totals`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStoreTotals());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownByStoreTotals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownByStoreTotals());
+        }
+      }
+    }),
+    getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
+      query: (params) => ({
+        url: `yearend/breakdown-by-store/totals`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        }
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStoreTotals());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownGrandTotals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownGrandTotals());
+        }
+      }
+    }),
+    getQPAY066BTerminatedWithVestedBalance: builder.query<
+      QPAY066BTerminatedWithVestedBalanceResponse,
+      QPAY066BTerminatedWithVestedBalanceRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          skip: params.pagination.skip,
+          take: params.pagination.take,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      })
     })
   })
 });
 
 export const {
+  useFinalizeReportMutation,
+  useLazyAdhocBeneficiariesReportQuery,
+  useLazyDownloadCertificatesFileQuery,
   useLazyGetAdditionalExecutivesQuery,
   useLazyGetBalanceByAgeQuery,
   useLazyGetBalanceByYearsQuery,
+
   useLazyGetBreakdownByStoreQuery,
   useLazyGetBreakdownByStoreTotalsQuery,
+  useLazyGetBreakdownGrandTotalsQuery,
+  useLazyGetBreakdownByStoreInactiveQuery,
+  useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery,
+  useLazyGetBreakdownByStoreTerminatedVestedBalanceQuery,
+  useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery,
+  useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery,
+  useLazyGetBreakdownByStoreTerminatedWithBalanceActivityQuery,
+  useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery,
   useLazyGetCertificatesReportQuery,
+
   useLazyGetContributionsByAgeQuery,
   useLazyGetControlSheetQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDistributionsAndForfeituresQuery,
   useLazyGetDistributionsByAgeQuery,
-  useLazyDownloadCertificatesFileQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
-  useRefreshDuplicateNamesAndBirthdaysCacheMutation,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetEligibleEmployeesQuery,
-  //useLazyGetEmployeesOnMilitaryLeaveQuery,
   useLazyGetEmployeeWagesForYearQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
+  useLazyGetForfeitureAdjustmentsQuery,
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
   useLazyGetGrossWagesReportQuery,
-  useLazyGetUnForfeitsQuery,
+  useLazyGetMasterRevertQuery,
   useLazyGetNegativeEVTASSNQuery,
+  useLazyGetPostFrozenUnder21Query,
+  useLazyGetProfitMasterStatusQuery,
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
+  useLazyGetProfitSharingLabelsQuery,
+  useLazyGetQPAY066BTerminatedWithVestedBalanceQuery,
+  useLazyGetRecentlyTerminatedReportQuery,
+  useLazyGetTerminatedLettersDownloadQuery,
+  useLazyGetTerminatedLettersReportQuery,
   useLazyGetTerminationReportQuery,
   useLazyGetUnder21BreakdownByStoreQuery,
   useLazyGetUnder21InactiveQuery,
   useLazyGetUnder21TotalsQuery,
-  useLazyGetVestingAmountByAgeQuery,
-  useLazyGetPostFrozenUnder21Query,
-  useLazyGetYearEndProfitSharingReportLiveQuery,
-  useLazyGetYearEndProfitSharingReportFrozenQuery,
-  useLazyGetYearEndProfitSharingReportTotalsQuery,
-  useUpdateExecutiveHoursAndDollarsMutation,
-  useLazyGetYearEndProfitSharingSummaryReportQuery,
-  useGetMasterApplyMutation,
-  useLazyGetMasterRevertQuery,
-  useLazyGetProfitSharingLabelsQuery,
-  useLazyGetProfitMasterStatusQuery,
-  useLazyGetBreakdownGrandTotalsQuery,
-  useLazyGetForfeitureAdjustmentsQuery,
-  useUpdateForfeitureAdjustmentMutation,
-  useUpdateForfeitureAdjustmentBulkMutation,
+  useLazyGetUnForfeitsQuery,
   useLazyGetUpdateSummaryQuery,
-  useUpdateEnrollmentMutation,
-  useFinalizeReportMutation,
-  useLazyAdhocBeneficiariesReportQuery,
+  useLazyGetVestingAmountByAgeQuery,
+  useLazyGetYearEndProfitSharingReportFrozenQuery,
+  useLazyGetYearEndProfitSharingReportLiveQuery,
+  useLazyGetYearEndProfitSharingReportTotalsQuery,
+  useLazyGetYearEndProfitSharingSummaryReportQuery,
   useLazyPayBenReportQuery,
-  useLazyGetQPAY066BTerminatedWithVestedBalanceQuery,
-  useLazyGetRecentlyTerminatedReportQuery,
-  useLazyGetTerminatedLettersReportQuery,
-  useLazyGetTerminatedLettersDownloadQuery
+  useGetMasterApplyMutation,
+  useRefreshDuplicateNamesAndBirthdaysCacheMutation,
+  useUpdateEnrollmentMutation,
+  useUpdateExecutiveHoursAndDollarsMutation,
+  useUpdateForfeitureAdjustmentBulkMutation,
+  useUpdateForfeitureAdjustmentMutation
 } = YearsEndApi;

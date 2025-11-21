@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
@@ -40,7 +41,7 @@ public static class DemographicsRequestExtension
                 FirstName = employee.Name.FirstName,
                 MiddleName = employee.Name.MiddleNames,
                 LastName = employee.Name.LastName,
-                FullName = $"{employee.Name.LastName}, {employee.Name.FirstName}",
+                FullName = DtoCommonExtensions.ComputeFullNameWithInitial(employee.Name.LastName, employee.Name.FirstName, employee.Name.MiddleNames),
                 PhoneNumber = employee.Phone?.PhoneNumber,
                 EmailAddress = employee.Email?.EmailAddress
             },

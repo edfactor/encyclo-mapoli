@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
@@ -225,6 +225,22 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
 
+        var states = new List<State>()
+        {
+            new State() { Abbreviation = "MA", Name = "Massachusetts" },
+            new State() { Abbreviation = "NH", Name = "New Hampshire" },
+            new State() { Abbreviation = "ME", Name = "Maine" },
+            new State() { Abbreviation = "CT", Name = "Connecticut" },
+            new State() { Abbreviation = "RI", Name = "Rhode Island" },
+            new State() { Abbreviation = "VT", Name = "Vermont" },
+            new State() { Abbreviation = "NY", Name = "New York" },
+            new State() { Abbreviation = "CA", Name = "California" },
+            new State() { Abbreviation = "TX", Name = "Texas" }
+        };
+        var mockStates = states.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.States).Returns(mockStates.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.States).Returns(mockStates.Object);
+
         var employmentTypes = new List<EmploymentType>()
         {
             new EmploymentType() {Id=EmploymentType.Constants.FullTimeAccruedPaidHolidays,Name=EmploymentType.Constants.FullTimeAccruedPaidHolidays.ToString() },
@@ -239,13 +255,24 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<Demographic>? demographics = new DemographicFaker().Generate(500);
         List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
 
-        var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 5);
+        var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 4);
+
+        // Add COMMENT_RELATED_STATE values to some profit details for state lookup testing
+        var statesToAssign = new[] { "MA", "NH", "ME", "CT", "RI", "VT", "NY", "CA", "TX" };
+        for (int i = 0; i < profitDetails.Count; i++)
+        {
+            if (i % 7 == 0) // Assign state to approximately 1 in 7 records
+            {
+                profitDetails[i].CommentRelatedState = statesToAssign[i % statesToAssign.Length];
+            }
+        }
+
         var mockProfitDetails = BuildMockDbSetWithBackingList(profitDetails);
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
-        List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(demographics.Count * 5);
-        List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count * 3);
+        List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(demographics.Count * 4);
+        List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count * 2);
 
         foreach (PayProfit payProfit in profits)
         {
@@ -447,6 +474,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<DistributionStatus>()).Returns(mockDistributionStatuses.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<CommentType>()).Returns(mockCommentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<TaxCode>()).Returns(mockTaxCodesList.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Set<State>()).Returns(mockStates.Object);
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()

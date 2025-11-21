@@ -72,6 +72,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }
     public virtual DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
     public virtual DbSet<StateTax> StateTaxes { get; set; }
+    public virtual DbSet<State> States { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

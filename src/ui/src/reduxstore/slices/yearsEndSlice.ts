@@ -4,8 +4,8 @@ import { YearsEndApi } from "reduxstore/api/YearsEndApi";
 import {
   BalanceByAge,
   BalanceByYears,
+  BreakdownByStoreEmployee,
   BreakdownByStoreRequest,
-  BreakdownByStoreResponse,
   BreakdownByStoreTotals,
   CertificatesReportResponse,
   ContributionsByAge,
@@ -140,10 +140,10 @@ export interface YearsEndState {
   yearEndProfitSharingReportFrozen: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReportTotals: YearEndProfitSharingReportTotalsResponse | null;
-  breakdownByStore: BreakdownByStoreResponse | null;
-  breakdownByStoreMangement: BreakdownByStoreResponse | null;
+  breakdownByStore: PagedReportResponse<BreakdownByStoreEmployee> | null;
+  breakdownByStoreManagement: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreTotals: BreakdownByStoreTotals | null;
-  storeManagementBreakdown: BreakdownByStoreResponse | null;
+  storeManagementBreakdown: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreQueryParams: BreakdownByStoreRequest | null;
   under21BreakdownByStore: Under21BreakdownByStoreResponse | null;
   under21BreakdownByStoreQueryParams: Under21BreakdownByStoreRequest | null;
@@ -243,7 +243,7 @@ const initialState: YearsEndState = {
   yearEndProfitSharingReportQueryParams: null,
   yearEndProfitSharingReportTotals: null,
   breakdownByStore: null,
-  breakdownByStoreMangement: null,
+  breakdownByStoreManagement: null,
   breakdownByStoreTotals: null,
   storeManagementBreakdown: null,
   breakdownByStoreQueryParams: null,
@@ -954,18 +954,25 @@ export const yearsEndSlice = createSlice({
     setYearEndProfitSharingReportTotals: (state, action: PayloadAction<YearEndProfitSharingReportTotalsResponse>) => {
       state.yearEndProfitSharingReportTotals = action.payload;
     },
-    setBreakdownByStore: (state, action: PayloadAction<BreakdownByStoreResponse>) => {
+
+    // ********************
+    // Breakdown Reports
+    // ********************
+    setBreakdownByStore: (state, action: PayloadAction<PagedReportResponse<BreakdownByStoreEmployee>>) => {
       state.breakdownByStore = action.payload;
     },
     clearBreakdownByStore: (state) => {
       state.breakdownByStore = null;
     },
-    setBreakdownByStoreMangement: (state, action: PayloadAction<BreakdownByStoreResponse>) => {
-      state.breakdownByStoreMangement = action.payload;
+    setBreakdownByStoreManagement: (state, action: PayloadAction<PagedReportResponse<BreakdownByStoreEmployee>>) => {
+      state.breakdownByStoreManagement = action.payload;
     },
-    clearBreakdownByStoreMangement: (state) => {
-      state.breakdownByStoreMangement = null;
+    clearBreakdownByStoreManagement: (state) => {
+      state.breakdownByStoreManagement = null;
     },
+
+    //
+
     setBreakdownByStoreTotals: (state, action: PayloadAction<BreakdownByStoreTotals>) => {
       state.breakdownByStoreTotals = action.payload;
     },
@@ -978,6 +985,7 @@ export const yearsEndSlice = createSlice({
     clearBreakdownGrandTotals: (state) => {
       state.breakdownGrandTotals = null;
     },
+
     setCertificates: (state, action: PayloadAction<CertificatesReportResponse>) => {
       state.certificates = action.payload;
     },
@@ -1041,7 +1049,7 @@ export const yearsEndSlice = createSlice({
       state.controlSheet = null;
     }
   },
-  // In yearsEndSlice.ts - find the extraReducers section
+
   extraReducers: (builder) => {
     // Your existing matchers
 
@@ -1123,8 +1131,8 @@ export const {
   updateExecutiveHoursAndDollarsGridRow,
   setBreakdownByStore,
   clearBreakdownByStore,
-  setBreakdownByStoreMangement,
-  clearBreakdownByStoreMangement,
+  setBreakdownByStoreManagement,
+  clearBreakdownByStoreManagement,
   setBreakdownByStoreTotals,
   clearBreakdownByStoreTotals,
   setBreakdownGrandTotals,

@@ -128,7 +128,12 @@ const useMasterInquiry = () => {
           startProfitMonth: params.startProfitMonth,
           endProfitMonth: params.endProfitMonth,
           memberType: params.memberType,
-          paymentType: params.paymentType
+          paymentType: params.paymentType,
+          contributionAmount: params.contributionAmount,
+          earningsAmount: params.earningsAmount,
+          forfeitureAmount: params.forfeitureAmount,
+          paymentAmount: params.paymentAmount,
+          voids: params.voids
         });
 
         // Skip if same params and already searching
@@ -154,8 +159,12 @@ const useMasterInquiry = () => {
           const total = Array.isArray(response) ? response.length : response.total;
 
           dispatch({ type: "SEARCH_SUCCESS", payload: { results: { results, total } } });
+          // Clear ref to allow repeat searches with same criteria
+          lastSearchParamsRef.current = null;
         } else {
           dispatch({ type: "SEARCH_SUCCESS", payload: { results: { results: [], total: 0 } } });
+          // Clear ref to allow repeat searches with same criteria
+          lastSearchParamsRef.current = null;
 
           // Add appropriate missive alert based on current search parameters
           // Convert API params back to form-ish structure for isSimpleSearch check
@@ -193,6 +202,8 @@ const useMasterInquiry = () => {
       } catch (error) {
         console.error("Search failed:", error);
         dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
+        // Clear ref to allow repeat searches after error
+        lastSearchParamsRef.current = null;
 
         // Add error alert
         addAlert({

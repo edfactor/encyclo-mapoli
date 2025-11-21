@@ -37,7 +37,7 @@ public sealed class TerminatedEmployeesWithBalanceActivityBreakdownEndpoint : En
         Get("/breakdown-by-store/terminated/withbalanceactivity");
         Summary(s =>
         {
-            s.Summary = "Breakdown terminated managers and associates for all stores who have a balance";
+            s.Summary = "QPAY066D: Breakdown terminated managers and associates for all stores who have a balance";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();

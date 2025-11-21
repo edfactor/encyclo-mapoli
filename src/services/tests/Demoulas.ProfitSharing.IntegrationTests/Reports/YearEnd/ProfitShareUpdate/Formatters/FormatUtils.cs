@@ -167,10 +167,9 @@ public static class FormatUtils
 
     private static string FormatCobolLong(long value, string format, int width)
     {
-        string formattedValue;
-
-        // Use zeroes as usual for integer fields; no special formatting needed for zero.
-        formattedValue = value.ToString(format, CultureInfo.InvariantCulture);
+        string formattedValue =
+            // Use zeroes as usual for integer fields; no special formatting needed for zero.
+            value.ToString(format, CultureInfo.InvariantCulture);
 
         if (value != 0)
         // Replace leading zeros with spaces.

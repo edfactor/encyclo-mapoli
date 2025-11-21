@@ -13,7 +13,7 @@ import { createDataSourceAwareBaseQuery } from "./api";
 // In-flight request tracking to prevent duplicate API calls
 const inFlightRequests = new Map<string, Promise<unknown>>();
 
-const baseQuery = createDataSourceAwareBaseQuery();
+const baseQuery = createDataSourceAwareBaseQuery(15000); // 15 second timeout for user-facing searches
 export const InquiryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "inquiryApi",
@@ -43,6 +43,7 @@ export const InquiryApi = createApi({
           paymentType: params.paymentType,
           memberType: params.memberType,
           name: params.name,
+          voids: params.voids,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -195,6 +196,7 @@ export const InquiryApi = createApi({
           paymentType: params.paymentType,
           memberType: params.memberType,
           name: params.name,
+          voids: params.voids,
           sortBy: params.pagination.sortBy,
           isSortDescending: params.pagination.isSortDescending,
           skip: params.pagination.skip,

@@ -10,10 +10,10 @@ export interface MasterInquirySearch {
   comment?: string | null;
   paymentType: "all" | "hardship" | "payoffs" | "rollovers";
   memberType: "all" | "employees" | "beneficiaries" | "none";
-  contribution?: number | null;
-  earnings?: number | null;
-  forfeiture?: number | null;
-  payment?: number | null;
+  contribution?: number | string | null;
+  earnings?: number | string | null;
+  forfeiture?: number | string | null;
+  payment?: number | string | null;
   voids: boolean;
   pagination: SortedPaginationRequestDto;
 }
@@ -70,6 +70,7 @@ export interface MasterInquiryRequest {
   paymentAmount?: number;
   name?: string;
   paymentType?: number;
+  voids?: boolean;
   pagination: SortedPaginationRequestDto;
   _timestamp?: number;
 }

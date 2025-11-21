@@ -30652,6 +30652,312 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.State", b =>
+                {
+                    b.Property<string>("Abbreviation")
+                        .HasMaxLength(2)
+                        .HasColumnType("NVARCHAR2(2)")
+                        .HasColumnName("ABBREVIATION");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Abbreviation")
+                        .HasName("PK_STATE");
+
+                    b.ToTable("STATE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Abbreviation = "AL",
+                            Name = "Alabama"
+                        },
+                        new
+                        {
+                            Abbreviation = "AK",
+                            Name = "Alaska"
+                        },
+                        new
+                        {
+                            Abbreviation = "AZ",
+                            Name = "Arizona"
+                        },
+                        new
+                        {
+                            Abbreviation = "AR",
+                            Name = "Arkansas"
+                        },
+                        new
+                        {
+                            Abbreviation = "CA",
+                            Name = "California"
+                        },
+                        new
+                        {
+                            Abbreviation = "CO",
+                            Name = "Colorado"
+                        },
+                        new
+                        {
+                            Abbreviation = "CT",
+                            Name = "Connecticut"
+                        },
+                        new
+                        {
+                            Abbreviation = "DE",
+                            Name = "Delaware"
+                        },
+                        new
+                        {
+                            Abbreviation = "FL",
+                            Name = "Florida"
+                        },
+                        new
+                        {
+                            Abbreviation = "GA",
+                            Name = "Georgia"
+                        },
+                        new
+                        {
+                            Abbreviation = "HI",
+                            Name = "Hawaii"
+                        },
+                        new
+                        {
+                            Abbreviation = "ID",
+                            Name = "Idaho"
+                        },
+                        new
+                        {
+                            Abbreviation = "IL",
+                            Name = "Illinois"
+                        },
+                        new
+                        {
+                            Abbreviation = "IN",
+                            Name = "Indiana"
+                        },
+                        new
+                        {
+                            Abbreviation = "IA",
+                            Name = "Iowa"
+                        },
+                        new
+                        {
+                            Abbreviation = "KS",
+                            Name = "Kansas"
+                        },
+                        new
+                        {
+                            Abbreviation = "KY",
+                            Name = "Kentucky"
+                        },
+                        new
+                        {
+                            Abbreviation = "LA",
+                            Name = "Louisiana"
+                        },
+                        new
+                        {
+                            Abbreviation = "ME",
+                            Name = "Maine"
+                        },
+                        new
+                        {
+                            Abbreviation = "MD",
+                            Name = "Maryland"
+                        },
+                        new
+                        {
+                            Abbreviation = "MA",
+                            Name = "Massachusetts"
+                        },
+                        new
+                        {
+                            Abbreviation = "MI",
+                            Name = "Michigan"
+                        },
+                        new
+                        {
+                            Abbreviation = "MN",
+                            Name = "Minnesota"
+                        },
+                        new
+                        {
+                            Abbreviation = "MS",
+                            Name = "Mississippi"
+                        },
+                        new
+                        {
+                            Abbreviation = "MO",
+                            Name = "Missouri"
+                        },
+                        new
+                        {
+                            Abbreviation = "MT",
+                            Name = "Montana"
+                        },
+                        new
+                        {
+                            Abbreviation = "NE",
+                            Name = "Nebraska"
+                        },
+                        new
+                        {
+                            Abbreviation = "NV",
+                            Name = "Nevada"
+                        },
+                        new
+                        {
+                            Abbreviation = "NH",
+                            Name = "New Hampshire"
+                        },
+                        new
+                        {
+                            Abbreviation = "NJ",
+                            Name = "New Jersey"
+                        },
+                        new
+                        {
+                            Abbreviation = "NM",
+                            Name = "New Mexico"
+                        },
+                        new
+                        {
+                            Abbreviation = "NY",
+                            Name = "New York"
+                        },
+                        new
+                        {
+                            Abbreviation = "NC",
+                            Name = "North Carolina"
+                        },
+                        new
+                        {
+                            Abbreviation = "ND",
+                            Name = "North Dakota"
+                        },
+                        new
+                        {
+                            Abbreviation = "OH",
+                            Name = "Ohio"
+                        },
+                        new
+                        {
+                            Abbreviation = "OK",
+                            Name = "Oklahoma"
+                        },
+                        new
+                        {
+                            Abbreviation = "OR",
+                            Name = "Oregon"
+                        },
+                        new
+                        {
+                            Abbreviation = "PA",
+                            Name = "Pennsylvania"
+                        },
+                        new
+                        {
+                            Abbreviation = "RI",
+                            Name = "Rhode Island"
+                        },
+                        new
+                        {
+                            Abbreviation = "SC",
+                            Name = "South Carolina"
+                        },
+                        new
+                        {
+                            Abbreviation = "SD",
+                            Name = "South Dakota"
+                        },
+                        new
+                        {
+                            Abbreviation = "TN",
+                            Name = "Tennessee"
+                        },
+                        new
+                        {
+                            Abbreviation = "TX",
+                            Name = "Texas"
+                        },
+                        new
+                        {
+                            Abbreviation = "UT",
+                            Name = "Utah"
+                        },
+                        new
+                        {
+                            Abbreviation = "VT",
+                            Name = "Vermont"
+                        },
+                        new
+                        {
+                            Abbreviation = "VA",
+                            Name = "Virginia"
+                        },
+                        new
+                        {
+                            Abbreviation = "WA",
+                            Name = "Washington"
+                        },
+                        new
+                        {
+                            Abbreviation = "WV",
+                            Name = "West Virginia"
+                        },
+                        new
+                        {
+                            Abbreviation = "WI",
+                            Name = "Wisconsin"
+                        },
+                        new
+                        {
+                            Abbreviation = "WY",
+                            Name = "Wyoming"
+                        },
+                        new
+                        {
+                            Abbreviation = "DC",
+                            Name = "District of Columbia"
+                        },
+                        new
+                        {
+                            Abbreviation = "AS",
+                            Name = "American Samoa"
+                        },
+                        new
+                        {
+                            Abbreviation = "GU",
+                            Name = "Guam"
+                        },
+                        new
+                        {
+                            Abbreviation = "MP",
+                            Name = "Northern Mariana Islands"
+                        },
+                        new
+                        {
+                            Abbreviation = "PR",
+                            Name = "Puerto Rico"
+                        },
+                        new
+                        {
+                            Abbreviation = "UM",
+                            Name = "United States Minor Outlying Islands"
+                        },
+                        new
+                        {
+                            Abbreviation = "VI",
+                            Name = "Virgin Islands"
+                        });
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.StateTax", b =>
                 {
                     b.Property<string>("Abbreviation")
@@ -31504,11 +31810,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("FirstName");
 
                             b1.Property<string>("FullName")
-                                .IsRequired()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasMaxLength(128)
+                                .HasColumnType("NVARCHAR2(128)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComment("FullName");
+                                .HasComputedColumnSql("LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", true)
+                                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()
@@ -31676,11 +31983,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("FirstName");
 
                             b1.Property<string>("FullName")
-                                .IsRequired()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasMaxLength(128)
+                                .HasColumnType("NVARCHAR2(128)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComment("FullName");
+                                .HasComputedColumnSql("LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", true)
+                                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()
@@ -31879,11 +32187,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("FirstName");
 
                             b1.Property<string>("FullName")
-                                .IsRequired()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasMaxLength(128)
+                                .HasColumnType("NVARCHAR2(128)")
                                 .HasColumnName("FULL_NAME")
-                                .HasComment("FullName");
+                                .HasComputedColumnSql("LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END", true)
+                                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()

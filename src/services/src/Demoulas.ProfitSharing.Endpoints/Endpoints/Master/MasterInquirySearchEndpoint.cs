@@ -49,6 +49,7 @@ public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRe
                                 Id = 1,
                                 Ssn = "XXX-XX-1234",
                                 FirstName = "John",
+                                MiddleName = "Q",
                                 LastName = "Doe",
                                 BadgeNumber = 1001,
                                 PayFrequencyId = 1,

@@ -1,10 +1,10 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import {
+  AgeColumnOptions,
   AlignableColumnOptions,
   BadgeColumnOptions,
   BadgeOrPSNOptions,
-  BaseColumnOptions,
   CityColumnOptions,
   CommentColumnOptions,
   CurrencyColumnOptions,
@@ -402,7 +402,7 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
   return column;
 };
 
-export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
+export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
   const {
     headerName = "Age",
     field = "age",
@@ -414,7 +414,8 @@ export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
     tooltip,
     tooltipField,
     tooltipValueGetter,
-    headerTooltip
+    headerTooltip,
+    valueGetter
   } = options;
 
   const column: ColDef = {
@@ -443,6 +444,19 @@ export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
   // Add header tooltip support
   if (headerTooltip) {
     column.headerTooltip = headerTooltip;
+  }
+
+  if (valueGetter) {
+    column.valueGetter = valueGetter;
+  } else if (field === "dateOfBirth") {
+    column.valueGetter = (params) => {
+      const dob = params.data?.[field];
+      if (!dob) return null;
+      const birthDate = new Date(dob);
+      const ageDifMs = Date.now() - birthDate.getTime();
+      const ageDate = new Date(ageDifMs);
+      return Math.abs(ageDate.getUTCFullYear() - 1970);
+    };
   }
 
   return column;

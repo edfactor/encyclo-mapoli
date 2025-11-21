@@ -19,7 +19,7 @@ vi.mock("reduxstore/api/BeneficiariesApi", () => ({
 const mockBeneficiaryDetail: BeneficiaryDetail = {
   badgeNumber: 123,
   psnSuffix: 1,
-  name: "John Doe",
+  fullName: "John Doe",
   ssn: "123-45-6789",
   city: "Boston",
   state: "MA",
