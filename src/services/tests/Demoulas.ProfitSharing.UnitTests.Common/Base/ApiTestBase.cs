@@ -10,6 +10,29 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 
 /// <summary>
+/// Static holder for the cached mock DbContext factory to avoid Sonar S2743 warning
+/// (static fields in generic types are not shared among different close constructed types).
+/// This ensures factory caching works across all test classes regardless of their TStartup type.
+/// </summary>
+internal static class MockDbContextFactoryCache
+{
+    private static IProfitSharingDataContextFactory? s_cachedFactory;
+    private static readonly object s_lockObject = new object();
+
+    public static IProfitSharingDataContextFactory GetOrCreate()
+    {
+        if (s_cachedFactory == null)
+        {
+            lock (s_lockObject)
+            {
+                s_cachedFactory ??= MockDataContextFactory.InitializeForTesting();
+            }
+        }
+        return s_cachedFactory;
+    }
+}
+
+/// <summary>
 ///   Abstraction for testing api endpoints that use a <c>DbContext</c>.
 /// </summary>
 public class ApiTestBase<TStartup> where TStartup : class
@@ -46,7 +69,10 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// </remarks>
     public ApiTestBase()
     {
-        MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
+        // Use cached factory to avoid generating 6,500 fake records for every test.
+        // Factory creation is expensive (~60-80 seconds), but after first test it's reused.
+        // Expected: 20+ minute test run → 10 minute test run (50% time savings).
+        MockDbContextFactory = MockDbContextFactoryCache.GetOrCreate();
 
         WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 
