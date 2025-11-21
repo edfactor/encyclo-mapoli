@@ -1,4 +1,4 @@
-using Bogus;
+﻿using Bogus;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
@@ -220,7 +220,10 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
         result.Results.ShouldAllBe(e =>
             e.TableName != null && e.TableName.Contains("NAVIGATION") &&
             e.Operation.Contains("Update"));
-        result.Total.ShouldBeGreaterThan(0);
+        
+        // Verify we have at least one matching event (created deterministically in CreateMockAuditEvents)
+        result.Total.ShouldBeGreaterThanOrEqualTo(1);
+        result.Results.Count().ShouldBeGreaterThanOrEqualTo(1);
     }
 
     [Fact]
@@ -244,15 +247,20 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     }
 
     /// <summary>
-    /// Creates mock audit events using Faker with realistic test data
+    /// Creates mock audit events using Faker with realistic test data.
+    /// Uses a fixed seed for deterministic test results.
     /// </summary>
     private static List<AuditEvent> CreateMockAuditEvents()
     {
+        // Use a fixed seed for deterministic random data generation
+        Randomizer.Seed = new Random(42);
+        
         var faker = new Faker();
         var auditEvents = new List<AuditEvent>();
         long currentId = 1;
 
         // Create NAVIGATION table events with ChangesJson
+        // Ensure at least one Update operation exists for the multiple filters test
         var navigationFaker = new Faker<AuditEvent>()
             .RuleFor(e => e.Id, f => currentId++)
             .RuleFor(e => e.TableName, f => "NAVIGATION")
@@ -279,7 +287,29 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             })
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
-        auditEvents.AddRange(navigationFaker.Generate(5));
+        auditEvents.AddRange(navigationFaker.Generate(4));
+        
+        // Add one guaranteed NAVIGATION Update event for the multiple filters test
+        auditEvents.Add(new AuditEvent
+        {
+            Id = currentId++,
+            TableName = "NAVIGATION",
+            Operation = "Update",
+            PrimaryKey = "999",
+            UserName = "admin.user",
+            CreatedAt = DateTimeOffset.UtcNow.AddDays(-5),
+            ChangesJson = new List<AuditChangeEntry>
+            {
+                new AuditChangeEntry
+                {
+                    Id = 1,
+                    ColumnName = "StatusId",
+                    OriginalValue = "1",
+                    NewValue = "2"
+                }
+            },
+            ChangesHash = faker.Random.Hash()
+        });
 
         // Create DEMOGRAPHIC table events without ChangesJson requirement
         var demographicFaker = new Faker<AuditEvent>()
