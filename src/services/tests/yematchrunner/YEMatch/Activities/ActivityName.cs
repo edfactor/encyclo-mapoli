@@ -338,6 +338,9 @@ public enum ActivityName
     /// <summary>Update navigation tree in SMART system</summary>
     UpdateNavigation,
 
+    /// <summary>execute profit master update integration test - runs contributions on SMART and compares them to READY.</summary>
+    IntProfitMasterUpdateTest,
+
     /// <summary>Dump Master Inquiry report from READY</summary>
     MasterInquiryDumper,
 
@@ -361,5 +364,11 @@ public enum ActivityName
     IntPay426N,
 
     /// <summary>Integration test for PAY426 report</summary>
-    IntPay426
+    IntPay426,
+
+    IntPay450,
+
+    IntPay444Test,
+
+    IntPay447Test
 }

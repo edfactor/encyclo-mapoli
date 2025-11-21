@@ -255,7 +255,8 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
 
         string responseBody = await response.Content.ReadAsStringAsync();
 
-        return Ok(aname, name, "");
+//        return Ok(aname, name, "Freeze");
+        return new Outcome(aname, name, "Freeze on SMART", OutcomeStatus.Ok, "", null, true);
     }
 
     private static async Task<Outcome> A13A_PAYPROFIT_SHIFT(ApiClient apiClient, string aname, string name)
@@ -339,7 +340,9 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
 
         string responseBody = await response.Content.ReadAsStringAsync();
 
-        return Ok(aname, name, "");
+        //return Ok(aname, name, "Update enrollment");
+        return new Outcome(aname, name, "Update enrollment on SMART", OutcomeStatus.Ok, "", null, true);
+
     }
 
     private async Task<Outcome> A19_Get_Eligible_Employees(ApiClient apiClient, string aname, string name)
@@ -442,7 +445,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
 
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/update-enrollment")
         {
-            Content = new StringContent("{ \"profitYear\": 2024}", Encoding.UTF8, "application/json")
+            Content = new StringContent("{ \"profitYear\": "+TestConstants.OpenProfitYear+"}", Encoding.UTF8, "application/json")
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
 

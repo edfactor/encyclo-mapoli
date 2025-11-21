@@ -237,6 +237,10 @@ public sealed class ActivityFactory : IActivityFactory
             "IntPay426N9" => ActivityName.IntPay426N9,
             "IntPay426N" => ActivityName.IntPay426N,
             "IntPay426" => ActivityName.IntPay426,
+            "IntProfitMasterUpdateTest" => ActivityName.IntProfitMasterUpdateTest,
+            "IntPay450" => ActivityName.IntPay450,
+            "IntPay444Test" => ActivityName.IntPay444Test,
+            "IntPay447Test" => ActivityName.IntPay447Test,
 
             _ => throw new ArgumentException($"Unknown activity name: {name}", nameof(name))
         };
