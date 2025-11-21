@@ -136,7 +136,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         return maxId;
     }
 
-    internal MockDataContextFactory()
+    private MockDataContextFactory()
     {
         _profitSharingDbContext = new Mock<ProfitSharingDbContext>();
         _profitSharingDbContext.Setup(ctx => ctx.SaveChangesAsync(true, It.IsAny<CancellationToken>())).ReturnsAsync(1);
@@ -477,7 +477,21 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<State>()).Returns(mockStates.Object);
     }
 
+    /// <summary>
+    /// For backward compatibility, returns a fresh factory instance per call.
+    /// Each test that needs isolation gets its own factory with 6,500+ fresh fake records.
+    /// Use this for all test scenarios to prevent state pollution.
+    /// </summary>
     public static IProfitSharingDataContextFactory InitializeForTesting()
+    {
+        return new MockDataContextFactory();
+    }
+
+    /// <summary>
+    /// INTERNAL: For future optimization only.
+    /// Allows returning a cached instance if needed, but not used by default to prevent test pollution.
+    /// </summary>
+    internal static IProfitSharingDataContextFactory InitializeForTestingCached()
     {
         return MockDbContextFactoryCache.GetOrCreateInstance();
     }
