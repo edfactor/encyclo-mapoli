@@ -253,10 +253,12 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
         long currentId = 1;
 
         // Create NAVIGATION table events with ChangesJson
+        // Make the first one explicitly "Update" to ensure the multi-filter test has data
         var navigationFaker = new Faker<AuditEvent>()
             .RuleFor(e => e.Id, f => currentId++)
             .RuleFor(e => e.TableName, f => "NAVIGATION")
-            .RuleFor(e => e.Operation, f => f.PickRandom("Insert", "Update", "Delete", "Archive"))
+            .RuleFor(e => e.Operation, (f, e) => 
+                e.Id == 1 ? "Update" : f.PickRandom("Insert", "Update", "Delete", "Archive"))
             .RuleFor(e => e.PrimaryKey, f => f.Random.Int(1, 1000).ToString())
             .RuleFor(e => e.UserName, f => f.PickRandom("admin.user", "finance.manager", "it.devops"))
             .RuleFor(e => e.CreatedAt, f => f.Date.RecentOffset(days: 30))
