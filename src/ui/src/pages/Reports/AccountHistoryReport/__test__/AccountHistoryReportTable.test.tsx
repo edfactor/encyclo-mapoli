@@ -57,6 +57,7 @@ describe("AccountHistoryReportTable", () => {
       timeoutOccurred: false,
       results: [
         {
+          id: 1,
           badgeNumber: 12345,
           fullName: "John Doe",
           ssn: "***-**-6789",
@@ -68,6 +69,7 @@ describe("AccountHistoryReportTable", () => {
           endingBalance: 5000
         },
         {
+          id: 2,
           badgeNumber: 12345,
           fullName: "John Doe",
           ssn: "***-**-6789",
