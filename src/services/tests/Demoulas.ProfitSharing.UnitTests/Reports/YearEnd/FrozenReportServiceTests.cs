@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
@@ -138,6 +138,8 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
                 pd.Forfeiture = 0;
                 pd.YearsOfServiceCredit = 1;
             }
+            
+            await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
         //Check unauthorized
