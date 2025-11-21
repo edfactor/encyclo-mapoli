@@ -136,7 +136,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         return maxId;
     }
 
-    private MockDataContextFactory()
+    internal MockDataContextFactory()
     {
         _profitSharingDbContext = new Mock<ProfitSharingDbContext>();
         _profitSharingDbContext.Setup(ctx => ctx.SaveChangesAsync(true, It.IsAny<CancellationToken>())).ReturnsAsync(1);

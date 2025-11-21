@@ -6,30 +6,28 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Sdk;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 
 /// <summary>
 ///   Abstraction for testing api endpoints that use a <c>DbContext</c>.
-///   Implements IAsyncLifetime to ensure each test method gets a FRESH factory instance,
-///   preventing state pollution even when multiple tests share a collection.
+///   NOTE: Each test CLASS (not method) gets its own factory instance.
+///   Tests within the same [Collection] share the factory, so they may pollute each other's data.
 /// </summary>
-public class ApiTestBase<TStartup> : IAsyncLifetime where TStartup : class
+public class ApiTestBase<TStartup> where TStartup : class
 {
     /// <summary>
     ///   Mock for DbContext.
-    ///   IMPORTANT: This is initialized FRESH for each test method via IAsyncLifetime.InitializeAsync(),
-    ///   ensuring no state pollution between tests even if they share a [Collection].
+    ///   Each test class gets a fresh instance, but tests within a class share this factory.
     /// </summary>
-    public IProfitSharingDataContextFactory MockDbContextFactory { get; set; } = null!;
+    public IProfitSharingDataContextFactory MockDbContextFactory { get; set; }
 
     /// <summary>
     ///   The client to invoke api endpoints.
     /// </summary>
-    public HttpClient ApiClient { get; private set; } = null!;
+    public HttpClient ApiClient { get; }
 
-    public HttpClient DownloadClient { get; private set; } = null!;
+    public HttpClient DownloadClient { get; }
 
     /// <summary>
     ///   Virtual method to allow derived classes to specify a custom HTTP client timeout.
@@ -38,6 +36,7 @@ public class ApiTestBase<TStartup> : IAsyncLifetime where TStartup : class
     /// <returns>The HTTP client timeout, or null to use the default 2-minute timeout.</returns>
     protected virtual TimeSpan? GetHttpClientTimeout() => null;
 
+
     public ServiceProvider? ServiceProvider { get; private set; }
 
     /// <summary>
@@ -45,20 +44,10 @@ public class ApiTestBase<TStartup> : IAsyncLifetime where TStartup : class
     /// </summary>
     /// <remarks>
     ///   Intentionally set as <c>protected</c> to prevent instances being created.
-    ///   Note: Actual initialization happens in InitializeAsync() (IAsyncLifetime),
-    ///   which xUnit calls before each test method runs.
     /// </remarks>
     public ApiTestBase()
     {
-        // Empty constructor - real initialization happens in InitializeAsync()
-    }
-
-    /// <summary>
-    /// IAsyncLifetime.InitializeAsync() - called by xUnit BEFORE each test method.
-    /// This ensures each test gets a FRESH factory instance with 6,500+ clean fake records.
-    /// </summary>
-    public async Task InitializeAsync()
-    {
+        // Each test class gets its own FRESH factory with 6,500+ fake records
         MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
 
         WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
@@ -91,20 +80,6 @@ public class ApiTestBase<TStartup> : IAsyncLifetime where TStartup : class
 
         DownloadClient = builder.CreateClient();
         DownloadClient.Timeout = GetHttpClientTimeout() ?? TimeSpan.FromMinutes(2);
-
-        await Task.CompletedTask; // Mark as async-ready
-    }
-
-    /// <summary>
-    /// IAsyncLifetime.DisposeAsync() - called by xUnit AFTER each test method completes.
-    /// Cleanup if needed (mock objects don't require cleanup, but adding for completeness).
-    /// </summary>
-    public async Task DisposeAsync()
-    {
-        ApiClient?.Dispose();
-        DownloadClient?.Dispose();
-        await Task.CompletedTask;
-    }
         DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }
 
