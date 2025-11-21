@@ -72,16 +72,25 @@ string[] allowedOrigins = [
         "https://ps.demoulas.net"
 ];
 
+string[] developmentOrigins = [
+        "http://localhost:3100",
+        "http://127.0.0.1:3100",
+        "https://localhost:3100",
+        "https://127.0.0.1:3100"
+];
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(pol =>
     {
         if (builder.Environment.IsDevelopment())
         {
-            // Local development: permissive CORS to simplify local testing
-            _ = pol.AllowAnyMethod()
+            // Local development: restrict to localhost origins only (PS-2025)
+            // Prevents MITM attacks on shared networks (e.g., coffee shop WiFi)
+            _ = pol.WithOrigins(developmentOrigins)
+                .AllowAnyMethod()
                 .AllowAnyHeader()
-                .AllowAnyOrigin()
+                .AllowCredentials()
                 .WithExposedHeaders("Location", "x-demographic-data-source");
         }
         else
