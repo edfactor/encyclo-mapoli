@@ -10,7 +10,7 @@ import {
   RadioGroup,
   TextField
 } from "@mui/material";
-import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -89,6 +89,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       badgeNumber: string;
     }>();
 
+    // Local state to immediately disable button on click
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     // Ref to track if URL search has been processed
     const urlSearchProcessedRef = useRef(false);
 
@@ -162,6 +165,13 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       }
     }, [badgeNumber, reset, profitYear, onSearch, navigate]);
 
+    // Reset local submitting state when search completes
+    useEffect(() => {
+      if (!isSearching) {
+        setIsSubmitting(false);
+      }
+    }, [isSearching]);
+
     /*
     const selectSx = useMemo(
       () => ({
@@ -180,18 +190,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
 
     const onSubmit = useCallback(
       (data: MasterInquirySearch) => {
-        if (isValid) {
+        if (isValid && !isSubmitting) {
+          setIsSubmitting(true);
           const searchParams = transformSearchParams(data, profitYear);
           onSearch(searchParams);
           dispatch(setMasterInquiryRequestParams(data));
         }
       },
-      [isValid, profitYear, onSearch, dispatch]
+      [isValid, profitYear, onSearch, dispatch, isSubmitting]
     );
 
     const validateAndSearch = handleSubmit(onSubmit);
 
     const handleReset = useCallback(() => {
+      setIsSubmitting(false);
       dispatch(clearMasterInquiryRequestParams());
       dispatch(clearMasterInquiryData());
       dispatch(clearMasterInquiryGroupingData());
@@ -355,12 +367,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                   }
 
                   // For dollar amount fields, only allow 0-9, ., and - characters
-                  if (
-                    name === "contribution" ||
-                    name === "earnings" ||
-                    name === "forfeiture" ||
-                    name === "payment"
-                  ) {
+                  if (name === "contribution" || name === "earnings" || name === "forfeiture" || name === "payment") {
                     // Allow negative numbers for all dollar amount fields
                     if (value !== "" && !/^-?\d*\.?\d*$/.test(value)) {
                       return;
@@ -691,8 +698,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
               <SearchAndReset
                 handleReset={handleReset}
                 handleSearch={validateAndSearch}
-                isFetching={isSearching}
-                disabled={!isValid || isSearching || !hasSearchCriteria}
+                isFetching={isSearching || isSubmitting}
+                disabled={!isValid || isSearching || isSubmitting || !hasSearchCriteria}
               />
             </Grid>
           </Grid>

@@ -36,6 +36,7 @@ const mockMember = {
   isEmployee: true,
   firstName: "John",
   lastName: "Doe",
+  fullName: "John Doe",
   address: "123 Main St",
   addressCity: "Boston",
   addressState: "MA",
