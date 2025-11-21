@@ -8,7 +8,7 @@
     <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="13.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.System" Version="9.0.0" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.9.0" />
-    <PackageVersion Include="Demoulas.Common.Logging" Version="2.0.2" />
+    <PackageVersion Include="Demoulas.Common.Logging" Version="2.1.0" />
     <PackageVersion Include="ErikEJ.EntityFrameworkCore.DgmlBuilder" Version="6.0.0" />
     <PackageVersion Include="FastEndpoints.AspVersioning" Version="7.1.1" />
     <PackageVersion Include="FastEndpoints.Swagger" Version="7.1.1" />
@@ -17,7 +17,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.11" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11" />
-    <PackageVersion Include="Demoulas.Util" Version="2.6.5" />
+    <PackageVersion Include="Demoulas.Util" Version="2.7.0" />
     <PackageVersion Include="FastEndpoints.Testing" Version="7.0.1" />
     <PackageVersion Include="IdGen" Version="3.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.11" />
@@ -33,12 +33,12 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
-    <PackageVersion Include="Demoulas.Common.Api" Version="3.0.6" />
-    <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.11.1" />
-    <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.6.1" />
-    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.9.1" />
-    <PackageVersion Include="Demoulas.Common.Caching" Version="3.1.2" />
-    <PackageVersion Include="Demoulas.Security" Version="3.7.1" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="3.1.0" />
+    <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.12.0" />
+    <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.7.0" />
+    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.10.0" />
+    <PackageVersion Include="Demoulas.Common.Caching" Version="3.2.0" />
+    <PackageVersion Include="Demoulas.Security" Version="3.8.0" />
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageVersion Include="FastEndpoints.Security" Version="5.31.0" />
     <PackageVersion Include="Microsoft.Extensions.Compliance.Redaction" Version="8.7.0" />
@@ -51,7 +51,7 @@
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.2" />
     <PackageVersion Include="JunitXml.TestLogger" Version="7.0.2" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.2" />
@@ -60,7 +60,7 @@
     <PackageVersion Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.2.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NSwag.Core" Version="14.1.0" />
-    <PackageVersion Include="Okta.AspNetCore" Version="4.6.7" />
+    <PackageVersion Include="Okta.AspNetCore" Version="4.6.8" />
     <PackageVersion Include="OpenTelemetry.Api" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
@@ -74,7 +74,7 @@
     <PackageVersion Include="Quartz" Version="3.15.1" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.1" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.0" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.10.3" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.11.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Memory" Version="1.0.4" />
