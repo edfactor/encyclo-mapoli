@@ -100,7 +100,7 @@ export interface YearEndProfitSharingEmployee {
   employeeTypeCode: string;
   employmentTypeName: string;
   dateOfBirth: Date;
-  age: number;
+  age: string;
   ssn: string;
   wages: number;
   hours: number;

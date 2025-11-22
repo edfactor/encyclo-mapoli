@@ -101,7 +101,7 @@ export interface Under21BreakdownByStoreEmployee {
   vestedAmount: number;
   vestingPercentage: number;
   dateOfBirth: string;
-  age: number;
+  age: string;
   enrollmentId: number;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -121,7 +121,7 @@ export interface Under21InactiveEmployee {
   birthDate: string;
   hireDate: string;
   terminationDate: string;
-  age: number;
+  age: string;
   enrollmentId: number;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
