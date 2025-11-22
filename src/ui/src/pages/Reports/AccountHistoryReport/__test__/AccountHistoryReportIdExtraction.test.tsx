@@ -99,7 +99,7 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
       const mockResponse: AccountHistoryReportPaginatedResponse | undefined = undefined;
 
       // Act
-      const reportId = mockResponse?.response?.results?.[0]?.id ?? 0;
+      const reportId = (mockResponse as AccountHistoryReportPaginatedResponse | undefined)?.response?.results?.[0]?.id ?? 0;
 
       // Assert
       expect(reportId).toBe(0);
@@ -304,7 +304,7 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
       ];
 
       // Act & Assert
-      testCases.forEach(({ data, expectedId, _description }) => {
+      testCases.forEach(({ data, expectedId }) => {
         const reportId = data?.response?.results?.[0]?.id ?? 0;
         expect(reportId).toBe(expectedId);
       });
@@ -368,7 +368,7 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
       const mockResponse: AccountHistoryReportPaginatedResponse | undefined = undefined;
 
       // Act
-      const reportId = mockResponse?.response?.results?.[0]?.id ?? 0;
+      const reportId = (mockResponse as AccountHistoryReportPaginatedResponse | undefined)?.response?.results?.[0]?.id ?? 0;
       const shouldSkip = reportId === 0;
 
       // Assert

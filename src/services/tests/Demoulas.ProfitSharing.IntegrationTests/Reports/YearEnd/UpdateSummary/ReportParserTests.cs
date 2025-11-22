@@ -9,7 +9,7 @@ public class ReportParserTests
     [Fact]
     public void CheckParsing()
     {
-        var record = ReportParser.ParseLine(
+        var record = Pay450ReportParser.ParseLine(
             "0705228 016 ROBINSON, CHARLIE             1,071,391.53-   4,071,393.55-    38      2        3,174,190.53-    2,174,190.53-    39      7");
         record.BadgeAndStore.ShouldBe("0705228 016");
         record.Name.ShouldBe("ROBINSON, CHARLIE");

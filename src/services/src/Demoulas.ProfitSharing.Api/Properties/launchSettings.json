@@ -29,6 +29,14 @@
             "ASPNETCORE_ENVIRONMENT": "Development"
         }
     },
+  "https-no-browser": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7141",
+      "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+  },
   "sqlSilent": {
       "commandName": "Project",
       "dotnetRunMessages": true,

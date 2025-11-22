@@ -1,8 +1,0 @@
-DJDE JDE=PAY426,JDL=PAYROL,END,;
-
-PAY444                            P R O F I T     S H A R I N G    F O R     2024     08/28/25    21:05          PAGE:      1
-
---------- E M P L O Y E E --------- BEGINNING                                                             MILITARY/    ENDING
- NUMBER      NAME                    BALANCE     CONTRIB    EARNINGS   EARNINGS2   FORFEITS     DISTRIB   PAID ALLOC   BALANCE
-
-<placeholder lines>

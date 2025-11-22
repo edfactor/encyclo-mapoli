@@ -1158,15 +1158,17 @@ MERGE INTO profit_detail tgt
     WHEN MATCHED THEN
         UPDATE SET tgt.YEARS_OF_SERVICE_CREDIT = 1;
 
--- Finally, handle the MILITARY contributions with MONTH_TO_DATE=20 
+-- Ready handles all ALL .1 extensions with MONTH_TO_DATE=20 with a year of service.
+-- See PAY450.cbl lines 1407-1415, ALL .1 extensions with BMDTE=20 count as a vesting year,
+-- regardless of contribution amount (even if 0). This must happen BEFORE we change MONTH_TO_DATE from 20 to 1.
 UPDATE profit_detail pd
 SET
     pd.years_of_service_credit = 1
 WHERE
-    comment_type_id = 19
-  AND profit_code_id = 0
+   -- comment_type_id = 19  <-- two comments in Scramble are OTHER and not MILITARY, - and READY counts them as service years 
+    profit_code_id = 0
   AND month_to_date = 20
-  and profit_year_iteration = 1
+  AND profit_year_iteration = 1
   AND EXISTS (
     SELECT
         ssn

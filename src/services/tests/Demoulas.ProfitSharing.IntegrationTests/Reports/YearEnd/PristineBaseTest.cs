@@ -48,6 +48,10 @@ public abstract class PristineBaseTest
 
     public static string ReadEmbeddedResource(string resourceName)
     {
+        if (resourceName.StartsWith('.'))
+        {
+            resourceName = "Demoulas.ProfitSharing.IntegrationTests.Resources" + resourceName;
+        }
         using Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
         using StreamReader reader = new(stream!);
         return reader.ReadToEnd();
