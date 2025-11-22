@@ -457,6 +457,11 @@ export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
       const ageDate = new Date(ageDifMs);
       return Math.abs(ageDate.getUTCFullYear() - 1970);
     };
+  } else {
+    // This should handle masked cases
+    column.valueGetter = (params) => {
+      return params.data?.[field];
+    };
   }
 
   return column;
