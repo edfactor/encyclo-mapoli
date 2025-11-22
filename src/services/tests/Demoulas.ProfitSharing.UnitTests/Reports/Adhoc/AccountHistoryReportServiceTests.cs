@@ -286,7 +286,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
     {
         // Arrange
         const int badgeNumber = 700006;
-        var DateOnly startDate = DateTime.Now.AddYears(-3).ToDateOnly();
+        DateOnly startDate = DateTime.Now.AddYears(-3).ToDateOnly();
         var request = new AccountHistoryReportRequest
         {
             BadgeNumber = badgeNumber,
