@@ -67,6 +67,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
+    "babel-plugin-react-compiler": "1.0.0",
     "@eslint/compat": "1.2.8",
     "@eslint/eslintrc": "3.3.1",
     "@eslint/js": "9.24.0",
