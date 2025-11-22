@@ -279,14 +279,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     /// <returns>Array of profit code IDs for payments/distributions</returns>
     public static byte[] GetPaymentProfitCodes()
     {
-        return
-        [
-            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-            ProfitCode.Constants.OutgoingForfeitures.Id,
-            ProfitCode.Constants.OutgoingDirectPayments.Id,
-            ProfitCode.Constants.OutgoingXferBeneficiary.Id,
-            ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-        ];
+        return ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
     }
 
     /// <summary>

@@ -91,22 +91,9 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitYear == year)
                     .ToListAsync(cancellationToken);
 
-                // Get payment profit codes for distinguishing forfeitures from payments
-                byte[] paymentProfitCodes = MasterInquiryService.GetPaymentProfitCodes();
-
-                // Aggregate contributions and earnings (code 0 = combined incoming)
-                decimal yearContributions = yearProfitDetails
-                    .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
-                    .Sum(pd => pd.Contribution);
-
-                decimal yearEarnings = yearProfitDetails
-                    .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
-                    .Sum(pd => pd.Earnings);
-
-                // Aggregate forfeitures (code 2 = outgoing forfeitures, but exclude payment codes)
-                decimal yearForfeitures = yearProfitDetails
-                    .Where(pd => !paymentProfitCodes.Contains(pd.ProfitCodeId))
-                    .Sum(pd => pd.Forfeiture);
+                // Use shared extension methods for consistent aggregation logic
+                (decimal yearContributions, decimal yearEarnings, decimal yearForfeitures) =
+                    ProfitDetailExtensions.AggregateAllProfitValues(yearProfitDetails);
 
                 // Current cumulative totals
                 decimal currentCumulativeEndingBalance = memberBalance?.TotalAmount ?? 0;
