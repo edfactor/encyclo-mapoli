@@ -10,7 +10,7 @@ import {
   MenuItem,
   TextField
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMDatePicker, SearchAndReset, SmartModal } from "smart-ui-library";
@@ -301,7 +301,10 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
           </Box>
           <FormHelperText
             error
-            sx={{ minHeight: "20px", visibility: errors.vestedBalanceValue || errors.vestedBalanceOperator ? "visible" : "hidden" }}>
+            sx={{
+              minHeight: "20px",
+              visibility: errors.vestedBalanceValue || errors.vestedBalanceOperator ? "visible" : "hidden"
+            }}>
             {errors.vestedBalanceOperator?.message || errors.vestedBalanceValue?.message || "\u00A0"}
           </FormHelperText>
         </Grid>
