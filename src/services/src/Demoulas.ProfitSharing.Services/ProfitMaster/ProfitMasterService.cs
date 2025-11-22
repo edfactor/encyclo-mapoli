@@ -33,16 +33,13 @@ public class ProfitMasterService : IProfitMasterService
     private readonly IProfitSharingDataContextFactory _dbFactory;
     private readonly IInternalProfitShareEditService _profitShareEditService;
     private readonly IFrozenService _frozenService;
-    private readonly IYearEndService _yearEndService;
 
-    public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory, IAppUser appUser, IFrozenService frozenService,
-        IYearEndService yearEndService)
+    public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory, IAppUser appUser, IFrozenService frozenService)
     {
         _profitShareEditService = profitShareEditService;
         _dbFactory = dbFactory;
         _appUser = appUser;
         _frozenService = frozenService;
-        _yearEndService = yearEndService;
     }
 
     public async Task<ProfitMasterUpdateResponse?> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken)
@@ -80,15 +77,29 @@ public class ProfitMasterService : IProfitMasterService
 
     public async Task<ProfitMasterUpdateResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken ct)
     {
-        (List<ProfitShareEditMemberRecord> records, _, _, _, _) = await _profitShareEditService.ProfitShareEditRecords(profitShareUpdateRequest, ct);
-
         return await _dbFactory.UseWritableContext(async ctx =>
         {
-            var (openProfitYear, etvaHotProfitYear) = await TemporalValidation( profitShareUpdateRequest.ProfitYear, ct);
+            // The ETVA value is always hot in the wall clock year.
+            short etvaHotProfitYear = (short)DateTime.Now.Year;
 
-            // Ensure records have not already been inserted for "openProfitYear"
-            await EnsureYearEndStatusNotExists(ctx, openProfitYear, ct);
+            var latestYearEndUpdateStatus = await ctx.YearEndUpdateStatuses
+                .OrderByDescending(st => st.ProfitYear)
+                .FirstOrDefaultAsync(ct);
 
+            // Get active frozen year.
+            var frozenDemographicYear = (await _frozenService.GetActiveFrozenDemographic(ct)).ProfitYear;
+
+            // lastestYearEndUpdateStatus == null only for first year ever, 2025.
+            if (latestYearEndUpdateStatus != null && latestYearEndUpdateStatus.ProfitYear != frozenDemographicYear - 1)
+            {
+                throw new BadHttpRequestException(
+                    $"Expected no year_end_update_status row to be present when starting the {frozenDemographicYear} (frozen demographics year) update");
+            }
+
+            var openProfitYear = frozenDemographicYear;
+
+            (List<ProfitShareEditMemberRecord> records, _, _, _, _) = await _profitShareEditService.ProfitShareEditRecords(profitShareUpdateRequest, ct);
+            
             Dictionary<byte, ProfitCode> code2ProfitCode = await ctx.ProfitCodes.ToDictionaryAsync(pc => pc.Id, pc => pc, ct);
 
             // Get the records to be created
@@ -188,7 +199,7 @@ public class ProfitMasterService : IProfitMasterService
                 AdjustEarningsAmount = profitShareUpdateRequest.AdjustEarningsAmount,
                 AdjustIncomingForfeitAmount = profitShareUpdateRequest.AdjustIncomingForfeitAmount,
                 AdjustEarningsSecondaryAmount = profitShareUpdateRequest.AdjustEarningsSecondaryAmount,
-                IsYearEndCompleted = false
+                IsYearEndCompleted = true, // Not used atm
             });
 
             await ctx.SaveChangesAsync(ct);
@@ -216,33 +227,6 @@ public class ProfitMasterService : IProfitMasterService
         }, ct);
     }
 
-    private async Task<(short, short)> TemporalValidation(short profitYearRequested, CancellationToken cancellationToken)
-    {
-        // The "open profit year" should be locked to the wall clock year -1.    but for testing we use a more dynamic algorithm.   
-        var openProfitYear = await _yearEndService.GetOpenProfitYear(cancellationToken);
-
-        if (openProfitYear != profitYearRequested)
-        {
-            throw new BadHttpRequestException($"The requested profit year {profitYearRequested} does not match the open profit year {openProfitYear}");
-        }
-
-        // The ETVA value is always hot in the wall clock year.
-        short etvaHotProfitYear = (short)DateTime.Now.Year;
-
-        var fs = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
-        if (!fs.IsActive)
-        {
-            throw new BadHttpRequestException($"The Profit Master update service requires frozen profit share data");
-        }
-
-        if (fs.ProfitYear != openProfitYear)
-        {
-            throw new BadHttpRequestException($"The open profit year ({openProfitYear} does not match the frozen profit year {fs.ProfitYear})");
-        }
-
-        return (openProfitYear, etvaHotProfitYear);
-    }
-
     private static List<ProfitDetail> CreateProfitDetailRecords(Dictionary<byte, ProfitCode> id2ProfitCode, short profitYear,
         IEnumerable<ProfitShareEditMemberRecord> rec)
     {
@@ -265,12 +249,21 @@ public class ProfitMasterService : IProfitMasterService
 
     public async Task<ProfitMasterRevertResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken)
     {
+        var frozenDemographicYear = (await _frozenService.GetActiveFrozenDemographic(cancellationToken)).ProfitYear;
+        // The ETVA value is always hot in the wall clock year.
+        short etvaHotProfitYear = (short)DateTime.Now.Year;
+
         return await _dbFactory.UseWritableContext(async ctx =>
         {
-            // The "open profit year" should be locked to the wall clock year -1.    but for testing we use a more dynamic algorithm.   
-            var (openProfitYear, etvaHotProfitYear) = await TemporalValidation(profitYearRequest.ProfitYear, cancellationToken);
+            var latestYearEndUpdateStatus = await ctx.YearEndUpdateStatuses
+                .OrderByDescending(st => st.ProfitYear)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (latestYearEndUpdateStatus == null || frozenDemographicYear != latestYearEndUpdateStatus.ProfitYear)
+            {
+                throw new BadHttpRequestException("Expected to be reverting a frozen year with an existing yearEndUpdateStatus row.");
+            }
 
-            var yearEndUpdateStatus = await EnsureYearEndStatusExists(ctx, openProfitYear, CancellationToken.None);
+            var openProfitYear = latestYearEndUpdateStatus.ProfitYear; // Undoing the just completed YE.
 
             // Consider adding additional checking to ensure that:
             // - the ETVA selection (how many EVTA rows will be altered)
@@ -314,14 +307,17 @@ public class ProfitMasterService : IProfitMasterService
                (PROFIT_CODE_id = {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} AND comment_type_id = {CommentType.Constants.OneHundredPercentEarnings.Id}))";
             var transactionsDeleted = await ctx.Database.ExecuteSqlRawAsync(deleteTransactionsSql, cancellationToken);
 
-            ctx.YearEndUpdateStatuses.Remove(yearEndUpdateStatus);
+            ctx.YearEndUpdateStatuses.Remove(latestYearEndUpdateStatus);
 
             await ctx.SaveChangesAsync(cancellationToken);
 
+            // Would be better if we figured out which of the profit rows are employees vs bene and then 
+            // validated that the number deleted matches the numbers inserted.
+
             return new ProfitMasterRevertResponse
             {
-                BeneficiariesEffected = yearEndUpdateStatus?.BeneficiariesEffected ?? 0,
-                EmployeesEffected = yearEndUpdateStatus?.EmployeesEffected ?? 0,
+                BeneficiariesEffected = latestYearEndUpdateStatus?.BeneficiariesEffected ?? 0,
+                EmployeesEffected = latestYearEndUpdateStatus?.EmployeesEffected ?? 0,
                 TransactionsRemoved = transactionsDeleted,
                 EtvasEffected = etvasEffected,
                 UpdatedTime = DateTime.Now,
@@ -411,31 +407,7 @@ public class ProfitMasterService : IProfitMasterService
 
         bulkCopy.WriteToServer(table);
     }
-
-
-    private static async Task EnsureYearEndStatusNotExists(ProfitSharingDbContext ctx, short openProfitYear, CancellationToken ct)
-    {
-        YearEndUpdateStatus? yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(yeStatus => yeStatus.ProfitYear == openProfitYear)
-            .FirstOrDefaultAsync(ct);
-        if (yearEndUpdateStatus != null)
-        {
-            throw new BadHttpRequestException($"Can not add new profit detail records for year {openProfitYear} until existing ones are removed.");
-        }
-    }
-
-    private static async Task<YearEndUpdateStatus> EnsureYearEndStatusExists(ProfitSharingDbContext ctx, short openProfitYear, CancellationToken ct)
-    {
-        YearEndUpdateStatus? yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(yeStatus => yeStatus.ProfitYear == openProfitYear)
-            .FirstOrDefaultAsync(ct);
-        if (yearEndUpdateStatus == null)
-        {
-            Debug.WriteLine($"Can not Revert. There is no year end update for profit year {openProfitYear}");
-            throw new BadHttpRequestException($"Can not Revert. There is no year end update for profit year {openProfitYear}");
-        }
-
-        return yearEndUpdateStatus;
-    }
-
+    
     private static void EnsureNoValuesOutOfBounds(List<ProfitDetail> profitDetailRecords)
     {
         const decimal maxAmount = 9999999.99m;

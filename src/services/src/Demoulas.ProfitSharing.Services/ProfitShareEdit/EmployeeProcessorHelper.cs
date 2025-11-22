@@ -37,7 +37,7 @@ internal static class EmployeeProcessorHelper
                 {
                     x.frozenDemographics.BadgeNumber,
                     x.ppYE.Demographic!.Ssn,
-                    Name = x.ppYE.Demographic.ContactInfo!.FullName,
+                    Name = x.ppYE.Demographic.ContactInfo!.LastName+", "+x.ppYE.Demographic.ContactInfo!.FirstName,
                     EnrolledId = x.ppYE.EnrollmentId,
                     x.ppYE.EmployeeTypeId,
                     PointsEarned = (int)(x.ppYE.PointsEarned ?? 0),
