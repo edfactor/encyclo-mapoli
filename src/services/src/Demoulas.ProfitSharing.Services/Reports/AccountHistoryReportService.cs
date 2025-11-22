@@ -87,7 +87,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
                 // Get vesting balance for this year
                 var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                    SearchBy.BadgeNumber, demographic.BadgeNumber, (short)year, cancellationToken);
+                    SearchBy.BadgeNumber, demographic.BadgeNumber, year, cancellationToken);
 
                 // Get year-specific profit details for contributions, earnings, and forfeitures
                 var yearProfitDetails = await ctx.ProfitDetails
@@ -107,6 +107,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 decimal yearEndingBalance = currentCumulativeEndingBalance - previousCumulativeEndingBalance;
                 decimal yearWithdrawals = currentCumulativeDistributions - previousCumulativeDistributions;
 
+                var yearVestedBalance = vestingBalance?.VestedBalance ?? 0;
                 reportData.Add(new AccountHistoryReportResponse
                 {
                     Id = demographic.Id,
@@ -119,7 +120,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     Forfeitures = yearForfeitures,
                     Withdrawals = yearWithdrawals,
                     EndingBalance = currentCumulativeEndingBalance,
-                    VestedBalance = vestingBalance?.VestedBalance ?? 0
+                    VestedBalance = yearVestedBalance
                 });
 
                 previousCumulativeEndingBalance = currentCumulativeEndingBalance;
@@ -139,7 +140,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         var totalEarnings = sortedResult.Sum(r => r.Earnings);
         var totalForfeitures = sortedResult.Sum(r => r.Forfeitures);
         var totalWithdrawals = sortedResult.Sum(r => r.Withdrawals);
-        var totalVestedBalance = sortedResult.Sum(r => r.VestedBalance);
+        // TotalVestedBalance is from the highest profit year (last in the unsorted chronological list)
+        var totalVestedBalance = result.LastOrDefault()?.VestedBalance ?? 0;
 
         // Calculate total count before pagination
         var totalCount = sortedResult.Count;
