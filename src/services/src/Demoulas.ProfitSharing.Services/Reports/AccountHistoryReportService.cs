@@ -3,9 +3,11 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -70,6 +72,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
             var reportData = new List<AccountHistoryReportResponse>();
             decimal previousCumulativeEndingBalance = 0;
+            decimal previousCumulativeDistributions = 0;
 
             foreach (var year in allYears)
             {
@@ -82,12 +85,36 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 var memberDistributions = await distributions
                     .FirstOrDefaultAsync(d => d.Ssn == demographic.Ssn, cancellationToken);
 
+                // Get year-specific profit details for contributions, earnings, and forfeitures
+                var yearProfitDetails = await ctx.ProfitDetails
+                    .TagWith($"AccountHistoryReport-ProfitDetails-{demographic.BadgeNumber}-{year}")
+                    .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitYear == year)
+                    .ToListAsync(cancellationToken);
+
+                // Get payment profit codes for distinguishing forfeitures from payments
+                byte[] paymentProfitCodes = MasterInquiryService.GetPaymentProfitCodes();
+
+                // Aggregate contributions and earnings (code 0 = combined incoming)
+                decimal yearContributions = yearProfitDetails
+                    .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
+                    .Sum(pd => pd.Contribution);
+
+                decimal yearEarnings = yearProfitDetails
+                    .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
+                    .Sum(pd => pd.Earnings);
+
+                // Aggregate forfeitures (code 2 = outgoing forfeitures, but exclude payment codes)
+                decimal yearForfeitures = yearProfitDetails
+                    .Where(pd => !paymentProfitCodes.Contains(pd.ProfitCodeId))
+                    .Sum(pd => pd.Forfeiture);
+
                 // Current cumulative totals
                 decimal currentCumulativeEndingBalance = memberBalance?.TotalAmount ?? 0;
                 decimal currentCumulativeDistributions = memberDistributions?.TotalAmount ?? 0;
 
-                // Year-over-year calculation: difference from previous year
+                // Year-over-year calculations: difference from previous year
                 decimal yearEndingBalance = currentCumulativeEndingBalance - previousCumulativeEndingBalance;
+                decimal yearWithdrawals = currentCumulativeDistributions - previousCumulativeDistributions;
 
                 reportData.Add(new AccountHistoryReportResponse
                 {
@@ -96,14 +123,15 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     FullName = demographic.ContactInfo.FullName ?? string.Empty,
                     Ssn = demographic.Ssn.MaskSsn(),
                     ProfitYear = year,
-                    Contributions = 0,  // Not separated in TotalBalance
-                    Earnings = 0,       // Not separated in TotalBalance
-                    Forfeitures = 0,
-                    Withdrawals = currentCumulativeDistributions,
+                    Contributions = yearContributions,
+                    Earnings = yearEarnings,
+                    Forfeitures = yearForfeitures,
+                    Withdrawals = yearWithdrawals,
                     EndingBalance = currentCumulativeEndingBalance
                 });
 
                 previousCumulativeEndingBalance = currentCumulativeEndingBalance;
+                previousCumulativeDistributions = currentCumulativeDistributions;
             }
 
             return reportData;
