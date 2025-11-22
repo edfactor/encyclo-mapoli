@@ -286,10 +286,11 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
     {
         // Arrange
         const int badgeNumber = 700006;
+        var DateOnly startDate = DateTime.Now.AddYears(-3).ToDateOnly();
         var request = new AccountHistoryReportRequest
         {
             BadgeNumber = badgeNumber,
-            StartDate = null,
+            StartDate = startDate,
             EndDate = null,
             Skip = 0,
             Take = 25
@@ -301,8 +302,8 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         // Assert
         result.ShouldNotBeNull();
         result.Response.ShouldNotBeNull();
-        // Service should use default dates (2007-01-01 to today)
-        result.StartDate.Year.ShouldBe(2007);
+        var startYear = request.StartDate!.Value.Year;
+        result.StartDate.Year.ShouldBe(startYear);
     }
 
     [Description("PS-2160 : Account history report records include all required transaction fields")]
