@@ -81,6 +81,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 }) => {
   const [openErrorModal, setOpenErrorModal] = useState(!fiscalData === false);
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
@@ -104,30 +105,41 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     }
   });
 
+  // Reset local submitting state when search completes
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   const validateAndSubmit = async (data: TerminationSearchRequest) => {
     if (hasUnsavedChanges) {
       setShowUnsavedChangesDialog(true);
       return;
     }
 
-    const params = {
-      ...data,
-      profitYear: selectedProfitYear,
-      beginningDate: data.beginningDate
-        ? mmDDYYFormat(data.beginningDate)
-        : mmDDYYFormat(fiscalData?.fiscalBeginDate || ""),
-      endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData?.fiscalEndDate || "")
-    };
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
 
-    // Only include vested balance fields if both are provided
-    if (data.vestedBalanceValue === null || data.vestedBalanceOperator === null) {
-      delete params.vestedBalanceValue;
-      delete params.vestedBalanceOperator;
+      const params = {
+        ...data,
+        profitYear: selectedProfitYear,
+        beginningDate: data.beginningDate
+          ? mmDDYYFormat(data.beginningDate)
+          : mmDDYYFormat(fiscalData?.fiscalBeginDate || ""),
+        endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData?.fiscalEndDate || "")
+      };
+
+      // Only include vested balance fields if both are provided
+      if (data.vestedBalanceValue === null || data.vestedBalanceOperator === null) {
+        delete params.vestedBalanceValue;
+        delete params.vestedBalanceOperator;
+      }
+
+      // Only update search params and initial loaded state; let the grid trigger the API
+      onSearch(params);
+      setInitialSearchLoaded(true);
     }
-
-    // Only update search params and initial loaded state; let the grid trigger the API
-    onSearch(params);
-    setInitialSearchLoaded(true);
   };
 
   const validateAndSearch = handleSubmit(validateAndSubmit as (data: TerminationSearchRequest) => Promise<void>);
@@ -322,8 +334,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
             <SearchAndReset
               handleReset={handleReset}
               handleSearch={validateAndSearch}
-              isFetching={isFetching}
-              disabled={!isValid || !prerequisitesComplete || isFetching}
+              isFetching={isFetching || isSubmitting}
+              disabled={!isValid || !prerequisitesComplete || isFetching || isSubmitting}
             />
           )}
         </DuplicateSsnGuard>

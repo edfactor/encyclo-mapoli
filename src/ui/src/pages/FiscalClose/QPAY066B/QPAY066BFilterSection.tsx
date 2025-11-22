@@ -1,6 +1,6 @@
 import { FormControl, FormLabel, MenuItem, Select } from "@mui/material";
 import { Grid } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 
@@ -24,6 +24,7 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
   onReset,
   isLoading = false
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit, reset } = useForm<QPAY066BFilterParams>({
     defaultValues: {
       qpay066Presets: "QPay066B",
@@ -35,8 +36,17 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
     }
   });
 
+  useEffect(() => {
+    if (!isLoading) {
+      setIsSubmitting(false);
+    }
+  }, [isLoading]);
+
   const validateAndSubmit = handleSubmit((data) => {
-    onFilterChange(data);
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      onFilterChange(data);
+    }
   });
 
   const handleReset = () => {
@@ -176,7 +186,8 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
-          isFetching={isLoading}
+          isFetching={isLoading || isSubmitting}
+          disabled={isLoading || isSubmitting}
         />
       </Grid>
     </form>

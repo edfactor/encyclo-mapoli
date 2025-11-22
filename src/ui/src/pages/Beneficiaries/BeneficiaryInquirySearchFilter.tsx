@@ -9,7 +9,7 @@ import {
   RadioGroup,
   TextField
 } from "@mui/material";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -132,6 +132,14 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
     [hasSSN, hasName, hasBadgeNumber]
   );
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isSearching) {
+      setIsSubmitting(false);
+    }
+  }, [isSearching]);
+
   const onSubmit = (data: BeneficiarySearchForm) => {
     const { badgeNumber, name, ssn, memberType } = data;
     let badge: number | undefined = undefined;
@@ -149,7 +157,8 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
       }
     }
 
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       const beneficiarySearchFilterRequest: BeneficiarySearchAPIRequest = {
         badgeNumber: badge,
         psnSuffix: psn,
@@ -380,8 +389,8 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
             <SearchAndReset
               handleReset={handleReset}
               handleSearch={validateAndSubmit}
-              isFetching={isSearching}
-              disabled={!isValid || isSearching || !hasSearchCriteria}
+              isFetching={isSearching || isSubmitting}
+              disabled={!isValid || isSearching || !hasSearchCriteria || isSubmitting}
             />
           </Grid>
         </Grid>

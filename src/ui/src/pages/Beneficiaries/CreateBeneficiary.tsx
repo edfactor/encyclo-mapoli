@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Checkbox from "@mui/material/Checkbox";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import {
   useLazyCreateBeneficiariesQuery,
@@ -88,6 +89,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
   const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
   const [triggerUpdateBeneficiary] = useLazyUpdateBeneficiaryQuery();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     control,
@@ -126,6 +128,12 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
           kindId: hasPrimaryBeneficiary ? "S" : "" // Default to Secondary if Primary exists
         }
   });
+
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
 
   const handleReset = () => {
     reset();
@@ -191,10 +199,13 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   };
 
   const onSubmit = (data: cb) => {
-    if (selectedBeneficiary) {
-      updateBeneficiary(data);
-    } else {
-      createBeneficiary(data);
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      if (selectedBeneficiary) {
+        updateBeneficiary(data);
+      } else {
+        createBeneficiary(data);
+      }
     }
   };
 
@@ -519,8 +530,8 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               <SearchAndReset
                 handleReset={handleReset}
                 handleSearch={validateAndSubmit}
-                isFetching={isFetching}
-                disabled={!isValid}
+                isFetching={isFetching || isSubmitting}
+                disabled={!isValid || isFetching || isSubmitting}
                 searchButtonText="Submit"
               />
             </Grid>
