@@ -806,7 +806,7 @@ public class FrozenReportService : IFrozenReportService
                 TotalAfterVesting = x.Sum(c => c.AfterVestedProfitSharingAmount),
                 TotalEmployees = x.Count(c => c.IsEmployee),
                 TotalBeneficiaries = x.Count(c => !c.IsEmployee)
-            }).First();
+            }).FirstOrDefault();
 
             var resp = baseQuery.Select(x => new UpdateSummaryReportDetail()
             {
@@ -839,12 +839,12 @@ public class FrozenReportService : IFrozenReportService
                 EndDate = startEnd.FiscalEndDate,
                 Response =
                     new PaginatedResponseDto<UpdateSummaryReportDetail>(req) { Results = resp, Total = baseQuery.Count },
-                TotalAfterProfitSharingAmount = (totals.TotalAfterProfitSharing ?? 0),
-                TotalAfterVestedAmount = (totals.TotalAfterVesting ?? 0),
-                TotalBeforeProfitSharingAmount = (totals.TotalBeforeProfitSharing ?? 0),
-                TotalBeforeVestedAmount = (totals.TotalBeforeVesting ?? 0),
-                TotalNumberOfBeneficiaries = totals.TotalBeneficiaries,
-                TotalNumberOfEmployees = totals.TotalEmployees
+                TotalAfterProfitSharingAmount = (totals?.TotalAfterProfitSharing ?? 0),
+                TotalAfterVestedAmount = (totals?.TotalAfterVesting ?? 0),
+                TotalBeforeProfitSharingAmount = (totals?.TotalBeforeProfitSharing ?? 0),
+                TotalBeforeVestedAmount = (totals?.TotalBeforeVesting ?? 0),
+                TotalNumberOfBeneficiaries = totals?.TotalBeneficiaries ?? 0,
+                TotalNumberOfEmployees = totals?.TotalEmployees ?? 0
             };
         }, cancellationToken);
 
