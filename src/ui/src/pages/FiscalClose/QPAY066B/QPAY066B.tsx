@@ -7,7 +7,7 @@ import QPAY066BFilterSection, { QPAY066BFilterParams } from "./QPAY066BFilterSec
 import QPAY066BGrid from "./QPAY066BGrid";
 
 const QPAY066B: React.FC = () => {
-  const [_filterParams, setFilterParams] = useState<QPAY066BFilterParams>({
+  const [filterParams, setFilterParams] = useState<QPAY066BFilterParams>({
     qpay066Presets: "QPay066B",
     startDate: null,
     endDate: null,
@@ -65,7 +65,10 @@ const QPAY066B: React.FC = () => {
 
         {hasSearched && (
           <Grid width="100%">
-            <QPAY066BGrid onLoadingChange={handleLoadingChange} />
+            <QPAY066BGrid
+              filterParams={filterParams}
+              onLoadingChange={handleLoadingChange}
+            />
           </Grid>
         )}
       </Grid>
