@@ -75,6 +75,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 }) => {
   const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
   const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { profitSharingUpdate, profitSharingEdit, resetYearEndPage } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -84,6 +85,12 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
   const dispatch = useDispatch();
 
   const fiscalCloseProfitYearAsDate = useMemo(() => new Date(fiscalCloseProfitYear, 0, 1), [fiscalCloseProfitYear]);
+
+  useEffect(() => {
+    if (!isFetchingUpdate && !isFetchingEdit) {
+      setIsSubmitting(false);
+    }
+  }, [isFetchingUpdate, isFetchingEdit]);
 
   useEffect(() => {
     if (fiscalCloseProfitYear && !profitSharingUpdate && !profitSharingEdit) {
@@ -203,7 +210,8 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
   };
 
   const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       setPageReset(true);
       const updateParams: ProfitShareUpdateRequest = {
         pagination: {
@@ -677,7 +685,8 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               handleReset={handleReset}
               searchButtonText="Preview"
               handleSearch={validateAndSearch}
-              isFetching={isFetchingUpdate || isFetchingEdit}
+              isFetching={isFetchingUpdate || isFetchingEdit || isSubmitting}
+              disabled={isFetchingUpdate || isFetchingEdit || isSubmitting}
             />
           </Grid>
         </Grid>

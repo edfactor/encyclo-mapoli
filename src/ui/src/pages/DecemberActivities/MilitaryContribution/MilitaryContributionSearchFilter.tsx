@@ -58,9 +58,20 @@ const MilitaryContributionSearchFilter: React.FC = () => {
     }
   }, [socialSecurity, badgeNumber]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isSearching) {
+      setIsSubmitting(false);
+    }
+  }, [isSearching]);
+
   const onSubmit = async (data: SearchFormData) => {
-    // executeSearch will handle the conversion internally
-    await executeSearch(data, defaultProfitYear);
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      // executeSearch will handle the conversion internally
+      await executeSearch(data, defaultProfitYear);
+    }
   };
 
   const handleReset = () => {
@@ -143,8 +154,8 @@ const MilitaryContributionSearchFilter: React.FC = () => {
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={handleSubmit(onSubmit)}
-          isFetching={isSearching}
-          disabled={!isValid || (!socialSecurity && !badgeNumber)}
+          isFetching={isSearching || isSubmitting}
+          disabled={!isValid || (!socialSecurity && !badgeNumber) || isSearching || isSubmitting}
         />
       </Grid>
     </form>

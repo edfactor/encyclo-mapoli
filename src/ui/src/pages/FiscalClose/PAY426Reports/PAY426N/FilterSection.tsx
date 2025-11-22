@@ -1,5 +1,5 @@
 import { FormControl, FormLabel, Grid, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ReportPreset } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 
@@ -20,6 +20,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   onSearch,
   isLoading = false
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsSubmitting(false);
+    }
+  }, [isLoading]);
+
   const handlePresetChange = (event: SelectChangeEvent<string>) => {
     const presetId = event.target.value;
     const selected = presets.find((p) => p.id === presetId) || null;
@@ -27,8 +35,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const handleApply = () => {
-    // Trigger search in parent component
-    onSearch();
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      // Trigger search in parent component
+      onSearch();
+    }
   };
 
   const handleReset = () => {
@@ -139,8 +150,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={handleApply}
-          isFetching={isLoading}
-          disabled={!currentPreset || isLoading}
+          isFetching={isLoading || isSubmitting}
+          disabled={!currentPreset || isLoading || isSubmitting}
         />
       </Grid>
     </form>

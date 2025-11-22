@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormControl, FormHelperText, FormLabel, Grid, MenuItem, Select } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -25,6 +25,7 @@ interface QPAY600FilterSectionProps {
 }
 
 const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterChange, onReset, isLoading = false }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     control,
     handleSubmit,
@@ -39,13 +40,22 @@ const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterCha
     }
   });
 
-  const validateAndSubmit = handleSubmit((data) => {
-    const dataCopy: QPAY600FilterParams = {
-      profitYear: data.profitYear ? new Date(data.profitYear.getTime()) : null,
-      employeeType: data.employeeType
-    };
+  useEffect(() => {
+    if (!isLoading) {
+      setIsSubmitting(false);
+    }
+  }, [isLoading]);
 
-    onFilterChange(dataCopy);
+  const validateAndSubmit = handleSubmit((data) => {
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      const dataCopy: QPAY600FilterParams = {
+        profitYear: data.profitYear ? new Date(data.profitYear.getTime()) : null,
+        employeeType: data.employeeType
+      };
+
+      onFilterChange(dataCopy);
+    }
   });
 
   const watchedValues = useWatch({ control });
@@ -123,8 +133,8 @@ const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterCha
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
-          isFetching={isLoading}
-          disabled={!isSearchEnabled || isLoading}
+          isFetching={isLoading || isSubmitting}
+          disabled={!isSearchEnabled || isLoading || isSubmitting}
         />
       </Grid>
     </form>

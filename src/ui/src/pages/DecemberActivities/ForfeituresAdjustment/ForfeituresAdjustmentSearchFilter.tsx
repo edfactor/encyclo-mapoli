@@ -77,18 +77,29 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
     }
   }, [socialSecurity, badgeNumber]);
 
-  const validateAndSearch = handleSubmit((data) => {
-    const searchParams: ForfeitureAdjustmentSearchParams = {
-      ssn: data.ssn,
-      badge: data.badge,
-      profitYear: new Date().getFullYear(), // Use current wall clock year
-      skip: 0,
-      take: 255,
-      sortBy: "badgeNumber",
-      isSortDescending: false
-    };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    onSearch(searchParams);
+  useEffect(() => {
+    if (!isSearching) {
+      setIsSubmitting(false);
+    }
+  }, [isSearching]);
+
+  const validateAndSearch = handleSubmit((data) => {
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      const searchParams: ForfeitureAdjustmentSearchParams = {
+        ssn: data.ssn,
+        badge: data.badge,
+        profitYear: new Date().getFullYear(), // Use current wall clock year
+        skip: 0,
+        take: 255,
+        sortBy: "badgeNumber",
+        isSortDescending: false
+      };
+
+      onSearch(searchParams);
+    }
   });
 
   const handleResetLocal = () => {
@@ -179,10 +190,10 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
         width="100%"
         paddingX="24px">
         <SearchAndReset
-          disabled={!isValid || !hasSearchCriteria}
+          disabled={!isValid || !hasSearchCriteria || isSearching || isSubmitting}
           handleReset={handleResetLocal}
           handleSearch={validateAndSearch}
-          isFetching={isSearching}
+          isFetching={isSearching || isSubmitting}
         />
       </Grid>
     </form>

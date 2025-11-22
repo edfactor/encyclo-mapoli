@@ -12,7 +12,7 @@ import {
   SelectChangeEvent,
   TextField
 } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -108,7 +108,14 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
   onSearch,
   isLoading = false
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const requiresDateRange = currentPreset?.requiresDateRange || false;
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsSubmitting(false);
+    }
+  }, [isLoading]);
 
   const {
     control,
@@ -168,7 +175,10 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
   };
 
   const handleFormSubmit = () => {
-    onSearch();
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      onSearch();
+    }
   };
 
   const handleResetForm = () => {
@@ -395,8 +405,8 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
         <SearchAndReset
           handleReset={handleResetForm}
           handleSearch={handleSubmit(handleFormSubmit)}
-          isFetching={isLoading}
-          disabled={!currentPreset || isLoading || !isValid}
+          isFetching={isLoading || isSubmitting}
+          disabled={!currentPreset || isLoading || isSubmitting || !isValid}
           searchButtonText="Search"
         />
       </Grid>

@@ -12,7 +12,7 @@ import {
   RadioGroup,
   TextField
 } from "@mui/material";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
@@ -58,6 +58,7 @@ const schema = yup.object().shape({
 const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterProps> = memo(
   ({ onSearch, onReset, isLoading }) => {
     const dispatch = useDispatch();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {
       control,
@@ -83,8 +84,17 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
       }
     });
 
+    useEffect(() => {
+      if (!isLoading) {
+        setIsSubmitting(false);
+      }
+    }, [isLoading]);
+
     const handleFormSubmit = (data: DistributionSearchFormData) => {
-      onSearch(data);
+      if (!isSubmitting) {
+        setIsSubmitting(true);
+        onSearch(data);
+      }
     };
 
     const handleFormReset = useCallback(() => {
@@ -508,8 +518,8 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
           <SearchAndReset
             handleReset={handleFormReset}
             handleSearch={handleSubmit(handleFormSubmit)}
-            isFetching={isLoading}
-            disabled={!isValid}
+            isFetching={isLoading || isSubmitting}
+            disabled={!isValid || isLoading || isSubmitting}
           />
         </Grid>
       </form>
