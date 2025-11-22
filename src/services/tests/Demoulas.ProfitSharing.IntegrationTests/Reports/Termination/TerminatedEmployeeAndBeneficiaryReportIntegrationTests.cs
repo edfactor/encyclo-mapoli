@@ -50,74 +50,6 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     }
 
     [Fact]
-    public async Task CompareMemberListsBetweenReadyAndSmart()
-    {
-        // Generate SMART report
-        string smartReport = await CreateTextReport();
-        smartReport.ShouldNotBeNullOrEmpty();
-
-        // Load READY report
-        string readyReport = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
-
-        // Parse records from both reports
-        List<QPay066Record> readyRecords = QPay066ReportParser.ParseRecords(readyReport);
-        List<QPay066Record> smartRecords = QPay066ReportParser.ParseRecords(smartReport);
-
-        // Create sets of badge/PSN + name for comparison
-        var readyMembers = readyRecords
-            .Select(r => new { BadgePsn = r.PsnSuffix > 0 ? $"{r.BadgeNumber}{r.PsnSuffix:D4}" : r.BadgeNumber.ToString(), r.EmployeeName, r.BadgeNumber, r.PsnSuffix })
-            .ToHashSet();
-
-        var smartMembers = smartRecords
-            .Select(r => new { BadgePsn = r.PsnSuffix > 0 ? $"{r.BadgeNumber}{r.PsnSuffix:D4}" : r.BadgeNumber.ToString(), r.EmployeeName, r.BadgeNumber, r.PsnSuffix })
-            .ToHashSet();
-
-        // Find members only in READY
-        var onlyInReady = readyMembers.ExceptBy(smartMembers.Select(m => m.BadgePsn), m => m.BadgePsn).OrderBy(m => m.EmployeeName).ToList();
-
-        // Find members only in SMART
-        var onlyInSmart = smartMembers.ExceptBy(readyMembers.Select(m => m.BadgePsn), m => m.BadgePsn).OrderBy(m => m.EmployeeName).ToList();
-
-        // Report differences
-        TestOutputHelper.WriteLine($"READY report: {readyRecords.Count} records");
-        TestOutputHelper.WriteLine($"SMART report: {smartRecords.Count} records");
-        TestOutputHelper.WriteLine($"Members only in READY: {onlyInReady.Count}");
-        TestOutputHelper.WriteLine($"Members only in SMART: {onlyInSmart.Count}");
-        TestOutputHelper.WriteLine("");
-
-        if (onlyInReady.Count > 0)
-        {
-            TestOutputHelper.WriteLine("=== Members ONLY in READY (missing from SMART) ===");
-            AsciiTable readyOnlyTable = new("Badge/PSN", "Name", "Type");
-            foreach (var member in onlyInReady)
-            {
-                string type = member.PsnSuffix > 0 ? "Beneficiary" : "Employee";
-                readyOnlyTable.Add(member.BadgePsn, member.EmployeeName, type);
-            }
-
-            TestOutputHelper.WriteLine(readyOnlyTable.ToString());
-            TestOutputHelper.WriteLine("");
-        }
-
-        if (onlyInSmart.Count > 0)
-        {
-            TestOutputHelper.WriteLine("=== Members ONLY in SMART (missing from READY) ===");
-            AsciiTable smartOnlyTable = new("Badge/PSN", "Name", "Type");
-            foreach (var member in onlyInSmart)
-            {
-                string type = member.PsnSuffix > 0 ? "Beneficiary" : "Employee";
-                smartOnlyTable.Add(member.BadgePsn, member.EmployeeName, type);
-            }
-
-            TestOutputHelper.WriteLine(smartOnlyTable.ToString());
-        }
-
-        // This assertion will fail if there are differences, showing the counts
-        (onlyInReady.Count, onlyInSmart.Count).ShouldBe((0, 0),
-            $"Member lists differ: {onlyInReady.Count} only in READY, {onlyInSmart.Count} only in SMART");
-    }
-
-    [Fact]
     public async Task EnsureSmartReportMatchesReadyReport()
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
@@ -126,7 +58,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         actualText.ShouldNotBeNullOrEmpty();
         QPay066Report a = new(actualText);
 
-        string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        string expectedText = ReadEmbeddedResource(".golden.R3-QPAY066");
         QPay066Report e = new(expectedText);
 
         // Lets check the totals.
@@ -137,7 +69,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         Dictionary<long, QPay066Record> expectedMap = AsDict(QPay066ReportParser.ParseRecords(expectedText));
         Dictionary<long, QPay066Record> actualMap = AsDict(QPay066ReportParser.ParseRecords(actualText));
-        actualMap.Keys.ShouldBe(expectedMap.Keys, true);
+        actualMap.Count.ShouldBeEquivalentTo(expectedMap.Count, $"We dont have the same number of employees in the two reports. SMART {actualMap.Count}, READY {expectedMap.Count}");
+        actualMap.Keys.ShouldBe(expectedMap.Keys, true, "The reports dont have the same set of PSN/Badges.");
 
         // Get employee badges (not beneficiaries) to query READY authoritative data
         HashSet<int> employeeBadges = expectedMap.Values
@@ -245,7 +178,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                     }
                 }
 
-                if (fieldDiffs.Count == 1 && vestedBalanceDiff && readyVestingData.TryGetValue(expected.BadgeNumber, out (decimal VestedBalance, decimal VestedPercent) rreadyData) && actual.VestedBalance == decimal.Round(rreadyData.VestedBalance, 2))
+                if (fieldDiffs.Count == 1 && vestedBalanceDiff &&
+                    readyVestingData.TryGetValue(expected.BadgeNumber, out (decimal VestedBalance, decimal VestedPercent) rreadyData) &&
+                    actual.VestedBalance == decimal.Round(rreadyData.VestedBalance, 2))
                 {
                     smartMatchesReady = true;
                     acceptedDifferences.Add($"PSN: {psnDisplay} ({expected.EmployeeName})  {string.Join(", ", fieldDiffs)} [SMART matches READY - OK]");

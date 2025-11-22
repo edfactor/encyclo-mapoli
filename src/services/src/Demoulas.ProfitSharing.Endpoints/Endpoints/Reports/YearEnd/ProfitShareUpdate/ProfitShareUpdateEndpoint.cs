@@ -56,9 +56,7 @@ public class ProfitShareUpdateEndpoint
         var response = await _profitShareUpdateService.ProfitShareUpdate(req, ct);
 
         // Perform cross-reference validation using the totals from the response
-        _logger.LogInformation(
-            "Performing cross-reference validation for Master Update preview year {ProfitYear}",
-            req.ProfitYear);
+        _logger.LogInformation("Performing cross-reference validation for Master Update preview");
 
         // IMPORTANT: Use PAY443 field names as keys because the validation service compares current PAY444 values
         // against archived PAY443 checksums FOR THE SAME PROFIT YEAR (except Beginning Balance which compares to previous year).
