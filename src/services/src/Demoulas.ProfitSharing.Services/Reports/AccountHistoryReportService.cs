@@ -36,6 +36,9 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         AccountHistoryReportRequest request,
         CancellationToken cancellationToken)
     {
+        var endYear = request.EndDate?.Year ?? DateTime.Today.Year;
+        var startYear = request.StartDate?.Year ?? endYear - 3;
+
         var result = await _contextFactory.UseReadOnlyContext(async ctx =>
         {
             // Get member demographic information
@@ -48,9 +51,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             {
                 return new List<AccountHistoryReportResponse>();
             }
-
-            var endYear = request.EndDate?.Year ?? DateTime.Today.Year;
-            var startYear = request.StartDate?.Year ?? endYear - 3;
 
             // Retrieve all profit years for this member within the date range
             var allYears = await ctx.ProfitDetails
@@ -131,7 +131,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             .Take(take)
             .ToList();
 
-        var startDate = request.StartDate ?? new DateOnly(2007, 1, 1);
+        var startDate = request.StartDate ?? new DateOnly(startYear, 1, 1);
         var endDate = request.EndDate ?? DateOnly.FromDateTime(DateTime.Today);
         var dateRange = startDate <= endDate
             ? (startDate, endDate)

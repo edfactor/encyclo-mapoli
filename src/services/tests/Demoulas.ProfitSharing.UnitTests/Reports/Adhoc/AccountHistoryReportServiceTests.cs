@@ -1,16 +1,21 @@
 ﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
+using Demoulas.Util.Extensions;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Shouldly;
 
@@ -29,7 +34,22 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
             .Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync((IProfitSharingDbContext ctx, bool _) => ctx.Demographics);
 
-        _service = new AccountHistoryReportService(MockDbContextFactory, _mockDemographicReader.Object);
+        var mockCalendarService = new Mock<ICalendarService>();
+        mockCalendarService
+            .Setup(c => c.GetYearStartAndEndAccountingDatesAsync((short)DateTime.Now.Year, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new CalendarResponseDto
+            {
+                FiscalBeginDate = DateTime.Now.AddYears(-5).ToDateOnly(),
+                FiscalEndDate = DateTime.Now.ToDateOnly()
+            });
+        var mockEmbeddedSql = new Mock<IEmbeddedSqlService>();
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var frozenService = new FrozenService(MockDbContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object);
+        var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());
+        var totalService = new TotalService(MockDbContextFactory, mockCalendarService.Object, mockEmbeddedSql.Object, demographicReader);
+
+
+        _service = new AccountHistoryReportService(MockDbContextFactory, _mockDemographicReader.Object, totalService);
     }
 
     [Description("PS-2160 : Account history report returns same ID for all rows of the same member")]
