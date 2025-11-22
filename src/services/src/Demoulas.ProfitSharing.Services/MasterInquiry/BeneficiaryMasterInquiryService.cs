@@ -174,7 +174,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                 Address = memberData.Address,
                 AddressZipCode = memberData.PostalCode!,
                 DateOfBirth = memberData.DateOfBirth,
-                Age = memberData.DateOfBirth.Age(),
+                Age = memberData.DateOfBirth.Age().ToString(),
                 Ssn = memberData.Ssn.MaskSsn(),
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,

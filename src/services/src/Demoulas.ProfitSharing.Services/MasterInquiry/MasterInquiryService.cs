@@ -793,7 +793,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Address = memberData.Address,
                 AddressZipCode = memberData.AddressZipCode,
                 DateOfBirth = memberData.DateOfBirth,
-                Age = memberData.DateOfBirth.Age(),
+                Age = memberData.DateOfBirth.Age().ToString(),
                 Ssn = memberData.Ssn,
                 IsExecutive = memberData.IsExecutive,
                 YearToDateProfitSharingHours = memberData.YearToDateProfitSharingHours,
