@@ -85,6 +85,10 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 var memberDistributions = await distributions
                     .FirstOrDefaultAsync(d => d.Ssn == demographic.Ssn, cancellationToken);
 
+                // Get vesting balance for this year
+                var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
+                    SearchBy.BadgeNumber, demographic.BadgeNumber, (short)year, cancellationToken);
+
                 // Get year-specific profit details for contributions, earnings, and forfeitures
                 var yearProfitDetails = await ctx.ProfitDetails
                     .TagWith($"AccountHistoryReport-ProfitDetails-{demographic.BadgeNumber}-{year}")
@@ -114,7 +118,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     Earnings = yearEarnings,
                     Forfeitures = yearForfeitures,
                     Withdrawals = yearWithdrawals,
-                    EndingBalance = currentCumulativeEndingBalance
+                    EndingBalance = currentCumulativeEndingBalance,
+                    VestedBalance = vestingBalance?.VestedBalance ?? 0
                 });
 
                 previousCumulativeEndingBalance = currentCumulativeEndingBalance;
@@ -134,6 +139,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         var totalEarnings = sortedResult.Sum(r => r.Earnings);
         var totalForfeitures = sortedResult.Sum(r => r.Forfeitures);
         var totalWithdrawals = sortedResult.Sum(r => r.Withdrawals);
+        var totalVestedBalance = sortedResult.Sum(r => r.VestedBalance);
 
         // Calculate total count before pagination
         var totalCount = sortedResult.Count;
@@ -168,7 +174,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 TotalContributions = totalContributions,
                 TotalEarnings = totalEarnings,
                 TotalForfeitures = totalForfeitures,
-                TotalWithdrawals = totalWithdrawals
+                TotalWithdrawals = totalWithdrawals,
+                TotalVestedBalance = totalVestedBalance
             }
         };
 
