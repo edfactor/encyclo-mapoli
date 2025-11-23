@@ -55,7 +55,7 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
         }
 
         stopwatch.Stop();
-        return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Ok, "", stopwatch.Elapsed, false));
+        return Task.FromResult(new Outcome(Name(), "test", "Ssn, employee_type_id, zero_contribution_reason_id, points_earned, PS_CERTIFICATE_ISSUED_DATE, ENROLLMENT_ID", OutcomeStatus.Ok, "", stopwatch.Elapsed, false));
     }
 
     private async Task<Dictionary<int, YearEndChange>> GetSmartRowsBySsn(short profitYear)

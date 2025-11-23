@@ -26,15 +26,23 @@ public class TinkerRun : Runnable
     public override async Task Exec()
     {
         await Run(Specify(
-//             IntTerminatedEmployee
-//            P00_BuildDatabase,
-//            DropBadBenesReady,
-//            R08_ProfitShareReport,
-//            IntPay426,
-//            IntPay426N,
-//            IntPay426N9
+            UpdateNavigation
+/*            
+            IntProfitMasterUpdateTest, // Runs Contributions on Smart
+            
+            // Ensure that YE update went to plan
+            TestProfitDetailSelectedColumns, // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont,enrollment_id
+            TestEtvaNow, // Verify ETVA for 2025
+            TestEtvaPrior,
 
-IntPay443
+            R24_ProfPayMasterUpdate, // Create PAY450 report on READY
+            // R24B_ProfPayMasterUpdatePartTwo // Updates the YEARS, and enrollment on READY, NOP on SMART
+
+            S24_ProfPayMasterUpdate, // <--- Writes out update enrollments to the OPEN PROFIT YEAR
+            IntPay450 // Does the FrozenService produce the same report as READY?
+            
+            // S24_ProfPayMasterUpdate // <--- Writes out update enrollments
+*/
         ));
     }
 }
