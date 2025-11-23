@@ -100,19 +100,17 @@ public static class PdfUtilities
         string sectionTitle,
         string? backgroundColor = null)
     {
-        container.PaddingVertical(PdfReportConfiguration.Spacing.SmallGap)
-            .Element(c =>
-            {
-                var textContainer = c.Text(sectionTitle)
-                    .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
-                    .Bold()
-                    .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
+        var headerContainer = container.PaddingVertical(PdfReportConfiguration.Spacing.SmallGap);
 
-                if (!string.IsNullOrEmpty(backgroundColor))
-                {
-                    textContainer.Background(backgroundColor);
-                }
-            });
+        if (!string.IsNullOrEmpty(backgroundColor))
+        {
+            headerContainer = headerContainer.Background(backgroundColor);
+        }
+
+        headerContainer.Text(sectionTitle)
+            .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
+            .Bold()
+            .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
     }
 
     /// <summary>
