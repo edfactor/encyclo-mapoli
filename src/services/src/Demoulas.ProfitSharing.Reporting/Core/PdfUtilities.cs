@@ -24,11 +24,11 @@ public static class PdfUtilities
         {
             if (showLogo)
             {
-                column.Item().Height(60).PaddingBottom(PdfReportConfiguration.Spacing.StandardGap)
+                column.Item().Height(72).PaddingBottom(PdfReportConfiguration.Spacing.StandardGap)
                     .Row(row =>
                     {
                         // Left: Logo
-                        row.ConstantItem(80).Element(c => ComposeLogoImage(c));
+                        row.ConstantItem(130).Element(c => ComposeLogoImage(c));
 
                         // Right: Title and date
                         row.RelativeItem()
@@ -298,9 +298,8 @@ public static class PdfUtilities
     {
         container.Column(column =>
         {
-            // Logo with top spacing
-            column.Item().Height(80).PaddingVertical(PdfReportConfiguration.Spacing.CoverPageGap)
-                .Element(ComposeLogoImage);
+            // Logo (max height to allow aspect ratio preservation)
+            column.Item().MaxHeight(45).Element(ComposeLogoImage);
 
             // Company name with brand color
             column.Item().PaddingVertical(PdfReportConfiguration.Spacing.StandardGap)

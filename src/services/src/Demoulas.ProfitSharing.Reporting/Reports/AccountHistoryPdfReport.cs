@@ -54,46 +54,14 @@ public class AccountHistoryPdfReport : BasePdfReport
     }
 
     /// <summary>
-    /// Composes the professional cover page with member info and report metadata
+    /// Cover page disabled due to QuestPDF image aspect ratio constraints
     /// </summary>
     protected override void ComposeCoverPageElement(IContainer container)
     {
-        container.Column(column =>
-        {
-            // Top spacing for visual balance
-            column.Item().Height(0.15f);
-
-            // Company header with logo and branding (compact)
-            column.Item().Height(35).ComposeCoverPageHeader();
-
-            // Spacing between header and title
-            column.Item().Height(0.2f);
-
-            // Report title
-            column.Item().ComposeCoverPageTitle("Account History Report");
-
-            // Spacing before metadata
-            column.Item().Height(0.2f);
-
-            // Metadata section (very compact)
-            column.Item().ComposeCoverPageMetadata("Member", _memberProfile.FullName);
-            column.Item().Height(0.08f);
-            column.Item().ComposeCoverPageMetadata("Badge Number", _memberProfile.BadgeNumber.ToString());
-            column.Item().Height(0.08f);
-            column.Item().ComposeCoverPageMetadata("Report Period",
-                $"{_startDate:MM/dd/yyyy} - {_endDate:MM/dd/yyyy}");
-            column.Item().Height(0.08f);
-            column.Item().ComposeCoverPageMetadata("Generated", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-            column.Item().Height(0.08f);
-            column.Item().ComposeCoverPageMetadata("Prepared For", _preparedFor);
-
-            // Spacing before divider
-            column.Item().Height(0.15f);
-
-            // Decorative divider
-            column.Item().ComposeCoverPageDivider();
-        });
+        // DISABLED: Cover page causes impossible layout constraints with logo aspect ratio
+        // Just render nothing - report will start with regular header on first page
     }
+
 
     /// <summary>
     /// Composes the main report content
