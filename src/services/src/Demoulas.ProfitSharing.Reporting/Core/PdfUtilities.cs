@@ -185,15 +185,15 @@ public static class PdfUtilities
         bool isAlternate,
         params string[] values)
     {
-        var element = container
+        var rowContainer = container
             .PaddingVertical(PdfReportConfiguration.TableDefaults.CellPaddingVertical);
 
         if (isAlternate)
         {
-            element.Background(PdfReportConfiguration.BrandColors.HeaderGray);
+            rowContainer = rowContainer.Background(PdfReportConfiguration.BrandColors.HeaderGray);
         }
 
-        element.Row(row =>
+        rowContainer.Row(row =>
         {
             foreach (var value in values)
             {
