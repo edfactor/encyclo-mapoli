@@ -62,10 +62,10 @@ public static class PdfReportConfiguration
     /// </summary>
     public static class Spacing
     {
-        public const float SmallGap = 0.1f;        // Tighter spacing within sections
-        public const float StandardGap = 0.15f;    // Standard gap between elements
-        public const float LargeGap = 0.25f;       // Larger gap for visual separation
-        public const float SectionBreak = 0.25f;   // Section break spacing (reduced from 0.4 to fit content)
+        public const float SmallGap = 0.15f;       // Spacing within sections (increased for readability)
+        public const float StandardGap = 0.20f;    // Standard gap between elements (increased for readability)
+        public const float LargeGap = 0.30f;       // Larger gap for visual separation (increased for readability)
+        public const float SectionBreak = 0.35f;   // Section break spacing (increased for better visual separation)
         public const float CoverPageGap = 0.3f;    // Gap for cover page spacing
     }
 
@@ -74,11 +74,11 @@ public static class PdfReportConfiguration
     /// </summary>
     public static class TableDefaults
     {
-        public const float CellPaddingVertical = 0.12f;     // Reduced vertical padding
-        public const float CellPaddingHorizontal = 0.1f;    // Reduced horizontal padding
+        public const float CellPaddingVertical = 0.18f;     // Vertical padding (increased for readability)
+        public const float CellPaddingHorizontal = 0.15f;   // Horizontal padding (increased for readability)
         public const float BorderWidth = 0.5f;
-        public const float RowSpacing = 0.08f;              // Reduced spacing between rows
-        public const float HeaderPaddingVertical = 0.14f;   // Reduced header padding
+        public const float RowSpacing = 0.10f;              // Spacing between rows (increased for readability)
+        public const float HeaderPaddingVertical = 0.20f;   // Header padding (increased for better visual hierarchy)
     }
 
     /// <summary>

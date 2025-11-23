@@ -24,7 +24,7 @@ public class AccountHistoryPdfReport : BasePdfReport
     public override string GeneratedBy => "Profit Sharing System";
     public override bool IncludePageNumbers => true;
     public override bool IncludeCompanyFooter => true;
-    public override bool IncludeCoverPage => true;
+    public override bool IncludeCoverPage => false;
 
     /// <summary>
     /// Account history PDF report constructor
@@ -52,16 +52,6 @@ public class AccountHistoryPdfReport : BasePdfReport
     {
         header.ComposeStandardHeader("Account History Report", showLogo: true);
     }
-
-    /// <summary>
-    /// Cover page disabled due to QuestPDF image aspect ratio constraints
-    /// </summary>
-    protected override void ComposeCoverPageElement(IContainer container)
-    {
-        // DISABLED: Cover page causes impossible layout constraints with logo aspect ratio
-        // Just render nothing - report will start with regular header on first page
-    }
-
 
     /// <summary>
     /// Composes the main report content
