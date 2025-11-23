@@ -342,4 +342,69 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
             record.EndingBalance.ShouldBeGreaterThanOrEqualTo(0);
         }
     }
+
+    [Description("PS-XXX : Account history PDF generation succeeds with valid member data")]
+    [Fact]
+    public async Task GeneratePdfAsync_WithValidMemberData_ShouldGenerateValidPdfStream()
+    {
+        // Arrange
+        const int badgeNumber = 700006;
+        var startDate = new DateOnly(2007, 1, 1);
+        var endDate = new DateOnly(2024, 12, 31);
+
+        var request = new AccountHistoryReportRequest
+        {
+            BadgeNumber = badgeNumber,
+            StartDate = startDate,
+            EndDate = endDate,
+            Skip = 0,
+            Take = int.MaxValue // Get all data for PDF
+        };
+
+        // Act
+        var pdfStream = await _service.GeneratePdfAsync(badgeNumber, request, CancellationToken.None);
+
+        // Assert
+        pdfStream.ShouldNotBeNull();
+        pdfStream.Length.ShouldBeGreaterThan(0, "PDF stream should contain data");
+
+        try
+        {
+            // Verify it's a valid PDF by checking the PDF header
+            pdfStream.Seek(0, System.IO.SeekOrigin.Begin);
+            byte[] header = new byte[4];
+            int bytesRead = await pdfStream.ReadAsync(header, 0, 4);
+            bytesRead.ShouldBe(4);
+
+            string headerString = System.Text.Encoding.ASCII.GetString(header);
+            headerString.ShouldBe("%PDF", "PDF stream should start with PDF header");
+        }
+        finally
+        {
+            await pdfStream.DisposeAsync();
+        }
+    }
+
+    [Description("PS-XXX : Account history PDF generation fails gracefully with no data")]
+    [Fact]
+    public async Task GeneratePdfAsync_WithNoAccountHistory_ShouldThrowInvalidOperationException()
+    {
+        // Arrange - Use a badge that won't have data
+        const int badgeNumber = 999999;
+        var startDate = new DateOnly(2007, 1, 1);
+        var endDate = new DateOnly(2024, 12, 31);
+
+        var request = new AccountHistoryReportRequest
+        {
+            BadgeNumber = badgeNumber,
+            StartDate = startDate,
+            EndDate = endDate,
+            Skip = 0,
+            Take = int.MaxValue
+        };
+
+        // Act & Assert
+        await Should.ThrowAsync<InvalidOperationException>(
+            () => _service.GeneratePdfAsync(badgeNumber, request, CancellationToken.None));
+    }
 }
