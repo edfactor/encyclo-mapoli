@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -67,10 +67,6 @@ public sealed class ExportAccountHistoryReportPdfEndpoint : ProfitSharingEndpoin
                     "Account history PDF export requested without valid badge number (correlation: {CorrelationId})",
                     HttpContext.TraceIdentifier);
 
-                var problemResult = new ProblemHttpResult(
-                    statusCode: StatusCodes.Status400BadRequest,
-                    detail: "Invalid badge number. Badge number must be greater than 0.");
-
                 return TypedResults.Problem(
                     detail: "Invalid badge number. Badge number must be greater than 0.",
                     statusCode: StatusCodes.Status400BadRequest);
@@ -82,7 +78,7 @@ public sealed class ExportAccountHistoryReportPdfEndpoint : ProfitSharingEndpoin
                 req,
                 ct);
 
-            if (pdfStream == null || pdfStream.Length == 0)
+            if (pdfStream.Length == 0)
             {
                 _logger.LogWarning(
                     "No account history data found for badge {BadgeNumber} (correlation: {CorrelationId})",
@@ -117,9 +113,6 @@ public sealed class ExportAccountHistoryReportPdfEndpoint : ProfitSharingEndpoin
 
             // Generate filename with member badge and date range
             var fileName = $"AccountHistory_{req.BadgeNumber}_{req.StartDate:yyyy-MM-dd}_to_{req.EndDate:yyyy-MM-dd}.pdf";
-
-            // Record response metrics
-            this.RecordResponseMetrics(HttpContext, _logger, null, statusCode: StatusCodes.Status200OK);
 
             return TypedResults.File(
                 fileStream: pdfStream,

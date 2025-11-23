@@ -1,5 +1,6 @@
 using Demoulas.ProfitSharing.Reporting.Core;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 

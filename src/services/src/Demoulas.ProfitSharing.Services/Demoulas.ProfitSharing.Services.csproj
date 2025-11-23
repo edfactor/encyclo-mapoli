@@ -6,6 +6,7 @@
     <ProjectReference Include="..\Demoulas.ProfitSharing.CachingServices\Demoulas.ProfitSharing.Services.Caching.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj" />
   <ProjectReference Include="..\Demoulas.ProfitSharing.Security\Demoulas.ProfitSharing.Security.csproj" />
+  <ProjectReference Include="..\Demoulas.ProfitSharing.Reporting\Demoulas.ProfitSharing.Reporting.csproj" />
   </ItemGroup>
 
   <ItemGroup>
