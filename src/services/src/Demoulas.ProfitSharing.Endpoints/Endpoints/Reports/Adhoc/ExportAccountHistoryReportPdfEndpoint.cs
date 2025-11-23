@@ -39,8 +39,8 @@ public sealed class ExportAccountHistoryReportPdfEndpoint : ProfitSharingEndpoin
             s.Description = "Generates and exports a complete account history report to PDF format. Includes all profit years within the specified date range with member account activity (contributions, earnings, forfeitures, withdrawals, and balances).";
             s.ExampleRequest = new AccountHistoryReportRequest
             {
-                BadgeNumber = 700006,
-                StartDate = new DateOnly(2007, 1, 1),
+                BadgeNumber = 700518,
+                StartDate = new DateOnly(2017, 1, 1),
                 EndDate = new DateOnly(2024, 12, 31)
             };
             s.Responses[200] = "PDF file generated successfully";
@@ -95,7 +95,7 @@ public sealed class ExportAccountHistoryReportPdfEndpoint : ProfitSharingEndpoin
                 new("operation", "account-history-report-pdf-export"),
                 new("endpoint", "ExportAccountHistoryReportPdfEndpoint"),
                 new("report_type", "account-history-pdf"),
-                new("date_range_years", $"{(req.StartDate?.Year ?? 2007)}-{(req.EndDate?.Year ?? DateTime.Today.Year)}"));
+                new("date_range_years", $"{(req.StartDate?.Year ?? 2017)}-{(req.EndDate?.Year ?? DateTime.Today.Year)}"));
 
             // Record file size metrics
             EndpointTelemetry.RecordCountsProcessed.Record((int)pdfStream.Length,

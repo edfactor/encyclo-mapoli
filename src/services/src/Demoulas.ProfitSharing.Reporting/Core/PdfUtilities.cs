@@ -103,14 +103,14 @@ public static class PdfUtilities
         container.PaddingVertical(PdfReportConfiguration.Spacing.SmallGap)
             .Element(c =>
             {
-                var element = c.Text(sectionTitle)
+                var textContainer = c.Text(sectionTitle)
                     .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
                     .Bold()
                     .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
 
                 if (!string.IsNullOrEmpty(backgroundColor))
                 {
-                    c.Background(backgroundColor);
+                    textContainer.Background(backgroundColor);
                 }
             });
     }
