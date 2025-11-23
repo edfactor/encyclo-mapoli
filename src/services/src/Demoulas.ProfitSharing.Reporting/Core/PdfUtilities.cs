@@ -25,7 +25,16 @@ public static class PdfUtilities
             if (showLogo)
             {
                 column.Item().Height(60).PaddingBottom(PdfReportConfiguration.Spacing.StandardGap)
-                    .Element(c => ComposeLogoAndTitle(c, reportTitle));
+                    .Row(row =>
+                    {
+                        // Left: Logo
+                        row.ConstantItem(80).Element(c => ComposeLogoImage(c));
+
+                        // Right: Title and date
+                        row.RelativeItem()
+                            .PaddingLeft(PdfReportConfiguration.Spacing.StandardGap)
+                            .Element(c => ComposeHeaderTextBlock(c, reportTitle));
+                    });
             }
             else
             {
@@ -38,23 +47,6 @@ public static class PdfUtilities
             // Horizontal rule
             column.Item().Height(1).PaddingBottom(PdfReportConfiguration.Spacing.StandardGap)
                 .Background(PdfReportConfiguration.BrandColors.BorderGray);
-        });
-    }
-
-    /// <summary>
-    /// Creates header with logo and right-aligned title/date
-    /// </summary>
-    private static void ComposeLogoAndTitle(IContainer container, string reportTitle)
-    {
-        container.Row(row =>
-        {
-            // Left: Logo
-            row.ConstantItem(80).Element(c => ComposeLogoImage(c));
-
-            // Right: Title and date
-            row.RelativeItem()
-                .PaddingLeft(PdfReportConfiguration.Spacing.StandardGap)
-                .Element(c => ComposeHeaderTextBlock(c, reportTitle));
         });
     }
 
