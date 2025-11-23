@@ -6,10 +6,12 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Reporting.Reports;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -22,16 +24,22 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 {
     private readonly IProfitSharingDataContextFactory _contextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly IMasterInquiryService _masterInquiryService;
     private readonly TotalService _totalService;
+    private readonly ILogger<AccountHistoryReportService> _logger;
 
     public AccountHistoryReportService(
         IProfitSharingDataContextFactory contextFactory,
         IDemographicReaderService demographicReaderService,
-        TotalService totalService)
+        IMasterInquiryService masterInquiryService,
+        TotalService totalService,
+        ILogger<AccountHistoryReportService> logger)
     {
         _contextFactory = contextFactory;
         _demographicReaderService = demographicReaderService;
+        _masterInquiryService = masterInquiryService;
         _totalService = totalService;
+        _logger = logger;
     }
 
     public async Task<AccountHistoryReportPaginatedResponse> GetAccountHistoryReportAsync(
@@ -231,5 +239,47 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         };
 
         return sorted;
+    }
+
+    /// <summary>
+    /// Generates a PDF report for the account history data.
+    /// </summary>
+    /// <param name="memberId">The member badge number</param>
+    /// <param name="request">The account history report request with date range and sorting</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Memory stream containing the PDF report</returns>
+    public async Task<MemoryStream> GeneratePdfAsync(
+        int memberId,
+        AccountHistoryReportRequest request,
+        CancellationToken cancellationToken)
+    {
+        _logger.LogInformation(
+            "Generating PDF account history report for member badge {BadgeNumber}",
+            memberId);
+
+        try
+        {
+            // Get the full report data (no pagination for PDF)
+            var fullRequest = request with { Skip = 0, Take = int.MaxValue };
+            var reportData = await GetAccountHistoryReportAsync(memberId, fullRequest, cancellationToken);
+
+            // Use the AccountHistoryReportGenerator to create the PDF
+            var pdfStream = AccountHistoryReportGenerator.GeneratePdf(reportData);
+
+            _logger.LogInformation(
+                "Successfully generated PDF account history report for member badge {BadgeNumber}, size: {FileSize} bytes",
+                memberId,
+                pdfStream.Length);
+
+            return pdfStream;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Error generating PDF account history report for member badge {BadgeNumber}",
+                memberId);
+            throw;
+        }
     }
 }
