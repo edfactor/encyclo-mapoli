@@ -1,4 +1,4 @@
-using QuestPDF.Fluent;
+﻿using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 
 namespace Demoulas.ProfitSharing.Reporting.Core;
@@ -128,7 +128,8 @@ public static class PdfUtilities
         bool bold = false)
     {
         container
-            .PaddingVertical(PdfReportConfiguration.Spacing.SmallGap)
+            .MinHeight(0.35f)
+            .PaddingVertical(0.08f)
             .Row(row =>
             {
                 row.RelativeItem()
@@ -162,7 +163,8 @@ public static class PdfUtilities
         params string[] columns)
     {
         container.Background(PdfReportConfiguration.BrandColors.HeaderGray)
-            .PaddingVertical(PdfReportConfiguration.TableDefaults.CellPaddingVertical)
+            .MinHeight(0.40f)
+            .PaddingVertical(0.12f)
             .Row(row =>
             {
                 foreach (var column in columns)
@@ -189,7 +191,8 @@ public static class PdfUtilities
         params string[] values)
     {
         var rowContainer = container
-            .PaddingVertical(PdfReportConfiguration.TableDefaults.CellPaddingVertical)
+            .MinHeight(0.38f)
+            .PaddingVertical(0.10f)
             .PaddingBottom(PdfReportConfiguration.TableDefaults.RowSpacing);
 
         if (isAlternate)
@@ -222,7 +225,8 @@ public static class PdfUtilities
         string value)
     {
         container.Background(PdfReportConfiguration.BrandColors.TotalsGray)
-            .PaddingVertical(PdfReportConfiguration.TableDefaults.CellPaddingVertical)
+            .MinHeight(0.40f)
+            .PaddingVertical(0.12f)
             .Row(row =>
             {
                 row.RelativeItem()
@@ -285,10 +289,14 @@ public static class PdfUtilities
     public static string TruncateWithEllipsis(this string text, int maxLength)
     {
         if (string.IsNullOrEmpty(text))
+        {
             return text;
+        }
 
         if (text.Length <= maxLength)
+        {
             return text;
+        }
 
         return text[..(maxLength - 3)] + "...";
     }
