@@ -46,7 +46,7 @@ public abstract class Runnable
     {
         Stopwatch wholeRunStopWatch = Stopwatch.StartNew();
         Logger.LogInformation("Starting run with {ActivityCount} activities", activitiesToRun.Count);
-        Console.WriteLine($"Starting run with {activitiesToRun.Count} activities. Press 'S' or 's' at any time to stop gracefully (no enter needed).");
+        Console.WriteLine($"Starting {this.GetType().Name} with {activitiesToRun.Count} activities. Press 'S' or 's' at any time to stop gracefully (no enter needed).");
         Console.WriteLine();
 
         if (activitiesToRun.Any(a => a is SmartActivity))
@@ -64,7 +64,9 @@ public abstract class Runnable
             Stopwatch wholeActivityStopWatch = Stopwatch.StartNew();
             Logger.LogInformation("------------------- Starting execution: {ActivityName}", activity.Name());
 
+            Console.Write($"Running ---> {activity.Name()} ");
             Outcome outcome = await activity.Execute();
+            Console.Write("\x1b[2K\r"); // Clears line.
             outcomes.Add(outcome);
 
             string msg = outcome.Message.Replace("\n", "\n" + "   ").Trim();
@@ -82,9 +84,9 @@ public abstract class Runnable
                 string timeStr = outcome.took.HasValue ? outcome.took.Value.ToString(@"mm\:ss") : "--:--";
 
                 // Show EJR command for READY activities
-                if (activity.Name().StartsWith('R') && !string.IsNullOrWhiteSpace(outcome.fullcommand))
+                if (!string.IsNullOrWhiteSpace(outcome.fullcommand))
                 {
-                    Console.WriteLine($"✓ {timeStr} {activity.Name()} (EJR {outcome.fullcommand})");
+                    Console.WriteLine($"✓ {timeStr} {activity.Name(),-12} ({outcome.fullcommand})");
                 }
                 else
                 {
