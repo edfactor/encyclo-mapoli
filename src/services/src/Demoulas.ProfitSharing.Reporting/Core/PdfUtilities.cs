@@ -102,8 +102,8 @@ public static class PdfUtilities
         string? backgroundColor = null)
     {
         var headerContainer = container
-            .PaddingVertical(0.12f)
-            .PaddingHorizontal(0.08f);
+            .PaddingVertical(PdfReportConfiguration.Spacing.StandardGap)
+            .PaddingHorizontal(PdfReportConfiguration.Spacing.SmallGap);
 
         if (!string.IsNullOrEmpty(backgroundColor))
         {
@@ -127,27 +127,29 @@ public static class PdfUtilities
         string value,
         bool bold = false)
     {
-        container.Row(row =>
-        {
-            row.RelativeItem()
-                .Text(label + ":")
-                .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
-                .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
+        container
+            .PaddingVertical(PdfReportConfiguration.Spacing.SmallGap)
+            .Row(row =>
+            {
+                row.RelativeItem()
+                    .Text(label + ":")
+                    .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
+                    .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
 
-            row.RelativeItem()
-                .AlignRight()
-                .Element(c =>
-                {
-                    var text = c.Text(value)
-                        .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
-                        .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
-
-                    if (bold)
+                row.RelativeItem()
+                    .AlignRight()
+                    .Element(c =>
                     {
-                        text.Bold();
-                    }
-                });
-        });
+                        var text = c.Text(value)
+                            .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
+                            .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
+
+                        if (bold)
+                        {
+                            text.Bold();
+                        }
+                    });
+            });
     }
 
     /// <summary>
