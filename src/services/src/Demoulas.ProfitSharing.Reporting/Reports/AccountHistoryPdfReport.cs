@@ -24,6 +24,7 @@ public class AccountHistoryPdfReport : BasePdfReport
     public override string GeneratedBy => "Profit Sharing System";
     public override bool IncludePageNumbers => true;
     public override bool IncludeCompanyFooter => true;
+    public override bool IncludeCoverPage => true;
 
     /// <summary>
     /// Account history PDF report constructor
@@ -50,6 +51,48 @@ public class AccountHistoryPdfReport : BasePdfReport
     protected override void ComposeHeader(IContainer header)
     {
         header.ComposeStandardHeader("Account History Report", showLogo: true);
+    }
+
+    /// <summary>
+    /// Composes the professional cover page with member info and report metadata
+    /// </summary>
+    protected override void ComposeCoverPageElement(IContainer container)
+    {
+        container.Column(column =>
+        {
+            // Top spacing for visual balance
+            column.Item().Height(PdfReportConfiguration.Spacing.CoverPageGap);
+
+            // Company header with logo and branding
+            column.Item().Height(60).ComposeCoverPageHeader();
+
+            // Large spacing between header and title
+            column.Item().Height(PdfReportConfiguration.Spacing.LargeGap);
+
+            // Report title
+            column.Item().ComposeCoverPageTitle("Account History Report");
+
+            // Spacing before metadata
+            column.Item().Height(PdfReportConfiguration.Spacing.LargeGap);
+
+            // Metadata section
+            column.Item().ComposeCoverPageMetadata("Member", _memberProfile.FullName);
+            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
+            column.Item().ComposeCoverPageMetadata("Badge Number", _memberProfile.BadgeNumber.ToString());
+            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
+            column.Item().ComposeCoverPageMetadata("Report Period",
+                $"{_startDate:MM/dd/yyyy} - {_endDate:MM/dd/yyyy}");
+            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
+            column.Item().ComposeCoverPageMetadata("Generated", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
+            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
+            column.Item().ComposeCoverPageMetadata("Prepared For", _preparedFor);
+
+            // Large spacing before divider
+            column.Item().Height(PdfReportConfiguration.Spacing.LargeGap);
+
+            // Decorative divider
+            column.Item().ComposeCoverPageDivider();
+        });
     }
 
     /// <summary>

@@ -64,6 +64,12 @@ public abstract class BasePdfReport : IDocument
     public virtual bool IncludeCompanyFooter => true;
 
     /// <summary>
+    /// Optional: Include a professional cover page. Default is false.
+    /// Override in derived classes to enable and customize cover page content.
+    /// </summary>
+    public virtual bool IncludeCoverPage => false;
+
+    /// <summary>
     /// QuestPDF document metadata (title, author, subject)
     /// </summary>
     public DocumentMetadata GetMetadata() => new DocumentMetadata
@@ -111,6 +117,36 @@ public abstract class BasePdfReport : IDocument
     /// Composes the main report content. Child classes MUST override.
     /// </summary>
     protected abstract void ComposeContent(IContainer content);
+
+    /// <summary>
+    /// Composes the cover page. Override to customize.
+    /// Default implementation is empty; child classes should override if IncludeCoverPage is true.
+    /// Use PdfUtilities extension methods for consistent cover page styling:
+    /// - ComposeCoverPageHeader(): Renders logo and company branding
+    /// - ComposeCoverPageTitle(title): Renders large title with blue accent
+    /// - ComposeCoverPageMetadata(label, value): Renders key-value metadata
+    /// - ComposeCoverPageDivider(): Renders decorative divider line
+    /// 
+    /// Example:
+    /// <code>
+    /// protected override void ComposeCoverPageElement(IContainer container)
+    /// {
+    ///     container.Column(column =>
+    ///     {
+    ///         column.Item().Height(60).ComposeCoverPageHeader();
+    ///         column.Item().Height(PdfReportConfiguration.Spacing.LargeGap);
+    ///         column.Item().ComposeCoverPageTitle("My Report Title");
+    ///         column.Item().Height(PdfReportConfiguration.Spacing.LargeGap);
+    ///         column.Item().ComposeCoverPageMetadata("Date", DateTime.Now.ToString("MM/dd/yyyy"));
+    ///         column.Item().ComposeCoverPageDivider();
+    ///     });
+    /// }
+    /// </code>
+    /// </summary>
+    protected virtual void ComposeCoverPageElement(IContainer container)
+    {
+        // Default: empty cover page. Child classes should override if IncludeCoverPage is true.
+    }
 
     /// <summary>
     /// Composes the page footer. Override to customize.
@@ -171,19 +207,34 @@ public abstract class BasePdfReport : IDocument
     {
         try
         {
-            return QuestPDF.Fluent.Document.Create(container => container.Page(page =>
+            return QuestPDF.Fluent.Document.Create(container =>
             {
-                page.MarginVertical(PdfReportConfiguration.PageMargins.Top);
-                page.MarginHorizontal(PdfReportConfiguration.PageMargins.Left);
-
-                page.Header().Element(ComposeHeaderElement);
-                page.Content().Element(ComposeContentElement);
-
-                if (IncludePageNumbers || IncludeCompanyFooter)
+                // Cover page (optional - only if report supports it)
+                if (IncludeCoverPage)
                 {
-                    page.Footer().Element(ComposeFooterElement);
+                    container.Page(page =>
+                    {
+                        page.MarginVertical(PdfReportConfiguration.PageMargins.Top);
+                        page.MarginHorizontal(PdfReportConfiguration.PageMargins.Left);
+                        page.Content().Element(ComposeCoverPageElement);
+                    });
                 }
-            })).GeneratePdf();
+
+                // Main content page(s)
+                container.Page(page =>
+                {
+                    page.MarginVertical(PdfReportConfiguration.PageMargins.Top);
+                    page.MarginHorizontal(PdfReportConfiguration.PageMargins.Left);
+
+                    page.Header().Element(ComposeHeaderElement);
+                    page.Content().Element(ComposeContentElement);
+
+                    if (IncludePageNumbers || IncludeCompanyFooter)
+                    {
+                        page.Footer().Element(ComposeFooterElement);
+                    }
+                });
+            }).GeneratePdf();
         }
         catch (Exception ex)
         {
