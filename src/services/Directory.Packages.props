@@ -36,7 +36,7 @@
     <PackageVersion Include="Demoulas.Common.Api" Version="3.2.0" />
     <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.12.0" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.7.0" />
-    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.10.0" />
+    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.11.0" />
     <PackageVersion Include="Demoulas.Common.Caching" Version="3.2.0" />
     <PackageVersion Include="Demoulas.Security" Version="3.9.0" />
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />

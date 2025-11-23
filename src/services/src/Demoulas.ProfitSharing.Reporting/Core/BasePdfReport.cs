@@ -144,8 +144,7 @@ public abstract class BasePdfReport : IDocument
     /// </summary>
     private void ComposeHeaderElement(IContainer container)
     {
-        container.PaddingBottom(PdfReportConfiguration.Spacing.StandardGap);
-        ComposeHeader(container);
+        container.PaddingBottom(PdfReportConfiguration.Spacing.StandardGap).Element(ComposeHeader);
     }
 
     /// <summary>
@@ -161,8 +160,7 @@ public abstract class BasePdfReport : IDocument
     /// </summary>
     private void ComposeFooterElement(IContainer container)
     {
-        container.PaddingTop(PdfReportConfiguration.Spacing.StandardGap);
-        ComposeFooter(container);
+        container.PaddingTop(PdfReportConfiguration.Spacing.StandardGap).Element(ComposeFooter);
     }
 
     /// <summary>
