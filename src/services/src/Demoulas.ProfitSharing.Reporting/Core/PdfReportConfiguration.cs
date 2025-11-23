@@ -62,11 +62,11 @@ public static class PdfReportConfiguration
     /// </summary>
     public static class Spacing
     {
-        public const float SmallGap = 0.2f;        // Tighter spacing within sections
-        public const float StandardGap = 0.35f;    // Standard gap between elements
-        public const float LargeGap = 0.5f;        // Larger gap for visual separation
-        public const float SectionBreak = 0.6f;    // Section break spacing
-        public const float CoverPageGap = 0.75f;   // Large gap for cover page spacing
+        public const float SmallGap = 0.15f;       // Tighter spacing within sections
+        public const float StandardGap = 0.25f;    // Standard gap between elements
+        public const float LargeGap = 0.35f;       // Larger gap for visual separation
+        public const float SectionBreak = 0.4f;    // Section break spacing
+        public const float CoverPageGap = 0.5f;    // Large gap for cover page spacing
     }
 
     /// <summary>
