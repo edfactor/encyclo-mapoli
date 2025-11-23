@@ -19,7 +19,7 @@ public sealed record DistributionRunReportDetail
     public DateOnly? FullTimeDate { get; set; }
     [MaskSensitive]
     public DateOnly DateOfBirth { get; set; }
-    public int Age { get; set; }
+    [MaskSensitive] public short Age { get; set; }
     public decimal GrossAmount { get; set; }
     public decimal StateTaxAmount { get; set; }
     public decimal FederalTaxAmount { get; set; }

@@ -13,6 +13,6 @@ public record BeneficiarySearchFilterResponse
     [MaskSensitive] public string? City { get; set; }
     public string? State { get; set; }
     public string? Zip { get; set; }
-    public int? Age { get; set; }
+    [MaskSensitive] public short? Age { get; set; }
 
 }

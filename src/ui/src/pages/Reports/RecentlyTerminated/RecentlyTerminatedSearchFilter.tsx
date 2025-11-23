@@ -38,6 +38,7 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const profitYear = useDecemberFlowProfitYear();
   const [isSearching, setIsSearching] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     control,
@@ -55,10 +56,15 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
   });
 
   const validateAndSearch = handleSubmit(async (data) => {
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       setIsSearching(true);
-      await onSearch(data.beginningDate, data.endingDate);
-      setIsSearching(false);
+      try {
+        await onSearch(data.beginningDate, data.endingDate);
+      } finally {
+        setIsSearching(false);
+        setIsSubmitting(false);
+      }
     }
   });
 
@@ -169,8 +175,8 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isSearching}
-          disabled={!isValid}
+          isFetching={isSearching || isSubmitting}
+          disabled={!isValid || isSearching || isSubmitting}
         />
       </Grid>
     </form>

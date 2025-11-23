@@ -3,8 +3,11 @@ import fs from "fs";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import compress from "vite-plugin-compression";
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(async ({ command, mode }) => {
+  // Dynamic import for React Compiler to work with ES modules
+  const ReactCompilerConfig = (await import("babel-plugin-react-compiler")).default;
   const env = loadEnv(mode, process.cwd(), "");
   const isProd = mode === "production";
 
@@ -63,7 +66,11 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     plugins: [
-      react(),
+      react({
+        babel: {
+          plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]]
+        }
+      }),
       compress({
         algorithm: "brotliCompress"
       })

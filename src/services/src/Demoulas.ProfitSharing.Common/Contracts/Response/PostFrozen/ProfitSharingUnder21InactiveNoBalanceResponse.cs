@@ -13,7 +13,7 @@ public sealed record ProfitSharingUnder21InactiveNoBalanceResponse : IIsExecutiv
     public DateOnly BirthDate { get; set; }
     public DateOnly HireDate { get; set; }
     public DateOnly? TerminationDate { get; set; }
-    public byte Age { get; set; }
+    [MaskSensitive] public short Age { get; set; }
     public byte EnrollmentId { get; set; }
     public bool IsExecutive { get; set; }
     /// <summary>

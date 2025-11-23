@@ -25,9 +25,24 @@ public class GoldenYearEndRun : Runnable
     public override async Task Exec()
     {
         // Generate the Golden files.  Run READY from Frozen to the YE Completed.
-        await Run(Specify(
-            R00_BuildDatabase, // import obfuscated
-            // R01-R14 - we cant run these because the SHIFT has already been run on the Scramble
+        await Run(Specify( 
+            R00_BuildDatabase, // import obfuscated 
+            DropBadBenesReady,
+            R01_CleanUpReports,
+            R02_MilitaryAndRehire,
+            R03_ProfTermination,
+            R04_ProfShareLoanBalance,
+            R05_ExtractExecutiveHoursAndDollars,
+            R06_ClearExecutiveHoursAndDollars,
+            R07_ReadyScreen00809,
+            R08_ProfitShareReport,
+            R09_YEOraclePayrollProcessing, // does nothing
+            R10_LoadOraclePayProfit, // does nothing
+            R11_ProfitSharingYTDWagesExtract,
+            R12_ProfLoadYrEndDemoProfitShare, // does nothing
+            R13A_PayProfitShiftPartTime,
+            R13B_PayProfitShiftWeekly,
+            R14_ZeroPyPdPayProfit,
             R15_ProfitSharingYTDWagesExtract2,
             R16_ReadyScreen00809Second,
             R17_ProfitShareReportEditRun,
@@ -41,8 +56,8 @@ public class GoldenYearEndRun : Runnable
             R24B_ProfPayMasterUpdatePartTwo,
             R25_ProfShareReportByAge,
             R26_ProfShareGrossReport,
-            R27_ProfShareByStore,
-            R28_PrintProfitCerts
+            R27_ProfShareByStore
+            // R28_PrintProfitCerts -- This poops out over not having an input file
         ));
     }
 }

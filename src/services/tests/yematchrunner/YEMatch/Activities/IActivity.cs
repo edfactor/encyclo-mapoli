@@ -7,4 +7,5 @@ public interface IActivity
 {
     string Name();
     Task<Outcome> Execute();
+
 }

@@ -1,7 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 public sealed record DistributionsByAgeDetail
 {
-    public required int Age { get; set; }
+    [MaskSensitive] public required short Age { get; set; }
     public int EmployeeCount => BadgeNumbers.Count;
     public decimal Amount { get; set; }
     public decimal HardshipAmount { get; set; }

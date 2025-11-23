@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, Divider, FormLabel, Grid, MenuItem, Select, Typography } from "@mui/material";
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -36,9 +36,16 @@ const PayBeNext = () => {
     sortBy: "psnSuffix",
     isSortDescending: true
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
+
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
 
   const mainColumns = useMemo(() => PayBeNextGridColumns(), []);
   const detailColumns = useMemo(() => ProfitDetailGridColumns(), []);
@@ -164,21 +171,24 @@ const PayBeNext = () => {
   };
 
   const onSubmit = (data: bRequest) => {
-    const request = createAdhocBeneficiariesReportReqeust(
-      0,
-      "",
-      false,
-      50,
-      data.isAlsoEmployee ?? true,
-      parseInt(data.profitYear)
-    );
-    triggerReport(request)
-      .unwrap()
-      .then((res) => {
-        console.log(res);
-        setAdhocBeneficiariesReport(res);
-      })
-      .catch((err) => console.log(err));
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      const request = createAdhocBeneficiariesReportReqeust(
+        0,
+        "",
+        false,
+        50,
+        data.isAlsoEmployee ?? true,
+        parseInt(data.profitYear)
+      );
+      triggerReport(request)
+        .unwrap()
+        .then((res) => {
+          console.log(res);
+          setAdhocBeneficiariesReport(res);
+        })
+        .catch((err) => console.log(err));
+    }
   };
 
   const validateAndSubmit = handleSubmit(onSubmit);
@@ -267,8 +277,8 @@ const PayBeNext = () => {
                     <SearchAndReset
                       handleReset={handleReset}
                       handleSearch={validateAndSubmit}
-                      isFetching={isFetching}
-                      disabled={!isValid}
+                      isFetching={isFetching || isSubmitting}
+                      disabled={!isValid || isFetching || isSubmitting}
                     />
                   </Grid>
                 </Grid>

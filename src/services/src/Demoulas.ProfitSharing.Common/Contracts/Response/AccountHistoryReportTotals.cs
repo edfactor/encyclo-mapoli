@@ -9,4 +9,5 @@ public record AccountHistoryReportTotals
     public decimal TotalEarnings { get; set; }
     public decimal TotalForfeitures { get; set; }
     public decimal TotalWithdrawals { get; set; }
+    public decimal TotalVestedBalance { get; set; }
 }

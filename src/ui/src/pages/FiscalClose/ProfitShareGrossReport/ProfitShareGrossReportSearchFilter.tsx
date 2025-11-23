@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
@@ -27,6 +28,7 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetGrossWagesReportQuery();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     control,
     handleSubmit,
@@ -40,8 +42,15 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
     }
   });
 
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   const validateAndSubmit = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       setPageReset(true);
       triggerSearch(
         {
@@ -118,8 +127,8 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
-          isFetching={isFetching}
-          disabled={!isValid}
+          isFetching={isFetching || isSubmitting}
+          disabled={!isValid || isFetching || isSubmitting}
         />
       </Grid>
     </form>

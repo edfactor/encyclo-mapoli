@@ -27,7 +27,11 @@ public sealed class IntegrationTestFactory : IIntegrationTestFactory
             new IntTestQPay129(_integrationTestPath),
             new IntPay426N9(_integrationTestPath),
             new IntPay426N(_integrationTestPath),
-            new IntPay426(_integrationTestPath)
+            new IntPay426(_integrationTestPath),
+            new IntProfitMasterUpdateTest(_integrationTestPath),
+            new IntPay450(_integrationTestPath),
+            new IntPay444Test(_integrationTestPath),
+            new IntPay447Test(_integrationTestPath)
         ];
     }
 }

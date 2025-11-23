@@ -1,8 +1,10 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 public sealed record BalanceByAgeDetail : BalanceByDetailBase
 {
-    public required byte Age { get; init; }
+    [MaskSensitive] public required short Age { get; set; }
 
     public static BalanceByAgeDetail ResponseExample()
     {
