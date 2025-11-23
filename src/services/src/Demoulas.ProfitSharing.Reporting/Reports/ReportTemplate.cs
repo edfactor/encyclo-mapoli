@@ -1,5 +1,6 @@
 using Demoulas.ProfitSharing.Reporting.Core;
 using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
 
 namespace Demoulas.ProfitSharing.Reporting.Reports;
 
@@ -18,7 +19,6 @@ namespace Demoulas.ProfitSharing.Reporting.Reports;
 /// </summary>
 public class ReportTemplate : BasePdfReport
 {
-    // TODO: Add your report data fields here
     private readonly string _reportDescription;
 
     public override string Title => "Report Template Title";
@@ -36,15 +36,8 @@ public class ReportTemplate : BasePdfReport
     /// </summary>
     protected override void ComposeHeader(IContainer header)
     {
-        // Option 1: Use standard branding header
+        // Use standard branding header
         header.ComposeStandardHeader(Title, showLogo: true);
-
-        // Option 2: Custom header layout
-        // header.Row(row =>
-        // {
-        //     row.RelativeColumn().Text("Custom Header Text");
-        //     row.RelativeColumn().AlignRight().Text(DateTime.Now.ToString("MM/dd/yyyy"));
-        // });
     }
 
     /// <summary>
@@ -96,7 +89,7 @@ public class ReportTemplate : BasePdfReport
     /// Composes the main report content section
     /// Replace with your actual content
     /// </summary>
-    private void ComposeMainSection(IContainer container)
+    private static void ComposeMainSection(IContainer container)
     {
         container.Column(column =>
         {
@@ -122,7 +115,7 @@ public class ReportTemplate : BasePdfReport
     /// <summary>
     /// Example table for reference - replace with your table logic
     /// </summary>
-    private void ComposeExampleTable(IContainer container)
+    private static void ComposeExampleTable(IContainer container)
     {
         container.Column(column =>
         {
@@ -142,7 +135,7 @@ public class ReportTemplate : BasePdfReport
     /// <summary>
     /// Composes footer notes/disclaimers section
     /// </summary>
-    private void ComposeFooterNotesSection(IContainer container)
+    private static void ComposeFooterNotesSection(IContainer container)
     {
         container.Column(column =>
         {
@@ -154,29 +147,5 @@ public class ReportTemplate : BasePdfReport
                 .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
         });
     }
-
-    /// <summary>
-    /// Optional: Customize the page footer
-    /// Default: Shows generation timestamp, user, and page numbers
-    /// </summary>
-    protected override void ComposeFooter(IContainer footer)
-    {
-        // Use default footer
-        base.ComposeFooter(footer);
-
-        // Or customize:
-        // footer.Row(row =>
-        // {
-        //     row.RelativeColumn().Text("Custom Footer Text");
-        //     row.RelativeColumn().AlignRight().Text($"Page {pageNumber}");
-        // });
-    }
-
-    /// <summary>
-    /// Optional: Override these as needed
-    /// </summary>
-    // public override bool IncludePageNumbers => true;
-    // public override bool IncludeCompanyFooter => true;
-    // public override DateTime GeneratedOn => DateTime.Now;
-    // public override string GeneratedBy => "Report System";
 }
+

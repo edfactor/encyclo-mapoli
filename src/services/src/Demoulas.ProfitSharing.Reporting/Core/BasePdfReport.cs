@@ -66,10 +66,12 @@ public abstract class BasePdfReport : IDocument
     /// <summary>
     /// QuestPDF document metadata (title, author, subject)
     /// </summary>
-    public DocumentMetadata GetMetadata() => DocumentMetadata.Default
-        .WithTitle(Title)
-        .WithAuthor(PdfReportConfiguration.ReportMetadata.Author)
-        .WithSubject(PdfReportConfiguration.ReportMetadata.Subject);
+    public DocumentMetadata GetMetadata() => new DocumentMetadata
+    {
+        Title = Title,
+        Author = PdfReportConfiguration.ReportMetadata.Author,
+        Subject = PdfReportConfiguration.ReportMetadata.Subject
+    };
 
     /// <summary>
     /// Main document composition method called by QuestPDF
@@ -119,7 +121,7 @@ public abstract class BasePdfReport : IDocument
         footer.Row(row =>
         {
             // Left: Generation info
-            row.RelativeColumn().Text(c =>
+            row.RelativeItem().Text(c =>
             {
                 c.Span($"Generated: {GeneratedOn:MM/dd/yyyy HH:mm} by {GeneratedBy}")
                     .FontSize(PdfReportConfiguration.FontSizes.FooterSize);
@@ -128,7 +130,7 @@ public abstract class BasePdfReport : IDocument
             // Right: Page numbers (if enabled)
             if (IncludePageNumbers)
             {
-                row.RelativeColumn().AlignRight().Text(c =>
+                row.RelativeItem().AlignRight().Text(c =>
                 {
                     c.CurrentPageNumber()
                         .FontSize(PdfReportConfiguration.FontSizes.FooterSize);

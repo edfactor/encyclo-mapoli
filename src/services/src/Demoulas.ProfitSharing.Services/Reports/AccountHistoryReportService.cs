@@ -9,7 +9,6 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Reporting.Reports;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -24,20 +23,17 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 {
     private readonly IProfitSharingDataContextFactory _contextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IMasterInquiryService _masterInquiryService;
     private readonly TotalService _totalService;
     private readonly ILogger<AccountHistoryReportService> _logger;
 
     public AccountHistoryReportService(
         IProfitSharingDataContextFactory contextFactory,
         IDemographicReaderService demographicReaderService,
-        IMasterInquiryService masterInquiryService,
         TotalService totalService,
         ILogger<AccountHistoryReportService> logger)
     {
         _contextFactory = contextFactory;
         _demographicReaderService = demographicReaderService;
-        _masterInquiryService = masterInquiryService;
         _totalService = totalService;
         _logger = logger;
     }
@@ -263,8 +259,39 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             var fullRequest = request with { Skip = 0, Take = int.MaxValue };
             var reportData = await GetAccountHistoryReportAsync(memberId, fullRequest, cancellationToken);
 
-            // Use the AccountHistoryReportGenerator to create the PDF
-            var pdfStream = AccountHistoryReportGenerator.GeneratePdf(reportData);
+            // Extract member profile from the first response item
+            var responseList = reportData.Response.Results.ToList();
+            var firstResponse = responseList.FirstOrDefault();
+            if (firstResponse is null)
+            {
+                _logger.LogWarning(
+                    "No account history data found for member badge {BadgeNumber}",
+                    memberId);
+                throw new InvalidOperationException($"No account history data found for member {memberId}");
+            }
+
+            // Create the PDF report document
+            var memberProfile = new AccountHistoryPdfReport.MemberProfileInfo
+            {
+                FullName = firstResponse.FullName,
+                BadgeNumber = firstResponse.BadgeNumber,
+                MaskedSsn = firstResponse.Ssn
+            };
+
+            // Ensure cumulative totals are provided (initialize if null)
+            var cumulativeTotals = reportData.CumulativeTotals ?? new AccountHistoryReportTotals();
+
+            var pdfReport = new AccountHistoryPdfReport(
+                memberProfile,
+                responseList,
+                cumulativeTotals,
+                reportData.StartDate,
+                reportData.EndDate,
+                "Member");
+
+            // Generate PDF bytes and create memory stream
+            byte[] pdfBytes = pdfReport.GeneratePdf();
+            var pdfStream = new MemoryStream(pdfBytes, writable: false);
 
             _logger.LogInformation(
                 "Successfully generated PDF account history report for member badge {BadgeNumber}, size: {FileSize} bytes",
@@ -273,13 +300,27 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
             return pdfStream;
         }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(
+                ex,
+                "Invalid operation while generating PDF account history report for member badge {BadgeNumber}: {ErrorMessage}",
+                memberId,
+                ex.Message);
+            throw new InvalidOperationException(
+                $"Unable to generate PDF account history report for member {memberId}: {ex.Message}",
+                ex);
+        }
         catch (Exception ex)
         {
             _logger.LogError(
                 ex,
-                "Error generating PDF account history report for member badge {BadgeNumber}",
-                memberId);
-            throw;
+                "Unexpected error generating PDF account history report for member badge {BadgeNumber}: {ErrorMessage}",
+                memberId,
+                ex.Message);
+            throw new InvalidOperationException(
+                $"Failed to generate PDF account history report for member {memberId}: {ex.Message}",
+                ex);
         }
     }
 }

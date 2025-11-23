@@ -16,6 +16,7 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 
@@ -48,8 +49,8 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());
         var totalService = new TotalService(MockDbContextFactory, mockCalendarService.Object, mockEmbeddedSql.Object, demographicReader);
 
-
-        _service = new AccountHistoryReportService(MockDbContextFactory, _mockDemographicReader.Object, totalService);
+        var mockLogger = new Mock<ILogger<AccountHistoryReportService>>();
+        _service = new AccountHistoryReportService(MockDbContextFactory, _mockDemographicReader.Object, totalService, mockLogger.Object);
     }
 
     [Description("PS-2160 : Account history report returns same ID for all rows of the same member")]

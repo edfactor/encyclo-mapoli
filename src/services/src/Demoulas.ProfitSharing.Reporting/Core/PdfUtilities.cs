@@ -49,10 +49,10 @@ public static class PdfUtilities
         container.Row(row =>
         {
             // Left: Logo
-            row.ConstantColumn(80).Element(c => ComposeLogoImage(c));
+            row.ConstantItem(80).Element(c => ComposeLogoImage(c));
 
             // Right: Title and date
-            row.RelativeColumn()
+            row.RelativeItem()
                 .PaddingLeft(PdfReportConfiguration.Spacing.StandardGap)
                 .Element(c => ComposeHeaderTextBlock(c, reportTitle));
         });
@@ -138,12 +138,12 @@ public static class PdfUtilities
     {
         container.Row(row =>
         {
-            row.RelativeColumn()
+            row.RelativeItem()
                 .Text(label + ":")
                 .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
                 .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
 
-            row.RelativeColumn()
+            row.RelativeItem()
                 .AlignRight()
                 .Element(c =>
                 {
@@ -174,7 +174,7 @@ public static class PdfUtilities
             {
                 foreach (var column in columns)
                 {
-                    row.RelativeColumn()
+                    row.RelativeItem()
                         .PaddingHorizontal(PdfReportConfiguration.TableDefaults.CellPaddingHorizontal)
                         .Text(column)
                         .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
@@ -207,7 +207,7 @@ public static class PdfUtilities
         {
             foreach (var value in values)
             {
-                row.RelativeColumn()
+                row.RelativeItem()
                     .PaddingHorizontal(PdfReportConfiguration.TableDefaults.CellPaddingHorizontal)
                     .Text(value)
                     .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
@@ -231,14 +231,14 @@ public static class PdfUtilities
             .PaddingVertical(PdfReportConfiguration.TableDefaults.CellPaddingVertical)
             .Row(row =>
             {
-                row.RelativeColumn()
+                row.RelativeItem()
                     .PaddingHorizontal(PdfReportConfiguration.TableDefaults.CellPaddingHorizontal)
                     .Text(label)
                     .FontSize(PdfReportConfiguration.FontSizes.TotalsSize)
                     .Bold()
                     .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
 
-                row.RelativeColumn()
+                row.RelativeItem()
                     .AlignRight()
                     .PaddingHorizontal(PdfReportConfiguration.TableDefaults.CellPaddingHorizontal)
                     .Text(value)

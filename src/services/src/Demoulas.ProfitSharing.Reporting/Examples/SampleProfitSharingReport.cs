@@ -1,5 +1,6 @@
 using Demoulas.ProfitSharing.Reporting.Core;
 using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
 
 namespace Demoulas.ProfitSharing.Reporting.Examples;
 
@@ -160,7 +161,7 @@ public class SampleProfitSharingReport : BasePdfReport
     /// <summary>
     /// Composes footer notes/disclaimers
     /// </summary>
-    private void ComposeFooterNotes(IContainer container)
+    private static void ComposeFooterNotes(IContainer container)
     {
         container.Column(column =>
         {
