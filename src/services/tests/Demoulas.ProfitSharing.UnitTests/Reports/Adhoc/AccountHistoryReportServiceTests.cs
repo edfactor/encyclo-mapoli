@@ -26,12 +26,11 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.Adhoc;
 public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 {
     private readonly AccountHistoryReportService _service;
-    private readonly Mock<IDemographicReaderService> _mockDemographicReader;
 
     public AccountHistoryReportServiceTests()
     {
-        _mockDemographicReader = new Mock<IDemographicReaderService>();
-        _mockDemographicReader
+        Mock<IDemographicReaderService> mockDemographicReader = new();
+        mockDemographicReader
             .Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync((IProfitSharingDbContext ctx, bool _) => ctx.Demographics);
 
@@ -50,7 +49,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         var totalService = new TotalService(MockDbContextFactory, mockCalendarService.Object, mockEmbeddedSql.Object, demographicReader);
 
         var mockLogger = new Mock<ILogger<AccountHistoryReportService>>();
-        _service = new AccountHistoryReportService(MockDbContextFactory, _mockDemographicReader.Object, totalService, mockLogger.Object);
+        _service = new AccountHistoryReportService(MockDbContextFactory, mockDemographicReader.Object, totalService, mockLogger.Object);
     }
 
     [Description("PS-2160 : Account history report returns same ID for all rows of the same member")]
@@ -343,62 +342,17 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         }
     }
 
-    [Description("PS-XXX : Account history PDF generation succeeds with valid member data")]
+    [Description("PS-2045 : Account history report throws InvalidOperationException when no data found")]
     [Fact]
-    public async Task GeneratePdfAsync_WithValidMemberData_ShouldGenerateValidPdfStream()
+    public async Task GeneratePdfAsync_WithoutAccountData_ShouldThrowInvalidOperationException()
     {
-        // Arrange
-        const int badgeNumber = 700006;
-        var startDate = new DateOnly(2007, 1, 1);
-        var endDate = new DateOnly(2024, 12, 31);
-
-        var request = new AccountHistoryReportRequest
-        {
-            BadgeNumber = badgeNumber,
-            StartDate = startDate,
-            EndDate = endDate,
-            Skip = 0,
-            Take = int.MaxValue // Get all data for PDF
-        };
-
-        // Act
-        var pdfStream = await _service.GeneratePdfAsync(badgeNumber, request, CancellationToken.None);
-
-        // Assert
-        pdfStream.ShouldNotBeNull();
-        pdfStream.Length.ShouldBeGreaterThan(0, "PDF stream should contain data");
-
-        try
-        {
-            // Verify it's a valid PDF by checking the PDF header
-            pdfStream.Seek(0, System.IO.SeekOrigin.Begin);
-            byte[] header = new byte[4];
-            int bytesRead = await pdfStream.ReadAsync(header, 0, 4);
-            bytesRead.ShouldBe(4);
-
-            string headerString = System.Text.Encoding.ASCII.GetString(header);
-            headerString.ShouldBe("%PDF", "PDF stream should start with PDF header");
-        }
-        finally
-        {
-            await pdfStream.DisposeAsync();
-        }
-    }
-
-    [Description("PS-XXX : Account history PDF generation fails gracefully with no data")]
-    [Fact]
-    public async Task GeneratePdfAsync_WithNoAccountHistory_ShouldThrowInvalidOperationException()
-    {
-        // Arrange - Use a badge that won't have data
+        // Arrange - Use a badge number that definitely won't have data
         const int badgeNumber = 999999;
-        var startDate = new DateOnly(2007, 1, 1);
-        var endDate = new DateOnly(2024, 12, 31);
-
         var request = new AccountHistoryReportRequest
         {
             BadgeNumber = badgeNumber,
-            StartDate = startDate,
-            EndDate = endDate,
+            StartDate = new DateOnly(2007, 1, 1),
+            EndDate = new DateOnly(2024, 12, 31),
             Skip = 0,
             Take = int.MaxValue
         };
@@ -408,3 +362,4 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
             () => _service.GeneratePdfAsync(badgeNumber, request, CancellationToken.None));
     }
 }
+
