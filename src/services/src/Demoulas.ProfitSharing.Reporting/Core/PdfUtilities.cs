@@ -82,9 +82,10 @@ public static class PdfUtilities
                 .Bold()
                 .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue);
 
-            column.Item().PaddingTop(PdfReportConfiguration.Spacing.SmallGap)
-                .Text(DateTime.Now.ToString("MM/dd/yyyy"))
+            column.Item().PaddingTop(0.08f)
+                .Text($"Generated: {DateTime.Now:MMM dd, yyyy 'at' h:mm tt}")
                 .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
+                .Italic()
                 .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
         });
     }
@@ -100,7 +101,9 @@ public static class PdfUtilities
         string sectionTitle,
         string? backgroundColor = null)
     {
-        var headerContainer = container.PaddingVertical(PdfReportConfiguration.Spacing.SmallGap);
+        var headerContainer = container
+            .PaddingVertical(0.12f)
+            .PaddingHorizontal(0.08f);
 
         if (!string.IsNullOrEmpty(backgroundColor))
         {
@@ -111,15 +114,13 @@ public static class PdfUtilities
             .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
             .Bold()
             .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
-    }
-
-    /// <summary>
-    /// Creates a simple key-value pair display (label and value)
-    /// </summary>
-    /// <param name="container">IContainer to add pair to</param>
-    /// <param name="label">Label/key text</param>
-    /// <param name="value">Value text</param>
-    /// <param name="bold">Whether to bold the value</param>
+    }    /// <summary>
+         /// Creates a simple key-value pair display (label and value)
+         /// </summary>
+         /// <param name="container">IContainer to add pair to</param>
+         /// <param name="label">Label/key text</param>
+         /// <param name="value">Value text</param>
+         /// <param name="bold">Whether to bold the value</param>
     public static void ComposeKeyValuePair(
         this IContainer container,
         string label,
@@ -186,7 +187,8 @@ public static class PdfUtilities
         params string[] values)
     {
         var rowContainer = container
-            .PaddingVertical(PdfReportConfiguration.TableDefaults.CellPaddingVertical);
+            .PaddingVertical(PdfReportConfiguration.TableDefaults.CellPaddingVertical)
+            .PaddingBottom(PdfReportConfiguration.TableDefaults.RowSpacing);
 
         if (isAlternate)
         {
@@ -287,5 +289,82 @@ public static class PdfUtilities
             return text;
 
         return text[..(maxLength - 3)] + "...";
+    }
+
+    /// <summary>
+    /// Composes a professional cover page with company branding
+    /// </summary>
+    public static void ComposeCoverPageHeader(this IContainer container)
+    {
+        container.Column(column =>
+        {
+            // Logo with top spacing
+            column.Item().Height(80).PaddingVertical(PdfReportConfiguration.Spacing.CoverPageGap)
+                .Element(ComposeLogoImage);
+
+            // Company name with brand color
+            column.Item().PaddingVertical(PdfReportConfiguration.Spacing.StandardGap)
+                .Text("Demoulas Supermarkets, Inc.")
+                .FontSize(20)
+                .Bold()
+                .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue);
+
+            // Department
+            column.Item().PaddingVertical(PdfReportConfiguration.Spacing.SmallGap)
+                .Text("Profit Sharing Program")
+                .FontSize(14)
+                .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
+        });
+    }
+
+    /// <summary>
+    /// Composes a professional title section for reports
+    /// </summary>
+    public static void ComposeCoverPageTitle(this IContainer container, string title)
+    {
+        container.Column(column =>
+        {
+            column.Item().Height(PdfReportConfiguration.Spacing.CoverPageGap);
+
+            column.Item().PaddingVertical(PdfReportConfiguration.Spacing.StandardGap)
+                .Text(title)
+                .FontSize(24)
+                .Bold()
+                .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue);
+
+            column.Item().Height(2).PaddingVertical(PdfReportConfiguration.Spacing.StandardGap)
+                .Background(PdfReportConfiguration.BrandColors.DemoulasBlue);
+        });
+    }
+
+    /// <summary>
+    /// Composes cover page metadata (date, prepared for, etc.)
+    /// </summary>
+    public static void ComposeCoverPageMetadata(this IContainer container, string label, string value)
+    {
+        container.Row(row =>
+        {
+            row.ConstantItem(120)
+                .Text(label + ":")
+                .FontSize(11)
+                .Bold()
+                .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
+
+            row.RelativeItem()
+                .PaddingLeft(PdfReportConfiguration.Spacing.StandardGap)
+                .Text(value)
+                .FontSize(11)
+                .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
+        });
+    }
+
+    /// <summary>
+    /// Composes a decorative divider for cover pages
+    /// </summary>
+    public static void ComposeCoverPageDivider(this IContainer container)
+    {
+        container.PaddingVertical(PdfReportConfiguration.Spacing.LargeGap)
+            .Height(2)
+            .Background(PdfReportConfiguration.BrandColors.BorderGray);
     }
 }

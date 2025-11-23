@@ -62,10 +62,11 @@ public static class PdfReportConfiguration
     /// </summary>
     public static class Spacing
     {
-        public const float SmallGap = 0.1f;
-        public const float StandardGap = 0.2f;
-        public const float LargeGap = 0.3f;
-        public const float SectionBreak = 0.5f;
+        public const float SmallGap = 0.2f;        // Tighter spacing within sections
+        public const float StandardGap = 0.35f;    // Standard gap between elements
+        public const float LargeGap = 0.5f;        // Larger gap for visual separation
+        public const float SectionBreak = 0.6f;    // Section break spacing
+        public const float CoverPageGap = 0.75f;   // Large gap for cover page spacing
     }
 
     /// <summary>
@@ -73,9 +74,11 @@ public static class PdfReportConfiguration
     /// </summary>
     public static class TableDefaults
     {
-        public const float CellPaddingVertical = 0.1f;
-        public const float CellPaddingHorizontal = 0.05f;
+        public const float CellPaddingVertical = 0.18f;      // Vertical padding for better readability
+        public const float CellPaddingHorizontal = 0.15f;    // Horizontal padding for breathing room
         public const float BorderWidth = 0.5f;
+        public const float RowSpacing = 0.1f;               // Additional space between rows
+        public const float HeaderPaddingVertical = 0.2f;    // Header row extra padding
     }
 
     /// <summary>
