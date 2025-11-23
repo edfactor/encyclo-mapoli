@@ -102,13 +102,13 @@ public class AccountHistoryPdfReport : BasePdfReport
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
                 .Column(innerColumn =>
                 {
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeKeyValuePair("Full Name", _memberProfile.FullName, bold: true);
                         row.RelativeItem().ComposeKeyValuePair("Badge Number", _memberProfile.BadgeNumber.ToString());
                     });
 
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeKeyValuePair("SSN", _memberProfile.MaskedSsn);
                         row.RelativeItem().ComposeKeyValuePair("Date of Birth", _memberProfile.DateOfBirth?.ToString("MM/dd/yyyy") ?? "N/A");
@@ -116,25 +116,25 @@ public class AccountHistoryPdfReport : BasePdfReport
 
                     innerColumn.Item().ComposeDivider(0.5f);
 
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeKeyValuePair("Address", _memberProfile.Address ?? "N/A");
                     });
 
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeKeyValuePair("City, State ZIP",
                             $"{_memberProfile.City}, {_memberProfile.State} {_memberProfile.ZipCode}".TrimEnd());
                     });
 
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeKeyValuePair("Phone", _memberProfile.Phone ?? "N/A");
                     });
 
                     innerColumn.Item().ComposeDivider(0.5f);
 
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeKeyValuePair("Hire Date", _memberProfile.HireDate?.ToString("MM/dd/yyyy") ?? "N/A");
                         row.RelativeItem().ComposeKeyValuePair("Termination Date", _memberProfile.TerminationDate?.ToString("MM/dd/yyyy") ?? "Current Employee");
@@ -162,13 +162,13 @@ public class AccountHistoryPdfReport : BasePdfReport
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
                 .Column(innerColumn =>
                 {
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeKeyValuePair("Report Period Start", _startDate.ToString("MM/dd/yyyy"));
                         row.RelativeItem().ComposeKeyValuePair("Report Period End", _endDate.ToString("MM/dd/yyyy"));
                     });
 
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeKeyValuePair("Prepared For", _preparedFor);
                         row.RelativeItem().ComposeKeyValuePair("Total Years Reported", _accountHistory.Count.ToString());
@@ -248,13 +248,13 @@ public class AccountHistoryPdfReport : BasePdfReport
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
                 .Column(innerColumn =>
                 {
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeTotalsRow("Total Contributions", _cumulativeTotals.TotalContributions.ToCurrencyString());
                         row.RelativeItem().ComposeTotalsRow("Total Earnings", _cumulativeTotals.TotalEarnings.ToCurrencyString());
                     });
 
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().PaddingBottom(PdfReportConfiguration.Spacing.SmallGap).Row(row =>
                     {
                         row.RelativeItem().ComposeTotalsRow("Total Forfeitures", _cumulativeTotals.TotalForfeitures.ToCurrencyString());
                         row.RelativeItem().ComposeTotalsRow("Total Withdrawals", _cumulativeTotals.TotalWithdrawals.ToCurrencyString());
