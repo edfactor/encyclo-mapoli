@@ -60,35 +60,35 @@ public class AccountHistoryPdfReport : BasePdfReport
     {
         container.Column(column =>
         {
-            // Top spacing for visual balance (reduced to fit on one page)
-            column.Item().Height(0.25f);
+            // Top spacing for visual balance
+            column.Item().Height(0.15f);
 
-            // Company header with logo and branding (reduced height)
-            column.Item().Height(40).ComposeCoverPageHeader();
+            // Company header with logo and branding (compact)
+            column.Item().Height(35).ComposeCoverPageHeader();
 
             // Spacing between header and title
-            column.Item().Height(0.3f);
+            column.Item().Height(0.2f);
 
             // Report title
             column.Item().ComposeCoverPageTitle("Account History Report");
 
             // Spacing before metadata
-            column.Item().Height(0.3f);
+            column.Item().Height(0.2f);
 
-            // Metadata section (compact)
+            // Metadata section (very compact)
             column.Item().ComposeCoverPageMetadata("Member", _memberProfile.FullName);
-            column.Item().Height(0.15f);
+            column.Item().Height(0.08f);
             column.Item().ComposeCoverPageMetadata("Badge Number", _memberProfile.BadgeNumber.ToString());
-            column.Item().Height(0.15f);
+            column.Item().Height(0.08f);
             column.Item().ComposeCoverPageMetadata("Report Period",
                 $"{_startDate:MM/dd/yyyy} - {_endDate:MM/dd/yyyy}");
-            column.Item().Height(0.15f);
+            column.Item().Height(0.08f);
             column.Item().ComposeCoverPageMetadata("Generated", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-            column.Item().Height(0.15f);
+            column.Item().Height(0.08f);
             column.Item().ComposeCoverPageMetadata("Prepared For", _preparedFor);
 
             // Spacing before divider
-            column.Item().Height(0.25f);
+            column.Item().Height(0.15f);
 
             // Decorative divider
             column.Item().ComposeCoverPageDivider();
