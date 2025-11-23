@@ -60,35 +60,35 @@ public class AccountHistoryPdfReport : BasePdfReport
     {
         container.Column(column =>
         {
-            // Top spacing for visual balance
-            column.Item().Height(PdfReportConfiguration.Spacing.CoverPageGap);
+            // Top spacing for visual balance (reduced to fit on one page)
+            column.Item().Height(0.25f);
 
-            // Company header with logo and branding
-            column.Item().Height(60).ComposeCoverPageHeader();
+            // Company header with logo and branding (reduced height)
+            column.Item().Height(40).ComposeCoverPageHeader();
 
-            // Large spacing between header and title
-            column.Item().Height(PdfReportConfiguration.Spacing.LargeGap);
+            // Spacing between header and title
+            column.Item().Height(0.3f);
 
             // Report title
             column.Item().ComposeCoverPageTitle("Account History Report");
 
             // Spacing before metadata
-            column.Item().Height(PdfReportConfiguration.Spacing.LargeGap);
+            column.Item().Height(0.3f);
 
-            // Metadata section
+            // Metadata section (compact)
             column.Item().ComposeCoverPageMetadata("Member", _memberProfile.FullName);
-            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
+            column.Item().Height(0.15f);
             column.Item().ComposeCoverPageMetadata("Badge Number", _memberProfile.BadgeNumber.ToString());
-            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
+            column.Item().Height(0.15f);
             column.Item().ComposeCoverPageMetadata("Report Period",
                 $"{_startDate:MM/dd/yyyy} - {_endDate:MM/dd/yyyy}");
-            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
+            column.Item().Height(0.15f);
             column.Item().ComposeCoverPageMetadata("Generated", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
+            column.Item().Height(0.15f);
             column.Item().ComposeCoverPageMetadata("Prepared For", _preparedFor);
 
-            // Large spacing before divider
-            column.Item().Height(PdfReportConfiguration.Spacing.LargeGap);
+            // Spacing before divider
+            column.Item().Height(0.25f);
 
             // Decorative divider
             column.Item().ComposeCoverPageDivider();
