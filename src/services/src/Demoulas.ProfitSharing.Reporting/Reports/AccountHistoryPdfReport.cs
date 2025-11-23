@@ -60,29 +60,21 @@ public class AccountHistoryPdfReport : BasePdfReport
     {
         content.Column(column =>
         {
+            // Add spacing between all items in the column (QuestPDF Spacing API)
+            // This provides consistent vertical spacing between major sections
+            column.Spacing(PdfReportConfiguration.Spacing.LargeGap);
+
             // Member Profile Section
             column.Item().Element(ComposeMemberProfileSection);
-
-            // Section break
-            column.Item().ComposeSectionBreak();
 
             // Report Parameters Section
             column.Item().Element(ComposeReportParametersSection);
 
-            // Section break
-            column.Item().ComposeSectionBreak();
-
             // Account History Table
             column.Item().Element(ComposeAccountHistoryTable);
 
-            // Section break
-            column.Item().ComposeSectionBreak();
-
             // Cumulative Totals Section
             column.Item().Element(ComposeCumulativeTotalsSection);
-
-            // Section break
-            column.Item().ComposeSectionBreak();
 
             // Legal Notice
             column.Item().Element(ComposeLegalNoticeSection);

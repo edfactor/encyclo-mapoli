@@ -127,30 +127,27 @@ public static class PdfUtilities
         string value,
         bool bold = false)
     {
-        container
-            .MinHeight(0.35f)
-            .PaddingVertical(0.08f)
-            .Row(row =>
-            {
-                row.RelativeItem()
-                    .Text(label + ":")
-                    .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
-                    .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
+        container.PaddingVertical(0.10f).Row(row =>
+        {
+            row.RelativeItem()
+                .Text(label + ":")
+                .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
+                .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
 
-                row.RelativeItem()
-                    .AlignRight()
-                    .Element(c =>
+            row.RelativeItem()
+                .AlignRight()
+                .Element(c =>
+                {
+                    var text = c.Text(value)
+                        .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
+                        .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
+
+                    if (bold)
                     {
-                        var text = c.Text(value)
-                            .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
-                            .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
-
-                        if (bold)
-                        {
-                            text.Bold();
-                        }
-                    });
-            });
+                        text.Bold();
+                    }
+                });
+        });
     }
 
     /// <summary>
