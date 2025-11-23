@@ -344,7 +344,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
     [Description("PS-2045 : Account history report throws InvalidOperationException when no data found")]
     [Fact]
-    public async Task GeneratePdfAsync_WithoutAccountData_ShouldThrowInvalidOperationException()
+    public Task GeneratePdfAsync_WithoutAccountData_ShouldThrowInvalidOperationException()
     {
         // Arrange - Use a badge number that definitely won't have data
         const int badgeNumber = 999999;
@@ -358,7 +358,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         };
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(
+        return Should.ThrowAsync<InvalidOperationException>(
             () => _service.GeneratePdfAsync(badgeNumber, request, CancellationToken.None));
     }
 }
