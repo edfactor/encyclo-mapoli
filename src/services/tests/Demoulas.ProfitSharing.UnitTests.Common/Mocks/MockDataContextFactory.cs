@@ -177,7 +177,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
 
-        List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(400);
+        List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(250);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
@@ -252,7 +252,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
 
-        List<Demographic>? demographics = new DemographicFaker().Generate(400);
+        List<Demographic>? demographics = new DemographicFaker().Generate(250);
         List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
 
         var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 4);
@@ -431,7 +431,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.DistributionStatuses).Returns(mockDistributionStatuses.Object);
 
         // Now create distributions with all related entities provided
-        var distributions = new DistributionFaker(distributionFrequencies, distributionStatuses, taxCodesList, distributionPayees).Generate(400);
+        var distributions = new DistributionFaker(distributionFrequencies, distributionStatuses, taxCodesList, distributionPayees).Generate(250);
         var mockDistributions = BuildMockDbSetWithBackingList(distributions);
         _profitSharingDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);

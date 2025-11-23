@@ -17,7 +17,7 @@ public sealed record ProfitSharingUnder21BreakdownByStoreResponse : IIsExecutive
     public decimal? VestedAmount { get; set; } = 0;
     public decimal? VestingPercentage { get; set; } = 0;
     [MaskSensitive] public DateOnly DateOfBirth { get; set; }
-    public byte Age { get; set; }
+    [MaskSensitive] public short Age { get; set; }
     public byte EnrollmentId { get; set; }
     public bool IsExecutive { get; set; }
 

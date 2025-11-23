@@ -43,6 +43,11 @@ export const GetAccountHistoryReportColumns = (): ColDef[] => {
       minWidth: 120
     }),
     createCurrencyColumn({
+      headerName: "Vested Balance",
+      field: "vestedBalance",
+      minWidth: 130
+    }),
+    createCurrencyColumn({
       headerName: "Ending Balance",
       field: "endingBalance",
       minWidth: 130

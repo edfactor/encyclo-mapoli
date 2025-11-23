@@ -1197,3 +1197,34 @@ const PROF130 = () => {
 **Pattern**: Tab-based navigation within a single page.
 
 ---
+
+
+## Frontend Code Review Checklist
+
+Use this checklist when reviewing frontend page components and UI changes:
+
+### Design & UX Review
+- [ ] **Consistent with design system** - Uses `smart-ui-library` components, not custom recreations
+- [ ] **Responsive layout** - Works on mobile, tablet, desktop (Material-UI Grid system used)
+- [ ] **Accessibility** - WCAG 2.1 AA compliant (labels, ARIA attributes, keyboard navigation)
+- [ ] **Loading states** - Loaders/spinners shown during async operations
+- [ ] **Error handling** - User-friendly error messages displayed (no stack traces)
+- [ ] **Empty states** - Graceful handling when no data available
+- [ ] **Consistent spacing** - Uses design tokens, not magic numbers
+
+### CRITICAL Security Requirements
+- [ ] **⚠️ CRITICAL: Age NEVER calculated in frontend** - Age MUST come from backend, never computed from DOB. Frontend calculation breaks:
+  1. Consistency with backend calculations (timezone/timing differences)
+  2. Sensitive data masking (age is masked for unprivileged users)
+  3. Access control (backend determines what fields are visible)
+  - RED FLAG: Any code calculating age from `dateOfBirth` using `Date.now()` or arithmetic
+  - CORRECT PATTERN: Display DOB only, let backend provide age if required by business logic
+
+### Critical Violations (Auto-Reject)
+
+PRs with these issues should be rejected immediately without further review:
+
+1. **⚠️ CRITICAL: Age calculated in frontend** - Any computation of age from DOB is a BLOCKER
+   - REJECT with comment: 'CRITICAL: Age must be calculated backend-only. Remove the age calculation and use backend-provided value instead. (See pages.instructions.md for details.)'
+   - ROOT CAUSE: Frontend calculation diverges from backend due to timezone/timing differences
+   - SECURITY IMPACT: Age is sensitive data that must be masked for unprivileged users

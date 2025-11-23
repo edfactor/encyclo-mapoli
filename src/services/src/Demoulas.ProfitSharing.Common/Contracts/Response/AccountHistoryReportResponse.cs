@@ -52,4 +52,10 @@ public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullName
     /// Ending balance at the end of the plan year (12/31).
     /// </summary>
     public decimal EndingBalance { get; set; }
+
+    /// <summary>
+    /// Vested balance at the end of the plan year (12/31).
+    /// Represents the portion of the account that is not subject to forfeiture.
+    /// </summary>
+    public decimal VestedBalance { get; set; }
 }

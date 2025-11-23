@@ -132,6 +132,45 @@ Review: **All sections** including documentation and branching
 - [ ] **No SSN-only composite keys**: Use `(Ssn, OracleHcmId)` not just `Ssn`
 - [ ] **No sensitive data in error messages**: Never expose PII in HTTP responses
 
+### 🚨 CRITICAL: Age NEVER Calculated in Frontend (Auto-Reject)
+
+**This is a BLOCKING issue. Reject immediately if found.**
+
+- [ ] **Age calculation backend-only**: Age MUST be calculated by backend API, never in frontend JavaScript/React
+
+  ```typescript
+  // ❌ WRONG - AUTO-REJECT: Frontend age calculation
+  const age = Math.floor(
+    (Date.now() - new Date(dateOfBirth).getTime()) /
+      (1000 * 60 * 60 * 24 * 365.25)
+  );
+  const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
+
+  // ✅ RIGHT: Display DOB only, let backend provide age if needed
+  const dobDisplay = dateOfBirth ? mmDDYYFormat(dateOfBirth) : "N/A";
+  ```
+
+  **Why this is critical:**
+
+  1. **Backend inconsistency**: Frontend calculation diverges from backend due to timezone and timing differences, causing data inconsistency
+  2. **Sensitive data masking violation**: Age is sensitive data that must be masked for unprivileged users—frontend can't enforce masking rules
+  3. **Access control breach**: Backend determines what fields are visible per user role; frontend calculation bypasses this control
+
+  **Rejection template:**
+
+  ```
+  CRITICAL - AUTO-REJECT: Age must be calculated backend-only.
+
+  • Remove frontend age calculation
+  • Display DOB only (no age display)
+  • If age required: request from backend API response
+
+  Impact: Frontend age calculation causes data inconsistency, breaks sensitive data masking, bypasses access control.
+  Reference: CODE_REVIEW_CHECKLIST.md - Security section
+  ```
+
+**Related Ticket:** PS-XXXX (Age calculation security fix)
+
 **Related Ticket:** ~~PS-2026~~ (✅ PII masking via shared library)
 
 ### Transport Security (A02/A05)
@@ -386,6 +425,18 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **Playwright tests**: E2E tests in `src/ui/e2e`
 - [ ] **`.playwright.env`**: Credentials from env file (no hardcoded secrets)
 - [ ] **Component tests**: Follow patterns if colocated
+
+### 🚨 Frontend Security Critical Violations (Auto-Reject)
+
+**These are blocking issues that must be rejected immediately:**
+
+- [ ] **Age NEVER calculated in frontend**: See Security section above (auto-reject violation)
+- [ ] **No unmasked PII in logs/console**: SSN, email, phone, bank accounts must be masked
+- [ ] **No client-side role elevation**: Never use `localStorage` to set roles that determine access
+- [ ] **No direct fetch/axios**: Use RTK Query hooks instead
+- [ ] **No stack traces in error messages**: Never expose technical details to users
+
+**Reference:** Security section for age calculation details
 
 **Reference:** `.github/instructions/pages.instructions.md`
 
