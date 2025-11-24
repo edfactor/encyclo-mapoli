@@ -4,6 +4,10 @@ namespace Demoulas.ProfitSharing.Services.Extensions;
 
 public static class ProfitDetailExtensions
 {
+    /// <summary>
+    /// Gets the profit code IDs that represent payments/distributions (used to differentiate forfeitures from payments).
+    /// These codes are used to distinguish actual forfeiture amounts from payment distribution amounts.
+    /// </summary>
     public static byte[] GetProfitCodesForBalanceCalc()
     {
         return
@@ -16,71 +20,51 @@ public static class ProfitDetailExtensions
         ];
     }
 
-    public static (decimal contribution, decimal earnings, decimal forfeiture, decimal payment, decimal distribution, decimal beneficiaryAllocation, decimal rowBalance) CalculateAmounts(this ProfitDetail detail)
+    /// <summary>
+    /// Aggregates contributions from profit details.
+    /// Contributions are identified by profit code 0 (IncomingContributions).
+    /// </summary>
+    public static decimal AggregateContributions(IEnumerable<ProfitDetail> profitDetails)
     {
-        var contribution = CalculateContribution(detail);
-        var earnings = CalculateEarnings(detail);
-        var forfeiture = CalculateForfeiture(detail);
-        var payment = CalculatePayment(detail);
-        var distribution = CalculateDistribution(detail);
-        var beneficiaryAllocation = CalculateBeneficiaryAllocation(detail);
-        var rowBalance = CalculateRowBalance(detail);
-
-        return (contribution, earnings, forfeiture, payment, distribution, beneficiaryAllocation, rowBalance);
+        return profitDetails
+            .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
+            .Sum(pd => pd.Contribution);
     }
 
-    internal static decimal CalculateContribution(this ProfitDetail detail)
+    /// <summary>
+    /// Aggregates earnings from profit details.
+    /// Earnings are identified by profit code 0 (IncomingContributions).
+    /// </summary>
+    public static decimal AggregateEarnings(IEnumerable<ProfitDetail> profitDetails)
     {
-        return detail.Contribution;
+        return profitDetails
+            .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
+            .Sum(pd => pd.Earnings);
     }
 
-    internal static decimal CalculateEarnings(this ProfitDetail detail)
+    /// <summary>
+    /// Aggregates forfeitures from profit details.
+    /// Forfeitures are identified as any forfeiture amount that is NOT a payment code.
+    /// This distinguishes actual forfeitures from payment distribution amounts.
+    /// </summary>
+    public static decimal AggregateForfeitures(IEnumerable<ProfitDetail> profitDetails)
     {
-        return detail.Earnings;
+        var paymentCodes = GetProfitCodesForBalanceCalc();
+        return profitDetails
+            .Where(pd => !paymentCodes.Contains(pd.ProfitCodeId))
+            .Sum(pd => pd.Forfeiture);
     }
 
-    internal static decimal CalculateForfeiture(this ProfitDetail detail)
+    /// <summary>
+    /// Aggregates all profit detail values (contributions, earnings, forfeitures) for a collection of profit details.
+    /// This is the primary aggregation method used across all services for consistency.
+    /// </summary>
+    public static (decimal Contributions, decimal Earnings, decimal Forfeitures) AggregateAllProfitValues(IEnumerable<ProfitDetail> profitDetails)
     {
-        if (GetProfitCodesForBalanceCalc().Contains(detail.ProfitCodeId))
-        {
-            return 0;
-        }
-        return detail.Forfeiture;
-    }
-
-    internal static decimal CalculatePayment(this ProfitDetail detail)
-    {
-        if (GetProfitCodesForBalanceCalc().Contains(detail.ProfitCodeId))
-        {
-            return detail.Forfeiture;
-        }
-
-        return 0;
-    }
-
-    internal static decimal CalculateDistribution(this ProfitDetail detail)
-    {
-        return (detail.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
-                detail.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
-                detail.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id)
-            ? -detail.Forfeiture
-            : 0;
-    }
-
-    internal static decimal CalculateBeneficiaryAllocation(this ProfitDetail detail)
-    {
-        return detail.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id
-            ? -detail.Forfeiture
-            : detail.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id
-                ? detail.Contribution
-                : 0;
-    }
-
-    internal static decimal CalculateRowBalance(this ProfitDetail detail)
-    {
-        byte[] sumAllFieldProfitCodeTypes = GetProfitCodesForBalanceCalc();
-        return sumAllFieldProfitCodeTypes.Contains(detail.ProfitCodeId)
-            ? (-detail.Forfeiture + detail.Contribution + detail.Earnings)
-            : (detail.Contribution + detail.Earnings + detail.Forfeiture);
+        return (
+            Contributions: AggregateContributions(profitDetails),
+            Earnings: AggregateEarnings(profitDetails),
+            Forfeitures: AggregateForfeitures(profitDetails)
+        );
     }
 }

@@ -23,7 +23,7 @@ public record ProfitSharingUnder21ReportDetail : IIsExecutive, IFirstName, ILast
 
     [MaskSensitive]
     public DateOnly DateOfBirth { get; init; }
-    public short Age { get; init; }
+    [MaskSensitive] public required short Age { get; init; }
     public required string EmploymentStatusId { get; init; }
     public decimal CurrentBalance { get; init; }
     public required string EnrollmentId { get; init; }

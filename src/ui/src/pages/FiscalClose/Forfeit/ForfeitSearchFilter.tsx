@@ -1,5 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -20,6 +21,7 @@ const schema = yup.object().shape({
 
 const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ onSearch, onReset, isSearching }) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     control,
@@ -33,8 +35,15 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ onSea
     }
   });
 
+  useEffect(() => {
+    if (!isSearching) {
+      setIsSubmitting(false);
+    }
+  }, [isSearching]);
+
   const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       onSearch({ profitYear: data.profitYear });
     }
   });
@@ -87,8 +96,8 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ onSea
             <SearchAndReset
               handleReset={handleResetClick}
               handleSearch={validateAndSearch}
-              isFetching={isSearching}
-              disabled={!isValid || !prerequisitesComplete}
+              isFetching={isSearching || isSubmitting}
+              disabled={!isValid || !prerequisitesComplete || isSearching || isSubmitting}
             />
           )}
         </DuplicateSsnGuard>

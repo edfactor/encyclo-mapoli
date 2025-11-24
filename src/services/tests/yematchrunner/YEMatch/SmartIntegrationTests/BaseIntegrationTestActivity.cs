@@ -29,12 +29,12 @@ public abstract class BaseIntegrationTestActivity : BaseActivity
 
     public override async Task<Outcome> Execute()
     {
-        string args = $"dotnet test --filter FullyQualifiedName~{_testFilter}";
+        string args = $"test --filter FullyQualifiedName~{_testFilter}";
 
         ProcessStartInfo psi = new()
         {
             FileName = "dotnet",
-            Arguments = $"test --filter FullyQualifiedName~{_testFilter}",
+            Arguments = args,
             WorkingDirectory = _integrationTestPath,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -52,6 +52,19 @@ public abstract class BaseIntegrationTestActivity : BaseActivity
         sw.Stop();
 
         OutcomeStatus status = process.ExitCode == 0 ? OutcomeStatus.Ok : OutcomeStatus.Error;
+
+        if (stdout.Contains("No test matches"))
+        {
+            Console.WriteLine("No test found!");
+            status = OutcomeStatus.Error;
+        }
+
+        string magicString = "Failed:     0,";
+        if (!stdout.Contains(magicString))
+        {
+            Console.WriteLine($"!!! Missing magic string! '{magicString}'");
+            status = OutcomeStatus.Error;
+        }
 
         return new Outcome(
             _activityId,

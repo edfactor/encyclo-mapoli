@@ -62,8 +62,15 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
   const { unForfeitsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedProfitYear = useDecemberFlowProfitYear();
+
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
 
   const validateAndSubmit = (data: StartAndEndDateRequest) => {
     if (hasUnsavedChanges) {
@@ -71,7 +78,8 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
       return;
     }
 
-    if (isValid && hasToken) {
+    if (isValid && hasToken && !isSubmitting) {
+      setIsSubmitting(true);
       const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || "";
       const endDate = data.endingDate || fiscalData.fiscalEndDate || "";
 
@@ -245,8 +253,8 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid || isFetching}
+          isFetching={isFetching || isSubmitting}
+          disabled={!isValid || isFetching || isSubmitting}
         />
       </Grid>
 

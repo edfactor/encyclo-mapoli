@@ -308,7 +308,7 @@ public sealed class TerminatedEmployeeReportService
                 }
 
                 // Calculate age if birthdate available
-                int? age = member.Birthday?.Age();
+                short? age = member.Birthday?.Age();
 
                 var hasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
                                    enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords;

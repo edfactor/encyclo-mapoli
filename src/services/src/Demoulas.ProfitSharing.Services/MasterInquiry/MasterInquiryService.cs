@@ -273,6 +273,16 @@ public sealed class MasterInquiryService : IMasterInquiryService
     }
 
     /// <summary>
+    /// Gets the profit code IDs that represent payments/distributions (used to differentiate forfeitures from payments).
+    /// These are the codes used in GetProfitCodesForBalanceCalc() for balance calculations.
+    /// </summary>
+    /// <returns>Array of profit code IDs for payments/distributions</returns>
+    public static byte[] GetPaymentProfitCodes()
+    {
+        return ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
+    }
+
+    /// <summary>
     /// Optimized query to get SSN query (not materialized) directly from ProfitDetails with selective filters.
     /// This avoids expensive joins when we have highly selective criteria.
     /// CRITICAL: Returns IQueryable to enable query composition and avoid Oracle's ~10K IN clause limit.
@@ -431,12 +441,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     public Task<PaginatedResponseDto<GroupedProfitSummaryDto>> GetGroupedProfitDetails(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
-        // These are the ProfitCode IDs used in GetProfitCodesForBalanceCalc()
-        byte[] balanceProfitCodes =
-        [
-            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingForfeitures.Id, ProfitCode.Constants.OutgoingDirectPayments.Id,
-            ProfitCode.Constants.OutgoingXferBeneficiary.Id, ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-        ];
+        byte[] balanceProfitCodes = GetPaymentProfitCodes();
 
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {

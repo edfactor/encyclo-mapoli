@@ -18,6 +18,7 @@ export interface AccountHistoryReportResponse {
   forfeitures: number;
   withdrawals: number;
   endingBalance: number;
+  vestedBalance: number;
   comment?: string;
 }
 
@@ -37,6 +38,7 @@ export interface AccountHistoryReportTotals {
   totalEarnings: number;
   totalForfeitures: number;
   totalWithdrawals: number;
+  totalVestedBalance?: number;
 }
 
 export interface AccountHistoryReportPaginatedResponse {
