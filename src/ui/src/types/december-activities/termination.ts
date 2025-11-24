@@ -19,7 +19,7 @@ export interface TerminationYearDetail {
   ytdPsHours: number;
   vestedPercent: number;
   suggestedForfeiture: number | null;
-  age: number | null;
+  age: string | null;
   enrollmentCode: number | null;
   [key: string]: unknown;
 }

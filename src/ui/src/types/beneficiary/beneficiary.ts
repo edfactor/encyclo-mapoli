@@ -76,7 +76,7 @@ export interface BeneficiaryDetail {
   city?: string | null;
   state?: string | null;
   zip?: string | null;
-  age?: number | null;
+  age?: string | null;
 }
 
 export interface BeneficiarySearchAPIRequest extends SortedPaginationRequestDto {
