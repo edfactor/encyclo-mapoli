@@ -448,15 +448,6 @@ export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
 
   if (valueGetter) {
     column.valueGetter = valueGetter;
-  } else if (field === "dateOfBirth") {
-    column.valueGetter = (params) => {
-      const dob = params.data?.[field];
-      if (!dob) return null;
-      const birthDate = new Date(dob);
-      const ageDifMs = Date.now() - birthDate.getTime();
-      const ageDate = new Date(ageDifMs);
-      return Math.abs(ageDate.getUTCFullYear() - 1970);
-    };
   } else {
     // This should handle masked cases
     column.valueGetter = (params) => {
