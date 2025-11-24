@@ -85,11 +85,9 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
     headerName: "Vested",
     field: "vestedPercentage"
   }),
-  // This is the person's age calculated from dateOfBirth
-  createAgeColumn({
-    field: "dateOfBirth"
-  }),
+  createAgeColumn({}),
   // This is the age at termination
+  // FIXME: This logic should be moved to the back end when more work is done on this page
   createAgeColumn({
     headerName: "Age at Term",
     valueGetter: (params) => {

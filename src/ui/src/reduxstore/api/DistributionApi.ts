@@ -22,7 +22,6 @@ export const DistributionApi = createApi({
       DistributionSearchRequest & { suppressAllToastErrors?: boolean; onlyNetworkToastErrors?: boolean }
     >({
       query: (params) => {
-        console.log("DistributionApi.searchDistributions called with params:", params);
         const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
         return {
           url: "/distribution/search",
