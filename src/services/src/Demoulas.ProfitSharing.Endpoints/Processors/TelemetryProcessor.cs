@@ -28,7 +28,7 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
     {
         if (context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<EndpointDefinition>() is { } def &&
             def.EndpointType.IsAssignableTo(typeof(IHasNavigationId)) &&
-            Activator.CreateInstance(def.EndpointType, args: new object[] { (short)0 }) is IHasNavigationId endpoint)
+            Activator.CreateInstance(def.EndpointType, args: [(short)0]) is IHasNavigationId endpoint)
         {
             // Start activity and store it in HttpContext for later retrieval
             var activity = endpoint.StartEndpointActivity(context.HttpContext);
@@ -49,9 +49,9 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
     public Task PostProcessAsync(IPostProcessorContext context, CancellationToken ct)
     {
         // Retrieve telemetry context from HttpContext
-        if (context.HttpContext.Items.TryGetValue("TelemetryActivity", out var activityObj) &&
-            context.HttpContext.Items.TryGetValue("TelemetryEndpoint", out var endpointObj) &&
-            context.HttpContext.Items.TryGetValue("TelemetryStartTime", out var startTimeObj) &&
+        if (context.HttpContext.Items.TryGetValue("TelemetryActivity", out object? activityObj) &&
+            context.HttpContext.Items.TryGetValue("TelemetryEndpoint", out object? endpointObj) &&
+            context.HttpContext.Items.TryGetValue("TelemetryStartTime", out object? startTimeObj) &&
             activityObj is Activity activity &&
             endpointObj is IHasNavigationId endpoint &&
             startTimeObj is long startTime)
@@ -59,8 +59,8 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
             try
             {
                 // Calculate execution duration
-                var endTime = Stopwatch.GetTimestamp();
-                var elapsedMs = (double)(endTime - startTime) / Stopwatch.Frequency * 1000;
+                long endTime = Stopwatch.GetTimestamp();
+                double elapsedMs = (double)(endTime - startTime) / Stopwatch.Frequency * 1000;
 
                 // Record execution duration
                 Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.EndpointDurationMs.Record(elapsedMs,
@@ -68,11 +68,11 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
                     new KeyValuePair<string, object?>("navigation.id", endpoint.NavigationId.ToString()));
 
                 // Determine if the response was successful based on HTTP status code
-                var isSuccess = context.HttpContext.Response.StatusCode >= 200 && context.HttpContext.Response.StatusCode < 400;
-                var errorType = isSuccess ? null : $"HTTP_{context.HttpContext.Response.StatusCode}";
+                bool isSuccess = context.HttpContext.Response.StatusCode is >= 200 and < 400;
+                string? errorType = isSuccess ? null : $"HTTP_{context.HttpContext.Response.StatusCode}";
 
                 // Get user role once for all metrics
-                var userRole = context.HttpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "unknown";
+                string userRole = context.HttpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "unknown";
 
                 if (!isSuccess)
                 {
@@ -108,7 +108,7 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
                 // Estimate response size if available
                 if (context.HttpContext.Response.ContentLength.HasValue)
                 {
-                    var responseSize = context.HttpContext.Response.ContentLength.Value;
+                    long responseSize = context.HttpContext.Response.ContentLength.Value;
                     Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.ResponseSizeBytes.Record(responseSize,
                         new KeyValuePair<string, object?>("endpoint.name", endpoint.GetType().Name),
                         new KeyValuePair<string, object?>("navigation.id", endpoint.NavigationId.ToString()));

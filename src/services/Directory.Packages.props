@@ -17,7 +17,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.11" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11" />
-    <PackageVersion Include="Demoulas.Util" Version="2.7.0" />
+    <PackageVersion Include="Demoulas.Util" Version="2.8.0" />
     <PackageVersion Include="FastEndpoints.Testing" Version="7.0.1" />
     <PackageVersion Include="IdGen" Version="3.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.11" />
@@ -33,12 +33,12 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
-    <PackageVersion Include="Demoulas.Common.Api" Version="3.1.0" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="3.2.0" />
     <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.12.0" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.7.0" />
-    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.10.0" />
+    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.11.0" />
     <PackageVersion Include="Demoulas.Common.Caching" Version="3.2.0" />
-    <PackageVersion Include="Demoulas.Security" Version="3.8.0" />
+    <PackageVersion Include="Demoulas.Security" Version="3.9.0" />
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageVersion Include="FastEndpoints.Security" Version="5.31.0" />
     <PackageVersion Include="Microsoft.Extensions.Compliance.Redaction" Version="8.7.0" />
@@ -57,7 +57,7 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageVersion Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.2.0" />
+    <PackageVersion Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.3.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NSwag.Core" Version="14.1.0" />
     <PackageVersion Include="Okta.AspNetCore" Version="4.6.8" />
@@ -110,6 +110,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Analyzers" Version="9.0.11" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
     <PackageVersion Include="AsyncFixer" Version="1.6.0" />
+    <PackageVersion Include="QuestPDF" Version="2025.7.4" />
     <!-- xUnit packages -->
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />

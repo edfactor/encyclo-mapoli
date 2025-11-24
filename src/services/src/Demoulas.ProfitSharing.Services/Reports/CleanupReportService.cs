@@ -325,7 +325,7 @@ public class CleanupReportService : ICleanupReportService
 
                 var response = new DistributionsAndForfeitureTotalsResponse()
                 {
-                    ReportName = "Distributions and Forfeitures",
+                    ReportName = ReportNameInfo.DistributionAndForfeitures.Name,
                     ReportDate = DateTimeOffset.UtcNow,
                     StartDate = startDate,
                     EndDate = endDate,
