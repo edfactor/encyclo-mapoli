@@ -1,4 +1,7 @@
 import { useEffect, useMemo } from "react";
+import { Grid, IconButton } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
@@ -22,6 +25,8 @@ interface TerminationGridSearchProps {
   onErrorOccurred?: () => void; // Add this prop
   onLoadingChange?: (isLoading: boolean) => void;
   onShowUnsavedChangesDialog?: () => void;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
@@ -36,10 +41,14 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   onArchiveHandled,
   onErrorOccurred,
   onLoadingChange,
-  onShowUnsavedChangesDialog
+  onShowUnsavedChangesDialog,
+  isGridExpanded = false,
+  onToggleExpand
 }) => {
   // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  const gridMaxHeight = useDynamicGridHeight({
+    heightPercentage: isGridExpanded ? 0.85 : 0.4
+  });
 
   // Check if current navigation should be read-only
   const isReadOnly = useReadOnlyNavigation();
@@ -118,7 +127,24 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     <div className="relative">
       {termination?.response && (
         <>
-          <ReportSummary report={termination} />
+          <Grid
+            container
+            justifyContent="space-between"
+            alignItems="center"
+            marginBottom={2}>
+            <Grid>
+              <ReportSummary report={termination} />
+            </Grid>
+            <Grid style={{ display: 'flex', gap: 8 }}>
+              {onToggleExpand && (
+                <IconButton
+                  onClick={onToggleExpand}
+                  sx={{ zIndex: 1 }}>
+                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              )}
+            </Grid>
+          </Grid>
 
           <div className="sticky top-0 z-10 flex bg-white">
             <TotalsGrid

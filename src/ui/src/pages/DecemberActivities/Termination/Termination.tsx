@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
@@ -8,6 +9,8 @@ import { CircularProgress, Divider, Grid } from "@mui/material";
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
+import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
+import { RootState } from "../../../reduxstore/store";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
 import { useTerminationState } from "./hooks/useTerminationState";
 import TerminationGrid from "./TerminationGrid";
@@ -23,10 +26,16 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 }
 
 const Termination = () => {
+  const dispatch = useDispatch();
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
   const [isFetching, setIsFetching] = useState(false);
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
+  const [isGridExpanded, setIsGridExpanded] = useState(false);
+  const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
+  
+  // Get current drawer state from Redux
+  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
 
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
@@ -46,6 +55,25 @@ const Termination = () => {
   }, [fetchAccountingRange]);
 
   const isCalendarDataLoaded = !!fiscalData?.fiscalBeginDate && !!fiscalData?.fiscalEndDate;
+
+  // Handler to toggle grid expansion
+  const handleToggleGridExpand = () => {
+    setIsGridExpanded((prev) => {
+      if (!prev) {
+        // Expanding: remember drawer state and close it
+        setWasDrawerOpenBeforeExpand(isDrawerOpen || false);
+        dispatch(closeDrawer());
+        dispatch(setFullscreen(true));
+      } else {
+        // Collapsing: restore previous drawer state
+        dispatch(setFullscreen(false));
+        if (wasDrawerOpenBeforeExpand) {
+          dispatch(openDrawer());
+        }
+      }
+      return !prev;
+    });
+  };
 
   // Add listener for error messages to scroll to top
   useEffect(() => {
@@ -68,16 +96,18 @@ const Termination = () => {
 
   return (
     <Page
-      label={CAPTIONS.TERMINATIONS}
-      actionNode={renderActionNode()}>
+      label={isGridExpanded ? "" : CAPTIONS.TERMINATIONS}
+      actionNode={isGridExpanded ? undefined : renderActionNode()}>
       <div>
-        <ApiMessageAlert commonKey="TerminationSave" />
+        {!isGridExpanded && <ApiMessageAlert commonKey="TerminationSave" />}
         <Grid
           container
           rowSpacing="24px">
-          <Grid width={"100%"}>
-            <Divider />
-          </Grid>
+          {!isGridExpanded && (
+            <Grid width={"100%"}>
+              <Divider />
+            </Grid>
+          )}
           {!isCalendarDataLoaded ? (
             <Grid
               width={"100%"}
@@ -88,18 +118,20 @@ const Termination = () => {
             </Grid>
           ) : (
             <>
-              <Grid width={"100%"}>
-                <DSMAccordion title="Filter">
-                  <TerminationSearchFilter
-                    fiscalData={fiscalData}
-                    onSearch={actions.handleSearch}
-                    setInitialSearchLoaded={actions.setInitialSearchLoaded}
-                    hasUnsavedChanges={state.hasUnsavedChanges}
-                    setHasUnsavedChanges={actions.handleUnsavedChanges}
-                    isFetching={isFetching}
-                  />
-                </DSMAccordion>
-              </Grid>
+              {!isGridExpanded && (
+                <Grid width={"100%"}>
+                  <DSMAccordion title="Filter">
+                    <TerminationSearchFilter
+                      fiscalData={fiscalData}
+                      onSearch={actions.handleSearch}
+                      setInitialSearchLoaded={actions.setInitialSearchLoaded}
+                      hasUnsavedChanges={state.hasUnsavedChanges}
+                      setHasUnsavedChanges={actions.handleUnsavedChanges}
+                      isFetching={isFetching}
+                    />
+                  </DSMAccordion>
+                </Grid>
+              )}
               <Grid width="100%">
                 <TerminationGrid
                   setInitialSearchLoaded={actions.setInitialSearchLoaded}
@@ -114,6 +146,8 @@ const Termination = () => {
                   onErrorOccurred={scrollToTop}
                   onLoadingChange={setIsFetching}
                   onShowUnsavedChangesDialog={() => setShowUnsavedChangesDialog(true)}
+                  isGridExpanded={isGridExpanded}
+                  onToggleExpand={handleToggleGridExpand}
                 />
               </Grid>
             </>
