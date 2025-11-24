@@ -60,21 +60,29 @@ public class AccountHistoryPdfReport : BasePdfReport
     {
         content.Column(column =>
         {
-            // Add spacing between all items in the column (QuestPDF Spacing API)
-            // This provides consistent vertical spacing between major sections
-            column.Spacing(PdfReportConfiguration.Spacing.LargeGap);
-
             // Member Profile Section
             column.Item().Element(ComposeMemberProfileSection);
+
+            // Vertical space before Report Parameters
+            column.Item().Height(PdfReportConfiguration.Spacing.SectionBreak);
 
             // Report Parameters Section
             column.Item().Element(ComposeReportParametersSection);
 
+            // Vertical space before Account Activity Table
+            column.Item().Height(PdfReportConfiguration.Spacing.SectionBreak);
+
             // Account History Table
             column.Item().Element(ComposeAccountHistoryTable);
 
+            // Vertical space before Cumulative Totals
+            column.Item().Height(PdfReportConfiguration.Spacing.SectionBreak);
+
             // Cumulative Totals Section
             column.Item().Element(ComposeCumulativeTotalsSection);
+
+            // Vertical space before Legal Notice
+            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
 
             // Legal Notice
             column.Item().Element(ComposeLegalNoticeSection);
@@ -95,7 +103,7 @@ public class AccountHistoryPdfReport : BasePdfReport
                 .Column(innerColumn =>
                 {
                     // Add proper spacing between items - this is the KEY from QuestPDF docs
-                    innerColumn.Spacing(PdfReportConfiguration.Spacing.RowSpacing);
+                    innerColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
 
                     innerColumn.Item().ComposeKeyValuePair("Full Name", _memberProfile.FullName, bold: true);
                     innerColumn.Item().ComposeKeyValuePair("Badge Number", _memberProfile.BadgeNumber.ToString());
@@ -132,25 +140,14 @@ public class AccountHistoryPdfReport : BasePdfReport
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
                 .Column(innerColumn =>
                 {
-                    // Add spacing between all rows in this section
-                    innerColumn.Spacing(0.08f);
+                    // Add proper spacing between items
+                    innerColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
 
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("Report Period Start", _startDate.ToString("MM/dd/yyyy"));
-                        row.RelativeItem().ComposeKeyValuePair("Report Period End", _endDate.ToString("MM/dd/yyyy"));
-                    });
-
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("Prepared By", _preparedBy);
-                        row.RelativeItem().ComposeKeyValuePair("Total Years Reported", _accountHistory.Count.ToString());
-                    });
-
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("Generated Date", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-                    });
+                    innerColumn.Item().ComposeKeyValuePair("Report Period Start", _startDate.ToString("MM/dd/yyyy"));
+                    innerColumn.Item().ComposeKeyValuePair("Report Period End", _endDate.ToString("MM/dd/yyyy"));
+                    innerColumn.Item().ComposeKeyValuePair("Prepared By", _preparedBy);
+                    innerColumn.Item().ComposeKeyValuePair("Total Years Reported", _accountHistory.Count.ToString());
+                    innerColumn.Item().ComposeKeyValuePair("Generated Date", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
                 });
         });
     }
@@ -221,42 +218,32 @@ public class AccountHistoryPdfReport : BasePdfReport
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
                 .Column(innerColumn =>
                 {
-                    // Add spacing between all rows in this section
-                    innerColumn.Spacing(0.08f);
+                    // Add proper spacing between items
+                    innerColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
 
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeTotalsRow("Total Contributions", _cumulativeTotals.TotalContributions.ToCurrencyString());
-                        row.RelativeItem().ComposeTotalsRow("Total Earnings", _cumulativeTotals.TotalEarnings.ToCurrencyString());
-                    });
-
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeTotalsRow("Total Forfeitures", _cumulativeTotals.TotalForfeitures.ToCurrencyString());
-                        row.RelativeItem().ComposeTotalsRow("Total Withdrawals", _cumulativeTotals.TotalWithdrawals.ToCurrencyString());
-                    });
+                    innerColumn.Item().ComposeTotalsRow("Total Contributions", _cumulativeTotals.TotalContributions.ToCurrencyString());
+                    innerColumn.Item().ComposeTotalsRow("Total Earnings", _cumulativeTotals.TotalEarnings.ToCurrencyString());
+                    innerColumn.Item().ComposeTotalsRow("Total Forfeitures", _cumulativeTotals.TotalForfeitures.ToCurrencyString());
+                    innerColumn.Item().ComposeTotalsRow("Total Withdrawals", _cumulativeTotals.TotalWithdrawals.ToCurrencyString());
 
                     innerColumn.Item().ComposeDivider(1);
 
-                    innerColumn.Item().Row(row =>
+                    innerColumn.Item().Element(el =>
                     {
-                        row.RelativeItem().Element(el =>
-                        {
-                            el.Padding(5)
-                                .Background(PdfReportConfiguration.BrandColors.TotalsGray)
-                                .Column(col =>
-                                {
-                                    col.Item().Text("Total Vested Balance")
-                                        .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
-                                        .FontColor(PdfReportConfiguration.BrandColors.TextBlack)
-                                        .Bold();
+                        el.Padding(5)
+                            .Background(PdfReportConfiguration.BrandColors.TotalsGray)
+                            .Column(col =>
+                            {
+                                col.Item().Text("Total Vested Balance")
+                                    .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
+                                    .FontColor(PdfReportConfiguration.BrandColors.TextBlack)
+                                    .Bold();
 
-                                    col.Item().Text(_cumulativeTotals.TotalVestedBalance.ToCurrencyString())
-                                        .FontSize(PdfReportConfiguration.FontSizes.TotalsSize)
-                                        .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue)
-                                        .Bold();
-                                });
-                        });
+                                col.Item().Text(_cumulativeTotals.TotalVestedBalance.ToCurrencyString())
+                                    .FontSize(PdfReportConfiguration.FontSizes.TotalsSize)
+                                    .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue)
+                                    .Bold();
+                            });
                     });
                 });
         });

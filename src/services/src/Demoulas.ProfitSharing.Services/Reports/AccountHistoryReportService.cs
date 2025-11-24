@@ -290,7 +290,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 cumulativeTotals,
                 reportData.StartDate,
                 reportData.EndDate,
-                _user.UserName);
+                _user.UserName ?? "Member");
 
             // Generate PDF bytes and create memory stream
             byte[] pdfBytes = pdfReport.GeneratePdf();

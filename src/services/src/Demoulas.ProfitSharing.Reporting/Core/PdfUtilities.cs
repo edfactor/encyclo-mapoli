@@ -71,18 +71,18 @@ public static class PdfUtilities
     }
 
     /// <summary>
-    /// Composes header text block (title, generated date)
+    /// Composes header text block (title, generated date) - CENTERED
     /// </summary>
     private static void ComposeHeaderTextBlock(IContainer container, string reportTitle)
     {
         container.Column(column =>
         {
-            column.Item().Text(reportTitle)
+            column.Item().AlignCenter().Text(reportTitle)
                 .FontSize(PdfReportConfiguration.FontSizes.HeaderSize)
                 .Bold()
                 .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue);
 
-            column.Item().PaddingTop(0.08f)
+            column.Item().AlignCenter().PaddingTop(0.08f)
                 .Text($"Generated: {DateTime.Now:MMM dd, yyyy 'at' h:mm tt}")
                 .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
                 .Italic()
@@ -110,7 +110,7 @@ public static class PdfUtilities
             headerContainer = headerContainer.Background(backgroundColor);
         }
 
-        headerContainer.Text(sectionTitle)
+        headerContainer.AlignCenter().Text(sectionTitle)
             .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
             .Bold()
             .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
@@ -130,7 +130,7 @@ public static class PdfUtilities
         container
             .Row(row =>
             {
-                row.ConstantItem(120)
+                row.ConstantItem(90)
                     .Text(label + ":")
                     .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
                     .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);

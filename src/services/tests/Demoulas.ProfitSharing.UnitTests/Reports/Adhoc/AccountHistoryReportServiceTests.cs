@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -43,13 +44,14 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
                 FiscalEndDate = DateTime.Now.ToDateOnly()
             });
         var mockEmbeddedSql = new Mock<IEmbeddedSqlService>();
+        var mockAppUser = new Mock<IAppUser>();
         var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         var frozenService = new FrozenService(MockDbContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object);
         var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());
         var totalService = new TotalService(MockDbContextFactory, mockCalendarService.Object, mockEmbeddedSql.Object, demographicReader);
 
         var mockLogger = new Mock<ILogger<AccountHistoryReportService>>();
-        _service = new AccountHistoryReportService(MockDbContextFactory, mockDemographicReader.Object, totalService, mockLogger.Object);
+        _service = new AccountHistoryReportService(MockDbContextFactory, mockDemographicReader.Object, totalService, mockAppUser.Object, mockLogger.Object);
     }
 
     [Description("PS-2160 : Account history report returns same ID for all rows of the same member")]
