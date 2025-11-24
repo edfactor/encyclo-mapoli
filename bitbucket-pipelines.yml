@@ -841,9 +841,10 @@ pipelines:
               Write-Host "  4) Parallel: Validate import + UAT API health check"
 
       - step: *create-frontend-artifact-uat
-      # Stage 7: UAT Deployment (reuses artifacts from Stage 3)
+      # Stage 7a: UAT Drop & Recreate DB (prerequisite)
+      - step: *uat-drop-recreate-db
+      # Stage 7b: UAT Deployment & Import in Parallel
       - parallel:
-          - step: *uat-drop-recreate-db
           - step:
               name: "Application Deployment UAT"
               runs-on:
@@ -875,8 +876,8 @@ pipelines:
                     pwsh .\scripts\Notify-Teams.ps1 -Status FAILURE -Environment UAT -Step Deployment -ErrorMessage $env:DEPLOY_ERROR
                     exit 1
                   }
-      # Stage 6: UAT Database Import (must run AFTER drop-recreate completes)
-      - step: *uat-import-from-ready
+          - step: *uat-import-from-ready
+      # Stage 7c: UAT Post-Deployment Steps
       - step: *uat-import-uat-navigation
       - step: *uat-validate-import
 
