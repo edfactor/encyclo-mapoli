@@ -80,7 +80,7 @@ internal sealed class MissiveService : IMissiveService
                     .Where(empl => empl.pp.ZeroContributionReasonId ==  /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
                     .Select(empl => empl.d.Ssn).ToHashSet();
 
-                var minHours = ReferenceData.MinimumHoursForContribution();
+                var minHours = ReferenceData.MinimumHoursForContribution;
                 var vestingIncreased = new HashSet<int>();
 
                 foreach (var empl in employeeList)

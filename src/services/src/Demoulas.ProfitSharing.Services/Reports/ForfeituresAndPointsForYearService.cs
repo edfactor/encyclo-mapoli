@@ -83,7 +83,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
                     DemographicId = demo.Id,
                     demo.Ssn,
                     demo.BadgeNumber,
-                    FullName = demo.ContactInfo.LastName+", "+ demo.ContactInfo.FirstName,
+                    FullName = demo.ContactInfo.FullName,
                     demo.PayFrequencyId,
                     // PayProfit fields
                     pp.PointsEarned

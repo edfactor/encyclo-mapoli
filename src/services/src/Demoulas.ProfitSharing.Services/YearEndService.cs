@@ -68,7 +68,7 @@ public sealed class YearEndService : IYearEndService
     /// </summary>
     private static DateOnly GetMinimumBirthDateForAge18(DateOnly fiscalEndDate)
     {
-        return fiscalEndDate.AddYears(-ReferenceData.MinimumAgeForVesting());
+        return fiscalEndDate.AddYears(-ReferenceData.MinimumAgeForVesting);
     }
 
     /// <summary>
@@ -79,8 +79,8 @@ public sealed class YearEndService : IYearEndService
     private static DateOnly GetMinimumBirthDateForAge64(DateOnly fiscalEndDate)
     {
         // To include age 64+, we need DOB <= (fiscalEndDate - 64 years)
-        // ReferenceData.RetirementAge() = 65, so -65 + 1 = -64
-        return fiscalEndDate.AddYears(-ReferenceData.RetirementAge() + 1);
+        // ReferenceData.RetirementAge = 65, so -65 + 1 = -64
+        return fiscalEndDate.AddYears(-ReferenceData.RetirementAge + 1);
     }
 
     private static short CalculateAge(DateOnly dateOfBirth, DateOnly fiscalEndDate)

@@ -23,7 +23,7 @@ internal static class YearEndChangeCalculator
         DateOnly fiscalEnd)
     {
         // Early exit for under 21
-        if (age < ReferenceData.MinimumAgeForContribution())
+        if (age < ReferenceData.MinimumAgeForContribution)
         {
             return ComputeChangeForUnder21(firstContributionYear, age);
         }
@@ -35,7 +35,7 @@ internal static class YearEndChangeCalculator
         }
 
         // Handle age 64+ employees
-        if (age >= (ReferenceData.RetirementAge() - 1))
+        if (age >= (ReferenceData.RetirementAge - 1))
         {
             return ComputeChangeForAge64Plus(employee, age, profitYear, firstContributionYear, currentBalance, fiscalEnd);
         }
@@ -70,7 +70,7 @@ internal static class YearEndChangeCalculator
             : ZeroContributionReason.Constants.Normal;
 
         // Terminated employees under 64 return immediately
-        if (age < (ReferenceData.RetirementAge() - 1))
+        if (age < (ReferenceData.RetirementAge - 1))
         {
             return new YearEndChange
             {
@@ -146,7 +146,7 @@ internal static class YearEndChangeCalculator
 
     private static int DetermineIsNewEmployee(short? firstContributionYear, short age)
     {
-        if (firstContributionYear == null && age >= ReferenceData.MinimumAgeForContribution())
+        if (firstContributionYear == null && age >= ReferenceData.MinimumAgeForContribution)
         {
             return EmployeeType.Constants.NewLastYear;
         }
@@ -182,19 +182,19 @@ internal static class YearEndChangeCalculator
         int yearsSinceFirst = CalculateYearsSinceFirstContribution(profitYear, firstContributionYear, currentBalance);
 
         // Age 65+ with 5+ years vesting
-        if (yearsSinceFirst >= ReferenceData.VestingYears() && age >= ReferenceData.RetirementAge())
+        if (yearsSinceFirst >= ReferenceData.VestingYears && age >= ReferenceData.RetirementAge)
         {
             return ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested;
         }
 
         // Age 65+ with 4 years vesting (vesting next year)
-        if (yearsSinceFirst == (ReferenceData.VestingYears() - 1) && age >= ReferenceData.RetirementAge())
+        if (yearsSinceFirst == (ReferenceData.VestingYears - 1) && age >= ReferenceData.RetirementAge)
         {
             return ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
         }
 
         // Age 64 with 4+ years vesting
-        if (yearsSinceFirst >= (ReferenceData.VestingYears() - 1) && age == (ReferenceData.RetirementAge() - 1))
+        if (yearsSinceFirst >= (ReferenceData.VestingYears - 1) && age == (ReferenceData.RetirementAge - 1))
         {
             return ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
         }

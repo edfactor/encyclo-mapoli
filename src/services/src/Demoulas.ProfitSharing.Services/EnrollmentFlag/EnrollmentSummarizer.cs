@@ -1,14 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
+using EnrollmentEntity = Demoulas.ProfitSharing.Data.Entities.Enrollment;
 
-namespace Demoulas.ProfitSharing.Services;
-
-internal enum VestingStateType
-{
-    NotVested,
-    PartiallyVested,
-    FullyVested
-}
+namespace Demoulas.ProfitSharing.Services.EnrollmentFlag;
 
 /// <summary>
 /// Summarizes enrollment status by analyzing profit detail transaction history.
@@ -80,13 +74,13 @@ internal class EnrollmentSummarizer
         if (years > 0)
         {
             VestedState = VestingStateType.PartiallyVested;
-            if (years > /*5*/ ReferenceData.VestingYears())
+            if (years > /*5*/ ReferenceData.VestingYears)
             {
                 VestedState = VestingStateType.FullyVested;
             }
         }
 
-        if (EnrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+        if (EnrollmentId == /*3*/ EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords)
         {
             VestedState = VestingStateType.PartiallyVested;
         }
@@ -101,28 +95,28 @@ internal class EnrollmentSummarizer
     // COBOL: 310-Get-Balance
     public byte GetEnrolled(short years)
     {
-        if (IsNewVestingRules && EnrollmentId == /*1*/ Enrollment.Constants.OldVestingPlanHasContributions)
+        if (IsNewVestingRules && EnrollmentId == /*1*/ EnrollmentEntity.Constants.OldVestingPlanHasContributions)
         {
-            EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
+            EnrollmentId = /*2*/ EnrollmentEntity.Constants.NewVestingPlanHasContributions;
         }
 
         if (VestedState != VestingStateType.NotVested)
         {
             if (Forfeiture != 0 && IsAfter2006)
             {
-                EnrollmentId = /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
+                EnrollmentId = /*3*/ EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords;
             }
 
             if (IsNewVestingRules)
             {
-                if (EnrollmentId == /*1*/ Enrollment.Constants.OldVestingPlanHasContributions)
+                if (EnrollmentId == /*1*/ EnrollmentEntity.Constants.OldVestingPlanHasContributions)
                 {
-                    EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
+                    EnrollmentId = /*2*/ EnrollmentEntity.Constants.NewVestingPlanHasContributions;
                 }
 
-                if (EnrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+                if (EnrollmentId == /*3*/ EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords)
                 {
-                    EnrollmentId = /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+                    EnrollmentId = /*4*/ EnrollmentEntity.Constants.NewVestingPlanHasForfeitureRecords;
                 }
             }
         }
@@ -155,7 +149,7 @@ internal class EnrollmentSummarizer
         if (pd is { ProfitYear: 2003, ProfitCodeId: 8 })
         {
             Is2003VoidProblem = true;
-            EnrollmentId = Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
+            EnrollmentId = EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords;
         }
 
         if (pd.ProfitCodeId != /*2*/ ProfitCode.Constants.OutgoingForfeitures)
@@ -197,7 +191,7 @@ internal class EnrollmentSummarizer
                     IsNewVestingRules = true;
                 }
 
-                EnrollmentId = /*1*/ Enrollment.Constants.OldVestingPlanHasContributions;
+                EnrollmentId = /*1*/ EnrollmentEntity.Constants.OldVestingPlanHasContributions;
                 LastYearSeen = pd.ProfitYear;
             }
         }
@@ -235,7 +229,7 @@ internal class EnrollmentSummarizer
                         when pd.Contribution != 0:
                     case /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay
                         when pd.Contribution != 0:
-                        EnrollmentId = /*1*/ Enrollment.Constants.OldVestingPlanHasContributions;
+                        EnrollmentId = /*1*/ EnrollmentEntity.Constants.OldVestingPlanHasContributions;
                         LastYearSeen = pd.ProfitYear;
                         break;
                 }
@@ -244,12 +238,12 @@ internal class EnrollmentSummarizer
 
         if (Is2003VoidProblem)
         {
-            EnrollmentId = /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
+            EnrollmentId = /*3*/ EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords;
         }
 
         if (pd is { ProfitYear: >= 2007, Contribution: > 0 })
         {
-            EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
+            EnrollmentId = /*2*/ EnrollmentEntity.Constants.NewVestingPlanHasContributions;
         }
     }
 }
