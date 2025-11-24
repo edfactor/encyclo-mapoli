@@ -69,7 +69,7 @@ export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   useFrozenData?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+ 
 export interface EmployeeWagesForYearResponse extends PagedReportResponse<EmployeeWagesForYear> {}
 
 export interface EligibleEmployee {

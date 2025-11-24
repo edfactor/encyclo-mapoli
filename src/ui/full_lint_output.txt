@@ -1,0 +1,63 @@
+
+> smart-profit-sharing@1.0.1 lint
+> eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
+
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\e2e\env.setup.ts
+  1:13  error  Parsing error: Unexpected token {
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\e2e\layout\layout.test.ts
+  216:24  error  Parsing error: Unexpected token :
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\e2e\unauthorized\unauthorized.test.ts
+  168:24  error  Parsing error: Unexpected token :
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\Layout\WelcomeDisplay.tsx
+  10:13  error  'MenuItem' is already defined  no-redeclare
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\middleware\apiLoggerMiddleware.ts
+  17:48  error  'RequestInfo' is not defined  no-undef
+  17:74  error  'RequestInit' is not defined  no-undef
+  31:28  error  'RequestInfo' is not defined  no-undef
+  31:55  error  'RequestInit' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DistributionsAndForfeitures\DistributionsAndForfeituresGrid.tsx
+  41:58  error  'NodeJS' is not defined  no-undef
+  42:62  error  'NodeJS' is not defined  no-undef
+  43:66  error  'NodeJS' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Dev\DevDebug.tsx
+  287:29  error  'process' is not defined  no-undef
+  288:28  error  'process' is not defined  no-undef
+  289:28  error  'process' is not defined  no-undef
+  290:31  error  'process' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\reduxstore\api\api.ts
+  4:20  error  'process' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\test\setup.ts
+  15:3  error  'process' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\test\utils\asyncHelpers.ts
+   50:7  error  'expect' is not defined  no-undef
+   78:7  error  'expect' is not defined  no-undef
+  107:7  error  'expect' is not defined  no-undef
+  136:7  error  'expect' is not defined  no-undef
+  162:7  error  'expect' is not defined  no-undef
+  184:7  error  'expect' is not defined  no-undef
+  206:7  error  'expect' is not defined  no-undef
+  224:7  error  'expect' is not defined  no-undef
+  244:7  error  'expect' is not defined  no-undef
+  349:7  error  'expect' is not defined  no-undef
+  370:7  error  'expect' is not defined  no-undef
+  396:7  error  'expect' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\utils\masterInquiryLink.tsx
+   9:17  error  'viewBadgeLinkRenderer' is already defined  no-redeclare
+  14:17  error  'viewBadgeLinkRenderer' is already defined  no-redeclare
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\vite.config.ts
+  24:12  error  '_e' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 32 problems (32 errors, 0 warnings)
+

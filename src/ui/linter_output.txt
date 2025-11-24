@@ -1,0 +1,839 @@
+
+> smart-profit-sharing@1.0.1 lint
+> eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
+
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\e2e\env.setup.ts
+  1:13  error  Parsing error: Unexpected token {
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\e2e\layout\layout.test.ts
+  216:24  error  Parsing error: Unexpected token :
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\e2e\unauthorized\unauthorized.test.ts
+  168:24  error  Parsing error: Unexpected token :
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\App.tsx
+  105:36  error  '_e' is defined but never used  no-unused-vars
+  125:16  error  '_e' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\DSMGrid\AgGridWrapper\AgGridWrapper.tsx
+  118:21  error  'states' is defined but never used         no-unused-vars
+  120:17  error  'gridApi' is defined but never used        no-unused-vars
+  122:25  error  'value' is defined but never used          no-unused-vars
+  389:41  error  '_valueA' is defined but never used        no-unused-vars
+  389:50  error  '_valueB' is defined but never used        no-unused-vars
+  389:59  error  '_nodeA' is defined but never used         no-unused-vars
+  389:67  error  '_nodeB' is defined but never used         no-unused-vars
+  389:75  error  '_isDescending' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\DSMGrid\ColumnControl\ColumnControl.tsx
+  10:27  error  'value' is defined but never used  no-unused-vars
+  11:21  error  'value' is defined but never used  no-unused-vars
+  12:14  error  'value' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\DSMGrid\DSMGrid.tsx
+   27:24  error  'update' is defined but never used   no-unused-vars
+   29:17  error  'gridApi' is defined but never used  no-unused-vars
+  105:14  error  '_e' is defined but never used       no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\DSMGrid\GridHeader\GridHeader.tsx
+   9:21  error  'value' is defined but never used  no-unused-vars
+  10:20  error  'value' is defined but never used  no-unused-vars
+  11:20  error  'value' is defined but never used  no-unused-vars
+  12:27  error  'value' is defined but never used  no-unused-vars
+  13:14  error  'value' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\DSMNestedGrid\NestedGrid.tsx
+   8:25  error  'row' is defined but never used         no-unused-vars
+   8:53  error  'isExpanded' is defined but never used  no-unused-vars
+  11:18  error  'row' is defined but never used         no-unused-vars
+  11:46  error  'isExpanded' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\DSMNestedGrid\NestedGridRow.tsx
+  15:13  error  'value' is defined but never used       no-unused-vars
+  15:29  error  'row' is defined but never used         no-unused-vars
+  21:25  error  'row' is defined but never used         no-unused-vars
+  21:53  error  'isExpanded' is defined but never used  no-unused-vars
+  22:18  error  'row' is defined but never used         no-unused-vars
+  22:46  error  'isExpanded' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\Drawer\RecursiveNavItem.tsx
+  21:17  error  'item' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\Drawer\hooks\useDrawerViewModel.ts
+  32:20  error  'item' is defined but never used   no-unused-vars
+  33:20  error  'item' is defined but never used   no-unused-vars
+  42:18  error  'item' is defined but never used   no-unused-vars
+  43:20  error  'item' is defined but never used   no-unused-vars
+  44:22  error  'item' is defined but never used   no-unused-vars
+  44:43  error  'level' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\Drawer\models\DrawerConfig.ts
+  25:17  error  'item' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\Drawer\utils\drawerUtils.ts
+  183:15  error  'item' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\DuplicateSsnGuard.tsx
+  14:14  error  'ctx' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\ForfeitActivities\SharedForfeitHeaderComponent.tsx
+  34:26  error  'id' is defined but never used        no-unused-vars
+  35:31  error  'id' is defined but never used        no-unused-vars
+  36:17  error  'requests' is defined but never used  no-unused-vars
+  36:64  error  'names' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\ForfeitActivities\SharedSaveButtonCellRenderer.tsx
+  10:31  error  'id' is defined but never used       no-unused-vars
+  11:26  error  'id' is defined but never used       no-unused-vars
+  12:13  error  'request' is defined but never used  no-unused-vars
+  12:57  error  'name' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\Layout\WelcomeDisplay.tsx
+  10:13  error  'MenuItem' is already defined  no-redeclare
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\MenuBar\ImpersonationMultiSelect.tsx
+  6:21  error  'value' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\MenuBar\MultiSelect.tsx
+  23:18  error  'event' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\MissiveAlerts\MissiveAlertContextDef.ts
+   6:14  error  'alert' is defined but never used    no-unused-vars
+   7:15  error  'alerts' is defined but never used   no-unused-vars
+   9:17  error  'alertId' is defined but never used  no-unused-vars
+  10:14  error  'alertId' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\PrerequisiteGuard.tsx
+  24:14  error  'ctx' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\ProfitYearSelector\ProfitYearSelector.tsx
+  12:18  error  'event' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\SelectableGridHeader\SelectableGridHeader.tsx
+   7:26  error  'id' is defined but never used        no-unused-vars
+   8:31  error  'id' is defined but never used        no-unused-vars
+  10:5   error  'nodeData' is defined but never used  no-unused-vars
+  21:5   error  'context' is defined but never used   no-unused-vars
+  26:5   error  'nodeData' is defined but never used  no-unused-vars
+  37:5   error  'context' is defined but never used   no-unused-vars
+  41:17  error  'requests' is defined but never used  no-unused-vars
+  41:64  error  'names' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\StatusDropdown.tsx
+  7:20  error  'newStatus' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\StatusDropdownActionNode.tsx
+  15:21  error  'newStatus' is defined but never used   no-unused-vars
+  15:40  error  'statusName' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\components\router\RouterSubAssembly.tsx
+  118:16  error  '_e' is defined but never used  no-unused-vars
+  475:16  error  '_e' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\hooks\useGridPagination.ts
+  15:28  error  'pageNumber' is defined but never used  no-unused-vars
+  15:48  error  'pageSize' is defined but never used    no-unused-vars
+  16:22  error  'sortParams' is defined but never used  no-unused-vars
+  24:25  error  'pageNumber' is defined but never used  no-unused-vars
+  24:45  error  'pageSize' is defined but never used    no-unused-vars
+  24:63  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\hooks\usePrerequisiteNavigations.ts
+  20:12  error  'template' is defined but never used    no-unused-vars
+  20:41  error  'incomplete' is defined but never used  no-unused-vars
+  20:70  error  'current' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\middleware\apiLoggerMiddleware.ts
+  17:48  error  'RequestInfo' is not defined  no-undef
+  17:74  error  'RequestInit' is not defined  no-undef
+  31:28  error  'RequestInfo' is not defined  no-undef
+  31:55  error  'RequestInit' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Beneficiaries\BeneficiariesListGridColumns.ts
+  14:29  error  'percentage' is defined but never used  no-unused-vars
+  14:49  error  'id' is defined but never used          no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Beneficiaries\BeneficiaryActions.tsx
+   9:23  error  'beneficiary' is defined but never used  no-unused-vars
+  10:12  error  'beneficiary' is defined but never used  no-unused-vars
+  11:14  error  'beneficiary' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Beneficiaries\BeneficiaryInquirySearchFilter.tsx
+  29:14  error  'params' is defined but never used  no-unused-vars
+  30:24  error  'type' is defined but never used    no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Beneficiaries\BeneficiaryRelationshipsGrids.tsx
+  21:23  error  'selectedMember' is defined but never used  no-unused-vars
+  22:28  error  'beneficiaries' is defined but never used   no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Beneficiaries\CreateBeneficiary.tsx
+  196:14  error  '_res' is defined but never used    no-unused-vars
+  225:14  error  '_value' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Beneficiaries\MemberResultsGrid.tsx
+  12:16  error  'data' is defined but never used        no-unused-vars
+  13:24  error  'pageNumber' is defined but never used  no-unused-vars
+  14:22  error  'pageSize' is defined but never used    no-unused-vars
+  45:18  error  'event' is defined but never used       no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Beneficiaries\hooks\useBeneficiaryPercentageUpdate.ts
+  20:5  error  'id' is defined but never used             no-unused-vars
+  21:5  error  'newPercentage' is defined but never used  no-unused-vars
+  22:5  error  'currentList' is defined but never used    no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Beneficiaries\hooks\useBeneficiarySearch.ts
+  22:28  error  'page' is defined but never used        no-unused-vars
+  22:42  error  'size' is defined but never used        no-unused-vars
+  23:22  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DemographicBadgesNotInPayprofit\DemographicBadgesNotInPayprofitGrid.tsx
+  14:24  error  'pageNumber' is defined but never used  no-unused-vars
+  14:44  error  'pageSize' is defined but never used    no-unused-vars
+  15:18  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DemographicBadgesNotInPayprofit\hooks\useDemographicBadgesNotInPayprofit.ts
+  71:71  error  '_source' is assigned a value but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DistributionsAndForfeitures\DistributionsAndForfeituresGrid.tsx
+  25:28  error  'loaded' is defined but never used     no-unused-vars
+  28:22  error  'isLoading' is defined but never used  no-unused-vars
+  41:58  error  'NodeJS' is not defined                no-undef
+  42:62  error  'NodeJS' is not defined                no-undef
+  43:66  error  'NodeJS' is not defined                no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DistributionsAndForfeitures\DistributionsAndForfeituresSearchFilter.tsx
+  41:28  error  'include' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DistributionsAndForfeitures\__tests__\DistributionsAndForfeitures.test.tsx
+  13:53  error  'val' is defined but never used                      no-unused-vars
+  25:31  error  '_setInitialSearchLoaded' is defined but never used  no-unused-vars
+  26:28  error  '_initialSearchLoaded' is defined but never used     no-unused-vars
+  31:47  error  'val' is defined but never used                      no-unused-vars
+  36:47  error  'val' is defined but never used                      no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DistributionsAndForfeitures\__tests__\DistributionsAndForfeituresSearchFilter.test.tsx
+  1:20  error  '_render' is defined but never used  no-unused-vars
+  1:39  error  '_screen' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DuplicateNamesAndBirthdays\DuplicateNamesAndBirthdaysGrid.tsx
+  15:24  error  'pageNumber' is defined but never used  no-unused-vars
+  15:44  error  'pageSize' is defined but never used    no-unused-vars
+  16:18  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DuplicateNamesAndBirthdays\DuplicateNamesAndBirthdaysSearchFilter.tsx
+  27:28  error  'include' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DuplicateNamesAndBirthdays\hooks\useDuplicateNamesAndBirthdays.ts
+  68:66  error  '_source' is assigned a value but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DuplicateSSNsOnDemographics\DuplicateSSNsOnDemographicsGrid.tsx
+  15:24  error  'pageNumber' is defined but never used  no-unused-vars
+  15:44  error  'pageSize' is defined but never used    no-unused-vars
+  16:18  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DuplicateSSNsOnDemographics\hooks\useDuplicateSSNsOnDemographics.ts
+  65:67  error  '_source' is assigned a value but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ForfeituresAdjustment\AddForfeitureModal.tsx
+   13:12  error  'formData' is defined but never used  no-unused-vars
+  122:14  error  '_error' is defined but never used    no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ForfeituresAdjustment\AddUnforfeitModal.tsx
+  12:12  error  'formData' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ForfeituresAdjustment\ForfeituresAdjustmentSearchFilter.tsx
+  31:14  error  'params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ForfeituresAdjustment\ForfeituresTransactionGrid.tsx
+  17:24  error  'pageNumber' is defined but never used  no-unused-vars
+  17:44  error  'pageSize' is defined but never used    no-unused-vars
+  17:62  error  'sortParams' is defined but never used  no-unused-vars
+  18:18  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ManageExecutiveHoursAndDollars\ManageExecutiveHoursAndDollars.tsx
+  174:14  error  '_error' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ManageExecutiveHoursAndDollars\ManageExecutiveHoursAndDollarsGrid.tsx
+  72:25  error  'badge' is defined but never used       no-unused-vars
+  72:40  error  'hours' is defined but never used       no-unused-vars
+  72:55  error  'dollars' is defined but never used     no-unused-vars
+  73:24  error  'badge' is defined but never used       no-unused-vars
+  75:25  error  'searchForm' is defined but never used  no-unused-vars
+  85:30  error  'executives' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ManageExecutiveHoursAndDollars\ManageExecutiveHoursAndDollarsSearchFilter.tsx
+   61:14  error  'searchData' is defined but never used         no-unused-vars
+  104:14  error  '_trigger' is assigned a value but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ManageExecutiveHoursAndDollars\SearchAndAddExecutive.tsx
+  58:24  error  'searchForm' is defined but never used  no-unused-vars
+  64:29  error  'executives' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ManageExecutiveHoursAndDollars\__test__\ManageExecutiveHoursAndDollars.test.tsx
+  112:25  error  'children' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ManageExecutiveHoursAndDollars\hooks\useExecutiveModal.ts
+  8:14  error  'searchForm' is defined but never used  no-unused-vars
+  9:24  error  'executives' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ManageExecutiveHoursAndDollars\hooks\useManageExecutiveHoursAndDollars.ts
+  42:14  error  'alert' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\MilitaryContribution\MilitaryContributionForm.tsx
+  16:14  error  'contribution' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\MilitaryContribution\__test__\MilitaryContribution.test.tsx
+  179:25  error  'children' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\NegativeEtvaForSSNsOnPayprofit\NegativeEtvaForSSNsOnPayprofitGrid.tsx
+  16:24  error  'pageNumber' is defined but never used  no-unused-vars
+  16:44  error  'pageSize' is defined but never used    no-unused-vars
+  17:18  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\NegativeEtvaForSSNsOnPayprofit\NegativeEtvaForSSNsOnPayprofitGridColumns.ts
+  5:72  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\NegativeEtvaForSSNsOnPayprofit\hooks\useNegativeEtvaForSSNsOnPayprofit.ts
+  65:70  error  '_source' is assigned a value but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ProfitShareReport\ProfitShareReport.tsx
+  35:17  error  '_error' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ProfitShareReport\ProfitShareReportSearchFilter.tsx
+  41:27  error  'searchParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\ProfitShareReport\__tests__\ProfitShareReport.test.tsx
+  44:12  error  '_params' is defined but never used   no-unused-vars
+  58:19  error  'children' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\Termination\TerminationDetailsGridColumns.tsx
+  19:26  error  'id' is defined but never used        no-unused-vars
+  20:31  error  'id' is defined but never used        no-unused-vars
+  22:13  error  'request' is defined but never used   no-unused-vars
+  22:57  error  'name' is defined but never used      no-unused-vars
+  23:17  error  'requests' is defined but never used  no-unused-vars
+  23:64  error  'names' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\Termination\TerminationGrid.tsx
+  14:28  error  'loaded' is defined but never used      no-unused-vars
+  17:22  error  'hasChanges' is defined but never used  no-unused-vars
+  23:22  error  'isLoading' is defined but never used   no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\Termination\TerminationHeaderComponent.tsx
+  6:26  error  'id' is defined but never used        no-unused-vars
+  7:31  error  'id' is defined but never used        no-unused-vars
+  8:17  error  'requests' is defined but never used  no-unused-vars
+  8:64  error  'names' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\Termination\TerminationSearchFilter.tsx
+   66:28  error  'include' is defined but never used     no-unused-vars
+   68:14  error  'params' is defined but never used      no-unused-vars
+   70:27  error  'hasChanges' is defined but never used  no-unused-vars
+  145:64  error  'data' is defined but never used        no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\Termination\__test__\Termination.test.tsx
+   68:79  error  'action' is defined but never used  no-unused-vars
+   86:79  error  'action' is defined but never used  no-unused-vars
+  109:79  error  'action' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\Termination\__test__\TerminationSearchFilter.test.tsx
+  39:27  error  '_min' is defined but never used             no-unused-vars
+  39:41  error  '_max' is defined but never used             no-unused-vars
+  39:55  error  '_fieldName' is defined but never used       no-unused-vars
+  41:7   error  '_beginFieldName' is defined but never used  no-unused-vars
+  42:7   error  '_dateParser' is defined but never used      no-unused-vars
+  42:21  error  'val' is defined but never used              no-unused-vars
+  43:7   error  '_message' is defined but never used         no-unused-vars
+  45:27  error  '_min' is defined but never used             no-unused-vars
+  45:41  error  '_max' is defined but never used             no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\Termination\hooks\useTerminationGrid.ts
+   51:28  error  'loaded' is defined but never used      no-unused-vars
+   54:22  error  'hasChanges' is defined but never used  no-unused-vars
+   60:22  error  'isLoading' is defined but never used   no-unused-vars
+  169:36  error  '_params' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\UnForfeit\UnForfeitGrid.tsx
+  17:28  error  'loaded' is defined but never used            no-unused-vars
+  19:22  error  'hasChanges' is defined but never used        no-unused-vars
+  23:26  error  'hasChanges' is defined but never used        no-unused-vars
+  29:24  error  'title' is defined but never used             no-unused-vars
+  29:39  error  'message' is defined but never used           no-unused-vars
+  44:20  error  '_onCloseLeftPane' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\UnForfeit\UnForfeitProfitDetailGridColumns.tsx
+  19:26  error  'id' is defined but never used        no-unused-vars
+  20:31  error  'id' is defined but never used        no-unused-vars
+  22:13  error  'request' is defined but never used   no-unused-vars
+  22:57  error  'name' is defined but never used      no-unused-vars
+  23:17  error  'requests' is defined but never used  no-unused-vars
+  23:64  error  'names' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\UnForfeit\UnForfeitSearchFilter.tsx
+   46:28  error  'include' is defined but never used     no-unused-vars
+   50:26  error  'hasChanges' is defined but never used  no-unused-vars
+  131:64  error  'data' is defined but never used        no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\UnForfeit\__test__\UnForfeitSearchFilter.test.tsx
+  25:28  error  'dateStr' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\UnForfeit\useUnForfeitGrid.ts
+   31:28  error  'loaded' is defined but never used      no-unused-vars
+   33:22  error  'hasChanges' is defined but never used  no-unused-vars
+   37:26  error  'hasChanges' is defined but never used  no-unused-vars
+   41:24  error  'title' is defined but never used       no-unused-vars
+   41:39  error  'message' is defined but never used     no-unused-vars
+  453:19  error  '_' is defined but never used           no-unused-vars
+  454:21  error  '_' is defined but never used           no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Dev\DevDebug.tsx
+   22:44  error  '_state' is defined but never used  no-unused-vars
+  287:29  error  'process' is not defined            no-undef
+  288:28  error  'process' is not defined            no-undef
+  289:28  error  'process' is not defined            no-undef
+  290:31  error  'process' is not defined            no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Distributions\AddDistribution\AddDistributionForm.tsx
+   50:14  error  'request' is defined but never used  no-unused-vars
+  297:43  error  'data' is defined but never used     no-unused-vars
+  307:57  error  'data' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Distributions\DistributionInquiry\DistributionInquiryGrid.tsx
+  14:24  error  'pageNumber' is defined but never used  no-unused-vars
+  14:44  error  'pageSize' is defined but never used    no-unused-vars
+  14:62  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Distributions\DistributionInquiry\DistributionInquirySearchFilter.tsx
+  31:14  error  'data' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Distributions\EditDistribution\EditDistributionForm.tsx
+  50:14  error  'request' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Distributions\ViewDistribution\DisbursementGrid.tsx
+  15:24  error  'pageNumber' is defined but never used  no-unused-vars
+  15:44  error  'pageSize' is defined but never used    no-unused-vars
+  15:62  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Distributions\ViewDistribution\hooks\useViewDistribution.ts
+  13:17  error  'memberId' is defined but never used    no-unused-vars
+  13:35  error  'memberType' is defined but never used  no-unused-vars
+  13:55  error  'profitYear' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\AgeReports\BalanceByAge\BalanceByAgeGridColumns.ts
+  5:40  error  '_reportType' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\AgeReports\BalanceByYears\BalanceByYearsGridColumns.ts
+  5:46  error  '_' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\AgeReports\ContributionsByAge\ContributionsByAgeGridColumns.ts
+  5:46  error  '_reportType' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\AgeReports\DistributionsByAge\DistributionsByAgeGridColumns.ts
+  5:46  error  '_reportType' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\AgeReports\ForfeituresByAge\ForfeituresByAgeGridColumns.ts
+  5:44  error  '_reportType' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\EligibleEmployees\EligibleEmployeesGrid.tsx
+  15:24  error  'pageNumber' is defined but never used  no-unused-vars
+  15:44  error  'pageSize' is defined but never used    no-unused-vars
+  16:18  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\EligibleEmployees\hooks\useEligibleEmployees.ts
+  68:57  error  '_source' is assigned a value but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\Forfeit\ForfeitGridColumns.ts
+  10:60  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\Forfeit\ForfeitSearchFilter.tsx
+  13:14  error  'params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\InfoCard.tsx
+  12:18  error  'event' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\PAY426Reports\PAY426-10\BeneficiariesGridColumns.ts
+  17:59  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\PAY426Reports\PAY426N\FilterSection.tsx
+  9:20  error  'preset' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\PAY426Reports\PAY426N\GetProfitSharingReportGridColumns.ts
+  16:65  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\PAY426Reports\PAY426N\ReportGrid.tsx
+  19:22  error  'isLoading' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\PAY426Reports\ProfitSummary\ProfitSummary.tsx
+  281:48  error  'event' is defined but never used  no-unused-vars
+  300:48  error  'event' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\PaymasterUpdate\PayMasterUpdateGrid.tsx
+  14:24  error  'reset' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\PaymasterUpdate\PayMasterUpdateGridColumns.ts
+  9:61  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\PaymasterUpdate\PayMasterUpdateSearchFilter.tsx
+  19:14  error  'data' is defined but never used   no-unused-vars
+  21:18  error  'reset' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\Profall\ProfallGrid.tsx
+  15:24  error  'reset' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\Profall\ProfallGridColumns.ts
+  11:53  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\BreakdownReport\AssociatesGrid.tsx
+  16:24  error  'reset' is defined but never used      no-unused-vars
+  17:22  error  'isLoading' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\BreakdownReport\AssociatesGridColumns.ts
+  4:57  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\BreakdownReport\QPAY066TABreakdownParameters.tsx
+  44:20  error  'store' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\BreakdownReport\StoreContent.tsx
+  9:22  error  'isLoading' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\BreakdownReport\StoreManagementGrid.tsx
+  16:24  error  'reset' is defined but never used      no-unused-vars
+  17:22  error  'isLoading' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\BreakdownReport\StoreManagementGridColumns.ts
+  4:66  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\BreakdownReport\SummariesContent.tsx
+  223:33  error  '_params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\BreakdownReport\TotalsContent.tsx
+  13:22  error  'isLoading' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\PostFrozenUnder21ReportGrid.tsx
+  13:28  error  'loaded' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\PostFrozenUnder21ReportGridColumns.tsx
+  14:73  error  'path' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\Under21ReportGrid.tsx
+  38:10  error  '__' is assigned a value but never used   no-unused-vars
+  39:10  error  '___' is assigned a value but never used  no-unused-vars
+  55:29  error  '_params' is defined but never used       no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\Under21ReportGridColumns.ts
+  12:55  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\Under21\Under21BreakdownGrid.tsx
+  12:28  error  'loaded' is defined but never used  no-unused-vars
+  15:18  error  'page' is defined but never used    no-unused-vars
+  83:27  error  '_value' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareByStore\Under21\Under21InactiveGrid.tsx
+  12:28  error  'loaded' is defined but never used  no-unused-vars
+  14:19  error  'value' is defined but never used   no-unused-vars
+  16:17  error  'value' is defined but never used   no-unused-vars
+  18:19  error  'value' is defined but never used   no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareEditUpdate\MasterUpdateSummaryTable.tsx
+  17:24  error  'fieldKey' is defined but never used   no-unused-vars
+  19:24  error  'fieldName' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareEditUpdate\ProfitShareEditConfirmation.tsx
+   7:90  error  'isOpen' is defined but never used  no-unused-vars
+  24:61  error  'isOpen' is defined but never used  no-unused-vars
+  43:18  error  'isOpen' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareEditUpdate\ProfitShareEditGrid.tsx
+  14:28  error  'loaded' is defined but never used  no-unused-vars
+  16:24  error  'reset' is defined but never used   no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareEditUpdate\ProfitShareEditUpdateSearchFilter.tsx
+  62:28  error  'include' is defined but never used  no-unused-vars
+  63:18  error  'reset' is defined but never used    no-unused-vars
+  64:30  error  'entered' is defined but never used  no-unused-vars
+  65:31  error  'valid' is defined but never used    no-unused-vars
+  66:31  error  'valid' is defined but never used    no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareEditUpdate\ProfitShareEditUpdateTabs.tsx
+  14:28  error  'loaded' is defined but never used  no-unused-vars
+  16:24  error  'reset' is defined but never used   no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareEditUpdate\ProfitShareRevertButton.tsx
+  7:24  error  'open' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareEditUpdate\ProfitShareSaveButton.tsx
+  8:22  error  'open' is defined but never used  no-unused-vars
+  9:23  error  'open' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareEditUpdate\ProfitShareUpdateGrid.tsx
+  14:28  error  'loaded' is defined but never used  no-unused-vars
+  16:24  error  'reset' is defined but never used   no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareEditUpdate\hooks\useChecksumValidation.ts
+  25:25  error  'data' is defined but never used   no-unused-vars
+  27:14  error  'error' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareGrossReport\ProfitShareGrossReportColumns.ts
+  6:64  error  'badgeNumber' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareGrossReport\ProfitShareGrossReportGrid.tsx
+  15:28  error  'loaded' is defined but never used  no-unused-vars
+  17:24  error  'reset' is defined but never used   no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareGrossReport\ProfitShareGrossReportSearchFilter.tsx
+  24:18  error  'reset' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ProfitShareTotals426\ProfitShareTotals426.tsx
+  15:10  error  '_initialSearchLoaded' is assigned a value but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\QPAY066B\QPAY066BFilterSection.tsx
+  17:20  error  'params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\QPAY066B\QPAY066BGrid.tsx
+  14:22  error  'isLoading' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ReprintCertificates\ReprintCertificatesFilterSection.tsx
+  16:20  error  'params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\ReprintCertificates\ReprintCertificatesGrid.tsx
+   15:24  error  'selectedBadgeNumbers' is defined but never used      no-unused-vars
+   25:10  error  '_selectedRowIds' is assigned a value but never used  no-unused-vars
+  142:54  error  'event' is defined but never used                     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\YTDWagesExtract\YTDWagesGrid.tsx
+  18:24  error  'pageNumber' is defined but never used  no-unused-vars
+  18:44  error  'pageSize' is defined but never used    no-unused-vars
+  19:18  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\YTDWagesExtract\YTDWagesSearchFilter.tsx
+  8:14  error  'params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FiscalClose\YTDWagesExtract\hooks\useYTDWages.ts
+  71:48  error  '_source' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FrozenSummary\FlexibleInfoCard.tsx
+  17:18  error  'event' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\FrozenSummary\FrozenSummaryCards.tsx
+  17:20  error  'value' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\ITOperations\AuditSearch\AuditSearchGrid.tsx
+  12:24  error  'pageNumber' is defined but never used  no-unused-vars
+  12:44  error  'pageSize' is defined but never used    no-unused-vars
+  12:62  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\ITOperations\AuditSearch\AuditSearchManager.tsx
+  45:14  error  'filters' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\ITOperations\DemographicFreeze\DemographicFreezeGrid.tsx
+  12:28  error  'loaded' is defined but never used  no-unused-vars
+  14:24  error  'reset' is defined but never used   no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\ITOperations\DemographicFreeze\DemographicFreezeManager.tsx
+  45:28  error  'include' is defined but never used  no-unused-vars
+  46:18  error  'reset' is defined but never used    no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\InquiriesAndAdjustments\MasterInquiry\MasterInquiryDetailsGrid.tsx
+  22:25  error  'pageNumber' is defined but never used  no-unused-vars
+  22:45  error  'pageSize' is defined but never used    no-unused-vars
+  23:19  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\InquiriesAndAdjustments\MasterInquiry\MasterInquiryMemberDetails.tsx
+  40:18  error  '_memberType' is defined but never used  no-unused-vars
+  40:35  error  '_id' is defined but never used          no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\InquiriesAndAdjustments\MasterInquiry\MasterInquiryMemberGrid.tsx
+   25:20  error  'member' is defined but never used      no-unused-vars
+   31:24  error  'pageNumber' is defined but never used  no-unused-vars
+   31:44  error  'pageSize' is defined but never used    no-unused-vars
+   32:18  error  'sortParams' is defined but never used  no-unused-vars
+  113:20  error  'event' is defined but never used       no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\InquiriesAndAdjustments\MasterInquiry\MasterInquirySearchFilter.tsx
+  77:14  error  'params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\AccountHistoryReport\AccountHistoryReportFilterSection.tsx
+  28:20  error  'params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\PayBeNext\PayBeNext.tsx
+  35:10  error  '_sortParams' is assigned a value but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\PayBenReport\PayBenReportGrid.tsx
+  16:24  error  'pageNumber' is defined but never used  no-unused-vars
+  16:44  error  'pageSize' is defined but never used    no-unused-vars
+  17:18  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\QPAY066xAdHocReports\QPAY066xAdHocSearchFilter.tsx
+  25:20  error  'preset' is defined but never used           no-unused-vars
+  27:25  error  'storeNumber' is defined but never used      no-unused-vars
+  28:25  error  'badgeNumber' is defined but never used      no-unused-vars
+  29:26  error  'employeeName' is defined but never used     no-unused-vars
+  30:29  error  'storeManagement' is defined but never used  no-unused-vars
+  31:23  error  'startDate' is defined but never used        no-unused-vars
+  32:21  error  'endDate' is defined but never used          no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\QPAY600\QPAY600Grid.tsx
+  17:22  error  'isLoading' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\QPAY600\QPAY600SearchFilter.tsx
+  22:20  error  'params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\RecentlyTerminated\RecentlyTerminatedSearchFilter.tsx
+  33:14  error  'beginningDate' is defined but never used  no-unused-vars
+  33:37  error  'endingDate' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\RecentlyTerminated\hooks\__test__\useRecentlyTerminated.test.tsx
+  443:11  error  'pageNumber' is defined but never used  no-unused-vars
+  444:11  error  'pageSize' is defined but never used    no-unused-vars
+  445:11  error  'sortParams' is defined but never used  no-unused-vars
+  474:11  error  'pageNumber' is defined but never used  no-unused-vars
+  475:11  error  'pageSize' is defined but never used    no-unused-vars
+  476:11  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\TerminatedLetters\TerminatedLettersGrid.tsx
+  25:21  error  'rows' is defined but never used     no-unused-vars
+  29:26  error  'open' is defined but never used     no-unused-vars
+  31:28  error  'content' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\TerminatedLetters\TerminatedLettersSearchFilter.tsx
+  33:14  error  'beginningDate' is defined but never used  no-unused-vars
+  33:37  error  'endingDate' is defined but never used     no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\Reports\TerminatedLetters\hooks\__test__\useTerminatedLetters.test.tsx
+  467:11  error  'pageNumber' is defined but never used  no-unused-vars
+  468:11  error  'pageSize' is defined but never used    no-unused-vars
+  469:11  error  'sortParams' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\redux\rtkQueryErrorToastMiddleware.ts
+  21:4  error  '_api' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\reduxstore\api\NavigationApi.ts
+  17:15  error  '_request' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\reduxstore\api\NavigationStatusApi.ts
+  23:15  error  '_request' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\reduxstore\api\YearsEndApi.ts
+  1309:46  error  '_dispatch' is defined but never used  no-unused-vars
+  1329:46  error  '_dispatch' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\reduxstore\api\api.ts
+  4:20  error  'process' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\test\mocks\createMockStore.ts
+  168:28  error  '_action' is defined but never used  no-unused-vars
+  302:32  error  'props' is defined but never used    no-unused-vars
+  330:22  error  'state' is defined but never used    no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\test\mocks\rtkQueryMockFactory.ts
+   52:35  error  '_args' is defined but never used  no-unused-vars
+  142:38  error  '_args' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\test\setup.ts
+  15:3  error  'process' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\test\utils\asyncHelpers.ts
+   50:7  error  'expect' is not defined  no-undef
+   78:7  error  'expect' is not defined  no-undef
+  107:7  error  'expect' is not defined  no-undef
+  136:7  error  'expect' is not defined  no-undef
+  162:7  error  'expect' is not defined  no-undef
+  184:7  error  'expect' is not defined  no-undef
+  206:7  error  'expect' is not defined  no-undef
+  224:7  error  'expect' is not defined  no-undef
+  244:7  error  'expect' is not defined  no-undef
+  349:7  error  'expect' is not defined  no-undef
+  370:7  error  'expect' is not defined  no-undef
+  396:7  error  'expect' is not defined  no-undef
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\types\common\enums.ts
+   2:3  error  'Auditor' is defined but never used                     no-unused-vars
+   3:3  error  'FinanceManager' is defined but never used              no-unused-vars
+   4:3  error  'DistributionsClerk' is defined but never used          no-unused-vars
+   5:3  error  'HardshipAdministrator' is defined but never used       no-unused-vars
+   6:3  error  'ProfitSharingAdministrator' is defined but never used  no-unused-vars
+   7:3  error  'ItDevOps' is defined but never used                    no-unused-vars
+   8:3  error  'ItOperations' is defined but never used                no-unused-vars
+   9:3  error  'ExecutiveAdministrator' is defined but never used      no-unused-vars
+  13:3  error  'Total' is defined but never used                       no-unused-vars
+  14:3  error  'FullTime' is defined but never used                    no-unused-vars
+  15:3  error  'PartTime' is defined but never used                    no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\types\december-activities\forfeitures.ts
+  64:26  error  'id' is defined but never used        no-unused-vars
+  65:31  error  'id' is defined but never used        no-unused-vars
+  66:17  error  'requests' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\utils\FormValidators.ts
+  143:19  error  'dateString' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\utils\appSupportUtil.ts
+  15:15  error  '_key' is assigned a value but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\utils\columnFactoryTypes.ts
+   14:25  error  'params' is defined but never used       no-unused-vars
+   28:18  error  'params' is defined but never used       no-unused-vars
+   32:18  error  'params' is defined but never used       no-unused-vars
+   36:21  error  'params' is defined but never used       no-unused-vars
+   40:18  error  'params' is defined but never used       no-unused-vars
+   50:21  error  'params' is defined but never used       no-unused-vars
+   56:23  error  'path' is defined but never used         no-unused-vars
+   61:18  error  'params' is defined but never used       no-unused-vars
+   62:21  error  'params' is defined but never used       no-unused-vars
+   63:16  error  'params' is defined but never used       no-unused-vars
+   68:21  error  'params' is defined but never used       no-unused-vars
+   73:19  error  'params' is defined but never used       no-unused-vars
+   77:21  error  'params' is defined but never used       no-unused-vars
+   85:21  error  'params' is defined but never used       no-unused-vars
+  113:23  error  'badgeNumber' is defined but never used  no-unused-vars
+  113:44  error  'psnSuffix' is defined but never used    no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\utils\forfeitActivities\gridDataHelpers.ts
+  136:12  error  'master' is defined but never used  no-unused-vars
+  138:16  error  'master' is defined but never used  no-unused-vars
+  140:16  error  'master' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\utils\forfeitActivities\saveOperationHelpers.ts
+  264:12  error  'request' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\utils\gridColumnFactory.test.ts
+   22:54  error  'params' is defined but never used  no-unused-vars
+   31:54  error  'params' is defined but never used  no-unused-vars
+   38:54  error  'params' is defined but never used  no-unused-vars
+   45:54  error  'params' is defined but never used  no-unused-vars
+   52:54  error  'params' is defined but never used  no-unused-vars
+   59:54  error  'params' is defined but never used  no-unused-vars
+   66:54  error  'params' is defined but never used  no-unused-vars
+   73:54  error  'params' is defined but never used  no-unused-vars
+   87:54  error  'params' is defined but never used  no-unused-vars
+  131:54  error  'params' is defined but never used  no-unused-vars
+  148:54  error  'params' is defined but never used  no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\utils\masterInquiryLink.tsx
+   6:3   error  'badgeNumber' is defined but never used       no-unused-vars
+   7:3   error  'navigateFunction' is defined but never used  no-unused-vars
+   7:23  error  'path' is defined but never used              no-unused-vars
+   9:17  error  'viewBadgeLinkRenderer' is already defined    no-redeclare
+  10:3   error  'badgeNumber' is defined but never used       no-unused-vars
+  11:3   error  'psnSuffix' is defined but never used         no-unused-vars
+  12:3   error  'navigateFunction' is defined but never used  no-unused-vars
+  12:23  error  'path' is defined but never used              no-unused-vars
+  14:17  error  'viewBadgeLinkRenderer' is already defined    no-redeclare
+  16:23  error  'path' is defined but never used              no-unused-vars
+  17:13  error  'path' is defined but never used              no-unused-vars
+  22:27  error  'path' is defined but never used              no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\src\utils\messageDictonary.ts
+  4:3  error  'ForfeituresAdjustment' is defined but never used  no-unused-vars
+  5:3  error  'ProfitShareEditUpdate' is defined but never used  no-unused-vars
+  6:3  error  'TerminationSave' is defined but never used        no-unused-vars
+  7:3  error  'TerminationBulkSave' is defined but never used    no-unused-vars
+  8:3  error  'UnforfeitSave' is defined but never used          no-unused-vars
+  9:3  error  'MilitaryContribution' is defined but never used   no-unused-vars
+
+D:\source\Demoulas\smart-profit-sharing\src\ui\vite.config.ts
+  24:12  error  '_e' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 468 problems (468 errors, 0 warnings)
+

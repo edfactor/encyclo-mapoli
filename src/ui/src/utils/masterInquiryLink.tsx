@@ -6,11 +6,13 @@ export function viewBadgeLinkRenderer(
   badgeNumber: number,
   navigateFunction?: (path: string) => void
 ): JSX.Element | number;
+// eslint-disable-next-line no-redeclare
 export function viewBadgeLinkRenderer(
   badgeNumber: number,
   psnSuffix: number,
   navigateFunction?: (path: string) => void
 ): JSX.Element | number;
+// eslint-disable-next-line no-redeclare
 export function viewBadgeLinkRenderer(
   badgeNumber: number,
   param2?: number | ((path: string) => void),
