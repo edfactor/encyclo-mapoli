@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import {
-  AccountHistoryReportRequest,
-  AccountHistoryReportPaginatedResponse
+  AccountHistoryReportPaginatedResponse,
+  AccountHistoryReportRequest
 } from "../../types/reports/AccountHistoryReportTypes";
 import { createDataSourceAwareBaseQuery } from "./api";
 
@@ -14,10 +14,7 @@ export const AccountHistoryReportApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
-    getAccountHistoryReport: builder.query<
-      AccountHistoryReportPaginatedResponse,
-      AccountHistoryReportRequest
-    >({
+    getAccountHistoryReport: builder.query<AccountHistoryReportPaginatedResponse, AccountHistoryReportRequest>({
       query: (params) => {
         return {
           url: "/adhoc/divorce-report",
@@ -33,8 +30,20 @@ export const AccountHistoryReportApi = createApi({
           }
         };
       }
+    }),
+    downloadAccountHistoryReportPdf: builder.mutation<Blob, Omit<AccountHistoryReportRequest, "pagination">>({
+      query: (params) => ({
+        url: "/adhoc/divorce-report/export-pdf",
+        method: "POST",
+        body: {
+          badgeNumber: params.badgeNumber,
+          startDate: params.startDate,
+          endDate: params.endDate
+        },
+        responseHandler: (response) => response.blob()
+      })
     })
   })
 });
 
-export const { useGetAccountHistoryReportQuery } = AccountHistoryReportApi;
+export const { useGetAccountHistoryReportQuery, useDownloadAccountHistoryReportPdfMutation } = AccountHistoryReportApi;

@@ -380,6 +380,31 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **Switch expressions**: Preferred over traditional switch statements
 - [ ] **XML doc comments**: Public & internal APIs documented
 
+### AsyncFixer01 Compliance (CRITICAL)
+
+**AsyncFixer analyzer enforces async/await patterns. Violations are build errors.**
+
+- [ ] **Single await returns Task directly** (AsyncFixer01 - MANDATORY):
+
+  ```csharp
+  // ❌ WRONG: Unnecessary async wrapper
+  public async Task<Result<T>> GetAsync(int id, CancellationToken ct)
+  {
+      return await _service.FetchAsync(id, ct);  // AsyncFixer01 error
+  }
+
+  // ✅ RIGHT: Return Task directly
+  public Task<Result<T>> GetAsync(int id, CancellationToken ct)
+  {
+      return _service.FetchAsync(id, ct);
+  }
+  ```
+
+- [ ] **`async` keyword only when needed**: Multiple awaits, error handling, resource cleanup
+- [ ] **Never wrap single awaits**: Remove unnecessary `async/await` wrappers
+- [ ] **Exception: Test methods are `async Task`**: Test frameworks require it
+- [ ] **No AsyncFixer01 violations in build**: All violations fixed before PR
+
 ### Project-Specific Conventions
 
 - [ ] **Constructor injection**: Dependencies injected through constructor

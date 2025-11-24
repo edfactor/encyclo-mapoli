@@ -19,4 +19,16 @@ public interface IAccountHistoryReportService
         int memberId,
         AccountHistoryReportRequest request,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Generates a PDF report for the account history data.
+    /// </summary>
+    /// <param name="memberId">The member badge number</param>
+    /// <param name="request">The account history report request with date range and sorting</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Memory stream containing the PDF report</returns>
+    Task<MemoryStream> GeneratePdfAsync(
+        int memberId,
+        AccountHistoryReportRequest request,
+        CancellationToken cancellationToken);
 }

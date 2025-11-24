@@ -308,7 +308,7 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 - Unit tests covering boundary cases
 - Client-side validation mirrors server constraints
 
-## Backend Coding Style (augmenting existing COPILOT_INSTRUCTIONS)
+### Backend Coding Style (augmenting existing COPILOT_INSTRUCTIONS)
 
 - File-scoped namespaces; one class per file; explicit access modifiers.
 - Prefer explicit types unless initializer makes type obvious.
@@ -316,6 +316,80 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`.
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
+
+### Async/Await Patterns (AsyncFixer01 - Critical)
+
+**AsyncFixer analyzer (https://github.com/semihokur/AsyncFixer) enforces these patterns. Violations are build errors.**
+
+- **Return Task directly when await is the last statement** (AsyncFixer01 - REQUIRED):
+
+  ```csharp
+  // ❌ WRONG: Unnecessary async/await wrapper
+  public async Task<Result<T>> GetAsync(int id, CancellationToken ct)
+  {
+      return await _service.FetchAsync(id, ct);  // AsyncFixer01 error
+  }
+
+  // ✅ RIGHT: Return Task directly, caller awaits
+  public Task<Result<T>> GetAsync(int id, CancellationToken ct)
+  {
+      return _service.FetchAsync(id, ct);
+  }
+  ```
+
+- **Use `async` keyword only when needed** (multiple awaits, try-catch, using statements):
+
+  ```csharp
+  // ✅ RIGHT: Multiple awaits require async
+  public async Task<Result<T>> ProcessAsync(int id, CancellationToken ct)
+  {
+      var data = await _service.FetchAsync(id, ct);
+      var processed = await _processor.ProcessAsync(data, ct);
+      return processed;
+  }
+
+  // ✅ RIGHT: Error handling requires async
+  public async Task<Result<T>> GetWithErrorHandlingAsync(int id, CancellationToken ct)
+  {
+      try
+      {
+          return await _service.FetchAsync(id, ct);
+      }
+      catch (Exception ex)
+      {
+          _logger.LogError(ex, "Error fetching");
+          throw;
+      }
+  }
+
+  // ✅ RIGHT: Resource cleanup requires async
+  public async Task DoWorkAsync(CancellationToken ct)
+  {
+      await using var resource = await _factory.CreateAsync();
+      await resource.DoSomethingAsync(ct);
+  }
+  ```
+
+- **Never wrap single awaits unnecessarily**:
+
+  ```csharp
+  // ❌ WRONG: AsyncFixer01 violation
+  public async Task FooAsync() => await BarAsync();
+
+  // ✅ RIGHT: Return Task directly
+  public Task FooAsync() => BarAsync();
+  ```
+
+- **Tests must be `async Task`** (exception to the rule above - test frameworks require it):
+  ```csharp
+  // ✅ RIGHT: Test methods are async Task, even with single await
+  [Fact]
+  public async Task MyTest_ShouldDoSomething()
+  {
+      var result = await _service.GetAsync(1, CancellationToken.None);
+      result.ShouldNotBeNull();
+  }
+  ```
 
 ### Project-specific Conventions
 
