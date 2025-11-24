@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -63,7 +64,7 @@ public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<Distribu
 
             // Archive the successful result
             var result = await _auditService.ArchiveCompletedReportAsync<DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(
-                "Distributions and Forfeitures",
+                ReportNameInfo.DistributionAndForfeitures.ReportCode,
                 (short)profitYear,
                 req,
                 async (archiveReq, _, cancellationToken) =>
