@@ -110,7 +110,7 @@ public static class PdfUtilities
             headerContainer = headerContainer.Background(backgroundColor);
         }
 
-        headerContainer.AlignCenter().Text(sectionTitle)
+        headerContainer.Text(sectionTitle)
             .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
             .Bold()
             .FontColor(PdfReportConfiguration.BrandColors.TextBlack);

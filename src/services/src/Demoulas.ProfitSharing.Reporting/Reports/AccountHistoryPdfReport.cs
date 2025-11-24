@@ -60,29 +60,24 @@ public class AccountHistoryPdfReport : BasePdfReport
     {
         content.Column(column =>
         {
+            // Set uniform spacing between all major sections
+            column.Spacing(15);
+
             // Member Profile Section
             column.Item().Element(ComposeMemberProfileSection);
-
-            // Vertical space before Report Parameters
-            column.Item().PaddingBottom(0.25f);
+            column.Item().AlignCenter().Text("").FontSize(1); // Spacer
 
             // Report Parameters Section
             column.Item().Element(ComposeReportParametersSection);
-
-            // Vertical space before Account Activity Table - EXPLICIT SPACING
-            column.Item().PaddingBottom(0.30f);
+            column.Item().AlignCenter().Text("").FontSize(1); // Spacer
 
             // Account History Table
             column.Item().Element(ComposeAccountHistoryTable);
-
-            // Vertical space before Cumulative Totals
-            column.Item().PaddingBottom(0.25f);
+            column.Item().AlignCenter().Text("").FontSize(1); // Spacer
 
             // Cumulative Totals Section
             column.Item().Element(ComposeCumulativeTotalsSection);
-
-            // Vertical space before Legal Notice
-            column.Item().PaddingBottom(0.15f);
+            column.Item().AlignCenter().Text("").FontSize(1); // Spacer
 
             // Legal Notice
             column.Item().Element(ComposeLegalNoticeSection);
