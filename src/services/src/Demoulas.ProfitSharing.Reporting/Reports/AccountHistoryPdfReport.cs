@@ -64,25 +64,25 @@ public class AccountHistoryPdfReport : BasePdfReport
             column.Item().Element(ComposeMemberProfileSection);
 
             // Vertical space before Report Parameters
-            column.Item().Height(PdfReportConfiguration.Spacing.SectionBreak);
+            column.Item().PaddingBottom(0.25f);
 
             // Report Parameters Section
             column.Item().Element(ComposeReportParametersSection);
 
-            // Vertical space before Account Activity Table
-            column.Item().Height(PdfReportConfiguration.Spacing.SectionBreak);
+            // Vertical space before Account Activity Table - EXPLICIT SPACING
+            column.Item().PaddingBottom(0.30f);
 
             // Account History Table
             column.Item().Element(ComposeAccountHistoryTable);
 
             // Vertical space before Cumulative Totals
-            column.Item().Height(PdfReportConfiguration.Spacing.SectionBreak);
+            column.Item().PaddingBottom(0.25f);
 
             // Cumulative Totals Section
             column.Item().Element(ComposeCumulativeTotalsSection);
 
             // Vertical space before Legal Notice
-            column.Item().Height(PdfReportConfiguration.Spacing.StandardGap);
+            column.Item().PaddingBottom(0.15f);
 
             // Legal Notice
             column.Item().Element(ComposeLegalNoticeSection);
@@ -90,7 +90,7 @@ public class AccountHistoryPdfReport : BasePdfReport
     }
 
     /// <summary>
-    /// Composes the member profile section with contact information
+    /// Composes the member profile section with contact information (two-column layout)
     /// </summary>
     private void ComposeMemberProfileSection(IContainer container)
     {
@@ -100,35 +100,37 @@ public class AccountHistoryPdfReport : BasePdfReport
 
             column.Item()
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
-                .Column(innerColumn =>
+                .Row(row =>
                 {
-                    // Add proper spacing between items - this is the KEY from QuestPDF docs
-                    innerColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
+                    // Left column
+                    row.RelativeItem().Column(leftColumn =>
+                    {
+                        leftColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
+                        leftColumn.Item().ComposeKeyValuePair("Full Name", _memberProfile.FullName, bold: true);
+                        leftColumn.Item().ComposeKeyValuePair("Badge Number", _memberProfile.BadgeNumber.ToString());
+                        leftColumn.Item().ComposeKeyValuePair("SSN", _memberProfile.MaskedSsn);
+                        leftColumn.Item().ComposeKeyValuePair("Date of Birth", _memberProfile.DateOfBirth?.ToString("MM/dd/yyyy") ?? "N/A");
+                        leftColumn.Item().ComposeDivider(0.5f);
+                        leftColumn.Item().ComposeKeyValuePair("Address", _memberProfile.Address ?? "N/A");
+                        leftColumn.Item().ComposeKeyValuePair("City, State ZIP", $"{_memberProfile.City}, {_memberProfile.State} {_memberProfile.ZipCode}".TrimEnd());
+                        leftColumn.Item().ComposeKeyValuePair("Phone", _memberProfile.Phone ?? "N/A");
+                    });
 
-                    innerColumn.Item().ComposeKeyValuePair("Full Name", _memberProfile.FullName, bold: true);
-                    innerColumn.Item().ComposeKeyValuePair("Badge Number", _memberProfile.BadgeNumber.ToString());
-
-                    innerColumn.Item().ComposeKeyValuePair("SSN", _memberProfile.MaskedSsn);
-                    innerColumn.Item().ComposeKeyValuePair("Date of Birth", _memberProfile.DateOfBirth?.ToString("MM/dd/yyyy") ?? "N/A");
-
-                    innerColumn.Item().ComposeDivider(0.5f);
-
-                    innerColumn.Item().ComposeKeyValuePair("Address", _memberProfile.Address ?? "N/A");
-                    innerColumn.Item().ComposeKeyValuePair("City, State ZIP", $"{_memberProfile.City}, {_memberProfile.State} {_memberProfile.ZipCode}".TrimEnd());
-                    innerColumn.Item().ComposeKeyValuePair("Phone", _memberProfile.Phone ?? "N/A");
-
-                    innerColumn.Item().ComposeDivider(0.5f);
-
-                    innerColumn.Item().ComposeKeyValuePair("Hire Date", _memberProfile.HireDate?.ToString("MM/dd/yyyy") ?? "N/A");
-                    innerColumn.Item().ComposeKeyValuePair("Termination Date", _memberProfile.TerminationDate?.ToString("MM/dd/yyyy") ?? "Current Employee");
-                    innerColumn.Item().ComposeKeyValuePair("Employment Status", _memberProfile.EmploymentStatus ?? "N/A");
-                    innerColumn.Item().ComposeKeyValuePair("Store Number", _memberProfile.StoreNumber?.ToString() ?? "N/A");
+                    // Right column
+                    row.RelativeItem().Column(rightColumn =>
+                    {
+                        rightColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
+                        rightColumn.Item().ComposeKeyValuePair("Hire Date", _memberProfile.HireDate?.ToString("MM/dd/yyyy") ?? "N/A");
+                        rightColumn.Item().ComposeKeyValuePair("Termination Date", _memberProfile.TerminationDate?.ToString("MM/dd/yyyy") ?? "Current Employee");
+                        rightColumn.Item().ComposeKeyValuePair("Employment Status", _memberProfile.EmploymentStatus ?? "N/A");
+                        rightColumn.Item().ComposeKeyValuePair("Store Number", _memberProfile.StoreNumber?.ToString() ?? "N/A");
+                    });
                 });
         });
     }
 
     /// <summary>
-    /// Composes the report parameters section
+    /// Composes the report parameters section (two-column layout)
     /// </summary>
     private void ComposeReportParametersSection(IContainer container)
     {
@@ -138,16 +140,23 @@ public class AccountHistoryPdfReport : BasePdfReport
 
             column.Item()
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
-                .Column(innerColumn =>
+                .Row(row =>
                 {
-                    // Add proper spacing between items
-                    innerColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
+                    // Left column
+                    row.RelativeItem().Column(leftColumn =>
+                    {
+                        leftColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
+                        leftColumn.Item().ComposeKeyValuePair("Report Period Start", _startDate.ToString("MM/dd/yyyy"));
+                        leftColumn.Item().ComposeKeyValuePair("Report Period End", _endDate.ToString("MM/dd/yyyy"));
+                    });
 
-                    innerColumn.Item().ComposeKeyValuePair("Report Period Start", _startDate.ToString("MM/dd/yyyy"));
-                    innerColumn.Item().ComposeKeyValuePair("Report Period End", _endDate.ToString("MM/dd/yyyy"));
-                    innerColumn.Item().ComposeKeyValuePair("Prepared By", _preparedBy);
-                    innerColumn.Item().ComposeKeyValuePair("Total Years Reported", _accountHistory.Count.ToString());
-                    innerColumn.Item().ComposeKeyValuePair("Generated Date", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
+                    // Right column
+                    row.RelativeItem().Column(rightColumn =>
+                    {
+                        rightColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
+                        rightColumn.Item().ComposeKeyValuePair("Prepared By", _preparedBy);
+                        rightColumn.Item().ComposeKeyValuePair("Generated Date", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
+                    });
                 });
         });
     }
