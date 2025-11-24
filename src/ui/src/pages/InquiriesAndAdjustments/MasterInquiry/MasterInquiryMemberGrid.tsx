@@ -1,5 +1,7 @@
 import { useDynamicGridHeight } from "@/hooks/useDynamicGridHeight";
-import { Box, Typography } from "@mui/material";
+import { Box, Grid, IconButton, Typography } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { RowClickedEvent } from "ag-grid-community";
 import React, { memo, useMemo } from "react";
 import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
@@ -31,6 +33,8 @@ interface MasterInquiryMemberGridProps {
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
   isLoading?: boolean;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
@@ -40,11 +44,13 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     memberGridPagination,
     onPaginationChange,
     onSortChange,
-    isLoading = false
+    isLoading = false,
+    isGridExpanded = false,
+    onToggleExpand
   }: MasterInquiryMemberGridProps) => {
     const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
 
-    // Calculate height based on pageSize: [5, 10, 50, 100]
+    // Calculate height based on pageSize and expansion state
     // Use square root scaling for better spread at all page sizes
     // 5 rows -> 255px (min), 10 rows -> 356px, 50 rows -> 631px, 100 rows -> 820px (max)
     const normalized = (memberGridPagination.pageSize - 5) / 95; // 0 to 1
@@ -52,7 +58,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     const maxHeightPixels = 255 + heightRatio * 600; // 255px minimum, 820px maximum
 
     const gridMaxHeight = useDynamicGridHeight({
-      heightPercentage: 0.5,
+      heightPercentage: isGridExpanded ? 0.85 : 0.5,
       maxHeight: Math.round(maxHeightPixels)
     });
 
@@ -90,13 +96,26 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
             }
           `}
         </style>
-        <div style={{ padding: "0 24px 0 24px" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "0 24px",
+            marginBottom: "8px"
+          }}>
           <Typography
             variant="h2"
             sx={{ color: "#0258A5" }}>
             {`Search Results (${formatNumberWithComma(searchResults.total)} ${searchResults.total === 1 ? "Record" : "Records"})`}
           </Typography>
-        </div>
+          <IconButton
+            onClick={onToggleExpand}
+            sx={{ zIndex: 1 }}
+            aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+            {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        </Box>
         <DSMGrid
           preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
           handleSortChanged={handleSortChange}
@@ -138,9 +157,11 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       prevProps.memberGridPagination.pageSize === nextProps.memberGridPagination.pageSize &&
       prevProps.memberGridPagination.sortParams === nextProps.memberGridPagination.sortParams &&
       prevProps.isLoading === nextProps.isLoading &&
+      prevProps.isGridExpanded === nextProps.isGridExpanded &&
       prevProps.onMemberSelect === nextProps.onMemberSelect &&
       prevProps.onPaginationChange === nextProps.onPaginationChange &&
-      prevProps.onSortChange === nextProps.onSortChange
+      prevProps.onSortChange === nextProps.onSortChange &&
+      prevProps.onToggleExpand === nextProps.onToggleExpand
     );
   }
 );
