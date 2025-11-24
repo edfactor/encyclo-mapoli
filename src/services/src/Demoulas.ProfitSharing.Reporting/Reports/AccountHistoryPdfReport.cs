@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Reporting.Core;
+﻿using Demoulas.ProfitSharing.Reporting.Core;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using QuestPDF.Fluent;
@@ -17,7 +17,7 @@ public class AccountHistoryPdfReport : BasePdfReport
     private readonly AccountHistoryReportTotals _cumulativeTotals;
     private readonly DateOnly _startDate;
     private readonly DateOnly _endDate;
-    private readonly string _preparedFor;
+    private readonly string _preparedBy;
 
     public override string Title => $"Account History Report - {_memberProfile.FullName}";
     public override string ReportName => "account-history-statement";
@@ -35,14 +35,14 @@ public class AccountHistoryPdfReport : BasePdfReport
         AccountHistoryReportTotals cumulativeTotals,
         DateOnly startDate,
         DateOnly endDate,
-        string preparedFor = "Member")
+        string preparedBy = "Member")
     {
         _memberProfile = memberProfile ?? throw new ArgumentNullException(nameof(memberProfile));
         _accountHistory = accountHistory ?? new List<AccountHistoryReportResponse>();
         _cumulativeTotals = cumulativeTotals ?? new AccountHistoryReportTotals();
         _startDate = startDate;
         _endDate = endDate;
-        _preparedFor = preparedFor;
+        _preparedBy = preparedBy;
     }
 
     /// <summary>
@@ -94,49 +94,27 @@ public class AccountHistoryPdfReport : BasePdfReport
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
                 .Column(innerColumn =>
                 {
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("Full Name", _memberProfile.FullName, bold: true);
-                        row.RelativeItem().ComposeKeyValuePair("Badge Number", _memberProfile.BadgeNumber.ToString());
-                    });
+                    // Add proper spacing between items - this is the KEY from QuestPDF docs
+                    innerColumn.Spacing(PdfReportConfiguration.Spacing.RowSpacing);
 
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("SSN", _memberProfile.MaskedSsn);
-                        row.RelativeItem().ComposeKeyValuePair("Date of Birth", _memberProfile.DateOfBirth?.ToString("MM/dd/yyyy") ?? "N/A");
-                    });
+                    innerColumn.Item().ComposeKeyValuePair("Full Name", _memberProfile.FullName, bold: true);
+                    innerColumn.Item().ComposeKeyValuePair("Badge Number", _memberProfile.BadgeNumber.ToString());
+
+                    innerColumn.Item().ComposeKeyValuePair("SSN", _memberProfile.MaskedSsn);
+                    innerColumn.Item().ComposeKeyValuePair("Date of Birth", _memberProfile.DateOfBirth?.ToString("MM/dd/yyyy") ?? "N/A");
 
                     innerColumn.Item().ComposeDivider(0.5f);
 
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("Address", _memberProfile.Address ?? "N/A");
-                    });
-
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("City, State ZIP",
-                            $"{_memberProfile.City}, {_memberProfile.State} {_memberProfile.ZipCode}".TrimEnd());
-                    });
-
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("Phone", _memberProfile.Phone ?? "N/A");
-                    });
+                    innerColumn.Item().ComposeKeyValuePair("Address", _memberProfile.Address ?? "N/A");
+                    innerColumn.Item().ComposeKeyValuePair("City, State ZIP", $"{_memberProfile.City}, {_memberProfile.State} {_memberProfile.ZipCode}".TrimEnd());
+                    innerColumn.Item().ComposeKeyValuePair("Phone", _memberProfile.Phone ?? "N/A");
 
                     innerColumn.Item().ComposeDivider(0.5f);
 
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("Hire Date", _memberProfile.HireDate?.ToString("MM/dd/yyyy") ?? "N/A");
-                        row.RelativeItem().ComposeKeyValuePair("Termination Date", _memberProfile.TerminationDate?.ToString("MM/dd/yyyy") ?? "Current Employee");
-                    });
-
-                    innerColumn.Item().Row(row =>
-                    {
-                        row.RelativeItem().ComposeKeyValuePair("Employment Status", _memberProfile.EmploymentStatus ?? "N/A");
-                        row.RelativeItem().ComposeKeyValuePair("Store Number", _memberProfile.StoreNumber?.ToString() ?? "N/A");
-                    });
+                    innerColumn.Item().ComposeKeyValuePair("Hire Date", _memberProfile.HireDate?.ToString("MM/dd/yyyy") ?? "N/A");
+                    innerColumn.Item().ComposeKeyValuePair("Termination Date", _memberProfile.TerminationDate?.ToString("MM/dd/yyyy") ?? "Current Employee");
+                    innerColumn.Item().ComposeKeyValuePair("Employment Status", _memberProfile.EmploymentStatus ?? "N/A");
+                    innerColumn.Item().ComposeKeyValuePair("Store Number", _memberProfile.StoreNumber?.ToString() ?? "N/A");
                 });
         });
     }
@@ -154,6 +132,9 @@ public class AccountHistoryPdfReport : BasePdfReport
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
                 .Column(innerColumn =>
                 {
+                    // Add spacing between all rows in this section
+                    innerColumn.Spacing(0.08f);
+
                     innerColumn.Item().Row(row =>
                     {
                         row.RelativeItem().ComposeKeyValuePair("Report Period Start", _startDate.ToString("MM/dd/yyyy"));
@@ -162,7 +143,7 @@ public class AccountHistoryPdfReport : BasePdfReport
 
                     innerColumn.Item().Row(row =>
                     {
-                        row.RelativeItem().ComposeKeyValuePair("Prepared For", _preparedFor);
+                        row.RelativeItem().ComposeKeyValuePair("Prepared By", _preparedBy);
                         row.RelativeItem().ComposeKeyValuePair("Total Years Reported", _accountHistory.Count.ToString());
                     });
 
@@ -240,6 +221,9 @@ public class AccountHistoryPdfReport : BasePdfReport
                 .Padding(PdfReportConfiguration.Spacing.StandardGap)
                 .Column(innerColumn =>
                 {
+                    // Add spacing between all rows in this section
+                    innerColumn.Spacing(0.08f);
+
                     innerColumn.Item().Row(row =>
                     {
                         row.RelativeItem().ComposeTotalsRow("Total Contributions", _cumulativeTotals.TotalContributions.ToCurrencyString());

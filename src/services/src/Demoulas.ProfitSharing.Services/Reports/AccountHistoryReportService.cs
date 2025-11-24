@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -23,17 +24,20 @@ public class AccountHistoryReportService : IAccountHistoryReportService
     private readonly IProfitSharingDataContextFactory _contextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
+    private readonly IAppUser _user;
     private readonly ILogger<AccountHistoryReportService> _logger;
 
     public AccountHistoryReportService(
         IProfitSharingDataContextFactory contextFactory,
         IDemographicReaderService demographicReaderService,
         TotalService totalService,
+        IAppUser user,
         ILogger<AccountHistoryReportService> logger)
     {
         _contextFactory = contextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
+        _user = user;
         _logger = logger;
     }
 
@@ -255,7 +259,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         try
         {
             // Get the full report data (no pagination for PDF)
-            var fullRequest = request with { Skip = 0, Take = int.MaxValue };
+            var fullRequest = request with { Skip = 0, Take = short.MaxValue };
             var reportData = await GetAccountHistoryReportAsync(memberId, fullRequest, cancellationToken);
 
             // Extract member profile from the first response item
@@ -286,7 +290,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 cumulativeTotals,
                 reportData.StartDate,
                 reportData.EndDate,
-                "Member");
+                _user.UserName);
 
             // Generate PDF bytes and create memory stream
             byte[] pdfBytes = pdfReport.GeneratePdf();
