@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -25,6 +26,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
     private readonly IAppUser _user;
+    private readonly IMasterInquiryService _employeeLookupService;
     private readonly ILogger<AccountHistoryReportService> _logger;
 
     public AccountHistoryReportService(
@@ -32,12 +34,14 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         IDemographicReaderService demographicReaderService,
         TotalService totalService,
         IAppUser user,
+        IMasterInquiryService employeeLookupService,
         ILogger<AccountHistoryReportService> logger)
     {
         _contextFactory = contextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
         _user = user;
+        _employeeLookupService = employeeLookupService;
         _logger = logger;
     }
 
@@ -273,12 +277,27 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 throw new InvalidOperationException($"No account history data found for member {memberId}");
             }
 
+            var employee = await _employeeLookupService.GetMemberVestingAsync(new MasterInquiryMemberRequest()
+            {
+                Id = firstResponse.Id, MemberType = 1, ProfitYear = (short)reportData.EndDate.Year
+            }, cancellationToken);
+
             // Create the PDF report document
             var memberProfile = new AccountHistoryPdfReport.MemberProfileInfo
             {
                 FullName = firstResponse.FullName,
                 BadgeNumber = firstResponse.BadgeNumber,
-                MaskedSsn = firstResponse.Ssn
+                MaskedSsn = firstResponse.Ssn,
+                Address = employee?.Address,
+                City = employee?.AddressCity,
+                State = employee?.AddressState,
+                ZipCode = employee?.AddressZipCode,
+                Phone = employee?.PhoneNumber,
+                DateOfBirth = employee?.DateOfBirth,
+                EmploymentStatus = employee?.EmploymentStatus,
+                HireDate = employee?.HireDate,
+                StoreNumber = employee?.StoreNumber,
+                TerminationDate = employee?.TerminationDate
             };
 
             // Ensure cumulative totals are provided (initialize if null)

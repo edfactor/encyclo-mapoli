@@ -288,7 +288,7 @@ public class AccountHistoryPdfReport : BasePdfReport
     /// <summary>
     /// Member profile data transfer object
     /// </summary>
-    public class MemberProfileInfo
+    public sealed class MemberProfileInfo
     {
         public string FullName { get; set; } = string.Empty;
         public int BadgeNumber { get; set; }
