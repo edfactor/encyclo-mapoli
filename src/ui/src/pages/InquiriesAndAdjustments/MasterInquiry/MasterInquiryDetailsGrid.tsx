@@ -1,4 +1,6 @@
-import { Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { memo, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
@@ -21,12 +23,16 @@ interface MasterInquiryGridProps {
   };
   onPaginationChange?: (pageNumber: number, pageSize: number) => void;
   onSortChange?: (sortParams: SortParams) => void;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
-  ({ profitData, isLoading, profitGridPagination, onPaginationChange, onSortChange }) => {
+  ({ profitData, isLoading, profitGridPagination, onPaginationChange, onSortChange, isGridExpanded = false, onToggleExpand }) => {
     const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
-    const gridMaxHeight = useDynamicGridHeight();
+    const gridMaxHeight = useDynamicGridHeight({
+      heightPercentage: isGridExpanded ? 0.85 : 0.5
+    });
 
     if (isLoading) {
       return <Typography>Loading profit details...</Typography>;
@@ -51,13 +57,26 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
     return (
       <>
         <div className="w-full">
-          <div className="px-6">
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "0 24px",
+              marginBottom: "8px"
+            }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
               {`Profit Details (${profitData.total} ${profitData.total === 1 ? "Record" : "Records"})`}
             </Typography>
-          </div>
+            <IconButton
+              onClick={onToggleExpand}
+              sx={{ zIndex: 1 }}
+              aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+              {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </IconButton>
+          </Box>
           <DSMGrid
             preferenceKey={CAPTIONS.MASTER_INQUIRY}
             handleSortChanged={handleSortChange}
@@ -99,11 +118,13 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
       prevProps.profitData?.results === nextProps.profitData?.results &&
       prevProps.profitData?.total === nextProps.profitData?.total &&
       prevProps.isLoading === nextProps.isLoading &&
+      prevProps.isGridExpanded === nextProps.isGridExpanded &&
       prevProps.profitGridPagination?.pageNumber === nextProps.profitGridPagination?.pageNumber &&
       prevProps.profitGridPagination?.pageSize === nextProps.profitGridPagination?.pageSize &&
       prevProps.profitGridPagination?.sortParams === nextProps.profitGridPagination?.sortParams &&
       prevProps.onPaginationChange === nextProps.onPaginationChange &&
-      prevProps.onSortChange === nextProps.onSortChange
+      prevProps.onSortChange === nextProps.onSortChange &&
+      prevProps.onToggleExpand === nextProps.onToggleExpand
     );
   }
 );

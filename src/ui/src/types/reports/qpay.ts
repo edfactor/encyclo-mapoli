@@ -58,7 +58,7 @@ export interface ProfitSharingUnder21ReportDetail {
   fullTimeDate: string | null;
   terminationDate: string | null;
   dateOfBirth: string;
-  age: number;
+  age: string;
   employmentStatusId: string;
   currentBalance: number;
   enrollmentId: number;

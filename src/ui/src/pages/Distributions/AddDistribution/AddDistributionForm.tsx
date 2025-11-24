@@ -51,7 +51,7 @@ interface AddDistributionFormProps {
   onReset: () => void;
   isSubmitting: boolean;
   dateOfBirth?: string | null;
-  age?: number | null;
+  age?: string | null;
   vestedAmount?: number | null;
 }
 
@@ -208,7 +208,7 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
 
     // Auto-set memo when age > 64, tax code is 7, and amount differs from vested amount
     useEffect(() => {
-      const memberAge = age ?? 0;
+      const memberAge = age != null ? Number(age) : 0;
       const requestedAmount = parseFloat(amountRequested) || 0;
       const vested = vestedAmount ?? 0;
 

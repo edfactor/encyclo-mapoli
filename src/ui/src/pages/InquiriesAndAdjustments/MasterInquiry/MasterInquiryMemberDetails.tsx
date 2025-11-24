@@ -80,7 +80,6 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         ...(isEmployee
           ? [{ label: "Store", value: typeof storeNumber === "number" && storeNumber > 0 ? storeNumber : "N/A" }]
           : []),
-        { label: "Enrolled", value: enrollmentStatus.enrolled.replace(/\s*\(\d+\)/, "") }, // Remove code like "(1)"
         { label: "Forfeited", value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "") } // Remove code like "(1)"
       ];
     }, [memberDetails, enrollmentStatus]);
@@ -97,7 +96,8 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         employmentStatus,
         gender,
         dateOfBirth,
-        ssn: ssnValue,
+        age,
+        ssn,
         allocationToAmount,
         badgesOfDuplicateSsns
       } = memberDetails;
@@ -113,9 +113,6 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         }
       }
 
-      const age = dateOfBirth
-        ? Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
-        : 0;
       const dobDisplay = dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A";
 
       return [
@@ -126,7 +123,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
         { label: "Gender", value: gender || "N/A" },
         { label: "DOB", value: dobDisplay },
-        { label: "SSN", value: `${ssnValue}` },
+        { label: "SSN", value: `${ssn}` },
         ...duplicateBadgeLink,
         { label: "Allocation To", value: numberToCurrency(allocationToAmount) }
       ];

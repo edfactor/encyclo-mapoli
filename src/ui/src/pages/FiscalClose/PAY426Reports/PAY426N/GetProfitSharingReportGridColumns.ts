@@ -10,7 +10,8 @@ import {
   createPointsColumn,
   createSSNColumn,
   createStatusColumn,
-  createStoreColumn
+  createStoreColumn,
+  createYesOrNoColumn
 } from "../../../../utils/gridColumnFactory";
 
 export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
@@ -43,15 +44,11 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
     }),
     createHoursColumn({}),
     createPointsColumn({}),
-    {
+    createYesOrNoColumn({
       headerName: "New",
       field: "isNew",
-      colId: "isNew",
-      minWidth: 100,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
+      colId: "isNew"
+    }),
     createStatusColumn({
       field: "employeeStatus",
       valueFormatter: (params) => {
