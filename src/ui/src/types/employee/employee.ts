@@ -20,6 +20,7 @@ export interface EmployeeDetails {
   addressState: string;
   addressZipCode: string;
   dateOfBirth: string;
+  age?: string;
   ssn: string;
   yearToDateProfitSharingHours: number;
   yearsInPlan: number;
