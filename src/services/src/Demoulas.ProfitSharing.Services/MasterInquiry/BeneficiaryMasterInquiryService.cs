@@ -158,7 +158,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
 
             if (memberData == null)
             {
-                return (0, new MemberDetails { Id = 0, FirstName = "", MiddleName = "", LastName = ""});
+                return (0, new MemberDetails { Id = 0, FirstName = "", MiddleName = "", LastName = "" });
             }
 
             return (memberData.Ssn, new MemberDetails
@@ -174,7 +174,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                 Address = memberData.Address,
                 AddressZipCode = memberData.PostalCode!,
                 DateOfBirth = memberData.DateOfBirth,
-                Age = memberData.DateOfBirth.Age().ToString(),
+                Age = memberData.DateOfBirth.Age(),
                 Ssn = memberData.Ssn.MaskSsn(),
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,

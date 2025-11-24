@@ -426,7 +426,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     AddressZipCode = memberData.PostalCode!,
                     DateOfBirth = memberData.DateOfBirth,
                     IsExecutive = memberData.IsExecutive,
-                    Age = memberData.DateOfBirth.Age().ToString(),
+                    Age = memberData.DateOfBirth.Age(),
                     Ssn = memberData.Ssn.MaskSsn(),
                     YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
                     HireDate = memberData.HireDate,
