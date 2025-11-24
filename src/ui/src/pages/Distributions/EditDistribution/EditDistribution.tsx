@@ -29,6 +29,7 @@ const EditDistributionContent = () => {
   const formRef = useRef<EditDistributionFormRef>(null);
   const isReadOnly = useReadOnlyNavigation();
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isFormDirty, setIsFormDirty] = useState(false);
 
   // Get current distribution from Redux
   const currentDistribution = useSelector((state: RootState) => state.distribution.currentDistribution);
@@ -178,12 +179,13 @@ const EditDistributionContent = () => {
   // Track 3rd party address requirement
   const [thirdPartyAddressRequired, setThirdPartyAddressRequired] = useState(false);
 
-  // Check form validity periodically
+  // Check form validity and dirty state periodically
   useEffect(() => {
     const interval = setInterval(() => {
       if (formRef.current) {
         setIsFormValid(formRef.current.isFormValid());
         setThirdPartyAddressRequired(formRef.current.isThirdPartyAddressRequired());
+        setIsFormDirty(formRef.current.isFormDirty());
       }
     }, 100);
 
@@ -223,13 +225,21 @@ const EditDistributionContent = () => {
         sx={{ display: "flex", justifyContent: "flex-end", paddingX: "24px", gap: "12px" }}>
         <Tooltip
           title={
-            isReadOnly ? "You are in read-only mode" : thirdPartyAddressRequired ? "3rd Party Address Required" : ""
+            isReadOnly
+              ? "You are in read-only mode"
+              : thirdPartyAddressRequired
+                ? "3rd Party Address Required"
+                : !isFormDirty
+                  ? "No changes to save"
+                  : ""
           }>
           <span>
             <Button
               variant="outlined"
               onClick={handleSave}
-              disabled={isReadOnly || isSubmitting || isMemberLoading || !isFormValid || thirdPartyAddressRequired}
+              disabled={
+                isReadOnly || isSubmitting || isMemberLoading || !isFormValid || thirdPartyAddressRequired || !isFormDirty
+              }
               startIcon={<SaveIcon />}>
               SAVE
             </Button>

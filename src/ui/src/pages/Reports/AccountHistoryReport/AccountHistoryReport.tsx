@@ -1,4 +1,4 @@
-import { Divider, Grid } from "@mui/material";
+import { Button, Divider, Grid } from "@mui/material";
 import React, { useCallback, useRef, useState } from "react";
 import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
@@ -16,6 +16,8 @@ import AccountHistoryReportTable from "./AccountHistoryReportTable";
 const AccountHistoryReport: React.FC = () => {
   const [filterParams, setFilterParams] = useState<AccountHistoryReportFilterParams | null>(null);
   const [triggerSearch, { data, isFetching }] = AccountHistoryReportApi.useLazyGetAccountHistoryReportQuery();
+  const [downloadPdf, { isLoading: isDownloadingPdf }] =
+    AccountHistoryReportApi.useDownloadAccountHistoryReportPdfMutation();
 
   // Fetch member details when report data changes
   const profitYear = filterParams?.endDate ? filterParams.endDate.getFullYear() : new Date().getFullYear();
@@ -92,6 +94,30 @@ const AccountHistoryReport: React.FC = () => {
     paginationRef.current.resetPagination();
   };
 
+  const handleDownloadPdf = async () => {
+    if (!filterParams) return;
+
+    try {
+      const blob = await downloadPdf({
+        badgeNumber: parseInt(filterParams.badgeNumber, 10),
+        startDate: filterParams.startDate ? filterParams.startDate.toISOString().split("T")[0] : undefined,
+        endDate: filterParams.endDate ? filterParams.endDate.toISOString().split("T")[0] : undefined
+      }).unwrap();
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `account-history-${filterParams.badgeNumber}-${new Date().toISOString().split("T")[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+    }
+  };
+
   return (
     <Page label={CAPTIONS.DIVORCE_REPORT}>
       <Grid
@@ -122,6 +148,15 @@ const AccountHistoryReport: React.FC = () => {
                   isLoading={isFetchingMemberDetails}
                 />
               </MissiveAlertProvider>
+            </Grid>
+            <Grid width="100%">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleDownloadPdf}
+                disabled={isDownloadingPdf || !filterParams}>
+                {isDownloadingPdf ? "Generating PDF..." : "Download PDF Report"}
+              </Button>
             </Grid>
             <Grid width="100%">
               <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2 [&_*]:!text-left">
@@ -159,6 +194,16 @@ const AccountHistoryReport: React.FC = () => {
                         breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                       />
                     </div>
+                    {data.cumulativeTotals.totalVestedBalance !== undefined && (
+                      <div className="flex-1">
+                        <TotalsGrid
+                          displayData={[[numberToCurrency(data.cumulativeTotals.totalVestedBalance)]]}
+                          leftColumnHeaders={["Vested Balance"]}
+                          topRowHeaders={[]}
+                          breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                        />
+                      </div>
+                    )}
                   </>
                 )}
               </div>

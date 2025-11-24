@@ -1,16 +1,23 @@
 ﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
+using Demoulas.Util.Extensions;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 
@@ -20,16 +27,32 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.Adhoc;
 public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 {
     private readonly AccountHistoryReportService _service;
-    private readonly Mock<IDemographicReaderService> _mockDemographicReader;
 
     public AccountHistoryReportServiceTests()
     {
-        _mockDemographicReader = new Mock<IDemographicReaderService>();
-        _mockDemographicReader
+        Mock<IDemographicReaderService> mockDemographicReader = new();
+        mockDemographicReader
             .Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync((IProfitSharingDbContext ctx, bool _) => ctx.Demographics);
 
-        _service = new AccountHistoryReportService(MockDbContextFactory, _mockDemographicReader.Object);
+        var mockCalendarService = new Mock<ICalendarService>();
+        mockCalendarService
+            .Setup(c => c.GetYearStartAndEndAccountingDatesAsync((short)DateTime.Now.Year, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new CalendarResponseDto
+            {
+                FiscalBeginDate = DateTime.Now.AddYears(-5).ToDateOnly(),
+                FiscalEndDate = DateTime.Now.ToDateOnly()
+            });
+        var mockEmbeddedSql = new Mock<IEmbeddedSqlService>();
+        var mockAppUser = new Mock<IAppUser>();
+        var mockMasterInquiry = new Mock<IMasterInquiryService>();
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var frozenService = new FrozenService(MockDbContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object);
+        var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());
+        var totalService = new TotalService(MockDbContextFactory, mockCalendarService.Object, mockEmbeddedSql.Object, demographicReader);
+
+        var mockLogger = new Mock<ILogger<AccountHistoryReportService>>();
+        _service = new AccountHistoryReportService(MockDbContextFactory, mockDemographicReader.Object, totalService, mockAppUser.Object, mockMasterInquiry.Object, mockLogger.Object);
     }
 
     [Description("PS-2160 : Account history report returns same ID for all rows of the same member")]
@@ -266,10 +289,11 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
     {
         // Arrange
         const int badgeNumber = 700006;
+        DateOnly startDate = DateTime.Now.AddYears(-3).ToDateOnly();
         var request = new AccountHistoryReportRequest
         {
             BadgeNumber = badgeNumber,
-            StartDate = null,
+            StartDate = startDate,
             EndDate = null,
             Skip = 0,
             Take = 25
@@ -281,8 +305,8 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         // Assert
         result.ShouldNotBeNull();
         result.Response.ShouldNotBeNull();
-        // Service should use default dates (2007-01-01 to today)
-        result.StartDate.Year.ShouldBe(2007);
+        var startYear = request.StartDate!.Value.Year;
+        result.StartDate.Year.ShouldBe(startYear);
     }
 
     [Description("PS-2160 : Account history report records include all required transaction fields")]
@@ -320,4 +344,25 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
             record.EndingBalance.ShouldBeGreaterThanOrEqualTo(0);
         }
     }
+
+    [Description("PS-2045 : Account history report throws InvalidOperationException when no data found")]
+    [Fact]
+    public Task GeneratePdfAsync_WithoutAccountData_ShouldThrowInvalidOperationException()
+    {
+        // Arrange - Use a badge number that definitely won't have data
+        const int badgeNumber = 999999;
+        var request = new AccountHistoryReportRequest
+        {
+            BadgeNumber = badgeNumber,
+            StartDate = new DateOnly(2007, 1, 1),
+            EndDate = new DateOnly(2024, 12, 31),
+            Skip = 0,
+            Take = int.MaxValue
+        };
+
+        // Act & Assert
+        return Should.ThrowAsync<InvalidOperationException>(
+            () => _service.GeneratePdfAsync(badgeNumber, request, CancellationToken.None));
+    }
 }
+

@@ -39,8 +39,8 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
             s.Description = "Returns a report of member account activity condensed by profit year. Includes contributions, earnings, forfeitures, withdrawals, and ending balances for each plan year.";
             s.ExampleRequest = new AccountHistoryReportRequest
             {
-                BadgeNumber = 700006,
-                StartDate = new DateOnly(2007, 1, 1),
+                BadgeNumber = 700518,
+                StartDate = new DateOnly(2017, 1, 1),
                 EndDate = new DateOnly(2024, 12, 31)
             };
             s.ResponseExamples = new Dictionary<int, object>
@@ -50,8 +50,8 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                     new AccountHistoryReportPaginatedResponse
                     {
                         ReportName = "Account History Report",
-                        ReportDate = DateTimeOffset.Now,
-                        StartDate = new DateOnly(2007, 1, 1),
+                        ReportDate = DateTimeOffset.UtcNow,
+                        StartDate = new DateOnly(2017, 1, 1),
                         EndDate = new DateOnly(2024, 12, 31),
                         Response = new PaginatedResponseDto<AccountHistoryReportResponse>
                         {
@@ -60,10 +60,10 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                                 new AccountHistoryReportResponse
                                 {
                                     Id = 123,
-                                    BadgeNumber = 700006,
+                                    BadgeNumber = 700518,
                                     FullName = "John Doe",
                                     Ssn = "***-**-6789",
-                                    ProfitYear = 2007,
+                                    ProfitYear = 2017,
                                     Contributions = 50000,
                                     Earnings = 5000,
                                     Forfeitures = 0,
@@ -73,7 +73,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                                 new AccountHistoryReportResponse
                                 {
                                     Id = 234,
-                                    BadgeNumber = 700006,
+                                    BadgeNumber = 700518,
                                     FullName = "John Doe",
                                     Ssn = "***-**-6789",
                                     ProfitYear = 2008,
@@ -119,7 +119,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                 var emptyResult = new AccountHistoryReportPaginatedResponse
                 {
                     ReportName = "Account History Report",
-                    StartDate = req.StartDate ?? new DateOnly(2007, 1, 1),
+                    StartDate = req.StartDate ?? new DateOnly(2017, 1, 1),
                     EndDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
                     Response = new PaginatedResponseDto<AccountHistoryReportResponse>
                     {
@@ -147,7 +147,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                 new("operation", "account-history-report-generation"),
                 new("endpoint", "AccountHistoryReportEndpoint"),
                 new("report_type", "account-history"),
-                new("date_range_years", $"{(req.StartDate?.Year ?? 2007)}-{(req.EndDate?.Year ?? DateTime.Today.Year)}"));
+                new("date_range_years", $"{(req.StartDate?.Year ?? 2017)}-{(req.EndDate?.Year ?? DateTime.Today.Year)}"));
 
             var recordCount = result?.Response?.Results?.Count() ?? 0;
             EndpointTelemetry.RecordCountsProcessed.Record(recordCount,
@@ -166,7 +166,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
             var emptyReportResult = new AccountHistoryReportPaginatedResponse
             {
                 ReportName = "Account History Report",
-                StartDate = req.StartDate ?? new DateOnly(2007, 1, 1),
+                StartDate = req.StartDate ?? new DateOnly(2017, 1, 1),
                 EndDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
                 Response = new PaginatedResponseDto<AccountHistoryReportResponse>
                 {

@@ -30,9 +30,19 @@ public static class TestToken
                 "If using 'dotnet user-jwts', you can find the key in the server's user secrets under 'Authentication:Schemes:Bearer:SigningKeys'.");
         }
 
-        // Convert the signing key from string to byte array
+        // Convert the signing key from Base64 string to byte array
         // The key should be at least 32 bytes (256 bits) for HS256
-        byte[] keyBytes = Encoding.UTF8.GetBytes(jwtOptions.SigningKey);
+        // The signing key from dotnet user-jwts is Base64-encoded
+        byte[] keyBytes;
+        try
+        {
+            keyBytes = Convert.FromBase64String(jwtOptions.SigningKey);
+        }
+        catch (FormatException)
+        {
+            // Fallback to UTF-8 if not Base64 (for backward compatibility)
+            keyBytes = Encoding.UTF8.GetBytes(jwtOptions.SigningKey);
+        }
 
         if (keyBytes.Length < 32)
         {

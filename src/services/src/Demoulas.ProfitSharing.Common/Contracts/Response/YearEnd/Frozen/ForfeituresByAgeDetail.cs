@@ -1,7 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 public sealed record ForfeituresByAgeDetail
 {
-    public required int Age { get; init; }
+    [MaskSensitive] public required short Age { get; set; }
     public required int EmployeeCount { get; init; }
     public required decimal Amount { get; init; }
 

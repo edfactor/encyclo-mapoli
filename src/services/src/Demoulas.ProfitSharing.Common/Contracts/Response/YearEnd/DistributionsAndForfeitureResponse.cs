@@ -19,7 +19,7 @@ public sealed record DistributionsAndForfeitureResponse : IIsExecutive
     /// Forfeit type indicator: 'A' = Administrative, 'C' = Class Action, null = Regular
     /// </summary>
     public char? ForfeitType { get; set; }
-    public required byte? Age { get; set; }
+    [MaskSensitive] public required byte? Age { get; set; }
     public required char? TaxCode { get; set; }
     public string? OtherName { get; set; }
     public string? OtherSsn { get; set; }

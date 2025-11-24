@@ -134,7 +134,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
         await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, _totalService, members, profitShareUpdateRequest, cancellationToken);
 
         members = members.OrderBy(m => m.Name).ToList();
-        // The PAY444 Report/Page does not show the zero event individuals, but the PAY447 needs the ZeroContribution records for the PAY447 report/page. 
+        // The PAY444 Report/Page does not show the zero event individuals, but the PAY447 needs the ZeroContribution records for the PAY447 report/page.
         if (!includeZeroAmounts)
         {
             members = members.Where(m => !m.IsAllZeros()).ToList();

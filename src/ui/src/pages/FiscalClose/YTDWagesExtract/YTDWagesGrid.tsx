@@ -39,8 +39,12 @@ const YTDWagesGrid = ({
 
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  // Use dynamic grid height utility hook with increased height for large page sizes
+  const gridMaxHeight = useDynamicGridHeight({
+    heightPercentage: 0.7, // Use 70% of viewport height (up from default 40%)
+    minHeight: 300,
+    maxHeight: 1600 // Allow grid to grow up to 1600px (up from default 800px)
+  });
 
   return (
     <div className="relative">

@@ -23,6 +23,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
+using QuestPDF;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
@@ -62,6 +63,12 @@ logConfig.MaskingOperators = [
 ];
 
 _ = builder.SetDefaultLoggerConfiguration(logConfig);
+
+// Configure QuestPDF license for development and production environments
+// For development and non-commercial use: Community license (free)
+// For commercial use with revenue > $1M USD: requires Commercial license
+// See: https://www.questpdf.com/license/
+Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 _ = builder.AddSecurityServices();
 

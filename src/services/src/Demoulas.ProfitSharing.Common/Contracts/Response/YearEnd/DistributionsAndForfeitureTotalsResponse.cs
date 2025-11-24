@@ -1,28 +1,36 @@
 ﻿
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBase<DistributionsAndForfeitureResponse>
 {
+    [YearEndArchiveProperty("QPAY129_DistributionTotals")]
     public required decimal DistributionTotal { get; init; }
+    [YearEndArchiveProperty]
     public required decimal StateTaxTotal { get; init; }
+    [YearEndArchiveProperty]
     public required decimal FederalTaxTotal { get; init; }
+    [YearEndArchiveProperty]
     public required decimal ForfeitureTotal { get; init; }
 
     /// <summary>
     /// Regular forfeitures (not Administrative or Class Action)
     /// </summary>
+    [YearEndArchiveProperty]
     public decimal ForfeitureRegularTotal { get; init; }
 
     /// <summary>
     /// Administrative forfeitures (MAIN-2170)
     /// </summary>
+    [YearEndArchiveProperty]
     public decimal ForfeitureAdministrativeTotal { get; init; }
 
     /// <summary>
     /// Class Action forfeitures
     /// </summary>
+    [YearEndArchiveProperty]
     public decimal ForfeitureClassActionTotal { get; init; }
 
     public required Dictionary<string, decimal> StateTaxTotals { get; init; }
@@ -42,7 +50,7 @@ public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBa
     {
         return new DistributionsAndForfeitureTotalsResponse
         {
-            ReportName = "Distributions and Forfeitures",
+            ReportName = ReportNameInfo.DistributionAndForfeitures.Name,
             ReportDate = DateTimeOffset.Now,
 
             DistributionTotal = 123456.78m,

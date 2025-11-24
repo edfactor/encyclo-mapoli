@@ -286,7 +286,8 @@ public sealed class AuditService : IAuditService
         var type = obj.GetType();
 
         // Check if the class itself has the YearEndArchivePropertyAttribute
-        bool classHasAttribute = Attribute.IsDefined(type, typeof(YearEndArchivePropertyAttribute));
+        var classAttribute = type.GetCustomAttribute<YearEndArchivePropertyAttribute>();
+        bool classHasAttribute = classAttribute != null;
 
         IEnumerable<PropertyInfo> properties;
         if (classHasAttribute)
@@ -305,10 +306,31 @@ public sealed class AuditService : IAuditService
 
         foreach (var prop in properties)
         {
+            // Get the attribute to retrieve the KeyName
+            var propertyAttribute = prop.GetCustomAttribute<YearEndArchivePropertyAttribute>();
+            string keyName;
+            
+            if (propertyAttribute != null)
+            {
+                // Use the KeyName from the property attribute
+                keyName = propertyAttribute.KeyName ?? prop.Name;
+            }
+            else if (classHasAttribute)
+            {
+                // Property doesn't have its own attribute, but class does
+                // Use the property name as the key
+                keyName = prop.Name;
+            }
+            else
+            {
+                // Shouldn't happen, but fallback to property name
+                keyName = prop.Name;
+            }
+            
             // Convert all numeric types to decimal for consistent hashing
             var rawValue = prop.GetValue(obj);
             var value = ConvertToDecimal(rawValue);
-            result.Add(new KeyValuePair<string, decimal>(prop.Name, value));
+            result.Add(new KeyValuePair<string, decimal>(keyName, value));
         }
 
         // Materialize the result list to avoid lazy evaluation issues with yield return

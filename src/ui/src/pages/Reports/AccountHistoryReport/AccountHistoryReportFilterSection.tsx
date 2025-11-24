@@ -1,7 +1,7 @@
 import { AccountHistoryReportTotals } from "@/types/reports/AccountHistoryReportTypes";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -35,6 +35,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
   onReset,
   isLoading = false
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const currentYear = new Date().getFullYear();
 
   const {
@@ -52,14 +53,23 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
     }
   });
 
-  const validateAndSubmit = handleSubmit((data) => {
-    const dataCopy: AccountHistoryReportFilterParams = {
-      badgeNumber: data.badgeNumber,
-      startDate: data.startDate ? new Date(data.startDate.getTime()) : null,
-      endDate: data.endDate ? new Date(data.endDate.getTime()) : null
-    };
+  useEffect(() => {
+    if (!isLoading) {
+      setIsSubmitting(false);
+    }
+  }, [isLoading]);
 
-    onFilterChange(dataCopy);
+  const validateAndSubmit = handleSubmit((data) => {
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      const dataCopy: AccountHistoryReportFilterParams = {
+        badgeNumber: data.badgeNumber,
+        startDate: data.startDate ? new Date(data.startDate.getTime()) : null,
+        endDate: data.endDate ? new Date(data.endDate.getTime()) : null
+      };
+
+      onFilterChange(dataCopy);
+    }
   });
 
   const watchedValues = useWatch({ control });
@@ -161,8 +171,8 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
-          isFetching={isLoading}
-          disabled={!isSearchEnabled || isLoading}
+          isFetching={isLoading || isSubmitting}
+          disabled={!isSearchEnabled || isLoading || isSubmitting}
         />
       </Grid>
     </form>

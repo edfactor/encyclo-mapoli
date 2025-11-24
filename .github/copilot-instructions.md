@@ -3,6 +3,7 @@
 **Quick navigation guide for AI coding agents** working in this repository. Detailed patterns are in separate documents (see references below).
 
 ## Architecture Overview
+
 - **Monorepo** with two primary roots:
   - `src/services/` - .NET 9 multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, RabbitMQ, Mapperly, Shouldly)
     - Hosted using **.NET Aspire** (`Demoulas.ProfitSharing.AppHost`) - do not create ad-hoc hosts
@@ -13,6 +14,7 @@
 - **Cross-cutting**: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`)
 
 ## Key Backend Conventions
+
 - **Startup**: Run/debug `Demoulas.ProfitSharing.AppHost` (Aspire host) - avoid ad-hoc hosts
 - **Endpoints**: FastEndpoints; group logically, use minimal API style, return typed results
 - **Mapping**: Prefer `Mapperly` for DTO<->entity (see `*Mapper.cs`)
@@ -31,21 +33,25 @@
 **ALL NEW CODE must follow these security patterns. Deviations require security review and PR justification.**
 
 ### Authentication & Authorization (A01/A07)
+
 - **Server-side validation ALWAYS**: Never trust client-provided roles or user context. Re-validate on every endpoint:
+
   ```csharp
   // WRONG: Trust header blindly
   var roles = req.Headers["x-impersonating-roles"];
-  
+
   // RIGHT: Always re-validate against authenticated user
   var allowedRoles = GetUserAllowedImpersonationRoles(userId);
   if (!requestedRoles.All(r => allowedRoles.Contains(r)))
       throw new UnauthorizedAccessException();
   ```
+
 - **No client-side storage for auth state**: Never use `localStorage` for roles/tokens that determine access. Okta JWT tokens (from secure auth flow) are OK; role elevation via localStorage is NOT
 - **Centralized role validation**: Use `PolicyRoleMap.cs` (single source of truth) for all authorization decisions
 - **Principle of least privilege**: Users get minimum required roles; audit role assignments quarterly
 
 ### Input Validation & SQL Injection (A03/A09)
+
 - **Validate ALL inputs server-side**: Client validation is UX only, never security
 - **Use parameterized queries**: EF Core does this automatically; NEVER construct SQL strings
 - **Boundary checks**: Numeric ranges, string lengths, collection sizes must be validated
@@ -61,12 +67,14 @@
   See `VALIDATION_PATTERNS.md` (`.github/`) for complete patterns
 
 ### PII Protection & Data Exposure (A01/A09)
+
 - **Mask PII in logs**: SSN, email, phone, bank account numbers MUST be masked. Use `GetMaskedUserId()` pattern from `TelemetryMiddleware.cs`
 - **Minimize claims used**: Only extract 'sub' (subject) from Okta JWT; avoid extracting unmasked email/identity claims into logs
 - **Secure database access**: Use read-only contexts (`UseReadOnlyContext()`) for queries; principle of least privilege for service accounts
 - **Avoid composite keys with SSN**: When building dictionaries from Demographics, use `(Ssn, OracleHcmId)` not just `Ssn` alone (SSN not unique)
 
 ### Transport Security (A02/A05)
+
 - **HTTPS enforcement**: All production endpoints MUST use HTTPS. Use `UseHttpsRedirection()` + `UseHsts()` middleware
 - **Security headers**: Endpoints MUST return:
   - `X-Frame-Options: DENY` (prevent clickjacking)
@@ -77,28 +85,33 @@
 - **CORS restrictions**: In dev, allow only `localhost:3100` / `127.0.0.1:3100`; in prod, allow only specific domains (never `AllowAnyOrigin()`)
 
 ### Error Handling (A01/A10)
+
 - **No sensitive data in error messages**: Never expose stack traces, SQL queries, or PII in HTTP responses
 - **Structured error codes**: Use domain errors (e.g., `Error.CalendarYearNotFound`) instead of raw exceptions
 - **Consistent error responses**: All endpoints return `ProblemHttpResult` with standard structure (status, title, detail)
 - **Log exceptions with correlation IDs**: Tie errors to audit trails for security incidents
 
 ### Telemetry & Logging (A01)
+
 - **Comprehensive telemetry required**: All endpoints MUST use `ExecuteWithTelemetry` extension or record metrics manually
 - **Declare sensitive fields**: List fields accessed (e.g., `"Ssn", "Email"`) in telemetry calls for security auditing
 - **Correlation IDs**: Generated automatically by middleware; tie logs/metrics together for traceability
 - **Business metrics**: Record operation counts (e.g., year-end runs, report generations) for anomaly detection
 
 ### Session & Credential Management
+
 - **No hardcoded secrets**: Use Azure Key Vault or environment variables
 - **Token expiration**: Okta JWT tokens auto-expire; no custom token storage in `localStorage`
 - **Re-authentication for sensitive ops**: Year-end processing, member updates should require re-auth confirmation
 
 ### Dependency Security
+
 - **Keep packages patched**: Run `dotnet list package --outdated` monthly; address critical CVEs within 48 hours
 - **No dev dependencies in production**: Exclude test packages from prod builds (already configured)
 - **Analyze new packages**: Check GitHub stars, maintenance, known vulnerabilities before adding
 
 ### Related Tickets
+
 - **PS-2021**: Remove localStorage impersonation (privilege escalation fix)
 - **PS-2022**: Add server-side role validation (defense-in-depth)
 - **PS-2023**: Security headers middleware (XSS/clickjacking prevention)
@@ -107,15 +120,18 @@
 - **PS-2026**: Telemetry PII masking audit (data exposure prevention)
 
 ## Endpoint Results Pattern (MANDATORY)
+
 All FastEndpoints MUST return typed minimal API union results AND use domain `Result<T>` record (`Demoulas.ProfitSharing.Common.Contracts.Result<T>`) for service outcomes.
 
 **Quick Pattern**:
+
 - Service returns `Result<T>` (Success, Failure, ValidationFailure)
 - Endpoint converts via `Match` or helpers to: `Results<Ok<T>, NotFound, ProblemHttpResult>`
 - Use `ResultHttpExtensions.ToResultOrNotFound()` + `ToHttpResult()` to reduce boilerplate
 - Specific error codes for NotFound (e.g., `Error.CalendarYearNotFound`)
 
 **Example**:
+
 ```csharp
 var result = await _svc.GetAsync(req.Id, ct);
 return result.ToHttpResult(Error.SomeEntityNotFound);
@@ -128,7 +144,9 @@ We use **EF Core 9** with Oracle provider. All DB access MUST follow these patte
 **CRITICAL**: Use `context.UseReadOnlyContext()` for read-only ops—it auto-applies `.AsNoTracking()`. Do NOT add `.AsNoTracking()` when using `UseReadOnlyContext()`.
 
 ### Query Tagging (Recommended)
+
 Tag queries for production traceability:
+
 - `TagWith()`: Add business context (year, user, operation, ticket) - **Required for complex operations**
 
 ```csharp
@@ -146,11 +164,14 @@ var data = await _context.Employees
 ```
 
 ### Oracle-Specific Patterns
+
 - **NO `??` in queries**: Oracle provider fails—use `x != null ? x : "default"` instead
 - **String search**: Use `EF.Functions.Like(m.Name, "%search%")` for case-insensitive
 
 ### Bulk Operations (ExecuteUpdate/ExecuteDelete)
+
 Use EF9 bulk ops—no entity loading, single SQL, efficient:
+
 ```csharp
 await _context.Records
     .TagWith($"BulkUpdate-Status-{year}")
@@ -159,8 +180,10 @@ await _context.Records
 ```
 
 ### Performance Patterns
+
 **Read-only (preferred)**:
 **Read-only (preferred)**:
+
 ```csharp
 await using var ctx = await _factory.CreateDbContextAsync(ct);
 ctx.UseReadOnlyContext(); // Auto AsNoTracking
@@ -172,7 +195,9 @@ var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
 **Degenerate guard**: Validate inputs (e.g., prevent all-zero badge numbers)
 
 ### Dictionary Keys with Demographic (CRITICAL)
+
 **SSN is NOT unique** in the `Demographic` entity. When building dictionaries/lookups from Demographics:
+
 - **WRONG**: `demographics.ToDictionary(d => d.Ssn)` — will throw duplicate key exception
 - **CORRECT**: Use a composite key combining SSN with a unique identifier:
   - `(d.Ssn, d.OracleHcmId)` — **preferred** (most reliable across systems)
@@ -180,6 +205,7 @@ var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
   - `(d.Ssn, d.Id)` — when badge/HCM unavailable (database ID)
 
 **Examples**:
+
 ```csharp
 // Best: Use OracleHcmId
 var demographicsByKey = demographics
@@ -193,30 +219,32 @@ var demographicsByKey = demographics
 // For lookups (one-to-many): Use ToLookup to avoid duplicates entirely
 var demographicsByKey = demographics
     .ToLookup(d => (d.Ssn, d.OracleHcmId));
-    
+
 // Access: var matches = demographicsByKey[(ssn, hcmId)];
 ```
 
 **Why**: Historical data, data feeds, and migrations can create SSN duplicates (same employee with multiple records). Always pair SSN with a unique identifier when creating dictionaries.
 
 ### Critical Rules
+
 - Services only—NO DbContext in endpoints
 - Always async (`FirstOrDefaultAsync`, `ToListAsync`)
 - Explicit `Include()`/`ThenInclude()`—NO lazy loading
 - Validate inputs to prevent table scans
 
 ### Example Service
-```csharp
+
+````csharp
 public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 {
     await using var ctx = await _factory.CreateDbContextAsync(ct);
     ctx.UseReadOnlyContext();
-    
+
     var member = await ctx.Members
         .TagWith($"GetMember-{id}")
         .FirstOrDefaultAsync(m => m.Id == id, ct);
-    
-    return member is null 
+
+    return member is null
         ? Result<MemberDto>.Failure(Error.MemberNotFound)
         : Result<MemberDto>.Success(member.ToDto());
 }
@@ -230,24 +258,26 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
     return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
     {
         var result = await _service.ProcessAsync(req, ct);
-        
+
         // Add business metrics
         EndpointTelemetry.BusinessOperationsTotal.Add(1,
             new("operation", "year-end-processing"),
             new("endpoint", nameof(MyEndpoint)));
-            
+
         return result;
     }, "Ssn", "OracleHcmId"); // List sensitive fields accessed
 }
-```
+````
 
 **Required**:
+
 - Inject `ILogger<TEndpoint>` for correlation
 - Use `TelemetryExtensions` patterns (`ExecuteWithTelemetry` or manual methods)
 - Include business metrics appropriate to endpoint category
 - Declare sensitive fields in telemetry calls
 
 **Documentation** (read these files when needed, not loaded by default):
+
 - TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive 75+ page reference for developers, QA, DevOps
 - TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples
 - TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production operations guide
@@ -258,6 +288,7 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
 All incoming data MUST be validated at server and client boundaries. See VALIDATION_PATTERNS.md (`.github/`) for complete reference when needed.
 
 **Quick Pattern**:
+
 ```csharp
 public class SearchRequestValidator : AbstractValidator<SearchRequest>
 {
@@ -271,12 +302,14 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 ```
 
 **Required**:
+
 - Numeric ranges, string lengths, collection sizes
 - Enum validation, date ranges, required fields
 - Unit tests covering boundary cases
 - Client-side validation mirrors server constraints
 
-## Backend Coding Style (augmenting existing COPILOT_INSTRUCTIONS)
+### Backend Coding Style (augmenting existing COPILOT_INSTRUCTIONS)
+
 - File-scoped namespaces; one class per file; explicit access modifiers.
 - Prefer explicit types unless initializer makes type obvious.
 - Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase.
@@ -284,18 +317,93 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
 
+### Async/Await Patterns (AsyncFixer01 - Critical)
+
+**AsyncFixer analyzer (https://github.com/semihokur/AsyncFixer) enforces these patterns. Violations are build errors.**
+
+- **Return Task directly when await is the last statement** (AsyncFixer01 - REQUIRED):
+
+  ```csharp
+  // ❌ WRONG: Unnecessary async/await wrapper
+  public async Task<Result<T>> GetAsync(int id, CancellationToken ct)
+  {
+      return await _service.FetchAsync(id, ct);  // AsyncFixer01 error
+  }
+
+  // ✅ RIGHT: Return Task directly, caller awaits
+  public Task<Result<T>> GetAsync(int id, CancellationToken ct)
+  {
+      return _service.FetchAsync(id, ct);
+  }
+  ```
+
+- **Use `async` keyword only when needed** (multiple awaits, try-catch, using statements):
+
+  ```csharp
+  // ✅ RIGHT: Multiple awaits require async
+  public async Task<Result<T>> ProcessAsync(int id, CancellationToken ct)
+  {
+      var data = await _service.FetchAsync(id, ct);
+      var processed = await _processor.ProcessAsync(data, ct);
+      return processed;
+  }
+
+  // ✅ RIGHT: Error handling requires async
+  public async Task<Result<T>> GetWithErrorHandlingAsync(int id, CancellationToken ct)
+  {
+      try
+      {
+          return await _service.FetchAsync(id, ct);
+      }
+      catch (Exception ex)
+      {
+          _logger.LogError(ex, "Error fetching");
+          throw;
+      }
+  }
+
+  // ✅ RIGHT: Resource cleanup requires async
+  public async Task DoWorkAsync(CancellationToken ct)
+  {
+      await using var resource = await _factory.CreateAsync();
+      await resource.DoSomethingAsync(ct);
+  }
+  ```
+
+- **Never wrap single awaits unnecessarily**:
+
+  ```csharp
+  // ❌ WRONG: AsyncFixer01 violation
+  public async Task FooAsync() => await BarAsync();
+
+  // ✅ RIGHT: Return Task directly
+  public Task FooAsync() => BarAsync();
+  ```
+
+- **Tests must be `async Task`** (exception to the rule above - test frameworks require it):
+  ```csharp
+  // ✅ RIGHT: Test methods are async Task, even with single await
+  [Fact]
+  public async Task MyTest_ShouldDoSomething()
+  {
+      var result = await _service.GetAsync(1, CancellationToken.None);
+      result.ShouldNotBeNull();
+  }
+  ```
+
 ### Project-specific Conventions
 
 These conventions are important project-wide rules. Follow them in addition to the coding style above:
 
 - Public methods use PascalCase naming
-- Private fields start with underscore (_)
+- Private fields start with underscore (\_)
 - Use Task/Task<T> or ValueTask/ValueTask<T> for asynchronous operations
 - Dependencies are injected through constructor parameters (constructor injection)
 - Use Result<T> pattern for error handling instead of throwing exceptions directly
 - Use DTOs/ViewModels for data transfer between layers
 
 ## Database & CLI
+
 - Add a migration (run from repo root PowerShell):
   ```pwsh
   pwsh -NoLogo -Command "cd src/services/src/Demoulas.ProfitSharing.Data; dotnet ef migrations add <MigrationName> --context ProfitSharingDbContext"
@@ -308,6 +416,7 @@ These conventions are important project-wide rules. Follow them in addition to t
   - Docs: `... generate-dgml` / `generate-markdown`.
 
 ## Frontend Conventions
+
 - Node managed via Volta; assume Node 20.x LTS. Do not hardcode npx version hacks.
 - Package registry split: `.npmrc` sets private `smart-ui-library` registry; keep that line when modifying.
 - State mgmt: Centralize API/data logic in `src/reduxstore/`; prefer RTK Query or slices patterns already present.
@@ -315,6 +424,7 @@ These conventions are important project-wide rules. Follow them in addition to t
 - E2E: Playwright tests under `src/ui/e2e`; new tests should support `.playwright.env` driven creds (no hard-coded secrets).
 
 ## Testing & Quality
+
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed.
 - All backend unit & service tests reside in the consolidated test project `Demoulas.ProfitSharing.UnitTests` (do NOT create stray ad-hoc test projects). Mirror source namespaces inside this project; prefer folder structure `Domain/`, `Services/`, `Endpoints/` for organization if adding new areas.
 - **Telemetry Testing**: All endpoint tests should verify telemetry integration (activity creation, metrics recording, business operations tracking). See `TELEMETRY_GUIDE.md` for testing patterns.
@@ -322,10 +432,12 @@ These conventions are important project-wide rules. Follow them in addition to t
 - Security warnings/analyzers treated as errors; keep build green.
 
 ## Logging & Observability
+
 - Use Serilog contextual logging. Critical issues (data mismatch / integrity) use `_logger.LogCritical` (see duplicate SSN guard). For expected fallbacks use Debug/Information.
 - When adding history/audit flows, log both counts & key identifiers (badge, OracleHcmId) for traceability.
 
 ## Performance & Safety Patterns
+
 - For batched upserts (see `AddDemographicsStreamAsync`):
   - Precompute lookups (`ToDictionary`, `ToLookup`) before DB roundtrips.
   - Build dynamic OR expressions instead of N roundtrips.
@@ -333,6 +445,7 @@ These conventions are important project-wide rules. Follow them in addition to t
 - Prefer `ConfigureAwait(false)` in library/service layer asynchronous calls.
 
 ## Secrets & Config
+
 - Never commit secrets—use user secrets (`secrets.json` pattern). Feature flags via .NET Feature Management; wire new flags centrally then inject `IFeatureManager`.
 
 ## Documentation Creation Guidelines
@@ -340,30 +453,35 @@ These conventions are important project-wide rules. Follow them in addition to t
 When creating documentation for new features, architectural changes, or implementation guides:
 
 ### File Locations
+
 - **User-Accessible Documentation**: Copy final documents to `src/ui/public/docs/` for web access
 - **Template References**: Use existing documentation structure from `src/ui/public/docs/` folder as examples
 
 ### File naming Conventions
+
 - Use `UPPERCASE_WITH_UNDERSCORES.md` for major guides (e.g., `TELEMETRY_GUIDE.md`, `READ_ONLY_FUNCTIONALITY.md`)
 - Use `PascalCase-With-Hyphens.md` for specific features (e.g., `Distribution-Processing-Requirements.md`)
 - Use ticket-prefixed names for implementation summaries (e.g., `PS-1623_READ_ONLY_SUMMARY.md`)
 
 ### Required Documentation Updates
+
 When creating new documentation:
+
 1. **Create primary file** in `src/ui/public/docs/` folder with comprehensive content
 2. **Update `README.md`** to include new documentation references
-4. **Update Documentation page** in `src/ui/src/pages/Documentation/Documentation.tsx`:
+3. **Update Documentation page** in `src/ui/src/pages/Documentation/Documentation.tsx`:
    ```typescript
    {
      key: "feature-name",
-     title: "Feature Documentation Title", 
+     title: "Feature Documentation Title",
      filename: "FEATURE_DOCUMENTATION.md",
      description: "Brief description of what this documentation covers"
    }
    ```
-5. **Update instruction files** (`copilot-instructions.md` and `CLAUDE.md`) if introducing new patterns
+4. **Update instruction files** (`copilot-instructions.md` and `CLAUDE.md`) if introducing new patterns
 
 ### Documentation Structure Standards
+
 - **Overview section** with clear objectives and scope
 - **Architecture/Implementation sections** with code examples
 - **Testing/Quality guidelines** with specific checklists
@@ -371,6 +489,7 @@ When creating new documentation:
 - **References section** linking to related documentation
 
 ### Content Guidelines
+
 - Include copy-paste code examples for common patterns
 - Provide checklists for implementation and testing
 - Document both "what to do" and "what NOT to do"
@@ -378,7 +497,9 @@ When creating new documentation:
 - Add cross-references to related documentation files
 
 ## When Extending
+
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root.
+- **CODE REVIEW CHECKLIST**: Use the [Master Code Review Checklist](CODE_REVIEW_CHECKLIST.md) for all PRs - includes comprehensive security, architecture, frontend, backend, and telemetry guidance. **CRITICAL**: Frontend section includes auto-reject blockers like age calculation.
 - **NEW ENDPOINT CHECKLIST**: Use the [RESTful API Guidelines Instructions](instructions/restful-api-guidelines.instructions.md#new-endpoint-checklist) to verify design, implementation, documentation, and security before submitting PR
 - ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section).
 - Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.).
@@ -391,6 +512,7 @@ When creating new documentation:
 See BRANCHING_AND_WORKFLOW.md (`.github/`) for complete Git, Jira, and PR conventions when needed.
 
 **Quick Summary**:
+
 - Always branch from `develop` (not `main`)
 - Branching and commit message examples:
 
@@ -398,11 +520,13 @@ See BRANCHING_AND_WORKFLOW.md (`.github/`) for complete Git, Jira, and PR conven
 Branch example: feature/PS-1720-add-reporting-view
 Commit example: PS-1720: Add reporting view
 ```
+
 - PR title: Start with Jira key
 - Use Atlassian MCP for all Jira/Confluence interactions
 - AI assistants: Do NOT auto-create or auto-merge PRs (human review required)
 
 **Typical workflow**:
+
 ```pwsh
 git checkout develop && git pull origin develop
 git checkout -b feature/PS-1720-add-reporting-view
@@ -416,27 +540,32 @@ git push -u origin feature/PS-1720-add-reporting-view
 For comprehensive implementation details, see these dedicated guides:
 
 ### Core Patterns (read when needed)
+
 - RESTFUL_API_GUIDELINES.INSTRUCTIONS.md (`.github/instructions/`) - Zalando RESTful API guidelines, endpoint design, HTTP semantics, URL patterns, pagination
 - DISTRIBUTED_CACHING_PATTERNS.md (`.github/`) - IDistributedCache patterns, version-based invalidation, unit testing
 - VALIDATION_PATTERNS.md (`.github/`) - Server & client validation, FluentValidation examples, boundary checks
 - BRANCHING_AND_WORKFLOW.md (`.github/`) - Git branching, Jira workflow, PR guidelines, deny list
 
 ### Telemetry & Observability (read when needed)
+
 - TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive 75+ page reference for developers, QA, DevOps
 - TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples
 - TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production operations, monitoring, alerting
 - SECURITY_TELEMETRY_SETUP.md (`.github/`) - Advanced security monitoring patterns
 
 ### Feature-Specific Guides (read when needed)
+
 - READ_ONLY_FUNCTIONALITY.md (`src/ui/public/docs/`) - Read-only role implementation
 - READ_ONLY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Read-only patterns cheat sheet
 - Distribution-Processing-Requirements.md (`src/ui/public/docs/`) - Distribution processing flows
 - Year-End-Testability-And-Acceptance-Criteria.md (`src/ui/public/docs/`) - Year-end processing tests
 
 ### Front End Tests
+
 - fe-unit-tests.md ('ai-templates/front-end/') Guide to writing tests for react tests
 
 ## Quick Commands (PowerShell)
+
 ```pwsh
 # Start the entire application (API + UI) - RUN FROM PROJECT ROOT
 aspire run
@@ -449,6 +578,7 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 ## Do NOT
 
 ### Security - CRITICAL
+
 - **Trust client-provided roles/headers for authorization**: Always re-validate server-side. Remove `localStorage` role elevation code (PS-2021). Never bypass `PolicyRoleMap.cs` validation.
 - **Store secrets in code**: Use Azure Key Vault or environment variables. Never hardcode connection strings, API keys, or credentials.
 - **Expose PII in logs/responses**: SSN, email, phone, bank accounts must be masked. Use `GetMaskedUserId()` pattern. Never log unmasked identity claims.
@@ -462,6 +592,7 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 - **Skip re-validation when handling impersonation**: Always re-check that authenticated user is allowed to assume requested roles (PS-2022).
 
 ### Architecture & Data Access
+
 - Bypass history tracking for mutable audited entities.
 - Introduce raw SQL without parameters.
 - Duplicate mapping logic already covered by Mapperly profiles.
@@ -475,6 +606,7 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 - Manually add `.AsNoTracking()` to queries when using `UseReadOnlyContext()`—it's already applied automatically by `UseReadOnlyContext()`.
 
 ### Observability & Quality
+
 - Create endpoints without comprehensive telemetry using `TelemetryExtensions` patterns.
 - Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods.
 - Access sensitive fields without declaring them in telemetry calls (security requirement).
@@ -486,6 +618,7 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 - Fail operations when cache operations fail—degrade gracefully and log errors.
 
 ---
+
 Provide reasoning in PR descriptions when deviating from these patterns.
 
 ## Formatting & EditorConfig (additional guidance)
@@ -513,4 +646,5 @@ Provide reasoning in PR descriptions when deviating from these patterns.
   This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.
 
 ---
+
 Provide reasoning in PR descriptions when deviating from these patterns.

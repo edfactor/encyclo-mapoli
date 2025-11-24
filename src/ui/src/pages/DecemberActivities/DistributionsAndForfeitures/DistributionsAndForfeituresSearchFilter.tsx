@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CircularProgress, FormControl, FormHelperText, FormLabel, Grid, MenuItem, TextField } from "@mui/material";
 import { format } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetStatesQuery, useGetTaxCodesQuery } from "reduxstore/api/LookupsApi";
@@ -48,6 +48,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching: isSearchFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: statesData, isLoading: isLoadingStates } = useGetStatesQuery();
   const { data: taxCodesData, isLoading: isLoadingTaxCodes } = useGetTaxCodesQuery();
   const dispatch = useDispatch();
@@ -70,6 +71,12 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     }
   });
 
+  useEffect(() => {
+    if (!isSearchFetching && !isFetchingProp) {
+      setIsSubmitting(false);
+    }
+  }, [isSearchFetching, isFetchingProp]);
+
   // Set form defaults when fiscal data becomes available
   useEffect(() => {
     if (profitYear) {
@@ -84,7 +91,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   }, [reset, profitYear]);
 
   const validateAndSearch = handleSubmit(async (data) => {
-    if (isValid && hasToken) {
+    if (isValid && hasToken && !isSubmitting) {
+      setIsSubmitting(true);
       const queryParams = {
         startDate: formatDateOnly(data.startDate),
         endDate: formatDateOnly(data.endDate),
@@ -313,8 +321,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetchingProp || isSearchFetching}
-          disabled={!isValid}
+          isFetching={isFetchingProp || isSearchFetching || isSubmitting}
+          disabled={!isValid || isFetchingProp || isSearchFetching || isSubmitting}
         />
       </Grid>
     </form>
