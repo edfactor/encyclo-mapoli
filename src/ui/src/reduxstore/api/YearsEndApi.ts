@@ -237,22 +237,27 @@ export const YearsEndApi = createApi({
     }),
     getDistributionsAndForfeitures: builder.query<
       DistributionsAndForfeitureTotalsResponse,
-      DistributionsAndForfeituresRequestDto
+      DistributionsAndForfeituresRequestDto & { archive?: boolean }
     >({
-      query: (params) => ({
-        url: `yearend/distributions-and-forfeitures`,
-        method: "POST",
-        body: {
-          startDate: params.startDate,
-          endDate: params.endDate,
-          states: params.states,
-          taxCodes: params.taxCodes,
-          skip: params.pagination.skip,
-          take: params.pagination.take,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
+      query: (params) => {
+        const baseUrl = `yearend/distributions-and-forfeitures`;
+        const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
+
+        return {
+          url,
+          method: "POST",
+          body: {
+            startDate: params.startDate,
+            endDate: params.endDate,
+            states: params.states,
+            taxCodes: params.taxCodes,
+            skip: params.pagination.skip,
+            take: params.pagination.take,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending
+          }
+        };
+      },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;

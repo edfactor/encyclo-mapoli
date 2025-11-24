@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Common;
 
 namespace Demoulas.ProfitSharing.Services.Validation;
 
@@ -218,9 +219,9 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
 
         // QPAY129.Distributions
         var qpay129Validation = await ValidateSingleFieldAsync(
-            profitYear, "QPAY129", "Distributions", currentValues, cancellationToken);
+            profitYear, ReportNameInfo.DistributionAndForfeitures.ReportCode, "QPAY129_DistributionTotals", currentValues, cancellationToken);
         validations.Add(qpay129Validation);
-        validatedReports.Add("QPAY129");
+        validatedReports.Add(ReportNameInfo.DistributionAndForfeitures.ReportCode);
 
         // QPAY066TA.TotalDisbursements
         var qpay066taValidation = await ValidateSingleFieldAsync(

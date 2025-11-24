@@ -332,6 +332,12 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                     {numberToCurrency(getFieldValidation("DistributionTotals")?.expectedValue || 0)}
                   </td>
                 </tr>
+                <tr>
+                  <td className="px-2 py-1 text-left">QPAY129 (Expected)</td>
+                  <td className="px-2 py-1 text-right">
+                    {numberToCurrency(getFieldValidation("QPAY129_DistributionTotals")?.expectedValue || 0)}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

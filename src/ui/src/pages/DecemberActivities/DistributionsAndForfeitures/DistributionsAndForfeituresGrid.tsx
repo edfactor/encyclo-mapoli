@@ -23,12 +23,16 @@ interface DistributionsAndForfeituresQueryParams {
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  shouldArchive?: boolean;
+  onArchiveHandled?: () => void;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
 const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
+  shouldArchive,
+  onArchiveHandled,
   onLoadingChange
 }) => {
   const [showStateTaxTooltip, setShowStateTaxTooltip] = useState(false);
@@ -71,6 +75,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 distributionsAndForfeituresQueryParams.taxCodes.length > 0 && {
                   taxCodes: distributionsAndForfeituresQueryParams?.taxCodes
                 }),
+              ...(shouldArchive && { archive: true }),
               pagination: {
                 skip: pageNum * pageSz,
                 take: pageSz,
@@ -89,6 +94,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           distributionsAndForfeituresQueryParams?.endDate,
           distributionsAndForfeituresQueryParams?.states,
           distributionsAndForfeituresQueryParams?.taxCodes,
+          shouldArchive,
           triggerSearch
         ]
       )
@@ -153,6 +159,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       }),
       states: distributionsAndForfeituresQueryParams?.states || [],
       taxCodes: distributionsAndForfeituresQueryParams?.taxCodes || [],
+      ...(shouldArchive && { archive: true }),
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
@@ -171,6 +178,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     pageNumber,
     pageSize,
     sortParams,
+    shouldArchive,
     triggerSearch
   ]);
 
@@ -211,6 +219,18 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       onSearch();
     }
   }, [initialSearchLoaded, onSearch, hasToken]);
+
+  // Handle archive mode
+  useEffect(() => {
+    if (shouldArchive && hasToken) {
+      // Perform search in archive mode
+      onSearch();
+      // Notify parent that archive has been handled
+      if (onArchiveHandled) {
+        onArchiveHandled();
+      }
+    }
+  }, [shouldArchive, hasToken, onSearch, onArchiveHandled]);
 
   // Notify parent of loading state changes
   useEffect(() => {
