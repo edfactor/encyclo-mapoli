@@ -7,9 +7,15 @@ import useYTDWages from "./hooks/useYTDWages";
 import YTDWagesGrid from "./YTDWagesGrid";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
 
-const YTDWages: React.FC = () => {
+interface YTDWagesProps {
+  useFrozenData?: boolean;
+}
+
+const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   const componentRef = useRef<HTMLDivElement>(null);
-  const { searchResults, isSearching, pagination, showData, hasResults, executeSearch } = useYTDWages();
+  const { searchResults, isSearching, pagination, showData, hasResults, executeSearch } = useYTDWages({
+    defaultUseFrozenData: useFrozenData
+  });
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -34,6 +40,7 @@ const YTDWages: React.FC = () => {
             <YTDWagesSearchFilter
               onSearch={executeSearch}
               isSearching={isSearching}
+              defaultUseFrozenData={useFrozenData}
             />
           </DSMAccordion>
         </Grid>

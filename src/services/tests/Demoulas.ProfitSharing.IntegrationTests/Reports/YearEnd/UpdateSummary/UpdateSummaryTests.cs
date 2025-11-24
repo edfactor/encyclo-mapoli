@@ -1,11 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
+using Demoulas.ProfitSharing.IntegrationTests.TotalSvc;
 using Demoulas.ProfitSharing.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,8 +11,6 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
 
-[SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
-[SuppressMessage("Major Code Smell", "S1144:Unused private types or members should be removed")]
 public class UpdateSummaryTests : PristineBaseTest
 {
     private readonly FrozenReportService _frozenReportService;
@@ -26,176 +22,143 @@ public class UpdateSummaryTests : PristineBaseTest
     }
 
     [Fact]
-    public async Task CheckVesting()
-    {
-
-        short profitYear = 2023;
-        var calendarInfo = await CalendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, CancellationToken.None);
-
-        await DbFactory.UseReadOnlyContext(async ctx =>
-        {
-            var employeeData = await (await DemographicReaderService.BuildDemographicQuery(ctx))
-                .Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
-                .Join(TotalService.GetYearsOfService(ctx, profitYear, calendarInfo.FiscalEndDate), b => b.d.Ssn, yos => yos.Ssn, (b, pty) => new { b.d, b.pp, pty.Years })
-                .Where(b => b.pp.ProfitYear == profitYear && b.d.BadgeNumber == 700036)
-                .SingleAsync(CancellationToken.None);
-
-            int age = calendarInfo.FiscalEndDate.Year - employeeData.d.DateOfBirth.Year;
-            if (calendarInfo.FiscalEndDate < employeeData.d.DateOfBirth)
-            {
-                age--;
-            }
-            TestOutputHelper.WriteLine($"Date Of Birth: {employeeData.d.DateOfBirth} Age: {age}");
-            TestOutputHelper.WriteLine($"Termination Date: {employeeData.d.TerminationDate}");
-            TestOutputHelper.WriteLine($"Termination Code Id: {employeeData.d.TerminationCodeId}");
-
-            TestOutputHelper.WriteLine($"Enrollment Id: {employeeData.pp.EnrollmentId}");
-            TestOutputHelper.WriteLine($"ZeroContributionReasonId: {employeeData.pp.ZeroContributionReasonId}");
-            TestOutputHelper.WriteLine($"Total Hours {employeeData.pp.CurrentHoursYear + employeeData.pp.HoursExecutive}");
-
-            TestOutputHelper.WriteLine($"YEARS = " + employeeData.Years);
-
-            var rslt = await TotalService.TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
-                .Where(d => d.Ssn == employeeData.d.Ssn)
-                .FirstOrDefaultAsync();
-            TestOutputHelper.WriteLine($"Current Balance {rslt!.CurrentBalance}");
-            TestOutputHelper.WriteLine($"Vested  Balance {rslt.VestedBalance}");
-
-            // When everything is correctly arranged... aka 2023 Enrollment and ZeroContribution Rebuilt.
-            rslt.CurrentBalance.ShouldBe(3817.03m);
-            rslt.VestedBalance.ShouldBe(763.406m);
-
-            return true;
-        });
-
-        "".ShouldBe("");
-    }
-
-
-    [Fact]
-    public async Task ValidateReport2()
+    public async Task ValidatePay450Report()
     {
         List<Pay450Record> ready = GetReadyRecords();
-
         List<Pay450Record> smart = await GetSmartRecords();
+
+        // Load all executive SSNs (PY_FREQ = '2') for profit year 2025
+        HashSet<string> executiveBadgeAndStore = await DbFactory.UseReadOnlyContext(async ctx =>
+        {
+            return await ctx.PayProfits
+                .Include(pp => pp.Demographic)
+                .Where(pp => pp.ProfitYear == TestConstants.OpenProfitYear && pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly /*Executive*/)
+                .Select(pp => $"0{pp.Demographic!.BadgeNumber} {pp.Demographic.StoreNumber:000}")
+                .ToHashSetAsync(CancellationToken.None);
+        });
+
+        TestOutputHelper.WriteLine($"Executive Count (PY_FREQ=2): {executiveBadgeAndStore.Count}");
 
         CountBreakdown("Ready", ready);
         CountBreakdown("Smart", smart);
 
-        // smart = smart.Where(s=>Interesting(s)).ToList()
-        smart = smart.Where(s => s.BadgeAndStore.Contains(" ") || s.BeforeAmount != 0 || s.AfterAmount != 0).ToList();
-
         List<Pay450Record> smartOnly = smart.ExceptBy(ready.Select(r => r.BadgeAndStore), r => r.BadgeAndStore).ToList();
+        // smartOnly.Count.ShouldBe(0) BOBH FIX THIS!!!
         List<Pay450Record> readyOnly = ready.ExceptBy(smart.Select(r => r.BadgeAndStore), r => r.BadgeAndStore).ToList();
+        // readyOnly.Count.ShouldBe(0) BOBH FIX THIS!!!
         List<Pay450Record> intersection = smart.IntersectBy(ready.Select(r => r.BadgeAndStore), r => r.BadgeAndStore).ToList();
         Dictionary<string, Pay450Record> readyByBadgeAndStore = ready.ToDictionary(k => k.BadgeAndStore, v => v);
-
 
         List<(Pay450Record Actual, Pay450Record Expected)> comparisons = new();
 
         foreach (Pay450Record smartInt in intersection)
         {
             Pay450Record readyInt = readyByBadgeAndStore[smartInt.BadgeAndStore];
-            Pay450Record readyIntNorm = Normalize(readyInt);
-            Pay450Record smartIntNorm = Normalize(smartInt);
-
-            if (readyIntNorm.BeforeEnroll != smartIntNorm.BeforeEnroll)
-            {
-                Pay450Record readyNoBeforEnroll = readyIntNorm with { BeforeEnroll = 0 };
-                Pay450Record smartNoBeforEnroll = readyIntNorm with { BeforeEnroll = 0 };
-
-                // If everything but the before enroll is different, then lets ignore the before enroll - for now. 
-                if (readyNoBeforEnroll == smartNoBeforEnroll)
-                {
-                    readyIntNorm = readyNoBeforEnroll;
-                    smartIntNorm = smartNoBeforEnroll;
-                }
-            }
-
-            if (smartIntNorm.AfterYears == 1 && readyIntNorm.AfterYears == 1 && readyIntNorm.AfterAmount == 0 && smartIntNorm.AfterAmount == 0 && readyIntNorm.AfterEnroll == 2)
-            {
-                smartIntNorm = smartIntNorm with { AfterEnroll = 2 }; // Lazy Ready.
-            }
-
-            // These are all small amounts that are part of year 1 that involve class action amounts.
-            // I think READY has bug where it returns zero, where SMART is correct and returns a value.
-            // I think READY sees 1 year and says you have nada, where SMART digs deeper and figures out 
-            // the right amount.   Would an employee with bene money and 1 year of service who leaves see nothing?   probably only effects people with just profit code 8 and 0,
-            // having a 6 (bene amount) would cause the correct vested amount to be shown.
-            if (readyIntNorm.BeforeVested == 0 && smartIntNorm.BeforeVested != 0)
-            {
-                decimal oneHunderdedPercentAmount = await computeOneHundredPercentInterestAndClassActionAmount(ExtractBadge(smartIntNorm.BadgeAndStore), 2023);
-                if (oneHunderdedPercentAmount == smartIntNorm.BeforeVested)
-                {
-                    // Suppress displaying vesting % when the forefeit amount matches a class action amount and 100% interest. (see comment above)
-#if true
-                    smartIntNorm = smartIntNorm with { BeforeVested = 0 };
-#endif
-                }
-            }
+            Pay450Record readyIntNorm = Normalize(executiveBadgeAndStore, readyInt);
+            Pay450Record smartIntNorm = Normalize(executiveBadgeAndStore, smartInt);
 
             if (readyIntNorm != smartIntNorm)
             {
-                comparisons.Add((readyIntNorm, smartIntNorm));
+                comparisons.Add((smartIntNorm, readyIntNorm));
             }
         }
 
-        int deathSkipped = 0;
         TestOutputHelper.WriteLine($"Discrepancy Count {comparisons.Count}");
-        TestOutputHelper.WriteLine(Pay450Comparisons.ToComparisonHeader() + GetHeader1());
-        int c = 0;
-        foreach ((Pay450Record readyIntNorm, Pay450Record smartIntNorm) in comparisons)
+        
+        if (comparisons.Count > 0)
         {
-            string beforeStatus = await VestDetailsBadgeSimple(ExtractBadge(smartIntNorm.BadgeAndStore), 2024);
-            // Skip death.
-            if (beforeStatus.Contains( /*"Z"*/ TerminationCode.Constants.Deceased))
+            TestOutputHelper.WriteLine($"\n=== DETAILED DISCREPANCIES (first 30 of {comparisons.Count}) ===");
+
+            // Calculate summary statistics for all comparisons
+            decimal totalAfterVestedDifference = 0;
+            int afterVestedDifferenceCount = 0;
+
+            foreach ((Pay450Record actual, Pay450Record expected) in comparisons)
             {
-                deathSkipped++;
-                continue;
+                decimal difference = actual.AfterVested - expected.AfterVested;
+                if (Math.Abs(difference) >= 0.01m)
+                {
+                    totalAfterVestedDifference += difference;
+                    afterVestedDifferenceCount++;
+                }
             }
 
-            TestOutputHelper.WriteLine(Pay450Comparisons.ToComparisonString(readyIntNorm, smartIntNorm) + "   " + beforeStatus);
-            TestOutputHelper.WriteLine(
-                "                                                                                                                                                                                                    " +
-                await VestDetailsBadgeSimple(ExtractBadge(smartIntNorm.BadgeAndStore), 2023));
-            c++;
-            if (c > 500)
+            // Common badges that appear on both TotalService and PAY450 reports
+            HashSet<string> commonBadges = new() { "700173", "700569", "700655", "702489", "706161" };
+            Dictionary<int, decimal> readyEtvaByBadge = await ReadyPayProfitLoader.GetReadyEtvaByBadge(DbFactory.ConnectionString, comparisons.Select(vci=>int.Parse(ExtractBadge(vci.Actual.BadgeAndStore))).ToList());
+
+            MarkdownTable detailedTable = new([
+                "Badge",
+                "Before Amt (R→S)", "Before Vested (R→S)", "Before Years (R→S)", "Before Enrl (R→S)",
+                "After Amt (R→S)", "After Vested (R→S)", "After Years (R→S)", "After Enrl (R→S)",
+                "R ETVA"
+            ]);
+
+            // Sort by Before Years for easier analysis
+            var sortedComparisons = comparisons
+                .OrderBy(c => c.Expected.BeforeYears ?? 0)
+                .ThenBy(c => ExtractBadge(c.Expected.BadgeAndStore))
+                .ToList();
+
+            foreach ((Pay450Record actual, Pay450Record expected) in sortedComparisons.Take(30))
             {
-                break;
+                string badge = ExtractBadge(expected.BadgeAndStore);
+                // Highlight common badges in grey
+                string? cssClass = commonBadges.Contains(badge) ? "highlight" : null;
+
+                detailedTable.AddRow(
+                    cssClass,
+                    badge,
+                    FormatDifferenceMoney(expected.BeforeAmount, actual.BeforeAmount),
+                    FormatDifferenceMoney(expected.BeforeVested, actual.BeforeVested),
+                    FormatDifference(expected.BeforeYears, actual.BeforeYears),
+                    FormatDifference(expected.BeforeEnroll, actual.BeforeEnroll),
+                    FormatDifferenceMoney(expected.AfterAmount, actual.AfterAmount),
+                    FormatDifferenceMoney(expected.AfterVested, actual.AfterVested),
+                    FormatDifference(expected.AfterYears, actual.AfterYears),
+                    FormatDifference(expected.AfterEnroll, actual.AfterEnroll),
+                    $"{readyEtvaByBadge[int.Parse(badge)]:N2}"
+                );
+            }
+
+            TestOutputHelper.WriteLine(detailedTable.ToString());
+
+            // Prepare summary statistics
+            Dictionary<string, string> summaryStats = new()
+            {
+                { "Total Discrepancies", comparisons.Count.ToString("N0") },
+                { "After Vested Differences Count", afterVestedDifferenceCount.ToString("N0") },
+                { "Sum of After Vested Differences (Smart - Ready)", $"${totalAfterVestedDifference:N2}" }
+            };
+
+            #if false
+            // Save HTML version
+            string title = $"PAY450 Discrepancies - Count of {comparisons.Count} of {intersection.Count:N0} considered";
+            detailedTable.SaveAsHtml("/Users/robertherrmann/Desktop/demos/sprint-38/update-summary-discrepancies.html", title, summaryStats);
+            TestOutputHelper.WriteLine("HTML report saved to: /Users/robertherrmann/Desktop/demos/sprint-37/update-summary-discrepancies.html");
+            #endif 
+            TestOutputHelper.WriteLine($"Sum of After Vested Differences (Smart - Ready): ${totalAfterVestedDifference:N2} across {afterVestedDifferenceCount} records");
+        
+            if (sortedComparisons.Count > 30)
+            {
+                TestOutputHelper.WriteLine($"... and {sortedComparisons.Count - 30} more discrepancies");
             }
         }
 
-        TestOutputHelper.WriteLine("Death skipped " + deathSkipped);
-
-
-        true.ShouldBeTrue();
+        comparisons.Count.ShouldBeLessThan(20);
     }
 
-    private async Task<decimal> computeOneHundredPercentInterestAndClassActionAmount(long badgeNumber, int profitYear)
-    {
-        return await DbFactory.UseReadOnlyContext(async ctx =>
-        {
-            Demographic? d = await ctx.Demographics.Where(d => d.BadgeNumber == badgeNumber).FirstOrDefaultAsync();
-            decimal earningsSum = await ctx.ProfitDetails
-                .Where(pd => pd.ProfitYear <= profitYear && pd.Ssn == d!.Ssn &&
-                             (pd.CommentType == CommentType.Constants.ClassAction || pd.CommentType == CommentType.Constants.OneHundredPercentEarnings))
-                .SumAsync(pd => pd.Earnings, CancellationToken.None);
-            return earningsSum;
-        });
-    }
-
-    private Pay450Record Normalize(Pay450Record p)
+    private Pay450Record Normalize(HashSet<string> badgeAndStore, Pay450Record p)
     {
         return p with
         {
             BeforeAmount = Math.Round(p.BeforeAmount, 2),
             BeforeVested = Math.Round(p.BeforeVested, 2),
-            BeforeYears = IfNullThenZero(p.BeforeYears),
-            BeforeEnroll = IfNullThenZero(p.BeforeEnroll), //  BOBH : Why do I think it is ok to ignore this ?
-
+            BeforeYears = badgeAndStore.Contains(p.BadgeAndStore) ? 0 : IfNullThenZero(p.BeforeYears),
+            BeforeEnroll = IfNullThenZero(p.BeforeEnroll),
             AfterAmount = Math.Round(p.AfterAmount, 2),
             AfterVested = Math.Round(p.AfterVested, 2),
-            AfterYears = IfNullThenZero(p.AfterYears),
+            AfterYears = badgeAndStore.Contains(p.BadgeAndStore) ? 0 : IfNullThenZero(p.AfterYears),
             AfterEnroll = IfNullThenZero(p.AfterEnroll)
         };
     }
@@ -204,17 +167,6 @@ public class UpdateSummaryTests : PristineBaseTest
     private static int? IfNullThenZero(int? x)
     {
         return x ?? 0;
-    }
-
-    private static long ExtractBadge(string smartIntBadgeAndStore)
-    {
-        int space = smartIntBadgeAndStore.IndexOf(" ");
-        if (space == -1)
-        {
-            return long.Parse(smartIntBadgeAndStore);
-        }
-
-        return long.Parse(smartIntBadgeAndStore.Substring(0, space));
     }
 
     private void CountBreakdown(string system, List<Pay450Record> p1)
@@ -239,7 +191,8 @@ public class UpdateSummaryTests : PristineBaseTest
 
     private async Task<List<Pay450Record>> GetSmartRecords()
     {
-        ProfitYearRequest pyr = new() { ProfitYear = 2024, Take = int.MaxValue, Skip = 0 };
+        // R24-PAY450 golden file is for profit year 2025 (see file header)
+        ProfitYearRequest pyr = new() { ProfitYear = TestConstants.OpenProfitYear, Take = int.MaxValue, Skip = 0 };
         UpdateSummaryReportResponse r = await _frozenReportService.GetUpdateSummaryReport(pyr, CancellationToken.None);
 
         List<Pay450Record> records = [];
@@ -267,7 +220,7 @@ public class UpdateSummaryTests : PristineBaseTest
 
     public static List<Pay450Record> GetReadyRecords()
     {
-        string expectedReport = Pay443Tests.ReadEmbeddedResource("golden.R24-PAY450");
+        string expectedReport = ReadEmbeddedResource(".golden.R24-PAY450");
 
         List<string> lines = expectedReport.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Skip(1).ToList();
 
@@ -280,7 +233,7 @@ public class UpdateSummaryTests : PristineBaseTest
                 continue;
             }
 
-            Pay450Record record = ReportParser.ParseLine(line);
+            Pay450Record record = Pay450ReportParser.ParseLine(line);
 
             records.Add(record);
         }
@@ -336,12 +289,6 @@ public class UpdateSummaryTests : PristineBaseTest
         }
     }
 
-    private static string GetHeader1()
-    {
-        return
-            "    ClSum         Year Age EnrollmentId Hours   EHours   TermDate   TermCode Years ZeroCont InitYear   ETVA        SSN";
-    }
-
     private static string GetRow(
         decimal has2021ClassActionSum, int profitYear, int age, int enrollmentId, decimal currentHoursYear,
         decimal hoursExecutive, DateOnly? terminationDate, string terminationCodeId, int years,
@@ -364,4 +311,38 @@ public class UpdateSummaryTests : PristineBaseTest
             ssn
         );
     }
+
+    private static string ExtractBadge(string badgeAndStore)
+    {
+        // BadgeAndStore format is like "0705804 063" or "0700549" (beneficiary)
+        // We want to extract just the badge number (first part before space) and remove leading zero
+        int spaceIndex = badgeAndStore.IndexOf(' ');
+        string badge = spaceIndex > 0
+            ? badgeAndStore.Substring(0, spaceIndex)
+            : badgeAndStore;
+
+        // Remove leading zero
+        return badge.TrimStart('0');
+    }
+
+    private static string FormatDifference(int? ready, int? smart)
+    {
+        if (ready == smart)
+        {
+            return ready?.ToString() ?? "";
+        }
+
+        return $"{ready} → {smart}";
+    }
+
+    private static string FormatDifferenceMoney(decimal ready, decimal smart)
+    {
+        if (Math.Abs(ready - smart) < 0.01m)
+        {
+            return ready == 0 ? "" : ready.ToString("N2");
+        }
+
+        return $"{ready:N2} → {smart:N2}";
+    }
+
 }

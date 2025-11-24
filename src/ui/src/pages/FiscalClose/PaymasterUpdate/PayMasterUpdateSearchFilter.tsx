@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -27,6 +28,7 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
   setPageReset,
   isFetching = false
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const {
@@ -41,8 +43,15 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
     }
   });
 
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   const validateAndSubmit = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       setPageReset(true);
       onSearch(data);
     }
@@ -91,8 +100,8 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
-          disabled={!isValid}
-          isFetching={isFetching}
+          disabled={!isValid || isFetching || isSubmitting}
+          isFetching={isFetching || isSubmitting}
         />
       </Grid>
     </form>

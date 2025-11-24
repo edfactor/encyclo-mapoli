@@ -308,7 +308,7 @@ public sealed class TerminatedEmployeeReportService
                 }
 
                 // Calculate age if birthdate available
-                int? age = member.Birthday?.Age();
+                short? age = member.Birthday?.Age();
 
                 var hasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
                                    enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
@@ -348,11 +348,11 @@ public sealed class TerminatedEmployeeReportService
 
                 yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
 
-                // Accumulate totals
-                totalVested += vestedBalance;
-                totalForfeit += member.ForfeitAmount;
-                totalEndingBalance += member.EndingBalance;
-                totalBeneficiaryAllocation += member.BeneficiaryAllocation;
+                // Accumulate totals (round to 2 decimal places to match individual record display)
+                totalVested += Math.Round(vestedBalance, 2, MidpointRounding.AwayFromZero);
+                totalForfeit += Math.Round(member.ForfeitAmount, 2, MidpointRounding.AwayFromZero);
+                totalEndingBalance += Math.Round(member.EndingBalance, 2, MidpointRounding.AwayFromZero);
+                totalBeneficiaryAllocation += Math.Round(member.BeneficiaryAllocation, 2, MidpointRounding.AwayFromZero);
             }
             return yearDetailsList;
         });

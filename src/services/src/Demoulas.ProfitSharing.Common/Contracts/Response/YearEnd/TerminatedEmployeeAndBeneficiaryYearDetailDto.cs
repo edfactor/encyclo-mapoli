@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -13,7 +14,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutiv
     public DateOnly? DateTerm { get; set; }
     public decimal YtdPsHours { get; set; }
     public decimal VestedPercent { get; set; }
-    public int? Age { get; set; }
+    [MaskSensitive] public required short? Age { get; set; }
     public bool HasForfeited { get; set; }
     public decimal? SuggestedForfeit { get; set; }
     public bool IsExecutive { get; set; }

@@ -14,6 +14,7 @@ export interface EmployeeDetails {
   isEmployee: boolean;
   firstName: string;
   lastName: string;
+  fullName: string;
   address: string;
   addressCity: string;
   addressState: string;
@@ -64,6 +65,7 @@ export interface EmployeeWagesForYear {
 
 export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
+  useFrozenData?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

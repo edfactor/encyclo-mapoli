@@ -1,7 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 public sealed record VestedAmountsByAgeDetail
 {
-    public byte Age { get; set; }
+    [MaskSensitive] public required short Age { get; set; }
     public short FullTime100PercentCount { get; set; }
     public decimal FullTime100PercentAmount { get; set; }
     public short FullTimePartialCount { get; set; }

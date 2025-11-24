@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
 import { GridPaginationActions, GridPaginationState, SortParams } from "@/hooks/useGridPagination";
 import { AccountHistoryReportResponse, ReportResponseBase } from "@/types/reports/AccountHistoryReportTypes";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import AccountHistoryReportTable from "../AccountHistoryReportTable";
 
 interface DSMGridProps {
@@ -57,6 +57,7 @@ describe("AccountHistoryReportTable", () => {
       timeoutOccurred: false,
       results: [
         {
+          id: 1,
           badgeNumber: 12345,
           fullName: "John Doe",
           ssn: "***-**-6789",
@@ -68,6 +69,7 @@ describe("AccountHistoryReportTable", () => {
           endingBalance: 5000
         },
         {
+          id: 2,
           badgeNumber: 12345,
           fullName: "John Doe",
           ssn: "***-**-6789",
@@ -215,5 +217,173 @@ describe("AccountHistoryReportTable", () => {
     );
 
     expect(screen.getByText(/Page 2, Size 25/)).toBeInTheDocument();
+  });
+
+  it("should include ID field in each result record (PS-2160)", () => {
+    const data = createMockResponse({
+      response: {
+        pageSize: 25,
+        currentPage: 1,
+        totalPages: 1,
+        resultHash: null,
+        total: 2,
+        isPartialResult: false,
+        timeoutOccurred: false,
+        results: [
+          {
+            id: 123, // Same ID for all records (member identifier)
+            badgeNumber: 12345,
+            fullName: "John Doe",
+            ssn: "***-**-6789",
+            profitYear: 2024,
+            contributions: 1000,
+            earnings: 500,
+            forfeitures: 100,
+            withdrawals: 50,
+            endingBalance: 5000
+          },
+          {
+            id: 123, // Same ID (member identifier)
+            badgeNumber: 12345,
+            fullName: "John Doe",
+            ssn: "***-**-6789",
+            profitYear: 2023,
+            contributions: 950,
+            earnings: 450,
+            forfeitures: 75,
+            withdrawals: 25,
+            endingBalance: 4000
+          }
+        ]
+      }
+    });
+    const gridPagination = createMockGridPagination();
+
+    render(
+      <AccountHistoryReportTable
+        data={data}
+        isLoading={false}
+        error={undefined}
+        showData={true}
+        gridPagination={gridPagination}
+      />
+    );
+
+    expect(screen.getByTestId("dsm-grid")).toBeInTheDocument();
+    expect(screen.getByText(/2 rows/)).toBeInTheDocument();
+  });
+
+  it("should have same ID for records with same badge number across profit years (PS-2160)", () => {
+    // This test verifies that records with the same badge number but different profit years
+    // share the same ID, which represents the member/demographic record (not the transaction)
+    const recordsWithSameBadgeNumber = [
+      {
+        id: 100, // SAME ID (represents the member)
+        badgeNumber: 12345,
+        fullName: "John Doe",
+        ssn: "***-**-6789",
+        profitYear: 2024,
+        contributions: 1000,
+        earnings: 500,
+        forfeitures: 100,
+        withdrawals: 50,
+        endingBalance: 5000
+      },
+      {
+        id: 100, // SAME ID (represents the member)
+        badgeNumber: 12345,
+        fullName: "John Doe",
+        ssn: "***-**-6789",
+        profitYear: 2023,
+        contributions: 950,
+        earnings: 450,
+        forfeitures: 75,
+        withdrawals: 25,
+        endingBalance: 4000
+      },
+      {
+        id: 100, // SAME ID (represents the member)
+        badgeNumber: 12345,
+        fullName: "John Doe",
+        ssn: "***-**-6789",
+        profitYear: 2022,
+        contributions: 900,
+        earnings: 400,
+        forfeitures: 50,
+        withdrawals: 10,
+        endingBalance: 3000
+      }
+    ];
+
+    const data = createMockResponse({
+      response: {
+        pageSize: 25,
+        currentPage: 1,
+        totalPages: 1,
+        resultHash: null,
+        total: 3,
+        isPartialResult: false,
+        timeoutOccurred: false,
+        results: recordsWithSameBadgeNumber
+      }
+    });
+    const gridPagination = createMockGridPagination();
+
+    render(
+      <AccountHistoryReportTable
+        data={data}
+        isLoading={false}
+        error={undefined}
+        showData={true}
+        gridPagination={gridPagination}
+      />
+    );
+
+    // Verify all records share the same ID (member ID, not transaction ID)
+    const uniqueIds = new Set(recordsWithSameBadgeNumber.map((r) => r.id));
+    expect(uniqueIds.size).toBe(1);
+    expect(Array.from(uniqueIds)[0]).toBe(100);
+  });
+
+  it("should render grid with results containing all required fields (PS-2160)", () => {
+    const data = createMockResponse({
+      response: {
+        pageSize: 25,
+        currentPage: 1,
+        totalPages: 1,
+        resultHash: null,
+        total: 1,
+        isPartialResult: false,
+        timeoutOccurred: false,
+        results: [
+          {
+            id: 999,
+            badgeNumber: 12345,
+            fullName: "Jane Smith",
+            ssn: "***-**-4321",
+            profitYear: 2024,
+            contributions: 2000,
+            earnings: 1000,
+            forfeitures: 200,
+            withdrawals: 100,
+            endingBalance: 10000
+          }
+        ]
+      }
+    });
+    const gridPagination = createMockGridPagination();
+
+    render(
+      <AccountHistoryReportTable
+        data={data}
+        isLoading={false}
+        error={undefined}
+        showData={true}
+        gridPagination={gridPagination}
+      />
+    );
+
+    expect(screen.getByTestId("dsm-grid")).toBeInTheDocument();
+    expect(screen.getByText(/1 rows/)).toBeInTheDocument();
   });
 });

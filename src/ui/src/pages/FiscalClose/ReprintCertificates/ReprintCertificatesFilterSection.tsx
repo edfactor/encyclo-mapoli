@@ -1,6 +1,6 @@
 import { FormControl, FormLabel, Grid, TextField } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetCertificatesReportQuery } from "reduxstore/api/YearsEndApi";
 import { CertificatePrintRequest } from "reduxstore/types";
@@ -23,6 +23,7 @@ const ReprintCertificatesFilterSection: React.FC<ReprintCertificatesFilterSectio
 }) => {
   const selectedProfitYear = useFiscalCloseProfitYear();
   const [getCertificatesReport, { isFetching }] = useLazyGetCertificatesReportQuery();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     control,
     handleSubmit,
@@ -36,37 +37,46 @@ const ReprintCertificatesFilterSection: React.FC<ReprintCertificatesFilterSectio
     }
   });
 
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   const validateAndSubmit = handleSubmit((data) => {
-    onFilterChange(data);
-    const request: CertificatePrintRequest = {
-      profitYear: data.profitYear,
-      skip: 0,
-      take: 25,
-      sortBy: "badgeNumber",
-      isSortDescending: false
-    };
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      onFilterChange(data);
+      const request: CertificatePrintRequest = {
+        profitYear: data.profitYear,
+        skip: 0,
+        take: 25,
+        sortBy: "badgeNumber",
+        isSortDescending: false
+      };
 
-    if (data.badgeNumber) {
-      const badgeNumbers = data.badgeNumber
-        .split(",")
-        .map((num) => parseInt(num.trim()))
-        .filter((num) => !isNaN(num));
-      if (badgeNumbers.length > 0) {
-        request.badgeNumbers = badgeNumbers;
+      if (data.badgeNumber) {
+        const badgeNumbers = data.badgeNumber
+          .split(",")
+          .map((num) => parseInt(num.trim()))
+          .filter((num) => !isNaN(num));
+        if (badgeNumbers.length > 0) {
+          request.badgeNumbers = badgeNumbers;
+        }
       }
-    }
 
-    if (data.socialSecurityNumber) {
-      const ssns = data.socialSecurityNumber
-        .split(",")
-        .map((ssn) => parseInt(ssn.replace(/\D/g, "")))
-        .filter((ssn) => !isNaN(ssn) && ssn > 0);
-      if (ssns.length > 0) {
-        request.ssns = ssns;
+      if (data.socialSecurityNumber) {
+        const ssns = data.socialSecurityNumber
+          .split(",")
+          .map((ssn) => parseInt(ssn.replace(/\D/g, "")))
+          .filter((ssn) => !isNaN(ssn) && ssn > 0);
+        if (ssns.length > 0) {
+          request.ssns = ssns;
+        }
       }
-    }
 
-    getCertificatesReport(request);
+      getCertificatesReport(request);
+    }
   });
 
   const handleReset = () => {
@@ -155,7 +165,8 @@ const ReprintCertificatesFilterSection: React.FC<ReprintCertificatesFilterSectio
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
-          isFetching={isFetching}
+          isFetching={isFetching || isSubmitting}
+          disabled={isFetching || isSubmitting}
         />
       </Grid>
     </form>

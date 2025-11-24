@@ -28,6 +28,7 @@ This document provides team guidelines for building RESTful API endpoints that c
 ## Quick Reference
 
 ### DO ✅
+
 - Use **resource-oriented design** (nouns, not verbs)
 - Use **kebab-case** for path segments: `/profit-sharing-distributions`
 - Use **plural** resource names: `/distributions`, `/beneficiaries`
@@ -40,6 +41,7 @@ This document provides team guidelines for building RESTful API endpoints that c
 - Add **comprehensive telemetry** with business metrics
 
 ### DON'T ❌
+
 - Use **verbs in URLs**: ~~`POST /update-enrollment`~~ → `PUT /profit-years/{id}`
 - Use **trailing slashes**: ~~`/distributions/`~~ → `/distributions`
 - Use **empty path segments**: ~~`GET /`~~ → `GET /resource-name`
@@ -62,6 +64,7 @@ This document provides team guidelines for building RESTful API endpoints that c
 Use **nouns** (resources) in URLs, not **verbs** (actions). Let HTTP methods indicate the action.
 
 #### ❌ WRONG (Verb-based)
+
 ```
 POST   /update-enrollment
 POST   /final
@@ -72,6 +75,7 @@ POST   /validate-checksum
 ```
 
 #### ✅ RIGHT (Resource-based)
+
 ```
 PUT    /profit-years/{id}/enrollment           # Update enrollment resource
 POST   /year-end-runs                          # Create year-end-run resource
@@ -83,13 +87,13 @@ POST   /report-validations                     # Create validation resource
 
 **Mapping Actions to Resources:**
 
-| Requirement | Old Pattern | New Pattern | HTTP Method |
-|---|---|---|---|
-| Initialize enrollment | `POST /update-enrollment` | `PUT /profit-years/{id}/enrollment` | PUT |
-| Run year-end process | `POST /final` | `POST /year-end-runs` | POST |
-| Create disbursement | `POST /disbursement` | `POST /beneficiary-disbursements` | POST |
-| Find members | `GET /search` | `GET /members?filter=...` | GET |
-| Download file | `GET /download` | `GET /certificates` + Accept header | GET |
+| Requirement           | Old Pattern               | New Pattern                         | HTTP Method |
+| --------------------- | ------------------------- | ----------------------------------- | ----------- |
+| Initialize enrollment | `POST /update-enrollment` | `PUT /profit-years/{id}/enrollment` | PUT         |
+| Run year-end process  | `POST /final`             | `POST /year-end-runs`               | POST        |
+| Create disbursement   | `POST /disbursement`      | `POST /beneficiary-disbursements`   | POST        |
+| Find members          | `GET /search`             | `GET /members?filter=...`           | GET         |
+| Download file         | `GET /download`           | `GET /certificates` + Accept header | GET         |
 
 ### Rule: Kebab-Case for Path Segments (MUST)
 
@@ -98,6 +102,7 @@ POST   /report-validations                     # Create validation resource
 Use hyphens to separate words in URL path segments (NOT underscores, NOT camelCase, NOT PascalCase).
 
 #### ❌ WRONG
+
 ```
 /profit_year_distributions     # snake_case
 /ProfitYearDistributions       # PascalCase
@@ -106,6 +111,7 @@ Use hyphens to separate words in URL path segments (NOT underscores, NOT camelCa
 ```
 
 #### ✅ RIGHT
+
 ```
 /profit-year-distributions
 /year-end-runs
@@ -114,6 +120,7 @@ Use hyphens to separate words in URL path segments (NOT underscores, NOT camelCa
 ```
 
 **C# Example:**
+
 ```csharp
 public override void Configure()
 {
@@ -132,6 +139,7 @@ public override void Configure()
 Collections use plural; items use singular identifiers.
 
 #### ❌ WRONG
+
 ```
 /distribution           # Singular for collection
 /member/{id}           # Singular
@@ -139,6 +147,7 @@ Collections use plural; items use singular identifiers.
 ```
 
 #### ✅ RIGHT
+
 ```
 /distributions         # Plural for collection
 /distributions/{id}    # Plural with ID
@@ -148,6 +157,7 @@ Collections use plural; items use singular identifiers.
 ```
 
 **C# Endpoint Example:**
+
 ```csharp
 // BEFORE: Singular (wrong)
 public class CreateDistributionEndpoint : ProfitSharingEndpoint<...>
@@ -179,6 +189,7 @@ public class CreateDistributionEndpoint : ProfitSharingEndpoint<...>
 Use names from your business domain, not generic terms.
 
 #### ❌ TOO GENERIC
+
 ```
 /items
 /records
@@ -187,6 +198,7 @@ Use names from your business domain, not generic terms.
 ```
 
 #### ✅ DOMAIN-SPECIFIC
+
 ```
 /profit-sharing-distributions
 /year-end-participants
@@ -197,14 +209,14 @@ Use names from your business domain, not generic terms.
 
 **Naming Convention for This Project:**
 
-| Business Object | Resource Name | Example Path |
-|---|---|---|
-| Profit Distribution | `profit-sharing-distributions` or `distributions` (in context) | `/distributions/{id}` |
-| Year-End Run | `year-end-runs` | `/year-end-runs` |
-| Member | `members` | `/members/{id}` |
-| Beneficiary | `beneficiaries` | `/beneficiaries/{id}` |
-| Disbursement | `beneficiary-disbursements` | `/beneficiary-disbursements` |
-| Member Enrollment | `enrollments` (in context of profit-year) | `/profit-years/{id}/enrollment` |
+| Business Object     | Resource Name                                                  | Example Path                    |
+| ------------------- | -------------------------------------------------------------- | ------------------------------- |
+| Profit Distribution | `profit-sharing-distributions` or `distributions` (in context) | `/distributions/{id}`           |
+| Year-End Run        | `year-end-runs`                                                | `/year-end-runs`                |
+| Member              | `members`                                                      | `/members/{id}`                 |
+| Beneficiary         | `beneficiaries`                                                | `/beneficiaries/{id}`           |
+| Disbursement        | `beneficiary-disbursements`                                    | `/beneficiary-disbursements`    |
+| Member Enrollment   | `enrollments` (in context of profit-year)                      | `/profit-years/{id}/enrollment` |
 
 ### Rule: Identify Sub-Resources via Path Segments (MUST)
 
@@ -213,6 +225,7 @@ Use names from your business domain, not generic terms.
 Use nested paths for one-to-many relationships.
 
 #### ✅ ONE-TO-MANY RELATIONSHIPS
+
 ```
 GET    /members/{member-id}/enrollments           # All enrollments for a member
 POST   /members/{member-id}/enrollments           # Create enrollment
@@ -221,12 +234,14 @@ DELETE /members/{member-id}/enrollments/{id}      # Delete enrollment
 ```
 
 #### ✅ ONE-TO-ONE RELATIONSHIPS
+
 ```
 GET    /members/{id}/contact                      # Member's contact (singular)
 PUT    /members/{id}/contact                      # Update member's contact
 ```
 
 #### ✅ ALTERNATIVELY: Flat Structure with Foreign Keys
+
 ```
 GET    /enrollments?member_id=123                 # Filter by member
 GET    /contacts?member_id=123                    # Filter by member
@@ -237,11 +252,13 @@ GET    /contacts?member_id=123                    # Filter by member
 Maximum **≤ 3 levels** of nesting.
 
 #### ✅ GOOD (2 levels)
+
 ```
 /profit-years/{id}/members/{id}/enrollments
 ```
 
 #### ❌ AVOID (4+ levels)
+
 ```
 /profit-years/{id}/members/{id}/enrollments/{id}/history/{id}/details
 ```
@@ -255,6 +272,7 @@ Maximum **≤ 3 levels** of nesting.
 **Guideline:** [MUST use HTTP methods correctly [148]](https://opensource.zalando.com/restful-api-guidelines/#148)
 
 #### GET - Safe, Idempotent, Cacheable
+
 ```csharp
 public override void Configure()
 {
@@ -265,6 +283,7 @@ public override void Configure()
 ```
 
 **Characteristics:**
+
 - ✅ Does not modify server state
 - ✅ Can be called multiple times safely
 - ✅ Results can be cached
@@ -272,6 +291,7 @@ public override void Configure()
 - ❌ Cannot include request body (or body must be ignored)
 
 #### POST - Creates Resource (NOT idempotent by default)
+
 ```csharp
 public override void Configure()
 {
@@ -282,17 +302,20 @@ public override void Configure()
 ```
 
 **Characteristics:**
+
 - ✅ Creates new resource (server generates ID)
 - ✅ Typically returns 201 (Created)
 - ❌ NOT idempotent (same call = multiple resources)
 - ✅ Can include request body
 
 **Response Codes:**
+
 - `201 Created` - Resource created (include Location header with new resource URI)
 - `200 OK` - Idempotent POST (if designed that way)
 - `202 Accepted` - Asynchronous processing started
 
 #### PUT - Updates Resource (Idempotent)
+
 ```csharp
 public override void Configure()
 {
@@ -303,6 +326,7 @@ public override void Configure()
 ```
 
 **Characteristics:**
+
 - ✅ Updates existing resource
 - ✅ Client provides all required fields
 - ✅ Idempotent (same call = same result)
@@ -310,11 +334,13 @@ public override void Configure()
 - ✅ Can include request body
 
 **Response Codes:**
+
 - `200 OK` - Resource updated; return updated resource
 - `204 No Content` - Resource updated; no response body
 - `404 Not Found` - Resource doesn't exist
 
 #### DELETE - Removes Resource (Idempotent)
+
 ```csharp
 public override void Configure()
 {
@@ -325,18 +351,21 @@ public override void Configure()
 ```
 
 **Characteristics:**
+
 - ✅ Removes resource
 - ✅ Idempotent (DELETE twice = same result)
 - ✅ Returns 200 (OK), 204 (No Content), or 202 (Accepted)
 - ❌ Typically no request body
 
 **Response Codes:**
+
 - `200 OK` - Resource deleted; return deleted resource
 - `204 No Content` - Resource deleted; no response body
 - `202 Accepted` - Deletion queued (asynchronous)
 - `404 Not Found` - Resource doesn't exist
 
 #### PATCH - Partial Update (with JSON Merge Patch)
+
 ```csharp
 public override void Configure()
 {
@@ -345,10 +374,12 @@ public override void Configure()
 ```
 
 **Use PATCH when:**
+
 - Only updating specific fields
 - Using JSON Merge Patch (`application/merge-patch+json`)
 
 **Prefer PUT** when:
+
 - Updating entire resource
 - Client provides complete object
 - Simple semantics needed
@@ -359,14 +390,14 @@ public override void Configure()
 
 Methods MUST be **safe**, **idempotent**, and **cacheable** as defined:
 
-| Method | Safe | Idempotent | Cacheable |
-|--------|------|-----------|-----------|
-| GET    | ✅ Yes | ✅ Yes | ✅ Yes |
-| HEAD   | ✅ Yes | ✅ Yes | ✅ Yes |
-| POST   | ❌ No | ⚠️ Design for idempotency | ⚠️ Only if safe |
-| PUT    | ❌ No | ✅ Yes | ❌ No |
-| PATCH  | ❌ No | ⚠️ Design for idempotency | ❌ No |
-| DELETE | ❌ No | ✅ Yes | ❌ No |
+| Method | Safe   | Idempotent                | Cacheable       |
+| ------ | ------ | ------------------------- | --------------- |
+| GET    | ✅ Yes | ✅ Yes                    | ✅ Yes          |
+| HEAD   | ✅ Yes | ✅ Yes                    | ✅ Yes          |
+| POST   | ❌ No  | ⚠️ Design for idempotency | ⚠️ Only if safe |
+| PUT    | ❌ No  | ✅ Yes                    | ❌ No           |
+| PATCH  | ❌ No  | ⚠️ Design for idempotency | ❌ No           |
+| DELETE | ❌ No  | ✅ Yes                    | ❌ No           |
 
 **Design for Idempotent POST:**
 
@@ -380,14 +411,14 @@ public class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDistributi
     {
         Post("distributions");
     }
-    
+
     public override async Task<DistributionResponse> ExecuteAsync(CreateDistributionRequest req, CancellationToken ct)
     {
         // Use secondary key (e.g., idempotency-key in header) to detect duplicates
         var existingDistribution = await _service.FindByIdempotencyKeyAsync(req.IdempotencyKey, ct);
         if (existingDistribution != null)
             return existingDistribution;  // Return existing (idempotent)
-        
+
         return await _service.CreateAsync(req, ct);
     }
 }
@@ -410,6 +441,7 @@ All request and response bodies MUST be JSON.
 Configure your JSON serializer to output snake_case:
 
 #### C# Configuration
+
 ```csharp
 // In Program.cs or appsettings.json
 services.AddFastEndpoints(x =>
@@ -426,6 +458,7 @@ services.Configure<JsonSerializerOptions>(options =>
 ```
 
 #### Example
+
 ```csharp
 // C# class (PascalCase)
 public class MemberDto
@@ -460,6 +493,7 @@ public class MemberDto
 Return objects (with `{ }` braces), NOT arrays.
 
 #### ❌ WRONG
+
 ```json
 [
   { "id": 1, "name": "Distribution 1" },
@@ -468,6 +502,7 @@ Return objects (with `{ }` braces), NOT arrays.
 ```
 
 #### ✅ RIGHT
+
 ```json
 {
   "results": [
@@ -480,6 +515,7 @@ Return objects (with `{ }` braces), NOT arrays.
 **Reason:** Allows for future expansion (pagination, metadata, etc.) without breaking clients.
 
 **C# Pattern:**
+
 ```csharp
 // ❌ Wrong
 public class ListDistributionsEndpoint : Endpoint<EmptyRequest, List<DistributionDto>>
@@ -497,7 +533,7 @@ public class DistributionListResponse
 {
     [JsonPropertyName("results")]
     public List<DistributionDto> Results { get; set; }
-    
+
     // Future: Add pagination, metadata, etc.
     public PaginationMetadata Pagination { get; set; }
 }
@@ -510,25 +546,28 @@ public class DistributionListResponse
 Query parameters should be snake_case:
 
 #### ❌ WRONG
+
 ```
 GET /members?profitYear=2024&memberType=employee
 GET /members?firstName=John&lastName=Doe
 ```
 
 #### ✅ RIGHT
+
 ```
 GET /members?profit_year=2024&member_type=employee
 GET /members?first_name=John&last_name=Doe
 ```
 
 **C# FastEndpoints Configuration:**
+
 ```csharp
 public class SearchMembersRequest
 {
     [QueryParam]
     [JsonPropertyName("profit_year")]
     public int ProfitYear { get; set; }
-    
+
     [QueryParam]
     [JsonPropertyName("member_type")]
     public string MemberType { get; set; }  // "employee" or "beneficiary"
@@ -546,6 +585,7 @@ public class SearchMembersRequest
 Every endpoint MUST be protected with authentication and authorization.
 
 #### FastEndpoints Pattern
+
 ```csharp
 public override void Configure()
 {
@@ -556,6 +596,7 @@ public override void Configure()
 ```
 
 #### Policy-Based Authorization (REQUIRED)
+
 ```csharp
 // Define in Security/Policies.cs
 public static class Policy
@@ -570,7 +611,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(Policy.CanViewDistributions, policy =>
         policy.RequireRole("ADMINISTRATOR", "FINANCEMANAGER", "READONLY"));
-    
+
     options.AddPolicy(Policy.CanManageDistributions, policy =>
         policy.RequireRole("ADMINISTRATOR", "FINANCEMANAGER"));
 });
@@ -597,14 +638,14 @@ public override async Task<IResult> ExecuteAsync(ImpersonationRequest req, Cance
 {
     // Get authenticated user from context
     var authenticatedUserId = HttpContext.User.FindFirst("sub")?.Value;
-    
+
     // Query database for user's allowed roles
     var allowedRoles = await _authService.GetAllowedRolesAsync(authenticatedUserId, ct);
-    
+
     // Validate requested roles are subset of allowed
     if (!req.RequestedRoles.All(r => allowedRoles.Contains(r)))
         throw new UnauthorizedAccessException("Cannot assume requested roles");
-    
+
     // Proceed with impersonation context
     ...
 }
@@ -623,6 +664,7 @@ See: `COPILOT_INSTRUCTIONS.md` - Authentication & Authorization (A01/A07)
 All error responses MUST follow Problem JSON schema (RFC 7807).
 
 #### Problem JSON Structure
+
 ```json
 {
   "type": "https://api.example.com/errors/validation-error",
@@ -634,13 +676,14 @@ All error responses MUST follow Problem JSON schema (RFC 7807).
 ```
 
 #### C# Pattern
+
 ```csharp
 public override async Task<Results<Ok<T>, BadRequest, ProblemHttpResult>> ExecuteAsync(
     TRequest req, CancellationToken ct)
 {
     // ✅ Use domain errors
     var result = await _service.GetAsync(req.Id, ct);
-    
+
     if (!result.IsSuccess)
     {
         return result.Error.ErrorCode switch
@@ -652,7 +695,7 @@ public override async Task<Results<Ok<T>, BadRequest, ProblemHttpResult>> Execut
                 statusCode: 500)
         };
     }
-    
+
     return TypedResults.Ok(result.Value);
 }
 ```
@@ -664,6 +707,7 @@ public override async Task<Results<Ok<T>, BadRequest, ProblemHttpResult>> Execut
 **CRITICAL SECURITY:** Never include stack traces, SQL queries, or internal details in HTTP responses.
 
 #### ❌ WRONG
+
 ```json
 {
   "error": "NullReferenceException at line 42",
@@ -673,6 +717,7 @@ public override async Task<Results<Ok<T>, BadRequest, ProblemHttpResult>> Execut
 ```
 
 #### ✅ RIGHT
+
 ```json
 {
   "type": "https://api.example.com/errors/member-not-found",
@@ -683,6 +728,7 @@ public override async Task<Results<Ok<T>, BadRequest, ProblemHttpResult>> Execut
 ```
 
 **C# Logging Pattern:**
+
 ```csharp
 // ✅ Log internally (safe)
 _logger.LogError(ex, "Error processing member {MemberId}: {ErrorMessage}",
@@ -705,6 +751,7 @@ return Results.Problem(
 Every collection endpoint MUST support pagination.
 
 #### Query Parameters
+
 ```
 GET /distributions?limit=20&cursor=abc123
 ```
@@ -713,6 +760,7 @@ GET /distributions?limit=20&cursor=abc123
 - `cursor` - Pagination cursor (opaque string for next/previous page)
 
 #### Response Structure
+
 ```json
 {
   "results": [ {...}, {...} ],
@@ -725,12 +773,13 @@ GET /distributions?limit=20&cursor=abc123
 ```
 
 #### C# Pattern
+
 ```csharp
 public class PaginatedResponseDto<T>
 {
     [JsonPropertyName("results")]
     public List<T> Results { get; set; }
-    
+
     [JsonPropertyName("pagination")]
     public PaginationMetadata Pagination { get; set; }
 }
@@ -739,31 +788,31 @@ public class PaginationMetadata
 {
     [JsonPropertyName("cursor")]
     public string? Cursor { get; set; }
-    
+
     [JsonPropertyName("limit")]
     public int Limit { get; set; }
-    
+
     [JsonPropertyName("has_more")]
     public bool HasMore { get; set; }
 }
 
 // In endpoint
-public class ListDistributionsEndpoint : 
+public class ListDistributionsEndpoint :
     Endpoint<ListDistributionsRequest, PaginatedResponseDto<DistributionDto>>
 {
     public override void Configure()
     {
         Get("distributions");
     }
-    
+
     public override async Task<PaginatedResponseDto<DistributionDto>> ExecuteAsync(
         ListDistributionsRequest req, CancellationToken ct)
     {
         var limit = Math.Min(req.Limit ?? 20, 1000);
-        
-        var (items, nextCursor, hasMore) = 
+
+        var (items, nextCursor, hasMore) =
             await _service.GetPaginatedAsync(req.Cursor, limit, ct);
-        
+
         return new PaginatedResponseDto<DistributionDto>
         {
             Results = items,
@@ -783,16 +832,19 @@ public class ListDistributionsEndpoint :
 **Guideline:** [SHOULD prefer cursor-based pagination, avoid offset-based [160]](https://opensource.zalando.com/restful-api-guidelines/#160)
 
 **Why cursors over offset:**
+
 - ✅ Handles data changes between requests (inserts/deletes)
 - ✅ Efficient for large datasets
 - ✅ No N+1 query issues
 
 **Don't use offset-based:**
+
 ```
 ❌ GET /members?offset=100&limit=20  # Bad - prone to gaps/duplicates
 ```
 
 **Use cursor-based:**
+
 ```
 ✅ GET /members?cursor=abc123&limit=20  # Good - stable pagination
 ```
@@ -807,12 +859,12 @@ public class ListDistributionsEndpoint :
 
 #### Success Codes (2xx)
 
-| Code | Method | Meaning |
-|------|--------|---------|
-| 200 | GET, PUT, PATCH | Success; resource returned |
-| 201 | POST | Created; return new resource + Location header |
-| 204 | PUT, PATCH, DELETE | Success; no content |
-| 202 | POST, PUT, PATCH, DELETE | Accepted; async processing |
+| Code | Method                   | Meaning                                        |
+| ---- | ------------------------ | ---------------------------------------------- |
+| 200  | GET, PUT, PATCH          | Success; resource returned                     |
+| 201  | POST                     | Created; return new resource + Location header |
+| 204  | PUT, PATCH, DELETE       | Success; no content                            |
+| 202  | POST, PUT, PATCH, DELETE | Accepted; async processing                     |
 
 ```csharp
 // GET - Return resource
@@ -839,15 +891,15 @@ public override void Configure()
 
 #### Client Error Codes (4xx)
 
-| Code | Meaning | When to Use |
-|------|---------|------------|
-| 400 | Bad Request | Invalid input, validation failed |
-| 401 | Unauthorized | Missing/invalid authentication |
-| 403 | Forbidden | Authenticated but not authorized |
-| 404 | Not Found | Resource doesn't exist |
-| 409 | Conflict | Concurrent update conflict (optimistic lock) |
-| 422 | Unprocessable Entity | Semantically invalid (e.g., invalid state transition) |
-| 429 | Too Many Requests | Rate limit exceeded |
+| Code | Meaning              | When to Use                                           |
+| ---- | -------------------- | ----------------------------------------------------- |
+| 400  | Bad Request          | Invalid input, validation failed                      |
+| 401  | Unauthorized         | Missing/invalid authentication                        |
+| 403  | Forbidden            | Authenticated but not authorized                      |
+| 404  | Not Found            | Resource doesn't exist                                |
+| 409  | Conflict             | Concurrent update conflict (optimistic lock)          |
+| 422  | Unprocessable Entity | Semantically invalid (e.g., invalid state transition) |
+| 429  | Too Many Requests    | Rate limit exceeded                                   |
 
 ```csharp
 // Validation error -> 400
@@ -869,11 +921,11 @@ if (member == null)
 
 #### Server Error Codes (5xx)
 
-| Code | Meaning | When to Use |
-|------|---------|------------|
-| 500 | Internal Server Error | Unhandled exception, bug |
-| 502 | Bad Gateway | Upstream service error |
-| 503 | Service Unavailable | Maintenance, overload |
+| Code | Meaning               | When to Use              |
+| ---- | --------------------- | ------------------------ |
+| 500  | Internal Server Error | Unhandled exception, bug |
+| 502  | Bad Gateway           | Upstream service error   |
+| 503  | Service Unavailable   | Maintenance, overload    |
 
 ---
 
@@ -897,6 +949,7 @@ Content-Type: application/json
 ```
 
 **C# Implementation (via middleware or base endpoint):**
+
 ```csharp
 public override async Task<IResult> ExecuteAsync(TRequest req, CancellationToken ct)
 {
@@ -905,14 +958,14 @@ public override async Task<IResult> ExecuteAsync(TRequest req, CancellationToken
     {
         flowId = Guid.NewGuid().ToString();
     }
-    
+
     // Include in response
     HttpContext.Response.Headers["X-Flow-ID"] = flowId;
-    
+
     // Use in logging
     using var scope = _logger.BeginScope(new { FlowId = flowId });
     _logger.LogInformation("Processing request");
-    
+
     return await base.ExecuteAsync(req, ct);
 }
 ```
@@ -941,18 +994,21 @@ public override async Task<IResult> ExecuteAsync(TRequest req, CancellationToken
 When changing APIs:
 
 **DO:**
+
 - ✅ Add optional fields
 - ✅ Add new endpoints
 - ✅ Deprecate old endpoints (with warning)
 - ✅ Support both old and new for 6+ months
 
 **DON'T:**
+
 - ❌ Remove fields
 - ❌ Change field types
 - ❌ Change HTTP methods for existing endpoints
 - ❌ Change URL structure without migration path
 
 **Example: Adding a Field**
+
 ```csharp
 // Old version (still supported)
 public class MemberDto
@@ -966,7 +1022,7 @@ public class MemberDto
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    
+
     [JsonPropertyName("employment_status")]
     public string EmploymentStatus { get; set; } = "active";  // ✅ Optional with default
 }
@@ -985,10 +1041,11 @@ Version format: `MAJOR.MINOR.PATCH`
 Example: `1.2.3`
 
 **Document in OpenAPI:**
+
 ```yaml
 info:
   title: Profit Sharing API
-  version: 1.2.3  # ✅ Semantic versioning
+  version: 1.2.3 # ✅ Semantic versioning
 ```
 
 ---
@@ -1004,6 +1061,7 @@ OpenAPI 3.1 specification MUST be published for all APIs.
 **File location:** `/src/services/Demoulas.ProfitSharing.openapi.yaml`
 
 **Minimal Example:**
+
 ```yaml
 openapi: 3.1.0
 info:
@@ -1013,7 +1071,7 @@ info:
   x-audience: component-internal
   description: |
     Core API for profit sharing calculations and member management.
-    
+
     Authentication: OAuth 2.0 Bearer (Okta)
     Roles: ADMINISTRATOR, FINANCEMANAGER, READONLY
 
@@ -1037,7 +1095,7 @@ paths:
             type: integer
             default: 20
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
@@ -1047,9 +1105,9 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Distribution'
+                      $ref: "#/components/schemas/Distribution"
                   pagination:
-                    $ref: '#/components/schemas/Pagination'
+                    $ref: "#/components/schemas/Pagination"
 
     post:
       summary: Create distribution
@@ -1059,20 +1117,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateDistributionRequest'
+              $ref: "#/components/schemas/CreateDistributionRequest"
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Distribution'
-        '400':
+                $ref: "#/components/schemas/Distribution"
+        "400":
           description: Bad Request
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: "#/components/schemas/Problem"
 
 components:
   schemas:
@@ -1107,6 +1165,7 @@ components:
 Use this checklist when creating any new endpoint to ensure compliance:
 
 ### Design Phase
+
 - [ ] **Resource-based URL** - Uses nouns (not verbs)
   - Example: `POST /beneficiary-disbursements` not `POST /create-disbursement`
 - [ ] **Correct HTTP method** - GET/POST/PUT/DELETE match semantics
@@ -1119,6 +1178,7 @@ Use this checklist when creating any new endpoint to ensure compliance:
 - [ ] **≤3 nesting levels** - Don't over-nest resources
 
 ### API Design
+
 - [ ] **Status codes defined** - 200, 201, 204, 400, 404, 500 documented
 - [ ] **Request/response DTOs** - Clear, documented structure
 - [ ] **Pagination implemented** - Collection endpoints support `limit` and `cursor`
@@ -1126,6 +1186,7 @@ Use this checklist when creating any new endpoint to ensure compliance:
 - [ ] **Security policy** - Endpoint has appropriate authorization
 
 ### Implementation
+
 - [ ] **Snake_case JSON** - JSON serializer configured for snake_case
 - [ ] **Snake_case query params** - Query parameters use snake_case
 - [ ] **Top-level JSON objects** - Never return arrays at root
@@ -1134,6 +1195,7 @@ Use this checklist when creating any new endpoint to ensure compliance:
 - [ ] **Input validation** - FluentValidation rules defined
 
 ### Documentation
+
 - [ ] **Summary provided** - Endpoint `Summary()` property populated
 - [ ] **Description detailed** - Explain purpose and usage
 - [ ] **Example request** - `ExampleRequest` property shown
@@ -1141,13 +1203,16 @@ Use this checklist when creating any new endpoint to ensure compliance:
 - [ ] **OpenAPI updated** - Specification includes new endpoint
 
 ### Security Review
+
 - [ ] **Endpoint secured** - Policy applied via `Policies()`
 - [ ] **Authentication required** - Not marked `AllowAnonymous`
 - [ ] **Server-side validation** - Roles validated server-side
 - [ ] **No PII in logs** - Sensitive fields masked in telemetry
 - [ ] **No stack traces exposed** - Error responses generic
+- [ ] **CRITICAL: Age never calculated in frontend** - Age MUST be calculated backend-only. Frontend must never compute age from DOB (causes inconsistency and breaks sensitive data masking)
 
 ### Testing
+
 - [ ] **Unit tests** - Happy path and error cases
 - [ ] **Integration tests** - HTTP method semantics verified
 - [ ] **Authorization tests** - Policy enforcement tested
@@ -1166,31 +1231,31 @@ Use this checklist when creating any new endpoint to ensure compliance:
 
 ## Quick Links by Rule Number
 
-| Rule | Title |
-|------|-------|
-| [104] | MUST secure endpoints |
-| [105] | MUST define and assign permissions |
+| Rule  | Title                                        |
+| ----- | -------------------------------------------- |
+| [104] | MUST secure endpoints                        |
+| [105] | MUST define and assign permissions           |
 | [110] | MUST always return JSON objects as top-level |
-| [116] | MUST use semantic versioning |
-| [118] | MUST property names must be snake_case |
-| [129] | MUST use kebab-case for path segments |
-| [130] | MUST use snake_case for query parameters |
-| [134] | MUST pluralize resource names |
-| [141] | MUST keep URLs verb-free |
-| [142] | MUST use domain-specific resource names |
-| [143] | MUST identify resources and sub-resources |
-| [147] | SHOULD limit number of sub-resource levels |
-| [148] | MUST use HTTP methods correctly |
-| [159] | MUST support pagination |
-| [160] | SHOULD prefer cursor-based pagination |
-| [167] | MUST use JSON as payload |
-| [176] | MUST support problem JSON |
-| [177] | MUST not expose stack traces |
-| [192] | MUST publish OpenAPI specification |
-| [215] | MUST provide API identifiers |
-| [219] | MUST provide API audience |
-| [233] | MUST support X-Flow-ID |
-| [243] | MUST use official HTTP status codes |
+| [116] | MUST use semantic versioning                 |
+| [118] | MUST property names must be snake_case       |
+| [129] | MUST use kebab-case for path segments        |
+| [130] | MUST use snake_case for query parameters     |
+| [134] | MUST pluralize resource names                |
+| [141] | MUST keep URLs verb-free                     |
+| [142] | MUST use domain-specific resource names      |
+| [143] | MUST identify resources and sub-resources    |
+| [147] | SHOULD limit number of sub-resource levels   |
+| [148] | MUST use HTTP methods correctly              |
+| [159] | MUST support pagination                      |
+| [160] | SHOULD prefer cursor-based pagination        |
+| [167] | MUST use JSON as payload                     |
+| [176] | MUST support problem JSON                    |
+| [177] | MUST not expose stack traces                 |
+| [192] | MUST publish OpenAPI specification           |
+| [215] | MUST provide API identifiers                 |
+| [219] | MUST provide API audience                    |
+| [233] | MUST support X-Flow-ID                       |
+| [243] | MUST use official HTTP status codes          |
 
 ---
 

@@ -10,6 +10,7 @@ export interface EditDistributionFormRef {
   reset: () => void;
   isFormValid: () => boolean;
   isThirdPartyAddressRequired: () => boolean;
+  isFormDirty: () => boolean;
 }
 
 interface EditDistributionFormData {
@@ -90,7 +91,7 @@ const EditDistributionForm = forwardRef<EditDistributionFormRef, EditDistributio
       reset,
       setValue,
       watch,
-      formState: { errors, isValid }
+      formState: { errors, isValid, isDirty }
     } = useForm<EditDistributionFormData>({
       resolver: yupResolver(schema) as unknown as Resolver<EditDistributionFormData>,
       mode: "onChange",
@@ -296,7 +297,8 @@ const EditDistributionForm = forwardRef<EditDistributionFormRef, EditDistributio
         handleFormReset();
       },
       isFormValid: () => isValid,
-      isThirdPartyAddressRequired: () => thirdPartyTouched && !thirdPartyAddressValid
+      isThirdPartyAddressRequired: () => thirdPartyTouched && !thirdPartyAddressValid,
+      isFormDirty: () => isDirty
     }));
 
     return (

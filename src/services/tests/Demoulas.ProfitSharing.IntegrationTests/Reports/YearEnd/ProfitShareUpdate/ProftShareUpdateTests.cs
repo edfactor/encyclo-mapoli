@@ -12,6 +12,8 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpd
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
+
+// PAY444 Testing
 public class ProfitShareUpdateTests : PristineBaseTest
 {
     public ProfitShareUpdateTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
@@ -22,12 +24,11 @@ public class ProfitShareUpdateTests : PristineBaseTest
     public async Task ReportWithUpdates()
     {
         // Arrange
-        short profitYear = 2024;
+        short profitYear = 2025;
         ProfitShareUpdateReport profitShareUpdateService = CreateProfitShareUpdateService();
 
-        string reportName = "psupdate-pay444-r2.txt";
         profitShareUpdateService.TodaysDateTime =
-            new DateTime(2025, 08, 28, 21, 05, 0, DateTimeKind.Local); // time this report was generated
+            new DateTime(2025, 11, 14, 21, 15, 0, DateTimeKind.Local); // time this report was generated
 
         Stopwatch sw = Stopwatch.StartNew();
         // Act
@@ -38,10 +39,10 @@ public class ProfitShareUpdateTests : PristineBaseTest
                 Take = null,
                 ProfitYear = profitYear,
                 ContributionPercent = 15,
-                IncomingForfeitPercent = 4,
-                EarningsPercent = 5,
+                IncomingForfeitPercent = 0.876678m,
+                EarningsPercent = 9.280136m,
                 SecondaryEarningsPercent = 0,
-                MaxAllowedContributions = 76_500,
+                MaxAllowedContributions = 57_000,
                 BadgeToAdjust = 0,
                 BadgeToAdjust2 = 0,
                 AdjustContributionAmount = 0,
@@ -55,14 +56,14 @@ public class ProfitShareUpdateTests : PristineBaseTest
         // We cannot do a simple report to report comparison because I believe that READY's sorting random
         // when users have the same name.   To cope with this, we extract lines with employee/bene information and compare lines.
 
-        string expectedReport = LoadExpectedReport(reportName);
+        string expectedReport = ReadEmbeddedResource(".golden.R21-PAY444").Replace("\f", "\n\n");
 
         if (false)
         {
             // Enabling this path enables the diff program to pop up the differences
 
             // The sort order on READY is not great, this maybe tweaked soon.
-            string expected = HandleSortingOddness(LoadExpectedReport(reportName));
+            string expected = HandleSortingOddness(expectedReport);
             string actual = HandleSortingOddness(CollectLines(profitShareUpdateService.ReportLines));
             AssertReportsAreEquivalent(expected, actual);
         }
@@ -101,11 +102,14 @@ public class ProfitShareUpdateTests : PristineBaseTest
     }
 
 
+#if false
+      This needs a special report which we dont yet automatically generate
+
     [Fact]
     public async Task EnsureUpdateWithValues_andEmployeeAdjustment_MatchesReady()
     {
         // Arrange
-        short profitYear = 2024;
+        short profitYear = 2025;
         ProfitShareUpdateReport profitShareUpdateService = CreateProfitShareUpdateService();
         string reportName = "psupdate-pay444-r3.txt";
         profitShareUpdateService.TodaysDateTime =
@@ -137,6 +141,7 @@ public class ProfitShareUpdateTests : PristineBaseTest
 
         AssertReportsAreEquivalent(expected, actual);
     }
+#endif
 
     // I think that if two people have the same name, that READY is not picking a particular order.
     // In the obfuscated data there are sometimes 5 people with the same name.
@@ -237,12 +242,5 @@ public class ProfitShareUpdateTests : PristineBaseTest
         using Process? process = Process.Start(startInfo);
         process?.WaitForExit();
     }
-
-    public static string LoadExpectedReport(string resourceName)
-    {
-        using Stream? stream = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream($"Demoulas.ProfitSharing.IntegrationTests.Resources.{resourceName}");
-        using StreamReader reader = new(stream!);
-        return reader.ReadToEnd().Replace("\f", "\n\n");
-    }
+    
 }

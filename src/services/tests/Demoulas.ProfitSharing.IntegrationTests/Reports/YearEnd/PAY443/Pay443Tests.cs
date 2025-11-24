@@ -23,7 +23,7 @@ public class Pay443Tests : PristineBaseTest
     public async Task TestPay443()
     {
         // Get Response by parsing READY Report
-        string expectedReport = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R20-PAY443").Trim();
+        string expectedReport = ReadEmbeddedResource(".golden.R20-PAY443").Trim();
 
         ForfeituresAndPointsForYearResponseWithTotals expectedResponse = ReadyReportParser.ParseReport(expectedReport);
 

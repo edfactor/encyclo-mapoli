@@ -1,6 +1,7 @@
 ---
 applyTo: "src/ui/src/pages/MasterInquiry/**/*.*"
 ---
+
 # Master Inquiry Page - Technical Documentation
 
 ## Overview
@@ -67,7 +68,11 @@ src/ui/src/pages/MasterInquiry/
 The page operates as a state machine with four distinct modes:
 
 ```typescript
-export type ViewMode = "idle" | "searching" | "multipleMembers" | "memberDetails";
+export type ViewMode =
+  | "idle"
+  | "searching"
+  | "multipleMembers"
+  | "memberDetails";
 ```
 
 #### State Transitions
@@ -107,8 +112,8 @@ export interface MasterInquiryState {
     params: MasterInquiryRequest | null;
     results: SearchResponse | null;
     isSearching: boolean;
-    isManuallySearching: boolean;      // User-initiated vs pagination
-    isFetchingMembers: boolean;        // Separate loading for pagination
+    isManuallySearching: boolean; // User-initiated vs pagination
+    isFetchingMembers: boolean; // Separate loading for pagination
     noResultsMessage: string | null;
     error: string | null;
   };
@@ -132,7 +137,10 @@ export interface MasterInquiryState {
 ```typescript
 export type MasterInquiryAction =
   // Search actions
-  | { type: "SEARCH_START"; payload: { params: MasterInquiryRequest; isManual: boolean } }
+  | {
+      type: "SEARCH_START";
+      payload: { params: MasterInquiryRequest; isManual: boolean };
+    }
   | { type: "SEARCH_SUCCESS"; payload: { results: SearchResponse } }
   | { type: "SEARCH_FAILURE"; payload: { error: string } }
   | { type: "SEARCH_RESET" }
@@ -147,7 +155,10 @@ export type MasterInquiryAction =
 
   // Member details actions
   | { type: "MEMBER_DETAILS_FETCH_START" }
-  | { type: "MEMBER_DETAILS_FETCH_SUCCESS"; payload: { details: MemberDetails } }
+  | {
+      type: "MEMBER_DETAILS_FETCH_SUCCESS";
+      payload: { details: MemberDetails };
+    }
   | { type: "MEMBER_DETAILS_FETCH_FAILURE" }
 
   // Profit data actions
@@ -190,17 +201,26 @@ const schema = yup.object().shape({
     }
   ),
   startProfitMonth: monthValidator,
-  endProfitMonth: monthValidator.min(yup.ref("startProfitMonth"), "End month must be after start month"),
+  endProfitMonth: monthValidator.min(
+    yup.ref("startProfitMonth"),
+    "End month must be after start month"
+  ),
   socialSecurity: ssnValidator,
   name: yup.string().nullable(),
   badgeNumber: badgeNumberOrPSNValidator,
-  paymentType: yup.string().oneOf(["all", "hardship", "payoffs", "rollovers"]).default("all"),
-  memberType: yup.string().oneOf(["all", "employees", "beneficiaries", "none"]).default("all"),
+  paymentType: yup
+    .string()
+    .oneOf(["all", "hardship", "payoffs", "rollovers"])
+    .default("all"),
+  memberType: yup
+    .string()
+    .oneOf(["all", "employees", "beneficiaries", "none"])
+    .default("all"),
   contribution: positiveNumberValidator("Contribution"),
   earnings: positiveNumberValidator("Earnings"),
   forfeiture: positiveNumberValidator("Forfeiture"),
   payment: positiveNumberValidator("Payment"),
-  voids: yup.boolean().default(false)
+  voids: yup.boolean().default(false),
 });
 ```
 
@@ -223,6 +243,7 @@ const isBadgeNumberDisabled = hasSocialSecurity || hasName;
 ```
 
 **Helper Text Example**:
+
 - If SSN field has value → Name and Badge show: "Disabled: SSN field is in use. Press Reset to clear and re-enable."
 
 #### Badge Number Auto-Detection
@@ -236,12 +257,15 @@ const handleBadgeNumberChange = useCallback(
     if (badgeStr.length === 0) {
       memberType = "all";
     } else if (badgeStr.length >= 8) {
-      memberType = "beneficiaries";  // PSN numbers are longer
+      memberType = "beneficiaries"; // PSN numbers are longer
     } else {
-      memberType = "employees";      // Regular badge numbers
+      memberType = "employees"; // Regular badge numbers
     }
 
-    setValue("memberType", memberType as "all" | "employees" | "beneficiaries" | "none");
+    setValue(
+      "memberType",
+      memberType as "all" | "employees" | "beneficiaries" | "none"
+    );
   },
   [setValue]
 );
@@ -262,7 +286,12 @@ useEffect(() => {
       memberType: determineCorrectMemberType(badgeNumber),
       badgeNumber: Number(badgeNumber),
       endProfitYear: profitYear,
-      pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true }
+      pagination: {
+        skip: 0,
+        take: 5,
+        sortBy: "badgeNumber",
+        isSortDescending: true,
+      },
     };
 
     reset(formData);
@@ -280,29 +309,34 @@ useEffect(() => {
 #### Search Button Enablement
 
 Search button is enabled only when:
+
 1. Form is valid (no validation errors)
 2. At least one search criterion is provided (any field has value OR non-default memberType/paymentType)
 3. Not currently searching
 
 ```typescript
-const hasSearchCriteria = useMemo(() => {
-  const hasFieldValues =
-    hasValue(watchedBadgeNumber) ||
-    hasValue(watchedStartProfitMonth) ||
-    hasValue(watchedEndProfitMonth) ||
-    hasValue(watchedSocialSecurity) ||
-    hasValue(watchedName) ||
-    hasValue(watchedContribution) ||
-    hasValue(watchedEarnings) ||
-    hasValue(watchedForfeiture) ||
-    hasValue(watchedPayment);
+const hasSearchCriteria = useMemo(
+  () => {
+    const hasFieldValues =
+      hasValue(watchedBadgeNumber) ||
+      hasValue(watchedStartProfitMonth) ||
+      hasValue(watchedEndProfitMonth) ||
+      hasValue(watchedSocialSecurity) ||
+      hasValue(watchedName) ||
+      hasValue(watchedContribution) ||
+      hasValue(watchedEarnings) ||
+      hasValue(watchedForfeiture) ||
+      hasValue(watchedPayment);
 
-  const hasNonDefaultSelections =
-    watchedMemberType !== "all" ||
-    watchedPaymentType !== "all";
+    const hasNonDefaultSelections =
+      watchedMemberType !== "all" || watchedPaymentType !== "all";
 
-  return hasFieldValues || hasNonDefaultSelections;
-}, [/* dependencies */]);
+    return hasFieldValues || hasNonDefaultSelections;
+  },
+  [
+    /* dependencies */
+  ]
+);
 
 // In render
 <SearchAndReset
@@ -310,7 +344,7 @@ const hasSearchCriteria = useMemo(() => {
   handleReset={handleReset}
   isFetching={isSearching}
   disabled={!isValid || isSearching || !hasSearchCriteria}
-/>
+/>;
 ```
 
 ### 2. Parameter Transformation
@@ -325,34 +359,43 @@ export const transformSearchParams = (
   profitYear: number
 ): MasterInquiryRequest => {
   // Split PSN if needed (badge numbers >7 chars are PSN+suffix)
-  const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(data.badgeNumber?.toString());
+  const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(
+    data.badgeNumber?.toString()
+  );
 
   return {
     pagination: {
       skip: data.pagination?.skip || 0,
       take: data.pagination?.take || 5,
       sortBy: data.pagination?.sortBy || "badgeNumber",
-      isSortDescending: data.pagination?.isSortDescending ?? true
+      isSortDescending: data.pagination?.isSortDescending ?? true,
     },
     endProfitYear: data.endProfitYear ?? profitYear,
     ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
     ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
     ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
     ...(!!data.name && { name: data.name }),
-    ...(verifiedBadgeNumber !== undefined && { badgeNumber: verifiedBadgeNumber }),
+    ...(verifiedBadgeNumber !== undefined && {
+      badgeNumber: verifiedBadgeNumber,
+    }),
     ...(psnSuffix !== undefined && { psnSuffix }),
-    ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
-    ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
+    ...(!!data.paymentType && {
+      paymentType: paymentTypeGetNumberMap[data.paymentType],
+    }),
+    ...(!!data.memberType && {
+      memberType: memberTypeGetNumberMap[data.memberType],
+    }),
     ...(!!data.contribution && { contributionAmount: data.contribution }),
     ...(!!data.earnings && { earningsAmount: data.earnings }),
     ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
     ...(!!data.payment && { paymentAmount: data.payment }),
-    _timestamp: Date.now()
+    _timestamp: Date.now(),
   };
 };
 ```
 
 **Key Transformations**:
+
 - **PSN splitting**: Badge numbers >7 digits split into `badgeNumber` + `psnSuffix`
 - **String to number mappings**: `paymentType: "hardship"` → `paymentType: 1`
 - **Conditional inclusion**: Only include fields that have values (using spread with conditional)
@@ -376,10 +419,13 @@ const executeSearch = useCallback(
         startProfitMonth: params.startProfitMonth,
         endProfitMonth: params.endProfitMonth,
         memberType: params.memberType,
-        paymentType: params.paymentType
+        paymentType: params.paymentType,
       });
 
-      if (lastSearchParamsRef.current === currentParamsString && state.search.isSearching) {
+      if (
+        lastSearchParamsRef.current === currentParamsString &&
+        state.search.isSearching
+      ) {
         console.log("[useMasterInquiry] Skipping duplicate executeSearch call");
         return;
       }
@@ -391,21 +437,35 @@ const executeSearch = useCallback(
       // Minimum 300ms loading state (UX improvement - prevents flash)
       const [response] = await Promise.all([
         triggerSearch(params).unwrap(),
-        new Promise((resolve) => setTimeout(resolve, 300))
+        new Promise((resolve) => setTimeout(resolve, 300)),
       ]);
 
-      if (response && (Array.isArray(response) ? response.length > 0 : response.results?.length > 0)) {
+      if (
+        response &&
+        (Array.isArray(response)
+          ? response.length > 0
+          : response.results?.length > 0)
+      ) {
         const results = Array.isArray(response) ? response : response.results;
-        const total = Array.isArray(response) ? response.length : response.total;
+        const total = Array.isArray(response)
+          ? response.length
+          : response.total;
 
-        dispatch({ type: "SEARCH_SUCCESS", payload: { results: { results, total } } });
+        dispatch({
+          type: "SEARCH_SUCCESS",
+          payload: { results: { results, total } },
+        });
       } else {
         // No results - dispatch success with empty array
-        dispatch({ type: "SEARCH_SUCCESS", payload: { results: { results: [], total: 0 } } });
+        dispatch({
+          type: "SEARCH_SUCCESS",
+          payload: { results: { results: [], total: 0 } },
+        });
 
         // Show appropriate "not found" message based on search type
         const isSimple = isSimpleSearch(searchFormData);
-        const isBeneficiarySearch = masterInquiryRequestParams?.memberType === "beneficiaries";
+        const isBeneficiarySearch =
+          masterInquiryRequestParams?.memberType === "beneficiaries";
 
         let alertMessage;
         if (isSimple && isBeneficiarySearch) {
@@ -420,12 +480,15 @@ const executeSearch = useCallback(
       }
     } catch (error) {
       console.error("Search failed:", error);
-      dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
+      dispatch({
+        type: "SEARCH_FAILURE",
+        payload: { error: error?.toString() || "Unknown error" },
+      });
       addAlert({
         id: 999,
         severity: "Error",
         message: "Search Failed",
-        description: "The search request failed. Please try again."
+        description: "The search request failed. Please try again.",
       } as MissiveResponse);
     }
   },
@@ -434,6 +497,7 @@ const executeSearch = useCallback(
 ```
 
 **Key Features**:
+
 - **Deduplication**: Prevents duplicate API calls using ref-based comparison
 - **Minimum loading time**: Always shows spinner for at least 300ms (prevents flash for fast queries)
 - **Smart error messages**: Different messages for simple searches vs complex searches
@@ -464,12 +528,13 @@ Shown when search returns 2+ members.
       if (event.data) {
         handleMemberClick(event.data);
       }
-    }
+    },
   }}
 />
 ```
 
 **Interaction**:
+
 - Click anywhere on row → Select member
 - Click badge link → Select member (same action)
 
@@ -484,7 +549,7 @@ Shown when search returns 2+ members.
   }}
   pageSize={memberGridPagination.pageSize}
   setPageSize={(value: number) => {
-    handlePaginationChange(0, value);  // Reset to page 0 on size change
+    handlePaginationChange(0, value); // Reset to page 0 on size change
   }}
   recordCount={searchResults.total}
 />
@@ -501,7 +566,7 @@ const handleMemberClick = (member: EmployeeDetails) => {
     id: Number(member.id),
     ssn: Number(member.ssn),
     badgeNumber: Number(member.badgeNumber),
-    psnSuffix: Number(member.psnSuffix)
+    psnSuffix: Number(member.psnSuffix),
   });
 };
 ```
@@ -534,14 +599,14 @@ useEffect(() => {
 
   lastMemberDetailsCallRef.current = {
     memberType: currentMember.memberType,
-    id: currentMember.id
+    id: currentMember.id,
   };
 
   dispatch({ type: "MEMBER_DETAILS_FETCH_START" });
   triggerMemberDetails({
     memberType: currentMember.memberType,
     id: currentMember.id,
-    profitYear: state.search.params?.endProfitYear
+    profitYear: state.search.params?.endProfitYear,
   })
     .unwrap()
     .then((details) => {
@@ -551,7 +616,9 @@ useEffect(() => {
       if (details.missives && details.missives.length > 0) {
         if (Array.isArray(missives) && missives.length > 0) {
           const localMissives: MissiveResponse[] = details.missives
-            .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
+            .map((id: number) =>
+              missives.find((m: MissiveResponse) => m.id === id)
+            )
             .filter(Boolean) as MissiveResponse[];
 
           if (localMissives.length > 0) {
@@ -561,14 +628,21 @@ useEffect(() => {
       }
 
       // Special alert: If searching "all" but found beneficiary
-      if (!details.isEmployee && masterInquiryRequestParams?.memberType === "all") {
+      if (
+        !details.isEmployee &&
+        masterInquiryRequestParams?.memberType === "all"
+      ) {
         addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(details.ssn));
       }
     })
     .catch(() => {
       dispatch({ type: "MEMBER_DETAILS_FETCH_FAILURE" });
     });
-}, [state.selection.selectedMember, state.search.params?.endProfitYear, triggerMemberDetails]);
+}, [
+  state.selection.selectedMember,
+  state.search.params?.endProfitYear,
+  triggerMemberDetails,
+]);
 ```
 
 **Missive Processing**: API returns array of missive IDs (e.g., `[1, 5, 12]`). Hook cross-references with Redux store's missive definitions to get full alert objects, then displays them.
@@ -583,7 +657,8 @@ useEffect(() => {
 
   // Skip if we just called with same member (pagination changes handled separately)
   if (
-    lastProfitDetailsCallRef.current?.memberType === profitFetchDeps.memberType &&
+    lastProfitDetailsCallRef.current?.memberType ===
+      profitFetchDeps.memberType &&
     lastProfitDetailsCallRef.current?.id === profitFetchDeps.id
   ) {
     console.log("[useMasterInquiry] Skipping duplicate profit details fetch");
@@ -592,7 +667,7 @@ useEffect(() => {
 
   lastProfitDetailsCallRef.current = {
     memberType: profitFetchDeps.memberType,
-    id: profitFetchDeps.id
+    id: profitFetchDeps.id,
   };
 
   dispatch({ type: "PROFIT_DATA_FETCH_START" });
@@ -602,7 +677,7 @@ useEffect(() => {
     skip: profitFetchDeps.pageNumber * profitFetchDeps.pageSize,
     take: profitFetchDeps.pageSize,
     sortBy: profitFetchDeps.sortBy,
-    isSortDescending: profitFetchDeps.isSortDescending
+    isSortDescending: profitFetchDeps.isSortDescending,
   })
     .unwrap()
     .then((profitData) => {
@@ -624,9 +699,11 @@ const profitFetchDeps = useMemo(
     pageNumber: profitGridPagination.pageNumber,
     pageSize: profitGridPagination.pageSize,
     sortBy: profitGridPagination.sortParams.sortBy,
-    isSortDescending: profitGridPagination.sortParams.isSortDescending
+    isSortDescending: profitGridPagination.sortParams.isSortDescending,
   }),
-  [/* dependencies */]
+  [
+    /* dependencies */
+  ]
 );
 ```
 
@@ -679,22 +756,43 @@ Displays detailed member information in four columns.
 ```typescript
 const summarySection = useMemo(() => {
   if (!memberDetails) return [];
-  const { firstName, lastName, address, addressCity, addressState, addressZipCode,
-          phoneNumber, isEmployee, workLocation, storeNumber } = memberDetails;
+  const {
+    firstName,
+    lastName,
+    address,
+    addressCity,
+    addressState,
+    addressZipCode,
+    phoneNumber,
+    isEmployee,
+    workLocation,
+    storeNumber,
+  } = memberDetails;
 
   const formattedZip = addressZipCode ? formatZipCode(addressZipCode) : "";
-  const cityStateZip = [formattedCity, formattedState].filter(Boolean).join(", ") +
-                       (formattedZip ? ` ${formattedZip}` : "");
+  const cityStateZip =
+    [formattedCity, formattedState].filter(Boolean).join(", ") +
+    (formattedZip ? ` ${formattedZip}` : "");
 
   return [
     { label: "Name", value: `${lastName}, ${firstName}` },
     { label: "Address", value: `${address}` },
     { label: "", value: cityStateZip },
     { label: "Phone #", value: formatPhoneNumber(phoneNumber) },
-    ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
-    ...(isEmployee ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }] : []),
-    { label: "Enrolled", value: enrollmentStatus.enrolled.replace(/\s*\(\d+\)/, "") },
-    { label: "Forfeited", value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "") }
+    ...(isEmployee
+      ? [{ label: "Work Location", value: workLocation || "N/A" }]
+      : []),
+    ...(isEmployee
+      ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }]
+      : []),
+    {
+      label: "Enrolled",
+      value: enrollmentStatus.enrolled.replace(/\s*\(\d+\)/, ""),
+    },
+    {
+      label: "Forfeited",
+      value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, ""),
+    },
   ];
 }, [memberDetails, enrollmentStatus]);
 ```
@@ -718,11 +816,12 @@ const personalSection = useMemo(() => {
     }
   }
 
-  // Age calculation
-  const age = dateOfBirth
-    ? Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
-    : 0;
-  const dobDisplay = dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A";
+  // CRITICAL: DO NOT CALCULATE AGE IN FRONTEND
+  // Age must be provided by backend and never calculated in the frontend because:
+  // 1. Frontend calculation will be inconsistent with backend (timezone, calculation timing)
+  // 2. Age is sensitive data that must be masked for unprivileged users
+  // 3. Backend has authoritative date references for age calculation
+  const dobDisplay = dateOfBirth ? mmDDYYFormat(dateOfBirth) : "N/A";
 
   return [
     /* badge/psn fields */,
@@ -739,13 +838,43 @@ const personalSection = useMemo(() => {
 ```typescript
 const milestoneSection = useMemo(() => {
   return [
-    ...(isEmployee ? [{ label: "Hire Date", value: hireDate ? mmDDYYFormat(hireDate) : "N/A" }] : []),
-    ...(isEmployee ? [{ label: "Full Time Date", value: fullTimeDate ? mmDDYYFormat(fullTimeDate) : "N/A" }] : []),
-    ...(isEmployee ? [{ label: "Termination Date", value: terminationDate ? mmDDYYFormat(terminationDate) : "N/A" }] : []),
-    ...(isEmployee ? [{ label: "Termination Reason", value: terminationReason || "N/A" }] : []),
-    ...(isEmployee ? [{ label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : "N/A" }] : []),
+    ...(isEmployee
+      ? [
+          {
+            label: "Hire Date",
+            value: hireDate ? mmDDYYFormat(hireDate) : "N/A",
+          },
+        ]
+      : []),
+    ...(isEmployee
+      ? [
+          {
+            label: "Full Time Date",
+            value: fullTimeDate ? mmDDYYFormat(fullTimeDate) : "N/A",
+          },
+        ]
+      : []),
+    ...(isEmployee
+      ? [
+          {
+            label: "Termination Date",
+            value: terminationDate ? mmDDYYFormat(terminationDate) : "N/A",
+          },
+        ]
+      : []),
+    ...(isEmployee
+      ? [{ label: "Termination Reason", value: terminationReason || "N/A" }]
+      : []),
+    ...(isEmployee
+      ? [
+          {
+            label: "Re-Hire Date",
+            value: reHireDate ? mmDDYYFormat(reHireDate) : "N/A",
+          },
+        ]
+      : []),
     { label: "ETVA", value: numberToCurrency(currentEtva) },
-    { label: "Allocation From", value: numberToCurrency(allocationFromAmount) }
+    { label: "Allocation From", value: numberToCurrency(allocationFromAmount) },
   ];
 }, [memberDetails]);
 ```
@@ -754,24 +883,58 @@ const milestoneSection = useMemo(() => {
 
 ```typescript
 const planSection = useMemo(() => {
-  const yearLabel = profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
+  const yearLabel =
+    profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
 
   // Current vested balance highlighted in bold blue (per PS-1897)
-  const formattedCurrentVested = currentVestedAmount == null ? "N/A" : (
-    <Typography component="span" variant="body2" sx={{ fontWeight: "bold", color: "#0258A5" }}>
-      {numberToCurrency(currentVestedAmount)}
-    </Typography>
-  );
+  const formattedCurrentVested =
+    currentVestedAmount == null ? (
+      "N/A"
+    ) : (
+      <Typography
+        component="span"
+        variant="body2"
+        sx={{ fontWeight: "bold", color: "#0258A5" }}
+      >
+        {numberToCurrency(currentVestedAmount)}
+      </Typography>
+    );
 
   return [
-    { label: "Begin Balance", value: beginPSAmount == null ? "N/A" : numberToCurrency(beginPSAmount) },
-    { label: "Begin Vested Balance", value: beginVestedAmount == null ? "N/A" : numberToCurrency(beginVestedAmount) },
-    { label: `${yearLabel} Balance`, value: currentPSAmount == null ? "N/A" : numberToCurrency(currentPSAmount) },
+    {
+      label: "Begin Balance",
+      value: beginPSAmount == null ? "N/A" : numberToCurrency(beginPSAmount),
+    },
+    {
+      label: "Begin Vested Balance",
+      value:
+        beginVestedAmount == null ? "N/A" : numberToCurrency(beginVestedAmount),
+    },
+    {
+      label: `${yearLabel} Balance`,
+      value:
+        currentPSAmount == null ? "N/A" : numberToCurrency(currentPSAmount),
+    },
     { label: `${yearLabel} Vested Balance`, value: formattedCurrentVested },
-    ...(isEmployee ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }] : []),
+    ...(isEmployee
+      ? [
+          {
+            label: "Profit Sharing Hours",
+            value: formatNumberWithComma(yearToDateProfitSharingHours),
+          },
+        ]
+      : []),
     ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
     { label: "Vested Percent", value: formatPercentage(percentageVested) },
-    { label: "Contributions in Last Year", value: receivedContributionsLastYear == null ? "N/A" : receivedContributionsLastYear ? "Y" : "N" }
+    {
+      label: "Contributions in Last Year",
+      value:
+        receivedContributionsLastYear == null
+          ? "N/A"
+          : receivedContributionsLastYear
+          ? "Y"
+          : "N",
+    },
   ];
 }, [memberDetails, profitYear]);
 ```
@@ -804,8 +967,8 @@ Shows year-by-year profit sharing data for the selected member.
       mode: "multiRow",
       checkboxes: false,
       headerCheckbox: false,
-      enableClickSelection: false
-    }
+      enableClickSelection: false,
+    },
   }}
 />
 ```
@@ -828,7 +991,14 @@ const MasterInquiryContent = memo(() => {
 });
 
 const MasterInquiryMemberGrid = memo(
-  ({ searchResults, onMemberSelect, memberGridPagination, onPaginationChange, onSortChange, isLoading }) => {
+  ({
+    searchResults,
+    onMemberSelect,
+    memberGridPagination,
+    onPaginationChange,
+    onSortChange,
+    isLoading,
+  }) => {
     // Component logic
   },
   (prevProps, nextProps) => {
@@ -836,9 +1006,12 @@ const MasterInquiryMemberGrid = memo(
     return (
       prevProps.searchResults.results === nextProps.searchResults.results &&
       prevProps.searchResults.total === nextProps.searchResults.total &&
-      prevProps.memberGridPagination.pageNumber === nextProps.memberGridPagination.pageNumber &&
-      prevProps.memberGridPagination.pageSize === nextProps.memberGridPagination.pageSize &&
-      prevProps.memberGridPagination.sortParams === nextProps.memberGridPagination.sortParams &&
+      prevProps.memberGridPagination.pageNumber ===
+        nextProps.memberGridPagination.pageNumber &&
+      prevProps.memberGridPagination.pageSize ===
+        nextProps.memberGridPagination.pageSize &&
+      prevProps.memberGridPagination.sortParams ===
+        nextProps.memberGridPagination.sortParams &&
       prevProps.isLoading === nextProps.isLoading &&
       prevProps.onMemberSelect === nextProps.onMemberSelect &&
       prevProps.onPaginationChange === nextProps.onPaginationChange &&
@@ -856,12 +1029,23 @@ Uses refs to track last API call parameters:
 
 ```typescript
 const lastSearchParamsRef = useRef<string | null>(null);
-const lastMemberDetailsCallRef = useRef<{ memberType: number; id: number } | null>(null);
-const lastProfitDetailsCallRef = useRef<{ memberType: number; id: number } | null>(null);
+const lastMemberDetailsCallRef = useRef<{
+  memberType: number;
+  id: number;
+} | null>(null);
+const lastProfitDetailsCallRef = useRef<{
+  memberType: number;
+  id: number;
+} | null>(null);
 
 // In executeSearch
-const currentParamsString = JSON.stringify({ /* search params */ });
-if (lastSearchParamsRef.current === currentParamsString && state.search.isSearching) {
+const currentParamsString = JSON.stringify({
+  /* search params */
+});
+if (
+  lastSearchParamsRef.current === currentParamsString &&
+  state.search.isSearching
+) {
   console.log("[useMasterInquiry] Skipping duplicate executeSearch call");
   return;
 }
@@ -878,7 +1062,9 @@ Member details sections are computed with `useMemo`:
 const summarySection = useMemo(() => {
   if (!memberDetails) return [];
   // Compute summary data
-  return [/* array of label/value pairs */];
+  return [
+    /* array of label/value pairs */
+  ];
 }, [memberDetails, enrollmentStatus]);
 ```
 
@@ -894,9 +1080,11 @@ const profitFetchDeps = useMemo(
     pageNumber: profitGridPagination.pageNumber,
     pageSize: profitGridPagination.pageSize,
     sortBy: profitGridPagination.sortParams.sortBy,
-    isSortDescending: profitGridPagination.sortParams.isSortDescending
+    isSortDescending: profitGridPagination.sortParams.isSortDescending,
   }),
-  [/* dependencies */]
+  [
+    /* dependencies */
+  ]
 );
 ```
 
@@ -918,14 +1106,14 @@ const memberGridPagination = useGridPagination({
   initialPageSize: 5,
   initialSortBy: "badgeNumber",
   initialSortDescending: true,
-  onPaginationChange: handleMemberGridPaginationChange
+  onPaginationChange: handleMemberGridPaginationChange,
 });
 
 const profitGridPagination = useGridPagination({
   initialPageSize: 25,
   initialSortBy: "profitYear",
   initialSortDescending: true,
-  onPaginationChange: handleProfitGridPaginationChange
+  onPaginationChange: handleProfitGridPaginationChange,
 });
 ```
 
@@ -945,17 +1133,25 @@ const handleMemberGridPaginationChange = useCallback(
           skip: pageNumber * pageSize,
           take: pageSize,
           sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        }
+          isSortDescending: sortParams.isSortDescending,
+        },
       })
         .unwrap()
         .then((response: SearchResponse | SearchResponse["results"]) => {
           const results = Array.isArray(response) ? response : response.results;
-          const total = Array.isArray(response) ? response.length : response.total;
-          dispatch({ type: "MEMBERS_FETCH_SUCCESS", payload: { results: { results, total } } });
+          const total = Array.isArray(response)
+            ? response.length
+            : response.total;
+          dispatch({
+            type: "MEMBERS_FETCH_SUCCESS",
+            payload: { results: { results, total } },
+          });
         })
         .catch((error: Error) => {
-          dispatch({ type: "MEMBERS_FETCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
+          dispatch({
+            type: "MEMBERS_FETCH_FAILURE",
+            payload: { error: error?.toString() || "Unknown error" },
+          });
         });
     }
   },
@@ -978,11 +1174,14 @@ const handleProfitGridPaginationChange = useCallback(
         skip: pageNumber * pageSize,
         take: pageSize,
         sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
+        isSortDescending: sortParams.isSortDescending,
       })
         .unwrap()
         .then((profitData) => {
-          dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
+          dispatch({
+            type: "PROFIT_DATA_FETCH_SUCCESS",
+            payload: { profitData },
+          });
         });
     }
   },
@@ -1010,7 +1209,7 @@ addAlert({
   id: 911,
   severity: "Error",
   message: "Member Not Found",
-  description: "No member found with the provided badge number."
+  description: "No member found with the provided badge number.",
 });
 
 // Multiple alerts (from API response)
@@ -1023,7 +1222,9 @@ clearAlerts();
 ### Alert Display
 
 ```typescript
-{missiveAlerts.length > 0 && <MissiveAlerts />}
+{
+  missiveAlerts.length > 0 && <MissiveAlerts />;
+}
 ```
 
 **Location**: Displays at top of page (in search filter accordion area) and at bottom of member details.
@@ -1034,7 +1235,8 @@ Three different messages based on search type:
 
 ```typescript
 const isSimple = isSimpleSearch(searchFormData);
-const isBeneficiarySearch = masterInquiryRequestParams?.memberType === "beneficiaries";
+const isBeneficiarySearch =
+  masterInquiryRequestParams?.memberType === "beneficiaries";
 
 let alertMessage;
 if (isSimple && isBeneficiarySearch) {
@@ -1073,12 +1275,14 @@ MasterInquiry/
 ### Key Test Scenarios
 
 **Reducer Tests** (`useMasterInquiryReducer.test.tsx`):
+
 - State transitions for all actions
 - View mode logic (idle → searching → multipleMembers → memberDetails)
 - Single result auto-selection
 - Error handling
 
 **Hook Tests** (`useMasterInquiry.test.tsx`):
+
 - Search execution flow
 - Member selection and dependent fetches
 - Pagination handlers
@@ -1086,11 +1290,13 @@ MasterInquiry/
 - Duplicate request prevention
 
 **Transformation Tests** (`transformSearchParams.test.ts`):
+
 - PSN splitting logic
 - Conditional field inclusion
 - Enum mappings (paymentType, memberType)
 
 **Component Tests**:
+
 - Rendering with various data shapes
 - Conditional field display (employee vs beneficiary)
 - User interactions (clicks, pagination)
@@ -1108,7 +1314,7 @@ return [
   { label: "Name", value: fullName },
   ...(isEmployee ? [{ label: "Store", value: storeNumber }] : []),
   ...(isEmployee ? [{ label: "Department", value: department }] : []),
-  { label: "SSN", value: ssn }
+  { label: "SSN", value: ssn },
 ];
 ```
 
@@ -1130,6 +1336,7 @@ const currentSearchParams = searchParamsRef.current;
 ```
 
 **Use Cases**:
+
 - Deduplication keys
 - Latest values in closures (avoiding stale closure issues)
 
@@ -1138,7 +1345,7 @@ const currentSearchParams = searchParamsRef.current;
 ```typescript
 const [response] = await Promise.all([
   triggerSearch(params).unwrap(),
-  new Promise((resolve) => setTimeout(resolve, 300))
+  new Promise((resolve) => setTimeout(resolve, 300)),
 ]);
 ```
 
@@ -1148,7 +1355,10 @@ const [response] = await Promise.all([
 
 ```typescript
 export type MasterInquiryAction =
-  | { type: "SEARCH_START"; payload: { params: MasterInquiryRequest; isManual: boolean } }
+  | {
+      type: "SEARCH_START";
+      payload: { params: MasterInquiryRequest; isManual: boolean };
+    }
   | { type: "SEARCH_SUCCESS"; payload: { results: SearchResponse } }
   | { type: "SEARCH_FAILURE"; payload: { error: string } };
 
@@ -1161,19 +1371,23 @@ dispatch({ type: "SEARCH_SUCCESS", payload: { results } });
 ### 5. Progressive Disclosure Rendering
 
 ```typescript
-{showMemberGrid && searchResults && !isFetchingMembers && (
-  <MasterInquiryMemberGrid {...props} />
-)}
+{
+  showMemberGrid && searchResults && !isFetchingMembers && (
+    <MasterInquiryMemberGrid {...props} />
+  );
+}
 
-{selectedMember && (
-  <Grid sx={{ display: showMemberDetails ? "block" : "none" }}>
-    {!isFetchingMemberDetails && memberDetails ? (
-      <MasterInquiryMemberDetails {...props} />
-    ) : (
-      <CircularProgress />
-    )}
-  </Grid>
-)}
+{
+  selectedMember && (
+    <Grid sx={{ display: showMemberDetails ? "block" : "none" }}>
+      {!isFetchingMemberDetails && memberDetails ? (
+        <MasterInquiryMemberDetails {...props} />
+      ) : (
+        <CircularProgress />
+      )}
+    </Grid>
+  );
+}
 ```
 
 **Pattern**: Render structure always present, use CSS `display: none` to hide. Prevents layout shift during async loads.
@@ -1187,6 +1401,7 @@ dispatch({ type: "SEARCH_SUCCESS", payload: { results } });
 **Hook**: `useLazySearchProfitMasterInquiryQuery()`
 
 **Request**:
+
 ```typescript
 interface MasterInquiryRequest {
   pagination: {
@@ -1202,8 +1417,8 @@ interface MasterInquiryRequest {
   name?: string;
   badgeNumber?: number;
   psnSuffix?: number;
-  paymentType?: number;       // 0=all, 1=hardship, 2=payoffs, 3=rollovers
-  memberType?: number;         // 0=all, 1=employees, 2=beneficiaries, 3=none
+  paymentType?: number; // 0=all, 1=hardship, 2=payoffs, 3=rollovers
+  memberType?: number; // 0=all, 1=employees, 2=beneficiaries, 3=none
   contributionAmount?: number;
   earningsAmount?: number;
   forfeitureAmount?: number;
@@ -1213,6 +1428,7 @@ interface MasterInquiryRequest {
 ```
 
 **Response**:
+
 ```typescript
 interface SearchResponse {
   results: EmployeeDetails[];
@@ -1225,6 +1441,7 @@ interface SearchResponse {
 **Hook**: `useLazyGetProfitMasterInquiryMemberQuery()`
 
 **Request**:
+
 ```typescript
 {
   memberType: number;  // 1=employee, 2=beneficiary
@@ -1234,6 +1451,7 @@ interface SearchResponse {
 ```
 
 **Response**:
+
 ```typescript
 interface MemberDetails {
   firstName: string;
@@ -1246,8 +1464,8 @@ interface MemberDetails {
   currentPSAmount: number;
   currentVestedAmount: number;
   percentageVested: number;
-  missives?: number[];         // Array of missive IDs to display
-  badgesOfDuplicateSsns?: number[];  // Alert user to duplicate SSNs
+  missives?: number[]; // Array of missive IDs to display
+  badgesOfDuplicateSsns?: number[]; // Alert user to duplicate SSNs
   // ... many more fields
 }
 ```
@@ -1257,6 +1475,7 @@ interface MemberDetails {
 **Hook**: `useLazyGetProfitMasterInquiryMemberDetailsQuery()`
 
 **Request**:
+
 ```typescript
 {
   memberType: number;
@@ -1269,6 +1488,7 @@ interface MemberDetails {
 ```
 
 **Response**:
+
 ```typescript
 interface ProfitData {
   results: Array<{
@@ -1291,10 +1511,12 @@ interface ProfitData {
 ### State Slices Used
 
 1. **`inquiry` slice** (`reduxstore/slices/inquirySlice`)
+
    - `masterInquiryRequestParams`: Persists search parameters for breadcrumbs/navigation
    - Actions: `setMasterInquiryRequestParams`, `clearMasterInquiryRequestParams`
 
 2. **`lookups` slice**
+
    - `missives`: Array of all possible alert definitions
    - Used to cross-reference missive IDs from API responses
 
@@ -1312,3 +1534,59 @@ dispatch(clearMasterInquiryRequestParams());
 dispatch(clearMasterInquiryData());
 dispatch(clearMasterInquiryGroupingData());
 ```
+
+---
+
+## Critical Security & Data Rules
+
+### DO NOT Calculate Age in Frontend
+
+**CRITICAL VIOLATION**: The following is STRICTLY PROHIBITED:
+
+```typescript
+// WRONG: DO NOT DO THIS
+const age = Math.floor(
+  (Date.now() - new Date(dateOfBirth).getTime()) /
+    (1000 * 60 * 60 * 24 * 365.25)
+);
+const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
+```
+
+**Why This Is Critical**:
+
+1. **Backend Inconsistency**: Frontend age calculations will diverge from backend calculations due to:
+
+   - Different timezones
+   - Timing differences in calculation
+   - Different date references used for calculation
+   - This causes data integrity issues and user confusion
+
+2. **Sensitive Data**: Age is classified as sensitive data that must be:
+
+   - Masked for users without elevated privileges
+   - Calculated centrally by backend with authority
+   - Never exposed via frontend logic where it could be manipulated
+
+3. **Privacy/Security**: Unprivileged users should never see calculated ages; the backend determines what fields are visible based on user role
+
+**Correct Pattern**:
+
+```typescript
+// CORRECT: Display DOB only, let backend handle age if needed
+const dobDisplay = dateOfBirth ? mmDDYYFormat(dateOfBirth) : "N/A";
+
+return [
+  { label: "DOB", value: dobDisplay },
+  // If age display is required by business logic, it MUST come from backend
+  // in the MemberDetails response, never calculated in frontend
+];
+```
+
+**If Age Display Is Required**:
+
+- Add an `Age` field to the `MemberDetails` API response
+- Backend calculates age with authoritative date references
+- Frontend displays the backend-provided value directly
+- Access control applied at backend: mask/exclude age for unprivileged users
+
+---

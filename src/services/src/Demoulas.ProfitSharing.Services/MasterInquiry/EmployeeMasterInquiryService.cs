@@ -162,11 +162,12 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 .Include(d => d.TerminationCode)
                 .Include(d => d.PayClassification)
                 .Include(d => d.Gender)
-                .Where(d => (d.Id == id || d.BadgeNumber == id))
+                .Where(d => d.Id == id)
                 .Select(d => new
                 {
                     d.Id,
                     d.ContactInfo.FirstName,
+                    d.ContactInfo.MiddleName,
                     d.ContactInfo.LastName,
                     d.ContactInfo.PhoneNumber,
                     d.Address.City,
@@ -220,7 +221,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
             if (memberData == null)
             {
                 _logger.LogInformation("Employee not found for ID: {EmployeeId}", id);
-                return (0, new MemberDetails { Id = 0 });
+                return (0, new MemberDetails { Id = 0, FirstName = "", MiddleName = "", LastName = "" });
             }
 
             _logger.LogDebug("Retrieved employee details for ID: {EmployeeId}, Badge: {BadgeNumber}, SSN: {MaskedSsn}",
@@ -257,6 +258,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 IsEmployee = true,
                 Id = memberData.Id,
                 FirstName = memberData.FirstName,
+                MiddleName = memberData.MiddleName,
                 LastName = memberData.LastName,
                 AddressCity = memberData.City!,
                 AddressState = memberData.State!,
@@ -327,6 +329,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     d.Id,
                     d.ContactInfo.FullName,
                     d.ContactInfo.FirstName,
+                    d.ContactInfo.MiddleName,
                     d.ContactInfo.LastName,
                     d.ContactInfo.PhoneNumber,
                     d.Address.City,
@@ -415,6 +418,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     IsEmployee = true,
                     Id = memberData.Id,
                     FirstName = memberData.FirstName,
+                    MiddleName = memberData.MiddleName,
                     LastName = memberData.LastName,
                     AddressCity = memberData.City!,
                     AddressState = memberData.State!,
@@ -482,6 +486,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     d.Id,
                     d.ContactInfo.FullName,
                     d.ContactInfo.FirstName,
+                    d.ContactInfo.MiddleName,
                     d.ContactInfo.LastName,
                     d.ContactInfo.PhoneNumber,
                     d.Address.City,
@@ -563,6 +568,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     IsEmployee = true,
                     Id = memberData.Id,
                     FirstName = memberData.FirstName,
+                    MiddleName = memberData.MiddleName,
                     LastName = memberData.LastName,
                     AddressCity = memberData.City!,
                     AddressState = memberData.State!,

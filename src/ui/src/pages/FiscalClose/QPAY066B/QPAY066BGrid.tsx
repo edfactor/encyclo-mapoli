@@ -6,14 +6,15 @@ import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
+import { QPAY066BFilterParams } from "./QPAY066BFilterSection";
 import { GetQPAY066BGridColumns } from "./QPAY066BGridColumns";
 
 interface QPAY066BGridProps {
-  //filterParams: QPAY066BFilterParams;
+  filterParams: QPAY066BFilterParams;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ onLoadingChange }) => {
+const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChange }) => {
   //const navigate = useNavigate();
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const [getQPAY066BData, { data: qpay066bData, isFetching }] = useLazyGetQPAY066BTerminatedWithVestedBalanceQuery();
@@ -60,7 +61,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ onLoadingChange }) => {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasToken, getQPAY066BData]);
+  }, [hasToken, getQPAY066BData, filterParams]);
 
   const sortEventHandler = (update: ISortParams) => {
     handleSortChange(update);

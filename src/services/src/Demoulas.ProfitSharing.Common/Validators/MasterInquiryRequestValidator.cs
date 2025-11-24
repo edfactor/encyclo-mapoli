@@ -189,30 +189,9 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
                 }
             });
 
-        // Miscellaneous checks (months, amounts, types, SSN/badge) done in a single Custom validator
+        // Miscellaneous checks (months, types, SSN/badge) done in a single Custom validator
         RuleFor(x => x).Custom((x, ctx) =>
         {
-            // Amounts non-negative
-            if (x.ContributionAmount is < 0)
-            {
-                ctx.AddFailure("ContributionAmount", "ContributionAmount cannot be negative.");
-            }
-
-            if (x.EarningsAmount is < 0)
-            {
-                ctx.AddFailure("EarningsAmount", "EarningsAmount cannot be negative.");
-            }
-
-            if (x.ForfeitureAmount is < 0)
-            {
-                ctx.AddFailure("ForfeitureAmount", "ForfeitureAmount cannot be negative.");
-            }
-
-            if (x.PaymentAmount is < 0)
-            {
-                ctx.AddFailure("PaymentAmount", "PaymentAmount cannot be negative.");
-            }
-
             // MemberType domain check (if provided)
             if (x.MemberType != 0 && (x.MemberType < 0 || x.MemberType > 3))
             {

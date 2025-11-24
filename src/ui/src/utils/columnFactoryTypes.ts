@@ -24,6 +24,10 @@ export interface LimitedAlignmentColumnOptions extends BaseColumnOptions {
   alignment?: "left" | "center";
 }
 
+export interface AgeColumnOptions extends LimitedAlignmentColumnOptions {
+  valueGetter?: (params: ValueGetterParams) => number;
+}
+
 export interface AddressColumnOptions extends AlignableColumnOptions {
   valueGetter?: (params: ValueGetterParams) => string;
 }

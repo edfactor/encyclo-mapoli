@@ -8,6 +8,7 @@ export interface AccountHistoryReportRequest {
 }
 
 export interface AccountHistoryReportResponse {
+  id: number;
   badgeNumber: number;
   fullName: string;
   ssn: string; // Masked for security
@@ -17,6 +18,7 @@ export interface AccountHistoryReportResponse {
   forfeitures: number;
   withdrawals: number;
   endingBalance: number;
+  vestedBalance: number;
   comment?: string;
 }
 
@@ -36,6 +38,7 @@ export interface AccountHistoryReportTotals {
   totalEarnings: number;
   totalForfeitures: number;
   totalWithdrawals: number;
+  totalVestedBalance?: number;
 }
 
 export interface AccountHistoryReportPaginatedResponse {

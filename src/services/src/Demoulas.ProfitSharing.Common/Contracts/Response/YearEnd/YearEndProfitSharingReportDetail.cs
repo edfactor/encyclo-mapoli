@@ -12,7 +12,7 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYea
     public required char EmployeeTypeCode { get; set; }
     public required string EmployeeTypeName { get; set; }
     [MaskSensitive] public required DateOnly DateOfBirth { get; set; }
-    public required byte Age { get; set; }
+    [MaskSensitive] public required short Age { get; set; }
     public required string Ssn { get; set; }
     public required decimal Wages { get; set; }
     public required decimal Hours { get; set; }

@@ -11,15 +11,16 @@ namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 
 /// <summary>
 ///   Abstraction for testing api endpoints that use a <c>DbContext</c>.
+///   NOTE: Each test CLASS (not method) gets its own factory instance.
+///   Tests within the same [Collection] share the factory, so they may pollute each other's data.
 /// </summary>
 public class ApiTestBase<TStartup> where TStartup : class
 {
     /// <summary>
     ///   Mock for DbContext.
+    ///   Each test class gets a fresh instance, but tests within a class share this factory.
     /// </summary>
     public IProfitSharingDataContextFactory MockDbContextFactory { get; set; }
-
-
 
     /// <summary>
     ///   The client to invoke api endpoints.
@@ -46,6 +47,7 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// </remarks>
     public ApiTestBase()
     {
+        // Each test class gets its own FRESH factory with 6,500+ fake records
         MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
 
         WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();

@@ -373,6 +373,14 @@ public sealed class YearEndService : IYearEndService
             }, ct);
     }
 
+    public async Task<short> GetOpenProfitYear(CancellationToken ct)
+    {
+        var completedYearEnd = await GetCompletedYearEnd(ct);
+        // consider looking into freeze - aka a freeze should exist for
+        // compltedYearEnd + 1 or we are in trouble town. 
+        return (short)(completedYearEnd + 1);
+    }
+
     /// <summary>
     /// Updates PayProfit table efficiently using bulk operations.
     /// Bulk inserts changes into a temp table, then merges into PayProfit.

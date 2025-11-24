@@ -8,9 +8,13 @@
 
 public static class DtoCommonExtensions
 {
-    public static string ComputeFullName(this INameParts parts, bool lastNameFirst = true)
+    public static string ComputeFullName(this INameParts parts, bool lastNameFirst = true, bool middleInitialOnly = true)
     {
-        string firstBlock = string.Join(" ", new[] { parts.FirstName, parts.MiddleName }
+        var middlePart = string.IsNullOrWhiteSpace(parts.MiddleName)
+            ? string.Empty
+            : (middleInitialOnly ? $"{parts.MiddleName[0]}" : parts.MiddleName);
+
+        string firstBlock = string.Join(" ", new[] { parts.FirstName, middlePart }
             .Where(s => !string.IsNullOrWhiteSpace(s)));
         string last = parts.LastName ?? string.Empty;
         if (lastNameFirst)
@@ -26,4 +30,15 @@ public static class DtoCommonExtensions
 
     public static bool HasContactChannel(this IEmailAddress e, IPhoneNumber p) =>
         (!string.IsNullOrWhiteSpace(e.EmailAddress)) || (!string.IsNullOrWhiteSpace(p.PhoneNumber));
+
+    /// <summary>
+    /// Computes a full name string with middle initial (if available) in the format: "LastName, FirstName M"
+    /// </summary>
+    public static string ComputeFullNameWithInitial(string lastName, string firstName, string? middleName)
+    {
+        var middleInitial = string.IsNullOrWhiteSpace(middleName) ? string.Empty : $"{middleName[0]}";
+        return string.IsNullOrWhiteSpace(middleInitial)
+            ? $"{lastName}, {firstName}"
+            : $"{lastName}, {firstName} {middleInitial}";
+    }
 }

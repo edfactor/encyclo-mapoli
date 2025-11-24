@@ -30,11 +30,11 @@ public class ProfitMasterTests : PristineBaseTest
     public async Task UpdateTest()
     {
         // Arrange
-        short profitYear = 2024;
+        short profitYear = await YearEndService.GetOpenProfitYear(CancellationToken.None);
         IAppUser iAppUser = new Mock<IAppUser>().Object;
         ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
         ProfitShareEditService pses = new(psus, CalendarService);
-        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService);
+        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, YearEndService);
 
         Stopwatch sw = Stopwatch.StartNew();
         try
@@ -70,10 +70,10 @@ public class ProfitMasterTests : PristineBaseTest
                 Take = null,
                 ProfitYear = profitYear,
                 ContributionPercent = 15,
-                IncomingForfeitPercent = 4,
-                EarningsPercent = 5,
+                IncomingForfeitPercent = 0.876678m,
+                EarningsPercent = 9.280136m,
                 SecondaryEarningsPercent = 0,
-                MaxAllowedContributions = 76_500,
+                MaxAllowedContributions = 57_000,
                 BadgeToAdjust = 0,
                 BadgeToAdjust2 = 0,
                 AdjustContributionAmount = 0,
@@ -91,11 +91,11 @@ public class ProfitMasterTests : PristineBaseTest
     public async Task RevertTest()
     {
         // Arrange
-        short profitYear = 2024;
+        short profitYear = await YearEndService.GetOpenProfitYear(CancellationToken.None);
         IAppUser iAppUser = new Mock<IAppUser>().Object;
         ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
         ProfitShareEditService pses = new(psus, CalendarService);
-        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService);
+        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, YearEndService);
 
         Stopwatch sw = Stopwatch.StartNew();
         // Act

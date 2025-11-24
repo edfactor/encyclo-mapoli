@@ -8,8 +8,9 @@ export interface PaginationState {
 }
 
 export interface SearchState {
-  isLoading: boolean;
   profitYear: number | null;
+  useFrozenData?: boolean;
+  isLoading: boolean;
   hasSearched: boolean;
 }
 
@@ -20,7 +21,7 @@ export interface YTDWagesState {
 }
 
 export type YTDWagesAction =
-  | { type: "SEARCH_START"; payload: { profitYear: number } }
+  | { type: "SEARCH_START"; payload: { profitYear: number; useFrozenData?: boolean } }
   | { type: "SEARCH_SUCCESS"; payload: EmployeeWagesForYearResponse }
   | { type: "SEARCH_ERROR" }
   | { type: "SET_PAGINATION"; payload: Partial<PaginationState> }
@@ -53,6 +54,7 @@ export const ytdWagesReducer = (state: YTDWagesState, action: YTDWagesAction): Y
           ...state.search,
           isLoading: true,
           profitYear: action.payload.profitYear,
+          useFrozenData: action.payload.useFrozenData,
           hasSearched: true
         }
       };

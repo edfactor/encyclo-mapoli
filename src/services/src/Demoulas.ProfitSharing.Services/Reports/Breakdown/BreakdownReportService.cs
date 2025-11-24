@@ -319,21 +319,21 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilter.Inactive, Balance.BalanceOrNoBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Inactive, Balance.BalanceOrNoBalance, withBeneficiaryAllocation: true, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithVestedBalanceByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilter.Inactive, Balance.HasVestedBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Inactive, Balance.HasVestedBalance, withBeneficiaryAllocation: true, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetRetiredEmployessWithBalanceActivity(
        TerminatedEmployeesWithBalanceBreakdownRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilter.Retired, Balance.HasBalanceActivity, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Retired, Balance.HasBalanceActivity, withBeneficiaryAllocation: true, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithVestedBalanceByStore(
@@ -354,7 +354,7 @@ public sealed class BreakdownReportService : IBreakdownService
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasCurrentBalanceNotVested, withBeneficiaryAllocation: true, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(
@@ -475,7 +475,11 @@ public sealed class BreakdownReportService : IBreakdownService
                 var ssnsWithBeneficiaryAllocation = ctx.ProfitDetails
                     .Where(ba => ba.ProfitYear == request.ProfitYear && profitCodes.Contains(ba.ProfitCodeId))
                     .GroupBy(x => x.Ssn)
-                    .Where(x => x.Sum(r => r.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id ? -r.Forfeiture : r.Contribution) > 0)
+                    // Fixed: Match the calculation used in GetTransactionsBySsnForProfitYearForOracle
+                    // OutgoingXferBeneficiary (5): -forfeiture, IncomingQdroBeneficiary (6): +contribution
+                    .Where(x => x.Sum(r => r.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id
+                        ? -r.Forfeiture
+                        : (r.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id ? r.Contribution : 0)) > 0)
                     .Select(ba => ba.Key);
 
                 employeesBase = employeesBase.Where(e =>
@@ -743,7 +747,7 @@ public sealed class BreakdownReportService : IBreakdownService
                         11
                      ) : 0,
                 /* ── plain columns ───────────────────────────────────────────── */
-                FullName = d.ContactInfo.FullName!,
+                FullName = d.ContactInfo.FullName ?? string.Empty,
                 Ssn = d.Ssn,
                 DateOfBirth = d.DateOfBirth,
                 PayClassificationId = d.PayClassificationId,
@@ -899,6 +903,7 @@ public sealed class BreakdownReportService : IBreakdownService
             Distributions = snap.Txn.Distribution,
             Forfeitures = snap.Txn.TotalForfeitures,
             EndingBalance = endBal,
+            BeneficiaryAllocation = snap.Txn.BeneficiaryAllocation,
             VestedAmount = endBal * snap.VestingRatio,
             VestedPercent = (byte)(snap.VestingRatio * 100),
             PayClassificationId = member.PayClassificationId,

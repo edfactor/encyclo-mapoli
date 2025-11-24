@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -58,7 +59,13 @@ public sealed class DistributionService : IDistributionService
                             dist.PaymentSequence,
                             dist.Ssn,
                             BadgeNumber = dem != null ? (int?)dem.BadgeNumber : null,
+                            DemLastName = dem != null ? dem.ContactInfo.LastName : null,
+                            DemFirstName = dem != null ? dem.ContactInfo.FirstName : null,
+                            DemMiddleName = dem != null ? dem.ContactInfo.MiddleName : null,
                             DemFullName = dem != null ? dem.ContactInfo.FullName : null,
+                            BeneLastName = ben != null ? ben.Contact!.ContactInfo.LastName : null,
+                            BeneFirstName = ben != null ? ben.Contact!.ContactInfo.FirstName : null,
+                            BeneMiddleName = ben != null ? ben.Contact!.ContactInfo.MiddleName : null,
                             BeneFullName = ben != null ? ben.Contact!.ContactInfo.FullName : null,
                             dist.FrequencyId,
                             Frequency = freq,
@@ -193,7 +200,11 @@ public sealed class DistributionService : IDistributionService
                 PaymentSequence = d.PaymentSequence,
                 Ssn = d.Ssn.MaskSsn(),
                 BadgeNumber = d.BadgeNumber,
-                FullName = d.DemFullName ?? d.BeneFullName,
+                FullName = !string.IsNullOrWhiteSpace(d.DemFullName)
+                    ? d.DemFullName
+                    : (!string.IsNullOrWhiteSpace(d.BeneFullName)
+                        ? d.BeneFullName
+                        : string.Empty),
                 FrequencyId = d.FrequencyId,
                 FrequencyName = d.Frequency!.Name,
                 StatusId = d.StatusId,
@@ -585,7 +596,7 @@ public sealed class DistributionService : IDistributionService
             groupedResults.AddRange(manualAndOnHoldDistributions);
             groupedResults.AddRange(missingStatuses);
 
-            groupedResults.Sort((a, b) => a.DistributionTypeName.CompareTo(b.DistributionTypeName));
+            groupedResults.Sort((a, b) => a.DistributionTypeName.CompareTo(b.DistributionTypeName, StringComparison.OrdinalIgnoreCase));
 
             return Result<DistributionRunReportSummaryResponse[]>.Success(groupedResults.ToArray());
         }, cancellationToken);

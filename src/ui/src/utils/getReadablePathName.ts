@@ -57,6 +57,7 @@ const pathToReadableName: Record<string, string> = {
   demographic: "Demographic Freeze",
   "demographic-freeze": "Demographic Freeze",
   "ytd-wages-extract": "YTD Wages Extract",
+  "ytd-wages-extract-live": "YTD Wages Extract",
   profall: "Profall",
   "pay426-final-run": "Pay 426 Final Run",
   "dev-debug": "Dev Debug",

@@ -198,10 +198,7 @@ const useForfeituresAdjustment = () => {
           profitYear
         }).unwrap();
 
-        const employeeName =
-          memberDetails.firstName && memberDetails.lastName
-            ? `${memberDetails.firstName} ${memberDetails.lastName}`
-            : "the selected employee";
+        const employeeName = memberDetails.fullName || "the selected employee";
 
         // Show success message
         addAlert({

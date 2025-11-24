@@ -16,15 +16,13 @@ import AccountHistoryReportTable from "./AccountHistoryReportTable";
 const AccountHistoryReport: React.FC = () => {
   const [filterParams, setFilterParams] = useState<AccountHistoryReportFilterParams | null>(null);
   const [triggerSearch, { data, isFetching }] = AccountHistoryReportApi.useLazyGetAccountHistoryReportQuery();
-  const [selectedBadgeNumber, setSelectedBadgeNumber] = useState<string | null>(null);
 
-  // Fetch member details when badge number changes
+  // Fetch member details when report data changes
   const profitYear = filterParams?.endDate ? filterParams.endDate.getFullYear() : new Date().getFullYear();
+  const reportId = data?.response?.results?.[0]?.id ?? 0;
   const { data: memberDetails, isFetching: isFetchingMemberDetails } = InquiryApi.useGetProfitMasterInquiryMemberQuery(
-    selectedBadgeNumber
-      ? { memberType: 1, id: parseInt(selectedBadgeNumber, 10), profitYear }
-      : { memberType: 1, id: 0, profitYear },
-    { skip: !selectedBadgeNumber }
+    reportId > 0 ? { memberType: 1, id: reportId, profitYear } : { memberType: 1, id: 0, profitYear },
+    { skip: reportId === 0 }
   );
 
   // Pagination state
@@ -69,7 +67,6 @@ const AccountHistoryReport: React.FC = () => {
 
   const handleFilterChange = (params: AccountHistoryReportFilterParams) => {
     setFilterParams(params);
-    setSelectedBadgeNumber(params.badgeNumber);
 
     // Trigger the query immediately with the search params
     const queryParams: AccountHistoryReportRequest = {
@@ -119,7 +116,7 @@ const AccountHistoryReport: React.FC = () => {
               <MissiveAlertProvider>
                 <MasterInquiryMemberDetails
                   memberType={1}
-                  id={selectedBadgeNumber || ""}
+                  id={reportId.toString()}
                   profitYear={profitYear}
                   memberDetails={memberDetails || undefined}
                   isLoading={isFetchingMemberDetails}
@@ -162,6 +159,16 @@ const AccountHistoryReport: React.FC = () => {
                         breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                       />
                     </div>
+                    {data.cumulativeTotals.totalVestedBalance !== undefined && (
+                      <div className="flex-1">
+                        <TotalsGrid
+                          displayData={[[numberToCurrency(data.cumulativeTotals.totalVestedBalance)]]}
+                          leftColumnHeaders={["Vested Balance"]}
+                          topRowHeaders={[]}
+                          breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                        />
+                      </div>
+                    )}
                   </>
                 )}
               </div>

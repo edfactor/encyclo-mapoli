@@ -46,10 +46,10 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
 
     // Calculate height based on pageSize: [5, 10, 50, 100]
     // Use square root scaling for better spread at all page sizes
-    // 5 rows -> 200px (min), 10 rows -> 338px, 50 rows -> 613px, 100 rows -> 800px (max)
+    // 5 rows -> 255px (min), 10 rows -> 356px, 50 rows -> 631px, 100 rows -> 820px (max)
     const normalized = (memberGridPagination.pageSize - 5) / 95; // 0 to 1
     const heightRatio = Math.sqrt(normalized); // Square root curve for even distribution
-    const maxHeightPixels = 200 + heightRatio * 600; // 200px minimum, 800px maximum
+    const maxHeightPixels = 255 + heightRatio * 600; // 255px minimum, 820px maximum
 
     const gridMaxHeight = useDynamicGridHeight({
       heightPercentage: 0.5,
