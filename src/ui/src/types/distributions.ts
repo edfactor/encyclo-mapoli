@@ -145,7 +145,7 @@ export interface DistributionsAndForfeitures {
   federalTax: number;
   forfeitAmount: number;
   forfeitType: string | null;
-  age: number;
+  age: string;
   taxCode: string | null;
   otherName: string | null;
   otherSsn: string | null;

@@ -286,13 +286,7 @@ const AddDistributionContent = () => {
               onReset={handleFormReset}
               isSubmitting={isSubmitting}
               dateOfBirth={memberData.dateOfBirth}
-              age={
-                memberData.dateOfBirth
-                  ? Math.floor(
-                      (Date.now() - new Date(memberData.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25)
-                    )
-                  : undefined
-              }
+              age={memberData.age}
               vestedAmount={memberData.currentVestedAmount}
             />
           </Grid>
