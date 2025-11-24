@@ -80,7 +80,6 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         ...(isEmployee
           ? [{ label: "Store", value: typeof storeNumber === "number" && storeNumber > 0 ? storeNumber : "N/A" }]
           : []),
-        // { label: "Enrolled", value: enrollmentStatus.enrolled.replace(/\s*\(\d+\)/, "") }, // Remove code like "(1)"
         { label: "Forfeited", value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "") } // Remove code like "(1)"
       ];
     }, [memberDetails, enrollmentStatus]);
