@@ -1,5 +1,5 @@
 import { useDynamicGridHeight } from "@/hooks/useDynamicGridHeight";
-import { Box, Grid, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { RowClickedEvent } from "ag-grid-community";
