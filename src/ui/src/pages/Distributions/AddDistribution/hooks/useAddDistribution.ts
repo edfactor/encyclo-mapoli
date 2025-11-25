@@ -381,9 +381,24 @@ export const useAddDistribution = () => {
         return memberResponse;
       } catch (error) {
         const serviceError = error as ServiceErrorResponse;
-        const errorMsg = serviceError?.data?.detail || "Failed to fetch member data";
-        dispatch({ type: "MEMBER_FETCH_FAILURE", payload: { error: errorMsg } });
-        throw error;
+        const errorInstance = error as Error;
+
+        // Check for member not found conditions
+        const isMemberNotFound =
+          errorInstance?.message?.includes("Member not found") ||
+          errorInstance?.message?.includes("No member found") ||
+          serviceError?.data?.status === 500 ||
+          serviceError?.data?.status === 400 ||
+          serviceError?.data?.title === "Badge number not found." ||
+          serviceError?.data?.title === "Validation Error";
+
+        if (isMemberNotFound) {
+          dispatch({ type: "MEMBER_FETCH_FAILURE", payload: { error: "MEMBER_NOT_FOUND" } });
+        } else {
+          const errorMsg = serviceError?.data?.detail || "Failed to fetch member data";
+          dispatch({ type: "MEMBER_FETCH_FAILURE", payload: { error: errorMsg } });
+        }
+        // Don't throw - let the component handle the error via state
       }
     },
     [triggerSearchMember, triggerGetMember, calculateSequenceNumber, fetchStateTaxRate]
