@@ -12,7 +12,7 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       sortable: false,
       headerClass: "left-align",
       cellClass:
-        "left-align h-5 normal-case underline decoration-blue-600 !outline-none !border-none focus:outline-none focus:border-none",
+        "left-align h-5 normal-case underline decoration-blue-600 cursor-pointer !outline-none !border-none focus:outline-none focus:border-none",
       resizable: true,
       //suppressCellFocus: true,
       valueFormatter: (params) => {
