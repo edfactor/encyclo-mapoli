@@ -143,6 +143,11 @@ const useMasterInquiry = () => {
         }
 
         lastSearchParamsRef.current = currentParamsString;
+
+        // Clear member and profit detail refs to allow fetching on new search
+        lastMemberDetailsCallRef.current = null;
+        lastProfitDetailsCallRef.current = null;
+
         dispatch({ type: "SEARCH_START", payload: { params, isManual: true } });
         clearAlerts();
 
