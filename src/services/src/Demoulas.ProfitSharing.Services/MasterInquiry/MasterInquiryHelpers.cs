@@ -11,6 +11,12 @@ namespace Demoulas.ProfitSharing.Services.MasterInquiry;
 /// </summary>
 public static class MasterInquiryHelpers
 {
+    public static readonly List<byte?> ContributionProfitCodes =
+    [
+        ProfitCode.Constants.IncomingContributions.Id,
+        ProfitCode.Constants.Incoming100PercentVestedEarnings.Id
+    ];
+
     /// <summary>
     /// Applies comprehensive filtering to a master inquiry query based on request parameters.
     /// Filters are applied in order of selectivity for optimal Oracle query performance.
@@ -79,19 +85,19 @@ public static class MasterInquiryHelpers
 
         if (req.ContributionAmount.HasValue)
         {
-            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.Contribution == req.ContributionAmount));
+            query = query.Where(x =>
+                x.ProfitDetail != null && ContributionProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) && x.ProfitDetail.Contribution == req.ContributionAmount);
         }
 
         if (req.EarningsAmount.HasValue)
         {
-            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.Earnings == req.EarningsAmount));
+            query = query.Where(x => x.ProfitDetail != null && ContributionProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) && x.ProfitDetail.Earnings == req.EarningsAmount);
         }
 
         if (req.ForfeitureAmount.HasValue)
         {
             query = query.Where(x =>
-                (x.ProfitDetail == null || x.ProfitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id) &&
-                (x.ProfitDetail == null || x.ProfitDetail.Forfeiture == req.ForfeitureAmount));
+                x.ProfitDetail != null && ContributionProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) && x.ProfitDetail.Forfeiture == req.ForfeitureAmount);
         }
 
         if (req.PaymentAmount.HasValue)
