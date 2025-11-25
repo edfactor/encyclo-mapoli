@@ -30,11 +30,13 @@ public sealed class JwtTokenService : IJwtTokenService
     }
 
     /// <inheritdoc />
-    public string GenerateToken(X509Certificate2 certificate, string issuer, string principal, int expirationMinutes = 10)
+    public string GenerateToken(X509Certificate2 certificate, string issuer, string principal, string subject, string audience, int expirationMinutes = 10)
     {
         ArgumentNullException.ThrowIfNull(certificate);
         ArgumentException.ThrowIfNullOrWhiteSpace(issuer);
         ArgumentException.ThrowIfNullOrWhiteSpace(principal);
+        ArgumentException.ThrowIfNullOrWhiteSpace(subject);
+        ArgumentException.ThrowIfNullOrWhiteSpace(audience);
 
         if (!certificate.HasPrivateKey)
         {
@@ -69,16 +71,16 @@ public sealed class JwtTokenService : IJwtTokenService
         // Create payload with Oracle HCM required claims
         long nowUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         long expUnix = nowUnix + (expirationMinutes * 60);
-        string jti = Guid.NewGuid().ToString();
+        string? jti = _config.IncludeJtiClaim ? Guid.NewGuid().ToString() : null;
 
         var payload = new
         {
             iss = issuer,
-            prn = "API_PS_PROD",
+            prn = principal,
             iat = nowUnix,
             exp = expUnix,
-            sub = "API_PS_PROD",
-            aud = "https://identity.oraclecloud.com",
+            sub = subject,
+            aud = audience,
             jti = jti
         };
 
@@ -117,9 +119,9 @@ public sealed class JwtTokenService : IJwtTokenService
         // Extract issuer from certificate subject
         string issuer = ExtractIssuerFromCertificate(certificate);
 
-        // Use configured principal and expiration (or provided override)
+        // Use configured principal, subject, audience, and expiration (or provided override)
         int tokenExpiration = expirationMinutes == 10 ? _config.JwtExpirationMinutes : expirationMinutes;
-        return GenerateToken(certificate, issuer, _config.JwtPrincipal, tokenExpiration);
+        return GenerateToken(certificate, issuer, _config.JwtPrincipal, _config.JwtSubject, _config.JwtAudience, tokenExpiration);
     }
 
     /// <summary>
