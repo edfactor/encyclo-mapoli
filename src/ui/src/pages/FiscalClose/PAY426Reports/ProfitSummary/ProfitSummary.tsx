@@ -78,6 +78,22 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
   }
 ];
 
+/**
+ * Helper to sum values that may be masked strings - returns masked string if any value is masked
+ */
+const sumOrMasked = (
+  rowData: YearEndProfitSharingReportSummaryLineItem[],
+  field: "totalWages" | "totalBalance"
+): number | string | undefined => {
+  const values = rowData.map((row) => row[field]);
+  const hasMaskedValue = values.some((v) => typeof v === "string" && String(v).includes("X"));
+  if (hasMaskedValue) {
+    // Return the first masked value as the total (since we can't sum masked data)
+    return values.find((v) => typeof v === "string" && String(v).includes("X"));
+  }
+  return values.reduce((acc, curr) => acc + (curr as number), 0);
+};
+
 interface ProfitSummaryProps {
   frozenData: boolean;
 }
@@ -217,24 +233,12 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
       return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
     };
 
-    // Helper to sum values that may be masked strings - returns masked string if any value is masked
-    const sumOrMasked = (field: "totalWages" | "totalBalance") => {
-      const values = activeAndInactiveRowData.map((row) => row[field]);
-      const hasMaskedValue = values.some((v) => typeof v === "string" && String(v).includes("X"));
-      if (hasMaskedValue) {
-        // Return the first masked value as the total (since we can't sum masked data)
-        const maskedValue = values.find((v) => typeof v === "string" && String(v).includes("X"));
-        return maskedValue;
-      }
-      return values.reduce((acc, curr) => acc + (curr as number), 0);
-    };
-
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-        totalWages: sumOrMasked("totalWages"),
-        totalBalance: sumOrMasked("totalBalance"),
+        totalWages: sumOrMasked(activeAndInactiveRowData, "totalWages"),
+        totalBalance: sumOrMasked(activeAndInactiveRowData, "totalBalance"),
         totalHours: sumNullable("totalHours"),
         totalPoints: sumNullable("totalPoints")
       }
@@ -252,24 +256,12 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
       return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
     };
 
-    // Helper to sum values that may be masked strings - returns masked string if any value is masked
-    const sumOrMasked = (field: "totalWages" | "totalBalance") => {
-      const values = terminatedRowData.map((row) => row[field]);
-      const hasMaskedValue = values.some((v) => typeof v === "string" && String(v).includes("X"));
-      if (hasMaskedValue) {
-        // Return the first masked value as the total (since we can't sum masked data)
-        const maskedValue = values.find((v) => typeof v === "string" && String(v).includes("X"));
-        return maskedValue;
-      }
-      return values.reduce((acc, curr) => acc + (curr as number), 0);
-    };
-
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-        totalWages: sumOrMasked("totalWages"),
-        totalBalance: sumOrMasked("totalBalance"),
+        totalWages: sumOrMasked(terminatedRowData, "totalWages"),
+        totalBalance: sumOrMasked(terminatedRowData, "totalBalance"),
         totalHours: sumNullable("totalHours"),
         totalPoints: sumNullable("totalPoints")
       }
