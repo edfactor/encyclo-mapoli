@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { getMonthDateRange, getMonthEndDate, getMonthStartDate } from "./dateRangeUtils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getLastYearDateRange, getMonthDateRange, getMonthEndDate, getMonthStartDate } from "./dateRangeUtils";
 
 describe("dateRangeUtils", () => {
   describe("getMonthStartDate", () => {
@@ -285,6 +285,136 @@ describe("dateRangeUtils", () => {
       expect(start2?.getDate()).toBe(1);
       expect(start1?.getMonth()).toBe(2);
       expect(start2?.getMonth()).toBe(2);
+    });
+  });
+
+  describe("getLastYearDateRange", () => {
+    beforeEach(() => {
+      // Reset mocked date after each test
+      vi.useRealTimers();
+    });
+
+    it("should return Jan 1 to Dec 31 of last year when called in 2025", () => {
+      // Mock current date as January 5, 2025
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 0, 5));
+
+      const result = getLastYearDateRange();
+
+      expect(result.beginDate.getFullYear()).toBe(2024);
+      expect(result.beginDate.getMonth()).toBe(0); // January
+      expect(result.beginDate.getDate()).toBe(1);
+
+      expect(result.endDate.getFullYear()).toBe(2024);
+      expect(result.endDate.getMonth()).toBe(11); // December
+      expect(result.endDate.getDate()).toBe(31);
+    });
+
+    it("should return same range regardless of what day of the year it is called", () => {
+      vi.useFakeTimers();
+
+      // Test at start of year
+      vi.setSystemTime(new Date(2025, 0, 1)); // Jan 1, 2025
+      let result = getLastYearDateRange();
+      expect(result.beginDate.getFullYear()).toBe(2024);
+      expect(result.endDate.getFullYear()).toBe(2024);
+
+      // Test at end of year
+      vi.setSystemTime(new Date(2025, 11, 31)); // Dec 31, 2025
+      result = getLastYearDateRange();
+      expect(result.beginDate.getFullYear()).toBe(2024);
+      expect(result.endDate.getFullYear()).toBe(2024);
+
+      // Test in middle of year
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
+      result = getLastYearDateRange();
+      expect(result.beginDate.getFullYear()).toBe(2024);
+      expect(result.endDate.getFullYear()).toBe(2024);
+    });
+
+    it("should handle leap year in last year correctly", () => {
+      // Mock current date as 2025 (last year 2024 was a leap year)
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 0, 5));
+
+      const result = getLastYearDateRange();
+
+      // Should still be Dec 31 of the leap year
+      expect(result.endDate.getFullYear()).toBe(2024);
+      expect(result.endDate.getMonth()).toBe(11);
+      expect(result.endDate.getDate()).toBe(31);
+    });
+
+    it("should handle non-leap year in last year correctly", () => {
+      // Mock current date as 2024 (last year 2023 was not a leap year)
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2024, 0, 5));
+
+      const result = getLastYearDateRange();
+
+      // Should be Dec 31 of the non-leap year
+      expect(result.endDate.getFullYear()).toBe(2023);
+      expect(result.endDate.getMonth()).toBe(11);
+      expect(result.endDate.getDate()).toBe(31);
+    });
+
+    it("should return correct ISO date strings", () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 0, 5));
+
+      const result = getLastYearDateRange();
+
+      expect(result.beginDate.toISOString().split("T")[0]).toBe("2024-01-01");
+      expect(result.endDate.toISOString().split("T")[0]).toBe("2024-12-31");
+    });
+
+    it("should handle century boundaries correctly", () => {
+      // Mock current date as 2001 (last year is 2000, a leap year)
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2001, 0, 5));
+
+      const result = getLastYearDateRange();
+
+      expect(result.beginDate.getFullYear()).toBe(2000);
+      expect(result.beginDate.getMonth()).toBe(0);
+      expect(result.beginDate.getDate()).toBe(1);
+      expect(result.endDate.getFullYear()).toBe(2000);
+      expect(result.endDate.getMonth()).toBe(11);
+      expect(result.endDate.getDate()).toBe(31);
+    });
+
+    it("should work with the termination use case scenario", () => {
+      // Termination page needs date range for last full year
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 0, 5)); // January 5, 2025
+
+      const result = getLastYearDateRange();
+
+      // Should get full 2024 calendar year
+      expect(result.beginDate.toISOString().split("T")[0]).toBe("2024-01-01");
+      expect(result.endDate.toISOString().split("T")[0]).toBe("2024-12-31");
+
+      // Verify it's a 365-day range (or 366 for leap years)
+      const daysDiff = Math.floor((result.endDate.getTime() - result.beginDate.getTime()) / (1000 * 60 * 60 * 24));
+      expect(daysDiff).toBe(365); // 2024 is a leap year, so 366 days - 1 = 365
+    });
+
+    it("should maintain consistent time component (midnight)", () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 0, 5, 14, 30, 45)); // 2:30:45 PM
+
+      const result = getLastYearDateRange();
+
+      // Both dates should be at midnight
+      expect(result.beginDate.getHours()).toBe(0);
+      expect(result.beginDate.getMinutes()).toBe(0);
+      expect(result.beginDate.getSeconds()).toBe(0);
+      expect(result.beginDate.getMilliseconds()).toBe(0);
+
+      expect(result.endDate.getHours()).toBe(0);
+      expect(result.endDate.getMinutes()).toBe(0);
+      expect(result.endDate.getSeconds()).toBe(0);
+      expect(result.endDate.getMilliseconds()).toBe(0);
     });
   });
 });

@@ -22,6 +22,7 @@ import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { getLastYearDateRange } from "../../../utils/dateRangeUtils";
 import {
   dateStringValidator,
   endDateStringAfterStartDateValidator,
@@ -85,6 +86,10 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const dispatch = useDispatch();
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
+
+  // Get last year date range (Dec 31 of year before last to Dec 31 of last year)
+  const { beginDate, endDate } = getLastYearDateRange();
+
   const {
     control,
     handleSubmit,
@@ -94,8 +99,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   } = useForm<TerminationSearchRequest>({
     resolver: yupResolver(schema) as Resolver<TerminationSearchRequest>,
     defaultValues: {
-      beginningDate: termination?.startDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") || "",
-      endingDate: termination?.endDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") || "",
+      beginningDate: termination?.startDate || mmDDYYFormat(beginDate),
+      endingDate: termination?.endDate || mmDDYYFormat(endDate),
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear,
@@ -124,10 +129,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       const params = {
         ...data,
         profitYear: selectedProfitYear,
-        beginningDate: data.beginningDate
-          ? mmDDYYFormat(data.beginningDate)
-          : mmDDYYFormat(fiscalData?.fiscalBeginDate || ""),
-        endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData?.fiscalEndDate || "")
+        beginningDate: data.beginningDate ? mmDDYYFormat(data.beginningDate) : mmDDYYFormat(beginDate),
+        endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(endDate)
       };
 
       // Only include vested balance fields if both are provided
@@ -148,8 +151,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     setHasUnsavedChanges?.(false);
     setInitialSearchLoaded(false);
     reset({
-      beginningDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "",
-      endingDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "",
+      beginningDate: mmDDYYFormat(beginDate),
+      endingDate: mmDDYYFormat(endDate),
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear,
