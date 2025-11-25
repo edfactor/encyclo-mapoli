@@ -71,7 +71,9 @@ public sealed class JwtTokenService : IJwtTokenService
             iss = issuer,
             prn = principal,
             iat = nowUnix,
-            exp = expUnix
+            exp = expUnix,
+            sub = "API_PS_PROD",
+            aud = "https://eqma-dev3.fa.ocs.oraclecloud.com",
         };
 
         // Encode header and payload as base64url
