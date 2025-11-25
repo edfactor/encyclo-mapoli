@@ -35,7 +35,7 @@ describe("MasterInquiryMemberGridColumns - Badge Styling", () => {
 
       // Badge column should be first for easy access
       expect(columns[0].field).toBe("badgeNumber");
-      expect(columns[0].headerName).toBe("Badge");
+      expect(columns[0].headerName).toBe("Badge/PSN");
     });
 
     it("should not create anchor tags with cellRenderer", () => {
@@ -71,7 +71,7 @@ describe("MasterInquiryMemberGridColumns - Badge Styling", () => {
       const badgeColumn = columns.find((col: ColDef) => col.field === "badgeNumber");
 
       expect(badgeColumn).toBeDefined();
-      expect(badgeColumn?.headerName).toBe("Badge");
+      expect(badgeColumn?.headerName).toBe("Badge/PSN");
       expect(badgeColumn?.field).toBe("badgeNumber");
       expect(badgeColumn?.colId).toBe("badgeNumber");
     });

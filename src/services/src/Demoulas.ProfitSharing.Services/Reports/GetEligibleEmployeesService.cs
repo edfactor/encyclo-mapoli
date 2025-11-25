@@ -32,7 +32,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
         CalendarResponseDto response =
             await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         DateOnly birthDateOfExactly21YearsOld = response.FiscalEndDate.AddYears(-21);
-        short hoursWorkedRequirement = ReferenceData.MinimumHoursForContribution();
+        short hoursWorkedRequirement = ReferenceData.MinimumHoursForContribution;
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {

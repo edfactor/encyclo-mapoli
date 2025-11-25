@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -41,10 +42,16 @@ internal sealed class ProfitShareUpdateReport
         (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, ProfitShareUpdateTotals totalsDto, bool _) =
             await psu.ProfitSharingUpdate(profitShareUpdateRequest, CancellationToken.None, false);
 
-        // Sort like READY sorts, meaning "Mc" comes after "ME" (aka it is doing a pure ascii sort - lowercase characters are higher.) 
+        // Sort like READY sorts, meaning "Mc" comes after "ME" (aka it is doing a pure ascii sort - lowercase characters are higher.)
         members = members
             .OrderBy(m => m.Name, StringComparer.Ordinal)
             .ToList();
+
+        // SMART has name with initial, READY only has name w/o initial
+        foreach (var member in members)
+        {
+            member.Name = Pay443Tests.RemoveMiddleInitial(member.Name);
+        }
 
         m805PrintSequence(members, profitShareUpdateRequest.MaxAllowedContributions, totalsDto);
         m1000AdjustmentReport(profitShareUpdateRequest, adjustmentsApplied);

@@ -108,6 +108,14 @@ const useYTDWages = (options?: UseYTDWagesOptions) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalCloseProfitYear, state.data, hasToken, state.search.isLoading]);
 
+  // Cleanup function to prevent AbortController errors on unmount
+  useEffect(() => {
+    return () => {
+      // Reset the search flag on unmount to allow re-initialization
+      hasInitiallySearched.current = false;
+    };
+  }, []);
+
   return {
     searchResults: state.data,
     isSearching: isSearching || state.search.isLoading,

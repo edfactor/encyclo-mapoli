@@ -57,10 +57,19 @@ export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
+export interface WagesCurrentYearParticipant {
+  badgeNumber: number;
+  incomeCurrentYear: number;
+  hoursCurrentYear: number;
+  storeNumber: number;
+  isExecutive: boolean;
+}
+
 export interface EmployeeWagesForYear {
   badgeNumber: number;
   incomeCurrentYear: number;
   hoursCurrentYear: number;
+  storeNumber: number;
   isExecutive: boolean;
 }
 
@@ -69,8 +78,10 @@ export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   useFrozenData?: boolean;
 }
 
- 
-export interface EmployeeWagesForYearResponse extends PagedReportResponse<EmployeeWagesForYear> {}
+export interface EmployeeWagesForYearResponse extends PagedReportResponse<EmployeeWagesForYear> {
+  totalHoursCurrentYearWages?: number;
+  totalIncomeCurrentYearWages?: number;
+}
 
 export interface EligibleEmployee {
   oracleHcmId: number;

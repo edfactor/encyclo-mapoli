@@ -66,7 +66,8 @@ describe("AccountHistoryReportTable", () => {
           earnings: 500,
           forfeitures: 100,
           withdrawals: 50,
-          endingBalance: 5000
+          endingBalance: 5000,
+          vestedBalance: 4500
         },
         {
           id: 2,
@@ -78,7 +79,8 @@ describe("AccountHistoryReportTable", () => {
           earnings: 450,
           forfeitures: 75,
           withdrawals: 25,
-          endingBalance: 4000
+          endingBalance: 4000,
+          vestedBalance: 3600
         }
       ]
     },
@@ -240,7 +242,8 @@ describe("AccountHistoryReportTable", () => {
             earnings: 500,
             forfeitures: 100,
             withdrawals: 50,
-            endingBalance: 5000
+            endingBalance: 5000,
+            vestedBalance: 4500
           },
           {
             id: 123, // Same ID (member identifier)
@@ -252,7 +255,8 @@ describe("AccountHistoryReportTable", () => {
             earnings: 450,
             forfeitures: 75,
             withdrawals: 25,
-            endingBalance: 4000
+            endingBalance: 4000,
+            vestedBalance: 3600
           }
         ]
       }
@@ -287,7 +291,8 @@ describe("AccountHistoryReportTable", () => {
         earnings: 500,
         forfeitures: 100,
         withdrawals: 50,
-        endingBalance: 5000
+        endingBalance: 5000,
+        vestedBalance: 4500
       },
       {
         id: 100, // SAME ID (represents the member)
@@ -299,7 +304,8 @@ describe("AccountHistoryReportTable", () => {
         earnings: 450,
         forfeitures: 75,
         withdrawals: 25,
-        endingBalance: 4000
+        endingBalance: 4000,
+        vestedBalance: 3600
       },
       {
         id: 100, // SAME ID (represents the member)
@@ -311,7 +317,8 @@ describe("AccountHistoryReportTable", () => {
         earnings: 400,
         forfeitures: 50,
         withdrawals: 10,
-        endingBalance: 3000
+        endingBalance: 3000,
+        vestedBalance: 2700
       }
     ];
 
@@ -366,7 +373,8 @@ describe("AccountHistoryReportTable", () => {
             earnings: 1000,
             forfeitures: 200,
             withdrawals: 100,
-            endingBalance: 10000
+            endingBalance: 10000,
+            vestedBalance: 9000
           }
         ]
       }

@@ -1,15 +1,28 @@
 import { CircularProgress, Divider, Grid, Typography } from "@mui/material";
-import { memo } from "react";
+import { memo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
+import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
+import { RootState } from "../../../reduxstore/store";
 import useMasterInquiry from "./hooks/useMasterInquiry";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 
-const MasterInquiryContent = memo(() => {
+interface MasterInquiryContentProps {
+  isGridExpanded: boolean;
+  setIsGridExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: MasterInquiryContentProps) => {
+  const dispatch = useDispatch();
+  const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
+
+  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen) ?? false;
+
   const {
     searchParams,
     searchResults,
@@ -30,27 +43,48 @@ const MasterInquiryContent = memo(() => {
     resetAll
   } = useMasterInquiry();
 
+  const handleToggleGridExpand = () => {
+    if (!isGridExpanded) {
+      // Expanding: remember current drawer state and close it
+      setWasDrawerOpenBeforeExpand(isDrawerOpen);
+      dispatch(closeDrawer());
+      dispatch(setFullscreen(true));
+      setIsGridExpanded(true);
+    } else {
+      // Collapsing: restore previous state
+      dispatch(setFullscreen(false));
+      if (wasDrawerOpenBeforeExpand) {
+        dispatch(openDrawer());
+      }
+      setIsGridExpanded(false);
+    }
+  };
+
   return (
     <Grid container>
-      <Grid
-        size={{ xs: 12 }}
-        width={"100%"}>
-        <Divider />
-      </Grid>
-      <Grid
-        size={{ xs: 12 }}
-        width={"100%"}></Grid>
-      <Grid
-        size={{ xs: 12 }}
-        width={"100%"}>
-        <DSMAccordion title="Filter">
-          <MasterInquirySearchFilter
-            onSearch={executeSearch}
-            onReset={resetAll}
-            isSearching={isSearching}
-          />
-        </DSMAccordion>
-      </Grid>
+      {!isGridExpanded && (
+        <>
+          <Grid
+            size={{ xs: 12 }}
+            width={"100%"}>
+            <Divider />
+          </Grid>
+          <Grid
+            size={{ xs: 12 }}
+            width={"100%"}></Grid>
+          <Grid
+            size={{ xs: 12 }}
+            width={"100%"}>
+            <DSMAccordion title="Filter">
+              <MasterInquirySearchFilter
+                onSearch={executeSearch}
+                onReset={resetAll}
+                isSearching={isSearching}
+              />
+            </DSMAccordion>
+          </Grid>
+        </>
+      )}
 
       {showMemberGrid && searchResults && !isFetchingMembers && (
         <MasterInquiryMemberGrid
@@ -60,6 +94,8 @@ const MasterInquiryContent = memo(() => {
           onPaginationChange={memberGridPagination.handlePaginationChange}
           onSortChange={memberGridPagination.handleSortChange}
           isLoading={isFetchingMembers}
+          isGridExpanded={isGridExpanded}
+          onToggleExpand={handleToggleGridExpand}
         />
       )}
 
@@ -81,7 +117,7 @@ const MasterInquiryContent = memo(() => {
       )}
 
       {/* Member Details Section - Always render when we have selection, just control visibility */}
-      {selectedMember && (
+      {selectedMember && !isGridExpanded && (
         <Grid
           size={{ xs: 12 }}
           sx={{
@@ -121,6 +157,8 @@ const MasterInquiryContent = memo(() => {
               profitGridPagination={profitGridPagination}
               onPaginationChange={profitGridPagination.handlePaginationChange}
               onSortChange={profitGridPagination.handleSortChange}
+              isGridExpanded={isGridExpanded}
+              onToggleExpand={handleToggleGridExpand}
             />
           ) : (
             <Grid
@@ -135,11 +173,15 @@ const MasterInquiryContent = memo(() => {
   );
 });
 
+MasterInquiryContent.displayName = "MasterInquiryContent";
+
 const MasterInquiry = () => {
+  const [isGridExpanded, setIsGridExpanded] = useState(false);
+
   return (
-    <Page label={CAPTIONS.MASTER_INQUIRY}>
+    <Page label={isGridExpanded ? "" : CAPTIONS.MASTER_INQUIRY}>
       <MissiveAlertProvider>
-        <MasterInquiryContent />
+        <MasterInquiryContent isGridExpanded={isGridExpanded} setIsGridExpanded={setIsGridExpanded} />
       </MissiveAlertProvider>
     </Page>
   );

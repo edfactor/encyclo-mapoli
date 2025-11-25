@@ -114,7 +114,7 @@ LEFT JOIN (
     :p_fiscal_end_date  – End-of-year date (same value used   
                            when the report is built)          
     :p_birthdate_21     – :p_fiscal_end_date – 21 years       
-    :p_min_hours        – ReferenceData.MinimumHoursForContribution()                        
+    :p_min_hours        – ReferenceData.MinimumHoursForContribution                        
 -----------------------------------------------------------*/
 WITH balances AS (
     /* 1️⃣  History-to-date balance per participant --------*/
@@ -300,7 +300,7 @@ FROM (
         string query = @$"
 SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
                + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
-                  AND ( NVL(MAX(pp.TOTAL_HOURS), 0) >= {ReferenceData.MinimumHoursForContribution()} 
+                  AND ( NVL(MAX(pp.TOTAL_HOURS), 0) >= {ReferenceData.MinimumHoursForContribution} 
                         AND MAX(d.DATE_OF_BIRTH) <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
                THEN 1 ELSE 0 END
                  AS YEARS
