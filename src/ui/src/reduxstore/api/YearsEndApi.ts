@@ -437,6 +437,22 @@ export const YearsEndApi = createApi({
           return response.json();
         }
       }),
+      transformResponse: (response: PagedReportResponse<EmployeeWagesForYear> | PagedReportResponse<{ participants: EmployeeWagesForYear[]; totalHoursCurrentYearWages: number; totalIncomeCurrentYearWages: number }>) => {
+        // Check if response has nested structure with participants
+        if ("response" in response && response.response?.results?.[0] && "participants" in response.response.results[0]) {
+          const firstResult = response.response.results[0] as { participants: EmployeeWagesForYear[]; totalHoursCurrentYearWages: number; totalIncomeCurrentYearWages: number };
+          return {
+            ...response,
+            totalHoursCurrentYearWages: firstResult.totalHoursCurrentYearWages,
+            totalIncomeCurrentYearWages: firstResult.totalIncomeCurrentYearWages,
+            response: {
+              ...response.response,
+              results: firstResult.participants
+            }
+          } as PagedReportResponse<EmployeeWagesForYear> & { totalHoursCurrentYearWages: number; totalIncomeCurrentYearWages: number };
+        }
+        return response as PagedReportResponse<EmployeeWagesForYear>;
+      },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
