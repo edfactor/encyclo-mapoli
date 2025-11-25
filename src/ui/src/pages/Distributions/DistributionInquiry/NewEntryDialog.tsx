@@ -26,7 +26,7 @@ const NewEntryDialog = ({ open, onClose }: NewEntryDialogProps) => {
   const navigate = useNavigate();
   const [badgeNumber, setBadgeNumber] = useState("");
   const [ssn, setSSN] = useState("");
-  const [memberType, setMemberType] = useState<number | "">("");
+  const [memberType, setMemberType] = useState<number | "">(1);
   const [errors, setErrors] = useState<{ badgeNumber?: string; ssn?: string; memberType?: string }>({});
 
   const handleClose = () => {
