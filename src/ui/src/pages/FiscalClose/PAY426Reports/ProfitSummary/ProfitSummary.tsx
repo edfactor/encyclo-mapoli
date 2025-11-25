@@ -217,12 +217,24 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
       return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
     };
 
+    // Helper to sum values that may be masked strings - returns masked string if any value is masked
+    const sumOrMasked = (field: "totalWages" | "totalBalance") => {
+      const values = activeAndInactiveRowData.map((row) => row[field]);
+      const hasMaskedValue = values.some((v) => typeof v === "string" && String(v).includes("X"));
+      if (hasMaskedValue) {
+        // Return the first masked value as the total (since we can't sum masked data)
+        const maskedValue = values.find((v) => typeof v === "string" && String(v).includes("X"));
+        return maskedValue;
+      }
+      return values.reduce((acc, curr) => acc + (curr as number), 0);
+    };
+
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-        totalWages: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
-        totalBalance: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
+        totalWages: sumOrMasked("totalWages"),
+        totalBalance: sumOrMasked("totalBalance"),
         totalHours: sumNullable("totalHours"),
         totalPoints: sumNullable("totalPoints")
       }
@@ -240,12 +252,24 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
       return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
     };
 
+    // Helper to sum values that may be masked strings - returns masked string if any value is masked
+    const sumOrMasked = (field: "totalWages" | "totalBalance") => {
+      const values = terminatedRowData.map((row) => row[field]);
+      const hasMaskedValue = values.some((v) => typeof v === "string" && String(v).includes("X"));
+      if (hasMaskedValue) {
+        // Return the first masked value as the total (since we can't sum masked data)
+        const maskedValue = values.find((v) => typeof v === "string" && String(v).includes("X"));
+        return maskedValue;
+      }
+      return values.reduce((acc, curr) => acc + (curr as number), 0);
+    };
+
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-        totalWages: terminatedRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
-        totalBalance: terminatedRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
+        totalWages: sumOrMasked("totalWages"),
+        totalBalance: sumOrMasked("totalBalance"),
         totalHours: sumNullable("totalHours"),
         totalPoints: sumNullable("totalPoints")
       }
