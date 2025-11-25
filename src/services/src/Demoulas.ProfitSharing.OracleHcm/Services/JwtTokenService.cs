@@ -54,26 +54,32 @@ public sealed class JwtTokenService : IJwtTokenService
         // Calculate x5t (SHA-1 thumbprint in base64) - Oracle HCM requirement
         string x5t = CalculateThumbprint(certificate);
 
+        // Use certificate thumbprint as kid (Key ID) for key identification
+        string kid = certificate.Thumbprint;
+
         // Create header
         var header = new
         {
             alg = signingAlgorithm,
             typ = TokenType,
-            x5t = x5t
+            x5t = x5t,
+            kid = kid
         };
 
         // Create payload with Oracle HCM required claims
         long nowUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         long expUnix = nowUnix + (expirationMinutes * 60);
+        string jti = Guid.NewGuid().ToString();
 
         var payload = new
         {
             iss = issuer,
-            prn = principal,
+            prn = "API_PS_PROD",
             iat = nowUnix,
             exp = expUnix,
             sub = "API_PS_PROD",
-            aud = "https://eqma-dev3.fa.ocs.oraclecloud.com",
+            aud = "https://identity.oraclecloud.com",
+            jti = jti
         };
 
         // Encode header and payload as base64url
