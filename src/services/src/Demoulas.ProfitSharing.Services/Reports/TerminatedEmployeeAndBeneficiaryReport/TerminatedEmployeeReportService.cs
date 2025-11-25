@@ -183,7 +183,7 @@ public sealed class TerminatedEmployeeReportService
             var seenMembers = new HashSet<(int BadgeNumber, short PsnSuffix)>();
 
             var memberSliceCollection = memberSliceUnion
-                .Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= ReferenceData.MinimumHoursForContribution()))
+                .Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= ReferenceData.MinimumHoursForContribution))
                 .AsAsyncEnumerable();
 
             await foreach (MemberSlice memberSlice in memberSliceCollection)
@@ -401,7 +401,7 @@ public sealed class TerminatedEmployeeReportService
     private static bool IsInteresting(Member member)
     {
         // If you are not past your second year, you have no money in profit sharing so lets move along
-        if (member.YearsInPlan <= 2 && member.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution())
+        if (member.YearsInPlan <= 2 && member.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution)
         {
             return false;
         }
