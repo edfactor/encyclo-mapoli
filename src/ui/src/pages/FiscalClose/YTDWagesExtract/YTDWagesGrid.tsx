@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 
 import { RefObject } from "react";
+import { RowClassParams } from "ag-grid-community";
 import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
@@ -39,17 +40,49 @@ const YTDWagesGrid = ({
 
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
 
-  // Use dynamic grid height utility hook with increased height for large page sizes
-  const gridMaxHeight = useDynamicGridHeight({
-    heightPercentage: 0.7, // Use 70% of viewport height (up from default 40%)
-    minHeight: 300,
-    maxHeight: 1600 // Allow grid to grow up to 1600px (up from default 800px)
-  });
+  // Calculate totals for pinned top row - use API totals if available, otherwise calculate
+  const totalsRow = useMemo(() => {
+    if (!clonedData?.response?.results) return null;
+    
+    // Check if API provided totals
+    const totalHours = clonedData.totalHoursCurrentYearWages ?? 
+      clonedData.response.results.reduce((sum, row) => sum + (row.hoursCurrentYear || 0), 0);
+    
+    const totalIncome = clonedData.totalIncomeCurrentYearWages ?? 
+      clonedData.response.results.reduce((sum, row) => sum + (row.incomeCurrentYear || 0), 0);
+
+    return {
+      badgeNumber: "TOTALS",
+      hoursCurrentYear: totalHours,
+      incomeCurrentYear: totalIncome,
+      isExecutive: false,
+      storeNumber: 0
+    };
+  }, [clonedData?.response?.results, clonedData?.totalHoursCurrentYearWages, clonedData?.totalIncomeCurrentYearWages]);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   return (
     <div className="relative">
       {showData && clonedData?.response && (
         <div ref={innerRef}>
+          <div className="mt-[37px] mb-[21px] flex items-center gap-6 px-6">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Total Hours:</span>
+              <span>
+                {clonedData.totalHoursCurrentYearWages?.toFixed(2) ?? 
+                 totalsRow?.hoursCurrentYear.toFixed(2) ?? "0.00"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Total Income:</span>
+              <span>
+                {numberToCurrency(clonedData.totalIncomeCurrentYearWages ?? 
+                 totalsRow?.incomeCurrentYear ?? 0)}
+              </span>
+            </div>
+          </div>
           <ReportSummary report={clonedData} />
           <DSMGrid
             preferenceKey={"TERM"}
@@ -58,7 +91,14 @@ const YTDWagesGrid = ({
             handleSortChanged={onSortChange}
             providedOptions={{
               rowData: clonedData.response.results,
-              columnDefs: columnDefs
+              pinnedTopRowData: totalsRow ? [totalsRow] : [],
+              columnDefs: columnDefs,
+              getRowStyle: (params: RowClassParams) => {
+                if (params.node.rowPinned) {
+                  return { background: "#f0f0f0", fontWeight: "bold" };
+                }
+                return undefined;
+              }
             }}
           />
         </div>
