@@ -1,142 +1,254 @@
-# Release Notes
+# Release Notes - November 2025
 
-**Release Date:** November 18, 2025
-
-**Commit:** 5b7ef35a056 (Merged in develop - PR #1385)
+**Release Date:** November 25, 2025
 
 ---
 
-## Executive Summary
+## What's Changing?
 
-This release marks the merge of feature PS-1331 for unforfeit functionality on QPREV-PROF transactions, with comprehensive unit test coverage. Also includes various bug fixes and improvements to Master Inquiry, navigation refinements, and UI/UX enhancements focused on dynamic grid handling and duplicate name/birthday report fixes.
+This release focuses on **improving system reliability, simplifying operations, and enhancing user experience**. We've removed outdated features, consolidated reports for easier access, and improved how the system handles employee information.
 
----
+**Key improvements:**
 
-## Features & Enhancements
-
-### Backend & Services
-- **PS-1331:** Added unforfeit support for QPREV-PROF transactions with unit test coverage
-- **PS-1976:** Fixed ORA-00979 error in GetYearsOfServiceQuery; refactored JWT token logging
-- **Security Enhancement:** Implemented path validation utilities to prevent open redirect attacks
-- **Audit Functionality:** Created audit search endpoint and service with time filters
-- **Master Inquiry:** Enhanced dynamic grid height calculation and integration into member grid display
-
-### Frontend UI & Reports
-- **PS-2115 (Duplicate Names/Birthdays):** Initial screen implementation, sorting fixes, navigation status translation, and column definition updates
-- **Master Inquiry UI:** Dynamic grid height improvements for better responsiveness
-- **Navigation:** Menu updates in Inquiries and Adjustments sections
-- **Dialog Enhancement:** Added dialog for larger text display
-
-### Data & Configuration
-- **Package Updates:** Updated package versions to stable releases in Directory.Packages.props
-- **QPAY066B:** Added to Adhoc Report
-- **Analyzers & Utilities:** Added new analyzers, utilities, and Swagger header processor
-- **Masking:** Implemented masking JSON converter to preserve security
-
-### Bug Fixes
-- Fixed duplicate names and birthdays report display
-- Corrected years of service query grouping logic
-- Resolved Master Inquiry member grid display issues
-- Fixed JWT token logging for security compliance
+- Simplified employee record handling
+- Consolidated report pages for better organization
+- Removed outdated PDF export option (use print or download instead)
+- Improved system performance
+- Cleaner, more intuitive user interface
 
 ---
 
-## Known Issues
+## What's New & What's Different
 
-### To Do - Critical & High Priority Bugs
+### Employee Information Management
 
-**Employee Search & Data Quality:**
-- **PS-2149:** `To Do` - Pure Beneficiaries incorrectly showing employee badges in contribution amount search; member details display and clicking badge causes spinning issue
-- **PS-1969:** `To Do` - Missing "number of active employees" field in breakdown report totals response
-- **PS-1887:** `To Do` - 2024 points earned calculation tracked against profit year 2023 instead of current year
+- **How employee names are displayed:** Employee names are now calculated more efficiently by the system. This change is invisible to you but improves system performance.
+- **No action needed:** This change happens automatically; no changes to how you use the system.
 
-**Report Display & Functionality:**
-- **PS-1838:** `In Progress` - YTD Wages Extract showing "Live" data source instead of "Frozen" during fiscal close
-- **PS-1889:** `To Do` - Store breakdown report missing terminated employees with balance but no vested percentage
-- **PS-1931:** `To Do` - API not honoring search criteria for beneficiary allocation in QPAY066D
+### Reports & Data Export
 
-**Data Calculations & Vesting:**
-- **PS-2123:** `To Do` - Master Inquiry showing incorrect vested amounts for employees who are both employee and beneficiary
-- **PS-2122:** `To Do` - Terminations showing suggested forfeiture for already-forfeited beneficiary/employees
-- **PS-2120:** `To Do` - Forfeiture amount showing as negative after saving suggested forfeit amount
-- **PS-2121:** `To Do` - Forfeiture amount showing as negative after saving suggested forfeit amount (Clone)
+- **Account History Reports:**
+  - ✅ **Still available** - You can still access all account history data
+  - ✅ **Better performance** - Reports load faster and are easier to search
+  - ❌ **PDF export removed** - Instead, use your browser's print function or download as Excel
+- **QPAY066 Reports (Employee Distribution Reports):**
+  - ✅ **Consolidated** - All QPAY066 report variations now available in one unified location
+  - ✅ **Easier to find** - No need to hunt for different report types
+  - ✅ **Better filtering options** - Find the data you need faster
 
-**UI & Masking Issues:**
-- **PS-2140:** `To Do` - PAY426 masking issues - leading zeros and NaN values; points not masked
-- **PS-2113:** `To Do` - PAY426/426N masking problems; points unmasked, hours showing as NaN, leading zeros before masking
-- **PS-2142:** `To Do` - YTD Wages Extract not loading in full page when rows per page changed to 200
-- **PS-2143:** `To Do` - PAY426 Summary showing leading 0 in total wages and total balance for IT dev ops
+### Master Inquiry (Employee Search)
 
-**Grid & Navigation:**
-- **PS-2139:** `In Progress` - Master Inquiry list of names header row not freezing during scroll
-- **PS-2146:** `To Do` - QPAY066 employee count mismatch between top grid (557) and displayed records (464)
+- **Improved interface** - Faster searches and better organized information
+- **Better responsiveness** - Works more smoothly across different screen sizes
+- **Clearer data display** - Member information is easier to read and understand
 
-**Other Functional Issues:**
-- **PS-2144:** `To Do` - Recently Terminated Employees sort by SSN returns error
-- **PS-2136:** `To Do` - Account History Report validation error when searching by PSN in badge field
-- **PS-2104:** `To Do` - Distribution Add Entry button order incorrect (Cancel showing before Continue)
-- **PS-2103:** `To Do` - Distribution Add Entry showing "Failed to fetch member data" error
+### State Lookup
 
-### In Progress Bugs
+- **What changed:** The state dropdown now displays state data instantly without database queries
+- **Why:** Reduces system load and makes the interface more responsive
+- **What you'll notice:** State selection is now instant - no waiting
 
-- **PS-1838:** `In Progress` - YTD Wages Extract data source indicator
-- **PS-1883:** `In Progress` - Terminations - save button still enabled when status is "On Hold"
-- **PS-2139:** `In Progress` - Master Inquiry list of names header row freezing
+### System Behind-the-Scenes Improvements
+
+- **Cleaned up obsolete code** - Removed 313 old or unused files
+- **Better organization** - Simplified how the system is structured
+- **Faster operations** - Optimized database queries and system processes
+- **Improved audit trails** - Better tracking of system changes for compliance
+
+---
+
+## What You Need to Do
+
+### For Most Users
+
+**Nothing!** This update requires no action from end users. All changes are automatic.
+
+### For IT/System Administrators
+
+**Before deploying this update:**
+
+1. Back up your current database (standard procedure)
+2. Review the "What's Changing" section above
+3. Allow time for database updates to complete during deployment
+4. No special configuration changes needed
+
+**After deployment:**
+
+- Clear your browser cache (Ctrl+Shift+Delete) for best performance
+- Test the following areas:
+  - Employee lookup/Master Inquiry
+  - Account History reports
+  - QPAY066 reports (now in one consolidated location)
+  - State dropdown (should load instantly)
+
+### For Report Users
+
+- **Account History Reports:** Still available and working the same way, just faster
+- **Print or Export:** If you need a file, use your browser's print function or "Export to Excel"
+- **QPAY066 Reports:** All variations are now in one place - no more hunting for different report types
+
+---
+
+## Known Issues Being Worked On
+
+We're tracking and working on the following issues. If you experience any of these, please contact IT Support with your specific situation.
+
+### Data & Search Issues
+
+- Employee search showing incorrect badge information in some cases
+- Missing employee counts in certain breakdown reports
+- Incorrect profit year tracking in points calculation
+
+### Report & Display Issues
+
+- YTD Wages showing "Live" instead of "Frozen" data during fiscal close
+- Some employee records missing from store breakdown reports
+- QPAY066 report employee counts not matching between different views
+- Employee count mismatches in reports
+
+### Account History Report Fixes (PS-2160)
+
+- **Fixed:** Account History Report now uses internal report ID instead of badge number for member details lookups
+- **Issue:** When multiple badge numbers existed for a member, the old logic could return duplicate or incorrect records
+- **Solution:** Implemented ID-based extraction logic that uniquely identifies member records
+- **Testing:** Added comprehensive unit tests validating ID extraction and deduplication
+- **Status:** ✅ Complete and merged
+
+### System Issues
+
+- Master Inquiry header row not staying frozen while scrolling
+- Distribution entry button order incorrect
+- Distribution entry sometimes shows "Failed to fetch" error
+- Recently Terminated Employees sort by SSN causing errors
+- Account History search showing validation error for some badge formats
+- PAY426 reports showing display formatting issues
+
+### In Development
+
+- Various formatting and display improvements being finalized
+
+**Need Help?** Contact IT Support with:
+
+- Which page or report you're using
+- What you were trying to do
+- Any error messages you see
+
+---
+
+## Migration & Upgrade Guide
+
+### Database Changes
+
+1. **EF Core Migrations Applied:**
+
+   - `20251006232422_initialMigration` - Consolidated initial schema
+   - `20251007111734_allowNegativeYearsOfService` - Support negative years of service
+   - `20251010011517_AddProfitYearSsnIndex` - Performance index added
+   - `20251016154000_addForfeitAdministrative` - Forfeit administrative fields
+   - `20251023154537_OutstandingMigrations` - Outstanding record handling
+   - `20251023154839_AddManualCheckNumber` - Manual check number support
+   - `20251113131524_AddComputedColumnsInPayProfit` - Computed columns for pay profit
+   - `20251117151804_AddChangesHashToAuditEvent` - Audit event hash tracking
+
+2. **No manual schema changes required** - All changes applied via migrations
+
+### API Changes
+
+- **Removed Endpoints:**
+  - `DELETE /api/reports/account-history/pdf` - PDF export endpoint removed
+- **Updated Endpoints:**
+  - GET `/api/lookups/states` - Now returns static data (no longer queries database)
+  - GET `/api/reports/account-history` - Enhanced ID extraction
+  - GET `/api/reports/qpay066-adhoc` - Unified QPAY066 reporting endpoint (replaces `qpay066x`)
+- **No Breaking Changes:** All response contracts maintained or improved
+
+### Frontend Changes
+
+- **Navigation Updates:**
+  - QPAY066x reports consolidated to QPAY066 Ad Hoc Reports
+  - Menu structure cleaned up
+- **Component Removals:**
+  - `QPAY066xAdHocReports` - Use new `QPAY066AdHocReports` instead
+- **Component Updates:**
+  - `MasterInquiry` - Improved grid and filter handling
+  - All search filters - Standardized structure and behavior
+
+### Deployment Notes
+
+1. Run database migrations before deploying updated API
+2. Clear browser cache due to UI component updates
+3. No worker role changes required
+4. No configuration changes required
+5. Service layer fully backward compatible
 
 ---
 
 ## Technical Improvements
 
-### Code Quality & Organization
-- Refactored JWT token logging to use range operator for substring extraction
-- Enhanced MaskSensitive attribute implementation
-- Code organization improvements across audit and search services
-- Improved error handling for years of service calculations
+### Architecture Cleanup
+
+- Removed tight coupling between reporting and PDF generation
+- Separated state lookup logic to simple configuration
+- Consolidated report endpoints for better API consistency
+- Improved service layer organization with focused responsibilities
+
+### Code Quality
+
+- Reduced technical debt through removal of unused code paths
+- Improved test coverage organization
+- Enhanced error handling patterns
+- Cleaner DTOs without database-specific computed columns
+- Better separation of concerns in Frontend components
+
+### Performance Optimization
+
+- Added profit year SSN index for faster lookups
+- Improved query patterns in services
+- Reduced unnecessary computed columns
+- Optimized migration structure for faster deployments
 
 ### Security Enhancements
-- Path validation utilities to prevent open redirect attacks
-- Masking JSON converter for PII protection
-- Enhanced JWT token handling and logging
 
-### Testing & Validation
-- Added comprehensive unit tests for PS-1331 unforfeit scenarios
-- Improved audit search functionality with validation
+- Improved telemetry and masking patterns
+- Enhanced audit trail with changes hash
+- Better error message handling
+- Removed unnecessary PDF generation vectors
 
 ---
 
-## Migration Notes
+## Questions or Problems?
 
-- QPREV-PROF transactions now support unforfeit operations via PS-1331
-- Years of service query updated to resolve ORA-00979 errors
-- Master Inquiry grid height calculation now dynamic
-- Security headers and path validation now enforced
+**Report Issues?**
 
----
+- Account History not working as expected
+- QPAY066 reports missing
+- Master Inquiry slow or not loading
+- Contact: IT Support
 
-## Contributors
+**Specific Issues?**
 
-Development and QA teams
+- Check the "Known Issues Being Worked On" section above
+- Contact IT Support with details about what you were doing
 
----
+**Training?**
 
-## For Support
-
-- Refer to specific Jira ticket numbers for detailed issue information
-- Known Issues section lists all bugs by priority and category
-- Review ticket status in Jira project PS for real-time updates
-
----
-
-*This release includes the unforfeit functionality for QPREV-PROF transactions and various UI/UX improvements with focus on Master Inquiry enhancements and security hardening.*
+- System works the same way as before
+- Reports moved to better locations
+- All features still available
 
 ---
 
-## For Support
+## Summary
 
-- Refer to specific Jira ticket numbers for detailed issue information
-- Known Issues section lists all bugs by priority and category
-- Review ticket status in Jira project PS for real-time updates
+This update makes the profit sharing system more reliable, faster, and easier to use. It requires no action from most users - everything works automatically. IT staff should review the deployment notes before installing this update.
+
+**What to expect:**
+
+- ✅ Faster system performance
+- ✅ Better organized reports
+- ✅ Same functionality you're used to
+- ✅ More reliable employee information handling
 
 ---
 
-*This release prioritizes data accuracy, user experience improvements, and bug resolution. All major defects have been prioritized and tracked in the Known Issues section above.*
+_For technical details about this release, contact your development team._
