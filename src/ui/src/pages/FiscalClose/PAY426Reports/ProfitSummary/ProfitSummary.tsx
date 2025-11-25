@@ -83,15 +83,18 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
  */
 const sumOrMasked = (
   rowData: YearEndProfitSharingReportSummaryLineItem[],
-  field: "totalWages" | "totalBalance"
-): number | string | undefined => {
+  field: "totalWages" | "totalBalance" | "totalHours" | "totalPoints"
+): number | string | null | undefined => {
   const values = rowData.map((row) => row[field]);
   const hasMaskedValue = values.some((v) => typeof v === "string" && String(v).includes("X"));
   if (hasMaskedValue) {
     // Return the first masked value as the total (since we can't sum masked data)
     return values.find((v) => typeof v === "string" && String(v).includes("X"));
   }
-  return values.reduce((acc, curr) => acc + (curr as number), 0);
+  // For nullable fields (hours/points), check if all values are null
+  const hasAnyValue = values.some((v) => v !== null && v !== undefined);
+  if (!hasAnyValue) return null;
+  return values.reduce((acc, curr) => (acc as number) + (Number(curr) || 0), 0);
 };
 
 interface ProfitSummaryProps {
@@ -225,22 +228,14 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   const getActiveAndInactiveTotals = useMemo(() => {
     if (!activeAndInactiveRowData) return [];
 
-    // Helper to sum nullable values - returns null if all values are null, otherwise sums them
-    const sumNullable = (field: keyof YearEndProfitSharingReportSummaryLineItem) => {
-      const values = activeAndInactiveRowData.map((row) => row[field]);
-      const hasAnyValue = values.some((v) => v !== null && v !== undefined);
-      if (!hasAnyValue) return null;
-      return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
-    };
-
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
         totalWages: sumOrMasked(activeAndInactiveRowData, "totalWages"),
         totalBalance: sumOrMasked(activeAndInactiveRowData, "totalBalance"),
-        totalHours: sumNullable("totalHours"),
-        totalPoints: sumNullable("totalPoints")
+        totalHours: sumOrMasked(activeAndInactiveRowData, "totalHours"),
+        totalPoints: sumOrMasked(activeAndInactiveRowData, "totalPoints")
       }
     ];
   }, [activeAndInactiveRowData]);
@@ -248,22 +243,14 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   const getTerminatedTotals = useMemo(() => {
     if (!terminatedRowData) return [];
 
-    // Helper to sum nullable values - returns null if all values are null, otherwise sums them
-    const sumNullable = (field: keyof YearEndProfitSharingReportSummaryLineItem) => {
-      const values = terminatedRowData.map((row) => row[field]);
-      const hasAnyValue = values.some((v) => v !== null && v !== undefined);
-      if (!hasAnyValue) return null;
-      return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
-    };
-
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
         totalWages: sumOrMasked(terminatedRowData, "totalWages"),
         totalBalance: sumOrMasked(terminatedRowData, "totalBalance"),
-        totalHours: sumNullable("totalHours"),
-        totalPoints: sumNullable("totalPoints")
+        totalHours: sumOrMasked(terminatedRowData, "totalHours"),
+        totalPoints: sumOrMasked(terminatedRowData, "totalPoints")
       }
     ];
   }, [terminatedRowData]);

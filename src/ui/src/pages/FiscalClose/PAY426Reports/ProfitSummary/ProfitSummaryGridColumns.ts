@@ -58,6 +58,9 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
         if (params.value === null || params.value === undefined) {
           return "";
         }
+        if (typeof params.value === "string" && params.value.includes("X")) {
+          return params.value;
+        }
         return formatNumberWithComma(params.value);
       }
     }),
@@ -69,6 +72,9 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       valueFormatter: (params) => {
         if (params.value === null || params.value === undefined) {
           return "";
+        }
+        if (typeof params.value === "string" && params.value.includes("X")) {
+          return params.value;
         }
         return formatNumberWithComma(params.value);
       }
