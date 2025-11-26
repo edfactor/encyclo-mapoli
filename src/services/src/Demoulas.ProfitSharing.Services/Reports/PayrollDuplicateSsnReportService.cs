@@ -126,7 +126,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
                             },
                             HireDate = x.HireDate,
                             TerminationDate = x.TerminationDate,
-                            CurrentHourYear = x.PayProfits.OrderByDescending(x=>x.LastUpdate).Select(x=>x.CurrentHoursYear).FirstOrDefault(),
+                            CurrentHourYears = x.PayProfits.OrderByDescending(x=>x.LastUpdate).Select(x=>x.CurrentHoursYear).FirstOrDefault(),
                             RehireDate = x.RehireDate,
                             Status = x.Status == EmploymentStatus.Constants.Active ? 'A' : 'T',
                             EmploymentStatusName = x.EmploymentStatusName,

@@ -18,7 +18,7 @@ public sealed record PayrollDuplicateSsnResponseDto : IIsExecutive
     public IEnumerable<PayProfitResponseDto> PayProfits { get; set; } = [];
     public required string EmploymentStatusName { get; set; }
     public required bool IsExecutive { get; set; }
-    public decimal? CurrentHourYear { get; set; }
+    public decimal? CurrentHourYears { get; set; }
 
     public static PayrollDuplicateSsnResponseDto ResponseExample()
     {
