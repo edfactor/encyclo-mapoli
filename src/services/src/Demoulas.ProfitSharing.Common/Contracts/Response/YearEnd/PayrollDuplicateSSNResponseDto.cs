@@ -18,6 +18,7 @@ public sealed record PayrollDuplicateSsnResponseDto : IIsExecutive
     public IEnumerable<PayProfitResponseDto> PayProfits { get; set; } = [];
     public required string EmploymentStatusName { get; set; }
     public required bool IsExecutive { get; set; }
+    public decimal? CurrentHourYears { get; set; }
 
     public static PayrollDuplicateSsnResponseDto ResponseExample()
     {
@@ -34,6 +35,7 @@ public sealed record PayrollDuplicateSsnResponseDto : IIsExecutive
             StoreNumber = 6,
             ProfitSharingRecords = 17,
             IsExecutive = false,
+            CurrentHourYears = 0,
         };
     }
 }
