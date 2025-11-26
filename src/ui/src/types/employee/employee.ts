@@ -152,11 +152,11 @@ export interface YearEndProfitSharingReportSummaryLineItem {
   lineItemPrefix: string;
   lineItemTitle: string;
   numberOfMembers: number;
-  totalWages: number;
-  totalBalance: number;
-  totalHours: number;
-  totalPoints: number;
-  totalPriorBalance: number;
+  totalWages: number | string;
+  totalBalance: number | string;
+  totalHours: number | string;
+  totalPoints: number | string;
+  totalPriorBalance: number | string;
 }
 
 export interface YearEndProfitSharingReportSummaryResponse {
