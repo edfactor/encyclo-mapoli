@@ -35,7 +35,7 @@ public sealed record PayrollDuplicateSsnResponseDto : IIsExecutive
             StoreNumber = 6,
             ProfitSharingRecords = 17,
             IsExecutive = false,
-            CurrentHourYear = 0,
+            CurrentHourYears = 0,
         };
     }
 }
