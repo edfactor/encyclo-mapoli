@@ -1,17 +1,15 @@
 import { Button, Divider, Grid, Typography } from "@mui/material";
-import { RowClickedEvent } from "ag-grid-community";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   useFinalizeReportMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery
 } from "reduxstore/api/YearsEndApi";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, Page } from "smart-ui-library";
-import { CAPTIONS, ROUTES } from "../../../../constants";
+import { CAPTIONS } from "../../../../constants";
 import { RootState } from "../../../../reduxstore/store";
 import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
@@ -108,7 +106,6 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-  const navigate = useNavigate();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
   const handleCommit = async () => {
@@ -130,35 +127,6 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
     // Only set shouldArchive to true when transitioning TO "Complete" status
     if (statusName === "Complete") {
       setShouldArchive(true);
-    }
-  };
-
-  const getPresetNumberForLineItem = (lineItemPrefix: string): string | null => {
-    const presetMap: { [key: string]: string } = {
-      "1": "1",
-      "2": "2",
-      "3": "3",
-      "4": "4",
-      "5": "5",
-      "6": "6",
-      "7": "7",
-      "8": "8",
-      "9": "9",
-      N: "10"
-    };
-
-    return presetMap[lineItemPrefix] || null;
-  };
-
-  const handleRowClick = (event: RowClickedEvent<YearEndProfitSharingReportSummaryLineItem>) => {
-    const rowData = event.data;
-    if (!rowData) return;
-    const clickedLineItem = rowData.lineItemPrefix;
-    const presetNumber = getPresetNumberForLineItem(clickedLineItem);
-
-    if (presetNumber) {
-      // Navigate to PAY426N with the preset number
-      navigate(`/${ROUTES.PAY426N_LIVE}/${presetNumber}`);
     }
   };
 
@@ -280,8 +248,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
             providedOptions={{
               rowData: activeAndInactiveRowData,
               pinnedTopRowData: getActiveAndInactiveTotals,
-              columnDefs: columnDefs,
-              onRowClicked: handleRowClick as (event: unknown) => void
+              columnDefs: columnDefs
             }}
           />
         </Grid>
@@ -299,8 +266,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
             providedOptions={{
               rowData: terminatedRowData,
               pinnedTopRowData: getTerminatedTotals,
-              columnDefs: columnDefs,
-              onRowClicked: handleRowClick as (event: unknown) => void
+              columnDefs: columnDefs
             }}
           />
         </Grid>
