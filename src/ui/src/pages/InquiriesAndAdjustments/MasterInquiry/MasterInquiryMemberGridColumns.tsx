@@ -10,6 +10,7 @@ import {
 
 export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
   const badgeColumn = createBadgeColumn({
+    headerName: "Badge/PSN",
     psnSuffix: true,
     renderAsLink: false // Don't render as link - row click handles selection
   });

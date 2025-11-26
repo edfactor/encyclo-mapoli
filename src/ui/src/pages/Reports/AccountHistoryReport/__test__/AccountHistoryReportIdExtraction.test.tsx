@@ -37,7 +37,8 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
               earnings: 500,
               forfeitures: 100,
               withdrawals: 50,
-              endingBalance: 5000
+              endingBalance: 5000,
+              vestedBalance: 4500
             },
             {
               id: 234,
@@ -49,7 +50,8 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
               earnings: 450,
               forfeitures: 75,
               withdrawals: 25,
-              endingBalance: 4000
+              endingBalance: 4000,
+              vestedBalance: 3600
             }
           ]
         },
@@ -150,7 +152,8 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
           earnings: 500,
           forfeitures: 100,
           withdrawals: 50,
-          endingBalance: 5000
+          endingBalance: 5000,
+          vestedBalance: 4500
         },
         {
           id: 100, // SAME ID (represents the member)
@@ -162,7 +165,8 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
           earnings: 450,
           forfeitures: 75,
           withdrawals: 25,
-          endingBalance: 4000
+          endingBalance: 4000,
+          vestedBalance: 3600
         },
         {
           id: 100, // SAME ID (represents the member)
@@ -174,7 +178,8 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
           earnings: 400,
           forfeitures: 50,
           withdrawals: 10,
-          endingBalance: 3000
+          endingBalance: 3000,
+          vestedBalance: 2700
         }
       ];
 
@@ -219,7 +224,8 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
               earnings: 2000,
               forfeitures: 500,
               withdrawals: 200,
-              endingBalance: 50000
+              endingBalance: 50000,
+              vestedBalance: 45000
             }
           ]
         }
@@ -268,7 +274,8 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
                   earnings: 0,
                   forfeitures: 0,
                   withdrawals: 0,
-                  endingBalance: 0
+                  endingBalance: 0,
+                  vestedBalance: 0
                 }
               ]
             }
@@ -338,7 +345,8 @@ describe("AccountHistoryReport - ID Extraction Logic (PS-2160)", () => {
               earnings: 500,
               forfeitures: 100,
               withdrawals: 50,
-              endingBalance: 5000
+              endingBalance: 5000,
+              vestedBalance: 4500
             }
           ]
         }

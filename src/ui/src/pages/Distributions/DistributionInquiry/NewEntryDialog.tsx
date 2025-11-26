@@ -26,7 +26,7 @@ const NewEntryDialog = ({ open, onClose }: NewEntryDialogProps) => {
   const navigate = useNavigate();
   const [badgeNumber, setBadgeNumber] = useState("");
   const [ssn, setSSN] = useState("");
-  const [memberType, setMemberType] = useState<number | "">("");
+  const [memberType, setMemberType] = useState<number | "">(1);
   const [errors, setErrors] = useState<{ badgeNumber?: string; ssn?: string; memberType?: string }>({});
 
   const handleClose = () => {
@@ -105,7 +105,8 @@ const NewEntryDialog = ({ open, onClose }: NewEntryDialogProps) => {
             label="Badge Number or PSN"
             value={badgeNumber}
             onChange={(e) => {
-              setBadgeNumber(e.target.value);
+              const value = e.target.value.replace(/\D/g, "").slice(0, 11);
+              setBadgeNumber(value);
               if (errors.badgeNumber) {
                 setErrors({ ...errors, badgeNumber: undefined });
               }
@@ -163,16 +164,16 @@ const NewEntryDialog = ({ open, onClose }: NewEntryDialogProps) => {
       </DialogContent>
       <DialogActions sx={{ padding: "16px 24px" }}>
         <Button
-          onClick={handleClose}
-          variant="outlined">
-          Cancel
-        </Button>
-        <Button
           onClick={handleSubmit}
           variant="contained"
           color="primary"
           disabled={(badgeNumber.trim() === "" && ssn.trim() === "") || memberType === ""}>
           Continue
+        </Button>
+        <Button
+          onClick={handleClose}
+          variant="outlined">
+          Cancel
         </Button>
       </DialogActions>
     </Dialog>

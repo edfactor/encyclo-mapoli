@@ -26,7 +26,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
-    private static readonly short _hoursThreshold = ReferenceData.MinimumHoursForContribution();
+    private static readonly short _hoursThreshold = ReferenceData.MinimumHoursForContribution;
 
     private sealed record EmployeeProjection
     {
@@ -687,7 +687,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             // 4. At least 18 years old (Report 3 shows "<21>" for all under-18, never "NEW")
             IsNew = x.Employee.EnrollmentId == 0
                     && x.Employee.FirstContributionYear == null
-                    && x.Employee.Hours >= ReferenceData.MinimumHoursForContribution()
+                    && x.Employee.Hours >= ReferenceData.MinimumHoursForContribution
                     && x.Employee.DateOfBirth.Age(ageCalcDate) >= 18,
             IsUnder21 = x.Employee.DateOfBirth.Age(ageCalcDate) < 21,
             EmployeeStatus = x.Employee.EmploymentStatusId,

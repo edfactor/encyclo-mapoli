@@ -77,6 +77,8 @@ interface ManageExecutiveHoursAndDollarsGridSearchProps {
   addExecutivesToMainGrid?: () => void;
   isModalSearching?: boolean;
   isReadOnly?: boolean;
+  // canEdit: true only when page status is "In Progress" AND user has ExecutiveAdministrator role
+  canEdit?: boolean;
   // Props for modal grid (not needed when isModal=false)
   modalResults?: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   modalGridPagination?: GridPaginationState & GridPaginationActions;
@@ -103,15 +105,27 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   modalSelectedExecutives = [],
   addExecutivesToMainGrid = () => {},
   isModalSearching = false,
-  isReadOnly = false
+  isReadOnly = false,
+  canEdit = false
 }) => {
   const currentData = isModal ? modalResults : gridData;
   const currentPagination = isModal ? modalGridPagination : mainGridPagination;
   const sortEventHandler = currentPagination?.handleSortChange;
-  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(isModal), [isModal]);
+  // Pass canEdit to column definitions - editing requires page status "In Progress" AND ExecutiveAdministrator role
+  const columnDefs = useMemo(
+    () => GetManageExecutiveHoursAndDollarsColumns({ mini: isModal, canEdit }),
+    [isModal, canEdit]
+  );
 
   const processEditedRow = useCallback(
     (event: CellValueChangedEvent) => {
+      // Safety guard: prevent editing if canEdit is false
+      // (columns should already be non-editable, but this is a safety measure)
+      if (!canEdit && !isModal) {
+        event.api.refreshCells({ force: true });
+        return;
+      }
+
       const rowInQuestion: IRowNode = event.node;
 
       // Mark that we're editing to prevent data resets
@@ -171,7 +185,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
         isEditingRef.current = false;
       }, 100);
     },
-    [isModal, currentData, updateExecutiveRow]
+    [isModal, currentData, updateExecutiveRow, canEdit]
   );
   const hasData = Boolean(currentData?.response?.results && currentData.response.results.length > 0);
   const isPaginationNeeded = hasData;

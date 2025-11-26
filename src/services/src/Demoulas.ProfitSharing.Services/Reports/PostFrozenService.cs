@@ -85,6 +85,7 @@ public class PostFrozenService : IPostFrozenService
                    from bal in balTmp.DefaultIfEmpty()
                    join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
                    from lyBal in lyBalTmp.DefaultIfEmpty()
+                   where bal.YearsInPlan > 0 || bal.VestedBalance > 0
                    select new Under21IntermediaryResult() { d = d, bal = bal, lyBal = lyBal, };
         };
 

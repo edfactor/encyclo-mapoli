@@ -1,17 +1,15 @@
 import { Button, Divider, Grid, Typography } from "@mui/material";
-import { RowClickedEvent } from "ag-grid-community";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   useFinalizeReportMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery
 } from "reduxstore/api/YearsEndApi";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, Page } from "smart-ui-library";
-import { CAPTIONS, ROUTES } from "../../../../constants";
+import { CAPTIONS } from "../../../../constants";
 import { RootState } from "../../../../reduxstore/store";
 import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
@@ -78,6 +76,25 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
   }
 ];
 
+/**
+ * Helper to sum values that may be masked strings - returns masked string if any value is masked
+ */
+const sumOrMasked = (
+  rowData: YearEndProfitSharingReportSummaryLineItem[],
+  field: "totalWages" | "totalBalance" | "totalHours" | "totalPoints"
+): number | string | null | undefined => {
+  const values = rowData.map((row) => row[field]);
+  const hasMaskedValue = values.some((v) => typeof v === "string" && String(v).includes("X"));
+  if (hasMaskedValue) {
+    // Return the first masked value as the total (since we can't sum masked data)
+    return values.find((v) => typeof v === "string" && String(v).includes("X"));
+  }
+  // For nullable fields (hours/points), check if all values are null
+  const hasAnyValue = values.some((v) => v !== null && v !== undefined);
+  if (!hasAnyValue) return null;
+  return values.reduce((acc, curr) => (acc as number) + (Number(curr) || 0), 0);
+};
+
 interface ProfitSummaryProps {
   frozenData: boolean;
 }
@@ -89,7 +106,6 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-  const navigate = useNavigate();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
   const handleCommit = async () => {
@@ -111,35 +127,6 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
     // Only set shouldArchive to true when transitioning TO "Complete" status
     if (statusName === "Complete") {
       setShouldArchive(true);
-    }
-  };
-
-  const getPresetNumberForLineItem = (lineItemPrefix: string): string | null => {
-    const presetMap: { [key: string]: string } = {
-      "1": "1",
-      "2": "2",
-      "3": "3",
-      "4": "4",
-      "5": "5",
-      "6": "6",
-      "7": "7",
-      "8": "8",
-      "9": "9",
-      N: "10"
-    };
-
-    return presetMap[lineItemPrefix] || null;
-  };
-
-  const handleRowClick = (event: RowClickedEvent<YearEndProfitSharingReportSummaryLineItem>) => {
-    const rowData = event.data;
-    if (!rowData) return;
-    const clickedLineItem = rowData.lineItemPrefix;
-    const presetNumber = getPresetNumberForLineItem(clickedLineItem);
-
-    if (presetNumber) {
-      // Navigate to PAY426N with the preset number
-      navigate(`/${ROUTES.PAY426N_LIVE}/${presetNumber}`);
     }
   };
 
@@ -209,22 +196,14 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   const getActiveAndInactiveTotals = useMemo(() => {
     if (!activeAndInactiveRowData) return [];
 
-    // Helper to sum nullable values - returns null if all values are null, otherwise sums them
-    const sumNullable = (field: keyof YearEndProfitSharingReportSummaryLineItem) => {
-      const values = activeAndInactiveRowData.map((row) => row[field]);
-      const hasAnyValue = values.some((v) => v !== null && v !== undefined);
-      if (!hasAnyValue) return null;
-      return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
-    };
-
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-        totalWages: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
-        totalBalance: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
-        totalHours: sumNullable("totalHours"),
-        totalPoints: sumNullable("totalPoints")
+        totalWages: sumOrMasked(activeAndInactiveRowData, "totalWages"),
+        totalBalance: sumOrMasked(activeAndInactiveRowData, "totalBalance"),
+        totalHours: sumOrMasked(activeAndInactiveRowData, "totalHours"),
+        totalPoints: sumOrMasked(activeAndInactiveRowData, "totalPoints")
       }
     ];
   }, [activeAndInactiveRowData]);
@@ -232,22 +211,14 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   const getTerminatedTotals = useMemo(() => {
     if (!terminatedRowData) return [];
 
-    // Helper to sum nullable values - returns null if all values are null, otherwise sums them
-    const sumNullable = (field: keyof YearEndProfitSharingReportSummaryLineItem) => {
-      const values = terminatedRowData.map((row) => row[field]);
-      const hasAnyValue = values.some((v) => v !== null && v !== undefined);
-      if (!hasAnyValue) return null;
-      return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
-    };
-
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-        totalWages: terminatedRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
-        totalBalance: terminatedRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
-        totalHours: sumNullable("totalHours"),
-        totalPoints: sumNullable("totalPoints")
+        totalWages: sumOrMasked(terminatedRowData, "totalWages"),
+        totalBalance: sumOrMasked(terminatedRowData, "totalBalance"),
+        totalHours: sumOrMasked(terminatedRowData, "totalHours"),
+        totalPoints: sumOrMasked(terminatedRowData, "totalPoints")
       }
     ];
   }, [terminatedRowData]);
@@ -277,8 +248,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
             providedOptions={{
               rowData: activeAndInactiveRowData,
               pinnedTopRowData: getActiveAndInactiveTotals,
-              columnDefs: columnDefs,
-              onRowClicked: handleRowClick as (event: unknown) => void
+              columnDefs: columnDefs
             }}
           />
         </Grid>
@@ -296,8 +266,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
             providedOptions={{
               rowData: terminatedRowData,
               pinnedTopRowData: getTerminatedTotals,
-              columnDefs: columnDefs,
-              onRowClicked: handleRowClick as (event: unknown) => void
+              columnDefs: columnDefs
             }}
           />
         </Grid>

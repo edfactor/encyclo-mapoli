@@ -57,10 +57,19 @@ export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
+export interface WagesCurrentYearParticipant {
+  badgeNumber: number;
+  incomeCurrentYear: number;
+  hoursCurrentYear: number;
+  storeNumber: number;
+  isExecutive: boolean;
+}
+
 export interface EmployeeWagesForYear {
   badgeNumber: number;
   incomeCurrentYear: number;
   hoursCurrentYear: number;
+  storeNumber: number;
   isExecutive: boolean;
 }
 
@@ -69,8 +78,10 @@ export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   useFrozenData?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface EmployeeWagesForYearResponse extends PagedReportResponse<EmployeeWagesForYear> {}
+export interface EmployeeWagesForYearResponse extends PagedReportResponse<EmployeeWagesForYear> {
+  totalHoursCurrentYearWages?: number;
+  totalIncomeCurrentYearWages?: number;
+}
 
 export interface EligibleEmployee {
   oracleHcmId: number;
@@ -141,11 +152,11 @@ export interface YearEndProfitSharingReportSummaryLineItem {
   lineItemPrefix: string;
   lineItemTitle: string;
   numberOfMembers: number;
-  totalWages: number;
-  totalBalance: number;
-  totalHours: number;
-  totalPoints: number;
-  totalPriorBalance: number;
+  totalWages: number | string;
+  totalBalance: number | string;
+  totalHours: number | string;
+  totalPoints: number | string;
+  totalPriorBalance: number | string;
 }
 
 export interface YearEndProfitSharingReportSummaryResponse {
