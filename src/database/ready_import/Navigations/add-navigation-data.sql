@@ -430,6 +430,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(INQUIRIES_MENU, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(INQUIRIES_MENU, FINANCE_MANAGER);
     assign_navigation_role(INQUIRIES_MENU, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(INQUIRIES_MENU, EXECUTIVE_ADMINISTRATOR);
 
 -- Assign roles for YEAR END (YearEndGroup -> CanViewYearEndReports)
     assign_navigation_role(YEAR_END_MENU, SYSTEM_ADMINISTRATOR); 
@@ -440,6 +441,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(INQUIRIES_GROUP, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(INQUIRIES_GROUP, FINANCE_MANAGER); 
     assign_navigation_role(INQUIRIES_GROUP, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(INQUIRIES_GROUP, EXECUTIVE_ADMINISTRATOR);
 
 -- Assign roles for ADHOC_GROUP
     assign_navigation_role(ADHOC_GROUP, SYSTEM_ADMINISTRATOR); 
@@ -450,11 +452,13 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(MASTER_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, FINANCE_MANAGER); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(MASTER_INQUIRY_PAGE, EXECUTIVE_ADMINISTRATOR);
 
 -- Assign roles for ADJUSTMENTS_GROUP
     assign_navigation_role(ADJUSTMENTS_GROUP, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(ADJUSTMENTS_GROUP, FINANCE_MANAGER);
     assign_navigation_role(ADJUSTMENTS_GROUP, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(ADJUSTMENTS_GROUP, EXECUTIVE_ADMINISTRATOR);
 
 -- Assign roles for DISTRIBUTIONS_MENU
     --assign_navigation_role(DISTRIBUTIONS_MENU, SYSTEM_ADMINISTRATOR); 
@@ -466,6 +470,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(ADJUSTMENTS_PAGE, FINANCE_MANAGER);
     assign_navigation_role(ADJUSTMENTS_PAGE, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(ADJUSTMENTS_PAGE, EXECUTIVE_ADMINISTRATOR);
 
 -- Assign roles for Military Contribution Adjustment
     assign_navigation_role(MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE, SYSTEM_ADMINISTRATOR);
@@ -478,6 +483,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 -- Assign roles for Manage Executive Hours Adjustment
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, FINANCE_MANAGER);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, EXECUTIVE_ADMINISTRATOR);
 
 -- Assign roles for Vesting Reports Group
     assign_navigation_role(VESTING_REPORTS_GROUP, SYSTEM_ADMINISTRATOR);
