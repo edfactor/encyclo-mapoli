@@ -10,6 +10,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
     [MaskSensitive] public required string? Name { get; set; }
 
     public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = [];
+    
     public bool IsExecutive { get; set; }
 
     public static TerminatedEmployeeAndBeneficiaryDataResponseDto ResponseExample()
@@ -22,7 +23,6 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
             [
                 new TerminatedEmployeeAndBeneficiaryYearDetailDto
                 {
-                    ProfitYear = 2024,
                     BeginningBalance = 100,
                     BeneficiaryAllocation = 200,
                     DistributionAmount = 300,
