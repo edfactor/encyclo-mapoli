@@ -7,6 +7,9 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
+import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
+import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { CAPTIONS, ROUTES } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
@@ -24,6 +27,7 @@ const AddDistributionContent = () => {
   const isReadOnly = useReadOnlyNavigation();
   const [isFormValid, setIsFormValid] = useState(false);
   const [submittedAmount, setSubmittedAmount] = useState<number | null>(null);
+  const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
 
   const profitYear = useDecemberFlowProfitYear();
 
@@ -56,10 +60,18 @@ const AddDistributionContent = () => {
       const memberTypeNum = parseInt(memberType, 10);
 
       if (!isNaN(memberIdNum) && !isNaN(memberTypeNum)) {
+        clearAlerts();
         fetchMemberData(memberId, memberTypeNum, profitYear);
       }
     }
-  }, [memberId, memberType, profitYear, fetchMemberData]);
+  }, [memberId, memberType, profitYear, fetchMemberData, clearAlerts]);
+
+  // Show missive alert when member not found
+  useEffect(() => {
+    if (memberError === "MEMBER_NOT_FOUND") {
+      addAlert(DISTRIBUTION_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
+    }
+  }, [memberError, addAlert]);
 
   // Handle successful submission
   useEffect(() => {
@@ -184,7 +196,7 @@ const AddDistributionContent = () => {
         <Button
           variant="outlined"
           onClick={handleReset}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !memberData}
           startIcon={<RestartAltIcon />}>
           RESET
         </Button>
@@ -196,6 +208,15 @@ const AddDistributionContent = () => {
           CANCEL
         </Button>
       </Grid>
+
+      {/* Missive Alerts */}
+      {missiveAlerts.length > 0 && (
+        <Grid
+          width="100%"
+          sx={{ paddingX: "24px" }}>
+          <MissiveAlerts />
+        </Grid>
+      )}
 
       {/* Error Messages */}
       {validationError && (
@@ -215,7 +236,7 @@ const AddDistributionContent = () => {
         </Grid>
       )}
 
-      {memberError && (
+      {memberError && memberError !== "MEMBER_NOT_FOUND" && (
         <Grid
           width="100%"
           sx={{ paddingX: "24px" }}>

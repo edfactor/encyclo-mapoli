@@ -58,7 +58,7 @@ public sealed class DistributionService : IDistributionService
                             dist.Id,
                             dist.PaymentSequence,
                             dist.Ssn,
-                            BadgeNumber = dem != null ? (int?)dem.BadgeNumber : null,
+                            BadgeNumber = dem != null ? (long?)dem.BadgeNumber : null,
                             DemLastName = dem != null ? dem.ContactInfo.LastName : null,
                             DemFirstName = dem != null ? dem.ContactInfo.FirstName : null,
                             DemMiddleName = dem != null ? dem.ContactInfo.MiddleName : null,
@@ -771,9 +771,9 @@ public sealed class DistributionService : IDistributionService
     {
         var validationErrors = new Dictionary<string, string[]>();
 
-        if (request.BadgeNumber < 9_999 || request.BadgeNumber > 9_999_999)
+        if (request.BadgeNumber < 9_999 || request.BadgeNumber > 99_999_999_999)
         {
-            validationErrors[nameof(request.BadgeNumber)] = ["BadgeNumber must be a 7-digit number."];
+            validationErrors[nameof(request.BadgeNumber)] = ["BadgeNumber must be between 5 and 11 digits."];
         }
         if (request.GrossAmount <= 0)
         {
