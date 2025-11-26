@@ -7,7 +7,7 @@ public sealed record DistributionSearchResponse : IIsExecutive
     public required long Id { get; set; }
     public required int PaymentSequence { get; set; }
     public required string Ssn { get; set; }
-    public int? BadgeNumber { get; set; }
+    public long? BadgeNumber { get; set; }
     [MaskSensitive]
     public required string FullName { get; set; }
     public bool IsExecutive { get; set; }
