@@ -22,7 +22,6 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "ssn",
       cellRenderer: SsnCellRenderer,
       sortable: true,
-      filter: true,
       width: 180
     },
     createNameColumn({

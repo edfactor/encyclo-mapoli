@@ -73,13 +73,13 @@ public sealed class UnmaskingService : IUnmaskingService
             details: $"User requested unmasked SSN for badge number {demographicData.BadgeNumber} for compliance/verification purposes",
             operation: async ct =>
             {
-                if (demographicData.Ssn == null)
+                if (demographicData.Ssn == 0)
                 {
                     return Result<string>.Failure(Error.EntityNotFound("Demographic"));
                 }
 
                 // Format SSN (e.g., 1234567890 -> "123-45-6789")
-                var formattedSsn = FormatSsn(demographicData.Ssn.Value);
+                var formattedSsn = FormatSsn(demographicData.Ssn);
 
                 return Result<string>.Success(formattedSsn);
             },

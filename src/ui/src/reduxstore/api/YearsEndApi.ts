@@ -301,7 +301,7 @@ export const YearsEndApi = createApi({
     }),
     unmaskSsn: builder.mutation<{ unmaskedSsn: string }, { demographicId: number }>({
       query: (params) => ({
-        url: "demographics/unmask-ssn",
+        url: "ssn-unmasking",
         method: "POST",
         body: { demographicId: params.demographicId }
       })

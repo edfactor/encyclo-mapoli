@@ -5,6 +5,8 @@ using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Contexts.Interceptor;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
@@ -12,6 +14,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -21,15 +24,18 @@ namespace Demoulas.ProfitSharing.Services.Audit;
 public sealed class AuditService : IAuditService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly ICommitGuardOverride _guardOverride;
     private readonly IAppUser? _appUser;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly JsonSerializerOptions _maskingOptions;
 
     public AuditService(IProfitSharingDataContextFactory dataContextFactory,
+        ICommitGuardOverride guardOverride,
         IAppUser? appUser,
         IHttpContextAccessor httpContextAccessor)
     {
         _dataContextFactory = dataContextFactory;
+        _guardOverride = guardOverride;
         _appUser = appUser;
         _httpContextAccessor = httpContextAccessor;
 
@@ -59,7 +65,8 @@ public sealed class AuditService : IAuditService
         return ArchiveCompletedReportAsync(reportName, profitYear, request, isArchiveRequest, reportFunction, cancellationToken);
     }
 
-    public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(string reportName,
+    public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
+        string reportName,
         short profitYear,
         TRequest request,
         bool isArchiveRequest,
@@ -107,17 +114,20 @@ public sealed class AuditService : IAuditService
         };
         checksum.KeyFieldsChecksumJson = ToKeyValuePairs(response);
 
-        await _dataContextFactory.UseWritableContext(async c =>
+        using (_guardOverride.AllowFor(Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING))
         {
-            c.AuditEvents.Add(auditEvent);
-            c.ReportChecksums.Add(checksum);
-            await c.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
+            await _dataContextFactory.UseWritableContext(async c =>
+            {
+                c.AuditEvents.Add(auditEvent);
+                c.ReportChecksums.Add(checksum);
+                await c.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
+        }
 
         return response;
     }
 
-    public Task LogSensitiveDataAccessAsync(
+    public async Task LogSensitiveDataAccessAsync(
         string operationName,
         string tableName,
         string? primaryKey,
@@ -142,11 +152,14 @@ public sealed class AuditService : IAuditService
             CreatedAt = DateTimeOffset.UtcNow
         };
 
-        return _dataContextFactory.UseWritableContext(async c =>
+        using (_guardOverride.AllowFor(Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING))
         {
-            c.AuditEvents.Add(auditEvent);
-            await c.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
+            await _dataContextFactory.UseWritableContext(async c =>
+            {
+                c.AuditEvents.Add(auditEvent);
+                await c.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
+        }
     }
 
     public async Task<TResult> LogSensitiveDataAccessAsync<TResult>(
