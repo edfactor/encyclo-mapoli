@@ -44,7 +44,7 @@ public sealed class UnmaskSsnEndpoint : ProfitSharingEndpoint<UnmaskSsnRequest, 
             {
                 {
                     200,
-                    new UnmaskSsnResponse { Ssn = "123-45-6789" }
+                    new UnmaskSsnResponse { UnmaskedSsn = "123-45-6789" }
                 }
             };
             s.Responses[404] = "Demographic not found";
@@ -80,7 +80,7 @@ public sealed class UnmaskSsnEndpoint : ProfitSharingEndpoint<UnmaskSsnRequest, 
             _logger.LogInformation("SSN unmasked for demographic ID {DemographicId} (correlation: {CorrelationId})",
                 req.DemographicId, HttpContext.TraceIdentifier);
 
-            var response = new UnmaskSsnResponse { Ssn = ssnResult.Value! };
+            var response = new UnmaskSsnResponse { UnmaskedSsn = ssnResult.Value! };
             return TypedResults.Ok(response);
         }, "Ssn");
     }
@@ -105,7 +105,7 @@ public sealed record UnmaskSsnResponse
     /// <summary>
     /// The formatted SSN (e.g., "123-45-6789").
     /// </summary>
-    public string Ssn { get; init; } = string.Empty;
+    public string UnmaskedSsn { get; init; } = string.Empty;
 }
 
 /// <summary>
