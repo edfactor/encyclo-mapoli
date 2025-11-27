@@ -1,8 +1,10 @@
 ﻿using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,20 +19,24 @@ public sealed class UnmaskingService : IUnmaskingService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IAppUser _appUser;
+    private readonly IAuditService _auditService;
 
     public UnmaskingService(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
-        IAppUser appUser)
+        IAppUser appUser,
+        IAuditService auditService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _appUser = appUser;
+        _auditService = auditService;
     }
 
     /// <summary>
     /// Gets the unmasked, formatted SSN for a demographic record.
     /// Defense in depth: Validates user has SSN-Unmasking role both at policy level and here.
+    /// Access is logged to audit trail for compliance and security monitoring.
     /// </summary>
     public async Task<Result<string>> GetUnmaskedSsnAsync(long demographicId, CancellationToken cancellationToken = default)
     {
@@ -42,29 +48,43 @@ public sealed class UnmaskingService : IUnmaskingService
             throw new UnauthorizedAccessException("User does not have SSN-Unmasking role");
         }
 
-        var ssn = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        // Fetch demographic data in single query
+        var demographicData = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-            var demographic = await demographicQuery
+            return await demographicQuery
                 .TagWith($"UnmaskSsn-DemographicId:{demographicId}")
                 .Where(d => d.Id == demographicId)
-                .Select(d => new { d.Ssn })
+                .Select(d => new { d.BadgeNumber, d.Ssn })
                 .FirstOrDefaultAsync(cancellationToken);
+        }, cancellationToken);
 
-            return demographic?.Ssn;
-        },
-        cancellationToken);
-
-        if (ssn == null)
+        if (demographicData == null || demographicData.BadgeNumber == 0)
         {
             return Result<string>.Failure(Error.EntityNotFound("Demographic"));
         }
 
-        // Format SSN (e.g., 1234567890 -> "123-45-6789")
-        var formattedSsn = FormatSsn(ssn.Value);
+        var result = await _auditService.LogSensitiveDataAccessAsync(
+            operationName: "Get Unmasked SSN",
+            tableName: "Demographic",
+            primaryKey: demographicData.BadgeNumber.ToString(),
+            details: $"User requested unmasked SSN for badge number {demographicData.BadgeNumber} for compliance/verification purposes",
+            operation: async ct =>
+            {
+                if (demographicData.Ssn == null)
+                {
+                    return Result<string>.Failure(Error.EntityNotFound("Demographic"));
+                }
 
-        return Result<string>.Success(formattedSsn);
+                // Format SSN (e.g., 1234567890 -> "123-45-6789")
+                var formattedSsn = FormatSsn(demographicData.Ssn.Value);
+
+                return Result<string>.Success(formattedSsn);
+            },
+            cancellationToken);
+
+        return result;
     }
 
     /// <summary>

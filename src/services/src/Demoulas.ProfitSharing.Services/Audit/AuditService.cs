@@ -95,7 +95,7 @@ public sealed class AuditService : IAuditService
         string archivedPayloadJson = JsonSerializer.Serialize(archivedPayload, JsonSerializerOptions.Web);
 
         var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = archivedPayloadJson } };
-        var auditEvent = new AuditEvent { TableName = reportName, Operation = "Archive", UserName = userName, ChangesJson = entries };
+        var auditEvent = new AuditEvent { TableName = reportName, Operation = AuditEvent.AuditOperations.Archive, UserName = userName, ChangesJson = entries };
 
         ReportChecksum checksum = new ReportChecksum
         {
@@ -115,6 +115,60 @@ public sealed class AuditService : IAuditService
         }, cancellationToken);
 
         return response;
+    }
+
+    public async Task LogSensitiveDataAccessAsync(
+        string operationName,
+        string tableName,
+        string? primaryKey,
+        string? details,
+        CancellationToken cancellationToken = default)
+    {
+        string userName = _appUser?.UserName ?? "Unknown";
+
+        var entries = new List<AuditChangeEntry>
+        {
+            new() { ColumnName = "Operation", NewValue = operationName },
+            new() { ColumnName = "Details", NewValue = details ?? "N/A" }
+        };
+
+        var auditEvent = new AuditEvent
+        {
+            TableName = tableName,
+            Operation = AuditEvent.AuditOperations.SensitiveAccess,
+            PrimaryKey = primaryKey,
+            UserName = userName,
+            ChangesJson = entries,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        await _dataContextFactory.UseWritableContext(async c =>
+        {
+            c.AuditEvents.Add(auditEvent);
+            await c.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+    }
+
+    public async Task<TResult> LogSensitiveDataAccessAsync<TResult>(
+        string operationName,
+        string tableName,
+        string? primaryKey,
+        string? details,
+        Func<CancellationToken, Task<TResult>> operation,
+        CancellationToken cancellationToken = default)
+        where TResult : notnull
+    {
+        var result = await operation(cancellationToken);
+
+        // Log access after successful operation
+        await LogSensitiveDataAccessAsync(
+            operationName,
+            tableName,
+            primaryKey,
+            details,
+            cancellationToken);
+
+        return result;
     }
 
     public Task<PaginatedResponseDto<AuditEventDto>> SearchAuditEventsAsync(
@@ -231,7 +285,7 @@ public sealed class AuditService : IAuditService
         {
             // Try to deserialize as ArchivedDataPayload
             var payload = JsonSerializer.Deserialize<ArchivedDataPayload>(jsonValue, JsonSerializerOptions.Web);
-            
+
             if (payload == null)
             {
                 return jsonValue;
@@ -239,7 +293,7 @@ public sealed class AuditService : IAuditService
 
             // Get the Type from TypeName
             var type = Type.GetType(payload.TypeName);
-            
+
             if (type == null)
             {
                 // If type can't be resolved, return the RawData as formatted JSON with masking
@@ -248,7 +302,7 @@ public sealed class AuditService : IAuditService
 
             // Deserialize RawData as the actual type
             var deserializedObject = JsonSerializer.Deserialize(payload.RawData.GetRawText(), type, JsonSerializerOptions.Web);
-            
+
             // Serialize back with masking options for proper role-based masking
             return JsonSerializer.Serialize(deserializedObject, _maskingOptions);
         }
@@ -309,7 +363,7 @@ public sealed class AuditService : IAuditService
             // Get the attribute to retrieve the KeyName
             var propertyAttribute = prop.GetCustomAttribute<YearEndArchivePropertyAttribute>();
             string keyName;
-            
+
             if (propertyAttribute != null)
             {
                 // Use the KeyName from the property attribute
@@ -326,7 +380,7 @@ public sealed class AuditService : IAuditService
                 // Shouldn't happen, but fallback to property name
                 keyName = prop.Name;
             }
-            
+
             // Convert all numeric types to decimal for consistent hashing
             var rawValue = prop.GetValue(obj);
             var value = ConvertToDecimal(rawValue);
