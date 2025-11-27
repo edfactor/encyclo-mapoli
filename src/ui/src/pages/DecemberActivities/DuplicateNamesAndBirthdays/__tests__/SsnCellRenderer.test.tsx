@@ -291,10 +291,9 @@ describe("SSN Display", () => {
     const button = getUnmaskButton();
     fireEvent.click(button);
 
-    // Assert
-    await waitFor(() => {
-      expect(screen.getByText("700-00-5181")).toBeInTheDocument();
-    });
+    // Assert - let microtasks complete
+    await vi.runAllTimersAsync();
+    expect(screen.getByText("700-00-5181")).toBeInTheDocument();
   });
 });
 
@@ -326,9 +325,8 @@ describe("Auto-Revert Timer", () => {
     const button = getUnmaskButton();
     fireEvent.click(button);
 
-    await waitFor(() => {
-      expect(screen.getByText("700-00-5181")).toBeInTheDocument();
-    });
+    await vi.runAllTimersAsync();
+    expect(screen.getByText("700-00-5181")).toBeInTheDocument();
 
     // Act - advance time by 60 seconds
     vi.advanceTimersByTime(60000);
@@ -362,9 +360,8 @@ describe("Auto-Revert Timer", () => {
     const button = getUnmaskButton();
     fireEvent.click(button);
 
-    await waitFor(() => {
-      expect(screen.getByText("700-00-5181")).toBeInTheDocument();
-    });
+    await vi.runAllTimersAsync();
+    expect(screen.getByText("700-00-5181")).toBeInTheDocument();
 
     // Act - advance time by 5 minutes
     vi.advanceTimersByTime(300000);
@@ -393,19 +390,16 @@ describe("Auto-Revert Timer", () => {
       </Provider>
     );
 
-    // Act - unmask SSN
-    const button = getUnmaskButton();
-    fireEvent.click(button);
+      // Act - unmask SSN
+      const button = getUnmaskButton();
+      fireEvent.click(button);
 
-    await waitFor(() => {
+      await vi.runAllTimersAsync();
       expect(screen.getByText("700-00-5181")).toBeInTheDocument();
-    });
 
-    // Act - unmount component before timer fires
-    unmount();
-    vi.advanceTimersByTime(60000);
-
-    // Assert - no errors (timer was cleared)
+      // Act - unmount component before timer fires
+      unmount();
+      vi.advanceTimersByTime(60000);    // Assert - no errors (timer was cleared)
     expect(true).toBe(true);
   });
 });
@@ -446,9 +440,8 @@ describe("Loading States", () => {
     fireEvent.click(button);
 
     // Assert - spinner appears
-    await waitFor(() => {
-      expect(screen.getByTestId("CircularProgressIcon")).toBeInTheDocument();
-    });
+    await vi.runAllTimersAsync();
+    expect(screen.getByTestId("CircularProgressIcon")).toBeInTheDocument();
 
     // Cleanup
     resolveUnmask!({ unmaskedSsn: "700-00-5181" });
@@ -479,9 +472,8 @@ describe("Loading States", () => {
     fireEvent.click(button);
 
     // Assert - button is disabled after unmask
-    await waitFor(() => {
-      expect(button).toBeDisabled();
-    });
+    await vi.runAllTimersAsync();
+    expect(button).toBeDisabled();
   });
 });
 
@@ -516,9 +508,8 @@ describe("Error Handling", () => {
     fireEvent.click(button);
 
     // Assert
-    await waitFor(() => {
-      expect(screen.getByText(/API Error/i)).toBeInTheDocument();
-    });
+    await vi.runAllTimersAsync();
+    expect(screen.getByText(/API Error/i)).toBeInTheDocument();
   });
 
   it("PS-2098: Should clear error after successful unmask", async () => {
