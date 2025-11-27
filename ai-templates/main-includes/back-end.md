@@ -15,32 +15,36 @@
 **ALL NEW CODE must follow these security patterns. Security review required for deviations (document in PR with risk/mitigation).**
 
 ### Authentication & Authorization (A01/A07 Broken Access Control)
+
 - **Server-side validation ALWAYS**: Never trust client-provided roles or impersonation headers. Re-validate every request:
+
   ```csharp
   // WRONG: Trust header from client
   var roles = req.Headers["x-impersonating-roles"];
   _context.Items["roles"] = roles; // NO!
-  
+
   // RIGHT: Always re-validate against authenticated user's permissions
   if (req.Headers.TryGetValue("x-impersonating-roles", out var rolesHeader))
   {
       var requestedRoles = JsonSerializer.Deserialize<List<string>>(rolesHeader);
       var allowedRoles = GetUserAllowedImpersonationRoles(userId, logger);
-      
+
       if (!requestedRoles.All(r => allowedRoles.Contains(r)))
           throw new UnauthorizedAccessException("Role impersonation not permitted");
-      
+
       // Log for audit trail
-      logger.LogWarning("User {UserId} impersonating roles {Roles}", 
+      logger.LogWarning("User {UserId} impersonating roles {Roles}",
           GetMaskedUserId(userId), string.Join(",", requestedRoles));
   }
   ```
+
 - **No client-side storage for auth elevation**: `localStorage` is vulnerable to XSS. Never use it to store/read roles that determine access control
 - **Centralized policies**: Authorization decisions via `PolicyRoleMap.cs` (single source of truth); all `[Authorize(Policy="...")]` attributes reference this map
 - **Least privilege**: Users assigned minimum required roles; audit role assignments quarterly; remove stale accounts
 - **Service account secrets**: Rotate Oracle connection string / Okta client secrets annually
 
 ### Input Validation & SQL Injection (A03 Injection / A09 SSRF)
+
 - **Server-side validation mandatory**: Client-side checks (React form validation) are UX only; never security
 - **Parameterized queries always**: EF Core does this automatically for `Where()` / `Include()`. NEVER string-concatenate SQL
 - **Boundary checks**: All numeric inputs (page size, year, counts) must be validated
@@ -55,23 +59,27 @@
 - See `VALIDATION_PATTERNS.md` (`.github/`) for comprehensive patterns with FluentValidation examples
 
 ### Sensitive Data Protection (A01 Broken Access Control / A09 Data Exposure)
+
 - **PII masking in logs**: SSN, email, phone, bank accounts MUST be masked in all logs/metrics
+
   ```csharp
   // Use TelemetryMiddleware.GetMaskedUserId() pattern
   var maskedUserId = GetMaskedUserId(userId); // Returns "***a1b2c3"
   logger.LogInformation("Request from {UserId}", maskedUserId);
-  
+
   // Declare sensitive fields in telemetry calls
-  await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => 
+  await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
   {
       // ...
   }, "Ssn", "Email", "BankAccount"); // List fields accessed
   ```
+
 - **Minimize Okta claims extracted**: Only use 'sub' (subject) claim; avoid storing unmasked email/user ID in context
 - **Read-only database contexts**: Use `context.UseReadOnlyContext()` for queries to enforce least privilege EF operations
 - **Composite keys for Demographics**: Never use `ToDictionary(d => d.Ssn)` alone; use `(d.Ssn, d.OracleHcmId)` because SSN is not unique
 
 ### Transport Security (A02 Cryptographic Failures / A05 Broken Access Control)
+
 - **HTTPS enforcement**: All prod endpoints require HTTPS. Dev can use HTTP locally only
   - Add `UseHttpsRedirection()` middleware in non-dev environments
   - Enable `UseHsts()` to send `Strict-Transport-Security` header (1-year HSTS)
@@ -82,27 +90,30 @@
   - `Strict-Transport-Security: max-age=31536000; includeSubDomains` (HSTS)
   - `Referrer-Policy: strict-origin-when-cross-origin` (leak prevention)
 - **CORS restrictions**: Explicitly restrict to known origins (never `AllowAnyOrigin()` in production or dev)
+
   ```csharp
   // Dev: localhost only
   .WithOrigins("http://localhost:3100", "http://127.0.0.1:3100")
-  
+
   // Prod: specific domain
   .WithOrigins("https://profit-sharing.example.com")
   ```
 
 ### Error Handling (A01/A10 Security Logging)
+
 - **No sensitive data in HTTP responses**: Never expose stack traces, SQL queries, file paths, or PII in error messages
 - **Use domain errors**: Return error codes (e.g., `Error.CalendarYearNotFound`) instead of raw exception messages
 - **Consistent HTTP responses**: All endpoints return `ProblemHttpResult` with standard structure: status, title, detail (never internal details)
-- **Log exceptions with correlation IDs**: 
+- **Log exceptions with correlation IDs**:
   ```csharp
   _logger.LogError(ex, "Unexpected error in {Endpoint}; CorrelationId: {CorrelationId}",
       nameof(MyEndpoint), HttpContext.TraceIdentifier);
   ```
 
 ### Telemetry & Observability (A10 Security Logging)
+
 - **Telemetry required on ALL endpoints**: Use `ExecuteWithTelemetry()` wrapper or manual telemetry patterns
-- **Declare sensitive fields accessed**: 
+- **Declare sensitive fields accessed**:
   ```csharp
   await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => {
       // ...
@@ -113,12 +124,14 @@
 - **Endpoint categorization**: Routes categorized (year-end, reports, beneficiaries) for security monitoring dashboards
 
 ### Credential & Session Management
+
 - **No hardcoded secrets**: Database passwords, API keys → Azure Key Vault or environment variables only
 - **Okta JWT tokens**: Auto-expire per Okta config (typically 1 hour); refresh tokens handled by Okta SDK
 - **No long-lived tokens**: Avoid custom JWT generation; rely on Okta OIDC flow
 - **Re-authentication for sensitive operations**: Year-end processing, member terminations should prompt re-auth confirmation (challenge-response)
 
 ### Dependency & Supply Chain Security
+
 - **Monthly patch reviews**: Run `dotnet list package --outdated`; patch all non-major updates
 - **CVE response**: Critical vulnerabilities (CVSS >= 7.0) patched within 48 hours; document in PR
 - **No dev-only packages in production**: Test packages (xUnit, Shouldly, Moq) excluded from release builds
@@ -127,6 +140,7 @@
 ### Code Review Checklist for Security
 
 Before approving PRs, verify:
+
 - [ ] **No client-side role elevation** (localStorage, URL params determining access)
 - [ ] **Server-side auth re-validation** present if handling impersonation
 - [ ] **Input validation** on all user-facing endpoints (parameterized queries, boundary checks)
@@ -138,12 +152,12 @@ Before approving PRs, verify:
 - [ ] **New packages** documented and reviewed for vulnerabilities
 - [ ] **Related security tickets** (PS-2021 through PS-2026) addressed
 
-
 ## Endpoint Results Pattern (MANDATORY)
 
 All FastEndpoints MUST return typed minimal API union results AND internally use the domain `Result<T>` record (`Demoulas.ProfitSharing.Common.Contracts.Result<T>`) for service-layer outcomes.
 
 Patterns:
+
 - Service layer returns/constructs `Result<T>` (Success, Failure, ValidationFailure)
 - Endpoint converts domain result via `Match` (or helper) to: `Results<Ok<T>, NotFound, ProblemHttpResult>` (queries) or `Results<Ok, ProblemHttpResult>` (commands). Include `NotFound` for resource-missing semantics; add `ValidationProblem` only if you propagate structured validation errors directly
 - Helpers: Use `ResultHttpExtensions.ToResultOrNotFound()` + `ToHttpResult()` to reduce boilerplate (e.g., `dto.ToResultOrNotFound(Error.CalendarYearNotFound).ToHttpResult(Error.CalendarYearNotFound)`)
@@ -158,14 +172,22 @@ Patterns:
 - Avoid returning raw DTOs or nulls; always wrap service outcomes in `Result<T>` before translating to HTTP
 - Catch unexpected exceptions and map to `TypedResults.Problem(ex.Message)` (logging appropriately) unless a global handler already standardizes this
 
-## EF Core 9 Patterns & Best Practices (MANDATORY)
+## EF Core 10 Patterns & Best Practices (MANDATORY)
 
-We use **EF Core 9** with Oracle provider. All DB access MUST follow these patterns.
+We use **EF Core 10** with Oracle provider. All DB access MUST follow these patterns.
+
+**References**:
+
+- [EF Core 10.0 What's New](https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-10.0/whatsnew)
+- [Oracle Entity Framework Core 10 Features](https://docs.oracle.com/en/database/oracle/oracle-database/26/odpnt/EFCore10features.html)
+- [Oracle .NET Database Samples](https://github.com/oracle/dotnet-db-samples)
 
 **CRITICAL**: Use `context.UseReadOnlyContext()` for read-only ops—it auto-applies `.AsNoTracking()`. Do NOT add `.AsNoTracking()` when using `UseReadOnlyContext()`.
 
 ### Query Tagging (Recommended)
+
 Tag queries for production traceability:
+
 - `TagWith()`: Add business context (year, user, operation, ticket) - **Required for complex operations**
 
 ```csharp
@@ -183,11 +205,14 @@ var data = await _context.Employees
 ```
 
 ### Oracle-Specific Patterns
+
 - **NO `??` in queries**: Oracle provider fails—use `x != null ? x : "default"` instead
 - **String search**: Use `EF.Functions.Like(m.Name, "%search%")` for case-insensitive
 
 ### Bulk Operations (ExecuteUpdate/ExecuteDelete)
+
 Use EF9 bulk ops—no entity loading, single SQL, efficient:
+
 ```csharp
 await _context.Records
     .TagWith($"BulkUpdate-Status-{year}")
@@ -196,7 +221,9 @@ await _context.Records
 ```
 
 ### Performance Patterns
+
 **Read-only (preferred)**:
+
 ```csharp
 await using var ctx = await _factory.CreateDbContextAsync(ct);
 ctx.UseReadOnlyContext(); // Auto AsNoTracking
@@ -208,7 +235,9 @@ var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
 **Degenerate guard**: Validate inputs (e.g., prevent all-zero badge numbers)
 
 ### Dictionary Keys with Demographic (CRITICAL)
+
 **SSN is NOT unique** in the `Demographic` entity. When building dictionaries/lookups from Demographics:
+
 - **WRONG**: `demographics.ToDictionary(d => d.Ssn)` — will throw duplicate key exception
 - **CORRECT**: Use a composite key combining SSN with a unique identifier:
   - `(d.Ssn, d.OracleHcmId)` — **preferred** (most reliable across systems)
@@ -216,6 +245,7 @@ var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
   - `(d.Ssn, d.Id)` — when badge/HCM unavailable (database ID)
 
 **Examples**:
+
 ```csharp
 // Best: Use OracleHcmId
 var demographicsByKey = demographics
@@ -229,30 +259,32 @@ var demographicsByKey = demographics
 // For lookups (one-to-many): Use ToLookup to avoid duplicates entirely
 var demographicsByKey = demographics
     .ToLookup(d => (d.Ssn, d.OracleHcmId));
-    
+
 // Access: var matches = demographicsByKey[(ssn, hcmId)];
 ```
 
 **Why**: Historical data, data feeds, and migrations can create SSN duplicates (same employee with multiple records). Always pair SSN with a unique identifier when creating dictionaries.
 
 ### Critical Rules
+
 - Services only—NO DbContext in endpoints
 - Always async (`FirstOrDefaultAsync`, `ToListAsync`)
 - Explicit `Include()`/`ThenInclude()`—NO lazy loading
 - Validate inputs to prevent table scans
 
 ### Example Service
-```csharp
+
+````csharp
 public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 {
     await using var ctx = await _factory.CreateDbContextAsync(ct);
     ctx.UseReadOnlyContext();
-    
+
     var member = await ctx.Members
         .TagWith($"GetMember-{id}")
         .FirstOrDefaultAsync(m => m.Id == id, ct);
-    
-    return member is null 
+
+    return member is null
         ? Result<MemberDto>.Failure(Error.MemberNotFound)
         : Result<MemberDto>.Success(member.ToDto());
 }
@@ -274,16 +306,16 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
     {
         // Your business logic here
         var result = await _service.ProcessAsync(req, ct);
-        
+
         // Add business metrics (required for business operations)
         EndpointTelemetry.BusinessOperationsTotal.Add(1,
             new("operation", "year-end-processing"),
             new("endpoint", nameof(MyEndpoint)));
-            
+
         return result;
     }, "Ssn", "OracleHcmId"); // List all sensitive fields accessed
 }
-```
+````
 
 **Manual Pattern (Advanced Control)**: Use individual telemetry methods for fine-grained control:
 
@@ -295,20 +327,20 @@ private readonly ILogger<MyEndpoint> _logger;
 public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationToken ct)
 {
     using var activity = this.StartEndpointActivity(HttpContext);
-    
+
     try
     {
         // Record request metrics (required)
         this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn", "OracleHcmId");
-        
+
         // Business logic
         var response = await _service.ProcessAsync(req, ct);
-        
+
         // Business metrics (required for business operations)
         EndpointTelemetry.BusinessOperationsTotal.Add(1,
             new("operation", "employee-lookup"),
             new("endpoint", nameof(MyEndpoint)));
-            
+
         // Record count metrics (when processing collections)
         if (response.Records?.Count > 0)
         {
@@ -316,10 +348,10 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
                 new("record_type", "employee"),
                 new("endpoint", nameof(MyEndpoint)));
         }
-        
+
         // Record response metrics (required)
         this.RecordResponseMetrics(HttpContext, _logger, response);
-        
+
         return response;
     }
     catch (Exception ex)
@@ -340,7 +372,7 @@ public class MyEndpoint : Endpoint<MyRequest, MyResponse>
 {
     private readonly IMyService _service;
     private readonly ILogger<MyEndpoint> _logger; // Required for telemetry
-    
+
     public MyEndpoint(IMyService service, ILogger<MyEndpoint> logger)
     {
         _service = service;
@@ -354,6 +386,7 @@ public class MyEndpoint : Endpoint<MyRequest, MyResponse>
 Add business operation metrics appropriate to the endpoint category:
 
 **Year-End Operations**:
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "year-end-enrollment"),
@@ -362,6 +395,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ```
 
 **Report Generation**:
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "report-generation"),
@@ -370,6 +404,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ```
 
 **Employee Lookups**:
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "employee-lookup"),
@@ -382,13 +417,15 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 When endpoints access sensitive fields, ALWAYS list them in telemetry calls:
 
 **Common Sensitive Fields**:
+
 - `"Ssn"` - Social Security Numbers
-- `"OracleHcmId"` - Internal employee identifiers  
+- `"OracleHcmId"` - Internal employee identifiers
 - `"BadgeNumber"` - Employee badge numbers
 - `"Salary"` - Salary information
 - `"BeneficiaryInfo"` - Beneficiary details
 
 **Examples**:
+
 ```csharp
 // Single sensitive field
 this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... }, "Ssn");
@@ -399,7 +436,6 @@ this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn", "OracleHcmId", "Sala
 // No sensitive fields (common for lookup endpoints)
 this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 ```
-
 
 ## Backend Coding Style
 
@@ -414,10 +450,10 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
   - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
   - XML doc comments for public & internal APIs
 
-
 ## Do NOT
 
 ### Security - CRITICAL
+
 - **Trust client-provided roles/headers for authorization**: Always re-validate server-side. Remove `localStorage` role elevation code (PS-2021). Never bypass `PolicyRoleMap.cs` validation.
 - **Store secrets in code**: Use Azure Key Vault or environment variables. Never hardcode connection strings, API keys, or credentials.
 - **Expose PII in logs/responses**: SSN, email, phone, bank accounts must be masked. Use `GetMaskedUserId()` pattern. Never log unmasked identity claims.
@@ -431,6 +467,7 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 - **Skip re-validation when handling impersonation**: Always re-check that authenticated user is allowed to assume requested roles (PS-2022).
 
 ### Architecture & Data Access
+
 - Bypass history tracking for mutable audited entities.
 - Introduce raw SQL without parameters.
 - Duplicate mapping logic already covered by Mapperly profiles.
@@ -444,6 +481,7 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 - Manually add `.AsNoTracking()` to queries when using `UseReadOnlyContext()`—it's already applied automatically by `UseReadOnlyContext()`.
 
 ### Observability & Quality
+
 - Create endpoints without comprehensive telemetry using `TelemetryExtensions` patterns.
 - Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods.
 - Access sensitive fields without declaring them in telemetry calls (security requirement).
@@ -459,6 +497,7 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 - Skip test coverage for security fixes: All PS-2021 through PS-2026 implementations must include unit tests and integration tests with telemetry validation.
 
 ---
+
 Provide reasoning in PR descriptions when deviating from these patterns.
 
 ## Validation & Boundary Checks (MANDATORY)
@@ -466,6 +505,7 @@ Provide reasoning in PR descriptions when deviating from these patterns.
 All incoming data MUST be validated with explicit boundary checks at both the server and client boundaries. Validation is a security and correctness concern: never rely solely on client-side checks. The following are required by policy for every endpoint and page that accepts user input.
 
 Server-side requirements (mandatory):
+
 - All request DTOs must have validation attributes or explicit validators that enforce:
   - numeric ranges (min/max) for integers/floats (e.g., page size, amounts, counts)
   - string length limits (min/max) and allowed character sets when applicable
@@ -481,11 +521,13 @@ Server-side requirements (mandatory):
 - All validators must be unit-tested (xUnit). Add tests for happy paths and boundary cases (min, max, empty, null, invalid enum) and at least one large/degenerate input test to assert the system rejects or truncates the request safely.
 
 Client-side requirements (recommended + required UX guardrails):
+
 - All pages must validate user input before submission using the project's front-end validation utilities (React + TypeScript). Client-side validation improves UX but is not a substitute for server-side checks.
 - Mirror server-side constraints in TypeScript types and validators: string lengths, numeric ranges, max collection sizes, allowed enum values, and file size/type checks.
 - Prevent users from requesting excessive data from the UI by enforcing pagination controls (max page size) and disabling controls that could produce wide unfiltered queries.
 
 Edge-case examples to cover (must be tested):
+
 - Empty / null payloads instead of expected objects
 - Oversized arrays (e.g., > 5k items) sent in request bodies
 - Very large numbers (bigger than database column bounds)
@@ -493,6 +535,7 @@ Edge-case examples to cover (must be tested):
 - Invalid enum numeric values or stale enum ids from older UI versions
 
 Developer guidance & patterns:
+
 - Prefer declarative validators (FluentValidation) in DTO classes for clarity and testability.
 - Keep validation logic out of service/business methods; endpoints should validate and then call services with well-formed input.
 - When trimming/normalizing input (for example, truncating an over-long string), document the behavior and return the normalized value or a validation error depending on severity.
@@ -545,13 +588,11 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
   - Import legacy READY: `... import-from-ready --connection-name ProfitSharing --sql-file "src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema PROFITSHARE`
   - Docs: `... generate-dgml` / `generate-markdown`
 
-
 ## Testing & Quality
 
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed
 - **Telemetry Testing**: All endpoint tests should verify telemetry integration (activity creation, metrics recording, business operations tracking). See `TELEMETRY_GUIDE.md` for testing patterns
 - Security warnings/analyzers treated as errors; keep build green
-
 
 ## Logging & Observability
 
@@ -566,11 +607,9 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
   - Guard against degenerate queries (e.g., all badge numbers zero) to prevent wide scans
 - Prefer `ConfigureAwait(false)` in library/service layer asynchronous calls
 
-
 ## Secrets & Config
 
 - Never commit secrets—use user secrets (`secrets.json` pattern). Feature flags via .NET Feature Management; wire new flags centrally then inject `IFeatureManager`
-
 
 ## When Extending
 
@@ -598,6 +637,5 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 - Include high-cardinality data in cache keys (use role combinations)
 - Fail operations when cache operations fail (degrade gracefully)
 - Create files unless they're absolutely necessary for achieving your goal
-- Proactively create documentation files (*.md) or README files unless explicitly requested
+- Proactively create documentation files (\*.md) or README files unless explicitly requested
 - Load large documentation files into context automatically (read them when needed using file tools)
-
