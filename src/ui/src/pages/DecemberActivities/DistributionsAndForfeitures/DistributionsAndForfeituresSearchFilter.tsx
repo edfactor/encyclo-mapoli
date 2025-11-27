@@ -101,7 +101,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         pagination: {
           skip: 0,
           take: 50,
-          sortBy: "badgeNumber",
+          sortBy: "badgePsn",
           isSortDescending: false
         }
       };

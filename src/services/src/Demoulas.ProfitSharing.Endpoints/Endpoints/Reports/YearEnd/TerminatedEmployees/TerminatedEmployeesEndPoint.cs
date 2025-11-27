@@ -143,7 +143,6 @@ public class TerminatedEmployeesEndPoint
         // Write the headers for the flattened structure
         csvWriter.WriteField("BADGE_PSN");
         csvWriter.WriteField("NAME");
-        csvWriter.WriteField("PROFIT_YEAR");
         csvWriter.WriteField("BEGINNING_BALANCE");
         csvWriter.WriteField("BENEFICIARY_ALLOCATION");
         csvWriter.WriteField("DISTRIBUTION_AMOUNT");
@@ -164,7 +163,6 @@ public class TerminatedEmployeesEndPoint
             {
                 csvWriter.WriteField(employee.PSN);
                 csvWriter.WriteField(employee.Name);
-                csvWriter.WriteField(yd.ProfitYear);
                 csvWriter.WriteField(yd.BeginningBalance);
                 csvWriter.WriteField(yd.BeneficiaryAllocation);
                 csvWriter.WriteField(yd.DistributionAmount);

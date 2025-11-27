@@ -1,6 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
-using EnrollmentEntity = Demoulas.ProfitSharing.Data.Entities.Enrollment;
 
 namespace Demoulas.ProfitSharing.Services.EnrollmentFlag;
 
@@ -63,24 +62,58 @@ internal class EnrollmentSummarizer
     }
 
     // COBOL: 530_PC_VESTED
+    // Determines vesting state based on years of service and vesting schedule.
+    // READY (PAY450) skips forfeiture enrollment updates when vesting percent is 0%.
+    // This matches that behavior by using actual vesting percentage, not just years > 0.
+    //
+    // COBOL PAY450 vesting table (P-VEST): "000000020040060080100"
+    // This is a 7-entry table where each entry is 3 digits (PIC 9V99):
+    //   P-VEST(1)=0%, P-VEST(2)=0%, P-VEST(3)=20%, P-VEST(4)=40%, P-VEST(5)=60%, P-VEST(6)=80%, P-VEST(7)=100%
+    //
+    // COBOL maps years to table index differently for old vs new vesting:
+    //   Old vesting (530-OLD-VESTING): Year 0→ZERO, Year 1→P-VEST(1), Year 2→P-VEST(2), etc.
+    //   New vesting (530-NEW-VESTING): Year 0→P-VEST(1), Year 1→P-VEST(2), Year 2→P-VEST(3), etc.
+    //
+    // Net effect for NEW vesting (the common case):
+    //   Year 0 → 0%, Year 1 → 0%, Year 2 → 20%, Year 3 → 40%, Year 4 → 60%, Year 5 → 80%, Year 6+ → 100%
+    //
+    // This means employees with 0-1 years under new vesting have 0% vesting and should NOT
+    // have their enrollment changed to 3/4 (forfeited) since there's no vested money to protect.
     private void ComputeVesting(short years, PayProfit pp)
     {
-        if (!IsNewVestingRules)
+        VestedState = VestingStateType.NotVested;
+
+        // Build vesting table based on plan type
+        // New vesting: index = years, where 0-1 = 0%, 2+ starts at 20%
+        // Old vesting: index = years - 1, where 0-2 = 0%, 3+ starts at 20%
+        byte vestingPercent;
+        if (IsNewVestingRules)
         {
-            years--;
+            // New plan: Year 0=0%, Year 1=0%, Year 2=20%, Year 3=40%, Year 4=60%, Year 5=80%, Year 6+=100%
+            byte[] newVestingTable = [0, 0, 20, 40, 60, 80, 100];
+            int yearIndex = Math.Clamp(years, 0, newVestingTable.Length - 1);
+            vestingPercent = newVestingTable[yearIndex];
+        }
+        else
+        {
+            // Old plan: Year 0=0%, Year 1=0%, Year 2=0%, Year 3=20%, Year 4=40%, Year 5=60%, Year 6=80%, Year 7+=100%
+            byte[] oldVestingTable = [0, 0, 0, 20, 40, 60, 80, 100];
+            int yearIndex = Math.Clamp(years, 0, oldVestingTable.Length - 1);
+            vestingPercent = oldVestingTable[yearIndex];
         }
 
-        VestedState = VestingStateType.NotVested;
-        if (years > 0)
+        // Only consider vested if actual vesting percent > 0
+        // This matches PAY450's "IF W-PC-VEST = 0 GO TO 310-PART-II" logic
+        if (vestingPercent > 0)
         {
             VestedState = VestingStateType.PartiallyVested;
-            if (years > /*5*/ ReferenceData.VestingYears)
+            if (vestingPercent >= 100)
             {
                 VestedState = VestingStateType.FullyVested;
             }
         }
 
-        if (EnrollmentId == /*3*/ EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords)
+        if (EnrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
         {
             VestedState = VestingStateType.PartiallyVested;
         }
@@ -95,28 +128,28 @@ internal class EnrollmentSummarizer
     // COBOL: 310-Get-Balance
     public byte GetEnrolled(short years)
     {
-        if (IsNewVestingRules && EnrollmentId == /*1*/ EnrollmentEntity.Constants.OldVestingPlanHasContributions)
+        if (IsNewVestingRules && EnrollmentId == /*1*/ Enrollment.Constants.OldVestingPlanHasContributions)
         {
-            EnrollmentId = /*2*/ EnrollmentEntity.Constants.NewVestingPlanHasContributions;
+            EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
         }
 
         if (VestedState != VestingStateType.NotVested)
         {
             if (Forfeiture != 0 && IsAfter2006)
             {
-                EnrollmentId = /*3*/ EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords;
+                EnrollmentId = /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
             }
 
             if (IsNewVestingRules)
             {
-                if (EnrollmentId == /*1*/ EnrollmentEntity.Constants.OldVestingPlanHasContributions)
+                if (EnrollmentId == /*1*/ Enrollment.Constants.OldVestingPlanHasContributions)
                 {
-                    EnrollmentId = /*2*/ EnrollmentEntity.Constants.NewVestingPlanHasContributions;
+                    EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
                 }
 
-                if (EnrollmentId == /*3*/ EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords)
+                if (EnrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
                 {
-                    EnrollmentId = /*4*/ EnrollmentEntity.Constants.NewVestingPlanHasForfeitureRecords;
+                    EnrollmentId = /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
                 }
             }
         }
@@ -149,7 +182,7 @@ internal class EnrollmentSummarizer
         if (pd is { ProfitYear: 2003, ProfitCodeId: 8 })
         {
             Is2003VoidProblem = true;
-            EnrollmentId = EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords;
+            EnrollmentId = Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
         }
 
         if (pd.ProfitCodeId != /*2*/ ProfitCode.Constants.OutgoingForfeitures)
@@ -191,7 +224,7 @@ internal class EnrollmentSummarizer
                     IsNewVestingRules = true;
                 }
 
-                EnrollmentId = /*1*/ EnrollmentEntity.Constants.OldVestingPlanHasContributions;
+                EnrollmentId = /*1*/ Enrollment.Constants.OldVestingPlanHasContributions;
                 LastYearSeen = pd.ProfitYear;
             }
         }
@@ -229,7 +262,7 @@ internal class EnrollmentSummarizer
                         when pd.Contribution != 0:
                     case /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay
                         when pd.Contribution != 0:
-                        EnrollmentId = /*1*/ EnrollmentEntity.Constants.OldVestingPlanHasContributions;
+                        EnrollmentId = /*1*/ Enrollment.Constants.OldVestingPlanHasContributions;
                         LastYearSeen = pd.ProfitYear;
                         break;
                 }
@@ -238,12 +271,12 @@ internal class EnrollmentSummarizer
 
         if (Is2003VoidProblem)
         {
-            EnrollmentId = /*3*/ EnrollmentEntity.Constants.OldVestingPlanHasForfeitureRecords;
+            EnrollmentId = /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
         }
 
         if (pd is { ProfitYear: >= 2007, Contribution: > 0 })
         {
-            EnrollmentId = /*2*/ EnrollmentEntity.Constants.NewVestingPlanHasContributions;
+            EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
         }
     }
 }
