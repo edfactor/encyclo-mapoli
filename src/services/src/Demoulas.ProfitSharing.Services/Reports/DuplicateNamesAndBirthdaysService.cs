@@ -116,6 +116,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                             where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
                             select new
                             {
+                                dem.Id,
                                 dem.BadgeNumber,
                                 dem.Ssn,
                                 Name = dem.ContactInfo.FullName,
@@ -165,6 +166,7 @@ FROM FILTERED_DEMOGRAPHIC p1
             // Project and mark IsFakeSsn BEFORE masking SSN
             var projectedResults = results.Results.Select(r => new DuplicateNamesAndBirthdaysResponse
             {
+                DemographicId = r.Id,
                 BadgeNumber = r.BadgeNumber,
                 Ssn = r.Ssn.MaskSsn(),
                 Name = r.Name,

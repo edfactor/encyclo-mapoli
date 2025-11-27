@@ -32,6 +32,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateN
     public override void Configure()
     {
         Get("duplicate-names-and-birthdays");
+        Policies(Security.Policy.CanViewDuplicateNamesAndBirthdays);
         Summary(s =>
         {
             s.Summary = "List of duplicate names, and birthdays in the demographics area";
@@ -52,6 +53,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateN
                             {
                                 new DuplicateNamesAndBirthdaysResponse
                                 {
+                                    DemographicId = 12345,
                                     State = "MA",
                                         PostalCode = "01876",
                                         City = "Tewksbury",
@@ -77,7 +79,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateN
                     }
                 }
             };
-            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
+            s.Responses[403] = $"Forbidden. Requires HR-ReadOnly or Finance roles";
         });
         Group<YearEndGroup>();
         base.Configure();
@@ -170,22 +172,23 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateN
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
-            Map(m => m.BadgeNumber).Index(2).Name("BADGE");
-            Map(m => m.Ssn).Index(3).Name("SSN");
-            Map(m => m.Name).Index(4).Name("NAME");
-            Map(m => m.DateOfBirth).Index(5).Name("DOB").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.Address).Index(6).Name("ADDRESS");
-            Map(m => m.City).Index(7).Name("CITY");
-            Map(m => m.State).Index(8).Name("ST");
-            Map(m => m.Years).Index(9).Name("YRS");
-            Map(m => m.HireDate).Index(10).Name("HIRE").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.TerminationDate).Index(11).Name("TERM").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.Status).Index(12).Name("ST");
-            Map(m => m.StoreNumber).Index(13).Name("STORE");
-            Map(m => m.Count).Index(14).Name("PS#");
-            Map(m => m.NetBalance).Index(15).Name("PSBAL");
-            Map(m => m.HoursCurrentYear).Index(16).Name("CUR HURS");
-            Map(m => m.IncomeCurrentYear).Index(17).Name("CUR WAGE");
+            Map(m => m.DemographicId).Index(2).Name("DEMOGRAPHIC_ID");
+            Map(m => m.BadgeNumber).Index(3).Name("BADGE");
+            Map(m => m.Ssn).Index(4).Name("SSN");
+            Map(m => m.Name).Index(5).Name("NAME");
+            Map(m => m.DateOfBirth).Index(6).Name("DOB").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.Address).Index(7).Name("ADDRESS");
+            Map(m => m.City).Index(8).Name("CITY");
+            Map(m => m.State).Index(9).Name("ST");
+            Map(m => m.Years).Index(10).Name("YRS");
+            Map(m => m.HireDate).Index(11).Name("HIRE").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.TerminationDate).Index(12).Name("TERM").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.Status).Index(13).Name("ST");
+            Map(m => m.StoreNumber).Index(14).Name("STORE");
+            Map(m => m.Count).Index(15).Name("PS#");
+            Map(m => m.NetBalance).Index(16).Name("PSBAL");
+            Map(m => m.HoursCurrentYear).Index(17).Name("CUR HURS");
+            Map(m => m.IncomeCurrentYear).Index(18).Name("CUR WAGE");
         }
     }
 }

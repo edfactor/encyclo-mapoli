@@ -16,8 +16,8 @@ public static class PolicyRoleMap
         // Year-end processes are highly sensitive; restrict to Finance and Admin only.
         [Policy.CanRunYearEndProcesses] = [Role.FINANCEMANAGER, Role.ADMINISTRATOR],
 
-        // Master inquiry is broad read; allow Finance, Clerks, Admin and Auditor.
-        [Policy.CanRunMasterInquiry] = [Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS, Role.HARDSHIPADMINISTRATOR],
+        // Master inquiry is broad read; allow Finance, Clerks, Admin, Auditor, and HR-ReadOnly.
+        [Policy.CanRunMasterInquiry] = [Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS, Role.HARDSHIPADMINISTRATOR, Role.HR_READONLY],
 
         // New, clearer name for beneficiary CRUD; keep mapping identical.
         [Policy.CanManageBeneficiaries] = [Role.FINANCEMANAGER, Role.HARDSHIPADMINISTRATOR, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.BENEFICIARY_ADMINISTRATOR],
@@ -33,6 +33,12 @@ public static class PolicyRoleMap
 
         // Audit viewing for security and compliance teams.
         [Policy.CanViewAudits] = [Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS],
+
+        // Duplicate names and birthdays cleanup report: same access as year-end reports plus HR-ReadOnly.
+        [Policy.CanViewDuplicateNamesAndBirthdays] = [Role.FINANCEMANAGER, Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS, Role.HR_READONLY],
+
+        // Unmask SSN values: highly restricted to SSN-Unmasking role only.
+        [Policy.CanUnmaskSsn] = [Role.SSN_UNMASKING],
     };
 
     public static string[] GetRoles(string policyName) => Map.TryGetValue(policyName, out var roles) ? roles : [];

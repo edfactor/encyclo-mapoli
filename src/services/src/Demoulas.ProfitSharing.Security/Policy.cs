@@ -36,6 +36,16 @@ public static class Policy
     public static readonly string CanManageBeneficiaries = "CAN_MANAGE_BENEFICIARIES";
 
     /// <summary>
+    /// View duplicate names and birthdays report. Sensitive demographic cleanup data.
+    /// </summary>
+    public static readonly string CanViewDuplicateNamesAndBirthdays = "CAN_VIEW_DUPLICATE_NAMES_AND_BIRTHDAYS";
+
+    /// <summary>
+    /// Unmask SSN values. Highly restricted permission for compliance and verification purposes.
+    /// </summary>
+    public static readonly string CanUnmaskSsn = "CAN_UNMASK_SSN";
+
+    /// <summary>
     /// View member distributions (read-only).
     /// </summary>
     public static readonly string CanViewDistributions = "CAN_VIEW_DISTRIBUTIONS";

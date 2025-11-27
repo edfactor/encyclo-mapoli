@@ -305,6 +305,7 @@ BEGIN
     assign_navigation_role(MASTER_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, FINANCE_MANAGER); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(MASTER_INQUIRY_PAGE, HR_READONLY);
 
 -- Assign roles for ADJUSTMENTS_GROUP - REMOVED
     -- assign_navigation_role(ADJUSTMENTS_GROUP, SYSTEM_ADMINISTRATOR); 
@@ -330,6 +331,7 @@ BEGIN
     assign_navigation_role(TERMINATIONS, FINANCE_MANAGER);
     assign_navigation_role(DUPLICATE_NAMES_BIRTHDAYS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DUPLICATE_NAMES_BIRTHDAYS, FINANCE_MANAGER);
+    assign_navigation_role(DUPLICATE_NAMES_BIRTHDAYS, HR_READONLY);
     assign_navigation_role(MILITARY_CONTRIBUTIONS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MILITARY_CONTRIBUTIONS, FINANCE_MANAGER);
     assign_navigation_role(UNFORFEIT, SYSTEM_ADMINISTRATOR);
