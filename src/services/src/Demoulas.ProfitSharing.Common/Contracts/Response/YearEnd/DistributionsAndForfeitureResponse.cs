@@ -5,8 +5,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record DistributionsAndForfeitureResponse : IIsExecutive
 {
-    public required int BadgeNumber { get; set; }
-    public required short PsnSuffix { get; set; }
+    public required long BadgePsn { get; set; }
     [MaskSensitive] public required string EmployeeName { get; set; }
     public required string Ssn { get; set; }
     public DateOnly? Date { get; set; }
@@ -30,8 +29,7 @@ public sealed record DistributionsAndForfeitureResponse : IIsExecutive
     {
         return new DistributionsAndForfeitureResponse()
         {
-            BadgeNumber = 123,
-            PsnSuffix = 1,
+            BadgePsn = 123,
             EmployeeName = "Doe, John",
             Ssn = "124",
             DistributionAmount = 1250.25m,

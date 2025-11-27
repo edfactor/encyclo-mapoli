@@ -194,8 +194,7 @@ public class CleanupReportService : ICleanupReportService
 
                             select new
                             {
-                                nameAndDob.BadgeNumber,
-                                nameAndDob.PsnSuffix,
+                                BadgePsn = (long)(nameAndDob.PsnSuffix > 0 ? (nameAndDob.BadgeNumber * 10_000 + nameAndDob.PsnSuffix) : nameAndDob.BadgeNumber),
                                 pd.Ssn,
                                 EmployeeName = nameAndDob.FullName,
                                 DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0m,
@@ -289,8 +288,7 @@ public class CleanupReportService : ICleanupReportService
 
                 var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
                 {
-                    BadgeNumber = pd.BadgeNumber,
-                    PsnSuffix = pd.PsnSuffix,
+                    BadgePsn = pd.BadgePsn,
                     Ssn = pd.Ssn.MaskSsn(),
                     EmployeeName = pd.EmployeeName,
                     DistributionAmount = pd.DistributionAmount,
