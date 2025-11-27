@@ -2,3 +2,1608 @@
 > smart-profit-sharing@1.0.2 test
 > vitest --coverage SsnCellRenderer.test.tsx --run
 
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mD:/source/Demoulas/smart-profit-sharing/src/ui[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+stderr | src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Component Integration > PS-2098: Should correctly render with different demographic IDs
+Error unmasking SSN: TypeError: unmaskSsn(...).unwrap is not a function
+    at D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DuplicateNamesAndBirthdays\SsnCellRenderer.tsx:62:10
+    at executeDispatch (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19116:9)
+    at runWithFiberInDEV (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at processDispatchQueue (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19166:19)
+    at D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19767:9
+    at batchedUpdates$1 (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:3255:40)
+    at dispatchEventForPluginEventSystem (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19320:7)
+    at dispatchEvent (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:23585:11)
+    at dispatchDiscreteEvent (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:23553:11)
+    at HTMLDivElement.callTheUserObjectsOperation (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+
+stderr | src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Component Integration > PS-2098: Should handle rapid clicks gracefully
+Error unmasking SSN: TypeError: unmaskSsn(...).unwrap is not a function
+    at D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DuplicateNamesAndBirthdays\SsnCellRenderer.tsx:62:10
+    at executeDispatch (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19116:9)
+    at runWithFiberInDEV (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at processDispatchQueue (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19166:19)
+    at D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19767:9
+    at batchedUpdates$1 (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:3255:40)
+    at dispatchEventForPluginEventSystem (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19320:7)
+    at dispatchEvent (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:23585:11)
+    at dispatchDiscreteEvent (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:23553:11)
+    at HTMLDivElement.callTheUserObjectsOperation (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+Error unmasking SSN: TypeError: unmaskSsn(...).unwrap is not a function
+    at D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DuplicateNamesAndBirthdays\SsnCellRenderer.tsx:62:10
+    at executeDispatch (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19116:9)
+    at runWithFiberInDEV (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at processDispatchQueue (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19166:19)
+    at D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19767:9
+    at batchedUpdates$1 (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:3255:40)
+    at dispatchEventForPluginEventSystem (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19320:7)
+    at dispatchEvent (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:23585:11)
+    at dispatchDiscreteEvent (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:23553:11)
+    at HTMLDivElement.callTheUserObjectsOperation (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+Error unmasking SSN: TypeError: unmaskSsn(...).unwrap is not a function
+    at D:\source\Demoulas\smart-profit-sharing\src\ui\src\pages\DecemberActivities\DuplicateNamesAndBirthdays\SsnCellRenderer.tsx:62:10
+    at executeDispatch (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19116:9)
+    at runWithFiberInDEV (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at processDispatchQueue (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19166:19)
+    at D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19767:9
+    at batchedUpdates$1 (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:3255:40)
+    at dispatchEventForPluginEventSystem (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:19320:7)
+    at dispatchEvent (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:23585:11)
+    at dispatchDiscreteEvent (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\react-dom\cjs\react-dom-client.development.js:23553:11)
+    at HTMLDivElement.callTheUserObjectsOperation (D:\source\Demoulas\smart-profit-sharing\src\ui\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+
+ [31mΓ¥»[39m src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx [2m([22m[2m18 tests[22m[2m | [22m[31m15 failed[39m[2m)[22m[33m 12696[2mms[22m[39m
+   [32mΓ£ô[39m SsnCellRenderer Component[2m > [22mPermission-Based UI Visibility[2m > [22mPS-2098: Should NOT display eye icon when user lacks SsnUnmasking permission (Production)[32m 102[2mms[22m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mPermission-Based UI Visibility[2m > [22mPS-2098: Should display eye icon when user has SsnUnmasking permission (Production)[39m[33m 527[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mPermission-Based UI Visibility[2m > [22mPS-2098: Should display eye icon with permission in Dev/QA environment[39m[32m 227[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mPermission-Based UI Visibility[2m > [22mPS-2098: Should display eye icon with impersonation role in Dev/QA environment[39m[32m 187[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+   [32mΓ£ô[39m SsnCellRenderer Component[2m > [22mPermission-Based UI Visibility[2m > [22mPS-2098: Should NOT display eye icon with impersonation role in Production[32m 7[2mms[22m[39m
+   [32mΓ£ô[39m SsnCellRenderer Component[2m > [22mSSN Display[2m > [22mPS-2098: Should display masked SSN by default[32m 29[2mms[22m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mSSN Display[2m > [22mPS-2098: Should display unmasked SSN after eye icon click[39m[32m 186[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mAuto-Revert Timer[2m > [22mPS-2098: Should revert to masked SSN after timeout in Dev/QA (60 seconds)[39m[32m 145[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mAuto-Revert Timer[2m > [22mPS-2098: Should revert to masked SSN after timeout in Production/UAT (5 minutes)[39m[32m 159[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mAuto-Revert Timer[2m > [22mPS-2098: Should clear timer on component unmount[39m[32m 180[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mLoading States[2m > [22mPS-2098: Should show loading spinner while unmasking[39m[32m 160[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mLoading States[2m > [22mPS-2098: Should disable button after unmasking until auto-revert[39m[32m 139[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mError Handling[2m > [22mPS-2098: Should display error message on API failure[39m[32m 200[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mError Handling[2m > [22mPS-2098: Should clear error after successful unmask[39m[32m 146[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mAccessibility[2m > [22mPS-2098: Should have accessible button with proper tooltip[39m[32m 130[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mAccessibility[2m > [22mPS-2098: Should update tooltip after unmasking[39m[32m 136[2mms[22m[39m
+[31m     ΓåÆ Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  [36m<button[31m
+    [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+    [33mtabindex[31m=[32m"0"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+    [36m>[31m
+      [36m<span>[31m
+        [0m***-**-5181[0m
+      [36m</span>[31m
+      [36m<span[31m
+        [33maria-label[31m=[32m"Click to unmask SSN"[31m
+        [33mclass[31m=[32m""[31m
+        [33mdata-mui-internal-clone-element[31m=[32m"true"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33mclass[31m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"[31m
+          [33mtabindex[31m=[32m"0"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [36m<svg[31m
+            [33maria-hidden[31m=[32m"true"[31m
+            [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"[31m
+            [33mdata-testid[31m=[32m"VisibilityIcon"[31m
+            [33mfocusable[31m=[32m"false"[31m
+            [33mviewBox[31m=[32m"0 0 24 24"[31m
+          [36m>[31m
+            [36m<path[31m
+              [33md[31m=[32m"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"[31m
+            [36m/>[31m
+          [36m</svg>[31m
+        [36m</button>[31m
+      [36m</span>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mComponent Integration[2m > [22mPS-2098: Should correctly render with different demographic IDs[39m[33m 5017[2mms[22m[39m
+[31m     ΓåÆ Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[31m   [31m├ù[31m SsnCellRenderer Component[2m > [22mComponent Integration[2m > [22mPS-2098: Should handle rapid clicks gracefully[39m[33m 5015[2mms[22m[39m
+[31m     ΓåÆ Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 15 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Permission-Based UI Visibility > PS-2098: Should display eye icon when user has SsnUnmasking permission (Production)
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:140:37
+    138| 
+    139|       // Assert
+    140|       const visibilityIcon = screen.getByRole("button", { name: /ClickΓÇª
+       |                                     ^
+    141|       expect(visibilityIcon).toBeInTheDocument();
+    142|     });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Permission-Based UI Visibility > PS-2098: Should display eye icon with permission in Dev/QA environment
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:166:37
+    164| 
+    165|       // Assert
+    166|       const visibilityIcon = screen.getByRole("button", { name: /ClickΓÇª
+       |                                     ^
+    167|       expect(visibilityIcon).toBeInTheDocument();
+    168|     });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Permission-Based UI Visibility > PS-2098: Should display eye icon with impersonation role in Dev/QA environment
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:192:37
+    190| 
+    191|       // Assert
+    192|       const visibilityIcon = screen.getByRole("button", { name: /ClickΓÇª
+       |                                     ^
+    193|       expect(visibilityIcon).toBeInTheDocument();
+    194|     });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[3/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > SSN Display > PS-2098: Should display unmasked SSN after eye icon click
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:271:29
+    269| 
+    270|       // Act
+    271|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    272|       fireEvent.click(button);
+    273| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[4/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Auto-Revert Timer > PS-2098: Should revert to masked SSN after timeout in Dev/QA (60 seconds)
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:306:29
+    304| 
+    305|       // Act - unmask SSN
+    306|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    307|       fireEvent.click(button);
+    308| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[5/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Auto-Revert Timer > PS-2098: Should revert to masked SSN after timeout in Production/UAT (5 minutes)
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:342:29
+    340| 
+    341|       // Act - unmask SSN
+    342|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    343|       fireEvent.click(button);
+    344| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[6/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Auto-Revert Timer > PS-2098: Should clear timer on component unmount
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:377:29
+    375| 
+    376|       // Act - unmask SSN
+    377|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    378|       fireEvent.click(button);
+    379| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[7/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Loading States > PS-2098: Should show loading spinner while unmasking
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:425:29
+    423| 
+    424|       // Act - click to unmask
+    425|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    426|       fireEvent.click(button);
+    427| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[8/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Loading States > PS-2098: Should disable button after unmasking until auto-revert
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:458:29
+    456| 
+    457|       // Act - unmask SSN
+    458|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    459|       fireEvent.click(button);
+    460| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[9/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Error Handling > PS-2098: Should display error message on API failure
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:495:29
+    493| 
+    494|       // Act
+    495|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    496|       fireEvent.click(button);
+    497| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[10/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Error Handling > PS-2098: Should clear error after successful unmask
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:533:29
+    531| 
+    532|       // Act - trigger error
+    533|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    534|       fireEvent.click(button);
+    535| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[11/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Accessibility > PS-2098: Should have accessible button with proper tooltip
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:577:29
+    575| 
+    576|       // Assert
+    577|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    578|       expect(button).toBeInTheDocument();
+    579|       expect(button).toHaveAttribute("type", "button");
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[12/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Accessibility > PS-2098: Should update tooltip after unmasking
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/Click to unmask SSN/i`
+
+Here are the accessible roles:
+
+  button:
+
+  Name "":
+  <button
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-axw7ok"
+    >
+      <span>
+        ***-**-5181
+      </span>
+      <span
+        aria-label="Click to unmask SSN"
+        class=""
+        data-mui-internal-clone-element="true"
+      >
+        <button
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1kn83a8-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-120dh41-MuiSvgIcon-root"
+            data-testid="VisibilityIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</body>
+ Γ¥» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ Γ¥» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:603:29
+    601| 
+    602|       // Act - unmask SSN
+    603|       const button = screen.getByRole("button", { name: /Click to unmaΓÇª
+       |                             ^
+    604|       fireEvent.click(button);
+    605| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[13/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Component Integration > PS-2098: Should correctly render with different demographic IDs
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:616:5
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m15 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 16:20:44
+[2m   Duration [22m 23.16s[2m (transform 817ms, setup 704ms, collect 3.31s, tests 12.70s, environment 2.01s, prepare 293ms)[22m
+
+    614| 
+    615|   describe("Component Integration", () => {
+    616|     it("PS-2098: Should correctly render with different demographic IDΓÇª
+       |     ^
+    617|       // Arrange
+    618|       const mockUnmask = setupYearsEndApiMocks();
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[14/15]ΓÄ»
+
+ FAIL  src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx > SsnCellRenderer Component > Component Integration > PS-2098: Should handle rapid clicks gracefully
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» src/pages/DecemberActivities/DuplicateNamesAndBirthdays/__tests__/SsnCellRenderer.test.tsx:648:5
+    646|     });
+    647| 
+    648|     it("PS-2098: Should handle rapid clicks gracefully", async () => {
+       |     ^
+    649|       // Arrange
+    650|       const mockUnmask = setupYearsEndApiMocks();
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[15/15]ΓÄ»
+
