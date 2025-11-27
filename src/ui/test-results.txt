@@ -1,0 +1,4 @@
+
+> smart-profit-sharing@1.0.2 test
+> vitest --coverage SsnCellRenderer.test.tsx --run
+
