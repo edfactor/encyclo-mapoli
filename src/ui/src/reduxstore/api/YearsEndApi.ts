@@ -299,6 +299,13 @@ export const YearsEndApi = createApi({
         body: {}
       })
     }),
+    unmaskSsn: builder.mutation<{ unmaskedSsn: string }, { demographicId: number }>({
+      query: (params) => ({
+        url: "demographics/unmask-ssn",
+        method: "POST",
+        body: { demographicId: params.demographicId }
+      })
+    }),
     getGrossWagesReport: builder.query<GrossWagesReportResponse, GrossWagesReportDto>({
       query: (params) => ({
         url: "yearend/frozen/grosswages",
@@ -437,10 +444,26 @@ export const YearsEndApi = createApi({
           return response.json();
         }
       }),
-      transformResponse: (response: PagedReportResponse<EmployeeWagesForYear> | PagedReportResponse<{ participants: EmployeeWagesForYear[]; totalHoursCurrentYearWages: number; totalIncomeCurrentYearWages: number }>) => {
+      transformResponse: (
+        response:
+          | PagedReportResponse<EmployeeWagesForYear>
+          | PagedReportResponse<{
+              participants: EmployeeWagesForYear[];
+              totalHoursCurrentYearWages: number;
+              totalIncomeCurrentYearWages: number;
+            }>
+      ) => {
         // Check if response has nested structure with participants
-        if ("response" in response && response.response?.results?.[0] && "participants" in response.response.results[0]) {
-          const firstResult = response.response.results[0] as { participants: EmployeeWagesForYear[]; totalHoursCurrentYearWages: number; totalIncomeCurrentYearWages: number };
+        if (
+          "response" in response &&
+          response.response?.results?.[0] &&
+          "participants" in response.response.results[0]
+        ) {
+          const firstResult = response.response.results[0] as {
+            participants: EmployeeWagesForYear[];
+            totalHoursCurrentYearWages: number;
+            totalIncomeCurrentYearWages: number;
+          };
           return {
             ...response,
             totalHoursCurrentYearWages: firstResult.totalHoursCurrentYearWages,
@@ -449,7 +472,10 @@ export const YearsEndApi = createApi({
               ...response.response,
               results: firstResult.participants
             }
-          } as PagedReportResponse<EmployeeWagesForYear> & { totalHoursCurrentYearWages: number; totalIncomeCurrentYearWages: number };
+          } as PagedReportResponse<EmployeeWagesForYear> & {
+            totalHoursCurrentYearWages: number;
+            totalIncomeCurrentYearWages: number;
+          };
         }
         return response as PagedReportResponse<EmployeeWagesForYear>;
       },
@@ -1798,6 +1824,7 @@ export const {
   useLazyPayBenReportQuery,
   useGetMasterApplyMutation,
   useRefreshDuplicateNamesAndBirthdaysCacheMutation,
+  useUnmaskSsnMutation,
   useUpdateEnrollmentMutation,
   useUpdateExecutiveHoursAndDollarsMutation,
   useUpdateForfeitureAdjustmentBulkMutation,

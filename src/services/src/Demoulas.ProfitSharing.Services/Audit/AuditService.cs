@@ -117,7 +117,7 @@ public sealed class AuditService : IAuditService
         return response;
     }
 
-    public async Task LogSensitiveDataAccessAsync(
+    public Task LogSensitiveDataAccessAsync(
         string operationName,
         string tableName,
         string? primaryKey,
@@ -142,7 +142,7 @@ public sealed class AuditService : IAuditService
             CreatedAt = DateTimeOffset.UtcNow
         };
 
-        await _dataContextFactory.UseWritableContext(async c =>
+        return _dataContextFactory.UseWritableContext(async c =>
         {
             c.AuditEvents.Add(auditEvent);
             await c.SaveChangesAsync(cancellationToken);
