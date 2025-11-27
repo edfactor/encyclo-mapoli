@@ -18,7 +18,6 @@ using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.LogMasking; // retains AddProjectServices & other extension methods
 using Demoulas.ProfitSharing.Services.Middleware;
 using Demoulas.ProfitSharing.Services.Serialization;
-using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
