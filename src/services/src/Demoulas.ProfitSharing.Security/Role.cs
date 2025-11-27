@@ -54,4 +54,14 @@ public static class Role
     /// Read-only access for audit/reporting and verification; no create/update/delete operations.
     /// </summary>
     public const string AUDITOR = "Auditor";
+
+    /// <summary>
+    /// Read-only HR access for managing HR-related inquiries and reporting.
+    /// </summary>
+    public const string HR_READONLY = "HR-ReadOnly";
+
+    /// <summary>
+    /// Read-only access with the ability to view unmasked SSN data for compliance and verification purposes.
+    /// </summary>
+    public const string SSN_UNMASKING = "SSN-Unmasking";
 }
