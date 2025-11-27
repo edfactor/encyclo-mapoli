@@ -52,7 +52,7 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
-            var dict = new Dictionary<int, byte>();
+            var dict = new Dictionary<long, byte>();
             var dupInfo = new HashSet<DemographicMatchDto>();
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
@@ -64,7 +64,7 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
                     _logger.LogWarning(1, "Inside the test environment");
                     dupNameSlashDateOfBirth = demographics
                         .Include(d => d.ContactInfo)
-                        .Select(d => new DemographicMatchDto { FullName = d.ContactInfo.FullName!, MatchedId = d.Id });
+                        .Select(d => new DemographicMatchDto { DemographicId = d.Id, MatchedDemographicId = d.Id });
                 }
                 else
                 {
@@ -72,7 +72,7 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
                     string dupQuery =
                         @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER, SSN
                               FROM DEMOGRAPHIC)
-SELECT /*+ USE_HASH(p1 p2) */ p1.FULL_NAME as FullName, p2.BADGE_NUMBER MatchedId
+SELECT /*+ USE_HASH(p1 p2) */ p1.ID as DemographicId, p2.ID as MatchedDemographicId
 FROM FILTERED_DEMOGRAPHIC p1
          JOIN FILTERED_DEMOGRAPHIC p2
               ON p1.Id <> p2.Id /* Avoid self-joins and duplicate pairs */
@@ -81,7 +81,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                   AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3 /* Name similarity threshold */
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */
 UNION ALL
-SELECT /*+ USE_HASH(p1 p2) */ p2.FULL_NAME as FullName, p1.BADGE_NUMBER MatchedId
+SELECT /*+ USE_HASH(p1 p2) */ p2.ID as DemographicId, p1.ID as MatchedDemographicId
 FROM FILTERED_DEMOGRAPHIC p1
          JOIN FILTERED_DEMOGRAPHIC p2
               ON p1.Id <> p2.Id /* Avoid self-joins and duplicate pairs */
@@ -92,14 +92,13 @@ FROM FILTERED_DEMOGRAPHIC p1
 
                     dupNameSlashDateOfBirth = ctx.Database
                         .SqlQueryRaw<DemographicMatchDto>(dupQuery);
-                    _logger.LogWarning(3, "Got value in dupNmaeSlashDateOfBirth");
+                    _logger.LogWarning(3, "Got value in dupNameSlashDateOfBirth");
                 }
 
                 dupInfo = await dupNameSlashDateOfBirth
-                    .Where(d => !string.IsNullOrEmpty(d.FullName))
                     .ToHashSetAsync(cancellationToken);
 
-                var names = dupInfo.Select(x => x.FullName).ToHashSet();
+                var demographicIds = dupInfo.Select(x => x.DemographicId).ToHashSet();
                 var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
                 _logger.LogWarning(4, "Running the linq query to get from demographics");
                 var query = from dem in demographics.Include(d => d.EmploymentStatus)
@@ -113,7 +112,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                             from bal in tmpBalance.DefaultIfEmpty()
                             join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear, calInfo.FiscalEndDate) on dem.Ssn equals yos.Ssn into tmpYos
                             from yos in tmpYos.DefaultIfEmpty()
-                            where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
+                            where demographicIds.Contains(dem.Id)
                             select new
                             {
                                 dem.Id,
@@ -181,7 +180,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 TerminationDate = r.TerminationDate,
                 Status = r.EmploymentStatusId,
                 StoreNumber = r.StoreNumber,
-                Count = GetDictValue(dict, r.BadgeNumber),
+                Count = GetDictValue(dict, r.Id),
                 NetBalance = r.NetBalance ?? 0,
                 HoursCurrentYear = r.HoursCurrentYear,
                 IncomeCurrentYear = r.IncomeCurrentYear,
@@ -192,7 +191,7 @@ FROM FILTERED_DEMOGRAPHIC p1
 
             foreach (var r in projectedResults)
             {
-                r.Count = dupInfo.Count(x => x.MatchedId == r.BadgeNumber);
+                r.Count = dupInfo.Count(x => x.MatchedDemographicId == r.DemographicId);
             }
             _logger.LogWarning(6, "Calling GetYearStartAndEndAccountingDatesAsync function");
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
@@ -310,7 +309,7 @@ FROM FILTERED_DEMOGRAPHIC p1
         }
     }
 
-    private static int GetDictValue(Dictionary<int, byte> dict, int key)
+    private static int GetDictValue(Dictionary<long, byte> dict, long key)
     {
         if (dict.ContainsKey(key))
         {
