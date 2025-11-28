@@ -432,6 +432,23 @@ These conventions are important project-wide rules. Follow them in addition to t
 - Styling: Tailwind utility-first; extend via `tailwind.config.js`; avoid inline style objects for reusable patterns—create small components.
 - E2E: Playwright tests under `src/ui/e2e`; new tests should support `.playwright.env` driven creds (no hard-coded secrets).
 
+### Build & Deployment (Vite)
+
+- **Build system**: Vite with mode-based configuration. See `src/ui/package.json` scripts:
+  - `npm run dev` - Development server on port 3100 (Vite dev server)
+  - `npm run build:prod` - Production build: runs `tsc -b` then `vite build --mode production`
+  - `npm run build:qa` - QA build: `vite build --mode qa`
+  - `npm run build:uat` - UAT build: `vite build --mode uat`
+- **TypeScript compilation**: Production builds run `tsc -b` BEFORE vite build. TypeScript errors will block the build.
+- **Code splitting**: Vite automatically code-splits routes using `React.lazy()`. Each lazy route creates a separate chunk file in `build/static/js/` (or `dist/`).
+- **Output locations**:
+  - Development: Run Vite dev server directly
+  - Build output: `build/` directory with subdirectories `static/js/`, `static/css/`, etc.
+- **Build verification**: After code changes affecting routes or components:
+  1. Run `npm run lint` - verify 0 errors, 0 warnings
+  2. Run `npm run build:qa` - verify build succeeds, check chunk file creation
+  3. Verify chunk files exist: `build/static/js/ComponentName-[hash].js` for each lazy route
+
 ## Testing & Quality
 
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed.

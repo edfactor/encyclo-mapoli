@@ -60,6 +60,7 @@ export interface DuplicateNameBirthdayAddress {
 }
 
 export interface DuplicateNameAndBirthday {
+  demographicId: number;
   badgeNumber: number;
   ssn: string;
   name: string;

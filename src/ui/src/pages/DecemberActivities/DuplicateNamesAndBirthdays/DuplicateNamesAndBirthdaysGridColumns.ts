@@ -8,16 +8,22 @@ import {
   createDateColumn,
   createHoursColumn,
   createNameColumn,
-  createSSNColumn,
   createStateColumn,
   createStatusColumn,
   createStoreColumn
 } from "../../../utils/gridColumnFactory";
+import SsnCellRenderer from "./SsnCellRenderer";
 
 export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
   return [
     createBadgeColumn({}),
-    createSSNColumn({}),
+    {
+      headerName: "SSN",
+      field: "ssn",
+      cellRenderer: SsnCellRenderer,
+      sortable: true,
+      width: 180
+    },
     createNameColumn({
       field: "name"
     }),

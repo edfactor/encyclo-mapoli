@@ -5,6 +5,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record DuplicateNamesAndBirthdaysResponse : IIsExecutive
 {
+    public required long DemographicId { get; set; }
     public required int BadgeNumber { get; set; }
     public required string Ssn { get; set; }
     [MaskSensitive] public string? Name { get; set; }
