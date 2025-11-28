@@ -4,7 +4,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +15,6 @@ internal sealed class MissiveService : IMissiveService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ITotalService _totalService;
-    private readonly ICalendarService _calendarService;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger<MissiveService> _logger;
 
@@ -24,13 +22,11 @@ internal sealed class MissiveService : IMissiveService
         IProfitSharingDataContextFactory dataContextFactory,
         ITotalService totalService,
         ILoggerFactory loggerFactory,
-        ICalendarService calendarService,
         IDemographicReaderService demographicReaderService
     )
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
-        _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
         _logger = loggerFactory.CreateLogger<MissiveService>();
     }
@@ -46,7 +42,6 @@ internal sealed class MissiveService : IMissiveService
 
         using (_logger.BeginScope("Searching for missives for ssns {0}", string.Join(",", ssnSet.Select(x => x.MaskSsn()))))
         {
-            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, cancellation);
             await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 // Pre-fetch demographics for all SSNs
@@ -55,7 +50,6 @@ internal sealed class MissiveService : IMissiveService
                     .Where(empl => ssnSet.Contains(empl.d.Ssn))
                     .Where(emp => emp.pp.ProfitYear == profitYear)
                     .ToListAsync(cancellation);
-                var demoIds = employeeList.Select(empl => empl.d.Id).ToList();
 
                 // Pre-fetch balances for all SSNs
                 var balances = await _totalService.GetVestingBalanceForMembersAsync(Common.Contracts.Request.SearchBy.Ssn, ssnSet, profitYear, cancellation);
@@ -104,7 +98,7 @@ internal sealed class MissiveService : IMissiveService
                         missives.Add(Missive.Constants.VestingIncreasedOnCurrentBalance);
                     }
 
-                    if (vestingNow100.Contains(ssn) && balanceMap.ContainsKey(ssn) && balanceMap[ssn].CurrentBalance > 0)
+                    if (vestingNow100.Contains(ssn) && balanceMap.TryGetValue(ssn, out BalanceEndpointResponse? value) && value.CurrentBalance > 0)
                     {
                         missives.Add(Missive.Constants.VestingIsNow100Percent);
                     }
@@ -128,9 +122,6 @@ internal sealed class MissiveService : IMissiveService
 
     public Task<List<MissiveResponse>> GetAllMissives(CancellationToken token)
     {
-        return _dataContextFactory.UseReadOnlyContext(ctx =>
-        {
-            return ctx.Missives.Select(x => new MissiveResponse() { Id = x.Id, Message = x.Message, Description = x.Description, Severity = x.Severity }).ToListAsync(token);
-        }, token);
+        return _dataContextFactory.UseReadOnlyContext(ctx => ctx.Missives.Select(x => new MissiveResponse { Id = x.Id, Message = x.Message, Description = x.Description, Severity = x.Severity }).ToListAsync(token), token);
     }
 }

@@ -379,3 +379,4 @@ test-results
 /src/services/tests/Demoulas.ProfitSharing.UnitTests/.vscode
 /.vscode/mcp.json
 /DEMO_SETUP_STEPS.md
+/src/ui/build
