@@ -61,14 +61,15 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
                 // Fallback for mocked (in-memory) db context which does not support raw SQL
                 if (_host.IsTestEnvironment())
                 {
-                    _logger.LogWarning(1, "Inside the test environment");
+                    _logger.LogDebug(1, "Inside the test environment");
                     dupNameSlashDateOfBirth = demographics
+                        .TagWith("GetDuplicateDemographics-Test")
                         .Include(d => d.ContactInfo)
                         .Select(d => new DemographicMatchDto { DemographicId = d.Id, MatchedDemographicId = d.Id });
                 }
                 else
                 {
-                    _logger.LogWarning(2, "Outside the test environment");
+                    _logger.LogDebug(2, "Outside the test environment");
                     string dupQuery =
                         @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER, SSN
                               FROM DEMOGRAPHIC)
@@ -91,17 +92,18 @@ FROM FILTERED_DEMOGRAPHIC p1
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */";
 
                     dupNameSlashDateOfBirth = ctx.Database
-                        .SqlQueryRaw<DemographicMatchDto>(dupQuery);
+                        .SqlQueryRaw<DemographicMatchDto>($"/*+ DuplicateNamesAndBirthdays-ProductionQuery */ {dupQuery}");
                     _logger.LogWarning(3, "Got value in dupNameSlashDateOfBirth");
                 }
 
                 dupInfo = await dupNameSlashDateOfBirth
+                    .TagWith("GetDuplicateMatches-DuplicateNamesAndBirthdays")
                     .ToHashSetAsync(cancellationToken);
 
                 var demographicIds = dupInfo.Select(x => x.DemographicId).ToHashSet();
                 var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-                _logger.LogWarning(4, "Running the linq query to get from demographics");
-                var query = from dem in demographics.Include(d => d.EmploymentStatus)
+                _logger.LogDebug(4, "Running the linq query to get from demographics");
+                var query = from dem in demographics.TagWith("GetDuplicateDemographicsReport-MainQuery").Include(d => d.EmploymentStatus)
                             join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
                             {
                                 ppLj.DemographicId,
@@ -136,7 +138,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                                 Years = yos != null ? yos.Years : (byte)0,
                                 dem.PayFrequencyId,
                             };
-                _logger.LogWarning(5, "Calling ToPaginationResultsAsync");
+                _logger.LogDebug(5, "Calling ToPaginationResultsAsync");
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             }, cancellationToken);
 
@@ -193,7 +195,7 @@ FROM FILTERED_DEMOGRAPHIC p1
             {
                 r.Count = dupInfo.Count(x => x.MatchedDemographicId == r.DemographicId);
             }
-            _logger.LogWarning(6, "Calling GetYearStartAndEndAccountingDatesAsync function");
+            _logger.LogDebug(6, "Calling GetYearStartAndEndAccountingDatesAsync function");
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
             _logger.Log(LogLevel.Debug, "Final return statement");
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
