@@ -75,10 +75,10 @@ function setupYearsEndApiMocks() {
 
   // Create a mutation function that when called returns an object with an .unwrap() method
   // This is how RTK Query mutations work - they return a result object with unwrap() and other status info
+  // We use a microtask (Promise.resolve) to ensure the state update happens asynchronously
   const mockUnmask = vi.fn(() => {
-    const promise = Promise.resolve({ unmaskedSsn: "700-00-5181" });
     return {
-      unwrap: () => promise
+      unwrap: () => Promise.resolve({ unmaskedSsn: "700-00-5181" })
     };
   });
 
@@ -332,13 +332,19 @@ describe("Auto-Revert Timer", () => {
     const button = getUnmaskButton();
     fireEvent.click(button);
 
-    // Wait for API response
-    await vi.runAllTimersAsync();
+    // Process microtasks to resolve the promise
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+    
+    // Verify SSN is unmasked
     expect(screen.getByText("700-00-5181")).toBeInTheDocument();
 
     // Act - advance time by 60 seconds (Dev/QA timeout)
+    // After advancing, the setTimeout callback should fire and revert the state
     await act(async () => {
       vi.advanceTimersByTime(60000);
+      // Run all timers to process the timeout callback
       await vi.runAllTimersAsync();
     });
 
@@ -371,13 +377,19 @@ describe("Auto-Revert Timer", () => {
     const button = getUnmaskButton();
     fireEvent.click(button);
 
-    // Wait for API response
-    await vi.runAllTimersAsync();
+    // Process microtasks to resolve the promise
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+    
+    // Verify SSN is unmasked
     expect(screen.getByText("700-00-5181")).toBeInTheDocument();
 
     // Act - advance time by 5 minutes (Production/UAT timeout)
+    // After advancing, the setTimeout callback should fire and revert the state
     await act(async () => {
       vi.advanceTimersByTime(300000);
+      // Run all timers to process the timeout callback
       await vi.runAllTimersAsync();
     });
 
@@ -405,16 +417,25 @@ describe("Auto-Revert Timer", () => {
       </Provider>
     );
 
-      // Act - unmask SSN
-      const button = getUnmaskButton();
-      fireEvent.click(button);
+    // Act - unmask SSN
+    const button = getUnmaskButton();
+    fireEvent.click(button);
 
+    // Process microtasks to resolve the promise
+    await act(async () => {
       await vi.runAllTimersAsync();
-      expect(screen.getByText("700-00-5181")).toBeInTheDocument();
+    });
+    
+    // Verify SSN is unmasked
+    expect(screen.getByText("700-00-5181")).toBeInTheDocument();
 
-      // Act - unmount component before timer fires
-      unmount();
-      vi.advanceTimersByTime(60000);    // Assert - no errors (timer was cleared)
+    // Act - unmount component before timer fires
+    unmount();
+    
+    // Advance time and ensure no errors occur
+    vi.advanceTimersByTime(60000);
+    
+    // Assert - no errors (timer was cleared)
     expect(true).toBe(true);
   });
 });
