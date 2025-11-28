@@ -91,8 +91,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                   AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3 /* Name similarity threshold */
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */";
 
-                    dupNameSlashDateOfBirth = ctx.Database
-                        .SqlQueryRaw<DemographicMatchDto>($"/*+ DuplicateNamesAndBirthdays-ProductionQuery */ {dupQuery}");
+                    dupNameSlashDateOfBirth = ctx.Database.SqlQueryRaw<DemographicMatchDto>(dupQuery);
                     _logger.LogWarning(3, "Got value in dupNameSlashDateOfBirth");
                 }
 

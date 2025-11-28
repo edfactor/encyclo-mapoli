@@ -1,10 +1,11 @@
+import type { Promise as PromiseType } from "@types/node";
 import { ModuleRegistry } from "ag-grid-community";
 
 /**
  * Register core ag-grid modules immediately at startup
  * These modules are loaded synchronously as they are needed for basic grid functionality
  */
-export const registerCoreGridModules = async (): Promise<void> => {
+export async function registerCoreGridModules() {
   const {
     ClientSideRowModelModule,
     PaginationModule,
@@ -18,14 +19,14 @@ export const registerCoreGridModules = async (): Promise<void> => {
     FilterToolPanelModule,
     StatusBarModule
   ]);
-};
+}
 
 /**
  * Register advanced ag-grid modules lazily when needed
  * These modules are deferred to improve initial load time
  * Call this function when the application needs advanced grid features
  */
-export const registerAdvancedGridModules = async (): Promise<void> => {
+export async function registerAdvancedGridModules() {
   const {
     ClipboardModule,
     ExcelExportModule,
@@ -53,14 +54,14 @@ export const registerAdvancedGridModules = async (): Promise<void> => {
     MultiFilterModule,
     AdvancedFilterModule
   ]);
-};
+}
 
 /**
  * Initialize ag-grid modules
  * Registers core modules immediately, defers advanced modules to idle time
  * This should be called early in the application lifecycle (e.g., in App.tsx useEffect)
  */
-export const initializeAgGrid = (): void => {
+export function initializeAgGrid(): void {
   // Register core modules immediately
   registerCoreGridModules().catch((err) => {
     console.error("Failed to register core ag-grid modules:", err);
@@ -84,4 +85,4 @@ export const initializeAgGrid = (): void => {
       });
     }, 2000);
   }
-};
+}
