@@ -86,6 +86,15 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         },
         commandOptions: new CommandOptions { IconName = "Navigation", IconVariant = IconVariant.Filled })
     .WithCommand(
+        name: "import-uat-navigation",
+        displayName: "Import UAT navigation",
+        executeCommand: async (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+            return await CommandHelper.RunConsoleAppAsync(projectPath!, "import-uat-navigation", logger, "Import UAT Navigation", interactionService);
+        },
+        commandOptions: new CommandOptions { IconName = "Navigation", IconVariant = IconVariant.Filled })
+    .WithCommand(
         name: "Nuclear-Option",
         displayName: "Full Nuclear Reset",
         executeCommand: async (c) =>
