@@ -28,7 +28,10 @@
         },
         {
           "PackageIdentifier": "Git.Git"
-        },       
+        },
+        {
+          "PackageIdentifier": "OpenSSL.OpenSSL"
+        },
         {
           "PackageIdentifier": "TortoiseGit.TortoiseGit"
         },

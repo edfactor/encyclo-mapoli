@@ -7,7 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import React, { useRef, useState } from "react";
 import { ICommon } from "../ICommon";
 
-export type MenuItem = {
+export type MenuItemConfig = {
   icon?: React.ReactNode;
   title: string;
   onClick: React.MouseEventHandler<HTMLLIElement>;
@@ -18,7 +18,7 @@ export interface WelcomeDisplayProps extends ICommon {
   oktaEnabled: boolean;
   additionalInfo?: string;
   logout: () => void;
-  items?: MenuItem[];
+  items?: MenuItemConfig[];
 }
 
 export const WelcomeDisplay: React.FC<WelcomeDisplayProps> = ({

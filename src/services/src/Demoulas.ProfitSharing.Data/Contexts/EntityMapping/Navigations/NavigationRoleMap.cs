@@ -26,7 +26,9 @@ internal sealed class NavigationRoleMap : IEntityTypeConfiguration<NavigationRol
             new NavigationRole { Id = NavigationRole.Contants.ItDevOps, Name = Role.ITDEVOPS, IsReadOnly = true },
             new NavigationRole { Id = NavigationRole.Contants.ItOperations, Name = Role.ITOPERATIONS, IsReadOnly = false },
             new NavigationRole { Id = NavigationRole.Contants.ExecutiveAdministrator, Name = Role.EXECUTIVEADMIN, IsReadOnly = false },
-            new NavigationRole { Id = NavigationRole.Contants.Auditor, Name = Role.AUDITOR, IsReadOnly = true }
+            new NavigationRole { Id = NavigationRole.Contants.Auditor, Name = Role.AUDITOR, IsReadOnly = true },
+            new NavigationRole { Id = NavigationRole.Contants.HrReadOnly, Name = Role.HR_READONLY, IsReadOnly = true },
+            new NavigationRole { Id = NavigationRole.Contants.SsnUnmasking, Name = Role.SSN_UNMASKING, IsReadOnly = true }
         );
     }
 }

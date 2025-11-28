@@ -30,13 +30,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { drawerClosedWidth, drawerOpenWidth, ROUTES } from "../../constants";
 import MenuData from "../../MenuData";
+import YTDWagesLive from "../../pages/DecemberActivities/YTDWagesExtractLive/YTDWagesLive";
 import BalanceByAge from "../../pages/FiscalClose/AgeReports/BalanceByAge/BalanceByAge";
 import ContributionsByAge from "../../pages/FiscalClose/AgeReports/ContributionsByAge/ContributionsByAge";
 import DistributionByAge from "../../pages/FiscalClose/AgeReports/DistributionsByAge/DistributionsByAge";
 import ForfeituresByAge from "../../pages/FiscalClose/AgeReports/ForfeituresByAge/ForfeituresByAge";
 import ProfitShareEditUpdate from "../../pages/FiscalClose/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import YTDWages from "../../pages/FiscalClose/YTDWagesExtract/YTDWages";
-import YTDWagesLive from "../../pages/DecemberActivities/YTDWagesExtractLive/YTDWagesLive";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 import Unauthorized from "../../pages/Unauthorized/Unauthorized";
 import { useGetNavigationQuery } from "../../reduxstore/api/NavigationApi";
@@ -150,9 +150,11 @@ const RouterSubAssembly: React.FC = () => {
                     ImpersonationRoles.ExecutiveAdministrator,
                     ImpersonationRoles.FinanceManager,
                     ImpersonationRoles.HardshipAdministrator,
+                    ImpersonationRoles.HrReadOnly,
                     ImpersonationRoles.ItDevOps,
                     ImpersonationRoles.ItOperations,
-                    ImpersonationRoles.ProfitSharingAdministrator
+                    ImpersonationRoles.ProfitSharingAdministrator,
+                    ImpersonationRoles.SsnUnmasking
                   ]}
                   currentRoles={impersonating || []}
                   setCurrentRoles={(value: string[]) => {
@@ -403,9 +405,11 @@ const RouterSubAssembly: React.FC = () => {
                   element={
                     <ProtectedRoute
                       requiredRoles={[
-                        ImpersonationRoles.ItDevOps,
                         ImpersonationRoles.Auditor,
-                        ImpersonationRoles.ProfitSharingAdministrator
+                        ImpersonationRoles.HrReadOnly,
+                        ImpersonationRoles.ItDevOps,
+                        ImpersonationRoles.ProfitSharingAdministrator,
+                        ImpersonationRoles.SsnUnmasking
                       ]}>
                       <AuditSearch />
                     </ProtectedRoute>

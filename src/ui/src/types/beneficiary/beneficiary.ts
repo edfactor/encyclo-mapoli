@@ -248,7 +248,7 @@ export interface PayBenReport {
   demographicFullName: string;
   percentage: number;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+ 
 export interface PayBenReportResponse extends Paged<PayBenReport> {
   // PayBenReportResponse extends Paged interface
 }

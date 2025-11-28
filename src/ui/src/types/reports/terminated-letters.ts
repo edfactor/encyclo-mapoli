@@ -26,5 +26,5 @@ export interface TerminatedLettersDetail {
   isExecutive: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+ 
 export interface TerminatedLettersResponse extends PagedReportResponse<TerminatedLettersDetail> {}

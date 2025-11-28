@@ -25,15 +25,17 @@ public interface IJwtTokenService
     /// <param name="certificate">The X509 certificate containing the private key for signing.</param>
     /// <param name="issuer">The issuer claim (e.g., "www.mycompany.com"). Required by Oracle HCM.</param>
     /// <param name="principal">The principal/username claim (e.g., "fusion"). Required by Oracle HCM.</param>
+    /// <param name="subject">The subject claim (e.g., "API_PS_PROD"). Identifies the principal about which the JWT makes a statement.</param>
+    /// <param name="audience">The audience claim (e.g., "https://eqma-dev3.fa.ocs.oraclecloud.com"). Identifies the recipients that the JWT is intended for.</param>
     /// <param name="expirationMinutes">Token expiration time in minutes from now. Default: 10 minutes.</param>
     /// <returns>A signed JWT token string ready for use in the Authorization header.</returns>
     /// <remarks>
     /// The generated token includes:
-    /// - Header: RS256 algorithm, JWT type, x5t (SHA-1 thumbprint of certificate)
-    /// - Payload: iss (issuer), prn (principal), iat (issued at), exp (expiration)
+    /// - Header: RS256 algorithm, JWT type, x5t (SHA-256 thumbprint of certificate), kid (Key ID)
+    /// - Payload: iss (issuer), prn (principal), iat (issued at), exp (expiration), sub (subject), aud (audience), jti (JWT ID)
     /// - Signature: Signed with the certificate's private RSA key
     /// </remarks>
-    string GenerateToken(X509Certificate2 certificate, string issuer, string principal, int expirationMinutes = 10);
+    string GenerateToken(X509Certificate2 certificate, string issuer, string principal, string subject, string audience, int expirationMinutes = 10);
 
     /// <summary>
     /// Generates a JWT token with the certificate issuer as the claim issuer.

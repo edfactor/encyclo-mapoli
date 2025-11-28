@@ -18,7 +18,6 @@ using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.LogMasking; // retains AddProjectServices & other extension methods
 using Demoulas.ProfitSharing.Services.Middleware;
 using Demoulas.ProfitSharing.Services.Serialization;
-using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -131,7 +130,7 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<AuditSaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
-        ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR]));
+        ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
 });

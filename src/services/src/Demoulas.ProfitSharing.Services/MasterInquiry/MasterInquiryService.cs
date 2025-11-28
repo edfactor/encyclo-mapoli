@@ -652,7 +652,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 .ToList();
 
             var beneficiaryPartnerKeys = formattedResults
-                .Where(x => x.CommentRelatedOracleHcmId.HasValue && x.CommentRelatedPsnSuffix.HasValue && x.CommentRelatedPsnSuffix > 0)
+                .Where(x => x is { CommentRelatedOracleHcmId: not null, CommentRelatedPsnSuffix: > 0 })
                 .Select(x => (OracleHcmId: x.CommentRelatedOracleHcmId!.Value, PsnSuffix: x.CommentRelatedPsnSuffix!.Value))
                 .Distinct()
                 .ToList();
