@@ -45,7 +45,7 @@ function createMockStore(preloadedState?: PreloadedState<RootState>) {
     reducer: {
       security: securityReducer
     },
-    preloadedState: preloadedState as any
+    preloadedState: preloadedState as PreloadedState<RootState>
   });
 }
 
@@ -78,13 +78,15 @@ function setupYearsEndApiMocks() {
   const mockUnmask = vi.fn(() => {
     const promise = Promise.resolve({ unmaskedSsn: "700-00-5181" });
     // Add unwrap method to the returned object
-    (promise as any).unwrap = () => promise;
+    (promise as Promise<{ unmaskedSsn: string }> & { unwrap: () => Promise<{ unmaskedSsn: string }> }).unwrap = () => promise;
     return promise;
   });
 
   mockUtils.useUnmaskSsnMutation = vi.fn().mockReturnValue([mockUnmask, { isLoading: false, isError: false }]);
   return mockUnmask;
-} /**
+}
+
+/**
  * Helper to get the unmask button (handles MUI Tooltip wrapper)
  */
 function getUnmaskButton() {
@@ -269,7 +271,7 @@ describe("SSN Display", () => {
 
   it("PS-2098: Should display unmasked SSN after eye icon click", async () => {
     // Arrange
-    const mockUnmask = setupYearsEndApiMocks();
+    setupYearsEndApiMocks();
     const store = createMockStore({
       security: {
         userPermissions: ["SSN-Unmasking"],
@@ -303,7 +305,7 @@ describe("Auto-Revert Timer", () => {
   it("PS-2098: Should revert to masked SSN after timeout in Dev/QA (60 seconds)", async () => {
     // Arrange
     setupEnvironmentMocks(true); // Dev/QA - 60 second timeout
-    const mockUnmask = setupYearsEndApiMocks();
+    setupYearsEndApiMocks();
     const store = createMockStore({
       security: {
         userPermissions: ["SSN-Unmasking"],
@@ -338,7 +340,7 @@ describe("Auto-Revert Timer", () => {
   it("PS-2098: Should revert to masked SSN after timeout in Production/UAT (5 minutes)", async () => {
     // Arrange
     setupEnvironmentMocks(false, true); // UAT - 5 minute timeout
-    const mockUnmask = setupYearsEndApiMocks();
+    setupYearsEndApiMocks();
     const store = createMockStore({
       security: {
         userPermissions: ["SSN-Unmasking"],
@@ -372,7 +374,7 @@ describe("Auto-Revert Timer", () => {
 
   it("PS-2098: Should clear timer on component unmount", async () => {
     // Arrange
-    const mockUnmask = setupYearsEndApiMocks();
+    setupYearsEndApiMocks();
     const store = createMockStore({
       security: {
         userPermissions: ["SSN-Unmasking"],
@@ -414,9 +416,9 @@ describe("Loading States", () => {
       resolveUnmask = resolve;
     });
 
-    const mockUnmask = vi.fn().mockReturnValue(unmaskedPromise);
+    const _mockUnmask = vi.fn().mockReturnValue(unmaskedPromise);
     const mockUtils = vi.mocked(YearsEndApi, true);
-    mockUtils.useUnmaskSsnMutation = vi.fn().mockReturnValue([mockUnmask, { isLoading: false, isError: false }]);
+    mockUtils.useUnmaskSsnMutation = vi.fn().mockReturnValue([_mockUnmask, { isLoading: false, isError: false }]);
 
     const store = createMockStore({
       security: {
@@ -449,7 +451,7 @@ describe("Loading States", () => {
 
   it("PS-2098: Should disable button after unmasking until auto-revert", async () => {
     // Arrange
-    const mockUnmask = setupYearsEndApiMocks();
+    setupYearsEndApiMocks();
     const store = createMockStore({
       security: {
         userPermissions: ["SSN-Unmasking"],
@@ -534,7 +536,7 @@ describe("Error Handling", () => {
       }
     });
 
-    const { rerender } = render(
+    render(
       <Provider store={store}>
         <SsnCellRenderer data={DEFAULT_TEST_DATA} />
       </Provider>
@@ -626,7 +628,7 @@ describe("Accessibility", () => {
 describe("Component Integration", () => {
   it("PS-2098: Should correctly render with different demographic IDs", async () => {
     // Arrange
-    const mockUnmask = setupYearsEndApiMocks();
+    setupYearsEndApiMocks();
     const store = createMockStore({
       security: {
         userPermissions: ["SSN-Unmasking"],
@@ -652,13 +654,13 @@ describe("Component Integration", () => {
 
     // Assert
     await waitFor(() => {
-      expect(mockUnmask).toHaveBeenCalledWith({ demographicId: 99999 });
+      expect(_mockUnmask).toHaveBeenCalledWith({ demographicId: 99999 });
     });
   });
 
   it("PS-2098: Should handle rapid clicks gracefully", async () => {
     // Arrange
-    const mockUnmask = setupYearsEndApiMocks();
+    setupYearsEndApiMocks();
     const store = createMockStore({
       security: {
         userPermissions: ["SSN-Unmasking"],
@@ -684,7 +686,7 @@ describe("Component Integration", () => {
 
     // Assert - Only called once (button disabled after first click)
     await waitFor(() => {
-      expect(mockUnmask).toHaveBeenCalledTimes(1);
+      expect(_mockUnmask).toHaveBeenCalledTimes(1);
     });
   });
 });

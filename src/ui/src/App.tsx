@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetMissivesQuery } from "reduxstore/api/LookupsApi";
 import { colors, themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
-import "../agGridConfig";
+import { initializeAgGrid } from "../agGridConfig";
 import Router from "./components/router/Router";
 import oktaConfig from "./Okta/config";
 import { useLazyGetHealthQuery } from "./reduxstore/api/AppSupportApi";
@@ -41,6 +41,11 @@ const App = () => {
   const [triggerHealth] = useLazyGetHealthQuery();
 
   const health = useSelector((state: RootState) => state.support.health);
+
+  // Initialize ag-grid modules (core immediately, advanced deferred to idle time)
+  useEffect(() => {
+    initializeAgGrid();
+  }, []);
 
   useEffect(() => {
     const config = oktaConfig(clientId, issuer);
@@ -88,8 +93,17 @@ const App = () => {
         const userGroups = tokenPayload.groups || [];
         dispatch(setUserGroups(userGroups));
 
-        // Load lookup data
-        loadMissives();
+        // Defer missives load to idle time (not critical for initial render)
+        if ("requestIdleCallback" in window) {
+          const handle = requestIdleCallback(() => {
+            loadMissives();
+          });
+          return () => cancelIdleCallback(handle);
+        } else {
+          // Fallback for browsers without requestIdleCallback
+          const timer = setTimeout(() => loadMissives(), 2000);
+          return () => clearTimeout(timer);
+        }
       } catch (error) {
         console.warn("Could not parse token for username:", error);
       }
@@ -144,8 +158,21 @@ const App = () => {
     }
   }, [buildNumber, uiBuildInfo]);
 
+  // Defer health check to idle time (not critical for initial render)
   useEffect(() => {
-    triggerHealth();
+    if ("requestIdleCallback" in window) {
+      const handle = requestIdleCallback(
+        () => {
+          triggerHealth();
+        },
+        { timeout: 3000 }
+      );
+      return () => cancelIdleCallback(handle);
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      const timer = setTimeout(() => triggerHealth(), 3000);
+      return () => clearTimeout(timer);
+    }
   }, [triggerHealth]);
 
   // Theme setup
