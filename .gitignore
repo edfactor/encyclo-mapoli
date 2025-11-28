@@ -380,3 +380,5 @@ test-results
 /.vscode/mcp.json
 /DEMO_SETUP_STEPS.md
 /src/ui/build
+/src/ui/test-results.txt
+/src/ui/test-output.txt
