@@ -27,16 +27,22 @@ const schema = yup.object().shape({
 interface AccountHistoryReportFilterSectionProps {
   onFilterChange: (params: AccountHistoryReportFilterParams) => void;
   onReset: () => void;
+  onFormDirty?: () => void;
   isLoading?: boolean;
 }
 
 const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSectionProps> = ({
   onFilterChange,
   onReset,
+  onFormDirty,
   isLoading = false
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const currentYear = new Date().getFullYear();
+  // Default start date goes back 5 years from current year
+  const defaultStartDate = new Date(currentYear - 5, 0, 1);
+  // Minimum allowed date goes back 75 years from current year
+  const minStartDate = new Date(currentYear - 75, 0, 1);
 
   const {
     control,
@@ -48,8 +54,8 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
     resolver: yupResolver(schema) as Resolver<AccountHistoryReportFilterParams>,
     defaultValues: {
       badgeNumber: "",
-      startDate: new Date(currentYear - 1, 0, 1),
-      endDate: new Date(currentYear, 11, 31)
+      startDate: defaultStartDate,
+      endDate: new Date(currentYear, 12, 31)
     }
   });
 
@@ -81,10 +87,16 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
     !errors.startDate &&
     !errors.endDate;
 
+  // Notify parent when form values change (user is modifying criteria)
+  useEffect(() => {
+    onFormDirty?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedValues.badgeNumber, watchedValues.startDate?.getTime(), watchedValues.endDate?.getTime()]);
+
   const handleReset = () => {
     reset({
       badgeNumber: "",
-      startDate: new Date(currentYear - 1, 0, 1),
+      startDate: defaultStartDate,
       endDate: new Date(currentYear, 11, 31)
     });
     onReset();
@@ -134,7 +146,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
                 required={true}
                 label="Start Date"
                 disableFuture
-                minDate={new Date(1980, 0)}
+                minDate={minStartDate}
                 error={errors.startDate?.message}
               />
             )}
