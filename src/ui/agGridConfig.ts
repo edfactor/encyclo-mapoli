@@ -1,4 +1,3 @@
-import type { Promise as PromiseType } from "@types/node";
 import { ModuleRegistry } from "ag-grid-community";
 
 /**
