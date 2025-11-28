@@ -55,7 +55,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
     defaultValues: {
       badgeNumber: "",
       startDate: defaultStartDate,
-      endDate: new Date(currentYear, 12, 31)
+      endDate: new Date(currentYear, 11, 31) // December 31 (month is 0-indexed)
     }
   });
 
