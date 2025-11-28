@@ -49,7 +49,7 @@ public static class PdfUtilities
             }
 
             // Horizontal rule with extra spacing after header
-            column.Item().Height(1).PaddingBottom(12)
+            column.Item().PaddingBottom(12).Height(1)
                 .Background(PdfReportConfiguration.BrandColors.BorderGray);
         });
     }
