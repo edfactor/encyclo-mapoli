@@ -168,6 +168,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
     /// <summary>
     /// Fetches year-specific data (balances, distributions, vesting) in a separate context for parallel execution.
+    /// Each year runs in its own context, enabling parallel execution across years.
     /// </summary>
     private Task<AccountHistoryReportResponse> FetchYearDataAsync(
         short year,
@@ -182,23 +183,20 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         (decimal yearContributions, decimal yearEarnings, decimal yearForfeitures) =
             ProfitDetailExtensions.AggregateAllProfitValues(yearProfitDetails);
 
-        // Execute balance/distribution/vesting queries in parallel within separate context
+        // Execute balance/distribution queries sequentially within this context
+        // (EF Core doesn't allow concurrent operations on the same context)
+        // Parallelism is achieved at the year level - each year has its own context
         return _contextFactory.UseReadOnlyContext(async ctx =>
         {
-            var balanceTask = _totalService.GetTotalBalanceSet(ctx, year)
+            var memberBalance = await _totalService.GetTotalBalanceSet(ctx, year)
                 .FirstOrDefaultAsync(b => b.Ssn == ssn, cancellationToken);
 
-            var distributionsTask = _totalService.GetTotalDistributions(ctx, year)
+            var memberDistributions = await _totalService.GetTotalDistributions(ctx, year)
                 .FirstOrDefaultAsync(d => d.Ssn == ssn, cancellationToken);
 
-            var vestingTask = _totalService.GetVestingBalanceForSingleMemberAsync(
+            // GetVestingBalanceForSingleMemberAsync creates its own context internally
+            var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
                 SearchBy.BadgeNumber, badgeNumber, year, cancellationToken);
-
-            await Task.WhenAll(balanceTask, distributionsTask, vestingTask);
-
-            var memberBalance = await balanceTask;
-            var memberDistributions = await distributionsTask;
-            var vestingBalance = await vestingTask;
 
             return new AccountHistoryReportResponse
             {
