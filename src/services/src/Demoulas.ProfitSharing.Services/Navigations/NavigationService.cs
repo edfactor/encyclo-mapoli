@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -35,6 +36,11 @@ public class NavigationService : INavigationService
             .Distinct() // Remove any duplicate roles
             .OrderBy(r => r) // Sort for consistent cache key
             .ToList();
+
+        // DIAGNOSTIC LOGGING: Log the actual user roles for troubleshooting
+        var rawUserRoles = _appUser.GetUserAllRoles();
+        _logger?.LogInformation("🔍 DIAGNOSTIC: User raw roles from Okta: {RawRoles}", rawUserRoles == null ? "NULL" : string.Join(", ", rawUserRoles));
+        _logger?.LogInformation("🔍 DIAGNOSTIC: User uppercase roles for filtering: {UppercaseRoles}", string.Join(", ", roleNamesUpper));
 
         // Get current cache version to ensure cache is busted when navigation status is updated
         const string versionKey = "navigation-tree-version";
@@ -77,6 +83,27 @@ public class NavigationService : INavigationService
 
             return query.ToListAsync(cancellationToken);
         }, cancellationToken);
+
+        // DIAGNOSTIC LOGGING: Log all available roles and what was matched
+        var allAvailableRoles = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            return await context.NavigationRoles
+                .Select(nr => new { nr.Id, nr.Name, nr.IsReadOnly })
+                .ToListAsync(cancellationToken);
+        }, cancellationToken);
+
+        _logger?.LogInformation("🔍 DIAGNOSTIC: All available navigation roles in database: {AvailableRoles}",
+            string.Join(", ", allAvailableRoles.Select(r => $"[{r.Id}:{r.Name}(RO={r.IsReadOnly})]")));
+        _logger?.LogInformation("🔍 DIAGNOSTIC: Navigations matched for user roles: {MatchedCount} items", flatList.Count);
+        if (flatList.Any())
+        {
+            var matchedRoles = flatList
+                .SelectMany(n => n.RequiredRoles ?? new List<NavigationRole>())
+                .Select(r => r.Name)
+                .Distinct()
+                .ToList();
+            _logger?.LogInformation("🔍 DIAGNOSTIC: Matched navigation roles: {MatchedRoles}", string.Join(", ", matchedRoles));
+        }
 
         // Check if the current user has any read-only roles based on database configuration
         var userRoles = _appUser.GetUserAllRoles()?.Where(r => !string.IsNullOrWhiteSpace(r)).ToList() ?? new List<string>();

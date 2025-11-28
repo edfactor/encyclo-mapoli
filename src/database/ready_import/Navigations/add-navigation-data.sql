@@ -1,12 +1,38 @@
 
 DECLARE
 
+    -- ================================================================================
+    -- CRITICAL: Navigation Role Hierarchy Rules
+    -- ================================================================================
+    -- IMPORTANT: Parent navigation items MUST have ALL roles that their children have.
+    -- This enforces permission inheritance: if a parent doesn't have a role, children
+    -- with that role will be FILTERED OUT by NavigationService.BuildTree() via role
+    -- intersection logic.
+    --
+    -- EXAMPLE - DO NOT DO THIS:
+    --   INQUIRIES_MENU (parent) has roles: [SYSTEM_ADMINISTRATOR, FINANCE_MANAGER]
+    --   MASTER_INQUIRY_PAGE (child) has roles: [SYSTEM_ADMINISTRATOR, HR_READONLY]
+    --   RESULT: HR_READONLY users will NOT see MASTER_INQUIRY_PAGE because the parent
+    --           doesn't have HR_READONLY, and the intersection fails.
+    --
+    -- CORRECT APPROACH:
+    --   INQUIRIES_MENU (parent) has roles: [SYSTEM_ADMINISTRATOR, FINANCE_MANAGER, HR_READONLY]
+    --   MASTER_INQUIRY_PAGE (child) has roles: [SYSTEM_ADMINISTRATOR, HR_READONLY]
+    --   RESULT: Both roles work correctly - HR_READONLY users see the page.
+    --
+    -- RULE: Before assigning a role to a child navigation item, ensure:
+    --   1. The immediate parent (ParentId) has that role
+    --   2. All ancestors up the tree have that role
+    --   3. Check NavigationService.BuildTree() method for the intersection logic
+    -- ================================================================================
+
     -- Process for adding a new menu item:
     -- 1. If you need a new menu, pleast add that first in the MENUS section
     -- 2. Add a new constant for the new page from 1xx and up
     -- 3. Decide what the parent menu is going to be out of the existing constants
     -- 4. Add the insert_navigation_item call to add the new item to the parent menu
     -- 5. Add the assign_navigation_role calls to assign roles to the new item
+    -- 6. ⚠️ CRITICAL: Ensure parent menu items have ALL roles that you assign to children (see role hierarchy rules above)
 
 
     -- MENUS (ids from 1 to 99)
@@ -443,21 +469,29 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 
 
 -- Assign roles for INQUIRIES (Master Inquiry endpoints -> CanRunMasterInquiry)
+-- NOTE: INQUIRIES_MENU is parent to INQUIRIES_GROUP and MASTER_INQUIRY_PAGE.
+--       It must have all roles assigned to its children (including HR_READONLY).
+--       If a parent lacks a role, children with that role will be filtered out.
     assign_navigation_role(INQUIRIES_MENU, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(INQUIRIES_MENU, FINANCE_MANAGER);
     assign_navigation_role(INQUIRIES_MENU, DISTRIBUTIONS_CLERK);
     assign_navigation_role(INQUIRIES_MENU, EXECUTIVE_ADMINISTRATOR);
+    assign_navigation_role(INQUIRIES_MENU, HR_READONLY);
 
 -- Assign roles for YEAR END (YearEndGroup -> CanViewYearEndReports)
     assign_navigation_role(YEAR_END_MENU, SYSTEM_ADMINISTRATOR); 
-    assign_navigation_role(YEAR_END_MENU, FINANCE_MANAGER); 
+    assign_navigation_role(YEAR_END_MENU, FINANCE_MANAGER);
+    assign_navigation_role(YEAR_END_MENU, HR_READONLY);  -- Parent must have this role for HR-ReadOnly users to see children 
 
 
 -- Assign roles for INQUIRIES_GROUP
+-- NOTE: INQUIRIES_GROUP is child of INQUIRIES_MENU (parent has the roles listed below)
+--       and parent to MASTER_INQUIRY_PAGE. It must have all roles assigned to its children.
     assign_navigation_role(INQUIRIES_GROUP, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(INQUIRIES_GROUP, FINANCE_MANAGER); 
     assign_navigation_role(INQUIRIES_GROUP, DISTRIBUTIONS_CLERK);
     assign_navigation_role(INQUIRIES_GROUP, EXECUTIVE_ADMINISTRATOR);
+    assign_navigation_role(INQUIRIES_GROUP, HR_READONLY);
 
 -- Assign roles for ADHOC_GROUP
     assign_navigation_role(ADHOC_GROUP, SYSTEM_ADMINISTRATOR); 
@@ -465,6 +499,9 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADHOC_GROUP, DISTRIBUTIONS_CLERK);
 
 -- Assign roles for MASTER INQUIRY (Endpoints base -> Navigation.Constants.MasterInquiry; Policy -> CanRunMasterInquiry)
+-- NOTE: MASTER_INQUIRY_PAGE is child of INQUIRIES_GROUP (parent has all these roles checked).
+--       Users with HR_READONLY role will only see this page because INQUIRIES_MENU and
+--       INQUIRIES_GROUP both have the HR_READONLY role assigned.
     assign_navigation_role(MASTER_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, FINANCE_MANAGER); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
@@ -507,8 +544,10 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 
     assign_navigation_role(DECEMBER_ACTIVITIES, SYSTEM_ADMINISTRATOR);  
     assign_navigation_role(DECEMBER_ACTIVITIES, FINANCE_MANAGER);
+    assign_navigation_role(DECEMBER_ACTIVITIES, HR_READONLY);  -- Parent of CLEANUP_REPORTS; must have this for HR-ReadOnly users
     assign_navigation_role(CLEANUP_REPORTS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(CLEANUP_REPORTS, FINANCE_MANAGER);
+    assign_navigation_role(CLEANUP_REPORTS, HR_READONLY);  -- Parent must have this role for children to be visible
     assign_navigation_role(DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT, FINANCE_MANAGER);
     assign_navigation_role(DUPLICATE_SSNS_DEMOGRAPHICS, SYSTEM_ADMINISTRATOR);
@@ -519,7 +558,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(TERMINATIONS, FINANCE_MANAGER);
     assign_navigation_role(DUPLICATE_NAMES_BIRTHDAYS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DUPLICATE_NAMES_BIRTHDAYS, FINANCE_MANAGER);
-    assign_navigation_role(DUPLICATE_NAMES_BIRTHDAYS, HR_READONLY);
+    assign_navigation_role(DUPLICATE_NAMES_BIRTHDAYS, HR_READONLY);  -- Child role matches parent CLEANUP_REPORTS role
     assign_navigation_role(MILITARY_CONTRIBUTIONS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MILITARY_CONTRIBUTIONS, FINANCE_MANAGER);
     assign_navigation_role(UNFORFEIT, SYSTEM_ADMINISTRATOR);
