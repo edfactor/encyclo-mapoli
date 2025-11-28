@@ -31,8 +31,8 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateN
 
     public override void Configure()
     {
-        Get("duplicate-names-and-birthdays");
-        Policies(Security.Policy.CanViewDuplicateNamesAndBirthdays);
+        Get("yearend/duplicate-names-and-birthdays");
+        Policies(Security.Policy.CanViewDuplicateNamesAndBirthdays);  // Override group policy with stricter endpoint policy
         Summary(s =>
         {
             s.Summary = "List of duplicate names, and birthdays in the demographics area";
@@ -81,7 +81,6 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateN
             };
             s.Responses[403] = $"Forbidden. Requires HR-ReadOnly or Finance roles";
         });
-        Group<YearEndGroup>();
         base.Configure();
     }
 
