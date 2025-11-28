@@ -33,7 +33,8 @@ export default defineConfig([
         NodeJS: "readonly",
         process: "readonly"
       },
-      parser: tsParser
+      parser: tsParser,
+      ecmaVersion: 2024
     },
 
     rules: {
