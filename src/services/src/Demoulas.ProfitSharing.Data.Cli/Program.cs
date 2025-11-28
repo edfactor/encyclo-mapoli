@@ -175,6 +175,21 @@ public sealed class Program
         _ = args;
         await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (_, context) =>
         {
+            var pending = await context.Database.GetPendingMigrationsAsync();
+
+            IEnumerable<string> enumerable = pending as string[] ?? pending.ToArray();
+            if (enumerable.Any())
+            {
+                var startingColor = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine("Pending Migrations");
+                foreach (string p in enumerable)
+                {
+                    Console.WriteLine(p);
+                }
+                Console.ForegroundColor = startingColor;
+            }
+
             await context.Database.MigrateAsync();
 
             var existingIds = await context.AccountingPeriods.Select(p => p.WeekendingDate).ToListAsync();

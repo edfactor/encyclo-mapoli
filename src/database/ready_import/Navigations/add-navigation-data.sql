@@ -201,7 +201,22 @@ BEGIN
     DELETE FROM NAVIGATION_ASSIGNED_ROLES;
     DELETE FROM NAVIGATION_TRACKING;
     DELETE FROM NAVIGATION;
+    DELETE FROM NAVIGATION_ROLE;
     
+    -- Populate NAVIGATION_ROLE table with all roles
+    -- This is the definitive source for navigation roles
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (1, 'System-Administrator', 0);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (2, 'Finance-Manager', 0);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (3, 'Distributions-Clerk', 0);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (4, 'Hardship-Administrator', 0);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (5, 'Impersonation', 0);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (6, 'IT-DevOps', 1);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (7, 'IT-Operations', 0);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (8, 'Executive-Administrator', 0);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (9, 'Auditor', 1);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (10, 'Beneficiary-Administrator', 0);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (11, 'HR-ReadOnly', 1);
+    INSERT INTO NAVIGATION_ROLE (ID, NAME, IS_READ_ONLY) VALUES (12, 'SSN-Unmasking', 1);
 
 --Top level menus
     insert_navigation_item(INQUIRIES_MENU, TOP_LEVEL_MENU, 'INQUIRIES & ADJUSTMENTS', 'Inquiries & Adjustments', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -453,7 +468,6 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(MASTER_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, FINANCE_MANAGER); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
-    assign_navigation_role(MASTER_INQUIRY_PAGE, EXECUTIVE_ADMINISTRATOR);
     assign_navigation_role(MASTER_INQUIRY_PAGE, HR_READONLY);
 
 -- Assign roles for ADJUSTMENTS_GROUP
@@ -690,9 +704,6 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     add_navigation_prerequisite(MASTER_UPDATE, PROFIT_SHARE_REPORT);
     add_navigation_prerequisite(MASTER_UPDATE, UNFORFEIT);
     add_navigation_prerequisite(MASTER_UPDATE, FORFEITURES);
-
-    -- MAKE THESE ROLES READ-ONLY 
-    UPDATE NAVIGATION_ROLE SET IS_READ_ONLY=1 where ID IN ( IT_DEVOPS, AUDITOR );
 
 END;
 COMMIT ;
