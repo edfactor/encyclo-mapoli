@@ -57,19 +57,19 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         {
             // Get member demographic information
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var demographic = await demographicQuery
+            var demographicForYears = await demographicQuery
                 .TagWith($"AccountHistoryReport-Demographics-{memberId}")
                 .FirstOrDefaultAsync(d => d.BadgeNumber == memberId, cancellationToken);
 
-            if (demographic is null)
+            if (demographicForYears is null)
             {
                 return new List<short>();
             }
 
             // Retrieve all profit years for this member within the date range
             return await ctx.ProfitDetails
-                .TagWith($"AccountHistoryReport-Years-{demographic.BadgeNumber}")
-                .Where(pd => pd.Ssn == demographic.Ssn &&
+                .TagWith($"AccountHistoryReport-Years-{demographicForYears.BadgeNumber}")
+                .Where(pd => pd.Ssn == demographicForYears.Ssn &&
                              pd.ProfitYear >= startYear &&
                              pd.ProfitYear <= endYear)
                 .Select(pd => pd.ProfitYear)
@@ -80,6 +80,32 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
         }, cancellationToken);
 
+        // Fetch demographic data once outside the loop to reduce database calls
+        var demographic = await _contextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            return await demographicQuery
+                .TagWith($"AccountHistoryReport-Demographics-{memberId}")
+                .FirstOrDefaultAsync(d => d.BadgeNumber == memberId, cancellationToken);
+        }, cancellationToken);
+
+        if (demographic is null)
+        {
+            return new AccountHistoryReportPaginatedResponse
+            {
+                ReportName = "Account History Report",
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = request.StartDate ?? new DateOnly(startYear, 1, 1),
+                EndDate = request.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
+                Response = new PaginatedResponseDto<AccountHistoryReportResponse>
+                {
+                    Results = [],
+                    Total = 0
+                },
+                CumulativeTotals = new AccountHistoryReportTotals()
+            };
+        }
+
         decimal previousCumulativeEndingBalance = 0;
         decimal previousCumulativeDistributions = 0;
         var reportData = new List<AccountHistoryReportResponse>();
@@ -88,30 +114,31 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
         foreach (var year in allYears)
         {
+            // Capture demographic values for use in async lambda
+            var demographicId = demographic.Id;
+            var badgeNumber = demographic.BadgeNumber;
+            var fullName = demographic.ContactInfo.FullName ?? string.Empty;
+            var ssn = demographic.Ssn;
+
             tasks.Add(_contextFactory.UseReadOnlyContext(async ctx =>
             {
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-                var demographic = await demographicQuery
-                    .TagWith($"AccountHistoryReport-Demographics-{memberId}")
-                    .FirstOrDefaultAsync(d => d.BadgeNumber == memberId, cancellationToken);
-
                 // Get cumulative totals from TotalService for this year
                 var balanceSet = _totalService.GetTotalBalanceSet(ctx, year);
                 var memberBalance = await balanceSet
-                    .FirstOrDefaultAsync(b => b.Ssn == demographic!.Ssn, cancellationToken);
+                    .FirstOrDefaultAsync(b => b.Ssn == ssn, cancellationToken);
 
                 var distributions = _totalService.GetTotalDistributions(ctx, year);
                 var memberDistributions = await distributions
-                    .FirstOrDefaultAsync(d => d.Ssn == demographic!.Ssn, cancellationToken);
+                    .FirstOrDefaultAsync(d => d.Ssn == ssn, cancellationToken);
 
                 // Get vesting balance for this year
                 var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                    SearchBy.BadgeNumber, demographic!.BadgeNumber, year, cancellationToken);
+                    SearchBy.BadgeNumber, badgeNumber, year, cancellationToken);
 
                 // Get year-specific profit details for contributions, earnings, and forfeitures
                 var yearProfitDetails = await ctx.ProfitDetails
-                    .TagWith($"AccountHistoryReport-ProfitDetails-{demographic.BadgeNumber}-{year}")
-                    .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitYear == year)
+                    .TagWith($"AccountHistoryReport-ProfitDetails-{badgeNumber}-{year}")
+                    .Where(pd => pd.Ssn == ssn && pd.ProfitYear == year)
                     .ToListAsync(cancellationToken);
 
                 // Use shared extension methods for consistent aggregation logic
@@ -129,10 +156,10 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 var yearVestedBalance = vestingBalance?.VestedBalance ?? 0;
                 return new AccountHistoryReportResponse
                 {
-                    Id = demographic.Id,
-                    BadgeNumber = demographic.BadgeNumber,
-                    FullName = demographic.ContactInfo.FullName ?? string.Empty,
-                    Ssn = demographic.Ssn.MaskSsn(),
+                    Id = demographicId,
+                    BadgeNumber = badgeNumber,
+                    FullName = fullName,
+                    Ssn = ssn.MaskSsn(),
                     ProfitYear = year,
                     Contributions = yearContributions,
                     Earnings = yearEarnings,
@@ -279,7 +306,9 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
             var employee = await _employeeLookupService.GetMemberVestingAsync(new MasterInquiryMemberRequest()
             {
-                Id = firstResponse.Id, MemberType = 1, ProfitYear = (short)reportData.EndDate.Year
+                Id = firstResponse.Id,
+                MemberType = 1,
+                ProfitYear = (short)reportData.EndDate.Year
             }, cancellationToken);
 
             // Create the PDF report document
