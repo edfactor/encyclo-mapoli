@@ -5,7 +5,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DSMGrid, Pagination, SmartModal } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
-import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { ExecutiveHoursAndDollars, PagedReportResponse } from "../../../reduxstore/types";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
@@ -111,6 +112,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   const currentData = isModal ? modalResults : gridData;
   const currentPagination = isModal ? modalGridPagination : mainGridPagination;
   const sortEventHandler = currentPagination?.handleSortChange;
+  const gridMaxHeight = useDynamicGridHeight();
   // Pass canEdit to column definitions - editing requires page status "In Progress" AND ExecutiveAdministrator role
   const columnDefs = useMemo(
     () => GetManageExecutiveHoursAndDollarsColumns({ mini: isModal, canEdit }),
@@ -259,6 +261,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           preferenceKey={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
           isLoading={isSearching}
           handleSortChanged={sortEventHandler}
+          maxHeight={gridMaxHeight}
           providedOptions={{
             rowData: mutableRowData,
             columnDefs: columnDefs,
@@ -280,7 +283,11 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             onCellValueChanged: processEditedRow,
             getRowStyle: (params) => {
               // Rows with unsaved changes will have yellow color
-              if (!isModal && params.node.data && isRowStagedToSave((params.node.data as ExecutiveHoursAndDollars).badgeNumber)) {
+              if (
+                !isModal &&
+                params.node.data &&
+                isRowStagedToSave((params.node.data as ExecutiveHoursAndDollars).badgeNumber)
+              ) {
                 return { background: "lemonchiffon" };
               } else {
                 return { background: "white" };
