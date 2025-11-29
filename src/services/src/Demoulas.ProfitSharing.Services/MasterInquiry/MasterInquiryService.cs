@@ -323,6 +323,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(pd => pd.ProfitCodeId == req.ProfitCode.Value);
         }
 
+        // Apply Voids filter (PS-2253: Missing from optimized path)
+        if (req.Voids.HasValue && req.Voids.Value)
+        {
+            query = query.Where(pd => pd.CommentTypeId == CommentType.Constants.Voided.Id);
+        }
+
         // Apply SSN filter if provided (most selective)
         if (req.Ssn != 0)
         {
