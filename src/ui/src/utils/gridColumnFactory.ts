@@ -1,4 +1,4 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef, ICellRendererParams, ValueFormatterParams } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import {
   AgeColumnOptions,
@@ -315,6 +315,17 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
       }
 
       return viewBadgeLinkRenderer(dataValue, navigateFunction);
+    };
+  } else if (psnSuffix) {
+    // PS-2258: When not rendering as link but psnSuffix is enabled, show full PSN (badge + suffix)
+    column.valueFormatter = (params: ValueFormatterParams) => {
+      const badgeNumber = params.data?.badgeNumber;
+      const suffix = params.data?.psnSuffix;
+      if (badgeNumber == null || badgeNumber === 0) return "";
+      if (suffix != null && suffix > 0) {
+        return `${badgeNumber}${String(suffix).padStart(4, "0")}`;
+      }
+      return String(badgeNumber);
     };
   }
 

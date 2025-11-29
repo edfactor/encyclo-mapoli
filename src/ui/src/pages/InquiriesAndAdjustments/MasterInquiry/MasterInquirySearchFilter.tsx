@@ -98,10 +98,12 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     // profitYear should always start with this year
     const profitYear = useDecemberFlowProfitYear();
 
+    // PS-2258: Only auto-switch to beneficiaries when badge length indicates a beneficiary (>= 8 chars)
+    // Don't auto-switch to employees - let the user choose
     const determineCorrectMemberType = (badgeNum: string | undefined) => {
       if (!badgeNum) return "all";
-      if (badgeNum.length <= MAX_EMPLOYEE_BADGE_LENGTH) return "employees";
-      return "beneficiaries";
+      if (badgeNum.length > MAX_EMPLOYEE_BADGE_LENGTH) return "beneficiaries";
+      return "all"; // Don't force employee type, let user choose
     };
 
     const {
@@ -295,20 +297,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       </Grid>
     ));
 */
+    // PS-2258: Only auto-switch to beneficiaries when badge length indicates a beneficiary (>= 8 chars)
+    // Don't auto-switch to employees - let the user choose
     const handleBadgeNumberChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const badgeStr = e.target.value;
-        let memberType: string;
 
         if (badgeStr.length === 0) {
-          memberType = "all";
-        } else if (badgeStr.length >= 8) {
-          memberType = "beneficiaries";
-        } else {
-          memberType = "employees";
+          // Reset to all when cleared
+          setValue("memberType", "all");
+        } else if (badgeStr.length > MAX_EMPLOYEE_BADGE_LENGTH) {
+          // Only auto-switch to beneficiaries when badge is long enough
+          setValue("memberType", "beneficiaries");
         }
-
-        setValue("memberType", memberType as "all" | "employees" | "beneficiaries" | "none");
+        // Don't change memberType for shorter badge numbers - let user choose
       },
       [setValue]
     );
@@ -596,7 +598,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       [hasSocialSecurity, hasName, hasBadgeNumber]
     );
 
-    const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
+    // PS-2258: Only lock radio button when badge length indicates a beneficiary (>= 8 chars)
+    const isMemberTypeDisabled = badgeNumberValue != null && badgeNumberValue.length > MAX_EMPLOYEE_BADGE_LENGTH;
 
     // Determine if search button should be enabled
     const hasSearchCriteria = useMemo(() => {
