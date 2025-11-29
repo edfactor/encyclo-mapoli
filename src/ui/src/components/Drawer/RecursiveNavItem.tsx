@@ -49,7 +49,18 @@ export const RecursiveNavItem: FC<RecursiveNavItemProps> = ({ item, level, maxAu
   const isNavigable = item.url && item.url.length > 0;
   const currentPath = location.pathname.replace(/^\/+/, "");
   const itemPath = item.url?.replace(/^\/+/, "");
-  const isActive = currentPath === itemPath;
+  
+  // Check if this specific item is active (handles duplicate pages with same URL but different IDs)
+  const isActive = (() => {
+    if (currentPath !== itemPath) return false;
+    
+    const storedNavId = localStorage.getItem("navigationId");
+    if (storedNavId) {
+      return item.id === parseInt(storedNavId);
+    }
+    
+    return true;
+  })();
 
   // Check if this item or any descendant contains the active path
   const containsActivePath = useCallback(
