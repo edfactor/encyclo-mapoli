@@ -10,7 +10,7 @@ namespace Demoulas.ProfitSharing.Reporting.Core;
 public static class PdfUtilities
 {
     /// <summary>
-    /// Creates a standard company header with logo and title
+    /// Creates a standard company header with logo, centered title, and company address (3-column layout)
     /// </summary>
     /// <param name="container">IContainer to add header to</param>
     /// <param name="reportTitle">Title to display (e.g., "Profit Sharing Report")</param>
@@ -30,10 +30,14 @@ public static class PdfUtilities
                         // Left: Logo
                         row.ConstantItem(130).Element(c => ComposeLogoImage(c));
 
-                        // Right: Title and date
+                        // Center: Title and generated date
                         row.RelativeItem()
-                            .PaddingLeft(PdfReportConfiguration.Spacing.StandardGap)
+                            .AlignCenter()
+                            .AlignMiddle()
                             .Element(c => ComposeHeaderTextBlock(c, reportTitle));
+
+                        // Right: Company address
+                        row.ConstantItem(160).Element(c => ComposeCompanyAddressBlock(c));
                     });
             }
             else
@@ -44,8 +48,8 @@ public static class PdfUtilities
                     .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue);
             }
 
-            // Horizontal rule
-            column.Item().Height(1).PaddingBottom(PdfReportConfiguration.Spacing.StandardGap)
+            // Horizontal rule with extra spacing after header
+            column.Item().PaddingBottom(12).Height(1)
                 .Background(PdfReportConfiguration.BrandColors.BorderGray);
         });
     }
@@ -87,6 +91,20 @@ public static class PdfUtilities
                 .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
                 .Italic()
                 .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
+        });
+    }
+
+    /// <summary>
+    /// Composes the company address block for the header - RIGHT ALIGNED
+    /// </summary>
+    private static void ComposeCompanyAddressBlock(IContainer container)
+    {
+        container.AlignMiddle().AlignRight().Column(column =>
+        {
+            column.Item().AlignRight().Text("DEMOULAS SUPERMARKETS, INC.").FontSize(PdfReportConfiguration.FontSizes.FooterSize).Bold();
+            column.Item().AlignRight().Text("875 EAST STREET").FontSize(PdfReportConfiguration.FontSizes.FooterSize).Bold();
+            column.Item().AlignRight().Text("TEWKSBURY, MA 01876-1495").FontSize(PdfReportConfiguration.FontSizes.FooterSize).Bold();
+            column.Item().AlignRight().Text("PHONE 978-851-8000").FontSize(PdfReportConfiguration.FontSizes.FooterSize).Bold();
         });
     }
 
