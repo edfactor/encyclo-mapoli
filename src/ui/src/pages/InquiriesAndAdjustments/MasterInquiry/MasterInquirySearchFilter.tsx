@@ -98,10 +98,12 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     // profitYear should always start with this year
     const profitYear = useDecemberFlowProfitYear();
 
+    // PS-2258: Only auto-switch to beneficiaries when badge length indicates a beneficiary (>= 8 chars)
+    // Don't auto-switch to employees - let the user choose
     const determineCorrectMemberType = (badgeNum: string | undefined) => {
       if (!badgeNum) return "all";
-      if (badgeNum.length <= MAX_EMPLOYEE_BADGE_LENGTH) return "employees";
-      return "beneficiaries";
+      if (badgeNum.length > MAX_EMPLOYEE_BADGE_LENGTH) return "beneficiaries";
+      return "all"; // Don't force employee type, let user choose
     };
 
     const {
@@ -295,20 +297,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       </Grid>
     ));
 */
+    // PS-2258: Only auto-switch to beneficiaries when badge length indicates a beneficiary (>= 8 chars)
+    // Don't auto-switch to employees - let the user choose
     const handleBadgeNumberChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const badgeStr = e.target.value;
-        let memberType: string;
 
         if (badgeStr.length === 0) {
-          memberType = "all";
-        } else if (badgeStr.length >= 8) {
-          memberType = "beneficiaries";
-        } else {
-          memberType = "employees";
+          // Reset to all when cleared
+          setValue("memberType", "all");
+        } else if (badgeStr.length > MAX_EMPLOYEE_BADGE_LENGTH) {
+          // Only auto-switch to beneficiaries when badge is long enough
+          setValue("memberType", "beneficiaries");
         }
-
-        setValue("memberType", memberType as "all" | "employees" | "beneficiaries" | "none");
+        // Don't change memberType for shorter badge numbers - let user choose
       },
       [setValue]
     );
@@ -366,10 +368,10 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                     }
                   }
 
-                  // For dollar amount fields, only allow 0-9, ., and - characters
+                  // For dollar amount fields, only allow 0-9, ., and - characters (max 2 decimal places)
                   if (name === "contribution" || name === "earnings" || name === "forfeiture" || name === "payment") {
-                    // Allow negative numbers for all dollar amount fields
-                    if (value !== "" && !/^-?\d*\.?\d*$/.test(value)) {
+                    // Allow negative numbers for all dollar amount fields, limit to 2 decimal places
+                    if (value !== "" && !/^-?\d*\.?\d{0,2}$/.test(value)) {
                       return;
                     }
                   }
@@ -395,9 +397,13 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                     name === "payment"
                   ) {
                     // For dollar fields that allow negative, keep as string while typing (intermediate states)
-                    // Only convert to number when it's a complete valid number
+                    // Only convert to number when it's a complete valid number AND the string representation matches
                     const endsWithPeriod = value.endsWith(".");
-                    const isIntermediateState = value === "-" || value === "." || value === "-." || endsWithPeriod;
+                    // Check for trailing zeros after decimal (e.g., "234.0", "234.00", "1.10")
+                    // These should be kept as strings since Number("234.0").toString() === "234" loses precision
+                    const hasTrailingDecimalZero = /\.\d*0$/.test(value);
+                    const isIntermediateState =
+                      value === "-" || value === "." || value === "-." || endsWithPeriod || hasTrailingDecimalZero;
                     const isValidNumber = !isIntermediateState && !isNaN(Number(value));
                     parsedValue = isValidNumber ? Number(value) : value;
                   } else if (type === "number") {
@@ -592,7 +598,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       [hasSocialSecurity, hasName, hasBadgeNumber]
     );
 
-    const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
+    // PS-2258: Only lock radio button when badge length indicates a beneficiary (>= 8 chars)
+    const isMemberTypeDisabled = badgeNumberValue != null && badgeNumberValue.length > MAX_EMPLOYEE_BADGE_LENGTH;
 
     // Determine if search button should be enabled
     const hasSearchCriteria = useMemo(() => {

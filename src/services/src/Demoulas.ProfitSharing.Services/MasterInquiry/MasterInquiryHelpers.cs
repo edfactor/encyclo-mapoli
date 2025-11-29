@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.MasterInquiry;
@@ -16,6 +17,12 @@ public static class MasterInquiryHelpers
         ProfitCode.Constants.IncomingContributions.Id,
         ProfitCode.Constants.Incoming100PercentVestedEarnings.Id
     ];
+
+    /// <summary>
+    /// Payment profit codes - these are the codes where the Forfeiture column contains payment amounts.
+    /// Using a private static readonly to satisfy Sonar analyzer (S3887, S2386).
+    /// </summary>
+    private static readonly byte[] s_paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
     /// <summary>
     /// Applies comprehensive filtering to a master inquiry query based on request parameters.
@@ -100,11 +107,13 @@ public static class MasterInquiryHelpers
                 x.ProfitDetail != null && ContributionProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) && x.ProfitDetail.Forfeiture == req.ForfeitureAmount);
         }
 
+        // PS-2254: Fixed payment filter - must have ProfitDetail with payment profit code and matching forfeiture amount
         if (req.PaymentAmount.HasValue)
         {
             query = query.Where(x =>
-                (x.ProfitDetail == null || x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id) &&
-                (x.ProfitDetail == null || x.ProfitDetail.Forfeiture == req.PaymentAmount));
+                x.ProfitDetail != null &&
+                s_paymentProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) &&
+                x.ProfitDetail.Forfeiture == req.PaymentAmount);
         }
 
         // Filter for void records (comment type = Voided)

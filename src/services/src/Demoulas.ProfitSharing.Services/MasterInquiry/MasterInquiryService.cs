@@ -323,6 +323,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(pd => pd.ProfitCodeId == req.ProfitCode.Value);
         }
 
+        // Apply Voids filter (PS-2253: Missing from optimized path)
+        if (req.Voids.HasValue && req.Voids.Value)
+        {
+            query = query.Where(pd => pd.CommentTypeId == CommentType.Constants.Voided.Id);
+        }
+
         // Apply SSN filter if provided (most selective)
         if (req.Ssn != 0)
         {
@@ -339,19 +345,24 @@ public sealed class MasterInquiryService : IMasterInquiryService
             if (req.MemberType == 2) // Beneficiary only
             {
                 // For beneficiaries, query the Beneficiary table
-                // CRITICAL: Beneficiaries MUST have both BadgeNumber and PsnSuffix to uniquely identify
-                if (req.PsnSuffix is not > 0)
+                // PS-2258: Query by badge number, optionally filtered by PsnSuffix if provided
+                if (req.PsnSuffix is > 0)
                 {
-                    // Return empty query - beneficiary search requires PsnSuffix
-                    ssnFromBadge = ctx.ProfitDetails.Where(pd => false).Select(pd => pd.Ssn);
-                }
-                else
-                {
+                    // PsnSuffix provided - search for specific beneficiary
                     ssnFromBadge = ctx.Beneficiaries
                         .Where(b => b.BadgeNumber == req.BadgeNumber.Value && b.PsnSuffix == req.PsnSuffix.Value)
                         .Include(b => b.Contact)
                         .Select(b => b.Contact!.Ssn)
                         .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value} PsnSuffix {req.PsnSuffix}");
+                }
+                else
+                {
+                    // No PsnSuffix - search all beneficiaries for this badge number
+                    ssnFromBadge = ctx.Beneficiaries
+                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
+                        .Include(b => b.Contact)
+                        .Select(b => b.Contact!.Ssn)
+                        .TagWith($"MasterInquiry: Get SSN for all Beneficiaries with BadgeNumber {req.BadgeNumber.Value}");
                 }
             }
             else if (req.MemberType == 1) // Employee only
@@ -380,8 +391,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 }
                 else
                 {
-                    // No PsnSuffix provided - skip beneficiary search in this path
-                    beneficiarySSNs = ctx.ProfitDetails.Where(pd => false).Select(pd => pd.Ssn);
+                    // PS-2258: No PsnSuffix - search all beneficiaries for this badge number
+                    beneficiarySSNs = ctx.Beneficiaries
+                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
+                        .Include(b => b.Contact)
+                        .Select(b => b.Contact!.Ssn)
+                        .TagWith($"MasterInquiry: Get SSN for all Beneficiaries with BadgeNumber {req.BadgeNumber.Value}");
                 }
 
                 var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
