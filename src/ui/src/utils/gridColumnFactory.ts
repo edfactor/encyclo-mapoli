@@ -847,7 +847,7 @@ export const createZipColumn = (options: FormattableColumnOptions = {}): ColDef 
     colId = field,
     minWidth = 100,
     maxWidth,
-    alignment = "left",
+    alignment = "right",
     sortable = true,
     resizable = true,
     valueFormatter = (params) => {

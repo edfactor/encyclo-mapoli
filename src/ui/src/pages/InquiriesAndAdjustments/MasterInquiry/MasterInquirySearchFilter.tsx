@@ -366,10 +366,10 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                     }
                   }
 
-                  // For dollar amount fields, only allow 0-9, ., and - characters
+                  // For dollar amount fields, only allow 0-9, ., and - characters (max 2 decimal places)
                   if (name === "contribution" || name === "earnings" || name === "forfeiture" || name === "payment") {
-                    // Allow negative numbers for all dollar amount fields
-                    if (value !== "" && !/^-?\d*\.?\d*$/.test(value)) {
+                    // Allow negative numbers for all dollar amount fields, limit to 2 decimal places
+                    if (value !== "" && !/^-?\d*\.?\d{0,2}$/.test(value)) {
                       return;
                     }
                   }
@@ -395,9 +395,13 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                     name === "payment"
                   ) {
                     // For dollar fields that allow negative, keep as string while typing (intermediate states)
-                    // Only convert to number when it's a complete valid number
+                    // Only convert to number when it's a complete valid number AND the string representation matches
                     const endsWithPeriod = value.endsWith(".");
-                    const isIntermediateState = value === "-" || value === "." || value === "-." || endsWithPeriod;
+                    // Check for trailing zeros after decimal (e.g., "234.0", "234.00", "1.10")
+                    // These should be kept as strings since Number("234.0").toString() === "234" loses precision
+                    const hasTrailingDecimalZero = /\.\d*0$/.test(value);
+                    const isIntermediateState =
+                      value === "-" || value === "." || value === "-." || endsWithPeriod || hasTrailingDecimalZero;
                     const isValidNumber = !isIntermediateState && !isNaN(Number(value));
                     parsedValue = isValidNumber ? Number(value) : value;
                   } else if (type === "number") {
