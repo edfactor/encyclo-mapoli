@@ -9,7 +9,6 @@
     <PackageReference Include="Demoulas.Common.Data.Services" />
     <PackageReference Include="IdGen" />
     <PackageReference Include="JetBrains.Annotations" />
-    <PackageReference Include="JunitXml.TestLogger" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />

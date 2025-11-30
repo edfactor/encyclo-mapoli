@@ -52,9 +52,13 @@ definitions:
         - echo "Building solution..."
         - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
-        # Run tests against the fresh build
+        # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
+        # VSTest is no longer supported - must run the executable directly
         - echo "Running unit tests..."
-        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --no-build --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
+        - |
+          $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
+          Write-Host "Executing test runner: $testExe"
+          & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
 
       artifacts:
         - test-reports/**

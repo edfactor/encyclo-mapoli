@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
-using Xunit.Abstractions;
+using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Contracts.Response;
 

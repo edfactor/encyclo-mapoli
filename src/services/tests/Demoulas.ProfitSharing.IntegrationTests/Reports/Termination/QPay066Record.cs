@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 
 /// <summary>
 ///     Represents a single data row from the QPAY066 Termination - Profit Sharing report.

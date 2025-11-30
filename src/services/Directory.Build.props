@@ -22,7 +22,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- CS8034 is loading the analyzers more than once -->
-    <NoWarn>CA2227;CA1715;CA1000;IDE0062;IDE1006;IDE0090;VSSpell001;NU1507;NU1900;S1481;IDE0161;VSTHRD200;S3358;S1699</NoWarn>
+    <!-- xUnit1051: Suppress CancellationToken analyzer warning during migration - use TestContext.Current.CancellationToken gradually -->
+    <NoWarn>CA2227;CA1715;CA1000;IDE0062;IDE1006;IDE0090;VSSpell001;NU1507;NU1900;S1481;IDE0161;VSTHRD200;S3358;S1699;xUnit1051</NoWarn>
 
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>

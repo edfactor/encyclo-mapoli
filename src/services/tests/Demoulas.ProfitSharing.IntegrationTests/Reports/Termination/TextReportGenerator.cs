@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 
 /// <summary>
 ///     Produces a paper report identical to the QPAY066.pco program.

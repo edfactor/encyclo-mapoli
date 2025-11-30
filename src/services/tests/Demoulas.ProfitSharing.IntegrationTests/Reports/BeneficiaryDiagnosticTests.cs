@@ -1,9 +1,9 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
+using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 
