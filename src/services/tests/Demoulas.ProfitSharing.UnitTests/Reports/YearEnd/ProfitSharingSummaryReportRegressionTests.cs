@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -15,7 +15,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Shouldly;
-using Xunit.Abstractions;
+using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Net;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -13,7 +13,7 @@ using FastEndpoints;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using Xunit.Abstractions;
+using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.PayServices;
 

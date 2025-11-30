@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;

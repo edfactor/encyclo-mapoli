@@ -1,4 +1,4 @@
-﻿using static Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ReadyParserHelpers;
+using static Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ReadyParserHelpers;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
 

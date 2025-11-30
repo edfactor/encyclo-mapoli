@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Shouldly;
 

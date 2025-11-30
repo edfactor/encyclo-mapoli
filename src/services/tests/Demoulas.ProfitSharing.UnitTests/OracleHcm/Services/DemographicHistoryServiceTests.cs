@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Microsoft.Extensions.Logging;
 using Moq;

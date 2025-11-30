@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
@@ -49,6 +49,10 @@ public class ApiTestBase<TStartup> where TStartup : class
     {
         // Each test class gets its own FRESH factory with 6,500+ fake records
         MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
+
+        // Note: ASPNETCORE_ENVIRONMENT is set via TestModuleInitializer to ensure
+        // it's configured before any WebApplicationFactory or ASP.NET host is created.
+        // This is required for xUnit v3 / Microsoft Testing Platform compatibility.
 
         WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 

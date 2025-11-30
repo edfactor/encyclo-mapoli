@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Endpoints.Validation;
+using Demoulas.ProfitSharing.Endpoints.Validation;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using FluentValidation.TestHelper;
 using System.ComponentModel;

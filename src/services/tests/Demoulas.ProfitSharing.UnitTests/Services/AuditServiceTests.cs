@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Services.Audit;
 using Shouldly;

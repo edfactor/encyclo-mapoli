@@ -53,8 +53,9 @@ definitions:
         - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
         # Run tests against the fresh build
+        # Note: Uses Microsoft Testing Platform (MTP) with xUnit v3 - requires --project flag and extension options
         - echo "Running unit tests..."
-        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --no-build --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
+        - dotnet test --project src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --no-build --results-directory $env:REPORTS_PATH --report-junit --report-junit-filename junit.xml
 
       artifacts:
         - test-reports/**

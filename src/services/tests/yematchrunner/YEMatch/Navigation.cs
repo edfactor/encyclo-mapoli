@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 // OH BOY.  Copied from 
 // /Users/robertherrmann/prj/smart-profit-sharing/src/services/src/Demoulas.ProfitSharing.Data/Entities/Navigations/Navigation.cs

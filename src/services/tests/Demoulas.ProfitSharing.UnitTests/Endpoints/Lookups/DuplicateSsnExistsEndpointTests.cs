@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;

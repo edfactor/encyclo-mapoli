@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
+using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.QPAY129;
 

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Api;
@@ -18,7 +18,7 @@ using IdGen;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using Xunit.Abstractions;
+using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
