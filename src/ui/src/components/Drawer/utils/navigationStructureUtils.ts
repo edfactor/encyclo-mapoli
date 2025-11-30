@@ -71,6 +71,7 @@ export const getL0NavigationByTitle = (
 /**
  * Get L0 navigation item that contains a specific route
  * Useful for determining which menu bar item should be active
+ * For duplicate pages, uses stored navigation ID to find the correct L0 section
  */
 export const getL0NavigationForRoute = (
   navigationData: NavigationResponseDto | undefined,
@@ -79,8 +80,19 @@ export const getL0NavigationForRoute = (
   if (!navigationData?.navigation) return undefined;
 
   const cleanPath = pathname.replace(/^\/+/, "");
+  const storedNavId = localStorage.getItem("navigationId");
 
-  // Search each L0 item's descendants for the matching route
+  // If we have a stored navigation ID, find the L0 that contains that specific item
+  if (storedNavId) {
+    const targetId = parseInt(storedNavId);
+    for (const l0Item of navigationData.navigation.filter((item) => item.parentId === null)) {
+      if (containsId(l0Item, targetId)) {
+        return l0Item;
+      }
+    }
+  }
+
+  // Fallback: Search each L0 item's descendants for the matching route
   for (const l0Item of navigationData.navigation.filter((item) => item.parentId === null)) {
     if (containsRoute(l0Item, cleanPath)) {
       return l0Item;
@@ -88,6 +100,23 @@ export const getL0NavigationForRoute = (
   }
 
   return undefined;
+};
+
+/**
+ * Check if a navigation item or its descendants contain a specific ID
+ */
+const containsId = (item: NavigationDto, targetId: number): boolean => {
+  // Check if this item matches
+  if (item.id === targetId) {
+    return true;
+  }
+
+  // Recursively check children
+  if (item.items && item.items.length > 0) {
+    return item.items.some((child) => containsId(child, targetId));
+  }
+
+  return false;
 };
 
 /**

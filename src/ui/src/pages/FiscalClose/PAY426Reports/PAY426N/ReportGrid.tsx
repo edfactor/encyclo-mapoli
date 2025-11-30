@@ -9,6 +9,7 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../../../hooks/useDynamicGridHeight";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { RootState } from "../../../../reduxstore/store";
 import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
@@ -113,6 +114,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
     [handleNavigationForButton]
   );
 
+  const gridMaxHeight = useDynamicGridHeight();
+
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
 
@@ -159,6 +162,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
             preferenceKey="PAY426N_REPORT"
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
+            maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: data?.response?.results || [],
               columnDefs: columnDefs,
