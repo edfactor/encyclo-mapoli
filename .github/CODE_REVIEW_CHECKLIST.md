@@ -112,6 +112,8 @@ Review: **All sections** including documentation and branching
   _logger.LogInformation("Processing employee: {MaskedName}", maskedName);
   ```
 
+  **CRITICAL: ALL service methods with PII access MUST include masking in logs. No unmasked names, SSN, email, phone, or addresses should ever appear in logs.**
+
 - [ ] **Standardized name properties in DTOs**: Use consistent naming conventions for name fields
 
   ```csharp
@@ -126,6 +128,8 @@ Review: **All sections** including documentation and branching
   public string MemberName { get; set; }     // Non-standard
   public string DisplayName { get; set; }    // Ambiguous
   ```
+
+  **CRITICAL: ONLY use FullName. NEVER fallback to manual name concatenation like `LastName, FirstName` in DTOs or services. Always use the pre-computed FullName property.**
 
 - [ ] **Minimal claims extraction**: Only extract 'sub' (subject) from Okta JWT
 - [ ] **Read-only contexts used**: Use `UseReadOnlyContext()` for query-only operations
@@ -333,13 +337,20 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
   var demographicsByKey = demographics
       .ToDictionary(d => (d.Ssn, d.OracleHcmId), d => d);
 
-  // ❌ WRONG: SSN only (will throw duplicate key exception)
+  // ❌ WRONG: SSN only (will throw duplicate key exception at runtime)
   var demographicsByKey = demographics
-      .ToDictionary(d => d.Ssn, d => d);
+      .ToDictionary(d => d.Ssn, d => d);  // CRASH if duplicate SSNs exist
+
+  // ❌ ALSO WRONG: Async variant with SSN only - CAUSES RUNTIME CRASH
+  var totalBalances = await _totalService.GetTotalBalanceSet(ctx, request.ProfitYear)
+      .Where(tb => employeeSsns.Contains(tb.Ssn))
+      .ToDictionaryAsync(tb => tb.Ssn, cancellationToken);  // CRASH if duplicate SSNs
   ```
 
+  **CRITICAL: Using SSN alone as dictionary key WILL crash at runtime if duplicates exist. ALWAYS use composite key `(Ssn, Id)` or use `ToLookup()` for one-to-many relationships.**
+
 - [ ] **Guards present**: Check `OracleHcmId != 0` before dictionary operations
-- [ ] **`ToLookup` for one-to-many**: Use when duplicates expected
+- [ ] **`ToLookup` for one-to-many**: Use when duplicates expected (preferred for TotalBalance queries)
 
 ### Performance Patterns
 
@@ -438,6 +449,32 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **No inline styles**: For reusable patterns (create components instead)
 - [ ] **`tailwind.config.js`**: Extended for custom utilities
 - [ ] **Consistent spacing**: Use Tailwind spacing scale
+
+### AG Grid Configuration (CRITICAL)
+
+- [ ] **Grid filter disabled by default**: All column definitions must have `filter: false`
+
+  ```typescript
+  // ❌ CRITICAL WRONG: Enables all columns to be filterable
+  const cols: ColDef[] = Object.keys(sampleData).map((key) => ({
+    headerName: key.replace(/([A-Z])/g, " $1").trim(),
+    field: key,
+    sortable: true,
+    filter: true, // WRONG - enables filtering on every column
+    resizable: true,
+  }));
+
+  // ✅ RIGHT: Filters disabled, only sortable
+  const cols: ColDef[] = Object.keys(sampleData).map((key) => ({
+    headerName: key.replace(/([A-Z])/g, " $1").trim(),
+    field: key,
+    sortable: true,
+    filter: false, // CORRECT - no filtering by default
+    resizable: true,
+  }));
+  ```
+
+  **CRITICAL: AG Grid filters must be disabled by default on all columns. Always set `filter: false` unless there's a specific business requirement to enable filtering.**
 
 ### Validation
 
