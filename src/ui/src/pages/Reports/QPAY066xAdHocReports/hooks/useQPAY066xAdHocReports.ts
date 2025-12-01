@@ -10,7 +10,7 @@ import {
   useLazyGetBreakdownByStoreTotalsQuery
 } from "reduxstore/api/YearsEndApi";
 import { SortedPaginationRequestDto } from "../../../../types/common/api";
-import { BreakdownByStoreEmployee } from "../QPAY066xAdHocGridColumns";
+import { BreakdownByStoreEmployee } from "../../../../types/reports/breakdown";
 import reports from "../availableQPAY066xReports";
 
 export interface QPAY066xSearchParams {
