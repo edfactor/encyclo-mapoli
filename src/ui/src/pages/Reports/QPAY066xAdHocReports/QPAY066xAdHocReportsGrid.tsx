@@ -9,13 +9,14 @@ import {
   TableRow,
   Typography
 } from "@mui/material";
+import { ColDef } from "ag-grid-community";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
-import { useGridPagination } from "../../../hooks/useGridPagination";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
-import { GetQPAY066xAdHocGridColumns } from "./QPAY066xAdHocGridColumns";
+import { useGridPagination } from "../../../hooks/useGridPagination";
+import { GetQPAY066xAdHocCommonGridColumns } from "./QPAY066xAdHocGridColumns";
 
 interface QPAY066xAdHocReportsGridProps {
   reportTitle: string;
@@ -73,9 +74,13 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
     };
   }, [breakdownByStoreTotals]);
 
-  const columnDefs = useMemo(() => {
-    return GetQPAY066xAdHocGridColumns();
-  }, []);
+
+  const columnDefs = (reportType: string): ColDef[] => {
+    
+    
+    
+    return GetQPAY066xAdHocCommonGridColumns();
+  };
 
   const rowData = useMemo(() => {
     // Check both locations - data location depends on storeManagement flag

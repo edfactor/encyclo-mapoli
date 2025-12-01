@@ -2,14 +2,17 @@ import { ColDef } from "ag-grid-community";
 import {
   createAgeColumn,
   createBadgeColumn,
+  createCountColumn,
   createCurrencyColumn,
   createDateColumn,
   createHoursColumn,
   createNameColumn,
-  createPercentageColumn
+  createPercentageColumn,
+  createStatusColumn
 } from "../../../utils/gridColumnFactory";
 
-export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
+
+export const GetQPAY066xAdHocCommonGridColumns = (): ColDef[] => [
   createBadgeColumn({}),
   createNameColumn({
     field: "fullName"
@@ -20,14 +23,6 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
     minWidth: 130
   }),
   createCurrencyColumn({
-    headerName: "Beneficiary Allocation",
-    field: "beneficiaryAllocation"
-  }),
-  createCurrencyColumn({
-    headerName: "Distribution Amount",
-    field: "distributions"
-  }),
-  createCurrencyColumn({
     headerName: "Forfeit",
     field: "forfeitures"
   }),
@@ -36,28 +31,52 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
     field: "endingBalance"
   }),
   createCurrencyColumn({
-    headerName: "Vesting Balance",
+    headerName: "Vested Balance",
     field: "vestedAmount"
-  }),
-  createDateColumn({
-    headerName: "Term Date",
-    field: "terminationDate",
-    minWidth: 100
   }),
   createHoursColumn({
     headerName: "YTD Hours",
     field: "profitShareHours",
     minWidth: 90
-  }),
-  createPercentageColumn({
-    headerName: "Vested",
-    field: "vestedPercentage"
-  }),
-  createAgeColumn({}),
-  // This is the age at termination
-  // FIXME: This logic should be moved to the back end when more work is done on this page
-  createAgeColumn({
-    headerName: "Age at Term",
+  })
+];
+
+export const GetQPAY066xDistributionAmountColumn = (field: string): ColDef => {
+  return createCurrencyColumn({
+    headerName: "Distribution Amount",
+    field: field || "distributions"
+  });
+}
+
+export const GetQPAY066xBeneficiaryAllocationColumn = (field: string): ColDef => {
+  return createCurrencyColumn({
+    headerName: "Beneficiary Allocation",
+    field: field || "beneficiaryAllocation"
+  });
+}
+
+export const GetQPAY066xTerminationDateColumn = (field: string): ColDef => {
+  return createDateColumn({
+    headerName: "Termination Date",
+    field: field || "terminationDate"
+  });
+}
+
+export const GetQPAY066xVestedBalanceColumn = (field: string): ColDef => {
+  return createPercentageColumn({
+    headerName: "Vested Balance",
+    field: field || "vestedAmount"
+  });
+}
+
+export const GetQPAY066xAgeColumn = (): ColDef => {
+  return createAgeColumn({});
+}
+
+// FIXME: This calculation should be done on the back end
+export const GetQPAY066xAgeAtTerminationColumn = (): ColDef => {
+  return createAgeColumn({
+    headerName: "Age at Termination",
     valueGetter: (params) => {
       const dob = params.data?.["dateOfBirth"];
       const termDate = params.data?.["terminationDate"];
@@ -71,5 +90,35 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
       }
       return age;
     }
-  })
-];
+  });
+}
+
+export const GetQPAY066xEnrollmentCodeColumn = (field: string): ColDef => {
+  return createCountColumn({
+    headerName: "EC",
+    field: field || "enrollmentCode"
+  });
+}
+
+export const GetQPAY066xPSYearsColumn = (field: string): ColDef => {
+  return createCountColumn({
+    headerName: "PS Years",
+    field: field || "profitShareYears"
+  });
+}
+
+export const GetQPAY066xTerminationCodeColumn = (field: string): ColDef => {
+  return createStatusColumn({
+    headerName: "Termination Code",
+    field: field || "terminationCode"
+  });
+}
+
+export const GetQPAY066xInactiveDateColumn = (field: string): ColDef => {
+  return createDateColumn({
+    headerName: "Inactive Date",
+    field: field || "inactiveDate"
+  });
+}
+
+
