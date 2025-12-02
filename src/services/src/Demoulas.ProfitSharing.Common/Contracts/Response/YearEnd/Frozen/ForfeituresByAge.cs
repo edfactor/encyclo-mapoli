@@ -16,7 +16,7 @@ public sealed record ForfeituresByAge : ReportResponseBase<ForfeituresByAgeDetai
 
     public FrozenReportsByAgeRequest.Report ReportType { get; init; }
 
-    public required short TotalEmployees { get; init; }
+    public required ushort TotalEmployees { get; init; }
     public required decimal TotalAmount { get; init; }
 
 
