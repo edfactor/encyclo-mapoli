@@ -79,20 +79,12 @@ export const store = configureStore({
     )
   },
 
-  middleware: (getDefaultMiddleware) => {
-    let middlewareChain = getDefaultMiddleware({ serializableCheck: false })
-      .concat(rtkQueryErrorToastMiddleware(true));
-
-    // Only add logger middleware in dev/QA
-    if (EnvironmentUtils.isDevelopmentOrQA) {
-      middlewareChain = middlewareChain.concat(apiLoggerMiddleware);
-    }
-
-    // Add all API middleware in a single operation
-    return middlewareChain.concat(
-      API_INSTANCES.map(api => api.middleware)
-    );
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  middleware: (getDefaultMiddleware: any) =>
+    getDefaultMiddleware({ serializableCheck: false })
+      .concat(rtkQueryErrorToastMiddleware(true))
+      .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
+      .concat(API_INSTANCES.map(api => api.middleware))
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

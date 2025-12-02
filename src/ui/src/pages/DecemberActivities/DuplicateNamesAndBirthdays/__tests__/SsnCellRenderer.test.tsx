@@ -1,11 +1,10 @@
-import { configureStore, PreloadedState } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as YearsEndApi from "../../../../reduxstore/api/YearsEndApi";
 import securityReducer from "../../../../reduxstore/slices/securitySlice";
-import { RootState } from "../../../../reduxstore/store";
-import { DuplicateNameAndBirthday } from "../../../../types";
+import { DuplicateNameAndBirthday, ImpersonationRoles } from "../../../../types";
 import EnvironmentUtils from "../../../../utils/environmentUtils";
 import SsnCellRenderer from "../SsnCellRenderer";
 
@@ -29,23 +28,53 @@ vi.mock("../../../../utils/environmentUtils");
 // Default test data
 const DEFAULT_TEST_DATA: DuplicateNameAndBirthday = {
   demographicId: 12345,
+  badgeNumber: 12345,
   ssn: "***-**-5181",
-  firstName: "John",
-  lastName: "Doe",
-  birthDate: new Date("1990-01-15"),
-  duplicateCount: 2,
-  lastModified: new Date()
+  name: "Doe, John",
+  dateOfBirth: "1990-01-15",
+  address: {
+    street: "123 Main St",
+    street2: null,
+    city: "Boston",
+    state: "MA",
+    postalCode: "02101",
+    countryIso: "US"
+  },
+  years: 10,
+  hireDate: "2014-01-15",
+  terminationDate: null,
+  status: "Active",
+  storeNumber: 1,
+  count: 1,
+  netBalance: 5000,
+  hoursCurrentYear: 2080,
+  incomeCurrentYear: 50000,
+  employmentStatusName: "Active"
 };
 
 /**
  * Creates a mock Redux store with security state
  */
-function createMockStore(preloadedState?: PreloadedState<RootState>) {
+function createMockStore(securityState: Partial<{
+  userPermissions: string[];
+  impersonating: string[];
+}> = {}) {
   return configureStore({
     reducer: {
       security: securityReducer
     },
-    preloadedState: preloadedState as PreloadedState<RootState>
+    preloadedState: {
+      security: {
+        token: null,
+        userGroups: [],
+        userRoles: [],
+        userPermissions: securityState.userPermissions ?? [],
+        username: "",
+        performLogout: false,
+        appUser: null,
+        impersonating: (securityState.impersonating ?? []) as ImpersonationRoles[]
+      }
+    }
   });
 }
 
@@ -71,8 +100,6 @@ function setupEnvironmentMocks(
 }
 
 function setupYearsEndApiMocks() {
-  const mockUtils = vi.mocked(YearsEndApi, true);
-
   // Create a mutation function that when called returns an object with an .unwrap() method
   // This is how RTK Query mutations work - they return a result object with unwrap() and other status info
   // We use a microtask (Promise.resolve) to ensure the state update happens asynchronously
@@ -82,7 +109,8 @@ function setupYearsEndApiMocks() {
     };
   });
 
-  mockUtils.useUnmaskSsnMutation = vi.fn().mockReturnValue([mockUnmask, { isLoading: false, isError: false }]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([mockUnmask as any, { isLoading: false, isError: false, reset: vi.fn() }]);
   return mockUnmask;
 }
 
@@ -116,14 +144,7 @@ describe("Permission-Based UI Visibility", () => {
   it("PS-2098: Should NOT display eye icon when user lacks SsnUnmasking permission (Production)", () => {
     // Arrange
     const store = createMockStore({
-      security: {
-        userPermissions: [],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: []
     });
 
     // Act
@@ -141,14 +162,7 @@ describe("Permission-Based UI Visibility", () => {
   it("PS-2098: Should display eye icon when user has SsnUnmasking permission (Production)", () => {
     // Arrange
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     // Act
@@ -167,14 +181,7 @@ describe("Permission-Based UI Visibility", () => {
     // Arrange
     setupEnvironmentMocks(true); // Dev/QA
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     // Act
@@ -193,14 +200,8 @@ describe("Permission-Based UI Visibility", () => {
     // Arrange
     setupEnvironmentMocks(true); // Dev/QA
     const store = createMockStore({
-      security: {
-        userPermissions: [],
-        impersonating: ["SSN-Unmasking"],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: [],
+      impersonating: ["SSN-Unmasking"]
     });
 
     // Act
@@ -219,14 +220,8 @@ describe("Permission-Based UI Visibility", () => {
     // Arrange
     setupEnvironmentMocks(false); // Production
     const store = createMockStore({
-      security: {
-        userPermissions: [],
-        impersonating: ["SSN-Unmasking"],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: [],
+      impersonating: ["SSN-Unmasking"]
     });
 
     // Act
@@ -248,14 +243,7 @@ describe("SSN Display", () => {
   it("PS-2098: Should display masked SSN by default", () => {
     // Arrange
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     // Act
@@ -275,14 +263,7 @@ describe("SSN Display", () => {
     try {
       setupYearsEndApiMocks();
       const store = createMockStore({
-        security: {
-          userPermissions: ["SSN-Unmasking"],
-          impersonating: [],
-          user: null,
-          roles: [],
-          isLoading: false,
-          error: null
-        }
+        userPermissions: ["SSN-Unmasking"]
       });
 
       render(
@@ -312,14 +293,7 @@ describe("Auto-Revert Timer", () => {
     setupEnvironmentMocks(true); // Dev/QA - 60 second timeout
     setupYearsEndApiMocks();
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     render(
@@ -357,14 +331,7 @@ describe("Auto-Revert Timer", () => {
     setupEnvironmentMocks(false, true); // UAT - 5 minute timeout
     setupYearsEndApiMocks();
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     render(
@@ -401,14 +368,7 @@ describe("Auto-Revert Timer", () => {
     // Arrange
     setupYearsEndApiMocks();
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     const { unmount } = render(
@@ -453,18 +413,10 @@ describe("Loading States", () => {
     const mockUnmask = vi.fn().mockReturnValue({
       unwrap: () => unmaskedPromise
     });
-    const mockUtils = vi.mocked(YearsEndApi, true);
-    mockUtils.useUnmaskSsnMutation = vi.fn().mockReturnValue([mockUnmask, { isLoading: false, isError: false }]);
+    vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([mockUnmask, { isLoading: false, isError: false, reset: vi.fn() }]);
 
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     render(
@@ -489,14 +441,7 @@ describe("Loading States", () => {
     // Arrange
     setupYearsEndApiMocks();
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     render(
@@ -523,18 +468,10 @@ describe("Error Handling", () => {
     const mockUnmask = vi.fn().mockReturnValue({
       unwrap: () => Promise.reject(new Error("API Error"))
     });
-    const mockUtils = vi.mocked(YearsEndApi, true);
-    mockUtils.useUnmaskSsnMutation = vi.fn().mockReturnValue([mockUnmask, { isLoading: false, isError: false }]);
+    vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([mockUnmask, { isLoading: false, isError: false, reset: vi.fn() }]);
 
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     render(
@@ -563,18 +500,10 @@ describe("Error Handling", () => {
         .mockReturnValueOnce({
           unwrap: () => Promise.resolve({ unmaskedSsn: "700-00-5181" })
         });
-      const mockUtils = vi.mocked(YearsEndApi, true);
-      mockUtils.useUnmaskSsnMutation = vi.fn().mockReturnValue([mockUnmask, { isLoading: false, isError: false }]);
+      vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([mockUnmask, { isLoading: false, isError: false, reset: vi.fn() }]);
 
       const store = createMockStore({
-        security: {
-          userPermissions: ["SSN-Unmasking"],
-          impersonating: [],
-          user: null,
-          roles: [],
-          isLoading: false,
-          error: null
-        }
+        userPermissions: ["SSN-Unmasking"]
       });
 
       render(
@@ -609,14 +538,7 @@ describe("Accessibility", () => {
   it("PS-2098: Should have accessible button with proper tooltip", () => {
     // Arrange
     const store = createMockStore({
-      security: {
-        userPermissions: ["SSN-Unmasking"],
-        impersonating: [],
-        user: null,
-        roles: [],
-        isLoading: false,
-        error: null
-      }
+      userPermissions: ["SSN-Unmasking"]
     });
 
     // Act
@@ -638,14 +560,7 @@ describe("Accessibility", () => {
     try {
       setupYearsEndApiMocks();
       const store = createMockStore({
-        security: {
-          userPermissions: ["SSN-Unmasking"],
-          impersonating: [],
-          user: null,
-          roles: [],
-          isLoading: false,
-          error: null
-        }
+        userPermissions: ["SSN-Unmasking"]
       });
 
       render(
@@ -676,14 +591,7 @@ describe("Component Integration", () => {
     try {
       setupYearsEndApiMocks();
       const store = createMockStore({
-        security: {
-          userPermissions: ["SSN-Unmasking"],
-          impersonating: [],
-          user: null,
-          roles: [],
-          isLoading: false,
-          error: null
-        }
+        userPermissions: ["SSN-Unmasking"]
       });
 
       const testData = { ...DEFAULT_TEST_DATA, demographicId: 99999 };
@@ -718,14 +626,7 @@ describe("Component Integration", () => {
     try {
       setupYearsEndApiMocks();
       const store = createMockStore({
-        security: {
-          userPermissions: ["SSN-Unmasking"],
-          impersonating: [],
-          user: null,
-          roles: [],
-          isLoading: false,
-          error: null
-        }
+        userPermissions: ["SSN-Unmasking"]
       });
 
       render(
