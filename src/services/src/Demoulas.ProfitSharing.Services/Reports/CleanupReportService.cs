@@ -184,8 +184,10 @@ public class CleanupReportService : ICleanupReportService
                                      !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                                       // PROFIT_DETAIL.profitYear <--- is the year selector 
                                       // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
-                                      (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && pd.MonthToDate >= startDate.Month)) &&
-                                      (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && pd.MonthToDate <= endDate.Month)) &&
+                                      // PS-2275: MonthToDate=0 indicates year-level records that should always be included for the year
+                                      // COBOL (QPAY129.pco) only applies month filtering when START-MONTH > 0 OR END-MONTH > 0
+                                      (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && (pd.MonthToDate == 0 || pd.MonthToDate >= startDate.Month))) &&
+                                      (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && (pd.MonthToDate == 0 || pd.MonthToDate <= endDate.Month))) &&
                                       !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)) &&
                                       // State filter - apply if specified (supports multiple states)
                                       (req.States == null || req.States.Length == 0 || req.States.Contains(pd.CommentRelatedState)) &&

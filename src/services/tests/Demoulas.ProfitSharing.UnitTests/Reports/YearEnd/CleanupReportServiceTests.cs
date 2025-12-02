@@ -501,6 +501,150 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     }
 
     [Fact]
+    [Description("PS-2275 : Distributions and Forfeitures should include MonthToDate=0 records (year-level records)")]
+    public async Task GetDistributionsAndForfeitures_IncludesMonthToDateZeroRecords()
+    {
+        // Arrange
+        decimal sampleDistribution = 1234.56m;
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        // Use last year to avoid any current year edge cases
+        var testYear = (short)(DateTime.Now.Year - 1);
+        var req = new DistributionsAndForfeituresRequest
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            StartDate = new DateOnly(testYear, 1, 1),  // January 1 (month = 1)
+            EndDate = new DateOnly(testYear, 12, 31)   // December 31 (month = 12)
+        };
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            // Clear out existing data to isolate test
+            foreach (var dem in ctx.Demographics)
+            {
+                dem.Ssn = -1;
+            }
+
+            foreach (var ben in ctx.Beneficiaries.Include(b => b.Contact))
+            {
+                ben.Contact!.Ssn = -1;
+                ben.PsnSuffix = -1;
+            }
+
+            await ctx.SaveChangesAsync(CancellationToken.None);
+        });
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            // Setup a demographic with known SSN
+            var demographic = await ctx.Demographics.FirstAsync(CancellationToken.None);
+            demographic.Ssn = 2275001; // Unique SSN for this test
+
+            // Create a ProfitDetail record with MonthToDate = 0 (year-level record)
+            // This is the bug scenario - these records were being excluded when startDate.Month = 1
+            var profitDetail = await ctx.ProfitDetails.FirstAsync(CancellationToken.None);
+            profitDetail.ProfitYear = testYear;
+            profitDetail.ProfitYearIteration = 0;
+            profitDetail.ProfitCodeId = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id; // Code 1 = distribution
+            profitDetail.Forfeiture = sampleDistribution;
+            profitDetail.MonthToDate = 0;  // <-- KEY: MonthToDate = 0 indicates year-level record
+            profitDetail.YearToDate = testYear;
+            profitDetail.FederalTaxes = 100;
+            profitDetail.StateTaxes = 50;
+            profitDetail.TaxCodeId = '7';
+            profitDetail.Ssn = demographic.Ssn;
+            profitDetail.DistributionSequence = 2275;
+            profitDetail.CommentTypeId = null; // Not a transfer/QDRO
+
+            await ctx.SaveChangesAsync(CancellationToken.None);
+        });
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert - MonthToDate=0 record should be included (this failed before PS-2275 fix)
+        response.Result.ShouldNotBeNull();
+        response.Result.Response.Results.Count().ShouldBe(1, "MonthToDate=0 records should be included in year-level queries");
+        response.Result.Response.Results.First().DistributionAmount.ShouldBe(sampleDistribution);
+        response.Result.DistributionTotal.ShouldBe(sampleDistribution);
+
+        _testOutputHelper.WriteLine($"PS-2275 Fix Verified: MonthToDate=0 record included with distribution amount {sampleDistribution:C}");
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    [Fact]
+    [Description("PS-2275 : Distributions and Forfeitures should correctly filter MonthToDate=0 records for partial year queries")]
+    public async Task GetDistributionsAndForfeitures_MonthToDateZero_IncludedInPartialYearQueries()
+    {
+        // Arrange - Test that MonthToDate=0 records are included even for partial year queries
+        // This tests the edge case where someone queries March through June, MonthToDate=0 should still be included
+        decimal sampleDistribution = 7890.12m;
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        var testYear = (short)(DateTime.Now.Year - 1);
+        var req = new DistributionsAndForfeituresRequest
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            StartDate = new DateOnly(testYear, 3, 1),  // March (month = 3)
+            EndDate = new DateOnly(testYear, 6, 30)    // June (month = 6)
+        };
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            // Clear out existing data to isolate test
+            foreach (var dem in ctx.Demographics)
+            {
+                dem.Ssn = -1;
+            }
+
+            foreach (var ben in ctx.Beneficiaries.Include(b => b.Contact))
+            {
+                ben.Contact!.Ssn = -1;
+                ben.PsnSuffix = -1;
+            }
+
+            await ctx.SaveChangesAsync(CancellationToken.None);
+        });
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var demographic = await ctx.Demographics.FirstAsync(CancellationToken.None);
+            demographic.Ssn = 2275002;
+
+            var profitDetail = await ctx.ProfitDetails.FirstAsync(CancellationToken.None);
+            profitDetail.ProfitYear = testYear;
+            profitDetail.ProfitYearIteration = 0;
+            profitDetail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id; // Code 2 = forfeiture
+            profitDetail.Forfeiture = sampleDistribution;
+            profitDetail.MonthToDate = 0;  // Year-level record
+            profitDetail.YearToDate = testYear;
+            profitDetail.FederalTaxes = 0;
+            profitDetail.StateTaxes = 0;
+            profitDetail.Ssn = demographic.Ssn;
+            profitDetail.DistributionSequence = 2275;
+            profitDetail.CommentTypeId = null;
+
+            await ctx.SaveChangesAsync(CancellationToken.None);
+        });
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert - MonthToDate=0 should be included even in partial year queries (year-level records apply to entire year)
+        response.Result.ShouldNotBeNull();
+        response.Result.Response.Results.Count().ShouldBe(1, "MonthToDate=0 records should be included in partial year queries");
+        response.Result.Response.Results.First().ForfeitAmount.ShouldBe(sampleDistribution);
+        response.Result.ForfeitureTotal.ShouldBe(sampleDistribution);
+
+        _testOutputHelper.WriteLine($"PS-2275 Partial Year Fix Verified: MonthToDate=0 record included with forfeiture amount {sampleDistribution:C}");
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    [Fact]
     [Description("PS-1731 : Distributions and Forfeitures returns Result<T> pattern and handles successful case")]
     public async Task GetDistributionsAndForfeitures_ReturnsResultPattern()
     {
