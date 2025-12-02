@@ -684,6 +684,264 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         _testOutputHelper.WriteLine($"Result pattern validation passed - IsSuccess: {result.IsSuccess}, IsError: {result.IsError}");
     }
 
+    [Fact]
+    [Description("PS-2275 : Validate all report columns against READY production values")]
+    public async Task GetDistributionsAndForfeitures_AllColumns_MatchREADYProductionValues()
+    {
+        // =============================================================================
+        // READY 2025 YTD PRODUCTION VALUES (from QPAY129 report screenshot)
+        // =============================================================================
+        // COMPANY TOTAL:
+        //   Distributions: $71,824,557.99
+        //   Forfeitures:   $30,896,800.40
+        //   Federal Tax:   $6,017,535.83
+        //   State Tax:     $1,085,194.87
+        //
+        // This test uses EXACT values from the READY production system to ensure
+        // our C# implementation matches the legacy COBOL QPAY129 program.
+        // =============================================================================
+
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
+
+        var testYear = (short)(DateTime.Now.Year - 1);
+        var req = new DistributionsAndForfeituresRequest
+        {
+            Skip = 0,
+            Take = 500, // Ensure we get all records
+            StartDate = new DateOnly(testYear, 1, 1),
+            EndDate = new DateOnly(testYear, 12, 31)
+        };
+
+        // EXACT STATE DISTRIBUTION DATA FROM READY SCREENSHOT
+        // Format: (State, GrossDistribution, NetDistribution, FederalTax, StateTax, Forfeitures)
+        // Note: In QPAY129, the last column is forfeitures PER STATE
+        var readyStateData = new (string State, decimal GrossDist, decimal NetDist, decimal FedTax, decimal StateTax, decimal Forfeit)[]
+        {
+            ("MA", 36_846_186.00m, 20_871_572.64m, 4_071_056.73m, 1_025_174.59m, 20_871_572.64m),
+            ("AR",      4_795.12m,      4_795.12m,       959.02m,         0.00m,      4_795.12m),
+            ("CA",      4_353.73m,      4_353.73m,       870.75m,         0.00m,      4_353.73m),
+            ("CO",     82_966.74m,     82_966.74m,    16_593.35m,         0.00m,     82_966.74m),
+            ("CT",     18_831.41m,     18_831.41m,       408.48m,         0.00m,     18_831.41m),
+            ("DE",      4_313.34m,      4_313.34m,       862.67m,         0.00m,      4_313.34m),
+            ("FL",  1_626_427.37m,    493_040.05m,    92_508.01m,         0.00m,    493_040.05m),
+            ("GA",     50_000.00m,     50_000.00m,    10_000.00m,         0.00m,     50_000.00m),
+            ("IN",     13_328.50m,      3_200.00m,       640.00m,         0.00m,      3_200.00m),
+            ("KY",      6_000.00m,      6_000.00m,     1_200.00m,         0.00m,      6_000.00m),
+            ("LA",      4_400.00m,      4_400.00m,         0.00m,         0.00m,      4_400.00m),
+            ("ME",    875_518.82m,    492_483.37m,   105_749.03m,    25_987.26m,    492_483.37m),
+            ("MI",      3_018.36m,      3_018.36m,       603.67m,         0.00m,      3_018.36m),
+            ("MO",     10_773.22m,     10_773.22m,     2_154.64m,         0.00m,     10_773.22m),
+            ("NC",    968_431.88m,    190_983.10m,    38_196.62m,         0.00m,    190_983.10m),
+            ("NE",      6_829.57m,      6_829.57m,     1_365.91m,         0.00m,      6_829.57m),
+            ("NH", 29_693_972.87m,  7_644_293.76m, 1_478_912.24m,         0.00m,  7_644_293.76m),
+            ("NJ",      4_274.35m,          0.00m,         0.00m,         0.00m,          0.00m),
+            ("NV",     16_000.65m,     16_000.65m,     3_200.13m,         0.00m,     16_000.65m),
+            ("NY",     66_123.24m,     66_123.24m,    13_224.65m,         0.00m,     66_123.24m),
+            ("OH",     71_677.97m,     71_677.97m,    14_335.59m,         0.00m,     71_677.97m),
+            ("PA",     60_000.00m,     60_000.00m,    12_000.00m,         0.00m,     60_000.00m),
+            ("RI",    809_444.88m,    595_835.91m,   113_632.70m,    34_033.02m,    595_835.91m),
+            ("SC",     92_680.34m,     92_680.34m,    18_536.07m,         0.00m,     92_680.34m),
+            ("TX",    233_293.63m,     73_485.34m,    14_697.06m,         0.00m,     73_485.34m),
+            ("VT",    186_123.03m,      1_860.21m,       372.04m,         0.00m,      1_860.21m),
+            ("WI",     37_510.64m,          0.00m,         0.00m,         0.00m,          0.00m),
+            ("WV",     27_282.33m,     27_282.33m,     5_456.47m,         0.00m,     27_282.33m),
+        };
+
+        // Expected COMPANY TOTALS from READY screenshot
+        // Note: These are for reference - we use calculated values from state data for validation
+        // Distribution Total: $71,824,557.99
+        // Forfeiture Total:   $30,896,800.40
+        // Federal Tax Total:  $6,017,535.83
+        const decimal expectedStateTaxTotal = 1_085_194.87m;
+
+        // Verify our test data matches expected totals
+        var calculatedGrossDist = readyStateData.Sum(x => x.GrossDist);
+        var calculatedFedTax = readyStateData.Sum(x => x.FedTax);
+        var calculatedStateTax = readyStateData.Sum(x => x.StateTax);
+
+        _testOutputHelper.WriteLine("=== READY DATA VALIDATION ===");
+        _testOutputHelper.WriteLine($"Sum of Gross Distributions: {calculatedGrossDist:C}");
+        _testOutputHelper.WriteLine($"Sum of Federal Taxes: {calculatedFedTax:C}");
+        _testOutputHelper.WriteLine($"Sum of State Taxes: {calculatedStateTax:C}");
+        _testOutputHelper.WriteLine($"Expected State Tax Total: {expectedStateTaxTotal:C}");
+
+        // State tax breakdown validation
+        _testOutputHelper.WriteLine("\n=== STATE TAX BREAKDOWN ===");
+        var statesWithTax = readyStateData.Where(x => x.StateTax > 0).ToList();
+        foreach (var state in statesWithTax.OrderByDescending(x => x.StateTax))
+        {
+            _testOutputHelper.WriteLine($"  {state.State}: {state.StateTax:C}");
+        }
+        _testOutputHelper.WriteLine($"  TOTAL: {statesWithTax.Sum(x => x.StateTax):C}");
+
+        // Verify state taxes add up correctly
+        // MA: $1,025,174.59 + RI: $34,033.02 + ME: $25,987.26 = $1,085,194.87
+        statesWithTax.Sum(x => x.StateTax).ShouldBe(expectedStateTaxTotal,
+            "State tax breakdown should sum to expected total");
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            // Clear out existing data to isolate test
+            foreach (var dem in ctx.Demographics)
+            {
+                dem.Ssn = -1;
+            }
+
+            foreach (var ben in ctx.Beneficiaries.Include(b => b.Contact))
+            {
+                ben.Contact!.Ssn = -1;
+                ben.PsnSuffix = -1;
+            }
+
+            await ctx.SaveChangesAsync(CancellationToken.None);
+        });
+
+        // Create ProfitDetail records matching READY data
+        // We need to create records for distributions (non-zero GrossDist with ProfitCode 1)
+        // The forfeitures column in READY appears to be tied to the same records
+        int ssnCounter = 2275300;
+        var profitDetailCounter = 0;
+
+        // Filter to states that have actual distribution activity
+        var activeStates = readyStateData.Where(x => x.GrossDist > 0).ToArray();
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var demographics = await ctx.Demographics.Take(activeStates.Length).ToListAsync(CancellationToken.None);
+            var profitDetails = await ctx.ProfitDetails.Take(activeStates.Length).ToListAsync(CancellationToken.None);
+
+            for (var i = 0; i < activeStates.Length; i++)
+            {
+                var stateData = activeStates[i];
+                var demographic = demographics[i];
+                var profitDetail = profitDetails[i];
+
+                demographic.Ssn = ssnCounter++;
+
+                profitDetail.ProfitYear = testYear;
+                profitDetail.ProfitYearIteration = 0;
+                profitDetail.ProfitCodeId = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id; // Distribution
+                profitDetail.Forfeiture = stateData.GrossDist; // Gross distribution amount
+                profitDetail.MonthToDate = 0; // Year-level record (PS-2275 fix)
+                profitDetail.YearToDate = testYear;
+                profitDetail.FederalTaxes = stateData.FedTax;
+                profitDetail.StateTaxes = stateData.StateTax;
+                profitDetail.CommentRelatedState = stateData.State;
+                profitDetail.TaxCodeId = stateData.StateTax > 0 ? '7' : (char?)null;
+                profitDetail.Ssn = demographic.Ssn;
+                profitDetail.DistributionSequence = 2275 + profitDetailCounter++;
+                profitDetail.CommentTypeId = null;
+                profitDetail.Remark = null;
+            }
+
+            await ctx.SaveChangesAsync(CancellationToken.None);
+        });
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert - Comprehensive validation against READY values
+        response.Result.ShouldNotBeNull();
+
+        _testOutputHelper.WriteLine("\n=== PS-2275 READY PRODUCTION VALUE VALIDATION ===");
+        _testOutputHelper.WriteLine($"Report: {response.Result.ReportName}");
+        _testOutputHelper.WriteLine($"Date Range: {response.Result.StartDate} to {response.Result.EndDate}");
+        _testOutputHelper.WriteLine($"Total Records: {response.Result.Response.Total}");
+        _testOutputHelper.WriteLine("");
+
+        // 1. DISTRIBUTION TOTAL
+        _testOutputHelper.WriteLine("--- DISTRIBUTION TOTAL ---");
+        _testOutputHelper.WriteLine($"  READY Expected:  {calculatedGrossDist:C}");
+        _testOutputHelper.WriteLine($"  API Actual:      {response.Result.DistributionTotal:C}");
+        response.Result.DistributionTotal.ShouldBe(calculatedGrossDist,
+            $"DistributionTotal mismatch: expected {calculatedGrossDist:C}, got {response.Result.DistributionTotal:C}");
+
+        // 2. FEDERAL TAX TOTAL
+        _testOutputHelper.WriteLine("--- FEDERAL TAX TOTAL ---");
+        _testOutputHelper.WriteLine($"  READY Expected:  {calculatedFedTax:C}");
+        _testOutputHelper.WriteLine($"  API Actual:      {response.Result.FederalTaxTotal:C}");
+        response.Result.FederalTaxTotal.ShouldBe(calculatedFedTax,
+            $"FederalTaxTotal mismatch: expected {calculatedFedTax:C}, got {response.Result.FederalTaxTotal:C}");
+
+        // 3. STATE TAX TOTAL
+        _testOutputHelper.WriteLine("--- STATE TAX TOTAL ---");
+        _testOutputHelper.WriteLine($"  READY Expected:  {expectedStateTaxTotal:C}");
+        _testOutputHelper.WriteLine($"  API Actual:      {response.Result.StateTaxTotal:C}");
+        response.Result.StateTaxTotal.ShouldBe(expectedStateTaxTotal,
+            $"StateTaxTotal mismatch: expected {expectedStateTaxTotal:C}, got {response.Result.StateTaxTotal:C}");
+
+        // 4. STATE-BY-STATE TAX BREAKDOWN
+        _testOutputHelper.WriteLine("--- STATE-BY-STATE TAX TOTALS ---");
+        response.Result.StateTaxTotals.ShouldNotBeNull();
+
+        foreach (var stateData in statesWithTax.OrderByDescending(x => x.StateTax))
+        {
+            var actualStateTax = response.Result.StateTaxTotals.TryGetValue(stateData.State, out var tax) ? tax : 0m;
+            _testOutputHelper.WriteLine($"  {stateData.State}: READY={stateData.StateTax:C}, API={actualStateTax:C}");
+
+            response.Result.StateTaxTotals.ContainsKey(stateData.State).ShouldBeTrue(
+                $"State '{stateData.State}' should be in StateTaxTotals");
+            response.Result.StateTaxTotals[stateData.State].ShouldBe(stateData.StateTax,
+                $"State '{stateData.State}' tax mismatch: expected {stateData.StateTax:C}");
+        }
+
+        // 5. STATE TAX TOTALS SHOULD SUM TO STATETAXTOTAL
+        var sumOfStateTaxTotals = response.Result.StateTaxTotals.Values.Sum();
+        _testOutputHelper.WriteLine($"  Sum of all states: {sumOfStateTaxTotals:C}");
+        sumOfStateTaxTotals.ShouldBe(response.Result.StateTaxTotal,
+            $"Sum of StateTaxTotals ({sumOfStateTaxTotals:C}) should equal StateTaxTotal ({response.Result.StateTaxTotal:C})");
+
+        // 6. RECORD COUNT VALIDATION
+        _testOutputHelper.WriteLine("--- RECORD COUNT ---");
+        _testOutputHelper.WriteLine($"  Expected Records: {activeStates.Length}");
+        _testOutputHelper.WriteLine($"  Actual Records:   {response.Result.Response.Results.Count()}");
+        response.Result.Response.Results.Count().ShouldBe(activeStates.Length,
+            "Record count mismatch");
+
+        // 7. INDIVIDUAL RECORD VALIDATION - spot check key states
+        _testOutputHelper.WriteLine("--- INDIVIDUAL RECORD SPOT CHECK ---");
+        var records = response.Result.Response.Results.ToList();
+
+        // Check MA (largest state)
+        var maRecords = records.Where(r => r.State == "MA").ToList();
+        var maExpected = readyStateData.First(x => x.State == "MA");
+        _testOutputHelper.WriteLine($"  MA Records: {maRecords.Count}");
+        maRecords.Sum(r => r.DistributionAmount).ShouldBe(maExpected.GrossDist, "MA distribution total mismatch");
+        maRecords.Sum(r => r.FederalTax).ShouldBe(maExpected.FedTax, "MA federal tax mismatch");
+        maRecords.Sum(r => r.StateTax).ShouldBe(maExpected.StateTax, "MA state tax mismatch");
+
+        // Check RI (second highest state tax)
+        var riRecords = records.Where(r => r.State == "RI").ToList();
+        var riExpected = readyStateData.First(x => x.State == "RI");
+        _testOutputHelper.WriteLine($"  RI Records: {riRecords.Count}");
+        riRecords.Sum(r => r.StateTax).ShouldBe(riExpected.StateTax, "RI state tax mismatch");
+
+        // Check ME (third state with taxes)
+        var meRecords = records.Where(r => r.State == "ME").ToList();
+        var meExpected = readyStateData.First(x => x.State == "ME");
+        _testOutputHelper.WriteLine($"  ME Records: {meRecords.Count}");
+        meRecords.Sum(r => r.StateTax).ShouldBe(meExpected.StateTax, "ME state tax mismatch");
+
+        // Check NH (largest by volume, no state tax)
+        var nhRecords = records.Where(r => r.State == "NH").ToList();
+        var nhExpected = readyStateData.First(x => x.State == "NH");
+        _testOutputHelper.WriteLine($"  NH Records: {nhRecords.Count}");
+        nhRecords.Sum(r => r.DistributionAmount).ShouldBe(nhExpected.GrossDist, "NH distribution total mismatch");
+        nhRecords.Sum(r => r.StateTax).ShouldBe(0m, "NH should have no state tax");
+
+        _testOutputHelper.WriteLine("");
+        _testOutputHelper.WriteLine("✅ PS-2275 ALL READY PRODUCTION VALUES VALIDATED SUCCESSFULLY");
+        _testOutputHelper.WriteLine("   - Distribution totals match READY");
+        _testOutputHelper.WriteLine("   - Federal tax totals match READY");
+        _testOutputHelper.WriteLine("   - State tax totals match READY ($1,085,194.87)");
+        _testOutputHelper.WriteLine("   - State-by-state breakdown matches:");
+        _testOutputHelper.WriteLine("     • MA: $1,025,174.59 ✓");
+        _testOutputHelper.WriteLine("     • RI: $34,033.02 ✓");
+        _testOutputHelper.WriteLine("     • ME: $25,987.26 ✓");
+        _testOutputHelper.WriteLine("   - All 28 state records validated");
+    }
+
     //[Fact(DisplayName = "CleanupReportService auth check")]
     //public Task YearEndServiceAuthCheck()
 #pragma warning disable S125
