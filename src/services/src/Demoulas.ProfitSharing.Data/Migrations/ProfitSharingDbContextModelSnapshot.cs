@@ -25508,7 +25508,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("USER_NAME")
                         .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
-                    b.Property<short>("Year")
+                    b.Property<byte>("Year")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
                         .HasColumnName("YEAR");
@@ -25620,6 +25620,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("ID");
+
+                    b.Property<string>("KindId")
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("KIND_ID");
 
                     b.Property<decimal>("Percent")
                         .HasPrecision(3)
@@ -25759,7 +25763,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("MODIFIED_AT_UTC")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
-                    b.Property<short>("ProfitYear")
+                    b.Property<byte>("ProfitYear")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
                         .HasColumnName("PROFIT_YEAR");
@@ -25826,6 +25830,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
 
+                    b.Property<string>("KindId")
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("KIND_ID");
+
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
@@ -25862,6 +25870,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("DemographicId")
                         .HasDatabaseName("IX_BENEFICIARY_DEMOGRAPHICID");
+
+                    b.HasIndex("KindId")
+                        .HasDatabaseName("IX_BENEFICIARY_KINDID");
 
                     b.HasIndex(new[] { "BadgeNumber" }, "IX_BADGE_NUMBER")
                         .HasDatabaseName("IX_BENEFICIARY_BADGENUMBER");
@@ -25924,15 +25935,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("BENEFICIARY_CONTACT", (string)null);
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_BENEFICIARY_KIND");
+
+                    b.ToTable("BENEFICIARY_KIND", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "P",
+                            Name = "Primary"
+                        },
+                        new
+                        {
+                            Id = "S",
+                            Name = "Secondary"
+                        });
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiarySsnChangeHistory", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(18)
                         .HasColumnType("NUMBER(18)")
                         .HasColumnName("ID");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<int>("BeneficiaryContactId")
                         .HasPrecision(9)
@@ -27667,7 +27709,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
 
-                    b.Property<short>("StoreNumber")
+                    b.Property<byte>("StoreNumber")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
                         .HasColumnName("STORE_NUMBER")
@@ -27825,7 +27867,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("REHIRE_DATE")
                         .HasComment("ReHireDate");
 
-                    b.Property<short>("StoreNumber")
+                    b.Property<byte>("StoreNumber")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
                         .HasColumnName("STORE_NUMBER")
@@ -27867,13 +27909,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicSsnChangeHistory", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(18)
                         .HasColumnType("NUMBER(18)")
                         .HasColumnName("ID");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -29166,18 +29208,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             Id = (byte)9,
                             IsReadOnly = true,
                             Name = "Auditor"
-                        },
-                        new
-                        {
-                            Id = (byte)11,
-                            IsReadOnly = true,
-                            Name = "HR-ReadOnly"
-                        },
-                        new
-                        {
-                            Id = (byte)12,
-                            IsReadOnly = true,
-                            Name = "SSN-Unmasking"
                         });
                 });
 
@@ -29978,7 +30008,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
 
-                    b.Property<short>("ProfitYear")
+                    b.Property<byte>("ProfitYear")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
                         .HasColumnName("PROFIT_YEAR");
@@ -30287,15 +30317,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("USER_NAME")
                         .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
-                    b.Property<short>("YearToDate")
+                    b.Property<byte>("YearToDate")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4,0)")
                         .HasColumnName("YEAR_TO_DATE");
 
-                    b.Property<short>("YearsOfServiceCredit")
+                    b.Property<byte>("YearsOfServiceCredit")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(3)")
-                        .HasDefaultValue((short)0)
+                        .HasDefaultValue((byte)0)
                         .HasColumnName("YEARS_OF_SERVICE_CREDIT");
 
                     b.Property<byte?>("ZeroContributionReasonId")
@@ -30340,13 +30370,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ProfitShareCheck", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(15)
                         .HasColumnType("NUMBER(15)")
                         .HasColumnName("Id");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("CheckAmount")
                         .HasPrecision(9, 2)
@@ -30357,7 +30387,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("CHECK_DATE");
 
-                    b.Property<int>("CheckNumber")
+                    b.Property<long>("CheckNumber")
                         .HasPrecision(15)
                         .HasColumnType("NUMBER(15)")
                         .HasColumnName("CHECK_NUMBER");
@@ -30383,7 +30413,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
 
-                    b.Property<short?>("FloatDays")
+                    b.Property<int?>("FloatDays")
                         .HasPrecision(6)
                         .HasColumnType("NUMBER(6)")
                         .HasColumnName("FLOAT_DAYS");
@@ -30406,7 +30436,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(84)")
                         .HasColumnName("PAYABLE_NAME");
 
-                    b.Property<int>("PscCheckId")
+                    b.Property<long>("PscCheckId")
                         .HasPrecision(15)
                         .HasColumnType("NUMBER(15)")
                         .HasColumnName("PSC_CHECK_ID");
@@ -31491,12 +31521,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(5,2)")
                         .HasColumnName("ADJUST_INCOMING_FORFEIT_AMOUNT");
 
-                    b.Property<long>("BadgeAdjusted")
+                    b.Property<int>("BadgeAdjusted")
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)")
                         .HasColumnName("BADGE_ADJUSTED");
 
-                    b.Property<long>("BadgeAdjusted2")
+                    b.Property<int>("BadgeAdjusted2")
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)")
                         .HasColumnName("BADGE_ADJUSTED2");
@@ -31541,7 +31571,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("IS_YEAR_END_COMPLETED");
 
-                    b.Property<long>("MaxAllowedContributions")
+                    b.Property<int>("MaxAllowedContributions")
                         .HasPrecision(6)
                         .HasColumnType("NUMBER(6)")
                         .HasColumnName("MAX_ALLOWED_CONTRIBUTIONS");
@@ -31552,7 +31582,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("MODIFIED_AT_UTC")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
-                    b.Property<short>("ProfitYear")
+                    b.Property<byte>("ProfitYear")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
                         .HasColumnName("PROFIT_YEAR");
@@ -31748,7 +31778,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex("CountryIso")
                                 .HasDatabaseName("IX_BENEFICIARY_CONTACT_ARCHIVE_COUNTRY_ISO");
 
-                            b1.ToTable("BENEFICIARY_CONTACT_ARCHIVE");
+                            b1.ToTable("BENEFICIARY_CONTACT_ARCHIVE", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("BeneficiaryContactArchiveArchiveId")
@@ -31812,7 +31842,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasKey("BeneficiaryContactArchiveArchiveId");
 
-                            b1.ToTable("BENEFICIARY_CONTACT_ARCHIVE");
+                            b1.ToTable("BENEFICIARY_CONTACT_ARCHIVE", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("BeneficiaryContactArchiveArchiveId")
@@ -31842,9 +31872,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_BENEFICIARY_DEMOGRAPHICS_DEMOGRAPHICID");
 
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", "Kind")
+                        .WithMany("Beneficiaries")
+                        .HasForeignKey("KindId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_BENEFICIARY_BENEFICIARY_KIND_KINDID");
+
                     b.Navigation("Contact");
 
                     b.Navigation("Demographic");
+
+                    b.Navigation("Kind");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", b =>
@@ -31913,7 +31951,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex("CountryIso")
                                 .HasDatabaseName("IX_BENEFICIARY_CONTACT_COUNTRY_ISO");
 
-                            b1.ToTable("BENEFICIARY_CONTACT");
+                            b1.ToTable("BENEFICIARY_CONTACT", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("BeneficiaryContactId")
@@ -31977,7 +32015,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasKey("BeneficiaryContactId");
 
-                            b1.ToTable("BENEFICIARY_CONTACT");
+                            b1.ToTable("BENEFICIARY_CONTACT", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("BeneficiaryContactId")
@@ -32117,7 +32155,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex("CountryIso")
                                 .HasDatabaseName("IX_DEMOGRAPHIC_COUNTRY_ISO");
 
-                            b1.ToTable("DEMOGRAPHIC");
+                            b1.ToTable("DEMOGRAPHIC", (string)null);
 
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
@@ -32184,7 +32222,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex(new[] { "FullName" }, "IX_FULL_NAME")
                                 .HasDatabaseName("IX_DEMOGRAPHIC_FULL_NAME");
 
-                            b1.ToTable("DEMOGRAPHIC");
+                            b1.ToTable("DEMOGRAPHIC", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("DemographicId")
@@ -32334,7 +32372,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex("CountryIso")
                                 .HasDatabaseName("IX_DISTRIBUTION_PAYEE_COUNTRY_ISO");
 
-                            b1.ToTable("DISTRIBUTION_PAYEE");
+                            b1.ToTable("DISTRIBUTION_PAYEE", (string)null);
 
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
@@ -32453,7 +32491,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex("CountryIso")
                                 .HasDatabaseName("IX_DISTRIBUTION_THIRDPARTY_PAYEE_COUNTRY_ISO");
 
-                            b1.ToTable("DISTRIBUTION_THIRDPARTY_PAYEE");
+                            b1.ToTable("DISTRIBUTION_THIRDPARTY_PAYEE", (string)null);
 
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
@@ -32692,6 +32730,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Beneficiaries");
 
                     b.Navigation("BeneficiarySsnChangeHistories");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", b =>
+                {
+                    b.Navigation("Beneficiaries");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>

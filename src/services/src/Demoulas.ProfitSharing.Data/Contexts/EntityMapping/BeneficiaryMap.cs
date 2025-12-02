@@ -31,6 +31,7 @@ internal sealed class BeneficiaryMap : ModifiedBaseMap<Beneficiary>
             .ValueGeneratedNever()
             .HasColumnName("DEMOGRAPHIC_ID");
 
+        _ = builder.Property(b => b.KindId).HasColumnName("KIND_ID");
         _ = builder.Property(b => b.BeneficiaryContactId).HasColumnName("BENEFICIARY_CONTACT_ID");
 
         _ = builder.Property(e => e.Percent).HasColumnName("PERCENT")
@@ -40,6 +41,11 @@ internal sealed class BeneficiaryMap : ModifiedBaseMap<Beneficiary>
 
         _ = builder.Property(e => e.Relationship).HasColumnName("RELATIONSHIP").HasMaxLength(10);
 
+
+        _ = builder.HasOne(d => d.Kind)
+            .WithMany(p => p.Beneficiaries)
+            .HasForeignKey(d => d.KindId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         _ = builder.HasOne(d => d.Contact)
             .WithMany(p => p.Beneficiaries)

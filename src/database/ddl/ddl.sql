@@ -7,6 +7,15 @@ create table "__EFMigrationsHistory"
 )
 /
 
+create table BENEFICIARY_KIND
+(
+    ID   NVARCHAR2(1)  not null
+        constraint PK_BENEFICIARY_KIND
+            primary key,
+    NAME NVARCHAR2(20) not null
+)
+/
+
 create table BENEFICIARY_TYPE
 (
     ID   NUMBER(3)     not null
@@ -761,6 +770,9 @@ create table BENEFICIARY
         constraint FK_BENEFICIARY_BENEFICIARY_CONTACT_BENEFICIARYCONTACTID
             references BENEFICIARY_CONTACT,
     RELATIONSHIP           NVARCHAR2(10),
+    KIND_ID                NVARCHAR2(1)
+        constraint FK_BENEFICIARY_BENEFICIARY_KIND_KINDID
+            references BENEFICIARY_KIND,
     DISTRIBUTION           NUMBER(9, 2) not null,
     AMOUNT                 NUMBER(9, 2) not null,
     EARNINGS               NUMBER(9, 2) not null,
@@ -775,6 +787,10 @@ create index IX_BENEFICIARY_BADGENUMBER
 
 create index IX_BENEFICIARY_BENEFICIARYCONTACTID
     on BENEFICIARY (BENEFICIARY_CONTACT_ID)
+/
+
+create index IX_BENEFICIARY_KINDID
+    on BENEFICIARY (KIND_ID)
 /
 
 create index IX_BENEFICIARY_ORACLE_HCM_ID
