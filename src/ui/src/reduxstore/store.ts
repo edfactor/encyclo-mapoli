@@ -34,8 +34,27 @@ import navigationSlice from "./slices/navigationSlice";
 import securitySlice from "./slices/securitySlice";
 import yearsEndSlice from "./slices/yearsEndSlice";
 
-// Create the store with the slices and the APIs
+// List of all API instances for efficient middleware registration
+const API_INSTANCES = [
+  SecurityApi,
+  YearsEndApi,
+  ItOperationsApi,
+  MilitaryApi,
+  InquiryApi,
+  LookupsApi,
+  CommonApi,
+  NavigationApi,
+  AppSupportApi,
+  NavigationStatusApi,
+  BeneficiariesApi,
+  AdjustmentsApi,
+  DistributionApi,
+  PayServicesApi,
+  AccountHistoryReportApi,
+  validationApi
+] as const;
 
+// Create the store with the slices and the APIs
 export const store = configureStore({
   reducer: {
     general: generalSlice,
@@ -54,45 +73,18 @@ export const store = configureStore({
     beneficiaries: beneficiarySlice,
     distribution: distributionSlice,
 
-    [SecurityApi.reducerPath]: SecurityApi.reducer,
-    [YearsEndApi.reducerPath]: YearsEndApi.reducer,
-    [ItOperationsApi.reducerPath]: ItOperationsApi.reducer,
-    [MilitaryApi.reducerPath]: MilitaryApi.reducer,
-    [InquiryApi.reducerPath]: InquiryApi.reducer,
-    [LookupsApi.reducerPath]: LookupsApi.reducer,
-    [CommonApi.reducerPath]: CommonApi.reducer,
-    [NavigationApi.reducerPath]: NavigationApi.reducer,
-    [AppSupportApi.reducerPath]: AppSupportApi.reducer,
-    [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer,
-    [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
-    [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
-    [DistributionApi.reducerPath]: DistributionApi.reducer,
-    [PayServicesApi.reducerPath]: PayServicesApi.reducer,
-    [AccountHistoryReportApi.reducerPath]: AccountHistoryReportApi.reducer,
-    [validationApi.reducerPath]: validationApi.reducer
+    // Dynamically register all API reducers
+    ...Object.fromEntries(
+      API_INSTANCES.map(api => [api.reducerPath, api.reducer])
+    )
   },
 
-  middleware: (getDefaultMiddleware) =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  middleware: (getDefaultMiddleware: any) =>
     getDefaultMiddleware({ serializableCheck: false })
       .concat(rtkQueryErrorToastMiddleware(true))
-      // Use array concat to avoid TS tuple union issues
       .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
-      .concat(SecurityApi.middleware)
-      .concat(YearsEndApi.middleware)
-      .concat(ItOperationsApi.middleware)
-      .concat(MilitaryApi.middleware)
-      .concat(InquiryApi.middleware)
-      .concat(LookupsApi.middleware)
-      .concat(CommonApi.middleware)
-      .concat(NavigationApi.middleware)
-      .concat(AppSupportApi.middleware)
-      .concat(NavigationStatusApi.middleware)
-      .concat(BeneficiariesApi.middleware)
-      .concat(AdjustmentsApi.middleware)
-      .concat(DistributionApi.middleware)
-      .concat(PayServicesApi.middleware)
-      .concat(AccountHistoryReportApi.middleware)
-      .concat(validationApi.middleware)
+      .concat(API_INSTANCES.map(api => api.middleware))
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

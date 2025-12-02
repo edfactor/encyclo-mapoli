@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record YearEndProfitSharingReportSummaryLineItem
 {
@@ -8,7 +10,7 @@ public sealed record YearEndProfitSharingReportSummaryLineItem
     public int NumberOfMembers { get; set; }
     public decimal TotalWages { get; set; }
     public decimal? TotalHours { get; set; }
-    public int? TotalPoints { get; set; }
+    [MaskSensitive] public int? TotalPoints { get; set; }
     public decimal TotalBalance { get; set; }
     public decimal TotalPriorBalance { get; set; }
 }

@@ -1,4 +1,7 @@
-﻿using CsvHelper.Configuration;
+﻿using System.Linq;
+using System.Collections.Generic;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -115,9 +118,27 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<WagesCurrentYearRequ
     }
 
 
+    // Override CSV generation to write participant rows from the response container
+    protected internal override Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<WagesCurrentYearResponse> report, CancellationToken cancellationToken)
+    {
+        // Register the participant map
+        _ = csvWriter.Context.RegisterClassMap<WagesCurrentYearParticipantMap>();
+
+        // Flatten participants from all containers (typically a single container per response)
+        var participants = report.Response.Results.SelectMany(r => r.Participants ?? new List<WagesCurrentYearParticipant>()).ToList();
+
+        return csvWriter.WriteRecordsAsync(participants, cancellationToken);
+    }
+
+    // Minimal response map to satisfy generic parameter - CSV generation uses participant map instead
     public sealed class WagesCurrentYearResponseMap : ClassMap<WagesCurrentYearResponse>
     {
-        public WagesCurrentYearResponseMap()
+        public WagesCurrentYearResponseMap() { }
+    }
+
+    public sealed class WagesCurrentYearParticipantMap : ClassMap<WagesCurrentYearParticipant>
+    {
+        public WagesCurrentYearParticipantMap()
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);

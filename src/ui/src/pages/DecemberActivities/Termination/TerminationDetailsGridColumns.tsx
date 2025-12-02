@@ -9,7 +9,6 @@ import {
   createCurrencyColumn,
   createDateColumn,
   createHoursColumn,
-  createYearColumn,
   createYesOrNoColumn
 } from "../../../utils/gridColumnFactory";
 import { HeaderComponent } from "./TerminationHeaderComponent";
@@ -24,11 +23,6 @@ export const GetDetailColumns = (
   isReadOnly = true
 ): ColDef[] => {
   return [
-    createYearColumn({
-      headerName: "Profit Year",
-      field: "profitYear",
-      sortable: false
-    }),
     createCurrencyColumn({
       headerName: "Beginning Balance",
       field: "beginningBalance",

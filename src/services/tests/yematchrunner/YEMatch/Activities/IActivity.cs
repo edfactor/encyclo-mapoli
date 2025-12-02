@@ -1,4 +1,4 @@
-﻿namespace YEMatch.Activities;
+namespace YEMatch.Activities;
 
 /*
  * This is a generic task in yerunner, not just a ye activity.

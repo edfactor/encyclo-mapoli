@@ -8,9 +8,6 @@
           "PackageIdentifier": "Microsoft.VisualStudioCode"
         },
         {
-          "PackageIdentifier": "CoreyButler.NVMforWindows"
-        },
-        {
           "PackageIdentifier": "Microsoft.VisualStudio.Professional",
           "InstallationOptions": {
             "InstallationType": "Full",
@@ -28,7 +25,7 @@
         },
         {
           "PackageIdentifier": "Git.Git"
-        },       
+        },
         {
           "PackageIdentifier": "TortoiseGit.TortoiseGit"
         },
@@ -40,9 +37,6 @@
           "InstallationOptions": {
             "Scope": "Machine"
           }
-        },
-        {
-          "PackageIdentifier": "Microsoft.Teams"
         },
         {
           "PackageIdentifier": "Postman.Postman"

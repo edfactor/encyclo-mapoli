@@ -39,7 +39,7 @@ export const useDynamicGridHeight = (options: UseDynamicGridHeightOptions = {}, 
   const {
     heightPercentage = 0.4, // Default to 40%
     minHeight = 250,
-    maxHeight = 800
+    maxHeight = 900
   } = options;
 
   const [gridMaxHeight, setGridMaxHeight] = useState(400);

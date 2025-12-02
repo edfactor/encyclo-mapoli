@@ -32,7 +32,7 @@ definitions:
           $dotnetSdkList = dotnet --list-sdks;
           Write-Output "Installed .NET SDKs:";
           Write-Output $dotnetSdkList;
-          
+
           $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
           if (-not $dotnetSdkRequired) {
               Write-Error "FAILED: .NET 10 SDK is required but not available.";
@@ -52,13 +52,17 @@ definitions:
         - echo "Building solution..."
         - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
-        # Run tests against the fresh build
+        # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
+        # VSTest is no longer supported - must run the executable directly
         - echo "Running unit tests..."
-        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --no-build --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
+        - |
+          $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
+          Write-Host "Executing test runner: $testExe"
+          & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
 
       artifacts:
         - test-reports/**
-    
+
     test-frontend: &test-frontend
       name: Build and Test Frontend UI
       # Run on Bitbucket Cloud to free on-premises resources
@@ -70,21 +74,21 @@ definitions:
       script:
         - cd src/ui
         - echo "Running frontend tests on cloud runner..."
-        
+
         # Update npm to latest version
         - npm install -g npm@latest
-        
+
         # Create .npmrc for JFrog access (uses pipeline variable)
         - |
           cat > .npmrc << EOF
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
-        
+
         # Install dependencies and run tests
         - npm ci
         - npm run test
-   
+
     generate-buildinfo: &generate-buildinfo
       name: Generate Build Information
       runs-on:
@@ -96,7 +100,7 @@ definitions:
         - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - if (!(Test-Path ".buildinfo.json")) { Write-Error "Failed to generate .buildinfo.json"; exit 1; }
-    
+
     create-api-artifacts: &create-api-artifacts
       name: Create API Artifacts
       runs-on:
@@ -115,10 +119,10 @@ definitions:
         - New-Item -ItemType Directory -Path "dist"
 
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
-        
+
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\publishOutput\"
-        
+
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.Api.zip -Force
 
     create-service-artifacts: &create-service-artifacts
@@ -133,7 +137,7 @@ definitions:
         - Write-Host $(Get-Location)
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
-        
+
         # Tool already updated in create-api-artifacts step (runs in parallel)
         # Only update if not already present
         - if (-not (Get-Command Demoulas.Common.Build.Cli -ErrorAction SilentlyContinue)) { dotnet tool update --global Demoulas.Common.Build.Cli --no-cache }
@@ -156,18 +160,18 @@ definitions:
       script:
         # Navigate to UI directory
         - cd src/ui
-        
+
         # Install zip utility and update npm
         - apk add --no-cache zip
         - npm install -g npm@latest
-        
+
         # Create .npmrc for JFrog access (using bash heredoc syntax)
         - |
           cat > .npmrc << 'EOF'
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
-        
+
         # Update package.json version from .buildinfo.json
         - |
           if [ -f ../../.buildinfo.json ]; then
@@ -189,31 +193,30 @@ definitions:
               grep '"version"' package.json
             fi
           fi
-        
+
         # Copy buildinfo.json from artifact to public directory
         - echo "Copying .buildinfo.json from artifact..."
         - cp ../../.buildinfo.json ./public/.buildinfo.json
         - echo "✓ Build info copied to public directory"
         - cat ./public/.buildinfo.json
-        
+
         # Install dependencies
         - npm ci
-        
+
         # Build for QA environment
         - npm run build:qa
-        
+
         # Create dist directory at repo root
         - mkdir -p ../../dist
-        
+
         # Package artifact using zip
         - cd build
         - zip -r ../../../dist/Demoulas.ProfitSharing.UI.qa.zip .
         - cd ..
-        
+
         # Verify artifact was created
         - ls -lh ../../dist/Demoulas.ProfitSharing.UI.qa.zip
         - echo "✓ QA artifact created successfully"
-        
 
     create-frontend-artifact-uat: &create-frontend-artifact-uat
       name: Create FrontEnd Artifacts (UAT)
@@ -224,18 +227,18 @@ definitions:
       script:
         # Navigate to UI directory
         - cd src/ui
-        
+
         # Install zip utility and update npm
         - apk add --no-cache zip
         - npm install -g npm@latest
-        
+
         # Create .npmrc for JFrog access (using bash heredoc syntax)
         - |
           cat > .npmrc << 'EOF'
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
-        
+
         # Update package.json version from .buildinfo.json
         - |
           if [ -f ../../.buildinfo.json ]; then
@@ -257,31 +260,30 @@ definitions:
               grep '"version"' package.json
             fi
           fi
-        
+
         # Copy buildinfo.json from artifact to public directory
         - echo "Copying .buildinfo.json from artifact..."
         - cp ../../.buildinfo.json ./public/.buildinfo.json
         - echo "✓ Build info copied to public directory"
         - cat ./public/.buildinfo.json
-        
+
         # Install dependencies
         - npm ci
-        
+
         # Build for UAT environment
         - npm run build:uat
-        
+
         # Create dist directory at repo root
         - mkdir -p ../../dist
-        
+
         # Package artifact using zip
         - cd build
         - zip -r ../../../dist/Demoulas.ProfitSharing.UI.uat.zip .
         - cd ..
-        
+
         # Verify artifact was created
         - ls -lh ../../dist/Demoulas.ProfitSharing.UI.uat.zip
         - echo "✓ UAT artifact created successfully"
-
 
     upgrade-database: &upgrade-database
       name: Upgrade Database
@@ -370,7 +372,6 @@ definitions:
             .\output\Demoulas.ProfitSharing.Data.Cli validate-import --connection-name ProfitSharing --sql-file ".\src\database\ready_import\Import Validations.sql" --source-schema $sourceSchema --current-year $currentYear
             if ($LASTEXITCODE -ne 0) { Write-Error "Database import validation failed. Exiting"; exit 1 }
           }
-          
 
     uat-drop-recreate-db: &uat-drop-recreate-db
       name: UAT Drop & Recreate DB
@@ -473,7 +474,6 @@ definitions:
         - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
         - dotnet restore Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
 
-
         - |
           $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
           if ($output -match "has the following vulnerable packages") {
@@ -483,8 +483,7 @@ definitions:
           } else {
             Write-Host "No vulnerabilities found."
             exit 0
-          }        
-
+          }
 
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
@@ -501,15 +500,15 @@ definitions:
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
         - npm audit --audit-level=high --production
-    
+
     frontend-lint: &frontend-lint
-      name: Frontend Lint
+      name: Frontend TSC + Lint
       # Run on Bitbucket Cloud to free on-premises resources
       image: node:22-alpine
       max-time: 10
       script:
         - cd src/ui
-        - echo "Running frontend linting on cloud runner..."
+        - echo "Running frontend tsc and linting on cloud runner..."
 
         # Update npm to latest version
         - npm install -g npm@latest
@@ -524,6 +523,7 @@ definitions:
         # Install dependencies and run linting
         - npm ci
         - npm run lint
+        - npx tsc -b --noEmit
 
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
@@ -701,43 +701,42 @@ definitions:
             echo "Error: .buildinfo.json not found"
             exit 1
           fi
-          
+
           # Parse buildNumber and buildId from JSON
           BUILD_NUMBER=$(grep -o '"buildNumber":"[^"]*"' .buildinfo.json | cut -d'"' -f4)
           BUILD_ID=$(grep -o '"buildId":[0-9]*' .buildinfo.json | cut -d':' -f2)
-          
+
           if [ -z "$BUILD_NUMBER" ] || [ -z "$BUILD_ID" ]; then
             echo "Error: Could not parse buildNumber or buildId from .buildinfo.json"
             cat .buildinfo.json
             exit 1
           fi
-          
+
           TAG_NAME="${BUILD_NUMBER}.${BUILD_ID}"
           TAG_MESSAGE="Release build ${BUILD_NUMBER}.${BUILD_ID} deployed to QA"
-          
+
           echo "Creating release tag: $TAG_NAME"
           echo "Message: $TAG_MESSAGE"
-          
+
           git config user.email "bitbucket-pipeline@demoulas.com"
           git config user.name "Bitbucket Pipeline"
-          
+
           # Check if tag already exists
           if git tag -l | grep -q "^${TAG_NAME}$"; then
             echo "Warning: Tag '$TAG_NAME' already exists locally. Skipping tag creation."
             exit 0
           fi
-          
+
           if git ls-remote --tags origin | grep -q "refs/tags/${TAG_NAME}$"; then
             echo "Warning: Tag '$TAG_NAME' already exists on remote. Skipping tag creation."
             exit 0
           fi
-          
+
           # Create and push tag
           git tag -a "$TAG_NAME" -m "$TAG_MESSAGE"
           git push origin "refs/tags/$TAG_NAME"
-          
+
           echo "✓ Release tag '$TAG_NAME' created and pushed successfully"
-          
 
 pipelines:
   branches:
@@ -789,7 +788,6 @@ pipelines:
                 exit 1
               }
       - step: *upgrade-database
-  
       - step:
           name: "Checking API Health"
           runs-on:
@@ -881,7 +879,6 @@ pipelines:
       - step: *uat-import-uat-navigation
       - step: *uat-validate-import
 
-
     develop:
       - parallel:
           - step: *build-and-test-backend
@@ -889,9 +886,8 @@ pipelines:
           - step: *audit-frontend
           - step: *audit-backend
 
-
   pull-requests:
-    '**':
+    "**":
       # Stage 1: Code quality checks (fail fast)
       - step: *frontend-lint
       # Stage 2: Build and test
@@ -903,7 +899,7 @@ pipelines:
           - step: *audit-frontend
           - step: *audit-backend
           - step: *secret-scan
-  
+
   custom:
     infrastructure_as_code:
       - variables:
@@ -918,10 +914,10 @@ pipelines:
               - install-hosting-bundle
               - configure-gzip-compression
           - name: ForceReinstall
-            default: 'false'
+            default: "false"
             allowed-values:
-              - 'true'
-              - 'false'
+              - "true"
+              - "false"
       - step:
           name: Execute IaC Operation
           runs-on:
@@ -1147,7 +1143,7 @@ pipelines:
             default: PROFITSHARE
             allowed-values:
               - PROFITSHARE
-              - MTPR    
+              - MTPR
               - PROFITSHARE_STAGING
       - step:
           name: Validate SourceSchema
@@ -1192,7 +1188,3 @@ pipelines:
       - step: *upgrade-database
     playwright_e2e_qa:
       - step: *run-playwright-tests
-
-
-
-

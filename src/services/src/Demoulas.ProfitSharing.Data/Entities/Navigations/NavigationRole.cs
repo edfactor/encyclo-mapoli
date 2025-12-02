@@ -16,6 +16,8 @@ public class NavigationRole : ILookupTable<byte>
         public const byte ExecutiveAdministrator = 8;
         public const byte Auditor = 9;
         public const byte BeneficiaryAdministrator = 10;
+        public const byte HrReadOnly = 11;
+        public const byte SsnUnmasking = 12;
     }
 
     public byte Id { get; set; }

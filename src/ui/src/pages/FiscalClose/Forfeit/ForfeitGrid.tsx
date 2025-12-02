@@ -32,7 +32,19 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
 
-  const sortEventHandler = (update: ISortParams) => pagination.handleSortChange(update);
+  const sortEventHandler = (update: ISortParams) => {
+    // if field is badgeOrPsn, we need to make sortBy equal to badgeNumber,beneficiaryPsn
+    // to get a compound sort
+    if (update.sortBy === "badgeOrPsn") {
+      const newUpdate = {
+        ...update,
+        sortBy: update.isSortDescending ? "beneficiaryPsn" : "badgeNumber"
+      };
+      pagination.handleSortChange(newUpdate);
+      return;
+    }
+    pagination.handleSortChange(update);
+  };
 
   // Some API responses may return numeric totals as strings; coerce safely before formatting.
   const safeNumber = (val: unknown) => {

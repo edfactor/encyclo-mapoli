@@ -8,7 +8,7 @@ using FastEndpoints;
 using Shouldly;
 using System.ComponentModel;
 using System.Net;
-using Xunit.Abstractions;
+using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Validation;
 

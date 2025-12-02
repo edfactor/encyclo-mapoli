@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -44,9 +44,27 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         return func(_ctx);
     }
 
-    public Task<T> UseWritableContextAsync<T>(Func<ProfitSharingDbContext, IDbContextTransaction, Task<T>> action, CancellationToken cancellationToken)
+    public async Task<T> UseWritableContextAsync<T>(Func<ProfitSharingDbContext, IDbContextTransaction, Task<T>> action, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        // Begin a transaction
+        await using var transaction = await _ctx.Database.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            // Execute the action with the context and transaction
+            var result = await action(_ctx, transaction);
+
+            // Note: The action is responsible for committing the transaction
+            // This allows the caller to control when the commit happens
+
+            return result;
+        }
+        catch
+        {
+            // Rollback on exception
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 
     public Task UseReadOnlyContext(Func<ProfitSharingReadOnlyDbContext, Task> func, CancellationToken cancellationToken = default)

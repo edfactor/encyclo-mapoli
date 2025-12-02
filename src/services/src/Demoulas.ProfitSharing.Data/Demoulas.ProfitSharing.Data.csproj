@@ -8,11 +8,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="C:\Users\russh\.nuget\packages\demoulas.common.data.services\3.0.0\contentFiles\any\net8.0\readme.md" />
-  </ItemGroup>
- 
-
-  <ItemGroup>
     <PackageReference Include="Aspire.Oracle.EntityFrameworkCore" />
     <PackageReference Include="Demoulas.Common.Data.Contexts" />
     <PackageReference Include="Demoulas.Common.Data.Services" />

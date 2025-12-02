@@ -12,12 +12,16 @@ import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 
-const MasterInquiryContent = memo(() => {
+interface MasterInquiryContentProps {
+  isGridExpanded: boolean;
+  setIsGridExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: MasterInquiryContentProps) => {
   const dispatch = useDispatch();
-  const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
-  
-  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
+
+  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen) ?? false;
 
   const {
     searchParams,

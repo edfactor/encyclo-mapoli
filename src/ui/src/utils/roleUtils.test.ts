@@ -170,4 +170,82 @@ describe("validateRoleRemoval", () => {
     );
     expect(result).toEqual([ImpersonationRoles.Auditor]);
   });
+
+  describe("SSN-Unmasking removal scenarios", () => {
+    it("should prevent selecting SSN-Unmasking when no roles are selected", () => {
+      const result = validateImpersonationRoles([], ImpersonationRoles.SsnUnmasking);
+      expect(result).toEqual([]);
+    });
+
+    it("should allow adding SSN-Unmasking to ProfitSharingAdministrator", () => {
+      const result = validateImpersonationRoles(
+        [ImpersonationRoles.ProfitSharingAdministrator],
+        ImpersonationRoles.SsnUnmasking
+      );
+      expect(result).toEqual([ImpersonationRoles.ProfitSharingAdministrator, ImpersonationRoles.SsnUnmasking]);
+    });
+
+    it("should prevent adding SSN-Unmasking to ExecutiveAdministrator with non-compatible base roles", () => {
+      const result = validateImpersonationRoles(
+        [ImpersonationRoles.ExecutiveAdministrator, ImpersonationRoles.FinanceManager],
+        ImpersonationRoles.SsnUnmasking
+      );
+      // SSN-Unmasking can only pair with ProfitSharingAdministrator or ExecutiveAdministrator directly
+      expect(result).toEqual([]);
+    });
+
+    it("should prevent adding SSN-Unmasking to Auditor", () => {
+      const result = validateImpersonationRoles([ImpersonationRoles.Auditor], ImpersonationRoles.SsnUnmasking);
+      expect(result).toEqual([]);
+    });
+
+    it("should prevent adding SSN-Unmasking to ItDevOps", () => {
+      const result = validateImpersonationRoles([ImpersonationRoles.ItDevOps], ImpersonationRoles.SsnUnmasking);
+      expect(result).toEqual([]);
+    });
+
+    it("should prevent adding SSN-Unmasking to Finance-Manager alone (not with Executive-Administrator)", () => {
+      const result = validateImpersonationRoles([ImpersonationRoles.FinanceManager], ImpersonationRoles.SsnUnmasking);
+      expect(result).toEqual([]);
+    });
+
+    it("should replace base role while keeping SSN-Unmasking only if new base is directly compatible", () => {
+      const result = validateImpersonationRoles(
+        [ImpersonationRoles.SsnUnmasking, ImpersonationRoles.ProfitSharingAdministrator],
+        ImpersonationRoles.ExecutiveAdministrator
+      );
+      // ExecutiveAdministrator can only be added to combinable roles, and SSN-Unmasking cannot pair with ExecutiveAdministrator alone
+      expect(result).toEqual([
+        ImpersonationRoles.SsnUnmasking,
+        ImpersonationRoles.ProfitSharingAdministrator,
+        ImpersonationRoles.ExecutiveAdministrator
+      ]);
+    });
+
+    it("should remove SSN-Unmasking when base role is removed and no Executive-Administrator", () => {
+      const result = validateRoleRemoval(
+        [ImpersonationRoles.ProfitSharingAdministrator, ImpersonationRoles.SsnUnmasking],
+        ImpersonationRoles.ProfitSharingAdministrator
+      );
+      expect(result).toEqual([]);
+    });
+
+    it("should keep SSN-Unmasking when Executive-Administrator remains after base role removal", () => {
+      const result = validateRoleRemoval(
+        [ImpersonationRoles.ExecutiveAdministrator, ImpersonationRoles.FinanceManager, ImpersonationRoles.SsnUnmasking],
+        ImpersonationRoles.FinanceManager
+      );
+      expect(result).toEqual([ImpersonationRoles.ExecutiveAdministrator, ImpersonationRoles.SsnUnmasking]);
+    });
+
+    it("should remove SSN-Unmasking when removing Executive-Administrator from mixed roles", () => {
+      const result = validateRoleRemoval(
+        [ImpersonationRoles.ExecutiveAdministrator, ImpersonationRoles.FinanceManager, ImpersonationRoles.SsnUnmasking],
+        ImpersonationRoles.ExecutiveAdministrator
+      );
+      // When ExecutiveAdministrator is removed, Finance-Manager remains but SSN-Unmasking is also removed
+      // because Finance-Manager alone is not a compatible base for SSN-Unmasking
+      expect(result).toEqual([ImpersonationRoles.FinanceManager]);
+    });
+  });
 });

@@ -41,6 +41,8 @@ export interface BreakdownByStoreEmployee {
   state: string;
   storeNumber: number;
   street1: string;
+  age?: string;
+  ageAtTermination?: string;
   terminationDate: string;
   vestedAmount: number;
   vestedPercentage: number;
@@ -104,7 +106,7 @@ export interface Under21BreakdownByStoreEmployee {
   age: string;
   enrollmentId: number;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+ 
 export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {
   // Under21BreakdownByStoreResponse extends PagedReportResponse
 }
@@ -124,7 +126,7 @@ export interface Under21InactiveEmployee {
   age: string;
   enrollmentId: number;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+ 
 export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {
   // Under21InactiveResponse extends PagedReportResponse
 }

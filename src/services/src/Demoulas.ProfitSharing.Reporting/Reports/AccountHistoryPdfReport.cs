@@ -54,234 +54,231 @@ public class AccountHistoryPdfReport : BasePdfReport
     }
 
     /// <summary>
-    /// Composes the main report content
+    /// Composes the main report content - clean, minimal styling like Monthly Statement
     /// </summary>
     protected override void ComposeContent(IContainer content)
     {
         content.Column(column =>
         {
-            // Set uniform spacing between all major sections
-            column.Spacing(15);
-
             // Member Profile Section
             column.Item().Element(ComposeMemberProfileSection);
-            column.Item().AlignCenter().Text("").FontSize(1); // Spacer
 
             // Report Parameters Section
-            column.Item().Element(ComposeReportParametersSection);
-            column.Item().AlignCenter().Text("").FontSize(1); // Spacer
+            column.Item().PaddingTop(10).Element(ComposeReportParametersSection);
 
             // Account History Table
-            column.Item().Element(ComposeAccountHistoryTable);
-            column.Item().AlignCenter().Text("").FontSize(1); // Spacer
+            column.Item().PaddingTop(10).Element(ComposeAccountHistoryTable);
 
             // Cumulative Totals Section
-            column.Item().Element(ComposeCumulativeTotalsSection);
-            column.Item().AlignCenter().Text("").FontSize(1); // Spacer
+            column.Item().PaddingTop(10).Element(ComposeCumulativeTotalsSection);
 
             // Legal Notice
-            column.Item().Element(ComposeLegalNoticeSection);
+            column.Item().PaddingTop(15).Element(ComposeLegalNoticeSection);
         });
     }
 
     /// <summary>
-    /// Composes the member profile section with contact information (two-column layout)
+    /// Composes the member profile section - clean style without heavy backgrounds
     /// </summary>
     private void ComposeMemberProfileSection(IContainer container)
     {
         container.Column(column =>
         {
-            column.Item().ComposeSectionHeader("Member Profile", "#F0F0F0");
+            // Section title - simple bold text with underline
+            column.Item().Text("Member Profile").FontSize(11).Bold();
+            column.Item().PaddingTop(2).Height(1).Background("#000000");
 
-            column.Item()
-                .Padding(PdfReportConfiguration.Spacing.StandardGap)
-                .Row(row =>
+            column.Item().PaddingTop(5).Row(row =>
+            {
+                // Left column
+                row.RelativeItem().Column(leftColumn =>
                 {
-                    // Left column
-                    row.RelativeItem().Column(leftColumn =>
-                    {
-                        leftColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
-                        leftColumn.Item().ComposeKeyValuePair("Full Name", _memberProfile.FullName, bold: true);
-                        leftColumn.Item().ComposeKeyValuePair("Badge Number", _memberProfile.BadgeNumber.ToString());
-                        leftColumn.Item().ComposeKeyValuePair("SSN", _memberProfile.MaskedSsn);
-                        leftColumn.Item().ComposeKeyValuePair("Date of Birth", _memberProfile.DateOfBirth?.ToString("MM/dd/yyyy") ?? "N/A");
-                        leftColumn.Item().ComposeDivider(0.5f);
-                        leftColumn.Item().ComposeKeyValuePair("Address", _memberProfile.Address ?? "N/A");
-                        leftColumn.Item().ComposeKeyValuePair("City, State ZIP", $"{_memberProfile.City}, {_memberProfile.State} {_memberProfile.ZipCode}".TrimEnd());
-                        leftColumn.Item().ComposeKeyValuePair("Phone", _memberProfile.Phone ?? "N/A");
-                    });
-
-                    // Right column
-                    row.RelativeItem().Column(rightColumn =>
-                    {
-                        rightColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
-                        rightColumn.Item().ComposeKeyValuePair("Hire Date", _memberProfile.HireDate?.ToString("MM/dd/yyyy") ?? "N/A");
-                        rightColumn.Item().ComposeKeyValuePair("Termination Date", _memberProfile.TerminationDate?.ToString("MM/dd/yyyy") ?? "Current Employee");
-                        rightColumn.Item().ComposeKeyValuePair("Employment Status", _memberProfile.EmploymentStatus ?? "N/A");
-                        rightColumn.Item().ComposeKeyValuePair("Store Number", _memberProfile.StoreNumber?.ToString() ?? "N/A");
-                    });
+                    ComposeSimpleRow(leftColumn, "Full Name:", _memberProfile.FullName);
+                    ComposeSimpleRow(leftColumn, "Badge Number:", _memberProfile.BadgeNumber.ToString());
+                    ComposeSimpleRow(leftColumn, "SSN:", _memberProfile.MaskedSsn);
+                    ComposeSimpleRow(leftColumn, "Date of Birth:", _memberProfile.DateOfBirth?.ToString("MM/dd/yyyy") ?? "N/A");
+                    ComposeSimpleRow(leftColumn, "Address:", _memberProfile.Address ?? "N/A");
+                    ComposeSimpleRow(leftColumn, "City, State ZIP:", $"{_memberProfile.City}, {_memberProfile.State} {_memberProfile.ZipCode}".TrimEnd());
+                    ComposeSimpleRow(leftColumn, "Phone:", _memberProfile.Phone ?? "N/A");
                 });
+
+                // Right column
+                row.RelativeItem().Column(rightColumn =>
+                {
+                    ComposeSimpleRow(rightColumn, "Hire Date:", _memberProfile.HireDate?.ToString("MM/dd/yyyy") ?? "N/A");
+                    ComposeSimpleRow(rightColumn, "Termination Date:", _memberProfile.TerminationDate?.ToString("MM/dd/yyyy") ?? "N/A");
+                    ComposeSimpleRow(rightColumn, "Employment Status:", _memberProfile.EmploymentStatus ?? "N/A");
+                    ComposeSimpleRow(rightColumn, "Store Number:", _memberProfile.StoreNumber?.ToString() ?? "N/A");
+                });
+            });
         });
     }
 
     /// <summary>
-    /// Composes the report parameters section (two-column layout)
+    /// Composes the report parameters section - clean style
     /// </summary>
     private void ComposeReportParametersSection(IContainer container)
     {
         container.Column(column =>
         {
-            column.Item().ComposeSectionHeader("Report Parameters", "#F0F0F0");
+            // Section title - simple bold text with underline
+            column.Item().Text("Report Parameters").FontSize(11).Bold();
+            column.Item().PaddingTop(2).Height(1).Background("#000000");
 
-            column.Item()
-                .Padding(PdfReportConfiguration.Spacing.StandardGap)
-                .Row(row =>
+            column.Item().PaddingTop(5).Row(row =>
+            {
+                // Left column
+                row.RelativeItem().Column(leftColumn =>
                 {
-                    // Left column
-                    row.RelativeItem().Column(leftColumn =>
-                    {
-                        leftColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
-                        leftColumn.Item().ComposeKeyValuePair("Report Period Start", _startDate.ToString("MM/dd/yyyy"));
-                        leftColumn.Item().ComposeKeyValuePair("Report Period End", _endDate.ToString("MM/dd/yyyy"));
-                    });
-
-                    // Right column
-                    row.RelativeItem().Column(rightColumn =>
-                    {
-                        rightColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
-                        rightColumn.Item().ComposeKeyValuePair("Prepared By", _preparedBy);
-                        rightColumn.Item().ComposeKeyValuePair("Generated Date", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-                    });
+                    ComposeSimpleRow(leftColumn, "Report Period Start:", _startDate.ToString("MM/dd/yyyy"));
+                    ComposeSimpleRow(leftColumn, "Report Period End:", _endDate.ToString("MM/dd/yyyy"));
                 });
+
+                // Right column
+                row.RelativeItem().Column(rightColumn =>
+                {
+                    ComposeSimpleRow(rightColumn, "Prepared By:", _preparedBy);
+                    ComposeSimpleRow(rightColumn, "Generated Date:", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
+                });
+            });
         });
     }
 
     /// <summary>
-    /// Composes the account history table with all transaction details
+    /// Composes the account history table - clean table styling
     /// </summary>
     private void ComposeAccountHistoryTable(IContainer container)
     {
         container.Column(column =>
         {
-            column.Item().ComposeSectionHeader("Account Activity by Profit Year", "#F0F0F0");
+            // Section title
+            column.Item().Text("Account Activity by Profit Year").FontSize(11).Bold();
+            column.Item().PaddingTop(2).Height(1).Background("#000000");
 
             if (_accountHistory.Count == 0)
             {
-                column.Item()
-                    .Padding(PdfReportConfiguration.Spacing.StandardGap)
-                    .Text("No account activity found for the specified period.")
-                    .FontSize(PdfReportConfiguration.FontSizes.ContentSize)
-                    .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
+                column.Item().PaddingTop(5).Text("No account activity found for the specified period.")
+                    .FontSize(10).Italic();
                 return;
             }
 
-            column.Item()
-                .Padding(PdfReportConfiguration.Spacing.StandardGap)
-                .Column(innerColumn =>
+            // Table with header and data rows
+            column.Item().PaddingTop(5).Table(table =>
+            {
+                // Define columns
+                table.ColumnsDefinition(columns =>
                 {
-                    // Table Header
-                    innerColumn.Item().ComposeTableHeaderRow(
-                        "Year",
-                        "Contributions",
-                        "Earnings",
-                        "Forfeitures",
-                        "Withdrawals",
-                        "Ending Balance");
-
-                    // Table Body - alternating row colors
-                    var isAlternate = false;
-                    foreach (var row in _accountHistory)
-                    {
-                        innerColumn.Item().ComposeTableDataRow(
-                            isAlternate,
-                            row.ProfitYear.ToString(),
-                            row.Contributions.ToCurrencyString(),
-                            row.Earnings.ToCurrencyString(),
-                            row.Forfeitures.ToCurrencyString(),
-                            row.Withdrawals.ToCurrencyString(),
-                            row.EndingBalance.ToCurrencyString());
-
-                        isAlternate = !isAlternate;
-                    }
-
-                    innerColumn.Item().ComposeDivider(1);
+                    columns.RelativeColumn(1);   // Year
+                    columns.RelativeColumn(1.5f); // Contributions
+                    columns.RelativeColumn(1.5f); // Earnings
+                    columns.RelativeColumn(1.5f); // Forfeitures
+                    columns.RelativeColumn(1.5f); // Withdrawals
+                    columns.RelativeColumn(1.5f); // Ending Balance
                 });
+
+                // Header row with bottom border
+                table.Header(header =>
+                {
+                    header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3)
+                        .Text("Year").FontSize(10).Bold();
+                    header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
+                        .Text("Contributions").FontSize(10).Bold();
+                    header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
+                        .Text("Earnings").FontSize(10).Bold();
+                    header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
+                        .Text("Forfeitures").FontSize(10).Bold();
+                    header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
+                        .Text("Withdrawals").FontSize(10).Bold();
+                    header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
+                        .Text("Ending Balance").FontSize(10).Bold();
+                });
+
+                // Data rows
+                foreach (var row in _accountHistory)
+                {
+                    table.Cell().Padding(3).Text(row.ProfitYear.ToString()).FontSize(10);
+                    table.Cell().Padding(3).AlignRight().Text(row.Contributions.ToCurrencyString()).FontSize(10);
+                    table.Cell().Padding(3).AlignRight().Text(row.Earnings.ToCurrencyString()).FontSize(10);
+                    table.Cell().Padding(3).AlignRight().Text(row.Forfeitures.ToCurrencyString()).FontSize(10);
+                    table.Cell().Padding(3).AlignRight().Text(row.Withdrawals.ToCurrencyString()).FontSize(10);
+                    table.Cell().Padding(3).AlignRight().Text(row.EndingBalance.ToCurrencyString()).FontSize(10).Bold();
+                }
+            });
         });
     }
 
     /// <summary>
-    /// Composes the cumulative totals section
+    /// Composes the cumulative totals section - clean styling
     /// </summary>
     private void ComposeCumulativeTotalsSection(IContainer container)
     {
         container.Column(column =>
         {
-            column.Item().ComposeSectionHeader("Cumulative Totals", "#F0F0F0");
+            // Section title
+            column.Item().Text("Cumulative Totals").FontSize(11).Bold();
+            column.Item().PaddingTop(2).Height(1).Background("#000000");
 
-            column.Item()
-                .Padding(PdfReportConfiguration.Spacing.StandardGap)
-                .Column(innerColumn =>
+            column.Item().PaddingTop(5).Table(table =>
+            {
+                table.ColumnsDefinition(columns =>
                 {
-                    // Add proper spacing between items
-                    innerColumn.Spacing(PdfReportConfiguration.TableDefaults.RowSpacing);
-
-                    innerColumn.Item().ComposeTotalsRow("Total Contributions", _cumulativeTotals.TotalContributions.ToCurrencyString());
-                    innerColumn.Item().ComposeTotalsRow("Total Earnings", _cumulativeTotals.TotalEarnings.ToCurrencyString());
-                    innerColumn.Item().ComposeTotalsRow("Total Forfeitures", _cumulativeTotals.TotalForfeitures.ToCurrencyString());
-                    innerColumn.Item().ComposeTotalsRow("Total Withdrawals", _cumulativeTotals.TotalWithdrawals.ToCurrencyString());
-
-                    innerColumn.Item().ComposeDivider(1);
-
-                    innerColumn.Item().Element(el =>
-                    {
-                        el.Padding(5)
-                            .Background(PdfReportConfiguration.BrandColors.TotalsGray)
-                            .Column(col =>
-                            {
-                                col.Item().Text("Total Vested Balance")
-                                    .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
-                                    .FontColor(PdfReportConfiguration.BrandColors.TextBlack)
-                                    .Bold();
-
-                                col.Item().Text(_cumulativeTotals.TotalVestedBalance.ToCurrencyString())
-                                    .FontSize(PdfReportConfiguration.FontSizes.TotalsSize)
-                                    .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue)
-                                    .Bold();
-                            });
-                    });
+                    columns.RelativeColumn(3);
+                    columns.RelativeColumn(2);
                 });
+
+                // Total rows
+                table.Cell().Padding(2).Text("Total Contributions").FontSize(10);
+                table.Cell().Padding(2).AlignRight().Text(_cumulativeTotals.TotalContributions.ToCurrencyString()).FontSize(10);
+
+                table.Cell().Padding(2).Text("Total Earnings").FontSize(10);
+                table.Cell().Padding(2).AlignRight().Text(_cumulativeTotals.TotalEarnings.ToCurrencyString()).FontSize(10);
+
+                table.Cell().Padding(2).Text("Total Forfeitures").FontSize(10);
+                table.Cell().Padding(2).AlignRight().Text(_cumulativeTotals.TotalForfeitures.ToCurrencyString()).FontSize(10);
+
+                table.Cell().Padding(2).Text("Total Withdrawals").FontSize(10);
+                table.Cell().Padding(2).AlignRight().Text(_cumulativeTotals.TotalWithdrawals.ToCurrencyString()).FontSize(10);
+            });
+
+            // Total Vested Balance - highlighted
+            column.Item().PaddingTop(5).Height(1).Background("#000000");
+            column.Item().PaddingTop(5).Row(row =>
+            {
+                row.RelativeItem().Text("Total Vested Balance").FontSize(11).Bold();
+                row.RelativeItem().AlignRight()
+                    .Text(_cumulativeTotals.TotalVestedBalance.ToCurrencyString())
+                    .FontSize(12).Bold().FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue);
+            });
         });
     }
 
     /// <summary>
-    /// Composes the legal notice section
+    /// Composes the legal notice section - boxed with border
     /// </summary>
     private static void ComposeLegalNoticeSection(IContainer container)
     {
-        container.Column(column =>
+        container.Border(1).BorderColor("#000000").Padding(8).Column(column =>
         {
-            column.Item()
-                .Padding(5)
-                .Background("#EEEEEE")
-                .BorderColor(PdfReportConfiguration.BrandColors.BorderGray)
-                .Border(1)
-                .Column(innerColumn =>
-                {
-                    innerColumn.Item().Text("Legal Notice")
-                        .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
-                        .FontColor(PdfReportConfiguration.BrandColors.TextBlack)
-                        .Bold();
+            column.Item().Text("Legal Notice").FontSize(10).Bold();
+            column.Item().PaddingTop(3).Text(
+                "This Account History Report is confidential and contains sensitive personal and financial information. " +
+                "It is intended solely for the member listed above or authorized representatives including the Company's legal department. " +
+                "Unauthorized disclosure, copying, or distribution of this report is strictly prohibited. " +
+                "This statement is provided as of the date generated and may not reflect subsequent transactions or changes. " +
+                "For questions regarding this report, please contact the Profit Sharing Administration office.")
+                .FontSize(8).LineHeight(1.3f);
+        });
+    }
 
-                    innerColumn.Item().Text(
-                        "This Account History Report is confidential and contains sensitive personal and financial information. " +
-                        "It is intended solely for the member listed above or authorized representatives including the Company's legal department. " +
-                        "Unauthorized disclosure, copying, or distribution of this report is strictly prohibited. " +
-                        "This statement is provided as of the date generated and may not reflect subsequent transactions or changes. " +
-                        "For questions regarding this report, please contact the Profit Sharing Administration office.")
-                        .FontSize(PdfReportConfiguration.FontSizes.FooterSize)
-                        .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray)
-                        .LineHeight(1.2f);
-                });
+    /// <summary>
+    /// Helper to compose a simple label:value row
+    /// </summary>
+    private static void ComposeSimpleRow(ColumnDescriptor column, string label, string value)
+    {
+        column.Item().PaddingVertical(1).Row(row =>
+        {
+            row.ConstantItem(100).Text(label).FontSize(10).FontColor("#666666");
+            row.RelativeItem().Text(value).FontSize(10).Bold();
         });
     }
 

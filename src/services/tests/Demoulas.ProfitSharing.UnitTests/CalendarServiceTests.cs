@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;

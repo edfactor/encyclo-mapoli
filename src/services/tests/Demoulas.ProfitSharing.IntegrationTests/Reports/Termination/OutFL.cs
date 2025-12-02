@@ -1,4 +1,4 @@
-﻿// OutFL.cs
+// OutFL.cs
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 

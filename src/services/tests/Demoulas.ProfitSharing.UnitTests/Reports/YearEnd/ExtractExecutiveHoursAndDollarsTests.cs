@@ -1,6 +1,7 @@
-﻿using System.Net;
+using System.Net;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -46,8 +47,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         var appUser = ServiceProvider!.GetService<IAppUser>();
         Mock<IHttpContextAccessor> mockHttpContextAccessor = new();
         Mock<ILogger<ExecutiveHoursAndDollarsEndpoint>> mockLogger = new();
+        Mock<ICommitGuardOverride> mockCommitGuardOverride = new();
         ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
-        IAuditService mockAuditService = new AuditService(MockDbContextFactory, appUser, mockHttpContextAccessor.Object);
+        IAuditService mockAuditService = new AuditService(MockDbContextFactory, mockCommitGuardOverride.Object, appUser, mockHttpContextAccessor.Object);
         _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockAuditService, mockLogger.Object);
     }
 

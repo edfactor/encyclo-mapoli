@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
@@ -30,22 +30,30 @@ public class ProfitMasterTests : PristineBaseTest
     public async Task UpdateTest()
     {
         // Arrange
-        short profitYear = await YearEndService.GetOpenProfitYear(CancellationToken.None);
+        short profitYear = 2025;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
         ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
         ProfitShareEditService pses = new(psus, CalendarService);
-        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, YearEndService);
+        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService);
+
+        var frozenDemographicYear = (await FrozenService.GetActiveFrozenDemographic(CancellationToken.None)).ProfitYear;
+        var maxYearEndStatusYear =
+            await DbFactory.UseWritableContext(async ctx => await ctx.YearEndUpdateStatuses.Select(st => (short?)st.ProfitYear).MaxAsync(CancellationToken.None))!;
+        bool needToRevert = (maxYearEndStatusYear == frozenDemographicYear);
 
         Stopwatch sw = Stopwatch.StartNew();
-        try
+        if (needToRevert)
         {
-            var prs = await pms.Revert(
-                new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = profitYear, }, CancellationToken.None);
-            TestOutputHelper.WriteLine($"Revert {sw.Took()}, for transactionsRemoved:{prs.TransactionsRemoved}  etvasEffected:{prs.EtvasEffected}");
-        }
-        catch (Exception e)
-        {
-            TestOutputHelper.WriteLine($"Revert failed: {e.Message}");
+            try
+            {
+                var prs = await pms.Revert(
+                    new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = 0, }, CancellationToken.None);
+                TestOutputHelper.WriteLine($"Revert {sw.Took()}, for transactionsRemoved:{prs.TransactionsRemoved}  etvasEffected:{prs.EtvasEffected}");
+            }
+            catch (Exception e)
+            {
+                TestOutputHelper.WriteLine($"Revert failed: {e.Message}");
+            }
         }
 
         sw = Stopwatch.StartNew();
@@ -91,19 +99,32 @@ public class ProfitMasterTests : PristineBaseTest
     public async Task RevertTest()
     {
         // Arrange
-        short profitYear = await YearEndService.GetOpenProfitYear(CancellationToken.None);
+        short profitYear = 2025;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
         ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
         ProfitShareEditService pses = new(psus, CalendarService);
-        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, YearEndService);
+        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService);
 
-        Stopwatch sw = Stopwatch.StartNew();
-        // Act
-        var prs = await pms.Revert(
-            new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = profitYear, }, CancellationToken.None);
+        var frozenDemographicYear = (await FrozenService.GetActiveFrozenDemographic(CancellationToken.None)).ProfitYear;
+        var maxYearEndStatusYear =
+            await DbFactory.UseWritableContext(async ctx => await ctx.YearEndUpdateStatuses.Select(st => (short?)st.ProfitYear).MaxAsync(CancellationToken.None))!;
+        bool needToRevert = (maxYearEndStatusYear == frozenDemographicYear);
 
-        sw.Stop();
-        TestOutputHelper.WriteLine($"Revert took {sw.Took()}; for TransactionsRemoved:{prs.TransactionsRemoved} etvasEffected:{prs.EtvasEffected}");
+        if (needToRevert)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            // Act
+            var prs = await pms.Revert(
+                new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = profitYear, }, CancellationToken.None);
+
+            sw.Stop();
+            TestOutputHelper.WriteLine($"Revert took {sw.Took()}; for TransactionsRemoved:{prs.TransactionsRemoved} etvasEffected:{prs.EtvasEffected}");
+        }
+        else
+        {
+            TestOutputHelper.WriteLine("Nothing really to revert...");
+        }
+
         true.ShouldBeTrue();
     }
 }

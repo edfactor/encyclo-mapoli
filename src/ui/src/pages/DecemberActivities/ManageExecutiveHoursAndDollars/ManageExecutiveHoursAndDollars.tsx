@@ -5,8 +5,8 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import { memo, useCallback } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
-import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS } from "../../../constants";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
@@ -85,6 +85,12 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   const isReadOnly = useReadOnlyNavigation();
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
+  
+  // Editing is only allowed when:
+  // 1. Page status is "In Progress" (not read-only by status)
+  // 2. Year is not frozen
+  // 3. Not in general read-only mode
+  const canEdit = !isReadOnlyByStatus && !isFrozen && !isReadOnly;
   //const [currentStatus, setCurrentStatus] = useState<string | null>(null);
 
   /*
@@ -154,6 +160,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
             addExecutivesToMainGrid={addExecutivesToMainGrid}
             isModalSearching={isModalSearching}
             isReadOnly={isReadOnly}
+            canEdit={canEdit}
           />
         </Grid>
       )}

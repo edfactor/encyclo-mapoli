@@ -114,7 +114,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     const mockState = {
-      security: { token: "mock-token" },
+      security: { token: "mock-token", impersonating: [] },
       navigation: { navigationData: undefined, error: undefined, currentNavigationId: null },
       yearsEnd: {
         selectedProfitYearForFiscalClose: 2024,

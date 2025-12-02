@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Oracle.ManagedDataAccess.Client;
 
 namespace YEMatch.AssertActivities;

@@ -45,7 +45,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         _logger = logger;
     }
 
-    public async Task<AccountHistoryReportPaginatedResponse> GetAccountHistoryReportAsync(
+    public Task<AccountHistoryReportPaginatedResponse> GetAccountHistoryReportAsync(
         int memberId,
         AccountHistoryReportRequest request,
         CancellationToken cancellationToken)
@@ -53,9 +53,10 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         var endYear = request.EndDate?.Year ?? DateTime.Today.Year;
         var startYear = request.StartDate?.Year ?? endYear - 3;
 
-        var allYears = await _contextFactory.UseReadOnlyContext(async ctx =>
+        // Single database context for initial queries, then parallel execution for per-year data
+        return _contextFactory.UseReadOnlyContext(async ctx =>
         {
-            // Get member demographic information
+            // Get member demographic information (single query)
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             var demographic = await demographicQuery
                 .TagWith($"AccountHistoryReport-Demographics-{memberId}")
@@ -63,90 +64,187 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
             if (demographic is null)
             {
-                return new List<short>();
+                return CreateEmptyResponse(request, startYear);
             }
 
-            // Retrieve all profit years for this member within the date range
-            return await ctx.ProfitDetails
-                .TagWith($"AccountHistoryReport-Years-{demographic.BadgeNumber}")
-                .Where(pd => pd.Ssn == demographic.Ssn &&
+            var ssn = demographic.Ssn;
+            var badgeNumber = demographic.BadgeNumber;
+            var demographicId = demographic.Id;
+            var fullName = demographic.ContactInfo.FullName ?? string.Empty;
+
+            // Get all profit years for this member - apply sorting to determine which years we need
+            var sortBy = request.SortBy ?? "ProfitYear";
+            var isSortDescending = request.IsSortDescending ?? true;
+            var skip = request.Skip ?? 0;
+            var take = request.Take ?? 25;
+
+            // For year-based sorting, we can optimize by only fetching the years we need
+            // For other sorting, we need all years to sort properly
+            var isYearBasedSort = sortBy.Equals("profityear", StringComparison.OrdinalIgnoreCase);
+
+            IQueryable<short> yearsQuery = ctx.ProfitDetails
+                .TagWith($"AccountHistoryReport-Years-{badgeNumber}")
+                .Where(pd => pd.Ssn == ssn &&
                              pd.ProfitYear >= startYear &&
                              pd.ProfitYear <= endYear)
                 .Select(pd => pd.ProfitYear)
-                .Distinct()
-                .OrderBy(py => py)
+                .Distinct();
+
+            // Get total count for pagination
+            var totalYearCount = await yearsQuery.CountAsync(cancellationToken);
+
+            if (totalYearCount == 0)
+            {
+                return CreateEmptyResponse(request, startYear);
+            }
+
+            List<short> yearsToFetch;
+            if (isYearBasedSort)
+            {
+                // Optimize: only fetch years needed for current page
+                yearsQuery = isSortDescending
+                    ? yearsQuery.OrderByDescending(y => y)
+                    : yearsQuery.OrderBy(y => y);
+
+                yearsToFetch = await yearsQuery
+                    .Skip(skip)
+                    .Take(take)
+                    .ToListAsync(cancellationToken);
+            }
+            else
+            {
+                // For non-year sorting, we need all data to sort correctly
+                // But still limit to a reasonable max to prevent excessive queries
+                const int maxYearsToFetch = 100;
+                yearsToFetch = await yearsQuery
+                    .OrderBy(y => y)
+                    .Take(maxYearsToFetch)
+                    .ToListAsync(cancellationToken);
+            }
+
+            // Batch load profit details for the years we're fetching
+            var allProfitDetails = await ctx.ProfitDetails
+                .TagWith($"AccountHistoryReport-AllProfitDetails-{badgeNumber}")
+                .Where(pd => pd.Ssn == ssn && yearsToFetch.Contains(pd.ProfitYear))
                 .ToListAsync(cancellationToken);
 
+            // Group profit details by year for efficient lookup
+            var profitDetailsByYear = allProfitDetails
+                .GroupBy(pd => pd.ProfitYear)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-        }, cancellationToken);
+            // Execute per-year queries in parallel for better performance
+            var tasks = yearsToFetch.Select(year => FetchYearDataAsync(
+                year,
+                ssn,
+                badgeNumber,
+                demographicId,
+                fullName,
+                profitDetailsByYear.GetValueOrDefault(year, []),
+                cancellationToken)).ToList();
 
-        decimal previousCumulativeEndingBalance = 0;
-        decimal previousCumulativeDistributions = 0;
-        var reportData = new List<AccountHistoryReportResponse>();
+            var reportData = (await Task.WhenAll(tasks)).ToList();
 
-        var tasks = new List<Task<AccountHistoryReportResponse>>();
-
-        foreach (var year in allYears)
-        {
-            tasks.Add(_contextFactory.UseReadOnlyContext(async ctx =>
+            // Build response - for year-based sort, data is already in correct order and paginated
+            if (isYearBasedSort)
             {
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-                var demographic = await demographicQuery
-                    .TagWith($"AccountHistoryReport-Demographics-{memberId}")
-                    .FirstOrDefaultAsync(d => d.BadgeNumber == memberId, cancellationToken);
-
-                // Get cumulative totals from TotalService for this year
-                var balanceSet = _totalService.GetTotalBalanceSet(ctx, year);
-                var memberBalance = await balanceSet
-                    .FirstOrDefaultAsync(b => b.Ssn == demographic!.Ssn, cancellationToken);
-
-                var distributions = _totalService.GetTotalDistributions(ctx, year);
-                var memberDistributions = await distributions
-                    .FirstOrDefaultAsync(d => d.Ssn == demographic!.Ssn, cancellationToken);
-
-                // Get vesting balance for this year
-                var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                    SearchBy.BadgeNumber, demographic!.BadgeNumber, year, cancellationToken);
-
-                // Get year-specific profit details for contributions, earnings, and forfeitures
-                var yearProfitDetails = await ctx.ProfitDetails
-                    .TagWith($"AccountHistoryReport-ProfitDetails-{demographic.BadgeNumber}-{year}")
-                    .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitYear == year)
-                    .ToListAsync(cancellationToken);
-
-                // Use shared extension methods for consistent aggregation logic
-                (decimal yearContributions, decimal yearEarnings, decimal yearForfeitures) =
-                    ProfitDetailExtensions.AggregateAllProfitValues(yearProfitDetails);
-
-                // Current cumulative totals
-                decimal currentCumulativeEndingBalance = memberBalance?.TotalAmount ?? 0;
-                decimal currentCumulativeDistributions = memberDistributions?.TotalAmount ?? 0;
-
-                // Year-over-year calculations: difference from previous year
-                decimal yearEndingBalance = currentCumulativeEndingBalance - previousCumulativeEndingBalance;
-                decimal yearWithdrawals = currentCumulativeDistributions - previousCumulativeDistributions;
-
-                var yearVestedBalance = vestingBalance?.VestedBalance ?? 0;
-                return new AccountHistoryReportResponse
+                // Calculate cumulative totals from the fetched data
+                var cumulativeTotals = new AccountHistoryReportTotals
                 {
-                    Id = demographic.Id,
-                    BadgeNumber = demographic.BadgeNumber,
-                    FullName = demographic.ContactInfo.FullName ?? string.Empty,
-                    Ssn = demographic.Ssn.MaskSsn(),
-                    ProfitYear = year,
-                    Contributions = yearContributions,
-                    Earnings = yearEarnings,
-                    Forfeitures = yearForfeitures,
-                    Withdrawals = yearWithdrawals,
-                    EndingBalance = currentCumulativeEndingBalance,
-                    VestedBalance = yearVestedBalance
+                    TotalContributions = reportData.Sum(r => r.Contributions),
+                    TotalEarnings = reportData.Sum(r => r.Earnings),
+                    TotalForfeitures = reportData.Sum(r => r.Forfeitures),
+                    TotalWithdrawals = reportData.Sum(r => r.Withdrawals),
+                    TotalVestedBalance = reportData.OrderByDescending(r => r.ProfitYear).FirstOrDefault()?.VestedBalance ?? 0
                 };
-            }, cancellationToken));
-        }
 
-        var results = await Task.WhenAll(tasks);
-        reportData.AddRange(results);
+                return BuildPaginatedResponsePreSorted(reportData, request, startYear, totalYearCount, cumulativeTotals);
+            }
 
+            // For non-year sorting, apply sorting and pagination now
+            return BuildPaginatedResponse(reportData, request, startYear);
+        }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Fetches year-specific data (balances, distributions, vesting) in a separate context for parallel execution.
+    /// Each year runs in its own context, enabling parallel execution across years.
+    /// </summary>
+    private Task<AccountHistoryReportResponse> FetchYearDataAsync(
+        short year,
+        int ssn,
+        int badgeNumber,
+        int demographicId,
+        string fullName,
+        List<Data.Entities.ProfitDetail> yearProfitDetails,
+        CancellationToken cancellationToken)
+    {
+        // Use shared extension methods for consistent aggregation logic
+        (decimal yearContributions, decimal yearEarnings, decimal yearForfeitures) =
+            ProfitDetailExtensions.AggregateAllProfitValues(yearProfitDetails);
+
+        // Execute balance/distribution queries sequentially within this context
+        // (EF Core doesn't allow concurrent operations on the same context)
+        // Parallelism is achieved at the year level - each year has its own context
+        return _contextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var memberBalance = await _totalService.GetTotalBalanceSet(ctx, year)
+                .FirstOrDefaultAsync(b => b.Ssn == ssn, cancellationToken);
+
+            var memberDistributions = await _totalService.GetTotalDistributions(ctx, year)
+                .FirstOrDefaultAsync(d => d.Ssn == ssn, cancellationToken);
+
+            // GetVestingBalanceForSingleMemberAsync creates its own context internally
+            var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
+                SearchBy.BadgeNumber, badgeNumber, year, cancellationToken);
+
+            return new AccountHistoryReportResponse
+            {
+                Id = demographicId,
+                BadgeNumber = badgeNumber,
+                FullName = fullName,
+                Ssn = ssn.MaskSsn(),
+                ProfitYear = year,
+                Contributions = yearContributions,
+                Earnings = yearEarnings,
+                Forfeitures = yearForfeitures,
+                Withdrawals = memberDistributions?.TotalAmount ?? 0,
+                EndingBalance = memberBalance?.TotalAmount ?? 0,
+                VestedBalance = vestingBalance?.VestedBalance ?? 0
+            };
+        }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Creates an empty response when no data is found.
+    /// </summary>
+    private static AccountHistoryReportPaginatedResponse CreateEmptyResponse(
+        AccountHistoryReportRequest request,
+        int startYear)
+    {
+        return new AccountHistoryReportPaginatedResponse
+        {
+            ReportName = "Account History Report",
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = request.StartDate ?? new DateOnly(startYear, 1, 1),
+            EndDate = request.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
+            Response = new PaginatedResponseDto<AccountHistoryReportResponse>
+            {
+                Results = [],
+                Total = 0
+            },
+            CumulativeTotals = new AccountHistoryReportTotals()
+        };
+    }
+
+    /// <summary>
+    /// Builds the paginated response from report data.
+    /// </summary>
+    private static AccountHistoryReportPaginatedResponse BuildPaginatedResponse(
+        List<AccountHistoryReportResponse> reportData,
+        AccountHistoryReportRequest request,
+        int startYear)
+    {
         // Apply sorting based on request parameters
         var sortBy = request.SortBy ?? "ProfitYear";
         var isSortDescending = request.IsSortDescending ?? true;
@@ -177,7 +275,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             ? (startDate, endDate)
             : (endDate, startDate);
 
-        var paginatedResponse = new AccountHistoryReportPaginatedResponse()
+        return new AccountHistoryReportPaginatedResponse
         {
             ReportName = "Account History Report",
             ReportDate = DateTimeOffset.UtcNow,
@@ -197,11 +295,43 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 TotalVestedBalance = totalVestedBalance
             }
         };
+    }
 
-        // Note: Cumulative totals (total contributions, earnings, forfeitures, withdrawals, balance)
-        // are calculated from all sorted results before pagination. The UI reads these values
-        // from the AccountHistoryReportPaginatedResponse.CumulativeTotals property
-        return paginatedResponse;
+    /// <summary>
+    /// Builds the paginated response when data is already fetched for the correct page.
+    /// This is used when sorting by year and we only fetch the years needed for the current page.
+    /// </summary>
+    /// <param name="reportData">Report data already limited to the current page</param>
+    /// <param name="request">The request with pagination and date range info</param>
+    /// <param name="startYear">The default start year for date range</param>
+    /// <param name="totalYearCount">The total count of years in the full date range (for pagination)</param>
+    /// <param name="cumulativeTotals">Pre-calculated cumulative totals across all years</param>
+    private static AccountHistoryReportPaginatedResponse BuildPaginatedResponsePreSorted(
+        List<AccountHistoryReportResponse> reportData,
+        AccountHistoryReportRequest request,
+        int startYear,
+        int totalYearCount,
+        AccountHistoryReportTotals cumulativeTotals)
+    {
+        var startDate = request.StartDate ?? new DateOnly(startYear, 1, 1);
+        var endDate = request.EndDate ?? DateOnly.FromDateTime(DateTime.Today);
+        var dateRange = startDate <= endDate
+            ? (startDate, endDate)
+            : (endDate, startDate);
+
+        return new AccountHistoryReportPaginatedResponse
+        {
+            ReportName = "Account History Report",
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = dateRange.Item1,
+            EndDate = dateRange.Item2,
+            Response = new PaginatedResponseDto<AccountHistoryReportResponse>
+            {
+                Results = reportData,
+                Total = totalYearCount
+            },
+            CumulativeTotals = cumulativeTotals
+        };
     }
 
     /// <summary>
@@ -279,7 +409,9 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
             var employee = await _employeeLookupService.GetMemberVestingAsync(new MasterInquiryMemberRequest()
             {
-                Id = firstResponse.Id, MemberType = 1, ProfitYear = (short)reportData.EndDate.Year
+                Id = firstResponse.Id,
+                MemberType = 1,
+                ProfitYear = (short)reportData.EndDate.Year
             }, cancellationToken);
 
             // Create the PDF report document

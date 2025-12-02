@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Repositories;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;

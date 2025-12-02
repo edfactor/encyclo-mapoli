@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
@@ -26,10 +26,22 @@ public class Pay443Tests : PristineBaseTest
         string expectedReport = ReadEmbeddedResource(".golden.R20-PAY443").Trim();
 
         ForfeituresAndPointsForYearResponseWithTotals expectedResponse = ReadyReportParser.ParseReport(expectedReport);
-
+        
         // Get a hot response from SMART
         ForfeituresAndPointsForYearResponseWithTotals actualResponse =
-            await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(new FrozenProfitYearRequest { ProfitYear = 2025, Take = int.MaxValue });
+            await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(new FrozenProfitYearRequest { ProfitYear = TestConstants.OpenProfitYear, Take = int.MaxValue });
+
+        // READY uses the name without initial, so we remove the middle initial from the name in smart.
+        actualResponse = actualResponse with
+        {
+            Response = actualResponse.Response with
+            {
+                Results = actualResponse.Response.Results.Select(r => r with
+                {
+                    EmployeeName = RemoveMiddleInitial(r.EmployeeName)
+                }).ToList()
+            }
+        };
 
         // We do not test that the order is identical.
         HashSet<ForfeituresAndPointsForYearResponse> actualRows = actualResponse.Response.Results.ToHashSet();
@@ -77,6 +89,31 @@ public class Pay443Tests : PristineBaseTest
         actualResponse = actualResponse with { Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] } };
 
         actualResponse.ShouldBeEquivalentTo(expectedResponse);
+    }
+
+    public static string? RemoveMiddleInitial(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return name;
+        }
+
+        // Names are in format "LAST, FIRST MIDDLE" - we want to remove the middle initial
+        // Example: "SMITH, JOHN K" becomes "SMITH, JOHN"
+        var parts = name.Split(',');
+        if (parts.Length != 2)
+        {
+            return name;
+        }
+
+        var lastName = parts[0].Trim();
+        var firstAndMiddle = parts[1].Trim();
+
+        // Split the first and middle parts
+        var nameTokens = firstAndMiddle.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return nameTokens.Length <= 1 ? name :
+            // Keep only the first name, remove middle initial(s)
+            $"{lastName}, {nameTokens[0]}";
     }
 
 }

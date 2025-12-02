@@ -1,4 +1,4 @@
-﻿using Shouldly;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
 

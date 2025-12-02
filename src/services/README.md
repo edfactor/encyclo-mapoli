@@ -7,13 +7,13 @@
 ### Getting Started
 Install 3rd Party Libraries:
 
-1. Visual Studio Professional 2022 (17.14.19) or higher installed - https://visualstudio.microsoft.com/downloads/
+1. Visual Studio Professional 2026 (18.0.2) or higher installed - https://visualstudio.microsoft.com/downloads/
 
     ![Workload](./setup_images/workload.PNG)
     - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads
     - If VS requires any additional workloads or packages, you will be prompted at startup.
 
-1.1. OPTIONAL: JetBrains Rider 2024.3.2 or higher installed - https://www.jetbrains.com/rider/
+1.1. OPTIONAL: JetBrains Rider 2025.3 or higher installed - https://www.jetbrains.com/rider/
 3. OPTIONAL - Latest version of Chrome web browser - https://www.google.com/chrome/
 
 
@@ -37,7 +37,7 @@ Install 3rd Party Libraries:
 
 1. [Safe storage of app secrets in development](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#enable-secret-storage)
 2. [Fast-Endpoints](https://fast-endpoints.com/) | [REPR Design Pattern](https://deviq.com/design-patterns/repr-design-pattern)
-3. [EntityFramework.Core 9 w/Oracle](https://www.nuget.org/packages/Oracle.EntityFrameworkCore)
+3. [EntityFramework.Core 10 w/Oracle](https://www.nuget.org/packages/Oracle.EntityFrameworkCore)
 4. [.editorconfig](https://learn.microsoft.com/en-us/visualstudio/ide/create-portable-custom-editor-options?view=vs-2022)
 5. [Directory.Build.Props](https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-by-directory?view=vs-2022)
 6. [Centralized package management](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management)

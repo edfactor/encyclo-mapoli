@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive, IProfitYearRequest
+public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive
 {
     public decimal BeginningBalance { get; set; }
     public decimal BeneficiaryAllocation { get; set; }
@@ -18,6 +18,5 @@ public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutiv
     public bool HasForfeited { get; set; }
     public decimal? SuggestedForfeit { get; set; }
     public bool IsExecutive { get; set; }
-    public short ProfitYear { get; set; }
     public byte EnrollmentId { get; set; }
 }

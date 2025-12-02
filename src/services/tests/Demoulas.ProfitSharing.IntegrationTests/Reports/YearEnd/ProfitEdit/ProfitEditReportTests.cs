@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Shouldly;
@@ -81,7 +82,7 @@ public class ProfitEditReportTests : PristineBaseTest
                 re.ForfeitureAmount,
                 re.RecordChangeSummary?.ToUpper() ?? "",
                 re.DisplayedZeroContStatus,
-                re.Name!
+                Pay443Tests.RemoveMiddleInitial(re.Name!)!
             )
         ).ToList();
 

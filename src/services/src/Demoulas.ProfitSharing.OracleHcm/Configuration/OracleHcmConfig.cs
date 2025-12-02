@@ -79,4 +79,25 @@ public sealed record OracleHcmConfig
     /// Default: 10 minutes
     /// </summary>
     public int JwtExpirationMinutes { get; set; } = 10;
+
+    /// <summary>
+    /// Gets or sets the subject (sub) claim for JWT tokens.
+    /// This identifies the principal about which the JWT makes a statement.
+    /// Example: "API_PS_PROD"
+    /// </summary>
+    public string JwtSubject { get; set; } = "API_PS_PROD";
+
+    /// <summary>
+    /// Gets or sets the audience (aud) claim for JWT tokens.
+    /// This identifies the recipients that the JWT is intended for.
+    /// Example: "https://eqma-dev3.fa.ocs.oraclecloud.com"
+    /// </summary>
+    public string JwtAudience { get; set; } = "https://eqma-dev3.fa.ocs.oraclecloud.com";
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to include the JWT ID (jti) claim in JWT tokens.
+    /// The jti claim provides a unique identifier for each token instance, useful for token tracking and preventing replay attacks.
+    /// Default: false
+    /// </summary>
+    public bool IncludeJtiClaim { get; set; } = false;
 }

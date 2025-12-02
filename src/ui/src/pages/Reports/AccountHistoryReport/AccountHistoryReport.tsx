@@ -15,6 +15,7 @@ import AccountHistoryReportTable from "./AccountHistoryReportTable";
 
 const AccountHistoryReport: React.FC = () => {
   const [filterParams, setFilterParams] = useState<AccountHistoryReportFilterParams | null>(null);
+  const [isFormDirty, setIsFormDirty] = useState(false);
   const [triggerSearch, { data, isFetching }] = AccountHistoryReportApi.useLazyGetAccountHistoryReportQuery();
   const [downloadPdf, { isLoading: isDownloadingPdf }] =
     AccountHistoryReportApi.useDownloadAccountHistoryReportPdfMutation();
@@ -69,6 +70,7 @@ const AccountHistoryReport: React.FC = () => {
 
   const handleFilterChange = (params: AccountHistoryReportFilterParams) => {
     setFilterParams(params);
+    setIsFormDirty(false); // Search was performed, form is no longer dirty
 
     // Trigger the query immediately with the search params
     const queryParams: AccountHistoryReportRequest = {
@@ -91,8 +93,16 @@ const AccountHistoryReport: React.FC = () => {
 
   const handleReset = () => {
     setFilterParams(null);
+    setIsFormDirty(false);
     paginationRef.current.resetPagination();
   };
+
+  const handleFormDirty = useCallback(() => {
+    // Mark form as dirty when user modifies filter criteria
+    if (filterParams) {
+      setIsFormDirty(true);
+    }
+  }, [filterParams]);
 
   const handleDownloadPdf = async () => {
     if (!filterParams) return;
@@ -131,6 +141,7 @@ const AccountHistoryReport: React.FC = () => {
             <AccountHistoryReportFilterSection
               onFilterChange={handleFilterChange}
               onReset={handleReset}
+              onFormDirty={handleFormDirty}
               isLoading={isFetching}
             />
           </DSMAccordion>
@@ -154,9 +165,15 @@ const AccountHistoryReport: React.FC = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleDownloadPdf}
-                disabled={isDownloadingPdf || !filterParams}>
+                disabled={isDownloadingPdf || !filterParams || isFormDirty}
+                title={isFormDirty ? "Click Search to update results before exporting" : undefined}>
                 {isDownloadingPdf ? "Generating PDF..." : "Download PDF Report"}
               </Button>
+              {isFormDirty && (
+                <span className="ml-2 text-sm text-amber-600">
+                  Search criteria changed. Click Search to update results before exporting.
+                </span>
+              )}
             </Grid>
             <Grid width="100%">
               <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2 [&_*]:!text-left">

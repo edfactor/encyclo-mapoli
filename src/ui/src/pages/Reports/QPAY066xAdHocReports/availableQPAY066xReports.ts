@@ -12,7 +12,7 @@ const reports: QPAY066xAdHocReportPreset[] = [
     apiEndpoint: "/api/yearend/breakdown-by-store/terminated/withcurrentbalance/notvested"
   },
   {
-    id: "QPAY066-Inactive",
+    id: "QPAY066-INACTIVE",
     name: "QPAY066-Inactive",
     description: "Inactive Employees",
     params: {
@@ -49,7 +49,7 @@ const reports: QPAY066xAdHocReportPreset[] = [
       reportId: 5
     },
     requiresDateRange: true,
-    apiEndpoint: "/api/yearend/breakdown-by-store/retired/withbalanceactivity"
+    apiEndpoint: "yearend/breakdown-by-store/retired/withbalanceactivity"
   },
   {
     id: "QPAY066TA",

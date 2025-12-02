@@ -35,7 +35,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 interface MockResult {
   badgeNumber: number;
   ssn: number;
-  employeeName: string;
+  fullName: string;
   store: number;
   status: string;
   statusName: string;
@@ -114,7 +114,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
             {
               badgeNumber: 12345,
               ssn: 123456789,
-              employeeName: "John Doe",
+              fullName: "John Doe",
               store: 1,
               status: "Active",
               statusName: "Active"
@@ -160,7 +160,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
             {
               badgeNumber: 12345,
               ssn: 123456789,
-              employeeName: "John Doe",
+              fullName: "John Doe",
               store: 1,
               status: "Active",
               statusName: "Active"
@@ -273,7 +273,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
     it("should display record count from hook results", () => {
       vi.mocked(useDemographicBadgesNotInPayprofit).mockReturnValue({
         searchResults: createMockSearchResults(
-          [{ badgeNumber: 1, ssn: 111111111, employeeName: "Name", store: 1, status: "Active", statusName: "Active" }],
+          [{ badgeNumber: 1, ssn: 111111111, fullName: "Name", store: 1, status: "Active", statusName: "Active" }],
           1
         ),
         isSearching: false,
@@ -348,7 +348,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
             {
               badgeNumber: 1,
               ssn: 111111111,
-              employeeName: "Jane Doe",
+              fullName: "Jane Doe",
               store: 1,
               status: "Active",
               statusName: "Active"
@@ -356,7 +356,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
             {
               badgeNumber: 2,
               ssn: 222222222,
-              employeeName: "John Smith",
+              fullName: "John Smith",
               store: 2,
               status: "Active",
               statusName: "Active"
@@ -364,7 +364,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
             {
               badgeNumber: 3,
               ssn: 333333333,
-              employeeName: "Bob Johnson",
+              fullName: "Bob Johnson",
               store: 3,
               status: "Active",
               statusName: "Active"
@@ -407,7 +407,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
   describe("Grid props passing", () => {
     it("should pass data to grid", () => {
       const mockResults = createMockSearchResults(
-        [{ badgeNumber: 123, ssn: 123000000, employeeName: "Test", store: 1, status: "Active", statusName: "Active" }],
+        [{ badgeNumber: 123, ssn: 123000000, fullName: "Test", store: 1, status: "Active", statusName: "Active" }],
         1
       );
 

@@ -11,7 +11,7 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
   return [
     createBadgeOrPSNColumn({
       headerName: "Badge/PSN",
-      colId: "badgeOrPsn",
+      field: "badgeOrPsn",
       badgeField: "badgeNumber",
       psnField: "beneficiaryPsn",
       navigateFunction: navFunction,

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Services.ItDevOps;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
@@ -42,7 +42,7 @@ public abstract class PristineBaseTest
         DemographicReaderService = new DemographicReaderService(FrozenService, HttpContextAccessor);
         TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);
         TestOutputHelper = testOutputHelper;
-        PayProfitUpdateService = new PayProfitUpdateService(DbFactory, new Mock<ILoggerFactory>().Object, TotalService, CalendarService);
+        PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService);
         YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService);
     }
 

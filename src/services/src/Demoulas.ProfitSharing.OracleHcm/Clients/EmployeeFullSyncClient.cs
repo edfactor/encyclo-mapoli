@@ -94,6 +94,9 @@ internal sealed class EmployeeFullSyncClient
                 break;
             }
 
+            // Per the Oracle Consultants, we need to slow this operation down, or continue to risk 401 errors as a way of handling too many requests.
+            await Task.Delay(new TimeSpan(0, 0, 10), cancellationToken).ConfigureAwait(false);
+
             // Use the server-provided pagination information when available.
             offset = demographics.Count + demographics.Offset;
             string nextUrl = await BuildUrl(offset, cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -126,7 +129,7 @@ internal sealed class EmployeeFullSyncClient
     private async Task<string> BuildUrl(int offset = 0, long? oracleHcmId = null, CancellationToken cancellationToken = default)
     {
         // Oracle will limit us to 500, but we run the risk of timeout well below that, so we need to be conservative.
-        ushort limit = ushort.Min(75, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(100, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>()
         {
             { "limit", $"{limit}" },

@@ -354,7 +354,7 @@ public sealed class BreakdownReportService : IBreakdownService
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasCurrentBalanceNotVested, withBeneficiaryAllocation: true, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(

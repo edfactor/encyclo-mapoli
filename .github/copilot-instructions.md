@@ -5,7 +5,7 @@
 ## Architecture Overview
 
 - **Monorepo** with two primary roots:
-  - `src/services/` - .NET 9 multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, RabbitMQ, Mapperly, Shouldly)
+  - `src/services/` - .NET 10 multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 10 + Oracle, Aspire, Serilog, RabbitMQ, Mapperly, Shouldly)
     - Hosted using **.NET Aspire** (`Demoulas.ProfitSharing.AppHost`) - do not create ad-hoc hosts
     - **Start app**: `aspire run` from project root
   - Aspire docs: https://github.com/dotnet/docs-aspire/blob/main/docs/cli/overview.md
@@ -22,7 +22,10 @@
   - Bulk maintenance uses `ExecuteUpdate/ExecuteDelete` inside services
   - Dynamic filters build expressions in services (see `DemographicsService`)
   - Avoid raw SQL; if needed, encapsulate in service layer
-- **EF Core 9 Best Practices**: See detailed EF Core patterns in the section below
+- **EF Core 10 Best Practices**: See detailed EF Core patterns in the section below. References:
+  - [EF Core 10.0 What's New](https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-10.0/whatsnew)
+  - [Oracle Entity Framework Core 10 Features](https://docs.oracle.com/en/database/oracle/oracle-database/26/odpnt/EFCore10features.html)
+  - [Oracle .NET Database Samples](https://github.com/oracle/dotnet-db-samples)
 - **Distributed Caching**: Use `IDistributedCache` (NOT `IMemoryCache`). See DISTRIBUTED_CACHING_PATTERNS.md (`.github/`) for complete patterns including version-based invalidation
 - **Auditing & History**: Close current record (`ValidTo = now`), insert new history row. NEVER overwrite historical rows.
 - **Identifiers**: `OracleHcmId` is authoritative; fall back to `(Ssn,BadgeNumber)` only when Oracle id missing
@@ -137,9 +140,15 @@ var result = await _svc.GetAsync(req.Id, ct);
 return result.ToHttpResult(Error.SomeEntityNotFound);
 ```
 
-## EF Core 9 Patterns & Best Practices (MANDATORY)
+## EF Core 10 Patterns & Best Practices (MANDATORY)
 
-We use **EF Core 9** with Oracle provider. All DB access MUST follow these patterns.
+We use **EF Core 10** with Oracle provider. All DB access MUST follow these patterns.
+
+**References**:
+
+- [EF Core 10.0 What's New](https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-10.0/whatsnew)
+- [Oracle Entity Framework Core 10 Features](https://docs.oracle.com/en/database/oracle/oracle-database/26/odpnt/EFCore10features.html)
+- [Oracle .NET Database Samples](https://github.com/oracle/dotnet-db-samples)
 
 **CRITICAL**: Use `context.UseReadOnlyContext()` for read-only ops—it auto-applies `.AsNoTracking()`. Do NOT add `.AsNoTracking()` when using `UseReadOnlyContext()`.
 
@@ -317,6 +326,28 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
 
+### Decimal Rounding (CRITICAL for Financial Calculations)
+
+**Always use `MidpointRounding.AwayFromZero` for monetary/financial calculations** to match COBOL behavior.
+
+```csharp
+// ✅ RIGHT: Use AwayFromZero for financial calculations (matches COBOL)
+var roundedAmount = Math.Round(amount, 2, MidpointRounding.AwayFromZero);
+
+// ❌ WRONG: Default rounding uses ToEven (banker's rounding)
+var roundedAmount = Math.Round(amount, 2);  // Uses MidpointRounding.ToEven
+```
+
+**Why**: COBOL uses traditional rounding (0.5 rounds up), while .NET defaults to banker's rounding (0.5 rounds to nearest even). This can cause penny differences in financial reports.
+
+**When to use**:
+
+- Tax calculations (federal, state)
+- Distribution amounts
+- Forfeiture amounts
+- Any monetary aggregation or reporting
+- Profit sharing calculations
+
 ### Async/Await Patterns (AsyncFixer01 - Critical)
 
 **AsyncFixer analyzer (https://github.com/semihokur/AsyncFixer) enforces these patterns. Violations are build errors.**
@@ -422,6 +453,23 @@ These conventions are important project-wide rules. Follow them in addition to t
 - State mgmt: Centralize API/data logic in `src/reduxstore/`; prefer RTK Query or slices patterns already present.
 - Styling: Tailwind utility-first; extend via `tailwind.config.js`; avoid inline style objects for reusable patterns—create small components.
 - E2E: Playwright tests under `src/ui/e2e`; new tests should support `.playwright.env` driven creds (no hard-coded secrets).
+
+### Build & Deployment (Vite)
+
+- **Build system**: Vite with mode-based configuration. See `src/ui/package.json` scripts:
+  - `npm run dev` - Development server on port 3100 (Vite dev server)
+  - `npm run build:prod` - Production build: runs `tsc -b` then `vite build --mode production`
+  - `npm run build:qa` - QA build: `vite build --mode qa`
+  - `npm run build:uat` - UAT build: `vite build --mode uat`
+- **TypeScript compilation**: Production builds run `tsc -b` BEFORE vite build. TypeScript errors will block the build.
+- **Code splitting**: Vite automatically code-splits routes using `React.lazy()`. Each lazy route creates a separate chunk file in `build/static/js/` (or `dist/`).
+- **Output locations**:
+  - Development: Run Vite dev server directly
+  - Build output: `build/` directory with subdirectories `static/js/`, `static/css/`, etc.
+- **Build verification**: After code changes affecting routes or components:
+  1. Run `npm run lint` - verify 0 errors, 0 warnings
+  2. Run `npm run build:qa` - verify build succeeds, check chunk file creation
+  3. Verify chunk files exist: `build/static/js/ComponentName-[hash].js` for each lazy route
 
 ## Testing & Quality
 

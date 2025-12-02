@@ -184,7 +184,7 @@ const DistributionInquiryContent = () => {
 
       // Check if it's a 500 error with "Badge number not found" or "SSN not found" title
       if (
-        serviceError?.data.status === 500 &&
+        serviceError?.data?.status === 500 &&
         (serviceError?.data?.title === "Badge number not found." || serviceError?.data?.title === "SSN not found.")
       ) {
         addAlert(DISTRIBUTION_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
