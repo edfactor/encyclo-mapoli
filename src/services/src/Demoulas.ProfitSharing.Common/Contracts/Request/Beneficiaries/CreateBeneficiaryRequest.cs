@@ -7,6 +7,7 @@ public sealed record CreateBeneficiaryRequest
     public byte? SecondLevelBeneficiaryNumber { get; set; }
     public byte? ThirdLevelBeneficiaryNumber { get; set; }
     public required string Relationship { get; set; }
+    public required char KindId { get; set; }
     public decimal Percentage { get; set; }
 
     public static CreateBeneficiaryRequest SampleRequest() => new CreateBeneficiaryRequest
@@ -16,6 +17,7 @@ public sealed record CreateBeneficiaryRequest
         SecondLevelBeneficiaryNumber = 2,
         ThirdLevelBeneficiaryNumber = 3,
         Relationship = "Sibling",
+        KindId = 'P',
         Percentage = 50
     };
 }

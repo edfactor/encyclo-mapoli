@@ -255,6 +255,7 @@ BEGIN
             DEMOGRAPHIC_ID,
             BENEFICIARY_CONTACT_ID,
             RELATIONSHIP,
+            KIND_ID,
             PERCENT
         )
         SELECT 
@@ -269,6 +270,7 @@ BEGIN
              FROM BENEFICIARY_CONTACT bc2 
              WHERE bc2.SSN = (SELECT bc.SSN + (v_iteration * 1000000) FROM BENEFICIARY_CONTACT bc WHERE bc.ID = b.BENEFICIARY_CONTACT_ID)) AS BENEFICIARY_CONTACT_ID,
             b.RELATIONSHIP,
+            b.KIND_ID,
             b.PERCENT
         FROM BENEFICIARY b
         WHERE b.ID <= v_original_beneficiary -- Only copy original records

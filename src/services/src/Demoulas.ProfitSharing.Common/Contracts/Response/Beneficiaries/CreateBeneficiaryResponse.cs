@@ -11,6 +11,7 @@ public sealed record CreateBeneficiaryResponse
     public int DemographicId { get; set; }
     public int BeneficiaryContactId { get; set; }
     public string? Relationship { get; set; }
+    public char? KindId { get; set; }
     public required decimal Percent { get; set; }
     public static CreateBeneficiaryResponse SampleResponse() => new CreateBeneficiaryResponse
     {
@@ -20,6 +21,7 @@ public sealed record CreateBeneficiaryResponse
         DemographicId = 3001,
         BeneficiaryContactId = 4002,
         Relationship = "Sibling",
+        KindId = 'P',
         Percent = 50.0m
     };
 }

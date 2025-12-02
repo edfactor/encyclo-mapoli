@@ -13,6 +13,8 @@ public sealed class Beneficiary : Member
     public required int BeneficiaryContactId { get; set; }
 
     public string? Relationship { get; set; }
+    public char? KindId { get; set; }
+    public BeneficiaryKind? Kind { get; set; }
     public required decimal Percent { get; set; }
     public Demographic? Demographic { get; set; }
 

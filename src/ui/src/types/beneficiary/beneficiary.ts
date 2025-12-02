@@ -11,6 +11,11 @@ export interface BeneficiaryContactDto {
   createdDate: Date;
 }
 
+export interface BeneficiaryKindDto {
+  id: string;
+  name?: string;
+}
+
 export interface BeneficiaryDto {
   id: number;
   psnSuffix: number;
@@ -38,6 +43,8 @@ export interface BeneficiaryDto {
 
   beneficiaryContactId: number;
   relationship?: string;
+  kindId?: number;
+  kind?: BeneficiaryKindDto;
   percent: number;
   currentBalance?: number;
 }
@@ -87,6 +94,7 @@ export interface CreateBeneficiaryRequest {
   secondLevelBeneficiaryNumber: number | null;
   thirdLevelBeneficiaryNumber: number | null;
   relationship: string;
+  kindId: string;
 }
 
 export interface CreateBeneficiaryResponse {
@@ -96,6 +104,7 @@ export interface CreateBeneficiaryResponse {
   demographicId: number;
   beneficiaryContactId: number;
   relationship: string | null;
+  kindId: string | null;
   percent: number;
 }
 
@@ -121,6 +130,7 @@ export interface UpdateBeneficiaryContactRequest {
 
 export interface UpdateBeneficiaryRequest extends UpdateBeneficiaryContactRequest {
   relationship?: string;
+  kindId?: string;
   percentage?: number;
 }
 
@@ -129,6 +139,7 @@ export interface UpdateBeneficiaryResponse {
   demographicId: number;
   beneficiaryContactId: number;
   relationship: string | null;
+  kindId: string | null;
   percent: number;
 }
 
@@ -186,6 +197,14 @@ export interface BeneficiaryTypesRequestDto {
 
 export interface BeneficiaryTypesResponseDto {
   beneficiaryTypeList?: BeneficiaryTypeDto[];
+}
+
+export interface BeneficiaryKindRequestDto {
+  id?: number;
+}
+
+export interface BeneficiaryKindResponseDto {
+  beneficiaryKindList?: BeneficiaryKindDto[];
 }
 
 export interface AdhocBeneficiariesReportRequest extends ProfitYearRequest, SortedPaginationRequestDto {
