@@ -92,7 +92,7 @@ export const WelcomeDisplay: React.FC<WelcomeDisplayProps> = ({
                   id="composition-menu"
                   aria-labelledby="composition-button"
                   onKeyDown={handleListKeyDown}>
-                  {items.map((item: MenuItem, index: number) => (
+                  {items.map((item: MenuItemConfig, index: number) => (
                     <MenuItem
                       key={index}
                       onClick={item.onClick}>

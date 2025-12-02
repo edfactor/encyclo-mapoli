@@ -161,11 +161,14 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
                 }
             }
 
-            // Sort once at the end
-            members = members
-                .OrderBy(m => m.EmployeeName, StringComparer.Ordinal)
-                .ThenByDescending(m => m.BadgeNumber)
-                .ToList();
+            // Default sort if no SortBy specified
+            if (string.IsNullOrWhiteSpace(req.SortBy))
+            {
+                members = members
+                    .OrderBy(m => m.EmployeeName, StringComparer.Ordinal)
+                    .ThenByDescending(m => m.BadgeNumber)
+                    .ToList();
+            }
 
             // Calculate total earning points
             int earningPoints = members.Sum(r => r.EarningPoints);
