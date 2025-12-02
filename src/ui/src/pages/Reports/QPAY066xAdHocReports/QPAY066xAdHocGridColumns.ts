@@ -84,25 +84,11 @@ export const GetQPAY066xAgeColumn = (): ColDef => {
   });
 }
 
-// FIXME: This calculation should be done on the back end
 export const GetQPAY066xAgeAtTerminationColumn = (): ColDef => {
   return createAgeColumn({
     headerName: "Age at Term",
-    maxWidth: 120,
     field: "ageAtTermination",
-    valueGetter: (params) => {
-      const dob = params.data?.["dateOfBirth"];
-      const termDate = params.data?.["terminationDate"];
-      if (!dob || !termDate) return 0;
-      const birthDate = new Date(dob);
-      const terminationDate = new Date(termDate);
-      let age = terminationDate.getFullYear() - birthDate.getFullYear();
-      const m = terminationDate.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && terminationDate.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      return age;
-    }
+    maxWidth: 150
   });
 }
 

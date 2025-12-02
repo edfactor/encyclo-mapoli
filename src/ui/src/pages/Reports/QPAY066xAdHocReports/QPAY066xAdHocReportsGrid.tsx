@@ -98,7 +98,7 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
         columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xTerminationDateColumn(), GetQPAY066xVestedPercentageColumn(), GetQPAY066xDistributionAmountColumn(),GetQPAY066xAgeColumn(), GetQPAY066xEnrollmentCodeColumn()];
         break;
       case "QPAY066D":
-      case "QPAY066I":
+      case "QPAY066-I":
         columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xTerminationDateColumn(), GetQPAY066xVestedPercentageColumn(), GetQPAY066xDistributionAmountColumn(),
           GetQPAY066xAgeColumn(), GetQPAY066xAgeAtTerminationColumn(),GetQPAY066xEnrollmentCodeColumn()];
         break;
