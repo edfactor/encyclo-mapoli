@@ -86,7 +86,6 @@ namespace Demoulas.ProfitSharing.Api.Serialization;
 [JsonSerializable(typeof(BeneficiaryDetailResponse))]
 [JsonSerializable(typeof(BeneficiarySearchFilterResponse))]
 [JsonSerializable(typeof(BeneficiaryTypesResponseDto))]
-[JsonSerializable(typeof(BeneficiaryKindResponseDto))]
 [JsonSerializable(typeof(UpdateBeneficiaryResponse))]
 [JsonSerializable(typeof(UpdateBeneficiaryContactResponse))]
 [JsonSerializable(typeof(CreateBeneficiaryResponse))]

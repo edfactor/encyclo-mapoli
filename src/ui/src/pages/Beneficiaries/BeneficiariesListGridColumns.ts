@@ -32,18 +32,6 @@ export const GetBeneficiariesListGridColumns = (
       cellRenderer: (params: ICellRendererParams) => percentageFieldRenderer(params.data.percent, params.data.id)
     },
     {
-      headerName: "Kind",
-      field: "kindId",
-      colId: "kindId",
-      maxWidth: 80,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.kindId}`;
-      }
-    },
-    {
       headerName: "Current Balance",
       field: "currentBalance",
       colId: "currentBalance",
