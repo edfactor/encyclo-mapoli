@@ -191,7 +191,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 PsnSuffix = x.PsnSuffix,
                 DemographicId = x.DemographicId,
                 Percent = x.Percent,
-                KindId = x.KindId,
                 CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
                 DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
                 Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : string.Empty,
@@ -209,11 +208,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 MobileNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MobileNumber ?? "" : "",
                 PhoneNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.PhoneNumber ?? "" : "",
                 IsExecutive = false,
-                Kind = new BeneficiaryKindDto()
-                {
-                    Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
-                    Name = x.Kind != null ? x.Kind.Name : null
-                },
                 Relationship = x.Relationship
             });
 
@@ -230,7 +224,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 PsnSuffix = x.PsnSuffix,
                 DemographicId = x.DemographicId,
                 Percent = x.Percent,
-                KindId = x.KindId,
                 CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
                 DateOfBirth = x.Demographic != null ? x.Demographic.DateOfBirth : DateOnly.MaxValue,
                 Ssn = x.Demographic != null && x.Demographic.Ssn != 0 ? x.Demographic.Ssn.ToString() : string.Empty,
@@ -247,11 +240,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 MiddleName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.MiddleName : null,
                 MobileNumber = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.MobileNumber ?? "" : "",
                 PhoneNumber = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.PhoneNumber ?? "" : "",
-                Kind = new BeneficiaryKindDto()
-                {
-                    Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
-                    Name = x.Kind != null ? x.Kind.Name : null
-                },
                 Relationship = x.Relationship,
                 IsExecutive = x.Demographic != null && x.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
             });
@@ -329,7 +317,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 PsnSuffix = x.PsnSuffix,
                 DemographicId = x.DemographicId,
                 Percent = x.Percent,
-                KindId = x.KindId,
                 CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
                 DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
                 Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : string.Empty,
@@ -347,11 +334,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 MobileNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MobileNumber ?? "" : "",
                 PhoneNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.PhoneNumber ?? "" : "",
                 IsExecutive = x.Demographic != null && x.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
-                Kind = new BeneficiaryKindDto()
-                {
-                    Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
-                    Name = x.Kind != null ? x.Kind.Name : null
-                },
                 Relationship = x.Relationship
             });
 
@@ -488,18 +470,4 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     }
 
 
-    /// <summary>
-    /// Retrieves all available beneficiary kinds (e.g., Primary, Contingent).
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Response containing list of beneficiary kinds.</returns>
-    public async Task<BeneficiaryKindResponseDto> GetBeneficiaryKind(CancellationToken cancellationToken)
-    {
-        var result = await _dataContextFactory.UseReadOnlyContext(context =>
-        {
-            return context.BeneficiaryKinds.Select(x => new BeneficiaryKindDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellationToken);
-        }, cancellationToken);
-
-        return new BeneficiaryKindResponseDto() { BeneficiaryKindList = result };
-    }
 }
