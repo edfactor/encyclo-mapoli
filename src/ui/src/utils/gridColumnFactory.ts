@@ -462,7 +462,13 @@ export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
   } else {
     // This should handle masked cases
     column.valueGetter = (params) => {
-      return params.data?.[field];
+      const age = params.data?.[field];
+      // If age is >= 125 (default Oracle date 1/1/1900), display empty string
+      const ageNumber = typeof age === "string" ? parseInt(age, 10) : age;
+      if (!isNaN(ageNumber) && ageNumber >= 125) {
+        return "";
+      }
+      return age;
     };
   }
 

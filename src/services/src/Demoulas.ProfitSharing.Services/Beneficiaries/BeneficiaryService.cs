@@ -62,19 +62,6 @@ public class BeneficiaryService : IBeneficiaryService
                 throw new InvalidOperationException("Invalid percentage");
             }
 
-            // Check if trying to create a primary beneficiary when one already exists
-            if (req.KindId == BeneficiaryKind.Constants.Primary)
-            {
-                var existingPrimaryBeneficiary = await ctx.Beneficiaries
-                    .Where(b => b.DemographicId == demographic.Id && b.KindId == BeneficiaryKind.Constants.Primary)
-                    .FirstOrDefaultAsync(cancellationToken);
-
-                if (existingPrimaryBeneficiary != null)
-                {
-                    throw new ValidationException("Employee already has a primary beneficiary. Only one primary beneficiary is allowed per employee.");
-                }
-            }
-
             var psnSuffix = await FindPsn(req, ctx, cancellationToken);
             var beneficiary = new Beneficiary
             {
@@ -85,7 +72,6 @@ public class BeneficiaryService : IBeneficiaryService
                 Contact = beneficiaryContact,
                 BeneficiaryContactId = req.BeneficiaryContactId,
                 Relationship = req.Relationship,
-                KindId = req.KindId,
                 Percent = req.Percentage
             };
 
@@ -104,7 +90,6 @@ public class BeneficiaryService : IBeneficiaryService
                 DemographicId = demographic.Id,
                 BeneficiaryContactId = beneficiaryContact.Id,
                 Relationship = beneficiary.Relationship,
-                KindId = beneficiary.KindId,
                 Percent = beneficiary.Percent
             };
 
@@ -194,11 +179,6 @@ public class BeneficiaryService : IBeneficiaryService
         {
             var beneficiary = await ctx.Beneficiaries.SingleAsync(x => x.Id == req.Id, cancellationToken);
 
-            if (req.KindId.HasValue)
-            {
-                beneficiary.KindId = req.KindId.Value;
-            }
-
             if (!string.IsNullOrEmpty(req.Relationship))
             {
                 beneficiary.Relationship = req.Relationship;
@@ -212,7 +192,6 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 Id = beneficiary.Id,
                 BeneficiaryContactId = beneficiary.BeneficiaryContactId,
-                KindId = beneficiary.KindId,
                 Relationship = beneficiary.Relationship,
                 Percentage = beneficiary.Percent,
                 DemographicId = beneficiary.DemographicId,

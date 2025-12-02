@@ -31,7 +31,6 @@ public class BeneficiarySaveChangesInterceptor : SaveChangesInterceptor
                     PsnSuffix = x.Entity.PsnSuffix,
                     BadgeNumber = x.Entity.BadgeNumber,
                     DemographicId = x.Entity.DemographicId,
-                    KindId = x.Entity.KindId,
                     BeneficiaryContactId = x.Entity.BeneficiaryContactId,
                     Percent = x.Entity.Percent,
                     Relationship = x.Entity.Relationship,

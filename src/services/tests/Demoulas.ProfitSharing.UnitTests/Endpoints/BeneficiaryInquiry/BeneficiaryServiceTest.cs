@@ -44,12 +44,6 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                         EmailAddress = "",
                     CreatedDate = DateOnly.FromDateTime(new DateTime(2025,5,8,0,0,0,DateTimeKind.Utc)),
                 Relationship = "DAUGHTER",
-                KindId ='P',
-                Kind =new BeneficiaryKindDto()
-                {
-                    Id = 'P',
-                    Name = "Primary"
-                },
                 Percent = 100,
                 IsExecutive = false,
             }
@@ -79,12 +73,6 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
             EmailAddress = "",
             CreatedDate = DateOnly.FromDateTime(new DateTime(2025, 5, 8, 0, 0, 0, DateTimeKind.Utc)),
             Relationship = "DAUGHTER",
-            KindId = 'P',
-            Kind = new BeneficiaryKindDto()
-            {
-                Id = 'P',
-                Name = "Primary"
-            },
             Percent = 100,
             IsExecutive = false,
         };
@@ -111,7 +99,7 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
         var res = await _beneficiaryService.GetBeneficiary(new BeneficiaryRequestDto() { BadgeNumber = 703244 }, CancellationToken.None);
         Assert.NotNull(res);
         Assert.NotNull(res.Beneficiaries?.Results);
-        res.Beneficiaries.Results.ShouldBeEquivalentTo(_beneficiaryList, nameof(BeneficiaryDto.CurrentBalance), nameof(BeneficiaryDto.Kind));
+        res.Beneficiaries.Results.ShouldBeEquivalentTo(_beneficiaryList, nameof(BeneficiaryDto.CurrentBalance));
     }
     [Fact(DisplayName = "Get Beneficiary Detail", Skip = "MockQueryable cannot properly evaluate complex Include chains with Where filters - test data mismatch")]
     public async Task GetBeneficiaryDetail()
