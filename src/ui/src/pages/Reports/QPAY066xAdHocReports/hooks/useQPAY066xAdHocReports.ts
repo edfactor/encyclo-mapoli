@@ -42,10 +42,10 @@ export const useQPAY066xAdHocReports = () => {
   // Call all query hooks unconditionally (React rules requirement)
   const [fetchQPAY066TA, { isFetching: isFetchingTA }] = useLazyGetBreakdownByStoreQuery();
   const [fetchQPAY066Inactive, { isFetching: isFetchingInactive }] = useLazyGetBreakdownByStoreInactiveQuery();
-  const [fetchQPAY066I, { isFetching: isFetchingI }] = useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery();
+   const [fetchQPAY066I, { isFetching: isFetchingI }] = useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery();
   const [fetchQPAY066C, { isFetching: isFetchingC }] = useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery();
-  const [fetchQPAY066B, { isFetching: isFetchingB }] = useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery();
-  const [fetchQPAY066W, { isFetching: isFetchingW }] = useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery();
+   const [fetchQPAY066B, { isFetching: isFetchingB }] = useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery();
+   const [fetchQPAY066W, { isFetching: isFetchingW }] = useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery();
   const [fetchTotals, { isFetching: isFetchingTotals }] = useLazyGetBreakdownByStoreTotalsQuery();
 
   // Aggregate loading state
@@ -102,7 +102,7 @@ export const useQPAY066xAdHocReports = () => {
           case "QPAY066TA":
             await fetchQPAY066TA(baseParams);
             break;
-          case "QPAY066-Inactive":
+          case "QPAY066-INACTIVE":
             await fetchQPAY066Inactive(baseParams);
             break;
           case "QPAY066-I":

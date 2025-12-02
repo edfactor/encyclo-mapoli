@@ -11,10 +11,10 @@ import {
   clearBreakdownByStoreManagement,
   clearBreakdownByStoreTotals
 } from "../../../reduxstore/slices/yearsEndSlice";
+import reports from "./availableQPAY066xReports";
 import { useQPAY066xAdHocReports } from "./hooks/useQPAY066xAdHocReports";
 import QPAY066xAdHocReportsGrid from "./QPAY066xAdHocReportsGrid";
 import QPAY066xAdHocSearchFilter from "./QPAY066xAdHocSearchFilter";
-import reports from "./availableQPAY066xReports";
 
 const QPAY066xAdHocReports: React.FC = () => {
   const dispatch = useDispatch();
@@ -162,6 +162,7 @@ const QPAY066xAdHocReports: React.FC = () => {
           {hasSearched && currentReportId && (
             <QPAY066xAdHocReportsGrid
               reportTitle={getReportTitle(currentReportId)}
+              reportId={currentReportId}
               isLoading={isLoading}
               storeNumber={storeNumber}
               gridPagination={gridPagination}
