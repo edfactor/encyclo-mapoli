@@ -17,6 +17,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { getLastYearDateRange } from "../../../utils/dateRangeUtils";
 import { dateStringValidator, endDateStringAfterStartDateValidator } from "../../../utils/FormValidators";
 
 interface QPAY066xAdHocSearchFilterProps {
@@ -111,6 +112,9 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const requiresDateRange = currentPreset?.requiresDateRange || false;
 
+  // Get last year date range for default values
+  const { beginDate, endDate: defaultEndDate } = getLastYearDateRange();
+
   useEffect(() => {
     if (!isLoading) {
       setIsSubmitting(false);
@@ -128,8 +132,8 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
     resolver: yupResolver(createSchema(requiresDateRange)),
     defaultValues: {
       storeNumber: null,
-      startDate: "",
-      endDate: "",
+      startDate: mmDDYYFormat(beginDate),
+      endDate: mmDDYYFormat(defaultEndDate),
       badgeNumber: "",
       employeeName: "",
       storeManagement: false

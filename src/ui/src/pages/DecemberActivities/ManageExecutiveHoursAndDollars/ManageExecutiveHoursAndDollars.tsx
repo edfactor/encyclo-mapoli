@@ -4,18 +4,15 @@ import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import { memo, useCallback } from "react";
-import { useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
-import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS } from "../../../constants";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
 import { useIsReadOnlyByStatus } from "../../../hooks/useIsReadOnlyByStatus";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
-import { RootState } from "../../../reduxstore/store";
-import { ImpersonationRoles } from "../../../types/common/enums";
 import useManageExecutiveHoursAndDollars from "./hooks/useManageExecutiveHoursAndDollars";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
@@ -88,17 +85,12 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   const isReadOnly = useReadOnlyNavigation();
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
-
-  // Check if user has ExecutiveAdministrator role
-  const impersonatingRoles = useSelector((state: RootState) => state.security.impersonating);
-  const hasExecutiveAdminRole = impersonatingRoles.includes(ImpersonationRoles.ExecutiveAdministrator);
-
+  
   // Editing is only allowed when:
   // 1. Page status is "In Progress" (not read-only by status)
-  // 2. User has ExecutiveAdministrator role
-  // 3. Year is not frozen
-  // 4. Not in general read-only mode
-  const canEdit = !isReadOnlyByStatus && hasExecutiveAdminRole && !isFrozen && !isReadOnly;
+  // 2. Year is not frozen
+  // 3. Not in general read-only mode
+  const canEdit = !isReadOnlyByStatus && !isFrozen && !isReadOnly;
   //const [currentStatus, setCurrentStatus] = useState<string | null>(null);
 
   /*
