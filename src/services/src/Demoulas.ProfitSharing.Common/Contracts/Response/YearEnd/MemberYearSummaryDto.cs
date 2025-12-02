@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -26,54 +27,36 @@ public record MemberYearSummaryDto : IIsExecutive
     public DateOnly? TerminationDate { get; init; }
 
     /// <summary>
-    /// Calculated current age. Returns "NA" if DateOfBirth is default.
+    /// Calculated current age. Returns 0 if DateOfBirth is default.
     /// </summary>
     [MaskSensitive]
-    public string Age
+    public short Age
     {
         get
         {
             if (DateOfBirth == default)
             {
-                return "NA";
+                return 0;
             }
 
-            var today = DateOnly.FromDateTime(DateTime.Today);
-            var age = today.Year - DateOfBirth.Year;
-
-            // Adjust if birthday hasn't occurred yet this year
-            if (today < DateOfBirth.AddYears(age))
-            {
-                age--;
-            }
-
-            return age.ToString();
+            return DateOfBirth.Age();
         }
     }
 
     /// <summary>
-    /// Calculated age at termination. Returns "NA" if DateOfBirth is default or TerminationDate is null.
+    /// Calculated age at termination. Returns 0 if DateOfBirth is default or TerminationDate is null.
     /// </summary>
     [MaskSensitive]
-    public string AgeAtTermination
+    public short AgeAtTermination
     {
         get
         {
             if (DateOfBirth == default || TerminationDate is null)
             {
-                return "NA";
+                return 0;
             }
 
-            var termDate = TerminationDate.Value;
-            var age = termDate.Year - DateOfBirth.Year;
-
-            // Adjust if birthday hasn't occurred yet in the termination year
-            if (termDate < DateOfBirth.AddYears(age))
-            {
-                age--;
-            }
-
-            return age.ToString();
+            return DateOfBirth.Age(TerminationDate.Value.ToDateTime(TimeOnly.MinValue));
         }
     }
     public byte? EnrollmentId { get; init; }

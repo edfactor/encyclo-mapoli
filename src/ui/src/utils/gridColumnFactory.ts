@@ -462,7 +462,11 @@ export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
   } else {
     // This should handle masked cases
     column.valueGetter = (params) => {
-      return params.data?.[field];
+      if (params.data?.[field] && typeof params.data?.[field] === "number" && params.data?.[field] == 0) {
+        return "N/A";
+      } else {   
+        return params.data?.[field];
+      }
     };
   }
 
