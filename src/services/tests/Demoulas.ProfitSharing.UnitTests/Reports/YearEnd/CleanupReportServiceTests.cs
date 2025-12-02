@@ -691,15 +691,25 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         // =============================================================================
         // READY 2025 YTD PRODUCTION VALUES (from QPAY129 report screenshot)
         // =============================================================================
-        // COMPANY TOTAL:
-        //   Distributions: $71,824,557.99
-        //   Forfeitures:   $30,896,800.40
-        //   Federal Tax:   $6,017,535.83
-        //   State Tax:     $1,085,194.87
-        //
         // This test uses EXACT values from the READY production system to ensure
         // our C# implementation matches the legacy COBOL QPAY129 program.
+        //
+        // IMPORTANT: All monetary calculations must use MidpointRounding.AwayFromZero
+        // to match COBOL behavior (traditional banker's rounding).
         // =============================================================================
+
+        // ======================== EXPECTED COMPANY TOTALS ========================
+        // These are the EXACT values from the READY screenshot header row
+        const decimal EXPECTED_DISTRIBUTION_TOTAL = 71_824_557.99m;
+        const decimal EXPECTED_FORFEITURE_TOTAL = 30_896_800.40m;
+        const decimal EXPECTED_FEDERAL_TAX_TOTAL = 6_017_535.83m;
+        const decimal EXPECTED_STATE_TAX_TOTAL = 1_085_194.87m;
+
+        // ======================== EXPECTED STATE TAX BREAKDOWN ========================
+        // Only 3 states have state tax withholding (MA, RI, ME)
+        const decimal EXPECTED_MA_STATE_TAX = 1_025_174.59m;
+        const decimal EXPECTED_RI_STATE_TAX = 34_033.02m;
+        const decimal EXPECTED_ME_STATE_TAX = 25_987.26m;
 
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
 
@@ -747,37 +757,72 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             ("WV",     27_282.33m,     27_282.33m,     5_456.47m,         0.00m,     27_282.33m),
         };
 
-        // Expected COMPANY TOTALS from READY screenshot
-        // Note: These are for reference - we use calculated values from state data for validation
-        // Distribution Total: $71,824,557.99
-        // Forfeiture Total:   $30,896,800.40
-        // Federal Tax Total:  $6,017,535.83
-        const decimal expectedStateTaxTotal = 1_085_194.87m;
-
-        // Verify our test data matches expected totals
+        // =============================================================================
+        // STEP 1: VALIDATE TEST DATA MATCHES EXPECTED CONSTANTS (to the penny)
+        // =============================================================================
         var calculatedGrossDist = readyStateData.Sum(x => x.GrossDist);
+        var calculatedNetDist = readyStateData.Sum(x => x.NetDist);
         var calculatedFedTax = readyStateData.Sum(x => x.FedTax);
         var calculatedStateTax = readyStateData.Sum(x => x.StateTax);
+        var calculatedForfeit = readyStateData.Sum(x => x.Forfeit);
 
-        _testOutputHelper.WriteLine("=== READY DATA VALIDATION ===");
-        _testOutputHelper.WriteLine($"Sum of Gross Distributions: {calculatedGrossDist:C}");
-        _testOutputHelper.WriteLine($"Sum of Federal Taxes: {calculatedFedTax:C}");
-        _testOutputHelper.WriteLine($"Sum of State Taxes: {calculatedStateTax:C}");
-        _testOutputHelper.WriteLine($"Expected State Tax Total: {expectedStateTaxTotal:C}");
+        _testOutputHelper.WriteLine("=== STEP 1: VALIDATE TEST DATA MATCHES READY CONSTANTS ===");
+        _testOutputHelper.WriteLine("");
 
-        // State tax breakdown validation
-        _testOutputHelper.WriteLine("\n=== STATE TAX BREAKDOWN ===");
+        // Validate DISTRIBUTION TOTAL
+        _testOutputHelper.WriteLine("--- DISTRIBUTION TOTAL ---");
+        _testOutputHelper.WriteLine($"  READY Constant:  {EXPECTED_DISTRIBUTION_TOTAL:C}");
+        _testOutputHelper.WriteLine($"  Sum of States:   {calculatedGrossDist:C}");
+        _testOutputHelper.WriteLine($"  Match: {(calculatedGrossDist == EXPECTED_DISTRIBUTION_TOTAL ? "✅ YES" : "❌ NO")}");
+        calculatedGrossDist.ShouldBe(EXPECTED_DISTRIBUTION_TOTAL,
+            $"Sum of state GrossDist ({calculatedGrossDist:C}) must equal READY Distribution Total ({EXPECTED_DISTRIBUTION_TOTAL:C})");
+
+        // Validate FORFEITURE TOTAL
+        _testOutputHelper.WriteLine("--- FORFEITURE TOTAL ---");
+        _testOutputHelper.WriteLine($"  READY Constant:  {EXPECTED_FORFEITURE_TOTAL:C}");
+        _testOutputHelper.WriteLine($"  Sum of States:   {calculatedForfeit:C}");
+        _testOutputHelper.WriteLine($"  Match: {(calculatedForfeit == EXPECTED_FORFEITURE_TOTAL ? "✅ YES" : "❌ NO")}");
+        calculatedForfeit.ShouldBe(EXPECTED_FORFEITURE_TOTAL,
+            $"Sum of state Forfeit ({calculatedForfeit:C}) must equal READY Forfeiture Total ({EXPECTED_FORFEITURE_TOTAL:C})");
+
+        // Validate FEDERAL TAX TOTAL
+        _testOutputHelper.WriteLine("--- FEDERAL TAX TOTAL ---");
+        _testOutputHelper.WriteLine($"  READY Constant:  {EXPECTED_FEDERAL_TAX_TOTAL:C}");
+        _testOutputHelper.WriteLine($"  Sum of States:   {calculatedFedTax:C}");
+        _testOutputHelper.WriteLine($"  Match: {(calculatedFedTax == EXPECTED_FEDERAL_TAX_TOTAL ? "✅ YES" : "❌ NO")}");
+        calculatedFedTax.ShouldBe(EXPECTED_FEDERAL_TAX_TOTAL,
+            $"Sum of state FedTax ({calculatedFedTax:C}) must equal READY Federal Tax Total ({EXPECTED_FEDERAL_TAX_TOTAL:C})");
+
+        // Validate STATE TAX TOTAL
+        _testOutputHelper.WriteLine("--- STATE TAX TOTAL ---");
+        _testOutputHelper.WriteLine($"  READY Constant:  {EXPECTED_STATE_TAX_TOTAL:C}");
+        _testOutputHelper.WriteLine($"  Sum of States:   {calculatedStateTax:C}");
+        _testOutputHelper.WriteLine($"  Match: {(calculatedStateTax == EXPECTED_STATE_TAX_TOTAL ? "✅ YES" : "❌ NO")}");
+        calculatedStateTax.ShouldBe(EXPECTED_STATE_TAX_TOTAL,
+            $"Sum of state StateTax ({calculatedStateTax:C}) must equal READY State Tax Total ({EXPECTED_STATE_TAX_TOTAL:C})");
+
+        // Validate STATE TAX BREAKDOWN
+        _testOutputHelper.WriteLine("\n--- STATE TAX BREAKDOWN ---");
         var statesWithTax = readyStateData.Where(x => x.StateTax > 0).ToList();
-        foreach (var state in statesWithTax.OrderByDescending(x => x.StateTax))
-        {
-            _testOutputHelper.WriteLine($"  {state.State}: {state.StateTax:C}");
-        }
-        _testOutputHelper.WriteLine($"  TOTAL: {statesWithTax.Sum(x => x.StateTax):C}");
+        var maData = statesWithTax.First(x => x.State == "MA");
+        var riData = statesWithTax.First(x => x.State == "RI");
+        var meData = statesWithTax.First(x => x.State == "ME");
 
-        // Verify state taxes add up correctly
-        // MA: $1,025,174.59 + RI: $34,033.02 + ME: $25,987.26 = $1,085,194.87
-        statesWithTax.Sum(x => x.StateTax).ShouldBe(expectedStateTaxTotal,
-            "State tax breakdown should sum to expected total");
+        _testOutputHelper.WriteLine($"  MA: Expected {EXPECTED_MA_STATE_TAX:C}, Actual {maData.StateTax:C} {(maData.StateTax == EXPECTED_MA_STATE_TAX ? "✅" : "❌")}");
+        _testOutputHelper.WriteLine($"  RI: Expected {EXPECTED_RI_STATE_TAX:C}, Actual {riData.StateTax:C} {(riData.StateTax == EXPECTED_RI_STATE_TAX ? "✅" : "❌")}");
+        _testOutputHelper.WriteLine($"  ME: Expected {EXPECTED_ME_STATE_TAX:C}, Actual {meData.StateTax:C} {(meData.StateTax == EXPECTED_ME_STATE_TAX ? "✅" : "❌")}");
+
+        maData.StateTax.ShouldBe(EXPECTED_MA_STATE_TAX, "MA state tax mismatch");
+        riData.StateTax.ShouldBe(EXPECTED_RI_STATE_TAX, "RI state tax mismatch");
+        meData.StateTax.ShouldBe(EXPECTED_ME_STATE_TAX, "ME state tax mismatch");
+
+        // Validate sum of state taxes equals total
+        var sumOfStateTaxes = EXPECTED_MA_STATE_TAX + EXPECTED_RI_STATE_TAX + EXPECTED_ME_STATE_TAX;
+        _testOutputHelper.WriteLine($"\n  Sum (MA+RI+ME): {sumOfStateTaxes:C}");
+        _testOutputHelper.WriteLine($"  State Tax Total: {EXPECTED_STATE_TAX_TOTAL:C}");
+        _testOutputHelper.WriteLine($"  Match: {(sumOfStateTaxes == EXPECTED_STATE_TAX_TOTAL ? "✅ YES" : "❌ NO")}");
+        sumOfStateTaxes.ShouldBe(EXPECTED_STATE_TAX_TOTAL,
+            "Sum of individual state taxes must equal State Tax Total");
 
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
@@ -850,26 +895,29 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         _testOutputHelper.WriteLine($"Total Records: {response.Result.Response.Total}");
         _testOutputHelper.WriteLine("");
 
-        // 1. DISTRIBUTION TOTAL
+        // 1. DISTRIBUTION TOTAL - Compare API against READY constant
         _testOutputHelper.WriteLine("--- DISTRIBUTION TOTAL ---");
-        _testOutputHelper.WriteLine($"  READY Expected:  {calculatedGrossDist:C}");
-        _testOutputHelper.WriteLine($"  API Actual:      {response.Result.DistributionTotal:C}");
-        response.Result.DistributionTotal.ShouldBe(calculatedGrossDist,
-            $"DistributionTotal mismatch: expected {calculatedGrossDist:C}, got {response.Result.DistributionTotal:C}");
+        _testOutputHelper.WriteLine($"  READY Constant:  {EXPECTED_DISTRIBUTION_TOTAL:C}");
+        _testOutputHelper.WriteLine($"  API Response:    {response.Result.DistributionTotal:C}");
+        _testOutputHelper.WriteLine($"  Match: {(response.Result.DistributionTotal == EXPECTED_DISTRIBUTION_TOTAL ? "✅ YES" : "❌ NO")}");
+        response.Result.DistributionTotal.ShouldBe(EXPECTED_DISTRIBUTION_TOTAL,
+            $"DistributionTotal mismatch: expected {EXPECTED_DISTRIBUTION_TOTAL:C}, got {response.Result.DistributionTotal:C}");
 
-        // 2. FEDERAL TAX TOTAL
+        // 2. FEDERAL TAX TOTAL - Compare API against READY constant
         _testOutputHelper.WriteLine("--- FEDERAL TAX TOTAL ---");
-        _testOutputHelper.WriteLine($"  READY Expected:  {calculatedFedTax:C}");
-        _testOutputHelper.WriteLine($"  API Actual:      {response.Result.FederalTaxTotal:C}");
-        response.Result.FederalTaxTotal.ShouldBe(calculatedFedTax,
-            $"FederalTaxTotal mismatch: expected {calculatedFedTax:C}, got {response.Result.FederalTaxTotal:C}");
+        _testOutputHelper.WriteLine($"  READY Constant:  {EXPECTED_FEDERAL_TAX_TOTAL:C}");
+        _testOutputHelper.WriteLine($"  API Response:    {response.Result.FederalTaxTotal:C}");
+        _testOutputHelper.WriteLine($"  Match: {(response.Result.FederalTaxTotal == EXPECTED_FEDERAL_TAX_TOTAL ? "✅ YES" : "❌ NO")}");
+        response.Result.FederalTaxTotal.ShouldBe(EXPECTED_FEDERAL_TAX_TOTAL,
+            $"FederalTaxTotal mismatch: expected {EXPECTED_FEDERAL_TAX_TOTAL:C}, got {response.Result.FederalTaxTotal:C}");
 
-        // 3. STATE TAX TOTAL
+        // 3. STATE TAX TOTAL - Compare API against READY constant
         _testOutputHelper.WriteLine("--- STATE TAX TOTAL ---");
-        _testOutputHelper.WriteLine($"  READY Expected:  {expectedStateTaxTotal:C}");
-        _testOutputHelper.WriteLine($"  API Actual:      {response.Result.StateTaxTotal:C}");
-        response.Result.StateTaxTotal.ShouldBe(expectedStateTaxTotal,
-            $"StateTaxTotal mismatch: expected {expectedStateTaxTotal:C}, got {response.Result.StateTaxTotal:C}");
+        _testOutputHelper.WriteLine($"  READY Constant:  {EXPECTED_STATE_TAX_TOTAL:C}");
+        _testOutputHelper.WriteLine($"  API Response:    {response.Result.StateTaxTotal:C}");
+        _testOutputHelper.WriteLine($"  Match: {(response.Result.StateTaxTotal == EXPECTED_STATE_TAX_TOTAL ? "✅ YES" : "❌ NO")}");
+        response.Result.StateTaxTotal.ShouldBe(EXPECTED_STATE_TAX_TOTAL,
+            $"StateTaxTotal mismatch: expected {EXPECTED_STATE_TAX_TOTAL:C}, got {response.Result.StateTaxTotal:C}");
 
         // 4. STATE-BY-STATE TAX BREAKDOWN
         _testOutputHelper.WriteLine("--- STATE-BY-STATE TAX TOTALS ---");

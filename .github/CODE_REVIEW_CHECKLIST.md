@@ -424,6 +424,26 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 
 **Reference:** `.editorconfig`
 
+### Decimal Rounding (CRITICAL for Financial Calculations)
+
+**Always use `MidpointRounding.AwayFromZero` for monetary/financial calculations** to match COBOL behavior (traditional rounding, not banker's rounding).
+
+- [ ] **`MidpointRounding.AwayFromZero` used**: For all financial calculations
+
+  ```csharp
+  // ✅ RIGHT: Use AwayFromZero for financial calculations (matches COBOL)
+  var roundedAmount = Math.Round(amount, 2, MidpointRounding.AwayFromZero);
+
+  // ❌ WRONG: Default rounding uses ToEven (banker's rounding)
+  var roundedAmount = Math.Round(amount, 2);  // Uses MidpointRounding.ToEven - INCORRECT
+  ```
+
+- [ ] **When to use**: Tax calculations (federal, state), distribution amounts, forfeiture amounts, any monetary aggregation or reporting, profit sharing calculations
+- [ ] **Why critical**: COBOL uses traditional rounding (0.5 rounds up), while .NET defaults to banker's rounding (0.5 rounds to nearest even). This causes penny differences in financial reports that don't match READY data.
+- [ ] **Validation**: Financial calculation unit tests verify rounded values match READY production values "to the penny"
+
+**Related Tickets:** PS-2275 (QPAY129 YTD totals rounding validation)
+
 ---
 
 ## 7. Frontend - React/TypeScript

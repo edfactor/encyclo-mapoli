@@ -326,6 +326,28 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
 
+### Decimal Rounding (CRITICAL for Financial Calculations)
+
+**Always use `MidpointRounding.AwayFromZero` for monetary/financial calculations** to match COBOL behavior.
+
+```csharp
+// ✅ RIGHT: Use AwayFromZero for financial calculations (matches COBOL)
+var roundedAmount = Math.Round(amount, 2, MidpointRounding.AwayFromZero);
+
+// ❌ WRONG: Default rounding uses ToEven (banker's rounding)
+var roundedAmount = Math.Round(amount, 2);  // Uses MidpointRounding.ToEven
+```
+
+**Why**: COBOL uses traditional rounding (0.5 rounds up), while .NET defaults to banker's rounding (0.5 rounds to nearest even). This can cause penny differences in financial reports.
+
+**When to use**:
+
+- Tax calculations (federal, state)
+- Distribution amounts
+- Forfeiture amounts
+- Any monetary aggregation or reporting
+- Profit sharing calculations
+
 ### Async/Await Patterns (AsyncFixer01 - Critical)
 
 **AsyncFixer analyzer (https://github.com/semihokur/AsyncFixer) enforces these patterns. Violations are build errors.**
