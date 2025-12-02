@@ -1,25 +1,25 @@
 import { ColDef, ICellRendererParams, ValueFormatterParams } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import {
-  AgeColumnOptions,
-  AlignableColumnOptions,
-  BadgeColumnOptions,
-  BadgeOrPSNOptions,
-  CityColumnOptions,
-  CommentColumnOptions,
-  CurrencyColumnOptions,
-  DateColumnOptions,
-  FormattableColumnOptions,
-  HoursColumnOptions,
-  NameColumnOptions,
-  PercentageColumnOptions,
-  PointsColumnOptions,
-  PSNColumnOptions,
-  SSNColumnOptions,
-  StateColumnOptions,
-  StreetAddressColumnOptions,
-  TaxCodeColumnOptions,
-  YesOrNoColumnOptions
+    AgeColumnOptions,
+    AlignableColumnOptions,
+    BadgeColumnOptions,
+    BadgeOrPSNOptions,
+    CityColumnOptions,
+    CommentColumnOptions,
+    CurrencyColumnOptions,
+    DateColumnOptions,
+    FormattableColumnOptions,
+    HoursColumnOptions,
+    NameColumnOptions,
+    PercentageColumnOptions,
+    PointsColumnOptions,
+    PSNColumnOptions,
+    SSNColumnOptions,
+    StateColumnOptions,
+    StreetAddressColumnOptions,
+    TaxCodeColumnOptions,
+    YesOrNoColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
@@ -593,7 +593,7 @@ export const createStoreColumn = (options: AlignableColumnOptions = {}): ColDef 
 export const createNameColumn = (options: NameColumnOptions = {}): ColDef => {
   const {
     headerName = "Name",
-    field = "employeeName",
+    field = "fullName",
     colId = field,
     minWidth = 180,
     maxWidth,

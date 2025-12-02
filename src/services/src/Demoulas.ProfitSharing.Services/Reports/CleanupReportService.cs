@@ -69,7 +69,7 @@ public class CleanupReportService : ICleanupReportService
                             {
                                 dem.BadgeNumber,
                                 dem.Ssn,
-                                EmployeeName = dem.ContactInfo.FullName ?? "",
+                                FullName = dem.ContactInfo.FullName ?? "",
                                 Status = dem.EmploymentStatusId,
                                 StatusName = dem.EmploymentStatus!.Name,
                                 Store = dem.StoreNumber,
@@ -84,7 +84,7 @@ public class CleanupReportService : ICleanupReportService
                 Results = data.Results.Select(x => new DemographicBadgesNotInPayProfitResponse
                 {
                     BadgeNumber = x.BadgeNumber,
-                    EmployeeName = x.EmployeeName,
+                    FullName = x.FullName,
                     Ssn = x.Ssn.MaskSsn(),
                     Status = x.Status,
                     StatusName = x.StatusName,

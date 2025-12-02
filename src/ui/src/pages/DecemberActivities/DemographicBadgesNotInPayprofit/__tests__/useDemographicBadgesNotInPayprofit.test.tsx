@@ -58,7 +58,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
           {
             badgeNumber: 12345,
             ssn: 123456789,
-            employeeName: "John Doe",
+            fullName: "John Doe",
             store: 1,
             status: "A",
             statusName: "Active"
