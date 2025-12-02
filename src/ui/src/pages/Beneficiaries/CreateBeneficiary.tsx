@@ -66,8 +66,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   onSaveSuccess,
   psnSuffix,
   selectedBeneficiary,
-  selectedMember,
-  existingBeneficiaries
+  selectedMember
 }) => {
   const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
   const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
