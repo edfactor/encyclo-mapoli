@@ -107,7 +107,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     {
                         Hours = pp.TotalHours,
                         Wages = pp.TotalIncome,
-                        Points = (int)Math.Round(pp.TotalIncome / 100, MidpointRounding.AwayFromZero),
+                        Points = (int)Math.Round(pp.TotalIncome / 100, 0, MidpointRounding.AwayFromZero),
                         DateOfBirth = d.DateOfBirth,
                         EmploymentStatus = d.EmploymentStatusId,
                         TerminationDate = d.TerminationDate,
@@ -502,7 +502,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             var hoursTotal = eligibleForTotals.Sum(x => Math.Truncate(x.Hours));
             // Calculate points per employee BEFORE summing to match READY PAY426.cbl behavior
             // READY: Rounds each employee's wages/100, then sums rounded points
-            var pointsTotal = eligibleForTotals.Sum(x => Math.Round(x.Wages / 100, MidpointRounding.AwayFromZero));
+            var pointsTotal = eligibleForTotals.Sum(x => Math.Round(x.Wages / 100, 0, MidpointRounding.AwayFromZero));
 
             return new YearEndProfitSharingReportTotals
             {

@@ -156,7 +156,7 @@ internal static class YearEndChangeCalculator
     private static decimal CalculateEarnPoints(PayProfitDto employee)
     {
         decimal income = employee.IncomeExecutive + employee.CurrentIncomeYear;
-        return Math.Round(income / 100.0m, MidpointRounding.AwayFromZero);
+        return Math.Round(income / 100.0m, 0, MidpointRounding.AwayFromZero);
     }
 
     private static byte DetermineZeroContributionReasonForAge64Plus(
