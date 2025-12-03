@@ -92,7 +92,7 @@ public sealed record OracleHcmConfig
     /// This identifies the recipients that the JWT is intended for.
     /// Example: "https://eqma-dev3.fa.ocs.oraclecloud.com"
     /// </summary>
-    public string JwtAudience { get; set; } = "https://eqma-dev3.fa.ocs.oraclecloud.com";
+    public string JwtAudience { get; set; } = "https://eqma-dev3.fa.ocs.oraclecloud.com/";
 
     /// <summary>
     /// Gets or sets a value indicating whether to include the JWT ID (jti) claim in JWT tokens.

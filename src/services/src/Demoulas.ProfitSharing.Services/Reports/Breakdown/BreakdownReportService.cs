@@ -271,7 +271,7 @@ public sealed class BreakdownReportService : IBreakdownService
             // ── Aggregate from already-loaded data ────────────────────────────────────
             var totals = new BreakdownByStoreTotals
             {
-                TotalNumberEmployees = (short)employees.Count,
+                TotalNumberEmployees = (ushort)employees.Count,
                 TotalBeginningBalances = employees.Sum(e => e.BeginningBalance ?? 0),
                 TotalEarnings = employees.Sum(e => e.Earnings),
                 TotalContributions = employees.Sum(e => e.Contributions),

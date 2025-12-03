@@ -3,6 +3,7 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+
 [NoMemberDataExposed]
 public sealed record VestedAmountsByAge : ReportResponseBase<VestedAmountsByAgeDetail>
 {
@@ -12,11 +13,11 @@ public sealed record VestedAmountsByAge : ReportResponseBase<VestedAmountsByAgeD
     public decimal TotalPartTime100PercentAmount { get; set; }
     public decimal TotalPartTimePartialAmount { get; set; }
     public decimal TotalPartTimeNotVestedAmount { get; set; }
-    public short TotalBeneficiaryCount { get; set; }
+    public ushort TotalBeneficiaryCount { get; set; }
     public decimal TotalBeneficiaryAmount { get; set; }
-    public short TotalFullTimeCount { get; set; }
-    public short TotalNotVestedCount { get; set; }
-    public short TotalPartialVestedCount { get; set; }
+    public ushort TotalFullTimeCount { get; set; }
+    public ushort TotalNotVestedCount { get; set; }
+    public ushort TotalPartialVestedCount { get; set; }
 
 
     public static VestedAmountsByAge ResponseExample()
