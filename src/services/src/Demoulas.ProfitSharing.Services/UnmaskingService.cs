@@ -39,7 +39,7 @@ public sealed class UnmaskingService : IUnmaskingService
     /// Defense in depth: Validates user has SSN-Unmasking role both at policy level and here.
     /// Access is logged to audit trail for compliance and security monitoring.
     /// </summary>
-    public async Task<Result<string>> GetUnmaskedSsnAsync(long demographicId, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> GetUnmaskedSsnAsync(int demographicId, CancellationToken cancellationToken = default)
     {
         // Defense in depth: Re-validate server-side that user has the required role
         // This ensures protection even if policy layer is somehow bypassed
