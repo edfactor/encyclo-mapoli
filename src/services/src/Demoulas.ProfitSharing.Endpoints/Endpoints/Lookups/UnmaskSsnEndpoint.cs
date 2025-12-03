@@ -94,7 +94,7 @@ public sealed record UnmaskSsnRequest
     /// <summary>
     /// The demographic ID to unmask SSN for.
     /// </summary>
-    public int demographicId { get; init; }
+    public int DemographicId { get; init; }
 }
 
 /// <summary>
