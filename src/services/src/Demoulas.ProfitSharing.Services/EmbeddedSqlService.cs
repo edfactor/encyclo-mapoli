@@ -226,22 +226,23 @@ GROUP BY pd.SSN";
     {
         return @$"SELECT
     pd.SSN as Ssn,
-    --Contributions + Earnings + EtvaForfeitures + Distributions + Forfeitures + VestedEarnings
-    --Contributions (Code 0):
+    --Contributions:
     SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.CONTRIBUTION ELSE 0 END)
-    --Earnings (Codes 0, 8):
+    --Earnings:
   + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0,8) THEN pd.EARNINGS ELSE 0 END)
-    --Etva forfeit incoming (Code 0):
+    --Forfeitures in:
   + SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.FORFEITURE ELSE 0 END)
-    --Distributions (Codes 1, 3, 5):
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (1,3,5) THEN pd.FORFEITURE * -1 ELSE 0 END)
-    --Forfeitures (Code 2):
+     -- Allocation in
+  + SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) 
+     --Distributions
+  + SUM(CASE WHEN pd.PROFIT_CODE_ID  IN (1,3) THEN pd.FORFEITURE * -1 ELSE 0 END) 
+      --Allocation out
+  + SUM(CASE WHEN pd.PROFIT_CODE_ID  = 5 THEN pd.FORFEITURE * -1 ELSE 0 END)
+    --Forfeitures
   + SUM(CASE WHEN pd.PROFIT_CODE_ID = 2 THEN pd.FORFEITURE * -1 ELSE 0 END)
-    --VestedEarnings (Code 6 QDRO incoming uses CONTRIBUTION, Code 9 ETVA payment uses FORFEITURE):
-  + (
-      SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) +
-      SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
-    ) AS Total
+    --ETVA Distributions
+  + SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
+     AS Total
   FROM PROFIT_DETAIL pd
  WHERE pd.PROFIT_YEAR <= {profitYear}
  GROUP BY pd.SSN";
