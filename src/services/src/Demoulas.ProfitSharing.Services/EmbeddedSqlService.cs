@@ -108,6 +108,8 @@ LEFT JOIN (
     public IQueryable<ProfitShareTotal> GetProfitShareTotals(IProfitSharingDbContext ctx, short profitYear, DateOnly fiscalEndDate,
        short min_hours, DateOnly birthdate_21, CancellationToken cancellationToken)
     {
+        var balanceSubquery = GetBalanceSubquery(profitYear);
+
         string query = @$"/*-----------------------------------------------------------
   Bind variables                                             
     :p_profit_year      – Profit year being reported on       
@@ -120,22 +122,7 @@ WITH balances AS (
     /* 1️⃣  History-to-date balance per participant --------*/
     SELECT bal.ssn, bal.total
     FROM  (
-        /* identical text as EmbeddedSqlService.GetTotalBalanceQuery */
-        SELECT pd.ssn,
-               SUM(CASE WHEN pd.profit_code_id = 0 THEN  pd.contribution ELSE 0 END) +
-               SUM(CASE WHEN pd.profit_code_id IN (0,2) THEN pd.earnings     ELSE 0 END) +
-               SUM(CASE WHEN pd.profit_code_id = 0 THEN  pd.forfeiture   ELSE 0 END) +
-               SUM(CASE WHEN pd.profit_code_id IN (1,3,5)
-                         THEN -pd.forfeiture ELSE 0 END) +
-               SUM(CASE WHEN pd.profit_code_id = 2
-                         THEN -pd.forfeiture ELSE 0 END) +
-               (  SUM(CASE WHEN pd.profit_code_id = 6 THEN pd.contribution ELSE 0 END)
-                + SUM(CASE WHEN pd.profit_code_id = 8 THEN pd.earnings     ELSE 0 END)
-                + SUM(CASE WHEN pd.profit_code_id = 9 THEN -pd.forfeiture  ELSE 0 END) )
-               AS total
-        FROM   profit_detail pd
-        WHERE  pd.profit_year <= {profitYear}
-        GROUP  BY pd.ssn
+        {balanceSubquery}
     ) bal
 ),
 employees AS (
@@ -221,32 +208,41 @@ GROUP BY pd.SSN";
 
     private static FormattableString GetTotalBalanceQuery(short profitYear)
     {
-        FormattableString query = @$"
-SELECT
+        var balanceSubquery = GetBalanceSubquery(profitYear);
+        FormattableString query = $@"{balanceSubquery}";
+        return query;
+    }
+
+    /// <summary>
+    /// Shared balance calculation subquery used by both GetTotalBalanceQuery and GetProfitShareTotals.
+    /// SME formula (Cheng Jiang): Current bal = sum 0 + sum 8 + sum 6 - (sum1 + sum 3 + sum9) - sum 5 - sum 2
+    /// Where: sum 0 on (CONT, EARN, FORT), sum 8 on EARN, sum 6 on CONT, sum 1,2,3,5,9 on FORT
+    /// </summary>
+    private static string GetBalanceSubquery(short profitYear)
+    {
+        return @$"SELECT
     pd.SSN as Ssn,
     --Contributions + Earnings + EtvaForfeitures + Distributions + Forfeitures + VestedEarnings
-    --Contributions:
+    --Contributions (Code 0):
     SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.CONTRIBUTION ELSE 0 END)
-    --Earnings:
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0,2) THEN pd.EARNINGS ELSE 0 END)
-    --EtvaForfeitures
+    --Earnings (Codes 0, 8):
+  + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0,8) THEN pd.EARNINGS ELSE 0 END)
+    --Etva forfeit incoming (Code 0):
   + SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.FORFEITURE ELSE 0 END)
-    --Distributions
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID  IN (1,3,5) THEN pd.FORFEITURE * -1 ELSE 0 END)
-    --Forfeitures
+    --Distributions (Codes 1, 3, 5):
+  + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (1,3,5) THEN pd.FORFEITURE * -1 ELSE 0 END)
+    --Forfeitures (Code 2):
   + SUM(CASE WHEN pd.PROFIT_CODE_ID = 2 THEN pd.FORFEITURE * -1 ELSE 0 END)
-   --VestedEarnings
+    --VestedEarnings (Code 6 QDRO incoming uses CONTRIBUTION, Code 9 ETVA payment uses FORFEITURE):
   + (
       SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) +
-      SUM(CASE WHEN pd.PROFIT_CODE_ID  = 8 THEN pd.EARNINGS  ELSE 0 END) + 
       SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
     ) AS Total
   FROM PROFIT_DETAIL pd
- WHERE pd.PROFIT_YEAR  <= {profitYear}
- GROUP BY pd.SSN
-";
-        return query;
+ WHERE pd.PROFIT_YEAR <= {profitYear}
+ GROUP BY pd.SSN";
     }
+
     private static string GetVestingRatioQuery(short profitYear, DateOnly asOfDate)
     {
         var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
