@@ -36,7 +36,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
 
   const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "employeeName",
+    initialSortBy: "fullName",
     initialSortDescending: false,
     onPaginationChange: useCallback(
       (pageNum: number, pageSz: number, sortPrms: SortParams) => {
@@ -89,7 +89,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
-          sortBy: "employeeName",
+          sortBy: "fullName",
           isSortDescending: false
         },
         reportId: matchingPreset ? Number(matchingPreset.id) : 0
@@ -121,7 +121,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
 
     return [
       {
-        employeeName: `TOTAL EMPS: ${data.numberOfEmployees || 0}`,
+        fullName: `TOTAL EMPS: ${data.numberOfEmployees || 0}`,
         wages: data.wagesTotal || 0,
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
@@ -129,7 +129,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
         isNew: data.numberOfNewEmployees || 0
       },
       {
-        employeeName: "No Wages",
+        fullName: "No Wages",
         wages: 0,
         hours: 0,
         points: 0,

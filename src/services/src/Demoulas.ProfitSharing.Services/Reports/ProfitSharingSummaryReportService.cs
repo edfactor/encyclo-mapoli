@@ -446,8 +446,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
     public async Task<YearEndProfitSharingReportTotals> GetYearEndProfitSharingTotalsAsync(
         BadgeNumberRequest req,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
@@ -612,7 +611,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         {
             BadgeNumber = 0, // Non-employees have badge 0
             ProfitYear = profitYear,
-            EmployeeName = x.Beneficiary.ContactInfo.FullName ?? string.Empty,
+            FullName = x.Beneficiary.ContactInfo.FullName ?? string.Empty,
             StoreNumber = 0,
             EmployeeTypeCode = '0', // READY reports beneficiaries with type code '0' (non-employee indicator)
             EmployeeTypeName = "Hourly", // Will be normalized to "Hourly" for comparison
@@ -663,7 +662,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         {
             BadgeNumber = x.Employee.BadgeNumber,
             ProfitYear = x.ProfitYear,
-            EmployeeName = x.Employee.FullName!,
+            FullName = x.Employee.FullName!,
             StoreNumber = x.Employee.StoreNumber,
             EmployeeTypeCode = x.Employee.EmploymentTypeId,
             EmployeeTypeName = x.Employee.EmploymentTypeName,

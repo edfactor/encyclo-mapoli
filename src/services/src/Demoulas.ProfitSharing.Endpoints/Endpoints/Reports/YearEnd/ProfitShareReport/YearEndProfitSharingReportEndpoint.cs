@@ -119,7 +119,7 @@ public class YearEndProfitSharingReportEndpoint : EndpointWithCsvTotalsBase<Year
         public YearEndProfitSharingReportClassMap()
         {
             Map(m => m.BadgeNumber).Index(0).Name("Badge Number");
-            Map(m => m.EmployeeName).Index(1).Name("Employee Name");
+            Map(m => m.FullName).Index(1).Name("Employee Name");
             Map(m => m.StoreNumber).Index(2).Name("Store Number");
             Map(m => m.EmployeeTypeCode).Index(3).Name("Employee Type");
             Map(m => m.DateOfBirth).Index(4).Name("Date of Birth");

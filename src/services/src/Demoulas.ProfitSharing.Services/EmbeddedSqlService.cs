@@ -226,23 +226,23 @@ GROUP BY pd.SSN";
     {
         return @$"SELECT
     pd.SSN as Ssn,
+    --Contributions + Earnings + EtvaForfeitures + Distributions + Forfeitures + VestedEarnings
     --Contributions:
     SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.CONTRIBUTION ELSE 0 END)
     --Earnings:
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0,8) THEN pd.EARNINGS ELSE 0 END)
-    --Forfeitures in:
+  + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0) THEN pd.EARNINGS ELSE 0 END)
+    --EtvaForfeitures
   + SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.FORFEITURE ELSE 0 END)
-     -- Allocation in
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) 
-     --Distributions
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID  IN (1,3) THEN pd.FORFEITURE * -1 ELSE 0 END) 
-      --Allocation out
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID  = 5 THEN pd.FORFEITURE * -1 ELSE 0 END)
+    --Distributions
+  + SUM(CASE WHEN pd.PROFIT_CODE_ID  IN (1,3,5) THEN pd.FORFEITURE * -1 ELSE 0 END)
     --Forfeitures
   + SUM(CASE WHEN pd.PROFIT_CODE_ID = 2 THEN pd.FORFEITURE * -1 ELSE 0 END)
-    --ETVA Distributions
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
-     AS Total
+   --VestedEarnings
+  + (
+      SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) +
+      SUM(CASE WHEN pd.PROFIT_CODE_ID  = 8 THEN pd.EARNINGS  ELSE 0 END) + 
+      SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
+    ) AS Total
   FROM PROFIT_DETAIL pd
  WHERE pd.PROFIT_YEAR <= {profitYear}
  GROUP BY pd.SSN";
