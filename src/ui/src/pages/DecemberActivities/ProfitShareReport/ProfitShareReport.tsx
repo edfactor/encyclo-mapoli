@@ -1,6 +1,6 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
@@ -15,7 +15,7 @@ const ProfitShareReport = () => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const dispatch = useDispatch();
   const [triggerSearch] = useLazyGetYearEndProfitSharingReportTotalsQuery();
-  const profitYear = useFiscalCloseProfitYear();
+  const profitYear = useDecemberFlowProfitYear();
 
   // Load both tables when page loads - this is consistent with other pages which only display data and do not take input.
   useEffect(() => {
@@ -106,7 +106,7 @@ const ProfitShareReport = () => {
         </Grid>
         */}
         <Grid width="100%">
-          <ProfitSummary frozenData={false} />
+          <ProfitSummary frozenData={false} profitYear={profitYear} />
         </Grid>
       </Grid>
     </Page>
