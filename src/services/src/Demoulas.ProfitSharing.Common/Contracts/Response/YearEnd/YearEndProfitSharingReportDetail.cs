@@ -7,7 +7,7 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYea
 {
     public required int BadgeNumber { get; set; }
     public required short ProfitYear { get; set; }
-    [MaskSensitive] public required string EmployeeName { get; set; }
+    [MaskSensitive] public required string FullName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
     public required string EmployeeTypeName { get; set; }
@@ -34,7 +34,7 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYea
         {
             BadgeNumber = 135,
             ProfitYear = 2024,
-            EmployeeName = "John Doe",
+            FullName = "John Doe",
             StoreNumber = 23,
             EmployeeTypeCode = 'p',
             EmployeeTypeName = "Part Time",

@@ -1,5 +1,4 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
@@ -20,23 +19,23 @@ interface ReportGridProps {
   onLoadingChange?: (isLoading: boolean) => void;
   isFrozen: boolean;
   searchTrigger: number;
+  profitYear: number;
 }
 
-const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFrozen, searchTrigger }) => {
+const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFrozen, searchTrigger, profitYear }) => {
   const navigate = useNavigate();
   const [triggerLive, { isFetching: isFetchingLive }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const [triggerFrozen, { isFetching: isFetchingFrozen }] = useLazyGetYearEndProfitSharingReportFrozenQuery();
   const trigger = isFrozen ? triggerFrozen : triggerLive;
   const isFetching = isFrozen ? isFetchingFrozen : isFetchingLive;
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const profitYear = useFiscalCloseProfitYear();
   const liveData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportLive);
   const frozenData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportFrozen);
   const data = isFrozen ? frozenData : liveData;
 
   const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "employeeName",
+    initialSortBy: "fullName",
     initialSortDescending: false,
     onPaginationChange: useCallback(
       (pageNum: number, pageSz: number, sortPrms: SortParams) => {
@@ -89,7 +88,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
-          sortBy: "employeeName",
+          sortBy: "fullName",
           isSortDescending: false
         },
         reportId: matchingPreset ? Number(matchingPreset.id) : 0
@@ -121,7 +120,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
 
     return [
       {
-        employeeName: `TOTAL EMPS: ${data.numberOfEmployees || 0}`,
+        fullName: `TOTAL EMPS: ${data.numberOfEmployees || 0}`,
         wages: data.wagesTotal || 0,
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
@@ -129,7 +128,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
         isNew: data.numberOfNewEmployees || 0
       },
       {
-        employeeName: "No Wages",
+        fullName: "No Wages",
         wages: 0,
         hours: 0,
         points: 0,

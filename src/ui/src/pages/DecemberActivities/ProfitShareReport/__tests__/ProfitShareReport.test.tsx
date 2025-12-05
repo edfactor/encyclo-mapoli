@@ -35,7 +35,7 @@ vi.mock("../../../FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary", () => 
   default: vi.fn(() => <div data-testid="profit-summary">Profit Summary</div>)
 }));
 
-vi.mock("hooks/useFiscalCloseProfitYear", () => ({
+vi.mock("hooks/useDecemberFlowProfitYear", () => ({
   default: vi.fn(() => 2024)
 }));
 
