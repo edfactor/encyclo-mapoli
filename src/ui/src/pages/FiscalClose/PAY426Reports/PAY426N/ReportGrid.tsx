@@ -1,5 +1,4 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
@@ -20,16 +19,16 @@ interface ReportGridProps {
   onLoadingChange?: (isLoading: boolean) => void;
   isFrozen: boolean;
   searchTrigger: number;
+  profitYear: number;
 }
 
-const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFrozen, searchTrigger }) => {
+const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFrozen, searchTrigger, profitYear }) => {
   const navigate = useNavigate();
   const [triggerLive, { isFetching: isFetchingLive }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const [triggerFrozen, { isFetching: isFetchingFrozen }] = useLazyGetYearEndProfitSharingReportFrozenQuery();
   const trigger = isFrozen ? triggerFrozen : triggerLive;
   const isFetching = isFrozen ? isFetchingFrozen : isFetchingLive;
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const profitYear = useFiscalCloseProfitYear();
   const liveData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportLive);
   const frozenData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportFrozen);
   const data = isFrozen ? frozenData : liveData;

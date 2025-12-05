@@ -126,10 +126,11 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
               onLoadingChange={handleLoadingChange}
               isFrozen={isFrozen}
               searchTrigger={searchTrigger}
+              profitYear={profitYear}
             />
           )}
 
-          {showSummaryReport && <ProfitSummary frozenData={isFrozen} />}
+          {showSummaryReport && <ProfitSummary frozenData={isFrozen} profitYear={profitYear} />}
         </Grid>
       </Grid>
     </Page>

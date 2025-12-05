@@ -1,8 +1,8 @@
-import { Button, Divider, Grid, Typography } from "@mui/material";
+import { Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import {
   useFinalizeReportMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery
@@ -97,15 +97,15 @@ const sumOrMasked = (
 
 interface ProfitSummaryProps {
   frozenData: boolean;
+  profitYear: number;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData, profitYear }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
   const [shouldArchive, setShouldArchive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const profitYear = useFiscalCloseProfitYear();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
   const handleCommit = async () => {
@@ -280,6 +280,39 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
       />
     </Page>
   );
+};
+
+/**
+ * Wrapper component that fetches the frozen state profitYear and renders ProfitSummary.
+ * Used by the router when navigating directly to the PAY426 Summary page under Fiscal Close.
+ */
+interface FrozenProfitSummaryWrapperProps {
+  frozenData: boolean;
+}
+
+export const FrozenProfitSummaryWrapper: React.FC<FrozenProfitSummaryWrapperProps> = ({ frozenData }) => {
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
+  const [fetchFrozenState, { data: frozenState, isLoading }] = useLazyGetFrozenStateResponseQuery();
+
+  useEffect(() => {
+    if (hasToken) {
+      fetchFrozenState(undefined, false);
+    }
+  }, [fetchFrozenState, hasToken]);
+
+  if (isLoading || !frozenState?.profitYear) {
+    return (
+      <Grid
+        container
+        justifyContent="center"
+        alignItems="center"
+        sx={{ minHeight: 200 }}>
+        <CircularProgress />
+      </Grid>
+    );
+  }
+
+  return <ProfitSummary frozenData={frozenData} profitYear={frozenState.profitYear} />;
 };
 
 export default ProfitSummary;
