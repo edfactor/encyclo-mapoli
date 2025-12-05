@@ -23,4 +23,12 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+
+
+  <ItemGroup>
+    <PackageReference Update="SonarAnalyzer.CSharp">
+      <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
