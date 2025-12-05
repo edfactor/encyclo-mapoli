@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -148,7 +148,7 @@ public class Pay426NTests : PristineBaseTest
                         var ready = readyBySsn[ssn];
                         var smart = smartBySsn[ssn];
 
-                        TestOutputHelper.WriteLine($"\n--- SSN {ssn} ({ready.EmployeeName}) ---");
+                        TestOutputHelper.WriteLine($"\n--- SSN {ssn} ({ready.FullName}) ---");
                         TestOutputHelper.WriteLine($"READY: {ready}");
                         TestOutputHelper.WriteLine($"SMART: {smart}");
 
@@ -182,7 +182,7 @@ public class Pay426NTests : PristineBaseTest
                     TestOutputHelper.WriteLine($"\n=== SSNs ONLY IN READY ({ssnsOnlyInReady.Count} shown) ===");
                     foreach (var ssn in ssnsOnlyInReady.Take(5))
                     {
-                        TestOutputHelper.WriteLine($"  SSN {ssn}: {readyBySsn[ssn].EmployeeName}");
+                        TestOutputHelper.WriteLine($"  SSN {ssn}: {readyBySsn[ssn].FullName}");
                     }
                 }
 
@@ -193,7 +193,7 @@ public class Pay426NTests : PristineBaseTest
                     TestOutputHelper.WriteLine($"\n=== SSNs ONLY IN SMART ({ssnsOnlyInSmart.Count} shown) ===");
                     foreach (var ssn in ssnsOnlyInSmart.Take(5))
                     {
-                        TestOutputHelper.WriteLine($"  SSN {ssn}: {smartBySsn[ssn].EmployeeName}");
+                        TestOutputHelper.WriteLine($"  SSN {ssn}: {smartBySsn[ssn].FullName}");
                     }
                 }
             }
@@ -325,7 +325,7 @@ public class Pay426NTests : PristineBaseTest
             {
                 // Log violation with detailed diagnostic info
                 violations.Add(
-                    $"Badge {badge} ({smart.EmployeeName}): " +
+                    $"Badge {badge} ({smart.FullName}): " +
                     $"READY={ready.YearsInPlan}, SMART={smart.YearsInPlan}, Diff={difference}, Expected={expectedDifference} | " +
                     $"FirstContrYear={smart.FirstContributionYear?.ToString() ?? "null"}, Hours={smart.Hours}, Age={smart.Age} | " +
                     $"Conditions: No2025Contr={hasNo2025Contribution}, Hours>=1000={hasEnoughHours}, Age>=18={isAge18Plus}, ShouldAdd+1={shouldAddOne}"
