@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common;
+﻿using System.Runtime.CompilerServices;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -208,13 +209,16 @@ GROUP BY pd.SSN";
 
     private static FormattableString GetTotalBalanceQuery(short profitYear)
     {
+        // Uses the shared balance subquery to ensure consistency across all usages.
+        // Note: This must return a FormattableString for use with FromSqlInterpolated.
+        // The query must start with SELECT (no leading whitespace) to be composable.
         var balanceSubquery = GetBalanceSubquery(profitYear);
-        FormattableString query = $@"{balanceSubquery}";
+        FormattableString query = FormattableStringFactory.Create(balanceSubquery);
         return query;
     }
 
     /// <summary>
-    /// Shared balance calculation subquery used by both GetTotalBalanceQuery and GetProfitShareTotals.
+    /// Shared balance calculation subquery used by GetTotalBalanceQuery and GetProfitShareTotals.
     /// SME formula (Cheng Jiang): Current bal = sum 0 + sum 8 + sum 6 - (sum1 + sum 3 + sum9) - sum 5 - sum 2
     /// Where: sum 0 on (CONT, EARN, FORT), sum 8 on EARN, sum 6 on CONT, sum 1,2,3,5,9 on FORT
     /// </summary>
