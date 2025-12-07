@@ -100,7 +100,7 @@ internal static class GenerateScriptHelper
                     sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
                 ]));
             factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
-            factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("Warehouse"));
+            factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonWarehouseContext>("Warehouse"));
         });
         builder.AddProjectServices();
 

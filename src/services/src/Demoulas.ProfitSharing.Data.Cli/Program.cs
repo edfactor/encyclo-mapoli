@@ -158,8 +158,6 @@ public sealed class Program
                     return await ExecuteValidateImport(configuration, args ?? Array.Empty<string>());
                 case "generate-upgrade-script":
                     return await ExecuteGenerateUpgradeScript(configuration, args ?? Array.Empty<string>());
-                case "update-calendar-seeder":
-                    return await ExecuteUpdateCalendarSeeder(configuration, args ?? Array.Empty<string>());
                 default:
                     Console.WriteLine($"Unknown or missing command '{invokedCommand}'");
                     return 1;
@@ -496,58 +494,5 @@ public sealed class Program
         {
             throw new ArgumentNullException(optionName, $"{optionName} must be provided.");
         }
-    }
-
-    private static async Task<int> ExecuteUpdateCalendarSeeder(IConfiguration configuration, string[] args)
-    {
-        await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (sp, _) =>
-        {
-            // Get the warehouse context directly - it's registered as a scoped service
-            await using var warehouseContext = sp.GetRequiredService<DemoulasCommonDataContext>();
-
-            Console.WriteLine("Fetching all accounting periods from warehouse database...");
-
-            // Query all accounting periods directly from the warehouse database
-            var accountingPeriods = await warehouseContext.AccountingPeriods
-                .OrderBy(ap => ap.WeekEnd)
-                .ToListAsync(CancellationToken.None);
-
-            Console.WriteLine($"Retrieved {accountingPeriods.Count} accounting period records");
-
-            // Generate the C# file content
-            var outputFile = configuration["output-file"] ?? "CaldarRecordSeeder.cs";
-            var sb = new StringBuilder();
-            sb.AppendLine("using Demoulas.Common.Data.Services.Entities.Entities;");
-            sb.AppendLine();
-            sb.AppendLine("namespace Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;");
-            sb.AppendLine();
-            sb.AppendLine("/// <summary>");
-            sb.AppendLine("/// Provides seeded accounting period calendar data.");
-            sb.AppendLine($"/// Last updated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-            sb.AppendLine($"/// Record count: {accountingPeriods.Count}");
-            sb.AppendLine("/// </summary>");
-            sb.AppendLine("public static class CaldarRecordSeeder");
-            sb.AppendLine("{");
-            sb.AppendLine("    public static IEnumerable<AccountingPeriod> Records =>");
-            sb.AppendLine("    [");
-
-#pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
-            foreach (var period in accountingPeriods)
-            {
-                sb.AppendLine($"        new() {{ WeekEnd = new DateOnly({period.WeekEnd.Year}, {period.WeekEnd.Month}, {period.WeekEnd.Day}) }},");
-            }
-#pragma warning restore S3267 // Loops should be simplified with "LINQ" expressions
-
-            sb.AppendLine("    ];");
-            sb.AppendLine("}");
-
-            // Write to file
-            await File.WriteAllTextAsync(outputFile, sb.ToString());
-
-            Console.WriteLine($"CaldarRecordSeeder.cs generated successfully at: {Path.GetFullPath(outputFile)}");
-            Console.WriteLine($"Date range: {accountingPeriods.Min(p => p.WeekEnd)} to {accountingPeriods.Max(p => p.WeekEnd)}");
-        });
-
-        return 0;
     }
 }
