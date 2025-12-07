@@ -502,9 +502,8 @@ public sealed class Program
     {
         await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (sp, _) =>
         {
-            // Get the warehouse context factory to access accounting periods
-            var warehouseFactory = sp.GetRequiredService<IDbContextFactory<DemoulasCommonDataContext>>();
-            await using var warehouseContext = await warehouseFactory.CreateDbContextAsync(CancellationToken.None);
+            // Get the warehouse context directly - it's registered as a scoped service
+            await using var warehouseContext = sp.GetRequiredService<DemoulasCommonDataContext>();
 
             Console.WriteLine("Fetching all accounting periods from warehouse database...");
 
