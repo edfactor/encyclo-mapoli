@@ -191,7 +191,7 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
-    public async Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {
         try
         {

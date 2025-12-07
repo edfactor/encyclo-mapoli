@@ -323,7 +323,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.FakeSsns).Returns(mockFakeSsns.Object);
 
         Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.ToList().BuildMockDbSet();
-        _profitSharingReadOnlyDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
+        _storeInfoDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
 
         Mock<DbSet<FrozenState>> mockFrozenStates = frozenStates.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
@@ -595,7 +595,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     }
 
 
-    public async Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {
         try
         {

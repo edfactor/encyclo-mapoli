@@ -18,6 +18,7 @@ if (PortHelper.IsTcpPortInUse(uiPort))
 }
 
 var database = builder.AddConnectionString("ProfitSharing", "ConnectionStrings:ProfitSharing");
+var warehouse = builder.AddConnectionString("Warehouse", "ConnectionStrings:Warehouse");
 
 Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
@@ -30,6 +31,7 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         projectPath!,
         "run", "--no-build", "--launch-profile", "upgrade-db")
     .WithReference(database)
+    .WithReference(warehouse)
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
@@ -133,6 +135,20 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         },
         commandOptions: new CommandOptions { IconName = "Navigation", IconVariant = IconVariant.Filled })
     .WithCommand(
+        name: "update-calendar-seeder",
+        displayName: "Update calendar seeder",
+        executeCommand: async (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+            return await CommandHelper.RunConsoleAppAsync(
+                projectPath!,
+                "update-calendar-seeder",
+                logger,
+                "Update Calendar Seeder",
+                interactionService);
+        },
+        commandOptions: new CommandOptions { IconName = "CalendarLtr", IconVariant = IconVariant.Filled })
+    .WithCommand(
         name: "Nuclear-Option",
         displayName: "Full Nuclear Reset",
         executeCommand: async (c) =>
@@ -234,7 +250,9 @@ var configuration = new ConfigurationBuilder()
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithParentRelationship(database)
+    .WithParentRelationship(warehouse)
     .WithReference(database)
+    .WithReference(warehouse)
     .WithSwaggerUi()
     .WithRedoc()
     .WithScalar()
@@ -266,16 +284,25 @@ ui.WithReference(api)
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
      .WaitFor(api)
      .WithParentRelationship(database)
+     .WithParentRelationship(warehouse)
+     .WithReference(database)
+     .WithReference(warehouse)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
      .WaitFor(api)
      .WithParentRelationship(database)
+     .WithParentRelationship(warehouse)
+     .WithReference(database)
+     .WithReference(warehouse)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
      .WaitFor(api)
      .WithParentRelationship(database)
+     .WithParentRelationship(warehouse)
+     .WithReference(database)
+     .WithReference(warehouse)
     .WithExplicitStart();
 
 // Playwright E2E test runner as an executable resource
