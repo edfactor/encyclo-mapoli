@@ -130,7 +130,7 @@ public class CalendarServiceCacheTests
         distributedCache.Verify(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once);
         // Note: Cannot use VerifyNoOtherCalls() when interface has methods with optional parameters
         // as Moq's expression tree compilation fails with CS0854
-        dataContextFactory.Verify(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonDataContext, Task<CalendarResponseDto>>>()), Times.Never);
+        dataContextFactory.Verify(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()), Times.Never);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class CalendarServiceCacheTests
             .ReturnsAsync((byte[]?)null);
         var dataContextFactory = new Mock<IProfitSharingDataContextFactory>();
         var accountingPeriodsService = new Mock<IAccountingPeriodsService>();
-        dataContextFactory.Setup(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonDataContext, Task<CalendarResponseDto>>>()))
+        dataContextFactory.Setup(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()))
             .ReturnsAsync(expected);
         var service = new Demoulas.ProfitSharing.Services.CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
 
@@ -156,6 +156,6 @@ public class CalendarServiceCacheTests
         Assert.Equal(expected.FiscalBeginDate, result.FiscalBeginDate);
         Assert.Equal(expected.FiscalEndDate, result.FiscalEndDate);
         distributedCache.Verify(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once);
-        dataContextFactory.Verify(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonDataContext, Task<CalendarResponseDto>>>()), Times.Once);
+        dataContextFactory.Verify(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()), Times.Once);
     }
 }

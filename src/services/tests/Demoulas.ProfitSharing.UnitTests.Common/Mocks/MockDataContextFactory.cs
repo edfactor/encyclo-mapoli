@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
@@ -24,7 +24,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 {
     private readonly Mock<ProfitSharingDbContext> _profitSharingDbContext;
     private readonly Mock<ProfitSharingReadOnlyDbContext> _profitSharingReadOnlyDbContext;
-    private readonly Mock<DemoulasCommonDataContext> _storeInfoDbContext;
+    private readonly Mock<DemoulasCommonWarehouseContext> _storeInfoDbContext;
 
     /// <summary>
     /// Creates a mock DbSet that uses a backing list to persist Add/Remove operations
@@ -142,7 +142,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(ctx => ctx.SaveChangesAsync(true, It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
-        _storeInfoDbContext = new Mock<DemoulasCommonDataContext>();
+        _storeInfoDbContext = new Mock<DemoulasCommonWarehouseContext>();
 
         // Setup Database facade for the read-only context
         var mockDatabaseFacade = new Mock<DatabaseFacade>(_profitSharingReadOnlyDbContext.Object);
@@ -595,7 +595,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     }
 
 
-    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
     {
         try
         {

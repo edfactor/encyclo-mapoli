@@ -135,20 +135,6 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         },
         commandOptions: new CommandOptions { IconName = "Navigation", IconVariant = IconVariant.Filled })
     .WithCommand(
-        name: "update-calendar-seeder",
-        displayName: "Update calendar seeder",
-        executeCommand: async (c) =>
-        {
-            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-            return await CommandHelper.RunConsoleAppAsync(
-                projectPath!,
-                "update-calendar-seeder",
-                logger,
-                "Update Calendar Seeder",
-                interactionService);
-        },
-        commandOptions: new CommandOptions { IconName = "CalendarLtr", IconVariant = IconVariant.Filled })
-    .WithCommand(
         name: "Nuclear-Option",
         displayName: "Full Nuclear Reset",
         executeCommand: async (c) =>

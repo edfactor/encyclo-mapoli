@@ -29,12 +29,12 @@ public sealed class DataContextFactory : DataContextFactoryBase<ProfitSharingDbC
     /// <typeparam name="T"></typeparam>
     /// <param name="func"></param>
     /// <returns></returns>
-    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
     {
         using (Logger.BeginScope("Warehouse DB Operation"))
         {
             await using AsyncServiceScope scope = ServiceProvider.CreateAsyncScope();
-            DemoulasCommonDataContext dbContext = scope.ServiceProvider.GetRequiredService<DemoulasCommonDataContext>();
+            DemoulasCommonWarehouseContext dbContext = scope.ServiceProvider.GetRequiredService<DemoulasCommonWarehouseContext>();
             return await func(dbContext);
         }
     }

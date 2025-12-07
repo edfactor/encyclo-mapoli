@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -82,7 +82,7 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         return func(_readOnlyCtx);
     }
 
-    public Task<T> UseWarehouseContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
     {
         throw new NotImplementedException();
     }

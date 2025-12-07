@@ -132,7 +132,7 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
         ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
-    factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("Warehouse"));
+    factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonWarehouseContext>("Warehouse"));
 });
 builder.AddProjectServices();
 
