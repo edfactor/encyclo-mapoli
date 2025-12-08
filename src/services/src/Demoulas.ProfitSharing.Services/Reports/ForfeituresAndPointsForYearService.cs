@@ -206,7 +206,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
         ProfitDetailRollup? singleYearNumbers)
     {
         decimal balanceConsideredForEarnings = (currentBalance ?? 0) - (singleYearNumbers?.MilitaryTotal ?? 0) - (singleYearNumbers?.ClassActionFundTotal ?? 0);
-        int earningsPoints = (int)Math.Round(balanceConsideredForEarnings / 100, MidpointRounding.AwayFromZero);
+        int earningsPoints = (int)Math.Round(balanceConsideredForEarnings / 100, 0, MidpointRounding.AwayFromZero);
         decimal forfeitures = singleYearNumbers == null ? 0.00m : -1 * singleYearNumbers.TotalForfeitures;
 
         return new ForfeituresAndPointsForYearResponse
@@ -225,7 +225,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
     // Optimized helper for beneficiaries when using projection
     private static ForfeituresAndPointsForYearResponse ToBeneficiaryMemberDetails(string fullName, int ssn, int badgeNumber, short psnSuffix, decimal? currentBalance)
     {
-        short earningsPoints = currentBalance != null ? (short)Math.Round(currentBalance.Value / 100, MidpointRounding.AwayFromZero) : (short)0;
+        short earningsPoints = currentBalance != null ? (short)Math.Round(currentBalance.Value / 100, 0, MidpointRounding.AwayFromZero) : (short)0;
         string psn = $"{badgeNumber}{psnSuffix:D4}";
 
         return new ForfeituresAndPointsForYearResponse

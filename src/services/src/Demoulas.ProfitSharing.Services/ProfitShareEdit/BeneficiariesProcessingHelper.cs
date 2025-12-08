@@ -78,7 +78,7 @@ internal static class BeneficiariesProcessingHelper
         if (memberTotals.NewCurrentAmount > 0)
         {
             memberTotals.PointsDollars = Math.Round(memberTotals.NewCurrentAmount, 2, MidpointRounding.AwayFromZero);
-            memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
+            memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, 0, MidpointRounding.AwayFromZero);
         }
 
         memberTotals.EarningsAmount = Math.Round(profitShareUpdateRequest.EarningsPercent * memberTotals.EarnPoints, 2,

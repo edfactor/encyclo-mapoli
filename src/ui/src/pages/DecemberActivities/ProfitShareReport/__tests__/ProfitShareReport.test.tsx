@@ -3,6 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import generalSlice from "../../../../reduxstore/slices/generalSlice";
 import securitySlice from "../../../../reduxstore/slices/securitySlice";
 import yearsEndSlice from "../../../../reduxstore/slices/yearsEndSlice";
 import ProfitShareReport from "../ProfitShareReport";
@@ -63,6 +64,7 @@ describe("ProfitShareReport", () => {
     // Create a fresh mock store for each test
     mockStore = configureStore({
       reducer: {
+        general: generalSlice,
         security: securitySlice,
         yearsEnd: yearsEndSlice,
         [mockYearsEndApi.reducerPath]: mockYearsEndApi.reducer

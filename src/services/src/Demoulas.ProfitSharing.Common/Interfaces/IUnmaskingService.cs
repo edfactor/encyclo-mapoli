@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 
@@ -15,5 +15,5 @@ public interface IUnmaskingService
     /// <param name="demographicId">The demographic ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Formatted SSN or error result</returns>
-    Task<Result<string>> GetUnmaskedSsnAsync(long demographicId, CancellationToken cancellationToken = default);
+    Task<Result<string>> GetUnmaskedSsnAsync(int demographicId, CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,6 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
@@ -19,10 +21,20 @@ interface ReportGridProps {
   onLoadingChange?: (isLoading: boolean) => void;
   isFrozen: boolean;
   searchTrigger: number;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
   profitYear: number;
 }
 
-const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFrozen, searchTrigger, profitYear }) => {
+const ReportGrid: React.FC<ReportGridProps> = ({ 
+  params, 
+  onLoadingChange, 
+  isFrozen, 
+  searchTrigger,
+  isGridExpanded = false,
+  onToggleExpand,
+  profitYear
+}) => {
   const navigate = useNavigate();
   const [triggerLive, { isFetching: isFetchingLive }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const [triggerFrozen, { isFetching: isFetchingFrozen }] = useLazyGetYearEndProfitSharingReportFrozenQuery();
@@ -113,7 +125,9 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
     [handleNavigationForButton]
   );
 
-  const gridMaxHeight = useDynamicGridHeight();
+  const gridMaxHeight = useDynamicGridHeight({
+    heightPercentage: isGridExpanded ? 0.85 : 0.65
+  });
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
@@ -139,13 +153,30 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
 
   return (
     <>
-      <div style={{ padding: "0 24px 0 24px" }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
-          {`${getReportTitle()} (${data?.response?.total || 0} records)`}
-        </Typography>
-      </div>
+      <Grid
+        container
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom={2}
+        paddingX="24px">
+        <Grid>
+          <Typography
+            variant="h2"
+            sx={{ color: "#0258A5" }}>
+            {`${getReportTitle()} (${data?.response?.total || 0} records)`}
+          </Typography>
+        </Grid>
+        <Grid>
+          {onToggleExpand && (
+            <IconButton
+              onClick={onToggleExpand}
+              sx={{ zIndex: 1 }}
+              aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+              {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </IconButton>
+          )}
+        </Grid>
+      </Grid>
 
       {isFetching ? (
         <Box

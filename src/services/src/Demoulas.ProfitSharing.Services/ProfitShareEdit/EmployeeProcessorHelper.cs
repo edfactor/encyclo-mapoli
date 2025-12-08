@@ -127,7 +127,7 @@ internal static class EmployeeProcessorHelper
                 + (empl.CurrentAmount - profitDetailTotals.ForfeitsTotal - profitDetailTotals.PaidAllocationsTotal)
                 - profitDetailTotals.DistributionsTotal
                 , 2, MidpointRounding.AwayFromZero);
-            memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
+            memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, 0, MidpointRounding.AwayFromZero);
         }
 
         ComputeEarningsEmployee(empl, memberTotals, profitShareUpdateRequest, adjustmentsSummaryData, profitDetailTotals.ClassActionFundTotal);

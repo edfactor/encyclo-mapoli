@@ -6,16 +6,16 @@ public abstract record BalanceByBase<TDetail> : ReportResponseBase<TDetail> wher
 {
     public FrozenReportsByAgeRequest.Report ReportType { get; init; }
 
-    public required short TotalMembers { get; init; }
+    public required ushort TotalMembers { get; init; }
     public required decimal BalanceTotalAmount { get; init; }
-    public required short TotalBeneficiaries { get; set; }
+    public required ushort TotalBeneficiaries { get; set; }
     public decimal VestedTotalAmount { get; set; }
     public decimal TotalBeneficiariesAmount { get; set; }
     public decimal TotalBeneficiariesVestedAmount { get; set; }
 
-    public short TotalEmployee
+    public ushort TotalEmployee
     {
-        get { return (short)(TotalMembers - TotalBeneficiaries); }
+        get { return (ushort)(TotalMembers - TotalBeneficiaries); }
     }
 
     public decimal TotalEmployeeAmount

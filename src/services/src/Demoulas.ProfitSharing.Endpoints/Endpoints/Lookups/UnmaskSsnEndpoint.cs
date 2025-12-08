@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -94,7 +94,7 @@ public sealed record UnmaskSsnRequest
     /// <summary>
     /// The demographic ID to unmask SSN for.
     /// </summary>
-    public long DemographicId { get; init; }
+    public int DemographicId { get; init; }
 }
 
 /// <summary>
