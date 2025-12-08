@@ -364,7 +364,8 @@ public sealed class TerminatedEmployeeReportService
                 {
                     PSN = g.Key.PsnSuffix == 0 ? g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
                     Name = g.Key.Name,
-                    YearDetails = g.Select(x => x.YearDetail).ToList()
+                    YearDetails = g.Select(x => x.YearDetail).ToList(),
+                    YtdPsHours = g.First().YearDetail.YtdPsHours
                 }).ToPaginationResultsAsync(req, cancellationToken));
 
         int groupCount = grouped.Results != null ? grouped.Results.Count() : 0;

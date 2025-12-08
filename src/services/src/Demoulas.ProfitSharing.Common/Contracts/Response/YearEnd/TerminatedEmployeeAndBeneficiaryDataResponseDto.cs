@@ -10,8 +10,13 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
     [MaskSensitive] public required string? Name { get; set; }
 
     public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = [];
-    
+
     public bool IsExecutive { get; set; }
+
+    /// <summary>
+    /// YTD Profit Sharing Hours from the first YearDetail, used for sorting.
+    /// </summary>
+    public decimal YtdPsHours { get; set; }
 
     public static TerminatedEmployeeAndBeneficiaryDataResponseDto ResponseExample()
     {
@@ -19,6 +24,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
         {
             PSN = 7771230100, // ie. Bene or Empl
             Name = "Example, Joe F",
+            YtdPsHours = 980,
             YearDetails =
             [
                 new TerminatedEmployeeAndBeneficiaryYearDetailDto
