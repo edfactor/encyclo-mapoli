@@ -1,7 +1,7 @@
 {
     "ConnectionStrings": {
         "ProfitSharing": "CONNECTIONSTRINGS_PROFITSHARING_SLUG",
-        "StoreInfo": "CONNECTIONSTRINGS_COMMON_SLUG"
+        "Warehouse": "CONNECTIONSTRINGS_COMMON_SLUG"
     },
     "OracleHcm": {
         "BaseAddress": "ORACLEHCM_BASE_URL_SLUG",

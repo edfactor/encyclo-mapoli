@@ -78,7 +78,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(futureDate);
         var ex = await act.ShouldThrowAsync<ArgumentOutOfRangeException>();
-        ex.Message.ShouldBe($"{AccountingPeriodsService.InvalidDateError} (Parameter 'date')");
+        ex.Message.ShouldBe($"{AccountingPeriodsService.InvalidDateError} (Parameter 'searchDate')");
     }
 
     [Fact(DisplayName = "Find Weekending Date - Valid Date")]
