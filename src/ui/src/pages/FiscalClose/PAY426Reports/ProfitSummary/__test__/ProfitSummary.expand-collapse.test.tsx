@@ -39,9 +39,10 @@ describe("ProfitSummary - Expand/Collapse Functionality", () => {
       const mockInternalHandler = vi.fn();
 
       const { result } = renderHook(() => {
+        const externalHandler: (() => void) | undefined = mockExternalHandler;
         const handleToggle = () => {
-          if (mockExternalHandler) {
-            mockExternalHandler();
+          if (externalHandler) {
+            externalHandler();
             return;
           }
           mockInternalHandler();
@@ -58,13 +59,13 @@ describe("ProfitSummary - Expand/Collapse Functionality", () => {
     });
 
     it("should use internal toggle handler when external not provided", () => {
-      const mockExternalHandler = undefined;
       const mockInternalHandler = vi.fn();
 
       const { result } = renderHook(() => {
+        const externalHandler = undefined as (() => void) | undefined;
         const handleToggle = () => {
-          if (mockExternalHandler) {
-            mockExternalHandler();
+          if (externalHandler) {
+            externalHandler();
             return;
           }
           mockInternalHandler();
@@ -147,7 +148,11 @@ describe("ProfitSummary - Expand/Collapse Functionality", () => {
     });
 
     it("should work with only frozenData prop (backwards compatible)", () => {
-      const props = {
+      const props: {
+        frozenData: boolean;
+        externalIsGridExpanded?: boolean;
+        externalOnToggleExpand?: () => void;
+      } = {
         frozenData: false
       };
 

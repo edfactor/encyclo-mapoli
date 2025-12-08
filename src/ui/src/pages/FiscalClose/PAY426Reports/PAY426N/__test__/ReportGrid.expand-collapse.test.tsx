@@ -42,7 +42,14 @@ describe("ReportGrid - Expand/Collapse Functionality", () => {
     });
 
     it("should work without onToggleExpand (optional)", () => {
-      const props = {
+      const props: {
+        params: { reportId: number };
+        onLoadingChange: ReturnType<typeof vi.fn>;
+        isFrozen: boolean;
+        searchTrigger: number;
+        isGridExpanded: boolean;
+        onToggleExpand?: () => void;
+      } = {
         params: { reportId: 1 },
         onLoadingChange: vi.fn(),
         isFrozen: false,
