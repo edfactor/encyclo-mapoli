@@ -1,7 +1,7 @@
 import { RefObject, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { EligibleEmployeeResponseDto } from "../../../reduxstore/types";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumns";
@@ -36,7 +36,9 @@ const EligibleEmployeesGrid = ({
   }
 
   const columnDefs = useMemo(() => GetEligibleEmployeesColumns(), []);
-  const gridMaxHeight = useDynamicGridHeight();
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: clonedData?.response?.results?.length ?? 0
+  });
 
   return (
     <>

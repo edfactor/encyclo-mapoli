@@ -2,7 +2,7 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
@@ -19,8 +19,10 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const [getQPAY066BData, { data: qpay066bData, isFetching }] = useLazyGetQPAY066BTerminatedWithVestedBalanceQuery();
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: qpay066bData?.response?.response?.results?.length ?? 0
+  });
 
   const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,

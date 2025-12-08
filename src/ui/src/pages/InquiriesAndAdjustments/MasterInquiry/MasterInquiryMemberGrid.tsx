@@ -1,4 +1,4 @@
-import { useDynamicGridHeight } from "@/hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "@/hooks/useContentAwareGridHeight";
 import { Box, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
@@ -50,16 +50,10 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
   }: MasterInquiryMemberGridProps) => {
     const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
 
-    // Calculate height based on pageSize and expansion state
-    // Use square root scaling for better spread at all page sizes
-    // 5 rows -> 255px (min), 10 rows -> 356px, 50 rows -> 631px, 100 rows -> 820px (max)
-    const normalized = (memberGridPagination.pageSize - 5) / 95; // 0 to 1
-    const heightRatio = Math.sqrt(normalized); // Square root curve for even distribution
-    const maxHeightPixels = 255 + heightRatio * 600; // 255px minimum, 820px maximum
-
-    const gridMaxHeight = useDynamicGridHeight({
-      heightPercentage: isGridExpanded ? 0.85 : 0.5,
-      maxHeight: Math.round(maxHeightPixels)
+    // Use content-aware grid height - shrinks for small result sets
+    const gridMaxHeight = useContentAwareGridHeight({
+      rowCount: searchResults.results?.length ?? 0,
+      heightPercentage: isGridExpanded ? 0.85 : 0.5
     });
 
     const handleMemberClick = (member: EmployeeDetails) => {
