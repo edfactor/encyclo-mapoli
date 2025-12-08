@@ -83,7 +83,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
         var fiscalEndDate = calInfo.FiscalEndDate;
-        var fiscalBeginDate = calInfo.FiscalBeginDate;
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -254,7 +253,28 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                          x.TerminationDate < fiscalEndDate &&
                          x.Hours < _hoursThreshold &&
                          x.DateOfBirth <= birthday18 &&
-                         x.Balance > 0)
+                         x.Balance > 0),
+                // Line 11 (X): Terminated under 18 with no wages
+                CreateLineFromData(
+                    "TERMINATED",
+                    ((int)YearEndProfitSharingReportId.TerminatedUnder18WagesGreaterThanZero).ToString(),
+                    GetEnumDescription(YearEndProfitSharingReportId.TerminatedUnder18WagesGreaterThanZero),
+                    x => x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
+                         x.TerminationDate != null &&
+                         x.TerminationDate < fiscalEndDate &&
+                         x.DateOfBirth > birthday18
+                         && x.Wages > 0),
+
+                // Line 12 (X): Terminated under 18 with no wages and has a balance
+                CreateLineFromData(
+                    "EMPLOYEES",
+                    ((int)YearEndProfitSharingReportId.EmployeesWithZeroWagesPositiveBalance).ToString(),
+                    GetEnumDescription(YearEndProfitSharingReportId.EmployeesWithZeroWagesPositiveBalance),
+                        x => (
+                        ((x.EmploymentStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate != null)  ||
+                        x.EmploymentStatus == EmploymentStatus.Constants.Active ||
+                        x.EmploymentStatus == EmploymentStatus.Constants.Inactive)
+                        && x.Wages == 0 && x.Balance > 0))
             };
 
             // Line N: Non-employee beneficiaries (from BeneficiaryContacts, NOT in Demographics)
@@ -318,10 +338,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 allDetails = await ActiveSummary(ctx, req, calInfo.FiscalEndDate);
             }
 
-            // Apply report-specific filtering for ReportId 1-8, 10
+            // Apply report-specific filtering for ReportId 1-8, 10, 11
             IQueryable<YearEndProfitSharingReportDetail> filteredDetails = allDetails;
             var reportIdInt = (int)req.ReportId;
-            if (reportIdInt is >= 1 and <= 8 or 10)
+
+            if (reportIdInt is >= 1 and <= 12 and not 9)
             {
                 var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
                 var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
@@ -333,10 +354,14 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             // READY excludes employees with zero wages (COBOL behavior) - BUT NOT for reports that track prior amounts
             // Reports 4 and 8 specifically include employees with prior balances regardless of current-year wages
             // Report 10 (NonEmployeeBeneficiaries) has zero wages by design - they're non-employees with inherited balances
+            // Report 11 (TerminatedUnder18NoWages) explicitly includes zero-wage terminated employees under 18
+            // Report 12 looks for zero wage, positive balance employees
             // Match this behavior to ensure SMART reports match READY reports
             if (req.ReportId != YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount &&
                 req.ReportId != YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount &&
-                req.ReportId != YearEndProfitSharingReportId.NonEmployeeBeneficiaries)
+                req.ReportId != YearEndProfitSharingReportId.NonEmployeeBeneficiaries &&
+                req.ReportId != YearEndProfitSharingReportId.TerminatedUnder18WagesGreaterThanZero &&
+                req.ReportId != YearEndProfitSharingReportId.EmployeesWithZeroWagesPositiveBalance)
             {
                 filteredDetails = filteredDetails.Where(d => d.Wages > 0);
             }
@@ -446,7 +471,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
     public async Task<YearEndProfitSharingReportTotals> GetYearEndProfitSharingTotalsAsync(
         BadgeNumberRequest req,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
@@ -742,7 +768,14 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.Balance > 0,
             10 => x =>
                 x.BadgeNumber == 0, // Non-employee beneficiaries (not in Demographics/PayProfit)
-            11 => x => x.BadgeNumber == 0,
+            11 => x =>
+                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate != null && x.TerminationDate < fiscalEndDate &&
+                x.DateOfBirth > birthday18 && x.Wages > 0, // Terminated under 18 with no wages
+            12 => x =>
+                (((x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate != null) ||
+                        x.EmployeeStatus == EmploymentStatus.Constants.Active ||
+                        x.EmployeeStatus == EmploymentStatus.Constants.Inactive)
+                        && x.Wages == 0 && x.Balance > 0),
             _ => x => true
         };
     }
