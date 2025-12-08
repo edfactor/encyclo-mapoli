@@ -38,11 +38,6 @@ const PayBeNext = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Use content-aware grid height utility hook
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: gridData?.length ?? 0
-  });
-
   useEffect(() => {
     if (!isFetching) {
       setIsSubmitting(false);
@@ -99,6 +94,11 @@ const PayBeNext = () => {
 
     return rows;
   }, [adhocBeneficiariesReport, expandedRows]);
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: gridData?.length ?? 0
+  });
 
   // Handle row expansion toggle
   const handleRowExpansion = (badgeNumber: string) => {
