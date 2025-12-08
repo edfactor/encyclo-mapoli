@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
+import { getLastYearDateRange } from "utils/dateRangeUtils";
 import * as yup from "yup";
 import {
   dateStringValidator,
@@ -40,6 +41,9 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
   const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Get last year date range for default values
+  const { beginDate, endDate } = getLastYearDateRange();
+
   const {
     control,
     handleSubmit,
@@ -50,8 +54,8 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
     resolver: yupResolver(schema) as Resolver<RecentlyTerminatedSearch>,
     defaultValues: {
       profitYear: profitYear || undefined,
-      beginningDate: "",
-      endingDate: ""
+      beginningDate: mmDDYYFormat(beginDate),
+      endingDate: mmDDYYFormat(endDate)
     }
   });
 
@@ -72,8 +76,8 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
     // Clear the form fields
     reset({
       profitYear: profitYear || undefined,
-      beginningDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "",
-      endingDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : ""
+      beginningDate: mmDDYYFormat(beginDate),
+      endingDate: mmDDYYFormat(endDate)
     });
 
     // Call parent reset
@@ -84,17 +88,6 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
   useEffect(() => {
     fetchAccountingRange();
   }, [fetchAccountingRange]);
-
-  useEffect(() => {
-    if (fiscalData && fiscalData.fiscalBeginDate && fiscalData.fiscalEndDate) {
-      reset({
-        profitYear: profitYear || undefined,
-        beginningDate: mmDDYYFormat(fiscalData.fiscalBeginDate),
-        endingDate: mmDDYYFormat(fiscalData.fiscalEndDate)
-      });
-      trigger();
-    }
-  }, [fiscalData, profitYear, reset, trigger]);
 
   return (
     <form onSubmit={validateAndSearch}>
