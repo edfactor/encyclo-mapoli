@@ -37,7 +37,7 @@ public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : Profi
             s.ExampleRequest = TerminatedLettersRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
     }
 
     public override async Task HandleAsync(TerminatedLettersRequest req, CancellationToken ct)

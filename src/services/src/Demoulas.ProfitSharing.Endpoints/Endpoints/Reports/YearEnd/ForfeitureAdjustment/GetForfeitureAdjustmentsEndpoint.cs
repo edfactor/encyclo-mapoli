@@ -34,7 +34,7 @@ public class GetForfeitureAdjustmentsEndpoint : ProfitSharingEndpoint<SuggestedF
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
             s.Description = "This endpoint is used to get a suggested forfeiture adjustment for a badge number or ssn.";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
     }
     public override Task<Results<Ok<SuggestedForfeitureAdjustmentResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(SuggestedForfeitureAdjustmentRequest req, CancellationToken ct)
     {

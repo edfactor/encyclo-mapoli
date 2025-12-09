@@ -71,7 +71,7 @@ public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<Star
                 }
             };
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
     public override string ReportFileName => "Adhoc Terminated Employees Report";

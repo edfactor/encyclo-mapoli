@@ -80,7 +80,7 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
                 }
             };
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
 

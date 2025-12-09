@@ -66,6 +66,7 @@ You are working with:
 - Use `waitFor` for async operations and state updates
 - Reference the project's guide: `ai-templates/front-end/fe-write-unit-tests-for-hooks.md` when available
 - Example test structure:
+
   ```typescript
   describe("useCustomHook", () => {
     it("returns initial state correctly", () => {
@@ -92,6 +93,7 @@ You are working with:
 - Use parameterized tests (`it.each`) for testing multiple scenarios
 - Cover null/undefined handling, empty inputs, and boundary values
 - Example test structure:
+
   ```typescript
   describe("utilityFunction", () => {
     it.each([
