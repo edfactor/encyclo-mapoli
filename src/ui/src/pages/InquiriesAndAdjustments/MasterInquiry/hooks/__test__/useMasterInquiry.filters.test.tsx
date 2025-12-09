@@ -18,8 +18,8 @@ const mockTriggerProfitDetails = vi.fn();
 vi.mock("reduxstore/api/InquiryApi", () => ({
   InquiryApi: {
     reducerPath: "inquiryApi",
-    reducer: {},
-    middleware: () => (next) => (action) => next(action)
+    reducer: (state: unknown) => state,
+    middleware: () => (next: (arg: unknown) => unknown) => (action: unknown) => next(action)
   },
   useLazySearchProfitMasterInquiryQuery: () => [
     mockTriggerSearch,
