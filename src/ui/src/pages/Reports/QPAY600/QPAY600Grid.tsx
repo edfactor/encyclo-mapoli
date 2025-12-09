@@ -1,7 +1,7 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import {
   useGetFullTimeAccruedPaidHolidaysPayServicesQuery,
@@ -52,8 +52,10 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, onLoadingChange
 
   const { data: apiData, isFetching, error, isError } = currentResult;
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: apiData?.payServicesForYear?.results?.length ?? 0
+  });
 
   const { pageNumber, pageSize, handlePaginationChange } = useGridPagination({
     initialPageSize: 25,

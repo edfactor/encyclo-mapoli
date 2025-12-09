@@ -1,6 +1,6 @@
-import { Box, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { Box, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { RootState } from "../../../../reduxstore/store";
 import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
@@ -125,7 +125,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({
     [handleNavigationForButton]
   );
 
-  const gridMaxHeight = useDynamicGridHeight({
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: data?.response?.results?.length ?? 0,
     heightPercentage: isGridExpanded ? 0.85 : 0.65
   });
 

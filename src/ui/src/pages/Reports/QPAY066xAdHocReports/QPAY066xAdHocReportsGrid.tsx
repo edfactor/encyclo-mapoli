@@ -14,7 +14,7 @@ import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetQPAY066xAdHocCommonGridColumns, GetQPAY066xAgeAtTerminationColumn, GetQPAY066xAgeColumn, GetQPAY066xBeneficiaryAllocationColumn, GetQPAY066xDistributionAmountColumn, GetQPAY066xEnrollmentCodeColumn, GetQPAY066xInactiveDateColumn, GetQPAY066xPSYearsColumn, GetQPAY066xTerminationCodeColumn, GetQPAY066xTerminationDateColumn, GetQPAY066xVestedPercentageColumn } from "./QPAY066xAdHocGridColumns";
 
@@ -38,9 +38,6 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
   const breakdownByStoreManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreManagement);
   const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
   const breakdownByStoreTotals = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreTotals);
-
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
 
   // Check if storeNumber is provided to determine if totals should be shown
   const showTotals = storeNumber && storeNumber.trim() !== "";
@@ -131,6 +128,11 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
     }
     return [];
   }, [breakdownByStoreManagement, breakdownByStore]);
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: rowData?.length ?? 0
+  });
 
   return (
     <Grid

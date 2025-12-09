@@ -5,7 +5,7 @@ import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community
 import React, { useEffect, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { UnForfeitGridColumns } from "./UnForfeitGridColumns";
@@ -45,11 +45,6 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
   onShowUnsavedChangesDialog,
   onShowErrorDialog
 }) => {
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight({
-    heightPercentage: isGridExpanded ? 0.85 : 0.4
-  });
-
   // Check if current navigation should be read-only
   const isReadOnly = useReadOnlyNavigation();
 
@@ -84,6 +79,12 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     isReadOnly,
     onShowUnsavedChangesDialog,
     onShowErrorDialog
+  });
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: gridData?.length ?? 0,
+    heightPercentage: isGridExpanded ? 0.85 : 0.4
   });
 
   // Refresh grid cells when read-only status changes

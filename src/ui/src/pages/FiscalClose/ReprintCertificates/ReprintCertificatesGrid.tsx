@@ -3,7 +3,7 @@ import { SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useLazyGetCertificatesReportQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import { CertificatePrintRequest } from "../../../reduxstore/types";
@@ -23,9 +23,6 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     isSortDescending: false
   });
   const [_selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
-
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
 
   const { certificates } = useSelector((state: RootState) => state.yearsEnd);
   const [getCertificatesReport, { isFetching }] = useLazyGetCertificatesReportQuery();
@@ -94,6 +91,11 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
       })
     );
   }, [certificates]);
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: gridData?.length ?? 0
+  });
 
   const columnDefs = useMemo(
     () => GetReprintCertificatesGridColumns(),
