@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
-import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../../reduxstore/api/YearsEndApi";
+import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../../reduxstore/api/AdhocApi";
 import { RootState } from "../../../reduxstore/store";
 import { QPAY066BFilterParams } from "./QPAY066BFilterSection";
 import { GetQPAY066BGridColumns } from "./QPAY066BGridColumns";

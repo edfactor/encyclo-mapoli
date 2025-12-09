@@ -8,7 +8,7 @@ import {
   useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery,
   useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery,
   useLazyGetBreakdownByStoreTotalsQuery
-} from "reduxstore/api/YearsEndApi";
+} from "reduxstore/api/AdhocApi";
 import { SortedPaginationRequestDto } from "../../../../types/common/api";
 import { BreakdownByStoreEmployee } from "../../../../types/reports/breakdown";
 import reports from "../availableQPAY066xReports";

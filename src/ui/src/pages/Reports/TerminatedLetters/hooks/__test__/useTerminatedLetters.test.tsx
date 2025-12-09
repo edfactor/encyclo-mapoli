@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import * as useLazyGetTerminatedLettersDownloadQuery from "reduxstore/api/YearsEndApi";
-import * as useLazyGetTerminatedLettersReportQuery from "reduxstore/api/YearsEndApi";
+import * as useLazyGetTerminatedLettersDownloadQuery from "reduxstore/api/AdhocApi";
+import * as useLazyGetTerminatedLettersReportQuery from "reduxstore/api/AdhocApi";
 import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { beforeEach, describe, expect, it, vi } from "vitest";

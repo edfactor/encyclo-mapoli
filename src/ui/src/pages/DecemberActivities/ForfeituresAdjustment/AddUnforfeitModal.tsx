@@ -1,7 +1,7 @@
 import { Button, Checkbox, FormControlLabel, Grid, TextField, Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
-import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
+import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/AdhocApi";
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 import { SmartModal } from "smart-ui-library";
 import { ConfirmationDialog } from "../../../components/ConfirmationDialog";

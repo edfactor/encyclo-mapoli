@@ -3,6 +3,7 @@ import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
 import EnvironmentUtils from "../utils/environmentUtils";
 import { AccountHistoryReportApi } from "./api/AccountHistoryReportApi";
+import { AdhocApi } from "./api/AdhocApi";
 import { AdjustmentsApi } from "./api/AdjustmentsApi";
 import { AppSupportApi } from "./api/AppSupportApi";
 import { BeneficiariesApi } from "./api/BeneficiariesApi";
@@ -38,6 +39,7 @@ import yearsEndSlice from "./slices/yearsEndSlice";
 const API_INSTANCES = [
   SecurityApi,
   YearsEndApi,
+  AdhocApi,
   ItOperationsApi,
   MilitaryApi,
   InquiryApi,
