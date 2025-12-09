@@ -2,11 +2,11 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { setMasterInquiryGroupingData, setMasterInquiryResults } from "reduxstore/slices/inquirySlice";
 import { Paged } from "smart-ui-library";
 import {
-  EmployeeDetails,
-  GroupedProfitSummaryDto,
-  MasterInquiryMemberRequest,
-  MasterInquiryRequest,
-  MasterInquiryResponseDto
+    EmployeeDetails,
+    GroupedProfitSummaryDto,
+    MasterInquiryMemberRequest,
+    MasterInquiryRequest,
+    MasterInquiryResponseDto
 } from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
