@@ -10,26 +10,43 @@ namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
 internal sealed class EmployeeDeltaSyncJob : IJob
 {
     private readonly IEmployeeSyncService _employeeSyncService;
+    private readonly IProcessWatchdog _watchdog;
     private readonly ISet<long>? _debugOracleHcmIdSet;
 
     public EmployeeDeltaSyncJob(IEmployeeSyncService employeeSyncService,
-        ISet<long>? debugOracleHcmIdSet) : this(employeeSyncService)
+        IProcessWatchdog watchdog,
+        ISet<long>? debugOracleHcmIdSet) : this(employeeSyncService, watchdog)
     {
         _debugOracleHcmIdSet = debugOracleHcmIdSet;
     }
 
-    public EmployeeDeltaSyncJob(IEmployeeSyncService employeeSyncService)
+    public EmployeeDeltaSyncJob(IEmployeeSyncService employeeSyncService, IProcessWatchdog watchdog)
     {
         _employeeSyncService = employeeSyncService;
+        _watchdog = watchdog;
     }
 
 
-    public Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context)
     {
-        if (_debugOracleHcmIdSet?.Any() ?? false)
+        try
         {
-            return _employeeSyncService.TrySyncEmployeeFromOracleHcm(requestedBy: Constants.SystemAccountName, _debugOracleHcmIdSet, context.CancellationToken);
+            if (_debugOracleHcmIdSet?.Any() ?? false)
+            {
+                await _employeeSyncService.TrySyncEmployeeFromOracleHcm(requestedBy: Constants.SystemAccountName, _debugOracleHcmIdSet, context.CancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await _employeeSyncService.ExecuteDeltaSyncAsync(requestedBy: Constants.SystemAccountName, context.CancellationToken).ConfigureAwait(false);
+            }
+
+            _watchdog.RecordSuccessfulCycle();
+            _watchdog.RecordHeartbeat();
         }
-        return _employeeSyncService.ExecuteDeltaSyncAsync(requestedBy: Constants.SystemAccountName, context.CancellationToken);
+        catch (Exception ex)
+        {
+            _watchdog.RecordError($"EmployeeDeltaSyncJob failed: {ex.Message}");
+            throw;
+        }
     }
 }

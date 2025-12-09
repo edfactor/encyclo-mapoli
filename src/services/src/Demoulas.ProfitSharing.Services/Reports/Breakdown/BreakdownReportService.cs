@@ -271,7 +271,7 @@ public sealed class BreakdownReportService : IBreakdownService
             // ── Aggregate from already-loaded data ────────────────────────────────────
             var totals = new BreakdownByStoreTotals
             {
-                TotalNumberEmployees = (short)employees.Count,
+                TotalNumberEmployees = (ushort)employees.Count,
                 TotalBeginningBalances = employees.Sum(e => e.BeginningBalance ?? 0),
                 TotalEarnings = employees.Sum(e => e.Earnings),
                 TotalContributions = employees.Sum(e => e.Contributions),
@@ -354,7 +354,7 @@ public sealed class BreakdownReportService : IBreakdownService
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasCurrentBalanceNotVested, withBeneficiaryAllocation: true, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(

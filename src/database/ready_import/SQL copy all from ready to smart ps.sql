@@ -1029,13 +1029,29 @@ SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS
     WHERE REMARK LIKE 'OTHER';
 
 --Rev
+--Sometimes like:  REV    12/20  MA
     UPDATE PROFIT_DETAIL pd
-    SET COMMENT_TYPE_ID = 21
+    SET COMMENT_TYPE_ID = 21,
+        COMMENT_RELATED_STATE = 
+          CASE 
+            WHEN CAST(pd.REMARK AS VARCHAR2(500)) IS NULL THEN NULL
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) >= 16 AND REGEXP_LIKE(SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2), '^[A-Z]{2}$') 
+                 THEN SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2)
+            ELSE NULL
+            END
     WHERE REMARK LIKE 'REV%';
 
 --Un-Rev
+--Sometimes like: UN-REV 12/23  MA
     UPDATE PROFIT_DETAIL pd
-    SET COMMENT_TYPE_ID = 22
+    SET COMMENT_TYPE_ID = 22,
+        COMMENT_RELATED_STATE = 
+          CASE 
+            WHEN CAST(pd.REMARK AS VARCHAR2(500)) IS NULL THEN NULL
+            WHEN LENGTH(TRIM(CAST(pd.REMARK AS VARCHAR2(500)))) >= 16 AND REGEXP_LIKE(SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2), '^[A-Z]{2}$') 
+                 THEN SUBSTR(TRIM(CAST(pd.REMARK AS VARCHAR2(500))), 15, 2)
+            ELSE NULL
+            END
     WHERE REMARK LIKE 'UN-REV%';
 
     UPDATE profit_detail pd

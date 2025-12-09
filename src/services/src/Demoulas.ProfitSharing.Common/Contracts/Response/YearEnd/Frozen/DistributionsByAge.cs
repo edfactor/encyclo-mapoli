@@ -16,12 +16,12 @@ public sealed record DistributionsByAge : ReportResponseBase<DistributionsByAgeD
 
     public FrozenReportsByAgeRequest.Report ReportType { get; set; }
 
-    public short HardshipTotalEmployees { get; set; }
+    public ushort HardshipTotalEmployees { get; set; }
     public decimal RegularTotalAmount { get; set; }
-    public short RegularTotalEmployees { get; set; }
+    public ushort RegularTotalEmployees { get; set; }
     public decimal HardshipTotalAmount { get; set; }
-    public short TotalEmployees { get; init; }
-    public short BothHardshipAndRegularEmployees { get; init; }
+    public ushort TotalEmployees { get; init; }
+    public ushort BothHardshipAndRegularEmployees { get; init; }
 
 
     public decimal DistributionTotalAmount

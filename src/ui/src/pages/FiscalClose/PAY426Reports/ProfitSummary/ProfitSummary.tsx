@@ -1,16 +1,21 @@
-import { Button, Divider, Grid, Typography } from "@mui/material";
+import { Button, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useDynamicGridHeight } from "hooks/useDynamicGridHeight";
 import { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
+import { useDispatch, useSelector } from "react-redux";
 import {
   useFinalizeReportMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery
 } from "reduxstore/api/YearsEndApi";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
-import { DSMGrid, Page } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../../constants";
 import { RootState } from "../../../../reduxstore/store";
+import { closeDrawer, openDrawer, setFullscreen } from "../../../../reduxstore/slices/generalSlice";
 import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 
@@ -97,16 +102,34 @@ const sumOrMasked = (
 
 interface ProfitSummaryProps {
   frozenData: boolean;
+  externalIsGridExpanded?: boolean;
+  externalOnToggleExpand?: () => void;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({ 
+  frozenData, 
+  externalIsGridExpanded, 
+  externalOnToggleExpand 
+}) => {
+  const dispatch = useDispatch();
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
   const [shouldArchive, setShouldArchive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [internalIsGridExpanded, setInternalIsGridExpanded] = useState(false);
+  const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
+
+  // Use external expand state if provided, otherwise use internal
+  const isGridExpanded = externalIsGridExpanded ?? internalIsGridExpanded;
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
   const profitYear = useFiscalCloseProfitYear();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
+
+  // Use dynamic grid height utility hook
+  useDynamicGridHeight({
+    heightPercentage: isGridExpanded ? 0.85 : 0.4
+  });
 
   const handleCommit = async () => {
     if (profitYear) {
@@ -154,6 +177,30 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
     }
   }, [shouldArchive, hasToken, frozenData, profitYear, trigger]);
 
+  const handleToggleGridExpand = () => {
+    // Use external handler if provided
+    if (externalOnToggleExpand) {
+      externalOnToggleExpand();
+      return;
+    }
+
+    // Otherwise use internal logic
+    if (!internalIsGridExpanded) {
+      // Expanding: remember current drawer state and close it
+      setWasDrawerOpenBeforeExpand(isDrawerOpen || false);
+      dispatch(closeDrawer());
+      dispatch(setFullscreen(true));
+      setInternalIsGridExpanded(true);
+    } else {
+      // Collapsing: restore previous state
+      dispatch(setFullscreen(false));
+      setInternalIsGridExpanded(false);
+      if (wasDrawerOpenBeforeExpand) {
+        dispatch(openDrawer());
+      }
+    }
+  };
+
   const renderActionNode = () => {
     if (!frozenData) return null;
 
@@ -193,6 +240,21 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
     return data.lineItems.filter((item) => item.subgroup.toUpperCase() === "TERMINATED");
   }, [data]);
 
+  const employeesRowData = useMemo(() => {
+    if (!data?.lineItems) return [];
+
+    return data.lineItems.filter((item) => {
+      const subgroupUpper = item.subgroup.toUpperCase();
+      return (
+        subgroupUpper.includes("EMPLOYEE") &&
+        !subgroupUpper.includes("NON-EMPLOYEE") &&
+        !subgroupUpper.includes("NON EMPLOYEE") &&
+        subgroupUpper !== "ACTIVE AND INACTIVE" &&
+        subgroupUpper !== "TERMINATED"
+      );
+    });
+  }, [data]);
+
   const getActiveAndInactiveTotals = useMemo(() => {
     if (!activeAndInactiveRowData) return [];
 
@@ -223,16 +285,104 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
     ];
   }, [terminatedRowData]);
 
+  const getEmployeesTotals = useMemo(() => {
+    if (!employeesRowData || employeesRowData.length === 0) return [];
+
+    return [
+      {
+        lineItemTitle: "TOTAL",
+        numberOfMembers: employeesRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+        totalWages: sumOrMasked(employeesRowData, "totalWages"),
+        totalBalance: sumOrMasked(employeesRowData, "totalBalance"),
+        totalHours: sumOrMasked(employeesRowData, "totalHours"),
+        totalPoints: sumOrMasked(employeesRowData, "totalPoints")
+      }
+    ];
+  }, [employeesRowData]);
+
+  const getGrandTotals = useMemo(() => {
+    const allSections = [
+      ...activeAndInactiveRowData,
+      ...terminatedRowData,
+      ...(employeesRowData || [])
+    ];
+
+    if (allSections.length === 0) return [];
+
+    return [
+      {
+        lineItemTitle: "GRAND TOTAL",
+        numberOfMembers: allSections.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+        totalWages: sumOrMasked(allSections, "totalWages"),
+        totalBalance: sumOrMasked(allSections, "totalBalance"),
+        totalHours: sumOrMasked(allSections, "totalHours"),
+        totalPoints: sumOrMasked(allSections, "totalPoints")
+      }
+    ];
+  }, [activeAndInactiveRowData, terminatedRowData, employeesRowData]);
+
   return (
     // Do not remove the label, as that also removes the buttons
     <Page
-      label={CAPTIONS.PAY426_SUMMARY}
-      actionNode={renderActionNode()}>
+      label={isGridExpanded ? "" : CAPTIONS.PAY426_SUMMARY}
+      actionNode={isGridExpanded ? undefined : renderActionNode()}>
       <Grid
         container
         rowSpacing="24px">
         <Grid width={"100%"}>
-          <Divider />
+          <Grid
+            container
+            justifyContent="space-between"
+            alignItems="center"
+            marginBottom={2}>
+            <Grid />
+            <Grid>
+              <IconButton
+                onClick={handleToggleGridExpand}
+                sx={{ zIndex: 1 }}
+                aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+                {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+              </IconButton>
+            </Grid>
+          </Grid>
+          <div className="mt-[37px] mb-[21px] flex items-center gap-6 px-6">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Total Employees:</span>
+              <span>{getGrandTotals[0]?.numberOfMembers?.toLocaleString() ?? 0}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Total Wages:</span>
+              <span>
+                {typeof getGrandTotals[0]?.totalWages === "string"
+                  ? getGrandTotals[0]?.totalWages
+                  : numberToCurrency(getGrandTotals[0]?.totalWages ?? 0)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Total Balance:</span>
+              <span>
+                {typeof getGrandTotals[0]?.totalBalance === "string"
+                  ? getGrandTotals[0]?.totalBalance
+                  : numberToCurrency(getGrandTotals[0]?.totalBalance ?? 0)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Total Hours:</span>
+              <span>
+                {typeof getGrandTotals[0]?.totalHours === "string"
+                  ? getGrandTotals[0]?.totalHours
+                  : getGrandTotals[0]?.totalHours?.toLocaleString() ?? "0"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Total Points:</span>
+              <span>
+                {typeof getGrandTotals[0]?.totalPoints === "string"
+                  ? getGrandTotals[0]?.totalPoints
+                  : getGrandTotals[0]?.totalPoints?.toLocaleString() ?? "0"}
+              </span>
+            </div>
+          </div>
         </Grid>
 
         <Grid width={"100%"}>
@@ -270,6 +420,26 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
             }}
           />
         </Grid>
+
+        {employeesRowData && employeesRowData.length > 0 && (
+          <Grid width={"100%"}>
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, px: 3 }}>
+              Employees
+            </Typography>
+            <DSMGrid
+              preferenceKey={"EMPLOYEES_SUMMARY"}
+              isLoading={isFetching}
+              handleSortChanged={() => {}}
+              providedOptions={{
+                rowData: employeesRowData,
+                pinnedTopRowData: getEmployeesTotals,
+                columnDefs: columnDefs
+              }}
+            />
+          </Grid>
+        )}
       </Grid>
 
       <CommitModal
@@ -280,6 +450,39 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
       />
     </Page>
   );
+};
+
+/**
+ * Wrapper component that fetches the frozen state profitYear and renders ProfitSummary.
+ * Used by the router when navigating directly to the PAY426 Summary page under Fiscal Close.
+ */
+interface FrozenProfitSummaryWrapperProps {
+  frozenData: boolean;
+}
+
+export const FrozenProfitSummaryWrapper: React.FC<FrozenProfitSummaryWrapperProps> = ({ frozenData }) => {
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
+  const [fetchFrozenState, { data: frozenState, isLoading }] = useLazyGetFrozenStateResponseQuery();
+
+  useEffect(() => {
+    if (hasToken) {
+      fetchFrozenState(undefined, false);
+    }
+  }, [fetchFrozenState, hasToken]);
+
+  if (isLoading || !frozenState?.profitYear) {
+    return (
+      <Grid
+        container
+        justifyContent="center"
+        alignItems="center"
+        sx={{ minHeight: 200 }}>
+        <CircularProgress />
+      </Grid>
+    );
+  }
+
+  return <ProfitSummary frozenData={frozenData} />;
 };
 
 export default ProfitSummary;

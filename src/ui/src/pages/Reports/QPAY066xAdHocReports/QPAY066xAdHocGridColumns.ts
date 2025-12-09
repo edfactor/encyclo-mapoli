@@ -2,47 +2,20 @@ import { ColDef } from "ag-grid-community";
 import {
   createAgeColumn,
   createBadgeColumn,
+  createCountColumn,
   createCurrencyColumn,
   createDateColumn,
   createHoursColumn,
   createNameColumn,
-  createPercentageColumn
+  createPercentageColumn,
+  createStatusColumn
 } from "../../../utils/gridColumnFactory";
 
-export interface BreakdownByStoreEmployee {
-  badgeNumber: number;
-  beginningBalance: number;
-  beneficiaryAllocation: number;
-  certificateSort: number;
-  city: string;
-  contributions: number;
-  dateOfBirth: string;
-  departmentId: number;
-  distributions: number;
-  earnings: number;
-  employmentStatusId: string;
-  endingBalance: number;
-  enrollmentId: number;
-  forfeitures: number;
-  fullName: string;
-  hireDate: string;
-  isExecutive: boolean;
-  payClassificationId: string; // changed from number to string to match backend refactor
-  payClassificationName: string;
-  payFrequencyId: number;
-  postalCode: string;
-  profitShareHours: number;
-  ssn: string;
-  state: string;
-  storeNumber: number;
-  street1: string;
-  terminationDate: string;
-  vestedAmount: number;
-  vestedPercentage: number;
-}
 
-export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
-  createBadgeColumn({}),
+export const GetQPAY066xAdHocCommonGridColumns = (): ColDef[] => [
+  createBadgeColumn({
+    maxWidth: 110
+  }),
   createNameColumn({
     field: "fullName"
   }),
@@ -52,56 +25,100 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
     minWidth: 130
   }),
   createCurrencyColumn({
-    headerName: "Beneficiary Allocation",
-    field: "beneficiaryAllocation"
-  }),
-  createCurrencyColumn({
-    headerName: "Distribution Amount",
-    field: "distributions"
-  }),
-  createCurrencyColumn({
     headerName: "Forfeit",
-    field: "forfeitures"
+    field: "forfeitures",
+    maxWidth: 120
   }),
   createCurrencyColumn({
     headerName: "Ending Balance",
-    field: "endingBalance"
+    field: "endingBalance",
+    maxWidth: 150
   }),
   createCurrencyColumn({
-    headerName: "Vesting Balance",
-    field: "vestedAmount"
-  }),
-  createDateColumn({
-    headerName: "Term Date",
-    field: "terminationDate",
-    minWidth: 100
+    headerName: "Vested Balance",
+    field: "vestedAmount",
+    maxWidth: 150
   }),
   createHoursColumn({
     headerName: "YTD Hours",
     field: "profitShareHours",
-    minWidth: 90
-  }),
-  createPercentageColumn({
-    headerName: "Vested",
-    field: "vestedPercentage"
-  }),
-  createAgeColumn({}),
-  // This is the age at termination
-  // FIXME: This logic should be moved to the back end when more work is done on this page
-  createAgeColumn({
-    headerName: "Age at Term",
-    valueGetter: (params) => {
-      const dob = params.data?.["dateOfBirth"];
-      const termDate = params.data?.["terminationDate"];
-      if (!dob || !termDate) return 0;
-      const birthDate = new Date(dob);
-      const terminationDate = new Date(termDate);
-      let age = terminationDate.getFullYear() - birthDate.getFullYear();
-      const m = terminationDate.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && terminationDate.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      return age;
-    }
+    maxWidth: 125
   })
 ];
+
+export const GetQPAY066xDistributionAmountColumn = (field?: string): ColDef => {
+  return createCurrencyColumn({
+    headerName: "Distribution Amount",
+    field: field || "distributions",
+    maxWidth: 140
+  });
+}
+
+export const GetQPAY066xBeneficiaryAllocationColumn = (field?: string): ColDef => {
+  return createCurrencyColumn({
+    headerName: "Beneficiary Allocation",
+    field: field || "beneficiaryAllocation",
+    maxWidth: 160
+  });
+}
+
+export const GetQPAY066xTerminationDateColumn = (field?: string): ColDef => {
+  return createDateColumn({
+    headerName: "Termination Date",
+    field: field || "terminationDate",
+    maxWidth: 160
+  });
+}
+
+export const GetQPAY066xVestedPercentageColumn = (field?: string): ColDef => {
+  return createPercentageColumn({
+    headerName: "Vested PCT",
+    field: field || "vestedPercent",
+    maxWidth: 120
+  });
+}
+
+export const GetQPAY066xAgeColumn = (): ColDef => {
+  return createAgeColumn({
+    maxWidth: 100,
+  });
+}
+
+export const GetQPAY066xAgeAtTerminationColumn = (): ColDef => {
+  return createAgeColumn({
+    headerName: "Age at Term",
+    field: "ageAtTermination",
+    maxWidth: 150
+  });
+}
+
+export const GetQPAY066xEnrollmentCodeColumn = (field?: string): ColDef => {
+  return createCountColumn({
+    headerName: "EC",
+    field: field || "enrollmentId",
+    maxWidth: 60
+  });
+}
+
+export const GetQPAY066xPSYearsColumn = (field?: string): ColDef => {
+  return createCountColumn({
+    headerName: "PS Years",
+    field: field || "profitShareYears"
+  });
+}
+
+export const GetQPAY066xTerminationCodeColumn = (field?: string): ColDef => {
+  return createStatusColumn({
+    headerName: "Termination Code",
+    field: field || "terminationCode"
+  });
+}
+
+export const GetQPAY066xInactiveDateColumn = (field? : string): ColDef => {
+  return createDateColumn({
+    headerName: "Inactive Date",
+    field: field || "inactiveDate"
+  });
+}
+
+

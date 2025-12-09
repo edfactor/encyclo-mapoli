@@ -4,7 +4,7 @@ import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import { RefObject } from "react";
 import { RowClassParams } from "ag-grid-community";
 import ReportSummary from "../../../components/ReportSummary";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { EmployeeWagesForYearResponse } from "../../../reduxstore/types";
 import { GetYTDWagesColumns } from "./YTDWagesGridColumns";
@@ -60,8 +60,10 @@ const YTDWagesGrid = ({
     };
   }, [clonedData?.response?.results, clonedData?.totalHoursCurrentYearWages, clonedData?.totalIncomeCurrentYearWages]);
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: clonedData?.response?.results?.length ?? 0
+  });
 
   return (
     <div className="relative">

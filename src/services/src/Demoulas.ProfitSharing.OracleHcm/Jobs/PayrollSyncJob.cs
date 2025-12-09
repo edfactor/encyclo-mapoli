@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.OracleHcm.Clients;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Quartz;
 
@@ -11,14 +12,26 @@ namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
 internal sealed class PayrollSyncJob : IJob
 {
     private readonly PayrollSyncClient _payrollSyncClient;
+    private readonly IProcessWatchdog _watchdog;
 
-    public PayrollSyncJob(PayrollSyncClient payrollSyncClient)
+    public PayrollSyncJob(PayrollSyncClient payrollSyncClient, IProcessWatchdog watchdog)
     {
         _payrollSyncClient = payrollSyncClient;
+        _watchdog = watchdog;
     }
 
-    public Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context)
     {
-        return _payrollSyncClient.RetrievePayrollBalancesAsync(requestedBy: Constants.SystemAccountName, context.CancellationToken);
+        try
+        {
+            await _payrollSyncClient.RetrievePayrollBalancesAsync(requestedBy: Constants.SystemAccountName, context.CancellationToken).ConfigureAwait(false);
+            _watchdog.RecordSuccessfulCycle();
+            _watchdog.RecordHeartbeat();
+        }
+        catch (Exception ex)
+        {
+            _watchdog.RecordError($"PayrollSyncJob failed: {ex.Message}");
+            throw;
+        }
     }
 }

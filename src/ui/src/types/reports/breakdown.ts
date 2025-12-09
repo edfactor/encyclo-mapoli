@@ -41,6 +41,8 @@ export interface BreakdownByStoreEmployee {
   state: string;
   storeNumber: number;
   street1: string;
+  age?: string;
+  ageAtTermination?: string;
   terminationDate: string;
   vestedAmount: number;
   vestedPercentage: number;

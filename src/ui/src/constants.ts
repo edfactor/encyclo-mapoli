@@ -135,8 +135,9 @@ export const CAPTIONS = {
   PAY426_ACTIVE_PRIOR_SHARING:
     "Active/inactive employees 18 and older with prior profit sharing amounts and <1000 hours",
   PAY426_ACTIVE_UNDER_18: "Active/inactive employees under 18",
-  PAY426_TERMINATED_UNDER_18: "< AGE 18 NO WAGES",
+  PAY426_TERMINATED_UNDER_18: "< AGE 18 WAGES > 0 (TERMINATED)",
   PAY426_NON_EMPLOYEE: "All non-employee beneficiaries",
+  PAY426_NO_WAGE_EMPLOYEES_POSITIVE_BALANCE: "No Wage Employees Positive Balance",
   PAY426_SUMMARY: "Profit Summary",
   PAY426_TERMINATED_1000_PLUS: "Terminated employees 18 and older with 1000 hours or more",
   PAY426_TERMINATED_NO_PRIOR: "Terminated employees 18 and older with no prior profit sharing amounts and < 1000 hours",

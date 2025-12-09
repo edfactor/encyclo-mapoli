@@ -18,6 +18,10 @@ indent_size = 2
 [*.{cs,vb}]
 charset = utf-8-bom
 
+# Custom analyzer rules
+# DSM003: SSN dictionary key analyzer - set to suggestion until existing violations are cleaned up
+dotnet_diagnostic.DSM003.severity = suggestion
+
 # Code quality analyzers
 dotnet_analyzer_diagnostic.category-Security.severity = error
 dotnet_code_quality.ca1802.api_surface = private, internal

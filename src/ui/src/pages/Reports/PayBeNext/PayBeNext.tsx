@@ -6,7 +6,7 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { CAPTIONS } from "../../../constants";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/YearsEndApi";
 import {
@@ -37,9 +37,6 @@ const PayBeNext = () => {
     isSortDescending: true
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
 
   useEffect(() => {
     if (!isFetching) {
@@ -97,6 +94,11 @@ const PayBeNext = () => {
 
     return rows;
   }, [adhocBeneficiariesReport, expandedRows]);
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: gridData?.length ?? 0
+  });
 
   // Handle row expansion toggle
   const handleRowExpansion = (badgeNumber: string) => {

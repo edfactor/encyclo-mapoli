@@ -5,7 +5,7 @@ export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<Demogr
 export interface DemographicBadgesNotInPayprofit {
   badgeNumber: number;
   ssn: number;
-  employeeName: string;
+  fullName: string;
   store: number;
   status: string;
   statusName: string;

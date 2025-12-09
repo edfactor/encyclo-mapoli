@@ -1,9 +1,10 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useDispatch, useSelector } from "react-redux";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { closeDrawer, openDrawer, setFullscreen } from "reduxstore/slices/generalSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
@@ -13,9 +14,12 @@ import ProfitSummary from "../../FiscalClose/PAY426Reports/ProfitSummary/ProfitS
 const ProfitShareReport = () => {
   const { yearEndProfitSharingReportTotals } = useSelector((state: RootState) => state.yearsEnd);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
+  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
   const dispatch = useDispatch();
   const [triggerSearch] = useLazyGetYearEndProfitSharingReportTotalsQuery();
-  const profitYear = useFiscalCloseProfitYear();
+    const [isGridExpanded, setIsGridExpanded] = useState(false);
+  const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
+  const profitYear = useDecemberFlowProfitYear();
 
   // Load both tables when page loads - this is consistent with other pages which only display data and do not take input.
   useEffect(() => {
@@ -60,6 +64,23 @@ const ProfitShareReport = () => {
     }
   };
 
+  const handleToggleGridExpand = () => {
+    if (!isGridExpanded) {
+      // Expanding: remember current drawer state and close it
+      setWasDrawerOpenBeforeExpand(isDrawerOpen || false);
+      dispatch(closeDrawer());
+      dispatch(setFullscreen(true));
+      setIsGridExpanded(true);
+    } else {
+      // Collapsing: restore previous state
+      dispatch(setFullscreen(false));
+      setIsGridExpanded(false);
+      if (wasDrawerOpenBeforeExpand) {
+        dispatch(openDrawer());
+      }
+    }
+  };
+
   const renderActionNode = () => {
     if (!yearEndProfitSharingReportTotals) return null;
 
@@ -72,8 +93,8 @@ const ProfitShareReport = () => {
 
   return (
     <Page
-      label={CAPTIONS.PROFIT_SHARE_REPORT}
-      actionNode={renderActionNode()}>
+      label={isGridExpanded ? "" : CAPTIONS.PROFIT_SHARE_REPORT}
+      actionNode={isGridExpanded ? undefined : renderActionNode()}>
       <Grid
         container
         rowSpacing="24px">
@@ -106,7 +127,11 @@ const ProfitShareReport = () => {
         </Grid>
         */}
         <Grid width="100%">
-          <ProfitSummary frozenData={false} />
+          <ProfitSummary 
+            frozenData={false} 
+            externalIsGridExpanded={isGridExpanded}
+            externalOnToggleExpand={handleToggleGridExpand}
+          />
         </Grid>
       </Grid>
     </Page>

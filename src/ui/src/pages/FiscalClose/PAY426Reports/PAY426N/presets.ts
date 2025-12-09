@@ -141,7 +141,36 @@ const presets: ReportPreset[] = [
       employeeStatus: "Non-Employee",
       priorProfitShare: "N/A"
     }
+  },
+{
+  id: "11",
+  name: "PAY426-11",
+  description: CAPTIONS.PAY426_TERMINATED_UNDER_18,
+  params: {
+    reportId: 11
+  },
+  displayCriteria: {
+    ageRange: "All",
+    hoursRange: "N/A",
+    employeeStatus: "< AGE 18, WAGE > 0",
+    priorProfitShare: "N/A"
   }
+},
+{
+  id: "12",
+  name: "PAY426-12",
+  description: CAPTIONS.PAY426_NO_WAGE_EMPLOYEES_POSITIVE_BALANCE,
+  params: {
+    reportId: 12
+  },
+  displayCriteria: {
+    ageRange: "All",
+    hoursRange: "N/A",
+    employeeStatus: "Employees with No Wages, Positive Balance",
+    priorProfitShare: "N/A"
+  }
+}
+
 ];
 
 export default presets;

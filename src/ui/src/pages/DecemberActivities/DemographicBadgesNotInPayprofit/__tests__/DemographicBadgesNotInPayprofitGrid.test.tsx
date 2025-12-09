@@ -38,7 +38,7 @@ vi.mock("../DemographicBadgesNotInPayprofitGridColumns", () => ({
   GetDemographicBadgesNotInPayprofitColumns: () => [
     { field: "badgeNumber", headerName: "Badge" },
     { field: "storeName", headerName: "Store" },
-    { field: "employeeName", headerName: "Name" }
+    { field: "fullName", headerName: "Name" }
   ]
 }));
 
@@ -54,7 +54,7 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
         {
           badgeNumber: 12345,
           ssn: 123456789,
-          employeeName: "John Doe",
+          fullName: "John Doe",
           store: 1,
           status: "Active",
           statusName: "Active"
@@ -62,7 +62,7 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
         {
           badgeNumber: 12346,
           ssn: 123456790,
-          employeeName: "Jane Smith",
+          fullName: "Jane Smith",
           store: 2,
           status: "Active",
           statusName: "Active"
@@ -321,7 +321,7 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
           results: Array.from({ length: 25 }, (_, i) => ({
             badgeNumber: 10000 + i,
             ssn: 100000000 + i,
-            employeeName: `Employee ${i}`,
+            fullName: `Employee ${i}`,
             store: i + 1,
             status: "Active",
             statusName: "Active"
@@ -352,7 +352,7 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
         dataSource: "Test Data",
         response: {
           results: [
-            { badgeNumber: 1, ssn: 100000000, employeeName: "Name", store: 1, status: "Active", statusName: "Active" }
+            { badgeNumber: 1, ssn: 100000000, fullName: "Name", store: 1, status: "Active", statusName: "Active" }
           ],
           total: 1,
           totalPages: 1,

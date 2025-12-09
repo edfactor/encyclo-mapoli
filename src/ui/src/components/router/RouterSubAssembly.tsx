@@ -65,7 +65,11 @@ const MilitaryContribution = lazy(() => import("../../pages/DecemberActivities/M
 const AddDistribution = lazy(() => import("../../pages/Distributions/AddDistribution/AddDistribution"));
 const ViewDistribution = lazy(() => import("../../pages/Distributions/ViewDistribution/ViewDistribution"));
 const PAY426N = lazy(() => import("../../pages/FiscalClose/PAY426Reports/PAY426N/PAY426N"));
-const ProfitSummary = lazy(() => import("../../pages/FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary"));
+const FrozenProfitSummaryWrapper = lazy(() =>
+  import("../../pages/FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary").then((module) => ({
+    default: module.FrozenProfitSummaryWrapper
+  }))
+);
 const QPAY066B = lazy(() => import("../../pages/FiscalClose/QPAY066B/QPAY066B"));
 const ReprintCertificates = lazy(() => import("../../pages/FiscalClose/ReprintCertificates/ReprintCertificates"));
 const Adjustments = lazy(() => import("../../pages/InquiriesAndAdjustments/Adjustments"));
@@ -367,7 +371,7 @@ const RouterSubAssembly: React.FC = () => {
                 </Route>
                 <Route
                   path={ROUTES.PAY426_SUMMARY}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ProfitSummary frozenData={true} /></Suspense>}
+                  element={<Suspense fallback={<PageLoadingFallback />}><FrozenProfitSummaryWrapper frozenData={true} /></Suspense>}
                 />
                 <Route
                   path={ROUTES.QPAY066_UNDER21}

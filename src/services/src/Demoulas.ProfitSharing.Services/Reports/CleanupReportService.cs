@@ -69,7 +69,7 @@ public class CleanupReportService : ICleanupReportService
                             {
                                 dem.BadgeNumber,
                                 dem.Ssn,
-                                EmployeeName = dem.ContactInfo.FullName ?? "",
+                                FullName = dem.ContactInfo.FullName ?? "",
                                 Status = dem.EmploymentStatusId,
                                 StatusName = dem.EmploymentStatus!.Name,
                                 Store = dem.StoreNumber,
@@ -84,7 +84,7 @@ public class CleanupReportService : ICleanupReportService
                 Results = data.Results.Select(x => new DemographicBadgesNotInPayProfitResponse
                 {
                     BadgeNumber = x.BadgeNumber,
-                    EmployeeName = x.EmployeeName,
+                    FullName = x.FullName,
                     Ssn = x.Ssn.MaskSsn(),
                     Status = x.Status,
                     StatusName = x.StatusName,
@@ -182,15 +182,18 @@ public class CleanupReportService : ICleanupReportService
                                    (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                                     (!pd.CommentTypeId.HasValue ||
                                      !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                                      // PROFIT_DETAIL.profitYear <--- is the year selector 
-                                      // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
-                                      (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && pd.MonthToDate >= startDate.Month)) &&
-                                      (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && pd.MonthToDate <= endDate.Month)) &&
-                                      !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)) &&
-                                      // State filter - apply if specified (supports multiple states)
-                                      (req.States == null || req.States.Length == 0 || req.States.Contains(pd.CommentRelatedState)) &&
-                                      // Tax code filter - apply if specified (supports multiple tax codes)
-                                      (req.TaxCodes == null || req.TaxCodes.Length == 0 || (pd.TaxCodeId.HasValue && req.TaxCodes.Contains(pd.TaxCodeId.Value)))
+                                  // PROFIT_DETAIL.profitYear <--- is the year selector 
+                                  // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
+                                  // PS-2275: MonthToDate=0 indicates year-level records that should always be included
+                                  // COBOL only applies month filtering when START-MONTH > 0 OR END-MONTH > 0
+                                  (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && (pd.MonthToDate == 0 || pd.MonthToDate >= startDate.Month))) &&
+                                  (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && (pd.MonthToDate == 0 || pd.MonthToDate <= endDate.Month))) &&
+                                  !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue &&
+                                    transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)) &&
+                                  // State filter - apply if specified (supports multiple states)
+                                  (req.States == null || req.States.Length == 0 || req.States.Contains(pd.CommentRelatedState)) &&
+                                  // Tax code filter - apply if specified (supports multiple tax codes)
+                                  (req.TaxCodes == null || req.TaxCodes.Length == 0 || (pd.TaxCodeId.HasValue && req.TaxCodes.Contains(pd.TaxCodeId.Value)))
 
                             select new
                             {
@@ -219,7 +222,7 @@ public class CleanupReportService : ICleanupReportService
                     .Select(g => new
                     {
                         DistributionTotal = g.Sum(x => x.DistributionAmount),
-                        StateTaxTotal = g.Where(x => !string.IsNullOrEmpty(x.State)).Sum(x => x.StateTax),
+                        StateTaxTotal = g.Where(x => !string.IsNullOrEmpty(x.State) && x.StateTax != 0).Sum(x => x.StateTax),
                         FederalTaxTotal = g.Sum(x => x.FederalTax),
                         ForfeitureTotal = g.Sum(x => x.ForfeitAmount),
                         // MAIN-2170: Breakdown forfeitures by type
@@ -253,7 +256,7 @@ public class CleanupReportService : ICleanupReportService
 
                 // Calculate state tax totals by state
                 var allStateTaxRecords = await query
-                    .Where(s => s.StateTax > 0)
+                    .Where(s => !string.IsNullOrEmpty(s.State) && s.StateTax != 0)
                     .ToListAsync(cancellationToken: cancellationToken);
 
                 // Separate unattributed (NULL state) records
