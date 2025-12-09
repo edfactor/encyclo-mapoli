@@ -32,6 +32,10 @@ import {
   TerminatedLettersRequest,
   TerminatedLettersResponse
 } from "reduxstore/types";
+import {
+  AccountHistoryReportPaginatedResponse,
+  AccountHistoryReportRequest
+} from "../../types/reports/AccountHistoryReportTypes";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 import {
@@ -574,6 +578,37 @@ export const AdhocApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       })
+    }),
+
+    // Account History Report (Divorce Report) endpoints
+    getAccountHistoryReport: builder.query<AccountHistoryReportPaginatedResponse, AccountHistoryReportRequest>({
+      query: (params) => {
+        return {
+          url: "/adhoc/divorce-report",
+          method: "POST",
+          body: {
+            badgeNumber: params.badgeNumber,
+            startDate: params.startDate,
+            endDate: params.endDate,
+            skip: params.pagination.skip ?? 0,
+            take: params.pagination.take ?? 25,
+            sortBy: params.pagination.sortBy ?? "profitYear",
+            isSortDescending: params.pagination.isSortDescending ?? true
+          }
+        };
+      }
+    }),
+    downloadAccountHistoryReportPdf: builder.mutation<Blob, Omit<AccountHistoryReportRequest, "pagination">>({
+      query: (params) => ({
+        url: "/adhoc/divorce-report/export-pdf",
+        method: "POST",
+        body: {
+          badgeNumber: params.badgeNumber,
+          startDate: params.startDate,
+          endDate: params.endDate
+        },
+        responseHandler: (response) => response.blob()
+      })
     })
   })
 });
@@ -596,5 +631,7 @@ export const {
   useLazyGetTerminatedLettersDownloadQuery,
   useLazyGetTerminatedLettersReportQuery,
   useUpdateForfeitureAdjustmentBulkMutation,
-  useUpdateForfeitureAdjustmentMutation
+  useUpdateForfeitureAdjustmentMutation,
+  useLazyGetAccountHistoryReportQuery,
+  useDownloadAccountHistoryReportPdfMutation
 } = AdhocApi;
