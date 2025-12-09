@@ -13,6 +13,7 @@
 6. Click **Save**
 
 ### Your Webhook URL:
+
 ```
 https://defaultce0691a156834f59974f30298e8159.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/7da515faaaf3450ca17c41c00d389cd4/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=AcRgaKlaXOe29HbDR5BEapYg8AGAvNv_W6_P3ilUVT0
 ```
@@ -22,16 +23,19 @@ https://defaultce0691a156834f59974f30298e8159.d1.environment.api.powerplatform.c
 The pipeline now automatically sends notifications to your Teams channel when:
 
 ### QA Deployment
+
 - ✅ **Deployment succeeds** → "✅ QA Deployment - SUCCESS"
 - ❌ **Deployment fails** → "❌ QA Deployment - FAILURE" with error details
 
 ### API Health Check
+
 - ✅ **Health check passes** → "✅ QA Health Check - SUCCESS"
 - ❌ **Health check fails** → "❌ QA Health Check - FAILURE"
 
 ## Step 3: Data Sent to Teams
 
 Each notification includes:
+
 - Deployment status (SUCCESS/FAILURE)
 - Environment (QA, UAT, etc.)
 - Build number
@@ -44,6 +48,7 @@ Each notification includes:
 ## Step 4: Configure Your Power Automate Workflow
 
 In your Power Automate workflow, you can access these fields:
+
 - `title` - Display title
 - `status` - SUCCESS or FAILURE
 - `environment` - QA or UAT
@@ -56,6 +61,7 @@ In your Power Automate workflow, you can access these fields:
 - `step` - Deployment, Health Check, etc.
 
 Example workflow card:
+
 ```
 Title: [title]
 Status: [status]
@@ -70,6 +76,7 @@ Error: [errorMessage]
 ## Testing the Integration
 
 To test your webhook integration:
+
 ```powershell
 $url = "https://defaultce0691a156834f59974f30298e8159.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/7da515faaaf3450ca17c41c00d389cd4/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=AcRgaKlaXOe29HbDR5BEapYg8AGAvNv_W6_P3ilUVT0"
 

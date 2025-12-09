@@ -5,12 +5,13 @@
 ### Backend Stragglers
 
 **Find Response DTOs with "Name" property (excluding legitimate uses):**
+
 ```powershell
 # PowerShell
-Get-ChildItem -Path "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Response" -Filter "*Response.cs" -Recurse | 
-  ForEach-Object { 
+Get-ChildItem -Path "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Response" -Filter "*Response.cs" -Recurse |
+  ForEach-Object {
     $content = Get-Content $_.FullName -Raw
-    if ($content -match 'public\s+string\s+Name\s*(?:{|=|;)' -and 
+    if ($content -match 'public\s+string\s+Name\s*(?:{|=|;)' -and
         $content -notmatch 'FullName|FrequencyName|StatusName|TaxCodeName|KindName|TypeName|EmploymentTypeName|DepartmentName|PayClassificationName|RelationshipName') {
       Write-Host "❌ $($_.FullName)" -ForegroundColor Red
     }
@@ -18,15 +19,16 @@ Get-ChildItem -Path "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Re
 ```
 
 **Find services assigning FullName without ComputeFullNameWithInitial:**
+
 ```powershell
 # PowerShell
-Get-ChildItem -Path "src/services/src/Demoulas.ProfitSharing.Services" -Filter "*Service.cs" -Recurse | 
+Get-ChildItem -Path "src/services/src/Demoulas.ProfitSharing.Services" -Filter "*Service.cs" -Recurse |
   ForEach-Object {
     $content = Get-Content $_.FullName
     $lineNum = 0
     $content | ForEach-Object {
       $lineNum++
-      if ($_ -match 'FullName\s*=' -and 
+      if ($_ -match 'FullName\s*=' -and
           $_ -notmatch 'ComputeFullNameWithInitial' -and
           $_ -notmatch '\.FullName\s*\?' -and
           $_ -notmatch '//') {
@@ -39,6 +41,7 @@ Get-ChildItem -Path "src/services/src/Demoulas.ProfitSharing.Services" -Filter "
 ### Frontend Stragglers
 
 **Find .name property access on person objects:**
+
 ```bash
 # Bash/PowerShell
 grep -r "\.name\b" src/ui/src/pages --include="*.tsx" --include="*.ts" |
@@ -48,6 +51,7 @@ grep -r "\.name\b" src/ui/src/pages --include="*.tsx" --include="*.ts" |
 ```
 
 **Find manual firstName/lastName concatenation:**
+
 ```bash
 # Bash
 grep -r -E "(firstName|lastName)\s*\+|firstName.*lastName|lastName.*firstName" \
@@ -57,6 +61,7 @@ grep -r -E "(firstName|lastName)\s*\+|firstName.*lastName|lastName.*firstName" \
 ```
 
 **Find components NOT using fullName in display:**
+
 ```bash
 # Look for BeneficiaryDetail, EmployeeDetails, etc. without fullName
 grep -r "selectedMember\.\(firstName\|lastName\)|memberDetails\.\(firstName\|lastName\)" \
@@ -68,14 +73,17 @@ grep -r "selectedMember\.\(firstName\|lastName\)|memberDetails\.\(firstName\|las
 ### ✅ Services Updated
 
 1. **ExecutiveHoursAndDollarsService** - Lines 84-94
+
    - Uses `DtoCommonExtensions.ComputeFullNameWithInitial()`
    - Format: "LastName, FirstName M"
 
 2. **BreakdownReportService** - Lines 746-748
+
    - Uses inline `ComputeFullNameWithInitial()` with null-safe pattern
    - Handles cases with/without middle name
 
 3. **BeneficiaryInquiryService** - GetBeneficiaryDetail method
+
    - Database query path: Uses `ComputeFullNameWithInitial()` with individual name parts
    - In-memory path: Uses computed FullName from upstream service
    - Both paths ensure consistent middle initial formatting
@@ -89,6 +97,7 @@ grep -r "selectedMember\.\(firstName\|lastName\)|memberDetails\.\(firstName\|las
 ### ✅ DTOs Updated
 
 **Backend (C#)**
+
 - ExecutiveHoursAndDollarsResponse: `FullName` property
 - BreakdownByStoreEmployeeResponse: `FullName` property
 - EmployeeDetails: `FullName` property
@@ -98,6 +107,7 @@ grep -r "selectedMember\.\(firstName\|lastName\)|memberDetails\.\(firstName\|las
 - BeneficiaryDto: `FullName` property
 
 **Frontend (TypeScript)**
+
 - EmployeeDetails: `fullName` property
 - BeneficiaryDetail: `fullName` property
 - DistributionSearchResponse: `fullName` property
@@ -106,6 +116,7 @@ grep -r "selectedMember\.\(firstName\|lastName\)|memberDetails\.\(firstName\|las
 ### ✅ Components Updated
 
 Frontend pages updated to use `fullName`:
+
 - MasterInquiryMemberDetails.tsx
 - EditDistribution.tsx
 - AddDistribution.tsx
@@ -148,7 +159,7 @@ After running the search commands above, check:
 ---
 
 **Questions?**
+
 - Check FULLNAME_CONSOLIDATION_GUIDE.md for implementation patterns
 - Review completed examples in services for reference implementations
 - See FULLNAME_PATTERN_PREVENTION.md for automated detection setup
-

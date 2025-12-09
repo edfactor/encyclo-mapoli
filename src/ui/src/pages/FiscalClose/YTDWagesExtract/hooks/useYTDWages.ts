@@ -71,7 +71,10 @@ const useYTDWages = (options?: UseYTDWagesOptions) => {
     async (searchParams: YTDWagesSearchParams, _source?: string) => {
       if (!hasToken) return;
 
-      dispatch({ type: "SEARCH_START", payload: { profitYear: searchParams.profitYear, useFrozenData: searchParams.useFrozenData } });
+      dispatch({
+        type: "SEARCH_START",
+        payload: { profitYear: searchParams.profitYear, useFrozenData: searchParams.useFrozenData }
+      });
 
       try {
         const request = {

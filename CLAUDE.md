@@ -7,5 +7,3 @@ AI Assistant Project Instructions for Claude Code (claude.ai/code) when working 
 @ai-templates/main-includes/documentation.md
 @ai-templates/main-includes/agent-denied-files.md
 @ai-templates/main-includes/commands.md
-
-

@@ -15,6 +15,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 #### Dashboard and Overview Screens
 
 **Distribution Dashboard (DIST-DASH-001)**
+
 - **Purpose**: Executive overview of distribution processing status
 - **User Roles**: HR Administrators, Finance Managers, Executives
 - **Key Components**:
@@ -27,6 +28,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 - **Export Capabilities**: PDF and Excel export of dashboard data
 
 **Distribution Processing Control (DIST-PROC-001)**
+
 - **Purpose**: Control and monitor distribution processing batches
 - **User Roles**: Distribution Administrators, HR Managers
 - **Key Components**:
@@ -41,6 +43,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 #### Employee Management Screens
 
 **Employee Distribution Management (EMP-DIST-001)**
+
 - **Purpose**: Manage individual employee distribution processing
 - **User Roles**: HR Administrators, Distribution Processors
 - **Key Components**:
@@ -53,6 +56,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 - **Bulk Operations**: Bulk processing for selected employees
 
 **Distribution Calculation Review (DIST-CALC-001)**
+
 - **Purpose**: Review and validate distribution calculations before processing
 - **User Roles**: Distribution Administrators, Finance Reviewers
 - **Key Components**:
@@ -67,6 +71,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 #### Reporting and Audit Screens
 
 **Distribution Reports (DIST-REP-001)**
+
 - **Purpose**: Generate and access distribution reports
 - **User Roles**: All administrative users based on permissions
 - **Key Components**:
@@ -79,6 +84,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 - **Scheduling**: Automated report generation and distribution
 
 **Audit Trail Viewer (DIST-AUD-001)**
+
 - **Purpose**: View comprehensive audit trails for distribution processing
 - **User Roles**: Auditors, Compliance Officers, Senior Administrators
 - **Key Components**:
@@ -95,6 +101,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 #### Employee Distribution Portal
 
 **My Distribution Summary (EMP-SUM-001)**
+
 - **Purpose**: Employee view of personal distribution information
 - **User Roles**: All eligible employees
 - **Key Components**:
@@ -107,6 +114,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 - **Accessibility**: Full WCAG 2.1 AA compliance
 
 **Distribution History (EMP-HIST-001)**
+
 - **Purpose**: Detailed view of employee's distribution history
 - **User Roles**: All eligible employees
 - **Key Components**:
@@ -121,6 +129,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 #### Preference Management
 
 **Distribution Preferences (EMP-PREF-001)**
+
 - **Purpose**: Employee management of distribution preferences
 - **User Roles**: All eligible employees
 - **Key Components**:
@@ -137,6 +146,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 #### Configuration and Setup
 
 **System Configuration (SYS-CONF-001)**
+
 - **Purpose**: Configure system-wide distribution processing settings
 - **User Roles**: System Administrators
 - **Key Components**:
@@ -149,6 +159,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 - **Backup/Restore**: Configuration backup and restore capabilities
 
 **User Management (USER-MGT-001)**
+
 - **Purpose**: Manage system users and permissions
 - **User Roles**: System Administrators, Security Administrators
 - **Key Components**:
@@ -167,6 +178,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 #### Phase 1: Pre-Processing Preparation
 
 **Step 1.1: Data Collection and Validation**
+
 1. Extract employee demographic data from Oracle HCM
 2. Validate employee eligibility for distribution
 3. Collect financial data (account balances, contribution history)
@@ -174,6 +186,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 5. Generate data quality reports for review
 
 **Step 1.2: Business Rule Application**
+
 1. Apply profit sharing plan rules and eligibility criteria
 2. Calculate vesting percentages based on service dates
 3. Determine distribution amounts based on allocation formulas
@@ -181,6 +194,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 5. Generate exception reports for manual review
 
 **Step 1.3: Tax Calculation and Withholding**
+
 1. Calculate federal tax withholding based on current rates
 2. Calculate state and local tax withholding as applicable
 3. Apply special tax rules for early distributions
@@ -190,6 +204,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 #### Phase 2: Distribution Processing Execution
 
 **Step 2.1: Batch Preparation**
+
 1. Group distributions by processing type and method
 2. Validate batch totals against available profit pools
 3. Generate processing batches with unique identifiers
@@ -197,6 +212,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 5. Queue batches for processing approval
 
 **Step 2.2: Approval Workflow**
+
 1. Route batches for required approvals based on amount thresholds
 2. Present distribution summaries to approvers
 3. Collect approval decisions and comments
@@ -204,6 +220,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 5. Generate approval audit trail
 
 **Step 2.3: Payment Processing**
+
 1. Generate payment files for banking integration
 2. Create direct deposit ACH files
 3. Generate check printing instructions
@@ -213,6 +230,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 #### Phase 3: Post-Processing Activities
 
 **Step 3.1: Payment Confirmation and Reconciliation**
+
 1. Receive payment confirmations from banking systems
 2. Update payment status in distribution records
 3. Handle payment rejections and returns
@@ -220,6 +238,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 5. Generate payment confirmation reports
 
 **Step 3.2: Employee Notification**
+
 1. Generate distribution statements for employees
 2. Send email notifications of distribution processing
 3. Update employee self-service portal information
@@ -227,6 +246,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 5. Handle notification delivery failures
 
 **Step 3.3: Reporting and Compliance**
+
 1. Generate management reports for distribution processing
 2. Create regulatory reports for tax authorities
 3. Update financial system with distribution accounting entries
@@ -236,18 +256,21 @@ This document defines the user interface screens, detailed processes, and non-fu
 ### Exception Handling Processes
 
 #### Data Validation Exceptions
+
 - **Employee Data Issues**: Missing or invalid employee information
 - **Financial Data Discrepancies**: Account balance or contribution discrepancies
 - **Eligibility Exceptions**: Employees not meeting eligibility criteria
 - **Calculation Errors**: Business rule validation failures
 
 #### Processing Exceptions
+
 - **System Errors**: Technical failures during processing
 - **Integration Failures**: External system communication errors
 - **Payment Rejections**: Bank or payment system rejections
 - **Approval Delays**: Workflow approval timeouts or rejections
 
 #### Resolution Workflows
+
 1. **Exception Detection**: Automated detection and classification
 2. **Exception Queue**: Centralized exception management queue
 3. **Investigation**: Detailed exception analysis and research
@@ -259,15 +282,17 @@ This document defines the user interface screens, detailed processes, and non-fu
 ### Performance Requirements
 
 #### Response Time Requirements
-| Screen/Function | Target Response Time | Maximum Acceptable | Measurement Method |
-|----------------|---------------------|-------------------|-------------------|
-| Dashboard Loading | < 2 seconds | 5 seconds | 95th percentile |
-| Employee Search | < 1 second | 3 seconds | 95th percentile |
-| Report Generation | < 30 seconds | 2 minutes | Standard reports |
-| Batch Processing | Background | N/A | Asynchronous |
-| Data Export | < 15 seconds | 45 seconds | Typical datasets |
+
+| Screen/Function   | Target Response Time | Maximum Acceptable | Measurement Method |
+| ----------------- | -------------------- | ------------------ | ------------------ |
+| Dashboard Loading | < 2 seconds          | 5 seconds          | 95th percentile    |
+| Employee Search   | < 1 second           | 3 seconds          | 95th percentile    |
+| Report Generation | < 30 seconds         | 2 minutes          | Standard reports   |
+| Batch Processing  | Background           | N/A                | Asynchronous       |
+| Data Export       | < 15 seconds         | 45 seconds         | Typical datasets   |
 
 #### Throughput Requirements
+
 - **Concurrent Users**: Support 100+ concurrent administrative users
 - **Employee Self-Service**: Support 1000+ concurrent employee users
 - **Batch Processing**: Process 10,000+ employees within 4 hours
@@ -275,6 +300,7 @@ This document defines the user interface screens, detailed processes, and non-fu
 - **Data Export**: Handle 20+ concurrent export requests
 
 #### System Capacity
+
 - **Database Storage**: Plan for 10TB+ of distribution and historical data
 - **File Storage**: Support 1TB+ of generated reports and documents
 - **Processing Memory**: Efficient memory usage for large batch processing
@@ -283,18 +309,21 @@ This document defines the user interface screens, detailed processes, and non-fu
 ### Scalability Requirements
 
 #### Horizontal Scaling
+
 - **Web Servers**: Scale web application servers based on user load
 - **Processing Nodes**: Scale distribution processing nodes for batch operations
 - **Database**: Support database scaling and partitioning strategies
 - **Storage**: Elastic storage scaling for documents and reports
 
 #### Vertical Scaling
+
 - **CPU**: Utilize multi-core processors for parallel processing
 - **Memory**: Efficient memory management for large datasets
 - **Storage**: High-performance storage for database and file operations
 - **Network**: High-bandwidth network connectivity for integrations
 
 #### Growth Planning
+
 - **User Growth**: Plan for 25% annual growth in user base
 - **Data Growth**: Plan for 30% annual growth in data volume
 - **Transaction Growth**: Plan for increasing distribution complexity
@@ -303,18 +332,21 @@ This document defines the user interface screens, detailed processes, and non-fu
 ### Reliability and Availability
 
 #### Uptime Requirements
+
 - **Business Hours**: 99.9% uptime during business hours (7 AM - 7 PM ET)
 - **Distribution Processing**: 99.5% uptime during critical processing periods
 - **Employee Self-Service**: 99% uptime for employee access
 - **Planned Maintenance**: Maximum 4 hours monthly maintenance window
 
 #### Fault Tolerance
+
 - **Database**: Database clustering and failover capabilities
 - **Application**: Load balancing and automatic failover
 - **Storage**: Redundant storage with automatic backup
 - **Network**: Multiple network paths and redundancy
 
 #### Disaster Recovery
+
 - **Recovery Time Objective (RTO)**: 4 hours for critical systems
 - **Recovery Point Objective (RPO)**: 1 hour maximum data loss
 - **Backup Strategy**: Daily full backups with hourly incremental
@@ -323,18 +355,21 @@ This document defines the user interface screens, detailed processes, and non-fu
 ### Security Requirements
 
 #### Authentication and Authorization
+
 - **Multi-Factor Authentication**: Required for administrative access
 - **Single Sign-On**: Integration with corporate SSO systems
 - **Session Management**: Secure session handling with timeout
 - **Password Policy**: Strong password requirements and rotation
 
 #### Data Protection
+
 - **Encryption at Rest**: AES-256 encryption for all sensitive data
 - **Encryption in Transit**: TLS 1.2+ for all data communications
 - **Data Masking**: PII masking in non-production environments
 - **Key Management**: Enterprise key management system integration
 
 #### Access Control
+
 - **Role-Based Access**: Granular permissions based on job functions
 - **Least Privilege**: Minimum necessary permissions for users
 - **Segregation of Duties**: Separation of processing and approval functions
@@ -343,18 +378,21 @@ This document defines the user interface screens, detailed processes, and non-fu
 ### Usability Requirements
 
 #### User Experience
+
 - **Intuitive Interface**: Minimal training required for basic functions
 - **Responsive Design**: Support for desktop, tablet, and mobile devices
 - **Accessibility**: WCAG 2.1 AA compliance for all user interfaces
 - **Browser Support**: Support for Chrome, Firefox, Safari, Edge
 
 #### Help and Support
+
 - **Online Help**: Context-sensitive help and documentation
 - **User Guides**: Comprehensive user guides and tutorials
 - **Training Materials**: Training videos and step-by-step guides
 - **Support Contact**: Clear support contact information and processes
 
 #### Error Handling
+
 - **User-Friendly Messages**: Clear, actionable error messages
 - **Error Recovery**: Graceful error recovery with user guidance
 - **Progress Indicators**: Clear progress indication for long operations
@@ -363,18 +401,21 @@ This document defines the user interface screens, detailed processes, and non-fu
 ### Compliance and Audit
 
 #### Regulatory Compliance
+
 - **ERISA Compliance**: Meet all ERISA requirements for plan administration
 - **IRS Compliance**: Accurate tax reporting and withholding
 - **State Regulations**: Compliance with applicable state regulations
 - **Privacy Laws**: Compliance with data privacy regulations
 
 #### Audit Requirements
+
 - **Comprehensive Logging**: Complete audit trail for all actions
 - **Data Integrity**: Tamper-evident audit logs
 - **Reporting**: Audit reports for regulatory examination
 - **Retention**: Long-term audit data retention per legal requirements
 
 #### Documentation
+
 - **System Documentation**: Complete technical and user documentation
 - **Process Documentation**: Detailed process documentation and procedures
 - **Change Documentation**: Documentation of all system changes

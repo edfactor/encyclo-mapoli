@@ -26,10 +26,10 @@ interface ReportGridProps {
   profitYear: number;
 }
 
-const ReportGrid: React.FC<ReportGridProps> = ({ 
-  params, 
-  onLoadingChange, 
-  isFrozen, 
+const ReportGrid: React.FC<ReportGridProps> = ({
+  params,
+  onLoadingChange,
+  isFrozen,
   searchTrigger,
   isGridExpanded = false,
   onToggleExpand,

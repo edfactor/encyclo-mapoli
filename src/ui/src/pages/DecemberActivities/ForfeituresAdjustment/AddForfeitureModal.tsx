@@ -19,13 +19,19 @@ const getErrorDialogContent = (error: ServiceErrorResponse): { title: string; me
 
   if (title) {
     if (title.includes("Employee with badge number")) {
-      return { title: "Badge Number Not Found", message: "The specified badge number could not be found in the system." };
+      return {
+        title: "Badge Number Not Found",
+        message: "The specified badge number could not be found in the system."
+      };
     } else if (title.includes("Invalid badge number")) {
       return { title: "Invalid Badge Number", message: "The badge number you entered is not valid." };
     } else if (title.includes("Forfeiture amount cannot be zero")) {
       return { title: "Invalid Amount", message: "Forfeiture amount cannot be zero. Please enter a non-zero value." };
     } else if (title.includes("Validation Error")) {
-      return { title: "Validation Error", message: "The submission contains data format errors. Please check your input and try again." };
+      return {
+        title: "Validation Error",
+        message: "The submission contains data format errors. Please check your input and try again."
+      };
     } else {
       return { title: "Error", message: "An unexpected error occurred. Please try again." };
     }

@@ -43,15 +43,15 @@ if ($CheckStaged) {
 
 foreach ($file in $files) {
     if (-not (Test-Path $file)) { continue }
-    
+
     $content = Get-Content $file -Raw
     $lineNumber = 0
-    
+
     # Backend Response DTOs check
     if ($file -match 'Response\.cs$' -and $file -notmatch 'Archive|Test') {
         foreach ($line in (Get-Content $file)) {
             $lineNumber++
-            
+
             # Flag "public string Name" (but allow "public string FullName" and "public string FrequencyName", "StatusName", etc.)
             if ($line -match 'public\s+string\s+Name\s*(?:{|=|;)' -and $line -notmatch 'FullName|FrequencyName|StatusName|TaxCodeName|KindName|TypeName') {
                 $violations += @{
@@ -64,21 +64,21 @@ foreach ($file in $files) {
             }
         }
     }
-    
+
     # Backend FullName assignment check
     if ($file -match 'Service\.cs$') {
         foreach ($line in (Get-Content $file)) {
             $lineNumber++
-            
+
             # Flag FullName assignment without computation
-            if ($line -match 'FullName\s*=\s*' -and 
+            if ($line -match 'FullName\s*=\s*' -and
                 $line -notmatch 'ComputeFullNameWithInitial' -and
                 $line -notmatch '\.FullName\s*\?' -and  # Fallback pattern ok
                 $line -notmatch '//.*FullName') {  # Commented code ok
-                
+
                 # Check if next few lines contain the computation
                 $nextContext = $content -split '\n' | Select-Object -Skip ($lineNumber - 1) | Select-Object -First 5 | Select-String 'ComputeFullNameWithInitial'
-                
+
                 if (-not $nextContext) {
                     $violations += @{
                         File = $file
@@ -91,19 +91,19 @@ foreach ($file in $files) {
             }
         }
     }
-    
+
     # Frontend .name property check
     if ($file -match '\.(tsx?|ts)$' -and $file -notmatch '__test__|\.test\.' -and $file -notmatch 'types/') {
         foreach ($line in (Get-Content $file)) {
             $lineNumber++
-            
+
             # Flag .name property access (but allow headerName, displayName, kindName, etc.)
-            if ($line -match '\.\b(name)\b' -and 
+            if ($line -match '\.\b(name)\b' -and
                 $line -notmatch '\.(headerName|displayName|kindName|statusName|frequencyName|typeName|roleName|pathName|taxCodeName|employmentTypeName|departmentName|payClassificationName|relationshipName)' -and
                 $line -notmatch 'params\.data|checkedValue|params\.value' -and
                 $line -notmatch '\/\/.*\.name' -and
                 $line -notmatch 'key\s*:\s*.*\.name|href\s*:') {
-                
+
                 $violations += @{
                     File = $file
                     Line = $lineNumber
@@ -112,12 +112,12 @@ foreach ($file in $files) {
                     Code = $line.Trim()
                 }
             }
-            
+
             # Flag manual firstName/lastName concatenation
-            if ($line -match '(firstName|lastName)\s*\+' -or 
+            if ($line -match '(firstName|lastName)\s*\+' -or
                 $line -match '\$\{.*firstName.*lastName' -or
                 $line -match "firstName.*lastName|lastName.*firstName") {
-                
+
                 if ($line -notmatch '\/\/|comment|WRONG|❌') {
                     $violations += @{
                         File = $file
@@ -180,12 +180,14 @@ Make executable: `chmod +x .git/hooks/pre-commit`
 ### Installation Instructions
 
 1. **Copy the script**
+
    ```bash
    cp scripts/check-fullname-pattern.ps1 .github/hooks/
    chmod +x .github/hooks/check-fullname-pattern.ps1
    ```
 
 2. **Setup git hook** (run once per developer)
+
    ```bash
    cp .github/hooks/pre-commit .git/hooks/
    chmod +x .git/hooks/pre-commit
@@ -221,23 +223,27 @@ module.exports = {
   meta: {
     type: "problem",
     docs: {
-      description: "Prevent manual firstName/lastName concatenation - use fullName from backend",
-      category: "Best Practices"
-    }
+      description:
+        "Prevent manual firstName/lastName concatenation - use fullName from backend",
+      category: "Best Practices",
+    },
   },
   create(context) {
     return {
       BinaryExpression(node) {
         // Detect firstName + lastName pattern
-        if (node.operator === '+') {
+        if (node.operator === "+") {
           const left = context.getSourceCode().getText(node.left);
           const right = context.getSourceCode().getText(node.right);
-          
-          if ((left.includes('firstName') && right.includes('lastName')) ||
-              (left.includes('lastName') && right.includes('firstName'))) {
+
+          if (
+            (left.includes("firstName") && right.includes("lastName")) ||
+            (left.includes("lastName") && right.includes("firstName"))
+          ) {
             context.report({
               node,
-              message: "Use 'fullName' from backend instead of concatenating firstName/lastName"
+              message:
+                "Use 'fullName' from backend instead of concatenating firstName/lastName",
             });
           }
         }
@@ -245,15 +251,16 @@ module.exports = {
       TemplateLiteral(node) {
         // Detect template literal interpolation
         const text = context.getSourceCode().getText(node);
-        if (text.includes('firstName') && text.includes('lastName')) {
+        if (text.includes("firstName") && text.includes("lastName")) {
           context.report({
             node,
-            message: "Use 'fullName' from backend instead of template interpolation"
+            message:
+              "Use 'fullName' from backend instead of template interpolation",
           });
         }
-      }
+      },
     };
-  }
+  },
 };
 ```
 
@@ -272,9 +279,9 @@ Add to your pipeline (e.g., GitHub Actions, Azure Pipelines):
 ---
 
 **Benefits of These Checks**:
+
 - ✅ Catches violations before merge
 - ✅ Educates new developers on the pattern
 - ✅ Prevents regression to old concatenation approach
 - ✅ Consistent naming across codebase
 - ✅ Better maintainability
-

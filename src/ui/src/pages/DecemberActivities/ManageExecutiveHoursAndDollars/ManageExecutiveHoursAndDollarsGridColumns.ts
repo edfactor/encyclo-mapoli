@@ -20,8 +20,8 @@ interface GetColumnsOptions {
 // Editing requires: page status "In Progress" AND user has ExecutiveAdministrator role.
 export const GetManageExecutiveHoursAndDollarsColumns = (options?: GetColumnsOptions | boolean): ColDef[] => {
   // Support legacy boolean argument for backwards compatibility
-  const mini = typeof options === "boolean" ? options : options?.mini ?? false;
-  const canEdit = typeof options === "boolean" ? !options : options?.canEdit ?? false;
+  const mini = typeof options === "boolean" ? options : (options?.mini ?? false);
+  const canEdit = typeof options === "boolean" ? !options : (options?.canEdit ?? false);
 
   // Columns are editable only when NOT in mini mode AND canEdit is true
   const isEditable = !mini && canEdit;

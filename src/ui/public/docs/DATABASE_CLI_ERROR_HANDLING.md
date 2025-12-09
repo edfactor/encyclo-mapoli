@@ -19,11 +19,11 @@ Now uses process exit code as the **primary indicator** of success/failure:
 if (process.ExitCode != 0)
 {
     // Operation failed - collect error details
-    var errorMessage = !string.IsNullOrWhiteSpace(error) 
-        ? error 
+    var errorMessage = !string.IsNullOrWhiteSpace(error)
+        ? error
         : $"Process exited with code {process.ExitCode}. Check console logs for details.";
-    
-    logger.LogError("Process failed with exit code {ExitCode}: {ErrorMessage}", 
+
+    logger.LogError("Process failed with exit code {ExitCode}: {ErrorMessage}",
         process.ExitCode, errorMessage);
     result = new ExecuteCommandResult { Success = false, ErrorMessage = errorMessage };
 }
@@ -34,12 +34,13 @@ if (process.ExitCode != 0)
 ### 2. Improved Error Messages
 
 Error notifications now include:
+
 - ❌ Clear failure indicator in title
 - **Bold formatting** for emphasis
 - **Formatted error details** in code blocks
 - Instructions to check console logs
 
-```csharp
+````csharp
 _ = interactionService.PromptNotificationAsync(
     title: $"❌ Failed: {operationName}",
     message: $"**Database operation failed**: {operationName}\n\n**Error Details:**\n```\n{result.ErrorMessage}\n```\n\nCheck console logs for more information.",
@@ -47,7 +48,7 @@ _ = interactionService.PromptNotificationAsync(
     {
         Intent = MessageIntent.Error
     });
-```
+````
 
 ### 3. Proper Output Logging
 
@@ -115,7 +116,7 @@ User clearly sees failure with details 👍
 
 When a database operation fails, users now see:
 
-```
+````
 ┌─────────────────────────────────────────────────────┐
 │ ❌ Failed: Step 2/3: Import from READY              │
 │                                                     │
@@ -132,9 +133,10 @@ When a database operation fails, users now see:
 │                                                     │
 │ [Dismiss]                                           │
 └─────────────────────────────────────────────────────┘
-```
+````
 
 **Features**:
+
 - ❌ Red error icon and intent
 - Bold formatting highlights key info
 - Code block preserves error formatting
@@ -146,11 +148,13 @@ When a database operation fails, users now see:
 ### Manual Testing
 
 1. **Test Database Connection Failure**:
+
    - Stop the Oracle database
    - Run "Upgrade database" command
    - Verify error notification appears with connection error details
 
 2. **Test Migration Failure**:
+
    - Create a breaking migration
    - Run "Upgrade database"
    - Verify exit code is non-zero and error is shown
@@ -168,14 +172,14 @@ public void RunConsoleApp_WhenProcessFails_ReturnsFailureResult()
 {
     // Arrange: Command that will fail
     var logger = Mock.Of<ILogger>();
-    
+
     // Act: Run command that exits with non-zero code
     var result = CommandHelper.RunConsoleApp(
-        projectPath, 
-        "invalid-profile", 
-        logger, 
+        projectPath,
+        "invalid-profile",
+        logger,
         "Test Operation");
-    
+
     // Assert
     result.Success.ShouldBeFalse();
     result.ErrorMessage.ShouldNotBeNullOrEmpty();
@@ -186,32 +190,35 @@ public void RunConsoleApp_WhenProcessFails_ReturnsFailureResult()
 
 Common exit codes you might encounter:
 
-| Exit Code | Meaning | Example Scenario |
-|-----------|---------|------------------|
-| 0 | Success | Operation completed normally |
-| 1 | General error | Unhandled exception in CLI |
-| 2 | Misuse of command | Invalid arguments to dotnet run |
-| 127 | Command not found | dotnet not in PATH |
-| 130 | Terminated by Ctrl+C | User cancelled operation |
-| 137 | Killed by signal | Out of memory, process killed |
+| Exit Code | Meaning              | Example Scenario                |
+| --------- | -------------------- | ------------------------------- |
+| 0         | Success              | Operation completed normally    |
+| 1         | General error        | Unhandled exception in CLI      |
+| 2         | Misuse of command    | Invalid arguments to dotnet run |
+| 127       | Command not found    | dotnet not in PATH              |
+| 130       | Terminated by Ctrl+C | User cancelled operation        |
+| 137       | Killed by signal     | Out of memory, process killed   |
 
 ## Logging Improvements
 
 ### Before
+
 ```csharp
 logger.LogError(output);  // Wrong level for output
 logger.LogError(error);   // Only logs if stderr has content
 ```
 
 ### After
+
 ```csharp
 logger.LogInformation(output);  // Correct level for normal output
-logger.LogError("Process failed with exit code {ExitCode}: {ErrorMessage}", 
+logger.LogError("Process failed with exit code {ExitCode}: {ErrorMessage}",
     process.ExitCode, errorMessage);  // Structured logging with exit code
 logger.LogWarning("Process succeeded but wrote to stderr: {StdErr}", error);  // Distinguishes warnings
 ```
 
 **Benefits**:
+
 - Proper log levels for filtering
 - Structured logging with exit codes
 - Clear distinction between errors and warnings
@@ -222,6 +229,7 @@ logger.LogWarning("Process succeeded but wrote to stderr: {StdErr}", error);  //
 ### For CLI Tool Authors
 
 1. **Always set appropriate exit codes**:
+
    ```csharp
    return 0;  // Success
    return 1;  // General failure
@@ -229,6 +237,7 @@ logger.LogWarning("Process succeeded but wrote to stderr: {StdErr}", error);  //
    ```
 
 2. **Write meaningful error messages to stderr**:
+
    ```csharp
    await Console.Error.WriteLineAsync($"Error: Connection to database failed: {ex.Message}");
    ```

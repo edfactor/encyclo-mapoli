@@ -4,13 +4,13 @@
 
 All Database CLI commands now have distinctive icons that visually represent their function:
 
-| Command | Icon | Icon Name | Description |
-|---------|------|-----------|-------------|
-| **Upgrade Database** | ⬆️ | `ArrowUp` (Filled) | Upward arrow representing database schema upgrades and migrations |
-| **Drop and Recreate Database** | ⚠️🗄️ | `DatabaseWarning` (Filled) | Database with warning symbol for destructive operation |
-| **Import from READY** | ⬇️ | `ArrowDownload` (Filled) | Download arrow representing data import from external system |
-| **Import Navigation** | 🧭 | `Navigation` (Filled) | Navigation compass representing navigation data import |
-| **Nuclear Option** | 🔥 | `Fire` (Filled) | Fire icon representing the most destructive operation! 💥 |
+| Command                        | Icon | Icon Name                  | Description                                                       |
+| ------------------------------ | ---- | -------------------------- | ----------------------------------------------------------------- |
+| **Upgrade Database**           | ⬆️   | `ArrowUp` (Filled)         | Upward arrow representing database schema upgrades and migrations |
+| **Drop and Recreate Database** | ⚠️🗄️ | `DatabaseWarning` (Filled) | Database with warning symbol for destructive operation            |
+| **Import from READY**          | ⬇️   | `ArrowDownload` (Filled)   | Download arrow representing data import from external system      |
+| **Import Navigation**          | 🧭   | `Navigation` (Filled)      | Navigation compass representing navigation data import            |
+| **Nuclear Option**             | 🔥   | `Fire` (Filled)            | Fire icon representing the most destructive operation! 💥         |
 
 ## Visual Preview in Aspire Dashboard
 
@@ -28,27 +28,32 @@ Database-Cli
 ## Icon Rationale
 
 ### Upgrade Database - `ArrowUp` 🎯
+
 - **Why**: Represents moving "up" to a newer database version
 - **Meaning**: Non-destructive, progressive operation
 - **User Psychology**: Positive upward motion = improvement
 
 ### Drop and Recreate - `DatabaseWarning` ⚠️
+
 - **Why**: Combines database symbol with warning indicator
 - **Meaning**: Destructive database operation requiring caution
 - **User Psychology**: Warning symbol makes users think twice
 
 ### Import from READY - `ArrowDownload` 📥
+
 - **Why**: Classic download/import arrow
 - **Meaning**: Data flowing into the system from external source
 - **User Psychology**: Familiar import metaphor
 
 ### Import Navigation - `Navigation` 🧭
+
 - **Why**: Navigation compass directly represents the data type
 - **Meaning**: Importing navigation/menu structure
 - **User Psychology**: Clear semantic connection to "navigation"
 
 ### Nuclear Option - `Fire` 🔥💥
-- **Why**: NUCLEAR = FIRE = DANGER = TOTAL DESTRUCTION! 
+
+- **Why**: NUCLEAR = FIRE = DANGER = TOTAL DESTRUCTION!
 - **Meaning**: Most extreme, irreversible, destructive operation
 - **User Psychology**: Fire universally signals danger and complete destruction
 - **Fun Factor**: You asked for a nuclear explosion, and fire is as close as Fluent UI gets! 😄
@@ -58,6 +63,7 @@ Database-Cli
 If you want to experiment with different icons, here are some alternatives from the Fluent UI library:
 
 ### For Nuclear Option:
+
 - `Fire` 🔥 (chosen - most dramatic!)
 - `Warning` ⚠️ (too subtle)
 - `Delete` 🗑️ (not dramatic enough)
@@ -65,16 +71,19 @@ If you want to experiment with different icons, here are some alternatives from 
 - `BombSolid` 💣 (if it existed - perfect!)
 
 ### For Drop-Recreate:
+
 - `DatabaseWarning` ⚠️🗄️ (chosen)
 - `Delete` 🗑️ (too generic)
 - `Refresh` 🔄 (misleading - suggests safe operation)
 
 ### For Upgrade:
+
 - `ArrowUp` ⬆️ (chosen)
 - `ArrowUpload` ⬆️📤 (similar but implies external upload)
 - `DatabaseArrowUp` (perfect if it existed!)
 
 ### For Imports:
+
 - `ArrowDownload` ⬇️ (chosen for READY)
 - `ArrowImport` ⬇️📥 (alternative)
 - `Navigation` 🧭 (chosen for navigation data)
@@ -84,7 +93,7 @@ If you want to experiment with different icons, here are some alternatives from 
 
 - **Icon Explorer**: https://storybooks.fluentui.dev/react/?path=/docs/icons-catalog--docs
 - **Search All Icons**: Type to filter over 2,000+ available icons
-- **Icon Variants**: 
+- **Icon Variants**:
   - `Regular` - Outline style (lighter visual weight)
   - `Filled` - Solid style (more prominent, chosen for all commands)
 
@@ -94,16 +103,17 @@ All icons use the `Filled` variant for consistency and visual prominence in the 
 
 ```csharp
 // Example: Nuclear Option with Fire icon
-commandOptions: new CommandOptions 
-{ 
-    IconName = "Fire", 
-    IconVariant = IconVariant.Filled 
+commandOptions: new CommandOptions
+{
+    IconName = "Fire",
+    IconVariant = IconVariant.Filled
 }
 ```
 
 ## Testing the New Icons
 
 1. **Start Aspire Dashboard**:
+
    ```bash
    aspire run
    ```
@@ -115,6 +125,7 @@ commandOptions: new CommandOptions
 4. **Hover over commands** to see the icons in the UI
 
 The icons make it much easier to:
+
 - Quickly identify commands at a glance
 - Understand command severity/danger level
 - Distinguish between similar operations
@@ -123,6 +134,7 @@ The icons make it much easier to:
 ## Future Icon Enhancements
 
 Potential improvements:
+
 - Add color coding (if Aspire supports it)
 - Animated icons for running operations
 - Different icon states (idle vs. running)

@@ -17,7 +17,7 @@ const ProfitShareReport = () => {
   const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
   const dispatch = useDispatch();
   const [triggerSearch] = useLazyGetYearEndProfitSharingReportTotalsQuery();
-    const [isGridExpanded, setIsGridExpanded] = useState(false);
+  const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
   const profitYear = useDecemberFlowProfitYear();
 
@@ -127,8 +127,8 @@ const ProfitShareReport = () => {
         </Grid>
         */}
         <Grid width="100%">
-          <ProfitSummary 
-            frozenData={false} 
+          <ProfitSummary
+            frozenData={false}
             externalIsGridExpanded={isGridExpanded}
             externalOnToggleExpand={handleToggleGridExpand}
           />

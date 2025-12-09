@@ -9,6 +9,7 @@ The report finds potentially duplicate demographic records by comparing full nam
 ## High-level algorithm
 
 1. Identify candidate duplicate name pairs (production):
+
    - Run an Oracle-optimized SQL query that:
      - Excludes records with placeholder/`FAKE_SSNS` values.
      - Uses `UTL_MATCH.EDIT_DISTANCE` to compute name similarity with a threshold (< 3).
@@ -18,11 +19,13 @@ The report finds potentially duplicate demographic records by comparing full nam
      - Returns both directions via `UNION ALL` (so each FullName maps to matched badge ids).
 
 2. Fallback for test/in-memory environments:
+
    - The in-memory provider cannot run Oracle functions. For tests, the service projects FullName and Id pairs directly from the demographics query to allow tests to exercise the LINQ codepath.
 
 3. Materialize the set of candidate full names and use it to filter the main demographics projection.
 
 4. For matching demographics, join to PayProfit (left), balance set, and years-of-service lookups to produce a rich projection that includes:
+
    - Badge, masked SSN, address, employment status and store,
    - Net balance (from totals service),
    - Hours/Income for the configured profit year,

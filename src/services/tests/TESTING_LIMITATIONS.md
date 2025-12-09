@@ -9,10 +9,10 @@
 
 **Advantages**:
 
--   Works with existing test patterns
--   Fast test execution
--   Easy to setup specific test scenarios
--   No database infrastructure required
+- Works with existing test patterns
+- Fast test execution
+- Easy to setup specific test scenarios
+- No database infrastructure required
 
 **Known Limitations**:
 
@@ -39,9 +39,9 @@
 
 **Potential Advantages**:
 
--   Real EF Core behavior including IAsyncQueryProvider
--   CRUD operations persist naturally
--   No mock setup complexity
+- Real EF Core behavior including IAsyncQueryProvider
+- CRUD operations persist naturally
+- No mock setup complexity
 
 **Current Blockers** (preventing production use):
 
@@ -84,12 +84,12 @@
 
 **DemographicsRepositoryTests**:
 
--   Total: 17 tests
--   Passing: 1 test
--   Failing: 16 tests
-    -   11 InvalidCastException (readonly context casting)
-    -   3 NotSupportedException (navigation property validation)
-    -   2 InvalidOperationException (ExecuteUpdate not supported)
+- Total: 17 tests
+- Passing: 1 test
+- Failing: 16 tests
+    - 11 InvalidCastException (readonly context casting)
+    - 3 NotSupportedException (navigation property validation)
+    - 2 InvalidOperationException (ExecuteUpdate not supported)
 
 ## Effort Estimate to Fix InMemory Approach
 
@@ -117,31 +117,31 @@
 
 Consider switching to InMemory if:
 
--   Async query testing becomes critical
--   Team has 17-27 hours to invest in fixing blockers
--   Benefits outweigh the migration effort
+- Async query testing becomes critical
+- Team has 17-27 hours to invest in fixing blockers
+- Benefits outweigh the migration effort
 
 ### Long Term (Future)
 
 **Real Database Testing** (highest reliability):
 
--   Use SQLite InMemory as alternative to EF Core InMemory
--   Use test containers (Docker) with real Oracle database
--   Both approaches eliminate mock limitations entirely
--   Trade-off: Higher setup complexity, slower test execution
+- Use SQLite InMemory as alternative to EF Core InMemory
+- Use test containers (Docker) with real Oracle database
+- Both approaches eliminate mock limitations entirely
+- Trade-off: Higher setup complexity, slower test execution
 
 ## Related Files
 
--   `ScenarioDataContextFactory.cs` - Test factory with both approaches
--   `ScenarioFactory.cs` - Higher-level test scenario builder
--   `DemographicsRepositoryTests.cs` - Main test file affected
--   `CLAUDE.md` - AI conversation history documenting investigation
+- `ScenarioDataContextFactory.cs` - Test factory with both approaches
+- `ScenarioFactory.cs` - Higher-level test scenario builder
+- `DemographicsRepositoryTests.cs` - Main test file affected
+- `CLAUDE.md` - AI conversation history documenting investigation
 
 ## References
 
--   [MockQueryable GitHub](https://github.com/romantitov/MockQueryable) - Mock IQueryable limitations
--   [EF Core InMemory Provider Docs](https://learn.microsoft.com/en-us/ef/core/providers/in-memory/) - InMemory limitations
--   [EF Core Testing Docs](https://learn.microsoft.com/en-us/ef/core/testing/) - Testing strategies
+- [MockQueryable GitHub](https://github.com/romantitov/MockQueryable) - Mock IQueryable limitations
+- [EF Core InMemory Provider Docs](https://learn.microsoft.com/en-us/ef/core/providers/in-memory/) - InMemory limitations
+- [EF Core Testing Docs](https://learn.microsoft.com/en-us/ef/core/testing/) - Testing strategies
 
 ---
 

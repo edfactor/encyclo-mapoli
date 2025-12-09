@@ -106,10 +106,10 @@ interface ProfitSummaryProps {
   externalOnToggleExpand?: () => void;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({ 
-  frozenData, 
-  externalIsGridExpanded, 
-  externalOnToggleExpand 
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({
+  frozenData,
+  externalIsGridExpanded,
+  externalOnToggleExpand
 }) => {
   const dispatch = useDispatch();
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
@@ -301,11 +301,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
   }, [employeesRowData]);
 
   const getGrandTotals = useMemo(() => {
-    const allSections = [
-      ...activeAndInactiveRowData,
-      ...terminatedRowData,
-      ...(employeesRowData || [])
-    ];
+    const allSections = [...activeAndInactiveRowData, ...terminatedRowData, ...(employeesRowData || [])];
 
     if (allSections.length === 0) return [];
 
@@ -345,7 +341,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
               </IconButton>
             </Grid>
           </Grid>
-          <div className="mt-[37px] mb-[21px] flex items-center gap-6 px-6">
+          <div className="mb-[21px] mt-[37px] flex items-center gap-6 px-6">
             <div className="flex items-center gap-2">
               <span className="font-semibold">Total Employees:</span>
               <span>{getGrandTotals[0]?.numberOfMembers?.toLocaleString() ?? 0}</span>
@@ -371,7 +367,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
               <span>
                 {typeof getGrandTotals[0]?.totalHours === "string"
                   ? getGrandTotals[0]?.totalHours
-                  : getGrandTotals[0]?.totalHours?.toLocaleString() ?? "0"}
+                  : (getGrandTotals[0]?.totalHours?.toLocaleString() ?? "0")}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -379,7 +375,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
               <span>
                 {typeof getGrandTotals[0]?.totalPoints === "string"
                   ? getGrandTotals[0]?.totalPoints
-                  : getGrandTotals[0]?.totalPoints?.toLocaleString() ?? "0"}
+                  : (getGrandTotals[0]?.totalPoints?.toLocaleString() ?? "0")}
               </span>
             </div>
           </div>

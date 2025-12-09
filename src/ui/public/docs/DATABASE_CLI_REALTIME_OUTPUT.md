@@ -46,6 +46,7 @@ process.BeginErrorReadLine();
 ```
 
 **Benefits**:
+
 - ✅ Output appears immediately in Aspire Dashboard console
 - ✅ Users can see progress as operations run
 - ✅ Last output before crashes/hangs is captured
@@ -61,9 +62,9 @@ bool exited = process.WaitForExit(timeoutMinutes * 60 * 1000);
 
 if (!exited)
 {
-    logger.LogError("[{Operation}] Process did not complete within {Timeout} minutes. Terminating...", 
+    logger.LogError("[{Operation}] Process did not complete within {Timeout} minutes. Terminating...",
         operationName, timeoutMinutes);
-    
+
     try
     {
         process.Kill(entireProcessTree: true);
@@ -76,13 +77,14 @@ if (!exited)
     var timeoutError = $"Operation timed out after {timeoutMinutes} minutes. Process was terminated.\n\n" +
                      $"Last output:\n{string.Join("\n", outputLines.TakeLast(10))}\n\n" +
                      $"Check console logs for full output.";
-    
+
     // Show timeout notification...
     return new ExecuteCommandResult { Success = false, ErrorMessage = timeoutError };
 }
 ```
 
 **Benefits**:
+
 - ✅ Prevents hung operations from blocking indefinitely
 - ✅ Shows last 10 lines of output before timeout
 - ✅ Kills entire process tree (including child processes)
@@ -97,6 +99,7 @@ logger.LogInformation("[{Operation}] {Output}", operationName ?? "CLI", e.Data);
 ```
 
 **Example Console Output**:
+
 ```
 [Step 1/3: Drop & Recreate Database] [DEBUG] Received args: drop-recreate-db
 [Step 1/3: Drop & Recreate Database] Dropping database...
@@ -130,6 +133,7 @@ User finally sees what happened
 ```
 
 **Problems**:
+
 - No progress indication
 - Impossible to tell if stuck or just slow
 - If process hangs, user never sees output
@@ -161,6 +165,7 @@ If process hangs:
 ```
 
 **Benefits**:
+
 - ✅ Immediate feedback
 - ✅ Progress visibility
 - ✅ Better hang detection
@@ -220,6 +225,7 @@ int timeoutMinutes = launchProfile switch
 **Before**: No idea where it's stuck, output appears all at once after manual kill
 
 **After**: Console shows:
+
 ```
 [Import from READY] Processing batch 43 of 100... ✓
 [Import from READY] Processing batch 44 of 100... ✓
@@ -236,6 +242,7 @@ int timeoutMinutes = launchProfile switch
 **Before**: `ReadToEnd()` returns empty string, no idea why
 
 **After**: Real-time streaming shows:
+
 ```
 [Operation] Starting...
 [Operation] ERROR: Connection string not configured

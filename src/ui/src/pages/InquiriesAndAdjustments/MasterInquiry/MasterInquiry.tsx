@@ -181,7 +181,10 @@ const MasterInquiry = () => {
   return (
     <Page label={isGridExpanded ? "" : CAPTIONS.MASTER_INQUIRY}>
       <MissiveAlertProvider>
-        <MasterInquiryContent isGridExpanded={isGridExpanded} setIsGridExpanded={setIsGridExpanded} />
+        <MasterInquiryContent
+          isGridExpanded={isGridExpanded}
+          setIsGridExpanded={setIsGridExpanded}
+        />
       </MissiveAlertProvider>
     </Page>
   );

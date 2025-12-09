@@ -194,7 +194,7 @@ const { data, isLoading, error } = useGetAccountHistoryReportQuery(
       isSortDescending,
     },
   },
-  { skip: !selectedMemberId }
+  { skip: !selectedMemberId },
 );
 ```
 

@@ -402,8 +402,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </div>
             {distributionsAndForfeitures.hasUnattributedRecords && distributionsAndForfeitures.unattributedTotals && (
               <div className="relative flex-1">
-                <div
-                  className="rounded bg-[#fff3cd] border border-[#ffc107]">
+                <div className="rounded border border-[#ffc107] bg-[#fff3cd]">
                   <TotalsGrid
                     displayData={[[numberToCurrency(distributionsAndForfeitures.unattributedTotals.stateTax || 0)]]}
                     leftColumnHeaders={["Unattributed State Taxes"]}

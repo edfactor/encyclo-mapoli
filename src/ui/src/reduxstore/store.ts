@@ -74,9 +74,7 @@ export const store = configureStore({
     distribution: distributionSlice,
 
     // Dynamically register all API reducers
-    ...Object.fromEntries(
-      API_INSTANCES.map(api => [api.reducerPath, api.reducer])
-    )
+    ...Object.fromEntries(API_INSTANCES.map((api) => [api.reducerPath, api.reducer]))
   },
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,7 +82,7 @@ export const store = configureStore({
     getDefaultMiddleware({ serializableCheck: false })
       .concat(rtkQueryErrorToastMiddleware(true))
       .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
-      .concat(API_INSTANCES.map(api => api.middleware))
+      .concat(API_INSTANCES.map((api) => api.middleware))
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
