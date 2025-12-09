@@ -58,7 +58,7 @@ export const AdhocApi = createApi({
     getRecentlyTerminatedReport: builder.query<RecentlyTerminatedResponse, StartAndEndDateRequest>({
       query: (params) => {
         return {
-          url: "adhoc/adhoc-terminated-employees-report",
+          url: "adhoc/terminated-employees-report",
           method: "GET",
           params: {
             profitYear: params.profitYear,
@@ -84,7 +84,7 @@ export const AdhocApi = createApi({
     getTerminatedLettersReport: builder.query<TerminatedLettersResponse, TerminatedLettersRequest>({
       query: (params) => {
         return {
-          url: "adhoc/adhoc-terminated-employees-report-needing-letter",
+          url: "adhoc/terminated-employees-report-needing-letter",
           method: "GET",
           params: {
             profitYear: params.profitYear,
@@ -110,7 +110,7 @@ export const AdhocApi = createApi({
     }),
     getTerminatedLettersDownload: builder.query<Blob, TerminatedLettersRequest>({
       query: (params) => ({
-        url: "adhoc/adhoc-terminated-employees-report-needing-letter/download",
+        url: "adhoc/terminated-employees-report-needing-letter/download",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -209,7 +209,7 @@ export const AdhocApi = createApi({
 
     adhocBeneficiariesReport: builder.query<adhocBeneficiariesReportResponse, AdhocBeneficiariesReportRequest>({
       query: (params) => ({
-        url: "adhoc/adhoc-beneficiaries-report",
+        url: "adhoc/beneficiaries-report",
         method: "GET",
         params: {
           isAlsoEmployee: params.isAlsoEmployee,

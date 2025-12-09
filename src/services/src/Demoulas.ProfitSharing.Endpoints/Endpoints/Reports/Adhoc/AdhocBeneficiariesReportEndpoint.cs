@@ -29,7 +29,7 @@ public class AdhocBeneficiariesReportEndpoint : EndpointWithCsvTotalsBase<AdhocB
 
     public override void Configure()
     {
-        Get("adhoc-beneficiaries-report");
+        Get("beneficiaries-report");
         Summary(s =>
         {
             s.Summary = "Adhoc Beneficiaries Report";
