@@ -3,6 +3,7 @@ import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import { store } from "reduxstore/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
 import useMasterInquiry from "../useMasterInquiry";
 
 /**
@@ -34,7 +35,9 @@ const createWrapper = () => {
   return ({ children }: { children: React.ReactNode }) => (
     <Provider store={store}>
       <BrowserRouter>
-        {children}
+        <MissiveAlertProvider>
+          {children}
+        </MissiveAlertProvider>
       </BrowserRouter>
     </Provider>
   );
