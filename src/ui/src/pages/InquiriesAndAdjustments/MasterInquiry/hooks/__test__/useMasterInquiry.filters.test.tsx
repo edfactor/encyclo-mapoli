@@ -18,7 +18,7 @@ const mockTriggerProfitDetails = vi.fn();
 vi.mock("reduxstore/api/InquiryApi", () => ({
   InquiryApi: {
     reducerPath: "inquiryApi",
-    reducer: (state: unknown) => state,
+    reducer: (state: unknown = {}) => state,
     middleware: () => (next: (arg: unknown) => unknown) => (action: unknown) => next(action)
   },
   useLazySearchProfitMasterInquiryQuery: () => [
@@ -26,7 +26,8 @@ vi.mock("reduxstore/api/InquiryApi", () => ({
     { isLoading: false }
   ],
   useLazyGetProfitMasterInquiryMemberQuery: () => [mockTriggerMemberDetails],
-  useLazyGetProfitMasterInquiryMemberDetailsQuery: () => [mockTriggerProfitDetails]
+  useLazyGetProfitMasterInquiryMemberDetailsQuery: () => [mockTriggerProfitDetails],
+  useLazyGetProfitMasterInquiryFilteredDetailsQuery: () => [mockTriggerProfitDetails]
 }));
 
 const createWrapper = () => {
