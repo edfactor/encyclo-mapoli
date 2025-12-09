@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
+
 public record MasterInquiryMemberDetailsRequest : SortedPaginationRequestDto
 {
     public required byte? MemberType { get; set; }
@@ -19,4 +20,5 @@ public record MasterInquiryMemberDetailsRequest : SortedPaginationRequestDto
     public decimal? PaymentAmount { get; set; }
     public string? Name { get; set; }
     public byte? PaymentType { get; set; }
+    public bool? Voids { get; set; }
 }
