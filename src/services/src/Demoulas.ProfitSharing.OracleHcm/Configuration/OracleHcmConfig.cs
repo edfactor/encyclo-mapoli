@@ -28,6 +28,7 @@ public sealed record OracleHcmConfig
     public string? PayrollUrl { get; set; }
 
     // Basic Authentication (Legacy - for development only)
+    public bool UseBasicAuth { get; set; } = true;
     public string? Username { get; set; }
     public string? Password { get; set; }
 
