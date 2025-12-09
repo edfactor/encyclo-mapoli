@@ -29,7 +29,7 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
       {!isFullscreen && (
         <div
           id="environment-banner"
-          className="fixed w-full top-0 z-[1000]">
+          className="fixed top-0 z-[1000] w-full">
           <EnvironmentBanner
             data-testid="environment-banner"
             id="environment-banner"
@@ -54,8 +54,7 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
               position: "fixed",
               zIndex: 1000
             }}>
-            <div
-              className="app-banner w-full fixed top-[52px] bg-white">
+            <div className="app-banner fixed top-[52px] w-full bg-white">
               <div className="text">{appTitle}</div>
               <WelcomeDisplay {...welcomeDisplayProps} />
             </div>

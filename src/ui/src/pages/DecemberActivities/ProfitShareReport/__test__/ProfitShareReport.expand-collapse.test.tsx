@@ -25,7 +25,7 @@ describe("ProfitShareReport - Expand/Collapse Functionality", () => {
 
     it("should track drawer state from Redux", () => {
       const mockIsDrawerOpen = true;
-      
+
       expect(mockIsDrawerOpen).toBe(true);
     });
   });
@@ -35,7 +35,7 @@ describe("ProfitShareReport - Expand/Collapse Functionality", () => {
       const mockDispatch = vi.fn();
       const mockCloseDrawer = vi.fn();
       const mockSetFullscreen = vi.fn();
-      
+
       const { result } = renderHook(() => {
         const [isGridExpanded, setIsGridExpanded] = React.useState(false);
         const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = React.useState(false);
@@ -72,7 +72,7 @@ describe("ProfitShareReport - Expand/Collapse Functionality", () => {
       const mockDispatch = vi.fn();
       const mockSetFullscreen = vi.fn();
       const mockOpenDrawer = vi.fn();
-      
+
       const { result } = renderHook(() => {
         const [isGridExpanded, setIsGridExpanded] = React.useState(true);
         const [wasDrawerOpenBeforeExpand] = React.useState(true);
@@ -103,7 +103,7 @@ describe("ProfitShareReport - Expand/Collapse Functionality", () => {
     it("should not restore drawer if it was closed before", () => {
       const mockDispatch = vi.fn();
       const mockSetFullscreen = vi.fn();
-      
+
       const { result } = renderHook(() => {
         const [isGridExpanded, setIsGridExpanded] = React.useState(true);
         const [wasDrawerOpenBeforeExpand] = React.useState(false);
@@ -158,7 +158,7 @@ describe("ProfitShareReport - Expand/Collapse Functionality", () => {
       };
 
       expect(profitSummaryProps.externalOnToggleExpand).toBe(mockHandler);
-      
+
       // Test handler can be called
       profitSummaryProps.externalOnToggleExpand();
       expect(mockHandler).toHaveBeenCalledTimes(1);
@@ -209,7 +209,7 @@ describe("ProfitShareReport - Expand/Collapse Functionality", () => {
 
     it("should delegate toggle to parent handler", () => {
       const mockParentHandler = vi.fn();
-      
+
       // Child component calls external handler
       mockParentHandler();
 
@@ -219,7 +219,7 @@ describe("ProfitShareReport - Expand/Collapse Functionality", () => {
     it("should synchronize expand state between parent and child", () => {
       const { result } = renderHook(() => {
         const [parentExpanded, setParentExpanded] = React.useState(false);
-        
+
         const handleToggle = () => {
           setParentExpanded(!parentExpanded);
         };

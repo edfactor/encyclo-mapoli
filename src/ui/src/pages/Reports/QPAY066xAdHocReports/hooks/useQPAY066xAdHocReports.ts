@@ -8,7 +8,7 @@ import {
   useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery,
   useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery,
   useLazyGetBreakdownByStoreTotalsQuery
-} from "reduxstore/api/YearsEndApi";
+} from "reduxstore/api/AdhocApi";
 import { SortedPaginationRequestDto } from "../../../../types/common/api";
 import { BreakdownByStoreEmployee } from "../../../../types/reports/breakdown";
 import reports from "../availableQPAY066xReports";
@@ -42,10 +42,10 @@ export const useQPAY066xAdHocReports = () => {
   // Call all query hooks unconditionally (React rules requirement)
   const [fetchQPAY066TA, { isFetching: isFetchingTA }] = useLazyGetBreakdownByStoreQuery();
   const [fetchQPAY066Inactive, { isFetching: isFetchingInactive }] = useLazyGetBreakdownByStoreInactiveQuery();
-   const [fetchQPAY066I, { isFetching: isFetchingI }] = useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery();
+  const [fetchQPAY066I, { isFetching: isFetchingI }] = useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery();
   const [fetchQPAY066C, { isFetching: isFetchingC }] = useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery();
-   const [fetchQPAY066B, { isFetching: isFetchingB }] = useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery();
-   const [fetchQPAY066W, { isFetching: isFetchingW }] = useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery();
+  const [fetchQPAY066B, { isFetching: isFetchingB }] = useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery();
+  const [fetchQPAY066W, { isFetching: isFetchingW }] = useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery();
   const [fetchTotals, { isFetching: isFetchingTotals }] = useLazyGetBreakdownByStoreTotalsQuery();
 
   // Aggregate loading state

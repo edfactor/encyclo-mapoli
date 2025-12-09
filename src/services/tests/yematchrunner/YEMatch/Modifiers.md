@@ -10,10 +10,10 @@ A13B - PAY PROFIT SHIFT (only on ready)
 
 ## After Frozen
 
-A18 - Profit Share Report  <----------------------- Pay426 updates the Earned Points, ZeroContributionReason, New
+A18 - Profit Share Report <----------------------- Pay426 updates the Earned Points, ZeroContributionReason, New
 Employee, and CertificateDate
-A20 - PAY443 - Profit Share Forfeit   (Report only)
+A20 - PAY443 - Profit Share Forfeit (Report only)
 A21 - Profit Share Update (updates PAYPROFIT shared values)
 A22 - Profit Share Edit (writes file used by A23)
 A23 - Profit Master Update
-A24 - Updates enrollement_id 
+A24 - Updates enrollement_id

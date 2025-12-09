@@ -2,7 +2,7 @@ import { useCallback, useReducer, useRef, useState } from "react";
 import {
   useLazyGetTerminatedLettersDownloadQuery,
   useLazyGetTerminatedLettersReportQuery
-} from "reduxstore/api/YearsEndApi";
+} from "reduxstore/api/AdhocApi";
 import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";

@@ -30,14 +30,14 @@ public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : Profi
 
     public override void Configure()
     {
-        Get("adhoc-terminated-employees-report-needing-letter/download");
+        Get("terminated-employees-report-needing-letter/download");
         Summary(s =>
         {
             s.Summary = "Returns a text file containing a form letter to be sent to terminated employees who aren't fully vested";
             s.ExampleRequest = TerminatedLettersRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
     }
 
     public override async Task HandleAsync(TerminatedLettersRequest req, CancellationToken ct)

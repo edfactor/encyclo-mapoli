@@ -40,7 +40,7 @@ public sealed class TerminatedEmployeesWithBalanceActivityBreakdownEndpoint : En
             s.Summary = "QPAY066D: Breakdown terminated managers and associates for all stores who have a balance";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
 

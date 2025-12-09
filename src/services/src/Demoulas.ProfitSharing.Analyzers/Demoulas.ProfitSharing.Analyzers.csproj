@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <!-- RS2007: Suppress analyzer release file format validation - conflicts with markdown formatter -->
+    <NoWarn>$(NoWarn);RS2007</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

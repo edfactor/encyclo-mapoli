@@ -23,7 +23,8 @@ export const transformSearchParams = (data: MasterInquirySearch, profitYear: num
     ...(psnSuffix !== undefined && { psnSuffix }),
     ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
     ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
-    ...(typeof data.contribution === "number" && !isNaN(data.contribution) && { contributionAmount: data.contribution }),
+    ...(typeof data.contribution === "number" &&
+      !isNaN(data.contribution) && { contributionAmount: data.contribution }),
     ...(typeof data.earnings === "number" && !isNaN(data.earnings) && { earningsAmount: data.earnings }),
     ...(typeof data.forfeiture === "number" && !isNaN(data.forfeiture) && { forfeitureAmount: data.forfeiture }),
     ...(typeof data.payment === "number" && !isNaN(data.payment) && { paymentAmount: data.payment }),

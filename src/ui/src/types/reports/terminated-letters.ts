@@ -26,5 +26,4 @@ export interface TerminatedLettersDetail {
   isExecutive: boolean;
 }
 
- 
 export interface TerminatedLettersResponse extends PagedReportResponse<TerminatedLettersDetail> {}

@@ -599,7 +599,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     );
 
     // PS-2258: Only lock radio button when badge length indicates a beneficiary (>= 8 chars)
-    const isMemberTypeDisabled = badgeNumberValue != null && String(badgeNumberValue).length > MAX_EMPLOYEE_BADGE_LENGTH;
+    const isMemberTypeDisabled =
+      badgeNumberValue != null && String(badgeNumberValue).length > MAX_EMPLOYEE_BADGE_LENGTH;
 
     // Determine if search button should be enabled
     const hasSearchCriteria = useMemo(() => {

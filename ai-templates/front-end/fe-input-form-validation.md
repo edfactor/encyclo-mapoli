@@ -19,22 +19,31 @@ All form validation begins with a Yup schema that defines the validation rules f
 
 ```typescript
 import * as yup from "yup";
-import { ssnValidator, badgeNumberValidator, monthValidator } from "../../utils/FormValidators";
+import {
+  ssnValidator,
+  badgeNumberValidator,
+  monthValidator,
+} from "../../utils/FormValidators";
 
 const schema = yup.object().shape({
   socialSecurity: ssnValidator,
   badgeNumber: badgeNumberValidator,
   name: yup.string().nullable(),
   startMonth: monthValidator,
-  endMonth: monthValidator.min(yup.ref("startMonth"), "End month must be after start month"),
-  contribution: yup.number()
+  endMonth: monthValidator.min(
+    yup.ref("startMonth"),
+    "End month must be after start month",
+  ),
+  contribution: yup
+    .number()
     .typeError("Contribution must be a number")
     .min(0, "Contribution must be a positive number")
-    .nullable()
+    .nullable(),
 });
 ```
 
 **Key patterns:**
+
 - **Reusable validators** from `utils/FormValidators.ts` (SSN, badge numbers, dates, etc.)
 - **Cross-field validation** using `yup.ref()` to compare fields (e.g., end date after start date)
 - **Custom test methods** for complex business logic
@@ -55,20 +64,21 @@ const {
   formState: { errors, isValid },
   reset,
   setValue,
-  watch
+  watch,
 } = useForm<FormDataType>({
   resolver: yupResolver(schema) as Resolver<FormDataType>,
-  mode: "onBlur",  // Validate on blur events
+  mode: "onBlur", // Validate on blur events
   defaultValues: {
     socialSecurity: undefined,
     badgeNumber: undefined,
     name: undefined,
     // ... other defaults
-  }
+  },
 });
 ```
 
 **Configuration options:**
+
 - **resolver**: Connects Yup schema to form validation
 - **mode**: `"onBlur"` validates when user leaves field (less intrusive than `"onChange"`)
 - **defaultValues**: Initial form state and reset values
@@ -110,6 +120,7 @@ Each input field is wrapped in a `Controller` component to connect React Hook Fo
 ```
 
 **Key patterns:**
+
 - **`{...field}`**: Spreads `onChange`, `onBlur`, `value`, `name`, and `ref` to the input
 - **`value={field.value ?? ""}`**: Prevents uncontrolled input warnings for null/undefined values
 - **`error={!!errors.fieldName}`**: Shows error styling when validation fails
@@ -140,6 +151,7 @@ onChange={(e) => {
 ```
 
 **Common patterns:**
+
 - **SSN fields**: Only digits, max 9 characters
 - **Badge numbers**: Only digits, max 7-11 characters depending on type
 - **Numeric fields**: Parse to number, handle empty as null
@@ -171,6 +183,7 @@ const validateAndSubmit = handleSubmit(onSubmit);
 ```
 
 **Flow:**
+
 1. User clicks submit button
 2. `handleSubmit` triggers validation against Yup schema
 3. If invalid, errors are set and submission is blocked
@@ -191,6 +204,7 @@ The search button is typically disabled until the form is valid and has sufficie
 ```
 
 **Disabled conditions:**
+
 - `!isValid`: Form has validation errors
 - `isSearching`: Request is in progress
 - `!hasSearchCriteria`: No search criteria entered (optional, page-specific)
@@ -223,6 +237,7 @@ const handleReset = () => {
 The project maintains a library of reusable validators to ensure consistency:
 
 ### SSN Validator
+
 ```typescript
 export const ssnValidator = yup
   .string()
@@ -235,6 +250,7 @@ export const ssnValidator = yup
 ```
 
 ### Badge Number Validator
+
 ```typescript
 export const badgeNumberValidator = yup
   .number()
@@ -247,6 +263,7 @@ export const badgeNumberValidator = yup
 ```
 
 ### Month Validator
+
 ```typescript
 export const monthValidator = yup
   .number()
@@ -258,6 +275,7 @@ export const monthValidator = yup
 ```
 
 ### Positive Number Validator (Factory Function)
+
 ```typescript
 export const positiveNumberValidator = (fieldName: string) =>
   yup
@@ -269,6 +287,7 @@ export const positiveNumberValidator = (fieldName: string) =>
 ```
 
 ### Profit Year Validator
+
 ```typescript
 export const profitYearNullableValidator = yup
   .number()
@@ -280,16 +299,24 @@ export const profitYearNullableValidator = yup
 ```
 
 ### Cross-Field Date Validators
+
 ```typescript
-export const endDateAfterStartDateValidator = (startFieldName: string, errorMessage?: string) =>
+export const endDateAfterStartDateValidator = (
+  startFieldName: string,
+  errorMessage?: string,
+) =>
   yup
     .date()
     .nullable()
-    .test("is-after-start", errorMessage || "End Date must be after Start Date", function (value) {
-      const startDate = this.parent[startFieldName];
-      if (!startDate || !value) return true;
-      return value > startDate;
-    });
+    .test(
+      "is-after-start",
+      errorMessage || "End Date must be after Start Date",
+      function (value) {
+        const startDate = this.parent[startFieldName];
+        if (!startDate || !value) return true;
+        return value > startDate;
+      },
+    );
 ```
 
 ## Advanced Validation Patterns
@@ -306,9 +333,9 @@ const schema = yup.object().shape({
     function (endYear) {
       const startYear = this.parent.startProfitYear;
       return !startYear || !endYear || endYear >= startYear;
-    }
+    },
   ),
-  startProfitYear: profitYearNullableValidator
+  startProfitYear: profitYearNullableValidator,
 });
 ```
 
@@ -350,11 +377,16 @@ const hasSearchCriteria = useMemo(() => {
     hasValue(watchedName);
 
   const hasNonDefaultSelections =
-    watchedMemberType !== "all" ||
-    watchedPaymentType !== "all";
+    watchedMemberType !== "all" || watchedPaymentType !== "all";
 
   return hasFieldValues || hasNonDefaultSelections;
-}, [watchedBadgeNumber, watchedSSN, watchedName, watchedMemberType, watchedPaymentType]);
+}, [
+  watchedBadgeNumber,
+  watchedSSN,
+  watchedName,
+  watchedMemberType,
+  watchedPaymentType,
+]);
 ```
 
 ### Auto-Update Related Fields
@@ -490,33 +522,42 @@ Consistent error messaging below each field:
 ## Best Practices
 
 ### 1. **Always Use Controller for MUI Components**
+
 Never use `register()` directly with Material-UI components always use `Controller` for proper integration.
 
 ### 2. **Preventative + Declarative Validation**
+
 Combine real-time input restrictions (`onChange` blocking) with schema validation for best UX:
+
 - **Preventative**: Block invalid characters immediately
 - **Declarative**: Validate complete field on blur with detailed error messages
 
 ### 3. **Null vs Undefined Handling**
+
 - Use `value={field.value ?? ""}` to prevent uncontrolled input warnings
 - Transform empty strings to `null` or `undefined` in `onChange` for consistent API payloads
 - Use `.nullable()` in schemas for optional fields
 
 ### 4. **Reuse Validators**
+
 Always check `utils/FormValidators.ts` before creating new validation logic. Reuse existing validators for consistency.
 
 ### 5. **Validation Mode Selection**
+
 - **`"onBlur"`**: Recommended for most forms validates when user leaves field
 - **`"onChange"`**: Use sparingly can be intrusive but useful for real-time feedback
 - **`"onSubmit"`**: Validates only on submit use for simple forms
 
 ### 6. **Error Message Clarity**
+
 Write user-friendly error messages that explain what's wrong and how to fix it:
--  "SSN must be exactly 9 digits"
--  "Badge Number must be 7 digits or less"
+
+- "SSN must be exactly 9 digits"
+- "Badge Number must be 7 digits or less"
 - L "Invalid input"
 
 ### 7. **Type Safety**
+
 Define TypeScript interfaces for form data that match your schema shape:
 
 ```typescript
@@ -532,11 +573,12 @@ const schema = yup.object().shape({
 });
 
 useForm<SearchFormData>({
-  resolver: yupResolver(schema)
+  resolver: yupResolver(schema),
 });
 ```
 
 ### 8. **Transform Data for API**
+
 Separate form state from API request format. Transform data in `onSubmit`:
 
 ```typescript
@@ -545,7 +587,8 @@ const onSubmit = (data: SearchFormData) => {
     badge_number: data.badgeNumber ?? undefined,
     ssn: data.socialSecurity ? Number(data.socialSecurity) : undefined,
     full_name: data.name ?? undefined,
-    member_type_code: data.memberType === "all" ? undefined : Number(data.memberType)
+    member_type_code:
+      data.memberType === "all" ? undefined : Number(data.memberType),
   };
 
   apiCall(apiRequest);
@@ -732,6 +775,7 @@ When writing tests for forms with validation:
 5. **Test reset functionality**: Verify form resets to default state
 
 Example test structure:
+
 ```typescript
 describe("SearchFilter Validation", () => {
   it("should submit with valid data", async () => {

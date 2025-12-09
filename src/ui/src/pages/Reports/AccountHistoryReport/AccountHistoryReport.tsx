@@ -4,7 +4,7 @@ import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-libra
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
-import { AccountHistoryReportApi } from "../../../reduxstore/api/AccountHistoryReportApi";
+import { AdhocApi } from "../../../reduxstore/api/AdhocApi";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 import { AccountHistoryReportRequest } from "../../../types/reports/AccountHistoryReportTypes";
 import MasterInquiryMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/MasterInquiryMemberDetails";
@@ -16,9 +16,8 @@ import AccountHistoryReportTable from "./AccountHistoryReportTable";
 const AccountHistoryReport: React.FC = () => {
   const [filterParams, setFilterParams] = useState<AccountHistoryReportFilterParams | null>(null);
   const [isFormDirty, setIsFormDirty] = useState(false);
-  const [triggerSearch, { data, isFetching }] = AccountHistoryReportApi.useLazyGetAccountHistoryReportQuery();
-  const [downloadPdf, { isLoading: isDownloadingPdf }] =
-    AccountHistoryReportApi.useDownloadAccountHistoryReportPdfMutation();
+  const [triggerSearch, { data, isFetching }] = AdhocApi.useLazyGetAccountHistoryReportQuery();
+  const [downloadPdf, { isLoading: isDownloadingPdf }] = AdhocApi.useDownloadAccountHistoryReportPdfMutation();
 
   // Fetch member details when report data changes
   const profitYear = filterParams?.endDate ? filterParams.endDate.getFullYear() : new Date().getFullYear();

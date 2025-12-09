@@ -211,7 +211,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             <Grid>
               <ReportSummary report={unForfeits} />
             </Grid>
-            <Grid style={{ display: 'flex', gap: 8 }}>
+            <Grid style={{ display: "flex", gap: 8 }}>
               {/* Remove left pane close button, only show expand/collapse */}
               {onToggleExpand && (
                 <IconButton

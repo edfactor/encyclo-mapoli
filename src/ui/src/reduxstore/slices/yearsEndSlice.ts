@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { YearsEndApi } from "reduxstore/api/YearsEndApi";
+import { AdhocApi } from "reduxstore/api/AdhocApi";
 
 import {
   BalanceByAge,
@@ -1054,7 +1054,7 @@ export const yearsEndSlice = createSlice({
     // Your existing matchers
 
     // Add this new matcher for the getBreakdownByStore endpoint
-    builder.addMatcher(YearsEndApi.endpoints.getBreakdownByStore.matchFulfilled, (state, action) => {
+    builder.addMatcher(AdhocApi.endpoints.getBreakdownByStore.matchFulfilled, (state, action) => {
       // Store data in different state variables based on storeManagement parameter
       if (action.meta.arg.originalArgs.storeManagement) {
         state.storeManagementBreakdown = action.payload;

@@ -28,9 +28,11 @@ The Terminated Employee & Beneficiary Report provides profit sharing distributio
 ## Service Architecture
 
 ### Primary Service
+
 **Location:** `Demoulas.ProfitSharing.Services/Reports/TerminatedEmployeeAndBeneficiaryReport/TerminatedEmployeeReportService.cs`
 
 **Dependencies:**
+
 - `TotalService` - Provides balance aggregation
 - `CalendarService` - Provides calendar year boundaries
 - `DemographicReaderService` - Reads employee demographic data
@@ -62,10 +64,12 @@ TerminatedEmployeeReportService (main service)
 ## Data Sources
 
 ### 1. Demographic Data
+
 **Table:** `DEMOGRAPHIC`  
 **Purpose:** Employee master data, termination information
 
 **Key Fields:**
+
 - `BadgeNumber` - Employee identifier
 - `Ssn` - Social Security Number
 - `FirstName`, `LastName` - Employee name
@@ -73,23 +77,27 @@ TerminatedEmployeeReportService (main service)
 - `EmploymentStatusId` - Current status (includes deceased flag)
 
 **Query Filter:**
+
 ```csharp
 var terminated = demographics
-    .Where(d => d.TerminationDate >= request.StartingDate 
+    .Where(d => d.TerminationDate >= request.StartingDate
              && d.TerminationDate <= request.EndingDate)
     .ToList();
 ```
 
 ### 2. Total Vesting Balance
+
 **Table:** `PARTICIPANT_TOTAL_VESTING_BALANCE`  
 **Purpose:** Current profit sharing balance snapshot
 
 **Key Fields:**
+
 - `Ssn` - Employee identifier (join to Demographics)
 - `CurrentBalance` - Current total vesting balance
 - `VestedBalance` - Current vested amount
 
 **Usage:**
+
 ```csharp
 var totalBalance = totalVestingBalances
     .FirstOrDefault(t => t.Ssn == demographic.Ssn);
@@ -97,10 +105,12 @@ var beginningBalance = totalBalance?.CurrentBalance ?? 0m;
 ```
 
 ### 3. Pay Profit Records
+
 **Table:** `PAY_PROFIT`  
 **Purpose:** Temporal profit sharing records (multiple per employee/year)
 
 **Key Fields:**
+
 - `DemographicId` - Links to employee
 - `ProfitYear` - Year of record
 - `ProfitYearAmount` - Balance for that year
@@ -108,10 +118,12 @@ var beginningBalance = totalBalance?.CurrentBalance ?? 0m;
 **Temporal Model:** Employee can have multiple `PayProfit` records for different years
 
 ### 4. Profit Detail Transactions
+
 **Table:** `PROFIT_DETAIL`  
 **Purpose:** Individual profit sharing transactions
 
 **Key Fields:**
+
 - `Ssn` - Employee identifier
 - `ProfitYear` - Transaction year
 - `ProfitCodeId` - Transaction type (0-9)
@@ -121,9 +133,10 @@ var beginningBalance = totalBalance?.CurrentBalance ?? 0m;
 - `Forfeiture` - Forfeiture/distribution amount (overloaded!)
 
 **Transaction Year Filter:**
+
 ```csharp
 var transactions = profitDetails
-    .Where(pd => pd.Ssn == demographic.Ssn 
+    .Where(pd => pd.Ssn == demographic.Ssn
               && pd.ProfitYear == reportYear)
     .ToList();
 ```
@@ -137,7 +150,7 @@ var transactions = profitDetails
 ```
 1. Load Terminated Employees
    ↓ Filter by termination date range
-   
+
 2. For Each Employee:
    ├─→ Load Total Vesting Balance
    │   └─→ Extract BeginningBalance
@@ -176,16 +189,18 @@ var transactions = profitDetails
 ### Detailed Calculation Formulas
 
 #### Beginning Balance
+
 ```csharp
 var totalBalance = await _totalService.GetTotalVestingBalanceByBadgeAsync(
     badgeNumber, cancellationToken);
-    
+
 decimal beginningBalance = totalBalance?.CurrentBalance ?? 0m;
 ```
 
 **Source:** `PARTICIPANT_TOTAL_VESTING_BALANCE.CurrentBalance`
 
 #### Years in Profit Sharing
+
 ```csharp
 var yearsInPs = transactions
     .Where(t => t.ProfitYear == profitYear)
@@ -195,6 +210,7 @@ var yearsInPs = transactions
 **Source:** Aggregated from `PROFIT_DETAIL.YEARS_OF_SERVICE_CREDIT`
 
 #### Transaction Aggregation
+
 ```csharp
 // Contributions (Type 6)
 var contributions = transactions
@@ -215,7 +231,7 @@ var forfeitures = transactions
 var beneDebit = transactions
     .Where(t => t.ProfitCodeId == 5)
     .Sum(t => t.Forfeiture ?? 0m);  // Debit from employee
-    
+
 var beneCredit = transactions
     .Where(t => t.ProfitCodeId == 6)
     .Sum(t => t.Contribution ?? 0m);  // Credit to beneficiary
@@ -224,15 +240,17 @@ decimal beneficiaryAllocation = beneCredit - beneDebit;
 ```
 
 #### Ending Balance
+
 ```csharp
-decimal endingBalance = beginningBalance 
-                      + contributions 
-                      - distributions 
-                      - forfeitures 
+decimal endingBalance = beginningBalance
+                      + contributions
+                      - distributions
+                      - forfeitures
                       + beneficiaryAllocation;
 ```
 
 #### Vesting Percentage
+
 ```csharp
 decimal vestedPercent = CalculateVestingPercent(yearsInPs, endingBalance);
 
@@ -241,10 +259,10 @@ private decimal CalculateVestingPercent(int years, decimal balance)
     // Special cases
     if (balance == 0) return 0m;
     if (years > 2) return 1.0m;  // 100% vested after 2 years
-    
+
     // Old schedule (< 2 years): [0, 0, 20, 40, 60, 80, 100]
     // New schedule (= 2 years): [0, 20, 40, 60, 80, 100]
-    
+
     if (years < 2)
     {
         int[] oldSchedule = { 0, 0, 20, 40, 60, 80, 100 };
@@ -259,6 +277,7 @@ private decimal CalculateVestingPercent(int years, decimal balance)
 ```
 
 #### Vested Balance
+
 ```csharp
 decimal vestedBalance = endingBalance * vestedPercent;
 ```
@@ -271,16 +290,16 @@ decimal vestedBalance = endingBalance * vestedPercent;
 
 The `PROFIT_DETAIL` table uses a `PROFIT_CODE_ID` field to classify transactions. **Critical:** The entity property mapping is counter-intuitive!
 
-| Type | Description | Properties Used | Logic |
-|------|-------------|-----------------|-------|
-| 0 | Combined forfeit/contribution/earnings | `Forfeiture + Contribution + Earnings` | Sum all three properties |
-| 1 | Standard distribution | `Forfeiture` | Distribution amount stored in Forfeiture! |
-| 2 | Forfeiture | `Forfeiture` | Actual forfeiture amount |
-| 3 | Hardship distribution | `Forfeiture` | Distribution amount stored in Forfeiture! |
-| 5 | Beneficiary allocation debit | `Forfeiture` | Debit amount stored in Forfeiture! |
-| 6 | Beneficiary allocation credit | `Contribution` | Credit amount |
-| 8 | Investment earnings | `Earnings` | Earnings amount |
-| 9 | Distribution (alternative) | `Forfeiture` | Distribution amount stored in Forfeiture! |
+| Type | Description                            | Properties Used                        | Logic                                     |
+| ---- | -------------------------------------- | -------------------------------------- | ----------------------------------------- |
+| 0    | Combined forfeit/contribution/earnings | `Forfeiture + Contribution + Earnings` | Sum all three properties                  |
+| 1    | Standard distribution                  | `Forfeiture`                           | Distribution amount stored in Forfeiture! |
+| 2    | Forfeiture                             | `Forfeiture`                           | Actual forfeiture amount                  |
+| 3    | Hardship distribution                  | `Forfeiture`                           | Distribution amount stored in Forfeiture! |
+| 5    | Beneficiary allocation debit           | `Forfeiture`                           | Debit amount stored in Forfeiture!        |
+| 6    | Beneficiary allocation credit          | `Contribution`                         | Credit amount                             |
+| 8    | Investment earnings                    | `Earnings`                             | Earnings amount                           |
+| 9    | Distribution (alternative)             | `Forfeiture`                           | Distribution amount stored in Forfeiture! |
 
 ### Important: Forfeiture Field Overloading
 
@@ -315,6 +334,7 @@ Profit sharing balances vest (become owned by employee) over time based on years
 ### Three Vesting Scenarios
 
 #### 1. Old Schedule (Years < 2)
+
 **Applies to:** Employees enrolled before change to new schedule
 
 ```
@@ -328,12 +348,14 @@ Year 6+: 100%
 ```
 
 **Implementation:**
+
 ```csharp
 int[] oldSchedule = { 0, 0, 20, 40, 60, 80, 100 };
 int percent = oldSchedule[Math.Min(years, 6)];
 ```
 
 #### 2. New Schedule (Years = 2)
+
 **Applies to:** Employees enrolled in transition year
 
 ```
@@ -346,18 +368,22 @@ Year 5+: 100%
 ```
 
 **Implementation:**
+
 ```csharp
 int[] newSchedule = { 0, 20, 40, 60, 80, 100 };
 int percent = newSchedule[Math.Min(years, 5)];
 ```
 
 #### 3. Immediate 100% Vesting
+
 **Applies to:**
+
 - Employees with > 2 years service credit
 - Deceased employees (ZeroCont = 6 in COBOL logic)
 - Employees at or past retirement age
 
 **Implementation:**
+
 ```csharp
 if (years > 2 || isDeceased || balance == 0)
 {
@@ -368,6 +394,7 @@ if (years > 2 || isDeceased || balance == 0)
 ### Edge Cases
 
 #### Zero Balance
+
 ```csharp
 // Prevent division issues, return 0% for zero balance
 if (endingBalance == 0)
@@ -377,7 +404,9 @@ if (endingBalance == 0)
 ```
 
 #### Beneficiaries
+
 Beneficiaries inherit the vested percentage of the deceased employee:
+
 ```csharp
 // When creating beneficiary record
 beneficiary.VestedPercent = employeeVestedPercent;
@@ -389,11 +418,13 @@ beneficiary.BeneficiaryAllocation = employee.VestedBalance;
 ## Beneficiary Handling
 
 ### Purpose
+
 When an employee dies, their vested profit sharing balance is allocated to beneficiaries.
 
 ### Process
 
 #### 1. Identify Deceased Employees
+
 ```csharp
 const int deceasedStatusId = 6;  // Employment status for deceased
 
@@ -403,62 +434,63 @@ var deceased = demographics
 ```
 
 #### 2. Create Beneficiary Records
+
 ```csharp
 foreach (var demographic in deceased)
 {
     // Find corresponding employee member record
-    var employee = members.FirstOrDefault(m => 
+    var employee = members.FirstOrDefault(m =>
         m.BadgeNumber == demographic.BadgeNumber);
-    
+
     if (employee == null) continue;
-    
+
     // Create beneficiary with special PSN
     var beneficiary = new MemberDto
     {
         // Append "1000" to create beneficiary identifier
         BadgePSn = demographic.BadgeNumber + "1000",
-        
+
         // Keep original badge for reference
         BadgeNumber = demographic.BadgeNumber,
-        
+
         // Copy employee details
         Name = employee.Name,
         Ssn = employee.Ssn,
-        
+
         // Year details with beneficiary allocation
         YearDetails = new[]
         {
             new YearDetailsDto
             {
                 ProfitYear = reportYear,
-                
+
                 // Beneficiary gets the vested amount
                 BeneficiaryAllocation = employee.YearDetails[0].VestedBalance,
-                
+
                 // Copy other relevant fields
                 BeginningBalance = 0m,
                 EndingBalance = employee.YearDetails[0].VestedBalance,
                 VestedBalance = employee.YearDetails[0].VestedBalance,
                 VestedPercent = 1.0m,  // 100% vested for beneficiaries
-                
+
                 // Metadata
                 DateTerm = demographic.TerminationDate,
                 Age = CalculateAge(demographic.BirthDate, reportDate)
             }
         }
     };
-    
+
     members.Add(beneficiary);
 }
 ```
 
 #### 3. Badge PSN Suffix Convention
 
-| Suffix | Meaning | Example |
-|--------|---------|---------|
-| (none) | Regular employee | `705824` |
-| `1000` | Primary beneficiary | `7058241000` |
-| `100` | Alternate beneficiary format | `706678100` |
+| Suffix | Meaning                      | Example      |
+| ------ | ---------------------------- | ------------ |
+| (none) | Regular employee             | `705824`     |
+| `1000` | Primary beneficiary          | `7058241000` |
+| `100`  | Alternate beneficiary format | `706678100`  |
 
 **Format:** `{BadgeNumber}{Suffix}`
 
@@ -475,7 +507,7 @@ private bool IsInteresting(MemberDto member)
 {
     var yearDetails = member.YearDetails?.FirstOrDefault();
     if (yearDetails == null) return false;
-    
+
     return yearDetails.BeginningBalance != 0
         || yearDetails.BeneficiaryAllocation != 0
         || yearDetails.DistributionAmount != 0
@@ -484,9 +516,10 @@ private bool IsInteresting(MemberDto member)
 ```
 
 **Logic:** Include employee if ANY of these is non-zero:
+
 - Beginning balance
 - Beneficiary allocation
-- Distribution amount  
+- Distribution amount
 - Forfeiture amount
 
 **Excludes:** Employees with all zeros (no activity)
@@ -522,6 +555,7 @@ public class TerminatedEmployeeAndBeneficiaryRequest
 ```
 
 **Example Request:**
+
 ```json
 {
   "startingDate": "2025-01-01",
@@ -590,6 +624,7 @@ var sorted = members
 ```
 
 **Pagination:**
+
 ```csharp
 var pageResults = sorted
     .Skip((request.Page - 1) * request.PageSize)
@@ -604,7 +639,7 @@ var pageResults = sorted
 ### Example 1: Basic Service Call
 
 ```csharp
-public async Task<PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>> 
+public async Task<PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>>
     GenerateReport(CancellationToken ct)
 {
     var request = new TerminatedEmployeeAndBeneficiaryRequest
@@ -614,9 +649,9 @@ public async Task<PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataRespo
         Page = 1,
         PageSize = 50
     };
-    
+
     var result = await _reportService.GetReportAsync(request, ct);
-    
+
     return result;
 }
 ```
@@ -630,7 +665,7 @@ foreach (var member in response.Results)
 {
     Console.WriteLine($"Badge: {member.BadgePSn}");
     Console.WriteLine($"Name: {member.Name}");
-    
+
     var yearDetail = member.YearDetails[0];
     Console.WriteLine($"Beginning: ${yearDetail.BeginningBalance:N2}");
     Console.WriteLine($"Ending: ${yearDetail.EndingBalance:N2}");
@@ -677,6 +712,7 @@ foreach (var beneficiary in beneficiaries)
 ### Unit Testing Strategy
 
 #### 1. Transaction Processing Tests
+
 ```csharp
 [Theory]
 [InlineData(1, 1000.00)] // Distribution
@@ -691,16 +727,17 @@ public async Task ProcessTransaction_Type_CalculatesCorrectly(
         ProfitCodeId = typeCode,
         // Set appropriate property based on type
     };
-    
+
     // Act
     var result = ProcessTransaction(transaction);
-    
+
     // Assert
     result.Should().Be(amount);
 }
 ```
 
 #### 2. Vesting Calculation Tests
+
 ```csharp
 [Theory]
 [InlineData(0, 0.0)]    // 0 years = 0%
@@ -713,13 +750,14 @@ public void CalculateVestingPercent_ReturnsCorrectSchedule(
 {
     // Act
     var result = CalculateVestingPercent(years, balance: 1000m);
-    
+
     // Assert
     result.Should().Be(expected);
 }
 ```
 
 #### 3. IsInteresting Filter Tests
+
 ```csharp
 [Fact]
 public void IsInteresting_AllZeros_ReturnsFalse()
@@ -738,10 +776,10 @@ public void IsInteresting_AllZeros_ReturnsFalse()
             }
         }
     };
-    
+
     // Act
     var result = IsInteresting(member);
-    
+
     // Assert
     result.Should().BeFalse();
 }
@@ -750,6 +788,7 @@ public void IsInteresting_AllZeros_ReturnsFalse()
 ### Integration Testing Strategy
 
 #### 1. End-to-End Report Generation
+
 ```csharp
 [Fact]
 public async Task GetReportAsync_ValidRequest_ReturnsData()
@@ -762,10 +801,10 @@ public async Task GetReportAsync_ValidRequest_ReturnsData()
         Page = 1,
         PageSize = 50
     };
-    
+
     // Act
     var response = await _service.GetReportAsync(request, ct);
-    
+
     // Assert
     response.Should().NotBeNull();
     response.Results.Should().NotBeEmpty();
@@ -775,19 +814,20 @@ public async Task GetReportAsync_ValidRequest_ReturnsData()
 ```
 
 #### 2. Beneficiary Processing
+
 ```csharp
 [Fact]
 public async Task GetReportAsync_DeceasedEmployee_CreatesBeneficiary()
 {
     // Arrange - requires test data with deceased employee
-    
+
     // Act
     var response = await _service.GetReportAsync(request, ct);
-    
+
     // Assert
     var beneficiary = response.Results
         .FirstOrDefault(m => m.BadgePSn.EndsWith("1000"));
-        
+
     beneficiary.Should().NotBeNull();
     beneficiary.BeneficiaryAllocation.Should().BeGreaterThan(0);
 }
@@ -796,6 +836,7 @@ public async Task GetReportAsync_DeceasedEmployee_CreatesBeneficiary()
 ### Test Data Requirements
 
 **Minimum Test Data Set:**
+
 - At least 1 employee terminated in report period
 - At least 1 employee with transactions (all types)
 - At least 1 deceased employee (for beneficiary testing)
@@ -809,6 +850,7 @@ public async Task GetReportAsync_DeceasedEmployee_CreatesBeneficiary()
 ### Database Queries
 
 **Query Count per Request:**
+
 1. Demographics query (terminated employees)
 2. Total vesting balances (bulk or per-employee)
 3. Pay profit records (per employee or bulk)
@@ -816,6 +858,7 @@ public async Task GetReportAsync_DeceasedEmployee_CreatesBeneficiary()
 5. Deceased employees query (for beneficiaries)
 
 **Optimization Strategies:**
+
 ```csharp
 // Bulk load instead of N+1 queries
 var ssns = demographics.Select(d => d.Ssn).ToList();
@@ -832,6 +875,7 @@ var transactions = await context.ProfitDetails
 ### Memory Considerations
 
 **Large Reports:** If report contains thousands of employees, consider:
+
 - Streaming results instead of loading all at once
 - Processing in batches
 - Implementing proper pagination limits
@@ -849,27 +893,33 @@ request.PageSize = Math.Min(request.PageSize, MaxPageSize);
 ### Common Issues
 
 #### Issue: Missing Employees in Report
+
 **Symptoms:** Expected employee not appearing
 
 **Checklist:**
+
 1. Verify termination date within request date range
 2. Check if filtered by `IsInteresting` (all values zero)
 3. Verify demographic record exists
 4. Check if total vesting balance exists
 
 #### Issue: Incorrect Vested Balance
+
 **Symptoms:** Vested balance calculation seems wrong
 
 **Checklist:**
+
 1. Verify years in profit sharing calculation
 2. Check vesting schedule being applied
 3. Verify ending balance calculation
 4. Check if employee is deceased (affects vesting)
 
 #### Issue: Missing Beneficiaries
+
 **Symptoms:** Deceased employee but no beneficiary record
 
 **Checklist:**
+
 1. Verify `EmploymentStatusId = 6` (deceased)
 2. Check if employee has vested balance > 0
 3. Verify employee passed `IsInteresting` filter
@@ -888,31 +938,32 @@ request.PageSize = Math.Min(request.PageSize, MaxPageSize);
 
 ## Glossary
 
-| Term | Definition |
-|------|------------|
-| **Badge PSN** | Badge number with optional suffix (1000 for beneficiaries) |
-| **Vesting** | Process of employee earning ownership of profit sharing balance over time |
-| **IsInteresting** | Filter to exclude employees with no reportable activity |
-| **Temporal Model** | Data model with multiple records per entity over time |
-| **Type Code** | Transaction classification in ProfitDetail (0-9) |
-| **Forfeiture** | Loss of non-vested balance when employee terminates |
-| **Beginning Balance** | Starting balance at beginning of report year |
-| **Ending Balance** | Calculated balance at end of report year |
-| **Vested Balance** | Portion of ending balance that employee owns |
+| Term                  | Definition                                                                |
+| --------------------- | ------------------------------------------------------------------------- |
+| **Badge PSN**         | Badge number with optional suffix (1000 for beneficiaries)                |
+| **Vesting**           | Process of employee earning ownership of profit sharing balance over time |
+| **IsInteresting**     | Filter to exclude employees with no reportable activity                   |
+| **Temporal Model**    | Data model with multiple records per entity over time                     |
+| **Type Code**         | Transaction classification in ProfitDetail (0-9)                          |
+| **Forfeiture**        | Loss of non-vested balance when employee terminates                       |
+| **Beginning Balance** | Starting balance at beginning of report year                              |
+| **Ending Balance**    | Calculated balance at end of report year                                  |
+| **Vested Balance**    | Portion of ending balance that employee owns                              |
 
 ---
 
 ## Change History
 
-| Date | Version | Changes | Author |
-|------|---------|---------|--------|
-| 2025-10-01 | 1.0 | Initial developer guide | System |
+| Date       | Version | Changes                 | Author |
+| ---------- | ------- | ----------------------- | ------ |
+| 2025-10-01 | 1.0     | Initial developer guide | System |
 
 ---
 
 ## Support
 
 For questions or issues with this implementation:
+
 1. Review related documentation (see above)
 2. Check test suite for examples
 3. Consult with senior developer or architect

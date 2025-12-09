@@ -75,15 +75,15 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   const { beneficiaryKinds } = useBeneficiaryKinds();
 
   // Check if employee already has a primary beneficiary
-  const hasPrimaryBeneficiary = existingBeneficiaries?.some(b => b.kindId+'' === 'P') || false;
-  
+  const hasPrimaryBeneficiary = existingBeneficiaries?.some((b) => b.kindId + "" === "P") || false;
+
   // Filter beneficiary kinds based on existing beneficiaries
   // If editing an existing beneficiary, allow all kinds
   // If creating new and already has primary, only show secondary
-  const availableBeneficiaryKinds = selectedBeneficiary 
+  const availableBeneficiaryKinds = selectedBeneficiary
     ? beneficiaryKinds // When editing, allow all kinds (user can edit existing primary)
-    : hasPrimaryBeneficiary 
-      ? beneficiaryKinds.filter(kind => kind.id !== 'P') // When adding new and has primary, exclude primary
+    : hasPrimaryBeneficiary
+      ? beneficiaryKinds.filter((kind) => kind.id !== "P") // When adding new and has primary, exclude primary
       : beneficiaryKinds; // When adding new and no primary exists, allow all
 
   const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
@@ -445,12 +445,11 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             <Grid size={{ md: 5, xs: 12 }}>
               <FormLabel>Beneficiary Kind</FormLabel>
               {!selectedBeneficiary && hasPrimaryBeneficiary && (
-                <Typography 
-                  variant="caption" 
-                  color="text.secondary" 
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
                   display="block"
-                  sx={{ mb: 1 }}
-                >
+                  sx={{ mb: 1 }}>
                   Primary beneficiary already exists. Only Secondary beneficiaries can be added.
                 </Typography>
               )}

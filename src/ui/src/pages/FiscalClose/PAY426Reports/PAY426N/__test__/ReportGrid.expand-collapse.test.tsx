@@ -108,7 +108,7 @@ describe("ReportGrid - Expand/Collapse Functionality", () => {
   describe("Handler Invocation", () => {
     it("should call onToggleExpand when button clicked", () => {
       const mockHandler = vi.fn();
-      
+
       // Simulate button click
       mockHandler();
 
@@ -117,7 +117,7 @@ describe("ReportGrid - Expand/Collapse Functionality", () => {
 
     it("should toggle state on multiple clicks", () => {
       const mockHandler = vi.fn();
-      
+
       // Simulate multiple clicks
       mockHandler();
       mockHandler();
@@ -169,7 +169,7 @@ describe("ReportGrid - Expand/Collapse Functionality", () => {
 
     it("should notify parent on toggle", () => {
       const mockParentHandler = vi.fn();
-      
+
       // Child calls parent handler
       mockParentHandler();
 

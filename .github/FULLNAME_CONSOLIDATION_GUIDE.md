@@ -1,6 +1,7 @@
 # FullName Consolidation Guide
 
 ## Overview
+
 This document establishes the standard pattern for handling employee/beneficiary name fields across the Profit Sharing application. All name information must be consolidated into a backend-provided `fullName` property formatted consistently with middle initials.
 
 ## ✅ Correct Pattern
@@ -8,6 +9,7 @@ This document establishes the standard pattern for handling employee/beneficiary
 ### Backend (C#)
 
 **1. DTO Response Definition**
+
 ```csharp
 public sealed record MyResponse
 {
@@ -17,16 +19,19 @@ public sealed record MyResponse
 ```
 
 **2. Service Mapping (Query Results)**
+
 - Fetch individual name parts from the database: `LastName`, `FirstName`, `MiddleName`
 - Compute FullName using the helper method:
+
 ```csharp
 FullName = DtoCommonExtensions.ComputeFullNameWithInitial(
-    lastName, 
-    firstName, 
+    lastName,
+    firstName,
     middleName)
 ```
 
 **3. Format Specification**
+
 - Format: `"LastName, FirstName M"` (with middle initial only)
 - Format: `"LastName, FirstName"` (without middle name)
 - Helper method: `DtoCommonExtensions.ComputeFullNameWithInitial(lastName, firstName, middleName?)`
@@ -34,13 +39,15 @@ FullName = DtoCommonExtensions.ComputeFullNameWithInitial(
 ### Frontend (TypeScript)
 
 **1. DTO Interface Definition**
+
 ```typescript
 export interface MyResponseDto {
-  fullName: string;  // ← Always use fullName (not name)
+  fullName: string; // ← Always use fullName (not name)
 }
 ```
 
 **2. Component Usage**
+
 ```typescript
 // ✅ CORRECT: Use backend-provided fullName
 <span>{person.fullName}</span>
@@ -64,6 +71,7 @@ When adding a new endpoint that includes person names:
 ## 🔍 Search Commands for Auditing
 
 ### Find remaining stragglers in backend:
+
 ```powershell
 # Search for properties named "Name" in response DTOs (excluding lookup types)
 grep -r "public string Name\b" src/services/src/Demoulas.ProfitSharing.Common/Contracts/Response --include="*.cs" | grep -v "Kind\|Type\|Frequency\|Status\|Code"
@@ -73,6 +81,7 @@ grep -r "FullName\s*=\s*" src/services/src/Demoulas.ProfitSharing.Services --inc
 ```
 
 ### Find remaining stragglers in frontend:
+
 ```bash
 # Search for .name property access on person objects
 grep -r "\.name\b" src/ui/src --include="*.tsx" --include="*.ts" | grep -v "headerName\|displayName\|path.*Name\|kind\.name\|status.*Name"
@@ -86,6 +95,7 @@ grep -r "\[firstName\|lastName\]\|firstName\s*\+\|lastName\s*\+" src/ui/src --in
 ### ❌ Backend Mistakes
 
 1. **Using stored FullName directly without middle initial**
+
 ```csharp
 // WRONG - database FullName may not have middle initial formatting
 FullName = entity.ContactInfo.FullName
@@ -98,6 +108,7 @@ FullName = DtoCommonExtensions.ComputeFullNameWithInitial(
 ```
 
 2. **Named property "Name" instead of "FullName"**
+
 ```csharp
 // WRONG
 public string Name { get; set; }
@@ -107,6 +118,7 @@ public string FullName { get; set; }
 ```
 
 3. **Forgetting to fetch individual name parts in queries**
+
 ```csharp
 // WRONG - FullName field only
 select new { FullName = e.ContactInfo.FullName }
@@ -122,6 +134,7 @@ select new {
 ### ❌ Frontend Mistakes
 
 1. **Using .name property on objects**
+
 ```typescript
 // WRONG
 <span>{person.name}</span>
@@ -131,6 +144,7 @@ select new {
 ```
 
 2. **Manual concatenation of firstName/lastName**
+
 ```typescript
 // WRONG
 const displayName = `${person.firstName} ${person.lastName}`;
@@ -140,12 +154,13 @@ const displayName = person.fullName;
 ```
 
 3. **Grid columns with wrong field mapping**
+
 ```typescript
 // WRONG - field defaults to "employeeName"
-createNameColumn({})
+createNameColumn({});
 
 // CORRECT - explicitly map to fullName
-createNameColumn({ field: "fullName" })
+createNameColumn({ field: "fullName" });
 ```
 
 ## 📝 Affected Services/Endpoints
@@ -161,16 +176,19 @@ These endpoints correctly implement the FullName pattern:
 ## 🛠️ Troubleshooting
 
 ### If names display without middle initials:
+
 1. Check if service is using `ComputeFullNameWithInitial`
 2. Verify query is fetching `MiddleName` field
 3. Check database has MiddleName populated for test records
 
 ### If TypeScript compilation fails:
+
 1. Verify DTO has `fullName` property (not `name`)
 2. Check grid column uses correct field binding: `field: "fullName"`
 3. Ensure all response objects mapped to updated DTO
 
 ### If old pattern appears in new code:
+
 1. Run search commands above to identify location
 2. Refactor to use `DtoCommonExtensions.ComputeFullNameWithInitial`
 3. Update TypeScript DTO to use `fullName`
