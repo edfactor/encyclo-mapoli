@@ -111,8 +111,8 @@ function setupYearsEndApiMocks() {
     };
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockUnmask as any,
     { isLoading: false, isError: false, reset: vi.fn() }
   ]);
