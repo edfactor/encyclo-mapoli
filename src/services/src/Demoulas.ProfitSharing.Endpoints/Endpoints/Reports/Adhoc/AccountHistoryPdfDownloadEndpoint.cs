@@ -15,14 +15,14 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 /// Endpoint for exporting account history reports to PDF format.
 /// Generates a complete PDF document with member account activity by profit year.
 /// </summary>
-public sealed class ExportAccountHistoryReportPdfEndpoint : ProfitSharingEndpoint<AccountHistoryReportRequest, Results<FileStreamHttpResult, ProblemHttpResult>>
+public sealed class AccountHistoryPdfDownloadEndpoint : ProfitSharingEndpoint<AccountHistoryReportRequest, Results<FileStreamHttpResult, ProblemHttpResult>>
 {
     private readonly IAccountHistoryReportService _accountHistoryReportService;
-    private readonly ILogger<ExportAccountHistoryReportPdfEndpoint> _logger;
+    private readonly ILogger<AccountHistoryPdfDownloadEndpoint> _logger;
 
-    public ExportAccountHistoryReportPdfEndpoint(
+    public AccountHistoryPdfDownloadEndpoint(
         IAccountHistoryReportService accountHistoryReportService,
-        ILogger<ExportAccountHistoryReportPdfEndpoint> logger)
+        ILogger<AccountHistoryPdfDownloadEndpoint> logger)
         : base(Navigation.Constants.AccountHistoryReport)
     {
         _accountHistoryReportService = accountHistoryReportService;
