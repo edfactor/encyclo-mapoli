@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Reporting.Reports;
 using Demoulas.ProfitSharing.Services.Extensions;
@@ -28,6 +29,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
     private readonly IAppUser _user;
     private readonly IMasterInquiryService _employeeLookupService;
     private readonly ILogger<AccountHistoryReportService> _logger;
+    private readonly IAuditService _auditService;
 
     public AccountHistoryReportService(
         IProfitSharingDataContextFactory contextFactory,
@@ -35,7 +37,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         TotalService totalService,
         IAppUser user,
         IMasterInquiryService employeeLookupService,
-        ILogger<AccountHistoryReportService> logger)
+        ILogger<AccountHistoryReportService> logger,
+        IAuditService auditService)
     {
         _contextFactory = contextFactory;
         _demographicReaderService = demographicReaderService;
@@ -43,6 +46,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         _user = user;
         _employeeLookupService = employeeLookupService;
         _logger = logger;
+        _auditService = auditService;
     }
 
     public Task<AccountHistoryReportPaginatedResponse> GetAccountHistoryReportAsync(
@@ -451,6 +455,14 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 "Successfully generated PDF account history report for member badge {BadgeNumber}, size: {FileSize} bytes",
                 memberId,
                 pdfStream.Length);
+
+            // Log audit event for PDF download tracking (PS-2284: Ensure audit tracking for Account History download)
+            await _auditService.LogSensitiveDataAccessAsync(
+                operationName: "Account History PDF Download",
+                tableName: "AccountHistory",
+                primaryKey: $"Badge:{memberId}",
+                details: $"Profit Year Range: {reportData.StartDate.Year} - {reportData.EndDate.Year}, Records: {reportData.Response.Total}",
+                cancellationToken);
 
             return pdfStream;
         }
