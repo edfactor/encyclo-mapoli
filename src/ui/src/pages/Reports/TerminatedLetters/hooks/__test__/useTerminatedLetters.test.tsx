@@ -256,18 +256,37 @@ describe("useTerminatedLetters", () => {
     });
 
     it("should set isSearching to true during search", async () => {
+      // Create a promise that we control when to resolve
+      let resolveSearch: ((value: unknown) => void) | undefined;
+      const searchPromise = new Promise((resolve) => {
+        resolveSearch = resolve;
+      });
+
       mockTriggerSearch.mockImplementation(() => {
-        return createMockRTKQueryPromise(createMockTerminatedLettersResponse());
+        const promise = searchPromise.then(() => ({
+          data: createMockTerminatedLettersResponse()
+        }));
+        (promise as unknown as { unwrap: () => Promise<unknown> }).unwrap = () =>
+          searchPromise.then(() => createMockTerminatedLettersResponse());
+        return promise;
       });
 
       const { result } = renderHook(() => useTerminatedLetters());
 
+      // Start the search but don't await it
+      let searchPromiseResult: Promise<boolean>;
       act(() => {
-        result.current.executeSearch("2024-01-01", "2024-12-31");
+        searchPromiseResult = result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      // Initially searching
+      // Check that isSearching is true while search is in progress
       expect(result.current.isSearching).toBe(true);
+
+      // Now resolve the search and wait for completion
+      await act(async () => {
+        resolveSearch!(null);
+        await searchPromiseResult;
+      });
     });
 
     it("should handle search errors", async () => {

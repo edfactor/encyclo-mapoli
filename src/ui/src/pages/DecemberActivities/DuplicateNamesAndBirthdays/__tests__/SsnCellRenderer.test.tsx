@@ -138,8 +138,10 @@ beforeEach(() => {
   setupYearsEndApiMocks();
 });
 
-afterEach(() => {
-  vi.runOnlyPendingTimers();
+afterEach(async () => {
+  await act(async () => {
+    vi.runOnlyPendingTimers();
+  });
   vi.useRealTimers();
 });
 
@@ -279,10 +281,12 @@ describe("SSN Display", () => {
 
       // Act
       const button = getUnmaskButton();
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
-      // Assert - wait for promise to resolve
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Assert
       expect(screen.getByText("700-00-5181")).toBeInTheDocument();
     } finally {
       vi.useFakeTimers();
@@ -309,10 +313,8 @@ describe("Auto-Revert Timer", () => {
 
     // Act - unmask SSN
     const button = getUnmaskButton();
-    fireEvent.click(button);
-
-    // Process microtasks to resolve the promise
     await act(async () => {
+      fireEvent.click(button);
       await vi.runAllTimersAsync();
     });
 
@@ -347,10 +349,8 @@ describe("Auto-Revert Timer", () => {
 
     // Act - unmask SSN
     const button = getUnmaskButton();
-    fireEvent.click(button);
-
-    // Process microtasks to resolve the promise
     await act(async () => {
+      fireEvent.click(button);
       await vi.runAllTimersAsync();
     });
 
@@ -384,10 +384,8 @@ describe("Auto-Revert Timer", () => {
 
     // Act - unmask SSN
     const button = getUnmaskButton();
-    fireEvent.click(button);
-
-    // Process microtasks to resolve the promise
     await act(async () => {
+      fireEvent.click(button);
       await vi.runAllTimersAsync();
     });
 
@@ -435,14 +433,19 @@ describe("Loading States", () => {
 
     // Act - click to unmask
     const button = getUnmaskButton();
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      await vi.runAllTimersAsync();
+    });
 
     // Assert - spinner appears
-    await vi.runAllTimersAsync();
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
 
     // Cleanup
-    resolveUnmask!({ unmaskedSsn: "700-00-5181" });
+    await act(async () => {
+      resolveUnmask!({ unmaskedSsn: "700-00-5181" });
+      await vi.runAllTimersAsync();
+    });
   });
 
   it("PS-2098: Should disable button after unmasking until auto-revert", async () => {
@@ -460,10 +463,12 @@ describe("Loading States", () => {
 
     // Act - unmask SSN
     const button = getUnmaskButton();
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      await vi.runAllTimersAsync();
+    });
 
     // Assert - button is disabled after unmask
-    await vi.runAllTimersAsync();
     expect(button).toBeDisabled();
   });
 });
@@ -493,10 +498,12 @@ describe("Error Handling", () => {
 
     // Act
     const button = getUnmaskButton();
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      await vi.runAllTimersAsync();
+    });
 
     // Assert
-    await vi.runAllTimersAsync();
     expect(screen.getByText(/API Error/i)).toBeInTheDocument();
   });
 
@@ -529,17 +536,21 @@ describe("Error Handling", () => {
 
       // Act - trigger error
       const button = getUnmaskButton();
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
-      // Assert - error shows (wait for async operation)
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Assert - error shows
       expect(screen.getByText(/Test Error/i)).toBeInTheDocument();
 
       // Act - try again successfully
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       // Assert - error is cleared
-      await new Promise((resolve) => setTimeout(resolve, 100));
       expect(screen.queryByText(/Test Error/i)).not.toBeInTheDocument();
     } finally {
       vi.useFakeTimers();
@@ -586,10 +597,12 @@ describe("Accessibility", () => {
 
       // Act - unmask SSN
       const button = getUnmaskButton();
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
-      // Assert - button is disabled after click (wait for async operation)
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Assert - button is disabled after click
       expect(button).toBeDisabled();
     } finally {
       vi.useFakeTimers();
@@ -624,10 +637,10 @@ describe("Component Integration", () => {
       expect(button).toBeInTheDocument();
 
       // Verify demographic ID is used by clicking
-      fireEvent.click(button);
-
-      // Wait for promise to resolve
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       expect(button).toBeDisabled();
     } finally {
@@ -652,12 +665,14 @@ describe("Component Integration", () => {
 
       // Act - Click multiple times rapidly
       const button = getUnmaskButton();
-      fireEvent.click(button);
-      fireEvent.click(button);
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        fireEvent.click(button);
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       // Assert - Button becomes disabled after first click to prevent race conditions
-      await new Promise((resolve) => setTimeout(resolve, 100));
       expect(button).toBeDisabled();
     } finally {
       vi.useFakeTimers();
