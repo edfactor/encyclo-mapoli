@@ -10,14 +10,26 @@ namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
 internal sealed class EmployeeFullSyncJob : IJob
 {
     private readonly IEmployeeSyncService _employeeSyncService;
+    private readonly IProcessWatchdog _watchdog;
 
-    public EmployeeFullSyncJob(IEmployeeSyncService employeeSyncService)
+    public EmployeeFullSyncJob(IEmployeeSyncService employeeSyncService, IProcessWatchdog watchdog)
     {
         _employeeSyncService = employeeSyncService;
+        _watchdog = watchdog;
     }
 
-    public Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context)
     {
-        return _employeeSyncService.ExecuteFullSyncAsync(requestedBy: Constants.SystemAccountName, context.CancellationToken);
+        try
+        {
+            await _employeeSyncService.ExecuteFullSyncAsync(requestedBy: Constants.SystemAccountName, context.CancellationToken).ConfigureAwait(false);
+            _watchdog.RecordSuccessfulCycle();
+            _watchdog.RecordHeartbeat();
+        }
+        catch (Exception ex)
+        {
+            _watchdog.RecordError($"EmployeeFullSyncJob failed: {ex.Message}");
+            throw;
+        }
     }
 }
