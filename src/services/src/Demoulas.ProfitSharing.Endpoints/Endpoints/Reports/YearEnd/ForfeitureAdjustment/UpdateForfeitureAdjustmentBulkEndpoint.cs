@@ -40,7 +40,7 @@ public class UpdateForfeitureAdjustmentBulkEndpoint : ProfitSharingEndpoint<List
             s.Responses[403] = $"Forbidden. Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
             s.Responses[404] = "One or more badge numbers not found";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
     }
 #pragma warning disable AsyncFixer01 // Method does use async/await inside ExecuteWithTelemetry lambda
     public override async Task<Results<NoContent, ProblemHttpResult>> ExecuteAsync(List<ForfeitureAdjustmentUpdateRequest> req, CancellationToken ct)

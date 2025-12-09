@@ -9,7 +9,7 @@ vi.mock("hooks/useFiscalCloseProfitYear", () => ({
 
 const mockUpdateForfeiture = vi.fn();
 
-vi.mock("reduxstore/api/YearsEndApi", () => ({
+vi.mock("reduxstore/api/AdhocApi", () => ({
   useUpdateForfeitureAdjustmentMutation: () => [mockUpdateForfeiture, { isLoading: false }]
 }));
 

@@ -34,7 +34,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const [deleteBeneficiaryId, setDeleteBeneficiaryId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
   const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
-  
+
   // Snackbar state for percentage update feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -149,7 +149,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
         setSnackbarMessage(result.error || "Failed to update percentage");
         setSnackbarSeverity("error");
         setSnackbarOpen(true);
-        
+
         // Restore previous value on validation failure
         if (e.target.value) {
           e.target.value = result.previousValue?.toString() || "";
@@ -270,7 +270,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
             recordCount={relationships.beneficiaryList?.total}
           />
         )}
-      
+
       {/* Snackbar for percentage update feedback */}
       <Snackbar
         open={snackbarOpen}

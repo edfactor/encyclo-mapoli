@@ -32,7 +32,7 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
 
     public override void Configure()
     {
-        Get("adhoc-terminated-employees-report-needing-letter");
+        Get("terminated-employees-report-needing-letter");
         Summary(s =>
         {
             s.Summary = "Adhoc Terminated Employees Report needing a form letter";
@@ -80,7 +80,7 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
                 }
             };
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
 

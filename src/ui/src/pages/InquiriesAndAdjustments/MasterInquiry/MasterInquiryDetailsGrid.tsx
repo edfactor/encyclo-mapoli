@@ -28,7 +28,15 @@ interface MasterInquiryGridProps {
 }
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
-  ({ profitData, isLoading, profitGridPagination, onPaginationChange, onSortChange, isGridExpanded = false, onToggleExpand }) => {
+  ({
+    profitData,
+    isLoading,
+    profitGridPagination,
+    onPaginationChange,
+    onSortChange,
+    isGridExpanded = false,
+    onToggleExpand
+  }) => {
     const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
     const gridMaxHeight = useContentAwareGridHeight({
       rowCount: profitData?.results?.length ?? 0,

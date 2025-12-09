@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
 import EnvironmentUtils from "../utils/environmentUtils";
-import { AccountHistoryReportApi } from "./api/AccountHistoryReportApi";
+import { AdhocApi } from "./api/AdhocApi";
 import { AdjustmentsApi } from "./api/AdjustmentsApi";
 import { AppSupportApi } from "./api/AppSupportApi";
 import { BeneficiariesApi } from "./api/BeneficiariesApi";
@@ -38,6 +38,7 @@ import yearsEndSlice from "./slices/yearsEndSlice";
 const API_INSTANCES = [
   SecurityApi,
   YearsEndApi,
+  AdhocApi,
   ItOperationsApi,
   MilitaryApi,
   InquiryApi,
@@ -50,7 +51,6 @@ const API_INSTANCES = [
   AdjustmentsApi,
   DistributionApi,
   PayServicesApi,
-  AccountHistoryReportApi,
   validationApi
 ] as const;
 
@@ -74,9 +74,7 @@ export const store = configureStore({
     distribution: distributionSlice,
 
     // Dynamically register all API reducers
-    ...Object.fromEntries(
-      API_INSTANCES.map(api => [api.reducerPath, api.reducer])
-    )
+    ...Object.fromEntries(API_INSTANCES.map((api) => [api.reducerPath, api.reducer]))
   },
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,7 +82,7 @@ export const store = configureStore({
     getDefaultMiddleware({ serializableCheck: false })
       .concat(rtkQueryErrorToastMiddleware(true))
       .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
-      .concat(API_INSTANCES.map(api => api.middleware))
+      .concat(API_INSTANCES.map((api) => api.middleware))
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

@@ -61,7 +61,7 @@ describe("PAY426N - Expand/Collapse Functionality", () => {
       const mockDispatch = vi.fn();
       const mockCloseDrawer = vi.fn();
       const mockSetFullscreen = vi.fn();
-      
+
       const { result } = renderHook(() => {
         const [isGridExpanded, setIsGridExpanded] = React.useState(false);
         const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = React.useState(false);
@@ -92,7 +92,7 @@ describe("PAY426N - Expand/Collapse Functionality", () => {
       const mockDispatch = vi.fn();
       const mockSetFullscreen = vi.fn();
       const mockOpenDrawer = vi.fn();
-      
+
       const { result } = renderHook(() => {
         const [isGridExpanded, setIsGridExpanded] = React.useState(true);
         const [wasDrawerOpenBeforeExpand] = React.useState(true);
@@ -122,7 +122,7 @@ describe("PAY426N - Expand/Collapse Functionality", () => {
       const mockDispatch = vi.fn();
       const mockSetFullscreen = vi.fn();
       const mockOpenDrawer = vi.fn();
-      
+
       const { result } = renderHook(() => {
         const [isGridExpanded, setIsGridExpanded] = React.useState(true);
         const [wasDrawerOpenBeforeExpand] = React.useState(false);

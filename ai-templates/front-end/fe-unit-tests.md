@@ -12,7 +12,6 @@ The frontend uses **Vitest** as the test runner with the following companion lib
 - **@testing-library/user-event** - User interaction simulation
 - **jsdom** - DOM implementation for Node.js environment
 
-
 ### Key Configuration Details
 
 - **Environment**: `jsdom` provides browser-like DOM environment
@@ -20,7 +19,6 @@ The frontend uses **Vitest** as the test runner with the following companion lib
 - **Setup File**: `./src/test/setup.ts` runs before each test suite
 - **Coverage**: Generates text and HTML coverage reports
 - **JUnit Output**: Test results exported to `./FE_Tests/unit-test.xml` for CI/CD
-
 
 ## Running Tests
 
@@ -53,6 +51,7 @@ npx vitest src/hooks/useFiscalCalendarYear.test.tsx
 ```
 
 Coverage reports are generated in:
+
 - **Terminal**: Text summary
 - **HTML**: `coverage/index.html` (open in browser for detailed view)
 
@@ -119,7 +118,9 @@ it("should update search results when user enters badge number", async () => {
 // ✅ Accessible and maintainable
 const searchButton = screen.getByRole("button", { name: /search/i });
 const dateInput = screen.getByLabelText("Rehire Begin Date");
-const checkBox = screen.getByRole("checkbox", { name: /exclude zero balance/i });
+const checkBox = screen.getByRole("checkbox", {
+  name: /exclude zero balance/i,
+});
 
 // ❌ Brittle and inaccessible
 const searchButton = screen.getByTestId("date-picker-Rehire Begin Date");
@@ -223,20 +224,23 @@ vi.mock("../../../utils/FormValidators", async () => {
 
   return {
     dateStringValidator: (minYear, maxYear, fieldName) => {
-      return yup.default.string()
+      return yup.default
+        .string()
         .nullable()
         .required(`${fieldName} is required`)
-        .test('valid-date', `${fieldName} must be valid`, function(value) {
+        .test("valid-date", `${fieldName} must be valid`, function (value) {
           if (!value) return false;
-          return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value) ||
-                 /^\d{4}-\d{2}-\d{2}$/.test(value);
+          return (
+            /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value) ||
+            /^\d{4}-\d{2}-\d{2}$/.test(value)
+          );
         });
     },
     mmDDYYFormat: (date) => {
       if (!date) return "";
       // Implementation
       return formattedDate;
-    }
+    },
   };
 });
 ```
@@ -276,6 +280,7 @@ vi.mock("smart-ui-library", () => ({
 ```
 
 **Key Points**:
+
 - Pass through all props your component uses
 - Make mock testable (include data-testid attributes)
 - Keep it simple - no need to replicate full component
@@ -291,19 +296,19 @@ RTK Query hooks are async and need proper promise handling.
 // Step 1: Create mock functions at module scope using vi.hoisted()
 const { mockTriggerSearch, mockTriggerStatus } = vi.hoisted(() => ({
   mockTriggerSearch: vi.fn(),
-  mockTriggerStatus: vi.fn()
+  mockTriggerStatus: vi.fn(),
 }));
 
 // Step 2: Mock the entire module
 vi.mock("../../../reduxstore/api/YearsEndApi", () => ({
   useLazyGetUnForfeitsQuery: vi.fn(() => [
-    mockTriggerSearch,           // The trigger function
-    { isFetching: false }        // The hook state
+    mockTriggerSearch, // The trigger function
+    { isFetching: false }, // The hook state
   ]),
   useLazyGetProfitMasterStatusQuery: vi.fn(() => [
     mockTriggerStatus,
-    { isFetching: false }
-  ])
+    { isFetching: false },
+  ]),
 }));
 
 // Step 3: Set up return values in beforeEach
@@ -313,20 +318,21 @@ beforeEach(() => {
   mockTriggerSearch.mockReturnValue({
     unwrap: vi.fn().mockResolvedValue({
       results: mockData,
-      total: 1
-    })
+      total: 1,
+    }),
   });
 
   mockTriggerStatus.mockReturnValue({
     unwrap: vi.fn().mockResolvedValue({
       updatedBy: "John Doe",
-      updatedTime: "2024-01-15"
-    })
+      updatedTime: "2024-01-15",
+    }),
   });
 });
 ```
 
 **Critical Points**:
+
 - Use `vi.hoisted()` before `vi.mock()` - this allows using mock variables in the mock definition
 - RTK Query lazy hooks return `[triggerFunction, stateObject]` - replicate this structure
 - Return value must have `.unwrap()` method that returns a Promise
@@ -366,11 +372,11 @@ import { createMockStoreAndWrapper } from "../../../../test";
 
 const { wrapper } = createMockStoreAndWrapper({
   yearsEnd: {
-    selectedProfitYear: 2024
+    selectedProfitYear: 2024,
   },
   security: {
-    token: "test-token"
-  }
+    token: "test-token",
+  },
 });
 
 // Option 2: Manual configuration (if helper not available)
@@ -379,13 +385,13 @@ function createTestStore(preloadedState) {
     reducer: {
       security: securityReducer,
       yearsEnd: yearsEndReducer,
-      distribution: distributionReducer
+      distribution: distributionReducer,
     },
     preloadedState: {
       security: { token: "test-token", ...preloadedState?.security },
       yearsEnd: { selectedProfitYear: 2024, ...preloadedState?.yearsEnd },
-      distribution: preloadedState?.distribution || {}
-    }
+      distribution: preloadedState?.distribution || {},
+    },
   });
 }
 ```
@@ -649,7 +655,7 @@ Use `renderHook` with proper Redux setup.
 ```typescript
 it("should return initial state", () => {
   const { wrapper } = createMockStoreAndWrapper({
-    yearsEnd: { selectedProfitYear: 2024 }
+    yearsEnd: { selectedProfitYear: 2024 },
   });
 
   const { result } = renderHook(() => useUnForfeitState(), { wrapper });
@@ -684,11 +690,11 @@ it("should update state when setInitialSearchLoaded called", () => {
 ```typescript
 it("should fetch data on mount", async () => {
   const mockTrigger = vi.fn().mockReturnValue({
-    unwrap: vi.fn().mockResolvedValue(mockData)
+    unwrap: vi.fn().mockResolvedValue(mockData),
   });
 
   vi.mock("../api", () => ({
-    useLazyFetchQuery: vi.fn(() => [mockTrigger, { isFetching: false }])
+    useLazyFetchQuery: vi.fn(() => [mockTrigger, { isFetching: false }]),
   }));
 
   const { wrapper } = createMockStoreAndWrapper({});
@@ -727,6 +733,7 @@ it("should memoize expensive calculation", () => {
 ### Pitfall 1: Not Using Redux Provider
 
 **❌ FAILS**:
+
 ```typescript
 it("should work", () => {
   render(<MyComponent />); // No Redux provider!
@@ -735,6 +742,7 @@ it("should work", () => {
 ```
 
 **✅ WORKS**:
+
 ```typescript
 it("should work", () => {
   const { wrapper } = createMockStoreAndWrapper({});
@@ -746,15 +754,19 @@ it("should work", () => {
 ### Pitfall 2: Brittle Element Selectors
 
 **❌ BRITTLE**:
+
 ```typescript
 it("should show data", () => {
   // These break if internal structure changes
-  const element = document.querySelector(".date-picker-container .MuiInput-root");
+  const element = document.querySelector(
+    ".date-picker-container .MuiInput-root",
+  );
   const button = document.querySelectorAll("button")[3];
 });
 ```
 
 **✅ ROBUST**:
+
 ```typescript
 it("should show data", () => {
   // These are resilient to changes
@@ -766,6 +778,7 @@ it("should show data", () => {
 ### Pitfall 3: Testing Implementation Instead of Behavior
 
 **❌ IMPLEMENTATION**:
+
 ```typescript
 it("should set state", () => {
   const { result } = renderHook(() => useMyHook());
@@ -777,6 +790,7 @@ it("should set state", () => {
 ```
 
 **✅ BEHAVIOR**:
+
 ```typescript
 it("should show loading state", () => {
   render(<MyComponent />);
@@ -790,6 +804,7 @@ it("should show loading state", () => {
 ### Pitfall 4: Async Code Without Proper Waiting
 
 **❌ FAILS**:
+
 ```typescript
 it("should load data", async () => {
   render(<MyComponent />);
@@ -802,6 +817,7 @@ it("should load data", async () => {
 ```
 
 **✅ WORKS**:
+
 ```typescript
 it("should load data", async () => {
   render(<MyComponent />);
@@ -818,6 +834,7 @@ it("should load data", async () => {
 ### Pitfall 5: Mock Not Set Up Correctly
 
 **❌ DOESN'T WORK** (vi.mock must be at module level):
+
 ```typescript
 it("should use mock", () => {
   // ❌ Too late - mocks must be defined before imports
@@ -828,10 +845,11 @@ it("should use mock", () => {
 ```
 
 **✅ WORKS**:
+
 ```typescript
 // ✅ At module level, before any imports
 vi.mock("../utils", () => ({
-  someFunction: vi.fn()
+  someFunction: vi.fn(),
 }));
 
 // Then import and test
@@ -845,6 +863,7 @@ it("should use mock", () => {
 ### Pitfall 6: Not Clearing Mocks Between Tests
 
 **❌ TEST POLLUTION**:
+
 ```typescript
 describe("Tests", () => {
   const mockFn = vi.fn();
@@ -861,6 +880,7 @@ describe("Tests", () => {
 ```
 
 **✅ CLEAN TESTS**:
+
 ```typescript
 describe("Tests", () => {
   const mockFn = vi.fn();
@@ -1016,11 +1036,11 @@ From `useProfitShareEditUpdate.test.tsx`:
 
 ```typescript
 const { mockApplyMaster } = vi.hoisted(() => ({
-  mockApplyMaster: vi.fn()
+  mockApplyMaster: vi.fn(),
 }));
 
 vi.mock("../../../reduxstore/api/YearsEndApi", () => ({
-  useGetMasterApplyMutation: vi.fn(() => [mockApplyMaster])
+  useGetMasterApplyMutation: vi.fn(() => [mockApplyMaster]),
 }));
 
 beforeEach(() => {
@@ -1028,8 +1048,8 @@ beforeEach(() => {
     unwrap: vi.fn().mockResolvedValue({
       employeesEffected: 100,
       beneficiariesEffected: 50,
-      etvasEffected: 150
-    })
+      etvasEffected: 150,
+    }),
   });
 });
 
@@ -1085,20 +1105,16 @@ it("should not fetch when token is missing", () => {
     security: { token: null, user: null },
     yearsEnd: {
       selectedProfitYearForDecemberActivities: 2024,
-      yearsEndData: null
-    }
+      yearsEndData: null,
+    },
   });
 
-  const { result } = renderHook(
-    () => useDuplicateNamesAndBirthdays(),
-    { wrapper }
-  );
+  const { result } = renderHook(() => useDuplicateNamesAndBirthdays(), {
+    wrapper,
+  });
 
   expect(result.current.isSearching).toBe(false);
 });
 ```
 
 ---
-
-
-

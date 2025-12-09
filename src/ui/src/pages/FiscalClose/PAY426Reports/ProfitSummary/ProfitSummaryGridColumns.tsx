@@ -18,7 +18,7 @@ const getPresetNumberForLineItem = (lineItemPrefix: string): string | null => {
     "7": "7",
     "8": "8",
     "9": "9",
-    N: "10", 
+    N: "10",
     "11": "11",
     "12": "12"
   };

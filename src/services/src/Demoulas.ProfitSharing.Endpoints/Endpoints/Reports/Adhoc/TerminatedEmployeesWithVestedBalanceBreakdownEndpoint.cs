@@ -35,7 +35,7 @@ public sealed class TerminatedEmployeesWithVestedBalanceBreakdownEndpoint : Endp
             s.Summary = "Breakdown terminated managers and associates for all stores who have a balance";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
 

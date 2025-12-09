@@ -1,6 +1,7 @@
 ---
 applyTo: "src/ui/src/pages/DecemberActivities/Termination/**/*.*"
 ---
+
 # Termination Feature - Technical Summary
 
 ## Overview
@@ -79,9 +80,7 @@ const { state, actions } = useTerminationState();
 **Layout Structure**:
 
 ```jsx
-<Page
-  label="TERMINATIONS"
-  actionNode={<StatusDropdownActionNode />}>
+<Page label="TERMINATIONS" actionNode={<StatusDropdownActionNode />}>
   <ApiMessageAlert commonKey="TerminationSave" />
   <DSMAccordion title="Filter">
     <TerminationSearchFilter
@@ -122,7 +121,10 @@ useUnsavedChangesGuard(state.hasUnsavedChanges);
 useEffect(() => {
   const handleMessageEvent = (event: Event) => {
     const customEvent = event as CustomEvent;
-    if (customEvent.detail?.key === "TerminationSave" && customEvent.detail?.message?.type === "error") {
+    if (
+      customEvent.detail?.key === "TerminationSave" &&
+      customEvent.detail?.message?.type === "error"
+    ) {
       scrollToTop(); // Smooth scroll to top to show error message
     }
   };
@@ -157,7 +159,7 @@ yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
+    "Ending date must be the same or after the beginning date",
   ).required(),
   forfeitureStatus: yup.string().required(),
   pagination: yup
@@ -165,7 +167,7 @@ yup.object().shape({
       skip: yup.number().required(),
       take: yup.number().required(),
       sortBy: yup.string().required(),
-      isSortDescending: yup.boolean().required()
+      isSortDescending: yup.boolean().required(),
     })
     .required(),
   profitYear: profitYearValidator(2015, 2099),
@@ -180,9 +182,10 @@ yup.object().shape({
     .nullable()
     .when("vestedBalanceValue", {
       is: (val: number | null | undefined) => val !== null && val !== undefined,
-      then: (schema) => schema.required("Operator is required when Vested Balance is provided"),
-      otherwise: (schema) => schema.nullable()
-    })
+      then: (schema) =>
+        schema.required("Operator is required when Vested Balance is provided"),
+      otherwise: (schema) => schema.nullable(),
+    }),
 });
 ```
 
@@ -299,7 +302,7 @@ const {
   onGridReady,
   paginationHandlers,
   gridRef,
-  gridContext
+  gridContext,
 } = useTerminationGrid({
   initialSearchLoaded,
   setInitialSearchLoaded,
@@ -312,7 +315,7 @@ const {
   onArchiveHandled,
   onErrorOccurred,
   onLoadingChange,
-  isReadOnly
+  isReadOnly,
 });
 ```
 
@@ -380,9 +383,9 @@ const detailColumns = useMemo(
       selectedProfitYear,
       handleSave,
       handleBulkSave,
-      isReadOnly
+      isReadOnly,
     ),
-  [selectionState, selectedProfitYear, handleSave, handleBulkSave, isReadOnly]
+  [selectionState, selectedProfitYear, handleSave, handleBulkSave, isReadOnly],
 );
 
 const columnDefs = useMemo(() => {
@@ -432,11 +435,11 @@ export const GetTerminationColumns = (): ColDef[] => {
     createBadgeColumn({
       headerName: "PSN",
       field: "psn",
-      psnSuffix: false // PSN already combined with suffix
+      psnSuffix: false, // PSN already combined with suffix
     }),
     createNameColumn({
-      field: "name"
-    })
+      field: "name",
+    }),
   ];
 };
 ```
@@ -628,7 +631,10 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (params) => {
 interface HeaderComponentProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
   removeRowFromSelectedRows: (id: number) => void;
-  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>;
+  onBulkSave?: (
+    requests: ForfeitureAdjustmentUpdateRequest[],
+    names: string[],
+  ) => Promise<void>;
   isBulkSaving?: boolean;
   isReadOnly?: boolean;
 }
@@ -678,7 +684,10 @@ type TerminationAction =
   | { type: "SET_INITIAL_SEARCH_LOADED"; payload: boolean }
   | { type: "SET_UNSAVED_CHANGES"; payload: boolean }
   | { type: "TOGGLE_RESET_PAGE_FLAG" }
-  | { type: "SET_STATUS_CHANGE"; payload: { status: string; statusName?: string } }
+  | {
+      type: "SET_STATUS_CHANGE";
+      payload: { status: string; statusName?: string };
+    }
   | { type: "SET_ARCHIVE_HANDLED" }
   | { type: "RESET_STATE" };
 ```
@@ -737,16 +746,21 @@ return {
     handleSearch: (params) => {
       const searchParamsWithArchive = {
         ...params,
-        ...(state.archiveMode && { archive: true })
+        ...(state.archiveMode && { archive: true }),
       };
       dispatch({ type: "SET_SEARCH_PARAMS", payload: searchParamsWithArchive });
     },
-    handleUnsavedChanges: (hasChanges) => dispatch({ type: "SET_UNSAVED_CHANGES", payload: hasChanges }),
+    handleUnsavedChanges: (hasChanges) =>
+      dispatch({ type: "SET_UNSAVED_CHANGES", payload: hasChanges }),
     handleStatusChange: (newStatus, statusName) =>
-      dispatch({ type: "SET_STATUS_CHANGE", payload: { status: newStatus, statusName } }),
+      dispatch({
+        type: "SET_STATUS_CHANGE",
+        payload: { status: newStatus, statusName },
+      }),
     handleArchiveHandled: () => dispatch({ type: "SET_ARCHIVE_HANDLED" }),
-    setInitialSearchLoaded: (loaded) => dispatch({ type: "SET_INITIAL_SEARCH_LOADED", payload: loaded })
-  }
+    setInitialSearchLoaded: (loaded) =>
+      dispatch({ type: "SET_INITIAL_SEARCH_LOADED", payload: loaded }),
+  },
 };
 ```
 
@@ -788,7 +802,8 @@ interface TerminationGridConfig {
 
 ```typescript
 const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
-const [updateForfeitureAdjustmentBulk] = useUpdateForfeitureAdjustmentBulkMutation();
+const [updateForfeitureAdjustmentBulk] =
+  useUpdateForfeitureAdjustmentBulkMutation();
 const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
 ```
 
@@ -797,15 +812,21 @@ const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
 ```typescript
 const editState = useEditState(); // Tracks edited values and loading rows
 const selectionState = useRowSelection(); // Tracks selected rows for bulk operations
-const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-  useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "name",
-    initialSortDescending: false,
-    onPaginationChange: async (pageNum, pageSz, sortPrms) => {
-      // Trigger search with updated pagination
-    }
-  });
+const {
+  pageNumber,
+  pageSize,
+  sortParams,
+  handlePaginationChange,
+  handleSortChange,
+  resetPagination,
+} = useGridPagination({
+  initialPageSize: 25,
+  initialSortBy: "name",
+  initialSortDescending: false,
+  onPaginationChange: async (pageNum, pageSz, sortPrms) => {
+    // Trigger search with updated pagination
+  },
+});
 ```
 
 **Grid Data Assembly** (Lines 528-560):
@@ -820,7 +841,9 @@ const gridData = useMemo(() => {
       const badgeNumber = masterRow.psn;
 
       // Find the yearDetail that matches the selected profit year
-      const matchingDetail = masterRow.yearDetails?.find((detail) => detail.profitYear === selectedProfitYear);
+      const matchingDetail = masterRow.yearDetails?.find(
+        (detail) => detail.profitYear === selectedProfitYear,
+      );
 
       // Skip this employee if no matching year detail found
       if (!matchingDetail) return null;
@@ -837,7 +860,7 @@ const gridData = useMemo(() => {
         // Metadata (mark as detail row for shared components)
         isDetail: true,
         parentId: badgeNumber,
-        index: 0
+        index: 0,
       };
     })
     .filter((row) => row !== null); // Remove null entries
@@ -924,7 +947,10 @@ const handleBulkSave = useCallback(
 
     try {
       // Transform all requests using shared helper
-      const transformedRequests = prepareBulkSaveRequests(ACTIVITY_CONFIG, requests);
+      const transformedRequests = prepareBulkSaveRequests(
+        ACTIVITY_CONFIG,
+        requests,
+      );
       await updateForfeitureAdjustmentBulk(transformedRequests);
 
       // Generate row keys using shared helper
@@ -936,7 +962,9 @@ const handleBulkSave = useCallback(
       clearGridSelectionsForBadges(gridRef.current?.api, badgeNumbers);
 
       // Check for remaining edits
-      const remainingEditKeys = Object.keys(editState.editedValues).filter((key) => !rowKeys.includes(key));
+      const remainingEditKeys = Object.keys(editState.editedValues).filter(
+        (key) => !rowKeys.includes(key),
+      );
       onUnsavedChanges(remainingEditKeys.length > 0);
 
       // Generate bulk success message
@@ -944,7 +972,7 @@ const handleBulkSave = useCallback(
       const bulkSuccessMessage = generateBulkSaveSuccessMessage(
         ACTIVITY_CONFIG.activityType,
         requests.length,
-        employeeNames
+        employeeNames,
       );
 
       if (searchParams) {
@@ -954,7 +982,7 @@ const handleBulkSave = useCallback(
           sortParams.sortBy,
           sortParams.isSortDescending,
           selectedProfitYear,
-          pageSize
+          pageSize,
         );
         if (request) {
           await triggerSearch(request, false);
@@ -965,15 +993,18 @@ const handleBulkSave = useCallback(
       }
     } catch (error) {
       console.error("Failed to save forfeiture adjustments:", error);
-      const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "bulkSave"));
+      const errorMessage = formatApiError(
+        error,
+        getErrorMessage(ACTIVITY_CONFIG.activityType, "bulkSave"),
+      );
       dispatch(
         setMessage({
           key: "TerminationSave",
           message: {
             message: errorMessage,
-            type: "error"
-          }
-        })
+            type: "error",
+          },
+        }),
       );
       if (onErrorOccurred) onErrorOccurred();
     } finally {
@@ -994,8 +1025,8 @@ const handleBulkSave = useCallback(
     triggerSearch,
     handlePaginationChange,
     dispatch,
-    onErrorOccurred
-  ]
+    onErrorOccurred,
+  ],
 );
 ```
 
@@ -1018,7 +1049,7 @@ const paginationHandlers = {
     }
     handlePaginationChange(0, value); // Reset to page 0
     setInitialSearchLoaded(true);
-  }
+  },
 };
 ```
 
@@ -1063,7 +1094,7 @@ return {
   gridRef,
 
   // Grid context
-  gridContext
+  gridContext,
 };
 ```
 

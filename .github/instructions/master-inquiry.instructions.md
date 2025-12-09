@@ -198,12 +198,12 @@ const schema = yup.object().shape({
     function (endYear) {
       const startYear = this.parent.startProfitYear;
       return !startYear || !endYear || endYear >= startYear;
-    }
+    },
   ),
   startProfitMonth: monthValidator,
   endProfitMonth: monthValidator.min(
     yup.ref("startProfitMonth"),
-    "End month must be after start month"
+    "End month must be after start month",
   ),
   socialSecurity: ssnValidator,
   name: yup.string().nullable(),
@@ -264,10 +264,10 @@ const handleBadgeNumberChange = useCallback(
 
     setValue(
       "memberType",
-      memberType as "all" | "employees" | "beneficiaries" | "none"
+      memberType as "all" | "employees" | "beneficiaries" | "none",
     );
   },
-  [setValue]
+  [setValue],
 );
 ```
 
@@ -356,11 +356,11 @@ Transforms form data (UI shape) into API request shape.
 ```typescript
 export const transformSearchParams = (
   data: MasterInquirySearch,
-  profitYear: number
+  profitYear: number,
 ): MasterInquiryRequest => {
   // Split PSN if needed (badge numbers >7 chars are PSN+suffix)
   const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(
-    data.badgeNumber?.toString()
+    data.badgeNumber?.toString(),
   );
 
   return {
@@ -492,7 +492,7 @@ const executeSearch = useCallback(
       } as MissiveResponse);
     }
   },
-  [triggerSearch, masterInquiryRequestParams, clearAlerts]
+  [triggerSearch, masterInquiryRequestParams, clearAlerts],
 );
 ```
 
@@ -617,7 +617,7 @@ useEffect(() => {
         if (Array.isArray(missives) && missives.length > 0) {
           const localMissives: MissiveResponse[] = details.missives
             .map((id: number) =>
-              missives.find((m: MissiveResponse) => m.id === id)
+              missives.find((m: MissiveResponse) => m.id === id),
             )
             .filter(Boolean) as MissiveResponse[];
 
@@ -703,7 +703,7 @@ const profitFetchDeps = useMemo(
   }),
   [
     /* dependencies */
-  ]
+  ],
 );
 ```
 
@@ -1017,7 +1017,7 @@ const MasterInquiryMemberGrid = memo(
       prevProps.onPaginationChange === nextProps.onPaginationChange &&
       prevProps.onSortChange === nextProps.onSortChange
     );
-  }
+  },
 );
 ```
 
@@ -1084,7 +1084,7 @@ const profitFetchDeps = useMemo(
   }),
   [
     /* dependencies */
-  ]
+  ],
 );
 ```
 
@@ -1155,7 +1155,7 @@ const handleMemberGridPaginationChange = useCallback(
         });
     }
   },
-  [triggerSearch]
+  [triggerSearch],
 );
 ```
 
@@ -1185,7 +1185,7 @@ const handleProfitGridPaginationChange = useCallback(
         });
     }
   },
-  [triggerProfitDetails]
+  [triggerProfitDetails],
 );
 ```
 
@@ -1547,7 +1547,7 @@ dispatch(clearMasterInquiryGroupingData());
 // WRONG: DO NOT DO THIS
 const age = Math.floor(
   (Date.now() - new Date(dateOfBirth).getTime()) /
-    (1000 * 60 * 60 * 24 * 365.25)
+    (1000 * 60 * 60 * 24 * 365.25),
 );
 const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 ```

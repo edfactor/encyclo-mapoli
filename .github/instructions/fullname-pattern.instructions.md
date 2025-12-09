@@ -1,6 +1,7 @@
 # FullName Consolidation Pattern - Implementation Rules
 
 ## Overview
+
 This file defines mandatory patterns for handling employee/beneficiary name fields across the Profit Sharing application. All new code must follow these rules to ensure consistency.
 
 ## Mandatory Patterns
@@ -8,17 +9,19 @@ This file defines mandatory patterns for handling employee/beneficiary name fiel
 ### Rule 1: Backend Response DTOs MUST Use `FullName`
 
 **REQUIRED:**
+
 - All Response DTOs that display person names MUST have a property named `FullName` (NOT `Name`)
 - Exception: Lookup table DTOs can have generic `name` properties (e.g., `FrequencyKindDto.Name`, `StatusDto.Name`)
 - The `FullName` property MUST be marked with `[MaskSensitive]` attribute
 
 **Pattern:**
+
 ```csharp
 public sealed record MyResponse
 {
     [MaskSensitive]
     public required string FullName { get; set; }  // ✅ Correct
-    
+
     // NOT: public string Name { get; set; }       // ❌ Wrong
 }
 ```
@@ -30,11 +33,13 @@ public sealed record MyResponse
 ### Rule 2: Backend Services MUST Compute FullName
 
 **REQUIRED:**
+
 - Services MUST compute `FullName` using `DtoCommonExtensions.ComputeFullNameWithInitial()`
 - MUST NOT assign stored `ContactInfo.FullName` directly to response DTOs
 - MUST include `LastName`, `FirstName`, `MiddleName` in LINQ SELECT clause before computing
 
 **Pattern:**
+
 ```csharp
 // Step 1: Fetch individual name parts in query
 select new
@@ -46,8 +51,8 @@ select new
 
 // Step 2: Compute FullName with middle initial
 FullName = DtoCommonExtensions.ComputeFullNameWithInitial(
-    lastName, 
-    firstName, 
+    lastName,
+    firstName,
     middleName)
 ```
 
@@ -58,19 +63,21 @@ FullName = DtoCommonExtensions.ComputeFullNameWithInitial(
 ### Rule 3: FullName Format Specification
 
 **REQUIRED:**
+
 - Format MUST be: `"LastName, FirstName"` (comma-separated)
 - If middle name exists: `"LastName, FirstName M"` (middle initial only, not full name)
 - If middle name missing: `"LastName, FirstName"` (no middle initial)
 
 **Pattern:**
+
 ```csharp
 // Use this helper for all FullName computation
 public static string ComputeFullNameWithInitial(string lastName, string firstName, string? middleName)
 {
-    var middleInitial = string.IsNullOrWhiteSpace(middleName) 
-        ? string.Empty 
+    var middleInitial = string.IsNullOrWhiteSpace(middleName)
+        ? string.Empty
         : $"{middleName[0]}";
-    
+
     return string.IsNullOrWhiteSpace(middleInitial)
         ? $"{lastName}, {firstName}"
         : $"{lastName}, {firstName} {middleInitial}";
@@ -78,6 +85,7 @@ public static string ComputeFullNameWithInitial(string lastName, string firstNam
 ```
 
 **Examples:**
+
 - Smith, John (no middle name) ✅
 - Smith, John M (middle name = Michael) ✅
 - Doe, Jane R (middle name = Rose) ✅
@@ -89,11 +97,13 @@ public static string ComputeFullNameWithInitial(string lastName, string firstNam
 ### Rule 4: Frontend DTOs MUST Use `fullName`
 
 **REQUIRED:**
+
 - All TypeScript DTO interfaces for person data MUST have `fullName` property (NOT `name`)
 - Property should be optional (`fullName?: string`) to allow partial updates
 - Exception: Lookup DTOs can have `name?: string` for generic purposes
 
 **Pattern:**
+
 ```typescript
 // ✅ Correct
 export interface PersonResponse {
@@ -103,7 +113,7 @@ export interface PersonResponse {
 
 // ❌ Wrong
 export interface PersonResponse {
-  name: string;  // Should be fullName
+  name: string; // Should be fullName
   badgeNumber: number;
 }
 ```
@@ -115,12 +125,14 @@ export interface PersonResponse {
 ### Rule 5: Frontend Components MUST Use Backend-Provided fullName
 
 **REQUIRED:**
+
 - Components MUST use `object.fullName` directly from backend DTO
 - MUST NOT manually concatenate `firstName` and `lastName`
 - MUST NOT construct names in components using template literals or string addition
 - Grid columns MUST use `field: "fullName"` mapping
 
 **Pattern:**
+
 ```typescript
 // ✅ Correct - Use backend-provided fullName
 <span>{person.fullName}</span>
@@ -145,20 +157,22 @@ createNameColumn({ field: "fullName" })
 ### Rule 6: Grid Columns MUST Specify fullName Field
 
 **REQUIRED:**
+
 - When using `createNameColumn()` factory, MUST explicitly specify `field: "fullName"`
 - If no field specified, defaults to `"employeeName"` which causes type mismatch
 - Ensure DTO being bound to grid has `fullName` property
 
 **Pattern:**
+
 ```typescript
 // ✅ Correct - Explicit field mapping
-createNameColumn({ field: "fullName" })
+createNameColumn({ field: "fullName" });
 
 // ❌ Wrong - No field specified (will default to employeeName)
-createNameColumn({})
+createNameColumn({});
 
 // ❌ Wrong - Wrong field name
-createNameColumn({ field: "name" })
+createNameColumn({ field: "name" });
 ```
 
 **Verification:** Grid definitions reviewed to ensure correct field binding.
@@ -181,6 +195,7 @@ When adding a new endpoint returning person names:
 - [ ] Unit tests verify format for edge cases (no middle name, etc.)
 
 **Example Checklist Item (in PR):**
+
 ```markdown
 - [x] FullName pattern implemented per FULLNAME_CONSOLIDATION_GUIDE.md
   - Backend DTO: FullName property ✓
@@ -195,16 +210,19 @@ When adding a new endpoint returning person names:
 ## Violation Consequences
 
 ### During Code Review
+
 - [ ] Any Response DTO using `Name` for person data → **Request Changes**
 - [ ] Any service assigning FullName without `ComputeFullNameWithInitial()` → **Request Changes**
 - [ ] Any frontend component concatenating firstName/lastName → **Request Changes**
 - [ ] Any grid column using wrong field name → **Request Changes**
 
 ### In Pre-commit Hooks (if enabled)
+
 - Scripts will detect violations and **block commit** with error message
 - Developer must fix violations before proceeding
 
 ### In CI/CD Pipeline (if enabled)
+
 - Build will **fail** if violations detected
 - PR will be marked as **status check failed**
 
@@ -215,6 +233,7 @@ When adding a new endpoint returning person names:
 ### Step-by-Step Example: Adding a New MyPerson Endpoint
 
 #### 1. Create Response DTO
+
 ```csharp
 // File: src/services/src/Demoulas.ProfitSharing.Common/Contracts/Response/MyPersonResponse.cs
 public sealed record MyPersonResponse
@@ -227,6 +246,7 @@ public sealed record MyPersonResponse
 ```
 
 #### 2. Implement Service Mapping
+
 ```csharp
 // File: MyService.cs
 public async Task<MyPersonResponse> GetPersonAsync(int id, CancellationToken ct)
@@ -242,10 +262,10 @@ public async Task<MyPersonResponse> GetPersonAsync(int id, CancellationToken ct)
             p.ContactInfo.MiddleName     // ← Include parts
         })
         .FirstOrDefaultAsync(ct);
-    
+
     if (person is null)
         return null;
-    
+
     return new MyPersonResponse
     {
         Id = person.Id,
@@ -259,16 +279,18 @@ public async Task<MyPersonResponse> GetPersonAsync(int id, CancellationToken ct)
 ```
 
 #### 3. Create TypeScript DTO
+
 ```typescript
 // File: src/ui/src/types/myPerson.ts
 export interface MyPersonResponse {
   id: number;
-  fullName: string;  // ← Must be fullName
+  fullName: string; // ← Must be fullName
   ssn: string;
 }
 ```
 
 #### 4. Use in Component
+
 ```typescript
 // ✅ Correct
 <div>{person.fullName}</div>
@@ -278,20 +300,21 @@ export interface MyPersonResponse {
 ```
 
 #### 5. Add Unit Test
+
 ```csharp
 [Fact(DisplayName = "PS-XXXX: FullName formatted with middle initial")]
 public async Task GetPersonAsync_Should_Format_FullName_With_Middle_Initial()
 {
     // Arrange
-    var person = new Person { 
-        LastName = "Smith", 
-        FirstName = "John", 
-        MiddleName = "Michael" 
+    var person = new Person {
+        LastName = "Smith",
+        FirstName = "John",
+        MiddleName = "Michael"
     };
-    
+
     // Act
     var result = await _service.GetPersonAsync(1, CancellationToken.None);
-    
+
     // Assert
     result.FullName.Should().Be("Smith, John M");  // Format: "LastName, FirstName M"
 }
@@ -329,4 +352,3 @@ If you violate these patterns, code review will request changes. These are not s
 **Last Updated**: November 19, 2025  
 **Status**: Active - All new code must comply
 **Enforcement**: Manual review + Optional automated checks
-

@@ -8,7 +8,7 @@ describe("ProfitSummary - Expand/Collapse Functionality", () => {
     it("should use external expand state when provided", () => {
       const externalIsGridExpanded = true;
       const internalIsGridExpanded = false;
-      
+
       const isGridExpanded = externalIsGridExpanded ?? internalIsGridExpanded;
 
       expect(isGridExpanded).toBe(true);
@@ -17,7 +17,7 @@ describe("ProfitSummary - Expand/Collapse Functionality", () => {
     it("should use internal expand state when external not provided", () => {
       const externalIsGridExpanded = undefined;
       const internalIsGridExpanded = true;
-      
+
       const isGridExpanded = externalIsGridExpanded ?? internalIsGridExpanded;
 
       expect(isGridExpanded).toBe(true);
@@ -26,7 +26,7 @@ describe("ProfitSummary - Expand/Collapse Functionality", () => {
     it("should prefer external expand state over internal", () => {
       const externalIsGridExpanded = false;
       const internalIsGridExpanded = true;
-      
+
       const isGridExpanded = externalIsGridExpanded ?? internalIsGridExpanded;
 
       expect(isGridExpanded).toBe(false);
@@ -86,7 +86,7 @@ describe("ProfitSummary - Expand/Collapse Functionality", () => {
       const mockDispatch = vi.fn();
       const mockCloseDrawer = vi.fn();
       const mockSetFullscreen = vi.fn();
-      
+
       const { result } = renderHook(() => {
         const [internalIsGridExpanded, setInternalIsGridExpanded] = React.useState(false);
         const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = React.useState(false);

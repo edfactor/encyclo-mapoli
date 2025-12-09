@@ -2,7 +2,7 @@ import { Typography } from "@mui/material";
 import LabelValueSection from "../../../../components/LabelValueSection";
 import { Grid } from "@mui/material";
 import { useEffect } from "react";
-import { useLazyGetBreakdownByStoreTotalsQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetBreakdownByStoreTotalsQuery } from "reduxstore/api/AdhocApi";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { numberToCurrency } from "smart-ui-library";
 import { useSelector } from "react-redux";

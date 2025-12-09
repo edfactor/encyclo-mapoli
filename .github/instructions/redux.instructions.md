@@ -93,8 +93,8 @@ export const store = configureStore({
       .concat(rtkQueryErrorToastMiddleware(true))
       .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
       .concat(SecurityApi.middleware)
-      .concat(YearsEndApi.middleware)
-      // ... other API middleware
+      .concat(YearsEndApi.middleware),
+  // ... other API middleware
 });
 
 // Infer types from the store
@@ -135,7 +135,7 @@ All RTK Query APIs share a common base query configuration:
 export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const createDataSourceAwareBaseQuery = (
-  timeout?: number
+  timeout?: number,
 ): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
   const rawBaseQuery = fetchBaseQuery({
     baseUrl: `${url}/api/`,
@@ -155,7 +155,7 @@ export const createDataSourceAwareBaseQuery = (
       }
 
       return headers;
-    }
+    },
   });
 
   return async (args, api, extra) => {
@@ -163,7 +163,9 @@ export const createDataSourceAwareBaseQuery = (
 
     // Automatically copy x-demographic-data-source header to response
     if (result.data && typeof result.data === "object") {
-      const hdr = result.meta?.response?.headers?.get("x-demographic-data-source") ?? "Live";
+      const hdr =
+        result.meta?.response?.headers?.get("x-demographic-data-source") ??
+        "Live";
       (result.data as Record<string, string>).dataSource = hdr;
     }
 
@@ -193,7 +195,7 @@ const baseQuery = createDataSourceAwareBaseQuery(120000); // 2 minutes
 
 export const YearsEndApi = createApi({
   baseQuery: baseQuery,
-  reducerPath: "yearsEndApi",  // Unique identifier
+  reducerPath: "yearsEndApi", // Unique identifier
   endpoints: (builder) => ({
     // Query example
     getDuplicateSSNs: builder.query<ResponseType, RequestType>({
@@ -203,8 +205,8 @@ export const YearsEndApi = createApi({
         params: {
           take: params.pagination.take,
           skip: params.pagination.skip,
-          profitYear: params.profitYear
-        }
+          profitYear: params.profitYear,
+        },
       }),
       // Optional: Update slice state when query succeeds
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -214,7 +216,7 @@ export const YearsEndApi = createApi({
         } catch (err) {
           console.log("Err: " + err);
         }
-      }
+      },
     }),
 
     // Mutation example
@@ -222,17 +224,15 @@ export const YearsEndApi = createApi({
       query: () => ({
         url: `yearend/update-enrollment`,
         method: "POST",
-        body: {}
-      })
-    })
-  })
+        body: {},
+      }),
+    }),
+  }),
 });
 
 // Export generated hooks
-export const {
-  useLazyGetDuplicateSSNsQuery,
-  useUpdateEnrollmentMutation
-} = YearsEndApi;
+export const { useLazyGetDuplicateSSNsQuery, useUpdateEnrollmentMutation } =
+  YearsEndApi;
 ```
 
 ### API Endpoint Patterns
@@ -244,17 +244,17 @@ getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
   query: (params) => ({
     url: "/lookup/calendar/accounting-year",
     method: "GET",
-    params: { profitYear: params.profitYear }
+    params: { profitYear: params.profitYear },
   }),
   async onQueryStarted(arg, { dispatch, queryFulfilled }) {
     try {
       const { data } = await queryFulfilled;
-      dispatch(setAccountingYearData(data));  // Update slice
+      dispatch(setAccountingYearData(data)); // Update slice
     } catch (err) {
       console.log("Err: " + err);
     }
-  }
-})
+  },
+});
 ```
 
 #### 2. Mutation with Error Suppression
@@ -262,31 +262,35 @@ getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
 ```typescript
 updateForfeitureAdjustment: builder.mutation<ResponseType, RequestType>({
   query: (params) => {
-    const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
+    const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } =
+      params;
     return {
       url: "yearend/forfeiture-adjustments/update",
       method: "PUT",
       body: requestData,
       // Pass metadata to middleware for error handling control
-      meta: { suppressAllToastErrors, onlyNetworkToastErrors }
+      meta: { suppressAllToastErrors, onlyNetworkToastErrors },
     };
-  }
-})
+  },
+});
 ```
 
 #### 3. Query with Archive Support
 
 ```typescript
-getExecutiveHoursAndDollars: builder.query<ResponseType, RequestType & { archive?: boolean }>({
+getExecutiveHoursAndDollars: builder.query<
+  ResponseType,
+  RequestType & { archive?: boolean }
+>({
   query: (params) => ({
     url: `yearend/executive-hours-and-dollars${params.archive ? "?archive=true" : ""}`,
     method: "GET",
     params: {
       profitYear: params.profitYear,
       // ... other params
-    }
-  })
-})
+    },
+  }),
+});
 ```
 
 #### 4. Response Transformation
@@ -294,10 +298,13 @@ getExecutiveHoursAndDollars: builder.query<ResponseType, RequestType & { archive
 ```typescript
 getMissives: builder.query<MissiveResponse[], void>({
   query: () => ({ url: "/lookup/missives", method: "GET" }),
-  transformResponse: (response: { items: MissiveResponse[]; count: number }) => {
-    return response.items;  // Extract just the items array
-  }
-})
+  transformResponse: (response: {
+    items: MissiveResponse[];
+    count: number;
+  }) => {
+    return response.items; // Extract just the items array
+  },
+});
 ```
 
 #### 5. Blob/File Download
@@ -307,16 +314,22 @@ downloadCertificatesFile: builder.query<Blob, CertificateDownloadRequest>({
   query: (params) => ({
     url: "yearend/post-frozen/certificates/download",
     method: "GET",
-    params: { profitYear: params.profitYear, badgeNumbers: params.badgeNumbers },
-    responseHandler: (response) => response.blob()  // Handle as blob
-  })
-})
+    params: {
+      profitYear: params.profitYear,
+      badgeNumbers: params.badgeNumbers,
+    },
+    responseHandler: (response) => response.blob(), // Handle as blob
+  }),
+});
 ```
 
 #### 6. Conditional CSV/JSON Response
 
 ```typescript
-getEmployeeWagesForYear: builder.query<ResponseType, RequestType & { acceptHeader: string }>({
+getEmployeeWagesForYear: builder.query<
+  ResponseType,
+  RequestType & { acceptHeader: string }
+>({
   query: (params) => ({
     url: "yearend/wages-current-year",
     method: "GET",
@@ -327,9 +340,9 @@ getEmployeeWagesForYear: builder.query<ResponseType, RequestType & { acceptHeade
         return response.blob();
       }
       return response.json();
-    }
-  })
-})
+    },
+  }),
+});
 ```
 
 ### Generated Hooks
@@ -337,6 +350,7 @@ getEmployeeWagesForYear: builder.query<ResponseType, RequestType & { acceptHeade
 RTK Query automatically generates hooks for each endpoint:
 
 - **Queries**:
+
   - `use[EndpointName]Query` - Immediate fetch on mount
   - `useLazy[EndpointName]Query` - Manual trigger
 
@@ -347,7 +361,8 @@ Example usage in components:
 
 ```typescript
 // Lazy query (manual trigger)
-const [getDuplicateSSNs, { data, isLoading, error }] = useLazyGetDuplicateSSNsQuery();
+const [getDuplicateSSNs, { data, isLoading, error }] =
+  useLazyGetDuplicateSSNsQuery();
 
 // Trigger the query
 useEffect(() => {
@@ -355,7 +370,8 @@ useEffect(() => {
 }, []);
 
 // Mutation
-const [updateEnrollment, { isLoading: isUpdating }] = useUpdateEnrollmentMutation();
+const [updateEnrollment, { isLoading: isUpdating }] =
+  useUpdateEnrollmentMutation();
 
 // Trigger mutation
 const handleUpdate = async () => {
@@ -393,7 +409,7 @@ const initialState: SecurityState = {
   username: "",
   performLogout: false,
   appUser: null,
-  impersonating: []
+  impersonating: [],
 };
 
 export const securitySlice = createSlice({
@@ -415,8 +431,8 @@ export const securitySlice = createSlice({
       state.userPermissions = [];
       state.performLogout = false;
       state.impersonating = [];
-    }
-  }
+    },
+  },
 });
 
 export const { setToken, setUserRoles, clearUserData } = securitySlice.actions;
@@ -430,7 +446,7 @@ export default securitySlice.reducer;
 ```typescript
 setBanner: (state, action: PayloadAction<string>) => {
   state.appBanner = action.payload;
-}
+};
 ```
 
 #### 2. LocalStorage Persistence
@@ -439,14 +455,17 @@ setBanner: (state, action: PayloadAction<string>) => {
 openDrawer: (state) => {
   state.isDrawerOpen = true;
   try {
-    localStorage.setItem("drawerState", JSON.stringify({
-      isDrawerOpen: true,
-      activeSubmenu: state.activeSubmenu
-    }));
+    localStorage.setItem(
+      "drawerState",
+      JSON.stringify({
+        isDrawerOpen: true,
+        activeSubmenu: state.activeSubmenu,
+      }),
+    );
   } catch (error) {
     console.error("Error saving drawer state to localStorage:", error);
   }
-}
+};
 ```
 
 #### 3. Complex State Reset
@@ -461,7 +480,7 @@ clearUserData: (state) => {
   state.userPermissions = [];
   state.performLogout = false;
   state.impersonating = [];
-}
+};
 ```
 
 #### 4. Dictionary/Map Pattern
@@ -481,8 +500,8 @@ const messagesSlice = createSlice({
     removeMessage: (state, action: PayloadAction<string>) => {
       delete state[action.payload];
     },
-    clearMessages: () => ({})
-  }
+    clearMessages: () => ({}),
+  },
 });
 ```
 
@@ -521,6 +540,7 @@ Automatically displays toast notifications for API errors.
 **Location**: `src/ui/src/redux/rtkQueryErrorToastMiddleware.ts`
 
 **Features**:
+
 - Intercepts rejected RTK Query actions
 - Displays appropriate error messages via toast service
 - Supports error suppression via metadata flags
@@ -542,14 +562,15 @@ updateData({ data: payload, onlyNetworkToastErrors: true });
 
 ```typescript
 query: (params) => {
-  const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
+  const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } =
+    params;
   return {
     url: "endpoint",
     method: "POST",
     body: requestData,
-    meta: { suppressAllToastErrors, onlyNetworkToastErrors }
+    meta: { suppressAllToastErrors, onlyNetworkToastErrors },
   };
-}
+};
 ```
 
 ### 2. API Logger Middleware
@@ -559,6 +580,7 @@ Logs API requests and responses in development/QA environments.
 **Location**: `src/ui/src/middleware/apiLoggerMiddleware.ts`
 
 **Configuration**:
+
 ```typescript
 .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
 ```
@@ -586,9 +608,9 @@ query: (params) => ({
     take: params.pagination.take,
     skip: params.pagination.skip,
     sortBy: params.pagination.sortBy,
-    isSortDescending: params.pagination.isSortDescending
-  }
-})
+    isSortDescending: params.pagination.isSortDescending,
+  },
+});
 ```
 
 ### 2. Updating Slice State from API
@@ -653,9 +675,9 @@ query: (arg) => {
 
   return {
     url: `yearend/frozen/contributions-by-age`,
-    params: { profitYear: arg.profitYear }
+    params: { profitYear: arg.profitYear },
   };
-}
+};
 ```
 
 ---
@@ -725,15 +747,16 @@ Middleware order matters:
 
 ```typescript
 getDefaultMiddleware({ serializableCheck: false })
-  .concat(rtkQueryErrorToastMiddleware(true))     // First: error handling
-  .concat(conditionalMiddleware)                   // Then: logging/debugging
-  .concat(SecurityApi.middleware)                  // Finally: API middleware
-  .concat(YearsEndApi.middleware)
+  .concat(rtkQueryErrorToastMiddleware(true)) // First: error handling
+  .concat(conditionalMiddleware) // Then: logging/debugging
+  .concat(SecurityApi.middleware) // Finally: API middleware
+  .concat(YearsEndApi.middleware);
 ```
 
 ### 6. LocalStorage Integration
 
 When persisting state to localStorage:
+
 - Wrap in try/catch blocks
 - Handle parse errors gracefully
 - Provide sensible defaults
@@ -806,7 +829,8 @@ export const LookupsApi = createApi({
   endpoints: (builder) => ({
     getStates: builder.query<StateListResponse[], void>({
       query: () => ({ url: "/lookup/states", method: "GET" }),
-      transformResponse: (response: { items: StateListResponse[] }) => response.items,
+      transformResponse: (response: { items: StateListResponse[] }) =>
+        response.items,
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -814,21 +838,20 @@ export const LookupsApi = createApi({
         } catch (err) {
           console.log("Err: " + err);
         }
-      }
+      },
     }),
 
     updateStateTax: builder.mutation<void, StateTaxUpdateRequest>({
       query: (params) => ({
         url: `/lookup/state-taxes/${params.state}`,
         method: "PUT",
-        body: params
-      })
-    })
-  })
+        body: params,
+      }),
+    }),
+  }),
 });
 
 export const { useGetStatesQuery, useUpdateStateTaxMutation } = LookupsApi;
 ```
 
 ---
-

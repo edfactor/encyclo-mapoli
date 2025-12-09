@@ -176,6 +176,7 @@ Time    Event
 ## Comparison: Before vs After
 
 ### Before Implementation
+
 ```
 User clicks command
   ↓
@@ -189,6 +190,7 @@ User clicks command
 ```
 
 ### After Implementation
+
 ```
 User clicks command
   ↓
@@ -206,21 +208,25 @@ Final summary with link to logs (convenience)
 ## Notification Message Details
 
 ### Information Messages (ℹ️)
+
 - **Color**: Blue
 - **Auto-dismiss**: Yes (after 5 seconds typically)
 - **Purpose**: Non-critical updates, operation start
 
 ### Success Messages (✅)
+
 - **Color**: Green
 - **Auto-dismiss**: Yes (after 5 seconds typically)
 - **Purpose**: Operation completed successfully
 
 ### Warning Messages (⚠️)
+
 - **Color**: Orange/Yellow
 - **Auto-dismiss**: No (requires user interaction)
 - **Purpose**: Confirmation dialogs, cautionary info
 
 ### Error Messages (❌)
+
 - **Color**: Red
 - **Auto-dismiss**: No (requires user dismissal)
 - **Purpose**: Operation failures, errors
@@ -228,10 +234,12 @@ Final summary with link to logs (convenience)
 ## User Experience Improvements
 
 ### Problem Solved
+
 - **Before**: Users had no idea when long operations started or completed
 - **After**: Clear visual feedback at every step
 
 ### Benefits
+
 1. **Immediate Feedback**: Users know their action was registered
 2. **Progress Tracking**: Users can see which step is executing
 3. **Error Visibility**: Failures are obvious (not hidden in logs)

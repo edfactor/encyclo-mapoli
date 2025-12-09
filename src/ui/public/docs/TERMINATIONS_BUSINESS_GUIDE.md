@@ -51,6 +51,7 @@ The **Terminations** page generates reports showing terminated employees and the
 The Terminations report includes:
 
 1. **Terminated Employees** who meet ALL of the following criteria:
+
    - Employment status is "Terminated"
    - Termination date is within the selected date range
    - NOT a retiree receiving pension (termination code excludes "Retired Receiving Pension")
@@ -65,15 +66,16 @@ The Terminations report includes:
 
 The system applies eligibility filters based on enrollment type:
 
-| Enrollment Type | Minimum Years Required |
-|----------------|------------------------|
-| **Not Enrolled** | 3+ years |
-| **Old Vesting Plan (Has Contributions)** | 3+ years |
-| **Old Vesting Plan (Has Forfeitures)** | 3+ years |
-| **New Vesting Plan (Has Contributions)** | 2+ years |
-| **New Vesting Plan (Has Forfeitures)** | 2+ years |
+| Enrollment Type                          | Minimum Years Required |
+| ---------------------------------------- | ---------------------- |
+| **Not Enrolled**                         | 3+ years               |
+| **Old Vesting Plan (Has Contributions)** | 3+ years               |
+| **Old Vesting Plan (Has Forfeitures)**   | 3+ years               |
+| **New Vesting Plan (Has Contributions)** | 2+ years               |
+| **New Vesting Plan (Has Forfeitures)**   | 2+ years               |
 
 **What This Means:**
+
 - Employees terminated before completing the minimum years will NOT appear in the report
 - The years count represents **years in the profit sharing plan**, not total employment years
 
@@ -87,6 +89,7 @@ Even after meeting the enrollment criteria, records must pass the "IsInteresting
 - Non-zero **beneficiary allocation** (always included)
 
 **What This Means:**
+
 - Employees with zero balances and no transactions are excluded
 - This prevents cluttering the report with employees who have no profit sharing activity
 
@@ -105,31 +108,33 @@ The system uses two vesting schedules based on enrollment:
 #### Old Vesting Plan
 
 | Years in Plan | Vested % |
-|---------------|----------|
-| 0-2 years | 0% |
-| 3 years | 25% |
-| 4 years | 50% |
-| 5 years | 75% |
-| 6+ years | 100% |
+| ------------- | -------- |
+| 0-2 years     | 0%       |
+| 3 years       | 25%      |
+| 4 years       | 50%      |
+| 5 years       | 75%      |
+| 6+ years      | 100%     |
 
 #### New Vesting Plan
 
 | Years in Plan | Vested % |
-|---------------|----------|
-| 0-1 years | 0% |
-| 2 years | 20% |
-| 3 years | 40% |
-| 4 years | 60% |
-| 5 years | 80% |
-| 6+ years | 100% |
+| ------------- | -------- |
+| 0-1 years     | 0%       |
+| 2 years       | 20%      |
+| 3 years       | 40%      |
+| 4 years       | 60%      |
+| 5 years       | 80%      |
+| 6+ years      | 100%     |
 
 ### Special Vesting Rules
 
 1. **100% Vesting Override (ZeroCont = 75)**
+
    - Employees age 65+ with first contribution more than 5 years ago are 100% vested
    - Beneficiaries are typically assigned this code and are 100% vested
 
 2. **Deceased Employees**
+
    - When an employee is marked as "Deceased," their ZeroCont is set to 75 (100% vested)
    - This ensures beneficiaries receive the full balance
 
@@ -145,19 +150,21 @@ The system uses two vesting schedules based on enrollment:
 
 When an employee is deceased, the system identifies beneficiaries and includes them in the report. The system uses a **PSN Suffix** to distinguish beneficiaries:
 
-| Scenario | Badge Number | PSN Suffix | Display |
-|----------|--------------|------------|---------|
-| **Employee Record** | 12345 | 0 | 12345 |
-| **Beneficiary (separate person)** | 12345 | -1000, -2000, etc. | 12345-1000 |
-| **Beneficiary who is also active** | 12345 | 0 | 12345 (shown as employee) |
+| Scenario                           | Badge Number | PSN Suffix         | Display                   |
+| ---------------------------------- | ------------ | ------------------ | ------------------------- |
+| **Employee Record**                | 12345        | 0                  | 12345                     |
+| **Beneficiary (separate person)**  | 12345        | -1000, -2000, etc. | 12345-1000                |
+| **Beneficiary who is also active** | 12345        | 0                  | 12345 (shown as employee) |
 
 ### Duplicate Prevention
 
 **Business Rule:** If a person appears as BOTH a terminated employee and a beneficiary:
+
 - The **employee record** is prioritized
 - The **beneficiary record** is excluded to prevent duplication
 
 **Example:**
+
 - Employee #12345 terminates on 6/15/2024
 - Employee #67890 dies on 8/20/2024 and lists #12345 as a beneficiary
 - Report will show:
@@ -167,6 +174,7 @@ When an employee is deceased, the system identifies beneficiaries and includes t
 ### Beneficiary Allocations
 
 **Beneficiary Allocation** transactions represent:
+
 - **Outgoing:** Transfer of funds FROM a deceased employee TO their beneficiary (negative amount, profit code 62)
 - **Incoming:** Transfer of funds TO a beneficiary FROM a deceased employee (positive amount, profit code 93)
 
@@ -181,6 +189,7 @@ These transactions ensure the balance flows correctly between parties.
 **CRITICAL RULE:** The system only processes transactions up to and including the **selected ending year**.
 
 **Example:**
+
 - User selects date range: 1/1/2024 to 12/31/2024
 - System will process transactions for 2024 and earlier years only
 - If the employee has 2025 transactions, they will be ignored
@@ -189,30 +198,34 @@ These transactions ensure the balance flows correctly between parties.
 
 The report aggregates the following transaction types:
 
-| Transaction Type | Profit Code | Impact on Balance |
-|-----------------|-------------|-------------------|
-| **Contributions** | 1 (Incoming Contributions) | Increases balance |
-| **Earnings** | Various | Increases balance |
-| **Forfeitures (Incoming)** | 1 (Incoming Contributions) | Increases balance |
-| **Forfeitures (Outgoing)** | 61 (Outgoing Forfeitures) | Decreases balance |
-| **Distributions** | 66, 67, 68 | Decreases balance |
+| Transaction Type                  | Profit Code                    | Impact on Balance |
+| --------------------------------- | ------------------------------ | ----------------- |
+| **Contributions**                 | 1 (Incoming Contributions)     | Increases balance |
+| **Earnings**                      | Various                        | Increases balance |
+| **Forfeitures (Incoming)**        | 1 (Incoming Contributions)     | Increases balance |
+| **Forfeitures (Outgoing)**        | 61 (Outgoing Forfeitures)      | Decreases balance |
+| **Distributions**                 | 66, 67, 68                     | Decreases balance |
 | **Beneficiary Allocations (Out)** | 62 (Outgoing Xfer Beneficiary) | Decreases balance |
-| **Beneficiary Allocations (In)** | 93 (Incoming QDRO Beneficiary) | Increases balance |
+| **Beneficiary Allocations (In)**  | 93 (Incoming QDRO Beneficiary) | Increases balance |
 
 ### Balance Calculations
 
 **Beginning Balance:**
+
 - Retrieved from the **previous profit year's** ending balance
 - Example: For 2024 report, beginning balance is the 2023 ending balance
 
 **Ending Balance:**
+
 - Beginning Balance + Total Contributions + Total Earnings + Total Forfeitures (net) + Distributions + Beneficiary Allocations (net)
 
 **Vested Balance:**
+
 - Ending Balance × Vesting Percentage
 - Special case: If ZeroCont = 75, vested balance = ending balance (100% vested)
 
 **Suggested Forfeiture:**
+
 - Only calculated for the **current profit year**
 - Formula: Ending Balance - Vested Balance
 - This represents the amount that would be forfeited if processed today
@@ -223,30 +236,31 @@ The report aggregates the following transaction types:
 
 ### Columns Displayed
 
-| Column | Description |
-|--------|-------------|
-| **Badge Number** | Employee or beneficiary identifier (with PSN suffix if applicable) |
-| **Name** | Full name of the employee or beneficiary |
-| **Profit Year** | The year being reported (can be multi-year) |
-| **Beginning Balance** | Balance at the start of the year |
-| **Beneficiary Allocation** | Net beneficiary transfers (in/out) |
-| **Distribution Amount** | Total distributions paid out |
-| **Forfeit** | Net forfeitures for the year |
-| **Ending Balance** | Final balance at year end |
-| **Vested Balance** | Amount employee is entitled to keep |
-| **Date Term** | Termination date |
-| **YTD PS Hours** | Year-to-date profit sharing hours |
-| **Is Executive** | Whether the employee is classified as executive |
-| **Vested Percent** | Percentage vested (0-100%) |
-| **Age** | Calculated age at end of profit year |
-| **Has Forfeited** | Indicates if employee has forfeiture history |
-| **Suggested Forfeit** | Amount to forfeit (current year only) |
+| Column                     | Description                                                        |
+| -------------------------- | ------------------------------------------------------------------ |
+| **Badge Number**           | Employee or beneficiary identifier (with PSN suffix if applicable) |
+| **Name**                   | Full name of the employee or beneficiary                           |
+| **Profit Year**            | The year being reported (can be multi-year)                        |
+| **Beginning Balance**      | Balance at the start of the year                                   |
+| **Beneficiary Allocation** | Net beneficiary transfers (in/out)                                 |
+| **Distribution Amount**    | Total distributions paid out                                       |
+| **Forfeit**                | Net forfeitures for the year                                       |
+| **Ending Balance**         | Final balance at year end                                          |
+| **Vested Balance**         | Amount employee is entitled to keep                                |
+| **Date Term**              | Termination date                                                   |
+| **YTD PS Hours**           | Year-to-date profit sharing hours                                  |
+| **Is Executive**           | Whether the employee is classified as executive                    |
+| **Vested Percent**         | Percentage vested (0-100%)                                         |
+| **Age**                    | Calculated age at end of profit year                               |
+| **Has Forfeited**          | Indicates if employee has forfeiture history                       |
+| **Suggested Forfeit**      | Amount to forfeit (current year only)                              |
 
 ### Multi-Year Display
 
 If the date range spans multiple profit years, each year is displayed as a separate row:
 
 **Example:**
+
 ```
 Badge    Name           Year  Begin     Ending    Vested
 12345    John Doe       2024  $10,000   $8,500    $8,500
@@ -268,11 +282,13 @@ The Terminations page includes a **duplicate SSN guard** that:
 3. **Displays an error message** prompting users to resolve duplicates before proceeding
 
 **Why This Matters:**
+
 - Duplicate SSNs cause incorrect calculations and reporting
 - The system must identify a unique person for vesting and transaction history
 - Duplicate SSN detection is logged as a **CRITICAL** issue for IT investigation
 
 **What to Do:**
+
 - Navigate to the **Duplicate SSNs on Demographics** page (December Activities menu)
 - Resolve all duplicates before using the Terminations page
 - Contact IT if duplicates cannot be resolved
@@ -284,11 +300,13 @@ The Terminations page includes a **duplicate SSN guard** that:
 ### Scenario 1: Newly Terminated Employee (< 3 Years)
 
 **Given:**
+
 - Employee terminates on 6/15/2024
 - Employee has 2 years in the profit sharing plan
 - Enrollment: Old Vesting Plan
 
 **Expected Behavior:**
+
 - Employee does NOT appear in the report
 - Reason: Old Vesting Plan requires 3+ years
 
@@ -297,12 +315,14 @@ The Terminations page includes a **duplicate SSN guard** that:
 ### Scenario 2: Terminated Employee with Partial Vesting
 
 **Given:**
+
 - Employee terminates on 6/15/2024
 - Employee has 4 years in the profit sharing plan
 - Enrollment: Old Vesting Plan
 - Ending balance: $10,000
 
 **Expected Behavior:**
+
 - Employee appears in the report
 - Vested %: 50%
 - Vested Balance: $5,000
@@ -313,12 +333,14 @@ The Terminations page includes a **duplicate SSN guard** that:
 ### Scenario 3: Deceased Employee with Beneficiary
 
 **Given:**
+
 - Employee #12345 dies on 8/20/2024
 - Employee has a beneficiary (#67890, PSN suffix -1000)
 - Employee's ending balance: $15,000
 - Beneficiary allocation: $15,000 transferred to beneficiary
 
 **Expected Behavior:**
+
 - Employee #12345 appears with:
   - Ending Balance: $0 (after transfer)
   - Beneficiary Allocation: -$15,000 (outgoing)
@@ -332,11 +354,13 @@ The Terminations page includes a **duplicate SSN guard** that:
 ### Scenario 4: Retiree Receiving Pension
 
 **Given:**
+
 - Employee terminates on 6/15/2024
 - Termination Code: "Retired Receiving Pension"
 - Ending balance: $20,000
 
 **Expected Behavior:**
+
 - Employee does NOT appear in the report
 - Reason: Retirees receiving pension are excluded (business rule)
 
@@ -345,12 +369,14 @@ The Terminations page includes a **duplicate SSN guard** that:
 ### Scenario 5: Zero Balance with No Transactions
 
 **Given:**
+
 - Employee terminates on 6/15/2024
 - Beginning balance: $0
 - No distributions, forfeitures, or beneficiary allocations
 - Years in plan: 5
 
 **Expected Behavior:**
+
 - Employee does NOT appear in the report
 - Reason: Fails the "IsInteresting" filter (no balance or transactions)
 
@@ -360,14 +386,14 @@ The Terminations page includes a **duplicate SSN guard** that:
 
 ### Common Issues
 
-| Issue | Cause | Resolution |
-|-------|-------|------------|
-| **Filter button is disabled** | Duplicate SSNs detected | Navigate to "Duplicate SSNs on Demographics" page and resolve duplicates |
-| **Employee not appearing in report** | Does not meet eligibility criteria (years, enrollment, balance) | Verify years in plan, enrollment status, and transaction history |
-| **Vesting % seems incorrect** | Check enrollment type and years in plan | Verify vesting schedule matches enrollment (Old vs. New Plan) |
-| **Beneficiary shows $0 balance** | Beneficiary allocation not processed yet | Check if beneficiary transfer transactions exist in ProfitDetails |
-| **Suggested forfeit is blank** | Record is from a prior year (not current profit year) | Suggested forfeit only displays for the current year |
-| **Multiple rows for same employee** | Report spans multiple profit years | Each profit year is displayed as a separate row |
+| Issue                                | Cause                                                           | Resolution                                                               |
+| ------------------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Filter button is disabled**        | Duplicate SSNs detected                                         | Navigate to "Duplicate SSNs on Demographics" page and resolve duplicates |
+| **Employee not appearing in report** | Does not meet eligibility criteria (years, enrollment, balance) | Verify years in plan, enrollment status, and transaction history         |
+| **Vesting % seems incorrect**        | Check enrollment type and years in plan                         | Verify vesting schedule matches enrollment (Old vs. New Plan)            |
+| **Beneficiary shows $0 balance**     | Beneficiary allocation not processed yet                        | Check if beneficiary transfer transactions exist in ProfitDetails        |
+| **Suggested forfeit is blank**       | Record is from a prior year (not current profit year)           | Suggested forfeit only displays for the current year                     |
+| **Multiple rows for same employee**  | Report spans multiple profit years                              | Each profit year is displayed as a separate row                          |
 
 ### Contact & Support
 

@@ -248,7 +248,7 @@ export interface PayBenReport {
   demographicFullName: string;
   percentage: number;
 }
- 
+
 export interface PayBenReportResponse extends Paged<PayBenReport> {
   // PayBenReportResponse extends Paged interface
 }

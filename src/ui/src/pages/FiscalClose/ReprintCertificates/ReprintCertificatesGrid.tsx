@@ -108,7 +108,9 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
   const onSelectionChanged = useCallback(
     (event: SelectionChangedEvent<ReprintCertificateEmployee>) => {
       const selectedNodes = event.api.getSelectedNodes();
-      const selectedIds = selectedNodes.map((node) => node.data?.badge).filter((badge): badge is number => badge !== undefined);
+      const selectedIds = selectedNodes
+        .map((node) => node.data?.badge)
+        .filter((badge): badge is number => badge !== undefined);
       setSelectedRowIds(selectedIds);
       onSelectionChange?.(selectedIds);
     },

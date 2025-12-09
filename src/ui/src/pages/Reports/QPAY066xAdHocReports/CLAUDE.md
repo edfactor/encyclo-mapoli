@@ -1094,28 +1094,34 @@ const rowData = useMemo(() => {
 All endpoints are defined in `src/ui/src/reduxstore/api/YearsEndApi.ts`:
 
 1. **getBreakdownByStore** (QPAY066TA)
+
    - Endpoint: `GET /api/yearend/breakdown-by-store`
    - Returns: Paginated list of all managers and associates
 
 2. **getBreakdownByStoreInactive** (QPAY066-Inactive)
+
    - Endpoint: `GET /api/yearend/breakdown-by-store/inactive`
    - Returns: Inactive employees
 
 3. **getBreakdownByStoreInactiveWithVestedBalance** (QPAY066-I)
+
    - Endpoint: `GET /api/yearend/breakdown-by-store/inactive/withvestedbalance`
    - Returns: Inactive employees with vested balance
 
 4. **getBreakdownByStoreTerminatedBalanceNotVested** (QPAY066C)
+
    - Endpoint: `GET /api/yearend/breakdown-by-store/terminated/withcurrentbalance/notvested`
    - Returns: Terminated employees with balance but not vested
    - Requires: startDate, endDate
 
 5. **getBreakdownByStoreTerminatedWithBenAllocations** (QPAY066B)
+
    - Endpoint: `GET /api/yearend/breakdown-by-store/terminated/withbeneficiaryallocation`
    - Returns: Terminated employees with beneficiary allocations
    - Optional: startDate, endDate
 
 6. **getBreakdownByStoreRetiredWithBalanceActivity** (QPAY066W)
+
    - Endpoint: `GET /api/yearend/breakdown-by-store/retired/withbalanceactivity`
    - Returns: Retired employees with balance activity
    - Optional: startDate, endDate

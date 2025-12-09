@@ -23,6 +23,7 @@ PAY444.DISTRIB (ddd,ddd,ddd.dd)
 ## 💰 Critical Financial Reconciliations
 
 ### 1. Distributions (4-way match)
+
 ```
 PAY444 ─────┐
             ├──→ Must all equal
@@ -34,11 +35,13 @@ QPAY066TA ──┘
 ```
 
 ### 2. Contributions (2-way match)
+
 ```
 PAY444.CONTRIB ←→ PAY443.TotalContributions
 ```
 
 ### 3. Forfeitures (3-way match)
+
 ```
 PAY444.FORFEITS ─┬─ Must all equal
                  ├─ PAY443.TotalForfeitures
@@ -46,11 +49,13 @@ PAY444.FORFEITS ─┬─ Must all equal
 ```
 
 ### 4. Earnings (2-way match)
+
 ```
 PAY444.EARNINGS ←→ PAY443.TotalEarnings
 ```
 
 ### 5. Balances (2-way match each)
+
 ```
 Beginning: PAY444 ←→ PAY443
 Ending:    PAY444 ←→ PAY443
@@ -82,7 +87,7 @@ PAY426N-9 (Summary)
 ## ⚖️ Balance Equation (Must Always Hold)
 
 ```
-Ending Balance = Beginning Balance 
+Ending Balance = Beginning Balance
                  + Contributions
                  + Earnings
                  + Earnings2
@@ -100,10 +105,10 @@ Ending Balance = Beginning Balance
 ```
 ALLOC + PAID ALLOC = 0.00
 
-PAY444.ALLOC (money IN) 
-    + 
-PAY444.PAID_ALLOC (money OUT) 
-    = 
+PAY444.ALLOC (money IN)
+    +
+PAY444.PAID_ALLOC (money OUT)
+    =
 0.00 (must net to zero!)
 ```
 
@@ -144,17 +149,17 @@ PAY426.IN_PLAN ───→ PAY426N-9.IN_PLAN
 
 When using the `ValidateReportFieldsAsync` endpoint, use these field names:
 
-| Report Value | Field Name in API |
-|--------------|-------------------|
-| Distributions | `TotalDistributions` |
-| Contributions | `TotalContributions` |
-| Forfeitures | `TotalForfeitures` |
-| Earnings | `TotalEarnings` |
-| Beginning Balance | `BeginningBalance` |
-| Ending Balance | `EndingBalance` |
-| ALLOC | `Alloc` |
-| PAID ALLOC | `PaidAlloc` |
-| Military | `Military` |
+| Report Value      | Field Name in API    |
+| ----------------- | -------------------- |
+| Distributions     | `TotalDistributions` |
+| Contributions     | `TotalContributions` |
+| Forfeitures       | `TotalForfeitures`   |
+| Earnings          | `TotalEarnings`      |
+| Beginning Balance | `BeginningBalance`   |
+| Ending Balance    | `EndingBalance`      |
+| ALLOC             | `Alloc`              |
+| PAID ALLOC        | `PaidAlloc`          |
+| Military          | `Military`           |
 
 ---
 

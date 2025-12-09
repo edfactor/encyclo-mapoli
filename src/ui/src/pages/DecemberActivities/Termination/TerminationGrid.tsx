@@ -136,7 +136,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             <Grid>
               <ReportSummary report={termination} />
             </Grid>
-            <Grid style={{ display: 'flex', gap: 8 }}>
+            <Grid style={{ display: "flex", gap: 8 }}>
               {onToggleExpand && (
                 <IconButton
                   onClick={onToggleExpand}

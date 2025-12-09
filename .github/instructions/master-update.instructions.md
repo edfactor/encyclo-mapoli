@@ -1,6 +1,7 @@
 ---
 applyTo: "src/ui/src/pages/FiscalClose/ProfitShareEditUpdate/**/*.*"
 ---
+
 # Profit Share Edit/Update Technical Documentation
 
 ## Overview
@@ -158,9 +159,9 @@ useEffect(() => {
         message: {
           type: "warning",
           title: "Invalid Year Selected",
-          message: `Please select a ${currentYear - 1} date in the drawer menu to proceed.`
-        }
-      })
+          message: `Please select a ${currentYear - 1} date in the drawer menu to proceed.`,
+        },
+      }),
     );
   } else {
     dispatch(setInvalidProfitShareEditYear(false));
@@ -228,26 +229,33 @@ useEffect(() => {
 **Implementation**:
 
 ```typescript
-const { validationData: validationResponse, getFieldValidation } = useChecksumValidation({
-  profitYear: profitYear || 0,
-  autoFetch: true,
-  // Pass current values from PAY444 for client-side comparison with PAY443 archived values
-  currentValues: profitSharingUpdate?.profitShareUpdateTotals
-    ? {
-        TotalProfitSharingBalance: profitSharingUpdate.profitShareUpdateTotals.beginningBalance,
-        DistributionTotals: profitSharingUpdate.profitShareUpdateTotals.distributions,
-        ForfeitureTotals: profitSharingUpdate.profitShareUpdateTotals.forfeiture,
-        ContributionTotals: profitSharingUpdate.profitShareUpdateTotals.totalContribution,
-        EarningsTotals: profitSharingUpdate.profitShareUpdateTotals.earnings,
-        IncomingAllocations: profitSharingUpdate.profitShareUpdateTotals.allocations,
-        OutgoingAllocations: profitSharingUpdate.profitShareUpdateTotals.paidAllocations,
-        // NetAllocTransfer is calculated: allocations + paidAllocations
-        NetAllocTransfer:
-          (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
-          (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
-      }
-    : undefined
-});
+const { validationData: validationResponse, getFieldValidation } =
+  useChecksumValidation({
+    profitYear: profitYear || 0,
+    autoFetch: true,
+    // Pass current values from PAY444 for client-side comparison with PAY443 archived values
+    currentValues: profitSharingUpdate?.profitShareUpdateTotals
+      ? {
+          TotalProfitSharingBalance:
+            profitSharingUpdate.profitShareUpdateTotals.beginningBalance,
+          DistributionTotals:
+            profitSharingUpdate.profitShareUpdateTotals.distributions,
+          ForfeitureTotals:
+            profitSharingUpdate.profitShareUpdateTotals.forfeiture,
+          ContributionTotals:
+            profitSharingUpdate.profitShareUpdateTotals.totalContribution,
+          EarningsTotals: profitSharingUpdate.profitShareUpdateTotals.earnings,
+          IncomingAllocations:
+            profitSharingUpdate.profitShareUpdateTotals.allocations,
+          OutgoingAllocations:
+            profitSharingUpdate.profitShareUpdateTotals.paidAllocations,
+          // NetAllocTransfer is calculated: allocations + paidAllocations
+          NetAllocTransfer:
+            (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
+            (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
+        }
+      : undefined,
+  });
 ```
 
 **Validation Display**: `MasterUpdateSummaryTable` shows validation icons in column headers
@@ -371,7 +379,9 @@ All critical actions use `ProfitShareEditConfirmation` component with different 
 **Minimum Fields Required**:
 
 ```typescript
-const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams) => {
+const wasFormUsed = (
+  profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams,
+) => {
   return (
     (profitSharingEditQueryParams?.contributionPercent ?? 0) > 0 ||
     (profitSharingEditQueryParams?.earningsPercent ?? 0) > 0 ||
@@ -849,7 +859,7 @@ const useSaveAction = () => {
         dispatch(setProfitShareEditUpdateShowSearch(false));
         dispatch(clearProfitSharingUpdate());
       })
-      .catch((error    ) => {
+      .catch((error) => {
         // Handle error
         dispatch(setMessage(/* error message */));
       });

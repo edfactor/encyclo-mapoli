@@ -55,10 +55,12 @@ const DEFAULT_TEST_DATA: DuplicateNameAndBirthday = {
 /**
  * Creates a mock Redux store with security state
  */
-function createMockStore(securityState: Partial<{
-  userPermissions: string[];
-  impersonating: string[];
-}> = {}) {
+function createMockStore(
+  securityState: Partial<{
+    userPermissions: string[];
+    impersonating: string[];
+  }> = {}
+) {
   return configureStore({
     reducer: {
       security: securityReducer
@@ -109,8 +111,11 @@ function setupYearsEndApiMocks() {
     };
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([mockUnmask as any, { isLoading: false, isError: false, reset: vi.fn() }]);
+  vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockUnmask as any,
+    { isLoading: false, isError: false, reset: vi.fn() }
+  ]);
   return mockUnmask;
 }
 
@@ -133,8 +138,10 @@ beforeEach(() => {
   setupYearsEndApiMocks();
 });
 
-afterEach(() => {
-  vi.runOnlyPendingTimers();
+afterEach(async () => {
+  await act(async () => {
+    vi.runOnlyPendingTimers();
+  });
   vi.useRealTimers();
 });
 
@@ -274,10 +281,12 @@ describe("SSN Display", () => {
 
       // Act
       const button = getUnmaskButton();
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
-      // Assert - wait for promise to resolve
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Assert
       expect(screen.getByText("700-00-5181")).toBeInTheDocument();
     } finally {
       vi.useFakeTimers();
@@ -304,13 +313,11 @@ describe("Auto-Revert Timer", () => {
 
     // Act - unmask SSN
     const button = getUnmaskButton();
-    fireEvent.click(button);
-
-    // Process microtasks to resolve the promise
     await act(async () => {
+      fireEvent.click(button);
       await vi.runAllTimersAsync();
     });
-    
+
     // Verify SSN is unmasked
     expect(screen.getByText("700-00-5181")).toBeInTheDocument();
 
@@ -342,13 +349,11 @@ describe("Auto-Revert Timer", () => {
 
     // Act - unmask SSN
     const button = getUnmaskButton();
-    fireEvent.click(button);
-
-    // Process microtasks to resolve the promise
     await act(async () => {
+      fireEvent.click(button);
       await vi.runAllTimersAsync();
     });
-    
+
     // Verify SSN is unmasked
     expect(screen.getByText("700-00-5181")).toBeInTheDocument();
 
@@ -379,22 +384,20 @@ describe("Auto-Revert Timer", () => {
 
     // Act - unmask SSN
     const button = getUnmaskButton();
-    fireEvent.click(button);
-
-    // Process microtasks to resolve the promise
     await act(async () => {
+      fireEvent.click(button);
       await vi.runAllTimersAsync();
     });
-    
+
     // Verify SSN is unmasked
     expect(screen.getByText("700-00-5181")).toBeInTheDocument();
 
     // Act - unmount component before timer fires
     unmount();
-    
+
     // Advance time and ensure no errors occur
     vi.advanceTimersByTime(60000);
-    
+
     // Assert - no errors (timer was cleared)
     expect(true).toBe(true);
   });
@@ -413,7 +416,10 @@ describe("Loading States", () => {
     const mockUnmask = vi.fn().mockReturnValue({
       unwrap: () => unmaskedPromise
     });
-    vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([mockUnmask, { isLoading: false, isError: false, reset: vi.fn() }]);
+    vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([
+      mockUnmask,
+      { isLoading: false, isError: false, reset: vi.fn() }
+    ]);
 
     const store = createMockStore({
       userPermissions: ["SSN-Unmasking"]
@@ -427,14 +433,19 @@ describe("Loading States", () => {
 
     // Act - click to unmask
     const button = getUnmaskButton();
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      await vi.runAllTimersAsync();
+    });
 
     // Assert - spinner appears
-    await vi.runAllTimersAsync();
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
 
     // Cleanup
-    resolveUnmask!({ unmaskedSsn: "700-00-5181" });
+    await act(async () => {
+      resolveUnmask!({ unmaskedSsn: "700-00-5181" });
+      await vi.runAllTimersAsync();
+    });
   });
 
   it("PS-2098: Should disable button after unmasking until auto-revert", async () => {
@@ -452,10 +463,12 @@ describe("Loading States", () => {
 
     // Act - unmask SSN
     const button = getUnmaskButton();
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      await vi.runAllTimersAsync();
+    });
 
     // Assert - button is disabled after unmask
-    await vi.runAllTimersAsync();
     expect(button).toBeDisabled();
   });
 });
@@ -468,7 +481,10 @@ describe("Error Handling", () => {
     const mockUnmask = vi.fn().mockReturnValue({
       unwrap: () => Promise.reject(new Error("API Error"))
     });
-    vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([mockUnmask, { isLoading: false, isError: false, reset: vi.fn() }]);
+    vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([
+      mockUnmask,
+      { isLoading: false, isError: false, reset: vi.fn() }
+    ]);
 
     const store = createMockStore({
       userPermissions: ["SSN-Unmasking"]
@@ -482,10 +498,12 @@ describe("Error Handling", () => {
 
     // Act
     const button = getUnmaskButton();
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      await vi.runAllTimersAsync();
+    });
 
     // Assert
-    await vi.runAllTimersAsync();
     expect(screen.getByText(/API Error/i)).toBeInTheDocument();
   });
 
@@ -493,14 +511,18 @@ describe("Error Handling", () => {
     // Arrange - disable fake timers for this test
     vi.useRealTimers();
     try {
-      const mockUnmask = vi.fn()
+      const mockUnmask = vi
+        .fn()
         .mockReturnValueOnce({
           unwrap: () => Promise.reject(new Error("Test Error"))
         })
         .mockReturnValueOnce({
           unwrap: () => Promise.resolve({ unmaskedSsn: "700-00-5181" })
         });
-      vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([mockUnmask, { isLoading: false, isError: false, reset: vi.fn() }]);
+      vi.mocked(YearsEndApi.useUnmaskSsnMutation).mockReturnValue([
+        mockUnmask,
+        { isLoading: false, isError: false, reset: vi.fn() }
+      ]);
 
       const store = createMockStore({
         userPermissions: ["SSN-Unmasking"]
@@ -514,17 +536,21 @@ describe("Error Handling", () => {
 
       // Act - trigger error
       const button = getUnmaskButton();
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
-      // Assert - error shows (wait for async operation)
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Assert - error shows
       expect(screen.getByText(/Test Error/i)).toBeInTheDocument();
 
       // Act - try again successfully
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       // Assert - error is cleared
-      await new Promise(resolve => setTimeout(resolve, 100));
       expect(screen.queryByText(/Test Error/i)).not.toBeInTheDocument();
     } finally {
       vi.useFakeTimers();
@@ -571,10 +597,12 @@ describe("Accessibility", () => {
 
       // Act - unmask SSN
       const button = getUnmaskButton();
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
-      // Assert - button is disabled after click (wait for async operation)
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Assert - button is disabled after click
       expect(button).toBeDisabled();
     } finally {
       vi.useFakeTimers();
@@ -604,16 +632,16 @@ describe("Component Integration", () => {
       );
 
       const button = getUnmaskButton();
-      
+
       // Assert - verify button is rendered and functional
       expect(button).toBeInTheDocument();
-      
+
       // Verify demographic ID is used by clicking
-      fireEvent.click(button);
-      
-      // Wait for promise to resolve
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+      await act(async () => {
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+
       expect(button).toBeDisabled();
     } finally {
       vi.useFakeTimers();
@@ -637,12 +665,14 @@ describe("Component Integration", () => {
 
       // Act - Click multiple times rapidly
       const button = getUnmaskButton();
-      fireEvent.click(button);
-      fireEvent.click(button);
-      fireEvent.click(button);
+      await act(async () => {
+        fireEvent.click(button);
+        fireEvent.click(button);
+        fireEvent.click(button);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       // Assert - Button becomes disabled after first click to prevent race conditions
-      await new Promise(resolve => setTimeout(resolve, 100));
       expect(button).toBeDisabled();
     } finally {
       vi.useFakeTimers();
