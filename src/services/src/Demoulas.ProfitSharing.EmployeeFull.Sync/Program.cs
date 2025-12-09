@@ -3,6 +3,7 @@ using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -44,6 +45,8 @@ logConfig.MaskingOperators = [
 
 builder.SetDefaultLoggerConfiguration(logConfig);
 
+builder.AddProcessWatchdog();
+
 builder.AddDatabaseServices((services, factoryRequests) =>
 {
     // Register contexts without immediately resolving the interceptor
@@ -52,7 +55,7 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<AuditSaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
-        ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING]));
+        ]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
 });
