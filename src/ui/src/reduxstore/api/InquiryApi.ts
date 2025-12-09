@@ -152,6 +152,7 @@ export const InquiryApi = createApi({
         startProfitMonth?: number;
         endProfitMonth?: number;
         profitCode?: number;
+        voids?: boolean;
         contributionAmount?: number;
         earningsAmount?: number;
         forfeitureAmount?: number;

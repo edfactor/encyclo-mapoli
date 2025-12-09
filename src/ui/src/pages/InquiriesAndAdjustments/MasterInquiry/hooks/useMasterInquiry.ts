@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
-  useLazyGetProfitMasterInquiryMemberDetailsQuery,
+  useLazyGetProfitMasterInquiryFilteredDetailsQuery,
   useLazyGetProfitMasterInquiryMemberQuery,
   useLazySearchProfitMasterInquiryQuery
 } from "reduxstore/api/InquiryApi";
@@ -29,7 +29,7 @@ const useMasterInquiry = () => {
 
   const [triggerSearch, { isLoading: isSearching }] = useLazySearchProfitMasterInquiryQuery();
   const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
-  const [triggerProfitDetails] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
+  const [triggerProfitDetails] = useLazyGetProfitMasterInquiryFilteredDetailsQuery();
 
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const missivesFromStore = useSelector((state: RootState) => state.lookups.missives);
