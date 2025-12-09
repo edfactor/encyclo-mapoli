@@ -32,6 +32,11 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
     private Timer? _watchdogTimer;
     private DateTime _lastHeartbeat;
     private int _missedHeartbeats;
+    private int _errorCount;
+    private string? _lastErrorMessage;
+    private DateTime? _lastErrorTime;
+    private int _successfulCycles;
+    private DateTime? _lastSuccessfulCycle;
 
     public bool IsRunning { get; private set; }
     public DateTime? LastHeartbeat { get; private set; }
@@ -43,6 +48,11 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
         _config = config;
         _lastHeartbeat = DateTime.UtcNow;
         _missedHeartbeats = 0;
+        _errorCount = 0;
+        _lastErrorMessage = null;
+        _lastErrorTime = null;
+        _successfulCycles = 0;
+        _lastSuccessfulCycle = null;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -91,6 +101,77 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
                 _missedHeartbeats);
             _missedHeartbeats = 0;
         }
+    }
+
+    public void RecordSuccessfulCycle()
+    {
+        _successfulCycles++;
+        _lastSuccessfulCycle = DateTime.UtcNow;
+        _logger.LogDebug("Successful work cycle recorded. Total cycles: {CycleCount}", _successfulCycles);
+    }
+
+    public void RecordError(string errorMessage)
+    {
+        _errorCount++;
+        _lastErrorMessage = errorMessage;
+        _lastErrorTime = DateTime.UtcNow;
+        _logger.LogWarning("Error recorded: {ErrorMessage} (Error count: {ErrorCount})", errorMessage, _errorCount);
+    }
+
+    public ProcessHealth GetHealth()
+    {
+        var timeSinceLastHeartbeat = DateTime.UtcNow - _lastHeartbeat;
+        bool isHealthy = timeSinceLastHeartbeat.TotalSeconds <= _config.HeartbeatTimeoutSeconds
+                         && _missedHeartbeats == 0
+                         && _errorCount == 0;
+        string state = DetermineState(timeSinceLastHeartbeat);
+        string statusMessage = GenerateStatusMessage(timeSinceLastHeartbeat, state);
+
+        return new ProcessHealth
+        {
+            IsHealthy = isHealthy,
+            State = state,
+            LastHeartbeat = LastHeartbeat,
+            TimeSinceLastHeartbeat = timeSinceLastHeartbeat,
+            MissedHeartbeats = _missedHeartbeats,
+            StatusMessage = statusMessage,
+            ErrorCount = _errorCount,
+            LastErrorMessage = _lastErrorMessage,
+            LastErrorTime = _lastErrorTime,
+            SuccessfulCycles = _successfulCycles,
+            LastSuccessfulCycle = _lastSuccessfulCycle
+        };
+    }
+
+    private string DetermineState(TimeSpan timeSinceLastHeartbeat)
+    {
+        if (!IsRunning)
+            return "Stopped";
+
+        if (_errorCount > 0)
+            return "Error";
+
+        if (timeSinceLastHeartbeat.TotalSeconds > _config.HeartbeatTimeoutSeconds)
+        {
+            if (_missedHeartbeats >= _config.AlertOnMissedHeartbeats)
+                return "Critical";
+            return "Unresponsive";
+        }
+
+        return "Healthy";
+    }
+
+    private string GenerateStatusMessage(TimeSpan timeSinceLastHeartbeat, string state)
+    {
+        return state switch
+        {
+            "Healthy" => "Process is running normally with regular heartbeats.",
+            "Unresponsive" => $"Process has not responded for {(int)timeSinceLastHeartbeat.TotalSeconds}s. Missed {_missedHeartbeats} heartbeat(s).",
+            "Critical" => $"CRITICAL: Process appears unresponsive for {(int)timeSinceLastHeartbeat.TotalSeconds}s. Missed {_missedHeartbeats} heartbeat checks.",
+            "Error" => $"Process has recorded {_errorCount} error(s). Last error: {_lastErrorMessage}",
+            "Stopped" => "Watchdog is not running.",
+            _ => "Status unknown."
+        };
     }
 
     private void CheckHeartbeat(object? state)
