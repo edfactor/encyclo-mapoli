@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
-    useLazyGetProfitMasterInquiryMemberDetailsQuery,
-    useLazyGetProfitMasterInquiryMemberQuery,
-    useLazySearchProfitMasterInquiryQuery
+  useLazyGetProfitMasterInquiryMemberDetailsQuery,
+  useLazyGetProfitMasterInquiryMemberQuery,
+  useLazySearchProfitMasterInquiryQuery
 } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
@@ -14,13 +14,13 @@ import { SortParams, useGridPagination } from "../../../../hooks/useGridPaginati
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { isSimpleSearch } from "../utils/MasterInquiryFunctions";
 import {
-    initialState,
-    masterInquiryReducer,
-    selectShowMemberDetails,
-    selectShowMemberGrid,
-    selectShowProfitDetails,
-    type SearchResponse,
-    type SelectedMember
+  initialState,
+  masterInquiryReducer,
+  selectShowMemberDetails,
+  selectShowMemberGrid,
+  selectShowProfitDetails,
+  type SearchResponse,
+  type SelectedMember
 } from "./useMasterInquiryReducer";
 
 const useMasterInquiry = () => {
@@ -89,6 +89,10 @@ const useMasterInquiry = () => {
           memberType: currentSelectedMember.memberType,
           id: currentSelectedMember.id,
           voids: currentSearchParams?.voids ?? false,
+          contributionAmount: currentSearchParams?.contributionAmount,
+          earningsAmount: currentSearchParams?.earningsAmount,
+          forfeitureAmount: currentSearchParams?.forfeitureAmount,
+          paymentAmount: currentSearchParams?.paymentAmount,
           skip: pageNumber * pageSize,
           take: pageSize,
           sortBy: sortParams.sortBy,
@@ -314,6 +318,10 @@ const useMasterInquiry = () => {
       memberType: state.selection.selectedMember?.memberType,
       id: state.selection.selectedMember?.id,
       voids: state.search.params?.voids ?? false,
+      contributionAmount: state.search.params?.contributionAmount,
+      earningsAmount: state.search.params?.earningsAmount,
+      forfeitureAmount: state.search.params?.forfeitureAmount,
+      paymentAmount: state.search.params?.paymentAmount,
       pageNumber: profitGridPagination.pageNumber,
       pageSize: profitGridPagination.pageSize,
       sortBy: profitGridPagination.sortParams.sortBy,
@@ -323,6 +331,10 @@ const useMasterInquiry = () => {
       state.selection.selectedMember?.memberType,
       state.selection.selectedMember?.id,
       state.search.params?.voids,
+      state.search.params?.contributionAmount,
+      state.search.params?.earningsAmount,
+      state.search.params?.forfeitureAmount,
+      state.search.params?.paymentAmount,
       profitGridPagination.pageNumber,
       profitGridPagination.pageSize,
       profitGridPagination.sortParams.sortBy,
@@ -354,6 +366,10 @@ const useMasterInquiry = () => {
       memberType: profitFetchDeps.memberType,
       id: profitFetchDeps.id,
       voids: profitFetchDeps.voids,
+      contributionAmount: profitFetchDeps.contributionAmount,
+      earningsAmount: profitFetchDeps.earningsAmount,
+      forfeitureAmount: profitFetchDeps.forfeitureAmount,
+      paymentAmount: profitFetchDeps.paymentAmount,
       skip: profitFetchDeps.pageNumber * profitFetchDeps.pageSize,
       take: profitFetchDeps.pageSize,
       sortBy: profitFetchDeps.sortBy,
