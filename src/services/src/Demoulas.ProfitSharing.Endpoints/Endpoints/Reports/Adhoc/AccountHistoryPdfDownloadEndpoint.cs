@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -12,11 +12,10 @@ using Microsoft.Extensions.Logging;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 
 /// <summary>
-/// Endpoint for downloading account history report as a PDF file.
-/// PS-2284: Ensure audit tracking for Account History download.
-/// This endpoint generates a PDF for the specified member and tracks the download in the audit log.
+/// Endpoint for exporting account history reports to PDF format.
+/// Generates a complete PDF document with member account activity by profit year.
 /// </summary>
-public sealed class AccountHistoryPdfDownloadEndpoint : ProfitSharingEndpoint<AccountHistoryReportRequest, Results<FileStreamHttpResult, BadRequest<object>, ProblemHttpResult>>
+public sealed class AccountHistoryPdfDownloadEndpoint : ProfitSharingEndpoint<AccountHistoryReportRequest, Results<FileStreamHttpResult, ProblemHttpResult>>
 {
     private readonly IAccountHistoryReportService _accountHistoryReportService;
     private readonly ILogger<AccountHistoryPdfDownloadEndpoint> _logger;
@@ -32,26 +31,26 @@ public sealed class AccountHistoryPdfDownloadEndpoint : ProfitSharingEndpoint<Ac
 
     public override void Configure()
     {
-        Post("account-history-pdf-download");
+        Post("divorce-report/export-pdf");
         Group<AdhocReportsGroup>();
         Summary(s =>
         {
-            s.Summary = "Download Account History Report as PDF";
-            s.Description = "Generates and downloads the account history report as a PDF file. Tracks download in audit log for compliance and security purposes (PS-2284).";
+            s.Summary = "Export Account History Report to PDF";
+            s.Description = "Generates and exports a complete account history report to PDF format. Includes all profit years within the specified date range with member account activity (contributions, earnings, forfeitures, withdrawals, and balances).";
             s.ExampleRequest = new AccountHistoryReportRequest
             {
                 BadgeNumber = 700518,
                 StartDate = new DateOnly(2017, 1, 1),
                 EndDate = new DateOnly(2024, 12, 31)
             };
-            s.Responses[200] = "PDF file generated successfully and ready for download";
+            s.Responses[200] = "PDF file generated successfully";
             s.Responses[400] = "Bad Request. Invalid badge number or date range.";
-            s.Responses[404] = "No account history data found for the specified member.";
+            s.Responses[404] = "Member not found or no account history available.";
             s.Responses[500] = "Internal Server Error.";
         });
     }
 
-    public override async Task<Results<FileStreamHttpResult, BadRequest<object>, ProblemHttpResult>> ExecuteAsync(
+    public override async Task<Results<FileStreamHttpResult, ProblemHttpResult>> ExecuteAsync(
         AccountHistoryReportRequest req,
         CancellationToken ct)
     {
@@ -60,82 +59,79 @@ public sealed class AccountHistoryPdfDownloadEndpoint : ProfitSharingEndpoint<Ac
         try
         {
             // Record request metrics - this endpoint accesses SSN data
-            this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn");
+            this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn", "FirstName", "LastName");
 
-            // Validate badge number
             if (req.BadgeNumber == 0)
             {
                 _logger.LogWarning(
-                    "Account history PDF download requested without valid badge number (correlation: {CorrelationId})",
+                    "Account history PDF export requested without valid badge number (correlation: {CorrelationId})",
                     HttpContext.TraceIdentifier);
 
-                return TypedResults.BadRequest((object)"BadgeNumber is required and must be greater than zero");
+                return TypedResults.Problem(
+                    detail: "Invalid badge number. Badge number must be greater than 0.",
+                    statusCode: StatusCodes.Status400BadRequest);
             }
 
-            _logger.LogInformation(
-                "Starting Account History PDF download for badge {BadgeNumber}, profit year range: {StartYear} - {EndYear} (correlation: {CorrelationId})",
-                req.BadgeNumber,
-                req.StartDate?.Year ?? DateTime.Now.Year - 3,
-                req.EndDate?.Year ?? DateTime.Now.Year,
-                HttpContext.TraceIdentifier);
-
-            // Generate PDF - includes audit logging internally (PS-2284)
+            // Generate PDF using the service
             var pdfStream = await _accountHistoryReportService.GeneratePdfAsync(
                 req.BadgeNumber,
                 req,
                 ct);
 
-            // Record business metrics for PDF download
+            if (pdfStream.Length == 0)
+            {
+                _logger.LogWarning(
+                    "No account history data found for badge {BadgeNumber} (correlation: {CorrelationId})",
+                    req.BadgeNumber,
+                    HttpContext.TraceIdentifier);
+
+                return TypedResults.Problem(
+                    detail: $"No account history data found for member badge {req.BadgeNumber}.",
+                    statusCode: StatusCodes.Status404NotFound);
+            }
+
+            // Record business metrics for PDF generation
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "account-history-pdf-download"),
-                new("endpoint", "AccountHistoryPdfDownloadEndpoint"),
+                new("operation", "account-history-report-pdf-export"),
+                new("endpoint", "ExportAccountHistoryReportPdfEndpoint"),
                 new("report_type", "account-history-pdf"),
                 new("date_range_years", $"{(req.StartDate?.Year ?? 2017)}-{(req.EndDate?.Year ?? DateTime.Today.Year)}"));
 
-            EndpointTelemetry.SensitiveFieldAccessTotal.Add(1,
-                new("field", "Ssn"),
-                new("endpoint", "AccountHistoryPdfDownloadEndpoint"));
+            // Record file size metrics
+            EndpointTelemetry.RecordCountsProcessed.Record((int)pdfStream.Length,
+                new("record_type", "pdf-export-bytes"),
+                new("endpoint", "ExportAccountHistoryReportPdfEndpoint"));
 
             _logger.LogInformation(
-                "Successfully generated Account History PDF for badge {BadgeNumber}, file size: {FileSizeKb} KB (correlation: {CorrelationId})",
+                "Account history PDF exported for badge {BadgeNumber}, file size: {FileSize} bytes (correlation: {CorrelationId})",
                 req.BadgeNumber,
-                pdfStream.Length / 1024,
+                pdfStream.Length,
                 HttpContext.TraceIdentifier);
 
-            // Return PDF as file stream with appropriate headers
-            var fileName = $"AccountHistory_Badge{req.BadgeNumber}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            // Reset stream position to beginning for output
+            pdfStream.Position = 0;
+
+            // Generate filename with member badge and date range
+            var fileName = $"AccountHistory_{req.BadgeNumber}_{req.StartDate:yyyy-MM-dd}_to_{req.EndDate:yyyy-MM-dd}.pdf";
+
             return TypedResults.File(
-                pdfStream,
+                fileStream: pdfStream,
                 contentType: "application/pdf",
                 fileDownloadName: fileName);
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "No account history data found for badge {BadgeNumber} (correlation: {CorrelationId})",
-                req.BadgeNumber,
-                HttpContext.TraceIdentifier);
-
-            this.RecordException(HttpContext, _logger, ex, activity);
-            return TypedResults.Problem(
-                detail: $"No account history found for badge {req.BadgeNumber}",
-                statusCode: StatusCodes.Status404NotFound,
-                title: "Account History Not Found");
         }
         catch (Exception ex)
         {
             _logger.LogError(
                 ex,
-                "Error generating Account History PDF for badge {BadgeNumber} (correlation: {CorrelationId})",
+                "Error exporting account history PDF for badge {BadgeNumber} (correlation: {CorrelationId})",
                 req.BadgeNumber,
                 HttpContext.TraceIdentifier);
 
             this.RecordException(HttpContext, _logger, ex, activity);
+
             return TypedResults.Problem(
-                detail: $"Failed to generate PDF: {ex.Message}",
-                statusCode: StatusCodes.Status500InternalServerError,
-                title: "PDF Generation Failed");
+                detail: "An error occurred while generating the PDF report.",
+                statusCode: StatusCodes.Status500InternalServerError);
         }
     }
 }
