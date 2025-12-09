@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Beneficiaries.Validators;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using FluentValidation;
@@ -18,49 +19,51 @@ public class BeneficiaryService : IBeneficiaryService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
-    public BeneficiaryService(IProfitSharingDataContextFactory dataContextFactory,
+    private readonly CreateBeneficiaryRequestValidator _createBeneficiaryValidator;
+    private readonly CreateBeneficiaryContactRequestValidator _createBeneficiaryContactValidator;
+    private readonly UpdateBeneficiaryContactRequestValidator _updateBeneficiaryContactValidator;
+    private readonly BeneficiaryDatabaseValidator _databaseValidator;
+
+    public BeneficiaryService(
+        IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
         TotalService totalService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
+        _createBeneficiaryValidator = new CreateBeneficiaryRequestValidator();
+        _createBeneficiaryContactValidator = new CreateBeneficiaryContactRequestValidator();
+        _updateBeneficiaryContactValidator = new UpdateBeneficiaryContactRequestValidator();
+        _databaseValidator = new BeneficiaryDatabaseValidator(demographicReaderService);
     }
     public async Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
+        // Validate request using FluentValidation
+        var validationResult = await _createBeneficiaryValidator.ValidateAsync(req, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
+
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            var beneficiaryContact = await ctx.BeneficiaryContacts.FirstOrDefaultAsync(x => x.Id == req.BeneficiaryContactId, cancellationToken);
-            if (beneficiaryContact == default)
+            // Validate database-dependent business rules
+            var dbValidationResult = await _databaseValidator.ValidateCreateBeneficiaryAsync(
+                req.BeneficiaryContactId,
+                req.EmployeeBadgeNumber,
+                ctx,
+                cancellationToken);
+
+            if (!dbValidationResult.IsValid)
             {
-                throw new InvalidOperationException("Beneficiary Contact does not exist");
+                throw new ValidationException(dbValidationResult.Errors);
             }
 
+            // At this point, validation has confirmed these entities exist
+            var beneficiaryContact = (await ctx.BeneficiaryContacts.FirstOrDefaultAsync(x => x.Id == req.BeneficiaryContactId, cancellationToken))!;
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var demographic = await demographicQuery.Where(x => x.BadgeNumber == req.EmployeeBadgeNumber).SingleOrDefaultAsync(cancellationToken);
-            if (demographic == default)
-            {
-                throw new InvalidOperationException("Employee Badge does not exist");
-            }
-
-            if (req.FirstLevelBeneficiaryNumber.HasValue && (req.FirstLevelBeneficiaryNumber < 0 || req.FirstLevelBeneficiaryNumber > 9))
-            {
-                throw new InvalidOperationException("FirstLevelBeneficiaryNumber must be between 1 and 9");
-            }
-
-            if (req.SecondLevelBeneficiaryNumber.HasValue && (req.SecondLevelBeneficiaryNumber < 0 || req.SecondLevelBeneficiaryNumber > 9))
-            {
-                throw new InvalidOperationException("SecondLevelBeneficiaryNumber must be between 1 and 9");
-            }
-
-            if (req.ThirdLevelBeneficiaryNumber.HasValue && (req.ThirdLevelBeneficiaryNumber < 0 || req.ThirdLevelBeneficiaryNumber > 9))
-            {
-                throw new InvalidOperationException("ThirdLevelBeneficiaryNumber must be between 1 and 9");
-            }
-            if (req.Percentage < 0 || req.Percentage > 100)
-            {
-                throw new InvalidOperationException("Invalid percentage");
-            }
+            var demographic = (await demographicQuery.Where(x => x.BadgeNumber == req.EmployeeBadgeNumber).SingleOrDefaultAsync(cancellationToken))!;
 
             var psnSuffix = await FindPsn(req, ctx, cancellationToken);
             var beneficiary = new Beneficiary
@@ -101,15 +104,24 @@ public class BeneficiaryService : IBeneficiaryService
 
     public async Task<CreateBeneficiaryContactResponse> CreateBeneficiaryContact(CreateBeneficiaryContactRequest req, CancellationToken cancellationToken)
     {
+        // Validate request using FluentValidation
+        var validationResult = await _createBeneficiaryContactValidator.ValidateAsync(req, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
+
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            if (req.ContactSsn > 999999999)
+            // Validate database-dependent business rules
+            var dbValidationResult = await BeneficiaryDatabaseValidator.ValidateCreateBeneficiaryContactAsync(
+                req.ContactSsn,
+                ctx,
+                cancellationToken);
+
+            if (!dbValidationResult.IsValid)
             {
-                throw new InvalidOperationException("Contact Ssn must be 9 digits");
-            }
-            if (await ctx.BeneficiaryContacts.AnyAsync(x => x.Ssn == req.ContactSsn, cancellationToken))
-            {
-                throw new InvalidOperationException("Contact Ssn already exists");
+                throw new ValidationException(dbValidationResult.Errors);
             }
             var beneficiaryContact = new BeneficiaryContact()
             {
@@ -248,13 +260,17 @@ public class BeneficiaryService : IBeneficiaryService
         return response;
     }
 
-    private static async Task<BeneficiaryContact> SetBeneficiaryContactColumns(int beneficiaryContactId, UpdateBeneficiaryContactRequest req, ProfitSharingDbContext ctx, UpdateBeneficiaryContactResponse response, CancellationToken cancellationToken)
+    private async Task<BeneficiaryContact> SetBeneficiaryContactColumns(int beneficiaryContactId, UpdateBeneficiaryContactRequest req, ProfitSharingDbContext ctx, UpdateBeneficiaryContactResponse response, CancellationToken cancellationToken)
     {
-        var contact = await ctx.BeneficiaryContacts.Include(x => x.Address).Include(x => x.ContactInfo).SingleAsync(x => x.Id == beneficiaryContactId, cancellationToken);
-        if (req.ContactSsn is > 999999999)
+        // Validate request using FluentValidation
+        req.Id = beneficiaryContactId; // Ensure ID is set for validation
+        var validationResult = await _updateBeneficiaryContactValidator.ValidateAsync(req, cancellationToken);
+        if (!validationResult.IsValid)
         {
-            throw new InvalidOperationException("Contact Ssn must be 9 digits");
+            throw new ValidationException(validationResult.Errors);
         }
+
+        var contact = await ctx.BeneficiaryContacts.Include(x => x.Address).Include(x => x.ContactInfo).SingleAsync(x => x.Id == beneficiaryContactId, cancellationToken);
 
         if (req.ContactSsn.HasValue)
         {
