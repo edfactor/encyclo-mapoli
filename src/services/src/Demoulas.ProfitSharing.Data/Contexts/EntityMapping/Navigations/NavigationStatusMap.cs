@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
+
 internal sealed class NavigationStatusMap : IEntityTypeConfiguration<NavigationStatus>
 {
     public void Configure(EntityTypeBuilder<NavigationStatus> builder)

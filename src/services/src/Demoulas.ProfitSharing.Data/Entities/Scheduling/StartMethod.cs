@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities.Scheduling;
+
 public sealed class StartMethod : ILookupTable<byte>
 {
     public static class Constants

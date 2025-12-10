@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
+
 public class Missive
 {
     public static class Constants

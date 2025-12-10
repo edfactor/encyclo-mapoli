@@ -4,7 +4,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
-using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Contracts.Response;
 

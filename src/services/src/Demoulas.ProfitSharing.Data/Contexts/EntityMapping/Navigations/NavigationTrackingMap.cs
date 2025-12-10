@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
+
 internal sealed class NavigationTrackingMap : IEntityTypeConfiguration<NavigationTracking>
 {
     public void Configure(EntityTypeBuilder<NavigationTracking> builder)

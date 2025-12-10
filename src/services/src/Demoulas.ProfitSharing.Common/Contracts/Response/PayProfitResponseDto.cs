@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
 public sealed record PayProfitResponseDto : IProfitYearRequest
 {
     /// <summary>

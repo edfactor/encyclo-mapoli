@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
+
 public sealed class DummyUser : IAppUser
 {
     public bool HasRole(string roleName)

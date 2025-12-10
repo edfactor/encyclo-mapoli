@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Validation;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Validation;
 
 /// <summary>
 /// Request to validate specific fields of a report against archived checksums.

@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -64,7 +64,7 @@ public class UpdateSummaryTests : PristineBaseTest
         }
 
         TestOutputHelper.WriteLine($"Discrepancy Count {comparisons.Count}");
-        
+
         if (comparisons.Count > 0)
         {
             TestOutputHelper.WriteLine($"\n=== DETAILED DISCREPANCIES (first 30 of {comparisons.Count}) ===");
@@ -85,7 +85,7 @@ public class UpdateSummaryTests : PristineBaseTest
 
             // Common badges that appear on both TotalService and PAY450 reports
             HashSet<string> commonBadges = new() { "700173", "700569", "700655", "702489", "706161" };
-            Dictionary<int, decimal> readyEtvaByBadge = await ReadyPayProfitLoader.GetReadyEtvaByBadge(DbFactory.ConnectionString, comparisons.Select(vci=>int.Parse(ExtractBadge(vci.Actual.BadgeAndStore))).ToList());
+            Dictionary<int, decimal> readyEtvaByBadge = await ReadyPayProfitLoader.GetReadyEtvaByBadge(DbFactory.ConnectionString, comparisons.Select(vci => int.Parse(ExtractBadge(vci.Actual.BadgeAndStore))).ToList());
 
             MarkdownTable detailedTable = new([
                 "Badge",
@@ -131,14 +131,14 @@ public class UpdateSummaryTests : PristineBaseTest
                 { "Sum of After Vested Differences (Smart - Ready)", $"${totalAfterVestedDifference:N2}" }
             };
 
-            #if false
+#if false
             // Save HTML version
             string title = $"PAY450 Discrepancies - Count of {comparisons.Count} of {intersection.Count:N0} considered";
             detailedTable.SaveAsHtml("/Users/robertherrmann/Desktop/demos/sprint-38/update-summary-discrepancies.html", title, summaryStats);
             TestOutputHelper.WriteLine("HTML report saved to: /Users/robertherrmann/Desktop/demos/sprint-37/update-summary-discrepancies.html");
-            #endif 
+#endif
             TestOutputHelper.WriteLine($"Sum of After Vested Differences (Smart - Ready): ${totalAfterVestedDifference:N2} across {afterVestedDifferenceCount} records");
-        
+
             if (sortedComparisons.Count > 30)
             {
                 TestOutputHelper.WriteLine($"... and {sortedComparisons.Count - 30} more discrepancies");

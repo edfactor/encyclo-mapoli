@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using Demoulas.Common.Data.Contexts.Configuration;
-using Demoulas.Common.Data.Services.Interfaces;
+﻿using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;

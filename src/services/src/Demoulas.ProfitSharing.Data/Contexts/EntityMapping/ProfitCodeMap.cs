@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class ProfitCodeMap : IEntityTypeConfiguration<ProfitCode>
 {
     public void Configure(EntityTypeBuilder<ProfitCode> builder)

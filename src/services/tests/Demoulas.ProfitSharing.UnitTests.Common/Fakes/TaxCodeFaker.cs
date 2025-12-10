@@ -1,7 +1,8 @@
-using Bogus;
+﻿using Bogus;
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
+
 internal sealed class TaxCodeFaker : Faker<TaxCode>
 {
     internal TaxCodeFaker()

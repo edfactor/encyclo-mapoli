@@ -1,5 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
-using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+﻿using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 

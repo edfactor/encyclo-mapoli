@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+
 public record PhoneItem(
     string PhoneId,
     string PhoneType,

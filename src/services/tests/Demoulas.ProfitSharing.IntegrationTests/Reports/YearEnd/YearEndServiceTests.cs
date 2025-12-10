@@ -1,4 +1,4 @@
-using System.Data.Common;
+﻿using System.Data.Common;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;

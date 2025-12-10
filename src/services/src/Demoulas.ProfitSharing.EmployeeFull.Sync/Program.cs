@@ -9,7 +9,6 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
-using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.Util.Extensions;
 

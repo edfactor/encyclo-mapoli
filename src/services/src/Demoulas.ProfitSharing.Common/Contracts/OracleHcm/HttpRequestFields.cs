@@ -1,6 +1,7 @@
 ﻿using System.Text;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+
 public static class HttpRequestFields
 {
     private static readonly HashSet<string> _root = ["PersonNumber", "PersonId", "DateOfBirth", "LastUpdateDate"];

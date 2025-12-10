@@ -1,5 +1,4 @@
-using System.Text.Json;
-using Demoulas.ProfitSharing.Api;
+﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -10,7 +9,6 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
-using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 

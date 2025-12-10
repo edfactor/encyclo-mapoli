@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using YEMatch.Activities;
 using YEMatch.ReadyActivities;
@@ -30,7 +30,7 @@ public class GoldenExpressRun : Runnable
     {
         // YE Express runs though frozen to End for both READY and SMART
         // ideally as quickly as possible
-        await Run(Specify( 
+        await Run(Specify(
             P00_BuildDatabase, // init both dbs
             DropBadBenesReady, // in READY, get rid of the two Bene/Employees w/o Demographics rows
 
@@ -42,29 +42,29 @@ public class GoldenExpressRun : Runnable
 
             // PAY426
             R18_ProfitShareReportFinalRun, // "PROF-SHARE sw[2]=1 CDATE=251227 YEAREND=Y" on READY
-            // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
-            
+                                           // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
+
             IntTestPay426DataUpdates,
             S18_ProfitShareReportFinalRun, // Run YearEndService on SMART  - update EarnPoints
 
             // Should match
             ActivityName.TestPayProfitSelectedColumns, // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
-            
+
             R20_ProfitForfeit, // PAY443
             IntPay443, // Runs the SMART Integration test
-            
+
             R21_ProfitShareUpdate, // PAY444 - update intermediate values
             IntPay444Test, // <-- Will fail with Nava
 
             R22_ProfitShareEdit, // PAY447 - creates a data file
             IntPay447Test,
-                
+
             UpdateNavigation, // Update the navigation table
 
             R23_ProfitMasterUpdate, // updates ready with contributions 
 
             IntProfitMasterUpdateTest, // Runs Contributions on Smart
-            
+
             // Ensure that YE update went to plan
             TestProfitDetailSelectedColumns, // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont,enrollment_id
             TestEtvaNow, // Verify ETVA for 2025
@@ -75,11 +75,11 @@ public class GoldenExpressRun : Runnable
 
             S24_ProfPayMasterUpdate, // <--- Writes out update enrollments to the OPEN PROFIT YEAR
             IntPay450 // Does the FrozenService produce the same report as READY?
-            
-            // S24_ProfPayMasterUpdate // <--- Writes out update enrollments
-            // 
-            
-            
+
+        // S24_ProfPayMasterUpdate // <--- Writes out update enrollments
+        // 
+
+
         ));
     }
 }

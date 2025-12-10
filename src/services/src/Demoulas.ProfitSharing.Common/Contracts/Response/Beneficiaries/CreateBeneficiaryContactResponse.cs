@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
+
 using Shared;
 
 [NoMemberDataExposed] //If you created the beneficiary, you should be able to see it immediately afterwards.

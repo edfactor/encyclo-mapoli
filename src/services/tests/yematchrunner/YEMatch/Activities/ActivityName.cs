@@ -1,4 +1,4 @@
-namespace YEMatch.Activities;
+﻿namespace YEMatch.Activities;
 
 /// <summary>
 ///     Enumeration of all available activities in the YEMatch testing framework.

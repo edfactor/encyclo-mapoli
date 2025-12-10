@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class BeneficiaryContact : ModifiedBase
 {
     private int _ssn;

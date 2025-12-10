@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
 public sealed record BalanceEndpointResponse : IdRequest
 {
     public required string Ssn { get; set; }

@@ -1,10 +1,7 @@
-using System.ComponentModel;
-using Demoulas.ProfitSharing.Common;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.EnrollmentFlag;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
@@ -27,7 +24,7 @@ public class EnrollmentSummarizerTests
     {
         var es = new EnrollmentSummarizer();
         var res = es.ComputeEnrollment(payProfit, yearsOfService, profitDetails);
-        
+
         // Verify both match expected result
         res.ShouldBe(expectedEnrollment, $"failed for: {testContext}");
     }
