@@ -146,7 +146,7 @@ Review: **All sections** including documentation and branching
   // ❌ WRONG - AUTO-REJECT: Frontend age calculation
   const age = Math.floor(
     (Date.now() - new Date(dateOfBirth).getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25),
+      (1000 * 60 * 60 * 24 * 365.25)
   );
   const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 
@@ -599,6 +599,7 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **All environments have same settings**: Development, Testing, QA, UAT appsettings include temporality preference for consistency
 
 **Why This Matters:**
+
 - Dynatrace doesn't support "cumulative" temporality (the OTLP SDK default) - metrics will silently fail to ingest
 - Configuration drift (different settings per environment) causes debugging nightmares when metrics appear in some envs but not others
 - Missing API token permissions causes silent failures (no error message, just no metrics)
