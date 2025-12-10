@@ -146,7 +146,7 @@ Review: **All sections** including documentation and branching
   // ❌ WRONG - AUTO-REJECT: Frontend age calculation
   const age = Math.floor(
     (Date.now() - new Date(dateOfBirth).getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25),
+      (1000 * 60 * 60 * 24 * 365.25)
   );
   const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 
@@ -583,6 +583,29 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **Mock logger verified**: Test assertions on logger calls
 
 **Reference:** `TELEMETRY_GUIDE.md` (src/ui/public/docs/)
+
+### OpenTelemetry Configuration (NEW ENVIRONMENTS or Config Changes)
+
+**Applies to:** New environment setup, Dynatrace migration, infrastructure changes
+
+- [ ] **Temporality preference set to "delta"**: `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "delta"` (CRITICAL - not the OTLP SDK default)
+- [ ] **OTEL endpoint configured**: `OTEL_EXPORTER_OTLP_ENDPOINT` points to correct Dynatrace instance
+- [ ] **OTEL protocol set correctly**: `OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"` (binary format, not gRPC)
+- [ ] **Service name follows convention**: `OTEL_SERVICE_NAME: "ProfitSharing-{Environment}"` (e.g., ProfitSharing-QA)
+- [ ] **API token secured**: `OTEL_EXPORTER_OTLP_HEADERS` uses environment variable or Key Vault, NOT hardcoded
+- [ ] **HTTP/1.1 forced**: `OTEL_EXPORTER_OTLP_FORCE_HTTP11: true` (Dynatrace prefers HTTP/1.1)
+- [ ] **SSL verification production-ready**: `OTEL_EXPORTER_OTLP_IGNORE_SSL: false` in production (true only for dev self-signed certs)
+- [ ] **Resource attributes populated**: `OTEL_RESOURCE_ATTRIBUTES` includes service name, environment, version for Dynatrace grouping
+- [ ] **All environments have same settings**: Development, Testing, QA, UAT appsettings include temporality preference for consistency
+
+**Why This Matters:**
+
+- Dynatrace doesn't support "cumulative" temporality (the OTLP SDK default) - metrics will silently fail to ingest
+- Configuration drift (different settings per environment) causes debugging nightmares when metrics appear in some envs but not others
+- Missing API token permissions causes silent failures (no error message, just no metrics)
+- `http/protobuf` is required (Dynatrace doesn't support gRPC)
+
+**Reference:** `.github/OTEL_CONFIGURATION_QUICK_REFERENCE.md`, `.github/TELEMETRY_CONFIGURATION_REVIEW.md`
 
 ---
 

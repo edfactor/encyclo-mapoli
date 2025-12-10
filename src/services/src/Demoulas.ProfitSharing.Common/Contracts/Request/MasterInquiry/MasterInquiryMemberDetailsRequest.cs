@@ -19,4 +19,5 @@ public record MasterInquiryMemberDetailsRequest : SortedPaginationRequestDto
     public decimal? PaymentAmount { get; set; }
     public string? Name { get; set; }
     public byte? PaymentType { get; set; }
+    public bool? Voids { get; set; }
 }

@@ -13,8 +13,9 @@ namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 ///   Abstraction for testing api endpoints that use a <c>DbContext</c>.
 ///   NOTE: Each test CLASS (not method) gets its own factory instance.
 ///   Tests within the same [Collection] share the factory, so they may pollute each other's data.
+///   Implements IAsyncDisposable to clean up ServiceProvider and HTTP clients after test completion.
 /// </summary>
-public class ApiTestBase<TStartup> where TStartup : class
+public class ApiTestBase<TStartup> : IAsyncDisposable where TStartup : class
 {
     /// <summary>
     ///   Mock for DbContext.
@@ -98,6 +99,22 @@ public class ApiTestBase<TStartup> where TStartup : class
         {
             return await ctx.PayProfits.MaxAsync(pp => pp.ProfitYear, cancellationToken: cancellationToken);
         }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Disposes test resources to reduce memory accumulation during test suite execution.
+    /// Called by xUnit test runner after each test class completes.
+    /// </summary>
+    public ValueTask DisposeAsync()
+    {
+        // Dispose ServiceProvider to release all registered services and their resources
+        ServiceProvider?.Dispose();
+
+        // Dispose HTTP clients to close connections and free resources
+        ApiClient?.Dispose();
+        DownloadClient?.Dispose();
+
+        return ValueTask.CompletedTask;
     }
 
 }
