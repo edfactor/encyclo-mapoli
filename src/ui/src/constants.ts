@@ -110,7 +110,7 @@ export const CAPTIONS = {
   POST_FROZEN: "Post Frozen",
   DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures (QPAY129)",
   DISTRIBUTIONS_BY_AGE: "Distributions by Age (PROF130)",
-  DISTRIBUTIONS_INQUIRY: "Distribution Inquiry (008-14l)",
+  DISTRIBUTIONS_INQUIRY: "Distribution Inquiry (008-14L)",
   VIEW_DISTRIBUTION: "View Distribution (008-14V)",
   ADD_DISTRIBUTION: "Add Distribution (008-14A)",
   EDIT_DISTRIBUTION: "Edit Distribution (008-14E)",
