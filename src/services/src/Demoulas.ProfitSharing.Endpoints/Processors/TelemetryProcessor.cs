@@ -169,11 +169,19 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
     /// <summary>
     /// Retrieves the session ID from cookies for user journey tracking across requests.
     /// </summary>
-    private static string GetSessionId(HttpContext context)
+    private static string GetSessionId(HttpContext? context)
     {
-        const string SessionCookieName = "ps-session-id";
+        const string sessionCookieName = "ps-session-id";
 
-        if (context.Request.Cookies.TryGetValue(SessionCookieName, out var sessionId) &&
+        // First, try to get from HttpContext.Items (set by middleware in same request)
+        if (context?.Items.TryGetValue(sessionCookieName, out var itemSessionId) == true &&
+            itemSessionId is string itemSessionIdStr && !string.IsNullOrEmpty(itemSessionIdStr))
+        {
+            return itemSessionIdStr;
+        }
+
+        // Fallback: try to get from request cookies (for subsequent requests)
+        if (context?.Request.Cookies.TryGetValue(sessionCookieName, out var sessionId) == true &&
             !string.IsNullOrEmpty(sessionId))
         {
             return sessionId;
