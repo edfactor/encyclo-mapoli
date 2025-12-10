@@ -1,5 +1,4 @@
-using System.Net;
-using Demoulas.ProfitSharing.Api;
+﻿using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -12,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
+
 public class FrozenReportServiceTests : ApiTestBase<Program>
 {
     [Fact(DisplayName = "PS-61 - Get Forfeitures and Points report.  PAY443")]
@@ -138,7 +138,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
                 pd.Forfeiture = 0;
                 pd.YearsOfServiceCredit = 1;
             }
-            
+
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 

@@ -316,7 +316,7 @@ public static class Pay426Parser
             Points = (short)emp.Points,
             IsUnder21 = emp.IsUnder21, // Use from marker field
             IsNew = emp.IsNew,
-            
+
             // Reusing the DTO between PAY426 and PAY426N reports
             EmployeeStatus = null, // Not available in PAY426 report
             Balance = 0, // Not available in PAY426 report

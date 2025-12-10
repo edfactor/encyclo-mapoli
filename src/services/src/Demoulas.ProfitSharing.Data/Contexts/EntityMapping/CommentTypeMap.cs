@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class CommentTypeMap : IEntityTypeConfiguration<CommentType>
 {
     public void Configure(EntityTypeBuilder<CommentType> builder)

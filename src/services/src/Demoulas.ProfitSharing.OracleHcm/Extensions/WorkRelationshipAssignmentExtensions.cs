@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
+
 internal static partial class WorkRelationshipAssignmentExtensions
 {
     [GeneratedRegex(@"(?:.*?-){2}(\d+)", RegexOptions.Compiled)]

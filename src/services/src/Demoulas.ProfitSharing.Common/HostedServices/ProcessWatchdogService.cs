@@ -146,15 +146,22 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
     private string DetermineState(TimeSpan timeSinceLastHeartbeat)
     {
         if (!IsRunning)
+        {
             return "Stopped";
+        }
 
         if (_errorCount > 0)
+        {
             return "Error";
+        }
 
         if (timeSinceLastHeartbeat.TotalSeconds > _config.HeartbeatTimeoutSeconds)
         {
             if (_missedHeartbeats >= _config.AlertOnMissedHeartbeats)
+            {
                 return "Critical";
+            }
+
             return "Unresponsive";
         }
 

@@ -1,6 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 namespace Demoulas.ProfitSharing.Services;
 

@@ -402,7 +402,7 @@ public static class Pay426NParser
         {
             BadgeNumber = emp.BadgeNumber,
             ProfitYear = profitYear,
-//            PriorProfitYear = (short)(profitYear - 1),
+            //            PriorProfitYear = (short)(profitYear - 1),
             FullName = emp.Name,
             StoreNumber = emp.StoreNumber,
             EmployeeTypeCode = emp.EmployeeTypeCode,
@@ -411,7 +411,7 @@ public static class Pay426NParser
             Age = age,
             Ssn = emp.Ssn,
             Wages = emp.Wages,
-   //         PriorBalance = 0, // Not available in PAY426 report
+            //         PriorBalance = 0, // Not available in PAY426 report
             // Truncate hours to match SMART's behavior (COBOL uses S-HRS integer part)
             Hours = Math.Truncate(emp.Hours),
             Points = (short)emp.Points,

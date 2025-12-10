@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Extensions;
+
 public static class DateOnlyExtensions
 {
     public static DateTimeOffset ToDateTimeOffset(this DateOnly date, TimeOnly time = default, TimeZoneInfo? timeZone = null)

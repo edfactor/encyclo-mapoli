@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
 public sealed record RehireTransactionDetailResponse : IProfitYearRequest
 {
     public required short ProfitYear { get; set; }

@@ -1,7 +1,7 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
+
 public record MasterInquiryMemberDetailsRequest : SortedPaginationRequestDto
 {
     public required byte? MemberType { get; set; }

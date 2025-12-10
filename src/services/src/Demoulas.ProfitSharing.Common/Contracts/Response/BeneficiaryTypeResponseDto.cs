@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
 public sealed record BeneficiaryTypeResponseDto
 {
     public required byte Id { get; set; }

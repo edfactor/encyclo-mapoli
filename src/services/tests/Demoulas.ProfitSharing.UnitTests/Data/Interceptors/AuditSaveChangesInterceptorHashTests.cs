@@ -1,11 +1,9 @@
-using System.ComponentModel;
-using Demoulas.Common.Contracts.Interfaces;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Data.Interceptors;
 
