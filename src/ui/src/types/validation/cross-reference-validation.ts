@@ -66,11 +66,11 @@ export interface CrossReferenceValidationGroup {
 }
 
 export interface ProfitSharingReportValidationRequest extends ProfitYearRequest {
-  reportSuffix: number
+  reportSuffix: number;
 }
 
 export interface ValidationResponse {
-/** Profit year being validated */
+  /** Profit year being validated */
   profitYear: number;
 
   /** Whether all validations passed */
@@ -108,7 +108,6 @@ export interface ValidationResponse {
  * Complete validation result for Master Update operation including all validation groups
  */
 export interface MasterUpdateCrossReferenceValidationResponse extends ValidationResponse {
-  
   /** Whether Master Update should be blocked due to Critical failures */
   blockMasterUpdate: boolean;
 }

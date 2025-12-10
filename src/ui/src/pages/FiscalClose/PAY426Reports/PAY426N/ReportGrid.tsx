@@ -118,7 +118,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
     if (hasToken && params) {
       const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
       const presetNumber = matchingPreset ? Number(matchingPreset.id) : 0;
-      
+
       if (presetNumber >= 1 && presetNumber <= 8) {
         triggerValidation({ profitYear, reportSuffix: presetNumber })
           .unwrap()

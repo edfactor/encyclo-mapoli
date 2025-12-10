@@ -2,7 +2,10 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Tooltip } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { numberToCurrency } from "smart-ui-library";
-import { CrossReferenceValidationGroup, ValidationResponse } from "../../../../types/validation/cross-reference-validation";
+import {
+  CrossReferenceValidationGroup,
+  ValidationResponse
+} from "../../../../types/validation/cross-reference-validation";
 import {
   createAgeColumn,
   createBadgeColumn,
@@ -24,24 +27,26 @@ import {
 const getValidationForGroup = (
   validationData: ValidationResponse | null,
   groupName: string,
-  checkValue: number,
-): { isValid: boolean; expectedValue: string, narrative: string } | null => {
+  checkValue: number
+): { isValid: boolean; expectedValue: string; narrative: string } | null => {
   if (!validationData?.validationGroups) return null;
-  
-  const group = validationData.validationGroups.find(
-    (g: CrossReferenceValidationGroup) => g.groupName === groupName
-  );
-  
-  if (!group || !group.validations || group.validations.length === 0 || group.validations[0].expectedValue === null) return {
-    isValid: false,
-    expectedValue: "??",
-    narrative: "Profit Sharing Summary hasn't been completed for this year."
-  };
-  
+
+  const group = validationData.validationGroups.find((g: CrossReferenceValidationGroup) => g.groupName === groupName);
+
+  if (!group || !group.validations || group.validations.length === 0 || group.validations[0].expectedValue === null)
+    return {
+      isValid: false,
+      expectedValue: "??",
+      narrative: "Profit Sharing Summary hasn't been completed for this year."
+    };
+
   return {
     isValid: group.validations[0].expectedValue == checkValue,
     expectedValue: group.validations[0].expectedValue + "",
-    narrative: group.validations[0].expectedValue == checkValue ? "Value matches Profit Sharing Summary." : "Profit Sharing Summary value is " + group.validations[0].expectedValue + "."
+    narrative:
+      group.validations[0].expectedValue == checkValue
+        ? "Value matches Profit Sharing Summary."
+        : "Profit Sharing Summary value is " + group.validations[0].expectedValue + "."
   };
 };
 
@@ -55,20 +60,20 @@ const createValidatedCurrencyCellRenderer = (
   return (params: ICellRendererParams) => {
     const value = params.value ?? 0;
     const formattedValue = numberToCurrency(value);
-    
+
     // Only show validation icon for pinned total row
     if (params.data?._isPinnedTotal && validationData) {
       const validation = getValidationForGroup(validationData, validationGroupName, value);
-      
+
       if (validation) {
         return (
           <span style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "4px" }}>
             <Tooltip title={validation.narrative}>
               <InfoOutlinedIcon
-                sx={{ 
-                fontSize: 16,
-                color: validation.isValid ? "#22c55e" : "#ef4444"
-              }}
+                sx={{
+                  fontSize: 16,
+                  color: validation.isValid ? "#22c55e" : "#ef4444"
+                }}
               />
             </Tooltip>
             <span>{formattedValue}</span>
@@ -76,7 +81,7 @@ const createValidatedCurrencyCellRenderer = (
         );
       }
     }
-    
+
     return formattedValue;
   };
 };
@@ -86,20 +91,20 @@ const createValidatedCurrencyCellRenderer = (
  */
 const createValidatedNameCellRenderer = (validationData: ValidationResponse | null) => {
   return (params: ICellRendererParams) => {
-    const rawValue = (params.value ?? "");
+    const rawValue = params.value ?? "";
     // Strip "TOTAL EMPS: " prefix if present and trim
     const value = rawValue.replace(/^TOTAL EMPS:\s*/i, "").trim();
-    
+
     // Only show validation icon for pinned total row
     if (params.data?._isPinnedTotal && validationData) {
       const validation = getValidationForGroup(validationData, "Members", value);
-      
+
       if (validation) {
         return (
           <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <Tooltip title={validation.narrative}>
               <InfoOutlinedIcon
-                sx={{ 
+                sx={{
                   fontSize: 16,
                   color: validation.isValid ? "#22c55e" : "#ef4444"
                 }}
@@ -110,7 +115,7 @@ const createValidatedNameCellRenderer = (validationData: ValidationResponse | nu
         );
       }
     }
-    
+
     return value;
   };
 };
