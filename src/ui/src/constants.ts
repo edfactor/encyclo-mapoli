@@ -109,9 +109,6 @@ export const CAPTIONS = {
   BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)",
   BREAKDOWN_REPORT_SHORT: "Breakdown Report",
 
-  CLEAN_UP_SUMMARY: "Clean Up Summary",
-  CLEAN_UP_SUMMARY_SHORT: "Clean Up Summary",
-
   CONTRIBUTIONS_BY_AGE: "Contributions by Age (PROF130)",
   CONTRIBUTIONS_BY_AGE_SHORT: "Contributions by Age",
 
@@ -120,9 +117,6 @@ export const CAPTIONS = {
 
   DECEMBER_ACTIVITIES_SUMMARY: "December Activities Summary",
   DECEMBER_ACTIVITIES_SUMMARY_SHORT: "December Activities Summary",
-
-  DECEMBER_PROCESS_LOCAL: "December Process Local",
-  DECEMBER_PROCESS_LOCAL_SHORT: "December Process Local",
 
   DEMOGRAPHIC_BADGES: "Demographic Badges Not In Payprofit",
   DEMOGRAPHIC_BADGES_SHORT: "Demographic Badges",
@@ -196,17 +190,11 @@ export const CAPTIONS = {
   MILITARY_CONTRIBUTIONS: "Military Contributions (TPR008-13)",
   MILITARY_CONTRIBUTIONS_SHORT: "Military Contributions",
 
-  MISSING_COMMA_IN_PY_NAME: "Missing Comma in PY Name",
-  MISSING_COMMA_IN_PY_NAME_SHORT: "Missing Comma in PY Name",
-
   NEGATIVE_ETVA: "Negative ETVA for SSNs on Payprofit",
   NEGATIVE_ETVA_SHORT: "Negative ETVA",
 
   NEW_PS_LABELS: "New Labels (QNEWPROFLBL)",
   NEW_PS_LABELS_SHORT: "New Labels",
-
-  NEW_PS_LABELS_REPORT: "New PS Labels Report",
-  NEW_PS_LABELS_REPORT_SHORT: "New PS Labels Report",
 
   PAY426_ACTIVE_18_20: "Active/inactive employees age 18 - 20 with 1000 hours or more",
   PAY426_ACTIVE_18_20_SHORT: "Active/inactive 18-20",
