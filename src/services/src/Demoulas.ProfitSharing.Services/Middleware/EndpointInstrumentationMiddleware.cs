@@ -28,7 +28,7 @@ public sealed class EndpointInstrumentationMiddleware
 
         // Get or create session ID for user journey tracking
         string sessionId = GetOrCreateSessionId(context);
-        
+
         // Store session ID in HttpContext.Items so downstream telemetry can access it
         // (cookies won't be sent to client until response completes, so downstream code
         // can't read from request cookies on the same request)
