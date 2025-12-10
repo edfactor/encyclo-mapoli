@@ -1,3 +1,5 @@
+import { CAPTIONS } from "@/constants";
+
 const pathToReadableName: Record<string, string> = {
   "": "",
   "demographic-badges-not-in-payprofit": "Demographic Badges Not In Payprofit",
@@ -72,10 +74,15 @@ const pathToReadableName: Record<string, string> = {
   "print-profit-certs": "Print Profit Certificates",
   "recently-terminated": "Recently Terminated",
   "terminated-letters": "Terminated Letters",
-  "it devops": "IT DevOps"
+  "it devops": "IT DevOps",
+  "add-distribution" : CAPTIONS.ADD_DISTRIBUTION,
+  "edit-distribution" : CAPTIONS.EDIT_DISTRIBUTION,
+  "view-distribution" : CAPTIONS.VIEW_DISTRIBUTION,
+  "distributions-inquiry" : CAPTIONS.DISTRIBUTIONS_INQUIRY
 };
 
 export const getReadablePathName = (path: string): string => {
   const basePath = path.replace(/^\/+|\/+$/g, "").split("/")[0];
+  console.log("getReadablePathName:", path, "->", basePath, "->", pathToReadableName[basePath]);
   return pathToReadableName[basePath] || basePath;
 };
