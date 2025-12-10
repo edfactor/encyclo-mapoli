@@ -32,7 +32,6 @@ export const ROUTES = {
   PROF_TERM: "prof-term",
   MILITARY_CONTRIBUTION: "military-contribution",
 
-  DECEMBER_PROCESS_ACCORDION: "december-process-accordion",
   DEMOGRAPHIC_BADGES: "demographic-badges-not-in-payprofit",
   DUPLICATE_SSNS: "duplicate-ssns-demographics",
   NEGATIVE_ETVA: "negative-etva-for-ssns-on-payprofit",
@@ -40,7 +39,6 @@ export const ROUTES = {
   REHIRE_FORFEITURES: "unforfeitures",
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_UPDATE: "profit-share-update",
-  PROFNEW: "/",
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
@@ -54,24 +52,12 @@ export const ROUTES = {
   ADD_DISTRIBUTION: "add-distribution",
   EDIT_DISTRIBUTION: "edit-distribution",
 
-  PAY426_ACTIVE_18_20: "pay426-1",
-  PAY426_ACTIVE_21_PLUS: "pay426-2",
-  PAY426_ACTIVE_UNDER_18: "pay426-3",
-  PAY426_ACTIVE_PRIOR_SHARING: "pay426-4",
-  PAY426_ACTIVE_NO_PRIOR: "pay426-5",
-  PAY426_TERMINATED_1000_PLUS: "pay426-6",
-  PAY426_TERMINATED_NO_PRIOR: "pay426-7",
-  PAY426_TERMINATED_PRIOR: "pay426-8",
   PAY426_SUMMARY: "pay426-9",
-  PAY426_NON_EMPLOYEE: "pay426-10",
   PAY426N_LIVE: "pay426n",
   PAY426N_FROZEN: "pay426n",
   QPAY066_ADHOC: "qpay066-adhoc",
   QPAY066B: "qpay066b",
   QPAY600: "qpay600",
-  REPRINT_CERTIFICATES: "reprint-certificates",
-  FORFEIT: "forfeit",
-  PROFIT_MASTER_UPDATE: "profit-master-update",
   PROFIT_SHARE_BY_STORE: "profit-share-by-store",
   PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
   RECENTLY_TERMINATED: "recently-terminated",
@@ -89,8 +75,6 @@ export const ROUTES = {
   AUDIT_SEARCH: "audit-search",
   DEV_DEBUG: "dev-debug",
   DOCUMENTATION: "documentation",
-  PROFIT_SHARE_EDIT: "profit-share-edit",
-  SAVE_PROF_PAYMSTR: "save-prof-paymstr",
   DIVORCE_REPORT: "divorce-report"
 } as const;
 
