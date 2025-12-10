@@ -196,7 +196,7 @@ public static class OracleEmployeeExtensions
             PersonId: d.OracleHcmId,
             BadgeNumber: d.BadgeNumber,
             DateOfBirth: d.DateOfBirth,
-            DateOfDeath: null,
+            DateOfDeath: d.DateOfDeath,
             CreatedBy: "faker",
             CreationDate: DateTimeOffset.UtcNow,
             LastUpdatedBy: "faker",
