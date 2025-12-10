@@ -1,4 +1,3 @@
-import { CAPTIONS } from "@/constants";
 
 const pathToReadableName: Record<string, string> = {
   "": "",
@@ -9,7 +8,7 @@ const pathToReadableName: Record<string, string> = {
   "missing-comma-in-py-name": "Missing Comma in PY Name",
   "military-and-rehire": "Military and Rehire",
   unforfeitures: "UnForfeit (PREVPROF)",
-  "distributions-and-forfeitures": "Distributions and Forfeitures (QPAY129)",
+  "distributions-and-forfeitures": "Distributions and Forfeitures",
   "manage-executive-hours-and-dollars": "Manage Executive Hours and Dollars",
   "eligible-employees": "Eligible Employees",
   "master-inquiry": "Master Inquiry",
@@ -45,7 +44,7 @@ const pathToReadableName: Record<string, string> = {
   "pay426-8": "Pay 426 Terminated Prior",
   "pay426-9": "Pay 426 Summary",
   "pay426-10": "Pay 426 Non Employee",
-  pay426n: "Profit Sharing Report (PAY426N)",
+  pay426n: "PAY426N",
   "pay450-summary": "Pay 450 Summary",
   "prof-control-sheet": "Control Sheet",
   "under-21-report": "Under 21 Age Report",
@@ -67,7 +66,7 @@ const pathToReadableName: Record<string, string> = {
   beneficiary: "Beneficiary Inquiry",
   "adhoc-beneficiaries-report": "Pay Be Next",
   "payben-report": "Pay Beneficiary Report",
-  "qpay066-adhoc": "QPAY066* Ad Hoc Reports",
+  "qpay066-adhoc": "QPAY066* Reports",
   qpay066b: "QPAY066B",
   qpay600: "QPAY600",
   "reprint-certificates": "Reprint Certificates",
@@ -75,10 +74,10 @@ const pathToReadableName: Record<string, string> = {
   "recently-terminated": "Recently Terminated",
   "terminated-letters": "Terminated Letters",
   "it devops": "IT DevOps",
-  "add-distribution": CAPTIONS.ADD_DISTRIBUTION,
-  "edit-distribution": CAPTIONS.EDIT_DISTRIBUTION,
-  "view-distribution": CAPTIONS.VIEW_DISTRIBUTION,
-  "distributions-inquiry": CAPTIONS.DISTRIBUTIONS_INQUIRY
+  "add-distribution": "Add Distribution",
+  "edit-distribution": "Edit Distribution",
+  "view-distribution": "View Distribution",
+  "distributions-inquiry": "Distribution Inquiry"
 };
 
 export const getReadablePathName = (path: string): string => {
