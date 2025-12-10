@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "vite --port 3100",
     "build:prod": "tsc -b && vite build --mode production",
-    "build:qa": "vite build --mode qa",
-    "build:uat": "vite build --mode uat",
+    "build:qa": "tsc -b && vite build --mode qa",
+    "build:uat": "tsc -b && vite build --mode uat",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "prettier": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
     "test": "vitest --coverage",
