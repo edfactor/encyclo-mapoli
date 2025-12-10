@@ -67,11 +67,11 @@ public static class TelemetryExtensions
     /// Retrieves the session ID from the HTTP context (set by EndpointInstrumentationMiddleware).
     /// Session ID correlates all requests within a user session for journey tracking.
     /// </summary>
-    private static string GetSessionId(HttpContext httpContext)
+    private static string GetSessionId(HttpContext? httpContext)
     {
-        const string SessionCookieName = "ps-session-id";
+        const string sessionCookieName = "ps-session-id";
 
-        if (httpContext.Request.Cookies.TryGetValue(SessionCookieName, out var sessionId) &&
+        if (httpContext?.Request.Cookies.TryGetValue(sessionCookieName, out var sessionId) == true &&
             !string.IsNullOrEmpty(sessionId))
         {
             return sessionId;
