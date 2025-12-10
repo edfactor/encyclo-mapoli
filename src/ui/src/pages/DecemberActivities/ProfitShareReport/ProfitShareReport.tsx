@@ -1,10 +1,10 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useEffect, useState } from "react";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { closeDrawer, openDrawer, setFullscreen } from "reduxstore/slices/generalSlice";
+import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
@@ -19,6 +19,7 @@ const ProfitShareReport = () => {
   const [triggerSearch] = useLazyGetYearEndProfitSharingReportTotalsQuery();
   const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
+  const [triggerArchive, setTriggerArchive] = useState(false);
   const profitYear = useDecemberFlowProfitYear();
 
   // Load both tables when page loads - this is consistent with other pages which only display data and do not take input.
@@ -45,6 +46,10 @@ const ProfitShareReport = () => {
   const handleStatusChange = (_newStatus: string, statusName?: string) => {
     // Check if the status is "Complete" and trigger search with archive=true
     if (statusName === "Complete" && profitYear) {
+      // Trigger archive for ProfitSummary component
+      setTriggerArchive(true);
+
+      // Also trigger archive for the totals query
       const totalsRequest = {
         profitYear: profitYear,
         useFrozenData: false,
@@ -62,6 +67,10 @@ const ProfitShareReport = () => {
           console.error("Archive search failed:", error);
         });
     }
+  };
+
+  const handleArchiveComplete = () => {
+    setTriggerArchive(false);
   };
 
   const handleToggleGridExpand = () => {
@@ -131,6 +140,8 @@ const ProfitShareReport = () => {
             frozenData={false}
             externalIsGridExpanded={isGridExpanded}
             externalOnToggleExpand={handleToggleGridExpand}
+            triggerArchive={triggerArchive}
+            onArchiveComplete={handleArchiveComplete}
           />
         </Grid>
       </Grid>

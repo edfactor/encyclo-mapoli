@@ -1,12 +1,12 @@
-import { Button, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { Button, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useDynamicGridHeight } from "hooks/useDynamicGridHeight";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
-import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import {
   useFinalizeReportMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery
@@ -14,8 +14,8 @@ import {
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, numberToCurrency, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../../constants";
-import { RootState } from "../../../../reduxstore/store";
 import { closeDrawer, openDrawer, setFullscreen } from "../../../../reduxstore/slices/generalSlice";
+import { RootState } from "../../../../reduxstore/store";
 import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 
@@ -104,12 +104,18 @@ interface ProfitSummaryProps {
   frozenData: boolean;
   externalIsGridExpanded?: boolean;
   externalOnToggleExpand?: () => void;
+  /** When true, triggers an archive request. Parent should set this when status changes to Complete. */
+  triggerArchive?: boolean;
+  /** Callback when archive request completes. Parent should reset triggerArchive to false. */
+  onArchiveComplete?: () => void;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({
-  frozenData,
-  externalIsGridExpanded,
-  externalOnToggleExpand
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({ 
+  frozenData, 
+  externalIsGridExpanded, 
+  externalOnToggleExpand,
+  triggerArchive,
+  onArchiveComplete
 }) => {
   const dispatch = useDispatch();
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
@@ -164,7 +170,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
     }
   }, [trigger, profitYear, hasToken, frozenData]);
 
-  // Reload with archive=true when status changes to Complete
+  // Reload with archive=true when status changes to Complete (internal trigger)
   useEffect(() => {
     if (shouldArchive && hasToken) {
       trigger({
@@ -176,6 +182,19 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
       setShouldArchive(false);
     }
   }, [shouldArchive, hasToken, frozenData, profitYear, trigger]);
+
+  // Handle archive trigger from parent component (e.g., ProfitShareReport)
+  useEffect(() => {
+    if (triggerArchive && hasToken) {
+      trigger({
+        useFrozenData: frozenData,
+        profitYear: profitYear,
+        badgeNumber: null,
+        archive: true
+      });
+      onArchiveComplete?.();
+    }
+  }, [triggerArchive, hasToken, frozenData, profitYear, trigger, onArchiveComplete]);
 
   const handleToggleGridExpand = () => {
     // Use external handler if provided

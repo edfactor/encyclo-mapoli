@@ -30,4 +30,6 @@ public interface ICrossReferenceValidationService
         short profitYear,
         Dictionary<string, decimal> currentValues,
         CancellationToken cancellationToken = default);
+
+    Task<Result<ValidationResponse>> ValidateProfitSharingReport(short profitYear, string reportSuffix, CancellationToken cancellationToken = default);
 }

@@ -102,22 +102,9 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
                 balanceEquationGroup
             };
 
-            // Calculate statistics
-            int totalValidations = validationGroups.Sum(g => g.Validations.Count);
-            int passedValidations = validationGroups.Sum(g => g.Validations.Count(v => v.IsValid));
-            int failedValidations = totalValidations - passedValidations;
-
-            // Identify critical issues
-            var criticalIssues = validationGroups
-                .Where(g => !g.IsValid && g.Priority == "Critical")
-                .Select(g => g.GroupName)
-                .ToList();
-
-            var warnings = validationGroups
-                .Where(g => !g.IsValid && g.Priority != "Critical")
-                .Select(g => g.GroupName)
-                .ToList();
-
+            int totalValidations, passedValidations, failedValidations;
+            List<string> criticalIssues, warnings;
+            SummarizeValidations(validationGroups, out totalValidations, out passedValidations, out failedValidations, out criticalIssues, out warnings);
             bool blockMasterUpdate = criticalIssues.Any();
 
             _logger.LogInformation(
@@ -153,7 +140,112 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         }
     }
 
+    public async Task<Result<ValidationResponse>> ValidateProfitSharingReport(short profitYear, string reportSuffix, CancellationToken cancellationToken = default)
+    {
+        var checksumPrefix = reportSuffix switch
+        {
+            "1" => "18_20WillVest",
+            "2" => "Over21WillVest",
+            "3" => "Under18",
+            "4" => "Ovr18WillNotVestPrior",
+            "5" => "Ovr18WillNotVestNoPrior",
+            "6" => "TermOvr18WouldVest",
+            "7" => "TermUndrWouldNotVestNoPrior",
+            "8" => "TermOvr18WouldNotVestNoPrior",
+            _ => null
+        };
+
+        var message = "Nothing done yet";
+
+        if (string.IsNullOrEmpty(checksumPrefix))
+        {
+            return Result<ValidationResponse>.Failure(Error.ReportNotFound);
+        }
+
+        var membersKey = checksumPrefix + "Members";
+        var balanceKey = checksumPrefix + "Balance";
+        var wagesKey = checksumPrefix + "Wages";
+
+        var memberValidation = await ValidateProfitSharingReportGroup(profitYear, membersKey, "Members", cancellationToken);
+
+        var balanceValidation = await ValidateProfitSharingReportGroup(profitYear, balanceKey, "Balance", cancellationToken);
+
+        var wagesValidation = await ValidateProfitSharingReportGroup(profitYear, wagesKey, "Wages", cancellationToken);
+
+        var validationGroups = new List<CrossReferenceValidationGroup>
+        {
+            memberValidation,
+            balanceValidation,
+            wagesValidation
+        };
+
+        int totalValidations, passedValidations, failedValidations;
+        List<string> criticalIssues, warnings;
+        SummarizeValidations(validationGroups, out totalValidations, out passedValidations, out failedValidations, out criticalIssues, out warnings);
+
+        var rslt = new ValidationResponse()
+        {
+            ProfitYear = profitYear,
+            Message = message,
+            ValidationGroups = validationGroups,
+            CriticalIssues = criticalIssues,
+            Warnings = warnings,
+            TotalValidations = totalValidations,
+            FailedValidations = failedValidations,
+            PassedValidations = passedValidations
+        };
+
+        return Result<ValidationResponse>.Success(rslt);
+    }
+
+    private static void SummarizeValidations(List<CrossReferenceValidationGroup> validationGroups, out int totalValidations, out int passedValidations, out int failedValidations, out List<string> criticalIssues, out List<string> warnings)
+    {
+        // Calculate statistics
+        totalValidations = validationGroups.Sum(g => g.Validations.Count);
+        passedValidations = validationGroups.Sum(g => g.Validations.Count(v => v.IsValid));
+        failedValidations = totalValidations - passedValidations;
+
+        // Identify critical issues
+        criticalIssues = validationGroups
+            .Where(g => !g.IsValid && g.Priority == "Critical")
+            .Select(g => g.GroupName)
+            .ToList();
+        warnings = validationGroups
+            .Where(g => !g.IsValid && g.Priority != "Critical")
+            .Select(g => g.GroupName)
+            .ToList();
+    }
+
     #region Validation Groups
+
+    private async Task<CrossReferenceValidationGroup> ValidateProfitSharingReportGroup(short profitYear, string key, string validationName, CancellationToken cancellationToken)
+    {
+        var wagesValidation = await ValidateSingleFieldAsync(
+            profitYear,
+            ReportNames.ProfitSharingSummary.ReportCode,
+            key,
+            new Dictionary<string, decimal>(),
+            cancellationToken);
+
+        var validations = new List<CrossReferenceValidation>() { wagesValidation };
+
+        bool allValid = validations.All(v => v.IsValid);
+
+        string summary = allValid
+            ? $"✅ {validationName} matches archived Profit Sharing Summary for year {profitYear}"
+            : $"⚠️ {validationName} does NOT match archived Profit Sharing Summary for year {profitYear}";
+
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = validationName,
+            Description = $"Validates Profit Sharing Report.  Matches archived Profit Sharing Summary {validationName} for year {profitYear}",
+            IsValid = allValid,
+            Validations = validations,
+            Summary = summary,
+            Priority = "Critical",
+            ValidationRule = $"Profit Sharing Report {validationName} should equal archived Profit Sharing Summary {validationName}"
+        };
+    }
 
     private async Task<CrossReferenceValidationGroup> ValidateBeginningBalanceGroupAsync(
         short profitYear,
@@ -213,9 +305,9 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
 
         // QPAY129.Distributions
         var qpay129Validation = await ValidateSingleFieldAsync(
-            profitYear, ReportNameInfo.DistributionAndForfeitures.ReportCode, "QPAY129_DistributionTotals", currentValues, cancellationToken);
+            profitYear, ReportNames.DistributionAndForfeitures.ReportCode, "QPAY129_DistributionTotals", currentValues, cancellationToken);
         validations.Add(qpay129Validation);
-        validatedReports.Add(ReportNameInfo.DistributionAndForfeitures.ReportCode);
+        validatedReports.Add(ReportNames.DistributionAndForfeitures.ReportCode);
 
         // QPAY066TA.TotalDisbursements
         var qpay066taValidation = await ValidateSingleFieldAsync(

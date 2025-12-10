@@ -61,7 +61,7 @@ public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<Distribu
 
             // Archive the successful result
             var result = await _auditService.ArchiveCompletedReportAsync<DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(
-                ReportNameInfo.DistributionAndForfeitures.ReportCode,
+                ReportNames.DistributionAndForfeitures.ReportCode,
                 (short)profitYear,
                 req,
                 async (archiveReq, _, cancellationToken) =>

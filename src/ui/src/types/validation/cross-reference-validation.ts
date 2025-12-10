@@ -5,6 +5,8 @@
  * @see PS-MASTER_UPDATE_CROSSREF_VALIDATION_IMPLEMENTATION.md
  */
 
+import { ProfitYearRequest } from "../common/api";
+
 /**
  * Individual field validation result showing if a specific report field matches its archived value
  */
@@ -63,11 +65,12 @@ export interface CrossReferenceValidationGroup {
   validationRule: string | null;
 }
 
-/**
- * Complete validation result for Master Update operation including all validation groups
- */
-export interface MasterUpdateCrossReferenceValidationResponse {
-  /** Profit year being validated */
+export interface ProfitSharingReportValidationRequest extends ProfitYearRequest {
+  reportSuffix: number
+}
+
+export interface ValidationResponse {
+/** Profit year being validated */
   profitYear: number;
 
   /** Whether all validations passed */
@@ -91,9 +94,6 @@ export interface MasterUpdateCrossReferenceValidationResponse {
   /** List of report codes that were validated */
   validatedReports: string[];
 
-  /** Whether Master Update should be blocked due to Critical failures */
-  blockMasterUpdate: boolean;
-
   /** List of critical issues that block Master Update */
   criticalIssues: string[];
 
@@ -102,6 +102,15 @@ export interface MasterUpdateCrossReferenceValidationResponse {
 
   /** When this validation was performed */
   validatedAt: string;
+}
+
+/**
+ * Complete validation result for Master Update operation including all validation groups
+ */
+export interface MasterUpdateCrossReferenceValidationResponse extends ValidationResponse {
+  
+  /** Whether Master Update should be blocked due to Critical failures */
+  blockMasterUpdate: boolean;
 }
 
 /**
