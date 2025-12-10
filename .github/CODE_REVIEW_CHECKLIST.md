@@ -146,7 +146,7 @@ Review: **All sections** including documentation and branching
   // ❌ WRONG - AUTO-REJECT: Frontend age calculation
   const age = Math.floor(
     (Date.now() - new Date(dateOfBirth).getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25)
+      (1000 * 60 * 60 * 24 * 365.25),
   );
   const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 

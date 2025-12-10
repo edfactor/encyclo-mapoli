@@ -1,4 +1,8 @@
-import { MasterUpdateCrossReferenceValidationResponse, ProfitSharingReportValidationRequest, ValidationResponse } from "@/types/validation/cross-reference-validation";
+import {
+  MasterUpdateCrossReferenceValidationResponse,
+  ProfitSharingReportValidationRequest,
+  ValidationResponse
+} from "@/types/validation/cross-reference-validation";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { prepareHeaders, url } from "./api";
 
@@ -35,14 +39,16 @@ export const validationApi = createApi({
     }),
     getProfitSharingReportValidation: builder.query<ValidationResponse, ProfitSharingReportValidationRequest>({
       query: (request) => `checksum/profit-sharing-report/${request.profitYear}/${request.reportSuffix}`,
-      providesTags: (_result, _error, request) => [{ type: "MasterUpdateValidation", id: `${request.profitYear}-${request.reportSuffix}` }]
-    }),
+      providesTags: (_result, _error, request) => [
+        { type: "MasterUpdateValidation", id: `${request.profitYear}-${request.reportSuffix}` }
+      ]
+    })
   })
 });
 
-export const { 
-  useGetMasterUpdateValidationQuery, 
+export const {
+  useGetMasterUpdateValidationQuery,
   useLazyGetMasterUpdateValidationQuery,
   useGetProfitSharingReportValidationQuery,
-  useLazyGetProfitSharingReportValidationQuery,
+  useLazyGetProfitSharingReportValidationQuery
 } = validationApi;

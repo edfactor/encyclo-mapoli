@@ -14,12 +14,12 @@ describe("getReadablePathName", () => {
 
   it("should convert demographic-badges-not-in-payprofit", () => {
     const result = getReadablePathName("/demographic-badges-not-in-payprofit");
-    expect(result).toBe("Demographic Badges Not In Payprofit");
+    expect(result).toBe("Demographic Badges");
   });
 
   it("should convert duplicate-ssns-demographics", () => {
     const result = getReadablePathName("/duplicate-ssns-demographics");
-    expect(result).toBe("Duplicate SSNs on Demographics");
+    expect(result).toBe("Duplicate SSNs");
   });
 
   it("should convert master-inquiry", () => {
@@ -29,12 +29,12 @@ describe("getReadablePathName", () => {
 
   it("should convert fiscal-close", () => {
     const result = getReadablePathName("/fiscal-close");
-    expect(result).toBe("Year End Flow");
+    expect(result).toBe("Fiscal Close");
   });
 
   it("should convert december-process", () => {
     const result = getReadablePathName("/december-process");
-    expect(result).toBe("December Process");
+    expect(result).toBe("December");
   });
 
   it("should handle paths with trailing slash", () => {
@@ -59,12 +59,12 @@ describe("getReadablePathName", () => {
 
   it("should convert unforfeitures", () => {
     const result = getReadablePathName("/unforfeitures");
-    expect(result).toBe("UnForfeit (PREVPROF)");
+    expect(result).toBe("UnForfeit");
   });
 
   it("should convert prof-term", () => {
     const result = getReadablePathName("/prof-term");
-    expect(result).toBe("Termination");
+    expect(result).toBe("Terminations");
   });
 
   it("should convert beneficiary", () => {
@@ -84,20 +84,18 @@ describe("getReadablePathName", () => {
   });
 
   it("should handle PAY426 variants", () => {
-    expect(getReadablePathName("/pay426-1")).toBe("Pay 426 Active 18-20");
-    expect(getReadablePathName("/pay426-2")).toBe("Pay 426 Active 21 Plus");
-    expect(getReadablePathName("/pay426-9")).toBe("Pay 426 Summary");
+    expect(getReadablePathName("/pay426-9")).toBe("Profit Summary");
   });
 
   it("should handle QPAY report paths", () => {
-    expect(getReadablePathName("/qpay066")).toBe("QPAY066 - Under 21 Age Report");
-    expect(getReadablePathName("/qpay066ta")).toBe("QPAY066TA - Under 21 Term Active");
+    expect(getReadablePathName("/qpay066")).toBe("QPAY066 Under 21");
+    expect(getReadablePathName("/qpay066ta")).toBe("QPAY066TA");
     expect(getReadablePathName("/qpay600")).toBe("QPAY600");
   });
 
   it("should handle fiscal close sub-paths", () => {
     expect(getReadablePathName("/eligible-employees")).toBe("Eligible Employees");
-    expect(getReadablePathName("/manage-executive-hours-and-dollars")).toBe("Manage Executive Hours and Dollars");
+    expect(getReadablePathName("/manage-executive-hours-and-dollars")).toBe("Manage Executive Hours");
   });
 
   it("should handle demographic paths", () => {

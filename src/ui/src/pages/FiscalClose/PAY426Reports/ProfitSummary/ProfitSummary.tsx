@@ -110,9 +110,9 @@ interface ProfitSummaryProps {
   onArchiveComplete?: () => void;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({ 
-  frozenData, 
-  externalIsGridExpanded, 
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({
+  frozenData,
+  externalIsGridExpanded,
   externalOnToggleExpand,
   triggerArchive,
   onArchiveComplete
