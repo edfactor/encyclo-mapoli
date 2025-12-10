@@ -62,10 +62,18 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
                 long endTime = Stopwatch.GetTimestamp();
                 double elapsedMs = (double)(endTime - startTime) / Stopwatch.Frequency * 1000;
 
+                // Get session ID and user info for correlation across requests
+                var sessionId = GetSessionId(context.HttpContext);
+                var appUser = context.HttpContext.RequestServices?.GetService(typeof(Demoulas.Common.Contracts.Interfaces.IAppUser))
+                    as Demoulas.Common.Contracts.Interfaces.IAppUser;
+                var userEmail = appUser?.Email ?? appUser?.UserName ?? "unknown";
+
                 // Record execution duration
                 Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.EndpointDurationMs.Record(elapsedMs,
                     new KeyValuePair<string, object?>("endpoint.name", endpoint.GetType().Name),
-                    new KeyValuePair<string, object?>("navigation.id", endpoint.NavigationId.ToString()));
+                    new KeyValuePair<string, object?>("navigation.id", endpoint.NavigationId.ToString()),
+                    new KeyValuePair<string, object?>("session.id", sessionId),
+                    new KeyValuePair<string, object?>("user.id", userEmail));
 
                 // Determine if the response was successful based on HTTP status code
                 bool isSuccess = context.HttpContext.Response.StatusCode is >= 200 and < 400;
@@ -80,23 +88,25 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
                     Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.EndpointErrorsTotal.Add(1,
                         new KeyValuePair<string, object?>("endpoint.name", endpoint.GetType().Name),
                         new KeyValuePair<string, object?>("error.type", errorType ?? "unknown"),
-                        new KeyValuePair<string, object?>("user.role", userRole));
+                        new KeyValuePair<string, object?>("user.role", userRole),
+                        new KeyValuePair<string, object?>("user.id", userEmail),
+                        new KeyValuePair<string, object?>("session.id", sessionId));
 
                     // Set activity error status
                     activity.SetStatus(ActivityStatusCode.Error, $"HTTP {context.HttpContext.Response.StatusCode}");
                     activity.SetTag("error.type", errorType);
                     activity.SetTag("http.status_code", context.HttpContext.Response.StatusCode);
 
-                    _logger.LogWarning("Endpoint execution failed: {Endpoint} returned {StatusCode} (correlation: {CorrelationId}, duration: {DurationMs}ms)",
-                        endpoint.GetType().Name, context.HttpContext.Response.StatusCode, context.HttpContext.TraceIdentifier, elapsedMs);
+                    _logger.LogWarning("Endpoint execution failed: {Endpoint} returned {StatusCode} by {UserEmail} ({UserRole}) - session: {SessionId}, correlation: {CorrelationId}, duration: {DurationMs}ms",
+                        endpoint.GetType().Name, context.HttpContext.Response.StatusCode, userEmail, userRole, sessionId, context.HttpContext.TraceIdentifier, elapsedMs);
                 }
                 else
                 {
                     // Record successful execution
                     activity.SetTag("http.status_code", context.HttpContext.Response.StatusCode);
 
-                    _logger.LogDebug("Endpoint execution completed: {Endpoint} returned {StatusCode} (correlation: {CorrelationId}, duration: {DurationMs}ms)",
-                        endpoint.GetType().Name, context.HttpContext.Response.StatusCode, context.HttpContext.TraceIdentifier, elapsedMs);
+                    _logger.LogDebug("Endpoint execution completed: {Endpoint} returned {StatusCode} by {UserEmail} ({UserRole}) - session: {SessionId}, correlation: {CorrelationId}, duration: {DurationMs}ms",
+                        endpoint.GetType().Name, context.HttpContext.Response.StatusCode, userEmail, userRole, sessionId, context.HttpContext.TraceIdentifier, elapsedMs);
                 }
 
                 // Record user activity metrics (aggregated by role for low cardinality)
@@ -154,5 +164,21 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
             var name when name.Contains("health") => "health",
             _ => "other"
         };
+    }
+
+    /// <summary>
+    /// Retrieves the session ID from cookies for user journey tracking across requests.
+    /// </summary>
+    private static string GetSessionId(HttpContext context)
+    {
+        const string SessionCookieName = "ps-session-id";
+
+        if (context.Request.Cookies.TryGetValue(SessionCookieName, out var sessionId) &&
+            !string.IsNullOrEmpty(sessionId))
+        {
+            return sessionId;
+        }
+
+        return "unknown";
     }
 }

@@ -26,25 +26,69 @@ public sealed class EndpointInstrumentationMiddleware
             ? ActivitySource.StartActivity(endpointName, ActivityKind.Server)
             : null;
 
+        // Get or create session ID for user journey tracking
+        string sessionId = GetOrCreateSessionId(context);
+
         if (activity is not null)
         {
             activity.DisplayName = endpointName;
             activity.SetTag("endpoint.name", endpointName);
             activity.SetTag("http.route", context.Request.Path.ToString());
             activity.SetTag("http.method", context.Request.Method);
+            activity.SetTag("session.id", sessionId);
         }
 
         IAppUser? appUser = context.RequestServices.GetService(typeof(IAppUser)) as IAppUser;
+        string userEmail = appUser?.Email ?? appUser?.UserName ?? "Unknown";
         string userName = appUser?.UserName ?? "Unknown";
-        activity?.SetTag("enduser.id", userName);
+
+        if (activity is not null)
+        {
+            // Unique identifier for user journey tracking (email preferred, fallback to username)
+            activity.SetTag("user.id", userEmail);
+            activity.SetTag("user.name", userName);
+            activity.SetTag("user.roles", string.Join(",", appUser?.GetUserAllRoles() ?? new List<string>()));
+        }
 
         using IDisposable? scope = _logger.BeginScope(new Dictionary<string, object?>
         {
+            ["UserId"] = userEmail,
             ["UserName"] = userName,
+            ["SessionId"] = sessionId,
             ["Endpoint"] = endpointName,
         });
 
         await _next(context);
+    }
+
+    /// <summary>
+    /// Gets an existing session ID from cookies or creates a new one.
+    /// Session ID is used to correlate all requests from a user session for journey tracking.
+    /// </summary>
+    private static string GetOrCreateSessionId(HttpContext context)
+    {
+        const string SessionCookieName = "ps-session-id";
+
+        if (context.Request.Cookies.TryGetValue(SessionCookieName, out var existingSessionId) &&
+            !string.IsNullOrEmpty(existingSessionId))
+        {
+            return existingSessionId;
+        }
+
+        // Create new session ID (use correlation ID as base for traceability)
+        var newSessionId = Guid.NewGuid().ToString("N").Substring(0, 20);
+
+        // Set secure session cookie (HttpOnly to prevent JavaScript access, Secure for HTTPS)
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddHours(8) // Standard 8-hour session timeout
+        };
+
+        context.Response.Cookies.Append(SessionCookieName, newSessionId, cookieOptions);
+        return newSessionId;
     }
 }
 

@@ -20,6 +20,8 @@ namespace Demoulas.ProfitSharing.Endpoints.Extensions;
 public static class TelemetryExtensions
 {
     private const string UserIdKey = "user.id";
+    private const string UserEmailKey = "user.email";
+    private const string SessionIdKey = "session.id";
     private const string UserRoleKey = "user.role";
     private const string EndpointKey = "endpoint.name";
     private const string NavigationIdKey = "navigation.id";
@@ -27,6 +29,7 @@ public static class TelemetryExtensions
 
     /// <summary>
     /// Creates a standardized activity for an endpoint execution with common tags.
+    /// Includes session ID and unique user identifier for journey tracking.
     /// </summary>
     /// <param name="endpoint">The endpoint instance (used for navigation ID and type name)</param>
     /// <param name="httpContext">The current HTTP context</param>
@@ -37,20 +40,44 @@ public static class TelemetryExtensions
         var endpointName = operationName ?? endpoint.GetType().Name;
         var activity = EndpointTelemetry.ActivitySource?.StartActivity($"endpoint.{endpointName}");
 
-        if (activity != null)
+        if (activity != null && httpContext != null)
         {
-            var correlationId = httpContext?.TraceIdentifier ?? "test-correlation";
-            var userId = httpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
-            var userRole = httpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
+            var correlationId = httpContext.TraceIdentifier ?? "test-correlation";
+            var sessionId = GetSessionId(httpContext);
+
+            // Get unique user identifier from IAppUser (email preferred, fallback to username)
+            var appUser = httpContext.RequestServices?.GetService(typeof(Demoulas.Common.Contracts.Interfaces.IAppUser))
+                as Demoulas.Common.Contracts.Interfaces.IAppUser;
+            var userEmail = appUser?.Email ?? appUser?.UserName ?? "anonymous";
+            var userRole = httpContext.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
 
             activity.SetTag(EndpointKey, endpointName);
             activity.SetTag(NavigationIdKey, endpoint.NavigationId.ToString());
             activity.SetTag(CorrelationIdKey, correlationId);
-            activity.SetTag(UserIdKey, userId);
+            activity.SetTag(SessionIdKey, sessionId);
+            activity.SetTag(UserIdKey, userEmail);
+            activity.SetTag(UserEmailKey, userEmail);
             activity.SetTag(UserRoleKey, userRole);
         }
 
         return activity;
+    }
+
+    /// <summary>
+    /// Retrieves the session ID from the HTTP context (set by EndpointInstrumentationMiddleware).
+    /// Session ID correlates all requests within a user session for journey tracking.
+    /// </summary>
+    private static string GetSessionId(HttpContext httpContext)
+    {
+        const string SessionCookieName = "ps-session-id";
+
+        if (httpContext.Request.Cookies.TryGetValue(SessionCookieName, out var sessionId) &&
+            !string.IsNullOrEmpty(sessionId))
+        {
+            return sessionId;
+        }
+
+        return "unknown";
     }
 
     /// <summary>
@@ -74,6 +101,12 @@ public static class TelemetryExtensions
         var endpointName = endpoint.GetType().Name;
         var userRole = httpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
         var correlationId = httpContext?.TraceIdentifier ?? "test-correlation";
+        var sessionId = GetSessionId(httpContext);
+
+        // Get user email from IAppUser
+        var appUser = httpContext?.RequestServices?.GetService(typeof(Demoulas.Common.Contracts.Interfaces.IAppUser))
+            as Demoulas.Common.Contracts.Interfaces.IAppUser;
+        var userEmail = appUser?.Email ?? appUser?.UserName ?? "anonymous";
 
         // Calculate request size for monitoring
         var requestSize = EstimateObjectSize(request);
@@ -100,17 +133,19 @@ public static class TelemetryExtensions
                 EndpointTelemetry.SensitiveFieldAccessTotal.Add(1,
                     new("field", field),
                     new(EndpointKey, endpointName),
-                    new(UserRoleKey, userRole));
+                    new(UserRoleKey, userRole),
+                    new(UserEmailKey, userEmail),
+                    new(SessionIdKey, sessionId));
 
-                // Log sensitive field access with masked user info
-                logger?.LogInformation("Sensitive field accessed: {Field} by user role {UserRole} in {Endpoint} (correlation: {CorrelationId})",
-                    field, userRole, endpointName, correlationId);
+                // Log sensitive field access with full user journey context
+                logger?.LogInformation("Sensitive field accessed: {Field} by {UserEmail} ({UserRole}) in {Endpoint} - session: {SessionId}, correlation: {CorrelationId}",
+                    field, userEmail, userRole, endpointName, sessionId, correlationId);
             }
         }
 
-        // Structured log for request processing
-        logger?.LogDebug("Processing request in {Endpoint} for user role {UserRole} (correlation: {CorrelationId}, size: {RequestSize} bytes)",
-            endpointName, userRole, correlationId, requestSize);
+        // Structured log for request processing with user journey context
+        logger?.LogDebug("Processing request in {Endpoint} by {UserEmail} ({UserRole}) - session: {SessionId}, correlation: {CorrelationId}, size: {RequestSize} bytes",
+            endpointName, userEmail, userRole, sessionId, correlationId, requestSize);
     }
 
     /// <summary>
