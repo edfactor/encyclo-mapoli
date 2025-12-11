@@ -18,7 +18,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 {
     // Magic number constants
     private const int EmployeeMemberType = 1;
-    private const int BeneficiaryMemberType = 2;
     private const int PsnSuffixRoot = 1000;
     private const int PsnSuffixRootMax = 10000;
 
@@ -35,7 +34,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         _masterInquiryService = masterInquiryService;
     }
 
-    private async Task<IQueryable<BeneficiarySearchFilterResponse>> GetEmployeeQuery(BeneficiarySearchFilterRequest request)
+    private async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> GetEmployeeQueryPaginated(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken)
     {
         var member = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest()
         {
@@ -47,8 +46,9 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             EndProfitYear = (short)DateTime.Now.Year,
             ProfitYear = (short)DateTime.Now.Year
 
-        });
-        return member.Results.Select(x => new BeneficiarySearchFilterResponse()
+        }, cancellationToken);
+        
+        var mapped = member.Results.Select(x => new BeneficiarySearchFilterResponse()
         {
             Ssn = x.Ssn.ToString(),
             Age = x.DateOfBirth.Age(),
@@ -58,8 +58,11 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             State = x.AddressState,
             Street = x.Address,
             Zip = x.AddressZipCode
-        }).AsQueryable();
+        });
 
+        // Use AsQueryable to work with ToPaginationResultsAsync extension
+        // Note: Data is already in memory from _masterInquiryService call
+        return await mapped.AsQueryable().ToPaginationResultsAsync(request, cancellationToken);
     }
 
     private IQueryable<BeneficiarySearchFilterResponse> GetBeneficiaryQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
@@ -95,25 +98,23 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     /// <returns>Paginated beneficiary results.</returns>
     public async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilter(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken)
     {
-        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
+        PaginatedResponseDto<BeneficiarySearchFilterResponse> result;
+        
+        if (request.MemberType == EmployeeMemberType)
         {
-            IQueryable<BeneficiarySearchFilterResponse> query;
-            switch (request.MemberType)
+            // Employee query is already in-memory, handle pagination separately
+            result = await GetEmployeeQueryPaginated(request, cancellationToken);
+        }
+        else
+        {
+            // Beneficiary query uses database, use proper async pagination
+            result = await _dataContextFactory.UseReadOnlyContext(async context =>
             {
-                case EmployeeMemberType:
-                    query = await GetEmployeeQuery(request);
-                    break;
-                case BeneficiaryMemberType:
-                    query = GetBeneficiaryQuery(request, context);
-                    break;
-                default:
-                    query = GetBeneficiaryQuery(request, context);
-                    break;
-            }
-
-            // IMPORTANT: await the pagination while the DbContext (and its connection) is still alive.
-            return await query.ToPaginationResultsAsync(request, cancellationToken);
-        }, cancellationToken);
+                var query = GetBeneficiaryQuery(request, context);
+                // IMPORTANT: await the pagination while the DbContext (and its connection) is still alive.
+                return await query.ToPaginationResultsAsync(request, cancellationToken);
+            }, cancellationToken);
+        }
 
         var payload = result.Results;
         if (payload == null || !payload.Any())
