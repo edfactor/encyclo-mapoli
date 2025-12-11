@@ -47,6 +47,10 @@ public static class DatabaseServicesExtension
             config.Bind("DataConfig", dataConfig);
             return dataConfig;
         });
+
+        // Must be registered BEFORE AuditSaveChangesInterceptor (which depends on it)
+        _ = builder.Services.AddHttpContextAccessor();
+
         _ = builder.Services.AddScoped<AuditSaveChangesInterceptor>(provider =>
         {
             var user = provider.GetService<IAppUser>();
@@ -57,7 +61,6 @@ public static class DatabaseServicesExtension
         _ = builder.Services.AddSingleton<BeneficiarySaveChangesInterceptor>();
         _ = builder.Services.AddSingleton<BeneficiaryContactSaveChangesInterceptor>();
         _ = builder.Services.AddSingleton<ICommitGuardOverride, CommitGuardOverride>();
-        _ = builder.Services.AddHttpContextAccessor();
 
 
         List<ContextFactoryRequest> factoryRequests = new();

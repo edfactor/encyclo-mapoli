@@ -74,6 +74,12 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
 
+        _ = builder.Property(e => e.DateOfDeath)
+            .HasComment("DateOfDeath")
+            .HasColumnName("DATE_OF_DEATH")
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>();
+
         _ = builder.Property(e => e.HireDate)
             .HasComment("HireDate")
             .HasColumnType("DATE")
