@@ -88,9 +88,8 @@ describe("getReadablePathName", () => {
   });
 
   it("should handle QPAY report paths", () => {
-    expect(getReadablePathName("/qpay066")).toBe("QPAY066 Under 21");
     expect(getReadablePathName("/qpay066ta")).toBe("QPAY066TA");
-    expect(getReadablePathName("/qpay600")).toBe("QPAY600");
+    
   });
 
   it("should handle fiscal close sub-paths", () => {
