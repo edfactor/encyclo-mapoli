@@ -64,7 +64,7 @@ const reports: QPAY066xAdHocReportPreset[] = [
   {
     id: "QPAY066M",
     name: "QPAY066M",
-    description: "Breakdown all monthly employees with distribution, forfeit, or contribution",
+    description: "Monthly employees with distribution, forfeit, or contribution",
     params: {
       reportId: 7
     },
