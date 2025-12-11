@@ -129,7 +129,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_SetFrozenHeader_WhenUsingFrozenData()
     {
         // Arrange
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
         // Act
         var response = await ApiClient.GETAsync<CurrentYearWagesEndpoint, WagesCurrentYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(

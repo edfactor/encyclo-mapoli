@@ -17,6 +17,7 @@ public static class DemographicsRequestExtension
             OracleHcmId = employee.PersonId,
             BadgeNumber = employee.BadgeNumber,
             DateOfBirth = employee.DateOfBirth,
+            DateOfDeath = employee.DateOfDeath,
             HireDate = employee.WorkRelationship?.StartDate ?? ReferenceData.DsmMinValue,
             TerminationDate = employee.WorkRelationship?.TerminationDate,
             Ssn = employee.NationalIdentifier?.NationalIdentifierNumber != null

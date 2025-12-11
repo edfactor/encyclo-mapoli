@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using FastEndpoints;
@@ -171,17 +172,15 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
     /// </summary>
     private static string GetSessionId(HttpContext? context)
     {
-        const string sessionCookieName = "ps-session-id";
-
         // First, try to get from HttpContext.Items (set by middleware in same request)
-        if (context?.Items.TryGetValue(sessionCookieName, out var itemSessionId) == true &&
+        if (context?.Items.TryGetValue(Telemetry.SessionIdKey, out var itemSessionId) == true &&
             itemSessionId is string itemSessionIdStr && !string.IsNullOrEmpty(itemSessionIdStr))
         {
             return itemSessionIdStr;
         }
 
         // Fallback: try to get from request cookies (for subsequent requests)
-        if (context?.Request.Cookies.TryGetValue(sessionCookieName, out var sessionId) == true &&
+        if (context?.Request.Cookies.TryGetValue(Telemetry.SessionIdKey, out var sessionId) == true &&
             !string.IsNullOrEmpty(sessionId))
         {
             return sessionId;

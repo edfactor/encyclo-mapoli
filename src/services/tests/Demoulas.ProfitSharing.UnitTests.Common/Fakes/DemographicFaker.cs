@@ -34,6 +34,7 @@ public sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate())
             .RuleFor(d => d.Address, f => addressFaker.Generate())
             .RuleFor(d => d.DateOfBirth, f => f.Date.Past(30, DateTime.Now.AddYears(-18)).ToDateOnly())
+            .RuleFor(d => d.DateOfDeath, f => f.Random.Bool(0.1f) ? f.Date.Past(1, DateTime.Now).ToDateOnly() : null)
             .RuleFor(d => d.FullTimeDate, f => f.Date.Past(10, new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local)).ToDateOnly())
             .RuleFor(d => d.HireDate, f => f.Date.Past(15, new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local)).ToDateOnly())
             .RuleFor(d => d.ReHireDate, f => f.Date.Past(5, new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local)).ToDateOnly())
