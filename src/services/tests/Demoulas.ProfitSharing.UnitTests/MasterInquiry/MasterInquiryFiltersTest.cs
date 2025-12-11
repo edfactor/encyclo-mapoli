@@ -1,9 +1,9 @@
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.UnitTests.MasterInquiry;
 
@@ -33,7 +33,8 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
             MemberType = memberType,
             Id = memberId,
             ProfitYear = 2024,
-            Voids = true // Only fetch voided records
+            Voids = true,
+            Take = 5// Only fetch voided records
         };
 
         // Act
@@ -56,7 +57,8 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
             MemberType = memberType,
             Id = memberId,
             ProfitYear = 2024,
-            Voids = false // Include all records
+            Voids = false, // Include all records
+            Take = 5
         };
 
         // Act
@@ -79,7 +81,8 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
             MemberType = memberType,
             Id = memberId,
             ProfitYear = 2024,
-            ContributionAmount = 1000.00m
+            ContributionAmount = 1000.00m,
+            Take = 5
         };
 
         // Act
@@ -102,7 +105,8 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
             MemberType = memberType,
             Id = memberId,
             ProfitYear = 2024,
-            EarningsAmount = 2500.00m
+            EarningsAmount = 2500.00m,
+            Take = 5
         };
 
         // Act
@@ -125,7 +129,8 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
             MemberType = memberType,
             Id = memberId,
             ProfitYear = 2024,
-            ForfeitureAmount = 500.00m
+            ForfeitureAmount = 500.00m,
+            Take = 5
         };
 
         // Act
@@ -148,7 +153,8 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
             MemberType = memberType,
             Id = memberId,
             ProfitYear = 2024,
-            PaymentAmount = 1500.00m
+            PaymentAmount = 1500.00m,
+            Take = 5
         };
 
         // Act
@@ -175,7 +181,8 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
             ContributionAmount = 1000.00m,
             EarningsAmount = 2500.00m,
             ForfeitureAmount = 500.00m,
-            PaymentAmount = 1500.00m
+            PaymentAmount = 1500.00m,
+            Take = 5
         };
 
         // Act
@@ -239,8 +246,12 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
         };
 
         // Act
-        var resultPage1 = await _masterInquiryService.GetMemberProfitDetails(requestPage1, CancellationToken.None);
-        var resultPage2 = await _masterInquiryService.GetMemberProfitDetails(requestPage2, CancellationToken.None);
+        var resultPage1Task = _masterInquiryService.GetMemberProfitDetails(requestPage1, CancellationToken.None);
+        var resultPage2Task = _masterInquiryService.GetMemberProfitDetails(requestPage2, CancellationToken.None);
+
+        await Task.WhenAll(resultPage1Task, resultPage2Task);
+        var resultPage1 = await resultPage1Task;
+        var resultPage2 = await resultPage2Task;
 
         // Assert
         resultPage1.ShouldNotBeNull();

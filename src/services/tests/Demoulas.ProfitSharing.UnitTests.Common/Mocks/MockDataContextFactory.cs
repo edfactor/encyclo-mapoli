@@ -26,6 +26,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     private readonly Mock<ProfitSharingReadOnlyDbContext> _profitSharingReadOnlyDbContext;
     private readonly Mock<DemoulasCommonDataContext> _storeInfoDbContext;
 
+    // Lazy loading: Store references for on-demand Beneficiary expansion (never reassigned, content is mutated)
+    private readonly List<Demographic>? _lazyDemographics;
+    private readonly List<Beneficiary>? _lazyBeneficiaries;
+    private readonly Mock<DbSet<Beneficiary>>? _lazyMockBeneficiariesDbSet;
+    private readonly Mock<DbSet<BeneficiaryContact>>? _lazyMockBeneficiaryContactsDbSet;
+
     /// <summary>
     /// Creates a mock DbSet that uses a backing list to persist Add/Remove operations
     /// </summary>
@@ -300,7 +306,15 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         timings["ProfitDetails Generation"] = profitDetailsTimer.ElapsedMilliseconds;
 
         var beneficiaryTimer = Stopwatch.StartNew();
-        List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(demographics.Count * 4);
+        // OPTIMIZATION: Generate only 50 beneficiaries initially (was demographics.Count * 4 = 1000)
+        // Tests can call LoadAdditionalBeneficiaries() to get more on demand
+        int initialBeneficiaryCount = 50;
+        List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(initialBeneficiaryCount);
+
+        // Cache for lazy loading
+        _lazyDemographics = demographics;
+        _lazyBeneficiaries = beneficiaries;
+
         beneficiaryTimer.Stop();
         timings["Beneficiaries Generation"] = beneficiaryTimer.ElapsedMilliseconds;
 
@@ -333,14 +347,14 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
         List<NavigationTracking>? navigationTrackings = new NavigationTrackingFaker().Generate(1);
 
-        Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.BuildMockDbSet();
-        Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts =
-            beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).ToList().BuildMockDbSet();
+        // Cache mock DbSets for lazy loading capability
+        _lazyMockBeneficiariesDbSet = beneficiaries.BuildMockDbSet();
+        _lazyMockBeneficiaryContactsDbSet = beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).ToList().BuildMockDbSet();
 
-        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
-        _profitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
+        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(_lazyMockBeneficiariesDbSet.Object);
+        _profitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(_lazyMockBeneficiaryContactsDbSet.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(_lazyMockBeneficiariesDbSet.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(_lazyMockBeneficiaryContactsDbSet.Object);
 
         Mock<DbSet<PayProfit>> mockProfits = BuildMockDbSetWithBackingList(profits);
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
@@ -513,7 +527,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<CommentType>()).Returns(mockCommentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<TaxCode>()).Returns(mockTaxCodesList.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<State>()).Returns(mockStates.Object);
-        
+
         otherTimer.Stop();
         timings["Other/Distributions/Lookup Setup"] = otherTimer.ElapsedMilliseconds;
 
@@ -633,6 +647,41 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
+    /// <summary>
+    /// LAZY LOADING: Load additional beneficiaries on demand.
+    /// By default, only 50 beneficiaries are generated at factory creation.
+    /// Tests that need more can call this to lazily generate additional beneficiaries.
+    /// 
+    /// Example:
+    ///   var factory = MockDataContextFactory.InitializeForTesting();
+    ///   await factory.LoadAdditionalBeneficiariesAsync(250); // Load 250 more (total = 300)
+    /// </summary>
+    public Task LoadAdditionalBeneficiariesAsync(int additionalCount)
+    {
+        if (_lazyDemographics == null || _lazyBeneficiaries == null ||
+            _lazyMockBeneficiariesDbSet == null || _lazyMockBeneficiaryContactsDbSet == null)
+        {
+            throw new InvalidOperationException("MockDataContextFactory not properly initialized for lazy loading.");
+        }
+
+        // Generate additional beneficiaries
+        var additionalBeneficiaries = new BeneficiaryFaker(_lazyDemographics).Generate(additionalCount);
+
+        // Add to cached list (mutate contents, don't reassign field)
+        _lazyBeneficiaries.AddRange(additionalBeneficiaries);
+
+        // Create new mock DbSet with all beneficiaries (initial + additional)
+        var newMockBeneficiaries = _lazyBeneficiaries.BuildMockDbSet();
+        var newMockContacts = _lazyBeneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).ToList().BuildMockDbSet();
+
+        // Re-setup the mocks with updated data (can reassign after initial constructor setup)
+        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(newMockBeneficiaries.Object);
+        _profitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(newMockContacts.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(newMockBeneficiaries.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(newMockContacts.Object);
+
+        return Task.CompletedTask;
+    }
 
     /// <summary>
     /// For read only workloads. This should not be mixed with Read/Write workloads in the same method as a matter of best
