@@ -1,6 +1,7 @@
 ---
 applyTo: "src/ui/src/pages/Beneficiaries/**/*.*"
 ---
+
 # Beneficiaries Module - Technical Summary
 
 A comprehensive reference guide for the Beneficiaries page component and its ecosystem.
@@ -31,6 +32,7 @@ The Beneficiaries module enables complex member relationship management within t
 - **Percentage Allocation**: Track and validate beneficiary allocation percentages
 
 ### Key Features
+
 - Auto-detection of member type (employee vs beneficiary) based on badge number
 - Real-time percentage validation (must sum ≤ 100%)
 - Two-step beneficiary creation (contact + beneficiary record)
@@ -44,9 +46,11 @@ The Beneficiaries module enables complex member relationship management within t
 ### Main Page Container
 
 #### `BeneficiaryInquiry.tsx`
+
 The primary orchestrator component that manages the search-and-detail workflow.
 
 **Responsibilities**:
+
 - Manages three sub-workflows: search filter, member results, and detail view
 - Tracks search request state and selected member
 - Handles auto-selection when single member found
@@ -54,6 +58,7 @@ The primary orchestrator component that manages the search-and-detail workflow.
 - Uses `useBeneficiarySearch` hook for pagination/sorting state
 
 **Component Tree**:
+
 ```
 BeneficiaryInquiry
 ├── BeneficiaryInquirySearchFilter
@@ -71,9 +76,11 @@ BeneficiaryInquiry
 ### Search & Filtering Components
 
 #### `BeneficiaryInquirySearchFilter.tsx`
+
 Complex search form with three mutually-exclusive search criteria.
 
 **Features**:
+
 - **Search Modes**: SSN, Name, or Badge/PSN number
 - **Auto-Detection**: Determines member type from badge length
   - 1-7 digits: Employee
@@ -83,6 +90,7 @@ Complex search form with three mutually-exclusive search criteria.
 - **Pagination**: Includes page size and sort parameters in submission
 
 **Props**:
+
 - `onSearchChange?: (request: BeneficiarySearchAPIRequest) => void`
 - `isLoading?: boolean`
 
@@ -92,9 +100,11 @@ Returns `BeneficiarySearchAPIRequest` with search criteria, pagination, and sort
 ---
 
 #### `MemberResultsGrid.tsx`
+
 Paginated display of search results with row selection.
 
 **Features**:
+
 - AG Grid with configurable column definitions
 - Row click triggers detail fetch
 - Pagination controls integrated with search state
@@ -102,6 +112,7 @@ Paginated display of search results with row selection.
 - Loading state during fetch
 
 **Props**:
+
 - `members: BeneficiaryDetail[]`
 - `totalCount: number`
 - `isLoading: boolean`
@@ -113,15 +124,18 @@ Paginated display of search results with row selection.
 ### Detail View Components
 
 #### `IndividualBeneficiaryView.tsx`
+
 Top-level wrapper for member detail workflow.
 
 **Responsibilities**:
+
 - Manages dialog state for create/update operations
 - Coordinates between detail panel, relationship grids, and dialogs
 - Tracks refresh triggers via counter
 - Passes member data to child components
 
 **Child Components**:
+
 - `MemberDetailsPanel`: Read-only member info
 - `BeneficiaryRelationshipsGrids`: Two relationship grids
 - `CreateBeneficiaryDialog`: Create/edit form
@@ -130,9 +144,11 @@ Top-level wrapper for member detail workflow.
 ---
 
 #### `MemberDetailsPanel.tsx`
+
 Read-only display of selected member information.
 
 **Displayed Fields**:
+
 - Full name
 - Address (street, city, state, zip)
 - Social Security Number
@@ -146,13 +162,16 @@ Read-only display of selected member information.
 ### Grid & Relationship Components
 
 #### `BeneficiaryRelationshipsGrids.tsx`
+
 Complex grid manager for bidirectional beneficiary relationships.
 
 **Manages Two Sections**:
+
 1. **"Beneficiary Of"**: People who list this member as beneficiary
 2. **"Beneficiaries"**: People this member is beneficiary for
 
 **Features**:
+
 - **Percentage Editing**: Inline percentage field with real-time validation
 - **Validation**: Sum of percentages must not exceed 100%
 - **Actions**: Edit/Delete buttons per row
@@ -162,10 +181,12 @@ Complex grid manager for bidirectional beneficiary relationships.
 - **Error Recovery**: Failed updates restore previous value
 
 **Custom Hooks Used**:
+
 - `useBeneficiaryRelationshipData`: Data fetching and pagination
 - `useBeneficiaryPercentageUpdate`: Validation and update
 
 **Props**:
+
 - `selectedMember: BeneficiaryDetail`
 - `externalRefreshTrigger: number` (counter for forced refresh)
 - `onAddBeneficiary: () => void`
@@ -176,16 +197,22 @@ Complex grid manager for bidirectional beneficiary relationships.
 #### Grid Column Definitions
 
 ##### `MemberResultsGridColumns.tsx`
+
 Search results grid (8 columns):
+
 - Badge, PSN Suffix, Name, SSN, City, State, Zip, Age
 
 ##### `BeneficiariesListGridColumns.ts`
+
 Beneficiary list grid (14 columns):
+
 - Badge, PSN, Full Name, SSN, Percentage (editable), Kind, Current Balance
 - Street, City, State, Zip, DOB, Relationship, Phone
 
 ##### `BeneficiaryOfGridColumns.tsx`
+
 "Beneficiary of" grid (11 columns):
+
 - Badge, PSN, Full Name, SSN, DOB, Street, City, State, Percentage, Zip, Current Balance
 
 ---
@@ -193,9 +220,11 @@ Beneficiary list grid (14 columns):
 ### Dialog Components
 
 #### `CreateBeneficiaryDialog.tsx`
+
 Material-UI Dialog wrapper for beneficiary creation/editing.
 
 **Responsibilities**:
+
 - Manages dialog lifecycle (open/close)
 - Passes form logic to child `CreateBeneficiary` component
 - Provides close button and title
@@ -203,9 +232,11 @@ Material-UI Dialog wrapper for beneficiary creation/editing.
 ---
 
 #### `CreateBeneficiary.tsx`
+
 Complex form component for creating and updating beneficiary records.
 
 **Form Fields**:
+
 - First Name (required)
 - Last Name (required)
 - Beneficiary SSN (required, 9 digits)
@@ -217,6 +248,7 @@ Complex form component for creating and updating beneficiary records.
 - Phone Number (optional, 9 digits max)
 
 **Implementation Pattern**:
+
 - Uses React Hook Form with Yup schema validation
 - Creation flow: Creates contact record first, then beneficiary record (2 API calls)
 - Update flow: Uses single update query
@@ -224,6 +256,7 @@ Complex form component for creating and updating beneficiary records.
 - Error handling: Displays field-level validation errors
 
 **Hooks Used**:
+
 - `useForm` (React Hook Form)
 - `useLazyCreateBeneficiaryContactQuery`
 - `useLazyCreateBeneficiariesQuery`
@@ -231,6 +264,7 @@ Complex form component for creating and updating beneficiary records.
 - `useBeneficiaryKinds`
 
 **Props**:
+
 - `initialData?: BeneficiaryDetail` (for edit mode)
 - `onSuccess: () => void`
 - `employeeAddress?: Address` (for address copy)
@@ -238,9 +272,11 @@ Complex form component for creating and updating beneficiary records.
 ---
 
 #### `DeleteBeneficiaryDialog.tsx`
+
 Simple confirmation dialog for beneficiary deletion.
 
 **Features**:
+
 - Confirmation prompt
 - Loading state during deletion
 - Success/error handling
@@ -254,6 +290,7 @@ Simple confirmation dialog for beneficiary deletion.
 **Purpose**: Encapsulates pagination and sorting state for member search
 
 **Returns**:
+
 ```typescript
 {
   pageNumber: number
@@ -266,12 +303,14 @@ Simple confirmation dialog for beneficiary deletion.
 ```
 
 **Key Characteristics**:
+
 - Manages pagination state independent of search execution
 - Parent component retains control over when search is triggered
 - Supports multi-column sorting
 - Reset clears pagination to defaults
 
 **Usage Pattern**:
+
 ```typescript
 const search = useBeneficiarySearch({ defaultPageSize: 50 });
 // Parent component calls search.handlePaginationChange() when needed
@@ -284,6 +323,7 @@ const search = useBeneficiarySearch({ defaultPageSize: 50 });
 **Purpose**: Fetches and caches beneficiary kind lookup data
 
 **Returns**:
+
 ```typescript
 {
   beneficiaryKinds: BeneficiaryKindDto[]
@@ -293,6 +333,7 @@ const search = useBeneficiarySearch({ defaultPageSize: 50 });
 ```
 
 **Implementation Details**:
+
 - Uses RTK Query's `useLazyGetBeneficiaryKindQuery` hook
 - Single-fetch guarantee via `hasAttempted` ref flag (prevents duplicate API calls)
 - Local state caching (candidate for Redux optimization)
@@ -308,6 +349,7 @@ const search = useBeneficiarySearch({ defaultPageSize: 50 });
 **Purpose**: Manages bidirectional beneficiary relationship data fetching with pagination
 
 **Returns**:
+
 ```typescript
 {
   beneficiaryList: {
@@ -325,6 +367,7 @@ const search = useBeneficiarySearch({ defaultPageSize: 50 });
 ```
 
 **Features**:
+
 - Lazy evaluation: only fetches when member and token available
 - Handles two simultaneous API queries (beneficiaries + beneficiary-of)
 - Supports pagination and sorting for each relationship type
@@ -332,10 +375,12 @@ const search = useBeneficiarySearch({ defaultPageSize: 50 });
 - External refresh trigger via `externalRefreshTrigger` prop (counter pattern)
 
 **Validation**:
+
 - Requires valid `badgeNumber` and `psnSuffix`
 - Skips fetch if identifiers missing
 
 **Configuration**:
+
 ```typescript
 useBeneficiaryRelationshipData({
   selectedMember: BeneficiaryDetail
@@ -353,18 +398,20 @@ useBeneficiaryRelationshipData({
 **Purpose**: Validates and updates beneficiary percentage allocation with business rule enforcement
 
 **Returns**:
+
 ```typescript
 {
   validateAndUpdate: (
     beneficiaryId: number,
     newPercentage: number,
-    currentBeneficiaries: BeneficiaryDto[]
-  ) => Promise<ValidationResult>
-  isUpdating: boolean
+    currentBeneficiaries: BeneficiaryDto[],
+  ) => Promise<ValidationResult>;
+  isUpdating: boolean;
 }
 ```
 
 **Validation Process**:
+
 1. Calculates new sum with proposed percentage
 2. Validates sum ≤ 100%
 3. Returns validation result with error message if invalid
@@ -373,11 +420,13 @@ useBeneficiaryRelationshipData({
 6. Calls optional `onUpdateSuccess` callback after successful update
 
 **Error Handling**:
+
 - Catches API failures and returns error message
 - Does NOT throw exceptions (error returned in result)
 - Provides previous value for UI rollback
 
 **Result Structure**:
+
 ```typescript
 {
   valid: boolean
@@ -396,22 +445,27 @@ useBeneficiaryRelationshipData({
 Badge/PSN parsing and member type detection utilities.
 
 #### `parseBadgeAndPSN(badgeInput: string)`
+
 Separates combined badge/PSN number into components.
 
 **Logic**:
+
 - Badges: 1-7 digits
 - PSNs: 8+ digits (badge + suffix)
 
 **Example**:
+
 ```typescript
-parseBadgeAndPSN("12345678")
+parseBadgeAndPSN("12345678");
 // Returns: { badge: 1234567, psn: 8 }
 ```
 
 #### `detectMemberTypeFromBadge(badge: number)`
+
 Determines member type based on badge length.
 
 **Returns**:
+
 - `0`: All (no specific type)
 - `1`: Employees (1-7 digits)
 - `2`: Beneficiaries (8+ digits)
@@ -419,30 +473,35 @@ Determines member type based on badge length.
 **Usage**: Auto-detect in search filter when user enters badge
 
 #### `isValidBadgeIdentifiers(badgeNumber: number, psnSuffix: number)`
+
 Validates both badge and PSN identifiers.
 
 **Rules**:
+
 - Both must be present and non-null
 - Badge must be > 0
 - PSN can be 0
 
 #### `decomposePSNSuffix(psnSuffix: number)`
+
 Breaks PSN into three beneficiary hierarchy levels.
 
 **Returns**:
+
 ```typescript
 {
-  firstLevel: number
-  secondLevel: number
-  thirdLevel: number
+  firstLevel: number;
+  secondLevel: number;
+  thirdLevel: number;
 }
 ```
 
 **Usage**: Constructs beneficiary payload during creation
 
 **Example**:
+
 ```typescript
-decomposePSNSuffix(123)
+decomposePSNSuffix(123);
 // Returns: { firstLevel: 1, secondLevel: 2, thirdLevel: 3 }
 ```
 
@@ -453,25 +512,30 @@ decomposePSNSuffix(123)
 Percentage validation utilities for beneficiary allocation.
 
 #### `calculatePercentageSum(items: BeneficiaryDto[], updatedId: number, newPercentage: number)`
+
 Computes sum with one item's percentage changed.
 
 **Returns**:
+
 ```typescript
 {
-  sum: number
-  previousValue: number
+  sum: number;
+  previousValue: number;
 }
 ```
 
 **Purpose**: Allows validation of proposed change before API call
 
 #### `validatePercentageAllocation(sum: number)`
+
 Validates percentage sum constraint.
 
 **Rules**:
+
 - Sum must be ≤ 100%
 
 **Returns**:
+
 ```typescript
 {
   sum: number
@@ -489,35 +553,41 @@ Validates percentage sum constraint.
 #### RTK Query Hooks (from `reduxstore/api/BeneficiariesApi`)
 
 **Query Hooks (Read Operations)**:
+
 - `useLazyBeneficiarySearchFilterQuery` - Primary search endpoint
 - `useLazyGetBeneficiaryDetailQuery` - Fetch single member details
 - `useLazyGetBeneficiariesQuery` - Fetch beneficiary relationships
 - `useLazyGetBeneficiaryKindQuery` - Fetch beneficiary kinds lookup
 
 **Mutation Hooks (Write Operations)**:
+
 - `useLazyCreateBeneficiariesQuery` - Create new beneficiary
 - `useLazyCreateBeneficiaryContactQuery` - Create contact record
 - `useLazyUpdateBeneficiaryQuery` - Update beneficiary percentage/info
 - `useLazyDeleteBeneficiaryQuery` - Delete beneficiary record
 
 #### Redux Store Access
+
 - **Authentication**: `state.security.token` (via `useSelector`)
 - All hooks check for valid token before API calls
 
 ### State Management Pattern
 
 **Local Component State** (React `useState`):
+
 - Dialog open/close state
 - Form data (Create/Edit form)
 - Member selection
 - Search criteria
 
 **RTK Query Cache** (Distributed):
+
 - Server data (automatic deduplication)
 - Automatic cache invalidation on mutations
 - Manual refresh via hook `refresh()` method
 
 **Custom Hooks** (Business Logic):
+
 - Encapsulate complex state logic (pagination, validation)
 - Promote code reuse across components
 - Facilitate unit testing
@@ -529,6 +599,7 @@ Validates percentage sum constraint.
 ### Request DTOs
 
 #### `BeneficiarySearchAPIRequest`
+
 Primary search filter request.
 
 ```typescript
@@ -545,16 +616,18 @@ Primary search filter request.
 ```
 
 #### `BeneficiaryDetailAPIRequest`
+
 Request for single member details.
 
 ```typescript
 {
-  badgeNumber: number
-  psnSuffix: number
+  badgeNumber: number;
+  psnSuffix: number;
 }
 ```
 
 #### `CreateBeneficiaryRequest`
+
 Beneficiary creation payload.
 
 ```typescript
@@ -575,6 +648,7 @@ Beneficiary creation payload.
 ```
 
 #### `CreateBeneficiaryContactRequest`
+
 Contact information creation.
 
 ```typescript
@@ -588,6 +662,7 @@ Contact information creation.
 ```
 
 #### `UpdateBeneficiaryRequest`
+
 Beneficiary update payload.
 
 ```typescript
@@ -609,6 +684,7 @@ Beneficiary update payload.
 ### Response DTOs
 
 #### `BeneficiaryDetail`
+
 Member search result.
 
 ```typescript
@@ -628,6 +704,7 @@ Member search result.
 ```
 
 #### `BeneficiaryDto`
+
 Beneficiary relationship record.
 
 ```typescript
@@ -652,6 +729,7 @@ Beneficiary relationship record.
 ```
 
 #### `Paged<T>`
+
 Paginated response wrapper.
 
 ```typescript
@@ -662,12 +740,13 @@ Paginated response wrapper.
 ```
 
 #### `BeneficiaryKindDto`
+
 Beneficiary kind lookup.
 
 ```typescript
 {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 ```
 
@@ -690,6 +769,7 @@ const [trigger, { isFetching, data, error }] = useLazyXxxQuery();
 ```
 
 **Advantages**:
+
 - Component controls when API calls execute
 - No automatic fetches on mount
 - Clear error handling with `.unwrap()` + `.catch()`
@@ -697,21 +777,23 @@ const [trigger, { isFetching, data, error }] = useLazyXxxQuery();
 ### Error Handling Strategy
 
 **Error Handling Pattern**:
+
 ```typescript
 trigger(params)
   .unwrap()
-  .then(response => {
+  .then((response) => {
     // Success path
-    onSuccess?.(response)
+    onSuccess?.(response);
   })
-  .catch(error => {
+  .catch((error) => {
     // Error path - both network and API errors
-    console.error('API failed:', error)
-    setErrorMessage(error.message || 'Operation failed')
-  })
+    console.error("API failed:", error);
+    setErrorMessage(error.message || "Operation failed");
+  });
 ```
 
 **Current Implementation**:
+
 - Console error logging (candidate for improvement)
 - Error messages propagated to UI (toasts or inline messages)
 - No automatic retry (user-initiated retry via re-trigger)
@@ -719,21 +801,24 @@ trigger(params)
 ### Data Refresh Strategy
 
 **Pattern 1: Custom Hook Refresh**
+
 ```typescript
 const { data, refresh } = useBeneficiaryRelationshipData(...)
 // After mutation: refresh()
 ```
 
 **Pattern 2: External Trigger Counter**
+
 ```typescript
-const [refreshCounter, setRefreshCounter] = useState(0)
+const [refreshCounter, setRefreshCounter] = useState(0);
 const data = useBeneficiaryRelationshipData({
-  externalRefreshTrigger: refreshCounter
-})
+  externalRefreshTrigger: refreshCounter,
+});
 // After mutation: setRefreshCounter(c => c + 1)
 ```
 
 **Pattern 3: RTK Query Auto-Invalidation**
+
 - Mutations automatically invalidate related queries
 - Manual cache control via tag-based invalidation (if configured)
 
@@ -744,6 +829,7 @@ const data = useBeneficiaryRelationshipData({
 ### Workflow 1: Search Member
 
 **Steps**:
+
 1. User enters search criteria (SSN, Name, or Badge/PSN) in `BeneficiaryInquirySearchFilter`
 2. Form validates inputs (SSN format, badge format)
 3. User submits form
@@ -759,6 +845,7 @@ const data = useBeneficiaryRelationshipData({
 **Precondition**: Member selected from search results
 
 **Steps**:
+
 1. User clicks row in `MemberResultsGrid`
 2. `BeneficiaryInquiry` triggers detail fetch for selected badge/PSN
 3. `IndividualBeneficiaryView` displays:
@@ -776,6 +863,7 @@ const data = useBeneficiaryRelationshipData({
 **Precondition**: Member selected with detail view displayed
 
 **Steps**:
+
 1. User clicks "Add Beneficiary" button in detail view
 2. `CreateBeneficiaryDialog` opens with `CreateBeneficiary` form
 3. User fills form fields:
@@ -805,6 +893,7 @@ const data = useBeneficiaryRelationshipData({
 **Precondition**: Beneficiary grid visible with edit-enabled cells
 
 **Steps**:
+
 1. User clicks percentage field in beneficiary grid
 2. User enters new percentage value
 3. User tabs/clicks away (blur event)
@@ -832,6 +921,7 @@ const data = useBeneficiaryRelationshipData({
 **Precondition**: Beneficiary grid visible with delete button per row
 
 **Steps**:
+
 1. User clicks delete icon in beneficiary grid row
 2. `DeleteBeneficiaryDialog` opens with confirmation prompt
 3. User clicks "Confirm Delete"
@@ -850,6 +940,7 @@ const data = useBeneficiaryRelationshipData({
 ### Workflow 6: Edit Beneficiary Details
 
 **Similar to Create Workflow but**:
+
 - Form pre-populated with existing beneficiary data
 - Uses `useLazyUpdateBeneficiaryQuery` instead of create queries
 - Single API call instead of two
@@ -894,5 +985,3 @@ Beneficiaries/
     ├── percentageUtils.ts                 # Percentage validation utilities
     └── percentageUtils.test.ts            # Tests (39 test cases)
 ```
-
-

@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class BeneficiaryKind : ILookupTable<char>
 {
     public static class Constants

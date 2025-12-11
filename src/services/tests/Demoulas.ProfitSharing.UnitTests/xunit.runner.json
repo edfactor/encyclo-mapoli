@@ -5,7 +5,7 @@
     "shadowCopy": false,
     "appDomain": "denied",
     "longRunningTestSeconds": 10,
-    "maxParallelThreads": 4,
+    "maxParallelThreads": 6,
     "parallelizeAssembly": true,
     "parallelizeTestCollections": true,
     "preEnumerateTheories": true

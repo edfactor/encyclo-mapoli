@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class EmployeeType : ILookupTable<byte>
 {
     public static class Constants

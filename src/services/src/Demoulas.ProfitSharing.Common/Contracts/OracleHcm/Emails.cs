@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+
 public record Emails(
     [property: JsonPropertyName("items")] IReadOnlyList<EmailItem> Items,
     [property: JsonPropertyName("totalResults")] int? TotalResults,

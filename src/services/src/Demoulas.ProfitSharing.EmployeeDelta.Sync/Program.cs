@@ -3,6 +3,7 @@ using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -10,8 +11,6 @@ using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.Util.Extensions;
-using Microsoft.Extensions.Hosting;
-using OpenTelemetry.Metrics;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -32,7 +31,11 @@ builder.AddDatabaseServices((services, factoryRequests) =>
 {
     // Register contexts without immediately resolving the interceptor
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing",
-        interceptorFactory: sp => [sp.GetRequiredService<AuditSaveChangesInterceptor>()]));
+        interceptorFactory: sp => [
+            sp.GetRequiredService<AuditSaveChangesInterceptor>(),
+            sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
+            sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
+        ]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonWarehouseContext>("ProfitSharing"));
 });
@@ -53,6 +56,8 @@ logConfig.MaskingOperators = [
 ];
 
 builder.SetDefaultLoggerConfiguration(logConfig);
+
+builder.AddProcessWatchdog();
 
 #pragma warning disable S125
 //HashSet<long> debugOracleHcmIdSet = [300005072436966, 300005305133563, 300005305485131, 300005305501085];

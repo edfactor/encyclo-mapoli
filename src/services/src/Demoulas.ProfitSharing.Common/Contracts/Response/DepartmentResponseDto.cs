@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
 public class DepartmentResponseDto
 {
     public byte Id { get; set; }

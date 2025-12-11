@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class DemographicSyncAudit : IDoNotAudit
 {
     public long Id { get; set; }

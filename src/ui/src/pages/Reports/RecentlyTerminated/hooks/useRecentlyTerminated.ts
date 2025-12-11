@@ -1,5 +1,5 @@
 import { useCallback, useReducer, useRef } from "react";
-import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/AdhocApi";
 import { RecentlyTerminatedResponse } from "reduxstore/types";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+
 public sealed record DistributionSearchRequest : SortedPaginationRequestDto
 {
     public string? Ssn { get; set; }

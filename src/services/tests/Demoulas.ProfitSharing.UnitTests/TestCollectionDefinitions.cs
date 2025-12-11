@@ -1,6 +1,4 @@
-using Xunit;
-
-namespace Demoulas.ProfitSharing.UnitTests;
+﻿namespace Demoulas.ProfitSharing.UnitTests;
 
 /// <summary>
 /// Collection definitions for parallel test execution.

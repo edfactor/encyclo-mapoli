@@ -60,7 +60,6 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
 - For any issues with `smart-ui-library`, ensure your `.npmrc` is correct and you are authenticated with JFrog.
 - See `src/pages/` for main feature implementations and `src/components/` for reusable UI.
 
-
 ## Playwright
 
 - Create a file on the main folder called `.playwright.env`

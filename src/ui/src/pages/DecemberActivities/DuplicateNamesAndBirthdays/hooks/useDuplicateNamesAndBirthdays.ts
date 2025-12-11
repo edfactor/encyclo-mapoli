@@ -5,10 +5,10 @@ import { SortParams, useGridPagination } from "../../../../hooks/useGridPaginati
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import {
-    duplicateNamesAndBirthdaysReducer,
-    initialState,
-    selectHasResults,
-    selectShowData
+  duplicateNamesAndBirthdaysReducer,
+  initialState,
+  selectHasResults,
+  selectShowData
 } from "./useDuplicateNamesAndBirthdaysReducer";
 
 export interface DuplicateNamesAndBirthdaysSearchParams {

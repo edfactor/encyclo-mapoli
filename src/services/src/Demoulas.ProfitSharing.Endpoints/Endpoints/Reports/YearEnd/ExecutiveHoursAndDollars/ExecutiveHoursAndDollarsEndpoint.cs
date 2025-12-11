@@ -95,7 +95,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
             if (result != null)
             {
                 this.RecordResponseMetrics(HttpContext, _logger, result);
-                
+
                 // DEBUG: Before returning, validate each record can be serialized
                 if (result.Response?.Results?.Any() == true)
                 {
@@ -118,7 +118,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
                     }
                 }
-                
+
                 return result;
             }
 

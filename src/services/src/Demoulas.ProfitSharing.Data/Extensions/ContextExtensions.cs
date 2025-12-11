@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
+
 internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)

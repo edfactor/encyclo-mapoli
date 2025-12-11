@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using YEMatch.Activities;
 using YEMatch.ReadyActivities;
@@ -25,7 +25,7 @@ public class GoldenYearEndRun : Runnable
     public override async Task Exec()
     {
         // Generate the Golden files.  Run READY from Frozen to the YE Completed.
-        await Run(Specify( 
+        await Run(Specify(
             R00_BuildDatabase, // import obfuscated 
             DropBadBenesReady,
             R01_CleanUpReports,
@@ -57,7 +57,7 @@ public class GoldenYearEndRun : Runnable
             R25_ProfShareReportByAge,
             R26_ProfShareGrossReport,
             R27_ProfShareByStore
-            // R28_PrintProfitCerts -- This poops out over not having an input file
+        // R28_PrintProfitCerts -- This poops out over not having an input file
         ));
     }
 }

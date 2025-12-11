@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+
 public sealed class UpdateSummaryReportDetail : IIsExecutive
 {
     public long BadgeNumber { get; set; }

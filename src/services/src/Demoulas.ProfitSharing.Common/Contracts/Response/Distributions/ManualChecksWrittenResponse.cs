@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+
 public sealed record ManualChecksWrittenResponse : DistributionsOnHoldResponse
 {
     public string? CheckNumber { get; set; }

@@ -5,11 +5,11 @@ using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.Common.Data.Contexts.Interceptor;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
@@ -44,11 +44,29 @@ public sealed class AuditService : IAuditService
         _maskingOptions.Converters.Add(new MaskingJsonConverterFactory());
     }
 
+    // Move all ArchiveCompletedReportAsync overloads so they are adjacent, per S4136
+
+    // Place all ArchiveCompletedReportAsync overloads together, after the constructor and before other public methods
+
     public Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
         string reportName,
         short profitYear,
         TRequest request,
         Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
+        CancellationToken cancellationToken)
+        where TResponse : class
+        where TRequest : PaginationRequestDto
+    {
+
+        return ArchiveCompletedReportAsync(reportName, profitYear, request, reportFunction, new List<Func<TResponse, (string, object)>>(), cancellationToken);
+    }
+
+    public Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
+        string reportName,
+        short profitYear,
+        TRequest request,
+        Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
+        List<Func<TResponse, (string, object)>> additionalChecksums,
         CancellationToken cancellationToken)
         where TResponse : class
         where TRequest : PaginationRequestDto
@@ -62,7 +80,20 @@ public sealed class AuditService : IAuditService
         _ = (_httpContextAccessor.HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
                        bool.TryParse(archiveValue, out isArchiveRequest) && isArchiveRequest;
 
-        return ArchiveCompletedReportAsync(reportName, profitYear, request, isArchiveRequest, reportFunction, cancellationToken);
+        return ArchiveCompletedReportAsync(reportName, profitYear, request, isArchiveRequest, reportFunction, additionalChecksums, cancellationToken);
+    }
+
+    public Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
+        string reportName,
+        short profitYear,
+        TRequest request,
+        bool isArchiveRequest,
+        Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
+        CancellationToken cancellationToken)
+        where TResponse : class
+        where TRequest : PaginationRequestDto
+    {
+        return ArchiveCompletedReportAsync(reportName, profitYear, request, isArchiveRequest, reportFunction, new List<Func<TResponse, (string, object)>>(), cancellationToken);
     }
 
     public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
@@ -71,6 +102,7 @@ public sealed class AuditService : IAuditService
         TRequest request,
         bool isArchiveRequest,
         Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
+        List<Func<TResponse, (string, object)>> additionalChecksums,
         CancellationToken cancellationToken) where TRequest : PaginationRequestDto where TResponse : class
     {
         TRequest archiveRequest = request;
@@ -90,6 +122,7 @@ public sealed class AuditService : IAuditService
         string requestJson = JsonSerializer.Serialize(request, JsonSerializerOptions.Web);
         string reportJson = JsonSerializer.Serialize(response, _maskingOptions);
         string userName = _appUser?.UserName ?? "Unknown";
+        string sessionId = GetSessionId(_httpContextAccessor.HttpContext);
 
         // Create archived data payload with type metadata
         // Parse the JSON to get a JsonElement so RawData is an object, not an escaped string
@@ -102,7 +135,7 @@ public sealed class AuditService : IAuditService
         string archivedPayloadJson = JsonSerializer.Serialize(archivedPayload, JsonSerializerOptions.Web);
 
         var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = archivedPayloadJson } };
-        var auditEvent = new AuditEvent { TableName = reportName, Operation = AuditEvent.AuditOperations.Archive, UserName = userName, ChangesJson = entries };
+        var auditEvent = new AuditEvent { TableName = reportName, Operation = AuditEvent.AuditOperations.Archive, UserName = userName, SessionId = sessionId, ChangesJson = entries };
 
         ReportChecksum checksum = new ReportChecksum
         {
@@ -112,7 +145,7 @@ public sealed class AuditService : IAuditService
             ReportJson = reportJson,
             UserName = userName
         };
-        checksum.KeyFieldsChecksumJson = ToKeyValuePairs(response);
+        checksum.KeyFieldsChecksumJson = ToKeyValuePairs(response, additionalChecksums);
 
         using (_guardOverride.AllowFor(Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING))
         {
@@ -135,6 +168,7 @@ public sealed class AuditService : IAuditService
         CancellationToken cancellationToken = default)
     {
         string userName = _appUser?.UserName ?? "Unknown";
+        string sessionId = GetSessionId(_httpContextAccessor.HttpContext);
 
         var entries = new List<AuditChangeEntry>
         {
@@ -148,6 +182,7 @@ public sealed class AuditService : IAuditService
             Operation = AuditEvent.AuditOperations.SensitiveAccess,
             PrimaryKey = primaryKey,
             UserName = userName,
+            SessionId = sessionId,
             ChangesJson = entries,
             CreatedAt = DateTimeOffset.UtcNow
         };
@@ -208,6 +243,11 @@ public sealed class AuditService : IAuditService
             if (!string.IsNullOrWhiteSpace(request.UserName))
             {
                 query = query.Where(e => e.UserName.Contains(request.UserName));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.SessionId))
+            {
+                query = query.Where(e => e.SessionId == request.SessionId);
             }
 
             // Apply date range filters
@@ -346,7 +386,7 @@ public sealed class AuditService : IAuditService
         }
     }
 
-    public static IEnumerable<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> ToKeyValuePairs<TReport>(TReport obj)
+    public static IEnumerable<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> ToKeyValuePairs<TReport>(TReport obj, List<Func<TReport, (string, object)>> additionalChecksums)
     where TReport : class
     {
         var result = new List<KeyValuePair<string, decimal>>();
@@ -398,6 +438,13 @@ public sealed class AuditService : IAuditService
             var rawValue = prop.GetValue(obj);
             var value = ConvertToDecimal(rawValue);
             result.Add(new KeyValuePair<string, decimal>(keyName, value));
+        }
+
+        foreach (var additionalChecksum in additionalChecksums)
+        {
+            var (key, valueObj) = additionalChecksum(obj);
+            var value = ConvertToDecimal(valueObj);
+            result.Add(new KeyValuePair<string, decimal>(key, value));
         }
 
         // Materialize the result list to avoid lazy evaluation issues with yield return
@@ -457,5 +504,33 @@ public sealed class AuditService : IAuditService
             null => 0m,
             _ => 0m
         };
+    }
+
+    /// <summary>
+    /// Extracts the session ID from HttpContext.Items, checking the current request's Items first (for same-request availability)
+    /// then falling back to request cookies (for subsequent requests).
+    /// </summary>
+    /// <param name="httpContext">The current HTTP context</param>
+    /// <returns>The session ID (20-character GUID) or "unknown" if not found</returns>
+    private static string GetSessionId(HttpContext? httpContext)
+    {
+        if (httpContext == null)
+        {
+            return "unknown";
+        }
+
+        // First check HttpContext.Items (session created/retrieved in same request)
+        if (httpContext.Items.TryGetValue(Demoulas.ProfitSharing.Common.Constants.Telemetry.SessionIdKey, out var sessionIdObj) && sessionIdObj is string sessionId)
+        {
+            return sessionId;
+        }
+
+        // Fallback to request cookies (for subsequent requests with existing session)
+        if (httpContext.Request.Cookies.TryGetValue(Demoulas.ProfitSharing.Common.Constants.Telemetry.SessionIdKey, out var cookieSessionId))
+        {
+            return cookieSessionId;
+        }
+
+        return "unknown";
     }
 }

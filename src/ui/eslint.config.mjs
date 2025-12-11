@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig([
   globalIgnores(["**/dist", "**/.eslintrc.cjs", "**/coverage", "**/node_modules", "**/.env*", "**/build"]),
-  
+
   // Main TypeScript/React files
   {
     files: ["src/**/*.{ts,tsx}"],
@@ -39,10 +39,10 @@ export default defineConfig([
 
     rules: {
       ...js.configs.recommended.rules,
-      
+
       // Disable JS version of no-unused-vars, use TypeScript version instead
       "no-unused-vars": "off",
-      
+
       // React Compiler - STRICT MODE
       "react-refresh/only-export-components": [
         "error",
@@ -50,7 +50,7 @@ export default defineConfig([
           allowConstantExport: false
         }
       ],
-      
+
       // React Hooks - STRICT (enforced as errors)
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "error",
@@ -73,7 +73,13 @@ export default defineConfig([
 
   // Test files with vitest/jest globals
   {
-    files: ["src/**/*.{test,spec}.{ts,tsx}", "**/__test__/**/*.{ts,tsx}", "**/__tests__/**/*.{ts,tsx}", "src/test/**/*.{ts,tsx}", "e2e/**/*.ts"],
+    files: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      "**/__test__/**/*.{ts,tsx}",
+      "**/__tests__/**/*.{ts,tsx}",
+      "src/test/**/*.{ts,tsx}",
+      "e2e/**/*.ts"
+    ],
     plugins: {
       "@typescript-eslint": fixupPluginRules(tsPlugin)
     },

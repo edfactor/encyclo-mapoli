@@ -561,7 +561,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 ForfeitureAmount = req.ForfeitureAmount,
                 PaymentAmount = req.PaymentAmount,
                 Name = req.Name,
-                PaymentType = req.PaymentType
+                PaymentType = req.PaymentType,
+                Voids = req.Voids
             };
 
             query = FilterMemberQuery(masterInquiryRequest, query);
@@ -579,6 +580,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
             if (req.MonthToDate.HasValue)
             {
                 query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
+            }
+
+            // Apply Voids filter (PS-2253: Missing from member details endpoint)
+            if (req.Voids.HasValue && req.Voids.Value)
+            {
+                query = query.Where(pd => pd.ProfitDetail != null && pd.ProfitDetail.CommentTypeId == CommentType.Constants.Voided.Id);
             }
 
             byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();

@@ -17,7 +17,7 @@ describe("transformSearchParams", () => {
     forfeiture: undefined,
     payment: undefined,
     voids: false,
-    pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true }
+    pagination: { skip: 0, take: 10, sortBy: "badgeNumber", isSortDescending: true }
   };
 
   it("should transform basic search parameters", () => {
@@ -25,7 +25,7 @@ describe("transformSearchParams", () => {
 
     expect(result.pagination).toEqual({
       skip: 0,
-      take: 5,
+      take: 10,
       sortBy: "badgeNumber",
       isSortDescending: true
     });
@@ -146,7 +146,7 @@ describe("transformSearchParams", () => {
 
     expect(result.pagination).toEqual({
       skip: 0,
-      take: 5,
+      take: 10,
       sortBy: "badgeNumber",
       isSortDescending: true
     });

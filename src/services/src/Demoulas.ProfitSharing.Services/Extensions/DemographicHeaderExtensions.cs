@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
+
 public static class DemographicHeaderExtensions
 {
     public static IApplicationBuilder UseDemographicHeaders(

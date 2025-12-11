@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+
 public record LegislativeInfo(
     [property: JsonPropertyName("items")] IReadOnlyList<LegislativeInfoItem> Items,
     [property: JsonPropertyName("count")] int? Count,

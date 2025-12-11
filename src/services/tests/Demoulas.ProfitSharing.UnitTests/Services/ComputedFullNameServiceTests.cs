@@ -1,7 +1,6 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
@@ -111,7 +110,7 @@ public class ComputedFullNameServiceTests
             var parts = response.FullName.Split(", ");
             parts[0].ShouldBe(response.LastName);   // First part is LastName
             parts[1].ShouldStartWith(response.FirstName[0].ToString()); // Second part starts with FirstName
-            
+
             // If middle name exists, verify initial is included
             if (!string.IsNullOrEmpty(response.MiddleName))
             {
@@ -191,7 +190,7 @@ public class ComputedFullNameServiceTests
         // 3. BeneficiaryContactArchive (line ~40 in migration)
 
         var entities = new[] { "Demographic", "BeneficiaryContact", "BeneficiaryContactArchive" };
-        
+
         // Each entity should have the computed column configured in its mapping
         entities.Length.ShouldBe(3);
         entities.ShouldContain("Demographic");
@@ -207,7 +206,7 @@ public class ComputedFullNameServiceTests
         // and does NOT use UNISTR() which causes charset mismatches at runtime
 
         var oracleExpression = "LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE '' END";
-        
+
         oracleExpression.ShouldContain("||");
         oracleExpression.ShouldContain("', '");
         oracleExpression.ShouldContain("SUBSTR");

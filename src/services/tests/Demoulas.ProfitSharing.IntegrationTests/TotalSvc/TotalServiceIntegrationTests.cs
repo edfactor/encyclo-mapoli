@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+﻿using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.TotalSvc;
@@ -155,11 +155,11 @@ public class TotalServiceIntegrationTests : PristineBaseTest
             TestOutputHelper.WriteLine(mdTable.ToString());
 
             // Save HTML version to desktop
-            #if false
+#if false
             string title = $"Total Service Discrepancies - Count of {mismatchCount} of {commonKeys.Count:N0} considered";
             mdTable.SaveAsHtml("/Users/robertherrmann/Desktop/demos/sprint-37/total-service-discrepencies.html", title);
             TestOutputHelper.WriteLine("HTML report saved to: /Users/robertherrmann/Desktop/demos/sprint-38/total-service-discrepencies.html");
-            #endif
+#endif
         }
 
         TestOutputHelper.WriteLine($"Total mismatched records: {mismatchCount}");

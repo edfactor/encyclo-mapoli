@@ -5,7 +5,6 @@ using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;

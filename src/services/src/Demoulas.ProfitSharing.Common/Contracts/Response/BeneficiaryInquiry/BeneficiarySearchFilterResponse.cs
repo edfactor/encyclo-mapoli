@@ -3,6 +3,7 @@
 using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
+
 public record BeneficiarySearchFilterResponse
 {
     public int BadgeNumber { get; set; }

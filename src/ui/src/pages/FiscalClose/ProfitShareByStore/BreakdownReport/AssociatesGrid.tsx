@@ -3,7 +3,7 @@ import { Grid } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";

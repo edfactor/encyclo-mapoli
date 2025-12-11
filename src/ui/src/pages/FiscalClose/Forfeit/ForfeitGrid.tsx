@@ -3,7 +3,7 @@ import { Path, useNavigate } from "react-router";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { ForfeituresAndPointsResponse } from "../../../types";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
@@ -29,8 +29,10 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
     [handleNavigationForButton]
   );
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: searchResults?.response?.results?.length ?? 0
+  });
 
   const sortEventHandler = (update: ISortParams) => {
     // if field is badgeOrPsn, we need to make sortBy equal to badgeNumber,beneficiaryPsn

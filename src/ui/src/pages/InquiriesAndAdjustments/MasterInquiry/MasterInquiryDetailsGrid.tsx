@@ -4,7 +4,7 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { memo, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams } from "../../../hooks/useGridPagination";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 
@@ -28,9 +28,18 @@ interface MasterInquiryGridProps {
 }
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
-  ({ profitData, isLoading, profitGridPagination, onPaginationChange, onSortChange, isGridExpanded = false, onToggleExpand }) => {
+  ({
+    profitData,
+    isLoading,
+    profitGridPagination,
+    onPaginationChange,
+    onSortChange,
+    isGridExpanded = false,
+    onToggleExpand
+  }) => {
     const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
-    const gridMaxHeight = useDynamicGridHeight({
+    const gridMaxHeight = useContentAwareGridHeight({
+      rowCount: profitData?.results?.length ?? 0,
       heightPercentage: isGridExpanded ? 0.85 : 0.5
     });
 

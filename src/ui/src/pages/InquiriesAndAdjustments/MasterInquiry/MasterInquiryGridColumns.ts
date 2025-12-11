@@ -65,7 +65,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
-      sortable: false,
+      sortable: true,
       resizable: true,
       valueFormatter: (params) => {
         const month = params.data.monthToDate; // assuming 'status' is in the row data

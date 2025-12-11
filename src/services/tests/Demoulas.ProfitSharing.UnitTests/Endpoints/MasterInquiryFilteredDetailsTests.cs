@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints;
 

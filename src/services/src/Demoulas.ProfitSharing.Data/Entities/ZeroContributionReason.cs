@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class ZeroContributionReason : ILookupTable<byte>
 {
 #pragma warning disable S1133

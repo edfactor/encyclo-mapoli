@@ -12,12 +12,14 @@ Successfully implemented .NET Aspire's Interaction Service to provide real-time 
 ### Files Modified
 
 1. **`CommandHelper.cs`**
+
    - Added `IInteractionService` parameter to `RunConsoleApp` method
    - Implemented automatic "Starting" notifications when operations begin
    - Implemented automatic "Success/Error" notifications when operations complete
    - Notifications show clear operation names and status messages
 
 2. **`Program.cs` (AppHost)**
+
    - Added `using Aspire.Hosting;` and `using Microsoft.Extensions.DependencyInjection;`
    - Updated all database commands to retrieve and use `IInteractionService`
    - Added confirmation dialogs for destructive operations (`drop-recreate-db`, `Nuclear-Option`)
@@ -30,6 +32,7 @@ Successfully implemented .NET Aspire's Interaction Service to provide real-time 
 ### Documentation Created
 
 1. **`DATABASE_CLI_INTERACTION_GUIDE.md`** (Comprehensive, 400+ lines)
+
    - Complete architecture and implementation details
    - Step-by-step guide for adding notifications to new commands
    - Best practices and troubleshooting guide
@@ -59,12 +62,12 @@ The Nuclear-Option now provides a comprehensive interactive experience:
 
 All database commands now support notifications:
 
-| Command | Notifications | Confirmation |
-|---------|--------------|--------------|
-| `upgrade-db` | ✅ Start/Complete/Error | ❌ No |
-| `drop-recreate-db` | ✅ Start/Complete/Error | ✅ Yes |
-| `import-from-ready` | ✅ Start/Complete/Error | ❌ No |
-| `import-from-navigation` | ✅ Start/Complete/Error | ❌ No |
+| Command                  | Notifications           | Confirmation |
+| ------------------------ | ----------------------- | ------------ |
+| `upgrade-db`             | ✅ Start/Complete/Error | ❌ No        |
+| `drop-recreate-db`       | ✅ Start/Complete/Error | ✅ Yes       |
+| `import-from-ready`      | ✅ Start/Complete/Error | ❌ No        |
+| `import-from-navigation` | ✅ Start/Complete/Error | ❌ No        |
 
 ### Notification Types
 
@@ -94,9 +97,9 @@ All database commands now support notifications:
         var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
         return Task.FromResult(
             CommandHelper.RunConsoleApp(
-                projectPath!, 
-                "launch-profile", 
-                logger, 
+                projectPath!,
+                "launch-profile",
+                logger,
                 "Operation Description",  // Shows in notifications
                 interactionService));
     },
@@ -130,18 +133,21 @@ if (interactionService.IsAvailable)
 ## Benefits
 
 ### For Developers
+
 - Clear visual feedback when database operations run
 - Confirmation dialogs prevent accidental destructive actions
 - Progress tracking for multi-step operations
 - Error messages displayed in dashboard (not just console)
 
 ### For QA/Testers
+
 - Immediate feedback on operation status
 - Clear indication when long-running operations complete
 - Error notifications make failures obvious
 - Links to console logs for detailed troubleshooting
 
 ### For DevOps
+
 - Better visibility into database operations in hosted environments
 - Notifications work in both local dashboard and deployment scenarios
 - Consistent UX across all database maintenance operations
@@ -151,6 +157,7 @@ if (interactionService.IsAvailable)
 ### How to Test
 
 1. **Start Aspire Dashboard**:
+
    ```bash
    aspire run
    ```
@@ -158,6 +165,7 @@ if (interactionService.IsAvailable)
 2. **Navigate to Database-Cli resource** in the dashboard
 
 3. **Test Nuclear-Option**:
+
    - Click "Full Nuclear Reset" command
    - Verify confirmation dialog appears
    - Confirm operation
@@ -172,6 +180,7 @@ if (interactionService.IsAvailable)
 ### Expected Behavior
 
 **Nuclear-Option Success Flow**:
+
 ```
 User clicks → Confirmation appears → User confirms
 → "Starting Nuclear Option" (info)
@@ -185,6 +194,7 @@ User clicks → Confirmation appears → User confirms
 ```
 
 **Drop-Recreate Cancellation Flow**:
+
 ```
 User clicks → Confirmation appears → User cancels
 → "Operation Cancelled" (info)
@@ -194,11 +204,13 @@ User clicks → Confirmation appears → User cancels
 ## Known Limitations
 
 1. **Preview API**: Interaction Service is marked as "evaluation purposes only" by Microsoft
+
    - Stable enough for internal use
    - May change in future Aspire versions
    - Warning suppressed via `ASPIREINTERACTION001` in project file
 
 2. **Dashboard Only**: Notifications only appear when running via `aspire run`
+
    - Running `dotnet run` directly bypasses dashboard (no notifications)
    - This is by design (Aspire feature)
 
@@ -219,11 +231,13 @@ Potential improvements for consideration:
 ## References
 
 ### Documentation
+
 - **Comprehensive Guide**: `src/ui/public/docs/DATABASE_CLI_INTERACTION_GUIDE.md`
 - **Quick Reference**: `src/ui/public/docs/DATABASE_CLI_INTERACTION_QUICK_REFERENCE.md`
 - **Microsoft Docs**: https://learn.microsoft.com/en-us/dotnet/aspire/extensibility/interaction-service
 
 ### Source Files
+
 - `src/services/src/Demoulas.ProfitSharing.AppHost/Program.cs`
 - `src/services/src/Demoulas.ProfitSharing.AppHost/Helpers/CommandHelper.cs`
 - `src/services/src/Demoulas.ProfitSharing.AppHost/Demoulas.ProfitSharing.AppHost.csproj`
@@ -232,6 +246,7 @@ Potential improvements for consideration:
 ## Build Status
 
 ✅ **Build Verified**: All changes compile successfully
+
 ```
 Build succeeded in 8.2s
 Demoulas.ProfitSharing.AppHost succeeded (2.8s)
@@ -242,12 +257,14 @@ No errors or warnings (preview API warnings suppressed as documented).
 ## Rollout Plan
 
 ### Development
+
 - ✅ Implementation complete
 - ✅ Build verified
 - ✅ Documentation created
 - ⏳ Testing in local Aspire dashboard (next step)
 
 ### Next Steps
+
 1. Test Nuclear-Option workflow in local dashboard
 2. Verify all notifications display correctly
 3. Test error scenarios (database connection failures)
@@ -257,6 +274,7 @@ No errors or warnings (preview API warnings suppressed as documented).
 ## Support
 
 For questions or issues:
+
 1. Review `DATABASE_CLI_INTERACTION_GUIDE.md` comprehensive guide
 2. Check `DATABASE_CLI_INTERACTION_QUICK_REFERENCE.md` for common patterns
 3. Verify running via `aspire run` (not `dotnet run`)

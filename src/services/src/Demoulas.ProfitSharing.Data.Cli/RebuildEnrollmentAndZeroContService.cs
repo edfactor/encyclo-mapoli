@@ -2,7 +2,6 @@
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
@@ -73,7 +72,7 @@ internal sealed class RebuildEnrollmentAndZeroContService
                 .SumAsync(p => p.EnrollmentId, cancellationToken);
 
             // Return the year if sum indicates rebuild needed, otherwise 0
-            return enrollmentSum == 0 ? minProfitYear :(short) 0;
+            return enrollmentSum == 0 ? minProfitYear : (short)0;
         }, cancellationToken);
     }
 }

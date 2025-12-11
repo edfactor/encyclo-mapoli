@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
+
 internal sealed class ProfitDetailRollupMap : IEntityTypeConfiguration<ProfitDetailRollup>
 {
     // This table is virtual in nature. It uses the FromSql method to access data.

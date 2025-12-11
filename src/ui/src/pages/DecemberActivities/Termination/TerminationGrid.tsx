@@ -4,7 +4,7 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { useTerminationGrid } from "./hooks/useTerminationGrid";
@@ -45,11 +45,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   isGridExpanded = false,
   onToggleExpand
 }) => {
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight({
-    heightPercentage: isGridExpanded ? 0.85 : 0.4
-  });
-
   // Check if current navigation should be read-only
   const isReadOnly = useReadOnlyNavigation();
 
@@ -84,6 +79,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     onLoadingChange,
     isReadOnly,
     onShowUnsavedChangesDialog
+  });
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: gridData?.length ?? 0,
+    heightPercentage: isGridExpanded ? 0.85 : 0.4
   });
 
   // Refresh grid cells when read-only status changes
@@ -135,7 +136,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             <Grid>
               <ReportSummary report={termination} />
             </Grid>
-            <Grid style={{ display: 'flex', gap: 8 }}>
+            <Grid style={{ display: "flex", gap: 8 }}>
               {onToggleExpand && (
                 <IconButton
                   onClick={onToggleExpand}

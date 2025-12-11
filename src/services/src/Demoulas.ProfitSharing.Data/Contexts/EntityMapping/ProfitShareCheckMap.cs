@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShareCheck>
 {
     public void Configure(EntityTypeBuilder<ProfitShareCheck> builder)

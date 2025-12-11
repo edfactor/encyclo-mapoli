@@ -19,7 +19,6 @@ using Demoulas.ProfitSharing.Services.LogMasking; // retains AddProjectServices 
 using Demoulas.ProfitSharing.Services.Middleware;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Demoulas.Util.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
 using QuestPDF;

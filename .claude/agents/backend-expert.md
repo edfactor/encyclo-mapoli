@@ -21,7 +21,9 @@ You are responsible for all backend code in the `./src/services` directory, whic
 # Critical Architectural Patterns (MANDATORY)
 
 ## Endpoint Results Pattern
+
 ALL FastEndpoints MUST:
+
 - Return typed minimal API union results: `Results<Ok<T>, NotFound, ProblemHttpResult>` for queries or `Results<Ok, ProblemHttpResult>` for commands
 - Use domain `Result<T>` record internally for service-layer outcomes
 - Convert via `Match` or helpers like `ToResultOrNotFound()` and `ToHttpResult()`
@@ -30,15 +32,18 @@ ALL FastEndpoints MUST:
 - Never return raw DTOs or nulls
 
 Example:
+
 ```csharp
 var result = await _service.GetAsync(req.Id, ct);
 return result.ToHttpResult(Error.SomeEntityNotFound);
 ```
 
 ## Telemetry Pattern (MANDATORY)
+
 ALL endpoints MUST implement telemetry using one of two patterns:
 
 **Automatic Pattern (Recommended)**:
+
 ```csharp
 using Demoulas.ProfitSharing.Common.Telemetry;
 
@@ -47,17 +52,18 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
     return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
     {
         var result = await _service.ProcessAsync(req, ct);
-        
+
         EndpointTelemetry.BusinessOperationsTotal.Add(1,
             new("operation", "employee-lookup"),
             new("endpoint", nameof(MyEndpoint)));
-            
+
         return result;
     }, "Ssn", "OracleHcmId"); // List ALL sensitive fields accessed
 }
 ```
 
 **Manual Pattern** (for fine-grained control):
+
 ```csharp
 using var activity = this.StartEndpointActivity(HttpContext);
 try
@@ -82,7 +88,9 @@ All endpoints MUST inject `ILogger<TEndpoint>` for telemetry correlation.
 ALWAYS declare sensitive fields in telemetry calls: `"Ssn"`, `"OracleHcmId"`, `"BadgeNumber"`, `"Salary"`, `"BeneficiaryInfo"`
 
 ## Validation Pattern (MANDATORY)
+
 ALL incoming data MUST be validated:
+
 - Use FluentValidation with `AbstractValidator<T>` for request DTOs
 - Enforce numeric ranges, string lengths, collection sizes, pagination bounds, date ranges, enum validation
 - Return structured `ValidationProblem` responses with field-level messages
@@ -90,6 +98,7 @@ ALL incoming data MUST be validated:
 - Unit test all validators with boundary cases
 
 Example:
+
 ```csharp
 public class SearchRequestValidator : AbstractValidator<SearchRequest>
 {
@@ -106,7 +115,9 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 ```
 
 ## History & Auditing Pattern
+
 For mutable entities with historical tracking:
+
 - Close current record with `ValidTo = now`
 - Insert new history row with `ValidFrom = now`
 - NEVER overwrite historical rows
@@ -114,6 +125,7 @@ For mutable entities with historical tracking:
 - Log counts and key identifiers for traceability
 
 ## Entity Framework Core Patterns
+
 - Use async operations: `ToListAsync`, `FirstOrDefaultAsync`, `SaveChangesAsync`
 - Bulk operations: `ExecuteUpdateAsync`, `ExecuteDeleteAsync` for safe batch updates
 - Dynamic filters: Build expressions (see `DemographicsService`)
@@ -124,6 +136,7 @@ For mutable entities with historical tracking:
   - Add comment explaining why `??` was avoided
 
 ## Identifier Strategy
+
 - `OracleHcmId` is authoritative when present
 - Fall back to composite `(Ssn, BadgeNumber)` only when Oracle ID missing
 - Skip ambiguous `BadgeNumber == 0` cases
@@ -178,6 +191,7 @@ For mutable entities with historical tracking:
 # Documentation References
 
 Refer to these documents for detailed patterns:
+
 - `TELEMETRY_GUIDE.md` - Comprehensive telemetry reference
 - `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet
 - `READ_ONLY_FUNCTIONALITY.md` - Read-only role patterns

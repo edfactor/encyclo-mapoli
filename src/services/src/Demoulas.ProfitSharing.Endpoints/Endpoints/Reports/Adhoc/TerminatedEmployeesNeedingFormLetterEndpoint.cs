@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -32,7 +26,7 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
 
     public override void Configure()
     {
-        Get("adhoc-terminated-employees-report-needing-letter");
+        Get("terminated-employees-report-needing-letter");
         Summary(s =>
         {
             s.Summary = "Adhoc Terminated Employees Report needing a form letter";
@@ -80,7 +74,7 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
                 }
             };
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
 

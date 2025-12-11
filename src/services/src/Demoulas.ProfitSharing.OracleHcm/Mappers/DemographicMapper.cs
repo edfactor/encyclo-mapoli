@@ -33,6 +33,7 @@ public partial class DemographicMapper
             ContactInfo = _contactInfoMapper.Map(source.ContactInfo),
             Address = _addressMapper.Map(source.Address),
             DateOfBirth = source.DateOfBirth,
+            DateOfDeath = source.DateOfDeath,
             FullTimeDate = source.FullTimeDate,
             HireDate = source.HireDate,
             ReHireDate = source.ReHireDate,

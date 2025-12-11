@@ -14,6 +14,7 @@ You will develop, modify, debug, and review React frontend code following the pr
 ## Technical Stack Expertise
 
 **React & TypeScript**:
+
 - Write type-safe React components using TypeScript with explicit types
 - Use functional components with hooks (useState, useEffect, useMemo, useCallback)
 - Implement proper prop typing with interfaces, never use `any` types
@@ -21,6 +22,7 @@ You will develop, modify, debug, and review React frontend code following the pr
 - Avoid unnecessary re-renders through proper memoization
 
 **State Management (Redux Toolkit & RTK Query)**:
+
 - Centralize API logic in `src/reduxstore/` following existing slice patterns
 - Use RTK Query for data fetching with proper cache invalidation tags
 - Implement Redux slices with createSlice for local state when needed
@@ -28,6 +30,7 @@ You will develop, modify, debug, and review React frontend code following the pr
 - Follow the project's pattern of separating API definitions from component logic
 
 **Styling (Material Design & Tailwind)**:
+
 - Use Material Design components from `@mui/material` for UI elements
 - Apply Tailwind utility classes for layout, spacing, and responsive design
 - Extend Tailwind via `tailwind.config.js` for custom design tokens
@@ -36,6 +39,7 @@ You will develop, modify, debug, and review React frontend code following the pr
 - Follow the project's existing component library patterns from `smart-ui-library`
 
 **Build Tools & Code Quality**:
+
 - Vite configuration: understand dev server (port 3100), build targets (prod/qa/uat)
 - ESLint: fix all warnings (max 0 warnings policy), follow existing .eslintrc rules
 - Prettier: format code consistently using project's .prettierrc configuration
@@ -43,6 +47,7 @@ You will develop, modify, debug, and review React frontend code following the pr
 - Ensure TypeScript compilation passes with `npm run build:prod`
 
 **Testing (Playwright E2E)**:
+
 - Write E2E tests in `src/ui/e2e/` following existing test patterns
 - Use `.playwright.env` for credentials (never hardcode secrets)
 - Implement proper selectors (data-testid attributes preferred)
@@ -52,6 +57,7 @@ You will develop, modify, debug, and review React frontend code following the pr
 ## Validation & Security Requirements (MANDATORY)
 
 **Client-Side Validation**:
+
 - Mirror server-side validation constraints in TypeScript types and validators
 - Validate all user input before submission using project's validation utilities
 - Enforce numeric ranges, string length limits, collection size limits
@@ -60,6 +66,7 @@ You will develop, modify, debug, and review React frontend code following the pr
 - Display clear, field-level validation error messages to users
 
 **Security Practices**:
+
 - Never expose sensitive data (SSN, OracleHcmId, salary) in client-side logs or errors
 - Sanitize user input to prevent XSS attacks
 - Use HTTPS-only API calls (enforced by Vite proxy configuration)
@@ -69,12 +76,14 @@ You will develop, modify, debug, and review React frontend code following the pr
 ## Development Workflow
 
 1. **Before Writing Code**:
+
    - Review existing components in the same domain for patterns to follow
    - Check `src/reduxstore/` for existing API slices that can be reused
    - Verify TypeScript types are defined in appropriate `.types.ts` files
    - Understand the component's data flow: props → state → API → rendering
 
 2. **While Writing Code**:
+
    - Use explicit TypeScript types for all props, state, and function parameters
    - Follow file-scoped exports; one primary component per file
    - Implement proper error boundaries for component error handling
@@ -82,6 +91,7 @@ You will develop, modify, debug, and review React frontend code following the pr
    - Handle empty states and edge cases (no data, API errors, network failures)
 
 3. **Code Quality Checks**:
+
    - Run `npm run lint` and fix all warnings (zero tolerance policy)
    - Run `npm run prettier` to format code consistently
    - Verify TypeScript compilation with `npm run build:prod`
@@ -98,6 +108,7 @@ You will develop, modify, debug, and review React frontend code following the pr
 ## Common Patterns to Follow
 
 **Component Structure**:
+
 ```typescript
 import React from 'react';
 import { Box, Button, TextField } from '@mui/material';
@@ -111,10 +122,10 @@ interface MyComponentProps {
 
 export const MyComponent: React.FC<MyComponentProps> = ({ employeeId, onSave }) => {
   const { data, isLoading, error } = useGetEmployeesQuery({ id: employeeId });
-  
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading data</div>;
-  
+
   return (
     <Box className="p-4 space-y-4">
       {/* Component content */}
@@ -124,17 +135,18 @@ export const MyComponent: React.FC<MyComponentProps> = ({ employeeId, onSave }) 
 ```
 
 **RTK Query API Slice**:
+
 ```typescript
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const employeeApi = createApi({
-  reducerPath: 'employeeApi',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
-  tagTypes: ['Employee'],
+  reducerPath: "employeeApi",
+  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+  tagTypes: ["Employee"],
   endpoints: (builder) => ({
     getEmployees: builder.query<Employee[], { id: number }>({
       query: ({ id }) => `employees/${id}`,
-      providesTags: ['Employee'],
+      providesTags: ["Employee"],
     }),
   }),
 });
@@ -143,20 +155,21 @@ export const { useGetEmployeesQuery } = employeeApi;
 ```
 
 **Form Validation**:
+
 ```typescript
 const [errors, setErrors] = useState<Record<string, string>>({});
 
 const validateForm = (data: FormData): boolean => {
   const newErrors: Record<string, string> = {};
-  
+
   if (!data.badgeNumber || data.badgeNumber < 1) {
-    newErrors.badgeNumber = 'Badge number must be greater than 0';
+    newErrors.badgeNumber = "Badge number must be greater than 0";
   }
-  
+
   if (data.pageSize < 1 || data.pageSize > 1000) {
-    newErrors.pageSize = 'Page size must be between 1 and 1000';
+    newErrors.pageSize = "Page size must be between 1 and 1000";
   }
-  
+
   setErrors(newErrors);
   return Object.keys(newErrors).length === 0;
 };
@@ -178,6 +191,7 @@ const validateForm = (data: FormData): boolean => {
 ## Error Handling & Debugging
 
 When encountering issues:
+
 1. Check browser console for TypeScript/React errors
 2. Verify API responses in Network tab (ensure backend is running)
 3. Review Redux DevTools for state management issues
@@ -188,6 +202,7 @@ When encountering issues:
 ## Output Format
 
 When providing code:
+
 - Include complete, runnable code snippets with proper imports
 - Add brief comments explaining non-obvious logic
 - Specify file paths relative to `src/ui/` directory

@@ -1,16 +1,20 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
-import React, { useCallback, useEffect, useMemo } from "react";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { Box, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
+import { useLazyGetProfitSharingReportValidationQuery } from "reduxstore/api/ValidationApi";
 import {
   useLazyGetYearEndProfitSharingReportFrozenQuery,
   useLazyGetYearEndProfitSharingReportLiveQuery
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { RootState } from "../../../../reduxstore/store";
+import { ValidationResponse } from "../../../../types/validation/cross-reference-validation";
 import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
 import presets from "./presets";
 
@@ -19,13 +23,25 @@ interface ReportGridProps {
   onLoadingChange?: (isLoading: boolean) => void;
   isFrozen: boolean;
   searchTrigger: number;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
   profitYear: number;
 }
 
-const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFrozen, searchTrigger, profitYear }) => {
+const ReportGrid: React.FC<ReportGridProps> = ({
+  params,
+  onLoadingChange,
+  isFrozen,
+  searchTrigger,
+  isGridExpanded = false,
+  onToggleExpand,
+  profitYear
+}) => {
   const navigate = useNavigate();
   const [triggerLive, { isFetching: isFetchingLive }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const [triggerFrozen, { isFetching: isFetchingFrozen }] = useLazyGetYearEndProfitSharingReportFrozenQuery();
+  const [triggerValidation] = useLazyGetProfitSharingReportValidationQuery();
+  const [validationData, setValidationData] = useState<ValidationResponse | null>(null);
   const trigger = isFrozen ? triggerFrozen : triggerLive;
   const isFetching = isFrozen ? isFetchingFrozen : isFetchingLive;
   const hasToken = useSelector((state: RootState) => !!state.security.token);
@@ -97,6 +113,27 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trigger, hasToken, profitYear, params, searchTrigger]);
 
+  // Fetch validation checksum data when preset changes (only for presets 1-8)
+  useEffect(() => {
+    if (hasToken && params) {
+      const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
+      const presetNumber = matchingPreset ? Number(matchingPreset.id) : 0;
+
+      if (presetNumber >= 1 && presetNumber <= 8) {
+        triggerValidation({ profitYear, reportSuffix: presetNumber })
+          .unwrap()
+          .then((response) => {
+            setValidationData(response);
+          })
+          .catch(() => {
+            setValidationData(null);
+          });
+      } else {
+        setValidationData(null);
+      }
+    }
+  }, [hasToken, params, profitYear, triggerValidation]);
+
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
       navigate(destination);
@@ -109,11 +146,14 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
   };
 
   const columnDefs = useMemo(
-    () => GetProfitSharingReportGridColumns(handleNavigationForButton),
-    [handleNavigationForButton]
+    () => GetProfitSharingReportGridColumns(handleNavigationForButton, validationData),
+    [handleNavigationForButton, validationData]
   );
 
-  const gridMaxHeight = useDynamicGridHeight();
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: data?.response?.results?.length ?? 0,
+    heightPercentage: isGridExpanded ? 0.85 : 0.65
+  });
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
@@ -125,7 +165,9 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0
+        isNew: data.numberOfNewEmployees || 0,
+        // Flag to identify pinned total row for cell renderers
+        _isPinnedTotal: true
       },
       {
         fullName: "No Wages",
@@ -139,13 +181,30 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
 
   return (
     <>
-      <div style={{ padding: "0 24px 0 24px" }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
-          {`${getReportTitle()} (${data?.response?.total || 0} records)`}
-        </Typography>
-      </div>
+      <Grid
+        container
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom={2}
+        paddingX="24px">
+        <Grid>
+          <Typography
+            variant="h2"
+            sx={{ color: "#0258A5" }}>
+            {`${getReportTitle()} (${data?.response?.total || 0} records)`}
+          </Typography>
+        </Grid>
+        <Grid>
+          {onToggleExpand && (
+            <IconButton
+              onClick={onToggleExpand}
+              sx={{ zIndex: 1 }}
+              aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+              {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </IconButton>
+          )}
+        </Grid>
+      </Grid>
 
       {isFetching ? (
         <Box
