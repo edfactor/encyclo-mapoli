@@ -528,7 +528,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            // OPTIMIZATION: Defer demographics loading until needed
+            // Demographics are only used for partner (XferQdro) lookup when CommentRelatedOracleHcmId is present
+            IQueryable<Demographic>? demographics = null;
             // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query;
 
@@ -681,6 +683,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             if (employeePartnerIds.Any() || beneficiaryPartnerKeys.Any())
             {
+                // OPTIMIZATION: Load demographics only if needed (when there are partner references)
+                if (demographics == null)
+                {
+                    demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+                }
+
                 // Single query to get both employees and beneficiaries
                 var badgeNumbers = employeePartnerIds.Concat(beneficiaryPartnerKeys.Select(k => k.OracleHcmId)).Distinct().ToList();
 
