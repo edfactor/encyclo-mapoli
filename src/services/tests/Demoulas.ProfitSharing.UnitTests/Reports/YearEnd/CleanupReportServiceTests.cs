@@ -183,7 +183,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-61 : Year-end Profit Sharing Report (JSON)")]
     public async Task GetYearEndProfitSharingReport()
     {
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
         var profitYear = (short)(2024);
         var req = new YearEndProfitSharingReportRequest()
         {
@@ -301,7 +301,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-399 : Year-end Profit Sharing Report with filters (JSON")]
     public async Task GetYearEndProfitSharingReportWithFilters()
     {
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
         var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2024);
         var req = new YearEndProfitSharingReportRequest()
         {
@@ -384,7 +384,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         decimal sampleforfeiture = 5150m;
 
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
         var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue };
         TestResult<DistributionsAndForfeitureTotalsResponse> response;
 
@@ -504,7 +504,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         // Arrange
         decimal sampleDistribution = 1234.56m;
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
         // Use last year to avoid any current year edge cases
         var testYear = (short)(DateTime.Now.Year - 1);
@@ -579,7 +579,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         // Arrange - Test that MonthToDate=0 records are included even for partial year queries
         // This tests the edge case where someone queries March through June, MonthToDate=0 should still be included
         decimal sampleDistribution = 7890.12m;
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
         var testYear = (short)(DateTime.Now.Year - 1);
         var req = new DistributionsAndForfeituresRequest
@@ -870,7 +870,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 profitDetail.FederalTaxes = stateData.FedTax;
                 profitDetail.StateTaxes = stateData.StateTax;
                 profitDetail.CommentRelatedState = stateData.State;
-                profitDetail.TaxCodeId = stateData.StateTax > 0 ? '7' : (char?)null;
+                profitDetail.TaxCodeId = stateData.StateTax > 0 ? '7' : null;
                 profitDetail.Ssn = demographic.Ssn;
                 profitDetail.DistributionSequence = 2275 + profitDetailCounter++;
                 profitDetail.CommentTypeId = null;
