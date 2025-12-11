@@ -6,5 +6,5 @@ namespace Demoulas.ProfitSharing.Data.Interfaces;
 
 public interface IProfitSharingDataContextFactory : IDataContextFactory<ProfitSharingDbContext, ProfitSharingReadOnlyDbContext>
 {
-    Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func);
+    Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func);
 }

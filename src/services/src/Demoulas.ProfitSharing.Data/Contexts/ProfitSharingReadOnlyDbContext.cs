@@ -1,6 +1,5 @@
 ﻿using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.Common.Data.Services.Entities.Entities;
-using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -13,7 +12,7 @@ using Department = Demoulas.ProfitSharing.Data.Entities.Department;
 
 namespace Demoulas.ProfitSharing.Data.Contexts;
 
-public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitSharingReadOnlyDbContext>, IProfitSharingDbContext, IAccountingPeriodContext
+public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitSharingReadOnlyDbContext>, IProfitSharingDbContext
 {
     public ProfitSharingReadOnlyDbContext()
     {
@@ -57,8 +56,6 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<CommentType> CommentTypes { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public virtual DbSet<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; }
-
-    public virtual DbSet<AccountingPeriod> AccountingPeriods { get; set; }
     public virtual DbSet<Missive> Missives { get; set; }
     public virtual DbSet<ParticipantTotal> ParticipantTotals { get; set; }
     public virtual DbSet<ParticipantTotal> ParticipantEvtaTotals { get; set; }

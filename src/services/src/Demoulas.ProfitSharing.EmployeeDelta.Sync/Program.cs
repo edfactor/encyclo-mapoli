@@ -37,7 +37,7 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
         ]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
-    factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
+    factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonWarehouseContext>("ProfitSharing"));
 });
 
 builder.AddServiceDefaults(null, null);
