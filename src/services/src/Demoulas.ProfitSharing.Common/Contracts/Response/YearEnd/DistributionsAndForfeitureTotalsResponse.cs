@@ -50,7 +50,7 @@ public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBa
     {
         return new DistributionsAndForfeitureTotalsResponse
         {
-            ReportName = ReportNameInfo.DistributionAndForfeitures.Name,
+            ReportName = ReportNames.DistributionAndForfeitures.Name,
             ReportDate = DateTimeOffset.Now,
 
             DistributionTotal = 123456.78m,

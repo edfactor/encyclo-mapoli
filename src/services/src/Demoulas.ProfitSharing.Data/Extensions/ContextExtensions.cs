@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
+
 internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
@@ -22,7 +23,6 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new BeneficiaryArchiveMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
         modelBuilder.ApplyConfiguration(new BeneficiarySsnChangeHistoryMap());
-        modelBuilder.ApplyConfiguration(new AccountingPeriodConfiguration { ExcludeFromMigrations = false, SeedDataAfterMigrations = true });
         modelBuilder.ApplyConfiguration(new CommentTypeMap());
         modelBuilder.ApplyConfiguration(new CountryMap());
         modelBuilder.ApplyConfiguration(new DepartmentMap());

@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
@@ -30,4 +30,6 @@ public interface ICrossReferenceValidationService
         short profitYear,
         Dictionary<string, decimal> currentValues,
         CancellationToken cancellationToken = default);
+
+    Task<Result<ValidationResponse>> ValidateProfitSharingReport(short profitYear, string reportSuffix, CancellationToken cancellationToken = default);
 }

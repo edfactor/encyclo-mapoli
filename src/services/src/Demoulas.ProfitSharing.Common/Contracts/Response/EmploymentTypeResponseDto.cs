@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
 public class EmploymentTypeResponseDto
 {
     public char Id { get; set; }

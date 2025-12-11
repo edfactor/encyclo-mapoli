@@ -157,10 +157,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
         data: previousData
       } as ReducerState;
 
-      const newData = createMockPagedResponse(
-        [{ badgeNumber: 2, storeName: "New Store", fullName: "New Name" }],
-        1
-      );
+      const newData = createMockPagedResponse([{ badgeNumber: 2, storeName: "New Store", fullName: "New Name" }], 1);
 
       const action = { type: "SEARCH_SUCCESS", payload: newData };
 

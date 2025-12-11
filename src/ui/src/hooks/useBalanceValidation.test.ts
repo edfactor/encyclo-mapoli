@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useBalanceValidation } from "./useBalanceValidation";
 import type { CrossReferenceValidationGroup } from "../types/validation/cross-reference-validation";
@@ -227,7 +227,9 @@ describe("useBalanceValidation", () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
 
       // Manual refetch
-      result.current.refetch();
+      act(() => {
+        result.current.refetch();
+      });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -244,7 +246,9 @@ describe("useBalanceValidation", () => {
     it("should not fetch when refetch called with null profitYear", () => {
       const { result } = renderHook(() => useBalanceValidation(null));
 
-      result.current.refetch();
+      act(() => {
+        result.current.refetch();
+      });
 
       expect(mockFetch).not.toHaveBeenCalled();
     });
@@ -252,7 +256,9 @@ describe("useBalanceValidation", () => {
     it("should not fetch when refetch called with invalid profitYear", () => {
       const { result } = renderHook(() => useBalanceValidation(0));
 
-      result.current.refetch();
+      act(() => {
+        result.current.refetch();
+      });
 
       expect(mockFetch).not.toHaveBeenCalled();
     });

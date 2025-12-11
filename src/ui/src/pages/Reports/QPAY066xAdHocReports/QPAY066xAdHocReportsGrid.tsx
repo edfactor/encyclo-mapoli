@@ -14,9 +14,21 @@ import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
-import { GetQPAY066xAdHocCommonGridColumns, GetQPAY066xAgeAtTerminationColumn, GetQPAY066xAgeColumn, GetQPAY066xBeneficiaryAllocationColumn, GetQPAY066xDistributionAmountColumn, GetQPAY066xEnrollmentCodeColumn, GetQPAY066xInactiveDateColumn, GetQPAY066xPSYearsColumn, GetQPAY066xTerminationCodeColumn, GetQPAY066xTerminationDateColumn, GetQPAY066xVestedPercentageColumn } from "./QPAY066xAdHocGridColumns";
+import {
+  GetQPAY066xAdHocCommonGridColumns,
+  GetQPAY066xAgeAtTerminationColumn,
+  GetQPAY066xAgeColumn,
+  GetQPAY066xBeneficiaryAllocationColumn,
+  GetQPAY066xDistributionAmountColumn,
+  GetQPAY066xEnrollmentCodeColumn,
+  GetQPAY066xInactiveDateColumn,
+  GetQPAY066xPSYearsColumn,
+  GetQPAY066xTerminationCodeColumn,
+  GetQPAY066xTerminationDateColumn,
+  GetQPAY066xVestedPercentageColumn
+} from "./QPAY066xAdHocGridColumns";
 
 interface QPAY066xAdHocReportsGridProps {
   reportTitle: string;
@@ -38,9 +50,6 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
   const breakdownByStoreManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreManagement);
   const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
   const breakdownByStoreTotals = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreTotals);
-
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
 
   // Check if storeNumber is provided to determine if totals should be shown
   const showTotals = storeNumber && storeNumber.trim() !== "";
@@ -76,47 +85,105 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
     };
   }, [breakdownByStoreTotals]);
 
-
   const columnDefs = (reportType: string): ColDef[] => {
     console.log("Generating columns for report type:", reportType);
-    
+
     let columns: ColDef[] = GetQPAY066xAdHocCommonGridColumns();
 
     switch (reportType) {
       case "QPAY066A":
       case "QPAY066AF":
-        columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xDistributionAmountColumn(), GetQPAY066xPSYearsColumn(), GetQPAY066xAgeAtTerminationColumn(), GetQPAY066xEnrollmentCodeColumn()];
+        columns = [
+          ...columns,
+          GetQPAY066xBeneficiaryAllocationColumn(),
+          GetQPAY066xDistributionAmountColumn(),
+          GetQPAY066xPSYearsColumn(),
+          GetQPAY066xAgeAtTerminationColumn(),
+          GetQPAY066xEnrollmentCodeColumn()
+        ];
         break;
       case "QPAY066A-1":
-        columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xDistributionAmountColumn(), GetQPAY066xPSYearsColumn(),GetQPAY066xAgeColumn()];
+        columns = [
+          ...columns,
+          GetQPAY066xBeneficiaryAllocationColumn(),
+          GetQPAY066xDistributionAmountColumn(),
+          GetQPAY066xPSYearsColumn(),
+          GetQPAY066xAgeColumn()
+        ];
         break;
       case "QPAY066B":
-        columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xTerminationDateColumn(), GetQPAY066xVestedPercentageColumn(), GetQPAY066xDistributionAmountColumn(),GetQPAY066xAgeAtTerminationColumn(),GetQPAY066xEnrollmentCodeColumn()];
+        columns = [
+          ...columns,
+          GetQPAY066xBeneficiaryAllocationColumn(),
+          GetQPAY066xTerminationDateColumn(),
+          GetQPAY066xVestedPercentageColumn(),
+          GetQPAY066xDistributionAmountColumn(),
+          GetQPAY066xAgeAtTerminationColumn(),
+          GetQPAY066xEnrollmentCodeColumn()
+        ];
         break;
-       case "QPAY066-AGE70":
-       case "QPAY066F": 
-        columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xTerminationDateColumn(), GetQPAY066xVestedPercentageColumn(), GetQPAY066xDistributionAmountColumn(),GetQPAY066xAgeColumn(), GetQPAY066xEnrollmentCodeColumn()];
+      case "QPAY066-AGE70":
+      case "QPAY066F":
+        columns = [
+          ...columns,
+          GetQPAY066xBeneficiaryAllocationColumn(),
+          GetQPAY066xTerminationDateColumn(),
+          GetQPAY066xVestedPercentageColumn(),
+          GetQPAY066xDistributionAmountColumn(),
+          GetQPAY066xAgeColumn(),
+          GetQPAY066xEnrollmentCodeColumn()
+        ];
         break;
       case "QPAY066D":
       case "QPAY066-I":
-        columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xTerminationDateColumn(), GetQPAY066xVestedPercentageColumn(), GetQPAY066xDistributionAmountColumn(),
-          GetQPAY066xAgeColumn(), GetQPAY066xAgeAtTerminationColumn(),GetQPAY066xEnrollmentCodeColumn()];
+        columns = [
+          ...columns,
+          GetQPAY066xBeneficiaryAllocationColumn(),
+          GetQPAY066xTerminationDateColumn(),
+          GetQPAY066xVestedPercentageColumn(),
+          GetQPAY066xDistributionAmountColumn(),
+          GetQPAY066xAgeColumn(),
+          GetQPAY066xAgeAtTerminationColumn(),
+          GetQPAY066xEnrollmentCodeColumn()
+        ];
         break;
       case "QPAY066-INACTIVE":
-        columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xTerminationDateColumn(), GetQPAY066xInactiveDateColumn(),
+        columns = [
+          ...columns,
+          GetQPAY066xBeneficiaryAllocationColumn(),
+          GetQPAY066xTerminationDateColumn(),
+          GetQPAY066xInactiveDateColumn(),
           GetQPAY066xVestedPercentageColumn(),
-          GetQPAY066xTerminationCodeColumn(), GetQPAY066xAgeColumn(), GetQPAY066xAgeAtTerminationColumn(),GetQPAY066xEnrollmentCodeColumn()];
+          GetQPAY066xTerminationCodeColumn(),
+          GetQPAY066xAgeColumn(),
+          GetQPAY066xAgeAtTerminationColumn(),
+          GetQPAY066xEnrollmentCodeColumn()
+        ];
         break;
       case "QPAY066W":
-         columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xVestedPercentageColumn(), GetQPAY066xDistributionAmountColumn(),
-          GetQPAY066xAgeColumn(), GetQPAY066xAgeAtTerminationColumn(),GetQPAY066xEnrollmentCodeColumn()];
+        columns = [
+          ...columns,
+          GetQPAY066xBeneficiaryAllocationColumn(),
+          GetQPAY066xVestedPercentageColumn(),
+          GetQPAY066xDistributionAmountColumn(),
+          GetQPAY066xAgeColumn(),
+          GetQPAY066xAgeAtTerminationColumn(),
+          GetQPAY066xEnrollmentCodeColumn()
+        ];
         break;
       case "QPAY066M":
-        columns = [...columns, GetQPAY066xBeneficiaryAllocationColumn(), GetQPAY066xTerminationDateColumn(), GetQPAY066xVestedPercentageColumn(), GetQPAY066xDistributionAmountColumn(),GetQPAY066xAgeColumn(), GetQPAY066xEnrollmentCodeColumn()];
+        columns = [
+          ...columns,
+          GetQPAY066xBeneficiaryAllocationColumn(),
+          GetQPAY066xTerminationDateColumn(),
+          GetQPAY066xVestedPercentageColumn(),
+          GetQPAY066xDistributionAmountColumn(),
+          GetQPAY066xAgeColumn(),
+          GetQPAY066xEnrollmentCodeColumn()
+        ];
         break;
       default:
         break;
-    
     }
     return columns;
   };
@@ -131,6 +198,11 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
     }
     return [];
   }, [breakdownByStoreManagement, breakdownByStore]);
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: rowData?.length ?? 0
+  });
 
   return (
     <Grid
@@ -211,7 +283,7 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
           providedOptions={{
             rowData: rowData,
             columnDefs: columnDefs(reportId),
-            maintainColumnOrder: true,
+            maintainColumnOrder: true
           }}
         />
       </Grid>

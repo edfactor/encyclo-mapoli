@@ -76,8 +76,10 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onS
   useEffect(() => {
     if (hasToken) triggerGetNavigationStatus({});
     const obj = getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId ?? undefined);
-    if (obj) setNavigationObj(obj);
-    setCurrentStatus(obj?.statusId + "");
+    if (obj) {
+      setNavigationObj(obj);
+      setCurrentStatus(String(obj.statusId));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, navigationList, currentNavigationId, hasToken, triggerGetNavigationStatus]);
 

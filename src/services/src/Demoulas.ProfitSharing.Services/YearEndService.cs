@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -309,10 +310,10 @@ public sealed class YearEndService : IYearEndService
 
 
 #pragma warning disable S125 // Sections of code should not be commented out
-                            // COBOL PAY426 lines 1199-1203: Reset if (hire date >= fiscal end) OR (not eligible)
-                            // Step 1: Get DemographicIds to reset (Oracle doesn't allow ExecuteUpdate on JOINs)
-                            // Note: Eligibility logic inlined here because EF Core can't translate custom methods to SQL
-                            // Eligibility is: (Age > 17 AND hours >= 1000) OR (Age > 63)
+        // COBOL PAY426 lines 1199-1203: Reset if (hire date >= fiscal end) OR (not eligible)
+        // Step 1: Get DemographicIds to reset (Oracle doesn't allow ExecuteUpdate on JOINs)
+        // Note: Eligibility logic inlined here because EF Core can't translate custom methods to SQL
+        // Eligibility is: (Age > 17 AND hours >= 1000) OR (Age > 63)
         var demographicIdsToReset = await ctx.PayProfits
             .Join(demographicQuery,
                 pp => pp.DemographicId,

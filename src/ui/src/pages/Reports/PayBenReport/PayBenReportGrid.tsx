@@ -1,7 +1,7 @@
 import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { PayBenReportResponse } from "../../../types";
 import { PayBenReportGridColumn } from "./PayBenReportGridColumns";
@@ -29,8 +29,10 @@ const PayBenReportGrid = ({
 }: PayBenReportGridProps) => {
   const columnDefs = useMemo(() => PayBenReportGridColumn(), []);
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: data?.results?.length ?? 0
+  });
 
   const handleSortChanged = useCallback(
     (update: ISortParams) => {

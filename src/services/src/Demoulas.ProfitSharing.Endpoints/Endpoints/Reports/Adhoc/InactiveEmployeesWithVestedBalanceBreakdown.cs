@@ -35,7 +35,7 @@ public sealed class InactiveEmployeesWithVestedBalanceBreakdown : EndpointWithCs
             s.Summary = "QPAY066-I: Breakdown inactive managers and associates for all stores with vested balance in date range";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
 

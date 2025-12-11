@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+
 public sealed record TaxCodeResponse
 {
     [Key]

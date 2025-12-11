@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace Demoulas.ProfitSharing.Common.Extensions;
+
 public static class SsnExtensions
 {
     /// <summary>

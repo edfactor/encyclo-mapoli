@@ -277,9 +277,11 @@ describe("DistributionsAndForfeitures", () => {
       const searchBtn = screen.getByTestId("search-btn");
 
       // Click multiple times rapidly
-      searchBtn.click();
-      searchBtn.click();
-      searchBtn.click();
+      await act(async () => {
+        searchBtn.click();
+        searchBtn.click();
+        searchBtn.click();
+      });
 
       await waitFor(() => {
         expect(screen.getByTestId("grid")).toBeInTheDocument();
@@ -293,17 +295,23 @@ describe("DistributionsAndForfeitures", () => {
       const stopLoadingBtn = screen.getByTestId("stop-loading");
 
       // Simulate multiple loading/unloading cycles
-      startLoadingBtn.click();
+      await act(async () => {
+        startLoadingBtn.click();
+      });
       await waitFor(() => {
         rerender(<DistributionsAndForfeitures />);
       });
 
-      stopLoadingBtn.click();
+      await act(async () => {
+        stopLoadingBtn.click();
+      });
       await waitFor(() => {
         rerender(<DistributionsAndForfeitures />);
       });
 
-      startLoadingBtn.click();
+      await act(async () => {
+        startLoadingBtn.click();
+      });
       await waitFor(() => {
         rerender(<DistributionsAndForfeitures />);
       });

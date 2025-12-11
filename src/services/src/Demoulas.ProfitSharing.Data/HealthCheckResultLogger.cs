@@ -4,6 +4,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Data;
+
 public class HealthCheckResultLogger : IHealthCheckPublisher
 {
     private readonly ILogger<HealthCheckResultLogger> _logger;

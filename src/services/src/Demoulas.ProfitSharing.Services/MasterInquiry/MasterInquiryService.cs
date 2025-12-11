@@ -1,6 +1,8 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Services.Entities.Entities;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
@@ -528,7 +530,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            // OPTIMIZATION: Defer demographics loading until needed
+            // Demographics are only used for partner (XferQdro) lookup when CommentRelatedOracleHcmId is present
+            IQueryable<Demographic>? demographics = null;
             // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query;
 
@@ -559,7 +563,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 ForfeitureAmount = req.ForfeitureAmount,
                 PaymentAmount = req.PaymentAmount,
                 Name = req.Name,
-                PaymentType = req.PaymentType
+                PaymentType = req.PaymentType,
+                Voids = req.Voids
             };
 
             query = FilterMemberQuery(masterInquiryRequest, query);
@@ -577,6 +582,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
             if (req.MonthToDate.HasValue)
             {
                 query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
+            }
+
+            // Apply Voids filter (PS-2253: Missing from member details endpoint)
+            if (req.Voids.HasValue && req.Voids.Value)
+            {
+                query = query.Where(pd => pd.ProfitDetail != null && pd.ProfitDetail.CommentTypeId == CommentType.Constants.Voided.Id);
             }
 
             byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
@@ -674,6 +685,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             if (employeePartnerIds.Any() || beneficiaryPartnerKeys.Any())
             {
+                // OPTIMIZATION: Load demographics only if needed (when there are partner references)
+                if (demographics == null)
+                {
+                    demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+                }
+
                 // Single query to get both employees and beneficiaries
                 var badgeNumbers = employeePartnerIds.Concat(beneficiaryPartnerKeys.Select(k => k.OracleHcmId)).Distinct().ToList();
 
@@ -773,6 +790,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var ssnCollection = memberDetailsMap.Keys.ToHashSet();
         List<BalanceEndpointResponse> currentBalance = [];
         List<BalanceEndpointResponse> previousBalance = [];
+        Dictionary<short, StoreInformation> stores = new();
         try
         {
             var previousBalanceTask =
@@ -783,11 +801,18 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _totalService.GetVestingBalanceForMembersAsync(
                     SearchBy.Ssn, ssnCollection, currentYear, cancellationToken);
 
-            await Task.WhenAll(previousBalanceTask, currentBalanceTask);
+            var storesTask = _dataContextFactory.UseWarehouseContext(c =>
+            {
+                var stores = memberDetailsMap.Values.Select(m => m.StoreNumber).ToHashSet();
+                return c.Stores.Where(s => stores.Contains(s.StoreId)).ToDictionaryAsync(s => s.StoreId, s => s, cancellationToken);
+            });
+
+            await Task.WhenAll(previousBalanceTask, currentBalanceTask, storesTask);
 
             currentBalance = await currentBalanceTask;
             previousBalance = await previousBalanceTask;
-        }
+            stores = await storesTask;
+        }   
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssnCollection);
@@ -800,6 +825,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             var memberData = kvp.Value;
             var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn });
             var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == kvp.Key);
+            _ = stores.TryGetValue(memberData.StoreNumber, out var store);
 
             detailsList.Add(new MemberProfitPlanDetails
             {
@@ -846,7 +872,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
                 PhoneNumber = memberData.PhoneNumber,
-                WorkLocation = memberData.WorkLocation,
+                WorkLocation = store != null ? $"{store.City} {store.State}" : memberData.WorkLocation,
 
                 AllocationToAmount = balance?.AllocationsToBeneficiary ?? 0,
                 AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0,

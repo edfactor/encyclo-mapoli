@@ -11,7 +11,6 @@ import {
   createStatusColumn
 } from "../../../utils/gridColumnFactory";
 
-
 export const GetQPAY066xAdHocCommonGridColumns = (): ColDef[] => [
   createBadgeColumn({
     maxWidth: 110
@@ -52,7 +51,7 @@ export const GetQPAY066xDistributionAmountColumn = (field?: string): ColDef => {
     field: field || "distributions",
     maxWidth: 140
   });
-}
+};
 
 export const GetQPAY066xBeneficiaryAllocationColumn = (field?: string): ColDef => {
   return createCurrencyColumn({
@@ -60,7 +59,7 @@ export const GetQPAY066xBeneficiaryAllocationColumn = (field?: string): ColDef =
     field: field || "beneficiaryAllocation",
     maxWidth: 160
   });
-}
+};
 
 export const GetQPAY066xTerminationDateColumn = (field?: string): ColDef => {
   return createDateColumn({
@@ -68,7 +67,7 @@ export const GetQPAY066xTerminationDateColumn = (field?: string): ColDef => {
     field: field || "terminationDate",
     maxWidth: 160
   });
-}
+};
 
 export const GetQPAY066xVestedPercentageColumn = (field?: string): ColDef => {
   return createPercentageColumn({
@@ -76,13 +75,13 @@ export const GetQPAY066xVestedPercentageColumn = (field?: string): ColDef => {
     field: field || "vestedPercent",
     maxWidth: 120
   });
-}
+};
 
 export const GetQPAY066xAgeColumn = (): ColDef => {
   return createAgeColumn({
-    maxWidth: 100,
+    maxWidth: 100
   });
-}
+};
 
 export const GetQPAY066xAgeAtTerminationColumn = (): ColDef => {
   return createAgeColumn({
@@ -90,7 +89,7 @@ export const GetQPAY066xAgeAtTerminationColumn = (): ColDef => {
     field: "ageAtTermination",
     maxWidth: 150
   });
-}
+};
 
 export const GetQPAY066xEnrollmentCodeColumn = (field?: string): ColDef => {
   return createCountColumn({
@@ -98,27 +97,25 @@ export const GetQPAY066xEnrollmentCodeColumn = (field?: string): ColDef => {
     field: field || "enrollmentId",
     maxWidth: 60
   });
-}
+};
 
 export const GetQPAY066xPSYearsColumn = (field?: string): ColDef => {
   return createCountColumn({
     headerName: "PS Years",
     field: field || "profitShareYears"
   });
-}
+};
 
 export const GetQPAY066xTerminationCodeColumn = (field?: string): ColDef => {
   return createStatusColumn({
     headerName: "Termination Code",
     field: field || "terminationCode"
   });
-}
+};
 
-export const GetQPAY066xInactiveDateColumn = (field? : string): ColDef => {
+export const GetQPAY066xInactiveDateColumn = (field?: string): ColDef => {
   return createDateColumn({
     headerName: "Inactive Date",
     field: field || "inactiveDate"
   });
-}
-
-
+};

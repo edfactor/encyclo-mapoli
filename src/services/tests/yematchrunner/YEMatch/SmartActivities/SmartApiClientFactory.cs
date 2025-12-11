@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -255,7 +255,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
 
         string responseBody = await response.Content.ReadAsStringAsync();
 
-//        return Ok(aname, name, "Freeze");
+        //        return Ok(aname, name, "Freeze");
         return new Outcome(aname, name, "Freeze on SMART", OutcomeStatus.Ok, "", null, true);
     }
 
@@ -445,7 +445,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
 
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/update-enrollment")
         {
-            Content = new StringContent("{ \"profitYear\": "+TestConstants.OpenProfitYear+"}", Encoding.UTF8, "application/json")
+            Content = new StringContent("{ \"profitYear\": " + TestConstants.OpenProfitYear + "}", Encoding.UTF8, "application/json")
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
 

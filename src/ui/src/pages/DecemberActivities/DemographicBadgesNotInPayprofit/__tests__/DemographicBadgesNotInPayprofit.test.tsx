@@ -65,6 +65,7 @@ interface MockPagination {
   setPageNumber: ReturnType<typeof vi.fn>;
   setPageSize: ReturnType<typeof vi.fn>;
   resetPagination: ReturnType<typeof vi.fn>;
+  clearPersistedState: ReturnType<typeof vi.fn>;
 }
 
 interface MockHookReturn {
@@ -131,7 +132,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         showData: true,
         hasResults: true,
@@ -177,7 +179,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         showData: true,
         hasResults: true,
@@ -212,7 +215,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         showData: false,
         hasResults: false,
@@ -246,7 +250,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         showData: false,
         hasResults: false,
@@ -285,7 +290,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         showData: true,
         hasResults: true,
@@ -319,7 +325,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         showData: false,
         hasResults: false,
@@ -381,7 +388,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         showData: true,
         hasResults: true,
@@ -465,7 +473,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         showData: true,
         hasResults: false,

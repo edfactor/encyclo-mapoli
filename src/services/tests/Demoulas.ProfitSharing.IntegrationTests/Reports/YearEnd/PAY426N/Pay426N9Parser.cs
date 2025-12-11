@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using static Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ReadyParserHelpers;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY426N;

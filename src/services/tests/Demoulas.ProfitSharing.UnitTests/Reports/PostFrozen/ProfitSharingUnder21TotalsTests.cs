@@ -1,5 +1,4 @@
-using System.Net;
-using Demoulas.ProfitSharing.Api;
+﻿using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
@@ -8,7 +7,6 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 

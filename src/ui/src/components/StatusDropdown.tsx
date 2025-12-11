@@ -31,7 +31,7 @@ const StatusDropdown = ({
       {navigationStatusList?.map((value) => (
         <MenuItem
           key={value.id}
-          value={value.id}>
+          value={String(value.id)}>
           {value.name}
         </MenuItem>
       ))}

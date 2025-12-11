@@ -1,5 +1,4 @@
-using System.Net;
-using Demoulas.ProfitSharing.Api;
+﻿using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -12,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
+
 public class FrozenReportServiceTests : ApiTestBase<Program>
 {
     [Fact(DisplayName = "PS-61 - Get Forfeitures and Points report.  PAY443")]
@@ -39,7 +39,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         long demoSsn = 0;
         int demoBadgeNumber = 0;
         const short testYear = 2024;
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             var demoTest = await ctx.Demographics.FirstAsync(CancellationToken.None);
@@ -62,14 +62,14 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
             pdArray[0].FederalTaxes = 0.5m;
             pdArray[0].StateTaxes = 0.25m;
 
-            pdArray[1].ProfitYear = (short)(testYear - 1);
+            pdArray[1].ProfitYear = testYear - 1;
             pdArray[1].ProfitCode = ProfitCode.Constants.IncomingContributions;
             pdArray[1].ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id;
             pdArray[1].Contribution = 500m;
             pdArray[1].Earnings = 50m;
             pdArray[1].Forfeiture = 0m;
             pdArray[1].MonthToDate = 0;
-            pdArray[1].YearToDate = (short)(testYear - 1);
+            pdArray[1].YearToDate = testYear - 1;
             pdArray[1].FederalTaxes = 0.5m;
             pdArray[1].StateTaxes = 0.25m;
 
@@ -93,7 +93,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
             ppArray[0].IncomeExecutive = 25;
             ppArray[0].CurrentIncomeYear = 49995;
             ppArray[0].TotalIncome = ppArray[0].IncomeExecutive + ppArray[0].CurrentIncomeYear;
-            ppArray[1].ProfitYear = (short)(testYear - 1);
+            ppArray[1].ProfitYear = testYear - 1;
             ppArray[1].IncomeExecutive = 0;
             ppArray[1].CurrentIncomeYear = 0;
             ppArray[1].TotalIncome = 0;
@@ -138,7 +138,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
                 pd.Forfeiture = 0;
                 pd.YearsOfServiceCredit = 1;
             }
-            
+
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 

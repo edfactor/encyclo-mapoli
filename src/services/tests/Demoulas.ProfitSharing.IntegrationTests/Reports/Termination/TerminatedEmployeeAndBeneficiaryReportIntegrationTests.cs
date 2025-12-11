@@ -1,9 +1,7 @@
-using System.Diagnostics;
-using System.Reflection;
+﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;

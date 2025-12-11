@@ -9,16 +9,19 @@ This project uses .NET 9 for services and Node 20.4 (via Volta) for the UI. The 
 **All you need**: Windows 10/11 and PowerShell
 
 1. **Open PowerShell as Administrator**
+
    ```powershell
    Start-Process pwsh -Verb RunAs
    ```
 
 2. **Enable script execution** (one-time):
+
    ```powershell
    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
    ```
 
 3. **Clone the repository** (or download the script folder):
+
    ```powershell
    git clone https://bitbucket.org/demoulas/smart-profit-sharing
    cd smart-profit-sharing
@@ -31,6 +34,7 @@ This project uses .NET 9 for services and Node 20.4 (via Volta) for the UI. The 
    ```
 
 That's it! The script will automatically:
+
 - ✓ Check prerequisites (winget installed)
 - ✓ Read local `winget-config.json`
 - ✓ Install all required tools via winget
@@ -97,6 +101,7 @@ If Volta didn't install via winget:
 Podman requires **WSL 2** (Windows Subsystem for Linux) to run containers on Windows.
 
 **Prerequisites:**
+
 - Windows 10 Build 19041 or later (or Windows 11)
 - WSL 2 must be installed and initialized
 
@@ -138,6 +143,7 @@ podman ps
 ```
 
 Verify the Aspire environment variable is set:
+
 ```pwsh
 [System.Environment]::GetEnvironmentVariable("ASPIRE_CONTAINER_RUNTIME", "User")
 # Should return: podman
@@ -169,7 +175,8 @@ dotnet --version
 git --version
 volta --version
 ```
-```
+
+````
 
 ### 4) Restore and Build
 
@@ -180,9 +187,10 @@ dotnet --version
 # Open solution in VS (recommended) or build from CLI
 # d:\source\Demoulas\smart-profit-sharing\src\services
 # dotnet build Demoulas.ProfitSharing.slnx
-```
+````
 
 UI (Vite + React):
+
 ```pwsh
 # d:\source\Demoulas\smart-profit-sharing\src\ui
 node --version
@@ -215,6 +223,7 @@ npm run dev
 ### Setup Script Issues
 
 **winget import fails:**
+
 ```pwsh
 # Install packages individually
 winget install Microsoft.VisualStudioCode --accept-package-agreements
@@ -227,27 +236,32 @@ winget install Microsoft.WebDeploy --accept-package-agreements
 ```
 
 **Visual Studio workloads don't install:**
+
 1. Open **Visual Studio Installer**
 2. Click "Modify" on Visual Studio 2022 Professional
 3. Select the required workloads manually
 4. Click "Modify"
 
 **Volta not found after installation:**
+
 - Close and restart PowerShell (it may need to reload PATH)
 - Verify: `volta --version`
 
 **Podman not found after installation:**
+
 - Close and restart PowerShell completely (PATH needs to be refreshed)
 - Verify: `podman --version`
 - **Ensure WSL 2 is installed and initialized**:
+
   ```pwsh
   wsl --list -v
   # Should show Ubuntu (or other distro) with VERSION 2
-  
+
   # If WSL not installed:
   winget install Microsoft.WSL --accept-package-agreements
   wsl --install -d Ubuntu
   ```
+
 - If still not working, manually initialize Podman:
   ```pwsh
   podman machine init --now
@@ -277,23 +291,28 @@ winget install Microsoft.WebDeploy --accept-package-agreements
 After setup completes:
 
 1. **Clone repository** (if not done):
+
    ```pwsh
    git clone https://bitbucket.org/demoulas/smart-profit-sharing
    cd smart-profit-sharing
    ```
 
 2. **Get secrets**:
+
    - Ask a teammate for `secrets.json`
    - Place in: `src/services/configuration/secrets.json`
    - See: https://learn.microsoft.com/aspnet/core/security/app-secrets
 
 3. **Configure NuGet source**:
+
    ```pwsh
    dotnet nuget list source
    ```
+
    - If "ArtifactoryCloud" is missing, add it following your internal guide
 
 4. **Build and run**:
+
    - Open `src/services/Demoulas.ProfitSharing.slnx` in Visual Studio
    - Set `Demoulas.ProfitSharing.AppHost` as startup project
    - Press `F5` to run
@@ -319,11 +338,13 @@ After setup completes:
 ## Optional Enhancements
 
 - **Visual Studio Extensions**:
+
   - Productivity Power Tools 2022
   - Visual Studio Spell Checker (VS2022 and Later)
   - Install from Extensions → Manage Extensions in VS
 
 - **Git LFS** (for large files):
+
   ```pwsh
   git lfs install
   ```

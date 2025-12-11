@@ -15,7 +15,8 @@ vi.mock("../../../../hooks/useGridPagination", () => ({
     sortParams: { sortBy: "ssn", isSortDescending: true },
     handlePaginationChange: vi.fn(),
     handleSortChange: vi.fn(),
-    resetPagination: vi.fn()
+    resetPagination: vi.fn(),
+    clearPersistedState: vi.fn()
   }))
 }));
 

@@ -32,7 +32,7 @@ public sealed class DistributionRunReportRequestValidator : AbstractValidator<Di
     private static bool IsValidDistributionFrequency(char frequency)
     {
         // Valid distribution frequency codes - adjust based on your business rules
-        var validFrequencies = new[] { DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Hardship, DistributionFrequency.Constants.PayDirect, DistributionFrequency.Constants.Quarterly, DistributionFrequency.Constants.RolloverDirect};
+        var validFrequencies = new[] { DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Hardship, DistributionFrequency.Constants.PayDirect, DistributionFrequency.Constants.Quarterly, DistributionFrequency.Constants.RolloverDirect };
         return validFrequencies.Contains(char.ToUpperInvariant(frequency));
     }
 }

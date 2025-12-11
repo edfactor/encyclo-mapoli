@@ -19,7 +19,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import React, { PropsWithChildren, ReactNode } from "react";
 import { Provider } from "react-redux";
-import { AccountHistoryReportApi } from "../../reduxstore/api/AccountHistoryReportApi";
+import { AdhocApi } from "../../reduxstore/api/AdhocApi";
 import { AdjustmentsApi } from "../../reduxstore/api/AdjustmentsApi";
 import { AppSupportApi } from "../../reduxstore/api/AppSupportApi";
 import { BeneficiariesApi } from "../../reduxstore/api/BeneficiariesApi";
@@ -216,7 +216,7 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
     [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
     [DistributionApi.reducerPath]: DistributionApi.reducer,
     [PayServicesApi.reducerPath]: PayServicesApi.reducer,
-    [AccountHistoryReportApi.reducerPath]: AccountHistoryReportApi.reducer,
+    [AdhocApi.reducerPath]: AdhocApi.reducer,
     [validationApi.reducerPath]: validationApi.reducer
   } as const;
 
@@ -239,7 +239,7 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
         .concat(AdjustmentsApi.middleware)
         .concat(DistributionApi.middleware)
         .concat(PayServicesApi.middleware)
-        .concat(AccountHistoryReportApi.middleware)
+        .concat(AdhocApi.middleware)
         .concat(validationApi.middleware)
   });
 };

@@ -1,5 +1,4 @@
-using Microsoft.Extensions.Logging;
-using Xunit.v3;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.QPAY129;
 

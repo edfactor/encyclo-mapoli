@@ -3,10 +3,8 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Data.Repositories;
 using Demoulas.ProfitSharing.OracleHcm.Commands;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
@@ -15,7 +13,6 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 

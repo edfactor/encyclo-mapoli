@@ -1,6 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Security;
 using Microsoft.AspNetCore.Authorization;
-using NSwag;
 using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;

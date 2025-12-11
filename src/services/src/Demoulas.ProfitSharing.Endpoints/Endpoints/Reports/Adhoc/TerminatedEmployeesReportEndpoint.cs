@@ -27,7 +27,7 @@ public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<Star
 
     public override void Configure()
     {
-        Get("adhoc-terminated-employees-report");
+        Get("terminated-employees-report");
         Summary(s =>
         {
             s.Summary = "Adhoc Terminated Employees Report";
@@ -71,7 +71,7 @@ public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<Star
                 }
             };
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
     public override string ReportFileName => "Adhoc Terminated Employees Report";

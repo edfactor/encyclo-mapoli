@@ -1,5 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.Common.Data.Contexts.Extensions;
+﻿using System.Linq.Dynamic.Core;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -11,11 +11,9 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System.Linq.Dynamic.Core;
-using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -53,7 +51,7 @@ public sealed class UnforfeitService : IUnforfeitService
                 // If someone is using this service in Jan/Feb/March - then we may have trouble in the Suggested Forfeit, because those transactions will be in the current year
                 // and not the "openProfitYear" (aka wall clock year - 1)
                 var today = DateTime.Today.ToDateOnly();
-                short profitYear = (short) today.Year;
+                short profitYear = (short)today.Year;
 
                 IQueryable<ParticipantTotalYear>? yearsOfServiceQuery = _totalService.GetYearsOfService(context, profitYear, today);
                 IQueryable<ParticipantTotalVestingBalance>? vestingServiceQuery = _totalService.TotalVestingBalance(context, profitYear, today);

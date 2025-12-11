@@ -1,6 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record WagesCurrentYearResponse
 {
     // Totals for the entire dataset

@@ -1,9 +1,10 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Common;
+
 public static class Constants
 {
     public static class Http

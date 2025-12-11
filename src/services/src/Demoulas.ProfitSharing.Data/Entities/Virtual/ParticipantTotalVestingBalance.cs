@@ -1,7 +1,5 @@
-﻿using System.Security.Cryptography;
-using System.Text;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.Virtual;
 
-namespace Demoulas.ProfitSharing.Data.Entities.Virtual;
 public class ParticipantTotalVestingBalance
 {
     public int Ssn { get; set; }

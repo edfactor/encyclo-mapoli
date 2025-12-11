@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 
@@ -22,6 +22,10 @@ public sealed record AuditSearchRequestDto : SortedPaginationRequestDto
     /// </summary>
     public string? UserName { get; init; }
 
+    /// <summary>
+    /// Filter by session ID (exact match for forensic session reconstruction).
+    /// </summary>
+    public string? SessionId { get; init; }
     /// <summary>
     /// Filter by events created on or after this time.
     /// </summary>

@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Reporting.Core;
+﻿namespace Demoulas.ProfitSharing.Reporting.Core;
 
 /// <summary>
 /// Centralized configuration for PDF report styling, fonts, colors, and branding.
@@ -92,7 +92,9 @@ public static class PdfReportConfiguration
             var assembly = typeof(PdfReportConfiguration).Assembly;
             using var stream = assembly.GetManifestResourceStream(EmbeddedLogoResourceName);
             if (stream is null)
+            {
                 return null;
+            }
 
             byte[] logo = new byte[stream.Length];
             _ = stream.Read(logo, 0, logo.Length);

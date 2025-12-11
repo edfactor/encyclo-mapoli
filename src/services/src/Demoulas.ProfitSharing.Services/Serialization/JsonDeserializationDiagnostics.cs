@@ -28,13 +28,13 @@ public static class JsonDeserializationDiagnostics
         {
             Debug.WriteLine($"Parse Error: {parseEx.Message}");
             Debug.WriteLine($"Line {parseEx.LineNumber}, Column {parseEx.BytePositionInLine}");
-            
+
             // Show context around error
             int errorPos = Math.Min((int)(parseEx.BytePositionInLine ?? 0) - 1, jsonString.Length - 1);
             int start = Math.Max(0, errorPos - 50);
             int end = Math.Min(jsonString.Length, errorPos + 50);
             string context = jsonString.Substring(start, end - start);
-            
+
             Debug.WriteLine($"Context around error: ...{context}...");
         }
     }
@@ -65,9 +65,9 @@ public static class JsonDeserializationDiagnostics
         if (element.ValueKind == JsonValueKind.Number)
         {
             string rawValue = element.GetRawText();
-            bool canParseDecimal = decimal.TryParse(rawValue, 
+            bool canParseDecimal = decimal.TryParse(rawValue,
                 System.Globalization.NumberStyles.AllowDecimalPoint | System.Globalization.NumberStyles.AllowExponent | System.Globalization.NumberStyles.AllowLeadingSign,
-                System.Globalization.CultureInfo.InvariantCulture, 
+                System.Globalization.CultureInfo.InvariantCulture,
                 out var decimalValue);
 
             if (canParseDecimal)
@@ -78,7 +78,7 @@ public static class JsonDeserializationDiagnostics
             {
                 Debug.WriteLine($"  ✗ {path}: {rawValue}");
                 Debug.WriteLine($"    ^^^ CANNOT PARSE AS DECIMAL ^^^");
-                
+
                 // Try to give more info
                 if (double.TryParse(rawValue, out var dblVal))
                 {

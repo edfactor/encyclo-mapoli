@@ -1,6 +1,5 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Net;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
 using Demoulas.ProfitSharing.Security;
@@ -8,7 +7,6 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Shouldly;
-using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Beneficiaries;
 

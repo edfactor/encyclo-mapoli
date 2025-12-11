@@ -2,6 +2,7 @@
 using System.Net.NetworkInformation;
 
 namespace Demoulas.ProfitSharing.AppHost.Helpers;
+
 public static class PortHelper
 {
     public static bool IsTcpPortInUse(int port)

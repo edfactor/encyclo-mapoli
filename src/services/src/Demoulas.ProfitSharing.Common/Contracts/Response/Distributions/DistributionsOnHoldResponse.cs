@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+
 public record DistributionsOnHoldResponse
 {
     public required string Ssn { get; set; }

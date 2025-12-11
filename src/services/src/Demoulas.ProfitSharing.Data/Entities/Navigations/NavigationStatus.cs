@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+
 public class NavigationStatus : ILookupTable<byte>
 {
 

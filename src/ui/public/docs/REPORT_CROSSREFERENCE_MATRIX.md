@@ -8,16 +8,16 @@
 
 ## Report Overview
 
-| Report Code | Report Name | Purpose |
-|-------------|-------------|---------|
-| **PAY426** | Profit Sharing Recap (by sections) | Current status of plan members, broken by sections |
-| **PAY426N-9** | Summary Report | Summary totals across all sections |
-| **PAY426N-01 through PAY426N-08, PAY426N-10** | Section Reports | Individual section breakdowns |
-| **PAY443** | Forfeitures and Points Report | Forfeiture details and point calculations |
-| **PAY444** | Year-End Balance Report | Detailed account balances with transactions |
-| **QPAY129** | Distribution and Forfeiture Amount Report | Distribution and forfeiture totals used in Year End |
-| **QPAY066** | Terminated Employee Report | Terminated employee details and balances |
-| **QPAY066TA** | Terminated Employee Total Disbursements | Total disbursements for terminated employees |
+| Report Code                                   | Report Name                               | Purpose                                             |
+| --------------------------------------------- | ----------------------------------------- | --------------------------------------------------- |
+| **PAY426**                                    | Profit Sharing Recap (by sections)        | Current status of plan members, broken by sections  |
+| **PAY426N-9**                                 | Summary Report                            | Summary totals across all sections                  |
+| **PAY426N-01 through PAY426N-08, PAY426N-10** | Section Reports                           | Individual section breakdowns                       |
+| **PAY443**                                    | Forfeitures and Points Report             | Forfeiture details and point calculations           |
+| **PAY444**                                    | Year-End Balance Report                   | Detailed account balances with transactions         |
+| **QPAY129**                                   | Distribution and Forfeiture Amount Report | Distribution and forfeiture totals used in Year End |
+| **QPAY066**                                   | Terminated Employee Report                | Terminated employee details and balances            |
+| **QPAY066TA**                                 | Terminated Employee Total Disbursements   | Total disbursements for terminated employees        |
 
 ---
 
@@ -27,14 +27,15 @@
 
 This is the primary cross-check value that appears across multiple reports.
 
-| Report | Field Name | Format | Notes |
-|--------|-----------|--------|-------|
-| **PAY444** | DISTRIB (Totals section) | ddd,ddd,ddd.dd | Total distributions for the year |
-| **PAY443** | Total Distributions | ddd,ddd,ddd.dd | Should match PAY444's DISTRIB exactly |
-| **QPAY129** | Distributions | ddd,ddd,ddd.dd | Should match PAY444 and PAY443 |
-| **QPAY066TA** | Total Disbursements | ddd,ddd,ddd.dd | Should match the above three reports |
+| Report        | Field Name               | Format         | Notes                                 |
+| ------------- | ------------------------ | -------------- | ------------------------------------- |
+| **PAY444**    | DISTRIB (Totals section) | ddd,ddd,ddd.dd | Total distributions for the year      |
+| **PAY443**    | Total Distributions      | ddd,ddd,ddd.dd | Should match PAY444's DISTRIB exactly |
+| **QPAY129**   | Distributions            | ddd,ddd,ddd.dd | Should match PAY444 and PAY443        |
+| **QPAY066TA** | Total Disbursements      | ddd,ddd,ddd.dd | Should match the above three reports  |
 
 **Validation Rule:**
+
 ```
 PAY444.DISTRIB = PAY443.TotalDistributions = QPAY129.Distributions = QPAY066TA.TotalDisbursements
 ```
@@ -43,13 +44,14 @@ PAY444.DISTRIB = PAY443.TotalDistributions = QPAY129.Distributions = QPAY066TA.T
 
 ### 2. Total Contributions
 
-| Report | Field Name | Format | Notes |
-|--------|-----------|--------|-------|
-| **PAY444** | CONTRIB (Totals section) | ddd,ddd,ddd.dd | Total contributions (excludes ALLOC) |
-| **PAY443** | Total Contributions | ddd,ddd,ddd.dd | Should match PAY444's CONTRIB |
-| **PAY426** | Section Total Contributions | ddd,ddd,ddd.dd | Sum of all section contributions |
+| Report     | Field Name                  | Format         | Notes                                |
+| ---------- | --------------------------- | -------------- | ------------------------------------ |
+| **PAY444** | CONTRIB (Totals section)    | ddd,ddd,ddd.dd | Total contributions (excludes ALLOC) |
+| **PAY443** | Total Contributions         | ddd,ddd,ddd.dd | Should match PAY444's CONTRIB        |
+| **PAY426** | Section Total Contributions | ddd,ddd,ddd.dd | Sum of all section contributions     |
 
 **Validation Rule:**
+
 ```
 PAY444.CONTRIB = PAY443.TotalContributions = SUM(PAY426.SectionContributions)
 ```
@@ -60,13 +62,14 @@ PAY444.CONTRIB = PAY443.TotalContributions = SUM(PAY426.SectionContributions)
 
 ### 3. Total Forfeitures
 
-| Report | Field Name | Format | Notes |
-|--------|-----------|--------|-------|
-| **PAY444** | FORFEITS (Totals section) | ddd,ddd,ddd.dd | Total forfeitures for the year |
-| **PAY443** | Total Forfeitures | ddd,ddd,ddd.dd | Should match PAY444's FORFEITS |
-| **QPAY129** | Forfeited Amount | ddd,ddd,ddd.dd | Should match PAY444 and PAY443 |
+| Report      | Field Name                | Format         | Notes                          |
+| ----------- | ------------------------- | -------------- | ------------------------------ |
+| **PAY444**  | FORFEITS (Totals section) | ddd,ddd,ddd.dd | Total forfeitures for the year |
+| **PAY443**  | Total Forfeitures         | ddd,ddd,ddd.dd | Should match PAY444's FORFEITS |
+| **QPAY129** | Forfeited Amount          | ddd,ddd,ddd.dd | Should match PAY444 and PAY443 |
 
 **Validation Rule:**
+
 ```
 PAY444.FORFEITS = PAY443.TotalForfeitures = QPAY129.ForfeitedAmount
 ```
@@ -75,12 +78,13 @@ PAY444.FORFEITS = PAY443.TotalForfeitures = QPAY129.ForfeitedAmount
 
 ### 4. Total Earnings
 
-| Report | Field Name | Format | Notes |
-|--------|-----------|--------|-------|
+| Report     | Field Name                | Format         | Notes                            |
+| ---------- | ------------------------- | -------------- | -------------------------------- |
 | **PAY444** | EARNINGS (Totals section) | ddd,ddd,ddd.dd | Investment earnings for the year |
-| **PAY443** | Total Earnings | ddd,ddd,ddd.dd | Should match PAY444's EARNINGS |
+| **PAY443** | Total Earnings            | ddd,ddd,ddd.dd | Should match PAY444's EARNINGS   |
 
 **Validation Rule:**
+
 ```
 PAY444.EARNINGS = PAY443.TotalEarnings
 ```
@@ -89,12 +93,13 @@ PAY444.EARNINGS = PAY443.TotalEarnings
 
 ### 5. Beginning Balance
 
-| Report | Field Name | Format | Notes |
-|--------|-----------|--------|-------|
+| Report     | Field Name                 | Format         | Notes                            |
+| ---------- | -------------------------- | -------------- | -------------------------------- |
 | **PAY444** | Beginning Balance (Totals) | ddd,ddd,ddd.dd | Total plan balance at year start |
-| **PAY443** | Beginning Balance | ddd,ddd,ddd.dd | Should match PAY444 |
+| **PAY443** | Beginning Balance          | ddd,ddd,ddd.dd | Should match PAY444              |
 
 **Validation Rule:**
+
 ```
 PAY444.BeginningBalance = PAY443.BeginningBalance
 ```
@@ -103,17 +108,19 @@ PAY444.BeginningBalance = PAY443.BeginningBalance
 
 ### 6. Ending Balance
 
-| Report | Field Name | Format | Notes |
-|--------|-----------|--------|-------|
+| Report     | Field Name              | Format         | Notes                          |
+| ---------- | ----------------------- | -------------- | ------------------------------ |
 | **PAY444** | Ending Balance (Totals) | ddd,ddd,ddd.dd | Total plan balance at year end |
-| **PAY443** | Ending Balance | ddd,ddd,ddd.dd | Should match PAY444 |
+| **PAY443** | Ending Balance          | ddd,ddd,ddd.dd | Should match PAY444            |
 
 **Validation Rule:**
+
 ```
 PAY444.EndingBalance = PAY443.EndingBalance
 ```
 
 **Balance Equation:**
+
 ```
 Ending Balance = Beginning Balance + CONTRIB + EARNINGS + EARNINGS2 + FORFEITS - DISTRIB + Military
 ```
@@ -124,22 +131,23 @@ Ending Balance = Beginning Balance + CONTRIB + EARNINGS + EARNINGS2 + FORFEITS -
 
 The PAY426N-9 (summary) should match the section totals from PAY426 and individual section reports.
 
-| Source | Field | Target | Validation |
-|--------|-------|--------|-----------|
-| **PAY426N-9** | Total Wages | **PAY426** | Sum of all section wages |
-| **PAY426N-9** | Total Hours | **PAY426** | Sum of all section hours |
-| **PAY426N-9** | Total Points | **PAY426** | Sum of all section points |
-| **PAY426N-9** | Section 1 Total | **PAY426N-01** | Section 1 total wages |
-| **PAY426N-9** | Section 2 Total | **PAY426N-02** | Section 2 total wages |
-| **PAY426N-9** | Section 3 Total | **PAY426N-03** | Section 3 total wages |
-| **PAY426N-9** | Section 4 Total | **PAY426N-04** | Section 4 total wages |
-| **PAY426N-9** | Section 5 Total | **PAY426N-05** | Section 5 total wages |
-| **PAY426N-9** | Section 6 Total | **PAY426N-06** | Section 6 total wages |
-| **PAY426N-9** | Section 7 Total | **PAY426N-07** | Section 7 total wages |
-| **PAY426N-9** | Section 8 Total | **PAY426N-08** | Section 8 total wages |
-| **PAY426N-9** | Section 10 Total | **PAY426N-10** | Section 10 total wages |
+| Source        | Field            | Target         | Validation                |
+| ------------- | ---------------- | -------------- | ------------------------- |
+| **PAY426N-9** | Total Wages      | **PAY426**     | Sum of all section wages  |
+| **PAY426N-9** | Total Hours      | **PAY426**     | Sum of all section hours  |
+| **PAY426N-9** | Total Points     | **PAY426**     | Sum of all section points |
+| **PAY426N-9** | Section 1 Total  | **PAY426N-01** | Section 1 total wages     |
+| **PAY426N-9** | Section 2 Total  | **PAY426N-02** | Section 2 total wages     |
+| **PAY426N-9** | Section 3 Total  | **PAY426N-03** | Section 3 total wages     |
+| **PAY426N-9** | Section 4 Total  | **PAY426N-04** | Section 4 total wages     |
+| **PAY426N-9** | Section 5 Total  | **PAY426N-05** | Section 5 total wages     |
+| **PAY426N-9** | Section 6 Total  | **PAY426N-06** | Section 6 total wages     |
+| **PAY426N-9** | Section 7 Total  | **PAY426N-07** | Section 7 total wages     |
+| **PAY426N-9** | Section 8 Total  | **PAY426N-08** | Section 8 total wages     |
+| **PAY426N-9** | Section 10 Total | **PAY426N-10** | Section 10 total wages    |
 
 **Validation Rules:**
+
 ```
 PAY426N-9.TotalWages = PAY426.SectionTotalWages
 PAY426N-9.TotalWages = SUM(PAY426N-01..08,10.Wages)
@@ -157,12 +165,13 @@ PAY426N-9.TotalPoints = SUM(PAY426N-01..08,10.Points)
 
 **Important:** These are internal transfers between accounts and should net to zero.
 
-| Report | Field Name | Format | Notes |
-|--------|-----------|--------|-------|
-| **PAY444** | ALLOC (Totals section) | ddd,ddd,ddd.dd | Money transferred INTO accounts |
+| Report     | Field Name                  | Format         | Notes                             |
+| ---------- | --------------------------- | -------------- | --------------------------------- |
+| **PAY444** | ALLOC (Totals section)      | ddd,ddd,ddd.dd | Money transferred INTO accounts   |
 | **PAY444** | PAID ALLOC (Totals section) | ddd,ddd,ddd.dd | Money transferred OUT of accounts |
 
 **Validation Rule:**
+
 ```
 PAY444.ALLOC + PAY444.PAID_ALLOC = 0.00
 ```
@@ -173,12 +182,13 @@ PAY444.ALLOC + PAY444.PAID_ALLOC = 0.00
 
 ### 9. Military Contributions
 
-| Report | Field Name | Format | Notes |
-|--------|-----------|--------|-------|
-| **PAY444** | Military (Detail section) | ddd,ddd.dd | Per-employee military contribution |
-| **PAY444** | Military (Totals section) | ddd,ddd,ddd.dd | Total military contributions |
+| Report     | Field Name                | Format         | Notes                              |
+| ---------- | ------------------------- | -------------- | ---------------------------------- |
+| **PAY444** | Military (Detail section) | ddd,ddd.dd     | Per-employee military contribution |
+| **PAY444** | Military (Totals section) | ddd,ddd,ddd.dd | Total military contributions       |
 
 **Notes:**
+
 - Military contributions do NOT show in the CONTRIB field
 - Military contributions are stored separately in PROFIT_EARN with PROFIT_CODE = 0 and PROFIT_YEAR = YYYY.1
 - Military contributions ARE included in the ending balance calculation
@@ -189,16 +199,17 @@ PAY444.ALLOC + PAY444.PAID_ALLOC = 0.00
 
 ### 10. Employee Counts
 
-| Report | Field Name | Notes |
-|--------|-----------|-------|
-| **PAY426** | ALL-EMP | Total employees in plan |
-| **PAY426** | NEW-EMP | New employees |
-| **PAY426** | EMP<21 | Employees under 21 |
-| **PAY426** | IN-PLAN | Employees actively in plan |
-| **PAY426N-9** | Employee Totals | Should match PAY426 counts |
-| **PAY443** | Total Participants | Should match PAY426 ALL-EMP |
+| Report        | Field Name         | Notes                       |
+| ------------- | ------------------ | --------------------------- |
+| **PAY426**    | ALL-EMP            | Total employees in plan     |
+| **PAY426**    | NEW-EMP            | New employees               |
+| **PAY426**    | EMP<21             | Employees under 21          |
+| **PAY426**    | IN-PLAN            | Employees actively in plan  |
+| **PAY426N-9** | Employee Totals    | Should match PAY426 counts  |
+| **PAY443**    | Total Participants | Should match PAY426 ALL-EMP |
 
 **Validation Rule:**
+
 ```
 PAY426.ALL_EMP = PAY426N-9.ALL_EMP
 PAY426.IN_PLAN = PAY426N-9.IN_PLAN
@@ -214,14 +225,17 @@ PAY443.TotalParticipants = PAY426.ALL_EMP
 These are the most important cross-checks for data integrity:
 
 1. **PAY444.DISTRIB = PAY443.DISTRIB = QPAY129.Distributions = QPAY066TA.TotalDisbursements**
+
    - Field names: `TotalDistributions`, `Distributions`, `TotalDisbursements`
    - Format: Decimal(15,2)
 
 2. **PAY444.CONTRIB = PAY443.CONTRIB**
+
    - Field names: `TotalContributions`
    - Format: Decimal(15,2)
 
 3. **PAY444.FORFEITS = PAY443.FORFEITS = QPAY129.ForfeitedAmount**
+
    - Field names: `TotalForfeitures`, `ForfeitedAmount`
    - Format: Decimal(15,2)
 
@@ -235,12 +249,12 @@ Validate the accounting equation within each report:
 
 ```csharp
 // PAY444 Balance Equation
-EndingBalance = BeginningBalance 
-                + Contributions 
-                + Earnings 
-                + Earnings2 
-                + Forfeitures 
-                - Distributions 
+EndingBalance = BeginningBalance
+                + Contributions
+                + Earnings
+                + Earnings2
+                + Forfeitures
+                - Distributions
                 + Military;
 ```
 
@@ -285,6 +299,7 @@ POST /checksum/validate-fields
 ```
 
 **Response will show:**
+
 - Which fields match archived checksums
 - Which fields indicate data drift
 - Per-field validation details

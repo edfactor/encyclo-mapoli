@@ -1,7 +1,8 @@
-using Bogus;
+﻿using Bogus;
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
+
 internal sealed class AddressFaker : Faker<Address>
 {
     internal AddressFaker()

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using YEMatch.AssertActivities;
 using YEMatch.ReadyActivities;
 using YEMatch.SmartActivities;
@@ -52,7 +52,7 @@ public sealed class ActivityFactory : IActivityFactory
         for (int i = 0; i < _readyActivities.Count; i++)
         {
             if (_smartActivities[i].Name().Substring(1) != _readyActivities[i].Name().Substring(1))
-                // We always expect Ready short name to be the same as Smart short name (ie.  A7 and A7 should match.)
+            // We always expect Ready short name to be the same as Smart short name (ie.  A7 and A7 should match.)
             {
                 throw new InvalidOperationException(
                     $"READY and SMART activities are different at index {i}  s={_smartActivities[i].Name()} r={_readyActivities[i].Name()}");

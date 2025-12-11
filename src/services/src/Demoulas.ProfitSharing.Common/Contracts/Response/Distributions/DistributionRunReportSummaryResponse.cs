@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+
 public sealed record DistributionRunReportSummaryResponse
 {
     public char? DistributionFrequencyId { get; set; }

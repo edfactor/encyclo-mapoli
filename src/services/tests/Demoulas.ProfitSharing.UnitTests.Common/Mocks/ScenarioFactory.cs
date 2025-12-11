@@ -1,4 +1,4 @@
-
+﻿
 using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
@@ -201,8 +201,7 @@ public sealed class ScenarioFactory
         _sdb.ProfitSharingDbContext.Setup(m => m.Database).Returns(databaseFacadeMock.Object);
 
         Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.ToList().BuildMockDbSet();
-        _sdb.ProfitSharingDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
-        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
+        _sdb.StoreInfoDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
 
         // Take care of Beneficiaries and child table BeneficiaryContacts
         Mock<DbSet<Beneficiary>> mockBeneficiaries = Beneficiaries.BuildMockDbSet();

@@ -1,9 +1,7 @@
-using System.Reflection;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Reports;
 using Moq;
 using Shouldly;
@@ -26,7 +24,7 @@ public class Pay443Tests : PristineBaseTest
         string expectedReport = ReadEmbeddedResource(".golden.R20-PAY443").Trim();
 
         ForfeituresAndPointsForYearResponseWithTotals expectedResponse = ReadyReportParser.ParseReport(expectedReport);
-        
+
         // Get a hot response from SMART
         ForfeituresAndPointsForYearResponseWithTotals actualResponse =
             await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(new FrozenProfitYearRequest { ProfitYear = TestConstants.OpenProfitYear, Take = int.MaxValue });

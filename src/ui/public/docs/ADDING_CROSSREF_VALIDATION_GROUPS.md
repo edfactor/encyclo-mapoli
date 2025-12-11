@@ -1,6 +1,7 @@
 # Quick Reference: Adding New Cross-Reference Validation Groups
 
 ## Overview
+
 This guide shows how to add new cross-reference validation groups to the Master Update validation process.
 
 ## Step 1: Add Validation Method to ChecksumValidationService
@@ -33,7 +34,7 @@ private async Task<CrossReferenceValidationGroup> ValidateYourFieldGroupAsync(
 
     // Check if all valid
     bool allValid = validations.All(v => v.IsValid);
-    
+
     // Create summary message
     string summary = allValid
         ? "[Success message - all reports in sync]"
@@ -70,7 +71,7 @@ if (!yourFieldGroup.IsValid)
 {
     // Add to critical issues if this blocks Master Update
     criticalIssues.Add($"[Your field] totals mismatch detected across reports");
-    
+
     // OR add to warnings if this doesn't block
     // warnings.Add($"[Your field] totals mismatch - review data");
 }
@@ -86,7 +87,7 @@ In the `HandleAsync` method, add to the `currentValues` dictionary:
 var currentValues = new Dictionary<string, decimal>
 {
     // ... existing fields
-    
+
     // Your new fields
     ["REPORT_CODE_1.FieldName1"] = await GetYourFieldValue1Async(req.ProfitYear, ct),
     ["REPORT_CODE_2.FieldName2"] = await GetYourFieldValue2Async(req.ProfitYear, ct),
@@ -110,8 +111,8 @@ Ensure endpoints use `IAuditService.ArchiveCompletedReportAsync`:
 
 ```csharp
 var result = await _auditService.ArchiveCompletedReportAsync(
-    "REPORT_CODE", 
-    req.ProfitYear, 
+    "REPORT_CODE",
+    req.ProfitYear,
     req,
     (audit, _, ct) => _service.GetReportAsync(audit, ct),
     ct);
@@ -206,14 +207,14 @@ public async Task ValidateYourFieldGroup_AllMatch_ReturnsValid()
         ["REPORT1.Field1"] = 1000.00m,
         ["REPORT2.Field2"] = 1000.00m
     };
-    
+
     // Mock archived checksums to match current values
     // ... setup mocks
-    
+
     // Act
     var result = await _service.ValidateMasterUpdateCrossReferencesAsync(
         2025, currentValues, CancellationToken.None);
-    
+
     // Assert
     result.IsSuccess.ShouldBeTrue();
     result.Value.IsValid.ShouldBeTrue();
@@ -231,11 +232,11 @@ public async Task ValidateYourFieldGroup_Mismatch_ReturnsInvalid()
         ["REPORT1.Field1"] = 1000.00m,
         ["REPORT2.Field2"] = 999.00m  // Intentional mismatch
     };
-    
+
     // Act
     var result = await _service.ValidateMasterUpdateCrossReferencesAsync(
         2025, currentValues, CancellationToken.None);
-    
+
     // Assert
     result.IsSuccess.ShouldBeTrue();
     result.Value.IsValid.ShouldBeFalse();
@@ -261,6 +262,7 @@ public async Task ValidateYourFieldGroup_Mismatch_ReturnsInvalid()
 ## Common Patterns
 
 ### 2-Way Validation
+
 ```csharp
 // Validates Field1 = Field2
 var report1 = await ValidateSingleFieldAsync(...);
@@ -268,6 +270,7 @@ var report2 = await ValidateSingleFieldAsync(...);
 ```
 
 ### 3-Way Validation
+
 ```csharp
 // Validates Field1 = Field2 = Field3
 var report1 = await ValidateSingleFieldAsync(...);
@@ -276,6 +279,7 @@ var report3 = await ValidateSingleFieldAsync(...);
 ```
 
 ### 4-Way Validation (like Distributions)
+
 ```csharp
 // Validates Field1 = Field2 = Field3 = Field4
 var report1 = await ValidateSingleFieldAsync(...);
@@ -285,6 +289,7 @@ var report4 = await ValidateSingleFieldAsync(...);
 ```
 
 ### Calculated Field Validation
+
 ```csharp
 // Validates Field1 + Field2 = Field3
 // Calculate expected value first, then validate
@@ -303,27 +308,30 @@ var calculatedValidation = new CrossReferenceValidation
 
 ## Priority Levels
 
-| Priority | When to Use | Behavior |
-|----------|-------------|----------|
+| Priority     | When to Use                                  | Behavior                                                |
+| ------------ | -------------------------------------------- | ------------------------------------------------------- |
 | **Critical** | Financial discrepancies that affect Year-End | Adds to `CriticalIssues`, sets `BlockMasterUpdate=true` |
-| **High** | Important but non-blocking mismatches | Adds to `Warnings`, doesn't block |
-| **Medium** | Informational checks | Adds to `Warnings` |
-| **Low** | Optional validations | Adds to `Warnings` |
+| **High**     | Important but non-blocking mismatches        | Adds to `Warnings`, doesn't block                       |
+| **Medium**   | Informational checks                         | Adds to `Warnings`                                      |
+| **Low**      | Optional validations                         | Adds to `Warnings`                                      |
 
 ## Troubleshooting
 
 **Validation always fails**
+
 - Check that source report is being archived (`[YearEndArchiveProperty]` on fields)
 - Verify report code matches exactly (case-sensitive)
 - Ensure field name matches property name exactly
 - Check that current value is being provided in dictionary
 
 **Current value is null**
+
 - Verify dictionary key format: `"ReportCode.FieldName"`
 - Check that value is being calculated/retrieved correctly
 - Ensure async method is awaited
 
 **Validation doesn't appear in results**
+
 - Verify you called your validation method in `ValidateMasterUpdateCrossReferencesAsync`
 - Check that you added it to `validationGroups` list
 - Ensure you're incrementing counters

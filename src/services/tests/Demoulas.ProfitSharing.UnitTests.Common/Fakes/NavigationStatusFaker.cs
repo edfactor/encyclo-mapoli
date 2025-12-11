@@ -1,6 +1,7 @@
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
+﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
+
 public class NavigationStatusFaker
 {
     public List<NavigationStatus> DummyNavigationStatus()

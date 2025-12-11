@@ -96,6 +96,7 @@ describe("AccountHistoryReportTable", () => {
     handlePaginationChange: vi.fn(),
     handleSortChange: vi.fn(),
     resetPagination: vi.fn(),
+    clearPersistedState: vi.fn(),
     ...overrides
   });
 

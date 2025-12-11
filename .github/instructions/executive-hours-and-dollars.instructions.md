@@ -1,6 +1,7 @@
 ---
 applyTo: "src/ui/src/pages/DecemberActivities/ManageExecutiveHoursAndDollars/**/*.*"
 ---
+
 # Manage Executive Hours and Dollars Technical Documentation
 
 ## Overview
@@ -198,7 +199,9 @@ The action node contains both the save button and the status dropdown, displayed
 const handleSave = useCallback(async () => {
   try {
     await saveChanges();
-    addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.EXECUTIVE_HOURS_SAVED_SUCCESS);
+    addAlert(
+      EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.EXECUTIVE_HOURS_SAVED_SUCCESS,
+    );
   } catch (_error) {
     addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.EXECUTIVE_HOURS_SAVE_ERROR);
   }
@@ -248,12 +251,15 @@ The grid operates in two modes controlled by `isModal` prop:
 const ManageExecutiveHoursAndDollarsGrid: React.FC<Props> = ({
   isModal = false,
   gridData = null, // Main grid data
-  modalResults = null // Modal grid data
+  modalResults = null, // Modal grid data
   // ... other props
 }) => {
   const currentData = isModal ? modalResults : gridData;
   const currentPagination = isModal ? modalGridPagination : mainGridPagination;
-  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(isModal), [isModal]);
+  const columnDefs = useMemo(
+    () => GetManageExecutiveHoursAndDollarsColumns(isModal),
+    [isModal],
+  );
   // ...
 };
 ```
@@ -263,13 +269,19 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<Props> = ({
 To support inline editing without React re-render issues:
 
 ```typescript
-const [mutableRowData, setMutableRowData] = useState<ExecutiveHoursAndDollars[]>([]);
+const [mutableRowData, setMutableRowData] = useState<
+  ExecutiveHoursAndDollars[]
+>([]);
 const isEditingRef = useRef(false);
 const dataInitializedRef = useRef(false);
 
 // Initialize mutable row data when we first get data
 useEffect(() => {
-  if (currentData?.response?.results && !dataInitializedRef.current && !isEditingRef.current) {
+  if (
+    currentData?.response?.results &&
+    !dataInitializedRef.current &&
+    !isEditingRef.current
+  ) {
     setMutableRowData(currentData.response.results.map((row) => ({ ...row })));
     dataInitializedRef.current = true;
   } else if (!currentData?.response?.results && !isEditingRef.current) {
@@ -294,7 +306,7 @@ const processEditedRow = useCallback(
     // Validate hours ≤ 4000
     if (rowInQuestion.data.hoursExecutive > 4000) {
       const originalRow = currentData?.response.results.find(
-        (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
+        (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber,
       );
       if (originalRow) {
         rowInQuestion.data.hoursExecutive = originalRow.hoursExecutive;
@@ -307,7 +319,7 @@ const processEditedRow = useCallback(
     // Validate dollars ≤ 20,000,000
     if (rowInQuestion.data.incomeExecutive > 20000000) {
       const originalRow = currentData?.response.results.find(
-        (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
+        (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber,
       );
       if (originalRow) {
         rowInQuestion.data.incomeExecutive = originalRow.incomeExecutive;
@@ -324,10 +336,10 @@ const processEditedRow = useCallback(
           ? {
               ...row,
               hoursExecutive: rowInQuestion.data.hoursExecutive,
-              incomeExecutive: rowInQuestion.data.incomeExecutive
+              incomeExecutive: rowInQuestion.data.incomeExecutive,
             }
-          : row
-      )
+          : row,
+      ),
     );
 
     // Update row if not in modal - this tracks changes for saving
@@ -335,7 +347,7 @@ const processEditedRow = useCallback(
       updateExecutiveRow(
         rowInQuestion.data.badgeNumber,
         rowInQuestion.data.hoursExecutive,
-        rowInQuestion.data.incomeExecutive
+        rowInQuestion.data.incomeExecutive,
       );
     }
 
@@ -344,7 +356,7 @@ const processEditedRow = useCallback(
       isEditingRef.current = false;
     }, 100);
   },
-  [isModal, currentData, updateExecutiveRow]
+  [isModal, currentData, updateExecutiveRow],
 );
 ```
 
@@ -479,7 +491,9 @@ Modal grid has:
 Only one of SSN, Badge Number, or Full Name can be active at a time:
 
 ```typescript
-const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | "fullNameContains" | null>(null);
+const [activeField, setActiveField] = useState<
+  "socialSecurity" | "badgeNumber" | "fullNameContains" | null
+>(null);
 
 useEffect(() => {
   if (socialSecurity && !badgeNumber) {
@@ -581,17 +595,20 @@ const validationSchema = yup
       .nullable()
       .transform((value) => value || undefined),
     hasExecutiveHoursAndDollars: yup.boolean().default(false).required(),
-    isMonthlyPayroll: yup.boolean().default(false).required()
+    isMonthlyPayroll: yup.boolean().default(false).required(),
   })
-  .test("at-least-one-required", "At least one field must be provided", (values) =>
-    Boolean(
-      values.profitYear ||
-        values.socialSecurity ||
-        values.badgeNumber ||
-        values.fullNameContains ||
-        values.hasExecutiveHoursAndDollars !== false ||
-        values.isMonthlyPayroll !== false
-    )
+  .test(
+    "at-least-one-required",
+    "At least one field must be provided",
+    (values) =>
+      Boolean(
+        values.profitYear ||
+          values.socialSecurity ||
+          values.badgeNumber ||
+          values.fullNameContains ||
+          values.hasExecutiveHoursAndDollars !== false ||
+          values.isMonthlyPayroll !== false,
+      ),
   );
 ```
 
@@ -686,7 +703,7 @@ const RenderAddButton = ({ canAddExecutives, onAddToMainGrid, isReadOnly = true 
 
 const SearchAndAddExecutive = ({
   // ... props
-  isReadOnly = true // Secure-by-default
+  isReadOnly = true, // Secure-by-default
 }: SearchAndAddExecutiveProps) => {
   // ...
 };
@@ -749,7 +766,9 @@ The modal contains its own filter and grid, both configured for modal mode (`isM
 **Dual Mode Configuration**:
 
 ```typescript
-export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef[] => {
+export const GetManageExecutiveHoursAndDollarsColumns = (
+  mini?: boolean,
+): ColDef[] => {
   const columns: ColDef[] = [
     createBadgeColumn({}),
     createNameColumn({ field: "fullName" }),
@@ -758,33 +777,33 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
     createHoursColumn({
       headerName: "Executive Hours",
       field: "hoursExecutive",
-      editable: !mini // Only editable in main grid
+      editable: !mini, // Only editable in main grid
     }),
     {
       ...createCurrencyColumn({
         headerName: "Executive Dollars",
-        field: "incomeExecutive"
+        field: "incomeExecutive",
       }),
-      editable: !mini // Only editable in main grid
+      editable: !mini, // Only editable in main grid
     },
     createHoursColumn({
       headerName: "Oracle Hours",
-      field: "currentHoursYear"
+      field: "currentHoursYear",
     }),
     createCurrencyColumn({
       headerName: "Oracle Dollars",
-      field: "currentIncomeYear"
+      field: "currentIncomeYear",
     }),
     createStatusColumn({
       headerName: "Pay Frequency",
       field: "payFrequencyId",
-      valueFormatter: (params) => params.data?.payFrequencyName
+      valueFormatter: (params) => params.data?.payFrequencyName,
     }),
     createStatusColumn({
       headerName: "Employment Status",
       field: "employmentStatusId",
-      valueFormatter: (params) => params.data?.employmentStatusName
-    })
+      valueFormatter: (params) => params.data?.employmentStatusName,
+    }),
   ];
 
   // Filter columns for modal (mini mode)
@@ -795,7 +814,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
         column.colId === "fullName" ||
         column.colId === "ssn" ||
         column.colId === "hoursExecutive" ||
-        column.colId === "incomeExecutive"
+        column.colId === "incomeExecutive",
     );
   }
   return columns;
@@ -880,18 +899,23 @@ interface State {
 
 ```typescript
 // Combine search results + manually added executives
-export const selectCombinedGridData = (state: State): PagedReportResponse<ExecutiveHoursAndDollars> | null => {
+export const selectCombinedGridData = (
+  state: State,
+): PagedReportResponse<ExecutiveHoursAndDollars> | null => {
   if (!state.search.results) return null;
 
-  const combinedResults = [...(state.search.results.response?.results || []), ...state.grid.additionalExecutives];
+  const combinedResults = [
+    ...(state.search.results.response?.results || []),
+    ...state.grid.additionalExecutives,
+  ];
 
   return {
     ...state.search.results,
     response: {
       ...state.search.results.response,
       results: combinedResults,
-      total: combinedResults.length
-    }
+      total: combinedResults.length,
+    },
   };
 };
 
@@ -904,7 +928,9 @@ export const selectHasPendingChanges = (state: State): boolean => {
 export const selectIsRowStagedToSave = (state: State) => {
   return (badgeNumber: number): boolean => {
     return state.grid.pendingChanges.some((change) =>
-      change.executiveHoursAndDollars.some((exec) => exec.badgeNumber === badgeNumber)
+      change.executiveHoursAndDollars.some(
+        (exec) => exec.badgeNumber === badgeNumber,
+      ),
     );
   };
 };
@@ -953,9 +979,11 @@ return {
   saveExecutiveHoursAndDollars, // Archive save (status complete)
 
   initialSearchLoaded: state.search.initialLoaded,
-  setInitialSearchLoaded: (loaded) => dispatch({ type: "SET_INITIAL_LOADED", payload: { loaded } }),
+  setInitialSearchLoaded: (loaded) =>
+    dispatch({ type: "SET_INITIAL_LOADED", payload: { loaded } }),
   pageNumberReset: state.view.pageNumberReset,
-  setPageNumberReset: (reset) => dispatch({ type: "SET_PAGE_RESET", payload: { reset } })
+  setPageNumberReset: (reset) =>
+    dispatch({ type: "SET_PAGE_RESET", payload: { reset } }),
 };
 ```
 
@@ -1153,12 +1181,14 @@ The main grid displays **search results + manually added executives**:
 
 ```typescript
 // Reducer selector
-export const selectCombinedGridData = (state: State): PagedReportResponse<ExecutiveHoursAndDollars> | null => {
+export const selectCombinedGridData = (
+  state: State,
+): PagedReportResponse<ExecutiveHoursAndDollars> | null => {
   if (!state.search.results) return null;
 
   const combinedResults = [
     ...(state.search.results.response?.results || []), // Search results
-    ...state.grid.additionalExecutives // Manually added
+    ...state.grid.additionalExecutives, // Manually added
   ];
 
   return {
@@ -1166,8 +1196,8 @@ export const selectCombinedGridData = (state: State): PagedReportResponse<Execut
     response: {
       ...state.search.results.response,
       results: combinedResults,
-      total: combinedResults.length
-    }
+      total: combinedResults.length,
+    },
   };
 };
 ```
@@ -1209,10 +1239,10 @@ const updateExecutiveRow = useCallback(
         {
           badgeNumber,
           executiveHours: hours,
-          executiveDollars: dollars
-        }
+          executiveDollars: dollars,
+        },
       ],
-      profitYear: profitYear || null
+      profitYear: profitYear || null,
     };
 
     const isRowStagedToSave = selectIsRowStagedToSave(state);
@@ -1220,15 +1250,27 @@ const updateExecutiveRow = useCallback(
     if (isRowStagedToSave(badgeNumber)) {
       // Row already has pending changes
       const combinedData = selectCombinedGridData(state);
-      const originalRow = combinedData?.response.results.find((obj) => obj.badgeNumber === badgeNumber);
+      const originalRow = combinedData?.response.results.find(
+        (obj) => obj.badgeNumber === badgeNumber,
+      );
 
-      if (originalRow && hours === originalRow.hoursExecutive && dollars === originalRow.incomeExecutive) {
+      if (
+        originalRow &&
+        hours === originalRow.hoursExecutive &&
+        dollars === originalRow.incomeExecutive
+      ) {
         // Reverted to original - remove pending change
-        dispatch({ type: "REMOVE_PENDING_CHANGE", payload: { change: rowRecord } });
+        dispatch({
+          type: "REMOVE_PENDING_CHANGE",
+          payload: { change: rowRecord },
+        });
         reduxDispatch(removeExecutiveHoursAndDollarsGridRow(rowRecord));
       } else {
         // Still different from original - update pending change
-        dispatch({ type: "UPDATE_PENDING_CHANGE", payload: { change: rowRecord } });
+        dispatch({
+          type: "UPDATE_PENDING_CHANGE",
+          payload: { change: rowRecord },
+        });
         reduxDispatch(updateExecutiveHoursAndDollarsGridRow(rowRecord));
       }
     } else {
@@ -1237,7 +1279,7 @@ const updateExecutiveRow = useCallback(
       reduxDispatch(addExecutiveHoursAndDollarsGridRow(rowRecord));
     }
   },
-  [state, profitYear, reduxDispatch]
+  [state, profitYear, reduxDispatch],
 );
 ```
 
@@ -1331,7 +1373,11 @@ Changes that exceed limits are **silently rejected** by reverting to the origina
 If user changes value back to original, the pending change is **removed**:
 
 ```typescript
-if (originalRow && hours === originalRow.hoursExecutive && dollars === originalRow.incomeExecutive) {
+if (
+  originalRow &&
+  hours === originalRow.hoursExecutive &&
+  dollars === originalRow.incomeExecutive
+) {
   dispatch({ type: "REMOVE_PENDING_CHANGE", payload: { change: rowRecord } });
   // Row background returns to white
 }
@@ -1459,7 +1505,8 @@ await triggerSearch({
 **Modal Search Endpoint**:
 
 ```typescript
-const [triggerModalSearch, { isLoading: isModalSearching }] = useLazyGetAdditionalExecutivesQuery();
+const [triggerModalSearch, { isLoading: isModalSearching }] =
+  useLazyGetAdditionalExecutivesQuery();
 
 // Same request/response structure as main search
 ```
@@ -1475,15 +1522,15 @@ await updateHoursAndDollars({
     {
       badgeNumber: 12345,
       executiveHours: 2080,
-      executiveDollars: 150000
+      executiveDollars: 150000,
     },
     {
       badgeNumber: 67890,
       executiveHours: 1500,
-      executiveDollars: 120000
-    }
+      executiveDollars: 120000,
+    },
   ],
-  profitYear: 2024
+  profitYear: 2024,
 }).unwrap();
 ```
 
@@ -1719,14 +1766,14 @@ export const EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES = {
     id: 1,
     severity: "success",
     message: "Executive Hours and Dollars Saved",
-    description: "Your changes have been successfully saved."
+    description: "Your changes have been successfully saved.",
   },
   EXECUTIVE_HOURS_SAVE_ERROR: {
     id: 2,
     severity: "error",
     message: "Save Failed",
-    description: "An error occurred while saving executive hours and dollars."
-  }
+    description: "An error occurred while saving executive hours and dollars.",
+  },
 };
 ```
 
@@ -1757,11 +1804,20 @@ const { isLoading: isSaving } = useUpdateExecutiveHoursAndDollarsMutation();
 
 ```typescript
 const combinedGridData = useMemo(() => selectCombinedGridData(state), [state]);
-const hasPendingChanges = useMemo(() => selectHasPendingChanges(state), [state]);
+const hasPendingChanges = useMemo(
+  () => selectHasPendingChanges(state),
+  [state],
+);
 const showGrid = useMemo(() => selectShowGrid(state), [state]);
-const isRowStagedToSave = useMemo(() => selectIsRowStagedToSave(state), [state]);
+const isRowStagedToSave = useMemo(
+  () => selectIsRowStagedToSave(state),
+  [state],
+);
 
-const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(isModal), [isModal]);
+const columnDefs = useMemo(
+  () => GetManageExecutiveHoursAndDollarsColumns(isModal),
+  [isModal],
+);
 ```
 
 **Benefits**:
@@ -1842,7 +1898,10 @@ ssnValidator: yup
 **Badge Number Validator**:
 
 ```typescript
-badgeNumberStringValidator: yup.string().nullable().matches(/^\d+$/, "Badge number must be numeric");
+badgeNumberStringValidator: yup
+  .string()
+  .nullable()
+  .matches(/^\d+$/, "Badge number must be numeric");
 ```
 
 **Full Name Validator**:

@@ -1,7 +1,8 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -15,7 +16,6 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Shouldly;
-using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -221,13 +221,13 @@ public class ProfitSharingSummaryReportRegressionTests
         // Assert
         result.ShouldNotBeNull();
         var report11 = result.LineItems.FirstOrDefault(r => r.LineItemPrefix == "11");
-        
+
         report11.ShouldNotBeNull("Report 11 line item should exist");
         report11.Subgroup.ShouldBe("TERMINATED");
         report11.LineItemTitle.ShouldNotBeNullOrEmpty();
         report11.NumberOfMembers.ShouldBe(1, "Should include 1 terminated under-18 employee with wages");
         report11.TotalWages.ShouldBe(8000m);
-        
+
         _testOutputHelper.WriteLine($"Report 11: {report11.NumberOfMembers} members, ${report11.TotalWages} wages");
     }
 
@@ -282,7 +282,7 @@ public class ProfitSharingSummaryReportRegressionTests
         // Assert
         var report11 = result.LineItems.FirstOrDefault(r => r.LineItemPrefix == "11");
         report11?.NumberOfMembers.ShouldBe(0, "Should NOT include terminated under-18 with zero wages");
-        
+
         _testOutputHelper.WriteLine($"Report 11 correctly excluded employee with zero wages");
     }
 
@@ -336,10 +336,10 @@ public class ProfitSharingSummaryReportRegressionTests
 
         // Assert
         var report11 = result.LineItems.FirstOrDefault(r => r.LineItemPrefix == "11");
-        
+
         // Should be in a different report (Report 6 - terminated 18+ with 1000+ hours)
         report11?.NumberOfMembers.ShouldBe(0, "Should NOT include terminated 18+ employees in Report 11");
-        
+
         _testOutputHelper.WriteLine($"Report 11 correctly excluded employee age 18+");
     }
 
@@ -393,7 +393,7 @@ public class ProfitSharingSummaryReportRegressionTests
         // Assert
         var report11 = result.LineItems.FirstOrDefault(r => r.LineItemPrefix == "11");
         report11?.NumberOfMembers.ShouldBe(0, "Should NOT include active under-18 employees");
-        
+
         _testOutputHelper.WriteLine($"Report 11 correctly excluded active employee");
     }
 
@@ -451,12 +451,12 @@ public class ProfitSharingSummaryReportRegressionTests
         // Assert
         result.ShouldNotBeNull();
         var report12 = result.LineItems.FirstOrDefault(r => r.LineItemPrefix == "12");
-        
+
         report12.ShouldNotBeNull("Report 12 line item should exist");
         report12.Subgroup.ShouldBe("EMPLOYEES");
         report12.NumberOfMembers.ShouldBeGreaterThanOrEqualTo(0, "Should include active employee with zero wages");
         report12.TotalWages.ShouldBe(0m, "Total wages should be zero");
-        
+
         _testOutputHelper.WriteLine($"Report 12: {report12.NumberOfMembers} members, ${report12.TotalWages} wages, ${report12.TotalBalance} balance");
     }
 
@@ -511,7 +511,7 @@ public class ProfitSharingSummaryReportRegressionTests
         var report12 = result.LineItems.FirstOrDefault(r => r.LineItemPrefix == "12");
         report12.ShouldNotBeNull();
         report12.NumberOfMembers.ShouldBeGreaterThanOrEqualTo(0, "Should include inactive employee with zero wages");
-        
+
         _testOutputHelper.WriteLine($"Report 12 included inactive employee");
     }
 
@@ -567,7 +567,7 @@ public class ProfitSharingSummaryReportRegressionTests
         var report12 = result.LineItems.FirstOrDefault(r => r.LineItemPrefix == "12");
         report12.ShouldNotBeNull();
         report12.NumberOfMembers.ShouldBeGreaterThanOrEqualTo(0, "Should include terminated employee with zero wages and positive balance");
-        
+
         _testOutputHelper.WriteLine($"Report 12 included terminated employee");
     }
 
@@ -621,7 +621,7 @@ public class ProfitSharingSummaryReportRegressionTests
         // Assert
         result.ShouldNotBeNull();
         var report12 = result.LineItems.FirstOrDefault(r => r.LineItemPrefix == "12");
-        
+
         // Note: Without mocking TotalService balance lookups, this will default to 0 balance
         // Report 12 requires BOTH zero wages AND positive balance, so this employee should NOT appear
         if (report12 != null)
@@ -636,7 +636,7 @@ public class ProfitSharingSummaryReportRegressionTests
             // This is acceptable since we're testing exclusion logic
             _testOutputHelper.WriteLine("Report 12 line does not exist (no employees with zero wages and positive balance)");
         }
-        
+
         _testOutputHelper.WriteLine($"Report 12: {report12?.NumberOfMembers ?? 0} members (correctly excluded zero balance employee)");
     }
 
@@ -689,14 +689,14 @@ public class ProfitSharingSummaryReportRegressionTests
 
         // Assert
         var report12 = result.LineItems.FirstOrDefault(r => r.LineItemPrefix == "12");
-        
+
         // Employee should NOT be in Report 12 (positive wages)
         // They would be in Report 2 (Age 21+ with 1000+ hours)
         if (report12 != null)
         {
             report12.TotalWages.ShouldBe(0m, "Report 12 should only contain employees with zero wages");
         }
-        
+
         _testOutputHelper.WriteLine($"Report 12 correctly excluded employee with positive wages");
     }
 

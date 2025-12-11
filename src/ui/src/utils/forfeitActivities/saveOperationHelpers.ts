@@ -40,9 +40,7 @@ export interface ActivityConfig {
  * );
  * // Returns: { ...request }
  */
-export function prepareSaveRequest(
-  request: ForfeitureAdjustmentUpdateRequest
-): ForfeitureAdjustmentUpdateRequest {
+export function prepareSaveRequest(request: ForfeitureAdjustmentUpdateRequest): ForfeitureAdjustmentUpdateRequest {
   return {
     ...request,
     forfeitureAmount: request.forfeitureAmount

@@ -2,6 +2,7 @@
 using Serilog.Enrichers.Sensitive;
 
 namespace Demoulas.ProfitSharing.Services.LogMasking;
+
 public sealed partial class UnformattedSocialSecurityNumberMaskingOperator : RegexMaskingOperator
 {
     // Define the SSN pattern (matches SSNs in the format XXX-XX-XXXX or XXXXXXXXX)

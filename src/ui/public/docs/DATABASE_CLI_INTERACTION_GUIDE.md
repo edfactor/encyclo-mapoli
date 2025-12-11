@@ -7,6 +7,7 @@ The Database CLI tooling in the Profit Sharing application uses .NET Aspire's In
 ## What is the Interaction Service?
 
 The Aspire Interaction Service (`IInteractionService`) allows applications to:
+
 - Display notifications to users in the Aspire Dashboard
 - Prompt for user confirmation before destructive operations
 - Show progress updates for long-running operations
@@ -56,12 +57,12 @@ Step 3/3: Import Navigation
 
 All database commands now provide notifications:
 
-| Command | Confirmation Required | Notifications |
-|---------|----------------------|---------------|
-| **upgrade-db** | No | Start/Complete/Error |
-| **drop-recreate-db** | Yes ⚠️ | Confirm, Start/Complete/Error |
-| **import-from-ready** | No | Start/Complete/Error |
-| **import-from-navigation** | No | Start/Complete/Error |
+| Command                    | Confirmation Required | Notifications                 |
+| -------------------------- | --------------------- | ----------------------------- |
+| **upgrade-db**             | No                    | Start/Complete/Error          |
+| **drop-recreate-db**       | Yes ⚠️                | Confirm, Start/Complete/Error |
+| **import-from-ready**      | No                    | Start/Complete/Error          |
+| **import-from-navigation** | No                    | Start/Complete/Error          |
 
 ### Notification Types
 
@@ -87,14 +88,15 @@ The `RunConsoleApp` method now accepts an optional `IInteractionService` paramet
 
 ```csharp
 public static ExecuteCommandResult RunConsoleApp(
-    string projectPath, 
-    string launchProfile, 
-    ILogger logger, 
-    string? operationName = null, 
+    string projectPath,
+    string launchProfile,
+    ILogger logger,
+    string? operationName = null,
     IInteractionService? interactionService = null)
 ```
 
 **Before operation starts:**
+
 ```csharp
 if (interactionService?.IsAvailable == true && !string.IsNullOrWhiteSpace(operationName))
 {
@@ -109,6 +111,7 @@ if (interactionService?.IsAvailable == true && !string.IsNullOrWhiteSpace(operat
 ```
 
 **After operation completes:**
+
 ```csharp
 if (result.Success)
 {
@@ -146,7 +149,7 @@ Commands are registered with `executeCommand` callbacks that retrieve the intera
     {
         var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
         return await Task.FromResult(
-            CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger, 
+            CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger,
                 "Upgrade Database", interactionService));
     },
     commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
@@ -176,6 +179,7 @@ if (!confirmation.Data)
 ```
 
 Key features:
+
 - Markdown support for rich formatting
 - Clear primary/secondary button labels
 - Warning intent for visual emphasis
@@ -198,9 +202,9 @@ When calling `CommandHelper.RunConsoleApp`, pass the interaction service and a d
         var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
         return await Task.FromResult(
             CommandHelper.RunConsoleApp(
-                projectPath!, 
-                "my-launch-profile", 
-                logger, 
+                projectPath!,
+                "my-launch-profile",
+                logger,
                 "My Operation Description",  // <- This shows in notifications
                 interactionService));
     },
@@ -215,7 +219,7 @@ If the operation is destructive or irreversible, add a confirmation dialog:
 executeCommand: async (c) =>
 {
     var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-    
+
     if (interactionService.IsAvailable)
     {
         var confirmation = await interactionService.PromptConfirmationAsync(
@@ -235,7 +239,7 @@ executeCommand: async (c) =>
             return CommandResults.Failure("User cancelled the operation.");
         }
     }
-    
+
     return await Task.FromResult(
         CommandHelper.RunConsoleApp(projectPath!, "profile", logger, "Operation", interactionService));
 }
@@ -244,6 +248,7 @@ executeCommand: async (c) =>
 ### Step 3: Test in Dashboard
 
 Run `aspire run` and click your command in the Database-Cli resource to verify:
+
 - Confirmation dialog appears (if applicable)
 - Starting notification shows when operation begins
 - Success/error notification shows when complete
@@ -254,12 +259,14 @@ Run `aspire run` and click your command in the Database-Cli resource to verify:
 ### Notification Messages
 
 **DO:**
+
 - Use clear, descriptive operation names (e.g., "Step 2/3: Import from READY")
 - Include context in error messages (include error details)
 - Use markdown for structured messages in confirmations
 - Include step numbers for multi-step operations
 
 **DON'T:**
+
 - Use generic names like "operation" or "command"
 - Hide error details from users
 - Spam users with too many notifications for trivial operations
@@ -268,12 +275,14 @@ Run `aspire run` and click your command in the Database-Cli resource to verify:
 ### Confirmation Dialogs
 
 **Always confirm before:**
+
 - Dropping databases
 - Deleting data
 - Operations that cannot be undone
 - Operations that take significant time
 
 **Don't confirm for:**
+
 - Read-only operations
 - Idempotent operations (like apply migrations)
 - Operations that can be easily reversed
@@ -281,6 +290,7 @@ Run `aspire run` and click your command in the Database-Cli resource to verify:
 ### Progress Updates
 
 For long-running multi-step operations:
+
 1. Show initial "Starting" notification with overview
 2. Show progress for each step (e.g., "Step 1/3")
 3. Show final success/error summary with link to logs
@@ -303,12 +313,14 @@ if (!confirmation.Data) { return CommandResults.Failure("..."); }
 ### Notifications Don't Appear
 
 **Check:**
+
 1. Is `aspire run` being used? (Notifications only work in dashboard context)
 2. Is `IInteractionService.IsAvailable` checked before calling?
 3. Are there any exceptions in the AppHost console output?
 4. Is the command registered with `executeCommand` callback that retrieves the service?
 
 **Common Issues:**
+
 - Running `dotnet run` directly bypasses Aspire dashboard (no interaction service)
 - Forgetting to add `using Aspire.Hosting;` directive
 - Not checking `IsAvailable` before using interaction service
@@ -318,6 +330,7 @@ if (!confirmation.Data) { return CommandResults.Failure("..."); }
 **Issue:** Operation proceeds even if user cancels
 
 **Fix:** Check the result and return failure:
+
 ```csharp
 var confirmation = await interactionService.PromptConfirmationAsync(...);
 if (!confirmation.Data)  // User cancelled or closed dialog
@@ -332,6 +345,7 @@ if (!confirmation.Data)  // User cancelled or closed dialog
 **Issue:** Too many notifications stack up and hide each other
 
 **Solutions:**
+
 1. Reduce notification frequency (don't notify for every minor step)
 2. Use markdown in a single notification to show multiple pieces of info
 3. Fire some notifications without awaiting (`_ = ...`) so they don't block
@@ -342,11 +356,13 @@ if (!confirmation.Data)  // User cancelled or closed dialog
 **Issue:** Operation fails but success notification shows
 
 **Check:**
+
 - Is the exit code being checked properly?
 - Are error conditions handled before showing success?
 - Is the `result.Success` property accurate?
 
 **Fix:** Ensure CommandHelper checks process exit codes:
+
 ```csharp
 if (!string.IsNullOrWhiteSpace(error))
 {
@@ -379,6 +395,7 @@ Potential improvements to the interaction service integration:
 ## Support
 
 For issues or questions:
+
 1. Check the Aspire dashboard console logs (Database-Cli resource)
 2. Review the operation name being passed to CommandHelper
 3. Verify `IInteractionService.IsAvailable` returns true

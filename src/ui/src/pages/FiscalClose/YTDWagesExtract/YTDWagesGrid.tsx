@@ -4,7 +4,7 @@ import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import { RefObject } from "react";
 import { RowClassParams } from "ag-grid-community";
 import ReportSummary from "../../../components/ReportSummary";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { EmployeeWagesForYearResponse } from "../../../reduxstore/types";
 import { GetYTDWagesColumns } from "./YTDWagesGridColumns";
@@ -43,12 +43,14 @@ const YTDWagesGrid = ({
   // Calculate totals for pinned top row - use API totals if available, otherwise calculate
   const totalsRow = useMemo(() => {
     if (!clonedData?.response?.results) return null;
-    
+
     // Check if API provided totals
-    const totalHours = clonedData.totalHoursCurrentYearWages ?? 
+    const totalHours =
+      clonedData.totalHoursCurrentYearWages ??
       clonedData.response.results.reduce((sum, row) => sum + (row.hoursCurrentYear || 0), 0);
-    
-    const totalIncome = clonedData.totalIncomeCurrentYearWages ?? 
+
+    const totalIncome =
+      clonedData.totalIncomeCurrentYearWages ??
       clonedData.response.results.reduce((sum, row) => sum + (row.incomeCurrentYear || 0), 0);
 
     return {
@@ -60,26 +62,26 @@ const YTDWagesGrid = ({
     };
   }, [clonedData?.response?.results, clonedData?.totalHoursCurrentYearWages, clonedData?.totalIncomeCurrentYearWages]);
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: clonedData?.response?.results?.length ?? 0
+  });
 
   return (
     <div className="relative">
       {showData && clonedData?.response && (
         <div ref={innerRef}>
-          <div className="mt-[37px] mb-[21px] flex items-center gap-6 px-6">
+          <div className="mb-[21px] mt-[37px] flex items-center gap-6 px-6">
             <div className="flex items-center gap-2">
               <span className="font-semibold">Total Hours:</span>
               <span>
-                {clonedData.totalHoursCurrentYearWages?.toFixed(2) ?? 
-                 totalsRow?.hoursCurrentYear.toFixed(2) ?? "0.00"}
+                {clonedData.totalHoursCurrentYearWages?.toFixed(2) ?? totalsRow?.hoursCurrentYear.toFixed(2) ?? "0.00"}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="font-semibold">Total Income:</span>
               <span>
-                {numberToCurrency(clonedData.totalIncomeCurrentYearWages ?? 
-                 totalsRow?.incomeCurrentYear ?? 0)}
+                {numberToCurrency(clonedData.totalIncomeCurrentYearWages ?? totalsRow?.incomeCurrentYear ?? 0)}
               </span>
             </div>
           </div>

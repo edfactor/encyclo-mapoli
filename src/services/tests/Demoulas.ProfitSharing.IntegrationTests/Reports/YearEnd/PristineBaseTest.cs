@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Services.ItDevOps;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -16,7 +17,7 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
 public abstract class PristineBaseTest
 {
-    protected readonly AccountingPeriodsService Aps = new();
+    protected readonly AccountingPeriodsService Aps = new(NullLogger<AccountingPeriodsService>.Instance);
     protected readonly CalendarService CalendarService;
     protected readonly TotalService TotalService;
     protected readonly PristineDataContextFactory DbFactory;
