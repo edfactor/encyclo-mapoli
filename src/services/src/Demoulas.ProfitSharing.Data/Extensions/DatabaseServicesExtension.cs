@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -50,7 +51,8 @@ public static class DatabaseServicesExtension
         {
             var user = provider.GetService<IAppUser>();
             var dataConfig = provider.GetRequiredService<DataConfig>();
-            return new AuditSaveChangesInterceptor(dataConfig, user);
+            var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+            return new AuditSaveChangesInterceptor(dataConfig, user, httpContextAccessor);
         });
         _ = builder.Services.AddSingleton<BeneficiarySaveChangesInterceptor>();
         _ = builder.Services.AddSingleton<BeneficiaryContactSaveChangesInterceptor>();

@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using System.Text.Json;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.Util.Extensions;
@@ -67,17 +68,15 @@ public static class TelemetryExtensions
     /// </summary>
     private static string GetSessionId(HttpContext? httpContext)
     {
-        const string sessionCookieName = "ps-session-id";
-
         // First, try to get from HttpContext.Items (set by middleware in same request)
-        if (httpContext?.Items.TryGetValue(sessionCookieName, out var itemSessionId) == true &&
+        if (httpContext?.Items.TryGetValue(Telemetry.SessionIdKey, out var itemSessionId) == true &&
             itemSessionId is string itemSessionIdStr && !string.IsNullOrEmpty(itemSessionIdStr))
         {
             return itemSessionIdStr;
         }
 
         // Fallback: try to get from request cookies (for subsequent requests)
-        if (httpContext?.Request.Cookies.TryGetValue(sessionCookieName, out var sessionId) == true &&
+        if (httpContext?.Request.Cookies.TryGetValue(Telemetry.SessionIdKey, out var sessionId) == true &&
             !string.IsNullOrEmpty(sessionId))
         {
             return sessionId;

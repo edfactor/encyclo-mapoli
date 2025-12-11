@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Constants;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -32,7 +33,7 @@ public sealed class EndpointInstrumentationMiddleware
         // Store session ID in HttpContext.Items so downstream telemetry can access it
         // (cookies won't be sent to client until response completes, so downstream code
         // can't read from request cookies on the same request)
-        context.Items["ps-session-id"] = sessionId;
+        context.Items[Telemetry.SessionIdKey] = sessionId;
 
         if (activity is not null)
         {
@@ -72,9 +73,7 @@ public sealed class EndpointInstrumentationMiddleware
     /// </summary>
     private static string GetOrCreateSessionId(HttpContext context)
     {
-        const string SessionCookieName = "ps-session-id";
-
-        if (context.Request.Cookies.TryGetValue(SessionCookieName, out var existingSessionId) &&
+        if (context.Request.Cookies.TryGetValue(Telemetry.SessionIdKey, out var existingSessionId) &&
             !string.IsNullOrEmpty(existingSessionId))
         {
             return existingSessionId;
@@ -92,7 +91,7 @@ public sealed class EndpointInstrumentationMiddleware
             Expires = DateTimeOffset.UtcNow.AddHours(8) // Standard 8-hour session timeout
         };
 
-        context.Response.Cookies.Append(SessionCookieName, newSessionId, cookieOptions);
+        context.Response.Cookies.Append(Telemetry.SessionIdKey, newSessionId, cookieOptions);
         return newSessionId;
     }
 }

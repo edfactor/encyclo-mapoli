@@ -57,7 +57,7 @@ public sealed class AuditService : IAuditService
         where TResponse : class
         where TRequest : PaginationRequestDto
     {
-        
+
         return ArchiveCompletedReportAsync(reportName, profitYear, request, reportFunction, new List<Func<TResponse, (string, object)>>(), cancellationToken);
     }
 
@@ -93,7 +93,7 @@ public sealed class AuditService : IAuditService
         where TResponse : class
         where TRequest : PaginationRequestDto
     {
-           return ArchiveCompletedReportAsync(reportName, profitYear, request, isArchiveRequest, reportFunction, new List<Func<TResponse, (string, object)>>(), cancellationToken); 
+        return ArchiveCompletedReportAsync(reportName, profitYear, request, isArchiveRequest, reportFunction, new List<Func<TResponse, (string, object)>>(), cancellationToken);
     }
 
     public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
@@ -122,6 +122,7 @@ public sealed class AuditService : IAuditService
         string requestJson = JsonSerializer.Serialize(request, JsonSerializerOptions.Web);
         string reportJson = JsonSerializer.Serialize(response, _maskingOptions);
         string userName = _appUser?.UserName ?? "Unknown";
+        string sessionId = GetSessionId(_httpContextAccessor.HttpContext);
 
         // Create archived data payload with type metadata
         // Parse the JSON to get a JsonElement so RawData is an object, not an escaped string
@@ -134,7 +135,7 @@ public sealed class AuditService : IAuditService
         string archivedPayloadJson = JsonSerializer.Serialize(archivedPayload, JsonSerializerOptions.Web);
 
         var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = archivedPayloadJson } };
-        var auditEvent = new AuditEvent { TableName = reportName, Operation = AuditEvent.AuditOperations.Archive, UserName = userName, ChangesJson = entries };
+        var auditEvent = new AuditEvent { TableName = reportName, Operation = AuditEvent.AuditOperations.Archive, UserName = userName, SessionId = sessionId, ChangesJson = entries };
 
         ReportChecksum checksum = new ReportChecksum
         {
@@ -167,6 +168,7 @@ public sealed class AuditService : IAuditService
         CancellationToken cancellationToken = default)
     {
         string userName = _appUser?.UserName ?? "Unknown";
+        string sessionId = GetSessionId(_httpContextAccessor.HttpContext);
 
         var entries = new List<AuditChangeEntry>
         {
@@ -180,6 +182,7 @@ public sealed class AuditService : IAuditService
             Operation = AuditEvent.AuditOperations.SensitiveAccess,
             PrimaryKey = primaryKey,
             UserName = userName,
+            SessionId = sessionId,
             ChangesJson = entries,
             CreatedAt = DateTimeOffset.UtcNow
         };
@@ -240,6 +243,11 @@ public sealed class AuditService : IAuditService
             if (!string.IsNullOrWhiteSpace(request.UserName))
             {
                 query = query.Where(e => e.UserName.Contains(request.UserName));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.SessionId))
+            {
+                query = query.Where(e => e.SessionId == request.SessionId);
             }
 
             // Apply date range filters
@@ -496,5 +504,33 @@ public sealed class AuditService : IAuditService
             null => 0m,
             _ => 0m
         };
+    }
+
+    /// <summary>
+    /// Extracts the session ID from HttpContext.Items, checking the current request's Items first (for same-request availability)
+    /// then falling back to request cookies (for subsequent requests).
+    /// </summary>
+    /// <param name="httpContext">The current HTTP context</param>
+    /// <returns>The session ID (20-character GUID) or "unknown" if not found</returns>
+    private static string GetSessionId(HttpContext? httpContext)
+    {
+        if (httpContext == null)
+        {
+            return "unknown";
+        }
+
+        // First check HttpContext.Items (session created/retrieved in same request)
+        if (httpContext.Items.TryGetValue(Demoulas.ProfitSharing.Common.Constants.Telemetry.SessionIdKey, out var sessionIdObj) && sessionIdObj is string sessionId)
+        {
+            return sessionId;
+        }
+
+        // Fallback to request cookies (for subsequent requests with existing session)
+        if (httpContext.Request.Cookies.TryGetValue(Demoulas.ProfitSharing.Common.Constants.Telemetry.SessionIdKey, out var cookieSessionId))
+        {
+            return cookieSessionId;
+        }
+
+        return "unknown";
     }
 }

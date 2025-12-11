@@ -23,6 +23,10 @@ public sealed record AuditSearchRequestDto : SortedPaginationRequestDto
     public string? UserName { get; init; }
 
     /// <summary>
+    /// Filter by session ID (exact match for forensic session reconstruction).
+    /// </summary>
+    public string? SessionId { get; init; }
+    /// <summary>
     /// Filter by events created on or after this time.
     /// </summary>
     public DateTimeOffset? StartTime { get; init; }
