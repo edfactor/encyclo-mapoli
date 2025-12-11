@@ -8,7 +8,7 @@ param (
 
 # Build dynamic environment-specific variable names
 $profitSharingVar = "ConnectionStrings_ProfitSharing_$Environment"
-$warehouseVar = "CONNECTIONSTRINGS_WAREHOUSE_SLUG"
+$warehouseVar = "CONNECTIONSTRINGS_WAREHOUSE"
 $oracleBaseUrlVar = "QA_ORACLEHCM_BASE_URL_SLUG".Replace("QA", $Environment)
 $oracleUsernameVar = "QA_ORACLEHCM_USERNAME_SLUG".Replace("QA", $Environment)
 $oraclePasswordVar = "QA_ORACLEHCM_PASSWORD_SLUG".Replace("QA", $Environment)
