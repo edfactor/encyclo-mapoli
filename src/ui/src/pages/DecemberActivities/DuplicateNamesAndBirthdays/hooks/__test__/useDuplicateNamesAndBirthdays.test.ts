@@ -163,7 +163,8 @@ const mockPaginationObject = {
   sortParams: { sortBy: "name", isSortDescending: false },
   handlePaginationChange: vi.fn(),
   handleSortChange: vi.fn(),
-  resetPagination: vi.fn()
+  resetPagination: vi.fn(),
+  clearPersistedState: vi.fn()
 };
 
 const mockDuplicateData = {

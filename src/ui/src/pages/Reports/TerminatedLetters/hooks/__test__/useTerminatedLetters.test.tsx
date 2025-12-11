@@ -147,7 +147,8 @@ describe("useTerminatedLetters", () => {
         },
         handlePaginationChange: mockHandlePaginationChange,
         handleSortChange: vi.fn(),
-        resetPagination: mockResetPagination
+        resetPagination: mockResetPagination,
+        clearPersistedState: vi.fn()
       } as ReturnType<typeof useGridPagination.useGridPagination>;
     });
 
