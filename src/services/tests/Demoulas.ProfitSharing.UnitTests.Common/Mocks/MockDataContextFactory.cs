@@ -155,13 +155,20 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.SetupGet(ctx => ctx.Database)
             .Returns(mockDatabaseFacade.Object);
 
+        var overallTimer = Stopwatch.StartNew();
+        var timings = new Dictionary<string, long>();
 
-        var dataGenTimer = Stopwatch.StartNew();
+        // Countries
+        var countryTimer = Stopwatch.StartNew();
         List<Country>? countries = new CountryFaker().Generate(10);
         Mock<DbSet<Country>> mockCountry = countries.BuildMockDbSet();
+        countryTimer.Stop();
+        timings["Countries"] = countryTimer.ElapsedMilliseconds;
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
 
+        // Navigation entities
+        var navTimer = Stopwatch.StartNew();
         List<Navigation>? navigations = new NavigationFaker().DummyNavigationData();
         Mock<DbSet<Navigation>> mockNavigation = navigations.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
@@ -176,12 +183,20 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<NavigationRole>> mockNavigationRoles = navigationRoles.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
+        navTimer.Stop();
+        timings["Navigation Entities"] = navTimer.ElapsedMilliseconds;
 
+        // PayClassifications
+        var payClassTimer = Stopwatch.StartNew();
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(250);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
+        payClassTimer.Stop();
+        timings["PayClassifications"] = payClassTimer.ElapsedMilliseconds;
 
+        // Profit Codes and Tax Codes
+        var codesTimer = Stopwatch.StartNew();
         var profitCodes = new ProfitCodeFaker().Generate(10);
         var mockProfitCodes = profitCodes.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
@@ -251,10 +266,21 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockEmploymentTypes = employmentTypes.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
+        codesTimer.Stop();
+        timings["TaxCodes/States/EmploymentTypes"] = codesTimer.ElapsedMilliseconds;
 
+        // Core Entities - Demographics, ProfitDetails, Beneficiaries (heavy hitters)
+        var demoTimer = Stopwatch.StartNew();
         List<Demographic>? demographics = new DemographicFaker().Generate(250);
-        List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
+        demoTimer.Stop();
+        timings["Demographics Generation"] = demoTimer.ElapsedMilliseconds;
 
+        var demoHistoryTimer = Stopwatch.StartNew();
+        List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
+        demoHistoryTimer.Stop();
+        timings["DemographicHistory Generation"] = demoHistoryTimer.ElapsedMilliseconds;
+
+        var profitDetailsTimer = Stopwatch.StartNew();
         var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 4);
 
         // Add COMMENT_RELATED_STATE values to some profit details for state lookup testing
@@ -270,15 +296,25 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockProfitDetails = BuildMockDbSetWithBackingList(profitDetails);
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
+        profitDetailsTimer.Stop();
+        timings["ProfitDetails Generation"] = profitDetailsTimer.ElapsedMilliseconds;
 
+        var beneficiaryTimer = Stopwatch.StartNew();
         List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(demographics.Count * 4);
+        beneficiaryTimer.Stop();
+        timings["Beneficiaries Generation"] = beneficiaryTimer.ElapsedMilliseconds;
+
+        var payProfitTimer = Stopwatch.StartNew();
         List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count * 2);
 
         foreach (PayProfit payProfit in profits)
         {
             demographics.Find(d => d.Id == payProfit.DemographicId)?.PayProfits.Add(payProfit);
         }
+        payProfitTimer.Stop();
+        timings["PayProfits Generation"] = payProfitTimer.ElapsedMilliseconds;
 
+        var participantTimer = Stopwatch.StartNew();
         List<ParticipantTotal> participantTotals = new ParticipantTotalFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
         Constants.FakeParticipantTotals = participantTotals.BuildMockDbSet();
 
@@ -290,8 +326,10 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         var profitShareTotal = new ProfitShareTotalFaker().Generate();
         Constants.ProfitShareTotals = (new List<ProfitShareTotal>() { profitShareTotal }).BuildMockDbSet();
+        participantTimer.Stop();
+        timings["ParticipantTotals/Vesting/ETVA"] = participantTimer.ElapsedMilliseconds;
 
-
+        var otherTimer = Stopwatch.StartNew();
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
         List<NavigationTracking>? navigationTrackings = new NavigationTrackingFaker().Generate(1);
 
@@ -475,12 +513,47 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<CommentType>()).Returns(mockCommentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<TaxCode>()).Returns(mockTaxCodesList.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<State>()).Returns(mockStates.Object);
+        
+        otherTimer.Stop();
+        timings["Other/Distributions/Lookup Setup"] = otherTimer.ElapsedMilliseconds;
+
+        // Log timing breakdown if test output helper provided
+        overallTimer.Stop();
+        LogProfilingResults(timings, overallTimer.ElapsedMilliseconds);
+    }
+
+    /// <summary>
+    /// Logs the profiling breakdown of mock data factory generation to test output.
+    /// Shows timing for each entity/category and total time.
+    /// </summary>
+    private static void LogProfilingResults(Dictionary<string, long> timings, long totalMs)
+    {
+        try
+        {
+            Console.WriteLine("");
+            Console.WriteLine("=== MOCK DATA FACTORY GENERATION TIMING (milliseconds) ===");
+
+            foreach (var timing in timings.OrderByDescending(t => t.Value))
+            {
+                var percentage = totalMs > 0 ? (100 * timing.Value / totalMs) : 0;
+                Console.WriteLine($"{timing.Key,-45} {timing.Value,5}ms ({percentage,3}%)");
+            }
+
+            Console.WriteLine($"{"TOTAL",-45} {totalMs,5}ms (100%)");
+            Console.WriteLine("");
+        }
+        catch
+        {
+            // Silently ignore any logging errors to avoid breaking tests
+        }
     }
 
     /// <summary>
     /// For backward compatibility, returns a fresh factory instance per call.
     /// Each test that needs isolation gets its own factory with 6,500+ fresh fake records.
     /// Use this for all test scenarios to prevent state pollution.
+    /// 
+    /// Optionally accepts ITestOutputHelper to enable per-test profiling output.
     /// </summary>
     public static IProfitSharingDataContextFactory InitializeForTesting()
     {
