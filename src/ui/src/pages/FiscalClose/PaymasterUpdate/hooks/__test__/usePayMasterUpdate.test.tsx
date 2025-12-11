@@ -127,7 +127,8 @@ describe("usePayMasterUpdate", () => {
       },
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
-      resetPagination: mockResetPagination
+      resetPagination: mockResetPagination,
+      clearPersistedState: vi.fn()
     } as ReturnType<typeof useGridPagination.useGridPagination>);
 
     // Mock lazy query - default to returning empty data

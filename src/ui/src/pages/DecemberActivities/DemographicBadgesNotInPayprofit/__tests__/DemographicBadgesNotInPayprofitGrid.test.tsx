@@ -83,7 +83,8 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     handleSortChange: vi.fn(),
     setPageNumber: vi.fn(),
     setPageSize: vi.fn(),
-    resetPagination: vi.fn()
+    resetPagination: vi.fn(),
+    clearPersistedState: vi.fn()
   };
 
   const mockRef = { current: null };

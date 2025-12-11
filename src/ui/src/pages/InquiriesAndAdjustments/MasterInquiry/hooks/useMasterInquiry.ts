@@ -108,7 +108,7 @@ const useMasterInquiry = () => {
   );
 
   const memberGridPagination = useGridPagination({
-    initialPageSize: 5,
+    initialPageSize: 10,
     initialSortBy: "badgeNumber",
     initialSortDescending: true,
     onPaginationChange: handleMemberGridPaginationChange

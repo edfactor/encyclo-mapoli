@@ -84,7 +84,8 @@ vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
       sortParams: { sortBy: "badgeNumber", isSortDescending: false },
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
+      resetPagination: vi.fn(),
+      clearPersistedState: vi.fn()
     },
     modalGridPagination: {
       pageSize: 25,
@@ -92,7 +93,8 @@ vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
       sortParams: { sortBy: "badgeNumber", isSortDescending: false },
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
+      resetPagination: vi.fn(),
+      clearPersistedState: vi.fn()
     },
     executeModalSearch: vi.fn(),
     modalSelectedExecutives: [],
@@ -171,7 +173,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         modalGridPagination: {
           pageSize: 25,
@@ -179,7 +182,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         executeModalSearch: vi.fn(),
         modalSelectedExecutives: [],
@@ -234,7 +238,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         modalGridPagination: {
           pageSize: 25,
@@ -242,7 +247,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         executeModalSearch: vi.fn(),
         modalSelectedExecutives: [],
@@ -305,7 +311,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         modalGridPagination: {
           pageSize: 25,
@@ -313,7 +320,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         executeModalSearch: vi.fn(),
         modalSelectedExecutives: [],
