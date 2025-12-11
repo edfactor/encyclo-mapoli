@@ -325,7 +325,6 @@ BEGIN
             DEMOGRAPHIC_ID,
             BENEFICIARY_CONTACT_ID,
             RELATIONSHIP,
-            KIND_ID,
             PERCENT
         )
         SELECT 
@@ -342,7 +341,6 @@ BEGIN
              AND bc2.SSN = v_max_ssn + (bc_orig.ID - 1)
              AND ROWNUM = 1) AS BENEFICIARY_CONTACT_ID,
             b.RELATIONSHIP,
-            b.KIND_ID,
             b.PERCENT
         FROM BENEFICIARY b
         JOIN DEMOGRAPHIC d_orig ON d_orig.ID = b.DEMOGRAPHIC_ID

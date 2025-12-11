@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,14 +12,16 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251201140700_RemoveBeneficiaryKind")]
+    partial class RemoveBeneficiaryKind
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "10.0.1")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -25558,11 +25561,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(512)")
                         .HasColumnName("PRIMARY_KEY");
 
-                    b.Property<string>("SessionId")
-                        .HasMaxLength(20)
-                        .HasColumnType("NVARCHAR2(20)")
-                        .HasColumnName("SESSION_ID");
-
                     b.Property<string>("TableName")
                         .HasMaxLength(128)
                         .HasColumnType("NVARCHAR2(128)")
@@ -25578,9 +25576,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("PK_AUDIT_EVENT");
-
-                    b.HasIndex(new[] { "SessionId", "CreatedAt" }, "IX_SessionIdCreatedAt")
-                        .HasDatabaseName("IX_AUDIT_EVENT_SESSION_ID_CREATEDAT");
 
                     b.HasIndex(new[] { "TableName" }, "IX_TableName")
                         .HasDatabaseName("IX_AUDIT_EVENT_TABLENAME");
@@ -27605,11 +27600,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("DATE_OF_BIRTH")
                         .HasComment("DateOfBirth");
-
-                    b.Property<DateTime?>("DateOfDeath")
-                        .HasColumnType("DATE")
-                        .HasColumnName("DATE_OF_DEATH")
-                        .HasComment("DateOfDeath");
 
                     b.Property<byte>("DepartmentId")
                         .HasPrecision(1)
