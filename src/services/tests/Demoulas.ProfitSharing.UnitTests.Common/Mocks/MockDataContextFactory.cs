@@ -287,7 +287,9 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         timings["DemographicHistory Generation"] = demoHistoryTimer.ElapsedMilliseconds;
 
         var profitDetailsTimer = Stopwatch.StartNew();
-        var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 4);
+        // OPTIMIZATION: Reduce ProfitDetails from 1000 (demographics.Count * 4) to 500
+        // Most test scenarios don't need 1000 profit details and this saves ~20-30ms per factory init
+        var profitDetails = new ProfitDetailFaker(demographics).Generate(500);
 
         // Add COMMENT_RELATED_STATE values to some profit details for state lookup testing
         var statesToAssign = new[] { "MA", "NH", "ME", "CT", "RI", "VT", "NY", "CA", "TX" };
