@@ -131,7 +131,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         voids: false,
         pagination: {
           skip: 0,
-          take: 5,
+          take: 10,
           sortBy: "badgeNumber",
           isSortDescending: true
         }
@@ -150,7 +150,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
           endProfitYear: profitYear,
           pagination: {
             skip: 0,
-            take: 5,
+            take: 10,
             sortBy: "badgeNumber",
             isSortDescending: true
           }
@@ -225,7 +225,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         voids: false,
         pagination: {
           skip: 0,
-          take: 5,
+          take: 10,
           sortBy: "badgeNumber",
           isSortDescending: true
         }
