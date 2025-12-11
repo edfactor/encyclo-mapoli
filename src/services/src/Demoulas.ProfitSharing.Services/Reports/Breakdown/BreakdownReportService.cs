@@ -90,6 +90,7 @@ public sealed class BreakdownReportService : IBreakdownService
         Inactive,
         Terminated,
         Retired,
+        Monthly,
     }
 
     private enum Balance
@@ -98,6 +99,7 @@ public sealed class BreakdownReportService : IBreakdownService
         HasVestedBalance,
         HasBalanceActivity,
         HasCurrentBalanceNotVested,
+        HasDistributionForfeitOrContribution,
     }
     #endregion
 
@@ -364,6 +366,13 @@ public sealed class BreakdownReportService : IBreakdownService
         return GetMembersByStore(request, StatusFilter.Terminated, Balance.BalanceOrNoBalance, applyQPAY066A1Filter: true, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetMonthlyEmployeesWithActivity(
+       TerminatedEmployeesWithBalanceBreakdownRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, StatusFilter.Monthly, Balance.HasDistributionForfeitOrContribution, applyQPAY066A1Filter: false, ssns: null, badgeNumbers: null, cancellationToken);
+    }
+
     #region ── Private: common building blocks ───────────────────────────────────────────
 
     private Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersByStore(
@@ -403,6 +412,10 @@ public sealed class BreakdownReportService : IBreakdownService
             else if (employeeStatusFilter == StatusFilter.Inactive)
             {
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
+            }
+            else if (employeeStatusFilter == StatusFilter.Monthly)
+            {
+                employeesBase = employeesBase.Where(e => e.PayFrequencyId == PayFrequency.Constants.Monthly);
             }
 
             if (employeeStatusFilter == StatusFilter.Terminated || employeeStatusFilter == StatusFilter.Retired)
@@ -453,6 +466,10 @@ public sealed class BreakdownReportService : IBreakdownService
                     || (e.Forfeitures != 0)
                     || (e.Contributions != 0)),
                 Balance.HasCurrentBalanceNotVested => employeesBase.Where(e => e.CurrentBalance.HasValue && e.CurrentBalance.Value > 0 && (e.VestedBalance == null || e.VestedBalance.Value == 0)),
+                Balance.HasDistributionForfeitOrContribution => employeesBase.Where(e =>
+                    (e.Distributions != 0)
+                    || (e.Forfeitures != 0)
+                    || (e.Contributions != 0)),
                 _ => employeesBase
             };
 

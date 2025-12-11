@@ -521,6 +521,34 @@ export const AdhocApi = createApi({
       }
     }),
 
+    getBreakdownByStoreMonthly: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: "adhoc/breakdown-by-store/monthly",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
+          startDate: convertToISODateString(params.startDate),
+          endDate: convertToISODateString(params.endDate),
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          // Monthly employees report uses breakdownByStore slice
+          dispatch(setBreakdownByStore(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+
     getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
       query: (params) => ({
         url: `adhoc/breakdown-by-store/${params.storeNumber}/totals`,
@@ -625,6 +653,7 @@ export const {
   useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery,
   useLazyGetBreakdownByStoreTerminatedWithBalanceActivityQuery,
   useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery,
+  useLazyGetBreakdownByStoreMonthlyQuery,
   useLazyGetForfeitureAdjustmentsQuery,
   useLazyGetQPAY066BTerminatedWithVestedBalanceQuery,
   useLazyGetRecentlyTerminatedReportQuery,

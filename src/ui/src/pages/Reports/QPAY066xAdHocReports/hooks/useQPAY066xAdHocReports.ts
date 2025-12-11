@@ -1,8 +1,9 @@
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import useDecemberFlowProfitYear from "@/hooks/useDecemberFlowProfitYear";
 import { useCallback, useMemo, useState } from "react";
 import {
   useLazyGetBreakdownByStoreInactiveQuery,
   useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery,
+  useLazyGetBreakdownByStoreMonthlyQuery,
   useLazyGetBreakdownByStoreQuery,
   useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery,
   useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery,
@@ -46,6 +47,7 @@ export const useQPAY066xAdHocReports = () => {
   const [fetchQPAY066C, { isFetching: isFetchingC }] = useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery();
   const [fetchQPAY066B, { isFetching: isFetchingB }] = useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery();
   const [fetchQPAY066W, { isFetching: isFetchingW }] = useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery();
+  const [fetchQPAY066M, { isFetching: isFetchingM }] = useLazyGetBreakdownByStoreMonthlyQuery();
   const [fetchTotals, { isFetching: isFetchingTotals }] = useLazyGetBreakdownByStoreTotalsQuery();
 
   // Aggregate loading state
@@ -57,8 +59,18 @@ export const useQPAY066xAdHocReports = () => {
       isFetchingC ||
       isFetchingB ||
       isFetchingW ||
+      isFetchingM ||
       isFetchingTotals,
-    [isFetchingTA, isFetchingInactive, isFetchingI, isFetchingC, isFetchingB, isFetchingW, isFetchingTotals]
+    [
+      isFetchingTA,
+      isFetchingInactive,
+      isFetchingI,
+      isFetchingC,
+      isFetchingB,
+      isFetchingW,
+      isFetchingM,
+      isFetchingTotals
+    ]
   );
 
   const executeSearch = useCallback(
@@ -122,13 +134,17 @@ export const useQPAY066xAdHocReports = () => {
             // QPAY066W has optional date range
             await fetchQPAY066W({ ...baseParams, startDate, endDate });
             break;
+          case "QPAY066M":
+            // QPAY066M - Monthly employees with distribution, forfeit, or contribution
+            await fetchQPAY066M({ ...baseParams, startDate, endDate });
+            break;
           default:
             console.error(`Unknown report ID: ${reportId}`);
             return;
         }
 
-        // Fetch totals only if storeNumber is provided
-        if (storeNumber) {
+        // Fetch totals only if storeNumber is provided (not applicable for QPAY066M)
+        if (storeNumber && reportId !== "QPAY066M") {
           await fetchTotals(baseParams);
         }
       } catch (error) {
@@ -143,6 +159,7 @@ export const useQPAY066xAdHocReports = () => {
       fetchQPAY066C,
       fetchQPAY066B,
       fetchQPAY066W,
+      fetchQPAY066M,
       fetchTotals
     ]
   );

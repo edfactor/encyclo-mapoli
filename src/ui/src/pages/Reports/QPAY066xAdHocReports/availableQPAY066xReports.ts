@@ -60,6 +60,16 @@ const reports: QPAY066xAdHocReportPreset[] = [
     },
     requiresDateRange: false,
     apiEndpoint: "/api/yearend/breakdown-by-store"
+  },
+  {
+    id: "QPAY066M",
+    name: "QPAY066M",
+    description: "Breakdown all monthly employees with distribution, forfeit, or contribution",
+    params: {
+      reportId: 7
+    },
+    requiresDateRange: true,
+    apiEndpoint: "/api/yearend/breakdown-by-store/monthly"
   }
 ];
 
