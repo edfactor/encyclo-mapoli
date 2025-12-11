@@ -73,11 +73,48 @@ public class CalendarServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "Find Weekending Date - Valid Date")]
     public async Task FindWeekendingDate_ValidDate()
     {
-        var validDate = DateOnly.ParseExact("250101", "yyMMdd", CultureInfo.InvariantCulture); // 2025-01-01
-        var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
+        // Arrange: Use 2024 date since CaldarRecordSeeder has data through 2024
+        var validDate = DateOnly.ParseExact("240101", "yyMMdd", CultureInfo.InvariantCulture); // 2024-01-01 (Wednesday)
+        var expectedWeekEndingDate = new DateOnly(2024, 1, 6); // Saturday following 2024-01-01
+
+        // Mock IAccountingPeriodsService to return the expected week-ending date
+        var accountingPeriodsService = new Mock<IAccountingPeriodsService>();
+        accountingPeriodsService
+            .Setup(s => s.FindWeekendingDateFromDateAsync(
+                It.IsAny<IAccountingPeriodContext>(),
+                validDate,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedWeekEndingDate);
+
+        // Mock IProfitSharingDataContextFactory to provide warehouse context
+        var dataContextFactory = new Mock<IProfitSharingDataContextFactory>();
+        dataContextFactory
+            .Setup(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonWarehouseContext, Task<DateOnly>>>()))
+            .Returns<Func<DemoulasCommonWarehouseContext, Task<DateOnly>>>(async func =>
+            {
+                // Create a minimal mock context - the actual context isn't used since IAccountingPeriodsService is mocked
+                var mockContext = new Mock<DemoulasCommonWarehouseContext>();
+                return await func(mockContext.Object);
+            });
+
+        var distributedCache = new Mock<IDistributedCache>();
+        var calendarService = new Demoulas.ProfitSharing.Services.CalendarService(
+            dataContextFactory.Object,
+            accountingPeriodsService.Object,
+            distributedCache.Object);
+
+        // Act
         var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(validDate);
+
+        // Assert
         weekEndingDate.ShouldBeGreaterThanOrEqualTo(validDate);
         weekEndingDate.DayOfWeek.ShouldBe(DayOfWeek.Saturday);
+        weekEndingDate.ShouldBe(expectedWeekEndingDate);
+
+        // Verify the accounting periods service was called correctly
+        accountingPeriodsService.Verify(
+            s => s.FindWeekendingDateFromDateAsync(It.IsAny<IAccountingPeriodContext>(), validDate, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact(DisplayName = "PS-366 Get start and end dates for a provided fiscal year")]
