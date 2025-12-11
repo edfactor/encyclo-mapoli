@@ -63,7 +63,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             var testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Outgoing Partial Withdrawal
             testRslt.Count.ShouldBe(1);
-            testRslt[0].TotalAmount.ShouldBe(2340);
+            testRslt[0].TotalAmount.ShouldBe(36);
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -77,7 +77,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Outgoing Forfeitures
             testRslt.Count.ShouldBe(1);
-            testRslt[0].TotalAmount.ShouldBe(2340);
+            testRslt[0].TotalAmount.ShouldBe(36);
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -91,7 +91,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Outgoing 100% Vested Earnings
             testRslt.Count.ShouldBe(1);
-            testRslt[0].TotalAmount.ShouldBe(2340);
+            testRslt[0].TotalAmount.ShouldBe(36);
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -106,7 +106,7 @@ public class TotalServiceTests : ApiTestBase<Program>
                 .ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Test as of filter
             testRslt.Count.ShouldBe(1);
-            testRslt[0].TotalAmount.ShouldBe(2336);
+            testRslt[0].TotalAmount.ShouldBe(32);
 
             for (int i = 0; i < pdArray.Length; i++)
             {

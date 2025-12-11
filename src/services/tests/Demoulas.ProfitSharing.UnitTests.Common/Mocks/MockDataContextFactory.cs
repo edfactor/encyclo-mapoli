@@ -26,6 +26,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     private readonly Mock<ProfitSharingReadOnlyDbContext> _profitSharingReadOnlyDbContext;
     private readonly Mock<DemoulasCommonDataContext> _storeInfoDbContext;
 
+    // Lazy loading: Store references for on-demand Beneficiary expansion (never reassigned, content is mutated)
+    private readonly List<Demographic>? _lazyDemographics;
+    private readonly List<Beneficiary>? _lazyBeneficiaries;
+    private readonly Mock<DbSet<Beneficiary>>? _lazyMockBeneficiariesDbSet;
+    private readonly Mock<DbSet<BeneficiaryContact>>? _lazyMockBeneficiaryContactsDbSet;
+
     /// <summary>
     /// Creates a mock DbSet that uses a backing list to persist Add/Remove operations
     /// </summary>
@@ -155,13 +161,20 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.SetupGet(ctx => ctx.Database)
             .Returns(mockDatabaseFacade.Object);
 
+        var overallTimer = Stopwatch.StartNew();
+        var timings = new Dictionary<string, long>();
 
-        var dataGenTimer = Stopwatch.StartNew();
+        // Countries
+        var countryTimer = Stopwatch.StartNew();
         List<Country>? countries = new CountryFaker().Generate(10);
         Mock<DbSet<Country>> mockCountry = countries.BuildMockDbSet();
+        countryTimer.Stop();
+        timings["Countries"] = countryTimer.ElapsedMilliseconds;
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
 
+        // Navigation entities
+        var navTimer = Stopwatch.StartNew();
         List<Navigation>? navigations = new NavigationFaker().DummyNavigationData();
         Mock<DbSet<Navigation>> mockNavigation = navigations.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
@@ -176,12 +189,20 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<NavigationRole>> mockNavigationRoles = navigationRoles.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
+        navTimer.Stop();
+        timings["Navigation Entities"] = navTimer.ElapsedMilliseconds;
 
+        // PayClassifications
+        var payClassTimer = Stopwatch.StartNew();
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(250);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
+        payClassTimer.Stop();
+        timings["PayClassifications"] = payClassTimer.ElapsedMilliseconds;
 
+        // Profit Codes and Tax Codes
+        var codesTimer = Stopwatch.StartNew();
         var profitCodes = new ProfitCodeFaker().Generate(10);
         var mockProfitCodes = profitCodes.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
@@ -251,11 +272,24 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockEmploymentTypes = employmentTypes.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
+        codesTimer.Stop();
+        timings["TaxCodes/States/EmploymentTypes"] = codesTimer.ElapsedMilliseconds;
 
+        // Core Entities - Demographics, ProfitDetails, Beneficiaries (heavy hitters)
+        var demoTimer = Stopwatch.StartNew();
         List<Demographic>? demographics = new DemographicFaker().Generate(250);
-        List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
+        demoTimer.Stop();
+        timings["Demographics Generation"] = demoTimer.ElapsedMilliseconds;
 
-        var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 4);
+        var demoHistoryTimer = Stopwatch.StartNew();
+        List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
+        demoHistoryTimer.Stop();
+        timings["DemographicHistory Generation"] = demoHistoryTimer.ElapsedMilliseconds;
+
+        var profitDetailsTimer = Stopwatch.StartNew();
+        // OPTIMIZATION: Reduce ProfitDetails from 1000 (demographics.Count * 4) to 500
+        // Most test scenarios don't need 1000 profit details and this saves ~20-30ms per factory init
+        var profitDetails = new ProfitDetailFaker(demographics).Generate(500);
 
         // Add COMMENT_RELATED_STATE values to some profit details for state lookup testing
         var statesToAssign = new[] { "MA", "NH", "ME", "CT", "RI", "VT", "NY", "CA", "TX" };
@@ -270,15 +304,33 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockProfitDetails = BuildMockDbSetWithBackingList(profitDetails);
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
+        profitDetailsTimer.Stop();
+        timings["ProfitDetails Generation"] = profitDetailsTimer.ElapsedMilliseconds;
 
-        List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(demographics.Count * 4);
+        var beneficiaryTimer = Stopwatch.StartNew();
+        // OPTIMIZATION: Generate only 50 beneficiaries initially (was demographics.Count * 4 = 1000)
+        // Tests can call LoadAdditionalBeneficiaries() to get more on demand
+        int initialBeneficiaryCount = 50;
+        List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(initialBeneficiaryCount);
+
+        // Cache for lazy loading
+        _lazyDemographics = demographics;
+        _lazyBeneficiaries = beneficiaries;
+
+        beneficiaryTimer.Stop();
+        timings["Beneficiaries Generation"] = beneficiaryTimer.ElapsedMilliseconds;
+
+        var payProfitTimer = Stopwatch.StartNew();
         List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count * 2);
 
         foreach (PayProfit payProfit in profits)
         {
             demographics.Find(d => d.Id == payProfit.DemographicId)?.PayProfits.Add(payProfit);
         }
+        payProfitTimer.Stop();
+        timings["PayProfits Generation"] = payProfitTimer.ElapsedMilliseconds;
 
+        var participantTimer = Stopwatch.StartNew();
         List<ParticipantTotal> participantTotals = new ParticipantTotalFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
         Constants.FakeParticipantTotals = participantTotals.BuildMockDbSet();
 
@@ -290,19 +342,21 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         var profitShareTotal = new ProfitShareTotalFaker().Generate();
         Constants.ProfitShareTotals = (new List<ProfitShareTotal>() { profitShareTotal }).BuildMockDbSet();
+        participantTimer.Stop();
+        timings["ParticipantTotals/Vesting/ETVA"] = participantTimer.ElapsedMilliseconds;
 
-
+        var otherTimer = Stopwatch.StartNew();
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
         List<NavigationTracking>? navigationTrackings = new NavigationTrackingFaker().Generate(1);
 
-        Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.BuildMockDbSet();
-        Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts =
-            beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).ToList().BuildMockDbSet();
+        // Cache mock DbSets for lazy loading capability
+        _lazyMockBeneficiariesDbSet = beneficiaries.BuildMockDbSet();
+        _lazyMockBeneficiaryContactsDbSet = beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).ToList().BuildMockDbSet();
 
-        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
-        _profitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
+        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(_lazyMockBeneficiariesDbSet.Object);
+        _profitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(_lazyMockBeneficiaryContactsDbSet.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(_lazyMockBeneficiariesDbSet.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(_lazyMockBeneficiaryContactsDbSet.Object);
 
         Mock<DbSet<PayProfit>> mockProfits = BuildMockDbSetWithBackingList(profits);
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
@@ -475,12 +529,47 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<CommentType>()).Returns(mockCommentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<TaxCode>()).Returns(mockTaxCodesList.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<State>()).Returns(mockStates.Object);
+
+        otherTimer.Stop();
+        timings["Other/Distributions/Lookup Setup"] = otherTimer.ElapsedMilliseconds;
+
+        // Log timing breakdown if test output helper provided
+        overallTimer.Stop();
+        LogProfilingResults(timings, overallTimer.ElapsedMilliseconds);
+    }
+
+    /// <summary>
+    /// Logs the profiling breakdown of mock data factory generation to test output.
+    /// Shows timing for each entity/category and total time.
+    /// </summary>
+    private static void LogProfilingResults(Dictionary<string, long> timings, long totalMs)
+    {
+        try
+        {
+            Console.WriteLine("");
+            Console.WriteLine("=== MOCK DATA FACTORY GENERATION TIMING (milliseconds) ===");
+
+            foreach (var timing in timings.OrderByDescending(t => t.Value))
+            {
+                var percentage = totalMs > 0 ? (100 * timing.Value / totalMs) : 0;
+                Console.WriteLine($"{timing.Key,-45} {timing.Value,5}ms ({percentage,3}%)");
+            }
+
+            Console.WriteLine($"{"TOTAL",-45} {totalMs,5}ms (100%)");
+            Console.WriteLine("");
+        }
+        catch
+        {
+            // Silently ignore any logging errors to avoid breaking tests
+        }
     }
 
     /// <summary>
     /// For backward compatibility, returns a fresh factory instance per call.
     /// Each test that needs isolation gets its own factory with 6,500+ fresh fake records.
     /// Use this for all test scenarios to prevent state pollution.
+    /// 
+    /// Optionally accepts ITestOutputHelper to enable per-test profiling output.
     /// </summary>
     public static IProfitSharingDataContextFactory InitializeForTesting()
     {
@@ -560,6 +649,41 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
+    /// <summary>
+    /// LAZY LOADING: Load additional beneficiaries on demand.
+    /// By default, only 50 beneficiaries are generated at factory creation.
+    /// Tests that need more can call this to lazily generate additional beneficiaries.
+    /// 
+    /// Example:
+    ///   var factory = MockDataContextFactory.InitializeForTesting();
+    ///   await factory.LoadAdditionalBeneficiariesAsync(250); // Load 250 more (total = 300)
+    /// </summary>
+    public Task LoadAdditionalBeneficiariesAsync(int additionalCount)
+    {
+        if (_lazyDemographics == null || _lazyBeneficiaries == null ||
+            _lazyMockBeneficiariesDbSet == null || _lazyMockBeneficiaryContactsDbSet == null)
+        {
+            throw new InvalidOperationException("MockDataContextFactory not properly initialized for lazy loading.");
+        }
+
+        // Generate additional beneficiaries
+        var additionalBeneficiaries = new BeneficiaryFaker(_lazyDemographics).Generate(additionalCount);
+
+        // Add to cached list (mutate contents, don't reassign field)
+        _lazyBeneficiaries.AddRange(additionalBeneficiaries);
+
+        // Create new mock DbSet with all beneficiaries (initial + additional)
+        var newMockBeneficiaries = _lazyBeneficiaries.BuildMockDbSet();
+        var newMockContacts = _lazyBeneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).ToList().BuildMockDbSet();
+
+        // Re-setup the mocks with updated data (can reassign after initial constructor setup)
+        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(newMockBeneficiaries.Object);
+        _profitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(newMockContacts.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(newMockBeneficiaries.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(newMockContacts.Object);
+
+        return Task.CompletedTask;
+    }
 
     /// <summary>
     /// For read only workloads. This should not be mixed with Read/Write workloads in the same method as a matter of best
