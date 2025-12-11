@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
 public sealed record AdhocTerminatedEmployeeResponse : IFullNameProperty, IIsExecutive
 {
     public required int BadgeNumber { get; set; }

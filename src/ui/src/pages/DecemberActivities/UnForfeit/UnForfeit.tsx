@@ -25,7 +25,7 @@ const UnForfeit = () => {
   const [isGridOnly, setIsGridOnly] = useState(false);
   const [isLeftPaneOpen, setIsLeftPaneOpen] = useState(true);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
-  
+
   // Get current drawer state from Redux
   const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
 

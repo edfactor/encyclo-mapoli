@@ -1,10 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { convertToISODateString } from "../../utils/dateUtils";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStoreTotals,
-  clearBreakdownGrandTotals,
   clearCertificates,
   clearProfitMasterApply,
   clearProfitMasterRevert,
@@ -22,10 +19,6 @@ import {
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
-  setBreakdownByStore,
-  setBreakdownByStoreManagement,
-  setBreakdownByStoreTotals,
-  setBreakdownGrandTotals,
   setCertificates,
   setContributionsByAge,
   setControlSheet,
@@ -50,8 +43,6 @@ import {
   setProfitSharingUnder21Report,
   setProfitSharingUpdate,
   setProfitSharingUpdateAdjustmentSummary,
-  setRecentlyTerminated,
-  setTerminatedLetters,
   setTermination,
   setUnder21BreakdownByStore,
   setUnder21Inactive,
@@ -64,15 +55,9 @@ import {
   setYearEndProfitSharingReportTotals
 } from "reduxstore/slices/yearsEndSlice";
 import {
-  AdhocBeneficiariesReportRequest,
-  adhocBeneficiariesReportResponse,
   BadgeNumberRequest,
   BalanceByAge,
   BalanceByYears,
-  BreakdownByStoreAndDateRangeRequest,
-  BreakdownByStoreEmployee,
-  BreakdownByStoreRequest,
-  BreakdownByStoreTotals,
   CertificateDownloadRequest,
   CertificatePrintRequest,
   CertificatesReportResponse,
@@ -93,13 +78,10 @@ import {
   EmployeeWagesForYearRequestDto,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
-  ForfeitureAdjustmentDetail,
-  ForfeitureAdjustmentUpdateRequest,
   ForfeituresAndPointsResponse,
   ForfeituresByAge,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
-  GrandTotalsByStoreResponseDto,
   GrossWagesReportDto,
   GrossWagesReportResponse,
   NegativeEtvaForSSNsOnPayProfit,
@@ -119,14 +101,7 @@ import {
   ProfitSharingUnder21ReportRequest,
   ProfitSharingUnder21ReportResponse,
   ProfitYearRequest,
-  QPAY066BTerminatedWithVestedBalanceRequest,
-  QPAY066BTerminatedWithVestedBalanceResponse,
-  RecentlyTerminatedResponse,
   StartAndEndDateRequest,
-  SuggestedForfeitResponse,
-  SuggestForfeitureAdjustmentRequest,
-  TerminatedLettersRequest,
-  TerminatedLettersResponse,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
   Under21BreakdownByStoreResponse,
@@ -155,11 +130,6 @@ type TerminationRequestWithArchive = StartAndEndDateRequest & {
   vestedBalanceValue?: number | null;
   vestedBalanceOperator?: number | null;
 };
-
-import {
-  clearForfeitureAdjustmentData,
-  setForfeitureAdjustmentData
-} from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 /* Use the centralized data source aware base query 
    2-minute timeout for year-end reports (after database index optimization) */
@@ -786,77 +756,6 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRecentlyTerminatedReport: builder.query<RecentlyTerminatedResponse, StartAndEndDateRequest>({
-      query: (params) => {
-        return {
-          url: "yearend/adhoc-terminated-employees-report",
-          method: "GET",
-          params: {
-            profitYear: params.profitYear,
-            beginningDate: params.beginningDate,
-            endingDate: params.endingDate,
-            excludeZeroBalance: params.excludeZeroBalance,
-            take: params.pagination.take,
-            skip: params.pagination.skip,
-            sortBy: params.pagination.sortBy,
-            isSortDescending: params.pagination.isSortDescending
-          }
-        };
-      },
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setRecentlyTerminated(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getTerminatedLettersReport: builder.query<TerminatedLettersResponse, TerminatedLettersRequest>({
-      query: (params) => {
-        return {
-          url: "yearend/adhoc-terminated-employees-report-needing-letter",
-          method: "GET",
-          params: {
-            profitYear: params.profitYear,
-            beginningDate: params.beginningDate,
-            endingDate: params.endingDate,
-            excludeZeroBalance: params.excludeZeroBalance,
-            badgeNumbers: params.badgeNumbers,
-            take: params.pagination.take,
-            skip: params.pagination.skip,
-            sortBy: params.pagination.sortBy,
-            isSortDescending: params.pagination.isSortDescending
-          }
-        };
-      },
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setTerminatedLetters(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getTerminatedLettersDownload: builder.query<Blob, TerminatedLettersRequest>({
-      query: (params) => ({
-        url: "yearend/adhoc-terminated-employees-report-needing-letter/download",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          beginningDate: params.beginningDate,
-          endingDate: params.endingDate,
-          excludeZeroBalance: params.excludeZeroBalance,
-          badgeNumbers: params.badgeNumbers,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        },
-        responseHandler: (response) => response.blob()
-      })
-    }),
     getProfitShareUpdate: builder.query<ProfitShareUpdateResponse, ProfitShareUpdateRequest>({
       query: (params) => ({
         url: "yearend/profit-sharing-update",
@@ -1247,114 +1146,12 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getForfeitureAdjustments: builder.query<
-      SuggestedForfeitResponse,
-      SuggestForfeitureAdjustmentRequest & { onlyNetworkToastErrors?: boolean }
-    >({
-      query: (params) => {
-        const { onlyNetworkToastErrors, ...requestParams } = params;
-        return {
-          url: "yearend/forfeiture-adjustments",
-          method: "GET",
-          params: {
-            ssn: requestParams.ssn,
-            badge: requestParams.badge,
-            profitYear: requestParams.profitYear,
-            skip: requestParams.skip || 0,
-            take: requestParams.take || 255,
-            sortBy: requestParams.sortBy,
-            isSortDescending: requestParams.isSortDescending
-          },
-          meta: { onlyNetworkToastErrors }
-        };
-      },
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setForfeitureAdjustmentData(data));
-        } catch (err: unknown) {
-          // Always clear the data on any error
-          dispatch(clearForfeitureAdjustmentData());
-
-          // Don't handle "Employee not found" errors here - let them bubble up to component
-          type RTKQueryError = {
-            error?: {
-              status?: number;
-              data?: {
-                title?: string;
-              };
-            };
-          };
-
-          if (
-            typeof err === "object" &&
-            err !== null &&
-            "error" in err &&
-            typeof (err as RTKQueryError).error === "object" &&
-            (err as RTKQueryError).error?.status === 500 &&
-            (err as RTKQueryError).error?.data?.title === "Employee not found."
-          ) {
-            return; // Don't log or handle, just clear data and let component handle it
-          }
-
-          // Handle other errors as before
-          console.log("Err: " + String(err));
-        }
-      }
-    }),
-    updateForfeitureAdjustment: builder.mutation<
-      ForfeitureAdjustmentDetail,
-      ForfeitureAdjustmentUpdateRequest & { suppressAllToastErrors?: boolean; onlyNetworkToastErrors?: boolean }
-    >({
-      query: (params) => {
-        const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
-        return {
-          url: "yearend/forfeiture-adjustments/update",
-          method: "PUT",
-          body: requestData,
-          // Pass params through meta so middleware can access it
-          meta: { suppressAllToastErrors, onlyNetworkToastErrors }
-        };
-      }
-    }),
-
-    updateForfeitureAdjustmentBulk: builder.mutation<ForfeitureAdjustmentDetail[], ForfeitureAdjustmentUpdateRequest[]>(
-      {
-        query: (params) => ({
-          url: "yearend/forfeiture-adjustments/bulk-update",
-          method: "PUT",
-          body: params
-        })
-      }
-    ),
-
     finalizeReport: builder.mutation<void, { profitYear: number }>({
       query: (params) => ({
         url: "yearend/final",
         method: "POST",
         body: params
       })
-    }),
-    adhocBeneficiariesReport: builder.query<adhocBeneficiariesReportResponse, AdhocBeneficiariesReportRequest>({
-      query: (params) => ({
-        url: "yearend/adhoc-beneficiaries-report",
-        method: "GET",
-        params: {
-          isAlsoEmployee: params.isAlsoEmployee,
-          profitYear: params.profitYear,
-          skip: params.skip || 0,
-          take: params.take || 255,
-          sortBy: params.sortBy,
-          isSortDescending: params.isSortDescending
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch: _dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
     }),
     payBenReport: builder.query<PayBenReportResponse, PayBenReportRequest>({
       query: (params) => ({
@@ -1411,380 +1208,17 @@ export const YearsEndApi = createApi({
         },
         responseHandler: (response) => response.blob()
       })
-    }),
-    // **************************
-    // Breakdown By Store Queries
-    //.  with PagedReportResponse<BreakdownByStoreEmployee>
-    // **************************
-    // 1. Get Breakdown By Store
-
-    getBreakdownByStore: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreManagement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getBreakdownByStoreInactive: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/inactive",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreManagement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-
-    getBreakdownByStoreInactiveWithVestedBalance: builder.query<
-      PagedReportResponse<BreakdownByStoreEmployee>,
-      BreakdownByStoreRequest
-    >({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/inactive/withvestedbalance",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreManagement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-
-    getBreakdownByStoreTerminatedVestedBalance: builder.query<
-      PagedReportResponse<BreakdownByStoreEmployee>,
-      BreakdownByStoreAndDateRangeRequest
-    >({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/terminated/withvestedbalance",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          startDate: params.startDate,
-          endDate: params.endDate,
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreManagement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-
-    getBreakdownByStoreTerminatedBalanceNotVested: builder.query<
-      PagedReportResponse<BreakdownByStoreEmployee>,
-      BreakdownByStoreAndDateRangeRequest
-    >({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
-          startDate: convertToISODateString(params.startDate),
-          endDate: convertToISODateString(params.endDate),
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreManagement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-
-    getBreakdownByStoreTerminatedWithBenAllocations: builder.query<
-      PagedReportResponse<BreakdownByStoreEmployee>,
-      BreakdownByStoreRequest
-    >({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/terminated/withbeneficiaryallocation",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
-          startDate: convertToISODateString(params.startDate),
-          endDate: convertToISODateString(params.endDate),
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreManagement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-
-    getBreakdownByStoreTerminatedWithBalanceActivity: builder.query<
-      PagedReportResponse<BreakdownByStoreEmployee>,
-      BreakdownByStoreAndDateRangeRequest
-    >({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/terminated/withbalanceactivity",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          startDate: params.startDate,
-          endDate: params.endDate,
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreManagement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-
-    getBreakdownByStoreRetiredWithBalanceActivity: builder.query<
-      PagedReportResponse<BreakdownByStoreEmployee>,
-      BreakdownByStoreRequest
-    >({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/retired/withbalanceactivity",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          storeNumber: params.storeNumber,
-          storeManagement: params.storeManagement,
-          // Convert dates from MM/dd/yyyy to yyyy-MM-dd for API
-          startDate: convertToISODateString(params.startDate),
-          endDate: convertToISODateString(params.endDate),
-          employeeName: params.employeeName,
-          badgeNumber: params.badgeNumber,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-
-          // Use the storeManagement flag to determine where to store the data
-          if (arg.storeManagement) {
-            dispatch(setBreakdownByStoreManagement(data));
-          } else {
-            dispatch(setBreakdownByStore(data));
-          }
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-
-    getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
-      query: (params) => ({
-        url: `yearend/breakdown-by-store/${params.storeNumber}/totals`,
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          dispatch(clearBreakdownByStoreTotals());
-          const { data } = await queryFulfilled;
-          dispatch(setBreakdownByStoreTotals(data));
-        } catch (err) {
-          console.log("Err: " + err);
-          dispatch(clearBreakdownByStoreTotals());
-        }
-      }
-    }),
-    getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
-      query: (params) => ({
-        url: `yearend/breakdown-by-store/totals`,
-        method: "GET",
-        params: {
-          profitYear: params.profitYear
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          dispatch(clearBreakdownByStoreTotals());
-          const { data } = await queryFulfilled;
-          dispatch(setBreakdownGrandTotals(data));
-        } catch (err) {
-          console.log("Err: " + err);
-          dispatch(clearBreakdownGrandTotals());
-        }
-      }
-    }),
-    getQPAY066BTerminatedWithVestedBalance: builder.query<
-      QPAY066BTerminatedWithVestedBalanceResponse,
-      QPAY066BTerminatedWithVestedBalanceRequest
-    >({
-      query: (params) => ({
-        url: "yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          skip: params.pagination.skip,
-          take: params.pagination.take,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      })
     })
   })
 });
 
 export const {
   useFinalizeReportMutation,
-  useLazyAdhocBeneficiariesReportQuery,
   useLazyDownloadCertificatesFileQuery,
   useLazyGetAdditionalExecutivesQuery,
   useLazyGetBalanceByAgeQuery,
   useLazyGetBalanceByYearsQuery,
-
-  useLazyGetBreakdownByStoreQuery,
-  useLazyGetBreakdownByStoreTotalsQuery,
-  useLazyGetBreakdownGrandTotalsQuery,
-  useLazyGetBreakdownByStoreInactiveQuery,
-  useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery,
-  useLazyGetBreakdownByStoreTerminatedVestedBalanceQuery,
-  useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery,
-  useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery,
-  useLazyGetBreakdownByStoreTerminatedWithBalanceActivityQuery,
-  useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery,
   useLazyGetCertificatesReportQuery,
-
   useLazyGetContributionsByAgeQuery,
   useLazyGetControlSheetQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
@@ -1795,7 +1229,6 @@ export const {
   useLazyGetEligibleEmployeesQuery,
   useLazyGetEmployeeWagesForYearQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
-  useLazyGetForfeitureAdjustmentsQuery,
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
   useLazyGetGrossWagesReportQuery,
@@ -1806,10 +1239,6 @@ export const {
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
   useLazyGetProfitSharingLabelsQuery,
-  useLazyGetQPAY066BTerminatedWithVestedBalanceQuery,
-  useLazyGetRecentlyTerminatedReportQuery,
-  useLazyGetTerminatedLettersDownloadQuery,
-  useLazyGetTerminatedLettersReportQuery,
   useLazyGetTerminationReportQuery,
   useLazyGetUnder21BreakdownByStoreQuery,
   useLazyGetUnder21InactiveQuery,
@@ -1826,7 +1255,5 @@ export const {
   useRefreshDuplicateNamesAndBirthdaysCacheMutation,
   useUnmaskSsnMutation,
   useUpdateEnrollmentMutation,
-  useUpdateExecutiveHoursAndDollarsMutation,
-  useUpdateForfeitureAdjustmentBulkMutation,
-  useUpdateForfeitureAdjustmentMutation
+  useUpdateExecutiveHoursAndDollarsMutation
 } = YearsEndApi;

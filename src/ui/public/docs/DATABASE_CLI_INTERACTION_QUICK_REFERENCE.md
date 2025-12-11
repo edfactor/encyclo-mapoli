@@ -23,9 +23,9 @@ Navigate to Database-Cli → Click "Full Nuclear Reset" → See interactive noti
         var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
         return await Task.FromResult(
             CommandHelper.RunConsoleApp(
-                projectPath!, 
-                "launch-profile", 
-                logger, 
+                projectPath!,
+                "launch-profile",
+                logger,
                 "Operation Name",  // Shows in notifications
                 interactionService));
     },
@@ -38,7 +38,7 @@ Navigate to Database-Cli → Click "Full Nuclear Reset" → See interactive noti
 executeCommand: async (c) =>
 {
     var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-    
+
     if (interactionService.IsAvailable)
     {
         var confirmation = await interactionService.PromptConfirmationAsync(
@@ -58,7 +58,7 @@ executeCommand: async (c) =>
             return CommandResults.Failure("User cancelled.");
         }
     }
-    
+
     return await Task.FromResult(CommandHelper.RunConsoleApp(...));
 }
 ```
@@ -69,7 +69,7 @@ executeCommand: async (c) =>
 executeCommand: async (c) =>
 {
     var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-    
+
     // Initial notification
     if (interactionService.IsAvailable)
     {
@@ -81,22 +81,22 @@ executeCommand: async (c) =>
                 Intent = MessageIntent.Information
             });
     }
-    
+
     // Step 1
     var step1 = CommandHelper.RunConsoleApp(
         projectPath!, "profile1", logger, "Step 1/3: First Task", interactionService);
     if (!step1.Success) return CommandResults.Failure($"Failed at step 1: {step1.ErrorMessage}");
-    
+
     // Step 2
     var step2 = CommandHelper.RunConsoleApp(
         projectPath!, "profile2", logger, "Step 2/3: Second Task", interactionService);
     if (!step2.Success) return CommandResults.Failure($"Failed at step 2: {step2.ErrorMessage}");
-    
+
     // Step 3
     var step3 = CommandHelper.RunConsoleApp(
         projectPath!, "profile3", logger, "Step 3/3: Final Task", interactionService);
     if (!step3.Success) return CommandResults.Failure($"Failed at step 3: {step3.ErrorMessage}");
-    
+
     // Success notification
     if (interactionService.IsAvailable)
     {
@@ -108,19 +108,19 @@ executeCommand: async (c) =>
                 Intent = MessageIntent.Success
             });
     }
-    
+
     return CommandResults.Success();
 }
 ```
 
 ## Notification Types
 
-| Intent | Icon | Use Case |
-|--------|------|----------|
-| `MessageIntent.Information` | ℹ️ | Starting operations, informational updates |
-| `MessageIntent.Success` | ✅ | Operation completed successfully |
-| `MessageIntent.Warning` | ⚠️ | Confirmation dialogs, cautionary messages |
-| `MessageIntent.Error` | ❌ | Failed operations with error details |
+| Intent                      | Icon | Use Case                                   |
+| --------------------------- | ---- | ------------------------------------------ |
+| `MessageIntent.Information` | ℹ️   | Starting operations, informational updates |
+| `MessageIntent.Success`     | ✅   | Operation completed successfully           |
+| `MessageIntent.Warning`     | ⚠️   | Confirmation dialogs, cautionary messages  |
+| `MessageIntent.Error`       | ❌   | Failed operations with error details       |
 
 ## Common Checklist
 
@@ -146,26 +146,29 @@ executeCommand: async (c) =>
 
 ## Quick Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| No notifications appear | Must run via `aspire run` (not `dotnet run`) |
-| Confirmation doesn't block | Check `if (!confirmation.Data) return Failure;` |
-| Notifications overlap | Reduce frequency, use markdown in single notification |
-| Wrong status shown | Verify `result.Success` is accurate |
+| Problem                    | Solution                                              |
+| -------------------------- | ----------------------------------------------------- |
+| No notifications appear    | Must run via `aspire run` (not `dotnet run`)          |
+| Confirmation doesn't block | Check `if (!confirmation.Data) return Failure;`       |
+| Notifications overlap      | Reduce frequency, use markdown in single notification |
+| Wrong status shown         | Verify `result.Success` is accurate                   |
 
 ## Examples in Codebase
 
 **Nuclear-Option** (multi-step with confirmation):
+
 - File: `src/services/src/Demoulas.ProfitSharing.AppHost/Program.cs`
 - Lines: ~50-120
 - Shows: Confirmation, progress notifications, final summary
 
 **Drop-Recreate-DB** (single step with confirmation):
+
 - File: `src/services/src/Demoulas.ProfitSharing.AppHost/Program.cs`
 - Lines: ~35-50
 - Shows: Confirmation dialog for destructive operation
 
 **Upgrade-DB** (simple notification):
+
 - File: `src/services/src/Demoulas.ProfitSharing.AppHost/Program.cs`
 - Lines: ~25-35
 - Shows: Basic start/complete notifications

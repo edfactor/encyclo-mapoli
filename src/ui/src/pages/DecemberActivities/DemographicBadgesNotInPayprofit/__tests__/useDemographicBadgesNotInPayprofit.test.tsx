@@ -49,7 +49,8 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       sortParams: { sortBy: "badgeNumber", isSortDescending: true },
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
+      resetPagination: vi.fn(),
+      clearPersistedState: vi.fn()
     } as unknown as GridPaginationState & GridPaginationActions);
 
     const mockTrigger = vi.fn().mockReturnValue({

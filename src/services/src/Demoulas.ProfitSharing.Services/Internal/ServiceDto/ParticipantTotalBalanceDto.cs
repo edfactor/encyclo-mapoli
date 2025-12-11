@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+
 internal class ParticipantTotalBalanceDto
 {
     internal int? Ssn { get; set; }

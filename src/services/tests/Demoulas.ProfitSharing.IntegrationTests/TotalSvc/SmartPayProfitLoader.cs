@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +18,7 @@ public static class SmartPayProfitLoader
     {
         return await dbFactory.UseReadOnlyContext(async ctx =>
         {
-            
+
             var tvbBySsn = await totalService.TotalVestingBalance(ctx, profitYear, asOfDate)
                 .ToDictionaryAsync(y => y.Ssn, y => y);
 

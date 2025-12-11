@@ -8,7 +8,7 @@ import * as yup from "yup";
 import { CAPTIONS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
-import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/YearsEndApi";
+import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/AdhocApi";
 import {
   AdhocBeneficiariesReportRequest,
   adhocBeneficiariesReportResponse,

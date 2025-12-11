@@ -159,8 +159,8 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
           )}
 
           {showSummaryReport && (
-            <ProfitSummary 
-              frozenData={isFrozen} 
+            <ProfitSummary
+              frozenData={isFrozen}
               externalIsGridExpanded={isGridExpanded}
               externalOnToggleExpand={handleToggleGridExpand}
             />

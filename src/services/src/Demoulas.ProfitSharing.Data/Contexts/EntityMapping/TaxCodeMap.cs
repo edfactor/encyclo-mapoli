@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class TaxCodeMap : IEntityTypeConfiguration<TaxCode>
 {
     public void Configure(EntityTypeBuilder<TaxCode> builder)

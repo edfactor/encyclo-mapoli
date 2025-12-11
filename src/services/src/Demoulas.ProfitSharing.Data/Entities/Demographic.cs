@@ -60,6 +60,7 @@ public sealed class Demographic : Member
     public required ContactInfo ContactInfo { get; set; }
     public required Address Address { get; set; }
     public required DateOnly DateOfBirth { get; set; }
+    public DateOnly? DateOfDeath { get; set; }
 
     /// <summary>
     /// Date of full-time status

@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
 /* Ensure the CSV comparision is working correctly */
 public class TolerantCsvComparisonTests

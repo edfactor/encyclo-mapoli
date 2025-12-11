@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -11,7 +6,6 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -30,14 +24,14 @@ public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : Profi
 
     public override void Configure()
     {
-        Get("adhoc-terminated-employees-report-needing-letter/download");
+        Get("terminated-employees-report-needing-letter/download");
         Summary(s =>
         {
             s.Summary = "Returns a text file containing a form letter to be sent to terminated employees who aren't fully vested";
             s.ExampleRequest = TerminatedLettersRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
     }
 
     public override async Task HandleAsync(TerminatedLettersRequest req, CancellationToken ct)

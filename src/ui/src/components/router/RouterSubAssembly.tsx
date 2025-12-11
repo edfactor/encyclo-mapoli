@@ -6,17 +6,31 @@ import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 import { PageLoadingFallback } from "../../components/router/LazyPageLoader";
 const FrozenSummary = lazy(() => import("../../pages/FrozenSummary/FrozenSummary"));
 const MasterInquiry = lazy(() => import("../../pages/InquiriesAndAdjustments/MasterInquiry/MasterInquiry"));
-const DemographicBadgesNotInPayprofit = lazy(() => import("../../pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit"));
-const DistributionsAndForfeitures = lazy(() => import("../../pages/DecemberActivities/DistributionsAndForfeitures/DistributionsAndForfeitures"));
-const DuplicateNamesAndBirthdays = lazy(() => import("../../pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays"));
-const DuplicateSSNsOnDemographics = lazy(() => import("../../pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics"));
-const ManageExecutiveHoursAndDollars = lazy(() => import("../../pages/DecemberActivities/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars"));
-const NegativeEtvaForSSNsOnPayprofit = lazy(() => import("../../pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit"));
+const DemographicBadgesNotInPayprofit = lazy(
+  () => import("../../pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit")
+);
+const DistributionsAndForfeitures = lazy(
+  () => import("../../pages/DecemberActivities/DistributionsAndForfeitures/DistributionsAndForfeitures")
+);
+const DuplicateNamesAndBirthdays = lazy(
+  () => import("../../pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays")
+);
+const DuplicateSSNsOnDemographics = lazy(
+  () => import("../../pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics")
+);
+const ManageExecutiveHoursAndDollars = lazy(
+  () => import("../../pages/DecemberActivities/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars")
+);
+const NegativeEtvaForSSNsOnPayprofit = lazy(
+  () => import("../../pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit")
+);
 const ProfitShareReport = lazy(() => import("../../pages/DecemberActivities/ProfitShareReport/ProfitShareReport"));
 const Termination = lazy(() => import("../../pages/DecemberActivities/Termination/Termination"));
 const UnForfeit = lazy(() => import("../../pages/DecemberActivities/UnForfeit/UnForfeit"));
 const BalanceByYears = lazy(() => import("../../pages/FiscalClose/AgeReports/BalanceByYears/BalanceByYears"));
-const VestedAmountsByAge = lazy(() => import("../../pages/FiscalClose/AgeReports/VestedAmountsByAge/VestedAmountsByAge"));
+const VestedAmountsByAge = lazy(
+  () => import("../../pages/FiscalClose/AgeReports/VestedAmountsByAge/VestedAmountsByAge")
+);
 const EligibleEmployees = lazy(() => import("../../pages/FiscalClose/EligibleEmployees/EligibleEmployees"));
 const Forfeit = lazy(() => import("../../pages/FiscalClose/Forfeit/Forfeit"));
 const Profall = lazy(() => import("../../pages/FiscalClose/Profall/Profall"));
@@ -25,7 +39,9 @@ const NewPSLabels = lazy(() => import("../../pages/FiscalClose/ProfitShareByStor
 const ProfitShareByStore = lazy(() => import("../../pages/FiscalClose/ProfitShareByStore/ProfitShareByStore"));
 const Under21TA = lazy(() => import("../../pages/FiscalClose/ProfitShareByStore/Under21/Under21TA"));
 const Under21Report = lazy(() => import("../../pages/FiscalClose/ProfitShareByStore/Under21Report"));
-const ProfitShareGrossReport = lazy(() => import("../../pages/FiscalClose/ProfitShareGrossReport/ProfitShareGrossReport"));
+const ProfitShareGrossReport = lazy(
+  () => import("../../pages/FiscalClose/ProfitShareGrossReport/ProfitShareGrossReport")
+);
 
 import { useDispatch, useSelector } from "react-redux";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
@@ -47,8 +63,12 @@ import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/rol
 import LandingPage from "./LandingPage";
 const YTDWagesLive = lazy(() => import("../../pages/DecemberActivities/YTDWagesExtractLive/YTDWagesLive"));
 const BalanceByAge = lazy(() => import("../../pages/FiscalClose/AgeReports/BalanceByAge/BalanceByAge"));
-const ContributionsByAge = lazy(() => import("../../pages/FiscalClose/AgeReports/ContributionsByAge/ContributionsByAge"));
-const DistributionByAge = lazy(() => import("../../pages/FiscalClose/AgeReports/DistributionsByAge/DistributionsByAge"));
+const ContributionsByAge = lazy(
+  () => import("../../pages/FiscalClose/AgeReports/ContributionsByAge/ContributionsByAge")
+);
+const DistributionByAge = lazy(
+  () => import("../../pages/FiscalClose/AgeReports/DistributionsByAge/DistributionsByAge")
+);
 const ForfeituresByAge = lazy(() => import("../../pages/FiscalClose/AgeReports/ForfeituresByAge/ForfeituresByAge"));
 const ProfitShareEditUpdate = lazy(() => import("../../pages/FiscalClose/ProfitShareEditUpdate/ProfitShareEditUpdate"));
 const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDWages"));
@@ -60,8 +80,12 @@ const AuditSearch = lazy(() => import("@/pages/ITOperations/AuditSearch/AuditSea
 const DistributionInquiry = lazy(() => import("../../pages//Distributions/DistributionInquiry/DistributionInquiry"));
 const EditDistribution = lazy(() => import("../../pages//Distributions/EditDistribution/EditDistribution"));
 const BeneficiaryInquiry = lazy(() => import("../../pages/Beneficiaries/BeneficiaryInquiry"));
-const ForfeituresAdjustment = lazy(() => import("../../pages/DecemberActivities/ForfeituresAdjustment/ForfeituresAdjustment"));
-const MilitaryContribution = lazy(() => import("../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution"));
+const ForfeituresAdjustment = lazy(
+  () => import("../../pages/DecemberActivities/ForfeituresAdjustment/ForfeituresAdjustment")
+);
+const MilitaryContribution = lazy(
+  () => import("../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution")
+);
 const AddDistribution = lazy(() => import("../../pages/Distributions/AddDistribution/AddDistribution"));
 const ViewDistribution = lazy(() => import("../../pages/Distributions/ViewDistribution/ViewDistribution"));
 const PAY426N = lazy(() => import("../../pages/FiscalClose/PAY426Reports/PAY426N/PAY426N"));
@@ -248,98 +272,222 @@ const RouterSubAssembly: React.FC = () => {
                 />
                 <Route
                   path={ROUTES.BENEFICIARY_INQUIRY}
-                  element={<Suspense fallback={<PageLoadingFallback />}><BeneficiaryInquiry /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <BeneficiaryInquiry />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.DISTRIBUTIONS_INQUIRY}
-                  element={<Suspense fallback={<PageLoadingFallback />}><DistributionInquiry /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <DistributionInquiry />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={`${ROUTES.VIEW_DISTRIBUTION}/:memberId/:memberType`}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ViewDistribution /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ViewDistribution />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={`${ROUTES.ADD_DISTRIBUTION}/:memberId/:memberType`}
-                  element={<Suspense fallback={<PageLoadingFallback />}><AddDistribution /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <AddDistribution />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={`${ROUTES.EDIT_DISTRIBUTION}/:memberId/:memberType`}
-                  element={<Suspense fallback={<PageLoadingFallback />}><EditDistribution /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <EditDistribution />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.PAY_BEN_REPORT}
-                  element={<Suspense fallback={<PageLoadingFallback />}><PayBenReport /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <PayBenReport />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.PAY_BE_NEXT}
-                  element={<Suspense fallback={<PageLoadingFallback />}><PayBeNext /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <PayBeNext />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.DEMOGRAPHIC_BADGES}
-                  element={<Suspense fallback={<PageLoadingFallback />}><DemographicBadgesNotInPayprofit /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <DemographicBadgesNotInPayprofit />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.DUPLICATE_SSNS}
-                  element={<Suspense fallback={<PageLoadingFallback />}><DuplicateSSNsOnDemographics /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <DuplicateSSNsOnDemographics />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.NEGATIVE_ETVA}
-                  element={<Suspense fallback={<PageLoadingFallback />}><NegativeEtvaForSSNsOnPayprofit /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <NegativeEtvaForSSNsOnPayprofit />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.DUPLICATE_NAMES}
-                  element={<Suspense fallback={<PageLoadingFallback />}><DuplicateNamesAndBirthdays /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <DuplicateNamesAndBirthdays />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.REHIRE_FORFEITURES}
-                  element={<Suspense fallback={<PageLoadingFallback />}><UnForfeit /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <UnForfeit />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
-                  element={<Suspense fallback={<PageLoadingFallback />}><DistributionsAndForfeitures /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <DistributionsAndForfeitures />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.MANAGE_EXECUTIVE_HOURS}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ManageExecutiveHoursAndDollars /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ManageExecutiveHoursAndDollars />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.ELIGIBLE_EMPLOYEES}
-                  element={<Suspense fallback={<PageLoadingFallback />}><EligibleEmployees /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <EligibleEmployees />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.YTD_WAGES_EXTRACT}
-                  element={<Suspense fallback={<PageLoadingFallback />}><YTDWages /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <YTDWages />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.YTD_WAGES_EXTRACT_LIVE}
-                  element={<Suspense fallback={<PageLoadingFallback />}><YTDWagesLive /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <YTDWagesLive />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={`${ROUTES.MASTER_INQUIRY}/:badgeNumber?`}
-                  element={<Suspense fallback={<PageLoadingFallback />}><MasterInquiry /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <MasterInquiry />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={`${ROUTES.ADJUSTMENTS}`}
-                  element={<Suspense fallback={<PageLoadingFallback />}><Adjustments /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <Adjustments />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.DISTRIBUTIONS_BY_AGE}
-                  element={<Suspense fallback={<PageLoadingFallback />}><DistributionByAge /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <DistributionByAge />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.CONTRIBUTIONS_BY_AGE}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ContributionsByAge /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ContributionsByAge />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.FORFEITURES_BY_AGE}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ForfeituresByAge /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ForfeituresByAge />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.BALANCE_BY_AGE}
-                  element={<Suspense fallback={<PageLoadingFallback />}><BalanceByAge /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <BalanceByAge />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.FROZEN_SUMMARY}
-                  element={<Suspense fallback={<PageLoadingFallback />}><FrozenSummary /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <FrozenSummary />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.BALANCE_BY_YEARS}
-                  element={<Suspense fallback={<PageLoadingFallback />}><BalanceByYears /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <BalanceByYears />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.VESTED_AMOUNTS_BY_AGE}
-                  element={<Suspense fallback={<PageLoadingFallback />}><VestedAmountsByAge /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <VestedAmountsByAge />
+                    </Suspense>
+                  }></Route>
 
                 <Route
                   path={ROUTES.PROF_TERM}
-                  element={<Suspense fallback={<PageLoadingFallback />}><Termination /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <Termination />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.MILITARY_CONTRIBUTION}
-                  element={<Suspense fallback={<PageLoadingFallback />}><MilitaryContribution /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <MilitaryContribution />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_REPORT}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ProfitShareReport /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ProfitShareReport />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path="forfeit/:badgeNumber?"
-                  element={<Suspense fallback={<PageLoadingFallback />}><Forfeit /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <Forfeit />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.FORFEITURES_ADJUSTMENT}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ForfeituresAdjustment /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ForfeituresAdjustment />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.FISCAL_CLOSE}
                   element={<></>}></Route>
@@ -357,41 +505,81 @@ const RouterSubAssembly: React.FC = () => {
                   element={<ProfitShareGrossReport />}></Route>
                 <Route
                   path={ROUTES.PAY450_SUMMARY}
-                  element={<Suspense fallback={<PageLoadingFallback />}><PayMasterUpdateSummary /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <PayMasterUpdateSummary />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.PROF_CTRLSHEET}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ProfitSharingControlSheet /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ProfitSharingControlSheet />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_BY_STORE}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ProfitShareByStore /></Suspense>}></Route>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ProfitShareByStore />
+                    </Suspense>
+                  }></Route>
                 <Route
                   path={ROUTES.UNDER_21_REPORT}
-                  element={<Suspense fallback={<PageLoadingFallback />}><Under21Report /></Suspense>}>
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <Under21Report />
+                    </Suspense>
+                  }>
                   {" "}
                 </Route>
                 <Route
                   path={ROUTES.PAY426_SUMMARY}
-                  element={<Suspense fallback={<PageLoadingFallback />}><FrozenProfitSummaryWrapper frozenData={true} /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <FrozenProfitSummaryWrapper frozenData={true} />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.QPAY066_UNDER21}
-                  element={<Suspense fallback={<PageLoadingFallback />}><Under21Report /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <Under21Report />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.QPAY066TA_UNDER21}
-                  element={<Suspense fallback={<PageLoadingFallback />}><Under21TA /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <Under21TA />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.QPAY066TA}
-                  element={<Suspense fallback={<PageLoadingFallback />}><QPAY066TA /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <QPAY066TA />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.NEW_PS_LABELS}
-                  element={<Suspense fallback={<PageLoadingFallback />}><NewPSLabels /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <NewPSLabels />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.PROFALL}
-                  element={<Suspense fallback={<PageLoadingFallback />}><Profall /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <Profall />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.DEMO_FREEZE}
@@ -430,40 +618,76 @@ const RouterSubAssembly: React.FC = () => {
                 />
                 <Route
                   path={`${ROUTES.PAY426N_LIVE}/:presetNumber?`}
-                  element={<Suspense fallback={<PageLoadingFallback />}><PAY426N isFrozen={false} /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <PAY426N isFrozen={false} />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={`${ROUTES.PAY426N_FROZEN}/:presetNumber?`}
-                  element={<Suspense fallback={<PageLoadingFallback />}><PAY426N isFrozen={true} /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <PAY426N isFrozen={true} />
+                    </Suspense>
+                  }
                 />
 
                 <Route
                   path={ROUTES.QPAY066_ADHOC}
-                  element={<Suspense fallback={<PageLoadingFallback />}><QPAY066xAdHocReports /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <QPAY066xAdHocReports />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.QPAY066B}
-                  element={<Suspense fallback={<PageLoadingFallback />}><QPAY066B /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <QPAY066B />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.QPAY600}
-                  element={<Suspense fallback={<PageLoadingFallback />}><QPAY600 /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <QPAY600 />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.PRINT_PROFIT_CERTS}
-                  element={<Suspense fallback={<PageLoadingFallback />}><ReprintCertificates /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ReprintCertificates />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.RECENTLY_TERMINATED}
-                  element={<Suspense fallback={<PageLoadingFallback />}><RecentlyTerminated /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <RecentlyTerminated />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.TERMINATED_LETTERS}
-                  element={<Suspense fallback={<PageLoadingFallback />}><TerminatedLetters /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <TerminatedLetters />
+                    </Suspense>
+                  }
                 />
                 <Route
                   path={ROUTES.DIVORCE_REPORT}
-                  element={<Suspense fallback={<PageLoadingFallback />}><AccountHistoryReport /></Suspense>}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <AccountHistoryReport />
+                    </Suspense>
+                  }
                 />
               </Routes>
             </Box>

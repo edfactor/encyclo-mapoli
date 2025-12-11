@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class Beneficiary : Member
 {
     public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)

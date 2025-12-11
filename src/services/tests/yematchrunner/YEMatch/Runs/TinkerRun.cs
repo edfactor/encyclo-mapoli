@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using YEMatch.Activities;
 using YEMatch.ReadyActivities;
@@ -27,22 +27,22 @@ public class TinkerRun : Runnable
     {
         await Run(Specify(
             UpdateNavigation
-/*            
-            IntProfitMasterUpdateTest, // Runs Contributions on Smart
-            
-            // Ensure that YE update went to plan
-            TestProfitDetailSelectedColumns, // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont,enrollment_id
-            TestEtvaNow, // Verify ETVA for 2025
-            TestEtvaPrior,
+        /*            
+                    IntProfitMasterUpdateTest, // Runs Contributions on Smart
 
-            R24_ProfPayMasterUpdate, // Create PAY450 report on READY
-            // R24B_ProfPayMasterUpdatePartTwo // Updates the YEARS, and enrollment on READY, NOP on SMART
+                    // Ensure that YE update went to plan
+                    TestProfitDetailSelectedColumns, // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont,enrollment_id
+                    TestEtvaNow, // Verify ETVA for 2025
+                    TestEtvaPrior,
 
-            S24_ProfPayMasterUpdate, // <--- Writes out update enrollments to the OPEN PROFIT YEAR
-            IntPay450 // Does the FrozenService produce the same report as READY?
-            
-            // S24_ProfPayMasterUpdate // <--- Writes out update enrollments
-*/
+                    R24_ProfPayMasterUpdate, // Create PAY450 report on READY
+                    // R24B_ProfPayMasterUpdatePartTwo // Updates the YEARS, and enrollment on READY, NOP on SMART
+
+                    S24_ProfPayMasterUpdate, // <--- Writes out update enrollments to the OPEN PROFIT YEAR
+                    IntPay450 // Does the FrozenService produce the same report as READY?
+
+                    // S24_ProfPayMasterUpdate // <--- Writes out update enrollments
+        */
         ));
     }
 }

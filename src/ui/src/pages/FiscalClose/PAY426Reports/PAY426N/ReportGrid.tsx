@@ -1,9 +1,10 @@
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { Box, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
+import { useLazyGetProfitSharingReportValidationQuery } from "reduxstore/api/ValidationApi";
 import {
   useLazyGetYearEndProfitSharingReportFrozenQuery,
   useLazyGetYearEndProfitSharingReportLiveQuery
@@ -13,6 +14,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { RootState } from "../../../../reduxstore/store";
+import { ValidationResponse } from "../../../../types/validation/cross-reference-validation";
 import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
 import presets from "./presets";
 
@@ -26,10 +28,10 @@ interface ReportGridProps {
   profitYear: number;
 }
 
-const ReportGrid: React.FC<ReportGridProps> = ({ 
-  params, 
-  onLoadingChange, 
-  isFrozen, 
+const ReportGrid: React.FC<ReportGridProps> = ({
+  params,
+  onLoadingChange,
+  isFrozen,
   searchTrigger,
   isGridExpanded = false,
   onToggleExpand,
@@ -38,6 +40,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({
   const navigate = useNavigate();
   const [triggerLive, { isFetching: isFetchingLive }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const [triggerFrozen, { isFetching: isFetchingFrozen }] = useLazyGetYearEndProfitSharingReportFrozenQuery();
+  const [triggerValidation] = useLazyGetProfitSharingReportValidationQuery();
+  const [validationData, setValidationData] = useState<ValidationResponse | null>(null);
   const trigger = isFrozen ? triggerFrozen : triggerLive;
   const isFetching = isFrozen ? isFetchingFrozen : isFetchingLive;
   const hasToken = useSelector((state: RootState) => !!state.security.token);
@@ -109,6 +113,27 @@ const ReportGrid: React.FC<ReportGridProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trigger, hasToken, profitYear, params, searchTrigger]);
 
+  // Fetch validation checksum data when preset changes (only for presets 1-8)
+  useEffect(() => {
+    if (hasToken && params) {
+      const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
+      const presetNumber = matchingPreset ? Number(matchingPreset.id) : 0;
+
+      if (presetNumber >= 1 && presetNumber <= 8) {
+        triggerValidation({ profitYear, reportSuffix: presetNumber })
+          .unwrap()
+          .then((response) => {
+            setValidationData(response);
+          })
+          .catch(() => {
+            setValidationData(null);
+          });
+      } else {
+        setValidationData(null);
+      }
+    }
+  }, [hasToken, params, profitYear, triggerValidation]);
+
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
       navigate(destination);
@@ -121,8 +146,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({
   };
 
   const columnDefs = useMemo(
-    () => GetProfitSharingReportGridColumns(handleNavigationForButton),
-    [handleNavigationForButton]
+    () => GetProfitSharingReportGridColumns(handleNavigationForButton, validationData),
+    [handleNavigationForButton, validationData]
   );
 
   const gridMaxHeight = useContentAwareGridHeight({
@@ -140,7 +165,9 @@ const ReportGrid: React.FC<ReportGridProps> = ({
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0
+        isNew: data.numberOfNewEmployees || 0,
+        // Flag to identify pinned total row for cell renderers
+        _isPinnedTotal: true
       },
       {
         fullName: "No Wages",

@@ -1,11 +1,11 @@
-using System.ComponentModel;
-using Demoulas.Common.Contracts.Interfaces;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interceptors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Data.Interceptors;
 
@@ -226,7 +226,10 @@ public sealed class AuditSaveChangesInterceptorHashTests
             .Options;
 
         var config = new DataConfig { EnableAudit = true };
-        var interceptor = new AuditSaveChangesInterceptor(config, null);
+        var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+        // HttpContext can be null for unit tests (no HTTP context available in interceptor)
+        mockHttpContextAccessor.Setup(h => h.HttpContext).Returns((HttpContext?)null);
+        var interceptor = new AuditSaveChangesInterceptor(config, null, mockHttpContextAccessor.Object);
 
         await using var context = new TestDbContext(options, interceptor);
 

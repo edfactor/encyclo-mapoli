@@ -2,6 +2,7 @@
 
 
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+
 public record AddressItem
 {
     [JsonPropertyName("AddressLine1")]

@@ -1,10 +1,9 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
-using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Contracts.Response;
 

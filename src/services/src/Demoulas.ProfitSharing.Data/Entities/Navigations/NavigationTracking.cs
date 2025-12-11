@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+
 public class NavigationTracking
 {
     public int Id { get; set; }

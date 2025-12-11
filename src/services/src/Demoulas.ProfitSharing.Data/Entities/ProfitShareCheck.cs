@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
+
 public class ProfitShareCheck
 {
     public int Id { get; set; }

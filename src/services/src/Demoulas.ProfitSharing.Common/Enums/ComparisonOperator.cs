@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Enums;
+﻿namespace Demoulas.ProfitSharing.Common.Enums;
 
 /// <summary>
 /// Defines comparison operators for filtering numeric values.

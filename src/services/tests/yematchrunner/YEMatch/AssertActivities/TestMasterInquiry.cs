@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
@@ -114,7 +114,7 @@ public class TestMasterInquiry : BaseSqlActivity
         decimal outCurrentBal = (decimal)employeeDetails.CurrentPSAmount!;
         decimal outVestingPct = employeeDetails.PercentageVested;
         decimal outVestingAmt = (decimal)employeeDetails.CurrentVestedAmount!;
-//        bool outContLastYear = employeeDetails.ContributionsLastYear;
+        //        bool outContLastYear = employeeDetails.ContributionsLastYear;
         decimal outEtva = employeeDetails.CurrentEtva;
         string outErrMesg = string.Join(",", employeeDetails.Missives);
 

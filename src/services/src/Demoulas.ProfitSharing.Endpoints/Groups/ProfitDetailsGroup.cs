@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Api.Groups;
+﻿using Demoulas.Common.Api.Groups;
 using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
+
 public sealed class ProfitDetailsGroup : GroupBase
 {
     protected override string RouteName => "ProfitDetails";

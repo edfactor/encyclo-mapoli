@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -40,7 +35,7 @@ public sealed class RetiredEmployeesWithBalanceActivityEndpoint : EndpointWithCs
             s.Summary = "QPAY066W: Breakdown retired managers and associates for all stores who have had balance activity";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
 

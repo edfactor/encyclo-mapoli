@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class ContactInfo
 {
     public string? FullName { get; set; }

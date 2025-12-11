@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Demographics;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Demographics;
 
 /// <summary>
 /// Request to merge profit details from a source demographic to a target demographic

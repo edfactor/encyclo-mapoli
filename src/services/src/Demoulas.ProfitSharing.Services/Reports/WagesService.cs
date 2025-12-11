@@ -1,5 +1,5 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
+
 public class WagesService : IWagesService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;

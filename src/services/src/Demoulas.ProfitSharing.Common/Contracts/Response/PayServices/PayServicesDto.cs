@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.PayServices;
+
 public class PayServicesDto
 {
     public int Employees { get; set; } = 0;

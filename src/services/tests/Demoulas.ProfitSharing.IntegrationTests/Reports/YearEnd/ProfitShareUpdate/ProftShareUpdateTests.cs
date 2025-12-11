@@ -1,6 +1,5 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -242,5 +241,5 @@ public class ProfitShareUpdateTests : PristineBaseTest
         using Process? process = Process.Start(startInfo);
         process?.WaitForExit();
     }
-    
+
 }

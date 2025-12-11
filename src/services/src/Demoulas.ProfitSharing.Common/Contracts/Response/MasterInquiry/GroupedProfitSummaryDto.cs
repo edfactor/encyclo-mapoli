@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
+
 public sealed record GroupedProfitSummaryDto : IProfitYearRequest
 {
     public short ProfitYear { get; set; }

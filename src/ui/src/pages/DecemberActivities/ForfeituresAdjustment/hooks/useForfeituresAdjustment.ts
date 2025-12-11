@@ -11,7 +11,7 @@ import {
   useLazyGetProfitMasterInquiryMemberDetailsQuery,
   useLazyGetProfitMasterInquiryMemberQuery
 } from "../../../../reduxstore/api/InquiryApi";
-import { useLazyGetForfeitureAdjustmentsQuery } from "../../../../reduxstore/api/YearsEndApi";
+import { useLazyGetForfeitureAdjustmentsQuery } from "../../../../reduxstore/api/AdhocApi";
 import { MasterInquiryResponseDto } from "../../../../types/master-inquiry/master-inquiry";
 import {
   ForfeitureAdjustmentSearchParams,

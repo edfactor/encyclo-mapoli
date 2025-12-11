@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import * as useLazyGetRecentlyTerminatedReportQuery from "reduxstore/api/YearsEndApi";
+import * as useLazyGetRecentlyTerminatedReportQuery from "reduxstore/api/AdhocApi";
 import { RecentlyTerminatedDetail } from "reduxstore/types";
 import type { RecentlyTerminatedResponse } from "../../../../../types/reports/recent-termination";
 import { Paged } from "smart-ui-library";

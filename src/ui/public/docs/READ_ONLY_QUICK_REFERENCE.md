@@ -3,6 +3,7 @@
 ## 🚀 Quick Start
 
 ### 1. Basic Implementation (3 steps)
+
 ```typescript
 // Step 1: Import the hook
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
@@ -31,14 +32,16 @@ return saveButton;
 ## 📋 Checklist
 
 ### Implementation Checklist
+
 - [ ] Import `useReadOnlyNavigation` hook
-- [ ] Call hook: `const isReadOnly = useReadOnlyNavigation();`  
+- [ ] Call hook: `const isReadOnly = useReadOnlyNavigation();`
 - [ ] Disable button: `disabled={isReadOnly}`
 - [ ] Disable click: `onClick={isReadOnly ? undefined : handler}`
 - [ ] Wrap in tooltip: `<Tooltip><span>{button}</span></Tooltip>`
 - [ ] Use standard message: "You are in read-only mode and cannot [action]."
 
-### Testing Checklist  
+### Testing Checklist
+
 - [ ] Test with ITDEVOPS role (should be read-only)
 - [ ] Test with AUDITOR role (should be read-only)
 - [ ] Test with normal user (should be editable)
@@ -49,18 +52,19 @@ return saveButton;
 ## 🎨 Common Patterns
 
 ### Simple Button
+
 ```typescript
 const MyButton = ({ onAction }) => {
   const isReadOnly = useReadOnlyNavigation();
-  
+
   const button = (
-    <Button 
+    <Button
       disabled={isReadOnly}
       onClick={isReadOnly ? undefined : onAction}>
       Action
     </Button>
   );
-  
+
   return isReadOnly ? (
     <Tooltip title="You are in read-only mode and cannot perform this action.">
       <span>{button}</span>
@@ -70,10 +74,11 @@ const MyButton = ({ onAction }) => {
 ```
 
 ### Modal/Dialog Trigger
+
 ```typescript
 const AddButton = ({ onOpenModal }) => {
   const isReadOnly = useReadOnlyNavigation();
-  
+
   return isReadOnly ? (
     <Tooltip title="You are in read-only mode and cannot add items.">
       <span>
@@ -84,34 +89,36 @@ const AddButton = ({ onOpenModal }) => {
     </Tooltip>
   ) : (
     <Button onClick={onOpenModal} startIcon={<AddOutlined />}>
-      Add Item  
+      Add Item
     </Button>
   );
 };
 ```
 
 ### Conditional Rendering
+
 ```typescript
 const ActionComponent = () => {
   const isReadOnly = useReadOnlyNavigation();
-  
+
   const handleAction = () => {
     if (isReadOnly) return; // Extra safety check
     // Perform action
   };
-  
+
   // Component implementation...
 };
 ```
 
 ### Passing to Child Components
+
 ```typescript
 // Parent component
 const ParentComponent = () => {
   const isReadOnly = useReadOnlyNavigation();
-  
+
   return (
-    <ChildComponent 
+    <ChildComponent
       data={data}
       onSave={handleSave}
       isReadOnly={isReadOnly}  // Pass down
@@ -134,6 +141,7 @@ const ChildComponent = ({ data, onSave, isReadOnly = false }: ChildProps) => {
 ## 💬 Standard Messages
 
 ### Button Actions
+
 - **Save**: "You are in read-only mode and cannot save changes."
 - **Add**: "You are in read-only mode and cannot add [items]."
 - **Edit**: "You are in read-only mode and cannot edit [items]."
@@ -141,10 +149,12 @@ const ChildComponent = ({ data, onSave, isReadOnly = false }: ChildProps) => {
 - **Update**: "You are in read-only mode and cannot update [items]."
 
 ### Bulk Operations
+
 - **Bulk Save**: "You are in read-only mode and cannot perform bulk operations."
 - **Bulk Add**: "You are in read-only mode and cannot add multiple [items]."
 
 ### Specific Actions
+
 - **Add Executive**: "You are in read-only mode and cannot add executives."
 - **Add Forfeiture**: "You are in read-only mode and cannot add forfeitures."
 - **Military Contribution**: "You are in read-only mode and cannot add military contributions."
@@ -152,14 +162,16 @@ const ChildComponent = ({ data, onSave, isReadOnly = false }: ChildProps) => {
 ## ⚠️ Common Mistakes
 
 ### ❌ Wrong - Missing span wrapper
+
 ```typescript
 // Tooltip won't work on disabled Material-UI button
 <Tooltip title="Message">
-  <Button disabled>Action</Button>  
+  <Button disabled>Action</Button>
 </Tooltip>
 ```
 
 ### ✅ Correct - With span wrapper
+
 ```typescript
 <Tooltip title="Message">
   <span>
@@ -169,6 +181,7 @@ const ChildComponent = ({ data, onSave, isReadOnly = false }: ChildProps) => {
 ```
 
 ### ❌ Wrong - Click handler still active
+
 ```typescript
 <Button disabled={isReadOnly} onClick={handleAction}>
   Action
@@ -176,15 +189,17 @@ const ChildComponent = ({ data, onSave, isReadOnly = false }: ChildProps) => {
 ```
 
 ### ✅ Correct - Click handler disabled
+
 ```typescript
-<Button 
-  disabled={isReadOnly} 
+<Button
+  disabled={isReadOnly}
   onClick={isReadOnly ? undefined : handleAction}>
-  Action  
+  Action
 </Button>
 ```
 
 ### ❌ Wrong - Disabling search/filter
+
 ```typescript
 // Don't disable viewing functionality
 <TextField disabled={isReadOnly} />
@@ -192,6 +207,7 @@ const ChildComponent = ({ data, onSave, isReadOnly = false }: ChildProps) => {
 ```
 
 ### ✅ Correct - Only disable modifications
+
 ```typescript
 // Keep search/filter active
 <TextField value={searchTerm} onChange={setSearchTerm} />
@@ -203,20 +219,24 @@ const ChildComponent = ({ data, onSave, isReadOnly = false }: ChildProps) => {
 ## 🔧 Troubleshooting
 
 ### Hook not working?
+
 1. Check import path: `"../../hooks/useReadOnlyNavigation"`
 2. Verify hook is called inside component function
 3. Check navigation API response in browser DevTools
 
 ### Tooltip not appearing?
+
 1. Ensure button is wrapped in `<span>` when disabled
 2. Import `Tooltip` from `@mui/material`
 3. Check that `title` prop has content
 
 ### Button still clickable?
+
 1. Set `onClick={isReadOnly ? undefined : handler}`
 2. Add safety check in handler: `if (isReadOnly) return;`
 
 ### Inconsistent behavior?
+
 1. Verify user role in NavigationRoles database table
 2. Test with different user accounts
 3. Check browser network tab for API responses
@@ -224,11 +244,13 @@ const ChildComponent = ({ data, onSave, isReadOnly = false }: ChildProps) => {
 ## 📚 File Locations
 
 ### Hook Location
+
 ```
 src/ui/src/hooks/useReadOnlyNavigation.ts
 ```
 
 ### Example Implementations
+
 ```
 src/ui/src/pages/DecemberActivities/UnForfeit/UnForfeitGrid.tsx
 src/ui/src/pages/FiscalClose/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars.tsx
@@ -236,6 +258,7 @@ src/ui/src/pages/ForfeituresAdjustment/ForfeituresAdjustmentPanel.tsx
 ```
 
 ### Backend Service
+
 ```
 src/services/src/Demoulas.ProfitSharing.Navigation/Services/NavigationService.cs
 ```

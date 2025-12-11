@@ -33,6 +33,11 @@ public sealed class AuditEventMap : IEntityTypeConfiguration<AuditEvent>
             .HasColumnName("USER_NAME")
             .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
+        _ = builder.Property(e => e.SessionId)
+            .HasMaxLength(20)
+            .HasColumnName("SESSION_ID");
+
+        _ = builder.HasIndex(e => new { e.SessionId, e.CreatedAt }, "IX_SessionIdCreatedAt");
 
         _ = builder.Property(e => e.CreatedAt)
             .IsRequired()

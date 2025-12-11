@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
+
 public sealed class BeneficiaryArchiveMap : IEntityTypeConfiguration<BeneficiaryArchive>
 {
     public void Configure(EntityTypeBuilder<BeneficiaryArchive> builder)

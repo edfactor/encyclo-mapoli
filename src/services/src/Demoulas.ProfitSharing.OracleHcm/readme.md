@@ -1,6 +1,7 @@
 # Demoulas.ProfitSharing.OracleHcm
 
 ## Overview
+
 This project integrates with Oracle HCM Cloud to synchronize employee and payroll data into the Profit Sharing system. It uses scheduled background jobs to perform full, delta, and payroll synchronizations, leveraging Oracle HCM REST APIs and Atom feeds.
 
 ---
@@ -8,6 +9,7 @@ This project integrates with Oracle HCM Cloud to synchronize employee and payrol
 ## Major Processes & Workflows
 
 ### 1. **Employee Full Sync**
+
 - **Purpose:** Retrieve all employee demographic data from Oracle HCM and queue it for processing.
 - **Workflow:**
     - Scheduled by `EmployeeFullSyncService` (Quartz job).
@@ -18,6 +20,7 @@ This project integrates with Oracle HCM Cloud to synchronize employee and payrol
     - Uses small page sizes (50) to avoid timeouts, but this increases API calls.
 
 ### 2. **Employee Delta Sync**
+
 - **Purpose:** Retrieve only changed employees (new hires, updates, terminations, assignments) since last sync.
 - **Workflow:**
     - Scheduled by `EmployeeDeltaSyncService` (Quartz job).
@@ -27,10 +30,10 @@ This project integrates with Oracle HCM Cloud to synchronize employee and payrol
     - Queues for downstream processing.
 - **Performance/Issues:**
     - Atom feed page size is small (25), leading to many requests.
-    - Feeds are processed sequentially, not in parallel.  
-
+    - Feeds are processed sequentially, not in parallel.
 
 ### 3. **Payroll Sync**
+
 - **Purpose:** Retrieve payroll process results and update profit sharing records.
 - **Workflow:**
     - Scheduled by `EmployeePayrollSyncService` (Quartz job).
@@ -44,7 +47,6 @@ This project integrates with Oracle HCM Cloud to synchronize employee and payrol
 
 ---
 
-
 ## Diagram showing the major processes and their interactions
 
 ![Workload](diagram.png)
@@ -52,6 +54,7 @@ This project integrates with Oracle HCM Cloud to synchronize employee and payrol
 ---
 
 ## See Also
+
 - [Oracle HCM Workers API](https://docs.oracle.com/en/cloud/saas/human-resources/25b/farws/api-workers.html)
 - [Oracle HCM Person Process Results API](https://docs.oracle.com/en/cloud/saas/human-resources/25b/farws/api-person-process-results.html)
 - [Oracle HCM Atom Feeds](https://docs.oracle.com/en/cloud/saas/human-resources/25b/farws/atom-feeds.html)

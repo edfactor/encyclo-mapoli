@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Report;
 
@@ -26,5 +25,5 @@ public enum YearEndProfitSharingReportId : byte
     [Description("< AGE 18 WAGES > 0 (TERMINATED)")]
     TerminatedUnder18WagesGreaterThanZero = 11,
     [Description("EMPLOYEES WITH 0 WAGES, POSITIVE BALANCE ")]
-    EmployeesWithZeroWagesPositiveBalance = 12 
+    EmployeesWithZeroWagesPositiveBalance = 12
 }

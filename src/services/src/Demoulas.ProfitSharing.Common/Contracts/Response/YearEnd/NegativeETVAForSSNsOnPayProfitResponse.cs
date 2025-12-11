@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
 public sealed record NegativeEtvaForSsNsOnPayProfitResponse : IIsExecutive
 {
     public long BadgeNumber { get; set; }

@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+
 public interface IBeneficiaryInquiryService
 {
     Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilter(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken);

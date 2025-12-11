@@ -1,16 +1,12 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Validation;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Validation;
 
 /// <summary>
 /// Request to validate specific fields of a report against archived checksums.
 /// Enables caller-driven validation where API consumers provide the field values
 /// they're currently seeing and want to validate against the archived report.
 /// </summary>
-public sealed class ValidateReportFieldsRequest
+public record class ValidateReportFieldsRequest : ProfitYearRequest
 {
-    /// <summary>
-    /// The profit year of the report to validate.
-    /// </summary>
-    public short ProfitYear { get; set; }
 
     /// <summary>
     /// The type of report to validate (e.g., "YearEndBreakdown", "ExecutiveSummary").

@@ -27,7 +27,8 @@ vi.mock("../hooks/useForfeit", () => ({
       sortParams: { sortBy: "badgeNumber", isSortDescending: false },
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
+      resetPagination: vi.fn(),
+      clearPersistedState: vi.fn()
     },
     executeSearch: mockExecuteSearch,
     handleStatusChange: mockHandleStatusChange,

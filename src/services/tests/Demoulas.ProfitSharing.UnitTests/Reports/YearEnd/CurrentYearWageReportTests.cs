@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -109,7 +109,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         headers.ShouldBe(new[] { "", "", "BADGE", "HOURS YR", "DOLLARS YR" });
 
     }
-    
+
     [Fact(DisplayName = "PS-351: Get current year wages with frozen data (JSON) - Archive mode")]
     public async Task GetResponse_Should_ReturnArchiveReportResponse_WhenCalledWithFrozenData()
     {
@@ -129,12 +129,12 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_SetFrozenHeader_WhenUsingFrozenData()
     {
         // Arrange
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
+
         // Act
         var response = await ApiClient.GETAsync<CurrentYearWagesEndpoint, WagesCurrentYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(
             new WagesCurrentYearRequest { ProfitYear = 2023, UseFrozenData = true });
-        
+
         // Assert
         response.Response.Headers.TryGetValues(DemographicHeaders.Source, out var sourceValues).ShouldBeTrue("X-Demographic-Data-Source header should be present");
         sourceValues!.Single().ShouldBe("Frozen", "Header should indicate frozen data when UseFrozenData is true");
@@ -145,21 +145,21 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     {
         // Arrange
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        
+
         // Act
         var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, WagesCurrentYearRequest, StreamContent>(
             new WagesCurrentYearRequest { ProfitYear = 2023, UseFrozenData = true });
-        
+
         string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
         result.ShouldNotBeNullOrEmpty();
 
         // Assert
         using var reader = new StringReader(result);
         using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
-        
+
         await csv.ReadAsync();  // First row is the date
         await csv.ReadAsync();  // Second row is the report name
-        
+
         string? reportNameLine = csv.GetField(0);
         reportNameLine.ShouldNotBeNull();
         reportNameLine.ShouldContain("Archive"); // CSV report name should include Archive suffix when using frozen data
@@ -170,21 +170,21 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     {
         // Arrange
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        
+
         // Act
         var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, WagesCurrentYearRequest, StreamContent>(
             new WagesCurrentYearRequest { ProfitYear = 2023, UseFrozenData = false });
-        
+
         string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
         result.ShouldNotBeNullOrEmpty();
 
         // Assert
         using var reader = new StringReader(result);
         using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
-        
+
         await csv.ReadAsync();  // First row is the date
         await csv.ReadAsync();  // Second row is the report name
-        
+
         string? reportNameLine = csv.GetField(0);
         reportNameLine.ShouldNotBeNull();
         reportNameLine.ShouldNotContain("Archive"); // CSV report name should not include Archive suffix when using live data

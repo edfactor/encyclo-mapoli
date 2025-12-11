@@ -1,5 +1,4 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 

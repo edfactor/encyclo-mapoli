@@ -116,7 +116,8 @@ vi.mock("../hooks/useForfeituresAdjustment", () => ({
       sortParams: { sortBy: "date", isSortDescending: true },
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
+      resetPagination: vi.fn(),
+      clearPersistedState: vi.fn()
     },
     profitYear: 2024,
     isReadOnly: false,
@@ -236,7 +237,8 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
@@ -286,7 +288,8 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
@@ -335,7 +338,8 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
@@ -385,7 +389,8 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
@@ -435,7 +440,8 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
@@ -487,7 +493,8 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
@@ -540,7 +547,8 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: true,

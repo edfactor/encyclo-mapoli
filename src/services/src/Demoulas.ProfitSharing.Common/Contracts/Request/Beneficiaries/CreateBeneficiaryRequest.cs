@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+
 public sealed record CreateBeneficiaryRequest
 {
     public int BeneficiaryContactId { get; set; }

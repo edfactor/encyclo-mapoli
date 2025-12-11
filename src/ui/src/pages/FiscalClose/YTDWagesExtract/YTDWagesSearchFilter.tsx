@@ -10,7 +10,11 @@ interface YTDWagesSearchFilterProps {
   defaultUseFrozenData?: boolean;
 }
 
-const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ onSearch, isSearching = false, defaultUseFrozenData = true }) => {
+const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({
+  onSearch,
+  isSearching = false,
+  defaultUseFrozenData = true
+}) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const [useFrozenData, setUseFrozenData] = useState(defaultUseFrozenData);
 

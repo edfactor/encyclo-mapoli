@@ -32,7 +32,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       headerName: "Current Hour Year",
       field: "currentHourYear",
       colId: "currentHourYear",
-      maxWidth: 150, 
+      maxWidth: 150
     },
     createDateColumn({
       headerName: "Termination Date",

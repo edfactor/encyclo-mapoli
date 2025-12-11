@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Demographics;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Demographics;
 using FastEndpoints;
 using FluentValidation;
 

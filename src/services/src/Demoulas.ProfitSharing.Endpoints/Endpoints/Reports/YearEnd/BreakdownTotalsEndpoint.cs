@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -34,7 +33,7 @@ public class BreakdownTotalsEndpoint : ProfitSharingEndpoint<BreakdownByStoreReq
             s.Summary = "Breakdown managers and associates totals for requested store";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
     }
 
     public override async Task<Results<Ok<BreakdownByStoreTotals>, NotFound, ProblemHttpResult>> ExecuteAsync(BreakdownByStoreRequest req, CancellationToken ct)

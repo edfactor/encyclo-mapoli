@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common;
+
 public static class ReferenceData
 {
     // Vesting Schedule Percent by year
