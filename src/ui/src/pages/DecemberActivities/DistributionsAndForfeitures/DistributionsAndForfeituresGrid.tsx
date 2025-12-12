@@ -1,5 +1,7 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { CircularProgress, Typography } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { CircularProgress, Grid, IconButton, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
@@ -26,6 +28,8 @@ interface DistributionsAndForfeituresGridSearchProps {
   shouldArchive?: boolean;
   onArchiveHandled?: () => void;
   onLoadingChange?: (isLoading: boolean) => void;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridSearchProps> = ({
@@ -33,7 +37,9 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   setInitialSearchLoaded,
   shouldArchive,
   onArchiveHandled,
-  onLoadingChange
+  onLoadingChange,
+  isGridExpanded = false,
+  onToggleExpand
 }) => {
   const [showStateTaxTooltip, setShowStateTaxTooltip] = useState(false);
   const [showForfeitureTooltip, setShowForfeitureTooltip] = useState(false);
@@ -100,9 +106,10 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       )
     });
 
-  // Use content-aware grid height utility hook
+  // Use content-aware grid height utility hook - updated to use heightPercentage based on expand state
   const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0
+    rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0,
+    heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
 
   const handleStateTaxPopoverOpen = () => {
@@ -258,6 +265,25 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     <>
       {distributionsAndForfeitures?.response && (
         <>
+          <Grid
+            container
+            justifyContent="space-between"
+            alignItems="center"
+            marginBottom={2}>
+            <Grid>
+              <ReportSummary report={distributionsAndForfeitures} />
+            </Grid>
+            <Grid>
+              {onToggleExpand && (
+                <IconButton
+                  onClick={onToggleExpand}
+                  sx={{ zIndex: 1 }}
+                  aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              )}
+            </Grid>
+          </Grid>
           <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2">
             <div className="flex-1">
               <TotalsGrid
@@ -485,7 +511,6 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             )}
           </div>
 
-          {!isFetching && <ReportSummary report={distributionsAndForfeitures} />}
           {isFetching ? (
             <div className="flex flex-col items-center justify-center gap-4 py-16">
               <CircularProgress />
@@ -510,7 +535,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           )}
         </>
       )}
-      {!isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response.results.length > 0 && (
+      {!isGridExpanded && !isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {

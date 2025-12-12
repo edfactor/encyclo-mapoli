@@ -1,8 +1,10 @@
 import { useMemo } from "react";
-import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
-
 import { RefObject } from "react";
 import { RowClassParams } from "ag-grid-community";
+import { Box, Grid, IconButton, Typography } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
@@ -18,6 +20,8 @@ interface YTDWagesGridProps {
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const YTDWagesGrid = ({
@@ -28,7 +32,9 @@ const YTDWagesGrid = ({
   hasResults,
   pagination,
   onPaginationChange,
-  onSortChange
+  onSortChange,
+  isGridExpanded = false,
+  onToggleExpand
 }: YTDWagesGridProps) => {
   // I need to clone the data object, but alter the reportName. I need to keep the year from the end
   // of the existing report name, but add "YTD Wages Extract " to the front.
@@ -64,28 +70,54 @@ const YTDWagesGrid = ({
 
   // Use content-aware grid height utility hook
   const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: clonedData?.response?.results?.length ?? 0
+    rowCount: clonedData?.response?.results?.length ?? 0,
+    heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
 
   return (
     <div className="relative">
       {showData && clonedData?.response && (
         <div ref={innerRef}>
-          <div className="mb-[21px] mt-[37px] flex items-center gap-6 px-6">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Hours:</span>
-              <span>
-                {clonedData.totalHoursCurrentYearWages?.toFixed(2) ?? totalsRow?.hoursCurrentYear.toFixed(2) ?? "0.00"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Income:</span>
-              <span>
-                {numberToCurrency(clonedData.totalIncomeCurrentYearWages ?? totalsRow?.incomeCurrentYear ?? 0)}
-              </span>
-            </div>
-          </div>
-          <ReportSummary report={clonedData} />
+          <Grid
+            container
+            justifyContent="space-between"
+            alignItems="center"
+            marginBottom={2}>
+            <Grid>
+              <Box display="flex" alignItems="center" gap={3}>
+                <Typography variant="h2" sx={{ color: "#0258A5" }}>
+                  {clonedData.reportName || "YTD Wages Extract"}
+                </Typography>
+                {!isGridExpanded && (
+                  <>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography variant="body2" fontWeight="semibold">Total Hours:</Typography>
+                      <Typography variant="body2">
+                        {clonedData.totalHoursCurrentYearWages?.toFixed(2) ?? totalsRow?.hoursCurrentYear.toFixed(2) ?? "0.00"}
+                      </Typography>
+                    </Box>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography variant="body2" fontWeight="semibold">Total Income:</Typography>
+                      <Typography variant="body2">
+                        {numberToCurrency(clonedData.totalIncomeCurrentYearWages ?? totalsRow?.incomeCurrentYear ?? 0)}
+                      </Typography>
+                    </Box>
+                  </>
+                )}
+              </Box>
+            </Grid>
+            <Grid>
+              {onToggleExpand && (
+                <IconButton
+                  onClick={onToggleExpand}
+                  sx={{ zIndex: 1 }}
+                  aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              )}
+            </Grid>
+          </Grid>
+          {!isGridExpanded && <ReportSummary report={clonedData} />}
           <DSMGrid
             preferenceKey={"TERM"}
             isLoading={isLoading}
@@ -105,7 +137,7 @@ const YTDWagesGrid = ({
           />
         </div>
       )}
-      {hasResults && data?.response && (
+      {!isGridExpanded && hasResults && data?.response && (
         <Pagination
           pageNumber={pagination.pageNumber}
           setPageNumber={(value: number) => {
