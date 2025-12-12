@@ -1,4 +1,4 @@
-import { ColDef, IRowNode, ValueFormatterParams } from "ag-grid-community";
+import { ColDef, IRowNode } from "ag-grid-community";
 import { createCountColumn, createCurrencyColumn } from "../../../utils/gridColumnFactory";
 import { PayServicesDto } from "../../../types/reports/payservices";
 
@@ -19,20 +19,17 @@ export function GetAdhocProfLetter73GridColumns(): ColDef<PayServicesDto>[] {
         const numA = nodeA.data?.yearsOfService ?? 0;
         const numB = nodeB.data?.yearsOfService ?? 0;
         return numA - numB;
-      },
-      cellClass: (params: ValueFormatterParams<PayServicesDto>) => {
-        return params.data?._isTotal ? "font-bold" : "";
       }
     },
-    createCountColumn<PayServicesDto>({
+    createCountColumn({
       headerName: "Employees",
       field: "employees"
     }),
-    createCurrencyColumn<PayServicesDto>({
+    createCurrencyColumn({
       headerName: "Total Weekly Pay",
       field: "weeklyPay"
     }),
-    createCurrencyColumn<PayServicesDto>({
+    createCurrencyColumn({
       headerName: "Last Year's Wages",
       field: "yearsWages"
     })
