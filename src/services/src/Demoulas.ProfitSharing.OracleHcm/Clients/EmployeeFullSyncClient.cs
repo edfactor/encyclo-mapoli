@@ -126,7 +126,7 @@ internal sealed class EmployeeFullSyncClient
     private async Task<string> BuildUrl(int offset = 0, long? oracleHcmId = null, CancellationToken cancellationToken = default)
     {
         // Oracle will limit us to 500, but we run the risk of timeout well below that, so we need to be conservative.
-        ushort limit = ushort.Min(100, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(500, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>()
         {
             { "limit", $"{limit}" },
@@ -160,7 +160,7 @@ internal sealed class EmployeeFullSyncClient
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)
     {
         // Per the Oracle Consultants, we need to slow this operation down, or continue to risk 401 errors as a way of handling too many requests.
-        await Task.Delay(new TimeSpan(0, 0, 10), cancellationToken).ConfigureAwait(false);
+        await Task.Delay(new TimeSpan(0, 0, 20), cancellationToken).ConfigureAwait(false);
 
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
