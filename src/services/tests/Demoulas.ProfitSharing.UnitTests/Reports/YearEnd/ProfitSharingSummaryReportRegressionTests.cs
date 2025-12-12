@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -14,6 +13,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 
@@ -863,12 +863,14 @@ public class ProfitSharingSummaryReportRegressionTests
 
         var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());
         var totalService = new TotalService(mockFactory, mockCalendarService.Object, mockEmbeddedSql.Object, demographicReader);
+        ILogger<ProfitSharingSummaryReportService> logger = new Logger<ProfitSharingSummaryReportService>(new LoggerFactory());
 
         return new ProfitSharingSummaryReportService(
             mockFactory,
             mockCalendarService.Object,
             totalService,
-            demographicReader);
+            demographicReader,
+            logger);
     }
 
     #endregion
