@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -252,23 +253,31 @@ internal class PayrollSyncClient
     /// </remarks>
     private async Task<HttpResponseMessage> GetOraclePayrollValue(string url, CancellationToken cancellationToken)
     {
+        await Task.Delay(new TimeSpan(0, 0, 10), cancellationToken).ConfigureAwait(false);
+
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-
-        // Copy default headers from HttpClient to the request message
-        // (SendAsync does NOT automatically add Authorization and other default headers)
-        foreach (var header in _httpClient.DefaultRequestHeaders)
-        {
-            request.Headers.Add(header.Key, header.Value);
-        }
-
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
         if (!response.IsSuccessStatusCode && Debugger.IsAttached)
         {
+            string errorResponse = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            _logger.LogWarning("Oracle HCM API request failed: {ErrorResponse} / {ReasonPhrase}", errorResponse, response.ReasonPhrase);
+
+            // Generate and display cURL command for manual testing
+            string curlCommand = request.GenerateCurlCommand(url);
+
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine();
-            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+            Console.WriteLine("=== API REQUEST FAILED ===");
+            Console.WriteLine(errorResponse);
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=== cURL Command for Postman/Manual Testing ===");
+            Console.WriteLine(curlCommand);
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
+
+            _logger.LogInformation("cURL command for manual testing: {CurlCommand}", curlCommand);
         }
 
         _ = response.EnsureSuccessStatusCode();

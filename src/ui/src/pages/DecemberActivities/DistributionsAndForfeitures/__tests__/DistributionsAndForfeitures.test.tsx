@@ -1,9 +1,23 @@
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
 import DistributionsAndForfeitures from "../DistributionsAndForfeitures";
 import DistributionsAndForfeituresGrid from "../DistributionsAndForfeituresGrid";
 import DistributionsAndForfeituresSearchFilter from "../DistributionsAndForfeituresSearchFilter";
+
+// Create a mock store
+const createMockStore = () => {
+  return configureStore({
+    reducer: {
+      general: () => ({
+        isDrawerOpen: false,
+        isFullscreen: false
+      })
+    }
+  });
+};
 
 // Mock child components
 vi.mock("../DistributionsAndForfeituresSearchFilter", () => ({
@@ -66,44 +80,49 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("DistributionsAndForfeitures", () => {
+  const renderWithProvider = (component: React.ReactElement) => {
+    const store = createMockStore();
+    return render(<Provider store={store}>{component}</Provider>);
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe("Rendering", () => {
     it("should render the page component", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
     });
 
     it("should render page with correct label", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       expect(screen.getByText(/DISTRIBUTIONS AND FORFEITURES/i)).toBeInTheDocument();
     });
 
     it("should render StatusDropdownActionNode", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
     });
 
     it("should render filter accordion", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       expect(screen.getByTestId("accordion")).toBeInTheDocument();
       expect(screen.getByText("Filter")).toBeInTheDocument();
     });
 
     it("should render search filter inside accordion", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       expect(screen.getByTestId("search-filter")).toBeInTheDocument();
     });
 
     it("should render grid component", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       expect(screen.getByTestId("grid")).toBeInTheDocument();
     });
@@ -111,7 +130,7 @@ describe("DistributionsAndForfeitures", () => {
 
   describe("State management", () => {
     it("should initialize with initialSearchLoaded false", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       // Verify grid receives initialSearchLoaded prop
       const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
@@ -120,7 +139,7 @@ describe("DistributionsAndForfeitures", () => {
     });
 
     it("should initialize with isFetching false", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       // Verify search filter receives isFetching prop
       const calls = vi.mocked(DistributionsAndForfeituresSearchFilter).mock.calls;
@@ -131,7 +150,7 @@ describe("DistributionsAndForfeitures", () => {
 
   describe("Search and loading coordination", () => {
     it("should pass setInitialSearchLoaded to search filter", async () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       await waitFor(() => {
         const calls = vi.mocked(DistributionsAndForfeituresSearchFilter).mock.calls;
@@ -142,7 +161,7 @@ describe("DistributionsAndForfeitures", () => {
     });
 
     it("should pass setInitialSearchLoaded to grid", async () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       await waitFor(() => {
         const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
@@ -153,7 +172,7 @@ describe("DistributionsAndForfeitures", () => {
     });
 
     it("should pass onLoadingChange callback to grid", async () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       await waitFor(() => {
         const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
@@ -167,7 +186,7 @@ describe("DistributionsAndForfeitures", () => {
   describe("Loading state propagation", () => {
     it("should update isFetching when grid calls onLoadingChange", async () => {
       const user = userEvent.setup();
-      const { rerender } = render(<DistributionsAndForfeitures />);
+      const { rerender } = renderWithProvider(<DistributionsAndForfeitures />);
 
       const startLoadingBtn = screen.getByTestId("start-loading");
       await act(async () => {
@@ -175,14 +194,14 @@ describe("DistributionsAndForfeitures", () => {
       });
 
       await waitFor(() => {
-        rerender(<DistributionsAndForfeitures />);
+        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
         expect(screen.getByTestId("fetching")).toBeInTheDocument();
       });
     });
 
     it("should clear isFetching when grid signals loading complete", async () => {
       const user = userEvent.setup();
-      const { rerender } = render(<DistributionsAndForfeitures />);
+      const { rerender } = renderWithProvider(<DistributionsAndForfeitures />);
 
       const startLoadingBtn = screen.getByTestId("start-loading");
       await act(async () => {
@@ -190,7 +209,7 @@ describe("DistributionsAndForfeitures", () => {
       });
 
       await waitFor(() => {
-        rerender(<DistributionsAndForfeitures />);
+        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
         expect(screen.getByTestId("fetching")).toBeInTheDocument();
       });
 
@@ -200,7 +219,7 @@ describe("DistributionsAndForfeitures", () => {
       });
 
       await waitFor(() => {
-        rerender(<DistributionsAndForfeitures />);
+        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
         expect(screen.queryByTestId("fetching")).not.toBeInTheDocument();
       });
     });
@@ -208,7 +227,7 @@ describe("DistributionsAndForfeitures", () => {
 
   describe("Component integration", () => {
     it("should render all major sections", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
       expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
@@ -218,7 +237,7 @@ describe("DistributionsAndForfeitures", () => {
     });
 
     it("should maintain proper component hierarchy", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       const page = screen.getByTestId("page");
       const accordion = screen.getByTestId("accordion");
@@ -236,7 +255,7 @@ describe("DistributionsAndForfeitures", () => {
   describe("Search button interaction", () => {
     it("should update initialSearchLoaded when search is triggered", async () => {
       const user = userEvent.setup();
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       const searchBtn = screen.getByTestId("search-btn");
       await act(async () => {
@@ -255,14 +274,14 @@ describe("DistributionsAndForfeitures", () => {
 
   describe("Responsive layout", () => {
     it("should render with Material-UI Grid layout", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
       expect(screen.getByTestId("accordion")).toBeInTheDocument();
     });
 
     it("should have proper spacing and structure", () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       const page = screen.getByTestId("page");
       expect(page).toBeInTheDocument();
@@ -272,7 +291,7 @@ describe("DistributionsAndForfeitures", () => {
 
   describe("Edge cases", () => {
     it("should handle rapid search clicks", async () => {
-      render(<DistributionsAndForfeitures />);
+      renderWithProvider(<DistributionsAndForfeitures />);
 
       const searchBtn = screen.getByTestId("search-btn");
 
@@ -289,7 +308,7 @@ describe("DistributionsAndForfeitures", () => {
     });
 
     it("should handle loading state transitions", async () => {
-      const { rerender } = render(<DistributionsAndForfeitures />);
+      const { rerender } = renderWithProvider(<DistributionsAndForfeitures />);
 
       const startLoadingBtn = screen.getByTestId("start-loading");
       const stopLoadingBtn = screen.getByTestId("stop-loading");
@@ -299,21 +318,21 @@ describe("DistributionsAndForfeitures", () => {
         startLoadingBtn.click();
       });
       await waitFor(() => {
-        rerender(<DistributionsAndForfeitures />);
+        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
       });
 
       await act(async () => {
         stopLoadingBtn.click();
       });
       await waitFor(() => {
-        rerender(<DistributionsAndForfeitures />);
+        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
       });
 
       await act(async () => {
         startLoadingBtn.click();
       });
       await waitFor(() => {
-        rerender(<DistributionsAndForfeitures />);
+        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
       });
 
       expect(screen.getByTestId("grid")).toBeInTheDocument();

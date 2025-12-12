@@ -49,7 +49,7 @@ public sealed class DemographicsService : IDemographicsServiceInternal
         _fakeSsnService = fakeSsnService;
     }
 
-    public async Task AddDemographicsStreamAsync(DemographicsRequest[] employees, byte batchSize = byte.MaxValue, CancellationToken cancellationToken = default)
+    public async Task AddDemographicsStreamAsync(DemographicsRequest[] employees, ushort batchSize = byte.MaxValue, CancellationToken cancellationToken = default)
     {
         DemographicsIngestMetrics.EnsureInitialized();
         long startTicks = Environment.TickCount64;

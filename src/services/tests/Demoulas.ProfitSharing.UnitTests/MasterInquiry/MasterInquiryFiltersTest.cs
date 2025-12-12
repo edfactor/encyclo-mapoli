@@ -292,7 +292,7 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
                 Voids = true,
                 ContributionAmount = 1000.00m,
                 Skip = 0,
-                Take = 10
+                Take = 5
             };
 
             var requestPage2 = new MasterInquiryMemberDetailsRequest
@@ -303,7 +303,7 @@ public class MasterInquiryFiltersTest : ApiTestBase<Program>
                 Voids = true,
                 ContributionAmount = 1000.00m,
                 Skip = 10,
-                Take = 10
+                Take = 5
             };
 
             // Act

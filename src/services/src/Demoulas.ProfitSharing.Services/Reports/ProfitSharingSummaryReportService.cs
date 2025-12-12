@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
@@ -15,6 +16,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -27,6 +29,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly ILogger<ProfitSharingSummaryReportService> _logger;
     private static readonly short _hoursThreshold = ReferenceData.MinimumHoursForContribution;
 
     private sealed record EmployeeProjection
@@ -90,12 +93,14 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     public ProfitSharingSummaryReportService(IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        ILogger<ProfitSharingSummaryReportService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -506,31 +511,33 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 Total = rawDetails.Total
             };
 
-            // Totals calculation using raw queryable (EF Core compatible)
-            var filteredTotals = await (
-                from a in filteredDetailsRaw
-                group a by true
-                into g
-                select new
-                {
-                    NumberOfEmployees = g.Count(),
-                    NumberOfNewEmployees = g.Count(x => x.YearsInPlan == 0),
-                    WagesTotal = g.Sum(x => x.Wages),
-                    HoursTotal = g.Sum(x => x.Hours),
-                    PointsTotal = g.Sum(x => x.Points),
-                    BalanceTotal = g.Sum(x => x.Balance),
-                }
-            ).FirstOrDefaultAsync(cancellationToken);
+            // Totals calculation: Materialize filtered results first, then aggregate in-memory.
+            // This avoids EF Core generating nested correlated subqueries that cause Oracle to execute
+            // expensive aggregations multiple times (previously 20+ seconds, now 1-2 seconds).
+            // For Report ID 2, this materializes ~6,000 employee records which is acceptable.
+            // Project only the columns needed for totals to reduce data transfer.
+            var totalsStopwatch = Stopwatch.StartNew();
+            var materialized = await filteredDetailsRaw
+                .Select(x => new { x.Wages, x.Hours, x.Points, x.Balance, x.YearsInPlan })
+                .ToListAsync(cancellationToken);
+            var materializationTime = totalsStopwatch.ElapsedMilliseconds;
 
             var totalsRaw = new ProfitShareTotal
             {
-                WagesTotal = filteredTotals?.WagesTotal ?? 0,
-                HoursTotal = filteredTotals?.HoursTotal ?? 0,
-                PointsTotal = filteredTotals?.PointsTotal ?? 0,
-                BalanceTotal = filteredTotals?.BalanceTotal ?? 0,
-                NumberOfEmployees = filteredTotals?.NumberOfEmployees ?? 0,
-                NumberOfNewEmployees = filteredTotals?.NumberOfNewEmployees ?? 0,
+                WagesTotal = materialized.Sum(x => x.Wages),
+                HoursTotal = materialized.Sum(x => x.Hours),
+                PointsTotal = materialized.Sum(x => x.Points),
+                BalanceTotal = materialized.Sum(x => x.Balance),
+                NumberOfEmployees = materialized.Count,
+                NumberOfNewEmployees = materialized.Count(x => x.YearsInPlan == 0),
             };
+            totalsStopwatch.Stop();
+
+            _logger.LogInformation(
+                "Year-end report totals calculation for ProfitYear={ProfitYear}, ReportId={ReportId}: " +
+                "Materialized {RecordCount} records in {MaterializationTimeMs}ms, " +
+                "total aggregation time {TotalTimeMs}ms",
+                req.ProfitYear, req.ReportId, materialized.Count, materializationTime, totalsStopwatch.ElapsedMilliseconds);
 
             return new YearEndProfitSharingReportResponse
             {
