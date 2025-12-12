@@ -1,15 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Paged } from "smart-ui-library";
-import { BeneficiaryDto, BeneficiaryKindRequestDto } from "../types";
+import { BeneficiaryDto } from "../types";
 
 export interface BeneficiaryState {
   beneficiaryList: Paged<BeneficiaryDto> | null;
-  beneficiaryRequest: BeneficiaryKindRequestDto | null;
   error: string | null;
 }
 const initialState: BeneficiaryState = {
   beneficiaryList: null,
-  beneficiaryRequest: null,
   error: null
 };
 
@@ -25,12 +23,6 @@ export const beneficiarySlice = createSlice({
         state.error = "Failed to fetch  beneficiaries";
       }
     },
-    setBeneficiaryRequest: (state, action: PayloadAction<BeneficiaryKindRequestDto | null>) => {
-      if (action.payload) {
-        state.beneficiaryRequest = action.payload;
-        state.error = null;
-      }
-    },
     setBeneficiaryError: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
       state.beneficiaryList = null;
@@ -38,6 +30,6 @@ export const beneficiarySlice = createSlice({
   }
 });
 
-export const { setBeneficiary, setBeneficiaryError, setBeneficiaryRequest } = beneficiarySlice.actions;
+export const { setBeneficiary, setBeneficiaryError } = beneficiarySlice.actions;
 
 export default beneficiarySlice.reducer;

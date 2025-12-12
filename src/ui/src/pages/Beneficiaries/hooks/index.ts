@@ -13,6 +13,3 @@ export type { UseBeneficiaryRelationshipDataReturn } from "./useBeneficiaryRelat
 
 export { useBeneficiaryPercentageUpdate } from "./useBeneficiaryPercentageUpdate";
 export type { UseBeneficiaryPercentageUpdateReturn } from "./useBeneficiaryPercentageUpdate";
-
-export { useBeneficiaryKinds } from "./useBeneficiaryKinds";
-export type { UseBeneficiaryKindsReturn } from "./useBeneficiaryKinds";
