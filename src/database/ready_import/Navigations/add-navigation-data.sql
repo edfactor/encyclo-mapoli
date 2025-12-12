@@ -52,7 +52,7 @@ DECLARE
     FISCAL_CLOSE CONSTANT NUMBER := 8;
     DECEMBER_ACTIVITIES CONSTANT NUMBER := 9;
     
-    -- Third-level under December Activities
+    -- Third-level under December 
     CLEANUP_REPORTS CONSTANT NUMBER := 10;
     -- Third-level under Fiscal Close
     PROF_SHARE_REPORT_BY_AGE CONSTANT NUMBER := 11;
@@ -138,8 +138,7 @@ DECLARE
     MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE CONSTANT NUMBER := 169;
     MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE CONSTANT NUMBER := 170;
     YTD_WAGES_EXTRACT_UNFROZEN CONSTANT NUMBER := 171;
-
-
+    ADHOC_PROF_LETTER73 CONSTANT NUMBER := 172;
 
     --- These are the role IDs from the ROLES table
     SYSTEM_ADMINISTRATOR CONSTANT NUMBER := 1;
@@ -273,6 +272,8 @@ BEGIN
     insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066B, ADHOC_GROUP, 'QPAY066B', '', 'qpay066b', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ADHOC_PROF_LETTER73, ADHOC_GROUP, 'Prof Letter73', '', 'adhoc-prof-letter73', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+
 
 --beneficiary items
     insert_navigation_item(BENEFICIARY_INQUIRY_PAGE, BENEFICIARIES_MENU, 'Beneficiary Inquiry', '', 'beneficiary', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -498,6 +499,8 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADHOC_GROUP, FINANCE_MANAGER); 
     assign_navigation_role(ADHOC_GROUP, DISTRIBUTIONS_CLERK);
 
+    
+
 -- Assign roles for MASTER INQUIRY (Endpoints base -> Navigation.Constants.MasterInquiry; Policy -> CanRunMasterInquiry)
 -- NOTE: MASTER_INQUIRY_PAGE is child of INQUIRIES_GROUP (parent has all these roles checked).
 --       Users with HR_READONLY role will only see this page because INQUIRIES_MENU and
@@ -609,6 +612,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(PROF_SHARE_BY_STORE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROF_SHARE_BY_STORE, FINANCE_MANAGER);
     assign_navigation_role(QPAY066_UNDR21, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADHOC_PROF_LETTER73, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(QPAY066_UNDR21, FINANCE_MANAGER);
     assign_navigation_role(QPAY066TA_UNDR21, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(QPAY066TA_UNDR21, FINANCE_MANAGER);

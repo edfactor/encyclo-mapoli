@@ -75,12 +75,14 @@ export const ROUTES = {
   AUDIT_SEARCH: "audit-search",
   DEV_DEBUG: "dev-debug",
   DOCUMENTATION: "documentation",
-  DIVORCE_REPORT: "divorce-report"
+  DIVORCE_REPORT: "divorce-report",
+  ADHOC_PROF_LETTER73: "adhoc-prof-letter73"
 } as const;
 
 export const CAPTIONS = {
   ADD_DISTRIBUTION: "Add Distribution (008-14A)",
   ADD_DISTRIBUTION_SHORT: "Add Distribution",
+  ADHOC_PROF_LETTER73: "Adhoc Prof Letter 73",
 
   ADJUSTMENTS: "Adjustments",
   ADJUSTMENTS_SHORT: "Adjustments",
@@ -337,6 +339,7 @@ export const CAPTIONS = {
 
   YTD_WAGES_EXTRACT_LIVE: "YTD Wages Extract Live (PROF-DOLLAR-EXTRACT)",
   YTD_WAGES_EXTRACT_LIVE_SHORT: "YTD Wages Extract Live"
+  
 } as const;
 
 export const VIEW = "View";

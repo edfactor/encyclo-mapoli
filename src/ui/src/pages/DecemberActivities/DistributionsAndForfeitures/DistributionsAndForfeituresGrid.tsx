@@ -6,7 +6,7 @@ import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
@@ -100,10 +100,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       )
     });
 
-  // Use content-aware grid height utility hook
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0
-  });
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const handleStateTaxPopoverOpen = () => {
     if (stateTaxTimeout) {
