@@ -94,9 +94,6 @@ internal sealed class EmployeeFullSyncClient
                 break;
             }
 
-            // Per the Oracle Consultants, we need to slow this operation down, or continue to risk 401 errors as a way of handling too many requests.
-            await Task.Delay(new TimeSpan(0, 0, 10), cancellationToken).ConfigureAwait(false);
-
             // Use the server-provided pagination information when available.
             offset = demographics.Count + demographics.Offset;
             string nextUrl = await BuildUrl(offset, cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -162,15 +159,10 @@ internal sealed class EmployeeFullSyncClient
 
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)
     {
+        // Per the Oracle Consultants, we need to slow this operation down, or continue to risk 401 errors as a way of handling too many requests.
+        await Task.Delay(new TimeSpan(0, 0, 10), cancellationToken).ConfigureAwait(false);
+
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-
-        // Copy default headers from HttpClient to the request message
-        // (SendAsync does NOT automatically add Authorization and other default headers)
-        foreach (var header in _httpClient.DefaultRequestHeaders)
-        {
-            request.Headers.Add(header.Key, header.Value);
-        }
-
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode && Debugger.IsAttached)
         {

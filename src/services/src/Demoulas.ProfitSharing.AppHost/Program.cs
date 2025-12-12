@@ -17,6 +17,7 @@ if (PortHelper.IsTcpPortInUse(uiPort))
 }
 
 var database = builder.AddConnectionString("ProfitSharing", "ConnectionStrings:ProfitSharing");
+var warehouse = builder.AddConnectionString("Warehouse", "ConnectionStrings:Warehouse");
 
 Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
@@ -29,6 +30,7 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         projectPath!,
         "run", "--no-build", "--launch-profile", "upgrade-db")
     .WithReference(database)
+    .WithReference(warehouse)
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
@@ -233,7 +235,9 @@ var configuration = new ConfigurationBuilder()
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithParentRelationship(database)
+    .WithParentRelationship(warehouse)
     .WithReference(database)
+    .WithReference(warehouse)
     .WithSwaggerUi()
     .WithRedoc()
     .WithScalar()
@@ -265,16 +269,25 @@ ui.WithReference(api)
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
      .WaitFor(api)
      .WithParentRelationship(database)
+     .WithParentRelationship(warehouse)
+     .WithReference(database)
+     .WithReference(warehouse)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
      .WaitFor(api)
      .WithParentRelationship(database)
+     .WithParentRelationship(warehouse)
+     .WithReference(database)
+     .WithReference(warehouse)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
      .WaitFor(api)
      .WithParentRelationship(database)
+     .WithParentRelationship(warehouse)
+     .WithReference(database)
+     .WithReference(warehouse)
     .WithExplicitStart();
 
 // Playwright E2E test runner as an executable resource
