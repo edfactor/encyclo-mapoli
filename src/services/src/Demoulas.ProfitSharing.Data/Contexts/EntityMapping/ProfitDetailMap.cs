@@ -20,6 +20,7 @@ internal sealed class ProfitDetailMap : ModifiedBaseMap<ProfitDetail>
         _ = builder.HasIndex(p => new { p.ProfitYear, p.ProfitCodeId }, "IX_PROFIT_CODE_ID_PROFIT_YEAR");
         _ = builder.HasIndex(p => new { p.ProfitYear, p.MonthToDate }, "IX_PROFIT_CODE_ID_MONTHTODATE");
         _ = builder.HasIndex(p => new { p.Ssn, p.ProfitYear, p.ProfitCodeId }, "IX_SSN_YEAR_PROFIT_CODE_ID");
+        _ = builder.HasIndex(p => new { p.ProfitCodeId, p.Ssn }, "IX_PROFIT_CODE_SSN"); // Optimizes GetFirstContributionYear query (WHERE PROFIT_CODE_ID = 0 GROUP BY SSN)
 
         _ = builder.Property(e => e.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         _ = builder.Property(x => x.ProfitYear).IsRequired().HasColumnName("PROFIT_YEAR");
