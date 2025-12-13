@@ -36,8 +36,8 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
       await triggerClear().unwrap();
       setShowClearConfirmation(false);
       onClearSuccess();
-    } catch (error: any) {
-      setClearError(error?.message || "Failed to clear audit records");
+    } catch (error: unknown) {
+      setClearError((error as Error)?.message || "Failed to clear audit records");
     }
   };
 

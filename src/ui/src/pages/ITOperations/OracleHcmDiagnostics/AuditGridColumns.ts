@@ -1,4 +1,4 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ValueFormatterParams } from "ag-grid-community";
 import { mmDDYYYY_HHMMSS_Format } from "../../../utils/dateUtils";
 import { createBadgeColumn } from "../../../utils/gridColumnFactory";
 
@@ -38,7 +38,7 @@ export const GetAuditGridColumns = (): ColDef[] => {
       sortable: true,
       filter: false,
       width: 200,
-      valueFormatter: (params: any) => (params.value ? mmDDYYYY_HHMMSS_Format(params.value) : "")
+      valueFormatter: (params: ValueFormatterParams) => (params.value ? mmDDYYYY_HHMMSS_Format(params.value) : "")
     }
   ];
 };
