@@ -29,6 +29,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly Channel<MessageRequest<OracleEmployee[]>> _employeeChannel;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IProcessWatchdog _watchdog;
     private readonly ILogger<EmployeeSyncService> _logger;
 
     public EmployeeSyncService(AtomFeedClient atomFeedClient,
@@ -36,6 +37,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         Channel<MessageRequest<OracleEmployee[]>> employeeChannel,
         IServiceScopeFactory serviceScopeFactory,
+        IProcessWatchdog watchdog,
         ILogger<EmployeeSyncService> logger)
     {
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
@@ -43,6 +45,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _employeeChannel = employeeChannel;
         _serviceScopeFactory = serviceScopeFactory;
+        _watchdog = watchdog;
         _logger = logger;
     }
 
@@ -79,10 +82,19 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         try
         {
             await demographicsService.CleanAuditError(cancellationToken).ConfigureAwait(false);
+            int batchHeartbeatCounter = 0;
             await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken).ConfigureAwait(false))
             {
                 await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
                 employeeBatchesProcessed++;
+
+                // Record heartbeat every 10 batches to prevent watchdog timeout during long-running sync
+                if (++batchHeartbeatCounter % 10 == 0)
+                {
+                    _watchdog.RecordHeartbeat();
+                    _logger.LogDebug("EmployeeFullSync: Processed {BatchCount} batches ({EmployeeCount} employees)",
+                        employeeBatchesProcessed, employeeBatchesProcessed * 75);
+                }
             }
 
             // Record success metrics
@@ -182,6 +194,9 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                     .MinAsync(d => (d.ModifiedAtUtc == null ? d.CreatedAtUtc : d.ModifiedAtUtc.Value) - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
             }, cancellationToken).ConfigureAwait(false);
 
+            // Record initial heartbeat before long-running feed fetch operations
+            _watchdog.RecordHeartbeat();
+
             // Fetch all feeds in parallel for better performance
             var newHiresTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken), cancellationToken);
             var assignmentsTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken), cancellationToken);
@@ -189,6 +204,9 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             var terminationsTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken), cancellationToken);
 
             await Task.WhenAll(newHiresTask, assignmentsTask, updatesTask, terminationsTask).ConfigureAwait(false);
+
+            // Record heartbeat after feed fetch completes (can take several minutes)
+            _watchdog.RecordHeartbeat();
 
             // Get results from completed tasks
             var newHires = await newHiresTask.ConfigureAwait(false);
@@ -205,6 +223,11 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             {
                 people.Add(record.PersonId);
             }
+
+            // Record heartbeat after merging results
+            _watchdog.RecordHeartbeat();
+            _logger.LogInformation("DeltaSync: Found {PersonCount} unique people to process from feeds (NewHires: {NewHires}, Assignments: {Assignments}, Updates: {Updates}, Terminations: {Terminations})",
+                people.Count, newHires.Count, assignments.Count, updates.Count, terminations.Count);
 
             totalChangedEmployees = people.Count;
 
