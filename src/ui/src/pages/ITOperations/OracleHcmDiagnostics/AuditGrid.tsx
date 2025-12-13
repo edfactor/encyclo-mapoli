@@ -1,7 +1,7 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
-import { DSMGrid } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { useClearDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
 import { mmDDYYYY_HHMMSS_Format } from "../../../utils/dateUtils";
 import { DemographicSyncAuditPage, DemographicSyncAuditRecord } from "./types";
@@ -10,12 +10,10 @@ interface AuditGridProps {
   data?: DemographicSyncAuditPage;
   isLoading: boolean;
   onClearSuccess: () => void;
-  onPageChange?: (page: number) => void;
-  currentPage?: number;
-  clearAudit?: any;
+  onPageChange: (page: number, pageSize: number) => void;
 }
 
-const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess }) => {
+const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, onPageChange }) => {
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [clearError, setClearError] = useState<string | null>(null);
 
@@ -106,17 +104,26 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess }
       {isLoading ? (
         <CircularProgress />
       ) : data && data.records.length > 0 ? (
-        <DSMGrid
-          preferenceKey={"DEMOGRAPHIC_SYNC_AUDIT"}
-          isLoading={isLoading}
-          providedOptions={{
-            rowData: data.records,
-            columnDefs: columnDefs,
-            suppressMoveWhenRowDragging: true,
-            enableCellTextSelection: true,
-            enableRangeSelection: true
-          }}
-        />
+        <>
+          <DSMGrid
+            preferenceKey={"DEMOGRAPHIC_SYNC_AUDIT"}
+            isLoading={isLoading}
+            providedOptions={{
+              rowData: data.records,
+              columnDefs: columnDefs,
+              suppressMoveWhenRowDragging: true,
+              enableCellTextSelection: true,
+              enableRangeSelection: true
+            }}
+          />
+          <Pagination
+            count={data.totalCount}
+            page={data.pageNumber}
+            rowsPerPage={data.pageSize}
+            onPageChange={(newPage) => onPageChange(newPage, data.pageSize)}
+            onRowsPerPageChange={(newPageSize) => onPageChange(1, newPageSize)}
+          />
+        </>
       ) : (
         <Typography variant="body1" sx={{ color: "#666", textAlign: "center", padding: "32px" }}>
           No audit records found
