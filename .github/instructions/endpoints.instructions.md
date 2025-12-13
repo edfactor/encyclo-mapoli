@@ -1910,6 +1910,7 @@ using Demoulas.Common.Data.Contexts.Extensions;
 ```
 
 **Compilation Error Without It:**
+
 ```
 error CS1061: 'IQueryable<T>' does not contain a definition for 'ToPaginationResultsAsync'
 ```
@@ -1923,6 +1924,7 @@ using Demoulas.Common.Data.Contexts.Extensions;
 ```
 
 **Pattern:**
+
 ```csharp
 await using var ctx = await _factory.CreateDbContextAsync(ct);
 ctx.UseReadOnlyContext();  // Requires extension using statement
@@ -1933,16 +1935,18 @@ ctx.UseReadOnlyContext();  // Requires extension using statement
 **Problem**: EF Core `Count()` returns `long`, but DTOs expect `int` for `TotalCount`.
 
 **Error:**
+
 ```
 error CS0029: Cannot implicitly convert type 'long' to 'int'
 ```
 
 **Solution**: Explicit cast in endpoint:
+
 ```csharp
 public override async Task<Results<Ok<PaginatedResponseDto<T>>, NotFound, ProblemHttpResult>> ExecuteAsync(...)
 {
     var result = await _service.GetDataAsync(req, ct);
-    
+
     return new PaginatedResponseDto<T>
     {
         Results = result.Value!.Items,
@@ -1956,16 +1960,19 @@ public override async Task<Results<Ok<PaginatedResponseDto<T>>, NotFound, Proble
 When adding sorting to existing endpoints, update service signatures:
 
 **Old Signature (pagination only):**
+
 ```csharp
 Task<Result<PaginatedResponseDto<T>>> GetDataAsync(PaginationRequestDto request, CancellationToken ct);
 ```
 
 **New Signature (pagination + sorting):**
+
 ```csharp
 Task<Result<PaginatedResponseDto<T>>> GetDataAsync(SortedPaginationRequestDto request, CancellationToken ct);
 ```
 
 **Update All Callers:**
+
 ```csharp
 // Update service implementation
 public async Task<Result<PaginatedResponseDto<T>>> GetDataAsync(
@@ -1987,17 +1994,20 @@ var request = new SortedPaginationRequestDto  // Changed from PaginationRequestD
 **Problem**: Using SSN alone as dictionary key causes runtime crashes with duplicate SSNs.
 
 **Error (Runtime):**
+
 ```
 System.ArgumentException: An item with the same key has already been added. Key: 123456789
 ```
 
 **Wrong Code:**
+
 ```csharp
 // ❌ CRASH if duplicate SSNs exist
 var demographicsByKey = demographics.ToDictionary(d => d.Ssn, d => d);
 ```
 
 **Correct Code:**
+
 ```csharp
 // ✅ Use composite key
 var demographicsByKey = demographics

@@ -135,7 +135,7 @@ All RTK Query APIs share a common base query configuration:
 export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const createDataSourceAwareBaseQuery = (
-  timeout?: number,
+  timeout?: number
 ): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
   const rawBaseQuery = fetchBaseQuery({
     baseUrl: `${url}/api/`,
@@ -283,7 +283,9 @@ getExecutiveHoursAndDollars: builder.query<
   RequestType & { archive?: boolean }
 >({
   query: (params) => ({
-    url: `yearend/executive-hours-and-dollars${params.archive ? "?archive=true" : ""}`,
+    url: `yearend/executive-hours-and-dollars${
+      params.archive ? "?archive=true" : ""
+    }`,
     method: "GET",
     params: {
       profitYear: params.profitYear,
@@ -398,18 +400,23 @@ const baseQuery = createDataSourceAwareBaseQuery();
 
 export const myFeatureApi = createApi({
   baseQuery: baseQuery,
-  reducerPath: "myFeatureApi",  // Must be unique
-  tagTypes: ["my-feature-data"],  // For cache invalidation
+  reducerPath: "myFeatureApi", // Must be unique
+  tagTypes: ["my-feature-data"], // For cache invalidation
   endpoints: (builder) => ({
     getMyData: builder.query<MyResponse, MyRequest>({
-      query: ({ pageNumber = 1, pageSize = 10, sortBy = "Created", isSortDescending = true }) => ({
+      query: ({
+        pageNumber = 1,
+        pageSize = 10,
+        sortBy = "Created",
+        isSortDescending = true,
+      }) => ({
         url: "my-endpoint",
         method: "GET",
-        params: { pageNumber, pageSize, sortBy, isSortDescending }
+        params: { pageNumber, pageSize, sortBy, isSortDescending },
       }),
-      providesTags: ["my-feature-data"]
-    })
-  })
+      providesTags: ["my-feature-data"],
+    }),
+  }),
 });
 
 // CRITICAL: Export hooks
@@ -426,12 +433,12 @@ import { myFeatureApi } from "./api/myFeatureApi";
 export const store = configureStore({
   reducer: {
     // ... existing reducers
-    [myFeatureApi.reducerPath]: myFeatureApi.reducer,  // Add reducer
+    [myFeatureApi.reducerPath]: myFeatureApi.reducer, // Add reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
       .concat(rtkQueryErrorToastMiddleware(true))
-      .concat(myFeatureApi.middleware),  // Add middleware
+      .concat(myFeatureApi.middleware), // Add middleware
 });
 ```
 
@@ -447,19 +454,24 @@ For paginated/sorted endpoints, ensure API accepts these parameters:
 
 ```typescript
 interface PaginatedSortedRequest {
-  pageNumber?: number;       // API expects 1-based
-  pageSize?: number;         // Default 10 or 25
-  sortBy?: string;           // Column name
+  pageNumber?: number; // API expects 1-based
+  pageSize?: number; // Default 10 or 25
+  sortBy?: string; // Column name
   isSortDescending?: boolean; // Sort direction
 }
 
 getData: builder.query<ResponseType, PaginatedSortedRequest>({
-  query: ({ pageNumber = 1, pageSize = 10, sortBy = "Created", isSortDescending = true }) => ({
+  query: ({
+    pageNumber = 1,
+    pageSize = 10,
+    sortBy = "Created",
+    isSortDescending = true,
+  }) => ({
     url: "my-endpoint",
     method: "GET",
-    params: { pageNumber, pageSize, sortBy, isSortDescending }  // All four params
-  })
-})
+    params: { pageNumber, pageSize, sortBy, isSortDescending }, // All four params
+  }),
+});
 ```
 
 ### Common RTK Query Mistakes
@@ -552,7 +564,7 @@ openDrawer: (state) => {
       JSON.stringify({
         isDrawerOpen: true,
         activeSubmenu: state.activeSubmenu,
-      }),
+      })
     );
   } catch (error) {
     console.error("Error saving drawer state to localStorage:", error);
@@ -878,16 +890,21 @@ import { setLoading } from "reduxstore/slices/generalSlice";
 
 export function DuplicateSSNsReport() {
   const dispatch = useDispatch();
-  const profitYear = useSelector((state: RootState) => state.yearsEnd.selectedYear);
-  const duplicateSSNs = useSelector((state: RootState) => state.yearsEnd.duplicateSSNsData);
+  const profitYear = useSelector(
+    (state: RootState) => state.yearsEnd.selectedYear
+  );
+  const duplicateSSNs = useSelector(
+    (state: RootState) => state.yearsEnd.duplicateSSNsData
+  );
 
-  const [getDuplicateSSNs, { isLoading, error }] = useLazyGetDuplicateSSNsQuery();
+  const [getDuplicateSSNs, { isLoading, error }] =
+    useLazyGetDuplicateSSNsQuery();
 
   useEffect(() => {
     dispatch(setLoading(true));
     getDuplicateSSNs({
       profitYear,
-      pagination: { skip: 0, take: 50 }
+      pagination: { skip: 0, take: 50 },
     }).finally(() => {
       dispatch(setLoading(false));
     });

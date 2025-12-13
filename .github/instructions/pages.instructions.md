@@ -108,9 +108,7 @@ const Profall = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.PROFALL}
-      actionNode={renderActionNode()}>
+    <Page label={CAPTIONS.PROFALL} actionNode={renderActionNode()}>
       <Grid container rowSpacing="24px">
         <Grid width="100%">
           <Divider />
@@ -146,9 +144,11 @@ const Profall = () => {
 ```typescript
 const DistributionInquiryContent = () => {
   const dispatch = useDispatch();
-  const [searchData, setSearchData] = useState<DistributionSearchRequest | null>(null);
+  const [searchData, setSearchData] =
+    useState<DistributionSearchRequest | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
+  const [triggerSearch, { data, isFetching }] =
+    useLazySearchDistributionsQuery();
   const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
 
   const handleSearch = async (formData: DistributionSearchFormData) => {
@@ -196,7 +196,10 @@ const DistributionInquiryContent = () => {
 
 const DistributionInquiry = () => {
   return (
-    <Page label={CAPTIONS.DISTRIBUTIONS_INQUIRY} actionNode={<StatusDropdownActionNode />}>
+    <Page
+      label={CAPTIONS.DISTRIBUTIONS_INQUIRY}
+      actionNode={<StatusDropdownActionNode />}
+    >
       <MissiveAlertProvider>
         <DistributionInquiryContent />
       </MissiveAlertProvider>
@@ -237,7 +240,7 @@ const MasterInquiryContent = memo(() => {
     showProfitDetails,
     executeSearch,
     selectMember,
-    resetAll
+    resetAll,
   } = useMasterInquiry(); // Custom hook encapsulates all logic
 
   return (
@@ -332,7 +335,13 @@ const useMasterInquiry = () => {
 const FrozenSummary = () => {
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const tabs = ["Summary", "Distributions", "Contributions", "Forfeitures", "Balance"];
+  const tabs = [
+    "Summary",
+    "Distributions",
+    "Contributions",
+    "Forfeitures",
+    "Balance",
+  ];
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -382,7 +391,9 @@ const ProfitShareEditUpdate = () => {
   const profitYear = useFiscalCloseProfitYear();
   const [changesApplied, setChangesApplied] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitSharingEdit, profitSharingUpdate } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const [applyMaster] = useGetMasterApplyMutation();
   const [triggerRevert] = useLazyGetMasterRevertQuery();
@@ -405,7 +416,10 @@ const ProfitShareEditUpdate = () => {
 
   return (
     <PrerequisiteGuard prerequisites={["FrozenData"]}>
-      <Page label="PROFIT SHARE EDIT/UPDATE" actionNode={<StatusDropdownActionNode />}>
+      <Page
+        label="PROFIT SHARE EDIT/UPDATE"
+        actionNode={<StatusDropdownActionNode />}
+      >
         <Grid container rowSpacing="24px">
           {/* Checksum validation alerts */}
           {checksumValidation && <ValidationAlert data={checksumValidation} />}
@@ -458,8 +472,8 @@ The `Page` component is the top-level container for all pages.
 
 ```typescript
 <Page
-  label="DISTRIBUTION INQUIRY"        // Page title (displayed in header)
-  actionNode={<StatusDropdownActionNode />}  // Optional action area (right side of header)
+  label="DISTRIBUTION INQUIRY" // Page title (displayed in header)
+  actionNode={<StatusDropdownActionNode />} // Optional action area (right side of header)
 >
   {/* Page content */}
 </Page>
@@ -577,7 +591,7 @@ import {
 } from "../../utils/gridColumnFactory";
 
 export const GetProfallGridColumns = (
-  navFunction: (badgeNumber: string) => void,
+  navFunction: (badgeNumber: string) => void
 ): ColDef[] => {
   return [
     createStoreColumn({ minWidth: 80, sortable: true }),
@@ -637,20 +651,22 @@ Application-wide alert/message system.
 // In page wrapper:
 <MissiveAlertProvider>
   <PageContent />
-</MissiveAlertProvider>
+</MissiveAlertProvider>;
 
 // In page content:
 const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
 
 // Display alerts:
-{missiveAlerts.length > 0 && <MissiveAlerts />}
+{
+  missiveAlerts.length > 0 && <MissiveAlerts />;
+}
 
 // Add alert:
 addAlert({
   id: 911,
   severity: "success",
   message: "Distribution Saved Successfully",
-  description: "Distribution for John Doe has been saved."
+  description: "Distribution for John Doe has been saved.",
 });
 
 // Clear alerts:
@@ -768,10 +784,10 @@ Complex state or state shared across pages stored in Redux slices.
 ```typescript
 // Reading from Redux
 const { profitSharingEdit, profitSharingUpdate } = useSelector(
-  (state: RootState) => state.yearsEnd,
+  (state: RootState) => state.yearsEnd
 );
 const currentMember = useSelector(
-  (state: RootState) => state.distribution.currentMember,
+  (state: RootState) => state.distribution.currentMember
 );
 
 // Dispatching actions
@@ -854,7 +870,7 @@ Context for cross-component communication within a page.
 // Page wrapper
 <MissiveAlertProvider>
   <PageContent />
-</MissiveAlertProvider>
+</MissiveAlertProvider>;
 
 // In any child component
 const { addAlert, clearAlerts } = useMissiveAlerts();
@@ -943,6 +959,7 @@ useEffect(() => {
 #### Complete Setup Pattern
 
 **Parent Component State:**
+
 ```typescript
 import { SortParams } from "../../../hooks/useGridPagination";
 
@@ -951,14 +968,20 @@ const [pageSize, setPageSize] = useState(10); // Default page size
 const [sortBy, setSortBy] = useState<string>("Created"); // Default sort column
 const [isSortDescending, setIsSortDescending] = useState<boolean>(true); // Default sort order
 
-const fetchData = useCallback((page: number, size: number, sort?: string, desc?: boolean) => {
-  triggerQuery({ 
-    pageNumber: page + 1,  // API expects 1-based
-    pageSize: size,
-    sortBy: sort ?? sortBy,
-    isSortDescending: desc ?? isSortDescending
-  }, false);
-}, [triggerQuery, sortBy, isSortDescending]);
+const fetchData = useCallback(
+  (page: number, size: number, sort?: string, desc?: boolean) => {
+    triggerQuery(
+      {
+        pageNumber: page + 1, // API expects 1-based
+        pageSize: size,
+        sortBy: sort ?? sortBy,
+        isSortDescending: desc ?? isSortDescending,
+      },
+      false
+    );
+  },
+  [triggerQuery, sortBy, isSortDescending]
+);
 
 const handlePageChange = (page: number, size: number) => {
   setPageNumber(page);
@@ -975,6 +998,7 @@ const handleSortChange = (sortParams: SortParams) => {
 ```
 
 **Child Grid Component Props:**
+
 ```typescript
 interface GridProps {
   data?: PaginatedData;
@@ -985,25 +1009,32 @@ interface GridProps {
   onSortChange: (sortParams: SortParams) => void;
 }
 
-const Grid: React.FC<GridProps> = ({ data, isLoading, pageNumber, pageSize, onPageChange, onSortChange }) => {
+const Grid: React.FC<GridProps> = ({
+  data,
+  isLoading,
+  pageNumber,
+  pageSize,
+  onPageChange,
+  onSortChange,
+}) => {
   const columnDefs = useMemo(() => GetGridColumns(), []);
-  
+
   return (
     <>
       <DSMGrid
         preferenceKey="MY_GRID"
         isLoading={isLoading}
-        handleSortChanged={onSortChange}  // CRITICAL: enables server-side sorting
+        handleSortChanged={onSortChange} // CRITICAL: enables server-side sorting
         providedOptions={{
           rowData: data?.results || [],
-          columnDefs: columnDefs
+          columnDefs: columnDefs,
         }}
       />
       <Pagination
         pageNumber={pageNumber}
-        setPageNumber={(value: number) => onPageChange(value - 1, pageSize)}  // Convert 1-based to 0-based
+        setPageNumber={(value: number) => onPageChange(value - 1, pageSize)} // Convert 1-based to 0-based
         pageSize={pageSize}
-        setPageSize={(value: number) => onPageChange(0, value)}  // Reset to page 0 on size change
+        setPageSize={(value: number) => onPageChange(0, value)} // Reset to page 0 on size change
         recordCount={data?.total || 0}
       />
     </>
@@ -1012,17 +1043,28 @@ const Grid: React.FC<GridProps> = ({ data, isLoading, pageNumber, pageSize, onPa
 ```
 
 **RTK Query API Endpoint:**
+
 ```typescript
 getData: builder.query<
   PaginatedData,
-  { pageNumber?: number; pageSize?: number; sortBy?: string; isSortDescending?: boolean }
+  {
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    isSortDescending?: boolean;
+  }
 >({
-  query: ({ pageNumber = 1, pageSize = 10, sortBy = "Created", isSortDescending = true }) => ({
+  query: ({
+    pageNumber = 1,
+    pageSize = 10,
+    sortBy = "Created",
+    isSortDescending = true,
+  }) => ({
     url: "my-endpoint",
     method: "GET",
-    params: { pageNumber, pageSize, sortBy, isSortDescending }
-  })
-})
+    params: { pageNumber, pageSize, sortBy, isSortDescending },
+  }),
+});
 ```
 
 #### Common Pagination Mistakes
@@ -1062,7 +1104,7 @@ import {
   createSSNColumn,
   createStateColumn,
   createStoreColumn,
-  createStatusColumn
+  createStatusColumn,
 } from "../../../utils/gridColumnFactory";
 
 export const GetMyGridColumns = (): ColDef[] => {
@@ -1071,40 +1113,40 @@ export const GetMyGridColumns = (): ColDef[] => {
     createBadgeColumn({
       headerName: "Badge Number",
       field: "badgeNumber",
-      minWidth: 120
+      minWidth: 120,
     }),
-    
+
     // Name column
     createNameColumn({
-      field: "fullName"
+      field: "fullName",
     }),
-    
+
     // Date column with automatic formatting
     createDateColumn({
       headerName: "Hire Date",
-      field: "hireDate"
+      field: "hireDate",
     }),
-    
+
     // Currency column with $ formatting
     createCurrencyColumn({
       headerName: "Balance",
-      field: "netBalance"
+      field: "netBalance",
     }),
-    
+
     // SSN column with masking
     createSSNColumn({
-      field: "ssn"
+      field: "ssn",
     }),
-    
+
     // Custom column (when factory doesn't exist)
     {
       headerName: "Custom Field",
       field: "customField",
       sortable: true,
-      filter: false,  // ALWAYS false by default
+      filter: false, // ALWAYS false by default
       flex: 1,
-      minWidth: 150
-    }
+      minWidth: 150,
+    },
   ];
 };
 ```
@@ -1115,7 +1157,10 @@ export const GetMyGridColumns = (): ColDef[] => {
 
 ```typescript
 import { ColDef } from "ag-grid-community";
-import { createBadgeColumn, createDateColumn } from "../../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createDateColumn,
+} from "../../../utils/gridColumnFactory";
 import { myCustomFormatter } from "../../../utils/dateUtils";
 
 export const GetMyGridColumns = (): ColDef[] => {
@@ -1127,9 +1172,9 @@ export const GetMyGridColumns = (): ColDef[] => {
       sortable: true,
       filter: false,
       width: 200,
-      valueFormatter: (params: any) => 
-        params.value ? myCustomFormatter(params.value) : ""
-    }
+      valueFormatter: (params: any) =>
+        params.value ? myCustomFormatter(params.value) : "",
+    },
   ];
 };
 ```
@@ -1141,12 +1186,12 @@ import { GetMyGridColumns } from "./MyGridColumns";
 
 const MyGrid = () => {
   const columnDefs = useMemo(() => GetMyGridColumns(), []);
-  
+
   return (
     <DSMGrid
       providedOptions={{
         columnDefs: columnDefs,
-        rowData: data
+        rowData: data,
       }}
     />
   );
@@ -1168,28 +1213,28 @@ const columnDefs = [
   {
     headerName: "Badge Number",
     field: "badgeNumber",
-    width: 120
-  }
+    width: 120,
+  },
 ];
 
 // ❌ WRONG: Enabling all filters
-const columnDefs = Object.keys(data).map(key => ({
+const columnDefs = Object.keys(data).map((key) => ({
   headerName: key,
   field: key,
-  filter: true  // WRONG
+  filter: true, // WRONG
 }));
 
 // ❌ WRONG: Enabling range selection (requires Enterprise license)
 <DSMGrid
   providedOptions={{
     columnDefs: cols,
-    enableRangeSelection: true  // WRONG
+    enableRangeSelection: true, // WRONG
   }}
-/>
+/>;
 
 // ✅ RIGHT: Use factory, disable filters, no range selection
 const columnDefs = useMemo(() => GetMyGridColumns(), []);
-<DSMGrid providedOptions={{ columnDefs, rowData: data }} />
+<DSMGrid providedOptions={{ columnDefs, rowData: data }} />;
 ```
 
 ---
@@ -1229,22 +1274,27 @@ const columnDefs = useMemo(() => GetMyGridColumns(), []);
 All route paths are defined in `src/ui/src/constants.ts`. When creating a new page:
 
 1. **Add route constant** to constants.ts:
+
    ```typescript
    export const ORACLE_HCM_DIAGNOSTICS = "oracle-hcm-diagnostics"; // NO leading slash!
    ```
 
 2. **NEVER include path prefixes** in route constants:
+
    ```typescript
    // ❌ WRONG - includes prefix, will break routing
    export const MY_PAGE = "/it-operations/my-page";
-   
+
    // ✅ RIGHT - just the page path, no prefix
    export const MY_PAGE = "my-page";
    ```
 
 3. **Use constant in RouterSubAssembly**:
    ```typescript
-   <Route path={Navigation.Constants.ORACLE_HCM_DIAGNOSTICS} element={<LazyOracleHcmDiagnostics />} />
+   <Route
+     path={Navigation.Constants.ORACLE_HCM_DIAGNOSTICS}
+     element={<LazyOracleHcmDiagnostics />}
+   />
    ```
 
 ### Common Routing Mistakes
@@ -1255,12 +1305,12 @@ All route paths are defined in `src/ui/src/constants.ts`. When creating a new pa
 
 ### Route Path Examples by Page Type
 
-| Page Category       | Correct Path          | Wrong Path                     |
-|---------------------|----------------------|--------------------------------|
-| IT Operations       | `oracle-hcm-diagnostics` | `/it-operations/oracle-hcm-diagnostics` |
-| Reports             | `audit-search`       | `/reports/audit-search`        |
-| Year-End            | `duplicate-names`    | `/december-activities/duplicate-names` |
-| Master Inquiry      | `master-inquiry`     | `/inquiries/master-inquiry`    |
+| Page Category  | Correct Path             | Wrong Path                              |
+| -------------- | ------------------------ | --------------------------------------- |
+| IT Operations  | `oracle-hcm-diagnostics` | `/it-operations/oracle-hcm-diagnostics` |
+| Reports        | `audit-search`           | `/reports/audit-search`                 |
+| Year-End       | `duplicate-names`        | `/december-activities/duplicate-names`  |
+| Master Inquiry | `master-inquiry`         | `/inquiries/master-inquiry`             |
 
 ---
 
@@ -1343,7 +1393,7 @@ const isReadOnly = useReadOnlyNavigation();
 
 <Button disabled={isReadOnly} onClick={handleEdit}>
   EDIT
-</Button>
+</Button>;
 ```
 
 **Pattern**: Disable actions when user has read-only permissions.
@@ -1421,15 +1471,15 @@ const AddDistribution = () => {
     if (selectedMember && formData) {
       await createDistribution({
         memberId: selectedMember.id,
-        ...formData
+        ...formData,
       }).unwrap();
 
       navigate("/distribution-inquiry", {
         state: {
           showSuccessMessage: true,
           memberName: selectedMember.name,
-          amount: formData.amount
-        }
+          amount: formData.amount,
+        },
       });
     }
   };
@@ -1478,13 +1528,16 @@ const PROF130 = () => {
     forfeitures: <ForfeituresByAge />,
     balanceByAge: <BalanceByAge />,
     balanceByYears: <BalanceByYears />,
-    vestedAmounts: <VestedAmountsByAge />
+    vestedAmounts: <VestedAmountsByAge />,
   };
 
   return (
     <Page label="PROF130 REPORTS" actionNode={<StatusDropdownActionNode />}>
       <Grid container rowSpacing="24px">
-        <Tabs value={selectedReport} onChange={(e, val) => setSelectedReport(val)}>
+        <Tabs
+          value={selectedReport}
+          onChange={(e, val) => setSelectedReport(val)}
+        >
           <Tab value="distributions" label="Distributions by Age" />
           <Tab value="contributions" label="Contributions by Age" />
           <Tab value="forfeitures" label="Forfeitures by Age" />
@@ -1493,9 +1546,7 @@ const PROF130 = () => {
           <Tab value="vestedAmounts" label="Vested Amounts by Age" />
         </Tabs>
 
-        <Grid width="100%">
-          {reports[selectedReport]}
-        </Grid>
+        <Grid width="100%">{reports[selectedReport]}</Grid>
       </Grid>
     </Page>
   );
