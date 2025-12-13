@@ -99,6 +99,7 @@ public static class ServicesExtension
 
 
         _ = builder.Services.AddScoped<ITableMetadataService, TableMetadataService>();
+        _ = builder.Services.AddScoped<IOracleHcmDiagnosticsService, OracleHcmDiagnosticsService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         _ = builder.Services.AddScoped<IUnmaskingService, UnmaskingService>();

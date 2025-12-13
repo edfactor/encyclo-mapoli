@@ -73,6 +73,7 @@ const ForfeituresByAge = lazy(() => import("../../pages/FiscalClose/AgeReports/F
 const ProfitShareEditUpdate = lazy(() => import("../../pages/FiscalClose/ProfitShareEditUpdate/ProfitShareEditUpdate"));
 const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDWages"));
 const DemographicFreeze = lazy(() => import("../../pages/ITOperations/DemographicFreeze/DemographicFreeze"));
+const OracleHcmDiagnostics = lazy(() => import("../../pages/ITOperations/OracleHcmDiagnostics/OracleHcmDiagnostics"));
 
 const PayMasterUpdateSummary = lazy(() => import("@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary"));
 const ProfitSharingControlSheet = lazy(() => import("@/pages/FiscalClose/PaymasterUpdate/ProfitSharingControlSheet"));
@@ -604,6 +605,20 @@ const RouterSubAssembly: React.FC = () => {
                       ]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <AuditSearch />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.ORACLE_HCM_DIAGNOSTICS}
+                  element={
+                    <ProtectedRoute
+                      requiredRoles={[
+                        ImpersonationRoles.ItDevOps,
+                        ImpersonationRoles.ProfitSharingAdministrator
+                      ]}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <OracleHcmDiagnostics />
                       </Suspense>
                     </ProtectedRoute>
                   }

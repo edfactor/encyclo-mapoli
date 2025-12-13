@@ -133,7 +133,8 @@ DECLARE
     LABELS CONSTANT NUMBER := 164;
     LABELS_NEW CONSTANT NUMBER := 165;
     AUDIT_SEARCH_PAGE CONSTANT NUMBER := 166;
-    VESTING_REPORTS_GROUP CONSTANT NUMBER := 167;
+    ORACLE_HCM_DIAGNOSTICS CONSTANT NUMBER := 167;
+    VESTING_REPORTS_GROUP CONSTANT NUMBER := 172;
     FORFEITURE_ADJUSTMENT_PAGE CONSTANT NUMBER := 168;
     MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE CONSTANT NUMBER := 169;
     MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE CONSTANT NUMBER := 170;
@@ -288,6 +289,7 @@ BEGIN
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(AUDIT_SEARCH_PAGE, IT_DEVOPS_MENU, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS_MENU, 'Oracle HCM Sync Diagnostics', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -674,6 +676,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(AUDIT_SEARCH_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(AUDIT_SEARCH_PAGE, FINANCE_MANAGER);
     assign_navigation_role(AUDIT_SEARCH_PAGE, IT_DEVOPS);
+    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, IT_DEVOPS);

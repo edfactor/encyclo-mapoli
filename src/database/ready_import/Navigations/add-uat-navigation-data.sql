@@ -261,6 +261,7 @@ BEGIN
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS_MENU, 'Oracle HCM Sync Diagnostics', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);

@@ -73,6 +73,7 @@ export const ROUTES = {
   PROFALL: "profall",
   DEMO_FREEZE: "demographic-freeze",
   AUDIT_SEARCH: "audit-search",
+  ORACLE_HCM_DIAGNOSTICS: "/it-operations/oracle-hcm-diagnostics",
   DEV_DEBUG: "dev-debug",
   DOCUMENTATION: "documentation",
   DIVORCE_REPORT: "divorce-report"
