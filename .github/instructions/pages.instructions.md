@@ -936,28 +936,261 @@ useEffect(() => {
 
 ---
 
-### 5. Pagination & Sorting
+### 5. Pagination & Sorting (Server-Side)
 
+**CRITICAL**: All grids with pagination MUST use server-side pagination and sorting. Never load all data client-side.
+
+#### Complete Setup Pattern
+
+**Parent Component State:**
 ```typescript
-const handlePaginationChange = async (
-  pageNumber: number,
-  pageSize: number,
-  sortParams: SortParams,
-) => {
-  if (searchData) {
-    const request = {
-      ...searchData,
-      skip: pageNumber * pageSize,
-      take: pageSize,
-      sortBy: sortParams.sortBy,
-      isSortDescending: sortParams.isSortDescending,
-    };
-    await triggerSearch(request);
-  }
+import { SortParams } from "../../../hooks/useGridPagination";
+
+const [pageNumber, setPageNumber] = useState(0); // 0-based for UI
+const [pageSize, setPageSize] = useState(10); // Default page size
+const [sortBy, setSortBy] = useState<string>("Created"); // Default sort column
+const [isSortDescending, setIsSortDescending] = useState<boolean>(true); // Default sort order
+
+const fetchData = useCallback((page: number, size: number, sort?: string, desc?: boolean) => {
+  triggerQuery({ 
+    pageNumber: page + 1,  // API expects 1-based
+    pageSize: size,
+    sortBy: sort ?? sortBy,
+    isSortDescending: desc ?? isSortDescending
+  }, false);
+}, [triggerQuery, sortBy, isSortDescending]);
+
+const handlePageChange = (page: number, size: number) => {
+  setPageNumber(page);
+  setPageSize(size);
+  fetchData(page, size);
+};
+
+const handleSortChange = (sortParams: SortParams) => {
+  setSortBy(sortParams.sortBy);
+  setIsSortDescending(sortParams.isSortDescending);
+  setPageNumber(0); // Reset to first page on sort
+  fetchData(0, pageSize, sortParams.sortBy, sortParams.isSortDescending);
 };
 ```
 
+**Child Grid Component Props:**
+```typescript
+interface GridProps {
+  data?: PaginatedData;
+  isLoading: boolean;
+  pageNumber: number;
+  pageSize: number;
+  onPageChange: (page: number, pageSize: number) => void;
+  onSortChange: (sortParams: SortParams) => void;
+}
+
+const Grid: React.FC<GridProps> = ({ data, isLoading, pageNumber, pageSize, onPageChange, onSortChange }) => {
+  const columnDefs = useMemo(() => GetGridColumns(), []);
+  
+  return (
+    <>
+      <DSMGrid
+        preferenceKey="MY_GRID"
+        isLoading={isLoading}
+        handleSortChanged={onSortChange}  // CRITICAL: enables server-side sorting
+        providedOptions={{
+          rowData: data?.results || [],
+          columnDefs: columnDefs
+        }}
+      />
+      <Pagination
+        pageNumber={pageNumber}
+        setPageNumber={(value: number) => onPageChange(value - 1, pageSize)}  // Convert 1-based to 0-based
+        pageSize={pageSize}
+        setPageSize={(value: number) => onPageChange(0, value)}  // Reset to page 0 on size change
+        recordCount={data?.total || 0}
+      />
+    </>
+  );
+};
+```
+
+**RTK Query API Endpoint:**
+```typescript
+getData: builder.query<
+  PaginatedData,
+  { pageNumber?: number; pageSize?: number; sortBy?: string; isSortDescending?: boolean }
+>({
+  query: ({ pageNumber = 1, pageSize = 10, sortBy = "Created", isSortDescending = true }) => ({
+    url: "my-endpoint",
+    method: "GET",
+    params: { pageNumber, pageSize, sortBy, isSortDescending }
+  })
+})
+```
+
+#### Common Pagination Mistakes
+
+1. **Missing `handleSortChanged`**: Grid won't trigger API calls on column header clicks
+2. **Missing `onSortChange` prop**: Grid component can't pass sort events to parent
+3. **Wrong page number base**: UI uses 0-based, API uses 1-based - must convert
+4. **Not resetting page on sort**: Should always go to page 0 when sorting changes
+5. **Client-side pagination**: Never load all records and paginate in browser
+6. **Missing sort state**: Parent must track `sortBy` and `isSortDescending`
+
 **Pattern**: Grid pagination/sort triggers new API call with updated parameters.
+
+---
+
+## Grid Column Factories (MANDATORY)
+
+### Always Use Grid Column Factories
+
+**NEVER manually define column objects**. Always use the grid column factory functions from `src/ui/src/utils/gridColumnFactory.ts`.
+
+#### Why Use Factories?
+
+1. **Consistent rendering**: Badge hyperlinks, date formatting, currency display
+2. **Master Inquiry integration**: Badge columns automatically link to Master Inquiry
+3. **Accessibility**: Standard tooltips, screen reader support
+4. **Maintainability**: Change once, applies everywhere
+
+#### Common Factory Functions
+
+```typescript
+import {
+  createBadgeColumn,
+  createNameColumn,
+  createDateColumn,
+  createCurrencyColumn,
+  createSSNColumn,
+  createStateColumn,
+  createStoreColumn,
+  createStatusColumn
+} from "../../../utils/gridColumnFactory";
+
+export const GetMyGridColumns = (): ColDef[] => {
+  return [
+    // Badge column with automatic Master Inquiry hyperlink
+    createBadgeColumn({
+      headerName: "Badge Number",
+      field: "badgeNumber",
+      minWidth: 120
+    }),
+    
+    // Name column
+    createNameColumn({
+      field: "fullName"
+    }),
+    
+    // Date column with automatic formatting
+    createDateColumn({
+      headerName: "Hire Date",
+      field: "hireDate"
+    }),
+    
+    // Currency column with $ formatting
+    createCurrencyColumn({
+      headerName: "Balance",
+      field: "netBalance"
+    }),
+    
+    // SSN column with masking
+    createSSNColumn({
+      field: "ssn"
+    }),
+    
+    // Custom column (when factory doesn't exist)
+    {
+      headerName: "Custom Field",
+      field: "customField",
+      sortable: true,
+      filter: false,  // ALWAYS false by default
+      flex: 1,
+      minWidth: 150
+    }
+  ];
+};
+```
+
+#### Grid Column File Pattern
+
+**File**: `MyGridColumns.ts` (colocated with grid component)
+
+```typescript
+import { ColDef } from "ag-grid-community";
+import { createBadgeColumn, createDateColumn } from "../../../utils/gridColumnFactory";
+import { myCustomFormatter } from "../../../utils/dateUtils";
+
+export const GetMyGridColumns = (): ColDef[] => {
+  return [
+    createBadgeColumn({ field: "badgeNumber" }),
+    {
+      headerName: "Created",
+      field: "created",
+      sortable: true,
+      filter: false,
+      width: 200,
+      valueFormatter: (params: any) => 
+        params.value ? myCustomFormatter(params.value) : ""
+    }
+  ];
+};
+```
+
+**Usage in Grid Component:**
+
+```typescript
+import { GetMyGridColumns } from "./MyGridColumns";
+
+const MyGrid = () => {
+  const columnDefs = useMemo(() => GetMyGridColumns(), []);
+  
+  return (
+    <DSMGrid
+      providedOptions={{
+        columnDefs: columnDefs,
+        rowData: data
+      }}
+    />
+  );
+};
+```
+
+#### AG Grid Configuration Rules
+
+1. **Filter disabled by default**: `filter: false` on all columns unless specific business requirement
+2. **Sortable enabled**: `sortable: true` for most columns
+3. **Width options**: Use `minWidth`, `maxWidth`, or `width` (fixed), or `flex` (responsive)
+4. **No `enableRangeSelection`**: Requires AG Grid Enterprise license - never set to `true`
+
+**Common Mistakes:**
+
+```typescript
+// ❌ WRONG: Manual column definitions, no hyperlinks
+const columnDefs = [
+  {
+    headerName: "Badge Number",
+    field: "badgeNumber",
+    width: 120
+  }
+];
+
+// ❌ WRONG: Enabling all filters
+const columnDefs = Object.keys(data).map(key => ({
+  headerName: key,
+  field: key,
+  filter: true  // WRONG
+}));
+
+// ❌ WRONG: Enabling range selection (requires Enterprise license)
+<DSMGrid
+  providedOptions={{
+    columnDefs: cols,
+    enableRangeSelection: true  // WRONG
+  }}
+/>
+
+// ✅ RIGHT: Use factory, disable filters, no range selection
+const columnDefs = useMemo(() => GetMyGridColumns(), []);
+<DSMGrid providedOptions={{ columnDefs, rowData: data }} />
+```
 
 ---
 
@@ -986,6 +1219,48 @@ const handlePaginationChange = async (
 1. **numberToCurrency** - Format numbers as currency
 2. **formatNumberWithComma** - Format numbers with commas
 3. **setMessage** - Dispatch message to message slice
+
+---
+
+## Route Path Patterns (CRITICAL)
+
+### Route Constants Location
+
+All route paths are defined in `src/ui/src/constants.ts`. When creating a new page:
+
+1. **Add route constant** to constants.ts:
+   ```typescript
+   export const ORACLE_HCM_DIAGNOSTICS = "oracle-hcm-diagnostics"; // NO leading slash!
+   ```
+
+2. **NEVER include path prefixes** in route constants:
+   ```typescript
+   // ❌ WRONG - includes prefix, will break routing
+   export const MY_PAGE = "/it-operations/my-page";
+   
+   // ✅ RIGHT - just the page path, no prefix
+   export const MY_PAGE = "my-page";
+   ```
+
+3. **Use constant in RouterSubAssembly**:
+   ```typescript
+   <Route path={Navigation.Constants.ORACLE_HCM_DIAGNOSTICS} element={<LazyOracleHcmDiagnostics />} />
+   ```
+
+### Common Routing Mistakes
+
+1. **Wrong path prefix**: Including group path in constant (e.g., `/it-operations/page` instead of `page`)
+2. **Leading slash**: Adding `/` to route constant when it's not needed
+3. **Inconsistent path**: Route constant doesn't match component file location
+
+### Route Path Examples by Page Type
+
+| Page Category       | Correct Path          | Wrong Path                     |
+|---------------------|----------------------|--------------------------------|
+| IT Operations       | `oracle-hcm-diagnostics` | `/it-operations/oracle-hcm-diagnostics` |
+| Reports             | `audit-search`       | `/reports/audit-search`        |
+| Year-End            | `duplicate-names`    | `/december-activities/duplicate-names` |
+| Master Inquiry      | `master-inquiry`     | `/inquiries/master-inquiry`    |
 
 ---
 

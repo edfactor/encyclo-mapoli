@@ -1895,6 +1895,121 @@ var result = await _service.GenerateAsync(req, ct); // No caching, slow for repe
 
 ---
 
+## Common Compilation Issues
+
+### Backend Service Required Using Statements
+
+When creating new services or endpoints that use common data access patterns, ensure these using statements are present:
+
+#### Pagination Extension (CRITICAL)
+
+If service uses `ToPaginationResultsAsync`, add:
+
+```csharp
+using Demoulas.Common.Data.Contexts.Extensions;
+```
+
+**Compilation Error Without It:**
+```
+error CS1061: 'IQueryable<T>' does not contain a definition for 'ToPaginationResultsAsync'
+```
+
+#### Read-Only Context Extension
+
+For services using `UseReadOnlyContext()`, ensure:
+
+```csharp
+using Demoulas.Common.Data.Contexts.Extensions;
+```
+
+**Pattern:**
+```csharp
+await using var ctx = await _factory.CreateDbContextAsync(ct);
+ctx.UseReadOnlyContext();  // Requires extension using statement
+```
+
+#### Type Conversion Issues
+
+**Problem**: EF Core `Count()` returns `long`, but DTOs expect `int` for `TotalCount`.
+
+**Error:**
+```
+error CS0029: Cannot implicitly convert type 'long' to 'int'
+```
+
+**Solution**: Explicit cast in endpoint:
+```csharp
+public override async Task<Results<Ok<PaginatedResponseDto<T>>, NotFound, ProblemHttpResult>> ExecuteAsync(...)
+{
+    var result = await _service.GetDataAsync(req, ct);
+    
+    return new PaginatedResponseDto<T>
+    {
+        Results = result.Value!.Items,
+        TotalCount = (int)result.Value!.Total  // ← Explicit cast from long to int
+    };
+}
+```
+
+### Service Method Signature Updates
+
+When adding sorting to existing endpoints, update service signatures:
+
+**Old Signature (pagination only):**
+```csharp
+Task<Result<PaginatedResponseDto<T>>> GetDataAsync(PaginationRequestDto request, CancellationToken ct);
+```
+
+**New Signature (pagination + sorting):**
+```csharp
+Task<Result<PaginatedResponseDto<T>>> GetDataAsync(SortedPaginationRequestDto request, CancellationToken ct);
+```
+
+**Update All Callers:**
+```csharp
+// Update service implementation
+public async Task<Result<PaginatedResponseDto<T>>> GetDataAsync(
+    SortedPaginationRequestDto request,  // Changed from PaginationRequestDto
+    CancellationToken ct)
+
+// Update unit tests
+var request = new SortedPaginationRequestDto  // Changed from PaginationRequestDto
+{
+    Skip = 0,
+    Take = 50,
+    SortBy = "Created",
+    IsSortDescending = true
+};
+```
+
+### Dictionary Key Issues (CRITICAL)
+
+**Problem**: Using SSN alone as dictionary key causes runtime crashes with duplicate SSNs.
+
+**Error (Runtime):**
+```
+System.ArgumentException: An item with the same key has already been added. Key: 123456789
+```
+
+**Wrong Code:**
+```csharp
+// ❌ CRASH if duplicate SSNs exist
+var demographicsByKey = demographics.ToDictionary(d => d.Ssn, d => d);
+```
+
+**Correct Code:**
+```csharp
+// ✅ Use composite key
+var demographicsByKey = demographics
+    .ToDictionary(d => (d.Ssn, d.OracleHcmId), d => d);
+
+// Or use ToLookup for one-to-many
+var demographicsByKey = demographics
+    .ToLookup(d => (d.Ssn, d.OracleHcmId));
+```
+
+---
+
 ## Reference Examples
 
 ### Simple Lookup Endpoint
