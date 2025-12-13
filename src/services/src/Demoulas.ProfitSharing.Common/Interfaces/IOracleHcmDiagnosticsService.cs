@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
@@ -16,7 +18,7 @@ public interface IOracleHcmDiagnosticsService
     /// <summary>
     /// Gets demographic sync audit records with pagination, ordered by Created date (descending).
     /// </summary>
-    Task<Result<DemographicSyncAuditPage>> GetDemographicSyncAuditAsync(int pageNumber = 1, int pageSize = 50, CancellationToken ct = default);
+    Task<Result<PaginatedResponseDto<DemographicSyncAuditDto>>> GetDemographicSyncAuditAsync(SortedPaginationRequestDto request, CancellationToken ct = default);
 
     /// <summary>
     /// Clears all records from the DEMOGRAPHIC_SYNC_AUDIT table and returns the count of deleted records.

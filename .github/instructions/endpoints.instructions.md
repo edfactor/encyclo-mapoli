@@ -8,7 +8,7 @@ Comprehensive technical documentation for the FastEndpoints-based API layer in t
 
 **Last Updated:** 2025-10-23
 **Project:** Demoulas Profit Sharing
-**Framework:** .NET 9, FastEndpoints 5.x
+**Framework:** .NET 10, FastEndpoints 7.x
 
 ---
 

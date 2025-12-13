@@ -1,3 +1,5 @@
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -67,16 +69,24 @@ public class GetDemographicSyncAuditEndpoint : ProfitSharingResponseEndpoint<Dem
         var pageNumber = Query<int?>("pageNumber") ?? 1;
         var pageSize = Query<int?>("pageSize") ?? 50;
 
-        return ExecuteAsyncInternal(pageNumber, pageSize, ct);
+        var request = new SortedPaginationRequestDto
+        {
+            Skip = (pageNumber - 1) * pageSize,
+            Take = pageSize,
+            SortBy = "Created",
+            IsSortDescending = true
+        };
+
+        return ExecuteAsyncInternal(request, ct);
     }
 
-    private async Task<DemographicSyncAuditPageResponse> ExecuteAsyncInternal(int pageNumber, int pageSize, CancellationToken ct)
+    private async Task<DemographicSyncAuditPageResponse> ExecuteAsyncInternal(SortedPaginationRequestDto request, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
         try
         {
-            var result = await _service.GetDemographicSyncAuditAsync(pageNumber, pageSize, ct);
+            var result = await _service.GetDemographicSyncAuditAsync(request, ct);
 
             if (result.IsError)
             {
@@ -84,9 +94,12 @@ public class GetDemographicSyncAuditEndpoint : ProfitSharingResponseEndpoint<Dem
                 return new DemographicSyncAuditPageResponse();
             }
 
+            // Calculate pageNumber from skip and take
+            int pageNumber = (request.Skip ?? 0) / (request.Take ?? 50) + 1;
+
             var response = new DemographicSyncAuditPageResponse
             {
-                Records = result.Value!.Records
+                Records = result.Value!.Results
                     .Select(r => new DemographicSyncAuditRecordResponse
                     {
                         Id = r.Id,
@@ -99,10 +112,10 @@ public class GetDemographicSyncAuditEndpoint : ProfitSharingResponseEndpoint<Dem
                         Created = r.Created
                     })
                     .ToList(),
-                PageNumber = result.Value!.PageNumber,
-                PageSize = result.Value!.PageSize,
-                TotalCount = result.Value!.TotalCount,
-                TotalPages = result.Value!.TotalPages
+                PageNumber = pageNumber,
+                PageSize = request.Take ?? 50,
+                TotalCount = (int)result.Value!.Total,
+                TotalPages = (int)Math.Ceiling((double)result.Value!.Total / (double)(request.Take ?? 50))
             };
 
             // Business metrics

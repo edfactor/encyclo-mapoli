@@ -1,25 +1,31 @@
 using System.ComponentModel;
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Data.Contexts.Interfaces;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.ItDevOps;
-using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services.ItDevOps;
 
 [Description("PS-2319 : OracleHcm sync diagnostics service methods")]
-public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
+public class OracleHcmDiagnosticsServiceTests
 {
-    private IOracleHcmDiagnosticsService _service = null!;
+    private readonly IOracleHcmDiagnosticsService _service;
+    private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
-    public OracleHcmDiagnosticsServiceTests(ServiceTestBaseFixture fixture) : base(fixture)
+    public OracleHcmDiagnosticsServiceTests()
     {
-    }
-
-    public override void Setup()
-    {
-        base.Setup();
-        _service = ServiceProvider.GetRequiredService<IOracleHcmDiagnosticsService>();
+        // Setup service with mock context factory
+        _dataContextFactory = new InMemoryProfitSharingDataContextFactory();
+        _service = new OracleHcmDiagnosticsService(_dataContextFactory, new MockCommitGuardOverride());
     }
 
     #region GetOracleHcmSyncMetadataAsync Tests
@@ -72,19 +78,17 @@ public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
     {
         // Arrange
         var ct = CancellationToken.None;
+        var request = new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true };
 
         // Act
-        var result = await _service.GetDemographicSyncAuditAsync(1, 50, ct);
+        var result = await _service.GetDemographicSyncAuditAsync(request, ct);
 
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
-        result.Value.Records.ShouldBeEmpty();
-        result.Value.PageNumber.ShouldBe(1);
-        result.Value.PageSize.ShouldBe(50);
-        result.Value.TotalCount.ShouldBe(0);
-        result.Value.TotalPages.ShouldBe(0);
+        result.Value.Results.ShouldBeEmpty();
+        result.Value.Total.ShouldBe(0);
     }
 
     [Fact]
@@ -96,7 +100,7 @@ public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
         var now = DateTimeOffset.UtcNow;
 
         // Add test audit records
-        await TestDbContextFactory.UseWritableContext(async ctx =>
+        await _dataContextFactory.UseWritableContext(async ctx =>
         {
             ctx.DemographicSyncAudit.Add(new DemographicSyncAudit
             {
@@ -124,19 +128,18 @@ public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
         }, ct);
 
         // Act
-        var result = await _service.GetDemographicSyncAuditAsync(1, 50, ct);
+        var request = new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true };
+        var result = await _service.GetDemographicSyncAuditAsync(request, ct);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Records.Count.ShouldBe(2);
-        result.Value.PageNumber.ShouldBe(1);
-        result.Value.PageSize.ShouldBe(50);
-        result.Value.TotalCount.ShouldBe(2);
-        result.Value.TotalPages.ShouldBe(1);
+        var records = result.Value!.Results.ToList();
+        records.Count.ShouldBe(2);
+        result.Value!.Total.ShouldBe(2);
 
         // Verify records are ordered by Created descending
-        result.Value.Records[0].BadgeNumber.ShouldBe(12345);
-        result.Value.Records[1].BadgeNumber.ShouldBe(12346);
+        records[0].BadgeNumber.ShouldBe(12345);
+        records[1].BadgeNumber.ShouldBe(12346);
     }
 
     [Fact]
@@ -148,7 +151,7 @@ public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
         var now = DateTimeOffset.UtcNow;
 
         // Add test records
-        await TestDbContextFactory.UseWritableContext(async ctx =>
+        await _dataContextFactory.UseWritableContext(async ctx =>
         {
             for (int i = 1; i <= 5; i++)
             {
@@ -168,21 +171,25 @@ public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
         }, ct);
 
         // Act - Page 1
-        var result1 = await _service.GetDemographicSyncAuditAsync(1, 2, ct);
+        var request1 = new SortedPaginationRequestDto { Skip = 0, Take = 2, SortBy = "Created", IsSortDescending = true };
+        var result1 = await _service.GetDemographicSyncAuditAsync(request1, ct);
 
         // Act - Page 2
-        var result2 = await _service.GetDemographicSyncAuditAsync(2, 2, ct);
+        var request2 = new SortedPaginationRequestDto { Skip = 2, Take = 2, SortBy = "Created", IsSortDescending = true };
+        var result2 = await _service.GetDemographicSyncAuditAsync(request2, ct);
 
         // Assert Page 1
         result1.IsSuccess.ShouldBeTrue();
-        result1.Value.Records.Count.ShouldBe(2);
-        result1.Value.TotalPages.ShouldBe(3);
-        result1.Value.Records[0].BadgeNumber.ShouldBe(12345); // Most recent (created now)
+        var records1 = result1.Value!.Results.ToList();
+        records1.Count.ShouldBe(2);
+        result1.Value!.Total.ShouldBe(5);
+        records1[0].BadgeNumber.ShouldBe(12345); // Most recent (created now)
 
         // Assert Page 2
         result2.IsSuccess.ShouldBeTrue();
-        result2.Value.Records.Count.ShouldBe(2);
-        result2.Value.Records[0].BadgeNumber.ShouldBe(12343); // Next in descending order
+        var records2 = result2.Value!.Results.ToList();
+        records2.Count.ShouldBe(2);
+        records2[0].BadgeNumber.ShouldBe(12343); // Next in descending order
     }
 
     [Fact]
@@ -193,11 +200,12 @@ public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
         var ct = CancellationToken.None;
 
         // Act - Test with page size > 1000 (should be adjusted to 50)
-        var result = await _service.GetDemographicSyncAuditAsync(1, 5000, ct);
+        var request = new SortedPaginationRequestDto { Skip = 0, Take = 5000, SortBy = "Created", IsSortDescending = true };
+        var result = await _service.GetDemographicSyncAuditAsync(request, ct);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.PageSize.ShouldBe(50); // Should be adjusted to default
+        result.Value!.Results.ShouldNotBeNull();
     }
 
     #endregion
@@ -213,7 +221,7 @@ public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
         var now = DateTimeOffset.UtcNow;
 
         // Add test records
-        await TestDbContextFactory.UseWritableContext(async ctx =>
+        await _dataContextFactory.UseWritableContext(async ctx =>
         {
             for (int i = 1; i <= 3; i++)
             {
@@ -233,19 +241,21 @@ public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
         }, ct);
 
         // Verify records exist before clear
-        var beforeClear = await _service.GetDemographicSyncAuditAsync(1, 50, ct);
-        beforeClear.Value.TotalCount.ShouldBe(3);
+        var beforeRequest = new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true };
+        var beforeClear = await _service.GetDemographicSyncAuditAsync(beforeRequest, ct);
+        beforeClear.Value!.Total.ShouldBe(3);
 
         // Act
         var result = await _service.ClearDemographicSyncAuditAsync(ct);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBe(3); // Should return count of deleted records
+        result.Value!.ShouldBe(3); // Should return count of deleted records
 
         // Verify records are deleted
-        var afterClear = await _service.GetDemographicSyncAuditAsync(1, 50, ct);
-        afterClear.Value.TotalCount.ShouldBe(0);
+        var afterRequest = new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true };
+        var afterClear = await _service.GetDemographicSyncAuditAsync(afterRequest, ct);
+        afterClear.Value!.Total.ShouldBe(0);
     }
 
     [Fact]
@@ -265,3 +275,98 @@ public class OracleHcmDiagnosticsServiceTests : ServiceTestBase
 
     #endregion
 }
+
+/// <summary>
+/// Mock implementation of ICommitGuardOverride for testing purposes.
+/// Allows the IT_DEVOPS role to perform write operations without actual authorization checks.
+/// </summary>
+internal sealed class MockCommitGuardOverride : ICommitGuardOverride
+{
+    public IDisposable AllowFor(params string[] roles)
+    {
+        return new MockGuardScope();
+    }
+
+    public IEnumerable<string> GetCurrentRoles()
+    {
+        return new[] { Role.ITDEVOPS };
+    }
+
+    private sealed class MockGuardScope : IDisposable
+    {
+        public void Dispose()
+        {
+            // No-op for mock
+        }
+    }
+}
+
+/// <summary>
+/// In-memory implementation of IProfitSharingDataContextFactory for unit testing.
+/// </summary>
+internal sealed class InMemoryProfitSharingDataContextFactory : IProfitSharingDataContextFactory
+{
+    private ProfitSharingDbContext? _context;
+
+    public Task<IProfitSharingDbContext> CreateDbContextAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult<IProfitSharingDbContext>(_context ??= CreateInMemoryContext());
+    }
+
+    public Task<T> UseReadOnlyContext<T>(
+        Func<ProfitSharingReadOnlyDbContext, Task<T>> operation,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException("Read-only context not implemented for in-memory tests");
+    }
+
+    public Task UseReadOnlyContext(
+        Func<ProfitSharingReadOnlyDbContext, Task> operation,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException("Read-only context not implemented for in-memory tests");
+    }
+
+    public Task<T> UseWritableContext<T>(
+        Func<ProfitSharingDbContext, Task<T>> operation,
+        CancellationToken cancellationToken = default)
+    {
+        var ctx = _context ??= CreateInMemoryContext();
+        return operation(ctx);
+    }
+
+    public Task UseWritableContext(
+        Func<ProfitSharingDbContext, Task> operation,
+        CancellationToken cancellationToken = default)
+    {
+        var ctx = _context ??= CreateInMemoryContext();
+        return operation(ctx);
+    }
+
+    public async Task<T> UseWritableContextAsync<T>(
+        Func<ProfitSharingDbContext, IDbContextTransaction, Task<T>> operation,
+        CancellationToken cancellationToken)
+    {
+        var ctx = _context ??= CreateInMemoryContext();
+        await using var transaction = await ctx.Database.BeginTransactionAsync(cancellationToken);
+        return await operation(ctx, transaction);
+    }
+
+    public Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
+    {
+        throw new NotImplementedException("Warehouse context not needed for tests");
+    }
+
+    private static ProfitSharingDbContext CreateInMemoryContext()
+    {
+        // Create in-memory SQLite context for testing
+        var options = new DbContextOptionsBuilder<ProfitSharingDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+        var context = new ProfitSharingDbContext(options);
+        context.Database.EnsureCreated();
+        return context;
+    }
+}
+

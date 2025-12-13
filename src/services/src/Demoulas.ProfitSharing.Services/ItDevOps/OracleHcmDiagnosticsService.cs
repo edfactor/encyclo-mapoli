@@ -1,4 +1,7 @@
-﻿using Demoulas.Common.Data.Contexts.Interfaces;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
@@ -66,37 +69,18 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
     }
 
     /// <summary>
-    /// Gets demographic sync audit records, grouped by BadgeNumber and ordered by Created date (descending).
-    /// Supports pagination.
+    /// Gets demographic sync audit records, ordered by Created date (descending).
+    /// Supports pagination using SortedPaginationRequestDto.
     /// </summary>
-    public async Task<Result<DemographicSyncAuditPage>> GetDemographicSyncAuditAsync(int pageNumber = 1, int pageSize = 50, CancellationToken ct = default)
+    public async Task<Result<PaginatedResponseDto<DemographicSyncAuditDto>>> GetDemographicSyncAuditAsync(SortedPaginationRequestDto request, CancellationToken ct = default)
     {
         try
         {
-            // Validate pagination parameters
-            if (pageNumber < 1)
-            {
-                pageNumber = 1;
-            }
-
-            if (pageSize < 1 || pageSize > 1000)
-            {
-                pageSize = 50;
-            }
-
             var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                // Get total count
-                var totalCount = await ctx.DemographicSyncAudit
-                    .TagWith("GetDemographicSyncAudit-Count")
-                    .CountAsync(ct);
-
-                // Get paginated records, ordered by Created descending
-                var records = await ctx.DemographicSyncAudit
-                    .TagWith("GetDemographicSyncAudit-Records")
+                var query = ctx.DemographicSyncAudit
+                    .TagWith("GetDemographicSyncAudit")
                     .OrderByDescending(a => a.Created)
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
                     .Select(a => new DemographicSyncAuditDto
                     {
                         Id = a.Id,
@@ -107,24 +91,16 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
                         InvalidValue = a.InvalidValue,
                         UserName = a.UserName,
                         Created = a.Created
-                    })
-                    .ToListAsync(ct);
+                    });
 
-                return new DemographicSyncAuditPage
-                {
-                    Records = records,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    TotalCount = totalCount,
-                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
-                };
+                return await query.ToPaginationResultsAsync(request, ct);
             }, ct);
 
-            return Result<DemographicSyncAuditPage>.Success(result);
+            return Result<PaginatedResponseDto<DemographicSyncAuditDto>>.Success(result);
         }
         catch (Exception ex)
         {
-            return Result<DemographicSyncAuditPage>.Failure(Error.Unexpected(ex.Message));
+            return Result<PaginatedResponseDto<DemographicSyncAuditDto>>.Failure(Error.Unexpected(ex.Message));
         }
     }
 

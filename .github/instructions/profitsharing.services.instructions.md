@@ -6,7 +6,7 @@ applyTo: "src/services/src/Demoulas.ProfitSharing.Services/**/*.*"
 
 **Project**: Demoulas Profit Sharing Application
 **Location**: `./src/services/src/Demoulas.ProfitSharing.Services/`
-**Technology**: .NET 9, C# 13, EF Core 9 with Oracle Provider
+**Technology**: .NET 10, C# 14, EF Core 10 with Oracle Provider
 **Lines of Code**: ~13,784
 **Last Updated**: 2025-10-23
 
