@@ -114,8 +114,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
               rowData: data.records,
               columnDefs: columnDefs,
               suppressMoveWhenRowDragging: true,
-              enableCellTextSelection: true,
-              enableRangeSelection: true
+              enableCellTextSelection: true
             }}
           />
           {data && data.records.length > 0 && (
