@@ -23,6 +23,21 @@ public sealed class DemographicHistory : IDoNotAudit
     public char? TerminationCodeId { get; set; }
     public char EmploymentStatusId { get; set; }
 
+    // ContactInfo fields (nullable - may not exist for pre-migration records)
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? MiddleName { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? MobileNumber { get; set; }
+    public string? EmailAddress { get; set; }
+
+    // Address fields (nullable - may not exist for pre-migration records)
+    public string? Street { get; set; }
+    public string? Street2 { get; set; }
+    public string? City { get; set; }
+    public string? State { get; set; }
+    public string? PostalCode { get; set; }
+
     public DateTimeOffset CreatedDateTime { get; set; } = DateTimeOffset.UtcNow;
 
     public static DemographicHistory FromDemographic(Demographic source, int demographicId)
@@ -49,7 +64,20 @@ public sealed class DemographicHistory : IDoNotAudit
             EmploymentTypeId = source.EmploymentTypeId,
             PayFrequencyId = source.PayFrequencyId,
             TerminationCodeId = source.TerminationCodeId,
-            EmploymentStatusId = source.EmploymentStatusId
+            EmploymentStatusId = source.EmploymentStatusId,
+            // ContactInfo fields
+            FirstName = source.ContactInfo.FirstName,
+            LastName = source.ContactInfo.LastName,
+            MiddleName = source.ContactInfo.MiddleName,
+            PhoneNumber = source.ContactInfo.PhoneNumber,
+            MobileNumber = source.ContactInfo.MobileNumber,
+            EmailAddress = source.ContactInfo.EmailAddress,
+            // Address fields
+            Street = source.Address.Street,
+            Street2 = source.Address.Street2,
+            City = source.Address.City,
+            State = source.Address.State,
+            PostalCode = source.Address.PostalCode
         };
         return h;
     }
