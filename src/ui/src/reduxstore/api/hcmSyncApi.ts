@@ -25,14 +25,16 @@ export const hcmSyncApi = createApi({
      */
     getDemographicSyncAudit: builder.query<
       DemographicSyncAuditPage,
-      { pageNumber?: number; pageSize?: number }
+      { pageNumber?: number; pageSize?: number; sortBy?: string; isSortDescending?: boolean }
     >({
-      query: ({ pageNumber = 1, pageSize = 50 }) => ({
+      query: ({ pageNumber = 1, pageSize = 50, sortBy = "Created", isSortDescending = true }) => ({
         url: "itdevops/oracleHcm/audit",
         method: "GET",
         params: {
           pageNumber,
-          pageSize
+          pageSize,
+          sortBy,
+          isSortDescending
         }
       }),
       providesTags: ["demographic-sync-audit"]

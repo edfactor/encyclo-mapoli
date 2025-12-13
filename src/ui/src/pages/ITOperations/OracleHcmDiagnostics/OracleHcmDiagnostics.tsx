@@ -1,6 +1,7 @@
 import { Box, Divider } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Page } from "smart-ui-library";
+import { SortParams } from "../../../hooks/useGridPagination";
 import { useClearDemographicSyncAudit, useGetOracleHcmSyncMetadata, useLazyGetDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
 import AuditGrid from "./AuditGrid";
 import OracleHcmMetadata from "./OracleHcmMetadata";
@@ -12,10 +13,17 @@ const OracleHcmDiagnostics = () => {
   const hasInitiallyFetched = useRef(false);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [sortBy, setSortBy] = useState<string>("Created");
+  const [isSortDescending, setIsSortDescending] = useState<boolean>(true);
 
-  const fetchAuditData = useCallback((page: number, size: number) => {
-    triggerGetAudit({ pageNumber: page + 1, pageSize: size }, false);
-  }, [triggerGetAudit]);
+  const fetchAuditData = useCallback((page: number, size: number, sort?: string, desc?: boolean) => {
+    triggerGetAudit({ 
+      pageNumber: page + 1, 
+      pageSize: size,
+      sortBy: sort ?? sortBy,
+      isSortDescending: desc ?? isSortDescending
+    }, false);
+  }, [triggerGetAudit, sortBy, isSortDescending]);
 
   useEffect(() => {
     if (!hasInitiallyFetched.current) {
@@ -34,6 +42,13 @@ const OracleHcmDiagnostics = () => {
     setPageNumber(page);
     setPageSize(size);
     fetchAuditData(page, size);
+  };
+
+  const handleSortChange = (sortParams: SortParams) => {
+    setSortBy(sortParams.sortBy);
+    setIsSortDescending(sortParams.isSortDescending);
+    setPageNumber(0);
+    fetchAuditData(0, pageSize, sortParams.sortBy, sortParams.isSortDescending);
   };
 
   return (
@@ -58,6 +73,7 @@ const OracleHcmDiagnostics = () => {
           pageNumber={pageNumber}
           pageSize={pageSize}
           onPageChange={handlePageChange}
+          onSortChange={handleSortChange}
         />
       </Box>
     </Page>

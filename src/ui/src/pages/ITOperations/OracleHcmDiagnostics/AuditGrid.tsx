@@ -2,9 +2,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
+import { SortParams } from "../../../hooks/useGridPagination";
 import { useClearDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
-import { mmDDYYYY_HHMMSS_Format } from "../../../utils/dateUtils";
-import { DemographicSyncAuditPage, DemographicSyncAuditRecord } from "./types";
+import { GetAuditGridColumns } from "./AuditGridColumns";
+import { DemographicSyncAuditPage } from "./types";
 
 interface AuditGridProps {
   data?: DemographicSyncAuditPage;
@@ -13,57 +14,16 @@ interface AuditGridProps {
   pageNumber: number;
   pageSize: number;
   onPageChange: (page: number, pageSize: number) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
-const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, pageNumber, pageSize, onPageChange }) => {
+const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, pageNumber, pageSize, onPageChange, onSortChange }) => {
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [clearError, setClearError] = useState<string | null>(null);
 
   const [triggerClear, { isLoading: isClearing }] = useClearDemographicSyncAudit();
 
-  const columnDefs = useMemo(
-    () => [
-      {
-        headerName: "Badge Number",
-        field: "badgeNumber" as keyof DemographicSyncAuditRecord,
-        sortable: true,
-        filter: false,
-        width: 120
-      },
-      {
-        headerName: "Created",
-        field: "created" as keyof DemographicSyncAuditRecord,
-        sortable: true,
-        filter: false,
-        width: 200,
-        valueFormatter: (params: any) => (params.value ? mmDDYYYY_HHMMSS_Format(params.value) : "")
-      },
-      {
-        headerName: "Property Name",
-        field: "propertyName" as keyof DemographicSyncAuditRecord,
-        sortable: true,
-        filter: false,
-        flex: 1,
-        minWidth: 150
-      },
-      {
-        headerName: "Message",
-        field: "message" as keyof DemographicSyncAuditRecord,
-        sortable: true,
-        filter: false,
-        flex: 2,
-        minWidth: 250
-      },
-      {
-        headerName: "Oracle HCM ID",
-        field: "oracleHcmId" as keyof DemographicSyncAuditRecord,
-        sortable: true,
-        filter: false,
-        width: 120
-      }
-    ] as any[],
-    []
-  );
+  const columnDefs = useMemo(() => GetAuditGridColumns(), []);
 
   const handleClearClick = () => {
     setShowClearConfirmation(true);
@@ -110,6 +70,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
           <DSMGrid
             preferenceKey={"DEMOGRAPHIC_SYNC_AUDIT"}
             isLoading={isLoading}
+            handleSortChanged={onSortChange}
             providedOptions={{
               rowData: data.records,
               columnDefs: columnDefs,
