@@ -1,5 +1,5 @@
 import { Box, Divider } from "@mui/material";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Page } from "smart-ui-library";
 import { useClearDemographicSyncAudit, useGetOracleHcmSyncMetadata, useLazyGetDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
 import AuditGrid from "./AuditGrid";
@@ -10,25 +10,30 @@ const OracleHcmDiagnostics = () => {
   const [triggerGetAudit, { data: auditData, isLoading: auditLoading }] = useLazyGetDemographicSyncAudit();
   const [, { isLoading: clearLoading }] = useClearDemographicSyncAudit();
   const hasInitiallyFetched = useRef(false);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
-  const fetchAuditData = useCallback((pageNumber: number = 1, pageSize: number = 50) => {
-    triggerGetAudit({ pageNumber, pageSize }, false);
+  const fetchAuditData = useCallback((page: number, size: number) => {
+    triggerGetAudit({ pageNumber: page + 1, pageSize: size }, false);
   }, [triggerGetAudit]);
 
   useEffect(() => {
     if (!hasInitiallyFetched.current) {
       hasInitiallyFetched.current = true;
-      fetchAuditData();
+      fetchAuditData(pageNumber, pageSize);
     }
-  }, [fetchAuditData]);
+  }, [fetchAuditData, pageNumber, pageSize]);
 
   const handleClearSuccess = () => {
     refetchMetadata();
-    fetchAuditData();
+    setPageNumber(0);
+    fetchAuditData(0, pageSize);
   };
 
-  const handlePageChange = (page: number, pageSize: number) => {
-    fetchAuditData(page, pageSize);
+  const handlePageChange = (page: number, size: number) => {
+    setPageNumber(page);
+    setPageSize(size);
+    fetchAuditData(page, size);
   };
 
   return (
@@ -50,6 +55,9 @@ const OracleHcmDiagnostics = () => {
           data={auditData}
           isLoading={auditLoading || clearLoading}
           onClearSuccess={handleClearSuccess}
+          pageNumber={pageNumber}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
         />
       </Box>
     </Page>

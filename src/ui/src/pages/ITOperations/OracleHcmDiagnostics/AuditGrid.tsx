@@ -10,10 +10,12 @@ interface AuditGridProps {
   data?: DemographicSyncAuditPage;
   isLoading: boolean;
   onClearSuccess: () => void;
+  pageNumber: number;
+  pageSize: number;
   onPageChange: (page: number, pageSize: number) => void;
 }
 
-const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, onPageChange }) => {
+const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, pageNumber, pageSize, onPageChange }) => {
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [clearError, setClearError] = useState<string | null>(null);
 
@@ -116,13 +118,19 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
               enableRangeSelection: true
             }}
           />
-          <Pagination
-            count={data.totalCount}
-            page={data.pageNumber}
-            rowsPerPage={data.pageSize}
-            onPageChange={(newPage) => onPageChange(newPage, data.pageSize)}
-            onRowsPerPageChange={(newPageSize) => onPageChange(1, newPageSize)}
-          />
+          {data && data.records.length > 0 && (
+            <Pagination
+              pageNumber={pageNumber}
+              setPageNumber={(value: number) => {
+                onPageChange(value - 1, pageSize);
+              }}
+              pageSize={pageSize}
+              setPageSize={(value: number) => {
+                onPageChange(0, value);
+              }}
+              recordCount={data.totalCount}
+            />
+          )}
         </>
       ) : (
         <Typography variant="body1" sx={{ color: "#666", textAlign: "center", padding: "32px" }}>
