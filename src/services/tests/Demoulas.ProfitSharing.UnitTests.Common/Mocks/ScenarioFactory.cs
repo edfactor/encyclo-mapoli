@@ -177,7 +177,27 @@ public sealed class ScenarioFactory
                 OracleHcmId = 44,
                 DepartmentId = 5,
                 TerminationCodeId = 'a',
-                DateOfBirth = DateTime.Now.AddYears(-40).ToDateOnly()
+                DateOfBirth = DateTime.Now.AddYears(-40).ToDateOnly(),
+                // Contact/Address fields copied from Demographics[0]
+                FirstName = Demographics[0].ContactInfo?.FirstName,
+                LastName = Demographics[0].ContactInfo?.LastName,
+                MiddleName = Demographics[0].ContactInfo?.MiddleName,
+                PhoneNumber = Demographics[0].ContactInfo?.PhoneNumber,
+                MobileNumber = Demographics[0].ContactInfo?.MobileNumber,
+                EmailAddress = Demographics[0].ContactInfo?.EmailAddress,
+                Street = Demographics[0].Address?.Street,
+                Street2 = Demographics[0].Address?.Street2,
+                City = Demographics[0].Address?.City,
+                State = Demographics[0].Address?.State,
+                PostalCode = Demographics[0].Address?.PostalCode,
+                HireDate = Demographics[0].HireDate,
+                ReHireDate = Demographics[0].ReHireDate,
+                TerminationDate = Demographics[0].TerminationDate,
+                EmploymentTypeId = Demographics[0].EmploymentTypeId,
+                PayFrequencyId = Demographics[0].PayFrequencyId,
+                EmploymentStatusId = Demographics[0].EmploymentStatusId,
+                ValidFrom = DateTime.UtcNow.AddDays(-1),
+                ValidTo = DateTime.UtcNow.AddYears(1)
             }
         ];
         return this;
