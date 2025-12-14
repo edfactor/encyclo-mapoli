@@ -125,6 +125,11 @@ const RouterSubAssembly: React.FC = () => {
       return;
     }
 
+    // If impersonation is already present (e.g., hydrated at store init), do not override it.
+    if (impersonating && impersonating.length > 0) {
+      return;
+    }
+
     try {
       const raw = localStorage.getItem(ImpersonatingRolesStorageKey);
       if (!raw) {
@@ -146,7 +151,7 @@ const RouterSubAssembly: React.FC = () => {
     } catch {
       // Ignore localStorage parse errors in dev/qa.
     }
-  }, [dispatch]);
+  }, [dispatch, impersonating]);
 
   // CRITICAL DEV/QA FUNCTIONALITY:
   // Persist/clear impersonation roles across refreshes (Development/QA only).

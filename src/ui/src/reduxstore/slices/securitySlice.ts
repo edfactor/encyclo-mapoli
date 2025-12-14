@@ -1,5 +1,42 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ImpersonationRoles } from "reduxstore/types";
+import EnvironmentUtils from "../../utils/environmentUtils";
+
+// CRITICAL DEV/QA FUNCTIONALITY:
+// We intentionally persist impersonation roles to localStorage ONLY in Development/QA.
+// This supports rapid debugging/testing workflows across refreshes.
+// Do NOT remove this without providing an equivalent dev/qa-only mechanism.
+// NOTE: Must stay in sync with the key in RouterSubAssembly.
+const ImpersonatingRolesStorageKey = "impersonatingRoles";
+
+function getInitialImpersonatingRoles(): ImpersonationRoles[] {
+  if (!EnvironmentUtils.isDevelopmentOrQA) {
+    return [];
+  }
+
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const raw = window.localStorage?.getItem(ImpersonatingRolesStorageKey);
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    const allowedRoleValues = new Set<string>(Object.values(ImpersonationRoles));
+    return parsed.filter(
+      (x): x is ImpersonationRoles => typeof x === "string" && allowedRoleValues.has(x)
+    );
+  } catch {
+    return [];
+  }
+}
 
 export interface SecurityState {
   token: string | null;
@@ -29,7 +66,7 @@ const initialState: SecurityState = {
   username: "",
   performLogout: false,
   appUser: null,
-  impersonating: []
+  impersonating: getInitialImpersonatingRoles()
 };
 
 export const securitySlice = createSlice({
