@@ -219,12 +219,14 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             BadgeNumber = validBadgeNumber,
             StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'R', // Use 'R' for Rollover Direct to allow third party payee
-            FederalTaxPercentage = 20.0m,
-            FederalTaxAmount = 200.00m,
-            StateTaxPercentage = 5.0m,
-            StateTaxAmount = 50.00m,
-            GrossAmount = 1000.00m,
-            CheckAmount = 750.00m,
+            // Rollover Direct requests are normalized server-side to 0 taxes and check amount = gross.
+            // Keep these values aligned to avoid test brittleness.
+            FederalTaxPercentage = 0.0m,
+            FederalTaxAmount = 0.00m,
+            StateTaxPercentage = 0.0m,
+            StateTaxAmount = 0.00m,
+            GrossAmount = 500.00m,
+            CheckAmount = 500.00m,
             TaxCodeId = '1',
             ThirdPartyPayee = new ThirdPartyPayee
             {
