@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
@@ -22,6 +23,37 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     public UpdateDistributionEndpointTests(ITestOutputHelper testOutputHelper)
     {
         // Constructor accepts ITestOutputHelper for xUnit framework compatibility
+    }
+
+    private const decimal HighVestedBalance = 1_000_000m;
+
+    private static void EnsureHighVestedBalanceForSsn(int ssn)
+    {
+        var matches = Constants.FakeParticipantTotalVestingBalances.Object
+            .AsEnumerable()
+            .Where(x => x.Ssn == ssn)
+            .ToList();
+
+        if (matches.Count == 0)
+        {
+            Constants.FakeParticipantTotalVestingBalances.Object.Add(new Data.Entities.Virtual.ParticipantTotalVestingBalance
+            {
+                Ssn = ssn,
+                VestedBalance = HighVestedBalance,
+                CurrentBalance = HighVestedBalance,
+                VestingPercent = 1.0m,
+                YearsInPlan = 40
+            });
+            return;
+        }
+
+        foreach (var match in matches)
+        {
+            match.VestedBalance = HighVestedBalance;
+            match.CurrentBalance = Math.Max(match.CurrentBalance, HighVestedBalance);
+            match.VestingPercent = 1.0m;
+            match.YearsInPlan = 40;
+        }
     }
 
     /// <summary>
@@ -77,6 +109,8 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             var demographic = await ctx.Demographics
                 .Where(d => d.BadgeNumber == badgeNumber)
                 .FirstAsync();
+
+            EnsureHighVestedBalanceForSsn(demographic.Ssn);
 
             var distribution = new Distribution
             {
