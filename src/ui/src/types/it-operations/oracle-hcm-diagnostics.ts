@@ -23,14 +23,6 @@ export interface DemographicSyncAuditRecord {
 }
 
 /// <summary>
-/// Standard paginated response wrapper.
-/// </summary>
-export interface PaginatedResponseDto<T> {
-  results: T[];
-  total: number;
-}
-
-/// <summary>
 /// Response from clear audit endpoint.
 /// </summary>
 export interface ClearAuditResponse {

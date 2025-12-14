@@ -1,7 +1,7 @@
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import type { OracleHcmSyncMetadata } from "../../../types";
 import { mmDDYYYY_HHMMSS_Format } from "../../../utils/dateUtils";
-import { OracleHcmSyncMetadata } from "./types";
 
 interface OracleHcmMetadataProps {
   metadata?: OracleHcmSyncMetadata;

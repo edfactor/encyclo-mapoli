@@ -323,18 +323,18 @@ internal sealed class InMemoryProfitSharingDataContextFactory : IProfitSharingDa
         return Task.FromResult<IProfitSharingDbContext>(_context ??= CreateInMemoryContext());
     }
 
-public Task<T> UseReadOnlyContext<T>(
-        Func<ProfitSharingReadOnlyDbContext, Task<T>> operation,
-        CancellationToken cancellationToken = default)
+    public Task<T> UseReadOnlyContext<T>(
+            Func<ProfitSharingReadOnlyDbContext, Task<T>> operation,
+            CancellationToken cancellationToken = default)
     {
         // Ensure the writable context exists first (creates the database)
         var ctx = _context ??= CreateInMemoryContext();
-        
+
         // Create a proper read-only context using the same database name
         var readOnlyOptions = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>()
             .UseInMemoryDatabase(databaseName: _databaseName)
             .Options;
-        
+
         var readOnlyCtx = new ProfitSharingReadOnlyDbContext(readOnlyOptions);
         return operation(readOnlyCtx);
     }
@@ -345,12 +345,12 @@ public Task<T> UseReadOnlyContext<T>(
     {
         // Ensure the writable context exists first (creates the database)
         var ctx = _context ??= CreateInMemoryContext();
-        
+
         // Create a proper read-only context using the same database name
         var readOnlyOptions = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>()
             .UseInMemoryDatabase(databaseName: _databaseName)
             .Options;
-        
+
         var readOnlyCtx = new ProfitSharingReadOnlyDbContext(readOnlyOptions);
         return operation(readOnlyCtx);
     }

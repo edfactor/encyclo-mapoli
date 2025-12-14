@@ -38,19 +38,6 @@ public class DemographicSyncAuditRecordResponse
 }
 
 /// <summary>
-/// Paginated response containing demographic sync audit records.
-/// </summary>
-[NoMemberDataExposed]
-public class DemographicSyncAuditPageResponse
-{
-    public List<DemographicSyncAuditRecordResponse> Records { get; set; } = [];
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public int TotalCount { get; set; }
-    public int TotalPages { get; set; }
-}
-
-/// <summary>
 /// Response indicating success of clearing demographic sync audit records.
 /// </summary>
 [NoMemberDataExposed]
@@ -86,17 +73,4 @@ public class DemographicSyncAuditDto
     public string? InvalidValue { get; set; }
     public string? UserName { get; set; }
     public DateTimeOffset Created { get; set; }
-}
-
-/// <summary>
-/// Internal DTO for paginated demographic sync audit records.
-/// Used by service layer to return paginated audit results to endpoints.
-/// </summary>
-public class DemographicSyncAuditPage
-{
-    public List<DemographicSyncAuditDto> Records { get; set; } = [];
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public int TotalCount { get; set; }
-    public int TotalPages { get; set; }
 }

@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { ClearAuditResponse, DemographicSyncAuditPage, OracleHcmSyncMetadata } from "../../pages/ITOperations/OracleHcmDiagnostics/types";
+import { Paged } from "smart-ui-library";
+import type { ClearAuditResponse, DemographicSyncAuditRecord, OracleHcmSyncMetadata, SortedPaginationRequestDto } from "../../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -24,19 +25,21 @@ export const hcmSyncApi = createApi({
      * Fetches paginated demographic sync audit records
      */
     getDemographicSyncAudit: builder.query<
-      DemographicSyncAuditPage,
-      { pageNumber?: number; pageSize?: number; sortBy?: string; isSortDescending?: boolean }
+      Paged<DemographicSyncAuditRecord>,
+      SortedPaginationRequestDto
     >({
-      query: ({ pageNumber = 1, pageSize = 50, sortBy = "Created", isSortDescending = true }) => ({
+      query: ({ skip, take, sortBy, isSortDescending }) => {
+        return {
         url: "itdevops/oracleHcm/audit",
         method: "GET",
         params: {
-          pageNumber,
-          pageSize,
+          skip,
+          take,
           sortBy,
           isSortDescending
         }
-      }),
+        };
+      },
       providesTags: ["demographic-sync-audit"]
     }),
 

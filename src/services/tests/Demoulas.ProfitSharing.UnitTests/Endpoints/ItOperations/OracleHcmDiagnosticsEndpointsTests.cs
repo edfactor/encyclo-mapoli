@@ -1,4 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Linq;
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 using Demoulas.ProfitSharing.Security;
@@ -54,32 +58,40 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
-        // Act - Call endpoint (default pagination parameters: pageNumber=1, pageSize=50)
-        var response = await ApiClient.GETAsync<GetDemographicSyncAuditEndpoint, DemographicSyncAuditPageResponse>();
+        // Act
+        var response = await ApiClient.GETAsync<GetDemographicSyncAuditEndpoint, SortedPaginationRequestDto, PaginatedResponseDto<DemographicSyncAuditRecordResponse>>(
+            new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true });
 
         // Assert - Verify endpoint returns valid paginated response structure
         response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
         response.Result.ShouldNotBeNull();
-        response.Result.PageNumber.ShouldBe(1);
-        response.Result.PageSize.ShouldBe(50);
-        response.Result.TotalCount.ShouldBe(0);
+        response.Result.Total.ShouldBe(5); // Mock factory seeds 5 DemographicSyncAudit records
+        response.Result.Results.ShouldNotBeNull();
+        response.Result.Results.Count().ShouldBe(5);
     }
 
     [Fact]
-    [Description("PS-2319 : GetDemographicSyncAuditEndpoint returns empty page when no records")]
-    public async Task ExecuteAsync_NoRecords_ReturnsEmptyPage()
+    [Description("PS-2319 : GetDemographicSyncAuditEndpoint returns audit records from mock factory")]
+    public async Task ExecuteAsync_ReturnsAuditRecords_FromMockFactory()
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
         // Act
-        var response = await ApiClient.GETAsync<GetDemographicSyncAuditEndpoint, DemographicSyncAuditPageResponse>();
+        var response = await ApiClient.GETAsync<GetDemographicSyncAuditEndpoint, SortedPaginationRequestDto, PaginatedResponseDto<DemographicSyncAuditRecordResponse>>(
+            new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true });
 
-        // Assert - Verify proper pagination response structure
+        // Assert - Verify audit records returned from mock data factory
         response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
         response.Result.ShouldNotBeNull();
-        response.Result.Records.ShouldBeEmpty();
-        response.Result.TotalCount.ShouldBe(0);
+        response.Result.Results.ShouldNotBeNull();
+        var records = response.Result.Results.ToList();
+        records.ShouldNotBeEmpty();
+        records.Count.ShouldBe(5); // DemographicSyncAuditFaker generates 5 records
+        response.Result.Total.ShouldBe(5);
+        records.All(r => r.Id > 0).ShouldBeTrue();
+        records.All(r => r.BadgeNumber > 0).ShouldBeTrue();
+        records.All(r => !string.IsNullOrWhiteSpace(r.Message)).ShouldBeTrue();
     }
 
     [Fact]
@@ -89,14 +101,17 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
-        // Act - Default pagination should return 50 items per page
-        var response = await ApiClient.GETAsync<GetDemographicSyncAuditEndpoint, DemographicSyncAuditPageResponse>();
+        // Act
+        var response = await ApiClient.GETAsync<GetDemographicSyncAuditEndpoint, SortedPaginationRequestDto, PaginatedResponseDto<DemographicSyncAuditRecordResponse>>(
+            new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true });
 
-        // Assert - Verify pagination defaults are applied
+        // Assert - Verify results are ordered by Created desc (newest first)
         response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
         response.Result.ShouldNotBeNull();
-        response.Result.PageNumber.ShouldBe(1);
-        response.Result.PageSize.ShouldBe(50);
+        response.Result.Total.ShouldBe(5);
+        var results = response.Result.Results.ToList();
+        results.Count.ShouldBe(5);
+        results.Zip(results.Skip(1), (a, b) => a.Created >= b.Created).All(x => x).ShouldBeTrue();
     }
 
     [Fact]
@@ -106,7 +121,8 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange - No token assigned
 
         // Act
-        var response = await ApiClient.GETAsync<GetDemographicSyncAuditEndpoint, DemographicSyncAuditPageResponse>();
+        var response = await ApiClient.GETAsync<GetDemographicSyncAuditEndpoint, SortedPaginationRequestDto, PaginatedResponseDto<DemographicSyncAuditRecordResponse>>(
+            new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true });
 
         // Assert
         ((int)response.Response.StatusCode).ShouldBe(401);
@@ -124,13 +140,13 @@ public class ClearDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
-        // Act - Clear endpoint (with empty database)
+        // Act - Clear endpoint (seeded with audit records)
         TestResult<ClearAuditResponse> response = await ApiClient.POSTAsync<ClearDemographicSyncAuditEndpoint, ClearAuditResponse>();
 
         // Assert - Verify endpoint returns valid response
         response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
         response.Result.ShouldNotBeNull();
-        response.Result.DeletedCount.ShouldBe(0);
+        response.Result.DeletedCount.ShouldBe(5);
     }
 
     [Fact]

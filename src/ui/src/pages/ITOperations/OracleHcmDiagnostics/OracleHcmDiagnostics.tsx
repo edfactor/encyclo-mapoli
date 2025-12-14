@@ -17,12 +17,15 @@ const OracleHcmDiagnostics = () => {
   const [isSortDescending, setIsSortDescending] = useState<boolean>(true);
 
   const fetchAuditData = useCallback((page: number, size: number, sort?: string, desc?: boolean) => {
-    triggerGetAudit({ 
-      pageNumber: page + 1, 
-      pageSize: size,
-      sortBy: sort ?? sortBy,
-      isSortDescending: desc ?? isSortDescending
-    }, false);
+    triggerGetAudit(
+      {
+        skip: Math.max(0, page) * size,
+        take: size,
+        sortBy: sort ?? sortBy,
+        isSortDescending: desc ?? isSortDescending
+      },
+      false
+    );
   }, [triggerGetAudit, sortBy, isSortDescending]);
 
   useEffect(() => {

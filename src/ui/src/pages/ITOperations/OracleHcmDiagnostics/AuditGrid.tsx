@@ -1,14 +1,14 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { SortParams } from "../../../hooks/useGridPagination";
 import { useClearDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
+import type { DemographicSyncAuditRecord } from "../../../types";
 import { GetAuditGridColumns } from "./AuditGridColumns";
-import { DemographicSyncAuditPage } from "./types";
 
 interface AuditGridProps {
-  data?: DemographicSyncAuditPage;
+  data?: Paged<DemographicSyncAuditRecord>;
   isLoading: boolean;
   onClearSuccess: () => void;
   pageNumber: number;
@@ -52,7 +52,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
           color="error"
           startIcon={<DeleteIcon />}
           onClick={handleClearClick}
-          disabled={isLoading || isClearing || (data?.records.length === 0)}>
+          disabled={isLoading || isClearing || ((data?.results?.length ?? 0) === 0)}>
           Clear Audit Records
         </Button>
       </Box>
@@ -65,20 +65,20 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
 
       {isLoading ? (
         <CircularProgress />
-      ) : data && data.records.length > 0 ? (
+      ) : data && (data.results?.length ?? 0) > 0 ? (
         <>
           <DSMGrid
             preferenceKey={"DEMOGRAPHIC_SYNC_AUDIT"}
             isLoading={isLoading}
             handleSortChanged={onSortChange}
             providedOptions={{
-              rowData: data.records,
+              rowData: data.results,
               columnDefs: columnDefs,
               suppressMoveWhenRowDragging: true,
               enableCellTextSelection: true
             }}
           />
-          {data && data.records.length > 0 && (
+          {data && (data.results?.length ?? 0) > 0 && (
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
@@ -88,7 +88,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
               setPageSize={(value: number) => {
                 onPageChange(0, value);
               }}
-              recordCount={data.totalCount}
+              recordCount={data.total}
             />
           )}
         </>
@@ -104,7 +104,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
         <DialogContent>
           <Box sx={{ paddingTop: "16px" }}>
             <Typography variant="body1">
-              Are you sure you want to delete all {data?.totalCount || 0} audit records?
+              Are you sure you want to delete all {data?.total || 0} audit records?
             </Typography>
             <Typography variant="body2" sx={{ color: "#666", marginTop: "8px" }}>
               This action cannot be undone.

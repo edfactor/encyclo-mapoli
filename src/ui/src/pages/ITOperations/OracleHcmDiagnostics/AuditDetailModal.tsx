@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import type { DemographicSyncAuditRecord } from "../../../types";
 import { mmDDYYYY_HHMMSS_Format } from "../../../utils/dateUtils";
-import { DemographicSyncAuditRecord } from "./types";
 
 interface AuditDetailModalProps {
   record: DemographicSyncAuditRecord;

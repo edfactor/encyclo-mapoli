@@ -72,7 +72,7 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
     /// Gets demographic sync audit records, ordered by Created date (descending).
     /// Supports pagination using SortedPaginationRequestDto.
     /// </summary>
-    public async Task<Result<PaginatedResponseDto<DemographicSyncAuditDto>>> GetDemographicSyncAuditAsync(SortedPaginationRequestDto request, CancellationToken ct = default)
+    public async Task<Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>> GetDemographicSyncAuditAsync(SortedPaginationRequestDto request, CancellationToken ct = default)
     {
         try
         {
@@ -81,7 +81,7 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
                 var query = ctx.DemographicSyncAudit
                     .TagWith("GetDemographicSyncAudit")
                     .OrderByDescending(a => a.Created)
-                    .Select(a => new DemographicSyncAuditDto
+                    .Select(a => new DemographicSyncAuditRecordResponse
                     {
                         Id = a.Id,
                         BadgeNumber = a.BadgeNumber,
@@ -96,11 +96,60 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
                 return await query.ToPaginationResultsAsync(request, ct);
             }, ct);
 
-            return Result<PaginatedResponseDto<DemographicSyncAuditDto>>.Success(result);
+            return Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>.Success(result);
         }
         catch (Exception ex)
         {
-            return Result<PaginatedResponseDto<DemographicSyncAuditDto>>.Failure(Error.Unexpected(ex.Message));
+            return Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>.Failure(Error.Unexpected(ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Gets demographic sync audit records with simple pagination parameters (no validation).
+    /// Records are ordered by Created date (descending).
+    /// </summary>
+    public async Task<Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>> GetDemographicSyncAuditAsync(int skip, int take, CancellationToken ct = default)
+    {
+        try
+        {
+            var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                // Get total count
+                var total = await ctx.DemographicSyncAudit
+                    .TagWith("GetDemographicSyncAudit-Count")
+                    .CountAsync(ct);
+
+                // Get paginated results
+                var items = await ctx.DemographicSyncAudit
+                    .TagWith("GetDemographicSyncAudit-Paginated")
+                    .OrderByDescending(a => a.Created)
+                    .Skip(skip)
+                    .Take(take)
+                    .Select(a => new DemographicSyncAuditRecordResponse
+                    {
+                        Id = a.Id,
+                        BadgeNumber = a.BadgeNumber,
+                        OracleHcmId = a.OracleHcmId,
+                        Message = a.Message,
+                        PropertyName = a.PropertyName,
+                        InvalidValue = a.InvalidValue,
+                        UserName = a.UserName,
+                        Created = a.Created
+                    })
+                    .ToListAsync(ct);
+
+                return new PaginatedResponseDto<DemographicSyncAuditRecordResponse>
+                {
+                    Results = items,
+                    Total = total
+                };
+            }, ct);
+
+            return Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>.Failure(Error.Unexpected(ex.Message));
         }
     }
 

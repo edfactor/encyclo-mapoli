@@ -18,7 +18,13 @@ public interface IOracleHcmDiagnosticsService
     /// <summary>
     /// Gets demographic sync audit records with pagination, ordered by Created date (descending).
     /// </summary>
-    Task<Result<PaginatedResponseDto<DemographicSyncAuditDto>>> GetDemographicSyncAuditAsync(SortedPaginationRequestDto request, CancellationToken ct = default);
+    Task<Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>> GetDemographicSyncAuditAsync(SortedPaginationRequestDto request, CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets demographic sync audit records with simple pagination parameters (no validation).
+    /// Records are ordered by Created date (descending).
+    /// </summary>
+    Task<Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>> GetDemographicSyncAuditAsync(int skip, int take, CancellationToken ct = default);
 
     /// <summary>
     /// Clears all records from the DEMOGRAPHIC_SYNC_AUDIT table and returns the count of deleted records.
