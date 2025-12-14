@@ -190,6 +190,10 @@ Review: **All sections** including documentation and branching
 
 **Related Tickets:** ~~PS-2025~~ (✅ Completed), ~~PS-2023~~ (✅ Headers via shared library), ~~PS-2024~~ (✅ HSTS via shared library, HTTPS at load balancer)
 
+### Compliance Baseline (FISMA Moderate)
+
+- [ ] **FISMA Moderate baseline**: Security-related changes MUST maintain alignment with a FISMA Moderate baseline (access control, auditability, crypto/transport protections, incident readiness, and PII protections). If a change impacts authN/authZ, logging/telemetry, masking, or data exposure, include explicit security validation steps in the PR.
+
 ### Error Handling & Secrets
 
 - [ ] **No sensitive data in errors**: Stack traces, SQL queries, PII never in HTTP responses
