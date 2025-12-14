@@ -1,10 +1,14 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using FastEndpoints;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
@@ -13,7 +17,8 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 /// Gets OracleHcm sync metadata including the most recent create and modify timestamps
 /// from Demographic and PayProfit tables.
 /// </summary>
-public class GetOracleHcmSyncMetadataEndpoint : ProfitSharingResponseEndpoint<OracleHcmSyncMetadataResponse>
+public class GetOracleHcmSyncMetadataEndpoint
+    : ProfitSharingEndpoint<EmptyRequest, Results<Ok<OracleHcmSyncMetadataResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IOracleHcmDiagnosticsService _service;
     private readonly ILogger<GetOracleHcmSyncMetadataEndpoint> _logger;
@@ -49,51 +54,32 @@ public class GetOracleHcmSyncMetadataEndpoint : ProfitSharingResponseEndpoint<Or
         Group<ItDevOpsGroup>();
     }
 
-    public override Task<OracleHcmSyncMetadataResponse> ExecuteAsync(CancellationToken ct)
+    public override Task<Results<Ok<OracleHcmSyncMetadataResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
+        EmptyRequest req,
+        CancellationToken ct)
     {
-        return ExecuteAsyncInternal(ct);
-    }
-
-    private async Task<OracleHcmSyncMetadataResponse> ExecuteAsyncInternal(CancellationToken ct)
-    {
-        using var activity = this.StartEndpointActivity(HttpContext);
-
-        try
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var result = await _service.GetOracleHcmSyncMetadataAsync(ct);
 
-            if (result.IsError)
-            {
-                _logger.LogError("Failed to get OracleHcm sync metadata: {Error}", result.Error?.Description);
-                return new OracleHcmSyncMetadataResponse();
-            }
+            var responseResult = result.Match(
+                v => Result<OracleHcmSyncMetadataResponse>.Success(new OracleHcmSyncMetadataResponse
+                {
+                    DemographicCreatedAtUtc = v.DemographicCreatedAtUtc,
+                    DemographicModifiedAtUtc = v.DemographicModifiedAtUtc,
+                    PayProfitCreatedAtUtc = v.PayProfitCreatedAtUtc,
+                    PayProfitModifiedAtUtc = v.PayProfitModifiedAtUtc
+                }),
+                _ => Result<OracleHcmSyncMetadataResponse>.Failure(result.Error!));
 
-            var response = new OracleHcmSyncMetadataResponse
+            if (responseResult.IsSuccess)
             {
-                DemographicCreatedAtUtc = result.Value!.DemographicCreatedAtUtc,
-                DemographicModifiedAtUtc = result.Value!.DemographicModifiedAtUtc,
-                PayProfitCreatedAtUtc = result.Value!.PayProfitCreatedAtUtc,
-                PayProfitModifiedAtUtc = result.Value!.PayProfitModifiedAtUtc
-            };
-
-            // Business metrics
-            try
-            {
-                EndpointTelemetry.BusinessOperationsTotal?.Add(1,
+                EndpointTelemetry.BusinessOperationsTotal.Add(1,
                     new("operation", "oracleHcm-metadata-query"),
-                    new("endpoint", "GetOracleHcmSyncMetadataEndpoint"));
-            }
-            catch
-            {
-                // Ignore telemetry errors in unit tests
+                    new("endpoint", nameof(GetOracleHcmSyncMetadataEndpoint)));
             }
 
-            return response;
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+            return responseResult.ToHttpResult();
+        });
     }
 }

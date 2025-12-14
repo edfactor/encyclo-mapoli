@@ -58,7 +58,6 @@ import { RootState } from "../../reduxstore/store";
 import { ImpersonationRoles } from "../../reduxstore/types";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
-import { isSafePath } from "../../utils/pathValidation";
 import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/roleUtils";
 import LandingPage from "./LandingPage";
 const YTDWagesLive = lazy(() => import("../../pages/DecemberActivities/YTDWagesExtractLive/YTDWagesLive"));
@@ -114,53 +113,11 @@ const RouterSubAssembly: React.FC = () => {
   const { impersonating, token } = useSelector((state: RootState) => state.security);
 
   const dispatch = useDispatch();
+
   const { isDrawerOpen } = useSelector((state: RootState) => state.general);
   const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined }, { skip: !token });
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Allow setting an impersonation role via query string in Dev/QA only.
-  // Expected query param: ?impersonationRole={roleName}
-  useEffect(() => {
-    if (!hasImpersonationRole) return;
-
-    const params = new URLSearchParams(location.search);
-    const roleParam = params.get("impersonationRole");
-
-    if (!roleParam) return;
-
-    // If impersonating already set, don't override
-    if (impersonating && impersonating.length > 0) return;
-
-    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-
-    // Try to match against enum keys or values (case/format tolerant)
-    const matched = Object.values(ImpersonationRoles).find((r) => {
-      const keyForValue =
-        Object.keys(ImpersonationRoles).find((k) => (ImpersonationRoles as Record<string, string>)[k] === r) || "";
-      return normalize(r) === normalize(roleParam) || normalize(keyForValue) === normalize(roleParam);
-    });
-
-    if (matched) {
-      const roles = [matched as ImpersonationRoles];
-      try {
-        localStorage.setItem("impersonatingRoles", JSON.stringify(roles));
-      } catch (_e) {
-        // ignore storage errors
-      }
-      dispatch(setImpersonating(roles));
-
-      // Remove the impersonationRole param from the URL so it isn't reapplied on refresh
-      params.delete("impersonationRole");
-      const newSearch = params.toString();
-
-      // Validate pathname to prevent open redirect attacks
-      // Use centralized path validation utility
-      const safePath = isSafePath(location.pathname) ? location.pathname : "/";
-
-      navigate(`${safePath}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
-    }
-  }, [location.search, hasImpersonationRole, impersonating, dispatch, navigate, location.pathname]);
 
   const isFullscreen = useSelector((state: RootState) => state.general.isFullscreen);
 
@@ -190,7 +147,6 @@ const RouterSubAssembly: React.FC = () => {
                   setCurrentRoles={(value: string[]) => {
                     if (value.length === 0) {
                       // Clear all roles
-                      localStorage.removeItem("impersonatingRoles");
                       dispatch(setImpersonating([]));
                       return;
                     }
@@ -222,8 +178,7 @@ const RouterSubAssembly: React.FC = () => {
                       validatedRoles = newRoles;
                     }
 
-                    // Update state and localStorage with validated roles
-                    localStorage.setItem("impersonatingRoles", JSON.stringify(validatedRoles));
+                    // Update state with validated roles
                     dispatch(setImpersonating(validatedRoles));
                   }}
                 />
@@ -713,19 +668,6 @@ const RouterSubAssembly: React.FC = () => {
       <></>
     );
   };
-
-  useEffect(() => {
-    const storedRoles = localStorage.getItem("impersonatingRoles");
-    if (storedRoles && (!impersonating || impersonating.length === 0)) {
-      try {
-        const roles = JSON.parse(storedRoles) as ImpersonationRoles[];
-        dispatch(setImpersonating(roles));
-      } catch (_e) {
-        // If there's an error parsing, clear the localStorage
-        localStorage.removeItem("impersonatingRoles");
-      }
-    }
-  }, [dispatch, impersonating]);
 
   useEffect(() => {
     if (

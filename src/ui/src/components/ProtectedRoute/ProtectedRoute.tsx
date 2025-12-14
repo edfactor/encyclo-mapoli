@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { RootState } from "reduxstore/store";
 import { ImpersonationRoles } from "reduxstore/types";
 
 interface ProtectedRouteProps {
@@ -8,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRoles }) => {
-  const localStorageImpersonating: string[] = JSON.parse(localStorage.getItem("impersonatingRoles") || "[]");
+  const { impersonating } = useSelector((state: RootState) => state.security);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -16,9 +18,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRoles
     () => (requiredRoles ? (Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles]) : []),
     [requiredRoles]
   );
-  const hasRequiredRole = rolesArray.length > 0 && rolesArray.some((role) => localStorageImpersonating.includes(role));
-
-  console.log("ProtectedRoute - hasRequiredRole:", hasRequiredRole);
+  const hasRequiredRole = rolesArray.length > 0 && rolesArray.some((role) => impersonating.includes(role));
 
   useEffect(() => {
     if (!requiredRoles) {

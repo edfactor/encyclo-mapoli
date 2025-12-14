@@ -1,5 +1,6 @@
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -7,15 +8,16 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
 /// <summary>
 /// Gets demographic sync audit records with pagination support, ordered by creation date (descending).
 /// </summary>
-public class GetDemographicSyncAuditEndpoint : ProfitSharingEndpoint<SortedPaginationRequestDto, PaginatedResponseDto<DemographicSyncAuditRecordResponse>>
+public class GetDemographicSyncAuditEndpoint
+    : ProfitSharingEndpoint<SortedPaginationRequestDto, Results<Ok<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>, NotFound, ProblemHttpResult>>
 {
     private readonly IOracleHcmDiagnosticsService _service;
     private readonly ILogger<GetDemographicSyncAuditEndpoint> _logger;
@@ -62,30 +64,27 @@ public class GetDemographicSyncAuditEndpoint : ProfitSharingEndpoint<SortedPagin
         Group<ItDevOpsGroup>();
     }
 
-    public override Task<PaginatedResponseDto<DemographicSyncAuditRecordResponse>> ExecuteAsync(SortedPaginationRequestDto req, CancellationToken ct)
+    public override Task<Results<Ok<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(
+        SortedPaginationRequestDto req,
+        CancellationToken ct)
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var result = await _service.GetDemographicSyncAuditAsync(req, ct);
 
-            if (result.IsError)
+            if (result.IsSuccess)
             {
-                _logger.LogError("Failed to get demographic sync audit records: {Error}", result.Error?.Description);
-                return new PaginatedResponseDto<DemographicSyncAuditRecordResponse>();
+                EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                    new("operation", "demographic-sync-audit-query"),
+                    new("endpoint", nameof(GetDemographicSyncAuditEndpoint)));
+
+                var count = result.Value?.Results?.LongCount() ?? 0;
+                EndpointTelemetry.RecordCountsProcessed.Record(count,
+                    new("record_type", "demographic-sync-audit"),
+                    new("endpoint", nameof(GetDemographicSyncAuditEndpoint)));
             }
 
-            var response = result.Value ?? new PaginatedResponseDto<DemographicSyncAuditRecordResponse>();
-
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "demographic-sync-audit-query"),
-                new("endpoint", nameof(GetDemographicSyncAuditEndpoint)));
-
-            var count = response.Results?.LongCount() ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(count,
-                new("record_type", "demographic-sync-audit"),
-                new("endpoint", nameof(GetDemographicSyncAuditEndpoint)));
-
-            return response;
+            return result.ToHttpResult();
         });
     }
 }

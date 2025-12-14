@@ -13,7 +13,7 @@ const OracleHcmMetadata: React.FC<OracleHcmMetadataProps> = ({ metadata, isLoadi
   return (
     <Box sx={{ padding: "0 24px" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography variant="h2" sx={(theme) => ({ color: theme.palette.primary.main })}>
           OracleHcm Sync Status
         </Typography>
         <Button
@@ -29,43 +29,73 @@ const OracleHcmMetadata: React.FC<OracleHcmMetadataProps> = ({ metadata, isLoadi
       {isLoading ? (
         <CircularProgress />
       ) : (
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px", marginTop: "8px" }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: "16px",
+            marginTop: "8px"
+          }}>
           {/* Demographic Created */}
-          <Box sx={{ border: "1px solid #ddd", borderRadius: "4px", padding: "12px", backgroundColor: "#f9f9f9" }}>
-            <Typography variant="body2" sx={{ color: "#666", marginBottom: "4px" }}>
+          <Box
+            sx={(theme) => ({
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: "4px",
+              padding: "12px",
+              backgroundColor: theme.palette.background.default
+            })}>
+            <Typography variant="body2" sx={(theme) => ({ color: theme.palette.text.secondary, marginBottom: "4px" })}>
               Demographic Table - Created
             </Typography>
-            <Typography variant="body1" sx={{ fontWeight: "600", color: "#000" }}>
+            <Typography variant="body1" sx={{ fontWeight: "600" }}>
               {metadata?.demographicCreatedAtUtc ? mmDDYYYY_HHMMSS_Format(metadata.demographicCreatedAtUtc) : "No data"}
             </Typography>
           </Box>
 
           {/* Demographic Modified */}
-          <Box sx={{ border: "1px solid #ddd", borderRadius: "4px", padding: "12px", backgroundColor: "#f9f9f9" }}>
-            <Typography variant="body2" sx={{ color: "#666", marginBottom: "4px" }}>
+          <Box
+            sx={(theme) => ({
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: "4px",
+              padding: "12px",
+              backgroundColor: theme.palette.background.default
+            })}>
+            <Typography variant="body2" sx={(theme) => ({ color: theme.palette.text.secondary, marginBottom: "4px" })}>
               Demographic Table - Last Modified
             </Typography>
-            <Typography variant="body1" sx={{ fontWeight: "600", color: "#000" }}>
+            <Typography variant="body1" sx={{ fontWeight: "600" }}>
               {metadata?.demographicModifiedAtUtc ? mmDDYYYY_HHMMSS_Format(metadata.demographicModifiedAtUtc) : "No data"}
             </Typography>
           </Box>
 
           {/* PayProfit Created */}
-          <Box sx={{ border: "1px solid #ddd", borderRadius: "4px", padding: "12px", backgroundColor: "#f9f9f9" }}>
-            <Typography variant="body2" sx={{ color: "#666", marginBottom: "4px" }}>
+          <Box
+            sx={(theme) => ({
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: "4px",
+              padding: "12px",
+              backgroundColor: theme.palette.background.default
+            })}>
+            <Typography variant="body2" sx={(theme) => ({ color: theme.palette.text.secondary, marginBottom: "4px" })}>
               PayProfit Table - Created
             </Typography>
-            <Typography variant="body1" sx={{ fontWeight: "600", color: "#000" }}>
+            <Typography variant="body1" sx={{ fontWeight: "600" }}>
               {metadata?.payProfitCreatedAtUtc ? mmDDYYYY_HHMMSS_Format(metadata.payProfitCreatedAtUtc) : "No data"}
             </Typography>
           </Box>
 
           {/* PayProfit Modified */}
-          <Box sx={{ border: "1px solid #ddd", borderRadius: "4px", padding: "12px", backgroundColor: "#f9f9f9" }}>
-            <Typography variant="body2" sx={{ color: "#666", marginBottom: "4px" }}>
+          <Box
+            sx={(theme) => ({
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: "4px",
+              padding: "12px",
+              backgroundColor: theme.palette.background.default
+            })}>
+            <Typography variant="body2" sx={(theme) => ({ color: theme.palette.text.secondary, marginBottom: "4px" })}>
               PayProfit Table - Last Modified
             </Typography>
-            <Typography variant="body1" sx={{ fontWeight: "600", color: "#000" }}>
+            <Typography variant="body1" sx={{ fontWeight: "600" }}>
               {metadata?.payProfitModifiedAtUtc ? mmDDYYYY_HHMMSS_Format(metadata.payProfitModifiedAtUtc) : "No data"}
             </Typography>
           </Box>

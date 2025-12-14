@@ -1,10 +1,14 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using FastEndpoints;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
@@ -13,7 +17,8 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 /// Clears all records from the DEMOGRAPHIC_SYNC_AUDIT table.
 /// Returns the count of deleted records.
 /// </summary>
-public class ClearDemographicSyncAuditEndpoint : ProfitSharingResponseEndpoint<ClearAuditResponse>
+public class ClearDemographicSyncAuditEndpoint
+    : ProfitSharingEndpoint<EmptyRequest, Results<Ok<ClearAuditResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IOracleHcmDiagnosticsService _service;
     private readonly ILogger<ClearDemographicSyncAuditEndpoint> _logger;
@@ -46,55 +51,32 @@ public class ClearDemographicSyncAuditEndpoint : ProfitSharingResponseEndpoint<C
         Group<ItDevOpsGroup>();
     }
 
-    public override Task<ClearAuditResponse> ExecuteAsync(CancellationToken ct)
+    public override Task<Results<Ok<ClearAuditResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(EmptyRequest req, CancellationToken ct)
     {
-        return ExecuteAsyncInternal(ct);
-    }
-
-    private async Task<ClearAuditResponse> ExecuteAsyncInternal(CancellationToken ct)
-    {
-        using var activity = this.StartEndpointActivity(HttpContext);
-
-        try
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var result = await _service.ClearDemographicSyncAuditAsync(ct);
 
-            if (result.IsError)
-            {
-                _logger.LogError("Failed to clear demographic sync audit records: {Error}", result.Error?.Description);
-                return new ClearAuditResponse { DeletedCount = 0 };
-            }
+            var responseResult = result.Match(
+                v => Result<ClearAuditResponse>.Success(new ClearAuditResponse { DeletedCount = v }),
+                _ => Result<ClearAuditResponse>.Failure(result.Error!));
 
-            var response = new ClearAuditResponse
+            if (responseResult.IsSuccess)
             {
-                DeletedCount = result.Value!
-            };
-
-            // Business metrics - record the clear operation
-            try
-            {
-                EndpointTelemetry.BusinessOperationsTotal?.Add(1,
+                EndpointTelemetry.BusinessOperationsTotal.Add(1,
                     new("operation", "clear-demographic-sync-audit"),
-                    new("endpoint", "ClearDemographicSyncAuditEndpoint"));
+                    new("endpoint", nameof(ClearDemographicSyncAuditEndpoint)));
 
-                EndpointTelemetry.RecordCountsProcessed?.Record(response.DeletedCount,
+                EndpointTelemetry.RecordCountsProcessed.Record(responseResult.Value!.DeletedCount,
                     new("record_type", "audit-records-deleted"),
-                    new("endpoint", "ClearDemographicSyncAuditEndpoint"));
-            }
-            catch
-            {
-                // Ignore telemetry errors in unit tests
+                    new("endpoint", nameof(ClearDemographicSyncAuditEndpoint)));
+
+                _logger.LogInformation("Cleared {DeletedCount} demographic sync audit records (correlation: {CorrelationId})",
+                    responseResult.Value!.DeletedCount,
+                    HttpContext.TraceIdentifier);
             }
 
-            _logger.LogInformation("Cleared {DeletedCount} demographic sync audit records (correlation: {CorrelationId})",
-                response.DeletedCount, HttpContext.TraceIdentifier);
-
-            return response;
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+            return responseResult.ToHttpResult();
+        });
     }
 }

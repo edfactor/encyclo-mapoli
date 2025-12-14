@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.ItDevOps;
 
@@ -19,13 +20,16 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICommitGuardOverride _guardOverride;
+    private readonly ILogger<OracleHcmDiagnosticsService> _logger;
 
     public OracleHcmDiagnosticsService(
         IProfitSharingDataContextFactory dataContextFactory,
-        ICommitGuardOverride guardOverride)
+        ICommitGuardOverride guardOverride,
+        ILogger<OracleHcmDiagnosticsService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _guardOverride = guardOverride;
+        _logger = logger;
     }
 
     /// <summary>
@@ -64,7 +68,8 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
         }
         catch (Exception ex)
         {
-            return Result<OracleHcmSyncMetadata>.Failure(Error.Unexpected(ex.Message));
+            _logger.LogError(ex, "Failed to get OracleHcm sync metadata");
+            return Result<OracleHcmSyncMetadata>.Failure(Error.Unexpected("Unexpected error"));
         }
     }
 
@@ -100,7 +105,8 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
         }
         catch (Exception ex)
         {
-            return Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>.Failure(Error.Unexpected(ex.Message));
+            _logger.LogError(ex, "Failed to get demographic sync audit records (sorted pagination)");
+            return Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>.Failure(Error.Unexpected("Unexpected error"));
         }
     }
 
@@ -149,7 +155,8 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
         }
         catch (Exception ex)
         {
-            return Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>.Failure(Error.Unexpected(ex.Message));
+            _logger.LogError(ex, "Failed to get demographic sync audit records (skip/take pagination)");
+            return Result<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>.Failure(Error.Unexpected("Unexpected error"));
         }
     }
 
@@ -184,7 +191,8 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
         }
         catch (Exception ex)
         {
-            return Result<int>.Failure(Error.Unexpected(ex.Message));
+            _logger.LogError(ex, "Failed to clear demographic sync audit records");
+            return Result<int>.Failure(Error.Unexpected("Unexpected error"));
         }
     }
 }

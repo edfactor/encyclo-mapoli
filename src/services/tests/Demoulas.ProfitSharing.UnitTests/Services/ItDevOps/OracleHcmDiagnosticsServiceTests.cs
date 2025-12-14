@@ -11,6 +11,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services.ItDevOps;
@@ -25,7 +26,7 @@ public class OracleHcmDiagnosticsServiceTests
     {
         // Setup service with mock context factory
         _dataContextFactory = new InMemoryProfitSharingDataContextFactory();
-        _service = new OracleHcmDiagnosticsService(_dataContextFactory, new MockCommitGuardOverride());
+        _service = new OracleHcmDiagnosticsService(_dataContextFactory, new MockCommitGuardOverride(), NullLogger<OracleHcmDiagnosticsService>.Instance);
     }
 
     #region GetOracleHcmSyncMetadataAsync Tests
