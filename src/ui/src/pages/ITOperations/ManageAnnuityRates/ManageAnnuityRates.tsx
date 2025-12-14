@@ -61,7 +61,7 @@ const ManageAnnuityRates = () => {
         sortable: true,
         filter: false,
         editable: false,
-        width: 120
+        width: 60
       },
       {
         headerName: "Age",
@@ -69,7 +69,7 @@ const ManageAnnuityRates = () => {
         sortable: true,
         filter: false,
         editable: false,
-        width: 110
+        width: 55
       },
       {
         headerName: "Single Rate",
@@ -77,7 +77,7 @@ const ManageAnnuityRates = () => {
         sortable: true,
         filter: false,
         editable: true,
-        width: 160,
+        width: 80,
         valueParser: (params: ValueParserParams) => {
           const parsed = Number.parseFloat(String(params.newValue ?? ""));
           return Number.isFinite(parsed) ? parsed : params.oldValue;
@@ -93,7 +93,7 @@ const ManageAnnuityRates = () => {
         sortable: true,
         filter: false,
         editable: true,
-        width: 160,
+        width: 80,
         valueParser: (params: ValueParserParams) => {
           const parsed = Number.parseFloat(String(params.newValue ?? ""));
           return Number.isFinite(parsed) ? parsed : params.oldValue;
