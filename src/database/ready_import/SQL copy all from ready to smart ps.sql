@@ -1442,7 +1442,7 @@ INSERT ALL
 
         -- Seed an active freeze point (READY import)
         INSERT INTO FROZEN_STATE (PROFIT_YEAR, FROZEN_BY, AS_OF_DATETIME, IS_ACTIVE)
-        VALUES (2025, USER, TO_TIMESTAMP_TZ('2026-01-04 00:01:00 +00:00', 'YYYY-MM-DD HH24:MI:SS TZH:TZM'), 1);
+        VALUES (2025, USER, TO_TIMESTAMP_TZ('2026-01-04 05:01:00 +00:00', 'YYYY-MM-DD HH24:MI:SS TZH:TZM'), 1);
 
 -- get rid of any history of YE Updates, as all the data is wiped
 delete from ye_update_status;
