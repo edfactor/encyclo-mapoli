@@ -10,6 +10,7 @@ export * from "./auth/security";
 export * from "./audit/audit";
 
 // IT Operations types
+export * from "./it-operations/annuity-rates";
 export * from "./it-operations/oracle-hcm-diagnostics";
 export * from "./it-operations/state-taxes";
 

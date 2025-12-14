@@ -3,12 +3,11 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.Util.Extensions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Certificates;
 
@@ -16,19 +15,19 @@ public sealed class CertificateService : ICertificateService
 {
     private readonly IBreakdownService _breakdownService;
     private readonly ICalendarService _calendarService;
-    private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IAnnuityRatesService _annuityRatesService;
 
-    public CertificateService(IBreakdownService breakdownService, ICalendarService calendarService, IProfitSharingDataContextFactory dataContextFactory)
+    public CertificateService(IBreakdownService breakdownService, ICalendarService calendarService, IAnnuityRatesService annuityRatesService)
     {
         _breakdownService = breakdownService;
         _calendarService = calendarService;
-        _dataContextFactory = dataContextFactory;
+        _annuityRatesService = annuityRatesService;
     }
 
     public async Task<string> GetCertificateFile(CerficatePrintRequest request, CancellationToken token)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, token);
-        Dictionary<byte, AnnuityRate> annuityRates = await GetAnnuityRatesByAge(request, token);
+        Dictionary<byte, AnnuityRateDto> annuityRates = await GetAnnuityRatesByAge(request, token);
 
         var members = await GetCertificateData(request, token);
 
@@ -264,13 +263,15 @@ public sealed class CertificateService : ICertificateService
         return _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, request.BadgeNumbers ?? Array.Empty<int>(), token);
     }
 
-    private Task<Dictionary<byte, AnnuityRate>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)
+    private async Task<Dictionary<byte, AnnuityRateDto>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)
     {
-        return _dataContextFactory.UseReadOnlyContext(ctx =>
+        var result = await _annuityRatesService.GetAnnuityRatesByYearAsync(request.ProfitYear, token);
+        if (!result.IsSuccess)
         {
-            return ctx.AnnuityRates
-                .Where(x => x.Year == request.ProfitYear)
-                .ToDictionaryAsync(x => x.Age, x => x, token);
-        }, token);
+            throw new InvalidOperationException(result.Error?.Description ?? "Failed to retrieve annuity rates.");
+        }
+
+        return result.Value!
+            .ToDictionary(x => x.Age, x => x);
     }
 }

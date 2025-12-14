@@ -73,6 +73,7 @@ const ProfitShareEditUpdate = lazy(() => import("../../pages/FiscalClose/ProfitS
 const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDWages"));
 const DemographicFreeze = lazy(() => import("../../pages/ITOperations/DemographicFreeze/DemographicFreeze"));
 const ManageStateTaxes = lazy(() => import("../../pages/ITOperations/ManageStateTaxes/ManageStateTaxes"));
+const ManageAnnuityRates = lazy(() => import("../../pages/ITOperations/ManageAnnuityRates/ManageAnnuityRates"));
 const OracleHcmDiagnostics = lazy(() => import("../../pages/ITOperations/OracleHcmDiagnostics/OracleHcmDiagnostics"));
 
 const PayMasterUpdateSummary = lazy(() => import("@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary"));
@@ -611,6 +612,16 @@ const RouterSubAssembly: React.FC = () => {
                     <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageStateTaxes />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.MANAGE_ANNUITY_RATES}
+                  element={
+                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <ManageAnnuityRates />
                       </Suspense>
                     </ProtectedRoute>
                   }
