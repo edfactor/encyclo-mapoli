@@ -105,6 +105,8 @@ const QPAY600 = lazy(() => import("../../pages/Reports/QPAY600/QPAY600"));
 const RecentlyTerminated = lazy(() => import("../../pages/Reports/RecentlyTerminated/RecentlyTerminated"));
 const TerminatedLetters = lazy(() => import("../../pages/Reports/TerminatedLetters/TerminatedLetters"));
 
+const ImpersonatingRolesStorageKey = "impersonatingRoles";
+
 const RouterSubAssembly: React.FC = () => {
   const isProductionOrUAT = EnvironmentUtils.isProduction || EnvironmentUtils.isUAT;
   const hasImpersonationRole = EnvironmentUtils.isDevelopmentOrQA;
@@ -113,6 +115,56 @@ const RouterSubAssembly: React.FC = () => {
   const { impersonating, token } = useSelector((state: RootState) => state.security);
 
   const dispatch = useDispatch();
+
+  // CRITICAL DEV/QA FUNCTIONALITY:
+  // We intentionally persist impersonation roles to localStorage ONLY in Development/QA.
+  // This supports rapid debugging/testing workflows across refreshes.
+  // Do NOT remove this without providing an equivalent dev/qa-only mechanism.
+  useEffect(() => {
+    if (!EnvironmentUtils.isDevelopmentOrQA) {
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem(ImpersonatingRolesStorageKey);
+      if (!raw) {
+        return;
+      }
+
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed)) {
+        return;
+      }
+
+      const allowedRoleValues = new Set<string>(Object.values(ImpersonationRoles));
+      const persistedRoles = parsed.filter(
+        (x): x is ImpersonationRoles => typeof x === "string" && allowedRoleValues.has(x)
+      );
+      if (persistedRoles.length > 0) {
+        dispatch(setImpersonating(persistedRoles));
+      }
+    } catch {
+      // Ignore localStorage parse errors in dev/qa.
+    }
+  }, [dispatch]);
+
+  // CRITICAL DEV/QA FUNCTIONALITY:
+  // Persist/clear impersonation roles across refreshes (Development/QA only).
+  useEffect(() => {
+    if (!EnvironmentUtils.isDevelopmentOrQA) {
+      return;
+    }
+
+    try {
+      if (impersonating && impersonating.length > 0) {
+        localStorage.setItem(ImpersonatingRolesStorageKey, JSON.stringify(impersonating));
+      } else {
+        localStorage.removeItem(ImpersonatingRolesStorageKey);
+      }
+    } catch {
+      // Ignore localStorage write errors in dev/qa.
+    }
+  }, [impersonating]);
 
   const { isDrawerOpen } = useSelector((state: RootState) => state.general);
   const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined }, { skip: !token });
