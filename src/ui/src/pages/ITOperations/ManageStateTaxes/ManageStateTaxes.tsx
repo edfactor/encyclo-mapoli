@@ -51,7 +51,7 @@ const ManageStateTaxes = () => {
         sortable: true,
         filter: false,
         editable: false,
-        width: 110
+        width: 130
       },
       {
         headerName: "Rate (%)",
@@ -59,7 +59,7 @@ const ManageStateTaxes = () => {
         sortable: true,
         filter: false,
         editable: true,
-        width: 140,
+        width: 170,
         valueParser: (params: ValueParserParams) => {
           const parsed = Number.parseFloat(String(params.newValue ?? ""));
           return Number.isFinite(parsed) ? parsed : params.oldValue;
@@ -156,9 +156,10 @@ const ManageStateTaxes = () => {
           <Box
             sx={{
               display: "flex",
-              gap: 2,
+              gap: 3,
               alignItems: "center",
-              width: "100%"
+              width: "100%",
+              px: 1
             }}>
             <Box sx={{ flex: 1 }}>
               {errorMessage && (
@@ -170,7 +171,7 @@ const ManageStateTaxes = () => {
               )}
             </Box>
 
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+            <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
               <Button
                 variant="contained"
                 disabled={!hasUnsavedChanges || isSaving}
@@ -196,6 +197,8 @@ const ManageStateTaxes = () => {
               columnDefs,
               suppressMultiSort: true,
               stopEditingWhenCellsLoseFocus: true,
+              enterNavigatesVertically: true,
+              enterNavigatesVerticallyAfterEdit: true,
               onCellValueChanged
             }}
           />
