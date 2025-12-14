@@ -72,6 +72,7 @@ export const ROUTES = {
   NEW_PS_LABELS: "new-ps-labels",
   PROFALL: "profall",
   DEMO_FREEZE: "demographic-freeze",
+  MANAGE_STATE_TAXES: "manage-state-taxes",
   AUDIT_SEARCH: "audit-search",
   ORACLE_HCM_DIAGNOSTICS: "oracle-hcm-diagnostics",
   DEV_DEBUG: "dev-debug",
@@ -178,6 +179,9 @@ export const CAPTIONS = {
 
   IT_DEVOPS: "IT DevOps",
   IT_DEVOPS_SHORT: "IT DevOps",
+
+  MANAGE_STATE_TAX_RATES: "Manage State Tax Rates",
+  MANAGE_STATE_TAX_RATES_SHORT: "Manage State Tax Rates",
 
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
   MANAGE_EXECUTIVE_HOURS_SHORT: "Manage Executive Hours",
