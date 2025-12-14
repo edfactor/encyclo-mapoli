@@ -15,6 +15,8 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 
+using ParticipantTotalVestingBalance = Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotalVestingBalance;
+
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Distributions;
 
 [Collection("Distribution Tests")]
@@ -36,13 +38,13 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         if (matches.Count == 0)
         {
-            Constants.FakeParticipantTotalVestingBalances.Object.Add(new Data.Entities.Virtual.ParticipantTotalVestingBalance
+            Constants.FakeParticipantTotalVestingBalances.Object.Add(new ParticipantTotalVestingBalance
             {
                 Ssn = ssn,
                 VestedBalance = HighVestedBalance,
                 CurrentBalance = HighVestedBalance,
                 VestingPercent = 1.0m,
-                YearsInPlan = 40
+                YearsInPlan = (byte)40
             });
             return;
         }
@@ -50,9 +52,9 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         foreach (var match in matches)
         {
             match.VestedBalance = HighVestedBalance;
-            match.CurrentBalance = Math.Max(match.CurrentBalance, HighVestedBalance);
+            match.CurrentBalance = Math.Max(match.CurrentBalance ?? 0m, HighVestedBalance);
             match.VestingPercent = 1.0m;
-            match.YearsInPlan = 40;
+            match.YearsInPlan = (byte)40;
         }
     }
 
