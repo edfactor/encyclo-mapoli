@@ -1,4 +1,4 @@
-import { Button, Divider, Grid, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid, Typography } from "@mui/material";
 import { CellValueChangedEvent, ColDef, ValueFormatterParams, ValueParserParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
@@ -9,6 +9,10 @@ import { StateTaxRateDto } from "../../../reduxstore/types";
 
 const hasMoreThanTwoDecimals = (value: number): boolean => {
   return Math.abs(value * 100 - Math.round(value * 100)) > Number.EPSILON;
+};
+
+const normalizeRateToTwoDecimals = (value: number): number => {
+  return Math.round(value * 100) / 100;
 };
 
 const ManageStateTaxes = () => {
@@ -26,7 +30,8 @@ const ManageStateTaxes = () => {
   useEffect(() => {
     if (!data) return;
 
-    setRowData(data);
+    // DSMGrid/AG Grid edits mutate row objects; make sure data isn't frozen.
+    setRowData(data.map((r) => ({ ...r })));
     setOriginalRatesByAbbr(
       data.reduce<Record<string, number>>((acc, cur) => {
         acc[cur.abbreviation] = cur.rate;
@@ -45,7 +50,8 @@ const ManageStateTaxes = () => {
         field: "abbreviation",
         sortable: true,
         filter: false,
-        editable: false
+        editable: false,
+        width: 110
       },
       {
         headerName: "Rate (%)",
@@ -53,6 +59,7 @@ const ManageStateTaxes = () => {
         sortable: true,
         filter: false,
         editable: true,
+        width: 140,
         valueParser: (params: ValueParserParams) => {
           const parsed = Number.parseFloat(String(params.newValue ?? ""));
           return Number.isFinite(parsed) ? parsed : params.oldValue;
@@ -72,18 +79,21 @@ const ManageStateTaxes = () => {
 
     setErrorMessage(null);
 
-    const newRate = row?.rate;
-    if (typeof newRate !== "number" || !Number.isFinite(newRate)) return;
+    const parsedNewRate = Number.parseFloat(String(event.newValue ?? ""));
+    if (!Number.isFinite(parsedNewRate)) return;
 
     const originalRate = originalRatesByAbbr[abbr];
     if (typeof originalRate !== "number") return;
 
+    const normalizedNewRate = normalizeRateToTwoDecimals(parsedNewRate);
+    const normalizedOriginalRate = normalizeRateToTwoDecimals(originalRate);
+
     setStagedRatesByAbbr((prev) => {
       const next = { ...prev };
-      if (newRate === originalRate) {
+      if (normalizedNewRate === normalizedOriginalRate) {
         delete next[abbr];
       } else {
-        next[abbr] = newRate;
+        next[abbr] = normalizedNewRate;
       }
       return next;
     });
@@ -91,7 +101,7 @@ const ManageStateTaxes = () => {
 
   const discardChanges = () => {
     if (!data) return;
-    setRowData(data);
+    setRowData(data.map((r) => ({ ...r })));
     setStagedRatesByAbbr({});
     setErrorMessage(null);
   };
@@ -142,29 +152,39 @@ const ManageStateTaxes = () => {
           <Divider />
         </Grid>
 
-        <Grid
-          width="100%"
-          sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <Button
-            variant="contained"
-            disabled={!hasUnsavedChanges || isSaving}
-            onClick={saveChanges}>
-            Save
-          </Button>
-          <Button
-            variant="outlined"
-            disabled={!hasUnsavedChanges || isSaving}
-            onClick={discardChanges}>
-            Discard
-          </Button>
+        <Grid width="100%">
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              alignItems: "center",
+              width: "100%"
+            }}>
+            <Box sx={{ flex: 1 }}>
+              {errorMessage && (
+                <Typography
+                  variant="body2"
+                  color="error">
+                  {errorMessage}
+                </Typography>
+              )}
+            </Box>
 
-          {errorMessage && (
-            <Typography
-              variant="body2"
-              color="error">
-              {errorMessage}
-            </Typography>
-          )}
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+              <Button
+                variant="contained"
+                disabled={!hasUnsavedChanges || isSaving}
+                onClick={saveChanges}>
+                Save
+              </Button>
+              <Button
+                variant="outlined"
+                disabled={!hasUnsavedChanges || isSaving}
+                onClick={discardChanges}>
+                Discard
+              </Button>
+            </Box>
+          </Box>
         </Grid>
 
         <Grid width="100%">
@@ -175,6 +195,7 @@ const ManageStateTaxes = () => {
               rowData,
               columnDefs,
               suppressMultiSort: true,
+              stopEditingWhenCellsLoseFocus: true,
               onCellValueChanged
             }}
           />

@@ -9,8 +9,6 @@ using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -197,6 +195,28 @@ public sealed class AuditService : IAuditService
         }
     }
 
+    public async Task<TResult> LogSensitiveDataAccessAsync<TResult>(
+        string operationName,
+        string tableName,
+        string? primaryKey,
+        string? details,
+        Func<CancellationToken, Task<TResult>> operation,
+        CancellationToken cancellationToken = default)
+        where TResult : notnull
+    {
+        var result = await operation(cancellationToken);
+
+        // Log access after successful operation
+        await LogSensitiveDataAccessAsync(
+            operationName,
+            tableName,
+            primaryKey,
+            details,
+            cancellationToken);
+
+        return result;
+    }
+
     public async Task LogDataChangeAsync(
         string operationName,
         string tableName,
@@ -242,28 +262,6 @@ public sealed class AuditService : IAuditService
                 await c.SaveChangesAsync(cancellationToken);
             }, cancellationToken);
         }
-    }
-
-    public async Task<TResult> LogSensitiveDataAccessAsync<TResult>(
-        string operationName,
-        string tableName,
-        string? primaryKey,
-        string? details,
-        Func<CancellationToken, Task<TResult>> operation,
-        CancellationToken cancellationToken = default)
-        where TResult : notnull
-    {
-        var result = await operation(cancellationToken);
-
-        // Log access after successful operation
-        await LogSensitiveDataAccessAsync(
-            operationName,
-            tableName,
-            primaryKey,
-            details,
-            cancellationToken);
-
-        return result;
     }
 
     public Task<PaginatedResponseDto<AuditEventDto>> SearchAuditEventsAsync(

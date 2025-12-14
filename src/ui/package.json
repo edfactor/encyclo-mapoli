@@ -1,7 +1,7 @@
 {
   "name": "smart-profit-sharing",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "overrides": {
     "@babel/runtime": "^7.26.0"
@@ -14,7 +14,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "prettier": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
     "test": "vitest --coverage",
-    "test:windows": "vitest --coverage --threads=1 --fileParallelism=false",
+    "test:windows": "vitest --coverage --run --pool=threads --poolOptions.threads.singleThread",
     "e2e": "playwright test --workers=2",
     "e2e:watch": "playwright test --watch",
     "e2e:ui": "playwright test --ui",
