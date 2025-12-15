@@ -2,6 +2,7 @@ import { BeneficiaryDetail } from "@/types";
 import { RowClickedEvent } from "ag-grid-community";
 import { useMemo } from "react";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
+import { GRID_KEYS } from "../../constants";
 import { GetMemberResultsGridColumns } from "./MemberResultsGridColumns";
 
 interface MemberResultsGridProps {
@@ -31,7 +32,7 @@ const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({
     <>
       <p>Please click on a row below to see details</p>
       <DSMGrid
-        preferenceKey={`member-results-grid`}
+        preferenceKey={GRID_KEYS.MEMBER_RESULTS}
         isLoading={isLoading}
         providedOptions={{
           rowData: searchResults.results,

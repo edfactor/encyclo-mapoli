@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 import StandaloneMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
@@ -102,7 +102,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
           </div>
 
           <DSMGrid
-            preferenceKey={CAPTIONS.MILITARY_CONTRIBUTIONS}
+            preferenceKey={GRID_KEYS.MILITARY_CONTRIBUTIONS}
             isLoading={isLoadingContributions}
             handleSortChanged={handleSortChange}
             providedOptions={{

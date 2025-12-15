@@ -6,6 +6,7 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { EmployeeWagesForYearResponse } from "../../../reduxstore/types";
@@ -84,20 +85,41 @@ const YTDWagesGrid = ({
             alignItems="center"
             marginBottom={2}>
             <Grid>
-              <Box display="flex" alignItems="center" gap={3}>
-                <Typography variant="h2" sx={{ color: "#0258A5" }}>
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={3}>
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5" }}>
                   {clonedData.reportName || "YTD Wages Extract"}
                 </Typography>
                 {!isGridExpanded && (
                   <>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography variant="body2" fontWeight="semibold">Total Hours:</Typography>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}>
+                      <Typography
+                        variant="body2"
+                        fontWeight="semibold">
+                        Total Hours:
+                      </Typography>
                       <Typography variant="body2">
-                        {clonedData.totalHoursCurrentYearWages?.toFixed(2) ?? totalsRow?.hoursCurrentYear.toFixed(2) ?? "0.00"}
+                        {clonedData.totalHoursCurrentYearWages?.toFixed(2) ??
+                          totalsRow?.hoursCurrentYear.toFixed(2) ??
+                          "0.00"}
                       </Typography>
                     </Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography variant="body2" fontWeight="semibold">Total Income:</Typography>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}>
+                      <Typography
+                        variant="body2"
+                        fontWeight="semibold">
+                        Total Income:
+                      </Typography>
                       <Typography variant="body2">
                         {numberToCurrency(clonedData.totalIncomeCurrentYearWages ?? totalsRow?.incomeCurrentYear ?? 0)}
                       </Typography>
@@ -119,7 +141,7 @@ const YTDWagesGrid = ({
           </Grid>
           {!isGridExpanded && <ReportSummary report={clonedData} />}
           <DSMGrid
-            preferenceKey={"TERM"}
+            preferenceKey={GRID_KEYS.YTD_WAGES}
             isLoading={isLoading}
             maxHeight={gridMaxHeight}
             handleSortChanged={onSortChange}

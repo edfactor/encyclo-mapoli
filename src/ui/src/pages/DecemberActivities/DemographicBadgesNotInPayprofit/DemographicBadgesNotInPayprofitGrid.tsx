@@ -1,5 +1,6 @@
 import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { GRID_KEYS } from "../../../constants";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { DemographicBadgesNotInPayprofit, PagedReportResponse } from "../../../types";
 import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
@@ -47,7 +48,7 @@ const DemographicBadgesNotInPayprofitGrid = ({
       {showData && data?.response && (
         <div ref={innerRef}>
           <DSMGrid
-            preferenceKey={"DEMO_BADGES"}
+            preferenceKey={GRID_KEYS.DEMOGRAPHIC_BADGES}
             isLoading={isLoading}
             handleSortChanged={handleSortChanged}
             providedOptions={{

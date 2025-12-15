@@ -3,7 +3,7 @@ import { Grid, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { DuplicateNameAndBirthday, PagedReportResponse } from "../../../types";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
@@ -35,7 +35,7 @@ const DuplicateNamesAndBirthdaysGrid = ({
   onToggleExpand
 }: DuplicateNamesAndBirthdaysGridProps) => {
   const columnDefs = useMemo(() => GetDuplicateNamesAndBirthdayColumns(), []);
-  
+
   // Use content-aware grid height utility hook
   const gridMaxHeight = useContentAwareGridHeight({
     rowCount: data?.response?.results?.length ?? 0,
@@ -70,7 +70,7 @@ const DuplicateNamesAndBirthdaysGrid = ({
             </Grid>
           </Grid>
           <DSMGrid
-            preferenceKey={CAPTIONS.DUPLICATE_NAMES}
+            preferenceKey={GRID_KEYS.DUPLICATE_NAMES}
             isLoading={isLoading}
             maxHeight={gridMaxHeight}
             handleSortChanged={onSortChange}

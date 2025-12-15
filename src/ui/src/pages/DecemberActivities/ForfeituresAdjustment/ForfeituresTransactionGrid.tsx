@@ -1,7 +1,7 @@
 import { CircularProgress, Typography } from "@mui/material";
 import { memo, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetForfeituresTransactionGridColumns } from "./ForfeituresTransactionGridColumns";
 
@@ -46,7 +46,7 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={`${CAPTIONS.FORFEITURES_ADJUSTMENT}_TRANSACTIONS`}
+            preferenceKey={GRID_KEYS.FORFEITURES_ADJUSTMENT}
             handleSortChanged={handleSortChangeInternal}
             isLoading={!!isLoading}
             providedOptions={{

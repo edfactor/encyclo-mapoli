@@ -23,7 +23,7 @@ const DuplicateNamesAndBirthdays = () => {
   const [refreshMessage, setRefreshMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
-  
+
   // Get current drawer state from Redux
   const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
 

@@ -4,6 +4,7 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { CalendarResponseDto } from "../../../reduxstore/types";
@@ -167,7 +168,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           </div>
 
           <DSMGrid
-            preferenceKey={"TERMINATION"}
+            preferenceKey={GRID_KEYS.TERMINATION}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}
             isLoading={isFetching}

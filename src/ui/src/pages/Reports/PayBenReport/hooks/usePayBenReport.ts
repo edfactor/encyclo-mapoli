@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyPayBenReportQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
@@ -46,7 +47,7 @@ const usePayBenReport = () => {
     initialSortBy: "ssn",
     initialSortDescending: true,
     onPaginationChange: handlePaginationChange,
-    persistenceKey: "PAY_BEN_REPORT"
+    persistenceKey: GRID_KEYS.PAY_BEN_REPORT
   });
 
   const executeSearch = useCallback(async () => {
