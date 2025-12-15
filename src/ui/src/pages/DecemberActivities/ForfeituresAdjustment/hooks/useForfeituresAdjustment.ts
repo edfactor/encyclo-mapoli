@@ -13,6 +13,7 @@ import {
 } from "../../../../reduxstore/api/InquiryApi";
 import { useLazyGetForfeitureAdjustmentsQuery } from "../../../../reduxstore/api/AdhocApi";
 import { MasterInquiryResponseDto } from "../../../../types/master-inquiry/master-inquiry";
+import { EmployeeDetails } from "../../../../types/employee/employee";
 import {
   ForfeitureAdjustmentSearchParams,
   forfeituresAdjustmentReducer,
@@ -258,6 +259,9 @@ const useForfeituresAdjustment = () => {
     clearAlerts();
   }, [transactionPagination, clearAlerts]);
 
+  const memberDetails = state.memberDetails.details as unknown as EmployeeDetails | null;
+  const currentBalance = memberDetails?.currentPSAmount ?? 0;
+
   return {
     // State
     searchParams: state.search.params,
@@ -268,6 +272,7 @@ const useForfeituresAdjustment = () => {
     isFetchingMemberDetails: state.memberDetails.isFetching,
     isFetchingTransactions: state.transactions.isFetching,
     isAddForfeitureModalOpen: state.modal.isAddForfeitureOpen,
+    currentBalance,
 
     // Computed state
     showEmployeeData: selectShowEmployeeData(state),
