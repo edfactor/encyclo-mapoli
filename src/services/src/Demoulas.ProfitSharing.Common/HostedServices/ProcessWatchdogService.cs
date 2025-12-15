@@ -41,7 +41,6 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
     private DateTime? _lastErrorTime;
     private int _successfulCycles;
     private DateTime? _lastSuccessfulCycle;
-    private DateTime? _watchdogStartedAt;
 
     public bool IsRunning { get; private set; }
     public DateTime? LastHeartbeat { get; private set; }
@@ -65,7 +64,6 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
         _lastErrorTime = null;
         _successfulCycles = 0;
         _lastSuccessfulCycle = null;
-        _watchdogStartedAt = null;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -77,7 +75,6 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
         }
 
         IsRunning = true;
-        _watchdogStartedAt = DateTime.UtcNow;
         _logger.LogInformation(
             "Process watchdog started for {ServiceName} ({EnvironmentName}) on {MachineName} PID {ProcessId}. Timeout: {TimeoutSeconds}s, Check interval: {CheckIntervalSeconds}s",
             _serviceName,
