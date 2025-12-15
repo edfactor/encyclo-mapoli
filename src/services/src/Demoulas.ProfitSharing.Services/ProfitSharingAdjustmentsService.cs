@@ -32,8 +32,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
     {
         return _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
-            ctx.UseReadOnlyContext();
-
             if (request.ProfitYear < 1900 || request.ProfitYear > 2500)
             {
                 return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
@@ -42,11 +40,11 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 });
             }
 
-            if (request.OracleHcmId <= 0)
+            if (request.DemographicId <= 0)
             {
                 return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                 {
-                    [nameof(request.OracleHcmId)] = ["OracleHcmId must be greater than zero."]
+                    [nameof(request.DemographicId)] = ["DemographicId must be greater than zero."]
                 });
             }
 
@@ -61,9 +59,10 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
 
             var demographic = await demographicQuery
-                .TagWith($"ProfitSharingAdjustments-Get-Demographic-{request.OracleHcmId}")
+                .TagWith($"ProfitSharingAdjustments-Get-Demographic-{request.DemographicId}")
+                .Where(d => d.Id == request.DemographicId)
                 .Select(d => new { d.Ssn })
-                .FirstOrDefaultAsync(d => d.OracleHcmId == request.OracleHcmId, ct);
+                .FirstOrDefaultAsync(ct);
 
             if (demographic is null)
             {
@@ -71,7 +70,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             }
 
             var ssn = demographic.Ssn;
-            var profitYear = (short)request.ProfitYear;
+            var profitYear = request.ProfitYear;
 
             var profitDetails = await ctx.ProfitDetails
                 .TagWith($"ProfitSharingAdjustments-Get-ProfitDetails-{profitYear}-{request.SequenceNumber}")
@@ -132,7 +131,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
             {
                 ProfitYear = request.ProfitYear,
-                OracleHcmId = request.OracleHcmId,
+                DemographicId = request.DemographicId,
                 SequenceNumber = request.SequenceNumber,
                 Rows = responseRows
             });
@@ -205,9 +204,10 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
 
                 var demographic = await demographicQuery
-                    .TagWith($"ProfitSharingAdjustments-Save-Demographic-{request.OracleHcmId}")
+                    .TagWith($"ProfitSharingAdjustments-Save-Demographic-{request.DemographicId}")
+                    .Where(d => d.Id == request.DemographicId)
                     .Select(d => new { d.Ssn })
-                    .FirstOrDefaultAsync(d => d.OracleHcmId == request.OracleHcmId, ct);
+                    .FirstOrDefaultAsync(ct);
 
                 if (demographic is null)
                 {
@@ -215,7 +215,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 }
 
                 var ssn = demographic.Ssn;
-                var profitYear = (short)request.ProfitYear;
+                var profitYear = request.ProfitYear;
 
                 var idsToUpdate = request.Rows
                     .Where(r => r.ProfitDetailId.HasValue)
@@ -308,7 +308,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
                 {
                     ProfitYear = request.ProfitYear,
-                    OracleHcmId = request.OracleHcmId,
+                    DemographicId = request.DemographicId,
                     SequenceNumber = request.SequenceNumber,
                     Rows = []
                 });
@@ -322,14 +322,14 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             return await GetAsync(new GetProfitSharingAdjustmentsRequest
             {
                 ProfitYear = request.ProfitYear,
-                OracleHcmId = request.OracleHcmId,
+                DemographicId = request.DemographicId,
                 SequenceNumber = request.SequenceNumber
             }, ct);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save profit sharing adjustments for OracleHcmId {OracleHcmId} year {ProfitYear} seq {SequenceNumber}",
-                request.OracleHcmId, request.ProfitYear, request.SequenceNumber);
+            _logger.LogError(ex, "Failed to save profit sharing adjustments for DemographicId {DemographicId} year {ProfitYear} seq {SequenceNumber}",
+                request.DemographicId, request.ProfitYear, request.SequenceNumber);
 
             return Result<GetProfitSharingAdjustmentsResponse>.Failure(Error.Unexpected("Failed to save profit sharing adjustments."));
         }

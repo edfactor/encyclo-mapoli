@@ -1,6 +1,6 @@
 export type ProfitSharingAdjustmentsKey = {
   profitYear: number;
-  oracleHcmId: number;
+  demographicId: number;
   sequenceNumber: number;
 };
 

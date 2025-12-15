@@ -475,6 +475,9 @@ These conventions are important project-wide rules. Follow them in addition to t
 
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed.
 - All backend unit & service tests reside in the consolidated test project `Demoulas.ProfitSharing.UnitTests` (do NOT create stray ad-hoc test projects). Mirror source namespaces inside this project; prefer folder structure `Domain/`, `Services/`, `Endpoints/` for organization if adding new areas.
+- IMPORTANT: Always ensure the backend compiles before running tests.
+  - If the solution/project does not compile, STOP and fix/report compile errors first.
+  - Do not run tests against stale binaries (e.g., via `--no-build`) unless a successful build has already been verified.
 - **Telemetry Testing**: All endpoint tests should verify telemetry integration (activity creation, metrics recording, business operations tracking). See `TELEMETRY_GUIDE.md` for testing patterns.
 - Frontend: Add Playwright or component tests colocated (if pattern emerges) but keep end-to-end in `e2e/`.
 - Security warnings/analyzers treated as errors; keep build green.
@@ -548,7 +551,7 @@ When creating new documentation:
 
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root.
 - **CODE REVIEW CHECKLIST**: Use the [Master Code Review Checklist](CODE_REVIEW_CHECKLIST.md) for all PRs - includes comprehensive security, architecture, frontend, backend, and telemetry guidance. **CRITICAL**: Frontend section includes auto-reject blockers like age calculation.
-- **NEW ENDPOINT CHECKLIST**: Use the [RESTful API Guidelines Instructions](instructions/restful-api-guidelines.instructions.md#new-endpoint-checklist) to verify design, implementation, documentation, and security before submitting PR
+- **NEW ENDPOINT CHECKLIST**: Use the [RESTful API Guidelines Instructions](instructions/restful-api-guidelines.instructions.md) (see “New endpoint checklist”) to verify design, implementation, documentation, and security before submitting PR
 - ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section).
 - Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.).
 - Declare all sensitive fields accessed in telemetry calls for security auditing.
@@ -623,8 +626,16 @@ cd src/services; dotnet build Demoulas.ProfitSharing.slnx
 # NOTE: Tests use xUnit v3 + Microsoft Testing Platform (MTP).
 # Run from src/services so global.json test runner settings are applied.
 cd src/services
+# Always build first (do not run tests if the solution doesn't compile)
+dotnet build Demoulas.ProfitSharing.slnx
+
+# Then run tests against the current source
+dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj
+
+# Optional fast loop (ONLY after a successful build has been verified)
 dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --no-build
 # Filter examples (MTP/xUnit options; NOT VSTest `--filter`):
+# dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --filter-class *OracleHcmDiagnostics*
 # dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --filter-class *OracleHcmDiagnostics* --no-build
 ```
 

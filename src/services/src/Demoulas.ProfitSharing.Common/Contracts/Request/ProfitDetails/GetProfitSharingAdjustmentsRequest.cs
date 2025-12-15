@@ -6,7 +6,7 @@ public sealed record GetProfitSharingAdjustmentsRequest : IProfitYearRequest
 {
     public short ProfitYear { get; set; }
 
-    public required long OracleHcmId { get; init; }
+    public required int DemographicId { get; init; }
 
     public required int SequenceNumber { get; init; }
 }

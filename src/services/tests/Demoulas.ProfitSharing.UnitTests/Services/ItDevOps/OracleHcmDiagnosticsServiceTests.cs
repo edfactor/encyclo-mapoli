@@ -1,8 +1,7 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Entities.Contexts;
-using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -216,74 +215,6 @@ public class OracleHcmDiagnosticsServiceTests
 
     #endregion
 
-    #region ClearDemographicSyncAuditAsync Tests
-
-    [Fact(Skip = "ExecuteDeleteAsync not supported by InMemory provider")]
-    [Description("PS-2319 : ClearDemographicSyncAuditAsync removes all audit records")]
-    public async Task ClearDemographicSyncAuditAsync_DeletesAllRecords()
-    {
-        // Arrange
-        var ct = CancellationToken.None;
-        var now = DateTimeOffset.UtcNow;
-
-        // Add test records
-        await _dataContextFactory.UseWritableContext(async ctx =>
-        {
-            for (int i = 1; i <= 3; i++)
-            {
-                ctx.DemographicSyncAudit.Add(new DemographicSyncAudit
-                {
-                    BadgeNumber = 12340 + i,
-                    OracleHcmId = i,
-                    Message = $"Test error {i}",
-                    PropertyName = "TestProp",
-                    InvalidValue = $"Value{i}",
-                    UserName = "testuser",
-                    Created = now
-                });
-            }
-
-            await ctx.SaveChangesAsync(ct);
-        }, ct);
-
-        // Verify records exist before clear
-        var beforeRequest = new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true };
-        var beforeClear = await _service.GetDemographicSyncAuditAsync(beforeRequest, ct);
-        beforeClear.Value!.Total.ShouldBe(3);
-
-        // Act
-        var result = await _service.ClearDemographicSyncAuditAsync(ct);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value!.ShouldBe(3); // Should return count of deleted records
-
-        // Verify records are deleted
-        var afterRequest = new SortedPaginationRequestDto { Skip = 0, Take = 50, SortBy = "Created", IsSortDescending = true };
-        var afterClear = await _service.GetDemographicSyncAuditAsync(afterRequest, ct);
-        afterClear.Value!.Total.ShouldBe(0);
-    }
-
-    [Fact(Skip = "ExecuteDeleteAsync not supported by InMemory provider")]
-    [Description("PS-2319 : ClearDemographicSyncAuditAsync returns 0 when no records exist")]
-    public async Task ClearDemographicSyncAuditAsync_NoRecords_ReturnsZero()
-    {
-        // Arrange
-        var ct = CancellationToken.None;
-
-        // Act
-        var result = await _service.ClearDemographicSyncAuditAsync(ct);
-
-        // Assert
-        if (!result.IsSuccess)
-        {
-            throw new Exception($"Service call failed with error: {result.Error?.Description}");
-        }
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBe(0);
-    }
-
-    #endregion
 }
 
 /// <summary>

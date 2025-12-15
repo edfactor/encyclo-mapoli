@@ -33,7 +33,7 @@ const ProfitSharingAdjustments = () => {
   const [saveAdjustments, { isLoading: isSaving }] = useSaveProfitSharingAdjustmentsMutation();
 
   const [profitYear, setProfitYear] = useState<number>(new Date().getFullYear());
-  const [oracleHcmId, setOracleHcmId] = useState<number>(0);
+  const [demographicId, setDemographicId] = useState<number>(0);
   const [sequenceNumber, setSequenceNumber] = useState<number>(0);
 
   const [loadedKey, setLoadedKey] = useState<ProfitSharingAdjustmentsKey | null>(null);
@@ -50,7 +50,7 @@ const ProfitSharingAdjustments = () => {
       return;
     }
 
-    setLoadedKey({ profitYear: data.profitYear, oracleHcmId: data.oracleHcmId, sequenceNumber: data.sequenceNumber });
+    setLoadedKey({ profitYear: data.profitYear, demographicId: data.demographicId, sequenceNumber: data.sequenceNumber });
 
     // DSMGrid/AG Grid edits mutate row objects; make sure data isn't frozen.
     const copy = (data.rows ?? []).map((r) => ({ ...r }));
@@ -170,8 +170,8 @@ const ProfitSharingAdjustments = () => {
       return;
     }
 
-    if (!Number.isFinite(oracleHcmId) || oracleHcmId <= 0) {
-      setErrorMessage("Oracle HCM ID must be greater than zero.");
+    if (!Number.isFinite(demographicId) || demographicId <= 0) {
+      setErrorMessage("Demographic ID must be greater than zero.");
       return;
     }
 
@@ -181,7 +181,7 @@ const ProfitSharingAdjustments = () => {
     }
 
     try {
-      await triggerGet({ profitYear, oracleHcmId, sequenceNumber }).unwrap();
+      await triggerGet({ profitYear, demographicId, sequenceNumber }).unwrap();
     } catch (e) {
       console.error("Failed to load profit sharing adjustments", e);
       setErrorMessage("Failed to load adjustments. Please try again.");
@@ -333,11 +333,11 @@ const ProfitSharingAdjustments = () => {
               inputProps={{ min: 1900, max: 2500 }}
             />
             <TextField
-              label="Oracle HCM ID"
+              label="Demographic ID"
               size="small"
               type="number"
-              value={oracleHcmId}
-              onChange={(e) => setOracleHcmId(Number.parseInt(e.target.value ?? "", 10) || 0)}
+              value={demographicId}
+              onChange={(e) => setDemographicId(Number.parseInt(e.target.value ?? "", 10) || 0)}
               sx={{ width: 150 }}
               inputProps={{ min: 1 }}
             />

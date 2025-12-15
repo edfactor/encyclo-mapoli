@@ -13,10 +13,10 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 [CollectionDefinition("PS-759-Under21Totals", DisableParallelization = true)]
 public sealed class ProfitSharingUnder21TotalsTests : ApiTestBase<Program>
 {
-    [Fact(DisplayName = "PS-759 - Profit Sharing under 21 ProfitShareUpdateTotals", Skip = "Computationally expensive with large mock datasets")]
+    [Fact(DisplayName = "PS-759 - Profit Sharing under 21 ProfitShareUpdateTotals")]
     public async Task CheckUnder21Totals()
     {
-        var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };
+        var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 25 };
 
         var response = await ApiClient.GETAsync<ProfitSharingUnder21TotalsEndpoint, ProfitYearRequest, ProfitSharingUnder21TotalsResponse>(request);
 

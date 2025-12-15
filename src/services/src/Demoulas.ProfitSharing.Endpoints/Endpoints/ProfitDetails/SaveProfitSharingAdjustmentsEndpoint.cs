@@ -52,6 +52,6 @@ public sealed class SaveProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint
                 new("profit_year", req.ProfitYear.ToString()));
 
             return result.ToHttpResult(Error.EmployeeNotFound);
-        }, nameof(req.OracleHcmId));
+        });
     }
 }
