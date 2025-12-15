@@ -197,22 +197,26 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             // Record initial heartbeat before long-running feed fetch operations
             _watchdog.RecordHeartbeat();
 
-            // Fetch all feeds in parallel for better performance
-            var newHiresTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken), cancellationToken);
-            var assignmentsTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken), cancellationToken);
-            var updatesTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken), cancellationToken);
-            var terminationsTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken), cancellationToken);
-
-            await Task.WhenAll(newHiresTask, assignmentsTask, updatesTask, terminationsTask).ConfigureAwait(false);
-
-            // Record heartbeat after feed fetch completes (can take several minutes)
+            // Fetch feeds sequentially to reduce throttling/401s (HCM returns 401 instead of 429)
+            var newHires = await MaterializeAsync(
+                _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
             _watchdog.RecordHeartbeat();
 
-            // Get results from completed tasks
-            var newHires = await newHiresTask.ConfigureAwait(false);
-            var assignments = await assignmentsTask.ConfigureAwait(false);
-            var updates = await updatesTask.ConfigureAwait(false);
-            var terminations = await terminationsTask.ConfigureAwait(false);
+            var assignments = await MaterializeAsync(
+                _atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
+            _watchdog.RecordHeartbeat();
+
+            var updates = await MaterializeAsync(
+                _atomFeedClient.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
+            _watchdog.RecordHeartbeat();
+
+            var terminations = await MaterializeAsync(
+                _atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
+            _watchdog.RecordHeartbeat();
 
             // Merge results and extract unique person IDs
             HashSet<long> people = new HashSet<long>();

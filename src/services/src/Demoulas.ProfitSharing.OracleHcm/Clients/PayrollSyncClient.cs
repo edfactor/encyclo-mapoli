@@ -267,7 +267,7 @@ internal class PayrollSyncClient
     /// </remarks>
     private async Task<HttpResponseMessage> GetOraclePayrollValue(string url, CancellationToken cancellationToken)
     {
-        await Task.Delay(new TimeSpan(0, 0, 10), cancellationToken).ConfigureAwait(false);
+        await Task.Delay(new TimeSpan(0, 0, 15), cancellationToken).ConfigureAwait(false);
 
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
