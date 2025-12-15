@@ -535,22 +535,25 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           )}
         </>
       )}
-      {!isGridExpanded && !isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response.results.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-            setInitialSearchLoaded(true);
-          }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            setInitialPageSize(value);
-            handlePaginationChange(0, value);
-            setInitialSearchLoaded(true);
-          }}
-          recordCount={distributionsAndForfeitures.response.total}
-        />
-      )}
+      {!isGridExpanded &&
+        !isFetching &&
+        !!distributionsAndForfeitures &&
+        distributionsAndForfeitures.response.results.length > 0 && (
+          <Pagination
+            pageNumber={pageNumber}
+            setPageNumber={(value: number) => {
+              handlePaginationChange(value - 1, pageSize);
+              setInitialSearchLoaded(true);
+            }}
+            pageSize={pageSize}
+            setPageSize={(value: number) => {
+              setInitialPageSize(value);
+              handlePaginationChange(0, value);
+              setInitialSearchLoaded(true);
+            }}
+            recordCount={distributionsAndForfeitures.response.total}
+          />
+        )}
     </>
   );
 };

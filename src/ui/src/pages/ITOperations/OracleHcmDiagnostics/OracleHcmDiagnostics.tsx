@@ -2,7 +2,11 @@ import { Box, Divider } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Page } from "smart-ui-library";
 import { SortParams } from "../../../hooks/useGridPagination";
-import { useClearDemographicSyncAudit, useGetOracleHcmSyncMetadata, useLazyGetDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
+import {
+  useClearDemographicSyncAudit,
+  useGetOracleHcmSyncMetadata,
+  useLazyGetDemographicSyncAudit
+} from "../../../reduxstore/api/hcmSyncApi";
 import AuditGrid from "./AuditGrid";
 import OracleHcmMetadata from "./OracleHcmMetadata";
 
@@ -16,17 +20,20 @@ const OracleHcmDiagnostics = () => {
   const [sortBy, setSortBy] = useState<string>("Created");
   const [isSortDescending, setIsSortDescending] = useState<boolean>(true);
 
-  const fetchAuditData = useCallback((page: number, size: number, sort?: string, desc?: boolean) => {
-    triggerGetAudit(
-      {
-        skip: Math.max(0, page) * size,
-        take: size,
-        sortBy: sort ?? sortBy,
-        isSortDescending: desc ?? isSortDescending
-      },
-      false
-    );
-  }, [triggerGetAudit, sortBy, isSortDescending]);
+  const fetchAuditData = useCallback(
+    (page: number, size: number, sort?: string, desc?: boolean) => {
+      triggerGetAudit(
+        {
+          skip: Math.max(0, page) * size,
+          take: size,
+          sortBy: sort ?? sortBy,
+          isSortDescending: desc ?? isSortDescending
+        },
+        false
+      );
+    },
+    [triggerGetAudit, sortBy, isSortDescending]
+  );
 
   useEffect(() => {
     if (!hasInitiallyFetched.current) {
@@ -82,6 +89,5 @@ const OracleHcmDiagnostics = () => {
     </Page>
   );
 };
-
 
 export default OracleHcmDiagnostics;
