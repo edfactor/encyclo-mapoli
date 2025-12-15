@@ -26,7 +26,7 @@ public class GetOracleHcmSyncMetadataEndpointTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
         // Act
-        var httpResponse = await ApiClient.GetAsync("/api/itdevops/oracleHcm/metadata");
+        var httpResponse = await ApiClient.GetAsync("/api/administration/oracleHcm/metadata");
         var result = await httpResponse.Content.ReadFromJsonAsync<OracleHcmSyncMetadataResponse>();
 
         // Assert - Verify endpoint returned 200 success
@@ -41,7 +41,7 @@ public class GetOracleHcmSyncMetadataEndpointTests : ApiTestBase<Program>
         // Arrange - No token assigned
 
         // Act
-        var response = await ApiClient.GetAsync("/api/itdevops/oracleHcm/metadata");
+        var response = await ApiClient.GetAsync("/api/administration/oracleHcm/metadata");
 
         // Assert
         ((int)response.StatusCode).ShouldBe(401);
@@ -60,7 +60,7 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
         // Act
-        var httpResponse = await ApiClient.GetAsync("/api/itdevops/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
+        var httpResponse = await ApiClient.GetAsync("/api/administration/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
         var result = await httpResponse.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>();
 
         // Assert - Verify endpoint returns valid paginated response structure
@@ -79,7 +79,7 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
         // Act
-        var httpResponse = await ApiClient.GetAsync("/api/itdevops/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
+        var httpResponse = await ApiClient.GetAsync("/api/administration/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
         var result = await httpResponse.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>();
 
         // Assert - Verify audit records returned from mock data factory
@@ -103,7 +103,7 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
         // Act
-        var httpResponse = await ApiClient.GetAsync("/api/itdevops/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
+        var httpResponse = await ApiClient.GetAsync("/api/administration/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
         var result = await httpResponse.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>();
 
         // Assert - Verify results are ordered by Created desc (newest first)
@@ -122,7 +122,7 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange - No token assigned
 
         // Act
-        var response = await ApiClient.GetAsync("/api/itdevops/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
+        var response = await ApiClient.GetAsync("/api/administration/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
 
         // Assert
         ((int)response.StatusCode).ShouldBe(401);
@@ -141,7 +141,7 @@ public class ClearDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
         // Act - Clear endpoint (seeded with audit records)
-        var httpResponse = await ApiClient.PostAsync("/api/itdevops/oracleHcm/audit/clear", content: null);
+        var httpResponse = await ApiClient.PostAsync("/api/administration/oracleHcm/audit/clear", content: null);
         var result = await httpResponse.Content.ReadFromJsonAsync<ClearAuditResponse>();
 
         // Assert - Verify endpoint returns valid response
@@ -157,7 +157,7 @@ public class ClearDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange - No token assigned
 
         // Act
-        var response = await ApiClient.PostAsync("/api/itdevops/oracleHcm/audit/clear", content: null);
+        var response = await ApiClient.PostAsync("/api/administration/oracleHcm/audit/clear", content: null);
 
         // Assert
         ((int)response.StatusCode).ShouldBe(401);

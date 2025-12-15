@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Api.Groups;
+using Demoulas.Common.Api.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
@@ -7,12 +7,12 @@ using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
-public sealed class ItDevOpsGroup : GroupBase
+public sealed class AdministrationGroup : GroupBase
 {
-    protected override string Route => "itdevops";
-    protected override string RouteName => "ItDevOps";
+    protected override string Route => "administration";
+    protected override string RouteName => "Administration";
 
-    public ItDevOpsGroup()
+    public AdministrationGroup()
     {
         Configure(Route.ToLowerInvariant(), ep =>
         {
@@ -24,8 +24,8 @@ public sealed class ItDevOpsGroup : GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
-            // Freeze endpoints are restricted to IT DevOps via the CanFreezeDemographics policy.
-            ep.Policies(Policy.CanFreezeDemographics);
+
+            ep.Policies(Policy.CanManageAdministration);
         });
     }
 }

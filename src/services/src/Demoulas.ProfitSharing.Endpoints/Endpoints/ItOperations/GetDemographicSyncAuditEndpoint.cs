@@ -61,7 +61,7 @@ public class GetDemographicSyncAuditEndpoint
                 }
             };
         });
-        Group<ItDevOpsGroup>();
+        Group<AdministrationGroup>();
     }
 
     public override Task<Results<Ok<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(

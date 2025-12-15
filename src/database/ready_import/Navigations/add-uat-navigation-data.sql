@@ -46,6 +46,7 @@ DECLARE
     -- RECONCILIATION_MENU CONSTANT NUMBER := 5; -- REMOVED
     YEAR_END_MENU CONSTANT NUMBER := 6;
     IT_DEVOPS_MENU CONSTANT NUMBER := 7;
+    ADMINISTRATIVE_MENU CONSTANT NUMBER := 8;
 
 
     -- These are the secondary drawer top-level menus
@@ -116,6 +117,12 @@ DECLARE
     UNFORFEIT CONSTANT NUMBER := 148;
     MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE CONSTANT NUMBER := 162;
     PAY426N_FISCAL_CLOSE CONSTANT NUMBER := 153;
+
+    -- Administrative pages
+    ORACLE_HCM_DIAGNOSTICS CONSTANT NUMBER := 167;
+    MANAGE_STATE_TAX_RATES_PAGE CONSTANT NUMBER := 173;
+    MANAGE_ANNUITY_RATES_PAGE CONSTANT NUMBER := 174;
+    PROFIT_SHARING_ADJUSTMENTS_PAGE CONSTANT NUMBER := 175;
 
     -- PROFIT_SHARE_REPORT_FINAL_RUN CONSTANT NUMBER := 149; -- REMOVED (was under FISCAL_CLOSE)
     -- PRINT_PROFIT_CERTS CONSTANT NUMBER := 150; -- REMOVED (was under FISCAL_CLOSE)
@@ -262,7 +269,12 @@ BEGIN
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS_MENU, 'Oracle HCM Sync Diagnostics', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+
+--Administrative Operations
+    insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, ADMINISTRATIVE_MENU, 'Demographic Sync Errors', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_ANNUITY_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage Annuity Rates', '', 'manage-annuity-rates', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADMINISTRATIVE_MENU, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -310,8 +322,9 @@ BEGIN
     assign_navigation_role(IT_DEVOPS_MENU, IT_DEVOPS);
 
 -- Inserting value for Administrative menu for role management
---  NOTE: Administrative navigation should be accessible only to members of the IT-DevOps role (role id 6).
+--  NOTE: Administrative navigation should be accessible to members of the IT-DevOps and System-Administrator roles.
     assign_navigation_role(ADMINISTRATIVE_MENU, IT_DEVOPS);
+    assign_navigation_role(ADMINISTRATIVE_MENU, SYSTEM_ADMINISTRATOR);
 
 -- Print PS Jobs - REMOVED
     -- assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);
@@ -521,6 +534,14 @@ BEGIN
     assign_navigation_role(INQUIRIES_GROUP, IT_DEVOPS);
     -- assign_navigation_role(ADJUSTMENTS_GROUP, IT_DEVOPS); -- REMOVED
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS);
+    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, IT_DEVOPS);
+    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     -- assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS); -- REMOVED

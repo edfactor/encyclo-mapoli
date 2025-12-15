@@ -31,7 +31,7 @@ public sealed class GetAnnuityRatesEndpoint : ProfitSharingEndpoint<GetAnnuityRa
         {
             s.Summary = "Gets all annuity rates.";
         });
-        Group<ItDevOpsGroup>();
+        Group<AdministrationGroup>();
     }
 
     public override Task<Results<Ok<IReadOnlyList<AnnuityRateDto>>, NotFound, ProblemHttpResult>> ExecuteAsync(GetAnnuityRatesRequest req, CancellationToken ct)

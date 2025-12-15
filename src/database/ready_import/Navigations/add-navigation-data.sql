@@ -137,6 +137,7 @@ DECLARE
     ORACLE_HCM_DIAGNOSTICS CONSTANT NUMBER := 167;
     MANAGE_STATE_TAX_RATES_PAGE CONSTANT NUMBER := 173;
     MANAGE_ANNUITY_RATES_PAGE CONSTANT NUMBER := 174;
+    PROFIT_SHARING_ADJUSTMENTS_PAGE CONSTANT NUMBER := 175;
     VESTING_REPORTS_GROUP CONSTANT NUMBER := 172;
     FORFEITURE_ADJUSTMENT_PAGE CONSTANT NUMBER := 168;
     MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE CONSTANT NUMBER := 169;
@@ -298,6 +299,7 @@ BEGIN
     insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, ADMINISTRATIVE_MENU, 'Demographic Sync Errors', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_ANNUITY_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage Annuity Rates', '', 'manage-annuity-rates', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADMINISTRATIVE_MENU, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -399,8 +401,9 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(IT_DEVOPS_MENU, IT_DEVOPS);
 
 -- Inserting value for Administrative menu for role management
---  NOTE: Administrative navigation should be accessible only to members of the IT-DevOps role (role id 6).
+--  NOTE: Administrative navigation should be accessible to members of the IT-DevOps and System-Administrator roles.
     assign_navigation_role(ADMINISTRATIVE_MENU, IT_DEVOPS);
+    assign_navigation_role(ADMINISTRATIVE_MENU, SYSTEM_ADMINISTRATOR);
 
 -- Payben report 
     -- assign_navigation_role(PAY_BEN_REPORT, SYSTEM_ADMINISTRATOR); -- COMMENTED OUT - navigation item doesn't exist
@@ -686,11 +689,16 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(VESTING_REPORTS_GROUP, IT_DEVOPS);
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
     assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, IT_DEVOPS);
+    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(AUDIT_SEARCH_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(AUDIT_SEARCH_PAGE, FINANCE_MANAGER);
     assign_navigation_role(AUDIT_SEARCH_PAGE, IT_DEVOPS);
     assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS);
+    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, IT_DEVOPS);

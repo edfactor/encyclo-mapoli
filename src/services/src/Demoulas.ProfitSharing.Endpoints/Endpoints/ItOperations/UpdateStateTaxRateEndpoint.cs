@@ -37,7 +37,7 @@ public sealed class UpdateStateTaxRateEndpoint : ProfitSharingEndpoint<UpdateSta
             s.Summary = "Updates a single state tax rate.";
             s.ExampleRequest = new UpdateStateTaxRateRequest { Abbreviation = "MA", Rate = 5.00m };
         });
-        Group<ItDevOpsGroup>();
+        Group<AdministrationGroup>();
     }
 
     public override Task<Results<Ok<StateTaxRateDto>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(UpdateStateTaxRateRequest req, CancellationToken ct)

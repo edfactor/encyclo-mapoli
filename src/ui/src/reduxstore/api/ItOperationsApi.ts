@@ -39,7 +39,7 @@ export const ItOperationsApi = createApi({
   endpoints: (builder) => ({
     getAnnuityRates: builder.query<AnnuityRateDto[], GetAnnuityRatesQueryArgs>({
       query: (params) => ({
-        url: "itdevops/annuity-rates",
+        url: "administration/annuity-rates",
         method: "GET",
         params: {
           sortBy: params.sortBy,
@@ -49,20 +49,20 @@ export const ItOperationsApi = createApi({
     }),
     updateAnnuityRate: builder.mutation<AnnuityRateDto, UpdateAnnuityRateRequest>({
       query: (request) => ({
-        url: "itdevops/annuity-rates",
+        url: "administration/annuity-rates",
         method: "PUT",
         body: request
       })
     }),
     getStateTaxRates: builder.query<StateTaxRateDto[], void>({
       query: () => ({
-        url: "itdevops/state-tax-rates",
+        url: "administration/state-tax-rates",
         method: "GET"
       })
     }),
     updateStateTaxRate: builder.mutation<StateTaxRateDto, UpdateStateTaxRateRequest>({
       query: (request) => ({
-        url: "itdevops/state-tax-rates",
+        url: "administration/state-tax-rates",
         method: "PUT",
         body: request
       })

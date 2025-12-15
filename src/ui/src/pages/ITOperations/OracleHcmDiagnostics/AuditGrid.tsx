@@ -66,7 +66,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          Demographic Sync Audit
+          Demographic Sync Errors
         </Typography>
         <Button
           variant="contained"
@@ -120,7 +120,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
         <Typography
           variant="body1"
           sx={{ color: "#666", textAlign: "center", padding: "32px" }}>
-          No audit records found
+          No sync errors found
         </Typography>
       )}
 
@@ -134,7 +134,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
         <DialogContent>
           <Box sx={{ paddingTop: "16px" }}>
             <Typography variant="body1">
-              Are you sure you want to delete all {data?.total || 0} audit records?
+                Are you sure you want to delete all {data?.total || 0} sync error records?
             </Typography>
             <Typography
               variant="body2"

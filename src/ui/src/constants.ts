@@ -74,6 +74,7 @@ export const ROUTES = {
   DEMO_FREEZE: "demographic-freeze",
   MANAGE_STATE_TAXES: "manage-state-taxes",
   MANAGE_ANNUITY_RATES: "manage-annuity-rates",
+  PROFIT_SHARING_ADJUSTMENTS: "profit-sharing-adjustments",
   AUDIT_SEARCH: "audit-search",
   ORACLE_HCM_DIAGNOSTICS: "oracle-hcm-diagnostics",
   DEV_DEBUG: "dev-debug",
@@ -186,6 +187,9 @@ export const CAPTIONS = {
 
   MANAGE_ANNUITY_RATES: "Manage Annuity Rates",
   MANAGE_ANNUITY_RATES_SHORT: "Manage Annuity Rates",
+
+  PROFIT_SHARING_ADJUSTMENTS: "Profit Sharing Adjustments (008-22)",
+  PROFIT_SHARING_ADJUSTMENTS_SHORT: "Profit Sharing Adjustments",
 
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
   MANAGE_EXECUTIVE_HOURS_SHORT: "Manage Executive Hours",
@@ -466,6 +470,7 @@ export const GRID_KEYS = {
   DEMOGRAPHIC_SYNC_AUDIT: "DEMOGRAPHIC-SYNC-AUDIT",
   MANAGE_STATE_TAX_RATES: "MANAGE-STATE-TAX-RATES",
   MANAGE_ANNUITY_RATES: "MANAGE-ANNUITY-RATES",
+  PROFIT_SHARING_ADJUSTMENTS: "PROFIT-SHARING-ADJUSTMENTS",
 
   // Distributions
   DISTRIBUTION_INQUIRY: "DISTRIBUTION-INQUIRY",
