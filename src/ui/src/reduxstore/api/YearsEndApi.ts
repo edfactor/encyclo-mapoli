@@ -390,7 +390,10 @@ export const YearsEndApi = createApi({
       }
     }),
     getEmployeeWagesForYear: builder.query<
-      PagedReportResponse<EmployeeWagesForYear>,
+      PagedReportResponse<EmployeeWagesForYear> & {
+        totalHoursCurrentYearWages?: number;
+        totalIncomeCurrentYearWages?: number;
+      },
       EmployeeWagesForYearRequestDto & { acceptHeader: string }
     >({
       query: (params) => ({
@@ -422,7 +425,10 @@ export const YearsEndApi = createApi({
               totalHoursCurrentYearWages: number;
               totalIncomeCurrentYearWages: number;
             }>
-      ) => {
+      ): PagedReportResponse<EmployeeWagesForYear> & {
+        totalHoursCurrentYearWages?: number;
+        totalIncomeCurrentYearWages?: number;
+      } => {
         // Check if response has nested structure with participants
         if (
           "response" in response &&
@@ -447,7 +453,7 @@ export const YearsEndApi = createApi({
             totalIncomeCurrentYearWages: number;
           };
         }
-        return response;
+        return response as PagedReportResponse<EmployeeWagesForYear>;
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
