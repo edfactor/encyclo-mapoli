@@ -6,7 +6,7 @@ applyTo: "src/services/src/Demoulas.ProfitSharing.Services/**/*.*"
 
 **Project**: Demoulas Profit Sharing Application
 **Location**: `./src/services/src/Demoulas.ProfitSharing.Services/`
-**Technology**: .NET 9, C# 13, EF Core 9 with Oracle Provider
+**Technology**: .NET 10, C# 14, EF Core 10 with Oracle Provider
 **Lines of Code**: ~13,784
 **Last Updated**: 2025-10-23
 
@@ -1326,6 +1326,117 @@ var members = await ctx.Members.AsEnumerable()
     })
     .ToList();
 ```
+
+### Pattern 8: Pagination with ToPaginationResultsAsync (Demoulas.Common)
+
+**Use When**: Returning paginated search results (lookups, grids, reports with filters)
+
+**Location**: Extension methods are in `Demoulas.Common.Data.Contexts.Extensions` namespace
+
+**Project Reference Requirement**: Services.csproj must reference `Demoulas.ProfitSharing.Common` to access pagination extensions (which transitively provides `Demoulas.Util` NuGet package).
+
+```csharp
+// Request types from Demoulas.Common.Contracts.Contracts.Request
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Data.Contexts.Extensions; // ← Extension method location
+
+public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
+{
+    private readonly IProfitSharingDataContextFactory _contextFactory;
+
+    public async Task<Result<PaginatedResponseDto<DemographicSyncAuditDto>>> GetDemographicSyncAuditAsync(
+        SortedPaginationRequestDto request,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            return await _contextFactory.UseReadOnlyContext(async ctx =>
+            {
+                ctx.UseReadOnlyContext(); // Auto-applies AsNoTracking
+
+                var query = ctx.DemographicSyncAudits
+                    .TagWith($"DemographicSyncAudit-Pagination")
+                    .AsQueryable();
+
+                // Build dynamic filters if needed
+                if (!string.IsNullOrEmpty(request.FilterValue))
+                {
+                    query = query.Where(d => d.Ssn.Contains(request.FilterValue));
+                }
+
+                // Apply sorting via ToPaginationResultsAsync (handles dynamic sort)
+                var paginatedResult = await query
+                    .ToPaginationResultsAsync<DemographicSyncAudit, DemographicSyncAuditDto>(
+                        request,
+                        q => q.Select(d => new DemographicSyncAuditDto
+                        {
+                            Id = d.Id,
+                            Ssn = d.Ssn,
+                            SyncStatus = d.SyncStatus,
+                            CreatedDate = d.CreatedDate
+                        }),
+                        ct);
+
+                return Result<PaginatedResponseDto<DemographicSyncAuditDto>>.Success(paginatedResult);
+            }, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve demographic sync audit");
+            return Result<PaginatedResponseDto<DemographicSyncAuditDto>>.Failure(Error.InternalError);
+        }
+    }
+}
+```
+
+**Response Structure** - PaginatedResponseDto<T>:
+
+```csharp
+public class PaginatedResponseDto<T>
+{
+    public IEnumerable<T> Results { get; set; }      // Query results (IEnumerable, not List)
+    public long Total { get; set; }                   // Total record count
+    public int Skip { get; set; }                     // Offset applied
+    public int Take { get; set; }                     // Page size
+}
+```
+
+**Critical Points**:
+
+1. **Results is IEnumerable<T>** - Not List<T>, so convert with `.ToList()` if you need `.Count()` or indexing
+
+   ```csharp
+   // Test example
+   records = result.Value!.Results.ToList();
+   records[0].Id.ShouldBe(123);
+   records.Count.ShouldBe(10);
+   ```
+
+2. **Request Parameter Type** - Use `SortedPaginationRequestDto` (not plain `PaginationRequestDto`)
+
+   ```csharp
+   public class SortedPaginationRequestDto
+   {
+       public int Skip { get; set; }
+       public int Take { get; set; }
+       public string SortBy { get; set; }           // Column name for sorting
+       public bool IsSortDescending { get; set; }   // Sort direction
+   }
+   ```
+
+3. **Project Reference** - Services.csproj must have:
+
+   ```xml
+   <ProjectReference Include="..\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj" />
+   ```
+
+   This provides transitive access to `Demoulas.Util` NuGet package and extension methods.
+
+4. **Dynamic Sorting** - The extension method handles sorting based on `SortBy` parameter; pass the SortedPaginationRequestDto directly to `ToPaginationResultsAsync`.
+
+5. **Parallel Execution** - `ToPaginationResultsAsync` runs count and data queries in parallel for efficiency.
+
+**Related Documentation**: See `common.services.instructions.md` "Pagination Extensions" section for complete details on ToPaginationResultsAsync overloads, filtering support, and advanced usage patterns.
 
 ---
 

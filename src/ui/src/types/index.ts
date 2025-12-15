@@ -9,6 +9,9 @@ export * from "./auth/security";
 // Audit types
 export * from "./audit/audit";
 
+// IT Operations types
+export * from "./it-operations/oracle-hcm-diagnostics";
+
 // Employee types
 export * from "./employee/employee";
 

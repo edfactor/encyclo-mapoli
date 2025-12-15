@@ -18,6 +18,7 @@ import { PayServicesApi } from "./api/PayServicesApi";
 import { SecurityApi } from "./api/SecurityApi";
 import { validationApi } from "./api/ValidationApi";
 import { YearsEndApi } from "./api/YearsEndApi";
+import { hcmSyncApi } from "./api/hcmSyncApi";
 import navigationStatusSlice from "./slices/NavigationStatusSlice";
 import AppSupportSlice from "./slices/appSupportSlice";
 import beneficiarySlice from "./slices/beneficiarySlice";
@@ -40,6 +41,7 @@ const API_INSTANCES = [
   YearsEndApi,
   AdhocApi,
   ItOperationsApi,
+  hcmSyncApi,
   MilitaryApi,
   InquiryApi,
   LookupsApi,

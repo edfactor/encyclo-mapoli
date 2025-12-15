@@ -370,6 +370,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
 
+        // Setup DemographicSyncAudit for IT Operations audit testing
+        List<DemographicSyncAudit> demographicSyncAudits = new DemographicSyncAuditFaker().Generate(5);
+        Mock<DbSet<DemographicSyncAudit>> mockDemographicSyncAudits = demographicSyncAudits.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.DemographicSyncAudit).Returns(mockDemographicSyncAudits.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.DemographicSyncAudit).Returns(mockDemographicSyncAudits.Object);
+
         // Setup FakeSsns - used to exclude fake SSNs from duplicate detection
         List<FakeSsn>? fakeSsns = new List<FakeSsn>();
         Mock<DbSet<FakeSsn>> mockFakeSsns = fakeSsns.BuildMockDbSet();

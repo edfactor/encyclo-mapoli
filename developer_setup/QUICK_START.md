@@ -132,7 +132,11 @@ cd src/services
 dotnet build Demoulas.ProfitSharing.slnx
 
 # Run tests
-dotnet test Demoulas.ProfitSharing.UnitTests
+# Tests use xUnit v3 + Microsoft Testing Platform (MTP) via src/services/global.json.
+# Run from src/services and use the new dotnet test syntax.
+dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj
+# Filter examples (MTP/xUnit options; NOT VSTest `--filter`):
+# dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --filter-class *OracleHcmDiagnostics*
 
 # Start UI dev server
 cd src/ui
