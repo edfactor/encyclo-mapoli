@@ -24,7 +24,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
             var request = new SuggestedForfeitureAdjustmentRequest { Ssn = demoTest.Ssn };
 
             // Act
-            var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
+            var response = await ApiClient.POSTAsync<GetForfeitureAdjustmentsEndpoint,
                 SuggestedForfeitureAdjustmentRequest, SuggestedForfeitureAdjustmentResponse>(request);
 
             // Assert
@@ -46,7 +46,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
             var request = new SuggestedForfeitureAdjustmentRequest { Ssn = demoTest.Ssn, };
 
             // Act
-            var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
+            var response = await ApiClient.POSTAsync<GetForfeitureAdjustmentsEndpoint,
                 SuggestedForfeitureAdjustmentRequest, SuggestedForfeitureAdjustmentResponse>(request);
 
             // Assert
@@ -64,7 +64,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
         var request = new SuggestedForfeitureAdjustmentRequest { Badge = 3333 };
 
         // Act
-        var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
+        var response = await ApiClient.POSTAsync<GetForfeitureAdjustmentsEndpoint,
             SuggestedForfeitureAdjustmentRequest, SuggestedForfeitureAdjustmentResponse>(request);
 
         // Assert

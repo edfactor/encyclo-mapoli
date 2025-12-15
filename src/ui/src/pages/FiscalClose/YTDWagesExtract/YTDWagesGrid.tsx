@@ -84,20 +84,41 @@ const YTDWagesGrid = ({
             alignItems="center"
             marginBottom={2}>
             <Grid>
-              <Box display="flex" alignItems="center" gap={3}>
-                <Typography variant="h2" sx={{ color: "#0258A5" }}>
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={3}>
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5" }}>
                   {clonedData.reportName || "YTD Wages Extract"}
                 </Typography>
                 {!isGridExpanded && (
                   <>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography variant="body2" fontWeight="semibold">Total Hours:</Typography>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}>
+                      <Typography
+                        variant="body2"
+                        fontWeight="semibold">
+                        Total Hours:
+                      </Typography>
                       <Typography variant="body2">
-                        {clonedData.totalHoursCurrentYearWages?.toFixed(2) ?? totalsRow?.hoursCurrentYear.toFixed(2) ?? "0.00"}
+                        {clonedData.totalHoursCurrentYearWages?.toFixed(2) ??
+                          totalsRow?.hoursCurrentYear.toFixed(2) ??
+                          "0.00"}
                       </Typography>
                     </Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography variant="body2" fontWeight="semibold">Total Income:</Typography>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}>
+                      <Typography
+                        variant="body2"
+                        fontWeight="semibold">
+                        Total Income:
+                      </Typography>
                       <Typography variant="body2">
                         {numberToCurrency(clonedData.totalIncomeCurrentYearWages ?? totalsRow?.incomeCurrentYear ?? 0)}
                       </Typography>

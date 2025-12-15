@@ -460,7 +460,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 operationName: "Account History PDF Download",
                 tableName: "AccountHistory",
                 primaryKey: $"Badge:{memberId}",
-                details: $"Profit Year Range: {reportData.StartDate.Year} - {reportData.EndDate.Year}, Records: {reportData.Response.Total}",
+                details: $"BadgeNumber: {memberId}, Profit Year Range: {reportData.StartDate.Year} - {reportData.EndDate.Year}, Records: {reportData.Response.Total}",
                 cancellationToken);
 
             return pdfStream;

@@ -108,9 +108,7 @@ const Profall = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.PROFALL}
-      actionNode={renderActionNode()}>
+    <Page label={CAPTIONS.PROFALL} actionNode={renderActionNode()}>
       <Grid container rowSpacing="24px">
         <Grid width="100%">
           <Divider />
@@ -146,9 +144,11 @@ const Profall = () => {
 ```typescript
 const DistributionInquiryContent = () => {
   const dispatch = useDispatch();
-  const [searchData, setSearchData] = useState<DistributionSearchRequest | null>(null);
+  const [searchData, setSearchData] =
+    useState<DistributionSearchRequest | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
+  const [triggerSearch, { data, isFetching }] =
+    useLazySearchDistributionsQuery();
   const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
 
   const handleSearch = async (formData: DistributionSearchFormData) => {
@@ -196,7 +196,10 @@ const DistributionInquiryContent = () => {
 
 const DistributionInquiry = () => {
   return (
-    <Page label={CAPTIONS.DISTRIBUTIONS_INQUIRY} actionNode={<StatusDropdownActionNode />}>
+    <Page
+      label={CAPTIONS.DISTRIBUTIONS_INQUIRY}
+      actionNode={<StatusDropdownActionNode />}
+    >
       <MissiveAlertProvider>
         <DistributionInquiryContent />
       </MissiveAlertProvider>
@@ -237,7 +240,7 @@ const MasterInquiryContent = memo(() => {
     showProfitDetails,
     executeSearch,
     selectMember,
-    resetAll
+    resetAll,
   } = useMasterInquiry(); // Custom hook encapsulates all logic
 
   return (
@@ -332,7 +335,13 @@ const useMasterInquiry = () => {
 const FrozenSummary = () => {
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const tabs = ["Summary", "Distributions", "Contributions", "Forfeitures", "Balance"];
+  const tabs = [
+    "Summary",
+    "Distributions",
+    "Contributions",
+    "Forfeitures",
+    "Balance",
+  ];
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -382,7 +391,9 @@ const ProfitShareEditUpdate = () => {
   const profitYear = useFiscalCloseProfitYear();
   const [changesApplied, setChangesApplied] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitSharingEdit, profitSharingUpdate } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const [applyMaster] = useGetMasterApplyMutation();
   const [triggerRevert] = useLazyGetMasterRevertQuery();
@@ -405,7 +416,10 @@ const ProfitShareEditUpdate = () => {
 
   return (
     <PrerequisiteGuard prerequisites={["FrozenData"]}>
-      <Page label="PROFIT SHARE EDIT/UPDATE" actionNode={<StatusDropdownActionNode />}>
+      <Page
+        label="PROFIT SHARE EDIT/UPDATE"
+        actionNode={<StatusDropdownActionNode />}
+      >
         <Grid container rowSpacing="24px">
           {/* Checksum validation alerts */}
           {checksumValidation && <ValidationAlert data={checksumValidation} />}
@@ -458,8 +472,8 @@ The `Page` component is the top-level container for all pages.
 
 ```typescript
 <Page
-  label="DISTRIBUTION INQUIRY"        // Page title (displayed in header)
-  actionNode={<StatusDropdownActionNode />}  // Optional action area (right side of header)
+  label="DISTRIBUTION INQUIRY" // Page title (displayed in header)
+  actionNode={<StatusDropdownActionNode />} // Optional action area (right side of header)
 >
   {/* Page content */}
 </Page>
@@ -577,7 +591,7 @@ import {
 } from "../../utils/gridColumnFactory";
 
 export const GetProfallGridColumns = (
-  navFunction: (badgeNumber: string) => void,
+  navFunction: (badgeNumber: string) => void
 ): ColDef[] => {
   return [
     createStoreColumn({ minWidth: 80, sortable: true }),
@@ -637,20 +651,22 @@ Application-wide alert/message system.
 // In page wrapper:
 <MissiveAlertProvider>
   <PageContent />
-</MissiveAlertProvider>
+</MissiveAlertProvider>;
 
 // In page content:
 const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
 
 // Display alerts:
-{missiveAlerts.length > 0 && <MissiveAlerts />}
+{
+  missiveAlerts.length > 0 && <MissiveAlerts />;
+}
 
 // Add alert:
 addAlert({
   id: 911,
   severity: "success",
   message: "Distribution Saved Successfully",
-  description: "Distribution for John Doe has been saved."
+  description: "Distribution for John Doe has been saved.",
 });
 
 // Clear alerts:
@@ -768,10 +784,10 @@ Complex state or state shared across pages stored in Redux slices.
 ```typescript
 // Reading from Redux
 const { profitSharingEdit, profitSharingUpdate } = useSelector(
-  (state: RootState) => state.yearsEnd,
+  (state: RootState) => state.yearsEnd
 );
 const currentMember = useSelector(
-  (state: RootState) => state.distribution.currentMember,
+  (state: RootState) => state.distribution.currentMember
 );
 
 // Dispatching actions
@@ -854,7 +870,7 @@ Context for cross-component communication within a page.
 // Page wrapper
 <MissiveAlertProvider>
   <PageContent />
-</MissiveAlertProvider>
+</MissiveAlertProvider>;
 
 // In any child component
 const { addAlert, clearAlerts } = useMissiveAlerts();
@@ -936,28 +952,290 @@ useEffect(() => {
 
 ---
 
-### 5. Pagination & Sorting
+### 5. Pagination & Sorting (Server-Side)
+
+**CRITICAL**: All grids with pagination MUST use server-side pagination and sorting. Never load all data client-side.
+
+#### Complete Setup Pattern
+
+**Parent Component State:**
 
 ```typescript
-const handlePaginationChange = async (
-  pageNumber: number,
-  pageSize: number,
-  sortParams: SortParams,
-) => {
-  if (searchData) {
-    const request = {
-      ...searchData,
-      skip: pageNumber * pageSize,
-      take: pageSize,
-      sortBy: sortParams.sortBy,
-      isSortDescending: sortParams.isSortDescending,
-    };
-    await triggerSearch(request);
-  }
+import { SortParams } from "../../../hooks/useGridPagination";
+
+const [pageNumber, setPageNumber] = useState(0); // 0-based for UI
+const [pageSize, setPageSize] = useState(10); // Default page size
+const [sortBy, setSortBy] = useState<string>("Created"); // Default sort column
+const [isSortDescending, setIsSortDescending] = useState<boolean>(true); // Default sort order
+
+const fetchData = useCallback(
+  (page: number, size: number, sort?: string, desc?: boolean) => {
+    triggerQuery(
+      {
+        pageNumber: page + 1, // API expects 1-based
+        pageSize: size,
+        sortBy: sort ?? sortBy,
+        isSortDescending: desc ?? isSortDescending,
+      },
+      false
+    );
+  },
+  [triggerQuery, sortBy, isSortDescending]
+);
+
+const handlePageChange = (page: number, size: number) => {
+  setPageNumber(page);
+  setPageSize(size);
+  fetchData(page, size);
+};
+
+const handleSortChange = (sortParams: SortParams) => {
+  setSortBy(sortParams.sortBy);
+  setIsSortDescending(sortParams.isSortDescending);
+  setPageNumber(0); // Reset to first page on sort
+  fetchData(0, pageSize, sortParams.sortBy, sortParams.isSortDescending);
 };
 ```
 
+**Child Grid Component Props:**
+
+```typescript
+interface GridProps {
+  data?: PaginatedData;
+  isLoading: boolean;
+  pageNumber: number;
+  pageSize: number;
+  onPageChange: (page: number, pageSize: number) => void;
+  onSortChange: (sortParams: SortParams) => void;
+}
+
+const Grid: React.FC<GridProps> = ({
+  data,
+  isLoading,
+  pageNumber,
+  pageSize,
+  onPageChange,
+  onSortChange,
+}) => {
+  const columnDefs = useMemo(() => GetGridColumns(), []);
+
+  return (
+    <>
+      <DSMGrid
+        preferenceKey="MY_GRID"
+        isLoading={isLoading}
+        handleSortChanged={onSortChange} // CRITICAL: enables server-side sorting
+        providedOptions={{
+          rowData: data?.results || [],
+          columnDefs: columnDefs,
+        }}
+      />
+      <Pagination
+        pageNumber={pageNumber}
+        setPageNumber={(value: number) => onPageChange(value - 1, pageSize)} // Convert 1-based to 0-based
+        pageSize={pageSize}
+        setPageSize={(value: number) => onPageChange(0, value)} // Reset to page 0 on size change
+        recordCount={data?.total || 0}
+      />
+    </>
+  );
+};
+```
+
+**RTK Query API Endpoint:**
+
+```typescript
+getData: builder.query<
+  PaginatedData,
+  {
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    isSortDescending?: boolean;
+  }
+>({
+  query: ({
+    pageNumber = 1,
+    pageSize = 10,
+    sortBy = "Created",
+    isSortDescending = true,
+  }) => ({
+    url: "my-endpoint",
+    method: "GET",
+    params: { pageNumber, pageSize, sortBy, isSortDescending },
+  }),
+});
+```
+
+#### Common Pagination Mistakes
+
+1. **Missing `handleSortChanged`**: Grid won't trigger API calls on column header clicks
+2. **Missing `onSortChange` prop**: Grid component can't pass sort events to parent
+3. **Wrong page number base**: UI uses 0-based, API uses 1-based - must convert
+4. **Not resetting page on sort**: Should always go to page 0 when sorting changes
+5. **Client-side pagination**: Never load all records and paginate in browser
+6. **Missing sort state**: Parent must track `sortBy` and `isSortDescending`
+
 **Pattern**: Grid pagination/sort triggers new API call with updated parameters.
+
+---
+
+## Grid Column Factories (MANDATORY)
+
+### Always Use Grid Column Factories
+
+**NEVER manually define column objects**. Always use the grid column factory functions from `src/ui/src/utils/gridColumnFactory.ts`.
+
+#### Why Use Factories?
+
+1. **Consistent rendering**: Badge hyperlinks, date formatting, currency display
+2. **Master Inquiry integration**: Badge columns automatically link to Master Inquiry
+3. **Accessibility**: Standard tooltips, screen reader support
+4. **Maintainability**: Change once, applies everywhere
+
+#### Common Factory Functions
+
+```typescript
+import {
+  createBadgeColumn,
+  createNameColumn,
+  createDateColumn,
+  createCurrencyColumn,
+  createSSNColumn,
+  createStateColumn,
+  createStoreColumn,
+  createStatusColumn,
+} from "../../../utils/gridColumnFactory";
+
+export const GetMyGridColumns = (): ColDef[] => {
+  return [
+    // Badge column with automatic Master Inquiry hyperlink
+    createBadgeColumn({
+      headerName: "Badge Number",
+      field: "badgeNumber",
+      minWidth: 120,
+    }),
+
+    // Name column
+    createNameColumn({
+      field: "fullName",
+    }),
+
+    // Date column with automatic formatting
+    createDateColumn({
+      headerName: "Hire Date",
+      field: "hireDate",
+    }),
+
+    // Currency column with $ formatting
+    createCurrencyColumn({
+      headerName: "Balance",
+      field: "netBalance",
+    }),
+
+    // SSN column with masking
+    createSSNColumn({
+      field: "ssn",
+    }),
+
+    // Custom column (when factory doesn't exist)
+    {
+      headerName: "Custom Field",
+      field: "customField",
+      sortable: true,
+      filter: false, // ALWAYS false by default
+      flex: 1,
+      minWidth: 150,
+    },
+  ];
+};
+```
+
+#### Grid Column File Pattern
+
+**File**: `MyGridColumns.ts` (colocated with grid component)
+
+```typescript
+import { ColDef } from "ag-grid-community";
+import {
+  createBadgeColumn,
+  createDateColumn,
+} from "../../../utils/gridColumnFactory";
+import { myCustomFormatter } from "../../../utils/dateUtils";
+
+export const GetMyGridColumns = (): ColDef[] => {
+  return [
+    createBadgeColumn({ field: "badgeNumber" }),
+    {
+      headerName: "Created",
+      field: "created",
+      sortable: true,
+      filter: false,
+      width: 200,
+      valueFormatter: (params: any) =>
+        params.value ? myCustomFormatter(params.value) : "",
+    },
+  ];
+};
+```
+
+**Usage in Grid Component:**
+
+```typescript
+import { GetMyGridColumns } from "./MyGridColumns";
+
+const MyGrid = () => {
+  const columnDefs = useMemo(() => GetMyGridColumns(), []);
+
+  return (
+    <DSMGrid
+      providedOptions={{
+        columnDefs: columnDefs,
+        rowData: data,
+      }}
+    />
+  );
+};
+```
+
+#### AG Grid Configuration Rules
+
+1. **Filter disabled by default**: `filter: false` on all columns unless specific business requirement
+2. **Sortable enabled**: `sortable: true` for most columns
+3. **Width options**: Use `minWidth`, `maxWidth`, or `width` (fixed), or `flex` (responsive)
+4. **No `enableRangeSelection`**: Requires AG Grid Enterprise license - never set to `true`
+
+**Common Mistakes:**
+
+```typescript
+// ❌ WRONG: Manual column definitions, no hyperlinks
+const columnDefs = [
+  {
+    headerName: "Badge Number",
+    field: "badgeNumber",
+    width: 120,
+  },
+];
+
+// ❌ WRONG: Enabling all filters
+const columnDefs = Object.keys(data).map((key) => ({
+  headerName: key,
+  field: key,
+  filter: true, // WRONG
+}));
+
+// ❌ WRONG: Enabling range selection (requires Enterprise license)
+<DSMGrid
+  providedOptions={{
+    columnDefs: cols,
+    enableRangeSelection: true, // WRONG
+  }}
+/>;
+
+// ✅ RIGHT: Use factory, disable filters, no range selection
+const columnDefs = useMemo(() => GetMyGridColumns(), []);
+<DSMGrid providedOptions={{ columnDefs, rowData: data }} />;
+```
 
 ---
 
@@ -986,6 +1264,53 @@ const handlePaginationChange = async (
 1. **numberToCurrency** - Format numbers as currency
 2. **formatNumberWithComma** - Format numbers with commas
 3. **setMessage** - Dispatch message to message slice
+
+---
+
+## Route Path Patterns (CRITICAL)
+
+### Route Constants Location
+
+All route paths are defined in `src/ui/src/constants.ts`. When creating a new page:
+
+1. **Add route constant** to constants.ts:
+
+   ```typescript
+   export const ORACLE_HCM_DIAGNOSTICS = "oracle-hcm-diagnostics"; // NO leading slash!
+   ```
+
+2. **NEVER include path prefixes** in route constants:
+
+   ```typescript
+   // ❌ WRONG - includes prefix, will break routing
+   export const MY_PAGE = "/it-operations/my-page";
+
+   // ✅ RIGHT - just the page path, no prefix
+   export const MY_PAGE = "my-page";
+   ```
+
+3. **Use constant in RouterSubAssembly**:
+   ```typescript
+   <Route
+     path={Navigation.Constants.ORACLE_HCM_DIAGNOSTICS}
+     element={<LazyOracleHcmDiagnostics />}
+   />
+   ```
+
+### Common Routing Mistakes
+
+1. **Wrong path prefix**: Including group path in constant (e.g., `/it-operations/page` instead of `page`)
+2. **Leading slash**: Adding `/` to route constant when it's not needed
+3. **Inconsistent path**: Route constant doesn't match component file location
+
+### Route Path Examples by Page Type
+
+| Page Category  | Correct Path             | Wrong Path                              |
+| -------------- | ------------------------ | --------------------------------------- |
+| IT Operations  | `oracle-hcm-diagnostics` | `/it-operations/oracle-hcm-diagnostics` |
+| Reports        | `audit-search`           | `/reports/audit-search`                 |
+| Year-End       | `duplicate-names`        | `/december-activities/duplicate-names`  |
+| Master Inquiry | `master-inquiry`         | `/inquiries/master-inquiry`             |
 
 ---
 
@@ -1068,7 +1393,7 @@ const isReadOnly = useReadOnlyNavigation();
 
 <Button disabled={isReadOnly} onClick={handleEdit}>
   EDIT
-</Button>
+</Button>;
 ```
 
 **Pattern**: Disable actions when user has read-only permissions.
@@ -1146,15 +1471,15 @@ const AddDistribution = () => {
     if (selectedMember && formData) {
       await createDistribution({
         memberId: selectedMember.id,
-        ...formData
+        ...formData,
       }).unwrap();
 
       navigate("/distribution-inquiry", {
         state: {
           showSuccessMessage: true,
           memberName: selectedMember.name,
-          amount: formData.amount
-        }
+          amount: formData.amount,
+        },
       });
     }
   };
@@ -1203,13 +1528,16 @@ const PROF130 = () => {
     forfeitures: <ForfeituresByAge />,
     balanceByAge: <BalanceByAge />,
     balanceByYears: <BalanceByYears />,
-    vestedAmounts: <VestedAmountsByAge />
+    vestedAmounts: <VestedAmountsByAge />,
   };
 
   return (
     <Page label="PROF130 REPORTS" actionNode={<StatusDropdownActionNode />}>
       <Grid container rowSpacing="24px">
-        <Tabs value={selectedReport} onChange={(e, val) => setSelectedReport(val)}>
+        <Tabs
+          value={selectedReport}
+          onChange={(e, val) => setSelectedReport(val)}
+        >
           <Tab value="distributions" label="Distributions by Age" />
           <Tab value="contributions" label="Contributions by Age" />
           <Tab value="forfeitures" label="Forfeitures by Age" />
@@ -1218,9 +1546,7 @@ const PROF130 = () => {
           <Tab value="vestedAmounts" label="Vested Amounts by Age" />
         </Tabs>
 
-        <Grid width="100%">
-          {reports[selectedReport]}
-        </Grid>
+        <Grid width="100%">{reports[selectedReport]}</Grid>
       </Grid>
     </Page>
   );
@@ -1231,34 +1557,10 @@ const PROF130 = () => {
 
 ---
 
-## Frontend Code Review Checklist
+## Code Review Checklist
 
-Use this checklist when reviewing frontend page components and UI changes:
+Use the master checklist for all PR reviews (including frontend pages):
 
-### Design & UX Review
+- [CODE_REVIEW_CHECKLIST.md](../CODE_REVIEW_CHECKLIST.md)
 
-- [ ] **Consistent with design system** - Uses `smart-ui-library` components, not custom recreations
-- [ ] **Responsive layout** - Works on mobile, tablet, desktop (Material-UI Grid system used)
-- [ ] **Accessibility** - WCAG 2.1 AA compliant (labels, ARIA attributes, keyboard navigation)
-- [ ] **Loading states** - Loaders/spinners shown during async operations
-- [ ] **Error handling** - User-friendly error messages displayed (no stack traces)
-- [ ] **Empty states** - Graceful handling when no data available
-- [ ] **Consistent spacing** - Uses design tokens, not magic numbers
-
-### CRITICAL Security Requirements
-
-- [ ] **⚠️ CRITICAL: Age NEVER calculated in frontend** - Age MUST come from backend, never computed from DOB. Frontend calculation breaks:
-  1. Consistency with backend calculations (timezone/timing differences)
-  2. Sensitive data masking (age is masked for unprivileged users)
-  3. Access control (backend determines what fields are visible)
-  - RED FLAG: Any code calculating age from `dateOfBirth` using `Date.now()` or arithmetic
-  - CORRECT PATTERN: Display DOB only, let backend provide age if required by business logic
-
-### Critical Violations (Auto-Reject)
-
-PRs with these issues should be rejected immediately without further review:
-
-1. **⚠️ CRITICAL: Age calculated in frontend** - Any computation of age from DOB is a BLOCKER
-   - REJECT with comment: 'CRITICAL: Age must be calculated backend-only. Remove the age calculation and use backend-provided value instead. (See pages.instructions.md for details.)'
-   - ROOT CAUSE: Frontend calculation diverges from backend due to timezone/timing differences
-   - SECURITY IMPACT: Age is sensitive data that must be masked for unprivileged users
+For frontend-specific review, see **“Frontend - React/TypeScript”** and the **auto-reject** security items in the Security section.

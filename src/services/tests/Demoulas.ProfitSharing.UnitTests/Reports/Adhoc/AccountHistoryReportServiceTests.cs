@@ -416,7 +416,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
                         It.IsAny<string>(),
                         It.IsAny<string>(),
                         It.IsAny<string>(),
-                        It.Is<string>(details => details.Contains("Profit Year Range") && details.Contains("Records:")),
+                        It.Is<string>(details => details.Contains($"BadgeNumber: {badgeNumber}") && details.Contains("Profit Year Range") && details.Contains("Records:")),
                         It.IsAny<CancellationToken>()),
                     Times.Once,
                     "Audit details should include profit year range and record count");

@@ -27,6 +27,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
 
     public virtual DbSet<AuditEvent> AuditEvents { get; set; }
     public virtual DbSet<ReportChecksum> ReportChecksums { get; set; }
+    public virtual DbSet<DemographicSyncAudit> DemographicSyncAudit { get; set; }
     public virtual DbSet<AnnuityRate> AnnuityRates { get; set; }
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }

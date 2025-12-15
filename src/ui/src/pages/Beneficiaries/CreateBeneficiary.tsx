@@ -72,7 +72,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
   const [triggerUpdateBeneficiary] = useLazyUpdateBeneficiaryQuery();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  //adding this comment to create the draft PR to review. 
+  //adding this comment to create the draft PR to review.
 
   const {
     control,

@@ -132,17 +132,18 @@ export const AdhocApi = createApi({
     >({
       query: (params) => {
         const { onlyNetworkToastErrors, ...requestParams } = params;
+
+        const ssnDigits = requestParams.ssn ? requestParams.ssn.replace(/\D/g, "") : "";
+        const badgeDigits = requestParams.badge ? requestParams.badge.replace(/\D/g, "") : "";
+        const ssn = ssnDigits.length > 0 ? Number.parseInt(ssnDigits, 10) : undefined;
+        const badge = badgeDigits.length > 0 ? Number.parseInt(badgeDigits, 10) : undefined;
+
         return {
           url: "adhoc/forfeiture-adjustments",
-          method: "GET",
-          params: {
-            ssn: requestParams.ssn,
-            badge: requestParams.badge,
-            profitYear: requestParams.profitYear,
-            skip: requestParams.skip || 0,
-            take: requestParams.take || 255,
-            sortBy: requestParams.sortBy,
-            isSortDescending: requestParams.isSortDescending
+          method: "POST",
+          body: {
+            ssn,
+            badge
           },
           meta: { onlyNetworkToastErrors }
         };

@@ -145,8 +145,7 @@ describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
     expect(screen.getByText("123 Main St")).toBeInTheDocument();
     expect(screen.getByText("Lowell, MA 01850")).toBeInTheDocument();
     expect(screen.getByText("(978) 555-1234")).toBeInTheDocument(); // Formatted phone
-    expect(screen.getByText("Store 4")).toBeInTheDocument();
-    expect(screen.getByText("4")).toBeInTheDocument();
+    expect(screen.getByText("Store 4 (4)")).toBeInTheDocument();
 
     // Personal Section
     expect(screen.getByText("Grocery")).toBeInTheDocument();

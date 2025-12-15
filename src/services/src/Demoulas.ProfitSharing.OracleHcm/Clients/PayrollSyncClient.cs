@@ -26,6 +26,7 @@ internal class PayrollSyncClient
     private readonly IEmployeeSyncService _employeeSyncService;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly EmployeeFullSyncClient _oracleEmployeeDataSyncClient;
+    private readonly IProcessWatchdog _watchdog;
     private readonly ILogger<PayrollSyncClient> _logger;
     private readonly Channel<MessageRequest<PayrollItem[]>> _payrollSyncBus;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
@@ -36,6 +37,7 @@ internal class PayrollSyncClient
         IEmployeeSyncService employeeSyncService,
         OracleHcmConfig oracleHcmConfig,
         EmployeeFullSyncClient oracleEmployeeDataSyncClient,
+        IProcessWatchdog watchdog,
         ILogger<PayrollSyncClient> logger,
         Channel<MessageRequest<PayrollItem[]>> payrollSyncBus)
     {
@@ -44,6 +46,7 @@ internal class PayrollSyncClient
         _employeeSyncService = employeeSyncService;
         _oracleHcmConfig = oracleHcmConfig;
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
+        _watchdog = watchdog;
         _logger = logger;
         _payrollSyncBus = payrollSyncBus;
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
@@ -149,13 +152,24 @@ internal class PayrollSyncClient
 
             // Queue Here
             const string requestedBy = "System";
+            int payrollChunkCounter = 0;
             foreach (PayrollItem[] items in results!.Items.Chunk(15))
             {
                 MessageRequest<PayrollItem[]> message = new() { ApplicationName = nameof(PayrollSyncClient), Body = items, UserId = requestedBy };
 
                 await _payrollSyncBus.Writer.WriteAsync(message, cancellationToken).ConfigureAwait(false);
+
+                // Record heartbeat every 20 chunks to prevent watchdog timeout during long-running payroll sync
+                if (++payrollChunkCounter % 20 == 0)
+                {
+                    _watchdog.RecordHeartbeat();
+                    _logger.LogDebug("PayrollSync: Queued {ChunkCount} payroll chunks ({ItemCount} items)",
+                        payrollChunkCounter, payrollChunkCounter * 15);
+                }
             }
 
+            // Record heartbeat before attempting missing employee sync (can take time)
+            _watchdog.RecordHeartbeat();
             await TrySyncMissingEmployees(results!.Items, cancellationToken).ConfigureAwait(false);
 
             if (!results.HasMore)
@@ -253,7 +267,7 @@ internal class PayrollSyncClient
     /// </remarks>
     private async Task<HttpResponseMessage> GetOraclePayrollValue(string url, CancellationToken cancellationToken)
     {
-        await Task.Delay(new TimeSpan(0, 0, 10), cancellationToken).ConfigureAwait(false);
+        await Task.Delay(new TimeSpan(0, 0, 15), cancellationToken).ConfigureAwait(false);
 
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);

@@ -74,7 +74,7 @@
     <PackageVersion Include="Quartz" Version="3.15.1" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.1" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.0" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.11.3" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.11.6" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Memory" Version="1.0.4" />
@@ -110,7 +110,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Analyzers" Version="10.0.1" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
     <PackageVersion Include="AsyncFixer" Version="1.6.0" />
-    <PackageVersion Include="QuestPDF" Version="2025.7.4" />
+    <PackageVersion Include="QuestPDF" Version="2025.12.0" />
     <!-- xUnit v3 packages with Microsoft Testing Platform v2 support -->
     <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.1" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />

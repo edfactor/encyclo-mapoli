@@ -35,7 +35,7 @@ const DuplicateNamesAndBirthdaysGrid = ({
   onToggleExpand
 }: DuplicateNamesAndBirthdaysGridProps) => {
   const columnDefs = useMemo(() => GetDuplicateNamesAndBirthdayColumns(), []);
-  
+
   // Use content-aware grid height utility hook
   const gridMaxHeight = useContentAwareGridHeight({
     rowCount: data?.response?.results?.length ?? 0,

@@ -2341,6 +2341,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(7)")
                         .HasColumnName("BADGE_NUMBER");
 
+                    b.Property<string>("City")
+                        .HasMaxLength(25)
+                        .HasColumnType("NVARCHAR2(25)")
+                        .HasColumnName("CITY")
+                        .HasComment("City from Address");
+
                     b.Property<DateTimeOffset>("CreatedDateTime")
                         .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
                         .HasColumnName("CREATED_DATETIME");
@@ -2361,6 +2367,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("DEPARTMENT")
                         .HasComment("Department");
 
+                    b.Property<string>("EmailAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("EMAIL_ADDRESS")
+                        .HasComment("EmailAddress from ContactInfo");
+
                     b.Property<string>("EmploymentStatusId")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
@@ -2373,10 +2385,34 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("EMPLOYMENT_TYPE_ID")
                         .HasComment("EmploymentType");
 
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("FIRST_NAME")
+                        .HasComment("FirstName from ContactInfo");
+
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("HIRE_DATE")
                         .HasComment("HireDate");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("LAST_NAME")
+                        .HasComment("LastName from ContactInfo");
+
+                    b.Property<string>("MiddleName")
+                        .HasMaxLength(25)
+                        .HasColumnType("NVARCHAR2(25)")
+                        .HasColumnName("MIDDLE_NAME")
+                        .HasComment("MiddleName from ContactInfo");
+
+                    b.Property<string>("MobileNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("NVARCHAR2(15)")
+                        .HasColumnName("MOBILE_NUMBER")
+                        .HasComment("MobileNumber from ContactInfo");
 
                     b.Property<long>("OracleHcmId")
                         .HasPrecision(15)
@@ -2396,16 +2432,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PAY_FREQUENCY_ID")
                         .HasComment("PayFrequency");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("NVARCHAR2(15)")
+                        .HasColumnName("PHONE_NUMBER")
+                        .HasComment("PhoneNumber from ContactInfo");
+
+                    b.Property<string>("PostalCode")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("POSTAL_CODE")
+                        .HasComment("PostalCode from Address");
+
                     b.Property<DateTime?>("ReHireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("REHIRE_DATE")
                         .HasComment("ReHireDate");
+
+                    b.Property<string>("State")
+                        .HasMaxLength(3)
+                        .HasColumnType("NVARCHAR2(3)")
+                        .HasColumnName("STATE")
+                        .HasComment("State from Address");
 
                     b.Property<short>("StoreNumber")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
                         .HasColumnName("STORE_NUMBER")
                         .HasComment("StoreNumber");
+
+                    b.Property<string>("Street")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("STREET")
+                        .HasComment("Street from Address");
+
+                    b.Property<string>("Street2")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("STREET2")
+                        .HasComment("Street2 from Address");
 
                     b.Property<string>("TerminationCodeId")
                         .HasMaxLength(1)

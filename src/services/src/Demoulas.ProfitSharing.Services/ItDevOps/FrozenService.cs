@@ -4,7 +4,9 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -92,8 +94,25 @@ public class FrozenService : IFrozenService
                 ModifiedAtUtc = dh.ValidFrom,
                 StoreNumber = dh.StoreNumber,
                 PayClassificationId = dh.PayClassificationId,
-                ContactInfo = d.ContactInfo,
-                Address = d.Address,
+                ContactInfo = new ContactInfo
+                {
+                    FirstName = dh.FirstName ?? string.Empty,
+                    LastName = dh.LastName ?? string.Empty,
+                    MiddleName = dh.MiddleName,
+                    PhoneNumber = dh.PhoneNumber,
+                    MobileNumber = dh.MobileNumber,
+                    EmailAddress = dh.EmailAddress,
+                    FullName = DtoCommonExtensions.ComputeFullNameWithInitial(dh.LastName ?? string.Empty, dh.FirstName ?? string.Empty, dh.MiddleName)
+                },
+                Address = new Address
+                {
+                    Street = dh.Street ?? string.Empty,
+                    Street2 = dh.Street2,
+                    City = dh.City ?? string.Empty,
+                    State = dh.State ?? string.Empty,
+                    PostalCode = dh.PostalCode ?? string.Empty,
+                    CountryIso = "US"
+                },
                 DateOfBirth = dh.DateOfBirth,
                 FullTimeDate = d.FullTimeDate,
                 HireDate = dh.HireDate,
