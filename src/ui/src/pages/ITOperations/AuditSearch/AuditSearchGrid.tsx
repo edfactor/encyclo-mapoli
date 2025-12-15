@@ -46,7 +46,7 @@ const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({
         </Typography>
       </div>
       <DSMGrid
-        preferenceKey={"AUDIT_SEARCH"}
+        preferenceKey={GRID_KEYS.AUDIT_SEARCH}
         isLoading={isLoading}
         handleSortChanged={handleSortChange}
         providedOptions={{

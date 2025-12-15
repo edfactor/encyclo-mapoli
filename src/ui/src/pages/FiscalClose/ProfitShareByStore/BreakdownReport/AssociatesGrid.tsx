@@ -138,7 +138,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
       </Grid>
       <Grid width="100%">
         <DSMGrid
-          preferenceKey={`BREAKDOWN_REPORT_ASSOCIATES_STORE_${store}`}
+          preferenceKey={`${GRID_KEYS.BREAKDOWN_REPORT_ASSOCIATES_PREFIX}${store}`}
           isLoading={isFetching}
           handleSortChanged={handleSortChange}
           providedOptions={{

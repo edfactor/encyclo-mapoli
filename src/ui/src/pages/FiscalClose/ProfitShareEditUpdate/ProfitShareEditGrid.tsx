@@ -120,7 +120,7 @@ const ProfitShareEditGrid = ({
       {!!profitSharingEdit && (
         <>
           <DSMGrid
-            preferenceKey={"ProfitShareEditGrid"}
+            preferenceKey={GRID_KEYS.PROFIT_SHARE_EDIT}
             isLoading={isFetching}
             handleSortChanged={handleSortChange}
             maxHeight={gridMaxHeight}

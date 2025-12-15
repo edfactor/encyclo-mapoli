@@ -12,9 +12,13 @@ function readText(filePath) {
 }
 
 function parseTsRoutes(constantsTs) {
-  const match = constantsTs.match(/export\s+const\s+ROUTES\s*=\s*\{([\s\S]*?)\}\s+as\s+const;/);
+  const match = constantsTs.match(
+    /export\s+const\s+ROUTES\s*=\s*\{([\s\S]*?)\}\s+as\s+const;/,
+  );
   if (!match) {
-    throw new Error("Unable to locate ROUTES object in src/ui/src/constants.ts");
+    throw new Error(
+      "Unable to locate ROUTES object in src/ui/src/constants.ts",
+    );
   }
 
   const body = match[1];
@@ -33,7 +37,7 @@ function parseRouterMapping(routerTsx) {
   const importMap = {};
 
   for (const m of routerTsx.matchAll(
-    /const\s+([A-Z][A-Za-z0-9_]*)\s*=\s*lazy\(\s*\(\)\s*=>\s*import\(\s*"([^"]+)"\s*\)\s*\)\s*;/g
+    /const\s+([A-Z][A-Za-z0-9_]*)\s*=\s*lazy\(\s*\(\)\s*=>\s*import\(\s*"([^"]+)"\s*\)\s*\)\s*;/g,
   )) {
     importMap[m[1]] = m[2];
   }
@@ -59,7 +63,9 @@ function parseRouterMapping(routerTsx) {
   function tryGetComponent(block) {
     // The block often contains other JSX like <PageLoadingFallback /> inside props.
     // Prefer a component that has a corresponding lazy import entry.
-    const candidates = Array.from(block.matchAll(/<([A-Z][A-Za-z0-9_]*)\s*\/>/g)).map((x) => x[1]);
+    const candidates = Array.from(
+      block.matchAll(/<([A-Z][A-Za-z0-9_]*)\s*\/>/g),
+    ).map((x) => x[1]);
     return candidates.find((c) => importMap[c]) ?? null;
   }
 
@@ -120,14 +126,16 @@ function parseRouterMapping(routerTsx) {
 function parseSqlNavItems(sql) {
   /** @type {Record<string, number>} */
   const constants = {};
-  for (const m of sql.matchAll(/\b([A-Z0-9_]+)\s+CONSTANT\s+NUMBER\s*:=\s*(\d+)\s*;/g)) {
+  for (const m of sql.matchAll(
+    /\b([A-Z0-9_]+)\s+CONSTANT\s+NUMBER\s*:=\s*(\d+)\s*;/g,
+  )) {
     constants[m[1]] = Number.parseInt(m[2], 10);
   }
 
   /** @type {Record<number, string>} */
   const roleIdToName = {};
   for (const m of sql.matchAll(
-    /INSERT\s+INTO\s+NAVIGATION_ROLE\s*\(ID,\s*NAME,\s*IS_READ_ONLY\)\s*VALUES\s*\((\d+),\s*'([^']+)'\s*,\s*\d+\);/gi
+    /INSERT\s+INTO\s+NAVIGATION_ROLE\s*\(ID,\s*NAME,\s*IS_READ_ONLY\)\s*VALUES\s*\((\d+),\s*'([^']+)'\s*,\s*\d+\);/gi,
   )) {
     roleIdToName[Number.parseInt(m[1], 10)] = m[2];
   }
@@ -168,10 +176,13 @@ function parseSqlNavItems(sql) {
     }
 
     urlToNav[url] = {
-      friendlyName: title.toUpperCase() === title ? title.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) : title,
+      friendlyName:
+        title.toUpperCase() === title
+          ? title.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+          : title,
       url,
       navigationId: navId,
-      roles: []
+      roles: [],
     };
   }
 
@@ -193,7 +204,9 @@ function parseSqlNavItems(sql) {
   }
 
   for (const nav of Object.values(urlToNav)) {
-    const roleIds = Array.from(navIdToRoleIds[nav.navigationId] ?? []).sort((a, b) => a - b);
+    const roleIds = Array.from(navIdToRoleIds[nav.navigationId] ?? []).sort(
+      (a, b) => a - b,
+    );
     nav.roles = roleIds.map((rid) => roleIdToName[rid] ?? `RoleId-${rid}`);
   }
 
@@ -226,7 +239,9 @@ function scanHooksUnder(repoRelativeGlob) {
         continue;
       }
       const text = readText(p);
-      for (const m of text.matchAll(/\b(use[A-Za-z0-9_]+(?:Query|Mutation))\b/g)) {
+      for (const m of text.matchAll(
+        /\b(use[A-Za-z0-9_]+(?:Query|Mutation))\b/g,
+      )) {
         hookNames.add(m[1]);
       }
     }
@@ -239,7 +254,7 @@ function scanHooksUnder(repoRelativeGlob) {
 function parseBackendGroupPolicies() {
   const groupsDir = path.resolve(
     REPO_ROOT,
-    "src/services/src/Demoulas.ProfitSharing.Endpoints/Groups"
+    "src/services/src/Demoulas.ProfitSharing.Endpoints/Groups",
   );
 
   /** @type {Record<string, string[]>} */
@@ -259,7 +274,9 @@ function parseBackendGroupPolicies() {
     const csPath = path.join(groupsDir, fileName);
     const text = readText(csPath);
 
-    const mRoute = text.match(/protected\s+override\s+string\s+Route\s*=>\s*"([^"]+)"\s*;/);
+    const mRoute = text.match(
+      /protected\s+override\s+string\s+Route\s*=>\s*"([^"]+)"\s*;/,
+    );
     if (!mRoute) {
       continue;
     }
@@ -286,7 +303,9 @@ function parseBackendGroupPolicies() {
 }
 
 function hookToEndpointKey(hookName) {
-  const m = hookName.match(/^use(?:Lazy)?([A-Z][A-Za-z0-9_]*)?(Query|Mutation)$/);
+  const m = hookName.match(
+    /^use(?:Lazy)?([A-Z][A-Za-z0-9_]*)?(Query|Mutation)$/,
+  );
   if (!m || !m[1]) {
     return null;
   }
@@ -350,19 +369,24 @@ function parseRtkUrls() {
       }
 
       const text = readText(p);
-      if (!text.includes("builder.query") && !text.includes("builder.mutation")) {
+      if (
+        !text.includes("builder.query") &&
+        !text.includes("builder.mutation")
+      ) {
         continue;
       }
 
       for (const m of text.matchAll(
-        /\b([a-zA-Z0-9_]+)\s*:\s*builder\.(query|mutation)(?:\s*<[\s\S]*?>\s*)?\s*\(/g
+        /\b([a-zA-Z0-9_]+)\s*:\s*builder\.(query|mutation)(?:\s*<[\s\S]*?>\s*)?\s*\(/g,
       )) {
         const endpointKey = m[1];
         const start = m.index ?? 0;
         const window = text.slice(start, start + 3000);
 
         // Prefer url: "..." or url: `...`
-        for (const um of window.matchAll(/\burl\s*:\s*(?:"([^"]+)"|`([^`]+)`)/g)) {
+        for (const um of window.matchAll(
+          /\burl\s*:\s*(?:"([^"]+)"|`([^`]+)`)/g,
+        )) {
           const raw = (um[1] ?? um[2] ?? "").trim();
           if (!raw) {
             continue;
@@ -385,7 +409,9 @@ function parseRtkUrls() {
 
         // Capture common patterns like: const baseUrl = `yearend/foo`;
         // (Very common in this codebase; helps when url is built from baseUrl.)
-        for (const bm of window.matchAll(/\bconst\s+baseUrl\s*=\s*`([^`]+)`\s*;/g)) {
+        for (const bm of window.matchAll(
+          /\bconst\s+baseUrl\s*=\s*`([^`]+)`\s*;/g,
+        )) {
           const normalized = normalizeTemplateLiteralPath(bm[1]);
           if (!normalized) {
             continue;
@@ -395,7 +421,10 @@ function parseRtkUrls() {
         }
 
         // Fallback: any "segment/segment" literal
-        if (!endpointToUrls[endpointKey] || endpointToUrls[endpointKey].size === 0) {
+        if (
+          !endpointToUrls[endpointKey] ||
+          endpointToUrls[endpointKey].size === 0
+        ) {
           for (const sm of window.matchAll(/"([a-zA-Z0-9_\-/]+)"/g)) {
             const url = sm[1];
             if (!url.includes("/")) {
@@ -414,7 +443,10 @@ function parseRtkUrls() {
             if (!normalized) {
               continue;
             }
-            if (normalized.startsWith("http") || normalized.startsWith("src/")) {
+            if (
+              normalized.startsWith("http") ||
+              normalized.startsWith("src/")
+            ) {
               continue;
             }
             endpointToUrls[endpointKey] ??= new Set();
@@ -449,14 +481,21 @@ function backendPrefixesFromUrls(urls) {
 
 function generateMappingTable(baseUrl) {
   const constantsTsPath = path.resolve(REPO_ROOT, "src/ui/src/constants.ts");
-  const routerTsxPath = path.resolve(REPO_ROOT, "src/ui/src/components/router/RouterSubAssembly.tsx");
-  const sqlPath = path.resolve(REPO_ROOT, "src/database/ready_import/Navigations/add-navigation-data.sql");
+  const routerTsxPath = path.resolve(
+    REPO_ROOT,
+    "src/ui/src/components/router/RouterSubAssembly.tsx",
+  );
+  const sqlPath = path.resolve(
+    REPO_ROOT,
+    "src/database/ready_import/Navigations/add-navigation-data.sql",
+  );
 
   const routes = parseTsRoutes(readText(constantsTsPath));
   const routeKeyToPageGlob = parseRouterMapping(readText(routerTsxPath));
   const urlToNav = parseSqlNavItems(readText(sqlPath));
 
-  const { routeToPolicies: groupPolicies, knownRoutes: knownGroupRoutes } = parseBackendGroupPolicies();
+  const { routeToPolicies: groupPolicies, knownRoutes: knownGroupRoutes } =
+    parseBackendGroupPolicies();
   const endpointToUrls = parseRtkUrls();
 
   /** @type {Array<Record<string, string>>} */
@@ -470,7 +509,12 @@ function generateMappingTable(baseUrl) {
     }
 
     const nav = urlToNav[routeUrl];
-    const friendly = nav ? nav.friendlyName : routeKey.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+    const friendly = nav
+      ? nav.friendlyName
+      : routeKey
+          .replaceAll("_", " ")
+          .toLowerCase()
+          .replace(/\b\w/g, (c) => c.toUpperCase());
     const navId = nav ? String(nav.navigationId) : "(no nav ID)";
 
     const hooks = scanHooksUnder(pageGlob);
@@ -486,32 +530,42 @@ function generateMappingTable(baseUrl) {
       }
     }
 
-    const backendPrefixNote2 = backendPrefixes.size > 0
-      ? `  → backend: ${Array.from(backendPrefixes).sort().map((p) => `${p}/*`).join(", ")}`
-      : "";
+    const backendPrefixNote2 =
+      backendPrefixes.size > 0
+        ? `  → backend: ${Array.from(backendPrefixes)
+            .sort()
+            .map((p) => `${p}/*`)
+            .join(", ")}`
+        : "";
 
-    const apisCalled = hooks.length > 0
-      ? `${hooks.join(", ")}${backendPrefixNote2}`
-      : "(unknown)";
+    const apisCalled =
+      hooks.length > 0
+        ? `${hooks.join(", ")}${backendPrefixNote2}`
+        : "(unknown)";
 
-    const policyLabels = Array.from(backendPrefixes).sort().map((prefix) => {
-      const pol = groupPolicies[prefix];
-      if (pol && pol.length > 0) {
-        return `${prefix}/* → ${pol.join(", ")}`;
-      }
-      if (knownGroupRoutes.has(prefix)) {
-        return `${prefix}/* → (no group policy)`;
-      }
-      return `${prefix}/* → (unknown group)`;
-    });
+    const policyLabels = Array.from(backendPrefixes)
+      .sort()
+      .map((prefix) => {
+        const pol = groupPolicies[prefix];
+        if (pol && pol.length > 0) {
+          return `${prefix}/* → ${pol.join(", ")}`;
+        }
+        if (knownGroupRoutes.has(prefix)) {
+          return `${prefix}/* → (no group policy)`;
+        }
+        return `${prefix}/* → (unknown group)`;
+      });
 
-    const mappedPolicy = policyLabels.length > 0 ? policyLabels.join("; ") : "(unknown)";
+    const mappedPolicy =
+      policyLabels.length > 0 ? policyLabels.join("; ") : "(unknown)";
 
     let roleLinks;
     if (nav && nav.roles && nav.roles.length > 0) {
       const base = baseUrl.replace(/\/$/, "");
       roleLinks = nav.roles
-        .map((role) => `[${role}](${base}/${routeUrl}?impersonationRole=${role})`)
+        .map(
+          (role) => `[${role}](${base}/${routeUrl}?impersonationRole=${role})`,
+        )
         .join(", ");
     } else {
       roleLinks = navId === "(no nav ID)" ? "(not a nav entry)" : "(none)";
@@ -524,7 +578,7 @@ function generateMappingTable(baseUrl) {
       "Navigation ID": navId,
       "APIs called (RTK Query hooks / backend prefix)": apisCalled,
       "Mapped Policy for each API": mappedPolicy,
-      "Navigation Roles (click to open with impersonationRole)": roleLinks
+      "Navigation Roles (click to open with impersonationRole)": roleLinks,
     });
   }
 
@@ -535,12 +589,12 @@ function generateMappingTable(baseUrl) {
     "Navigation ID",
     "APIs called (RTK Query hooks / backend prefix)",
     "Mapped Policy for each API",
-    "Navigation Roles (click to open with impersonationRole)"
+    "Navigation Roles (click to open with impersonationRole)",
   ];
 
   const lines = [
     `| ${headers.join(" | ")} |`,
-    `| ${headers.map(() => "---").join(" | ")} |`
+    `| ${headers.map(() => "---").join(" | ")} |`,
   ];
 
   for (const r of rows) {
@@ -557,7 +611,8 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a.startsWith("--")) {
       const key = a.slice(2);
-      const val = argv[i + 1] && !argv[i + 1].startsWith("--") ? argv[++i] : "true";
+      const val =
+        argv[i + 1] && !argv[i + 1].startsWith("--") ? argv[++i] : "true";
       args[key] = val;
     }
   }
@@ -566,7 +621,9 @@ function parseArgs(argv) {
 
 const args = parseArgs(process.argv);
 const baseUrl = args["base-url"] ?? "https://ps.qa.demoulas.net";
-const output = args["output"] ?? path.resolve(REPO_ROOT, "docs/generated/PROFIT_SHARING_SECURITY_MAPPING.md");
+const output =
+  args["output"] ??
+  path.resolve(REPO_ROOT, "docs/generated/PROFIT_SHARING_SECURITY_MAPPING.md");
 
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, generateMappingTable(baseUrl), { encoding: "utf8" });

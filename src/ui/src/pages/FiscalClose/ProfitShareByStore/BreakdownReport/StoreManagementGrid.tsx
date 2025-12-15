@@ -138,7 +138,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
       </Grid>
       <Grid width="100%">
         <DSMGrid
-          preferenceKey={`STORE_MANAGEMENT_STORE_${store}`}
+          preferenceKey={`${GRID_KEYS.STORE_MANAGEMENT_PREFIX}${store}`}
           isLoading={isFetching}
           handleSortChanged={handleSortChange}
           providedOptions={{

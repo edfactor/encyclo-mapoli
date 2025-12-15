@@ -9,20 +9,20 @@ import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../../hooks/useReadOnlyNavigation";
 import { useLazyGetForfeitureAdjustmentsQuery } from "../../../../reduxstore/api/AdhocApi";
 import {
-    InquiryApi,
-    useLazyGetProfitMasterInquiryMemberDetailsQuery,
-    useLazyGetProfitMasterInquiryMemberQuery
+  InquiryApi,
+  useLazyGetProfitMasterInquiryMemberDetailsQuery,
+  useLazyGetProfitMasterInquiryMemberQuery
 } from "../../../../reduxstore/api/InquiryApi";
 import { EmployeeDetails } from "../../../../types/employee/employee";
 import { MasterInquiryResponseDto } from "../../../../types/master-inquiry/master-inquiry";
 import {
-    ForfeitureAdjustmentSearchParams,
-    forfeituresAdjustmentReducer,
-    initialState,
-    selectShowEmployeeData,
-    selectShowMemberDetails,
-    selectShowTransactions,
-    TransactionData
+  ForfeitureAdjustmentSearchParams,
+  forfeituresAdjustmentReducer,
+  initialState,
+  selectShowEmployeeData,
+  selectShowMemberDetails,
+  selectShowTransactions,
+  TransactionData
 } from "./useForfeituresAdjustmentReducer";
 
 interface SaveForfeitureFormData {

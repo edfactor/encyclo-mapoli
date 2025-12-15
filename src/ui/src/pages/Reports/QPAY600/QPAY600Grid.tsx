@@ -62,7 +62,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, onLoadingChange
     initialPageSize: 25,
     initialSortBy: "employeeName",
     initialSortDescending: false,
-    persistenceKey: GRID_KEYS.QPAY600,
+    persistenceKey: `${GRID_KEYS.QPAY600_PREFIX}PAGINATION`,
     onPaginationChange: () => {
       // Pagination handled by backend API
     }
@@ -142,7 +142,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, onLoadingChange
       ) : apiData && !errorMessage ? (
         <>
           <DSMGrid
-            preferenceKey={`QPAY600_${filterParams.employeeType.toUpperCase()}`}
+            preferenceKey={`${GRID_KEYS.QPAY600_PREFIX}${filterParams.employeeType.toUpperCase()}`}
             isLoading={isFetching}
             maxHeight={gridMaxHeight}
             providedOptions={{

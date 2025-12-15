@@ -119,7 +119,7 @@ const ProfitShareEditUpdateGrid = ({
       {!!profitSharingUpdate && (
         <>
           <DSMGrid
-            preferenceKey={"ProfitShareUpdateGrid"}
+            preferenceKey={GRID_KEYS.PROFIT_SHARE_UPDATE}
             isLoading={isFetching}
             handleSortChanged={handleSortChange}
             maxHeight={gridMaxHeight}

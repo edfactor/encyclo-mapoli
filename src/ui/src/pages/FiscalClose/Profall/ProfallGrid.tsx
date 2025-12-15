@@ -105,7 +105,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
         </Typography>
       </div>
       <DSMGrid
-        preferenceKey={"PROFALL_REPORT"}
+        preferenceKey={GRID_KEYS.PROFALL_REPORT}
         isLoading={isFetching}
         handleSortChanged={handleSortChange}
         providedOptions={{

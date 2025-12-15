@@ -137,7 +137,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
             />
           )}
           <DSMGrid
-            preferenceKey={"PROFIT_SHARE_GROSS_REPORT"}
+            preferenceKey={GRID_KEYS.PROFIT_SHARE_GROSS_REPORT}
             isLoading={isFetching}
             maxHeight={gridMaxHeight}
             handleSortChanged={handleSortChange}

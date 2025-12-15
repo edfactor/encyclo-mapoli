@@ -116,7 +116,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   return (
     <div className="relative">
       <DSMGrid
-        preferenceKey={"ProfitShareReportGrid"}
+        preferenceKey={GRID_KEYS.PROFIT_SHARE_REPORT}
         isLoading={isFetching}
         maxHeight={gridMaxHeight}
         handleSortChanged={handleSortChanged}

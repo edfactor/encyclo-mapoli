@@ -186,7 +186,7 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
    * Saves current column state to localStorage without triggering React re-renders.
    * Critical: Does not update React state to prevent infinite re-render loops.
    */
-  const saveGridState = () => {
+  const saveGridStateToStorage = () => {
     if (!ref?.current?.api || !gridReady) {
       return;
     }
@@ -216,7 +216,7 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
   // instead of using deprecated showLoadingOverlay/hideOverlay API methods
 
   /**
-   * Handles resetting grid preferences - clears localStorage and resets column state
+   * Handles resetting grid preferences - clears column state and resets grid
    */
   useEffect(() => {
     if (resetPreferences && gridReady && ref?.current?.api) {
@@ -260,7 +260,7 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
           applyOrder: true
         });
 
-        saveGridState();
+        saveGridStateToStorage();
       } else {
         console.warn(`Column with colId "${state.colId}" not found in grid column state`);
       }
@@ -339,7 +339,7 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
           }
         : SortDefault;
 
-      saveGridState();
+      saveGridStateToStorage();
       handleSortChanged(updatedSort);
     }
 
@@ -377,10 +377,10 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
           ref={ref}
           onGridReady={handleGridReady}
           onDragStopped={() => {
-            saveGridState();
+            saveGridStateToStorage();
           }}
           onColumnMoved={() => {
-            saveGridState();
+            saveGridStateToStorage();
           }}
           defaultColDef={
             handleSortChanged

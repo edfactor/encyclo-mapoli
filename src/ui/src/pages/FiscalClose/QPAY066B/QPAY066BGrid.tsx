@@ -125,7 +125,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
       ) : (
         <>
           <DSMGrid
-            preferenceKey="QPAY066B_GRID"
+            preferenceKey={GRID_KEYS.QPAY066B}
             isLoading={isFetching}
             maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}

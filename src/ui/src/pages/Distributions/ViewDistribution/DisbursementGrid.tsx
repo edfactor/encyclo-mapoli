@@ -57,7 +57,7 @@ const DisbursementGrid: React.FC<DisbursementGridProps> = ({
       </div>
 
       <DSMGrid
-        preferenceKey={title}
+        preferenceKey={`${GRID_KEYS.DISBURSEMENT_PREFIX}${title}`}
         isLoading={isLoading}
         handleSortChanged={handleSortChange}
         maxHeight={gridMaxHeight}

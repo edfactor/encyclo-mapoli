@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { CAPTIONS, GRID_KEYS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
@@ -523,7 +523,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </div>
           ) : (
             <DSMGrid
-              preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
+              preferenceKey={GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES}
               isLoading={false}
               handleSortChanged={sortEventHandler}
               maxHeight={gridMaxHeight}

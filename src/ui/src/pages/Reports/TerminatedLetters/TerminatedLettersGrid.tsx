@@ -13,7 +13,7 @@ import { SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useMemo } from "react";
 import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
 import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetTerminatedLettersColumns } from "./TerminatedLettersGridColumns";
 
@@ -101,7 +101,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
             {renderPrintButton()}
           </div>
           <DSMGrid
-            preferenceKey={CAPTIONS.TERMINATED_LETTERS}
+            preferenceKey={GRID_KEYS.TERMINATED_LETTERS}
             isLoading={isLoading}
             handleSortChanged={sortEventHandler}
             providedOptions={{

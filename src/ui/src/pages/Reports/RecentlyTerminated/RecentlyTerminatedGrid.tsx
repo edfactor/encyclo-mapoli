@@ -2,7 +2,7 @@ import { Typography } from "@mui/material";
 import React, { useMemo } from "react";
 import { RecentlyTerminatedResponse } from "reduxstore/types";
 import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetRecentlyTerminatedColumns } from "./RecentlyTerminatedGridColumns";
 
@@ -31,7 +31,7 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridProps> = ({ reportD
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
+            preferenceKey={GRID_KEYS.RECENTLY_TERMINATED}
             isLoading={isLoading}
             handleSortChanged={sortEventHandler}
             providedOptions={{

@@ -86,7 +86,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"FREEZE"}
+            preferenceKey={GRID_KEYS.DEMOGRAPHIC_FREEZE}
             isLoading={isFetching}
             handleSortChanged={handleSortChange}
             providedOptions={{

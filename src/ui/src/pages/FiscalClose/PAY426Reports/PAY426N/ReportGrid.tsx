@@ -219,7 +219,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
       ) : (
         <>
           <DSMGrid
-            preferenceKey="PAY426N_REPORT"
+            preferenceKey={GRID_KEYS.PAY426N_REPORT}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}

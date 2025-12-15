@@ -6,10 +6,10 @@ import { SortParams, useGridPagination } from "../../../../hooks/useGridPaginati
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import {
-    demographicBadgesNotInPayprofitReducer,
-    initialState,
-    selectHasResults,
-    selectShowData
+  demographicBadgesNotInPayprofitReducer,
+  initialState,
+  selectHasResults,
+  selectShowData
 } from "./useDemographicBadgesNotInPayprofitReducer";
 
 export interface DemographicBadgesNotInPayprofitSearchParams {

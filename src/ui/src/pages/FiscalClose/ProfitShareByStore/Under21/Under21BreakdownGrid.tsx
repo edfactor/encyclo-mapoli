@@ -66,7 +66,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
       {under21Breakdown && <ReportSummary report={under21Breakdown} />}
       <Grid width="100%">
         <DSMGrid
-          preferenceKey="UNDER_21_BREAKDOWN_REPORT"
+          preferenceKey={GRID_KEYS.UNDER_21_BREAKDOWN_REPORT}
           isLoading={isLoading}
           handleSortChanged={sortEventHandler}
           providedOptions={{
