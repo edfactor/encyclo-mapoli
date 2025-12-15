@@ -7,6 +7,7 @@ import {
   setProfitYearSelectorData
 } from "../../reduxstore/slices/frozenSlice";
 import {
+  AnnuityRateDto,
   AuditChangeEntryDto,
   AuditEventDto,
   AuditSearchRequestDto,
@@ -14,7 +15,10 @@ import {
   FreezeDemographicsRequest,
   FrozenStateResponse,
   RowCountResult,
-  SortedPaginationRequestDto
+  SortedPaginationRequestDto,
+  StateTaxRateDto,
+  UpdateAnnuityRateRequest,
+  UpdateStateTaxRateRequest
 } from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
@@ -27,6 +31,32 @@ export const ItOperationsApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
+    getAnnuityRates: builder.query<AnnuityRateDto[], void>({
+      query: () => ({
+        url: "itdevops/annuity-rates",
+        method: "GET"
+      })
+    }),
+    updateAnnuityRate: builder.mutation<AnnuityRateDto, UpdateAnnuityRateRequest>({
+      query: (request) => ({
+        url: "itdevops/annuity-rates",
+        method: "PUT",
+        body: request
+      })
+    }),
+    getStateTaxRates: builder.query<StateTaxRateDto[], void>({
+      query: () => ({
+        url: "itdevops/state-tax-rates",
+        method: "GET"
+      })
+    }),
+    updateStateTaxRate: builder.mutation<StateTaxRateDto, UpdateStateTaxRateRequest>({
+      query: (request) => ({
+        url: "itdevops/state-tax-rates",
+        method: "PUT",
+        body: request
+      })
+    }),
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({
         url: `itdevops/frozen/active`,
@@ -133,6 +163,10 @@ export const ItOperationsApi = createApi({
 });
 
 export const {
+  useGetAnnuityRatesQuery,
+  useUpdateAnnuityRateMutation,
+  useGetStateTaxRatesQuery,
+  useUpdateStateTaxRateMutation,
   useLazyGetFrozenStateResponseQuery,
   useLazyGetHistoricalFrozenStateResponseQuery,
   useLazyGetProfitYearSelectorFrozenDataQuery,

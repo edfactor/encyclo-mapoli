@@ -135,7 +135,7 @@ All RTK Query APIs share a common base query configuration:
 export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const createDataSourceAwareBaseQuery = (
-  timeout?: number,
+  timeout?: number
 ): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
   const rawBaseQuery = fetchBaseQuery({
     baseUrl: `${url}/api/`,
@@ -283,7 +283,9 @@ getExecutiveHoursAndDollars: builder.query<
   RequestType & { archive?: boolean }
 >({
   query: (params) => ({
-    url: `yearend/executive-hours-and-dollars${params.archive ? "?archive=true" : ""}`,
+    url: `yearend/executive-hours-and-dollars${
+      params.archive ? "?archive=true" : ""
+    }`,
     method: "GET",
     params: {
       profitYear: params.profitYear,
@@ -381,6 +383,108 @@ const handleUpdate = async () => {
 
 ---
 
+## New API Setup Checklist
+
+When creating a new RTK Query API, follow this checklist to avoid common mistakes:
+
+### 1. Create API File
+
+**File**: `src/ui/src/reduxstore/api/myFeatureApi.ts`
+
+```typescript
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { MyResponse, MyRequest } from "../../pages/MyFeature/types";
+import { createDataSourceAwareBaseQuery } from "./api";
+
+const baseQuery = createDataSourceAwareBaseQuery();
+
+export const myFeatureApi = createApi({
+  baseQuery: baseQuery,
+  reducerPath: "myFeatureApi", // Must be unique
+  tagTypes: ["my-feature-data"], // For cache invalidation
+  endpoints: (builder) => ({
+    getMyData: builder.query<MyResponse, MyRequest>({
+      query: ({
+        pageNumber = 1,
+        pageSize = 10,
+        sortBy = "Created",
+        isSortDescending = true,
+      }) => ({
+        url: "my-endpoint",
+        method: "GET",
+        params: { pageNumber, pageSize, sortBy, isSortDescending },
+      }),
+      providesTags: ["my-feature-data"],
+    }),
+  }),
+});
+
+// CRITICAL: Export hooks
+export const { useGetMyDataQuery, useLazyGetMyDataQuery } = myFeatureApi;
+```
+
+### 2. Register in Store
+
+**File**: `src/ui/src/reduxstore/store.ts`
+
+```typescript
+import { myFeatureApi } from "./api/myFeatureApi";
+
+export const store = configureStore({
+  reducer: {
+    // ... existing reducers
+    [myFeatureApi.reducerPath]: myFeatureApi.reducer, // Add reducer
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({ serializableCheck: false })
+      .concat(rtkQueryErrorToastMiddleware(true))
+      .concat(myFeatureApi.middleware), // Add middleware
+});
+```
+
+### 3. Export from reduxstore/types.ts (Optional)
+
+```typescript
+export * from "./api/myFeatureApi";
+```
+
+### 4. Pagination/Sorting Query Parameters
+
+For paginated/sorted endpoints, ensure API accepts these parameters:
+
+```typescript
+interface PaginatedSortedRequest {
+  pageNumber?: number; // API expects 1-based
+  pageSize?: number; // Default 10 or 25
+  sortBy?: string; // Column name
+  isSortDescending?: boolean; // Sort direction
+}
+
+getData: builder.query<ResponseType, PaginatedSortedRequest>({
+  query: ({
+    pageNumber = 1,
+    pageSize = 10,
+    sortBy = "Created",
+    isSortDescending = true,
+  }) => ({
+    url: "my-endpoint",
+    method: "GET",
+    params: { pageNumber, pageSize, sortBy, isSortDescending }, // All four params
+  }),
+});
+```
+
+### Common RTK Query Mistakes
+
+1. **Missing API registration in store**: Middleware not added → API calls fail silently
+2. **Missing hook exports**: `useGetMyDataQuery` not exported → component can't import
+3. **Wrong `reducerPath`**: Must match key in store reducer object
+4. **Missing sort/pagination params**: API definition doesn't accept `sortBy`/`isSortDescending`
+5. **Not using `createDataSourceAwareBaseQuery()`**: Won't handle auth/headers correctly
+6. **Forgetting tag types**: Cache invalidation won't work on mutations
+
+---
+
 ## Redux Slices
 
 Redux slices manage **local UI state** that doesn't come from the server or needs client-side transformations.
@@ -460,7 +564,7 @@ openDrawer: (state) => {
       JSON.stringify({
         isDrawerOpen: true,
         activeSubmenu: state.activeSubmenu,
-      }),
+      })
     );
   } catch (error) {
     console.error("Error saving drawer state to localStorage:", error);
@@ -786,16 +890,21 @@ import { setLoading } from "reduxstore/slices/generalSlice";
 
 export function DuplicateSSNsReport() {
   const dispatch = useDispatch();
-  const profitYear = useSelector((state: RootState) => state.yearsEnd.selectedYear);
-  const duplicateSSNs = useSelector((state: RootState) => state.yearsEnd.duplicateSSNsData);
+  const profitYear = useSelector(
+    (state: RootState) => state.yearsEnd.selectedYear
+  );
+  const duplicateSSNs = useSelector(
+    (state: RootState) => state.yearsEnd.duplicateSSNsData
+  );
 
-  const [getDuplicateSSNs, { isLoading, error }] = useLazyGetDuplicateSSNsQuery();
+  const [getDuplicateSSNs, { isLoading, error }] =
+    useLazyGetDuplicateSSNsQuery();
 
   useEffect(() => {
     dispatch(setLoading(true));
     getDuplicateSSNs({
       profitYear,
-      pagination: { skip: 0, take: 50 }
+      pagination: { skip: 0, take: 50 },
     }).finally(() => {
       dispatch(setLoading(false));
     });

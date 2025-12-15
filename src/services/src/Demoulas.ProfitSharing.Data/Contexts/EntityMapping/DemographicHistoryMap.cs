@@ -103,6 +103,63 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
         _ = builder.Property(e => e.EmploymentStatusId)
             .HasColumnName("EMPLOYMENT_STATUS_ID");
 
+        // ContactInfo fields
+        _ = builder.Property(e => e.FirstName)
+            .HasMaxLength(30)
+            .HasColumnName("FIRST_NAME")
+            .HasComment("FirstName from ContactInfo");
+
+        _ = builder.Property(e => e.LastName)
+            .HasMaxLength(30)
+            .HasColumnName("LAST_NAME")
+            .HasComment("LastName from ContactInfo");
+
+        _ = builder.Property(e => e.MiddleName)
+            .HasMaxLength(25)
+            .HasColumnName("MIDDLE_NAME")
+            .HasComment("MiddleName from ContactInfo");
+
+        _ = builder.Property(e => e.PhoneNumber)
+            .HasMaxLength(15)
+            .HasColumnName("PHONE_NUMBER")
+            .HasComment("PhoneNumber from ContactInfo");
+
+        _ = builder.Property(e => e.MobileNumber)
+            .HasMaxLength(15)
+            .HasColumnName("MOBILE_NUMBER")
+            .HasComment("MobileNumber from ContactInfo");
+
+        _ = builder.Property(e => e.EmailAddress)
+            .HasMaxLength(50)
+            .HasColumnName("EMAIL_ADDRESS")
+            .HasComment("EmailAddress from ContactInfo");
+
+        // Address fields
+        _ = builder.Property(e => e.Street)
+            .HasMaxLength(30)
+            .HasColumnName("STREET")
+            .HasComment("Street from Address");
+
+        _ = builder.Property(e => e.Street2)
+            .HasMaxLength(30)
+            .HasColumnName("STREET2")
+            .HasComment("Street2 from Address");
+
+        _ = builder.Property(e => e.City)
+            .HasMaxLength(25)
+            .HasColumnName("CITY")
+            .HasComment("City from Address");
+
+        _ = builder.Property(e => e.State)
+            .HasMaxLength(3)
+            .HasColumnName("STATE")
+            .HasComment("State from Address");
+
+        _ = builder.Property(e => e.PostalCode)
+            .HasMaxLength(9)
+            .HasColumnName("POSTAL_CODE")
+            .HasComment("PostalCode from Address");
+
         _ = builder.Property(e => e.CreatedDateTime)
             .IsRequired()
             .HasColumnName("CREATED_DATETIME");

@@ -192,10 +192,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("ID");
 
-                    b.Property<string>("KindId")
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("KIND_ID");
-
                     b.Property<decimal>("Percent")
                         .HasPrecision(3)
                         .HasColumnType("numeric(3,0)")
@@ -401,10 +397,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
 
-                    b.Property<string>("KindId")
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("KIND_ID");
-
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
@@ -441,9 +433,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("DemographicId")
                         .HasDatabaseName("IX_BENEFICIARY_DEMOGRAPHICID");
-
-                    b.HasIndex("KindId")
-                        .HasDatabaseName("IX_BENEFICIARY_KINDID");
 
                     b.HasIndex(new[] { "BadgeNumber" }, "IX_BADGE_NUMBER")
                         .HasDatabaseName("IX_BENEFICIARY_BADGENUMBER");
@@ -504,37 +493,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_BENEFICIARY_CONTACT_SSN");
 
                     b.ToTable("BENEFICIARY_CONTACT", (string)null);
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("ID");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("NVARCHAR2(20)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_BENEFICIARY_KIND");
-
-                    b.ToTable("BENEFICIARY_KIND", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "P",
-                            Name = "Primary"
-                        },
-                        new
-                        {
-                            Id = "S",
-                            Name = "Secondary"
-                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiarySsnChangeHistory", b =>
@@ -2383,6 +2341,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(7)")
                         .HasColumnName("BADGE_NUMBER");
 
+                    b.Property<string>("City")
+                        .HasMaxLength(25)
+                        .HasColumnType("NVARCHAR2(25)")
+                        .HasColumnName("CITY")
+                        .HasComment("City from Address");
+
                     b.Property<DateTimeOffset>("CreatedDateTime")
                         .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
                         .HasColumnName("CREATED_DATETIME");
@@ -2403,6 +2367,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("DEPARTMENT")
                         .HasComment("Department");
 
+                    b.Property<string>("EmailAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("EMAIL_ADDRESS")
+                        .HasComment("EmailAddress from ContactInfo");
+
                     b.Property<string>("EmploymentStatusId")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
@@ -2415,10 +2385,34 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("EMPLOYMENT_TYPE_ID")
                         .HasComment("EmploymentType");
 
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("FIRST_NAME")
+                        .HasComment("FirstName from ContactInfo");
+
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("HIRE_DATE")
                         .HasComment("HireDate");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("LAST_NAME")
+                        .HasComment("LastName from ContactInfo");
+
+                    b.Property<string>("MiddleName")
+                        .HasMaxLength(25)
+                        .HasColumnType("NVARCHAR2(25)")
+                        .HasColumnName("MIDDLE_NAME")
+                        .HasComment("MiddleName from ContactInfo");
+
+                    b.Property<string>("MobileNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("NVARCHAR2(15)")
+                        .HasColumnName("MOBILE_NUMBER")
+                        .HasComment("MobileNumber from ContactInfo");
 
                     b.Property<long>("OracleHcmId")
                         .HasPrecision(15)
@@ -2438,16 +2432,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PAY_FREQUENCY_ID")
                         .HasComment("PayFrequency");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("NVARCHAR2(15)")
+                        .HasColumnName("PHONE_NUMBER")
+                        .HasComment("PhoneNumber from ContactInfo");
+
+                    b.Property<string>("PostalCode")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("POSTAL_CODE")
+                        .HasComment("PostalCode from Address");
+
                     b.Property<DateTime?>("ReHireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("REHIRE_DATE")
                         .HasComment("ReHireDate");
+
+                    b.Property<string>("State")
+                        .HasMaxLength(3)
+                        .HasColumnType("NVARCHAR2(3)")
+                        .HasColumnName("STATE")
+                        .HasComment("State from Address");
 
                     b.Property<short>("StoreNumber")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
                         .HasColumnName("STORE_NUMBER")
                         .HasComment("StoreNumber");
+
+                    b.Property<string>("Street")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("STREET")
+                        .HasComment("Street from Address");
+
+                    b.Property<string>("Street2")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("STREET2")
+                        .HasComment("Street2 from Address");
 
                     b.Property<string>("TerminationCodeId")
                         .HasMaxLength(1)
@@ -6460,17 +6484,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_BENEFICIARY_DEMOGRAPHICS_DEMOGRAPHICID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", "Kind")
-                        .WithMany("Beneficiaries")
-                        .HasForeignKey("KindId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_BENEFICIARY_BENEFICIARY_KIND_KINDID");
-
                     b.Navigation("Contact");
 
                     b.Navigation("Demographic");
-
-                    b.Navigation("Kind");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", b =>
@@ -7318,11 +7334,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Beneficiaries");
 
                     b.Navigation("BeneficiarySsnChangeHistories");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", b =>
-                {
-                    b.Navigation("Beneficiaries");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>

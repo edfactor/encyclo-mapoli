@@ -60,9 +60,10 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         addressState,
         addressZipCode,
         phoneNumber,
-        isEmployee,
-        workLocation,
-        storeNumber
+        gender,
+        dateOfBirth,
+        age,
+        ssn
       } = memberDetails;
 
       const formattedCity = addressCity || "";
@@ -76,13 +77,11 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         { label: "Address", value: `${address}` },
         { label: "", value: cityStateZip },
         { label: "Phone #", value: formatPhoneNumber(phoneNumber) },
-        ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
-        ...(isEmployee
-          ? [{ label: "Store", value: typeof storeNumber === "number" && storeNumber > 0 ? storeNumber : "N/A" }]
-          : []),
-        { label: "Forfeited", value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "") } // Remove code like "(1)"
+        { label: "Gender", value: gender || "N/A" },
+        { label: "DOB", value: dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A" },
+        { label: "SSN", value: `${ssn}` }
       ];
-    }, [memberDetails, enrollmentStatus]);
+    }, [memberDetails]);
 
     // Memoized personal section
     const personalSection = useMemo(() => {
@@ -91,13 +90,11 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         badgeNumber,
         psnSuffix,
         isEmployee,
+        workLocation,
+        storeNumber,
         department,
         payClassification,
         employmentStatus,
-        gender,
-        dateOfBirth,
-        age,
-        ssn,
         allocationToAmount,
         badgesOfDuplicateSsns
       } = memberDetails;
@@ -113,21 +110,21 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         }
       }
 
-      const dobDisplay = dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A";
+      const storeNumberDisplay = typeof storeNumber === "number" && storeNumber > 0 ? storeNumber : "N/A";
+      const workLocationDisplay = workLocation ? `${workLocation} (${storeNumberDisplay})` : `N/A (${storeNumberDisplay})`;
 
       return [
         ...(isEmployee ? [{ label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) }] : []),
         ...(!isEmployee ? [{ label: "PSN", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
+        ...(isEmployee ? [{ label: "Work Location", value: workLocationDisplay }] : []),
         ...(isEmployee ? [{ label: "Department", value: department || "N/A" }] : []),
         ...(isEmployee ? [{ label: "Class", value: payClassification || "N/A" }] : []),
         ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
-        { label: "Gender", value: gender || "N/A" },
-        { label: "DOB", value: dobDisplay },
-        { label: "SSN", value: `${ssn}` },
         ...duplicateBadgeLink,
+        { label: "Forfeited", value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "") }, // Remove code like "(1)"
         { label: "Allocation To", value: numberToCurrency(allocationToAmount) }
       ];
-    }, [memberDetails]);
+    }, [memberDetails, enrollmentStatus]);
 
     // Memoized plan section
     const planSection = useMemo(() => {
@@ -213,8 +210,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
 
     return (
       <div
-        className="m-[1px] box-border p-[1px]"
-        style={{ width: "100%" }}>
+        className="m-[1px] box-border p-[1px] w-full">
         <Grid
           container
           paddingX="24px"

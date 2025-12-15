@@ -620,7 +620,12 @@ aspire run
 # Build services
 cd src/services; dotnet build Demoulas.ProfitSharing.slnx
 # Run tests (ONLY the consolidated UnitTests project; do not run entire solution test graph)
-dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --no-build
+# NOTE: Tests use xUnit v3 + Microsoft Testing Platform (MTP).
+# Run from src/services so global.json test runner settings are applied.
+cd src/services
+dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --no-build
+# Filter examples (MTP/xUnit options; NOT VSTest `--filter`):
+# dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --filter-class *OracleHcmDiagnostics* --no-build
 ```
 
 ## Do NOT

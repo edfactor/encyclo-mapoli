@@ -27,6 +27,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
 
     public virtual DbSet<AuditEvent> AuditEvents { get; set; }
     public virtual DbSet<ReportChecksum> ReportChecksums { get; set; }
+    public virtual DbSet<DemographicSyncAudit> DemographicSyncAudit { get; set; }
     public virtual DbSet<AnnuityRate> AnnuityRates { get; set; }
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }
@@ -45,7 +46,6 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<BeneficiaryContact> BeneficiaryContacts { get; set; }
     public virtual DbSet<BeneficiaryContactArchive> BeneficiaryContactArchives { get; set; }
     public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
-    public virtual DbSet<BeneficiaryKind> BeneficiaryKinds { get; set; }
     public virtual DbSet<Enrollment> Enrollments { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
     public virtual DbSet<Distribution> Distributions { get; set; }

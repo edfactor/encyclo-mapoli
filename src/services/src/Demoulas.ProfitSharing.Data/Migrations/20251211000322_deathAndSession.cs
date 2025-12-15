@@ -37,14 +37,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 maxLength: 20,
                 nullable: true);
 
-            migrationBuilder.InsertData(
-                table: "NAVIGATION_ROLE",
-                columns: new[] { "ID", "IS_READ_ONLY", "NAME" },
-                values: new object[,]
-                {
-                    { (byte)11, true, "HR-ReadOnly" },
-                    { (byte)12, true, "SSN-Unmasking" }
-                });
+            // REMOVED DUPLICATE InsertData - IDs 11 and 12 were already inserted in previous migration
 
             migrationBuilder.CreateIndex(
                 name: "IX_AUDIT_EVENT_SESSION_ID_CREATEDAT",
@@ -59,15 +52,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_AUDIT_EVENT_SESSION_ID_CREATEDAT",
                 table: "AUDIT_EVENT");
 
-            migrationBuilder.DeleteData(
-                table: "NAVIGATION_ROLE",
-                keyColumn: "ID",
-                keyValue: (byte)11);
-
-            migrationBuilder.DeleteData(
-                table: "NAVIGATION_ROLE",
-                keyColumn: "ID",
-                keyValue: (byte)12);
+            // REMOVED DUPLICATE DeleteData - IDs 11 and 12 are managed by previous migration
 
             migrationBuilder.DropColumn(
                 name: "DATE_OF_DEATH",

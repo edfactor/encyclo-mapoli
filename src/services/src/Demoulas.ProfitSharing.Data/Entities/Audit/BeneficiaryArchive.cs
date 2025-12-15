@@ -9,7 +9,6 @@ public sealed class BeneficiaryArchive
     public required int DemographicId { get; set; }
     public required int BeneficiaryContactId { get; set; }
     public string? Relationship { get; set; }
-    public char? KindId { get; set; }
     public required decimal Percent { get; set; }
     public DateOnly DeleteDate { get; set; }
     public required string DeletedBy { get; set; }

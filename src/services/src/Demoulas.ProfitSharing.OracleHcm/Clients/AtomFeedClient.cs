@@ -1,6 +1,8 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Clients;
@@ -60,7 +62,33 @@ internal class AtomFeedClient
             try
             {
 
-                HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(new TimeSpan(0, 0, 6), cancellationToken).ConfigureAwait(false);
+
+                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+                HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+                if (!response.IsSuccessStatusCode && Debugger.IsAttached)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                    _logger.LogWarning("Oracle HCM API request failed: {ErrorResponse} / {ReasonPhrase}", errorResponse, response.ReasonPhrase);
+
+                    // Generate and display cURL command for manual testing
+                    string curlCommand = request.GenerateCurlCommand(url);
+
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine();
+                    Console.WriteLine("=== API REQUEST FAILED ===");
+                    Console.WriteLine(errorResponse);
+                    Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("=== cURL Command for Postman/Manual Testing ===");
+                    Console.WriteLine(curlCommand);
+                    Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.White;
+
+                    _logger.LogInformation("cURL command for manual testing: {CurlCommand}", curlCommand);
+                }
+
                 response.EnsureSuccessStatusCode();
 
                 feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse<TContextType>>(cancellationToken).ConfigureAwait(false);

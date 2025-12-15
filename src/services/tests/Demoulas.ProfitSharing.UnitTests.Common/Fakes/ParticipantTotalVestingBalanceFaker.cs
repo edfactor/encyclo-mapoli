@@ -8,6 +8,8 @@ internal sealed class ParticipantTotalVestingBalanceFaker : Faker<ParticipantTot
 {
     public ParticipantTotalVestingBalanceFaker(IList<Demographic> demographicFakes, IList<Beneficiary> beneficiaryFakes)
     {
+        _ = UseSeed(100);
+
         var demoSsns = demographicFakes.Select(x => x.Ssn).ToList();
         var beneSsns = beneficiaryFakes.Where(z => !demoSsns.Contains(z.Contact!.Ssn)).Select(x => x.Contact!.Ssn).ToList();
         var ssnQueue = new Queue<int>(demoSsns.Union(beneSsns).Distinct());

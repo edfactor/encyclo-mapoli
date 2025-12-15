@@ -41,12 +41,6 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
 
         .RuleFor(d => d.Id, f => _iDCounter++)
             .RuleFor(b => b.PsnSuffix, f => f.Random.Short(1_000, 9_999))
-            .RuleFor(b => b.Kind,
-            f => f.PickRandom(new List<BeneficiaryKind>
-            {
-                new BeneficiaryKind { Id = BeneficiaryKind.Constants.Primary, Name = "Primary", },
-                new BeneficiaryKind { Id = BeneficiaryKind.Constants.Secondary, Name = "Secondary", }
-            }))
 
             .RuleFor(b => b.Contact, f =>
         {

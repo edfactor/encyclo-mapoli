@@ -335,7 +335,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Constants.FakeParticipantTotals = participantTotals.BuildMockDbSet();
 
         List<ParticipantTotalVestingBalance> participantTotalVestingBalances = new ParticipantTotalVestingBalanceFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
-        Constants.FakeParticipantTotalVestingBalances = participantTotalVestingBalances.BuildMockDbSet();
+        Constants.FakeParticipantTotalVestingBalances = BuildMockDbSetWithBackingList(participantTotalVestingBalances);
 
         List<ParticipantTotal> etvaBalances = new ParticipantEtvaTotalFaker(profitDetails).Generate(profitDetails.Count);
         Constants.FakeEtvaTotals = etvaBalances.BuildMockDbSet();
@@ -369,6 +369,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<DemographicHistory>> mockDemographicHistories = demographicHistories.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
+
+        // Setup DemographicSyncAudit for IT Operations audit testing
+        List<DemographicSyncAudit> demographicSyncAudits = new DemographicSyncAuditFaker().Generate(5);
+        Mock<DbSet<DemographicSyncAudit>> mockDemographicSyncAudits = demographicSyncAudits.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.DemographicSyncAudit).Returns(mockDemographicSyncAudits.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.DemographicSyncAudit).Returns(mockDemographicSyncAudits.Object);
 
         // Setup FakeSsns - used to exclude fake SSNs from duplicate detection
         List<FakeSsn>? fakeSsns = new List<FakeSsn>();
