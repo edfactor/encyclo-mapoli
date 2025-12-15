@@ -13,7 +13,7 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, numberToCurrency, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../../../constants";
+import { CAPTIONS, GRID_KEYS } from "../../../../constants";
 import { closeDrawer, openDrawer, setFullscreen } from "../../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../../reduxstore/store";
 import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
@@ -407,7 +407,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
             Active and Inactive
           </Typography>
           <DSMGrid
-            preferenceKey={"ACTIVE_INACTIVE_SUMMARY"}
+            preferenceKey={GRID_KEYS.ACTIVE_INACTIVE_SUMMARY}
             isLoading={isFetching}
             handleSortChanged={() => {}}
             providedOptions={{
@@ -425,7 +425,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
             Terminated
           </Typography>
           <DSMGrid
-            preferenceKey={"TERMINATED_SUMMARY"}
+            preferenceKey={GRID_KEYS.TERMINATED_SUMMARY}
             isLoading={isFetching}
             handleSortChanged={() => {}}
             providedOptions={{
@@ -444,7 +444,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
               Employees
             </Typography>
             <DSMGrid
-              preferenceKey={"EMPLOYEES_SUMMARY"}
+              preferenceKey={GRID_KEYS.EMPLOYEES_SUMMARY}
               isLoading={isFetching}
               handleSortChanged={() => {}}
               providedOptions={{

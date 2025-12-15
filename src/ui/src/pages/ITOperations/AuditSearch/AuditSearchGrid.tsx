@@ -1,6 +1,7 @@
 import { Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { AuditEventDto, NavigationStatusDto } from "../../../types";
 import { GetAuditSearchColumns } from "./AuditSearchGridColumns";
@@ -24,6 +25,7 @@ const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({
     initialPageSize: 25,
     initialSortBy: "createdAt",
     initialSortDescending: true,
+    persistenceKey: GRID_KEYS.AUDIT_SEARCH,
     onPaginationChange: useCallback(
       (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         onPaginationChange(pageNum, pageSz, sortPrms);
@@ -44,7 +46,7 @@ const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({
         </Typography>
       </div>
       <DSMGrid
-        preferenceKey={"AUDIT_SEARCH"}
+        preferenceKey={GRID_KEYS.AUDIT_SEARCH}
         isLoading={isLoading}
         handleSortChanged={handleSortChange}
         providedOptions={{

@@ -5,6 +5,7 @@ import { setMessage } from "reduxstore/slices/messageSlice";
 import { RootState } from "reduxstore/store";
 import { NavigationDto, UpdateSummaryResponse } from "reduxstore/types";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { ServiceErrorResponse } from "../../../../types/errors/errors";
 
@@ -222,6 +223,7 @@ export const usePayMasterUpdate = () => {
     initialPageSize: 25,
     initialSortBy: "name",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.ELIGIBLE_EMPLOYEES,
     onPaginationChange: handleSummaryPaginationChange
   });
 

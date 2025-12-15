@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { GRID_KEYS } from "../../../../constants";
 import { FrozenReportsByAgeRequestType } from "../../../../reduxstore/types";
 import { GetDistributionsByAgeColumns } from "./DistributionsByAgeGridColumns";
 
@@ -45,7 +46,7 @@ const DistributionByAgeGrid: React.FC = () => {
                 leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
                 topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
               <DSMGrid
-                preferenceKey={"DIST_AGE_Total"}
+                preferenceKey={GRID_KEYS.DISTRIBUTIONS_AGE_TOTAL}
                 isLoading={false}
                 providedOptions={{
                   rowData: distributionsByAgeTotal?.response?.results ?? [],
@@ -78,7 +79,7 @@ const DistributionByAgeGrid: React.FC = () => {
                 leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
                 topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
               <DSMGrid
-                preferenceKey={"DIST_AGE_FullTime"}
+                preferenceKey={GRID_KEYS.DISTRIBUTIONS_AGE_FULLTIME}
                 isLoading={false}
                 providedOptions={{
                   rowData: distributionsByAgeFullTime?.response?.results ?? [],
@@ -111,7 +112,7 @@ const DistributionByAgeGrid: React.FC = () => {
                 leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
                 topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
               <DSMGrid
-                preferenceKey={"DIST_AGE_PartTime"}
+                preferenceKey={GRID_KEYS.DISTRIBUTIONS_AGE_PARTTIME}
                 isLoading={false}
                 providedOptions={{
                   rowData: distributionsByAgePartTime?.response?.results ?? [],

@@ -3,7 +3,7 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { memo, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams } from "../../../hooks/useGridPagination";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
@@ -87,7 +87,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
             </IconButton>
           </Box>
           <DSMGrid
-            preferenceKey={CAPTIONS.MASTER_INQUIRY}
+            preferenceKey={GRID_KEYS.MASTER_INQUIRY}
             handleSortChanged={handleSortChange}
             isLoading={!!isLoading}
             maxHeight={gridMaxHeight}

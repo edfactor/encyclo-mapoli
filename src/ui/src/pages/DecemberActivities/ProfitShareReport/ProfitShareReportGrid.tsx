@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useLazyGetYearEndProfitSharingReportLiveQuery } from "reduxstore/api/YearsEndApi";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
@@ -49,6 +50,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.PROFIT_SHARE_REPORT,
     onPaginationChange: useCallback(
       async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (isInitialSearchLoaded && searchParams) {
@@ -114,7 +116,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   return (
     <div className="relative">
       <DSMGrid
-        preferenceKey={"ProfitShareReportGrid"}
+        preferenceKey={GRID_KEYS.PROFIT_SHARE_REPORT}
         isLoading={isFetching}
         maxHeight={gridMaxHeight}
         handleSortChanged={handleSortChanged}

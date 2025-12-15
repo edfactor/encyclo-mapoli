@@ -6,6 +6,7 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { EmployeeWagesForYearResponse } from "../../../reduxstore/types";
@@ -140,7 +141,7 @@ const YTDWagesGrid = ({
           </Grid>
           {!isGridExpanded && <ReportSummary report={clonedData} />}
           <DSMGrid
-            preferenceKey={"TERM"}
+            preferenceKey={GRID_KEYS.YTD_WAGES}
             isLoading={isLoading}
             maxHeight={gridMaxHeight}
             handleSortChanged={onSortChange}

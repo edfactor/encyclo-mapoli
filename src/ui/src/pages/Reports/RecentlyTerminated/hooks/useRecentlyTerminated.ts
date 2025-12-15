@@ -2,6 +2,7 @@ import { useCallback, useReducer, useRef } from "react";
 import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/AdhocApi";
 import { RecentlyTerminatedResponse } from "reduxstore/types";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { ServiceErrorResponse } from "../../../../types/errors/errors";
@@ -192,6 +193,7 @@ export const useRecentlyTerminated = () => {
     initialPageSize: 25,
     initialSortBy: "fullName, terminationDate",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.RECENTLY_TERMINATED,
     onPaginationChange: handleReportPaginationChange
   });
 
