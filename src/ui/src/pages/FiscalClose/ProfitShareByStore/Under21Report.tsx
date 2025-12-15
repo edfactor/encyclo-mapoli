@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetPostFrozenUnder21Query } from "../../../reduxstore/api/YearsEndApi";
@@ -21,7 +21,8 @@ const Under21Report = () => {
   const gridPagination = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
-    initialSortDescending: false
+    initialSortDescending: false,
+    persistenceKey: GRID_KEYS.UNDER_21_REPORT
   });
 
   const profitYear = useDecemberFlowProfitYear();

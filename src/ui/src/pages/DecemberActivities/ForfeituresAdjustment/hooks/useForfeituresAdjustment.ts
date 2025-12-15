@@ -2,26 +2,27 @@ import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { formatNumberWithComma } from "smart-ui-library";
 import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
+import { GRID_KEYS } from "../../../../constants";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../../hooks/useReadOnlyNavigation";
-import {
-  InquiryApi,
-  useLazyGetProfitMasterInquiryMemberDetailsQuery,
-  useLazyGetProfitMasterInquiryMemberQuery
-} from "../../../../reduxstore/api/InquiryApi";
 import { useLazyGetForfeitureAdjustmentsQuery } from "../../../../reduxstore/api/AdhocApi";
-import { MasterInquiryResponseDto } from "../../../../types/master-inquiry/master-inquiry";
-import { EmployeeDetails } from "../../../../types/employee/employee";
 import {
-  ForfeitureAdjustmentSearchParams,
-  forfeituresAdjustmentReducer,
-  initialState,
-  selectShowEmployeeData,
-  selectShowMemberDetails,
-  selectShowTransactions,
-  TransactionData
+    InquiryApi,
+    useLazyGetProfitMasterInquiryMemberDetailsQuery,
+    useLazyGetProfitMasterInquiryMemberQuery
+} from "../../../../reduxstore/api/InquiryApi";
+import { EmployeeDetails } from "../../../../types/employee/employee";
+import { MasterInquiryResponseDto } from "../../../../types/master-inquiry/master-inquiry";
+import {
+    ForfeitureAdjustmentSearchParams,
+    forfeituresAdjustmentReducer,
+    initialState,
+    selectShowEmployeeData,
+    selectShowMemberDetails,
+    selectShowTransactions,
+    TransactionData
 } from "./useForfeituresAdjustmentReducer";
 
 interface SaveForfeitureFormData {
@@ -115,6 +116,7 @@ const useForfeituresAdjustment = () => {
     initialPageSize: 50,
     initialSortBy: "profitYear",
     initialSortDescending: true,
+    persistenceKey: GRID_KEYS.FORFEITURES_ADJUSTMENT,
     onPaginationChange: handleTransactionPaginationChange
   });
 

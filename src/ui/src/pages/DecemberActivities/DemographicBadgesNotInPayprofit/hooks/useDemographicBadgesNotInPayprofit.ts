@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
+import { GRID_KEYS } from "../../../../constants";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import {
-  demographicBadgesNotInPayprofitReducer,
-  initialState,
-  selectHasResults,
-  selectShowData
+    demographicBadgesNotInPayprofitReducer,
+    initialState,
+    selectHasResults,
+    selectShowData
 } from "./useDemographicBadgesNotInPayprofitReducer";
 
 export interface DemographicBadgesNotInPayprofitSearchParams {
@@ -64,6 +65,7 @@ const useDemographicBadgesNotInPayprofit = () => {
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: true,
+    persistenceKey: GRID_KEYS.DEMOGRAPHIC_BADGES,
     onPaginationChange: handlePaginationChange
   });
 

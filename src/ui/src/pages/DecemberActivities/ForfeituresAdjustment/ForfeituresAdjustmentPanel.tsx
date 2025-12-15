@@ -8,7 +8,11 @@ interface ForfeituresAdjustmentPanelProps {
   currentBalance: number;
 }
 
-const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({ onAddForfeiture, isReadOnly, currentBalance }) => {
+const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
+  onAddForfeiture,
+  isReadOnly,
+  currentBalance
+}) => {
   const isBalanceZero = currentBalance === 0;
   const isDisabled = isReadOnly || isBalanceZero;
   return (

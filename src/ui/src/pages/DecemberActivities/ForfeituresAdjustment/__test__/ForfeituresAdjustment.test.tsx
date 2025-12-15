@@ -297,7 +297,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0,
-        currentBalance: 1500.50
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -349,7 +349,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0,
-        currentBalance: 1500.50
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -365,7 +365,7 @@ describe("ForfeituresAdjustment", () => {
     it("should pass currentBalance to ForfeituresAdjustmentPanel", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       const testBalance = 2500.75;
-      
+
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         searchParams: null,
         employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
@@ -408,7 +408,7 @@ describe("ForfeituresAdjustment", () => {
 
     it("should disable add forfeiture button when balance is zero", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
-      
+
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         searchParams: null,
         employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
@@ -452,7 +452,7 @@ describe("ForfeituresAdjustment", () => {
 
     it("should enable add forfeiture button when balance is positive and not read-only", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
-      
+
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         searchParams: null,
         employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
@@ -535,7 +535,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0,
-        currentBalance: 1500.50
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -587,7 +587,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0,
-        currentBalance: 1500.50
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -641,7 +641,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0,
-        currentBalance: 1500.50
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -696,7 +696,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: true,
         memberDetailsRefreshTrigger: 0,
-        currentBalance: 1500.50
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();

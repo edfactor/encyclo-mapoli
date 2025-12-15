@@ -8,6 +8,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetProfallGridColumns } from "./ProfallGridColumns";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { GRID_KEYS } from "../../../constants";
 import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
 
 interface ProfallGridProps {
@@ -27,6 +28,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
       initialPageSize: 25,
       initialSortBy: "badgeNumber",
       initialSortDescending: false,
+      persistenceKey: GRID_KEYS.PROFALL_REPORT,
       onPaginationChange: useCallback(
         (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (profitYear && securityState.token) {

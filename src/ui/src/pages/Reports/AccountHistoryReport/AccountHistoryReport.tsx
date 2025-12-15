@@ -2,7 +2,7 @@ import { Button, Divider, Grid } from "@mui/material";
 import React, { useCallback, useRef, useState } from "react";
 import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { AdhocApi } from "../../../reduxstore/api/AdhocApi";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
@@ -61,6 +61,7 @@ const AccountHistoryReport: React.FC = () => {
     initialPageSize: 25,
     initialSortBy: "profitYear",
     initialSortDescending: true,
+    persistenceKey: GRID_KEYS.ACCOUNT_HISTORY_REPORT,
     onPaginationChange: handleReportPaginationChange
   });
 

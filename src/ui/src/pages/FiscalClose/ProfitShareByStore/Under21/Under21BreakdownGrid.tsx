@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
+import { GRID_KEYS } from "../../../../constants";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownGridColumns";
 
@@ -29,6 +30,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.UNDER_21_BREAKDOWN_REPORT,
     onPaginationChange: () => {
       // This component doesn't trigger API calls on pagination change
       // The data is already loaded from the parent component

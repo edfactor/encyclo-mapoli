@@ -6,6 +6,7 @@ import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { GRID_KEYS } from "../../../constants";
 import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
 import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
 
@@ -38,6 +39,7 @@ const ProfitShareEditGrid = ({
       initialPageSize: 25,
       initialSortBy: "name",
       initialSortDescending: false,
+      persistenceKey: GRID_KEYS.PROFIT_SHARE_EDIT,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded && hasToken) {

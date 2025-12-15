@@ -2,6 +2,7 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { GRID_KEYS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import {
   useGetFullTimeAccruedPaidHolidaysPayServicesQuery,
@@ -61,6 +62,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, onLoadingChange
     initialPageSize: 25,
     initialSortBy: "employeeName",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.QPAY600,
     onPaginationChange: () => {
       // Pagination handled by backend API
     }

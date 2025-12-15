@@ -12,6 +12,7 @@ import {
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { RootState } from "../../../../reduxstore/store";
 import { ValidationResponse } from "../../../../types/validation/cross-reference-validation";
@@ -53,6 +54,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
     initialPageSize: 25,
     initialSortBy: "fullName",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.PAY426N_REPORT,
     onPaginationChange: useCallback(
       (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (hasToken && params) {

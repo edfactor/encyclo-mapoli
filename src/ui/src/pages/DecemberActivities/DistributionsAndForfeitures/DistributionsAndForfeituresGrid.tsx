@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
@@ -62,6 +62,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       initialPageSize,
       initialSortBy: "employeeName, date",
       initialSortDescending: false,
+      persistenceKey: GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (hasToken && initialSearchLoaded) {

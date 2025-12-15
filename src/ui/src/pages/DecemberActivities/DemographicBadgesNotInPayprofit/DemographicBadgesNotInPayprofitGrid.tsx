@@ -47,7 +47,7 @@ const DemographicBadgesNotInPayprofitGrid = ({
       {showData && data?.response && (
         <div ref={innerRef}>
           <DSMGrid
-            preferenceKey={"DEMO_BADGES"}
+            preferenceKey={"DEMOGRAPHIC_BADGES"}
             isLoading={isLoading}
             handleSortChanged={handleSortChanged}
             providedOptions={{

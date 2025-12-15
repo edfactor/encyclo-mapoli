@@ -7,6 +7,7 @@ import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
 import { DSMGrid, Pagination, TotalsGrid, numberToCurrency } from "smart-ui-library";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetProfitShareGrossReportColumns } from "./ProfitShareGrossReportColumns";
 
@@ -37,6 +38,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
       initialPageSize: 25,
       initialSortBy: "badgeNumber",
       initialSortDescending: false,
+      persistenceKey: GRID_KEYS.PROFIT_SHARE_GROSS_REPORT,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded) {

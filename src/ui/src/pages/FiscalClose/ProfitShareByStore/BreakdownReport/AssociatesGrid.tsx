@@ -7,6 +7,7 @@ import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetAssociatesColumns } from "./AssociatesGridColumns";
 
@@ -35,6 +36,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
       initialPageSize: 10,
       initialSortBy: "badgeNumber",
       initialSortDescending: false,
+      persistenceKey: `${GRID_KEYS.BREAKDOWN_REPORT_ASSOCIATES_PREFIX}${store}`,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (hasToken) {
