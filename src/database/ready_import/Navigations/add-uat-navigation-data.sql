@@ -49,8 +49,8 @@ DECLARE
 
 
     -- These are the secondary drawer top-level menus
-    FISCAL_CLOSE CONSTANT NUMBER := 8;
-    DECEMBER_ACTIVITIES CONSTANT NUMBER := 9;
+    FISCAL_CLOSE CONSTANT NUMBER := 9;
+    DECEMBER_ACTIVITIES CONSTANT NUMBER := 10;
     
     -- Third-level under December Activities
     CLEANUP_REPORTS CONSTANT NUMBER := 10;
@@ -244,7 +244,8 @@ BEGIN
     -- insert_navigation_item(DISTRIBUTIONS_MENU, TOP_LEVEL_MENU, 'DISTRIBUTIONS', 'Distributions', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     -- RECONCILIATION REMOVED
     insert_navigation_item(YEAR_END_MENU, TOP_LEVEL_MENU, 'YEAR END', 'Year End', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(IT_DEVOPS_MENU, TOP_LEVEL_MENU, 'IT DEVOPS', 'IT DevOps', '', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ADMINISTRATIVE_MENU, TOP_LEVEL_MENU, 'ADMINISTRATIVE', 'Administrative', '', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(IT_DEVOPS_MENU, TOP_LEVEL_MENU, 'IT DEVOPS', 'IT DevOps', '', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
 
 --Sub values for INQUIRIES
     insert_navigation_item(INQUIRIES_GROUP, INQUIRIES_MENU, 'Inquiries', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -307,6 +308,10 @@ BEGIN
 --  NOTE: IT-DevOps navigation should be accessible only to members of the IT-DevOps role (role id 6).
 --  Remove other role assignments so the IT menu is exclusive to IT-DevOps.
     assign_navigation_role(IT_DEVOPS_MENU, IT_DEVOPS);
+
+-- Inserting value for Administrative menu for role management
+--  NOTE: Administrative navigation should be accessible only to members of the IT-DevOps role (role id 6).
+    assign_navigation_role(ADMINISTRATIVE_MENU, IT_DEVOPS);
 
 -- Print PS Jobs - REMOVED
     -- assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);

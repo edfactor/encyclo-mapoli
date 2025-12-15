@@ -23,6 +23,12 @@ import {
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
+
+type GetAnnuityRatesQueryArgs = {
+  sortBy: string;
+  isSortDescending: boolean;
+};
+
 export const ItOperationsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "itOperationsApi",
@@ -31,10 +37,14 @@ export const ItOperationsApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
-    getAnnuityRates: builder.query<AnnuityRateDto[], void>({
-      query: () => ({
+    getAnnuityRates: builder.query<AnnuityRateDto[], GetAnnuityRatesQueryArgs>({
+      query: (params) => ({
         url: "itdevops/annuity-rates",
-        method: "GET"
+        method: "GET",
+        params: {
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
       })
     }),
     updateAnnuityRate: builder.mutation<AnnuityRateDto, UpdateAnnuityRateRequest>({

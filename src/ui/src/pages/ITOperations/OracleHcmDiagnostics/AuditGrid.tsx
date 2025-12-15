@@ -130,7 +130,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
         onClose={() => setShowClearConfirmation(false)}
         maxWidth="xs"
         fullWidth>
-        <DialogTitle>Clear Demographic Sync Audit</DialogTitle>
+        <DialogTitle>Clear Demographic Sync Errors</DialogTitle>
         <DialogContent>
           <Box sx={{ paddingTop: "16px" }}>
             <Typography variant="body1">

@@ -2,6 +2,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
@@ -11,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
-public sealed class GetAnnuityRatesEndpoint : ProfitSharingResultResponseEndpoint<IReadOnlyList<AnnuityRateDto>>
+public sealed class GetAnnuityRatesEndpoint : ProfitSharingEndpoint<GetAnnuityRatesRequest, Results<Ok<IReadOnlyList<AnnuityRateDto>>, NotFound, ProblemHttpResult>>
 {
     private readonly IAnnuityRatesService _annuityRatesService;
     private readonly ILogger<GetAnnuityRatesEndpoint> _logger;
@@ -35,9 +36,15 @@ public sealed class GetAnnuityRatesEndpoint : ProfitSharingResultResponseEndpoin
 
     public override Task<Results<Ok<IReadOnlyList<AnnuityRateDto>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, new { }, async () =>
+        var request = new GetAnnuityRatesRequest
         {
-            var result = await _annuityRatesService.GetAnnuityRatesAsync(ct);
+            SortBy = string.IsNullOrWhiteSpace(Req.SortBy) ? "Year" : Req.SortBy,
+            IsSortDescending = Req.IsSortDescending ?? true,
+        };
+
+        return this.ExecuteWithTelemetry(HttpContext, _logger, request, async () =>
+        {
+            var result = await _annuityRatesService.GetAnnuityRatesAsync(request, ct);
 
             try
             {
