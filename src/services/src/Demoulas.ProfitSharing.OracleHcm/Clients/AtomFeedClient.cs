@@ -62,7 +62,7 @@ internal class AtomFeedClient
             try
             {
 
-                await Task.Delay(new TimeSpan(0, 0, 6), cancellationToken).ConfigureAwait(false);
+                await Task.Delay(new TimeSpan(0, 0, 10), cancellationToken).ConfigureAwait(false);
 
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);

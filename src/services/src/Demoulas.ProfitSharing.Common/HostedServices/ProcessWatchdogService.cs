@@ -29,6 +29,10 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
 {
     private readonly ILogger<ProcessWatchdogService> _logger;
     private readonly ProcessWatchdogConfiguration _config;
+    private readonly string _serviceName;
+    private readonly string _environmentName;
+    private readonly string _machineName;
+    private readonly int _processId;
     private Timer? _watchdogTimer;
     private DateTime _lastHeartbeat;
     private int _missedHeartbeats;
@@ -37,15 +41,23 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
     private DateTime? _lastErrorTime;
     private int _successfulCycles;
     private DateTime? _lastSuccessfulCycle;
+    private DateTime? _watchdogStartedAt;
 
     public bool IsRunning { get; private set; }
     public DateTime? LastHeartbeat { get; private set; }
     public int MissedHeartbeats => _missedHeartbeats;
 
-    public ProcessWatchdogService(ILogger<ProcessWatchdogService> logger, ProcessWatchdogConfiguration config)
+    public ProcessWatchdogService(
+        ILogger<ProcessWatchdogService> logger,
+        ProcessWatchdogConfiguration config,
+        IHostEnvironment hostEnvironment)
     {
         _logger = logger;
         _config = config;
+        _serviceName = hostEnvironment.ApplicationName;
+        _environmentName = hostEnvironment.EnvironmentName;
+        _machineName = Environment.MachineName;
+        _processId = Environment.ProcessId;
         _lastHeartbeat = DateTime.UtcNow;
         _missedHeartbeats = 0;
         _errorCount = 0;
@@ -53,6 +65,7 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
         _lastErrorTime = null;
         _successfulCycles = 0;
         _lastSuccessfulCycle = null;
+        _watchdogStartedAt = null;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -64,8 +77,13 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
         }
 
         IsRunning = true;
+        _watchdogStartedAt = DateTime.UtcNow;
         _logger.LogInformation(
-            "Process watchdog started. Timeout: {TimeoutSeconds}s, Check interval: {CheckIntervalSeconds}s",
+            "Process watchdog started for {ServiceName} ({EnvironmentName}) on {MachineName} PID {ProcessId}. Timeout: {TimeoutSeconds}s, Check interval: {CheckIntervalSeconds}s",
+            _serviceName,
+            _environmentName,
+            _machineName,
+            _processId,
             _config.HeartbeatTimeoutSeconds,
             _config.CheckIntervalSeconds);
 
@@ -197,10 +215,18 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
 
             if (_missedHeartbeats >= _config.AlertOnMissedHeartbeats)
             {
+                int elapsedSeconds = (int)timeSinceLastHeartbeat.TotalSeconds;
                 _logger.LogCritical(
-                    "WATCHDOG ALERT: Process appears to be unresponsive. Missed {MissedCount} heartbeat checks. Last heartbeat: {LastHeartbeat}",
+                    "WATCHDOG ALERT: {ServiceName} ({EnvironmentName}) on {MachineName} PID {ProcessId} appears to be unresponsive. Missed {MissedCount} heartbeat checks (threshold: {Threshold}). Last heartbeat (UTC): {LastHeartbeatUtc:O} ({ElapsedSeconds}s ago). Timeout: {TimeoutSeconds}s.",
+                    _serviceName,
+                    _environmentName,
+                    _machineName,
+                    _processId,
                     _missedHeartbeats,
-                    _lastHeartbeat);
+                    _config.AlertOnMissedHeartbeats,
+                    _lastHeartbeat,
+                    elapsedSeconds,
+                    _config.HeartbeatTimeoutSeconds);
             }
         }
     }
