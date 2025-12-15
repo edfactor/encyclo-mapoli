@@ -194,7 +194,11 @@ describe("DistributionsAndForfeitures", () => {
       });
 
       await waitFor(() => {
-        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
+        rerender(
+          <Provider store={createMockStore()}>
+            <DistributionsAndForfeitures />
+          </Provider>
+        );
         expect(screen.getByTestId("fetching")).toBeInTheDocument();
       });
     });
@@ -209,7 +213,11 @@ describe("DistributionsAndForfeitures", () => {
       });
 
       await waitFor(() => {
-        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
+        rerender(
+          <Provider store={createMockStore()}>
+            <DistributionsAndForfeitures />
+          </Provider>
+        );
         expect(screen.getByTestId("fetching")).toBeInTheDocument();
       });
 
@@ -219,7 +227,11 @@ describe("DistributionsAndForfeitures", () => {
       });
 
       await waitFor(() => {
-        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
+        rerender(
+          <Provider store={createMockStore()}>
+            <DistributionsAndForfeitures />
+          </Provider>
+        );
         expect(screen.queryByTestId("fetching")).not.toBeInTheDocument();
       });
     });
@@ -318,21 +330,33 @@ describe("DistributionsAndForfeitures", () => {
         startLoadingBtn.click();
       });
       await waitFor(() => {
-        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
+        rerender(
+          <Provider store={createMockStore()}>
+            <DistributionsAndForfeitures />
+          </Provider>
+        );
       });
 
       await act(async () => {
         stopLoadingBtn.click();
       });
       await waitFor(() => {
-        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
+        rerender(
+          <Provider store={createMockStore()}>
+            <DistributionsAndForfeitures />
+          </Provider>
+        );
       });
 
       await act(async () => {
         startLoadingBtn.click();
       });
       await waitFor(() => {
-        rerender(<Provider store={createMockStore()}><DistributionsAndForfeitures /></Provider>);
+        rerender(
+          <Provider store={createMockStore()}>
+            <DistributionsAndForfeitures />
+          </Provider>
+        );
       });
 
       expect(screen.getByTestId("grid")).toBeInTheDocument();

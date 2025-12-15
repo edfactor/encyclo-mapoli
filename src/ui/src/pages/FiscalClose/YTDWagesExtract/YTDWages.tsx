@@ -22,12 +22,12 @@ const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   });
   const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
-  
+
   // Get current drawer state from Redux
   const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />
+    return <StatusDropdownActionNode />;
   };
 
   // Handler to toggle grid expansion

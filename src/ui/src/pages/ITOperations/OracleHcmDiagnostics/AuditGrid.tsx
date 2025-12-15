@@ -1,5 +1,15 @@
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography
+} from "@mui/material";
 import { useMemo, useState } from "react";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { SortParams } from "../../../hooks/useGridPagination";
@@ -17,7 +27,15 @@ interface AuditGridProps {
   onSortChange: (sortParams: SortParams) => void;
 }
 
-const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, pageNumber, pageSize, onPageChange, onSortChange }) => {
+const AuditGrid: React.FC<AuditGridProps> = ({
+  data,
+  isLoading,
+  onClearSuccess,
+  pageNumber,
+  pageSize,
+  onPageChange,
+  onSortChange
+}) => {
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [clearError, setClearError] = useState<string | null>(null);
 
@@ -44,7 +62,9 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
   return (
     <Box sx={{ padding: "0 24px" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           Demographic Sync Audit
         </Typography>
         <Button
@@ -52,13 +72,16 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
           color="error"
           startIcon={<DeleteIcon />}
           onClick={handleClearClick}
-          disabled={isLoading || isClearing || ((data?.results?.length ?? 0) === 0)}>
+          disabled={isLoading || isClearing || (data?.results?.length ?? 0) === 0}>
           Clear Audit Records
         </Button>
       </Box>
 
       {clearError && (
-        <Alert severity="error" sx={{ marginBottom: "16px" }} onClose={() => setClearError(null)}>
+        <Alert
+          severity="error"
+          sx={{ marginBottom: "16px" }}
+          onClose={() => setClearError(null)}>
           {clearError}
         </Alert>
       )}
@@ -93,29 +116,43 @@ const AuditGrid: React.FC<AuditGridProps> = ({ data, isLoading, onClearSuccess, 
           )}
         </>
       ) : (
-        <Typography variant="body1" sx={{ color: "#666", textAlign: "center", padding: "32px" }}>
+        <Typography
+          variant="body1"
+          sx={{ color: "#666", textAlign: "center", padding: "32px" }}>
           No audit records found
         </Typography>
       )}
 
       {/* Clear Confirmation Dialog */}
-      <Dialog open={showClearConfirmation} onClose={() => setShowClearConfirmation(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={showClearConfirmation}
+        onClose={() => setShowClearConfirmation(false)}
+        maxWidth="xs"
+        fullWidth>
         <DialogTitle>Clear Demographic Sync Audit</DialogTitle>
         <DialogContent>
           <Box sx={{ paddingTop: "16px" }}>
             <Typography variant="body1">
               Are you sure you want to delete all {data?.total || 0} audit records?
             </Typography>
-            <Typography variant="body2" sx={{ color: "#666", marginTop: "8px" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "#666", marginTop: "8px" }}>
               This action cannot be undone.
             </Typography>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowClearConfirmation(false)} disabled={isClearing}>
+          <Button
+            onClick={() => setShowClearConfirmation(false)}
+            disabled={isClearing}>
             Cancel
           </Button>
-          <Button onClick={handleConfirmClear} variant="contained" color="error" disabled={isClearing}>
+          <Button
+            onClick={handleConfirmClear}
+            variant="contained"
+            color="error"
+            disabled={isClearing}>
             {isClearing ? <CircularProgress size={20} /> : "Delete"}
           </Button>
         </DialogActions>

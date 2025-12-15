@@ -111,7 +111,9 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
       }
 
       const storeNumberDisplay = typeof storeNumber === "number" && storeNumber > 0 ? storeNumber : "N/A";
-      const workLocationDisplay = workLocation ? `${workLocation} (${storeNumberDisplay})` : `N/A (${storeNumberDisplay})`;
+      const workLocationDisplay = workLocation
+        ? `${workLocation} (${storeNumberDisplay})`
+        : `N/A (${storeNumberDisplay})`;
 
       return [
         ...(isEmployee ? [{ label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) }] : []),
@@ -209,8 +211,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
     if (!memberDetails) return <Typography>No details found.</Typography>;
 
     return (
-      <div
-        className="m-[1px] box-border p-[1px] w-full">
+      <div className="m-[1px] box-border w-full p-[1px]">
         <Grid
           container
           paddingX="24px"
