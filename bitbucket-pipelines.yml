@@ -890,15 +890,15 @@ pipelines:
     "**":
       # Stage 1: Code quality checks (fail fast)
       - step: *frontend-lint
-      # Stage 2: Build and test
-      - parallel:
-          - step: *build-and-test-backend
-          - step: *test-frontend
-      # Stage 3: Run audits and security scans only if build succeeds
+      # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
           - step: *audit-frontend
           - step: *audit-backend
           - step: *secret-scan
+   # Stage 3: Build and test
+      - parallel:
+          - step: *build-and-test-backend
+          - step: *test-frontend
 
   custom:
     infrastructure_as_code:
