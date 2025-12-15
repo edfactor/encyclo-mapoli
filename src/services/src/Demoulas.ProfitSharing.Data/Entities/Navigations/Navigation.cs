@@ -89,6 +89,7 @@ public sealed class Navigation
         public const short AuditSearch = 166;
         public const short OracleHcmDiagnostics = 167;
         public const short ManageStateTaxRates = 173;
+        public const short ManageAnnuityRates = 174;
     }
 
     public short Id { get; set; }

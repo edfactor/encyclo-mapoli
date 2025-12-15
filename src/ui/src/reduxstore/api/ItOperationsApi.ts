@@ -7,6 +7,7 @@ import {
   setProfitYearSelectorData
 } from "../../reduxstore/slices/frozenSlice";
 import {
+  AnnuityRateDto,
   AuditChangeEntryDto,
   AuditEventDto,
   AuditSearchRequestDto,
@@ -16,6 +17,7 @@ import {
   RowCountResult,
   SortedPaginationRequestDto,
   StateTaxRateDto,
+  UpdateAnnuityRateRequest,
   UpdateStateTaxRateRequest
 } from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
@@ -29,6 +31,19 @@ export const ItOperationsApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
+    getAnnuityRates: builder.query<AnnuityRateDto[], void>({
+      query: () => ({
+        url: "itdevops/annuity-rates",
+        method: "GET"
+      })
+    }),
+    updateAnnuityRate: builder.mutation<AnnuityRateDto, UpdateAnnuityRateRequest>({
+      query: (request) => ({
+        url: "itdevops/annuity-rates",
+        method: "PUT",
+        body: request
+      })
+    }),
     getStateTaxRates: builder.query<StateTaxRateDto[], void>({
       query: () => ({
         url: "itdevops/state-tax-rates",
@@ -148,6 +163,8 @@ export const ItOperationsApi = createApi({
 });
 
 export const {
+  useGetAnnuityRatesQuery,
+  useUpdateAnnuityRateMutation,
   useGetStateTaxRatesQuery,
   useUpdateStateTaxRateMutation,
   useLazyGetFrozenStateResponseQuery,

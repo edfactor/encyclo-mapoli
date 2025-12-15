@@ -105,6 +105,10 @@ describe("getReadablePathName", () => {
     expect(getReadablePathName("/manage-state-taxes")).toBe("Manage State Tax Rates");
   });
 
+  it("should handle IT DevOps manage annuity rates path", () => {
+    expect(getReadablePathName("/manage-annuity-rates")).toBe("Manage Annuity Rates");
+  });
+
   it("should handle case-sensitive IT DevOps path", () => {
     const result = getReadablePathName("/it devops");
     expect(result).toBe("IT DevOps");
