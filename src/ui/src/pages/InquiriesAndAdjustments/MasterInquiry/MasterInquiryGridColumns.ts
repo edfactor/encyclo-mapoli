@@ -67,6 +67,18 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       cellClass: "right-align",
       sortable: true,
       resizable: true,
+      comparator: (_valueA, _valueB, nodeA, nodeB) => {
+        const yearA = nodeA.data.yearToDate;
+        const yearB = nodeB.data.yearToDate;
+        const monthA = nodeA.data.monthToDate;
+        const monthB = nodeB.data.monthToDate;
+        
+        // Sort by year first, then by month
+        if (yearA !== yearB) {
+          return yearA - yearB;
+        }
+        return monthA - monthB;
+      },
       valueFormatter: (params) => {
         const month = params.data.monthToDate; // assuming 'status' is in the row data
         const year = params.data.yearToDate; // assuming 'statusName' is in the row data
