@@ -9,12 +9,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static Demoulas.ProfitSharing.Common.Contracts.Request.FrozenReportsByAgeRequest;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -224,100 +219,6 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             letter.AppendLine();
             letter.AppendLine();
             letter.AppendLine($"{space7}{emp.BadgeNumber}");
-            ////#region Spacing
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////#endregion
-
-            ////#region Salutation
-            ////letter.AppendLine($"{space7}Dear {emp.FirstName}:");
-            ////#endregion
-
-            ////#region Spacing
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////#endregion
-
-            ////#region Body of letter
-            ////letter.AppendLine($"{space7}As you have reached age 73, you are now required to begin taking required minimum");
-            ////letter.AppendLine($"{space7}distributions (RMDs) from your Demoulas Profit Sharing Plan and Trust account under");
-            ////letter.AppendLine($"{space7}federal tax law.");
-            ////#endregion
-
-            ////#region Spacing
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////#endregion
-
-            ////#region Instructions
-            ////letter.AppendLine($"{space7}Please contact the Plan Administrator to discuss your distribution options and ensure");
-            ////letter.AppendLine($"{space7}compliance with IRS regulations. You may reach us at:");
-            ////#endregion
-
-            ////#region Spacing
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////#endregion
-
-            ////#region Contact information
-            ////letter.AppendLine($"{space25}Demoulas Profit Sharing Plan and Trust");
-            ////letter.AppendLine($"{space25}875 East Street");
-            ////letter.AppendLine($"{space25}Tewksbury, MA  01876");
-            ////letter.AppendLine($"{space25}Phone: (978) 851-8000");
-            ////#endregion
-
-            ////#region Spacing
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////#endregion
-
-            ////#region Closing
-            ////letter.AppendLine($"{space7}Sincerely,");
-            ////#endregion
-
-            ////#region Spacing
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////#endregion
-
-            ////#region Signature
-            ////letter.AppendLine($"{space7}DEMOULAS PROFIT SHARING PLAN & TRUST");
-            ////#endregion
-
-            ////#region Printer Control
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine("DJDE JDE=DISNO1,JDL=PAYROL,END,;");
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine("DJDE JDE=DISNO2,JDL=PAYROL,END,;");
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine("DJDE JDE=DISNO3,JDL=PAYROL,END,;");
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine("DJDE JDE=DISNO4,JDL=PAYROL,END,;");
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine("DJDE JDE=DISNO5,JDL=PAYROL,END,;");
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine("DJDE JDE=BENDS1,JDL=PAYROL,END,;");
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine();
-            ////letter.AppendLine("DJDE JDE=ACKNRC,JDL=PAYROL,END,;");
-            ////letter.Append("\f"); // Form feed to end the letter
-            ////#endregion
-
             letter.Append("\f"); // Form feed to end the letter
         }
 
