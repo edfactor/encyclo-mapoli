@@ -14,7 +14,9 @@ import {
   FreezeDemographicsRequest,
   FrozenStateResponse,
   RowCountResult,
-  SortedPaginationRequestDto
+  SortedPaginationRequestDto,
+  StateTaxRateDto,
+  UpdateStateTaxRateRequest
 } from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
@@ -27,6 +29,19 @@ export const ItOperationsApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
+    getStateTaxRates: builder.query<StateTaxRateDto[], void>({
+      query: () => ({
+        url: "itdevops/state-tax-rates",
+        method: "GET"
+      })
+    }),
+    updateStateTaxRate: builder.mutation<StateTaxRateDto, UpdateStateTaxRateRequest>({
+      query: (request) => ({
+        url: "itdevops/state-tax-rates",
+        method: "PUT",
+        body: request
+      })
+    }),
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({
         url: `itdevops/frozen/active`,
@@ -133,6 +148,8 @@ export const ItOperationsApi = createApi({
 });
 
 export const {
+  useGetStateTaxRatesQuery,
+  useUpdateStateTaxRateMutation,
   useLazyGetFrozenStateResponseQuery,
   useLazyGetHistoricalFrozenStateResponseQuery,
   useLazyGetProfitYearSelectorFrozenDataQuery,

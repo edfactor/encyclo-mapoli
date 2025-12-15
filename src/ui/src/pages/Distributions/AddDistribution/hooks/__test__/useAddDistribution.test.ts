@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../../test";
 
@@ -57,7 +57,9 @@ describe("useAddDistribution", () => {
     const { result } = renderHook(() => useAddDistribution(), { wrapper });
 
     // Reset
-    result.current.reset();
+    act(() => {
+      result.current.reset();
+    });
 
     // Verify reset to initial state
     expect(result.current.memberData).toBeNull();

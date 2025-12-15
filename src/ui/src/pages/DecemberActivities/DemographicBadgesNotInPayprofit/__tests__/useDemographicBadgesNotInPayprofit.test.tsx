@@ -1,8 +1,8 @@
+import { configureStore } from "@reduxjs/toolkit";
 import { renderHook } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
 import { PropsWithChildren } from "react";
 import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Setup store with minimal required reducers
 const createMockStore = (preloadedState?: { security?: { token: string | null } }) => {
@@ -29,9 +29,9 @@ vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
 
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import {
-  useGridPagination,
-  type GridPaginationState,
-  type GridPaginationActions
+    useGridPagination,
+    type GridPaginationActions,
+    type GridPaginationState
 } from "../../../../hooks/useGridPagination";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "../../../../reduxstore/api/YearsEndApi";
 import useDemographicBadgesNotInPayprofit from "../hooks/useDemographicBadgesNotInPayprofit";
@@ -41,7 +41,9 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
     vi.clearAllMocks();
 
     // Setup default mocks
-    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
+    // Default to 0 so the hook does not auto-trigger a search via useEffect.
+    // Individual tests can override as needed.
+    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(0);
 
     vi.mocked(useGridPagination).mockReturnValue({
       pageNumber: 0,
@@ -142,8 +144,8 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       expect(useDecemberFlowProfitYear).toHaveBeenCalled();
     });
 
-    it("should handle null profit year", () => {
-      vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
+    it("should handle missing profit year", () => {
+      vi.mocked(useDecemberFlowProfitYear).mockReturnValue(0);
 
       const store = createMockStore();
       const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
