@@ -1,19 +1,19 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Typography
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
-import { SortParams } from "../../../hooks/useGridPagination";
 import { GRID_KEYS } from "../../../constants";
+import { SortParams } from "../../../hooks/useGridPagination";
 import { useClearDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
 import type { DemographicSyncAuditRecord } from "../../../types";
 import { GetAuditGridColumns } from "./AuditGridColumns";

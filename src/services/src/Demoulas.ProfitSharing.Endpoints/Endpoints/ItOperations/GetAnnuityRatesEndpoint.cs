@@ -34,12 +34,12 @@ public sealed class GetAnnuityRatesEndpoint : ProfitSharingEndpoint<GetAnnuityRa
         Group<ItDevOpsGroup>();
     }
 
-    public override Task<Results<Ok<IReadOnlyList<AnnuityRateDto>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
+    public override Task<Results<Ok<IReadOnlyList<AnnuityRateDto>>, NotFound, ProblemHttpResult>> ExecuteAsync(GetAnnuityRatesRequest req, CancellationToken ct)
     {
         var request = new GetAnnuityRatesRequest
         {
-            SortBy = string.IsNullOrWhiteSpace(Req.SortBy) ? "Year" : Req.SortBy,
-            IsSortDescending = Req.IsSortDescending ?? true,
+            SortBy = string.IsNullOrWhiteSpace(req.SortBy) ? "Year" : req.SortBy,
+            IsSortDescending = req.IsSortDescending ?? true,
         };
 
         return this.ExecuteWithTelemetry(HttpContext, _logger, request, async () =>
