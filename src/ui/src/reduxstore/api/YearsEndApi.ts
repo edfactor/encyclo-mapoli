@@ -447,7 +447,7 @@ export const YearsEndApi = createApi({
             totalIncomeCurrentYearWages: number;
           };
         }
-        return response;
+        return response as PagedReportResponse<EmployeeWagesForYear>;
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
