@@ -4,6 +4,7 @@ import { DSMGrid, Pagination } from "smart-ui-library";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { AccountHistoryReportPaginatedResponse } from "../../../types/reports/AccountHistoryReportTypes";
+import { GRID_KEYS } from "../../../constants";
 import { GetAccountHistoryReportColumns } from "./AccountHistoryReportGridColumns";
 
 interface AccountHistoryReportTableProps {
@@ -36,7 +37,7 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
           rowSpacing="24px">
           <Grid width="100%">
             <DSMGrid
-              preferenceKey="Account_History_Report"
+              preferenceKey={GRID_KEYS.ACCOUNT_HISTORY_REPORT}
               isLoading={isLoading}
               maxHeight={gridMaxHeight}
               providedOptions={{

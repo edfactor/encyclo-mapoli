@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../../reduxstore/api/AdhocApi";
 import { RootState } from "../../../reduxstore/store";
@@ -28,6 +29,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.QPAY066B,
     onPaginationChange: useCallback(
       (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (hasToken) {
@@ -123,7 +125,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
       ) : (
         <>
           <DSMGrid
-            preferenceKey="QPAY066B_GRID"
+            preferenceKey={GRID_KEYS.QPAY066B}
             isLoading={isFetching}
             maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}

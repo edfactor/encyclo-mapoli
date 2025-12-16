@@ -87,6 +87,9 @@ public sealed class Navigation
         public const short DistributionEditRunReport = 160;
         public const short AccountHistoryReport = 161;
         public const short AuditSearch = 166;
+        public const short OracleHcmDiagnostics = 167;
+        public const short ManageStateTaxRates = 173;
+        public const short ManageAnnuityRates = 174;
     }
 
     public short Id { get; set; }

@@ -39,8 +39,6 @@ public partial record BeneficiaryDto : IdRequest, INameParts, IFullNameProperty,
 
     public DateOnly CreatedDate { get; set; }
     public string? Relationship { get; set; }
-    public char? KindId { get; set; }
-    public BeneficiaryKindDto? Kind { get; set; }
     public required decimal Percent { get; set; }
     public decimal? CurrentBalance { get; set; }
     public required bool IsExecutive { get; set; }

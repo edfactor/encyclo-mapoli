@@ -133,7 +133,10 @@ DECLARE
     LABELS CONSTANT NUMBER := 164;
     LABELS_NEW CONSTANT NUMBER := 165;
     AUDIT_SEARCH_PAGE CONSTANT NUMBER := 166;
-    VESTING_REPORTS_GROUP CONSTANT NUMBER := 167;
+    ORACLE_HCM_DIAGNOSTICS CONSTANT NUMBER := 167;
+    MANAGE_STATE_TAX_RATES_PAGE CONSTANT NUMBER := 173;
+    MANAGE_ANNUITY_RATES_PAGE CONSTANT NUMBER := 174;
+    VESTING_REPORTS_GROUP CONSTANT NUMBER := 172;
     FORFEITURE_ADJUSTMENT_PAGE CONSTANT NUMBER := 168;
     MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE CONSTANT NUMBER := 169;
     MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE CONSTANT NUMBER := 170;
@@ -287,7 +290,10 @@ BEGIN
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, IT_DEVOPS_MENU, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(AUDIT_SEARCH_PAGE, IT_DEVOPS_MENU, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS_MENU, 'Oracle HCM Sync Diagnostics', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_ANNUITY_RATES_PAGE, IT_DEVOPS_MENU, 'Manage Annuity Rates', '', 'manage-annuity-rates', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -305,7 +311,7 @@ BEGIN
     insert_navigation_item(FORFEITURES, DECEMBER_ACTIVITIES, 'Forfeitures', '008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_AND_FORFEITURES, DECEMBER_ACTIVITIES, 'Distributions and Forfeitures', 'QPAY129', 'distributions-and-forfeitures', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, DECEMBER_ACTIVITIES, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Sharing Summmary', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Sharing Summary', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PAY426N_DECEMBER, DECEMBER_ACTIVITIES, 'Profit Sharing Report', 'PAY426N', 'pay426n', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(YTD_WAGES_EXTRACT_UNFROZEN, DECEMBER_ACTIVITIES, 'YTD Extract', 'PROF-DOLLAR-EXTRACT', 'ytd-wages-extract-live', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
                        
@@ -671,9 +677,12 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
     assign_navigation_role(VESTING_REPORTS_GROUP, IT_DEVOPS);
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, IT_DEVOPS);
     assign_navigation_role(AUDIT_SEARCH_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(AUDIT_SEARCH_PAGE, FINANCE_MANAGER);
     assign_navigation_role(AUDIT_SEARCH_PAGE, IT_DEVOPS);
+    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, IT_DEVOPS);
@@ -738,9 +747,9 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 
 
     -- Define prerequisites: Master Update
-    add_navigation_prerequisite(MASTER_UPDATE, MANAGE_EXECUTIVE_HOURS_PAGE);
+    add_navigation_prerequisite(MASTER_UPDATE, MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE);
     add_navigation_prerequisite(MASTER_UPDATE, MILITARY_CONTRIBUTIONS);
-    add_navigation_prerequisite(MASTER_UPDATE, PROFIT_SHARE_REPORT);
+    add_navigation_prerequisite(MASTER_UPDATE, PROFIT_SUMMARY);
     add_navigation_prerequisite(MASTER_UPDATE, UNFORFEIT);
     add_navigation_prerequisite(MASTER_UPDATE, FORFEITURES);
 

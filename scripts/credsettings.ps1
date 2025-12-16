@@ -8,42 +8,42 @@ param (
 
 # Build dynamic environment-specific variable names
 $profitSharingVar = "ConnectionStrings_ProfitSharing_$Environment"
-$commonConnectionStringVar = "ConnectionStrings_ProfitSharing_$Environment"
+$warehouseVar = "CONNECTIONSTRINGS_WAREHOUSE"
 $oracleBaseUrlVar = "QA_ORACLEHCM_BASE_URL_SLUG".Replace("QA", $Environment)
 $oracleUsernameVar = "QA_ORACLEHCM_USERNAME_SLUG".Replace("QA", $Environment)
 $oraclePasswordVar = "QA_ORACLEHCM_PASSWORD_SLUG".Replace("QA", $Environment)
 
 Write-Host "ProfitSharing variable: $profitSharingVar"
-Write-Host "Common Connection String variable: $commonConnectionStringVar"
+Write-Host "Warehouse variable: $warehouseVar"
 Write-Host "Oracle Base URL variable: $oracleBaseUrlVar"
 Write-Host "Oracle Username variable: $oracleUsernameVar"
 Write-Host "Oracle Password variable: $oraclePasswordVar"
 
 # Dynamically retrieve environment variable values
 $profitSharing = [System.Environment]::GetEnvironmentVariable($profitSharingVar)
-$commonConnectionString = [System.Environment]::GetEnvironmentVariable($commonConnectionStringVar)
+$warehouse = [System.Environment]::GetEnvironmentVariable($warehouseVar)
 $oracleBaseUrl = [System.Environment]::GetEnvironmentVariable($oracleBaseUrlVar)
 $oracleUsername = [System.Environment]::GetEnvironmentVariable($oracleUsernameVar)
 $oraclePassword = [System.Environment]::GetEnvironmentVariable($oraclePasswordVar)
 
 # Validate that all variables are populated
-if (-not $profitSharing -or -not $commonConnectionString -or -not $oracleBaseUrl -or -not $oracleUsername -or -not $oraclePassword) {
+if (-not $profitSharing -or -not $warehouse -or -not $oracleBaseUrl -or -not $oracleUsername -or -not $oraclePassword) {
     throw "One or more environment variables are missing for the environment: $Environment."
 }
 
 Write-Host "Environment: $Environment"
 Write-Host "ProfitSharing: $profitSharing"
-Write-Host "Common Connection String: $commonConnectionString"
+Write-Host "Warehouse: $warehouse"
 Write-Host "Oracle Base URL: $oracleBaseUrl"
 Write-Host "Oracle Username: $oracleUsername"
 
 # Create the replacements hashtable
 [hashtable]$Replacements = @{
     "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = $profitSharing
-    "CONNECTIONSTRINGS_COMMON_SLUG" = $commonConnectionString
-    "ORACLEHCM_BASE_URL_SLUG" = $oracleBaseUrl
-    "ORACLEHCM_USERNAME_SLUG" = $oracleUsername
-    "ORACLEHCM_PASSWORD_SLUG" = $oraclePassword
+    "CONNECTIONSTRINGS_WAREHOUSE_SLUG"     = $warehouse
+    "ORACLEHCM_BASE_URL_SLUG"              = $oracleBaseUrl
+    "ORACLEHCM_USERNAME_SLUG"              = $oracleUsername
+    "ORACLEHCM_PASSWORD_SLUG"              = $oraclePassword
 }
 
 if (-not $Replacements -or $Replacements.GetEnumerator().Count -eq 0) {
@@ -97,9 +97,11 @@ try {
     Copy-Item -ToSession $Session -Path $OutputPath -Destination $RemotePath
 
     Write-Host "File copied successfully to ${RemoteServer}:${RemotePath}"
-} catch {
+}
+catch {
     Write-Error "Failed to copy the file to ${RemoteServer}:${RemotePath}. Error: $_"
-} finally {
+}
+finally {
     if ($Session -ne $null) {
         Write-Host "Removing remote session"
         Remove-PSSession -Session $Session

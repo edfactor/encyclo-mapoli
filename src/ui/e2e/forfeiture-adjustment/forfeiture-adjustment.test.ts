@@ -40,14 +40,14 @@ test.describe("Forfeiture Adjustment (008-12): ", () => {
     await page.getByRole("textbox", { name: "Badge" }).fill("706222");
     await page.getByTestId("searchButton").click();
     const [response] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes("yearend/forfeiture-adjustments"))
+      page.waitForResponse((resp) => resp.url().includes("adhoc/forfeiture-adjustments"))
     ]);
     await expect(response.status()).toBe(200);
   });
 
   test("Add Forfeiture", async ({ page }) => {
     const [response0] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes("yearend/forfeiture-adjustments")),
+      page.waitForResponse((resp) => resp.url().includes("adhoc/forfeiture-adjustments")),
       (async () => {
         await page.getByRole("textbox", { name: "Badge" }).fill("706222");
         await page.getByTestId("searchButton").click();
@@ -56,7 +56,7 @@ test.describe("Forfeiture Adjustment (008-12): ", () => {
     await expect(response0.status()).toBe(200);
 
     const [response] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes("yearend/forfeiture-adjustments/update")),
+      page.waitForResponse((resp) => resp.url().includes("adhoc/forfeiture-adjustments/update")),
       (async () => {
         await page.getByRole("button", { name: "ADD FORFEITURE" }).click();
         await page.getByRole("checkbox", { name: "Class Action" }).check();
@@ -66,7 +66,7 @@ test.describe("Forfeiture Adjustment (008-12): ", () => {
     ]);
     await expect(response.status()).toBe(204);
     const [response1] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes("yearend/forfeiture-adjustments"))
+      page.waitForResponse((resp) => resp.url().includes("adhoc/forfeiture-adjustments"))
     ]);
     await expect(response1.status()).toBe(200);
   });

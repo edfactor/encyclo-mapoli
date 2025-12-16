@@ -15,6 +15,7 @@ import {
 import { setMessage } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { useEditState } from "../../../../hooks/useEditState";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useRowSelection } from "../../../../hooks/useRowSelection";
 import { generateRowKey } from "../../../../utils/forfeitActivities/gridDataHelpers";
@@ -147,6 +148,7 @@ export const useTerminationGrid = ({
       initialPageSize: 25,
       initialSortBy: "name",
       initialSortDescending: false,
+      persistenceKey: GRID_KEYS.TERMINATION,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded && searchParams) {

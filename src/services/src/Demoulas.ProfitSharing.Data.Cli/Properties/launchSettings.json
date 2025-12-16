@@ -55,6 +55,13 @@
             "environmentVariables": {
                 "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
             }
+        },
+        "update-calendar-seeder": {
+            "commandName": "Project",
+            "commandLineArgs": "update-calendar-seeder --connection-name Warehouse --output-file \"CaldarRecordSeeder.cs\"",
+            "environmentVariables": {
+                "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
+            }
         }
     }
 }

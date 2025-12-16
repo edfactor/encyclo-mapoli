@@ -25,21 +25,25 @@ public class GetForfeitureAdjustmentsEndpoint : ProfitSharingEndpoint<SuggestedF
 
     public override void Configure()
     {
-        Get("forfeiture-adjustments");
+        Post("forfeiture-adjustments");
         Summary(s =>
         {
-            s.Summary = "Get forfeiture suggested adjustments for  badge number or ssn.";
+            s.Summary = "Get forfeiture suggested adjustments for badge number or SSN.";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
-            s.Description = "This endpoint is used to get a suggested forfeiture adjustment for a badge number or ssn.";
+            s.Description = "This endpoint is used to get a suggested forfeiture adjustment for a badge number or SSN. Uses POST to keep SSN out of the URL.";
         });
         Group<AdhocReportsGroup>();
     }
     public override Task<Results<Ok<SuggestedForfeitureAdjustmentResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(SuggestedForfeitureAdjustmentRequest req, CancellationToken ct)
     {
+        var sensitiveFields = req.Ssn.HasValue
+            ? new[] { "Ssn" }
+            : Array.Empty<string>();
+
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var result = await _forfeitureAdjustmentService.GetSuggestedForfeitureAmount(req, ct);
             return result.ToHttpResult(Error.EmployeeNotFound);
-        }, "operation:year-end-forfeiture-adjustments-get", $"has_ssn:{req.Ssn.HasValue}", $"has_badge:{req.Badge.HasValue}", $"ssn:{req.Ssn}", $"badge:{req.Badge}");
+        }, sensitiveFields);
     }
 }

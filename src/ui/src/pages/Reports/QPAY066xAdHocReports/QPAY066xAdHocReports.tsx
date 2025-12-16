@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { QPAY066xAdHocReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import {
   clearBreakdownByStore,
@@ -31,6 +31,7 @@ const QPAY066xAdHocReports: React.FC = () => {
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.QPAY066_ADHOC_REPORT,
     onPaginationChange: (pageNumber, pageSize, sortParams) => {
       if (currentPreset) {
         executeSearch({

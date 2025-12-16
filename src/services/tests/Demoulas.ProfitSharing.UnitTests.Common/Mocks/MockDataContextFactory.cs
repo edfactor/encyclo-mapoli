@@ -24,7 +24,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 {
     private readonly Mock<ProfitSharingDbContext> _profitSharingDbContext;
     private readonly Mock<ProfitSharingReadOnlyDbContext> _profitSharingReadOnlyDbContext;
-    private readonly Mock<DemoulasCommonDataContext> _storeInfoDbContext;
+    private readonly Mock<DemoulasCommonWarehouseContext> _storeInfoDbContext;
 
     // Lazy loading: Store references for on-demand Beneficiary expansion (never reassigned, content is mutated)
     private readonly List<Demographic>? _lazyDemographics;
@@ -148,7 +148,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(ctx => ctx.SaveChangesAsync(true, It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
-        _storeInfoDbContext = new Mock<DemoulasCommonDataContext>();
+        _storeInfoDbContext = new Mock<DemoulasCommonWarehouseContext>();
 
         // Setup Database facade for the read-only context
         var mockDatabaseFacade = new Mock<DatabaseFacade>(_profitSharingReadOnlyDbContext.Object);
@@ -335,7 +335,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Constants.FakeParticipantTotals = participantTotals.BuildMockDbSet();
 
         List<ParticipantTotalVestingBalance> participantTotalVestingBalances = new ParticipantTotalVestingBalanceFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
-        Constants.FakeParticipantTotalVestingBalances = participantTotalVestingBalances.BuildMockDbSet();
+        Constants.FakeParticipantTotalVestingBalances = BuildMockDbSetWithBackingList(participantTotalVestingBalances);
 
         List<ParticipantTotal> etvaBalances = new ParticipantEtvaTotalFaker(profitDetails).Generate(profitDetails.Count);
         Constants.FakeEtvaTotals = etvaBalances.BuildMockDbSet();
@@ -370,6 +370,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
 
+        // Setup DemographicSyncAudit for IT Operations audit testing
+        List<DemographicSyncAudit> demographicSyncAudits = new DemographicSyncAuditFaker().Generate(5);
+        Mock<DbSet<DemographicSyncAudit>> mockDemographicSyncAudits = demographicSyncAudits.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.DemographicSyncAudit).Returns(mockDemographicSyncAudits.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.DemographicSyncAudit).Returns(mockDemographicSyncAudits.Object);
+
         // Setup FakeSsns - used to exclude fake SSNs from duplicate detection
         List<FakeSsn>? fakeSsns = new List<FakeSsn>();
         Mock<DbSet<FakeSsn>> mockFakeSsns = fakeSsns.BuildMockDbSet();
@@ -377,7 +383,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.FakeSsns).Returns(mockFakeSsns.Object);
 
         Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.ToList().BuildMockDbSet();
-        _profitSharingReadOnlyDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
+        _storeInfoDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
 
         Mock<DbSet<FrozenState>> mockFrozenStates = frozenStates.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
@@ -738,7 +744,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     }
 
 
-    public async Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
     {
         try
         {

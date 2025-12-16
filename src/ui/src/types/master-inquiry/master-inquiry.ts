@@ -42,6 +42,8 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   commentRelatedOracleHcmId?: number;
   commentRelatedPsnSuffix?: number;
   commentIsPartialTransaction?: boolean;
+  xFerQdroId?: number;
+  xFerQdroName?: string;
   profitCodeName?: string;
   zeroContributionReasonName?: string;
   taxCodeName?: string;
@@ -110,6 +112,8 @@ export interface MasterInquiryResponseDto {
   commentRelatedOracleHcmId?: number;
   commentRelatedPsnSuffix?: number;
   commentIsPartialTransaction?: boolean;
+  xFerQdroId?: number;
+  xFerQdroName?: string;
   badgeNumber?: number;
   profitCodeName?: string;
   zeroContributionReasonName?: string;

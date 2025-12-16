@@ -56,7 +56,7 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
         {
           profitYear: data.profitYear,
           minGrossAmount: data.gross,
-          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
+          pagination: { skip: 0, take: 25, sortBy: "BadgeNumber", isSortDescending: false }
         },
         false
       ).unwrap();

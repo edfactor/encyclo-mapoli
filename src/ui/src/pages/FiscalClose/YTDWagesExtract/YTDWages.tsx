@@ -1,8 +1,11 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
+import { RootState } from "../../../reduxstore/store";
 import useYTDWages from "./hooks/useYTDWages";
 import YTDWagesGrid from "./YTDWagesGrid";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
@@ -13,37 +16,66 @@ interface YTDWagesProps {
 
 const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   const componentRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
   const { searchResults, isSearching, pagination, showData, hasResults, executeSearch } = useYTDWages({
     defaultUseFrozenData: useFrozenData
   });
+  const [isGridExpanded, setIsGridExpanded] = useState(false);
+  const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
+
+  // Get current drawer state from Redux
+  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
+  };
+
+  // Handler to toggle grid expansion
+  const handleToggleGridExpand = () => {
+    setIsGridExpanded((prev) => {
+      if (!prev) {
+        // Expanding: remember drawer state and close it
+        setWasDrawerOpenBeforeExpand(isDrawerOpen || false);
+        dispatch(closeDrawer());
+        dispatch(setFullscreen(true));
+      } else {
+        // Collapsing: restore previous drawer state
+        dispatch(setFullscreen(false));
+        if (wasDrawerOpenBeforeExpand) {
+          dispatch(openDrawer());
+        }
+      }
+      return !prev;
+    });
   };
 
   //const recordCount = searchResults?.response?.total || 0;
 
   return (
     <Page
-      label={`${CAPTIONS.YTD_WAGES_EXTRACT}`}
-      actionNode={renderActionNode()}>
+      label={isGridExpanded ? "" : `${CAPTIONS.YTD_WAGES_EXTRACT}`}
+      actionNode={isGridExpanded ? undefined : renderActionNode()}>
       <Grid
         container
         rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid
-          width={"100%"}
-          hidden={true}>
-          <DSMAccordion title="Filter">
-            <YTDWagesSearchFilter
-              onSearch={executeSearch}
-              isSearching={isSearching}
-              defaultUseFrozenData={useFrozenData}
-            />
-          </DSMAccordion>
-        </Grid>
+        {!isGridExpanded && (
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
+        )}
+        {!isGridExpanded && (
+          <Grid
+            width={"100%"}
+            hidden={true}>
+            <DSMAccordion title="Filter">
+              <YTDWagesSearchFilter
+                onSearch={executeSearch}
+                isSearching={isSearching}
+                defaultUseFrozenData={useFrozenData}
+              />
+            </DSMAccordion>
+          </Grid>
+        )}
 
         <Grid width="100%">
           <YTDWagesGrid
@@ -55,6 +87,8 @@ const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
             pagination={pagination}
             onPaginationChange={pagination.handlePaginationChange}
             onSortChange={pagination.handleSortChange}
+            isGridExpanded={isGridExpanded}
+            onToggleExpand={handleToggleGridExpand}
           />
         </Grid>
       </Grid>

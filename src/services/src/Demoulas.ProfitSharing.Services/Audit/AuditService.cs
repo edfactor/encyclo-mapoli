@@ -9,8 +9,6 @@ using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -109,7 +107,7 @@ public sealed class AuditService : IAuditService
         if (isArchiveRequest)
         {
             // Create archive request with full data retrieval
-            archiveRequest = request with { Skip = 0, Take = ushort.MaxValue };
+            archiveRequest = request with { Skip = 0, Take = int.MaxValue };
         }
 
         TResponse response = await reportFunction(archiveRequest, isArchiveRequest, cancellationToken);
@@ -217,6 +215,53 @@ public sealed class AuditService : IAuditService
             cancellationToken);
 
         return result;
+    }
+
+    public async Task LogDataChangeAsync(
+        string operationName,
+        string tableName,
+        string auditOperation,
+        string? primaryKey,
+        IReadOnlyList<AuditChangeEntryInput> changes,
+        CancellationToken cancellationToken = default)
+    {
+        string userName = _appUser?.UserName ?? "Unknown";
+        string sessionId = GetSessionId(_httpContextAccessor.HttpContext);
+
+        var entries = new List<AuditChangeEntry>
+        {
+            new() { ColumnName = "Operation", NewValue = operationName }
+        };
+
+        if (changes.Count > 0)
+        {
+            entries.AddRange(changes.Select(c => new AuditChangeEntry
+            {
+                ColumnName = c.ColumnName,
+                OriginalValue = c.OriginalValue,
+                NewValue = c.NewValue
+            }));
+        }
+
+        var auditEvent = new AuditEvent
+        {
+            TableName = tableName,
+            Operation = string.IsNullOrWhiteSpace(auditOperation) ? AuditEvent.AuditOperations.Update : auditOperation,
+            PrimaryKey = primaryKey,
+            UserName = userName,
+            SessionId = sessionId,
+            ChangesJson = entries,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        using (_guardOverride.AllowFor(Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING))
+        {
+            await _dataContextFactory.UseWritableContext(async c =>
+            {
+                c.AuditEvents.Add(auditEvent);
+                await c.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
+        }
     }
 
     public Task<PaginatedResponseDto<AuditEventDto>> SearchAuditEventsAsync(
