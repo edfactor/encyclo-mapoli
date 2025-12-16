@@ -5,6 +5,7 @@ import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community
 import React, { useEffect, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { CalendarResponseDto } from "../../../reduxstore/types";
@@ -224,7 +225,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
           </Grid>
 
           <DSMGrid
-            preferenceKey={"REHIRE-FORFEITURES"}
+            preferenceKey={GRID_KEYS.REHIRE_FORFEITURES}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}

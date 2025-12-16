@@ -95,17 +95,21 @@ export const DSMGrid: FC<DSMGridOptions> = (props) => {
   const [resetPreferences, setResetPreferences] = useState<boolean>(false);
 
   /**
-   * Memoized preferences from localStorage to avoid unnecessary re-parsing
+   * Memoized column preferences from localStorage
    */
   const preferenceArray = useMemo(() => {
-    const preferencesPresent = localStorage.getItem(preferenceKey) ?? "[]";
-    let preferenceArray: ColumnState[];
     try {
-      preferenceArray = JSON.parse(preferencesPresent);
-    } catch (_e) {
-      preferenceArray = [];
+      const stored = localStorage.getItem(preferenceKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          return parsed as ColumnState[];
+        }
+      }
+    } catch {
+      // Ignore parse errors
     }
-    return preferenceArray;
+    return [];
   }, [preferenceKey]);
 
   const [columnStates, setColumnStates] = useState<ColumnState[]>(preferenceArray);

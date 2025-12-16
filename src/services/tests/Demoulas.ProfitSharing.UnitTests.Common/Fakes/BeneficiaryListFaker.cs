@@ -42,12 +42,6 @@ internal sealed class BeneficiaryListFaker
                 },
                 BeneficiaryContactId = 145,
                 Relationship = "DAUGHTER",
-                KindId ='P',
-                Kind =new BeneficiaryKind()
-                {
-                    Id = 'P',
-                    Name = "Primary"
-                },
                 Percent = 100
             }
         };

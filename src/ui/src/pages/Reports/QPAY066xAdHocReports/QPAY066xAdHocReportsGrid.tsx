@@ -14,6 +14,7 @@ import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import {
@@ -277,7 +278,7 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
       {/* Grid Section */}
       <Grid size={{ xs: 12 }}>
         <DSMGrid
-          preferenceKey="QPAY066_ADHOC_REPORT"
+          preferenceKey={GRID_KEYS.QPAY066_ADHOC_REPORT}
           isLoading={isLoading}
           maxHeight={gridMaxHeight}
           providedOptions={{

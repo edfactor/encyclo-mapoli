@@ -5,9 +5,16 @@ import React from "react";
 interface ForfeituresAdjustmentPanelProps {
   onAddForfeiture: () => void;
   isReadOnly: boolean;
+  currentBalance: number;
 }
 
-const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({ onAddForfeiture, isReadOnly }) => {
+const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
+  onAddForfeiture,
+  isReadOnly,
+  currentBalance
+}) => {
+  const isBalanceZero = currentBalance === 0;
+  const isDisabled = isReadOnly || isBalanceZero;
   return (
     <div
       style={{
@@ -16,8 +23,13 @@ const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
         justifyContent: "space-between",
         alignItems: "center"
       }}>
-      {isReadOnly ? (
-        <Tooltip title="You are in read-only mode and cannot add forfeitures.">
+      {isDisabled ? (
+        <Tooltip
+          title={
+            isBalanceZero
+              ? "Cannot add forfeiture when balance is zero."
+              : "You are in read-only mode and cannot add forfeitures."
+          }>
           <span>
             <Button
               disabled

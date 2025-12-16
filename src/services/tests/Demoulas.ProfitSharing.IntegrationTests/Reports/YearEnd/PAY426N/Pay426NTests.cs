@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Services.Reports;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY426N;
@@ -16,7 +17,7 @@ public class Pay426NTests : PristineBaseTest
 
     public Pay426NTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _reportService = new ProfitSharingSummaryReportService(DbFactory, CalendarService, TotalService, DemographicReaderService);
+        _reportService = new ProfitSharingSummaryReportService(DbFactory, CalendarService, TotalService, DemographicReaderService, new NullLogger<ProfitSharingSummaryReportService>());
     }
 
     /// <summary>

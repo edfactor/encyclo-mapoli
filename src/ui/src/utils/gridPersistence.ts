@@ -1,64 +1,62 @@
 /**
  * Utility functions for persisting grid pagination state to localStorage.
- * Used by useGridPagination hook when a persistenceKey is provided.
+ *
+ * Note: Column state is handled separately by smart-ui-library's DSMGrid,
+ * which stores it as a raw array directly under the GRID_KEY.
+ * Pagination is stored under `${GRID_KEY}_pagination` to avoid conflicts.
  */
 
-export interface PersistedGridState {
+/**
+ * Pagination state stored for each grid
+ */
+export interface PaginationState {
   pageNumber: number;
   pageSize: number;
   sortBy: string;
   isSortDescending: boolean;
 }
 
-const STORAGE_PREFIX = "gridPagination_";
+const PAGINATION_SUFFIX = "_pagination";
 
 /**
- * Load persisted grid state from localStorage
- * @param key - Unique key for the grid (e.g., "TERMINATION", "PROFALL")
- * @returns The persisted state or null if not found/invalid
+ * Load pagination state from localStorage
+ * @param key - Unique key for the grid (from GRID_KEYS)
+ * @returns The pagination state or null if not found
  */
-export const loadGridState = (key: string): PersistedGridState | null => {
+export const loadPaginationState = (key: string): PaginationState | null => {
   try {
-    const stored = localStorage.getItem(`${STORAGE_PREFIX}${key}`);
+    const stored = localStorage.getItem(`${key}${PAGINATION_SUFFIX}`);
     if (stored) {
-      const parsed = JSON.parse(stored) as PersistedGridState;
-      // Validate the parsed object has required fields
-      if (
-        typeof parsed.pageNumber === "number" &&
-        typeof parsed.pageSize === "number" &&
-        typeof parsed.sortBy === "string" &&
-        typeof parsed.isSortDescending === "boolean"
-      ) {
-        return parsed;
-      }
+      return JSON.parse(stored) as PaginationState;
     }
+    return null;
   } catch (error) {
-    console.warn(`Failed to load persisted grid state for key "${key}":`, error);
-  }
-  return null;
-};
-
-/**
- * Save grid state to localStorage
- * @param key - Unique key for the grid
- * @param state - The grid state to persist
- */
-export const saveGridState = (key: string, state: PersistedGridState): void => {
-  try {
-    localStorage.setItem(`${STORAGE_PREFIX}${key}`, JSON.stringify(state));
-  } catch (error) {
-    console.warn(`Failed to save grid state for key "${key}":`, error);
+    console.warn(`Failed to load pagination state for key "${key}":`, error);
+    return null;
   }
 };
 
 /**
- * Clear persisted grid state from localStorage
+ * Save pagination state to localStorage
+ * @param key - Unique key for the grid
+ * @param pagination - The pagination state to persist
+ */
+export const savePaginationState = (key: string, pagination: PaginationState): void => {
+  try {
+    localStorage.setItem(`${key}${PAGINATION_SUFFIX}`, JSON.stringify(pagination));
+  } catch (error) {
+    console.warn(`Failed to save pagination state for key "${key}":`, error);
+  }
+};
+
+/**
+ * Clear pagination state from localStorage
  * @param key - Unique key for the grid
  */
-export const clearGridState = (key: string): void => {
+export const clearPaginationState = (key: string): void => {
   try {
-    localStorage.removeItem(`${STORAGE_PREFIX}${key}`);
+    localStorage.removeItem(`${key}${PAGINATION_SUFFIX}`);
   } catch (error) {
-    console.warn(`Failed to clear grid state for key "${key}":`, error);
+    console.warn(`Failed to clear pagination state for key "${key}":`, error);
   }
 };

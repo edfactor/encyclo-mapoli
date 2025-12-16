@@ -21,7 +21,7 @@ public sealed class ProcessWatchdogConfiguration
     /// Gets or sets the interval (in seconds) at which the watchdog checks for heartbeats.
     /// Default: 30 seconds
     /// </summary>
-    public int CheckIntervalSeconds { get; set; } = 30;
+    public int CheckIntervalSeconds { get; set; } = 60;
 
     /// <summary>
     /// Gets or sets the number of missed heartbeats before a critical alert is issued.

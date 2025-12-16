@@ -82,7 +82,7 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         return func(_readOnlyCtx);
     }
 
-    public Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
     {
         throw new NotImplementedException();
     }

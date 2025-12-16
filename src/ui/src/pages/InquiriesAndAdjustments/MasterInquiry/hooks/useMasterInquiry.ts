@@ -9,7 +9,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
 import { MASTER_INQUIRY_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
-import { ROUTES } from "../../../../constants";
+import { GRID_KEYS, ROUTES } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { isSimpleSearch } from "../utils/MasterInquiryFunctions";
@@ -111,6 +111,7 @@ const useMasterInquiry = () => {
     initialPageSize: 10,
     initialSortBy: "badgeNumber",
     initialSortDescending: true,
+    persistenceKey: GRID_KEYS.MASTER_INQUIRY_MEMBER,
     onPaginationChange: handleMemberGridPaginationChange
   });
 
@@ -118,6 +119,7 @@ const useMasterInquiry = () => {
     initialPageSize: 25,
     initialSortBy: "profitYear",
     initialSortDescending: true,
+    persistenceKey: GRID_KEYS.MASTER_INQUIRY,
     onPaginationChange: handleProfitGridPaginationChange
   });
 

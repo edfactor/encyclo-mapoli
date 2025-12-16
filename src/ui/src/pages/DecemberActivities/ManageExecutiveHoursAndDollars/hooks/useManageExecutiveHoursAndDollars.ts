@@ -1,3 +1,4 @@
+import { GRID_KEYS } from "../../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -129,6 +130,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
     initialPageSize: 25,
     initialSortBy: "fullName",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.MANAGE_EXECUTIVE_HOURS,
     onPaginationChange: handleMainGridPaginationChange
   });
 
@@ -136,6 +138,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
     initialPageSize: 25,
     initialSortBy: "fullName",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.MANAGE_EXECUTIVE_HOURS_MODAL,
     onPaginationChange: handleModalGridPaginationChange
   });
 

@@ -3,6 +3,7 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
@@ -415,7 +416,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
                         It.IsAny<string>(),
                         It.IsAny<string>(),
                         It.IsAny<string>(),
-                        It.Is<string>(details => details.Contains("Profit Year Range") && details.Contains("Records:")),
+                        It.Is<string>(details => details.Contains($"BadgeNumber: {badgeNumber}") && details.Contains("Profit Year Range") && details.Contains("Records:")),
                         It.IsAny<CancellationToken>()),
                     Times.Once,
                     "Audit details should include profit year range and record count");

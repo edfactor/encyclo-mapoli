@@ -2,6 +2,7 @@ import { Typography } from "@mui/material";
 import { DSMGrid } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { useCallback, useMemo } from "react";
+import { GRID_KEYS } from "../../../constants";
 import { GetUnder21ReportColumns } from "./Under21ReportGridColumns";
 import { useLazyGetUnder21BreakdownByStoreQuery, useLazyGetUnder21TotalsQuery } from "reduxstore/api/YearsEndApi";
 
@@ -50,7 +51,7 @@ const Under21ReportGrid = () => {
         </Typography>
       </div>
       <DSMGrid
-        preferenceKey={"UNDER_21_REPORT"}
+        preferenceKey={GRID_KEYS.UNDER_21_REPORT}
         isLoading={isFetching}
         handleSortChanged={(_params) => {}}
         providedOptions={{
