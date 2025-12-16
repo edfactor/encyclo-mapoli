@@ -11,8 +11,14 @@ using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.Util.Extensions;
+using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+});
 
 if (!builder.Environment.IsTestEnvironment())
 {
@@ -80,3 +86,4 @@ GlobalMeter.InitializeFromServices(host.Services);
 GlobalMeter.RegisterObservableGauges();
 GlobalMeter.RecordDeploymentStartup();
 await host.RunAsync().ConfigureAwait(false);
+

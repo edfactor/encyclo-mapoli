@@ -42,6 +42,45 @@ Review: **All sections** including documentation and branching
 
 ---
 
+## OWASP Top 10 (2025) + FISMA Moderate Coverage
+
+This checklist is the primary review artifact for:
+
+- **OWASP Top 10 (2025)**: Ensure each PR is reviewed against the relevant OWASP risk categories.
+- **FISMA Moderate alignment**: Ensure changes maintain auditability, access control, and secure operation expectations.
+
+### OWASP Top 10 (2025) Coverage Map
+
+As of December 2025, OWASP has announced an **OWASP Top 10:2025 Release Candidate**; the most current fully released version remains **OWASP Top 10:2021**. Use the mapping below for Top 10:2025 category alignment, and treat any item wording as subject to change until the final 2025 release.
+
+Use this mapping to confirm the PR touches the right sections of this checklist (as applicable):
+
+- **A01: Broken Access Control** → Authentication & Authorization; PII Protection; Frontend “No client-side role elevation”; Endpoint authorization decisions.
+- **A02: Security Misconfiguration** → Transport Security; CORS restrictions; environment-specific configuration guidance.
+- **A03: Software Supply Chain Failures** → Dependency Security; monthly patch reviews; new package review; lock down registries.
+- **A04: Cryptographic Failures** → Transport Security (HTTPS/HSTS, security headers); secrets management; "No hardcoded secrets".
+- **A05: Injection** → Input Validation & SQL Injection; “No raw SQL”; EF Core parameterization.
+- **A06: Insecure Design** → Architecture & Data Access; least privilege; validation/degenerate guards; domain errors.
+- **A07: Authentication Failures** → Minimal claims extraction; Okta/JWT usage; server-side re-validation.
+- **A08: Software or Data Integrity Failures** → CI/CD expectations; dependency provenance; avoiding ad-hoc hosts; schema/migrations via CLI.
+- **A09: Security Logging and Alerting Failures** → Telemetry & Observability; correlation IDs; sensitive field access tracking; error logging expectations.
+- **A10: Mishandling of Exceptional Conditions** → Error Handling & Secrets; ProblemDetails/ProblemHttpResult patterns; no sensitive data in errors; consistent HTTP mapping.
+
+### FISMA Moderate Review Checklist (Baseline Alignment)
+
+If the PR impacts authN/authZ, PII, logging/telemetry, configuration, or data flows, reviewers should explicitly confirm:
+
+- **Access control (AC)**: Role checks are server-side and least-privilege; no client-side elevation paths.
+- **Identification & authentication (IA)**: Auth uses Okta/OIDC; minimal claims used; session/token handling follows approved flow.
+- **Audit & accountability (AU)**: Telemetry/logging present for sensitive operations; correlation IDs; no unmasked PII in logs.
+- **System & communications protection (SC)**: HTTPS/HSTS and required security headers in place; secrets are not hardcoded.
+- **Configuration management (CM)**: Environment-specific config is correct (CORS, OTEL); no insecure defaults.
+- **System & information integrity (SI)**: Input validation and safe error handling; dependency hygiene and vulnerability response.
+- **Risk assessment (RA)**: New external dependencies, new endpoints, or new data exposure are documented and reviewed.
+- **Incident response readiness (IR)**: Errors are diagnosable via correlation IDs/telemetry without exposing sensitive details.
+
+Note: This document is a review aid, not a formal control implementation statement; when a PR is security-relevant, include explicit validation steps in the PR description.
+
 ## 1. Security (MANDATORY - OWASP Top 10)
 
 **All security items are CRITICAL. Deviations require security review.**
@@ -114,22 +153,17 @@ Review: **All sections** including documentation and branching
 
   **CRITICAL: ALL service methods with PII access MUST include masking in logs. No unmasked names, SSN, email, phone, or addresses should ever appear in logs.**
 
-- [ ] **Standardized name properties in DTOs**: Use consistent naming conventions for name fields
+- [ ] **FullName pattern for person-name DTOs (backend + frontend)**: Avoid duplicate name-building logic and keep formatting/masking consistent
 
-  ```csharp
-  // ✅ RIGHT: Standard property names
-  public string FirstName { get; set; }
-  public string LastName { get; set; }
-  public string FullName { get; set; }  // Computed: FirstName + LastName
+  - [ ] **Backend Response DTOs**: Use `FullName` (NOT `Name`) and mark it with `[MaskSensitive]`
+  - [ ] **Backend mapping**: Compute via `DtoCommonExtensions.ComputeFullNameWithInitial(lastName, firstName, middleName)` (format: `"LastName, FirstName"` or `"LastName, FirstName M"`)
+  - [ ] **Backend query**: Ensure `LastName`, `FirstName`, `MiddleName` are selected/loaded so the helper can compute correctly
+  - [ ] **Frontend DTOs**: Use `fullName` (NOT `name`) for person-name responses
+  - [ ] **Frontend rendering**: Use `person.fullName`; never concatenate first/last names in the UI
+  - [ ] **Grid columns**: Use `createNameColumn({ field: "fullName" })`; no `valueFormatter` that constructs names
+  - [ ] **Tests**: Cover both with/without middle name and verify the expected format
 
-  // ❌ WRONG: Custom variations
-  public string Name { get; set; }           // Too generic
-  public string EmployeeName { get; set; }   // Non-standard
-  public string MemberName { get; set; }     // Non-standard
-  public string DisplayName { get; set; }    // Ambiguous
-  ```
-
-  **CRITICAL: ONLY use FullName. NEVER fallback to manual name concatenation like `LastName, FirstName` in DTOs or services. Always use the pre-computed FullName property.**
+  **Exception**: Lookup tables can use a generic `Name`/`name` property.
 
 - [ ] **Minimal claims extraction**: Only extract 'sub' (subject) from Okta JWT
 - [ ] **Read-only contexts used**: Use `UseReadOnlyContext()` for query-only operations
@@ -146,7 +180,7 @@ Review: **All sections** including documentation and branching
   // ❌ WRONG - AUTO-REJECT: Frontend age calculation
   const age = Math.floor(
     (Date.now() - new Date(dateOfBirth).getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25)
+      (1000 * 60 * 60 * 24 * 365.25),
   );
   const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 
@@ -459,6 +493,16 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **Type files**: Complex types in separate `types.ts` files
 - [ ] **Hooks extracted**: Custom hooks in `hooks/` folder
 - [ ] **Component colocated**: Grid definitions, filters, etc. near parent component
+
+### Design & UX Review
+
+- [ ] **Consistent with design system**: Use `smart-ui-library` components; do not recreate common UI widgets
+- [ ] **Responsive layout**: Page works on common viewport sizes
+- [ ] **Accessibility**: Labels/ARIA/keyboard navigation are correct for interactive controls
+- [ ] **Loading states**: Users see clear loading indicators for async work
+- [ ] **Empty states**: Graceful UI when results are empty
+- [ ] **Error handling**: User-friendly errors only; never show stack traces/technical details
+- [ ] **Spacing consistency**: Use theme/tokens; avoid ad-hoc magic numbers
 
 ### State Management
 

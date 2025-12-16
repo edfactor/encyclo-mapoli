@@ -16,12 +16,12 @@ const DistributionsAndForfeitures = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
-  
+
   // Get current drawer state from Redux
   const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />
+    return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
   };
 
   // Handler to toggle grid expansion

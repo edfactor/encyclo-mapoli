@@ -312,7 +312,7 @@ BEGIN
     insert_navigation_item(FORFEITURES, DECEMBER_ACTIVITIES, 'Forfeitures', '008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_AND_FORFEITURES, DECEMBER_ACTIVITIES, 'Distributions and Forfeitures', 'QPAY129', 'distributions-and-forfeitures', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, DECEMBER_ACTIVITIES, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Sharing Summmary', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Sharing Summary', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PAY426N_DECEMBER, DECEMBER_ACTIVITIES, 'Profit Sharing Report', 'PAY426N', 'pay426n', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(YTD_WAGES_EXTRACT_UNFROZEN, DECEMBER_ACTIVITIES, 'YTD Extract', 'PROF-DOLLAR-EXTRACT', 'ytd-wages-extract-live', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
                        
@@ -751,9 +751,9 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 
 
     -- Define prerequisites: Master Update
-    add_navigation_prerequisite(MASTER_UPDATE, MANAGE_EXECUTIVE_HOURS_PAGE);
+    add_navigation_prerequisite(MASTER_UPDATE, MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE);
     add_navigation_prerequisite(MASTER_UPDATE, MILITARY_CONTRIBUTIONS);
-    add_navigation_prerequisite(MASTER_UPDATE, PROFIT_SHARE_REPORT);
+    add_navigation_prerequisite(MASTER_UPDATE, PROFIT_SUMMARY);
     add_navigation_prerequisite(MASTER_UPDATE, UNFORFEIT);
     add_navigation_prerequisite(MASTER_UPDATE, FORFEITURES);
 

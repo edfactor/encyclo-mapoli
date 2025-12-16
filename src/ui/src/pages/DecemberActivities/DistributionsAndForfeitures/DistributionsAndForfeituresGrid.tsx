@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
@@ -62,6 +62,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       initialPageSize,
       initialSortBy: "employeeName, date",
       initialSortDescending: false,
+      persistenceKey: GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (hasToken && initialSearchLoaded) {
@@ -519,7 +520,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </div>
           ) : (
             <DSMGrid
-              preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
+              preferenceKey={GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES}
               isLoading={false}
               handleSortChanged={sortEventHandler}
               maxHeight={gridMaxHeight}
@@ -532,22 +533,25 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           )}
         </>
       )}
-      {!isGridExpanded && !isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response.results.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-            setInitialSearchLoaded(true);
-          }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            setInitialPageSize(value);
-            handlePaginationChange(0, value);
-            setInitialSearchLoaded(true);
-          }}
-          recordCount={distributionsAndForfeitures.response.total}
-        />
-      )}
+      {!isGridExpanded &&
+        !isFetching &&
+        !!distributionsAndForfeitures &&
+        distributionsAndForfeitures.response.results.length > 0 && (
+          <Pagination
+            pageNumber={pageNumber}
+            setPageNumber={(value: number) => {
+              handlePaginationChange(value - 1, pageSize);
+              setInitialSearchLoaded(true);
+            }}
+            pageSize={pageSize}
+            setPageSize={(value: number) => {
+              setInitialPageSize(value);
+              handlePaginationChange(0, value);
+              setInitialSearchLoaded(true);
+            }}
+            recordCount={distributionsAndForfeitures.response.total}
+          />
+        )}
     </>
   );
 };

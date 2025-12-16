@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
+import { GRID_KEYS } from "../../../../constants";
 import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
 
 interface VestedAmountsByAgeGridProps {
@@ -25,7 +26,7 @@ const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({ gridTit
         <>
           <ReportSummary report={vestedAmountsByAge} />
           <DSMGrid
-            preferenceKey={gridTitle}
+            preferenceKey={`${GRID_KEYS.VESTED_AMOUNTS_PREFIX}${gridTitle}`}
             isLoading={false}
             providedOptions={{
               rowData: vestedAmountsByAge?.response.results,

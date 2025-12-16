@@ -2,6 +2,7 @@ import { Grid } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, TotalsGrid } from "smart-ui-library";
+import { GRID_KEYS } from "../../../../constants";
 import { FrozenReportsByAgeRequestType } from "../../../../reduxstore/types";
 import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
 
@@ -73,7 +74,7 @@ const ForfeituresByAgeGrid: React.FC = () => {
             rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
-                preferenceKey={"AGE_Total"}
+                preferenceKey={GRID_KEYS.FORFEITURES_AGE_TOTAL}
                 isLoading={false}
                 providedOptions={{
                   rowData: forfeituresByAgeTotal?.response.results ?? [],
@@ -85,7 +86,7 @@ const ForfeituresByAgeGrid: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
-                preferenceKey={"AGE_FullTime"}
+                preferenceKey={GRID_KEYS.FORFEITURES_AGE_FULLTIME}
                 isLoading={false}
                 providedOptions={{
                   rowData: forfeituresByAgeFullTime?.response.results ?? [],
@@ -97,7 +98,7 @@ const ForfeituresByAgeGrid: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
-                preferenceKey={"AGE_PartTime"}
+                preferenceKey={GRID_KEYS.FORFEITURES_AGE_PARTTIME}
                 isLoading={false}
                 providedOptions={{
                   rowData: forfeituresByAgePartTime?.response.results ?? [],

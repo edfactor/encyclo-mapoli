@@ -3,7 +3,7 @@ import { RootState } from "../reduxstore/store";
 import { NavigationDto } from "../types/navigation/navigation";
 
 // Navigation status constants (from backend NavigationStatus.Constants)
-const NavigationStatus = {
+export const NavigationStatus = {
   NotStarted: 1,
   InProgress: 2,
   OnHold: 3,

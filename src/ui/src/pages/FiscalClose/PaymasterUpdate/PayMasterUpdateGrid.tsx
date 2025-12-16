@@ -4,6 +4,7 @@ import { Path } from "react-router";
 import { UpdateSummaryResponse } from "reduxstore/types";
 import { Pagination } from "smart-ui-library";
 import { DSMGrid } from "../../../components/DSMGrid/DSMGrid";
+import { GRID_KEYS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetPayMasterUpdateGridColumns } from "./PayMasterUpdateGridColumns";
 
@@ -84,7 +85,7 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"ELIGIBLE_EMPLOYEES"}
+            preferenceKey={GRID_KEYS.PAY_MASTER_UPDATE}
             handleSortChanged={handleSortChange}
             isLoading={isLoading}
             providedOptions={{

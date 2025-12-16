@@ -648,10 +648,7 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.ORACLE_HCM_DIAGNOSTICS}
                   element={
                     <ProtectedRoute
-                      requiredRoles={[
-                        ImpersonationRoles.ItDevOps,
-                        ImpersonationRoles.ProfitSharingAdministrator
-                      ]}>
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <OracleHcmDiagnostics />
                       </Suspense>

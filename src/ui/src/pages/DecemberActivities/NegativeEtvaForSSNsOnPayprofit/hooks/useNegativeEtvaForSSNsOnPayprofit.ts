@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetNegativeEVTASSNQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
@@ -58,6 +59,7 @@ const useNegativeEtvaForSSNsOnPayprofit = () => {
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.NEGATIVE_ETVA,
     onPaginationChange: handlePaginationChange
   });
 

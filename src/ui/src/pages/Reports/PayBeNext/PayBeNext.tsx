@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/AdhocApi";
@@ -302,7 +302,7 @@ const PayBeNext = () => {
                 </Typography>
                 <strong>Ending Balance</strong> ${adhocBeneficiariesReport?.totalEndingBalance}
                 <DSMGrid
-                  preferenceKey={CAPTIONS.BENEFICIARY_INQUIRY}
+                  preferenceKey={GRID_KEYS.BENEFICIARY_INQUIRY}
                   isLoading={isFetching}
                   maxHeight={gridMaxHeight}
                   handleSortChanged={sortEventHandler}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { clearGridState, loadGridState, saveGridState } from "../utils/gridPersistence";
+import { clearPaginationState, loadPaginationState, savePaginationState } from "../utils/gridPersistence";
 
 export interface SortParams {
   sortBy: string;
@@ -45,7 +45,7 @@ export const useGridPagination = ({
   persistenceKey
 }: UseGridPaginationConfig): GridPaginationState & GridPaginationActions => {
   // Load persisted state if persistenceKey is provided
-  const persistedState = persistenceKey ? loadGridState(persistenceKey) : null;
+  const persistedState = persistenceKey ? loadPaginationState(persistenceKey) : null;
 
   const [pageNumber, setPageNumber] = useState(persistedState?.pageNumber ?? 0);
   const [pageSize, setPageSize] = useState(persistedState?.pageSize ?? initialPageSize);
@@ -81,7 +81,7 @@ export const useGridPagination = ({
   // Persist state to localStorage when it changes (if persistenceKey is provided)
   useEffect(() => {
     if (persistenceKey) {
-      saveGridState(persistenceKey, {
+      savePaginationState(persistenceKey, {
         pageNumber,
         pageSize,
         sortBy,
@@ -132,15 +132,15 @@ export const useGridPagination = ({
     setSortBy(initialSortBy);
     setIsSortDescending(initialSortDescending);
 
-    // Clear persisted state when resetting
+    // Clear persisted pagination state when resetting (preserves column state)
     if (persistenceKey) {
-      clearGridState(persistenceKey);
+      clearPaginationState(persistenceKey);
     }
   }, [initialPageSize, initialSortBy, initialSortDescending, persistenceKey]);
 
   const clearPersistedState = useCallback(() => {
     if (persistenceKey) {
-      clearGridState(persistenceKey);
+      clearPaginationState(persistenceKey);
     }
   }, [persistenceKey]);
 

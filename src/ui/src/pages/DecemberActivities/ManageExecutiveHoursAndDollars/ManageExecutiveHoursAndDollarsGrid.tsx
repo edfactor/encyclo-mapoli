@@ -4,7 +4,7 @@ import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DSMGrid, Pagination, SmartModal } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { ExecutiveHoursAndDollars, PagedReportResponse } from "../../../reduxstore/types";
@@ -260,7 +260,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           </>
         )}
         <DSMGrid
-          preferenceKey={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
+          preferenceKey={GRID_KEYS.MANAGE_EXECUTIVE_HOURS}
           isLoading={isSearching}
           handleSortChanged={sortEventHandler}
           maxHeight={gridMaxHeight}
