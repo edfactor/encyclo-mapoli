@@ -881,11 +881,10 @@ public class FrozenReportService : IFrozenReportService
                                      lBal_tmp
                                  from lBal_lj in lBal_tmp.DefaultIfEmpty()
                                  where pp != null && (pp.TotalIncome) >= req.MinGrossAmount
-                                 orderby d.ContactInfo.FullName
                                  select new
                                  {
                                      d.BadgeNumber,
-                                     EmployeeName = d.ContactInfo.FullName ?? "",
+                                     EmployeeName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : string.Empty,
                                      d.DateOfBirth,
                                      d.Ssn,
                                      Forfeitures = fBal_lj != null ? fBal_lj.TotalAmount : (decimal?)null,

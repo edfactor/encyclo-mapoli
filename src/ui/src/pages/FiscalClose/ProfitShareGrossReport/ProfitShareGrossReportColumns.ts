@@ -8,83 +8,100 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
     {
       headerName: "Badge",
       field: "badgeNumber",
-      colId: "badgeNumber",
+      colId: "BadgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       type: "rightAligned",
       resizable: true,
       sortable: true,
+      filter: false,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
       headerName: "Name",
       field: "employeeName",
-      colId: "employeeName",
+      colId: "EmployeeName",
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      sortable: true,
+      filter: false
     },
     {
       headerName: "SSN",
       field: "ssn",
-      colId: "ssn",
+      colId: "Ssn",
       minWidth: GRID_COLUMN_WIDTHS.SSN,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      sortable: true,
+      filter: false
     },
     {
       headerName: "Date of Birth",
       field: "dateOfBirth",
-      colId: "dateOfBirth",
+      colId: "DateOfBirth",
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      sortable: true,
+      filter: false
     },
     {
       headerName: "P/S Wages",
       field: "grossWages",
-      colId: "grossWages",
+      colId: "GrossWages",
       minWidth: 150,
       type: "rightAligned",
       resizable: true,
+      sortable: true,
+      filter: false,
       valueFormatter: (params) => numberToCurrency(params.value)
     },
     {
       headerName: "P/S Amount",
       field: "profitSharingAmount",
-      colId: "profitSharingAmount",
+      colId: "ProfitSharingAmount",
       minWidth: 150,
       type: "rightAligned",
       resizable: true,
+      sortable: true,
+      filter: false,
       valueFormatter: (params) => numberToCurrency(params.value)
     },
     {
       headerName: "Distrubutions",
       field: "loans",
-      colId: "loans",
+      colId: "Loans",
       minWidth: 120,
       type: "rightAligned",
       resizable: true,
+      sortable: true,
+      filter: false,
       valueFormatter: (params) => numberToCurrency(params.value)
     },
     {
       headerName: "Forfeitures",
       field: "forfeitures",
-      colId: "forfeitures",
+      colId: "Forfeitures",
       minWidth: 120,
       type: "rightAligned",
       resizable: true,
+      sortable: true,
+      filter: false,
       valueFormatter: (params) => numberToCurrency(params.value)
     },
     {
       headerName: "EC",
       field: "enrollmentId",
-      colId: "enrollmentId",
+      colId: "EnrollmentId",
       minWidth: 100,
       type: "rightAligned",
-      resizable: true
+      resizable: true,
+      sortable: true,
+      filter: false
     }
   ];
 };
