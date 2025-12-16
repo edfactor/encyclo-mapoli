@@ -474,7 +474,10 @@ These conventions are important project-wide rules. Follow them in addition to t
 ## Testing & Quality
 
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed.
-- All backend unit & service tests reside in the consolidated test project `Demoulas.ProfitSharing.UnitTests` (do NOT create stray ad-hoc test projects). Mirror source namespaces inside this project; prefer folder structure `Domain/`, `Services/`, `Endpoints/` for organization if adding new areas.
+- Backend test project split (do NOT create additional ad-hoc test projects):
+  - **Functional unit/service tests** live in `Demoulas.ProfitSharing.UnitTests`.
+  - **Architecture, analyzer, and infrastructure tests** live in `Demoulas.ProfitSharing.UnitTests.Architecture`.
+  - Integration tests remain in `Demoulas.ProfitSharing.IntegrationTests`.
 - **Telemetry Testing**: All endpoint tests should verify telemetry integration (activity creation, metrics recording, business operations tracking). See `TELEMETRY_GUIDE.md` for testing patterns.
 - Frontend: Add Playwright or component tests colocated (if pattern emerges) but keep end-to-end in `e2e/`.
 - Security warnings/analyzers treated as errors; keep build green.

@@ -107,6 +107,10 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
         _ = builder.Services.AddScoped<IStateTaxLookupService, StateTaxLookupService>();
+        _ = builder.Services.AddScoped<ICommentTypeLookupService, CommentTypeLookupService>();
+        _ = builder.Services.AddScoped<IDistributionFrequencyLookupService, DistributionFrequencyLookupService>();
+        _ = builder.Services.AddScoped<IDistributionStatusLookupService, DistributionStatusLookupService>();
+        _ = builder.Services.AddScoped<ITaxCodeLookupService, TaxCodeLookupService>();
         _ = builder.Services.AddScoped<IStateService, StateService>();
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
         _ = builder.Services.AddScoped<IBeneficiaryDisbursementService, BeneficiaryDisbursementService>();

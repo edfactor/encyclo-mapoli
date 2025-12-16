@@ -146,7 +146,7 @@ Review: **All sections** including documentation and branching
   // ❌ WRONG - AUTO-REJECT: Frontend age calculation
   const age = Math.floor(
     (Date.now() - new Date(dateOfBirth).getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25),
+      (1000 * 60 * 60 * 24 * 365.25)
   );
   const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 
@@ -655,7 +655,9 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 
 ### Backend Tests
 
-- [ ] **Consolidated test project**: Tests in `Demoulas.ProfitSharing.UnitTests` only
+- [ ] **Backend unit test split (no ad-hoc projects)**:
+  - `Demoulas.ProfitSharing.UnitTests` for functional unit/service tests
+  - `Demoulas.ProfitSharing.UnitTests.Architecture` for analyzer/infrastructure/architecture guardrail tests
 - [ ] **xUnit + Shouldly**: Test framework and assertions
 - [ ] **Namespace mirroring**: Test namespaces match source structure
 - [ ] **`Description` attribute**: Tests tagged with Jira ticket

@@ -103,6 +103,7 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="tests/Demoulas.ProfitSharing.IntegrationTests/Demoulas.ProfitSharing.IntegrationTests.csproj" />
+    <Project Path="tests/Demoulas.ProfitSharing.UnitTests.Architecture/Demoulas.ProfitSharing.UnitTests.Architecture.csproj" />
     <Project Path="tests/Demoulas.ProfitSharing.UnitTests.Common/Demoulas.ProfitSharing.UnitTests.Common.csproj" />
     <Project Path="tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj" />
     <Project Path="tests/yematchrunner/YEMatch.csproj" />
