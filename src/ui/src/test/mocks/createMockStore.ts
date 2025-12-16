@@ -31,7 +31,6 @@ import { LookupsApi } from "../../reduxstore/api/LookupsApi";
 import { MilitaryApi } from "../../reduxstore/api/MilitaryApi";
 import { NavigationApi } from "../../reduxstore/api/NavigationApi";
 import { NavigationStatusApi } from "../../reduxstore/api/NavigationStatusApi";
-import { PayServicesApi } from "../../reduxstore/api/PayServicesApi";
 import { SecurityApi } from "../../reduxstore/api/SecurityApi";
 import { validationApi } from "../../reduxstore/api/ValidationApi";
 import { YearsEndApi } from "../../reduxstore/api/YearsEndApi";
@@ -215,7 +214,6 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
     [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
     [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
     [DistributionApi.reducerPath]: DistributionApi.reducer,
-    [PayServicesApi.reducerPath]: PayServicesApi.reducer,
     [AdhocApi.reducerPath]: AdhocApi.reducer,
     [validationApi.reducerPath]: validationApi.reducer
   } as const;
@@ -238,7 +236,6 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
         .concat(BeneficiariesApi.middleware)
         .concat(AdjustmentsApi.middleware)
         .concat(DistributionApi.middleware)
-        .concat(PayServicesApi.middleware)
         .concat(AdhocApi.middleware)
         .concat(validationApi.middleware)
   });

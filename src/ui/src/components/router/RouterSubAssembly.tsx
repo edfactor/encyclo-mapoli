@@ -103,7 +103,6 @@ const AccountHistoryReport = lazy(() => import("../../pages/Reports/AccountHisto
 const PayBeNext = lazy(() => import("../../pages/Reports/PayBeNext/PayBeNext"));
 const PayBenReport = lazy(() => import("../../pages/Reports/PayBenReport/PayBenReport"));
 const QPAY066xAdHocReports = lazy(() => import("../../pages/Reports/QPAY066xAdHocReports/QPAY066xAdHocReports"));
-const QPAY600 = lazy(() => import("../../pages/Reports/QPAY600/QPAY600"));
 const RecentlyTerminated = lazy(() => import("../../pages/Reports/RecentlyTerminated/RecentlyTerminated"));
 const TerminatedLetters = lazy(() => import("../../pages/Reports/TerminatedLetters/TerminatedLetters"));
 
@@ -692,14 +691,6 @@ const RouterSubAssembly: React.FC = () => {
                   element={
                     <Suspense fallback={<PageLoadingFallback />}>
                       <QPAY066B />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path={ROUTES.QPAY600}
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <QPAY600 />
                     </Suspense>
                   }
                 />
