@@ -74,7 +74,6 @@ src/ui/src/pages/
 │   ├── PayBeNext/
 │   ├── PayBenReport/
 │   ├── QPAY066AdHocReports/
-│   ├── QPAY600/
 │   ├── RecentlyTerminated/
 │   └── TerminatedLetters/
 └── Unauthorized/             # Unauthorized access page
