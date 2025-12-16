@@ -73,7 +73,6 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               <th className="px-3 py-2 text-right text-sm font-semibold">
                 <div className="flex items-center justify-end gap-1">
                   <span>Contributions</span>
-                  {renderHeaderValidationIcon("TotalContributions")}
                 </div>
               </th>
 
@@ -81,7 +80,6 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               <th className="px-3 py-2 text-right text-sm font-semibold">
                 <div className="flex items-center justify-end gap-1">
                   <span>Earnings</span>
-                  {renderHeaderValidationIcon("TotalEarnings")}
                 </div>
               </th>
 
@@ -92,7 +90,6 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               <th className="px-3 py-2 text-right text-sm font-semibold">
                 <div className="flex items-center justify-end gap-1">
                   <span>Forfeitures</span>
-                  {renderHeaderValidationIcon("TotalForfeitures")}
                 </div>
               </th>
 
