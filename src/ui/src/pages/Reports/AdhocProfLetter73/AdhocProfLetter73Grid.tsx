@@ -5,6 +5,7 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { ColDef, SelectionChangedEvent } from "ag-grid-community";
 import React, { useEffect, useState } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
+import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetAdhocProfLetter73Query } from "../../../reduxstore/api/AdhocProfLetter73Api";
@@ -52,22 +53,38 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
   // Use dynamic grid height utility hook - increase height when expanded
   const gridMaxHeight = useDynamicGridHeight({ heightPercentage: isGridExpanded ? 0.85 : 0.4 });
 
-  // Pagination hook
-  const { pageNumber, pageSize, handlePaginationChange } = useGridPagination({
+  // Pagination hook with server-side sorting support
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "",
+    initialSortBy: "BadgeNumber",
     initialSortDescending: false,
-    onPaginationChange: () => {
-      // Pagination handled client-side for now
+    persistenceKey: "ADHOC_PROF_LETTER73",
+    onPaginationChange: (newPageNumber, newPageSize, newSortParams) => {
+      // Server-side pagination and sorting - trigger API call
+      if (profitYear > 0) {
+        trigger({
+          profitYear,
+          skip: newPageNumber * newPageSize,
+          take: newPageSize,
+          sortBy: newSortParams.sortBy,
+          isSortDescending: newSortParams.isSortDescending
+        });
+      }
     }
   });
 
-  // Trigger API call when profitYear or pagination changes
+  // Trigger API call when profitYear changes (initial load)
   useEffect(() => {
     if (profitYear > 0) {
-      trigger({ profitYear });
+      trigger({
+        profitYear,
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      });
     }
-  }, [profitYear, pageNumber, pageSize, trigger]);
+  }, [profitYear, trigger, pageNumber, pageSize, sortParams]);
 
   useEffect(() => {
     onLoadingChange?.(isFetching);
@@ -83,164 +100,185 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
     }
   }, [isError, error, isFetching, apiData]);
 
-  // Generate columns dynamically from API response and apply client-side pagination
+  // Generate columns dynamically from API response - server-side sorting
   useEffect(() => {
-    if (apiData?.response?.results && Array.isArray(apiData.response.results) && apiData.response.results.length > 0) {
-      // Get first row to determine structure
-      const sampleData = apiData.response.results[0];
-      
-      if (sampleData) {
-        const cols: ColDef[] = Object.keys(sampleData).map((key) => ({
-          headerName: key.replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase()),
-          field: key,
-          sortable: true,
-          filter: true,
-          resizable: true
-        }));
+    if (apiData?.results && Array.isArray(apiData.results)) {
+      if (apiData.results.length > 0) {
+        // Get first row to determine structure
+        const sampleData = apiData.results[0];
         
-        // Add Print checkbox column
-        cols.push({
-          headerName: "Print",
-          field: "print",
-          colId: "print",
-          checkboxSelection: true,
-          headerCheckboxSelection: true,
-          width: 95,
-          maxWidth: 95,
-          minWidth: 95,
-          pinned: "right",
-          lockPosition: "right",
-          suppressSizeToFit: true,
-          suppressAutoSize: true,
-          suppressColumnsToolPanel: true,
-          suppressMovable: true
-        });
-        
-        setColumnDefs(cols);
-        
-        // Apply client-side pagination
-        const startIndex = pageNumber * pageSize;
-        const endIndex = startIndex + pageSize;
-        const paginatedData = apiData.response.results.slice(startIndex, endIndex);
-        
-        setRowData(paginatedData);
+        if (sampleData) {
+          const cols: ColDef[] = Object.keys(sampleData).map((key) => ({
+            headerName: key.replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase()),
+            field: key,
+            sortable: true,
+            filter: true,
+            resizable: true
+          }));
+          
+          // Add Print checkbox column
+          cols.push({
+            headerName: "Print",
+            field: "print",
+            colId: "print",
+            checkboxSelection: true,
+            headerCheckboxSelection: true,
+            width: 95,
+            maxWidth: 95,
+            minWidth: 95,
+            pinned: "right",
+            lockPosition: "right",
+            suppressSizeToFit: true,
+            suppressAutoSize: true,
+            suppressColumnsToolPanel: true,
+            suppressMovable: true
+          });
+          
+          setColumnDefs(cols);
+          setRowData(apiData.results);
+        }
+      } else {
+        // No results - clear the grid
+        setColumnDefs([]);
+        setRowData([]);
       }
     }
-  }, [apiData, pageNumber, pageSize]);
+  }, [apiData]);
 
   return (
-    <div className="relative">
-      {printError && (
-        <Box sx={{ padding: "0 24px", marginBottom: "16px" }}>
-          <Alert 
-            severity="error" 
-            onClose={clearError}>
-            {printError}
-          </Alert>
-        </Box>
-      )}
-      <Grid
-        container
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ padding: "0 24px" }}>
-        <Grid>
-          <Typography
-            variant="h2"
-            sx={{ color: "#0258A5" }}>
-            Adhoc Prof Letter 73
-          </Typography>
-        </Grid>
-        <Grid sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip 
-            title={selectedRows.length === 0 ? "You must check at least one box" : "Print Prof Letter 73"} 
-            placement="top">
-            <span>
+    <DuplicateSsnGuard>
+      {() => (
+        <div className="relative">
+          {printError && (
+            <Box sx={{ padding: "0 24px", marginBottom: "16px" }}>
+              <Alert 
+                severity="error" 
+                onClose={clearError}>
+                {printError}
+              </Alert>
+            </Box>
+          )}
+          <Grid
+            container
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ padding: "0 24px" }}>
+            <Grid>
+              <Typography
+                variant="h2"
+                sx={{ color: "#0258A5" }}>
+                Adhoc Prof Letter 73
+              </Typography>
+            </Grid>
+            <Grid sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip 
+                title={selectedRows.length === 0 ? "You must check at least one box" : "Print Prof Letter 73"} 
+                placement="top">
+                <span>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="medium"
+                    startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
+                    onClick={handlePrint}
+                    disabled={isDownloading || selectedRows.length === 0}
+                    sx={{ marginLeft: 2, marginRight: "20px" }}>
+                    {isDownloading ? "Generating..." : "Print"}
+                  </Button>
+                </span>
+              </Tooltip>
+              {onToggleExpand && (
+                <IconButton
+                  onClick={onToggleExpand}
+                  aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}
+                  sx={{ zIndex: 1 }}>
+                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              )}
+            </Grid>
+          </Grid>
+
+          {errorMessage && (
+            <Box sx={{ padding: "24px", color: "error.main" }}>
+              <Typography color="error">{errorMessage}</Typography>
+            </Box>
+          )}
+
+          {isFetching ? (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              py={4}>
+              <CircularProgress />
+            </Box>
+          ) : apiData && !errorMessage ? (
+            columnDefs.length > 0 ? (
+              <>
+                <DSMGrid
+                  preferenceKey="ADHOC_PROF_LETTER73"
+                  isLoading={isFetching}
+                  maxHeight={gridMaxHeight}
+                  providedOptions={{
+                    rowData: rowData,
+                    columnDefs: columnDefs,
+                    rowSelection: "multiple",
+                    onSelectionChanged: handleSelectionChanged,
+                    onSortChanged: (event) => {
+                      const columnState = event.api.getColumnState();
+                      const sortedColumn = columnState.find(col => col.sort !== null && col.sort !== undefined);
+                      
+                      if (sortedColumn && sortedColumn.colId) {
+                        handleSortChange({
+                          sortBy: sortedColumn.colId,
+                          isSortDescending: sortedColumn.sort === 'desc'
+                        });
+                      }
+                    }
+                  }}
+                />
+                {rowData.length > 0 && (
+                  <Pagination
+                    pageNumber={pageNumber}
+                    setPageNumber={(value: number) => {
+                      handlePaginationChange(value - 1, pageSize);
+                    }}
+                    pageSize={pageSize}
+                    setPageSize={(value: number) => {
+                      handlePaginationChange(0, value);
+                    }}
+                    recordCount={apiData.total || rowData.length}
+                  />
+                )}
+              </>
+            ) : (
+              <Box sx={{ padding: "24px" }}>
+                <Typography>No data available for the selected profit year.</Typography>
+              </Box>
+            )
+          ) : null}
+
+          <Dialog
+            open={isPrintDialogOpen}
+            onClose={() => setIsPrintDialogOpen(false)}
+            maxWidth="lg"
+            fullWidth>
+            <DialogTitle>Print Preview - Prof Letter 73</DialogTitle>
+            <DialogContent>
+              <pre style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "12px" }}>{printContent}</pre>
+            </DialogContent>
+            <DialogActions sx={{ paddingRight: "25px" }}>
+              <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
               <Button
-                variant="outlined"
-                color="primary"
-                size="medium"
-                startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
-                onClick={handlePrint}
-                disabled={isDownloading || selectedRows.length === 0}
-                sx={{ marginLeft: 2, marginRight: "20px" }}>
-                {isDownloading ? "Generating..." : "Print"}
+                onClick={() => printFormLetter(printContent)}
+                variant="contained">
+                Print
               </Button>
-            </span>
-          </Tooltip>
-          {onToggleExpand && (
-            <IconButton
-              onClick={onToggleExpand}
-              aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}
-              sx={{ zIndex: 1 }}>
-              {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
-            </IconButton>
-          )}
-        </Grid>
-      </Grid>
-
-      {errorMessage && (
-        <Box sx={{ padding: "24px", color: "error.main" }}>
-          <Typography color="error">{errorMessage}</Typography>
-        </Box>
+            </DialogActions>
+          </Dialog>
+        </div>
       )}
-
-      {isFetching ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          py={4}>
-          <CircularProgress />
-        </Box>
-      ) : apiData && !errorMessage && columnDefs.length > 0 ? (
-        <>
-          <DSMGrid
-            preferenceKey="ADHOC_PROF_LETTER73"
-            isLoading={isFetching}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: rowData,
-              columnDefs: columnDefs,
-              rowSelection: "multiple",
-              onSelectionChanged: handleSelectionChanged
-            }}
-          />
-          {rowData.length > 0 && (
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={(value: number) => {
-                handlePaginationChange(value - 1, pageSize);
-              }}
-              pageSize={pageSize}
-              setPageSize={(value: number) => {
-                handlePaginationChange(0, value);
-              }}
-              recordCount={apiData.response?.total || rowData.length}
-            />
-          )}
-        </>
-      ) : null}
-
-      <Dialog
-        open={isPrintDialogOpen}
-        onClose={() => setIsPrintDialogOpen(false)}
-        maxWidth="lg"
-        fullWidth>
-        <DialogTitle>Print Preview - Prof Letter 73</DialogTitle>
-        <DialogContent>
-          <pre style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "12px" }}>{printContent}</pre>
-        </DialogContent>
-        <DialogActions sx={{ paddingRight: "25px" }}>
-          <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
-          <Button
-            onClick={() => printFormLetter(printContent)}
-            variant="contained">
-            Print
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+    </DuplicateSsnGuard>
   );
 };
 

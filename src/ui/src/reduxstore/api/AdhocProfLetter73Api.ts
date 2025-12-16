@@ -1,11 +1,15 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { PagedReportResponse } from "../../types/common/api";
+import { RobustlyPaged } from "../../types/common/api";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 
 export interface AdhocProfLetter73Request {
   profitYear: number;
+  skip?: number;
+  take?: number;
+  sortBy?: string;
+  isSortDescending?: boolean;
 }
 
 export interface AdhocProfLetter73FormLetterRequest {
@@ -17,7 +21,7 @@ export interface AdhocProfLetter73Data {
   [key: string]: string | number | boolean | null | undefined; // Dynamic structure based on API response
 }
 
-export type AdhocProfLetter73Response = PagedReportResponse<AdhocProfLetter73Data>;
+export type AdhocProfLetter73Response = RobustlyPaged<AdhocProfLetter73Data>;
 
 export const AdhocProfLetter73Api = createApi({
   baseQuery: baseQuery,
@@ -27,8 +31,25 @@ export const AdhocProfLetter73Api = createApi({
   endpoints: (builder) => ({
     getAdhocProfLetter73: builder.query<AdhocProfLetter73Response, AdhocProfLetter73Request>({
       query: (params) => {
+        const queryParams = new URLSearchParams({
+          profitYear: params.profitYear.toString()
+        });
+        
+        if (params.skip !== undefined) {
+          queryParams.append('skip', params.skip.toString());
+        }
+        if (params.take !== undefined) {
+          queryParams.append('take', params.take.toString());
+        }
+        if (params.sortBy) {
+          queryParams.append('sortBy', params.sortBy);
+        }
+        if (params.isSortDescending !== undefined) {
+          queryParams.append('isSortDescending', params.isSortDescending.toString());
+        }
+        
         return {
-          url: `/adhoc/prof-letter73?profitYear=${params.profitYear}`,
+          url: `/adhoc/prof-letter73?${queryParams.toString()}`,
           method: "GET"
         };
       }

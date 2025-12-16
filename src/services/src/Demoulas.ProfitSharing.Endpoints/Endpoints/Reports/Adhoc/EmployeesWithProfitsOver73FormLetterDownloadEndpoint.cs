@@ -7,9 +7,7 @@ using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Net.Mime;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 
@@ -34,6 +32,10 @@ public sealed class EmployeesWithProfitsOver73FormLetterDownloadEndpoint : Profi
     public override void Configure()
     {
         Get("prof-letter73/download-form-letter");
+
+        // Add role-based authorization
+        Roles(Role.ADMINISTRATOR, Role.FINANCEMANAGER);
+
         Summary(s =>
         {
             s.Summary = "Returns a text file containing form letters for employees over age 73 who must take required minimum distributions";
@@ -64,40 +66,35 @@ public sealed class EmployeesWithProfitsOver73FormLetterDownloadEndpoint : Profi
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "form-letter-download"),
                 new("endpoint", "EmployeesWithProfitsOver73FormLetterDownloadEndpoint"),
-                new("report_type", "over-73-rmd"),
-                new("file_type", "text"),
-                new("file_name", "QPROF_OVER73.txt"));
+                new("report_type", "over-73-rmd"));
 
-            var responseLength = formLetterContent?.Length ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(responseLength,
+            var contentLength = formLetterContent?.Length ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(contentLength,
                 new("record_type", "letter-content-bytes"),
                 new("endpoint", "EmployeesWithProfitsOver73FormLetterDownloadEndpoint"));
 
             _logger.LogInformation(
                 "Form letter download for employees over 73 generated, file size: {FileSize} bytes (correlation: {CorrelationId})",
-                responseLength,
+                contentLength,
                 HttpContext.TraceIdentifier);
 
+            // Convert string to stream and send
             var memoryStream = new MemoryStream();
-            await using (var writer = new StreamWriter(memoryStream))
+            await using (var writer = new StreamWriter(memoryStream, leaveOpen: false))
             {
                 await writer.WriteAsync(formLetterContent);
                 await writer.FlushAsync(ct);
-
                 memoryStream.Position = 0;
 
-                var cd = new ContentDisposition
-                {
-                    FileName = "QPROF_OVER73.txt",
-                    Inline = false
-                };
-                HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-                // Record successful file download
-                this.RecordResponseMetrics(HttpContext, _logger, formLetterContent ?? string.Empty);
-
-                await Send.StreamAsync(memoryStream, "QPROF_OVER73.txt", contentType: "text/plain", cancellation: ct);
+                // Send stream as file download (FastEndpoints handles Content-Disposition)
+                await Send.StreamAsync(
+                    stream: memoryStream,
+                    fileName: "QPROF_OVER73.txt",
+                    contentType: "text/plain",
+                    cancellation: ct);
             }
+
+            this.RecordResponseMetrics(HttpContext, _logger, formLetterContent ?? string.Empty);
         }
         catch (Exception ex)
         {

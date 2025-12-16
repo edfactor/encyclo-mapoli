@@ -133,7 +133,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
             ProfitYear = TestProfitYear,
             Skip = 0,
             Take = 50,
-            SortBy = "Name",
+            SortBy = "FullName",
             IsSortDescending = true
         };
 

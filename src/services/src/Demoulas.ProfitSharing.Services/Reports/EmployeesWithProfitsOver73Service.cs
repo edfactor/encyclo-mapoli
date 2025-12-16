@@ -61,9 +61,6 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                     d.Ssn,
                     d.BadgeNumber,
                     FullName = d.ContactInfo.FullName,
-                    FirstName = d.ContactInfo.FirstName,
-                    LastName = d.ContactInfo.LastName,
-                    MiddleInitial = d.ContactInfo.MiddleName != null ? d.ContactInfo.MiddleName[0].ToString() : string.Empty,
                     Address = d.Address.Street,
                     City = d.Address.City,
                     State = d.Address.State,
@@ -94,10 +91,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                     return new EmployeesWithProfitsOver73DetailDto
                     {
                         BadgeNumber = employee.BadgeNumber,
-                        Name = employee.FullName ?? string.Empty,
-                        FirstName = employee.FirstName,
-                        LastName = employee.LastName,
-                        MiddleInitial = employee.MiddleInitial ?? string.Empty,
+                        FullName = employee.FullName ?? string.Empty,
                         Address = employee.Address ?? string.Empty,
                         City = employee.City ?? string.Empty,
                         State = employee.State ?? string.Empty,
@@ -169,7 +163,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             #endregion
 
             #region Member information
-            letter.AppendLine($"{space7}{emp.FirstName}{(emp.MiddleInitial != string.Empty ? " " : "")}{emp.MiddleInitial} {emp.LastName}");
+            letter.AppendLine($"{space7}{emp.FullName}");
             letter.AppendLine($"{space7}{emp.Address}");
             letter.AppendLine($"{space7}{emp.City}, {emp.State} {emp.Zip}");
             #endregion

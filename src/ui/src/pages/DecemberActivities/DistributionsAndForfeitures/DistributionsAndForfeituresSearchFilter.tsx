@@ -15,7 +15,7 @@ import { RootState } from "reduxstore/store";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear.ts";
-import { tryddmmyyyyToDate } from "../../../utils/dateUtils.ts";
+import { getLastYearDateRange } from "../../../utils/dateRangeUtils.ts";
 import { endDateAfterStartDateValidator } from "../../../utils/FormValidators.ts";
 
 const formatDateOnly = (date: Date | null): string | undefined => {
@@ -55,6 +55,9 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   //  const fiscalData = useFiscalCalendarYear();
   const profitYear = useDecemberFlowProfitYear();
 
+ // Get last year date range for default values
+  const { beginDate, endDate: lastYearEndDate } = getLastYearDateRange();
+
   const {
     control,
     handleSubmit,
@@ -64,8 +67,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   } = useForm<DistributionsAndForfeituresSearch>({
     resolver: yupResolver(schema) as Resolver<DistributionsAndForfeituresSearch>,
     defaultValues: {
-      startDate: null,
-      endDate: null,
+      startDate: beginDate,
+      endDate: lastYearEndDate,
       states: [],
       taxCodes: []
     }
@@ -76,19 +79,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
       setIsSubmitting(false);
     }
   }, [isSearchFetching, isFetchingProp]);
-
-  // Set form defaults when fiscal data becomes available
-  useEffect(() => {
-    if (profitYear) {
-      reset({
-        // PROFIT_DETAIL transactions historically have month/year - so this date range is the profit_year
-        startDate: tryddmmyyyyToDate(new Date(profitYear, 0, 1)),
-        endDate: tryddmmyyyyToDate(new Date(profitYear, 11, 31)),
-        states: [],
-        taxCodes: []
-      });
-    }
-  }, [reset, profitYear]);
 
   const validateAndSearch = handleSubmit(async (data) => {
     if (isValid && hasToken && !isSubmitting) {
@@ -122,8 +112,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     // Clear the form fields
     reset({
       // PROFIT_DETAIL transactions historically have month/year - so this date range is the profit_year
-      startDate: tryddmmyyyyToDate(new Date(profitYear, 0, 1)),
-      endDate: tryddmmyyyyToDate(new Date(profitYear, 11, 31)),
+      startDate: beginDate,
+      endDate: lastYearEndDate,
       states: [],
       taxCodes: []
     });

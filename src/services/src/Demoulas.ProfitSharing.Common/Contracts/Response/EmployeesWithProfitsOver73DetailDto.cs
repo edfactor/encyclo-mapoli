@@ -12,28 +12,12 @@ public sealed record EmployeesWithProfitsOver73DetailDto
     /// <summary>
     /// Employee badge number.
     /// </summary>
-    [MaskSensitive]
     public required int BadgeNumber { get; init; }
 
     /// <summary>
     /// Employee full name.
     /// </summary>
-    public required string FirstName { get; init; }
-
-    /// <summary>
-    /// Employee full name.
-    /// </summary>
-    public required string LastName { get; init; }
-
-    /// <summary>
-    /// Employee full name.
-    /// </summary>
-    public string? MiddleInitial { get; init; }
-
-    /// <summary>
-    /// Employee full name.
-    /// </summary>
-    public required string Name { get; init; }
+    public required string FullName { get; init; }
 
     /// <summary>
     /// Employee address.
@@ -64,17 +48,18 @@ public sealed record EmployeesWithProfitsOver73DetailDto
     /// <summary>
     /// Employee date of birth.
     /// </summary>
+    [MaskSensitive]
     public required DateOnly DateOfBirth { get; init; }
 
     /// <summary>
     /// Employee's current age.
     /// </summary>
+    [MaskSensitive]
     public required int Age { get; init; }
 
     /// <summary>
     /// Masked SSN (XXX-XX-1234 format).
     /// </summary>
-    [MaskSensitive]
     public required string Ssn { get; init; }
 
     /// <summary>

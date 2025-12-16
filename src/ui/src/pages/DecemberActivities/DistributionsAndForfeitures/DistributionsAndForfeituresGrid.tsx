@@ -8,7 +8,7 @@ import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
@@ -107,10 +107,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       )
     });
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
-
+  // Use content-aware grid height utility hook - updated to use heightPercentage based on expand state
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0,
+    heightPercentage: isGridExpanded ? 0.85 : 0.5
+  });
+  
   const handleStateTaxPopoverOpen = () => {
+
     if (stateTaxTimeout) {
       clearTimeout(stateTaxTimeout);
       setStateTaxTimeout(null);
