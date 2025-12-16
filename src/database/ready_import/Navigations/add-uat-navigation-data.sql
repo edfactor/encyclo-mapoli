@@ -103,7 +103,7 @@ DECLARE
     -- PAY_BENEFICIARY_REPORT CONSTANT NUMBER := 134; -- REMOVED (was under FISCAL_CLOSE)
     -- ADHOC_BENEFICIARIES_REPORT CONSTANT NUMBER := 135; -- REMOVED (was under FISCAL_CLOSE)
     -- TERMINATED_LETTERS CONSTANT NUMBER := 136; -- REMOVED (was under FISCAL_CLOSE)
-    -- QPAY600 CONSTANT NUMBER := 137; -- REMOVED (was under FISCAL_CLOSE)
+    
     PAY426N_DECEMBER CONSTANT NUMBER := 138;
     PROFIT_SUMMARY CONSTANT NUMBER := 139;
     -- PAY426_2 CONSTANT NUMBER := 140;
@@ -133,7 +133,6 @@ DECLARE
     -- PRINT_PS_JOBS CONSTANT NUMBER :=155; -- REMOVED
 
     -- Adhoc Reports
-    QPAY600 CONSTANT NUMBER := 137;
     TERMINATED_LETTERS CONSTANT NUMBER := 136;
     RECENTLY_TERMINATED CONSTANT NUMBER := 133;
     -- QPAY066_AD_HOC_REPORTS CONSTANT NUMBER := 132; -- REMOVED
@@ -297,7 +296,6 @@ BEGIN
 
 -- Adhoc Reports Group
     insert_navigation_item(ADHOC_GROUP, INQUIRIES_MENU, 'Adhoc Reports', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(QPAY600, ADHOC_GROUP, 'QPAY600', '', 'qpay600', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(TERMINATED_LETTERS, ADHOC_GROUP, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     -- insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE); -- REMOVED
@@ -492,8 +490,6 @@ BEGIN
     -- assign_navigation_role(TERMINATED_LETTERS, FINANCE_MANAGER);
     -- assign_navigation_role(PROFIT_SUMMARY, SYSTEM_ADMINISTRATOR);
     -- assign_navigation_role(PROFIT_SUMMARY, FINANCE_MANAGER);
-    -- assign_navigation_role(QPAY600, SYSTEM_ADMINISTRATOR);
-    -- assign_navigation_role(QPAY600, FINANCE_MANAGER);
     -- assign_navigation_role(PAY426N_FROZEN, SYSTEM_ADMINISTRATOR);
     -- assign_navigation_role(PAY426N_FROZEN, FINANCE_MANAGER);
     -- assign_navigation_role(PAY426_2, SYSTEM_ADMINISTRATOR);
@@ -505,10 +501,6 @@ BEGIN
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, FINANCE_MANAGER);
 
     -- Adhoc Reports role assignments
-    assign_navigation_role(QPAY600, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(QPAY600, FINANCE_MANAGER);
-    assign_navigation_role(QPAY600, DISTRIBUTIONS_CLERK);
-    
     assign_navigation_role(TERMINATED_LETTERS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(TERMINATED_LETTERS, FINANCE_MANAGER);
     assign_navigation_role(TERMINATED_LETTERS, DISTRIBUTIONS_CLERK);
@@ -574,7 +566,6 @@ BEGIN
 
     -- Adhoc Reports IT_DEVOPS role assignments
     assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
-    assign_navigation_role(QPAY600, IT_DEVOPS);
     assign_navigation_role(TERMINATED_LETTERS, IT_DEVOPS);
     assign_navigation_role(RECENTLY_TERMINATED, IT_DEVOPS);
     -- assign_navigation_role(QPAY066_AD_HOC_REPORTS, IT_DEVOPS); -- REMOVED
@@ -611,7 +602,6 @@ BEGIN
     -- assign_navigation_role(PAY_BENEFICIARY_REPORT, IT_DEVOPS);
     -- assign_navigation_role(ADHOC_BENEFICIARIES_REPORT, IT_DEVOPS);
     -- assign_navigation_role(UNDER_21_REPORT, IT_DEVOPS);
-    -- assign_navigation_role(QPAY600, IT_DEVOPS);
     -- assign_navigation_role(PROFIT_SUMMARY, IT_DEVOPS);
 
 

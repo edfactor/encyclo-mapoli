@@ -6,21 +6,17 @@ import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
 import { DSMGrid, Pagination, TotalsGrid, numberToCurrency } from "smart-ui-library";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetProfitShareGrossReportColumns } from "./ProfitShareGrossReportColumns";
 
 interface ProfitShareGrossReportGridProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
   pageNumberReset: boolean;
   setPageNumberReset: (reset: boolean) => void;
 }
 
 const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded,
   pageNumberReset,
   setPageNumberReset
 }) => {
@@ -33,30 +29,34 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     rowCount: grossWagesReport?.response?.results?.length ?? 0
   });
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+  const { pageNumber, pageSize, handlePaginationChange, handleSortChange, resetPagination } =
     useGridPagination({
       initialPageSize: 25,
-      initialSortBy: "badgeNumber",
+      initialSortBy: "BadgeNumber",
       initialSortDescending: false,
       persistenceKey: GRID_KEYS.PROFIT_SHARE_GROSS_REPORT,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (initialSearchLoaded) {
-            const request: GrossWagesReportDto = {
-              profitYear: grossWagesReportQueryParams?.profitYear ?? 0,
-              pagination: {
-                skip: pageNum * pageSz,
-                take: pageSz,
-                sortBy: sortPrms.sortBy,
-                isSortDescending: sortPrms.isSortDescending
-              },
-              minGrossAmount: grossWagesReportQueryParams?.minGrossAmount ?? 0
-            };
-            await triggerSearch(request, false);
+          // Match the behavior of Duplicate Names & Birthdays: once search params exist,
+          // page/sort changes trigger a server call.
+          if (!grossWagesReportQueryParams?.profitYear) {
+            return;
           }
+
+          const request: GrossWagesReportDto = {
+            profitYear: grossWagesReportQueryParams.profitYear,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            },
+            minGrossAmount: grossWagesReportQueryParams.minGrossAmount ?? 0
+          };
+
+          await triggerSearch(request, false);
         },
         [
-          initialSearchLoaded,
           grossWagesReportQueryParams?.profitYear,
           grossWagesReportQueryParams?.minGrossAmount,
           triggerSearch
@@ -75,34 +75,6 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     () => GetProfitShareGrossReportColumns(handleNavigationForButton),
     [handleNavigationForButton]
   );
-
-  const onSearch = useCallback(async () => {
-    const request: GrossWagesReportDto = {
-      profitYear: grossWagesReportQueryParams?.profitYear ?? 0,
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      },
-      minGrossAmount: grossWagesReportQueryParams?.minGrossAmount ?? 0
-    };
-
-    await triggerSearch(request, false);
-  }, [
-    pageNumber,
-    pageSize,
-    triggerSearch,
-    grossWagesReportQueryParams?.profitYear,
-    grossWagesReportQueryParams?.minGrossAmount,
-    sortParams
-  ]);
-
-  useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, onSearch]);
 
   useEffect(() => {
     if (pageNumberReset) {
@@ -155,12 +127,10 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             handlePaginationChange(value - 1, pageSize);
-            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             handlePaginationChange(0, value);
-            setInitialSearchLoaded(true);
           }}
           recordCount={grossWagesReport.response.total}
         />

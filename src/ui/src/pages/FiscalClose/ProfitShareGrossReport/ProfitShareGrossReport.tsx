@@ -10,7 +10,6 @@ import ProfitShareGrossReportGrid from "./ProfitShareGrossReportGrid";
 import ProfitShareGrossReportParameters from "./ProfitShareGrossReportSearchFilter";
 
 const ProfitShareGrossReport = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const [frozenStateNotAvailable, setFrozenStateNotAvailable] = useState(false);
   const { grossWagesReportQueryParams } = useSelector((state: RootState) => state.yearsEnd);
@@ -69,8 +68,6 @@ const ProfitShareGrossReport = () => {
 
         <Grid width="100%">
           <ProfitShareGrossReportGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
             pageNumberReset={pageNumberReset}
             setPageNumberReset={setPageNumberReset}
           />

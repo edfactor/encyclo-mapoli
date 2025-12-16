@@ -67,7 +67,6 @@ public sealed class Navigation
         public const short PayBeneficiaryReport = 134;
         public const short AdhocBeneficiariesReport = 135;
         public const short TerminatedLetters = 136;
-        public const short QPAY600 = 137;
         public const short PAY426N = 138;
         public const short ProfitSummary = 139;
         public const short PAY426_2 = 140;

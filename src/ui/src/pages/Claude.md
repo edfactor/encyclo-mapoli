@@ -70,7 +70,6 @@ src/ui/src/pages/
 │   ├── PayBeNext/
 │   ├── PayBenReport/
 │   ├── QPAY066AdHocReports/
-│   ├── QPAY600/
 │   ├── RecentlyTerminated/
 │   └── TerminatedLetters/
 └── Unauthorized/             # Unauthorized access page
@@ -1049,50 +1048,6 @@ const isReadOnly = useReadOnlyNavigation();
 ---
 
 ## Page Assembly Examples
-
-### Example 1: Simple Report Page
-
-**File**: `QPAY600/QPAY600.tsx`
-
-```typescript
-const QPAY600 = () => {
-  const profitYear = useFiscalCloseProfitYear();
-  const [searchParams, setSearchParams] = useState<QPAY600Request | null>(null);
-  const [triggerReport, { data, isFetching }] = useLazyGetQPAY600ReportQuery();
-
-  const handleSearch = (params: QPAY600SearchParams) => {
-    const request = { ...params, profitYear };
-    setSearchParams(request);
-    triggerReport(request);
-  };
-
-  return (
-    <Page label="QPAY600 REPORT" actionNode={<StatusDropdownActionNode />}>
-      <Grid container rowSpacing="24px">
-        <Divider />
-
-        <DSMAccordion title="Filter">
-          <QPAY600FilterSection onSearch={handleSearch} />
-        </DSMAccordion>
-
-        {searchParams && (
-          <QPAY600Grid data={data?.results ?? []} isLoading={isFetching} />
-        )}
-      </Grid>
-    </Page>
-  );
-};
-```
-
-**Components**:
-
-- `Page` wrapper with status dropdown
-- `DSMAccordion` for filter
-- `QPAY600FilterSection` (search form)
-- `QPAY600Grid` (results grid)
-
----
-
 ### Example 2: Multi-Step Workflow
 
 **File**: `AddDistribution/AddDistribution.tsx`

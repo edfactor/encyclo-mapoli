@@ -42,7 +42,6 @@ export * from "./master-inquiry/master-inquiry";
 export * from "./reports/breakdown";
 export * from "./reports/certificates";
 export * from "./reports/frozen";
-export * from "./reports/payservices";
 export * from "./reports/profit-sharing";
 export * from "./reports/qpay";
 export * from "./reports/recent-termination";

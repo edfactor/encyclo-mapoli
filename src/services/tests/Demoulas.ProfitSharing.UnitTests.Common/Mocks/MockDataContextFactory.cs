@@ -719,9 +719,28 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
-    public Task UseReadOnlyContext(Func<ProfitSharingReadOnlyDbContext, Task> func, CancellationToken cancellationToken = new CancellationToken())
+    public async Task UseReadOnlyContext(Func<ProfitSharingReadOnlyDbContext, Task> func, CancellationToken cancellationToken = new CancellationToken())
     {
-        throw new NotImplementedException();
+        if (_profitSharingReadOnlyDbContext == null)
+        {
+            throw new InvalidOperationException("_profitSharingReadOnlyDbContext is null. Mock initialization failed.");
+        }
+
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await func.Invoke(_profitSharingReadOnlyDbContext.Object);
+        }
+        catch (TargetInvocationException ex)
+        {
+            switch (ex.InnerException)
+            {
+                case null:
+                    throw;
+                default:
+                    throw ex.InnerException;
+            }
+        }
     }
 
 

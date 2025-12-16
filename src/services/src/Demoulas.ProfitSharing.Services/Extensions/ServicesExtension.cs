@@ -19,7 +19,6 @@ using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Demoulas.ProfitSharing.Services.MergeProfitDetails;
 using Demoulas.ProfitSharing.Services.Military;
 using Demoulas.ProfitSharing.Services.Navigations;
-using Demoulas.ProfitSharing.Services.PayServices;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -112,6 +111,10 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
         _ = builder.Services.AddScoped<IStateTaxLookupService, StateTaxLookupService>();
+        _ = builder.Services.AddScoped<ICommentTypeLookupService, CommentTypeLookupService>();
+        _ = builder.Services.AddScoped<IDistributionFrequencyLookupService, DistributionFrequencyLookupService>();
+        _ = builder.Services.AddScoped<IDistributionStatusLookupService, DistributionStatusLookupService>();
+        _ = builder.Services.AddScoped<ITaxCodeLookupService, TaxCodeLookupService>();
         _ = builder.Services.AddScoped<IStateService, StateService>();
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
         _ = builder.Services.AddScoped<IBeneficiaryDisbursementService, BeneficiaryDisbursementService>();
