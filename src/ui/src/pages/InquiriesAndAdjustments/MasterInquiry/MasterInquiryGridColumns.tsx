@@ -1,4 +1,5 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import Link from "@mui/material/Link";
 import {
   createCurrencyColumn,
   createHoursColumn,
@@ -8,6 +9,38 @@ import {
   createYearColumn,
   createYesOrNoColumn
 } from "../../../utils/gridColumnFactory";
+
+/**
+ * Cell renderer for Comment Type that creates links for QDRO transfers
+ */
+const CommentTypeLinkRenderer = (params: ICellRendererParams) => {
+  const { data, value } = params;
+  if (!data) return value;
+
+  const commentTypeId = data.commentTypeId;
+  const commentTypeName = data.commentTypeName || value;
+  const xFerQdroId = data.xFerQdroId;
+
+  // Check if this is a QDRO In (3) or QDRO Out (4) entry
+  if ((commentTypeId === 3 || commentTypeId === 4) && xFerQdroId) {
+    const badgeStr = xFerQdroId.toString();
+
+    // Always link to master inquiry with the badge number
+    const route = `/master-inquiry/${badgeStr}`;
+
+    // Return a Link component
+    return (
+      <Link
+        className="solid h-5 normal-case underline"
+        href={route}>
+        {commentTypeName}
+      </Link>
+    );
+  }
+
+  // For non-QDRO entries, just display the text
+  return commentTypeName;
+};
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
@@ -102,6 +135,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120
     }),
     createTaxCodeColumn({}),
+    createTaxCodeColumn({}),
     {
       headerName: "Comment Type",
       headerTooltip: "Comment Type",
@@ -110,7 +144,19 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      cellRenderer: CommentTypeLinkRenderer,
+      tooltipValueGetter: (params) => {
+        // Show QDRO info for comment types 3 (QDRO In) and 4 (QDRO Out)
+        if (params.data?.commentTypeId === 3 || params.data?.commentTypeId === 4) {
+          const qdroId = params.data?.xFerQdroId;
+          const qdroName = params.data?.xFerQdroName;
+          if (qdroId || qdroName) {
+            return `Name: ${qdroName || "N/A"}\nBadge:${qdroId || "N/A"}`;
+          }
+        }
+        return "";
+      }
     },
     {
       headerName: "Check Number",
