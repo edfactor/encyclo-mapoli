@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using ArchUnitNET.Domain;
 using ArchUnitNET.Fluent;
 using ArchUnitNET.Loader;
@@ -7,10 +7,9 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Services;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
-using Xunit;
 using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
-namespace Demoulas.ProfitSharing.UnitTests.Architecture;
+namespace Demoulas.ProfitSharing.UnitTests.Architecture.Architecture;
 
 [Collection("Architecture Tests")]
 public sealed class ArchitectureRulesTests

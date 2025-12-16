@@ -376,7 +376,7 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **Explicit access modifiers**: All types and members have modifiers
 - [ ] **PascalCase public methods**: Public APIs use PascalCase
 - [ ] **`_camelCase` private fields**: Private fields start with underscore
-- [ ] **`s_` static prefix**: Private static fields use `s_` prefix
+- [ ] **Static readonly field prefix**: Private `static readonly` fields use `_` prefix (e.g., `_myCacheKey`)
 - [ ] **PascalCase constants**: Constants use PascalCase (not UPPER_SNAKE)
 - [ ] **Explicit types**: Unless initializer makes type obvious
 - [ ] **`readonly` where applicable**: Immutable fields marked readonly

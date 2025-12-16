@@ -321,7 +321,7 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 
 - File-scoped namespaces; one class per file; explicit access modifiers.
 - Prefer explicit types unless initializer makes type obvious.
-- Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase.
+- Use `readonly` where applicable; private fields `_camelCase` (including `private static readonly`); constants PascalCase.
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`.
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
