@@ -102,7 +102,18 @@ public class FrozenService : IFrozenService
                     PhoneNumber = dh.PhoneNumber,
                     MobileNumber = dh.MobileNumber,
                     EmailAddress = dh.EmailAddress,
-                    FullName = DtoCommonExtensions.ComputeFullNameWithInitial(dh.LastName ?? string.Empty, dh.FirstName ?? string.Empty, dh.MiddleName)
+                    // IMPORTANT: Do NOT use DtoCommonExtensions.ComputeFullNameWithInitial() here!
+                    // This projection is used within EF Core LINQ queries (e.g., FrozenReportService.GetGrossWagesReport)
+                    // and the Oracle provider cannot translate custom C# methods to SQL.
+                    // Using ComputeFullNameWithInitial causes System.InvalidOperationException at runtime.
+                    // See PS-2333 for details. Use inline string concatenation that EF can translate instead.
+                    FullName =
+                        (dh.LastName != null ? dh.LastName : string.Empty)
+                        + ", "
+                        + (dh.FirstName != null ? dh.FirstName : string.Empty)
+                        + (dh.MiddleName != null && dh.MiddleName != string.Empty
+                            ? " " + dh.MiddleName.Substring(0, 1)
+                            : string.Empty)
                 },
                 Address = new Address
                 {
