@@ -1,12 +1,12 @@
 import { Alert, AlertTitle, Grid, Typography } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMAccordion, numberToCurrency, Page, SmartModal, TotalsGrid } from "smart-ui-library";
-import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
-import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
-import { RootState } from "../../../reduxstore/store";
 import PrerequisiteGuard from "../../../components/PrerequisiteGuard";
+import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
+import { NavigationStatus, useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
+import { RootState } from "../../../reduxstore/store";
 import { Messages } from "../../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import { MasterUpdateSummaryTable } from "./MasterUpdateSummaryTable";
@@ -51,17 +51,29 @@ const ProfitShareEditUpdate = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const [openValidationField, setOpenValidationField] = useState<string | null>(null);
+  // Track current status locally to enable immediate re-evaluation of isReadOnly when status changes
+  const [currentStatusId, setCurrentStatusId] = useState<number | null>(null);
 
   const handleValidationToggle = (fieldName: string) => {
     setOpenValidationField(openValidationField === fieldName ? null : fieldName);
   };
 
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
-  const isReadOnly = useReadOnlyNavigation();
+  const isReadOnlyByNavigation = useReadOnlyNavigation();
+  // Combine navigation-based read-only with status-based read-only for immediate feedback
+  // When status changes via dropdown, currentStatusId updates immediately, before Redux refreshes
+  const isReadOnlyByCurrentStatus =
+    currentStatusId !== null && currentStatusId !== NavigationStatus.InProgress;
+  const isReadOnly = isReadOnlyByNavigation || isReadOnlyByCurrentStatus;
   const { profitSharingUpdateAdjustmentSummary } = useSelector((state: RootState) => state.yearsEnd);
 
+  // Handle status changes from the dropdown to immediately re-evaluate isReadOnly
+  const handleStatusChange = useCallback((newStatus: string) => {
+    setCurrentStatusId(parseInt(newStatus));
+  }, []);
+
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
 
   return (
