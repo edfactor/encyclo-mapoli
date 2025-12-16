@@ -895,7 +895,7 @@ pipelines:
           - step: *audit-frontend
           - step: *audit-backend
           - step: *secret-scan
-   # Stage 3: Build and test
+      # Stage 3: Build and test
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend

@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { Path, useNavigate } from "react-router";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { ForfeituresAndPointsResponse } from "../../../types";
@@ -90,7 +90,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
 
           <ReportSummary report={searchResults} />
           <DSMGrid
-            preferenceKey={CAPTIONS.FORFEIT}
+            preferenceKey={GRID_KEYS.FORFEIT}
             isLoading={isSearching}
             maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}

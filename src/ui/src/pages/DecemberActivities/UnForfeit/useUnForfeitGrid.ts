@@ -11,6 +11,7 @@ import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDate
 import { setMessage } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useEditState } from "../../../hooks/useEditState";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useRowSelection } from "../../../hooks/useRowSelection";
 import { flattenMasterDetailData, generateRowKey } from "../../../utils/forfeitActivities/gridDataHelpers";
@@ -113,7 +114,8 @@ export const useUnForfeitGrid = ({
     useGridPagination({
       initialPageSize: 25,
       initialSortBy: "fullName",
-      initialSortDescending: false
+      initialSortDescending: false,
+      persistenceKey: GRID_KEYS.REHIRE_FORFEITURES
     });
 
   const isPaginationChangeRef = useRef<boolean>(false);

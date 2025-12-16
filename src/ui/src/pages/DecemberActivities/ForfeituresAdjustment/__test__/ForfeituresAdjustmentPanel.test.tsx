@@ -142,7 +142,7 @@ describe("ForfeituresAdjustmentPanel", () => {
       );
 
       const button = screen.getByRole("button", { name: /add forfeiture/i });
-      
+
       // Button should be disabled and not clickable
       expect(button).toBeDisabled();
       expect(mockOnAddForfeiture).not.toHaveBeenCalled();

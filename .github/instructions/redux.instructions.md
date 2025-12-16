@@ -135,7 +135,7 @@ All RTK Query APIs share a common base query configuration:
 export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const createDataSourceAwareBaseQuery = (
-  timeout?: number
+  timeout?: number,
 ): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
   const rawBaseQuery = fetchBaseQuery({
     baseUrl: `${url}/api/`,
@@ -564,7 +564,7 @@ openDrawer: (state) => {
       JSON.stringify({
         isDrawerOpen: true,
         activeSubmenu: state.activeSubmenu,
-      })
+      }),
     );
   } catch (error) {
     console.error("Error saving drawer state to localStorage:", error);

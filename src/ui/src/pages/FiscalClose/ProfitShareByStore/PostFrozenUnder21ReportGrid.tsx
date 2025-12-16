@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
+import { GRID_KEYS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetPostFrozenUnder21ReportColumnDefs } from "./PostFrozenUnder21ReportGridColumns";
 
@@ -49,7 +50,7 @@ const PostFrozenUnder21ReportGrid: React.FC<PostFrozenUnder21ReportGridProps> = 
       {profitSharingUnder21Report && <ReportSummary report={profitSharingUnder21Report} />}
       <Grid width="100%">
         <DSMGrid
-          preferenceKey="POST_FROZEN_UNDER_21_REPORT"
+          preferenceKey={GRID_KEYS.POST_FROZEN_UNDER_21_REPORT}
           isLoading={isLoading}
           handleSortChanged={sortEventHandler}
           providedOptions={{

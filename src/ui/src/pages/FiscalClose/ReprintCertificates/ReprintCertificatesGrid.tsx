@@ -3,6 +3,7 @@ import { SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useLazyGetCertificatesReportQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
@@ -130,7 +131,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
       </div>
 
       <DSMGrid
-        preferenceKey="REPRINT_CERTIFICATES_GRID"
+        preferenceKey={GRID_KEYS.REPRINT_CERTIFICATES}
         isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         maxHeight={gridMaxHeight}

@@ -5,6 +5,7 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { RowClickedEvent } from "ag-grid-community";
 import React, { memo, useMemo } from "react";
 import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams } from "../../../hooks/useGridPagination";
 import { EmployeeDetails } from "../../../reduxstore/types";
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
@@ -111,7 +112,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
           </IconButton>
         </Box>
         <DSMGrid
-          preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
+          preferenceKey={GRID_KEYS.MASTER_INQUIRY_MEMBER}
           handleSortChanged={handleSortChange}
           isLoading={isLoading}
           maxHeight={gridMaxHeight}

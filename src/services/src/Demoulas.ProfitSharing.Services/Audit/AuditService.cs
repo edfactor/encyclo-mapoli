@@ -107,7 +107,7 @@ public sealed class AuditService : IAuditService
         if (isArchiveRequest)
         {
             // Create archive request with full data retrieval
-            archiveRequest = request with { Skip = 0, Take = ushort.MaxValue };
+            archiveRequest = request with { Skip = 0, Take = int.MaxValue };
         }
 
         TResponse response = await reportFunction(archiveRequest, isArchiveRequest, cancellationToken);

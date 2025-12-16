@@ -13,6 +13,7 @@ import {
 import { useMemo, useState } from "react";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { SortParams } from "../../../hooks/useGridPagination";
+import { GRID_KEYS } from "../../../constants";
 import { useClearDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
 import type { DemographicSyncAuditRecord } from "../../../types";
 import { GetAuditGridColumns } from "./AuditGridColumns";
@@ -91,7 +92,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
       ) : data && (data.results?.length ?? 0) > 0 ? (
         <>
           <DSMGrid
-            preferenceKey={"DEMOGRAPHIC_SYNC_AUDIT"}
+            preferenceKey={GRID_KEYS.DEMOGRAPHIC_SYNC_AUDIT}
             isLoading={isLoading}
             handleSortChanged={onSortChange}
             providedOptions={{
