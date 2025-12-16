@@ -618,8 +618,9 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(PROF_SHARE_BY_STORE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROF_SHARE_BY_STORE, FINANCE_MANAGER);
     assign_navigation_role(QPAY066_UNDR21, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(ADHOC_PROF_LETTER73, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(QPAY066_UNDR21, FINANCE_MANAGER);
+    assign_navigation_role(ADHOC_PROF_LETTER73, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADHOC_PROF_LETTER73, FINANCE_MANAGER);
     assign_navigation_role(QPAY066TA_UNDR21, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(QPAY066TA_UNDR21, FINANCE_MANAGER);
     -- assign_navigation_role(UNDER_21_REPORT, SYSTEM_ADMINISTRATOR); -- COMMENTED OUT - navigation item doesn't exist
@@ -695,7 +696,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(VIEW_DISTRIBUTION_PAGE, IT_DEVOPS);
     assign_navigation_role(PAY426N_DECEMBER, IT_DEVOPS);
     assign_navigation_role(PAY426N_FISCAL_CLOSE, IT_DEVOPS);
-
+    assign_navigation_role(ADHOC_PROF_LETTER73, IT_DEVOPS);
     
 
     -- assign_navigation_role(RECONCILIATION_MENU, IT_DEVOPS); -- REMOVED

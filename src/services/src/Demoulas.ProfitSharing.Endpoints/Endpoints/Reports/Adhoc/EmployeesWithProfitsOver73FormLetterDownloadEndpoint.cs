@@ -34,7 +34,7 @@ public sealed class EmployeesWithProfitsOver73FormLetterDownloadEndpoint : Profi
         Get("prof-letter73/download-form-letter");
 
         // Add role-based authorization
-        Roles(Role.ADMINISTRATOR, Role.FINANCEMANAGER);
+        Roles(Role.ADMINISTRATOR, Role.FINANCEMANAGER, Role.ITDEVOPS);
 
         Summary(s =>
         {
