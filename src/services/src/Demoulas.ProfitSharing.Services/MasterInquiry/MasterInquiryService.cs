@@ -812,7 +812,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             currentBalance = await currentBalanceTask;
             previousBalance = await previousBalanceTask;
             stores = await storesTask;
-        }   
+        }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssnCollection);
@@ -823,7 +823,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         foreach (var kvp in memberDetailsMap)
         {
             var memberData = kvp.Value;
-            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn });
+            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn.MaskSsn() });
             var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == kvp.Key);
             _ = stores.TryGetValue(memberData.StoreNumber, out var store);
 
@@ -840,7 +840,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 AddressZipCode = memberData.AddressZipCode,
                 DateOfBirth = memberData.DateOfBirth,
                 Age = memberData.DateOfBirth.Age(),
-                Ssn = memberData.Ssn,
+                Ssn = memberData.Ssn.MaskSsn(),
                 IsExecutive = memberData.IsExecutive,
                 YearToDateProfitSharingHours = memberData.YearToDateProfitSharingHours,
                 HireDate = memberData.HireDate,

@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using System.Reflection;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
@@ -39,7 +40,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             IsEmployee = m.IsEmployee,
             BadgeNumber = m.BadgeNumber,
             Psn = m.Psn,
-            Name = m.Name,
+            FullName = m.Name,
             Code = m.ProfitCode,
             ContributionAmount = m.ContributionAmount,
             EarningsAmount = m.EarningAmount,
@@ -76,11 +77,16 @@ public class ProfitShareEditService : IInternalProfitShareEditService
 
     public static List<T> HandleInMemorySortAndPaging<T>(SortedPaginationRequestDto sortedPaginationRequest, List<T> rows)
     {
-        string sortBy = sortedPaginationRequest.SortBy ?? "Name";
+        string sortBy = sortedPaginationRequest.SortBy ?? "FullName";
         bool isDescending = sortedPaginationRequest.IsSortDescending ?? false;
 
-        var property = typeof(T).GetProperty(sortBy);
-        if (property == null)
+        var property = typeof(T).GetProperty(sortBy, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+        if (property is null && string.Equals(sortBy, "Name", StringComparison.OrdinalIgnoreCase))
+        {
+            property = typeof(T).GetProperty("FullName", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+        }
+
+        if (property is null)
         {
             throw new ArgumentException($"Property '{sortBy}' not found on type {typeof(T).Name}");
         }

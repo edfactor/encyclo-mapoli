@@ -12,6 +12,17 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class PayBenReportService : IPayBenReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+
+    private sealed record PayBenRow
+    {
+        public required string Ssn { get; init; }
+        public required string BeneficiaryFullName { get; init; }
+        public required string DemographicFullName { get; init; }
+        public required string Psn { get; init; }
+        public required int BadgeNumber { get; init; }
+        public required decimal Percentage { get; init; }
+    }
+
     public PayBenReportService(IProfitSharingDataContextFactory dataContextFactory)
     {
         _dataContextFactory = dataContextFactory;
@@ -30,8 +41,8 @@ public class PayBenReportService : IPayBenReportService
                 .ThenInclude(x => x!.ContactInfo)
                 .Where(x => request.Id == null || x.Id == request.Id);
 
-            // Project unmasked SSN for sorting/pagination
-            var paginatedResult = await query.Select(x => new PayBenReportResponse()
+            // Project to a non-response type so we never assign unmasked SSN into a response DTO.
+            var paginatedResult = await query.Select(x => new PayBenRow
             {
                 Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : string.Empty,
                 BeneficiaryFullName = x.Contact != null && x.Contact.ContactInfo != null
@@ -42,12 +53,24 @@ public class PayBenReportService : IPayBenReportService
                     : string.Empty,
                 Psn = $"{x.BadgeNumber}{x.PsnSuffix:D4}",
                 BadgeNumber = x.BadgeNumber,
-                Percentage = x.Percent
+                Percentage = x.Percent,
             }).ToPaginationResultsAsync(request, cancellationToken);
 
-            // Mask SSN after pagination
-            var results = paginatedResult.Results.Select(r => r with { Ssn = r.Ssn?.MaskSsn() }).ToList();
-            return paginatedResult with { Results = results };
+            var results = paginatedResult.Results.Select(r => new PayBenReportResponse
+            {
+                Ssn = r.Ssn.MaskSsn(),
+                BeneficiaryFullName = r.BeneficiaryFullName,
+                DemographicFullName = r.DemographicFullName,
+                Psn = r.Psn,
+                BadgeNumber = r.BadgeNumber,
+                Percentage = r.Percentage,
+            }).ToList();
+
+            return new PaginatedResponseDto<PayBenReportResponse>
+            {
+                Results = results,
+                Total = paginatedResult.Total,
+            };
         }, cancellationToken);
 
         return result;

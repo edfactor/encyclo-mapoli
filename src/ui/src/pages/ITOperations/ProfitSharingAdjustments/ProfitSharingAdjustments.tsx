@@ -68,7 +68,10 @@ const ProfitSharingAdjustments = () => {
   }, [data]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
-    const isEditable = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.isEditable === true;
+    const isExistingRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId != null;
+    const isInsertRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId == null && row?.activityDate != null;
+    const canEditExtOnExistingRow = (row?: ProfitSharingAdjustmentRowDto): boolean =>
+      isExistingRow(row) && row?.isEditable === true;
 
     return [
       {
@@ -92,7 +95,7 @@ const ProfitSharingAdjustments = () => {
         field: "profitYearIteration",
         sortable: false,
         filter: false,
-        editable: (params) => isEditable(params.data as ProfitSharingAdjustmentRowDto | undefined),
+        editable: (params) => canEditExtOnExistingRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
         width: 60,
         valueParser: (params: ValueParserParams) => {
           const parsed = Number.parseInt(String(params.newValue ?? ""), 10);
@@ -115,7 +118,7 @@ const ProfitSharingAdjustments = () => {
         field: "contribution",
         sortable: false,
         filter: false,
-        editable: (params) => isEditable(params.data as ProfitSharingAdjustmentRowDto | undefined),
+        editable: (params) => isInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
         width: 110,
         valueParser: toNumberOrOld
       },
@@ -124,7 +127,7 @@ const ProfitSharingAdjustments = () => {
         field: "earnings",
         sortable: false,
         filter: false,
-        editable: (params) => isEditable(params.data as ProfitSharingAdjustmentRowDto | undefined),
+        editable: (params) => isInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
         width: 110,
         valueParser: toNumberOrOld
       },
@@ -133,7 +136,7 @@ const ProfitSharingAdjustments = () => {
         field: "forfeiture",
         sortable: false,
         filter: false,
-        editable: (params) => isEditable(params.data as ProfitSharingAdjustmentRowDto | undefined),
+        editable: (params) => isInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
         width: 110,
         valueParser: toNumberOrOld
       },
@@ -142,7 +145,7 @@ const ProfitSharingAdjustments = () => {
         field: "activityDate",
         sortable: false,
         filter: false,
-        editable: (params) => isEditable(params.data as ProfitSharingAdjustmentRowDto | undefined),
+        editable: false,
         width: 120
       },
       {
@@ -150,7 +153,7 @@ const ProfitSharingAdjustments = () => {
         field: "comment",
         sortable: false,
         filter: false,
-        editable: (params) => isEditable(params.data as ProfitSharingAdjustmentRowDto | undefined),
+        editable: false,
         flex: 1,
         minWidth: 160
       }
@@ -326,29 +329,29 @@ const ProfitSharingAdjustments = () => {
             <TextField
               label="Profit Year"
               size="small"
-              type="number"
+              type="text"
               value={profitYear}
               onChange={(e) => setProfitYear(Number.parseInt(e.target.value ?? "", 10) || 0)}
               sx={{ width: 130 }}
-              inputProps={{ min: 1900, max: 2500 }}
+              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
             />
             <TextField
               label="Badge Number"
               size="small"
-              type="number"
+              type="text"
               value={badgeNumber}
               onChange={(e) => setBadgeNumber(Number.parseInt(e.target.value ?? "", 10) || 0)}
               sx={{ width: 150 }}
-              inputProps={{ min: 1 }}
+              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
             />
             <TextField
               label="Sequence #"
               size="small"
-              type="number"
+              type="text"
               value={sequenceNumber}
               onChange={(e) => setSequenceNumber(Number.parseInt(e.target.value ?? "", 10) || 0)}
               sx={{ width: 120 }}
-              inputProps={{ min: 0 }}
+              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
             />
 
             <Button
