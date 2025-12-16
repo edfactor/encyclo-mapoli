@@ -88,7 +88,7 @@ public sealed class AdditionalArchitectureRulesTests
             .As("Data");
 
         IObjectProvider<IType> memoryCache = Types().That()
-            .ResideInAssembly(typeof(IMemoryCache).Assembly)
+            .ResideInNamespace("Microsoft.Extensions.Caching.Memory")
             .As("IMemoryCache");
 
         IObjectProvider<IType> production = Types().That()
