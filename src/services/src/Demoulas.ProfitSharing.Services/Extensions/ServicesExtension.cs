@@ -39,6 +39,7 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
+        _ = builder.Services.AddScoped<IPayService, PayService>();
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
@@ -133,9 +134,6 @@ public static class ServicesExtension
         {
             _ = builder.Services.AddHostedService<StateTaxCacheWarmerHostedService>();
         }
-
-        // PayServicees
-        _ = builder.Services.AddScoped<IPayService, PayService>();
 
         return builder;
     }

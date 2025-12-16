@@ -154,20 +154,6 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             return;
         }
 
-        //  ETVA Vested Earnings create 8 records 
-
-        if (member.EtvaEarnings > 0 /* PY_PROF_ETVA */)
-        {
-            ProfitShareEditMemberRecord rec = new(member, /*8*/ProfitCode.Constants.Incoming100PercentVestedEarnings)
-            {
-                EarningAmount = member.EtvaEarnings, // force new line formatting
-                ZeroContStatus = ZeroContributionReason.Constants.Normal,
-                Remark = /*"100% Earnings"*/ CommentType.Constants.OneHundredPercentEarnings.Name,
-                CommentTypeId = CommentType.Constants.OneHundredPercentEarnings.Id
-            };
-            AddRecord(records, rec);
-        }
-
         if (member.SecondaryEtvaEarnings /*PY_PROF_ETVA2*/ > 0)
         {
             ProfitShareEditMemberRecord rec = new(member, /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings)

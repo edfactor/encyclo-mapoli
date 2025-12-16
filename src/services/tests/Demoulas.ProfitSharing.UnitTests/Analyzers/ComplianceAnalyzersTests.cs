@@ -1,4 +1,5 @@
 using Demoulas.ProfitSharing.Analyzers;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 
 namespace Demoulas.ProfitSharing.UnitTests.Analyzers;
@@ -22,9 +23,9 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.Test
     }
 }";
 
-        var expected = AnalyzerVerifier<NameInterfaceAnalyzer>.Diagnostic("DSM002")
+        var expected = AnalyzerVerifier<NameInterfaceAnalyzer>.Diagnostic("DSM002", DiagnosticSeverity.Info)
             .WithLocation(4, 19)
-            .WithMessage("Type 'TestResponse' should implement 'INameProperty' because it has FirstName and LastName properties.");
+            .WithArguments("TestResponse", "FirstName/LastName", "INameParts");
 
         return AnalyzerVerifier<NameInterfaceAnalyzer>.VerifyAnalyzerAsync(source, expected);
     }
@@ -45,7 +46,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.Test
 
         var expected = AnalyzerVerifier<DtoNamePropertyAnalyzer>.Diagnostic("DSM005")
             .WithLocation(6, 23)
-            .WithMessage("Property 'Name' in person-oriented Contracts.Response DTO should be named 'FullName' for consistency.");
+            .WithArguments("Name", "PersonResponse");
 
         return AnalyzerVerifier<DtoNamePropertyAnalyzer>.VerifyAnalyzerAsync(source, expected);
     }
@@ -82,9 +83,9 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.Test
     }
 }";
 
-        var expected = AnalyzerVerifier<MaskSensitiveAttributeAnalyzer>.Diagnostic("DSM007")
+        var expected = AnalyzerVerifier<MaskSensitiveAttributeAnalyzer>.Diagnostic("DSM007", DiagnosticSeverity.Error)
             .WithLocation(8, 21)
-            .WithMessage("Property 'Age' should be marked with [MaskSensitive] attribute in person response DTOs.");
+            .WithArguments("Age", "PersonResponse");
 
         return AnalyzerVerifier<MaskSensitiveAttributeAnalyzer>.VerifyAnalyzerAsync(source, expected);
     }
@@ -105,9 +106,9 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.Test
     }
 }";
 
-        var expected = AnalyzerVerifier<MaskSensitiveAttributeAnalyzer>.Diagnostic("DSM009")
+        var expected = AnalyzerVerifier<MaskSensitiveAttributeAnalyzer>.Diagnostic("DSM009", DiagnosticSeverity.Error)
             .WithLocation(9, 20)
-            .WithMessage("Property 'BadgeNumber' should not be marked with [MaskSensitive] attribute.");
+            .WithArguments("BadgeNumber", "PersonResponse");
 
         return AnalyzerVerifier<MaskSensitiveAttributeAnalyzer>.VerifyAnalyzerAsync(source, expected);
     }
@@ -140,9 +141,9 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.Test
     }
 }";
 
-        var expected = AnalyzerVerifier<SsnMaskingAssignmentAnalyzer>.Diagnostic("DSM008")
-            .WithLocation(12, 23)
-            .WithMessage("Assignment to 'Ssn' property in Contracts.Response DTO should use '.MaskSsn()' method.");
+        var expected = AnalyzerVerifier<SsnMaskingAssignmentAnalyzer>.Diagnostic("DSM008", DiagnosticSeverity.Error)
+            .WithLocation(12, 17)
+            .WithArguments("PersonResponse");
 
         return AnalyzerVerifier<SsnMaskingAssignmentAnalyzer>.VerifyAnalyzerAsync(source, expected);
     }
