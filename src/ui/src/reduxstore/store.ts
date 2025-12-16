@@ -43,7 +43,6 @@ const API_INSTANCES = [
   hcmSyncApi,
   MilitaryApi,
   InquiryApi,
-  ProfitDetailsApi,
   LookupsApi,
   CommonApi,
   NavigationApi,
