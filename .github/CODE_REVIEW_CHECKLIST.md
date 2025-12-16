@@ -180,7 +180,7 @@ Note: This document is a review aid, not a formal control implementation stateme
   // ❌ WRONG - AUTO-REJECT: Frontend age calculation
   const age = Math.floor(
     (Date.now() - new Date(dateOfBirth).getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25),
+      (1000 * 60 * 60 * 24 * 365.25)
   );
   const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 
@@ -414,7 +414,7 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **Explicit access modifiers**: All types and members have modifiers
 - [ ] **PascalCase public methods**: Public APIs use PascalCase
 - [ ] **`_camelCase` private fields**: Private fields start with underscore
-- [ ] **`s_` static prefix**: Private static fields use `s_` prefix
+- [ ] **Static readonly field prefix**: Private `static readonly` fields use `_` prefix (e.g., `_myCacheKey`)
 - [ ] **PascalCase constants**: Constants use PascalCase (not UPPER_SNAKE)
 - [ ] **Explicit types**: Unless initializer makes type obvious
 - [ ] **`readonly` where applicable**: Immutable fields marked readonly
@@ -703,7 +703,9 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 
 ### Backend Tests
 
-- [ ] **Consolidated test project**: Tests in `Demoulas.ProfitSharing.UnitTests` only
+- [ ] **Backend unit test split (no ad-hoc projects)**:
+  - `Demoulas.ProfitSharing.UnitTests` for functional unit/service tests
+  - `Demoulas.ProfitSharing.UnitTests.Architecture` for analyzer/infrastructure/architecture guardrail tests
 - [ ] **xUnit + Shouldly**: Test framework and assertions
 - [ ] **Namespace mirroring**: Test namespaces match source structure
 - [ ] **`Description` attribute**: Tests tagged with Jira ticket

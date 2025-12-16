@@ -321,7 +321,7 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 
 - File-scoped namespaces; one class per file; explicit access modifiers.
 - Prefer explicit types unless initializer makes type obvious.
-- Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase.
+- Use `readonly` where applicable; private fields `_camelCase` (including `private static readonly`); constants PascalCase.
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`.
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
@@ -474,7 +474,10 @@ These conventions are important project-wide rules. Follow them in addition to t
 ## Testing & Quality
 
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed.
-- All backend unit & service tests reside in the consolidated test project `Demoulas.ProfitSharing.UnitTests` (do NOT create stray ad-hoc test projects). Mirror source namespaces inside this project; prefer folder structure `Domain/`, `Services/`, `Endpoints/` for organization if adding new areas.
+- Backend test project split (do NOT create additional ad-hoc test projects):
+  - **Functional unit/service tests** live in `Demoulas.ProfitSharing.UnitTests`.
+  - **Architecture, analyzer, and infrastructure tests** live in `Demoulas.ProfitSharing.UnitTests.Architecture`.
+  - Integration tests remain in `Demoulas.ProfitSharing.IntegrationTests`.
 - **Telemetry Testing**: All endpoint tests should verify telemetry integration (activity creation, metrics recording, business operations tracking). See `TELEMETRY_GUIDE.md` for testing patterns.
 - Frontend: Add Playwright or component tests colocated (if pattern emerges) but keep end-to-end in `e2e/`.
 - Security warnings/analyzers treated as errors; keep build green.
