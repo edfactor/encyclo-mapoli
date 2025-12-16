@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -32,7 +32,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
     {
         return _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
-            if (request.ProfitYear < 1900 || request.ProfitYear > 2500)
+            if (request.ProfitYear is < 1900 or > 2100)
             {
                 return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                 {
@@ -94,7 +94,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     Forfeiture = pd.Forfeiture,
                     ActivityDate = pd.MonthToDate > 0 && pd.YearToDate > 0
                         ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1)
-                        : (DateOnly?)null,
+                        : null,
                     Comment = pd.Remark != null ? pd.Remark : string.Empty,
                     IsEditable = true
                 })
