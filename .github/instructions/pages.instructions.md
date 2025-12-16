@@ -572,6 +572,12 @@ const DistributionInquirySearchFilter: React.FC<SearchFilterProps> = ({
 - `SearchAndReset` button component from `smart-ui-library`
 - Validation logic (optional)
 
+**Numeric Inputs (Badge Number, Profit Year, etc.)**:
+
+- Do **NOT** rely on native browser up/down spinner controls for number entry. They are disabled as a UI standard.
+- Prefer a text input with `inputMode="numeric"` (and optional numeric `pattern`) for badge/SSN-style fields; validate/parse on submit.
+- Only use `type="number"` when numeric semantics are truly required; never expect spinners to be available.
+
 ---
 
 ### 5. Grid Column Definitions

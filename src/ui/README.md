@@ -46,8 +46,8 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
 ## Development
 
 - **Run**: `npm run dev` (Vite dev server)
-- **Build**: `npm run build`
 - **Lint**: `npm run lint`
+- **Build (QA)**: `npm run build:qa`
 
 ## UI Library & Styling
 

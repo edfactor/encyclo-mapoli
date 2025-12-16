@@ -40,11 +40,11 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 });
             }
 
-            if (request.DemographicId <= 0)
+            if (request.BadgeNumber <= 0)
             {
                 return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                 {
-                    [nameof(request.DemographicId)] = ["DemographicId must be greater than zero."]
+                    [nameof(request.BadgeNumber)] = ["BadgeNumber must be greater than zero."]
                 });
             }
 
@@ -59,8 +59,8 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
 
             var demographic = await demographicQuery
-                .TagWith($"ProfitSharingAdjustments-Get-Demographic-{request.DemographicId}")
-                .Where(d => d.Id == request.DemographicId)
+                .TagWith($"ProfitSharingAdjustments-Get-Demographic-{request.BadgeNumber}")
+                .Where(d => d.BadgeNumber == request.BadgeNumber)
                 .Select(d => new { d.Ssn })
                 .FirstOrDefaultAsync(ct);
 
@@ -95,7 +95,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     ActivityDate = pd.MonthToDate > 0 && pd.YearToDate > 0
                         ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1)
                         : (DateOnly?)null,
-                    Comment = pd.Remark ?? string.Empty,
+                    Comment = pd.Remark != null ? pd.Remark : string.Empty,
                     IsEditable = true
                 })
                 .ToListAsync(ct);
@@ -131,7 +131,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
             {
                 ProfitYear = request.ProfitYear,
-                DemographicId = request.DemographicId,
+                BadgeNumber = request.BadgeNumber,
                 SequenceNumber = request.SequenceNumber,
                 Rows = responseRows
             });
@@ -204,8 +204,8 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
 
                 var demographic = await demographicQuery
-                    .TagWith($"ProfitSharingAdjustments-Save-Demographic-{request.DemographicId}")
-                    .Where(d => d.Id == request.DemographicId)
+                    .TagWith($"ProfitSharingAdjustments-Save-Demographic-{request.BadgeNumber}")
+                    .Where(d => d.BadgeNumber == request.BadgeNumber)
                     .Select(d => new { d.Ssn })
                     .FirstOrDefaultAsync(ct);
 
@@ -308,7 +308,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
                 {
                     ProfitYear = request.ProfitYear,
-                    DemographicId = request.DemographicId,
+                    BadgeNumber = request.BadgeNumber,
                     SequenceNumber = request.SequenceNumber,
                     Rows = []
                 });
@@ -322,14 +322,14 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             return await GetAsync(new GetProfitSharingAdjustmentsRequest
             {
                 ProfitYear = request.ProfitYear,
-                DemographicId = request.DemographicId,
+                BadgeNumber = request.BadgeNumber,
                 SequenceNumber = request.SequenceNumber
             }, ct);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save profit sharing adjustments for DemographicId {DemographicId} year {ProfitYear} seq {SequenceNumber}",
-                request.DemographicId, request.ProfitYear, request.SequenceNumber);
+            _logger.LogError(ex, "Failed to save profit sharing adjustments for BadgeNumber {BadgeNumber} year {ProfitYear} seq {SequenceNumber}",
+                request.BadgeNumber, request.ProfitYear, request.SequenceNumber);
 
             return Result<GetProfitSharingAdjustmentsResponse>.Failure(Error.Unexpected("Failed to save profit sharing adjustments."));
         }

@@ -56,7 +56,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
       setShowClearConfirmation(false);
       onClearSuccess();
     } catch (error: unknown) {
-      setClearError((error as Error)?.message || "Failed to clear audit records");
+      setClearError((error as Error)?.message || "Failed to clear sync error records");
     }
   };
 
@@ -74,7 +74,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
           startIcon={<DeleteIcon />}
           onClick={handleClearClick}
           disabled={isLoading || isClearing || (data?.results?.length ?? 0) === 0}>
-          Clear Audit Records
+          Clear Sync Error Records
         </Button>
       </Box>
 

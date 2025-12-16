@@ -23,7 +23,7 @@ export interface DemographicSyncAuditRecord {
 }
 
 /// <summary>
-/// Response from clear audit endpoint.
+/// Response from clear sync error records endpoint.
 /// </summary>
 export interface ClearAuditResponse {
   deletedCount: number;

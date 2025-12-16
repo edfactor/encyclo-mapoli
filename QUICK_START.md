@@ -54,9 +54,17 @@
    ```
 
 4. **Start development**:
+
    ```powershell
    # From project root
    aspire run
+   ```
+
+5. **Verify UI quality checks** (recommended before pushing UI changes):
+   ```powershell
+   cd src/ui
+   npm run lint
+   npm run build:qa
    ```
 
 ---

@@ -26,7 +26,7 @@ export const ProfitDetailsApi = createApi({
       providesTags: (_result, _error, args) => [
         {
           type: "ProfitSharingAdjustments" as const,
-          id: `${args.profitYear}-${args.demographicId}-${args.sequenceNumber}`
+          id: `${args.profitYear}-${args.badgeNumber}-${args.sequenceNumber}`
         }
       ]
     }),
@@ -42,7 +42,7 @@ export const ProfitDetailsApi = createApi({
       invalidatesTags: (_result, _error, args) => [
         {
           type: "ProfitSharingAdjustments" as const,
-          id: `${args.profitYear}-${args.demographicId}-${args.sequenceNumber}`
+          id: `${args.profitYear}-${args.badgeNumber}-${args.sequenceNumber}`
         }
       ]
     })

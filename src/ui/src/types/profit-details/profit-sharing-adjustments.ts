@@ -1,6 +1,6 @@
 export type ProfitSharingAdjustmentsKey = {
   profitYear: number;
-  demographicId: number;
+  badgeNumber: number;
   sequenceNumber: number;
 };
 

@@ -452,6 +452,7 @@ These conventions are important project-wide rules. Follow them in addition to t
 - Package registry split: `.npmrc` sets private `smart-ui-library` registry; keep that line when modifying.
 - State mgmt: Centralize API/data logic in `src/reduxstore/`; prefer RTK Query or slices patterns already present.
 - Styling: Tailwind utility-first; extend via `tailwind.config.js`; avoid inline style objects for reusable patterns—create small components.
+- Numeric inputs: Do NOT rely on native browser up/down spinners. Prefer text inputs with `inputMode="numeric"` + validation for badge/SSN-style fields. Spinners are disabled globally in `src/ui/src/styles/index.css`.
 - E2E: Playwright tests under `src/ui/e2e`; new tests should support `.playwright.env` driven creds (no hard-coded secrets).
 
 ### Build & Deployment (Vite)

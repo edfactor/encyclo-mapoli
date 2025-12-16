@@ -6,7 +6,7 @@ public sealed record SaveProfitSharingAdjustmentsRequest : IProfitYearRequest
 {
     public short ProfitYear { get; set; }
 
-    public required int DemographicId { get; init; }
+    public required int BadgeNumber { get; init; }
 
     public required int SequenceNumber { get; init; }
 

@@ -13,9 +13,9 @@ public sealed class SaveProfitSharingAdjustmentsRequestValidator : AbstractValid
             .Must(y => y is >= 1900 and <= 2500)
             .WithMessage("ProfitYear must be between 1900 and 2500.");
 
-        RuleFor(x => x.DemographicId)
+        RuleFor(x => x.BadgeNumber)
             .GreaterThan(0)
-            .WithMessage("DemographicId must be greater than zero.");
+            .WithMessage("BadgeNumber must be greater than zero.");
 
         RuleFor(x => x.SequenceNumber)
             .GreaterThanOrEqualTo(0)
