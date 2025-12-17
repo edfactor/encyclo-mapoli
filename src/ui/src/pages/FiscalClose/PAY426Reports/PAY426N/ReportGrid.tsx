@@ -11,8 +11,8 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
 import { GRID_KEYS } from "../../../../constants";
+import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { RootState } from "../../../../reduxstore/store";
 import { ValidationResponse } from "../../../../types/validation/cross-reference-validation";
@@ -122,7 +122,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
       const presetNumber = matchingPreset ? Number(matchingPreset.id) : 0;
 
       if (presetNumber >= 1 && presetNumber <= 8) {
-        triggerValidation({ profitYear, reportSuffix: presetNumber })
+        triggerValidation({ profitYear, reportSuffix: presetNumber, useFrozenData: isFrozen })
           .unwrap()
           .then((response) => {
             setValidationData(response);

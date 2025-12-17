@@ -148,7 +148,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         }
     }
 
-    public async Task<Result<ValidationResponse>> ValidateProfitSharingReport(short profitYear, string reportSuffix, CancellationToken cancellationToken = default)
+    public async Task<Result<ValidationResponse>> ValidateProfitSharingReport(short profitYear, string reportSuffix, bool isFrozen, CancellationToken cancellationToken = default)
     {
         var checksumPrefix = reportSuffix switch
         {
@@ -174,11 +174,11 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         var balanceKey = checksumPrefix + "Balance";
         var wagesKey = checksumPrefix + "Wages";
 
-        var memberValidation = await ValidateProfitSharingReportGroup(profitYear, membersKey, "Members", cancellationToken);
+        var memberValidation = await ValidateProfitSharingReportGroup(profitYear, membersKey, "Members", isFrozen, cancellationToken);
 
-        var balanceValidation = await ValidateProfitSharingReportGroup(profitYear, balanceKey, "Balance", cancellationToken);
+        var balanceValidation = await ValidateProfitSharingReportGroup(profitYear, balanceKey, "Balance", isFrozen, cancellationToken);
 
-        var wagesValidation = await ValidateProfitSharingReportGroup(profitYear, wagesKey, "Wages", cancellationToken);
+        var wagesValidation = await ValidateProfitSharingReportGroup(profitYear, wagesKey, "Wages", isFrozen, cancellationToken);
 
         var validationGroups = new List<CrossReferenceValidationGroup>
         {
@@ -206,6 +206,62 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         return Result<ValidationResponse>.Success(rslt);
     }
 
+    public async Task<ValidationResponse> ValidateForfeitureAndPointsReport(short profitYear, decimal distributionTotal, decimal forfeitTotal, CancellationToken cancellationToken = default)
+    {
+        var currentValues = new Dictionary<string, decimal>
+        {
+            { "QPAY129.QPAY129_DistributionTotals", forfeitTotal },
+            { "QPAY129.ForfeitureTotal", distributionTotal }
+        };
+        var lastYear = (short)(profitYear - 1); //QPAY129 seems to archive for the prior year
+
+        var distributionTotalValidation = await ValidateSingleFieldAsync(
+            lastYear,
+            "QPAY129",
+            "QPAY129_DistributionTotals",
+            currentValues,
+            cancellationToken);
+        var forfeitTotalValidation = await ValidateSingleFieldAsync(
+            lastYear,
+            "QPAY129",
+            "ForfeitureTotal",
+            currentValues,
+            cancellationToken);
+
+        var validationGroup = new CrossReferenceValidationGroup
+        {
+            GroupName = "Forfeitures and Points",
+            Description = "Validates PAY444 Forfeitures and Points against archived values",
+            IsValid = distributionTotalValidation.IsValid
+                      && forfeitTotalValidation.IsValid,
+            Validations = new List<CrossReferenceValidation>
+            {
+                distributionTotalValidation,
+                forfeitTotalValidation
+            },
+            Summary = "Forfeitures and Points validation completed.",
+            Priority = "High",
+            ValidationRule = "PAY444 Distribution Totals, and Forfeit Totals should match archived values"
+        };
+
+        var validationGroups = new List<CrossReferenceValidationGroup> { validationGroup };
+        int totalValidations, passedValidations, failedValidations;
+        List<string> criticalIssues, warnings;
+        SummarizeValidations(validationGroups, out totalValidations, out passedValidations, out failedValidations, out criticalIssues, out warnings);
+        var rslt = new ValidationResponse()
+        {
+            ProfitYear = profitYear,
+            Message = "Forfeitures and Points validation completed.",
+            ValidationGroups = validationGroups,
+            CriticalIssues = criticalIssues,
+            Warnings = warnings,
+            TotalValidations = totalValidations,
+            FailedValidations = failedValidations,
+            PassedValidations = passedValidations
+        };
+        return rslt;
+    }
+
     private static void SummarizeValidations(List<CrossReferenceValidationGroup> validationGroups, out int totalValidations, out int passedValidations, out int failedValidations, out List<string> criticalIssues, out List<string> warnings)
     {
         // Calculate statistics
@@ -226,11 +282,12 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
 
     #region Validation Groups
 
-    private async Task<CrossReferenceValidationGroup> ValidateProfitSharingReportGroup(short profitYear, string key, string validationName, CancellationToken cancellationToken)
+    private async Task<CrossReferenceValidationGroup> ValidateProfitSharingReportGroup(short profitYear, string key, string validationName, bool isFrozen, CancellationToken cancellationToken)
     {
+        var reportNameSuffix = isFrozen ? "_FROZEN" : "";
         var wagesValidation = await ValidateSingleFieldAsync(
             profitYear,
-            ReportNames.ProfitSharingSummary.ReportCode,
+            ReportNames.ProfitSharingSummary.ReportCode + reportNameSuffix,
             key,
             new Dictionary<string, decimal>(),
             cancellationToken);

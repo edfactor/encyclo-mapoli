@@ -175,8 +175,10 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : ProfitSharingEnd
                 },
             };
 
+            var reportSuffix = req.UseFrozenData ? "_FROZEN" : "";
+
             var data = await _auditService.ArchiveCompletedReportAsync(
-                ReportNames.ProfitSharingSummary.ReportCode,
+                ReportNames.ProfitSharingSummary.ReportCode + reportSuffix,
                 req.ProfitYear,
                 req,
                 (archiveReq, _, cancellationToken) => _cleanupReportService.GetYearEndProfitSharingSummaryReportAsync(req, ct),

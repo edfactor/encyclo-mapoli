@@ -38,7 +38,7 @@ export const validationApi = createApi({
       providesTags: (_result, _error, profitYear) => [{ type: "MasterUpdateValidation", id: profitYear }]
     }),
     getProfitSharingReportValidation: builder.query<ValidationResponse, ProfitSharingReportValidationRequest>({
-      query: (request) => `checksum/profit-sharing-report/${request.profitYear}/${request.reportSuffix}`,
+      query: (request) => `checksum/profit-sharing-report/${request.profitYear}/${request.reportSuffix}/${request.useFrozenData ? "true" : "false"}`,
       providesTags: (_result, _error, request) => [
         { type: "MasterUpdateValidation", id: `${request.profitYear}-${request.reportSuffix}` }
       ]
