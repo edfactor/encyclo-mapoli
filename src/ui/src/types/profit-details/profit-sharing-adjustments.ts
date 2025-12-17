@@ -7,25 +7,16 @@ export type ProfitSharingAdjustmentRowDto = {
   profitDetailId: number | null;
   rowNumber: number;
   profitYear: number;
+  profitYearIteration: number;
   profitCodeId: number;
   profitCodeName: string;
   contribution: number;
   earnings: number;
   forfeiture: number;
   payment: number;
-  monthToDate: number | null;
-  yearToDate: number | null;
   federalTaxes: number;
   stateTaxes: number;
   taxCodeId: string;
-  taxCodeName: string;
-  commentTypeId: number | null;
-  commentTypeName: string;
-  commentRelatedCheckNumber: string | null;
-  commentRelatedState: string | null;
-  commentIsPartialTransaction: boolean;
-  currentHoursYear: number;
-  currentIncomeYear: number;
   activityDate: string | null;
   comment: string;
   isEditable: boolean;
@@ -36,10 +27,7 @@ export type GetProfitSharingAdjustmentsRequest = ProfitSharingAdjustmentsKey & {
 };
 
 export type GetProfitSharingAdjustmentsResponse = ProfitSharingAdjustmentsKey & {
-  demographicId: number | null;
-  isOver21AtInitialHire: boolean;
-  currentBalance: number;
-  vestedBalance: number;
+  demographicId: number;
   rows: ProfitSharingAdjustmentRowDto[];
 };
 

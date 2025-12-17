@@ -166,6 +166,14 @@ const ProfitSharingAdjustmentsContent = () => {
         width: 90
       },
       {
+        headerName: "Iteration",
+        field: "profitYearIteration",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 90
+      },
+      {
         headerName: "Profit Code",
         field: "profitCodeName",
         sortable: false,
@@ -180,22 +188,6 @@ const ProfitSharingAdjustmentsContent = () => {
 
           return row.profitCodeName || String(row.profitCodeId);
         }
-      },
-      {
-        headerName: "Month",
-        field: "monthToDate",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 75
-      },
-      {
-        headerName: "Year",
-        field: "yearToDate",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 75
       },
       {
         headerName: "Contribution",
@@ -233,22 +225,6 @@ const ProfitSharingAdjustmentsContent = () => {
         valueParser: toNumberOrOld
       },
       {
-        headerName: "Hours YTD",
-        field: "currentHoursYear",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 110
-      },
-      {
-        headerName: "Wages YTD",
-        field: "currentIncomeYear",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 110
-      },
-      {
         headerName: "Fed Tax",
         field: "federalTaxes",
         sortable: false,
@@ -266,39 +242,7 @@ const ProfitSharingAdjustmentsContent = () => {
       },
       {
         headerName: "Tax Code",
-        field: "taxCodeName",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 120
-      },
-      {
-        headerName: "Comment Type",
-        field: "commentTypeName",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 140
-      },
-      {
-        headerName: "Related Check",
-        field: "commentRelatedCheckNumber",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 120
-      },
-      {
-        headerName: "Related State",
-        field: "commentRelatedState",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 120
-      },
-      {
-        headerName: "Partial",
-        field: "commentIsPartialTransaction",
+        field: "taxCodeId",
         sortable: false,
         filter: false,
         editable: false,
@@ -408,31 +352,22 @@ const ProfitSharingAdjustmentsContent = () => {
     const maxRowNumber = rowData.reduce((max, r) => Math.max(max, r.rowNumber), 0);
     const rowNumber = existingDraft?.rowNumber ?? maxRowNumber + 1;
 
-    const seedRowForYtd = rowData.find((r) => r.profitDetailId != null) ?? selectedRow;
+    const seedRow = rowData.find((r) => r.profitDetailId != null) ?? selectedRow;
 
     const draftRow: ProfitSharingAdjustmentRowDto = {
       profitDetailId: null,
       rowNumber,
       profitYear: loadedKey.profitYear,
-      profitCodeId: seedRowForYtd?.profitCodeId ?? 0,
-      profitCodeName: seedRowForYtd?.profitCodeName ?? "",
+      profitYearIteration: 3,
+      profitCodeId: seedRow?.profitCodeId ?? 0,
+      profitCodeName: seedRow?.profitCodeName ?? "",
       contribution: adjustmentDraft.contribution,
       earnings: adjustmentDraft.earnings,
       payment: 0,
       forfeiture: adjustmentDraft.forfeiture,
-      monthToDate: now.getMonth() + 1,
-      yearToDate: now.getFullYear(),
-      currentHoursYear: seedRowForYtd?.currentHoursYear ?? 0,
-      currentIncomeYear: seedRowForYtd?.currentIncomeYear ?? 0,
       federalTaxes: 0,
       stateTaxes: 0,
-      taxCodeId: `${seedRowForYtd?.taxCodeId ?? ""}`,
-      taxCodeName: seedRowForYtd?.taxCodeName ?? "",
-      commentTypeId: null,
-      commentTypeName: "",
-      commentRelatedCheckNumber: null,
-      commentRelatedState: null,
-      commentIsPartialTransaction: false,
+      taxCodeId: `${seedRow?.taxCodeId ?? ""}`,
       activityDate: todayIso,
       comment: "ADMINISTRATIVE",
       isEditable: false
