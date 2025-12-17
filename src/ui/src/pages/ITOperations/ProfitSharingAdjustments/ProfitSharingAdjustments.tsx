@@ -1,18 +1,18 @@
 import {
-    Box,
-    Button,
-    Checkbox,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Divider,
-    FormControlLabel,
-    Grid,
-    TextField,
-    Typography
+  Box,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Grid,
+  TextField,
+  Typography
 } from "@mui/material";
-import { CellValueChangedEvent, ColDef, GridApi, SelectionChangedEvent, ValueParserParams } from "ag-grid-community";
+import { CellValueChangedEvent, GridApi, SelectionChangedEvent } from "ag-grid-community";
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
 import { useEffect, useRef, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
@@ -21,13 +21,13 @@ import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import {
-    useLazyGetProfitSharingAdjustmentsQuery,
-    useSaveProfitSharingAdjustmentsMutation
+  useLazyGetProfitSharingAdjustmentsQuery,
+  useSaveProfitSharingAdjustmentsMutation
 } from "../../../reduxstore/api/ProfitDetailsApi";
 import {
-    ProfitSharingAdjustmentRowDto,
-    ProfitSharingAdjustmentsKey,
-    SaveProfitSharingAdjustmentRowRequest
+  ProfitSharingAdjustmentRowDto,
+  ProfitSharingAdjustmentsKey,
+  SaveProfitSharingAdjustmentRowRequest
 } from "../../../reduxstore/types";
 import { GetProfitSharingAdjustmentsGridColumns } from "./ProfitSharingAdjustmentsGridColumns";
 

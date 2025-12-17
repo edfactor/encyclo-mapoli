@@ -1,10 +1,10 @@
 import { ColDef } from "ag-grid-community";
-import {
-  createCurrencyColumn,
-  createTaxCodeColumn,
-  createYearColumn
-} from "../../../utils/gridColumnFactory";
 import type { ProfitSharingAdjustmentRowDto } from "../../../types/profitSharingAdjustments";
+import {
+    createCurrencyColumn,
+    createTaxCodeColumn,
+    createYearColumn
+} from "../../../utils/gridColumnFactory";
 
 /**
  * Helper to parse string to number or keep old value
