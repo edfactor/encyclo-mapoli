@@ -442,26 +442,6 @@ const ProfitSharingAdjustmentsContent = () => {
             Load
           </Button>
 
-          <Button
-            variant="outlined"
-            disabled={!selectedRow || isSaving || isFetchingAdjustments}
-            onClick={clearSelection}>
-            Clear selection
-          </Button>
-
-          <Button
-            variant="contained"
-            disabled={
-              !selectedRow ||
-              selectedRow.profitDetailId == null ||
-              isSaving ||
-              isFetchingAdjustments ||
-              rowData.length === 0
-            }
-            onClick={openAdjustModal}>
-            Adjust…
-          </Button>
-
           <Box sx={{ flex: 1 }}>
             {errorMessage && (
               <Typography
@@ -496,6 +476,37 @@ const ProfitSharingAdjustmentsContent = () => {
           profitYear={data.profitYear}
         />
       )}
+
+      <Grid width="100%">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 2,
+            px: 1,
+            flexWrap: "wrap"
+          }}>
+          <Button
+            variant="outlined"
+            disabled={!selectedRow || isSaving || isFetchingAdjustments}
+            onClick={clearSelection}>
+            Clear selection
+          </Button>
+
+          <Button
+            variant="contained"
+            disabled={
+              !selectedRow ||
+              selectedRow.profitDetailId == null ||
+              isSaving ||
+              isFetchingAdjustments ||
+              rowData.length === 0
+            }
+            onClick={openAdjustModal}>
+            Adjust…
+          </Button>
+        </Box>
+      </Grid>
 
       <Grid width="100%">
         <DSMGrid
