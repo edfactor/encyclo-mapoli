@@ -67,6 +67,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IBeneficiaryService, BeneficiaryService>();
         _ = builder.Services.AddScoped<IAdhocBeneficiariesReport, AdhocBeneficiariesReport>();
         _ = builder.Services.AddScoped<IAdhocTerminatedEmployeesService, AdhocTerminatedEmployeesService>();
+        _ = builder.Services.AddScoped<IEmployeesWithProfitsOver73Service, EmployeesWithProfitsOver73Service>();
 
 
         _ = builder.Services.AddScoped<IAuditService, AuditService>();

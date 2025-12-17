@@ -112,8 +112,9 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0,
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
-
+  
   const handleStateTaxPopoverOpen = () => {
+
     if (stateTaxTimeout) {
       clearTimeout(stateTaxTimeout);
       setStateTaxTimeout(null);
