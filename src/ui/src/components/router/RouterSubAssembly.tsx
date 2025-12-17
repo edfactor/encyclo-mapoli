@@ -99,6 +99,7 @@ const FrozenProfitSummaryWrapper = lazy(() =>
 const QPAY066B = lazy(() => import("../../pages/FiscalClose/QPAY066B/QPAY066B"));
 const ReprintCertificates = lazy(() => import("../../pages/FiscalClose/ReprintCertificates/ReprintCertificates"));
 const Adjustments = lazy(() => import("../../pages/InquiriesAndAdjustments/Adjustments"));
+const Reversals = lazy(() => import("../../pages/InquiriesAndAdjustments/Reversals/Reversals"));
 const AccountHistoryReport = lazy(() => import("../../pages/Reports/AccountHistoryReport/AccountHistoryReport"));
 const PayBeNext = lazy(() => import("../../pages/Reports/PayBeNext/PayBeNext"));
 const PayBenReport = lazy(() => import("../../pages/Reports/PayBenReport/PayBenReport"));
@@ -416,6 +417,13 @@ const RouterSubAssembly: React.FC = () => {
                   element={
                     <Suspense fallback={<PageLoadingFallback />}>
                       <Adjustments />
+                    </Suspense>
+                  }></Route>
+                <Route
+                  path={ROUTES.REVERSALS}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <Reversals />
                     </Suspense>
                   }></Route>
                 <Route

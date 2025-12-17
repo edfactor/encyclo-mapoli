@@ -1,5 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { MergeProfitsDetailRequest } from "@/types/adjustment/adjustment";
+import {
+  MergeProfitsDetailRequest,
+  ReverseProfitDetailsRequest,
+  ReverseProfitDetailsResponse
+} from "@/types/adjustment/adjustment";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -28,8 +32,31 @@ export const AdjustmentsApi = createApi({
           throw err;
         }
       }
+    }),
+    reverseProfitDetails: builder.mutation<
+      ReverseProfitDetailsResponse,
+      ReverseProfitDetailsRequest & { onlyNetworkToastErrors?: boolean }
+    >({
+      query: (request) => {
+        const { onlyNetworkToastErrors, ...requestData } = request;
+        return {
+          url: "adjustments/reverse-profit-details",
+          method: "POST",
+          body: requestData,
+          meta: { onlyNetworkToastErrors }
+        };
+      },
+      async onQueryStarted(_request, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          console.log("Reversal operation completed successfully:", data);
+        } catch (err) {
+          console.error("Reversal operation failed:", err);
+          throw err;
+        }
+      }
     })
   })
 });
 
-export const { useMergeProfitsDetailMutation } = AdjustmentsApi;
+export const { useMergeProfitsDetailMutation, useReverseProfitDetailsMutation } = AdjustmentsApi;
