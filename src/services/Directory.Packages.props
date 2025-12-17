@@ -25,6 +25,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1" />
@@ -108,7 +109,7 @@
     <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
     <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.15.0" />
     <PackageVersion Include="AsyncAwaitBestPractices" Version="9.0.0" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.16.1.129956" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.17.0.131074" />
     <PackageVersion Include="Microsoft.SourceLink.Bitbucket.Git" Version="8.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Analyzers" Version="10.0.1" />

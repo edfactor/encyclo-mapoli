@@ -24,7 +24,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly ITotalService _totalService;
     private readonly IAuditService _auditService;
     private readonly ILogger<ProfitSharingAdjustmentsService> _logger;
     private readonly TimeProvider _timeProvider;
@@ -32,14 +31,12 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
     public ProfitSharingAdjustmentsService(
         IProfitSharingDataContextFactory dbContextFactory,
         IDemographicReaderService demographicReaderService,
-        ITotalService totalService,
         IAuditService auditService,
         ILogger<ProfitSharingAdjustmentsService> logger,
         TimeProvider? timeProvider = null)
     {
         _dbContextFactory = dbContextFactory;
         _demographicReaderService = demographicReaderService;
-        _totalService = totalService;
         _auditService = auditService;
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
@@ -83,12 +80,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var profitYear = request.ProfitYear;
             var includeAllRows = request.GetAllRows;
             var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
-            var isOver21AtInitialHire = IsOverAgeAtDate(demographic.DateOfBirth, demographic.HireDate, ageThreshold: 21);
-
-            var balances = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, new HashSet<int> { ssn }, profitYear, ct);
-            var balance = balances.FirstOrDefault();
-            var currentBalance = balance?.CurrentBalance ?? 0m;
-            var vestedBalance = balance?.VestedBalance ?? 0m;
 
             // Confluence rule: default to only show rows for accounts under 21 as of today.
             // Users can override via GetAllRows.
@@ -102,9 +93,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 {
                     ProfitYear = request.ProfitYear,
                     DemographicId = demographicId,
-                    IsOver21AtInitialHire = isOver21AtInitialHire,
-                    CurrentBalance = currentBalance,
-                    VestedBalance = vestedBalance,
                     BadgeNumber = request.BadgeNumber,
                     Rows = new List<ProfitSharingAdjustmentRowResponse>()
                 });
@@ -124,25 +112,16 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         ProfitDetailId = pd.Id,
                         RowNumber = 0, // assigned after materialization
                         ProfitYear = pd.ProfitYear,
+                        ProfitYearIteration = pd.ProfitYearIteration,
                         ProfitCodeId = pd.ProfitCodeId,
                         ProfitCodeName = pd.ProfitCode != null ? pd.ProfitCode.Name : string.Empty,
                         Contribution = pd.Contribution,
                         Earnings = pd.Earnings,
                         Forfeiture = !paymentProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                         Payment = paymentProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
-                        MonthToDate = pd.MonthToDate > 0 && pd.YearToDate > 0 ? pd.MonthToDate : null,
-                        YearToDate = pd.MonthToDate > 0 && pd.YearToDate > 0 ? pd.YearToDate : null,
                         FederalTaxes = pd.FederalTaxes,
                         StateTaxes = pd.StateTaxes,
                         TaxCodeId = pd.TaxCodeId != null ? pd.TaxCodeId.Value : TaxCode.Constants.Unknown.Id,
-                        TaxCodeName = pd.TaxCode != null ? pd.TaxCode.Name : TaxCode.Constants.Unknown.Name,
-                        CommentTypeId = pd.CommentTypeId,
-                        CommentTypeName = pd.CommentType != null ? pd.CommentType.Name : string.Empty,
-                        CommentRelatedCheckNumber = pd.CommentRelatedCheckNumber,
-                        CommentRelatedState = pd.CommentRelatedState,
-                        CommentIsPartialTransaction = pd.CommentIsPartialTransaction == true,
-                        CurrentHoursYear = 0m, // assigned after materialization (per ProfitYear)
-                        CurrentIncomeYear = 0m, // assigned after materialization (per ProfitYear)
                         ActivityDate = pd.MonthToDate > 0 && pd.YearToDate > 0
                             ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1)
                             : null,
@@ -152,43 +131,18 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     .ToListAsync(ct)
                 : new List<ProfitSharingAdjustmentRowResponse>();
 
-            if (profitDetails.Count > 0)
+            for (var i = 0; i < profitDetails.Count; i++)
             {
-                var profitYears = profitDetails
-                    .Select(r => r.ProfitYear)
-                    .Distinct()
-                    .ToArray();
-
-                var payProfitsByYear = await ctx.PayProfits
-                    .TagWith($"ProfitSharingAdjustments-Get-PayProfits-ByYear-{demographicId}")
-                    .Where(pp => pp.DemographicId == demographicId && profitYears.Contains(pp.ProfitYear))
-                    .Select(pp => new { pp.ProfitYear, pp.CurrentHoursYear, pp.CurrentIncomeYear })
-                    .ToListAsync(ct);
-
-                var payProfitLookup = payProfitsByYear
-                    .GroupBy(pp => pp.ProfitYear)
-                    .ToDictionary(g => g.Key, g => g.First());
-
-                for (var i = 0; i < profitDetails.Count; i++)
+                profitDetails[i] = profitDetails[i] with
                 {
-                    payProfitLookup.TryGetValue(profitDetails[i].ProfitYear, out var pp);
-
-                    profitDetails[i] = profitDetails[i] with
-                    {
-                        RowNumber = i + 1,
-                        CurrentHoursYear = pp?.CurrentHoursYear ?? 0m,
-                        CurrentIncomeYear = pp?.CurrentIncomeYear ?? 0m
-                    };
-                }
+                    RowNumber = i + 1
+                };
             }
 
             return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
             {
                 ProfitYear = request.ProfitYear,
                 DemographicId = demographicId,
-                IsOver21AtInitialHire = isOver21AtInitialHire,
-                CurrentBalance = currentBalance,
-                VestedBalance = vestedBalance,
                 BadgeNumber = request.BadgeNumber,
                 Rows = profitDetails
             });
