@@ -13,4 +13,5 @@ public sealed record Pay450Record
     public decimal AfterVested { get; init; }
     public int? AfterYears { get; init; }
     public int? AfterEnroll { get; init; }
+    public decimal Etva { get; init; }
 }
