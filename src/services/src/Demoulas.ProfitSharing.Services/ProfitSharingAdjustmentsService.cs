@@ -233,13 +233,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     });
                 }
 
-                var isOver21AtInitialHire = IsOverAgeAtDate(demographic.DateOfBirth, demographic.HireDate, ageThreshold: 21);
-
-                var balances = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, new HashSet<int> { ssn }, profitYear, ct);
-                var balance = balances.FirstOrDefault();
-                var currentBalance = balance?.CurrentBalance ?? 0m;
-                var vestedBalance = balance?.VestedBalance ?? 0m;
-
                 var idsToUpdate = request.Rows
                     .Where(r => r.ProfitDetailId.HasValue)
                     .Select(r => r.ProfitDetailId!.Value)
@@ -396,9 +389,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 {
                     ProfitYear = request.ProfitYear,
                     DemographicId = demographicId,
-                    IsOver21AtInitialHire = isOver21AtInitialHire,
-                    CurrentBalance = currentBalance,
-                    VestedBalance = vestedBalance,
                     BadgeNumber = request.BadgeNumber,
                     Rows = []
                 });
@@ -433,17 +423,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
         }
 
         return age < underAgeThreshold;
-    }
-
-    private static bool IsOverAgeAtDate(DateOnly dateOfBirth, DateOnly asOf, int ageThreshold)
-    {
-        var age = asOf.Year - dateOfBirth.Year;
-        if (dateOfBirth > asOf.AddYears(-age))
-        {
-            age--;
-        }
-
-        return age > ageThreshold;
     }
 
     private static DateOnly? GetActivityDateOrNull(ProfitDetail pd)
