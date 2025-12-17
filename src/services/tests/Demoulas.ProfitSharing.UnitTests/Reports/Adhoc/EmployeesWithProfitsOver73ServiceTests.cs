@@ -40,7 +40,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     #region Service Initialization Tests
 
     [Fact]
-    [Description("PS-XXXX : Service should be resolvable from DI container")]
+    [Description("PS-2153 : Service should be resolvable from DI container")]
     public void Service_ShouldBeResolvableFromDI()
     {
         // Arrange & Act
@@ -56,7 +56,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     #region Empty Data / No Results Tests
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async with no demographics returns empty report")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async with no demographics returns empty report")]
     public async Task GetEmployeesWithProfitsOver73Async_WithNoDemographics_ReturnsEmptyReport()
     {
         // Arrange
@@ -88,7 +88,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async with empty profit details returns empty report")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async with empty profit details returns empty report")]
     public async Task GetEmployeesWithProfitsOver73Async_WithEmptyProfitDetails_ReturnsEmptyReport()
     {
         // Arrange
@@ -118,7 +118,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     #region Request Parameter Validation Tests
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async with valid request parameters handles request properly")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async with valid request parameters handles request properly")]
     public async Task GetEmployeesWithProfitsOver73Async_WithValidRequest_HandlesRequestProperly()
     {
         // Arrange
@@ -149,7 +149,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async handles pagination parameters")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async handles pagination parameters")]
     public async Task GetEmployeesWithProfitsOver73Async_HandlesPaginationParameters()
     {
         // Arrange
@@ -178,7 +178,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async handles different profit years")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async handles different profit years")]
     public async Task GetEmployeesWithProfitsOver73Async_HandlesDifferentProfitYears()
     {
         // Arrange
@@ -218,7 +218,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async accepts cancellation token parameter")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async accepts cancellation token parameter")]
     public async Task GetEmployeesWithProfitsOver73Async_AcceptsCancellationToken()
     {
         // Arrange
@@ -249,7 +249,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     #region Badge Number Filtering Tests
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async with null badge numbers accepts request")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async with null badge numbers accepts request")]
     public async Task GetEmployeesWithProfitsOver73Async_WithNullBadgeNumbers_AcceptsRequest()
     {
         // Arrange
@@ -276,7 +276,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async with empty badge numbers list accepts request")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async with empty badge numbers list accepts request")]
     public async Task GetEmployeesWithProfitsOver73Async_WithEmptyBadgeNumbersList_AcceptsRequest()
     {
         // Arrange
@@ -303,7 +303,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async with specific badge numbers accepts request")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async with specific badge numbers accepts request")]
     public async Task GetEmployeesWithProfitsOver73Async_WithSpecificBadgeNumbers_AcceptsRequest()
     {
         // Arrange
@@ -330,7 +330,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async with non-existent badge numbers returns empty")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async with non-existent badge numbers returns empty")]
     public async Task GetEmployeesWithProfitsOver73Async_WithNonExistentBadgeNumbers_ReturnsEmpty()
     {
         // Arrange
@@ -361,7 +361,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     #region Report Metadata Tests
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async returns correct date range in report")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async returns correct date range in report")]
     public async Task GetEmployeesWithProfitsOver73Async_ReturnsCorrectDateRange()
     {
         // Arrange
@@ -389,7 +389,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73Async response DTO structure has all required fields")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73Async response DTO structure has all required fields")]
     public async Task GetEmployeesWithProfitsOver73Async_ResponseDtoStructureIsComplete()
     {
         // Arrange
@@ -428,7 +428,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     #region Form Letter Generation Tests
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73FormLetterAsync with no employees returns empty message")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73FormLetterAsync with no employees returns empty message")]
     public async Task GetEmployeesWithProfitsOver73FormLetterAsync_WithNoEmployees_ReturnsEmptyMessage()
     {
         // Arrange
@@ -452,7 +452,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73FormLetterAsync with badge filter accepts request")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73FormLetterAsync with badge filter accepts request")]
     public async Task GetEmployeesWithProfitsOver73FormLetterAsync_WithBadgeFilter_AcceptsRequest()
     {
         // Arrange
@@ -476,7 +476,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     }
 
     [Fact]
-    [Description("PS-XXXX : GetEmployeesWithProfitsOver73FormLetterAsync accepts cancellation token")]
+    [Description("PS-2153 : GetEmployeesWithProfitsOver73FormLetterAsync accepts cancellation token")]
     public async Task GetEmployeesWithProfitsOver73FormLetterAsync_AcceptsCancellationToken()
     {
         // Arrange
@@ -505,7 +505,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     #region Request Example Tests
 
     [Fact]
-    [Description("PS-XXXX : EmployeesWithProfitsOver73Request.RequestExample returns valid example")]
+    [Description("PS-2153 : EmployeesWithProfitsOver73Request.RequestExample returns valid example")]
     public void EmployeesWithProfitsOver73Request_RequestExample_ReturnsValidExample()
     {
         // Act

@@ -17,6 +17,7 @@ public sealed record EmployeesWithProfitsOver73DetailDto
     /// <summary>
     /// Employee full name.
     /// </summary>
+    [MaskSensitive]
     public required string FullName { get; init; }
 
     /// <summary>
