@@ -51,6 +51,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
     suggestedForfeitAmount: null,
     classAction: false
   });
+  // Track the display value as a string to avoid leading zero issues
+  const [forfeitureAmountDisplay, setForfeitureAmountDisplay] = useState<string>("0");
   const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
   const [updateForfeiture, { isLoading }] = useUpdateForfeitureAdjustmentMutation();
   const profitYear = useFiscalCloseProfitYear();
@@ -58,16 +60,19 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
   useEffect(() => {
     if (!open) {
       setFormData({ badgeNumber: 0, forfeitureAmount: 0, suggestedForfeitAmount: null, classAction: false });
+      setForfeitureAmountDisplay("0");
       return;
     }
 
     if (suggestedForfeitResponse) {
+      const amount = suggestedForfeitResponse.suggestedForfeitAmount ?? 0;
       setFormData((prev) => ({
         ...prev,
         badgeNumber: suggestedForfeitResponse.badgeNumber,
         suggestedForfeitAmount: suggestedForfeitResponse.suggestedForfeitAmount,
-        forfeitureAmount: suggestedForfeitResponse.suggestedForfeitAmount ?? 0
+        forfeitureAmount: amount
       }));
+      setForfeitureAmountDisplay(String(amount));
     }
   }, [suggestedForfeitResponse, open]);
 
@@ -75,6 +80,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
     const { name, value } = e.target;
 
     if (name === "forfeitureAmount") {
+      // Update display value directly (allows user to type freely)
+      setForfeitureAmountDisplay(value);
       const numericValue = parseFloat(value) || 0;
       setFormData({
         ...formData,
@@ -182,7 +189,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
         <Grid size={{ xs: 2 }}>
           <TextField
             name="forfeitureAmount"
-            value={formData.forfeitureAmount}
+            value={forfeitureAmountDisplay}
             onChange={handleChange}
             fullWidth
             size="small"

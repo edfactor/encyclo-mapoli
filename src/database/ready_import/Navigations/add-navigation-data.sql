@@ -266,6 +266,7 @@ BEGIN
     insert_navigation_item(MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Military Contribution', '008-13', 'military-contribution', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(FORFEITURE_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Forfeiture Adjustment', 'TPR008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_DETAILS_REVERSAL, ADJUSTMENTS_GROUP, 'Reversals', '', 'reversals', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
 
     insert_navigation_item(ADHOC_GROUP, INQUIRIES_MENU, 'Adhoc Reports', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     --insert_navigation_item(PAY_BEN_REPORT, ADHOC_GROUP, 'Pay Ben Report', '', 'payben-report', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -554,6 +555,10 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, FINANCE_MANAGER);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, EXECUTIVE_ADMINISTRATOR);
+
+-- Assign roles for Profit Details Reversal
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, FINANCE_MANAGER);
 
 -- Assign roles for Vesting Reports Group
     assign_navigation_role(VESTING_REPORTS_GROUP, SYSTEM_ADMINISTRATOR);

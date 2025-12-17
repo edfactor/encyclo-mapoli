@@ -46,6 +46,7 @@ export const ROUTES = {
   BENEFICIARY_INQUIRY: "beneficiary",
   PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
+  REVERSALS: "reversals",
   PAY_BEN_REPORT: "payben-report",
   DISTRIBUTIONS_INQUIRY: "distributions-inquiry",
   VIEW_DISTRIBUTION: "view-distribution",
@@ -331,6 +332,9 @@ export const CAPTIONS = {
   REPRINT_CERTIFICATES: "Reprint Certificates",
   REPRINT_CERTIFICATES_SHORT: "Reprint Certificates",
 
+  REVERSALS: "Reversals",
+  REVERSALS_SHORT: "Reversals",
+
   TERMINATED_LETTERS: "Terminated Letters (QPROF003-1)",
   TERMINATED_LETTERS_SHORT: "Terminated Letters",
 
@@ -462,6 +466,7 @@ export const GRID_KEYS = {
   // Inquiries and Adjustments
   MASTER_INQUIRY_MEMBER: "MASTER-INQUIRY-MEMBER-GRID",
   MASTER_INQUIRY: "MASTER-INQUIRY-DETAILS-GRID",
+  REVERSALS: "REVERSALS-GRID",
 
   // IT Operations
   AUDIT_SEARCH: "AUDIT-SEARCH",

@@ -62,8 +62,7 @@ const ProfitShareEditUpdate = () => {
   const isReadOnlyByNavigation = useReadOnlyNavigation();
   // Combine navigation-based read-only with status-based read-only for immediate feedback
   // When status changes via dropdown, currentStatusId updates immediately, before Redux refreshes
-  const isReadOnlyByCurrentStatus =
-    currentStatusId !== null && currentStatusId !== NavigationStatus.InProgress;
+  const isReadOnlyByCurrentStatus = currentStatusId !== null && currentStatusId !== NavigationStatus.InProgress;
   const isReadOnly = isReadOnlyByNavigation || isReadOnlyByCurrentStatus;
   const { profitSharingUpdateAdjustmentSummary } = useSelector((state: RootState) => state.yearsEnd);
 
