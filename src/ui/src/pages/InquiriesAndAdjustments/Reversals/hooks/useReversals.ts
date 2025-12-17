@@ -286,7 +286,7 @@ export function useReversals() {
             currentIncomeYear: item.currentIncomeYear,
             federalTaxes: item.federalTaxes,
             stateTaxes: item.stateTaxes,
-            taxCode: item.taxCode,
+            taxCode: (item.taxCode as string) ?? "",
             commentTypeName: item.commentTypeName ?? "",
             commentRelatedCheckNumber: item.commentRelatedCheckNumber ?? "",
             employmentStatus: item.employmentStatus ?? ""
@@ -445,7 +445,7 @@ export function useReversals() {
                 currentIncomeYear: item.currentIncomeYear,
                 federalTaxes: item.federalTaxes,
                 stateTaxes: item.stateTaxes,
-                taxCode: item.taxCode,
+                taxCode: (item.taxCode as string) ?? "",
                 commentTypeName: item.commentTypeName ?? "",
                 commentRelatedCheckNumber: item.commentRelatedCheckNumber ?? "",
                 employmentStatus: item.employmentStatus ?? ""
