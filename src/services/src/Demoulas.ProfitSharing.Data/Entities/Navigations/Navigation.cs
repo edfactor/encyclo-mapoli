@@ -13,15 +13,21 @@ public sealed class Navigation
         public const short Reconciliation = 5;
         public const short YearEnd = 6;
         public const short ItDevOps = 7;
+        public const short Administrative = 8;
 
         // Secondary drawer top-level menus
-        public const short FiscalClose = 8;
-        public const short DecemberActivities = 9;
+        public const short FiscalClose = 9;
+        public const short DecemberActivities = 10;
 
         // Third-level menus
-        public const short CleanupReports = 10;
-        public const short ProfShareReportByAge = 11;
-        public const short ProfShareByStore = 12;
+        public const short CleanupReports = 11;
+        public const short ProfShareReportByAge = 12;
+        public const short ProfShareByStore = 13;
+
+        // Groups under INQUIRIES
+        public const short InquiriesGroup = 14;
+        public const short AdjustmentsGroup = 15;
+        public const short AdhocGroup = 16;
 
         // Available pages (ids starting at 100)
         public const short MasterInquiry = 100;
@@ -89,7 +95,8 @@ public sealed class Navigation
         public const short OracleHcmDiagnostics = 167;
         public const short ManageStateTaxRates = 173;
         public const short ManageAnnuityRates = 174;
-        public const short AdhocProfLetter73 = 175;
+        public const short ProfitSharingAdjustments = 175;
+        public const short AdhocProfLetter73 = 176;
     }
 
     public short Id { get; set; }

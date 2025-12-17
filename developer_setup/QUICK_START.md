@@ -142,6 +142,10 @@ dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitShar
 cd src/ui
 npm run dev
 
+# UI quality checks (run lint before builds)
+npm run lint
+npm run build:qa
+
 # Pin Node version (Volta)
 volta install node@LTS
 

@@ -25,7 +25,7 @@ const getRowKey = (row: Pick<AnnuityRateDto, "year" | "age">): string => {
 };
 
 const ManageAnnuityRates = () => {
-  const { data, isFetching, refetch } = useGetAnnuityRatesQuery();
+  const { data, isFetching, refetch } = useGetAnnuityRatesQuery({ sortBy: "Year", isSortDescending: true });
   const [updateAnnuityRate, { isLoading: isSaving }] = useUpdateAnnuityRateMutation();
 
   const [rowData, setRowData] = useState<AnnuityRateDto[]>([]);
@@ -257,7 +257,7 @@ const ManageAnnuityRates = () => {
               stopEditingWhenCellsLoseFocus: true,
               enterNavigatesVertically: true,
               enterNavigatesVerticallyAfterEdit: true,
-              onCellValueChanged
+              onCellValueChanged,
             }}
           />
         </Grid>

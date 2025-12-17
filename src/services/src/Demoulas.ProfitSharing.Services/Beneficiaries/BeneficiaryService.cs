@@ -211,7 +211,7 @@ public class BeneficiaryService : IBeneficiaryService
                 City = string.Empty,
                 State = string.Empty,
                 PostalCode = string.Empty,
-                Ssn = string.Empty,
+                Ssn = string.Empty.MaskSsn(),
                 DateOfBirth = DateOnly.MinValue,
                 FullName = string.Empty,
                 FirstName = string.Empty,
@@ -240,7 +240,7 @@ public class BeneficiaryService : IBeneficiaryService
         {
             var resp = new UpdateBeneficiaryContactResponse()
             {
-                Ssn = string.Empty,
+                Ssn = string.Empty.MaskSsn(),
                 DateOfBirth = DateOnly.MinValue,
                 Street1 = string.Empty,
                 City = string.Empty,

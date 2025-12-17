@@ -36,6 +36,7 @@ public sealed class CommentType : ILookupTable<byte>, IEquatable<CommentType>
         public static CommentType SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested => new() { Id = 24, Name = ">64 & >5 100%" };
         public static CommentType ForfeitClassAction => new() { Id = 25, Name = "Forfeit Class Action" }; //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/402817082/008-12+to+forfeit+Class+Action+-+Mockup
         public static CommentType ForfeitAdministrative => new() { Id = 26, Name = "Forfeit Administrative" }; // MAIN-2170 Administrative forfeitures
+        public static CommentType UnforfeitUnder21 => new() { Id = 27, Name = "Administrative - taking money from under 21" }; // PS-2152
     }
 
     // Override Equals method for correct comparison between materialized values and constants

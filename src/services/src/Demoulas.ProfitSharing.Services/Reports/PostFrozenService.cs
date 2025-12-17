@@ -449,131 +449,129 @@ public class PostFrozenService : IPostFrozenService
                             where bal.YearsInPlan > 0 || bal.VestedBalance > 0
                             select new { r.d, r.pp, bal };
 
-            rslt.NumberOfEmployees = await baseQuery.CountAsync(cancellationToken);
-            rslt.NumberOfActiveUnder21With1to2Years = await baseQuery.CountAsync(x =>
-                    (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
-                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
-                    ) &&
-                    x.bal.YearsInPlan >= 1 &&
-                    x.bal.YearsInPlan <= 2,
-                cancellationToken);
-            rslt.NumberOfActiveUnder21With20to80PctVested = await baseQuery.CountAsync(x =>
-                    (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
-                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
-                    ) &&
-                    x.bal.VestingPercent >= .2m &&
-                    x.bal.VestingPercent <= .8m,
-                cancellationToken);
-            rslt.NumberOfActiveUnder21With100PctVested = await baseQuery.CountAsync(x =>
-                    (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
-                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
-                    ) &&
-                    x.bal.VestingPercent == 1,
-                cancellationToken);
+            // Consolidate counts into a single query to reduce DB roundtrips.
+            var countSummary = await baseQuery
+                .TagWith($"PostFrozen.GetUnder21Totals.Counts-{request.ProfitYear}")
+                .GroupBy(_ => 1)
+                .Select(g => new
+                {
+                    TotalEmployees = g.Count(),
 
-            rslt.NumberOfInActiveUnder21With1to2Years = await baseQuery.CountAsync(x =>
-                    (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive &&
-                        x.d.TerminationDate <= calInfo.FiscalEndDate
-                    ) &&
-                    x.bal.YearsInPlan >= 1 &&
-                    x.bal.YearsInPlan <= 2,
-                cancellationToken);
-            rslt.NumberOfInActiveUnder21With20to80PctVested = await baseQuery.CountAsync(x =>
-                    (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive &&
-                        x.d.TerminationDate <= calInfo.FiscalEndDate
-                    ) &&
-                    x.bal.VestingPercent >= .2m &&
-                    x.bal.VestingPercent <= .8m,
-                cancellationToken);
-            rslt.NumberOfInActiveUnder21With100PctVested = await baseQuery.CountAsync(x =>
-                    (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive &&
-                        x.d.TerminationDate <= calInfo.FiscalEndDate
-                    ) &&
-                    x.bal.VestingPercent == 1,
-                cancellationToken);
+                    Active_1to2 = g.Sum(x =>
+                        (
+                            x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                            (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
+                        )
+                        && x.bal.YearsInPlan >= 1
+                        && x.bal.YearsInPlan <= 2
+                            ? 1
+                            : 0),
+                    Active_20to80 = g.Sum(x =>
+                        (
+                            x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                            (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
+                        )
+                        && x.bal.VestingPercent >= .2m
+                        && x.bal.VestingPercent <= .8m
+                            ? 1
+                            : 0),
+                    Active_100 = g.Sum(x =>
+                        (
+                            x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                            (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
+                        )
+                        && x.bal.VestingPercent == 1
+                            ? 1
+                            : 0),
 
-            rslt.NumberOfTerminatedUnder21With1to2Years = await baseQuery.CountAsync(x =>
-                    (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                        x.d.TerminationDate <= calInfo.FiscalEndDate
-                    ) &&
-                    x.bal.YearsInPlan >= 1 &&
-                    x.bal.YearsInPlan <= 2,
-                cancellationToken);
-            rslt.NumberOfTerminatedUnder21With20to80PctVested = await baseQuery.CountAsync(x =>
-                    (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                        x.d.TerminationDate <= calInfo.FiscalEndDate
-                    ) &&
-                    x.bal.VestingPercent >= .2m &&
-                    x.bal.VestingPercent <= .8m,
-                cancellationToken);
-            rslt.NumberOfTerminatedUnder21With100PctVested = await baseQuery.CountAsync(x =>
-                    (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                        x.d.TerminationDate <= calInfo.FiscalEndDate
-                    ) &&
-                    x.bal.VestingPercent == 1,
-                cancellationToken);
+                    Inactive_1to2 = g.Sum(x =>
+                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && x.d.TerminationDate <= calInfo.FiscalEndDate)
+                        && x.bal.YearsInPlan >= 1
+                        && x.bal.YearsInPlan <= 2
+                            ? 1
+                            : 0),
+                    Inactive_20to80 = g.Sum(x =>
+                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && x.d.TerminationDate <= calInfo.FiscalEndDate)
+                        && x.bal.VestingPercent >= .2m
+                        && x.bal.VestingPercent <= .8m
+                            ? 1
+                            : 0),
+                    Inactive_100 = g.Sum(x =>
+                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && x.d.TerminationDate <= calInfo.FiscalEndDate)
+                        && x.bal.VestingPercent == 1
+                            ? 1
+                            : 0),
+
+                    Terminated_1to2 = g.Sum(x =>
+                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate <= calInfo.FiscalEndDate)
+                        && x.bal.YearsInPlan >= 1
+                        && x.bal.YearsInPlan <= 2
+                            ? 1
+                            : 0),
+                    Terminated_20to80 = g.Sum(x =>
+                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate <= calInfo.FiscalEndDate)
+                        && x.bal.VestingPercent >= .2m
+                        && x.bal.VestingPercent <= .8m
+                            ? 1
+                            : 0),
+                    Terminated_100 = g.Sum(x =>
+                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate <= calInfo.FiscalEndDate)
+                        && x.bal.VestingPercent == 1
+                            ? 1
+                            : 0),
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            rslt.NumberOfEmployees = countSummary?.TotalEmployees ?? 0;
+            rslt.NumberOfActiveUnder21With1to2Years = countSummary?.Active_1to2 ?? 0;
+            rslt.NumberOfActiveUnder21With20to80PctVested = countSummary?.Active_20to80 ?? 0;
+            rslt.NumberOfActiveUnder21With100PctVested = countSummary?.Active_100 ?? 0;
+
+            rslt.NumberOfInActiveUnder21With1to2Years = countSummary?.Inactive_1to2 ?? 0;
+            rslt.NumberOfInActiveUnder21With20to80PctVested = countSummary?.Inactive_20to80 ?? 0;
+            rslt.NumberOfInActiveUnder21With100PctVested = countSummary?.Inactive_100 ?? 0;
+
+            rslt.NumberOfTerminatedUnder21With1to2Years = countSummary?.Terminated_1to2 ?? 0;
+            rslt.NumberOfTerminatedUnder21With20to80PctVested = countSummary?.Terminated_20to80 ?? 0;
+            rslt.NumberOfTerminatedUnder21With100PctVested = countSummary?.Terminated_100 ?? 0;
+
 
             rslt.TotalBeginningBalance = await (
                 from b in rootQuery
                 join bal in _totalService.GetTotalBalanceSet(ctx, lastYear) on b.d.Ssn equals bal.Ssn
                 group bal by true
                 into grp
-                select grp.Sum(x => x.TotalAmount)
-            ).FirstOrDefaultAsync(cancellationToken);
+                select grp.Sum(x => x.TotalAmount.HasValue ? x.TotalAmount.Value : 0m)
+            ).TagWith($"PostFrozen.GetUnder21Totals.BeginningBalance-{request.ProfitYear}")
+            .FirstOrDefaultAsync(cancellationToken);
 
-            rslt.TotalEarnings = await (
+            // Consolidate ProfitDetails-based totals into a single scan (and filter by profit year).
+            var profitDetailTotals = await (
                 from b in rootQuery
                 join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
-                where s_earningsProfitCodes.Contains(pd.ProfitCodeId)
+                where pd.ProfitYear == request.ProfitYear
                 group pd by true
                 into grp
-                select grp.Sum(x => x.Earnings)
-            ).FirstOrDefaultAsync(cancellationToken);
+                select new
+                {
+                    TotalEarnings = grp.Sum(x => s_earningsProfitCodes.Contains(x.ProfitCodeId) ? x.Earnings : 0m),
+                    TotalContributions = grp.Sum(x => s_contributionProfitCodes.Contains(x.ProfitCodeId) ? x.Contribution : 0m),
+                    TotalForfeituresNet = grp.Sum(x =>
+                        x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                            ? x.Forfeiture
+                            : x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id
+                                ? -x.Forfeiture
+                                : 0m),
+                    TotalDisbursements = grp.Sum(x => s_distributionProfitCodes.Contains(x.ProfitCodeId) ? -x.Forfeiture : 0m)
+                }
+            )
+            .TagWith($"PostFrozen.GetUnder21Totals.ProfitDetailsTotals-{request.ProfitYear}")
+            .FirstOrDefaultAsync(cancellationToken);
 
-            rslt.TotalContributions = await (
-                from b in rootQuery
-                join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
-                where s_contributionProfitCodes.Contains(pd.ProfitCodeId)
-                group pd by true
-                into grp
-                select grp.Sum(x => x.Contribution)
-            ).FirstOrDefaultAsync(cancellationToken);
-
-            rslt.TotalForfeitures = await (
-                from b in rootQuery
-                join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
-                where pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
-                group pd by true
-                into grp
-                select grp.Sum(x => x.Forfeiture)
-            ).FirstOrDefaultAsync(cancellationToken);
-
-            rslt.TotalForfeitures -= await (
-                from b in rootQuery
-                join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
-                where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id
-                group pd by true
-                into grp
-                select grp.Sum(x => x.Forfeiture)
-            ).FirstOrDefaultAsync(cancellationToken);
-
-            rslt.TotalDisbursements = await (
-                from b in rootQuery
-                join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
-                where s_distributionProfitCodes.Contains(pd.ProfitCodeId)
-                group pd by true
-                into grp
-                select grp.Sum(x => x.Forfeiture * -1)
-            ).FirstOrDefaultAsync(cancellationToken);
+            rslt.TotalEarnings = profitDetailTotals?.TotalEarnings ?? 0m;
+            rslt.TotalContributions = profitDetailTotals?.TotalContributions ?? 0m;
+            rslt.TotalForfeitures = profitDetailTotals?.TotalForfeituresNet ?? 0m;
+            rslt.TotalDisbursements = profitDetailTotals?.TotalDisbursements ?? 0m;
 
 
             rslt.TotalEndingBalance = await (
@@ -581,16 +579,18 @@ public class PostFrozenService : IPostFrozenService
                 join bal in _totalService.GetTotalBalanceSet(ctx, request.ProfitYear) on b.d.Ssn equals bal.Ssn
                 group bal by true
                 into grp
-                select grp.Sum(x => x.TotalAmount)
-            ).FirstOrDefaultAsync(cancellationToken);
+                select grp.Sum(x => x.TotalAmount.HasValue ? x.TotalAmount.Value : 0m)
+            ).TagWith($"PostFrozen.GetUnder21Totals.EndingBalance-{request.ProfitYear}")
+            .FirstOrDefaultAsync(cancellationToken);
 
             rslt.TotalVestingBalance = await (
                 from b in rootQuery
                 join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on b.d.Ssn equals bal.Ssn
                 group bal by true
                 into grp
-                select grp.Sum(x => x.VestedBalance)
-            ).FirstOrDefaultAsync(cancellationToken);
+                select grp.Sum(x => x.VestedBalance.HasValue ? x.VestedBalance.Value : 0m)
+            ).TagWith($"PostFrozen.GetUnder21Totals.VestingBalance-{request.ProfitYear}")
+            .FirstOrDefaultAsync(cancellationToken);
 
 
 

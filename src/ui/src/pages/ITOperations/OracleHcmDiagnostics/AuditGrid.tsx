@@ -1,19 +1,19 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Typography
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
-import { SortParams } from "../../../hooks/useGridPagination";
 import { GRID_KEYS } from "../../../constants";
+import { SortParams } from "../../../hooks/useGridPagination";
 import { useClearDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
 import type { DemographicSyncAuditRecord } from "../../../types";
 import { GetAuditGridColumns } from "./AuditGridColumns";
@@ -56,7 +56,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
       setShowClearConfirmation(false);
       onClearSuccess();
     } catch (error: unknown) {
-      setClearError((error as Error)?.message || "Failed to clear audit records");
+      setClearError((error as Error)?.message || "Failed to clear sync error records");
     }
   };
 
@@ -66,7 +66,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          Demographic Sync Audit
+          Demographic Sync Errors
         </Typography>
         <Button
           variant="contained"
@@ -74,7 +74,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
           startIcon={<DeleteIcon />}
           onClick={handleClearClick}
           disabled={isLoading || isClearing || (data?.results?.length ?? 0) === 0}>
-          Clear Audit Records
+          Clear Sync Error Records
         </Button>
       </Box>
 
@@ -120,7 +120,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
         <Typography
           variant="body1"
           sx={{ color: "#666", textAlign: "center", padding: "32px" }}>
-          No audit records found
+          No sync errors found
         </Typography>
       )}
 
@@ -130,11 +130,11 @@ const AuditGrid: React.FC<AuditGridProps> = ({
         onClose={() => setShowClearConfirmation(false)}
         maxWidth="xs"
         fullWidth>
-        <DialogTitle>Clear Demographic Sync Audit</DialogTitle>
+        <DialogTitle>Clear Demographic Sync Errors</DialogTitle>
         <DialogContent>
           <Box sx={{ paddingTop: "16px" }}>
             <Typography variant="body1">
-              Are you sure you want to delete all {data?.total || 0} audit records?
+                Are you sure you want to delete all {data?.total || 0} sync error records?
             </Typography>
             <Typography
               variant="body2"

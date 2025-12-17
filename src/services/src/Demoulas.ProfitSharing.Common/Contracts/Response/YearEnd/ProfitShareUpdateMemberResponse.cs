@@ -9,6 +9,7 @@ public record ProfitShareUpdateMemberResponse : IIsExecutive
     public long Badge { get; set; }
     public string? Psn { get; set; }
     [MaskSensitive] public string? Name { get; set; }
+    [MaskSensitive] public string? FullName => Name;
     public decimal BeginningAmount { get; set; }
     public decimal Distributions { get; set; }
     public decimal Military { get; set; }

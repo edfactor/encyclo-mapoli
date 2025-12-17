@@ -23,6 +23,12 @@ import {
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
+
+type GetAnnuityRatesQueryArgs = {
+  sortBy: string;
+  isSortDescending: boolean;
+};
+
 export const ItOperationsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "itOperationsApi",
@@ -31,28 +37,32 @@ export const ItOperationsApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
-    getAnnuityRates: builder.query<AnnuityRateDto[], void>({
-      query: () => ({
-        url: "itdevops/annuity-rates",
-        method: "GET"
+    getAnnuityRates: builder.query<AnnuityRateDto[], GetAnnuityRatesQueryArgs>({
+      query: (params) => ({
+        url: "administration/annuity-rates",
+        method: "GET",
+        params: {
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
       })
     }),
     updateAnnuityRate: builder.mutation<AnnuityRateDto, UpdateAnnuityRateRequest>({
       query: (request) => ({
-        url: "itdevops/annuity-rates",
+        url: "administration/annuity-rates",
         method: "PUT",
         body: request
       })
     }),
     getStateTaxRates: builder.query<StateTaxRateDto[], void>({
       query: () => ({
-        url: "itdevops/state-tax-rates",
+        url: "administration/state-tax-rates",
         method: "GET"
       })
     }),
     updateStateTaxRate: builder.mutation<StateTaxRateDto, UpdateStateTaxRateRequest>({
       query: (request) => ({
-        url: "itdevops/state-tax-rates",
+        url: "administration/state-tax-rates",
         method: "PUT",
         body: request
       })

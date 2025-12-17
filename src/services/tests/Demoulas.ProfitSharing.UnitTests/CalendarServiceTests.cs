@@ -1,14 +1,11 @@
 ﻿using System.Globalization;
 using System.Text.Json;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Interfaces;
-using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 using Demoulas.ProfitSharing.Security;
@@ -47,7 +44,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
     [InlineData("250509")] // 2025-05-09
     [InlineData("251009")] // 2025-10-09
     [InlineData("251209")] // 2025-12-09
-    [Theory(DisplayName = "Find Weekending Date", Skip = "CaldarRecordSeeder from common library doesn't have calendar data for 2025. Test requires update when common library calendar data is extended.")]
+    [Theory(DisplayName = "Find Weekending Date")]
     public async Task FindWeekendingDate(string sDate)
     {
         var date = DateOnly.ParseExact(sDate, "yyMMdd", CultureInfo.InvariantCulture);

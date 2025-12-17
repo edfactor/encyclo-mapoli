@@ -34,7 +34,7 @@ public class GetActiveFrozenDemographicEndpoint : ProfitSharingResponseEndpoint<
                 }
             };
         });
-        Group<ItDevOpsAllUsersGroup>();
+        Group<ItDevOpsGroup>();
     }
 
     public override async Task<FrozenStateResponse> ExecuteAsync(CancellationToken ct)

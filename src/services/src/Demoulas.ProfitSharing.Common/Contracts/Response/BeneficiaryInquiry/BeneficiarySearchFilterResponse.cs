@@ -8,7 +8,7 @@ public record BeneficiarySearchFilterResponse
 {
     public int BadgeNumber { get; set; }
     public short PsnSuffix { get; set; }
-    [MaskSensitive] public string? Name { get; set; }
+    [MaskSensitive] public string? FullName { get; set; }
     public string? Ssn { get; set; }
     [MaskSensitive] public string? Street { get; set; }
     [MaskSensitive] public string? City { get; set; }

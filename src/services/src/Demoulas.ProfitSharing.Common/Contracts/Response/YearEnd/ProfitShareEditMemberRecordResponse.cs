@@ -11,7 +11,7 @@ public record ProfitShareEditMemberRecordResponse : IIsExecutive
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; set; }
     public long Psn { get; set; }
-    public string? Name { get; set; }
+    public string? FullName { get; set; }
     public byte Code { get; set; }
     public decimal ContributionAmount { get; set; }
     public decimal EarningsAmount { get; set; }
@@ -29,7 +29,7 @@ public record ProfitShareEditMemberRecordResponse : IIsExecutive
         {
             BadgeNumber = 123,
             Psn = 123,
-            Name = "VILLANUEVA, ISAAC",
+            FullName = "VILLANUEVA, ISAAC",
             ContributionAmount = 4350m,
             EarningsAmount = 50,
             ForfeitureAmount = 290,

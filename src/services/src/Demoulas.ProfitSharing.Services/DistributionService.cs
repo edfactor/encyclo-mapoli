@@ -71,7 +71,7 @@ public sealed class DistributionService : IDistributionService
                             dist.StateTaxAmount,
                             dist.CheckAmount,
                             IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly,
-                            DemographicId = dem != null ? (int?)dem.OracleHcmId : null,
+                            DemographicId = dem != null ? (int?)dem.Id : null,
                             BeneficiaryId = ben != null ? (int?)ben.Id : null
                         };
 

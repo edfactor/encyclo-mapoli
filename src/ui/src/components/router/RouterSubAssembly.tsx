@@ -74,6 +74,9 @@ const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDW
 const DemographicFreeze = lazy(() => import("../../pages/ITOperations/DemographicFreeze/DemographicFreeze"));
 const ManageStateTaxes = lazy(() => import("../../pages/ITOperations/ManageStateTaxes/ManageStateTaxes"));
 const ManageAnnuityRates = lazy(() => import("../../pages/ITOperations/ManageAnnuityRates/ManageAnnuityRates"));
+const ProfitSharingAdjustments = lazy(
+  () => import("../../pages/ITOperations/ProfitSharingAdjustments/ProfitSharingAdjustments")
+);
 const OracleHcmDiagnostics = lazy(() => import("../../pages/ITOperations/OracleHcmDiagnostics/OracleHcmDiagnostics"));
 
 const PayMasterUpdateSummary = lazy(() => import("@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary"));
@@ -609,7 +612,8 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.MANAGE_STATE_TAXES}
                   element={
-                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageStateTaxes />
                       </Suspense>
@@ -619,9 +623,21 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.MANAGE_ANNUITY_RATES}
                   element={
-                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageAnnuityRates />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.PROFIT_SHARING_ADJUSTMENTS}
+                  element={
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <ProfitSharingAdjustments />
                       </Suspense>
                     </ProtectedRoute>
                   }

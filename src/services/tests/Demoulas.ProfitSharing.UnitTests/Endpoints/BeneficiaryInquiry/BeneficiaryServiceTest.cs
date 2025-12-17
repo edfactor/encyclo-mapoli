@@ -82,7 +82,7 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                 Age = 41,
                 BadgeNumber = 703244,
                 City = "PEPPERELL",
-                Name= "DELAROSA, ZOE",
+                FullName = "DELAROSA, ZOE",
                 PsnSuffix= 1000,
                 Ssn ="XXX-XX-0692",
                 State = "MA",

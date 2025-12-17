@@ -47,5 +47,8 @@ export * from "./reports/qpay";
 export * from "./reports/recent-termination";
 export * from "./reports/terminated-letters";
 
+// Profit Details types
+export * from "./profit-details/profit-sharing-adjustments";
+
 // UI types
 export * from "./ui/grid";
