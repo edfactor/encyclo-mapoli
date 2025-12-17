@@ -1,37 +1,54 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { UNSAFE_NavigationContext as NavigationContext } from "react-router-dom";
 
 const UNSAVED_CHANGES_MESSAGE = "Please save your changes. Do you want to leave without saving?";
 
+/**
+ * Navigation guard that prevents accidental navigation when there are unsaved changes.
+ * Works with legacy BrowserRouter (does not require data router).
+ */
 export const useUnsavedChangesGuard = (hasUnsavedChanges: boolean) => {
-  // Handle browser navigation (refresh, close tab)
+  const { navigator } = useContext(NavigationContext);
+
+  // Block React Router SPA navigation (navigate(), <Link>, etc.)
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = "Please save your changes.";
-        return "Please save your changes.";
-      }
+    if (!hasUnsavedChanges) return;
+
+    // Override the navigator's push and replace methods
+    const originalPush = navigator.push;
+    const originalReplace = navigator.replace;
+
+    const blockNavigation = (originalFn: typeof navigator.push) => {
+      return (...args: Parameters<typeof navigator.push>) => {
+        const userConfirmed = window.confirm(UNSAVED_CHANGES_MESSAGE);
+        if (userConfirmed) {
+          originalFn.apply(navigator, args);
+        }
+      };
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+    navigator.push = blockNavigation(originalPush);
+    navigator.replace = blockNavigation(originalReplace);
+
+    return () => {
+      navigator.push = originalPush;
+      navigator.replace = originalReplace;
+    };
+  }, [hasUnsavedChanges, navigator]);
 
   // Handle browser back/forward buttons
   useEffect(() => {
     if (!hasUnsavedChanges) return;
 
-    const handlePopState = (event: PopStateEvent) => {
-      if (hasUnsavedChanges) {
-        const userConfirmed = window.confirm(UNSAVED_CHANGES_MESSAGE);
-        if (!userConfirmed) {
-          window.history.pushState(null, "", window.location.href);
-          event.preventDefault();
-        }
+    const handlePopState = () => {
+      const userConfirmed = window.confirm(UNSAVED_CHANGES_MESSAGE);
+      if (!userConfirmed) {
+        // Push current state back to prevent navigation
+        window.history.pushState(null, "", window.location.href);
       }
     };
 
-    // Push current state to enable detection of back button
+    // Push initial state so we can detect back button
     window.history.pushState(null, "", window.location.href);
     window.addEventListener("popstate", handlePopState);
 
@@ -40,32 +57,17 @@ export const useUnsavedChangesGuard = (hasUnsavedChanges: boolean) => {
     };
   }, [hasUnsavedChanges]);
 
-  // Handle navigation through links and buttons
+  // Handle browser navigation (refresh, close tab)
   useEffect(() => {
     if (!hasUnsavedChanges) return;
 
-    const handleClick = (event: Event) => {
-      const target = event.target as HTMLElement;
-      const link = target.closest('a, [role="button"], button');
-
-      if (link && hasUnsavedChanges) {
-        const href = link.getAttribute("href");
-
-        if (href && href !== window.location.pathname && href !== "#") {
-          const userConfirmed = window.confirm(UNSAVED_CHANGES_MESSAGE);
-          if (!userConfirmed) {
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
-          }
-        }
-      }
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "Please save your changes.";
+      return "Please save your changes.";
     };
 
-    document.addEventListener("click", handleClick, true);
-
-    return () => {
-      document.removeEventListener("click", handleClick, true);
-    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges]);
 };
