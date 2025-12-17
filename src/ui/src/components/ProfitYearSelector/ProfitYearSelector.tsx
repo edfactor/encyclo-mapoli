@@ -2,7 +2,7 @@ import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material"
 import InputLabel from "@mui/material/InputLabel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetProfitYearSelectorFrozenDataQuery } from "reduxstore/api/ItOperationsApi";
+import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { useLazyGetAccountingYearQuery } from "reduxstore/api/LookupsApi";
 import { RootState } from "reduxstore/store";
 import { mmDDYYFormat } from "../../utils/dateUtils";
@@ -24,25 +24,19 @@ const ProfitYearSelector = ({
   disabledWhileLoading = true,
   defaultValue
 }: ProfitYearSelectorProps) => {
-  const profitYearSelectorData = useSelector((state: RootState) => state.frozen.profitYearSelectorData);
+  const activeFrozenState = useSelector((state: RootState) => state.frozen.frozenStateResponseData);
   const token = useSelector((state: RootState) => state.security.token);
-  const [triggerFrozenStateSearch, { isLoading: isFrozenLoading }] = useLazyGetProfitYearSelectorFrozenDataQuery();
+  const [triggerFetchActiveFrozenState, { isLoading: isFrozenLoading }] = useLazyGetFrozenStateResponseQuery();
   const thisYear = new Date().getFullYear();
 
   // Get frozen profit year if available
   useEffect(() => {
     if (showDates && token) {
-      triggerFrozenStateSearch({
-        skip: 0,
-        take: 1,
-        sortBy: "createdDateTime",
-        isSortDescending: true
-      });
+      triggerFetchActiveFrozenState();
     }
-  }, [showDates, triggerFrozenStateSearch, token]);
+  }, [showDates, triggerFetchActiveFrozenState, token]);
 
-  const activeFrozenState = profitYearSelectorData?.results?.find((state) => state.isActive);
-  const hasFrozenData = profitYearSelectorData?.results && profitYearSelectorData.results.length > 0;
+  const hasFrozenData = !!activeFrozenState?.isActive && !!activeFrozenState?.profitYear;
 
   // Build years to display
   const yearsToDisplay = useMemo<number[]>(() => {

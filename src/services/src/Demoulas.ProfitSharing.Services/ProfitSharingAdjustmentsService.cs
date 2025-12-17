@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
+using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -18,10 +19,11 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 {
     private const int MaxRows = 18;
     private const string AdministrativeComment = "ADMINISTRATIVE";
+    private const byte AdministrativeProfitYearIteration = 3;
+    private const int AdministrativeDistributionSequence = 0;
 
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly ITotalService _totalService;
     private readonly IAuditService _auditService;
     private readonly ILogger<ProfitSharingAdjustmentsService> _logger;
     private readonly TimeProvider _timeProvider;
@@ -29,14 +31,12 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
     public ProfitSharingAdjustmentsService(
         IProfitSharingDataContextFactory dbContextFactory,
         IDemographicReaderService demographicReaderService,
-        ITotalService totalService,
         IAuditService auditService,
         ILogger<ProfitSharingAdjustmentsService> logger,
         TimeProvider? timeProvider = null)
     {
         _dbContextFactory = dbContextFactory;
         _demographicReaderService = demographicReaderService;
-        _totalService = totalService;
         _auditService = auditService;
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
@@ -62,14 +62,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 });
             }
 
-            if (request.SequenceNumber < 0)
-            {
-                return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
-                {
-                    [nameof(request.SequenceNumber)] = ["SequenceNumber must be zero or greater."]
-                });
-            }
-
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
 
             var demographic = await demographicQuery
@@ -88,17 +80,12 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var profitYear = request.ProfitYear;
             var includeAllRows = request.GetAllRows;
             var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
-            var canEditYearExtension = IsUnderAgeAtContributionYearEnd(demographic.DateOfBirth, profitYear, underAgeThreshold: 18);
-            var isOver21AtInitialHire = IsOverAgeAtDate(demographic.DateOfBirth, demographic.HireDate, ageThreshold: 21);
-
-            var balances = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, new HashSet<int> { ssn }, profitYear, ct);
-            var balance = balances.FirstOrDefault();
-            var currentBalance = balance?.CurrentBalance ?? 0m;
-            var vestedBalance = balance?.VestedBalance ?? 0m;
 
             // Confluence rule: default to only show rows for accounts under 21 as of today.
             // Users can override via GetAllRows.
             var includeRowsForYear = includeAllRows || IsUnderAgeAtDate(demographic.DateOfBirth, today, underAgeThreshold: 21);
+
+            byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
             if (!includeRowsForYear)
             {
@@ -106,25 +93,19 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 {
                     ProfitYear = request.ProfitYear,
                     DemographicId = demographicId,
-                    IsOver21AtInitialHire = isOver21AtInitialHire,
-                    CurrentBalance = currentBalance,
-                    VestedBalance = vestedBalance,
                     BadgeNumber = request.BadgeNumber,
-                    SequenceNumber = request.SequenceNumber,
                     Rows = new List<ProfitSharingAdjustmentRowResponse>()
                 });
             }
 
             var profitDetails = includeRowsForYear
                 ? await ctx.ProfitDetails
-                    .TagWith($"ProfitSharingAdjustments-Get-ProfitDetails-{profitYear}-{request.SequenceNumber}")
+                    .TagWith($"ProfitSharingAdjustments-Get-ProfitDetails-AllYears")
                     .Where(pd =>
                         pd.Ssn == ssn &&
-                        pd.ProfitYear == profitYear &&
-                        pd.DistributionSequence == request.SequenceNumber &&
                         pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
-                    .OrderBy(pd => pd.ProfitYearIteration)
-                    .ThenBy(pd => pd.CreatedAtUtc)
+                    .OrderByDescending(pd => pd.ProfitYear)
+                    .ThenByDescending(pd => pd.CreatedAtUtc)
                     .Take(MaxRows)
                     .Select(pd => new ProfitSharingAdjustmentRowResponse
                     {
@@ -133,64 +114,37 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         ProfitYear = pd.ProfitYear,
                         ProfitYearIteration = pd.ProfitYearIteration,
                         ProfitCodeId = pd.ProfitCodeId,
+                        ProfitCodeName = pd.ProfitCode != null ? pd.ProfitCode.Name : string.Empty,
                         Contribution = pd.Contribution,
                         Earnings = pd.Earnings,
-                        Forfeiture = pd.Forfeiture,
+                        Forfeiture = !paymentProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
+                        Payment = paymentProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
+                        FederalTaxes = pd.FederalTaxes,
+                        StateTaxes = pd.StateTaxes,
+                        TaxCodeId = pd.TaxCodeId != null ? pd.TaxCodeId.Value : TaxCode.Constants.Unknown.Id,
                         ActivityDate = pd.MonthToDate > 0 && pd.YearToDate > 0
                             ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1)
                             : null,
                         Comment = pd.Remark != null ? pd.Remark : string.Empty,
-                        // For 008-22 parity: only the EXT (ProfitYearIteration) field is editable, and only
-                        // when the account holder is under 18 as of Dec 31 of the contribution year.
-                        IsEditable = canEditYearExtension
+                        IsEditable = false
                     })
                     .ToListAsync(ct)
                 : new List<ProfitSharingAdjustmentRowResponse>();
 
             for (var i = 0; i < profitDetails.Count; i++)
             {
-                profitDetails[i] = profitDetails[i] with { RowNumber = i + 1 };
-            }
-
-            var responseRows = new List<ProfitSharingAdjustmentRowResponse>(MaxRows);
-            responseRows.AddRange(profitDetails);
-
-            while (responseRows.Count < MaxRows)
-            {
-                var rowNumber = responseRows.Count + 1;
-
-                // For 008-22 parity, we expose exactly one "new row" for inserts.
-                // Only amount fields are intended to be editable on that row; the UI enforces that.
-                // We keep additional filler rows non-editable and blank.
-                bool isInsertRow = rowNumber == profitDetails.Count + 1;
-
-                responseRows.Add(new ProfitSharingAdjustmentRowResponse
+                profitDetails[i] = profitDetails[i] with
                 {
-                    ProfitDetailId = null,
-                    RowNumber = rowNumber,
-                    ProfitYear = request.ProfitYear,
-                    ProfitYearIteration = 3,
-                    ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
-                    Contribution = 0,
-                    Earnings = 0,
-                    Forfeiture = 0,
-                    ActivityDate = isInsertRow ? today : null,
-                    Comment = isInsertRow ? AdministrativeComment : string.Empty,
-                    // For the insert row: EXT is not editable.
-                    IsEditable = false
-                });
+                    RowNumber = i + 1
+                };
             }
 
             return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
             {
                 ProfitYear = request.ProfitYear,
                 DemographicId = demographicId,
-                IsOver21AtInitialHire = isOver21AtInitialHire,
-                CurrentBalance = currentBalance,
-                VestedBalance = vestedBalance,
                 BadgeNumber = request.BadgeNumber,
-                SequenceNumber = request.SequenceNumber,
-                Rows = responseRows
+                Rows = profitDetails
             });
         }, ct);
     }
@@ -231,14 +185,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
         foreach (var row in request.Rows)
         {
-            if (row.ProfitYearIteration is not (0 or 3))
-            {
-                return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
-                {
-                    [nameof(ProfitSharingAdjustmentRowRequest.ProfitYearIteration)] = ["ProfitYearIteration (EXT) must be 0 or 3."]
-                });
-            }
-
             if (row.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id)
             {
                 return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
@@ -247,7 +193,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 });
             }
 
-            if (row.Contribution == 0 && row.Earnings == 0 && row.Forfeiture == 0 && row.ProfitDetailId is null)
+            if (row is { Contribution: 0, Earnings: 0, Forfeiture: 0, ProfitDetailId: null })
             {
                 // Allow empty insert rows.
                 continue;
@@ -287,14 +233,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     });
                 }
 
-                var canEditYearExtension = IsUnderAgeAtContributionYearEnd(demographic.DateOfBirth, profitYear, underAgeThreshold: 18);
-                var isOver21AtInitialHire = IsOverAgeAtDate(demographic.DateOfBirth, demographic.HireDate, ageThreshold: 21);
-
-                var balances = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, new HashSet<int> { ssn }, profitYear, ct);
-                var balance = balances.FirstOrDefault();
-                var currentBalance = balance?.CurrentBalance ?? 0m;
-                var vestedBalance = balance?.VestedBalance ?? 0m;
-
                 var idsToUpdate = request.Rows
                     .Where(r => r.ProfitDetailId.HasValue)
                     .Select(r => r.ProfitDetailId!.Value)
@@ -304,14 +242,13 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 List<ProfitDetail> existing = idsToUpdate.Length == 0
                     ? new List<ProfitDetail>()
                     : await ctx.ProfitDetails
-                        .TagWith($"ProfitSharingAdjustments-Save-LoadExisting-{profitYear}-{request.SequenceNumber}")
+                        .TagWith($"ProfitSharingAdjustments-Save-LoadExisting-{profitYear}")
                         .Where(pd => idsToUpdate.Contains(pd.Id))
                         .ToListAsync(ct);
 
                 var existingById = existing.ToDictionary(pd => pd.Id);
 
                 var nowUtc = DateTimeOffset.UtcNow;
-                var extUpdates = new List<(int ProfitDetailId, byte OriginalValue, byte NewValue)>();
 
                 foreach (var row in request.Rows.Where(r => r.ProfitDetailId.HasValue))
                 {
@@ -325,11 +262,11 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         });
                     }
 
-                    if (pd.Ssn != ssn || pd.ProfitYear != profitYear || pd.DistributionSequence != request.SequenceNumber)
+                    if (pd.Ssn != ssn || pd.ProfitYear != profitYear)
                     {
                         return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                         {
-                            [nameof(ProfitSharingAdjustmentRowRequest.ProfitDetailId)] = [$"ProfitDetailId {id} does not belong to the requested employee/year/sequence."]
+                            [nameof(ProfitSharingAdjustmentRowRequest.ProfitDetailId)] = [$"ProfitDetailId {id} does not belong to the requested employee/year."]
                         });
                     }
 
@@ -341,13 +278,13 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         });
                     }
 
-                    // 008-22 parity: For existing rows, only EXT (ProfitYearIteration) may be updated.
+                    // Existing rows are read-only in this workflow.
                     if (row.Contribution != pd.Contribution || row.Earnings != pd.Earnings || row.Forfeiture != pd.Forfeiture)
                     {
                         return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                         {
                             [nameof(ProfitSharingAdjustmentRowRequest.RowNumber)] = [
-                                $"Row {row.RowNumber} can only update EXT (ProfitYearIteration). Amount fields are read-only for existing rows."
+                                $"Row {row.RowNumber} is read-only. Amount fields cannot be changed for existing rows."
                             ]
                         });
                     }
@@ -358,7 +295,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                         {
                             [nameof(ProfitSharingAdjustmentRowRequest.RowNumber)] = [
-                                $"Row {row.RowNumber} can only update EXT (ProfitYearIteration). ActivityDate is read-only for existing rows."
+                                $"Row {row.RowNumber} is read-only. ActivityDate cannot be changed for existing rows."
                             ]
                         });
                     }
@@ -369,27 +306,10 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                         {
                             [nameof(ProfitSharingAdjustmentRowRequest.RowNumber)] = [
-                                $"Row {row.RowNumber} can only update EXT (ProfitYearIteration). Comment is read-only for existing rows."
+                                $"Row {row.RowNumber} is read-only. Comment cannot be changed for existing rows."
                             ]
                         });
                     }
-
-                    if (!canEditYearExtension && row.ProfitYearIteration != pd.ProfitYearIteration)
-                    {
-                        return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
-                        {
-                            [nameof(ProfitSharingAdjustmentRowRequest.ProfitYearIteration)] = [
-                                "Year extension (EXT) is only editable when the account holder is under 18 as of Dec 31 of the contribution year."
-                            ]
-                        });
-                    }
-
-                    if (row.ProfitYearIteration != pd.ProfitYearIteration)
-                    {
-                        extUpdates.Add((pd.Id, pd.ProfitYearIteration, row.ProfitYearIteration));
-                    }
-
-                    pd.ProfitYearIteration = row.ProfitYearIteration;
 
                     pd.ModifiedAtUtc = nowUtc;
                 }
@@ -412,22 +332,14 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
                 foreach (var row in insertCandidates)
                 {
-                    if (row.ProfitYearIteration != 3)
-                    {
-                        return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
-                        {
-                            [nameof(ProfitSharingAdjustmentRowRequest.ProfitYearIteration)] = ["New rows must have EXT (ProfitYearIteration) = 3."]
-                        });
-                    }
-
                     var activityDate = today;
 
                     var newProfitDetail = new ProfitDetail
                     {
                         Ssn = ssn,
                         ProfitYear = profitYear,
-                        ProfitYearIteration = row.ProfitYearIteration,
-                        DistributionSequence = request.SequenceNumber,
+                        ProfitYearIteration = AdministrativeProfitYearIteration,
+                        DistributionSequence = AdministrativeDistributionSequence,
                         ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
                         Contribution = row.Contribution,
                         Earnings = row.Earnings,
@@ -448,25 +360,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
                 await ctx.SaveChangesAsync(ct);
 
-                // Audit updates (EXT changes) and optional insert.
-                foreach (var update in extUpdates)
-                {
-                    await _auditService.LogDataChangeAsync(
-                        operationName: "Update Profit Sharing Adjustment",
-                        tableName: "PROFIT_DETAIL",
-                        auditOperation: AuditEvent.AuditOperations.Update,
-                        primaryKey: $"Id:{update.ProfitDetailId}",
-                        changes:
-                        [
-                            new AuditChangeEntryInput
-                            {
-                                ColumnName = "PROFIT_YEAR_ITERATION",
-                                OriginalValue = update.OriginalValue.ToString(),
-                                NewValue = update.NewValue.ToString(),
-                            },
-                        ],
-                        cancellationToken: ct);
-                }
+                // Audit optional insert.
 
                 if (insertedProfitDetail is not null)
                 {
@@ -495,11 +389,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 {
                     ProfitYear = request.ProfitYear,
                     DemographicId = demographicId,
-                    IsOver21AtInitialHire = isOver21AtInitialHire,
-                    CurrentBalance = currentBalance,
-                    VestedBalance = vestedBalance,
                     BadgeNumber = request.BadgeNumber,
-                    SequenceNumber = request.SequenceNumber,
                     Rows = []
                 });
             }, ct);
@@ -512,24 +402,16 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             return await GetAsync(new GetProfitSharingAdjustmentsRequest
             {
                 ProfitYear = request.ProfitYear,
-                BadgeNumber = request.BadgeNumber,
-                SequenceNumber = request.SequenceNumber
+                BadgeNumber = request.BadgeNumber
             }, ct);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save profit sharing adjustments for BadgeNumber {BadgeNumber} year {ProfitYear} seq {SequenceNumber}",
-                request.BadgeNumber, request.ProfitYear, request.SequenceNumber);
+            _logger.LogError(ex, "Failed to save profit sharing adjustments for BadgeNumber {BadgeNumber} year {ProfitYear}",
+                request.BadgeNumber, request.ProfitYear);
 
             return Result<GetProfitSharingAdjustmentsResponse>.Failure(Error.Unexpected("Failed to save profit sharing adjustments."));
         }
-    }
-
-    private static bool IsUnderAgeAtContributionYearEnd(DateOnly dateOfBirth, short profitYear, int underAgeThreshold)
-    {
-        var asOf = new DateOnly(profitYear, 12, 31);
-
-        return IsUnderAgeAtDate(dateOfBirth, asOf, underAgeThreshold);
     }
 
     private static bool IsUnderAgeAtDate(DateOnly dateOfBirth, DateOnly asOf, int underAgeThreshold)
@@ -541,17 +423,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
         }
 
         return age < underAgeThreshold;
-    }
-
-    private static bool IsOverAgeAtDate(DateOnly dateOfBirth, DateOnly asOf, int ageThreshold)
-    {
-        var age = asOf.Year - dateOfBirth.Year;
-        if (dateOfBirth > asOf.AddYears(-age))
-        {
-            age--;
-        }
-
-        return age > ageThreshold;
     }
 
     private static DateOnly? GetActivityDateOrNull(ProfitDetail pd)

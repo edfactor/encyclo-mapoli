@@ -12,9 +12,9 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { CellValueChangedEvent, ColDef, GridApi, SelectionChangedEvent, ValueParserParams } from "ag-grid-community";
+import { CellValueChangedEvent, GridApi, SelectionChangedEvent } from "ag-grid-community";
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
@@ -29,6 +29,7 @@ import {
   ProfitSharingAdjustmentsKey,
   SaveProfitSharingAdjustmentRowRequest
 } from "../../../reduxstore/types";
+import { GetProfitSharingAdjustmentsGridColumns } from "./ProfitSharingAdjustmentsGridColumns";
 
 const isValidIsoDate = (value: string): boolean => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -37,11 +38,6 @@ const isValidIsoDate = (value: string): boolean => {
 
   const parsed = new Date(`${value}T00:00:00Z`);
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().startsWith(value);
-};
-
-const toNumberOrOld = (params: ValueParserParams): number => {
-  const parsed = Number.parseFloat(String(params.newValue ?? ""));
-  return Number.isFinite(parsed) ? parsed : (params.oldValue as number);
 };
 
 const ProfitSharingAdjustmentsContent = () => {
@@ -53,7 +49,6 @@ const ProfitSharingAdjustmentsContent = () => {
 
   const [profitYear, setProfitYear] = useState<number>(new Date().getFullYear());
   const [badgeNumber, setBadgeNumber] = useState<string>("");
-  const [sequenceNumber, setSequenceNumber] = useState<number>(0);
   const [getAllRows, setGetAllRows] = useState<boolean>(false);
   const [loadedGetAllRows, setLoadedGetAllRows] = useState<boolean>(false);
 
@@ -83,7 +78,7 @@ const ProfitSharingAdjustmentsContent = () => {
 
     clearAlerts();
 
-    setLoadedKey({ profitYear: data.profitYear, badgeNumber: data.badgeNumber, sequenceNumber: data.sequenceNumber });
+    setLoadedKey({ profitYear: data.profitYear, badgeNumber: data.badgeNumber });
     setBadgeNumber(String(data.badgeNumber));
 
     // DSMGrid/AG Grid edits mutate row objects; make sure data isn't frozen.
@@ -107,18 +102,22 @@ const ProfitSharingAdjustmentsContent = () => {
 
   const upsertStageForRow = (row: ProfitSharingAdjustmentRowDto) => {
     const original = originalByRowNumber[row.rowNumber];
-    if (!original) {
-      return;
-    }
 
-    const changed =
-      row.profitYearIteration !== original.profitYearIteration ||
-      row.profitCodeId !== original.profitCodeId ||
-      row.contribution !== original.contribution ||
-      row.earnings !== original.earnings ||
-      row.forfeiture !== original.forfeiture ||
-      row.activityDate !== original.activityDate ||
-      row.comment !== original.comment;
+    const isDraftInsertRow = row.profitDetailId == null;
+
+    const changed = original
+      ? row.profitCodeId !== original.profitCodeId ||
+        row.contribution !== original.contribution ||
+        row.earnings !== original.earnings ||
+        row.forfeiture !== original.forfeiture ||
+        row.activityDate !== original.activityDate ||
+        row.comment !== original.comment
+      : isDraftInsertRow &&
+        (row.contribution !== 0 ||
+          row.earnings !== 0 ||
+          row.forfeiture !== 0 ||
+          row.activityDate != null ||
+          (row.comment ?? "") !== "");
 
     setStagedByRowNumber((prev) => {
       const next = { ...prev };
@@ -130,7 +129,6 @@ const ProfitSharingAdjustmentsContent = () => {
       next[row.rowNumber] = {
         profitDetailId: row.profitDetailId,
         rowNumber: row.rowNumber,
-        profitYearIteration: row.profitYearIteration,
         profitCodeId: row.profitCodeId,
         contribution: row.contribution,
         earnings: row.earnings,
@@ -143,98 +141,7 @@ const ProfitSharingAdjustmentsContent = () => {
     });
   };
 
-  const columnDefs = useMemo<ColDef[]>(() => {
-    const isExistingRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId != null;
-    const isInsertRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId == null && row?.activityDate != null;
-    const canEditExtOnExistingRow = (row?: ProfitSharingAdjustmentRowDto): boolean =>
-      isExistingRow(row) && row?.isEditable === true;
-
-    return [
-      {
-        headerName: "Row",
-        field: "rowNumber",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 55
-      },
-      {
-        headerName: "Profit Year",
-        field: "profitYear",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 90
-      },
-      {
-        headerName: "EXT",
-        field: "profitYearIteration",
-        sortable: false,
-        filter: false,
-        editable: (params) => canEditExtOnExistingRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        width: 60,
-        valueParser: (params: ValueParserParams) => {
-          const parsed = Number.parseInt(String(params.newValue ?? ""), 10);
-          if (parsed === 0 || parsed === 3) {
-            return parsed;
-          }
-          return params.oldValue;
-        }
-      },
-      {
-        headerName: "Profit Code",
-        field: "profitCodeId",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 90
-      },
-      {
-        headerName: "Contribution",
-        field: "contribution",
-        sortable: false,
-        filter: false,
-        editable: (params) => isInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        width: 110,
-        valueParser: toNumberOrOld
-      },
-      {
-        headerName: "Earnings",
-        field: "earnings",
-        sortable: false,
-        filter: false,
-        editable: (params) => isInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        width: 110,
-        valueParser: toNumberOrOld
-      },
-      {
-        headerName: "Forfeiture",
-        field: "forfeiture",
-        sortable: false,
-        filter: false,
-        editable: (params) => isInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        width: 110,
-        valueParser: toNumberOrOld
-      },
-      {
-        headerName: "Activity Date",
-        field: "activityDate",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 120
-      },
-      {
-        headerName: "Comment",
-        field: "comment",
-        sortable: false,
-        filter: false,
-        editable: false,
-        flex: 1,
-        minWidth: 160
-      }
-    ];
-  }, []);
+  const columnDefs = GetProfitSharingAdjustmentsGridColumns();
 
   const loadAdjustments = async () => {
     setErrorMessage(null);
@@ -256,14 +163,9 @@ const ProfitSharingAdjustmentsContent = () => {
       return;
     }
 
-    if (!Number.isFinite(sequenceNumber) || sequenceNumber < 0) {
-      setErrorMessage("Sequence Number must be zero or greater.");
-      return;
-    }
-
     try {
       setLoadedGetAllRows(getAllRows);
-      await triggerGet({ profitYear, badgeNumber: parsedBadgeNumber, sequenceNumber, getAllRows }).unwrap();
+      await triggerGet({ profitYear, badgeNumber: parsedBadgeNumber, getAllRows }).unwrap();
     } catch (e) {
       console.error("Failed to load profit sharing adjustments", e);
       setErrorMessage("Failed to load adjustments. Please try again.");
@@ -307,22 +209,54 @@ const ProfitSharingAdjustmentsContent = () => {
   const applyAdjustmentDraftToInsertRow = () => {
     setErrorMessage(null);
 
-    const insertRow = rowData.find((r) => r.profitDetailId == null && r.activityDate != null);
-    if (!insertRow) {
-      setErrorMessage("No insert row is available. Load adjustments first.");
+    if (!loadedKey) {
+      setErrorMessage("Load adjustments before making an adjustment.");
       return;
     }
 
-    const updatedRow: ProfitSharingAdjustmentRowDto = {
-      ...insertRow,
+    const existingDraft = rowData.find((r) => r.profitDetailId == null);
+
+    if (!existingDraft && rowData.length >= 18) {
+      setErrorMessage("A maximum of 18 rows can be displayed/saved.");
+      return;
+    }
+
+    const now = new Date();
+    const todayIso = now.toISOString().slice(0, 10);
+
+    const maxRowNumber = rowData.reduce((max, r) => Math.max(max, r.rowNumber), 0);
+    const rowNumber = existingDraft?.rowNumber ?? maxRowNumber + 1;
+
+    const seedRow = rowData.find((r) => r.profitDetailId != null) ?? selectedRow;
+
+    const draftRow: ProfitSharingAdjustmentRowDto = {
+      profitDetailId: null,
+      rowNumber,
+      profitYear: loadedKey.profitYear,
       profitYearIteration: 3,
+      profitCodeId: seedRow?.profitCodeId ?? 0,
+      profitCodeName: seedRow?.profitCodeName ?? "",
       contribution: adjustmentDraft.contribution,
       earnings: adjustmentDraft.earnings,
-      forfeiture: adjustmentDraft.forfeiture
+      payment: 0,
+      forfeiture: adjustmentDraft.forfeiture,
+      federalTaxes: 0,
+      stateTaxes: 0,
+      taxCodeId: `${seedRow?.taxCodeId ?? ""}`,
+      activityDate: todayIso,
+      comment: "ADMINISTRATIVE",
+      isEditable: false
     };
 
-    setRowData((prev) => prev.map((r) => (r.rowNumber === updatedRow.rowNumber ? updatedRow : r)));
-    upsertStageForRow(updatedRow);
+    setRowData((prev) => {
+      const withoutExistingDraft = prev.filter((r) => r.profitDetailId != null);
+      const next = [...withoutExistingDraft, draftRow];
+      return next
+        .sort((a, b) => a.rowNumber - b.rowNumber)
+        .map((r, idx) => ({ ...r, rowNumber: idx + 1 }));
+    });
+
+    upsertStageForRow({ ...draftRow, rowNumber });
     setIsAdjustModalOpen(false);
   };
 
@@ -359,24 +293,13 @@ const ProfitSharingAdjustmentsContent = () => {
       return;
     }
 
-    const rowsToSave: SaveProfitSharingAdjustmentRowRequest[] = rowData.map((r) => ({
-      profitDetailId: r.profitDetailId,
-      rowNumber: r.rowNumber,
-      profitYearIteration: r.profitYearIteration,
-      profitCodeId: r.profitCodeId,
-      contribution: r.contribution,
-      earnings: r.earnings,
-      forfeiture: r.forfeiture,
-      activityDate: r.activityDate,
-      comment: r.comment
-    }));
+    const rowsToSave: SaveProfitSharingAdjustmentRowRequest[] = Object.values(stagedByRowNumber);
+
+    if (rowsToSave.length === 0) {
+      return;
+    }
 
     for (const row of rowsToSave) {
-      if (row.profitYearIteration !== 0 && row.profitYearIteration !== 3) {
-        setErrorMessage("EXT must be 0 or 3.");
-        return;
-      }
-
       if (row.activityDate && !isValidIsoDate(row.activityDate)) {
         setErrorMessage("Activity Date must be in YYYY-MM-DD format.");
         return;
@@ -431,15 +354,6 @@ const ProfitSharingAdjustmentsContent = () => {
             sx={{ width: 150 }}
             inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
-          <TextField
-            label="Sequence #"
-            size="small"
-            type="text"
-            value={sequenceNumber}
-            onChange={(e) => setSequenceNumber(Number.parseInt(e.target.value ?? "", 10) || 0)}
-            sx={{ width: 120 }}
-            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-          />
 
           <FormControlLabel
             control={
@@ -466,26 +380,6 @@ const ProfitSharingAdjustmentsContent = () => {
             disabled={isFetchingAdjustments || isSaving}
             onClick={loadAdjustments}>
             Load
-          </Button>
-
-          <Button
-            variant="outlined"
-            disabled={!selectedRow || isSaving || isFetchingAdjustments}
-            onClick={clearSelection}>
-            Clear selection
-          </Button>
-
-          <Button
-            variant="contained"
-            disabled={
-              !selectedRow ||
-              selectedRow.profitDetailId == null ||
-              isSaving ||
-              isFetchingAdjustments ||
-              rowData.length === 0
-            }
-            onClick={openAdjustModal}>
-            Adjust…
           </Button>
 
           <Box sx={{ flex: 1 }}>
@@ -522,6 +416,37 @@ const ProfitSharingAdjustmentsContent = () => {
           profitYear={data.profitYear}
         />
       )}
+
+      <Grid width="100%">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 2,
+            px: 1,
+            flexWrap: "wrap"
+          }}>
+          <Button
+            variant="outlined"
+            disabled={!selectedRow || isSaving || isFetchingAdjustments}
+            onClick={clearSelection}>
+            Clear selection
+          </Button>
+
+          <Button
+            variant="contained"
+            disabled={
+              !selectedRow ||
+              selectedRow.profitDetailId == null ||
+              isSaving ||
+              isFetchingAdjustments ||
+              rowData.length === 0
+            }
+            onClick={openAdjustModal}>
+            Adjust…
+          </Button>
+        </Box>
+      </Grid>
 
       <Grid width="100%">
         <DSMGrid
@@ -624,7 +549,7 @@ const ProfitSharingAdjustmentsContent = () => {
           <Button
             variant="contained"
             onClick={applyAdjustmentDraftToInsertRow}>
-            Apply to insert row
+            Apply
           </Button>
         </DialogActions>
       </Dialog>
