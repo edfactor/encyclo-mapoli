@@ -308,7 +308,8 @@ SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
             FROM PROFIT_DETAIL pd
            INNER JOIN DEMOGRAPHIC d ON pd.SSN = d.SSN
        LEFT JOIN PAY_PROFIT pp ON pp.DEMOGRAPHIC_ID = d.ID AND pp.PROFIT_YEAR = {profitYear}
-           WHERE pd.PROFIT_YEAR <= {profitYear}
+                     WHERE pd.PROFIT_YEAR <= {profitYear}
+                         AND pd.PROFIT_YEAR_ITERATION <> 3
         GROUP BY d.ID, pd.SSN
         /* MAX() is used for pp.TOTAL_HOURS and d.DATE_OF_BIRTH to satisfy Oracle's GROUP BY requirements.
            Since the JOIN on PAY_PROFIT uses DEMOGRAPHIC_ID + PROFIT_YEAR (which form a unique key per year),
