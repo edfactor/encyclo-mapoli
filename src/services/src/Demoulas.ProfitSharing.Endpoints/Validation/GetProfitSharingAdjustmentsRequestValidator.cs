@@ -14,9 +14,5 @@ public sealed class LegacyGetProfitSharingAdjustmentsRequestValidator : Abstract
         RuleFor(x => x.BadgeNumber)
             .GreaterThan(0)
             .WithMessage("BadgeNumber must be greater than zero.");
-
-        RuleFor(x => x.SequenceNumber)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("SequenceNumber must be zero or greater.");
     }
 }

@@ -1,7 +1,6 @@
 export type ProfitSharingAdjustmentsKey = {
   profitYear: number;
   badgeNumber: number;
-  sequenceNumber: number;
 };
 
 export type ProfitSharingAdjustmentRowDto = {
@@ -10,9 +9,14 @@ export type ProfitSharingAdjustmentRowDto = {
   profitYear: number;
   profitYearIteration: number;
   profitCodeId: number;
+  profitCodeName: string;
   contribution: number;
   earnings: number;
   forfeiture: number;
+  payment: number;
+  federalTaxes: number;
+  stateTaxes: number;
+  taxCodeId: string;
   activityDate: string | null;
   comment: string;
   isEditable: boolean;
@@ -23,17 +27,13 @@ export type GetProfitSharingAdjustmentsRequest = ProfitSharingAdjustmentsKey & {
 };
 
 export type GetProfitSharingAdjustmentsResponse = ProfitSharingAdjustmentsKey & {
-  demographicId: number | null;
-  isOver21AtInitialHire: boolean;
-  currentBalance: number;
-  vestedBalance: number;
+  demographicId: number;
   rows: ProfitSharingAdjustmentRowDto[];
 };
 
 export type SaveProfitSharingAdjustmentRowRequest = {
   profitDetailId: number | null;
   rowNumber: number;
-  profitYearIteration: number;
   profitCodeId: number;
   contribution: number;
   earnings: number;

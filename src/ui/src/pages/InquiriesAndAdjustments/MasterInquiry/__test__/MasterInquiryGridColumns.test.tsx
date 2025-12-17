@@ -223,9 +223,9 @@ describe("MasterInquiryGridColumns - Comment Type QDRO Links", () => {
       const columns = GetMasterInquiryGridColumns();
 
       expect(columns.length).toBeGreaterThan(10);
-      
+
       const columnFields = columns.map((col: ColDef) => col.field).filter(Boolean);
-      
+
       expect(columnFields).toContain("profitYear");
       expect(columnFields).toContain("commentTypeName");
       expect(columnFields).toContain("commentRelatedCheckNumber");

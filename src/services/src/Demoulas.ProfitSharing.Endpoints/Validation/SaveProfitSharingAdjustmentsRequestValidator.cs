@@ -17,10 +17,6 @@ public sealed class LegacySaveProfitSharingAdjustmentsRequestValidator : Abstrac
             .GreaterThan(0)
             .WithMessage("BadgeNumber must be greater than zero.");
 
-        RuleFor(x => x.SequenceNumber)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("SequenceNumber must be zero or greater.");
-
         RuleFor(x => x.Rows)
             .NotNull()
             .Must(x => x.Count is > 0 and <= MaxRows)
@@ -31,10 +27,6 @@ public sealed class LegacySaveProfitSharingAdjustmentsRequestValidator : Abstrac
             row.RuleFor(r => r.RowNumber)
                 .InclusiveBetween(1, MaxRows)
                 .WithMessage($"RowNumber must be between 1 and {MaxRows}.");
-
-            row.RuleFor(r => r.ProfitYearIteration)
-                .Must(v => v is 0 or 3)
-                .WithMessage("ProfitYearIteration (EXT) must be 0 or 3.");
 
             row.RuleFor(r => r.ProfitCodeId)
                 .Equal((byte)0)

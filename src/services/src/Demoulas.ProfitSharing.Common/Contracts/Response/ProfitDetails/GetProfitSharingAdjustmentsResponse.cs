@@ -8,15 +8,7 @@ public sealed record GetProfitSharingAdjustmentsResponse : IProfitYearRequest
 
     public required int DemographicId { get; init; }
 
-    public required bool IsOver21AtInitialHire { get; init; }
-
-    public required decimal CurrentBalance { get; init; }
-
-    public required decimal VestedBalance { get; init; }
-
     public required int BadgeNumber { get; init; }
-
-    public required int SequenceNumber { get; init; }
 
     public required IReadOnlyList<ProfitSharingAdjustmentRowResponse> Rows { get; init; }
 }
@@ -33,11 +25,21 @@ public sealed record ProfitSharingAdjustmentRowResponse
 
     public required byte ProfitCodeId { get; init; }
 
+    public required string ProfitCodeName { get; init; }
+
     public required decimal Contribution { get; init; }
 
     public required decimal Earnings { get; init; }
 
     public required decimal Forfeiture { get; init; }
+
+    public required decimal Payment { get; init; }
+
+    public required decimal FederalTaxes { get; init; }
+
+    public required decimal StateTaxes { get; init; }
+
+    public required char TaxCodeId { get; init; }
 
     public required DateOnly? ActivityDate { get; init; }
 

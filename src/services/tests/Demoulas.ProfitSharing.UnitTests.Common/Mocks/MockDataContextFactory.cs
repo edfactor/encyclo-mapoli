@@ -5,6 +5,7 @@ using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -191,6 +192,15 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
         navTimer.Stop();
         timings["Navigation Entities"] = navTimer.ElapsedMilliseconds;
+
+        // Audit entities (needed by validation services)
+        var auditTimer = Stopwatch.StartNew();
+        List<ReportChecksum> reportChecksums = [];
+        Mock<DbSet<ReportChecksum>> mockReportChecksums = reportChecksums.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.ReportChecksums).Returns(mockReportChecksums.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.ReportChecksums).Returns(mockReportChecksums.Object);
+        auditTimer.Stop();
+        timings["Audit Entities"] = auditTimer.ElapsedMilliseconds;
 
         // PayClassifications
         var payClassTimer = Stopwatch.StartNew();

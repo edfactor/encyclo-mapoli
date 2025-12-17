@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetProfitYearSelectorFrozenDataQuery } from "../reduxstore/api/ItOperationsApi";
+import { useLazyGetFrozenStateResponseQuery } from "../reduxstore/api/ItOperationsApi";
 import { RootState } from "../reduxstore/store";
 
 /**
@@ -18,26 +18,21 @@ import { RootState } from "../reduxstore/store";
  * ```
  */
 export const useIsProfitYearFrozen = (profitYear?: number): boolean => {
-  const frozenStates = useSelector((state: RootState) => state.frozen.profitYearSelectorData);
+  const activeFrozenState = useSelector((state: RootState) => state.frozen.frozenStateResponseData);
   const token = useSelector((state: RootState) => state.security.token);
-  const [triggerFrozenStateSearch, { isLoading }] = useLazyGetProfitYearSelectorFrozenDataQuery();
+  const [triggerFetchActiveFrozenState, { isLoading }] = useLazyGetFrozenStateResponseQuery();
 
   // Fetch frozen state data if not already loaded
   useEffect(() => {
-    if (profitYear && token && !frozenStates && !isLoading) {
-      triggerFrozenStateSearch({
-        skip: 0,
-        take: 100, // Get all frozen states
-        sortBy: "createdDateTime",
-        isSortDescending: true
-      });
+    if (profitYear && token && !activeFrozenState && !isLoading) {
+      triggerFetchActiveFrozenState();
     }
-  }, [profitYear, token, frozenStates, isLoading, triggerFrozenStateSearch]);
+  }, [profitYear, token, activeFrozenState, isLoading, triggerFetchActiveFrozenState]);
 
-  if (!profitYear || !frozenStates?.results) {
+  if (!profitYear || !activeFrozenState) {
     return false;
   }
 
-  // Check if there's an ACTIVE frozen state for this profit year
-  return frozenStates.results.some((state) => state.profitYear === profitYear && state.isActive);
+  // Check if the active frozen state corresponds to this profit year
+  return activeFrozenState.profitYear === profitYear && !!activeFrozenState.isActive;
 };
