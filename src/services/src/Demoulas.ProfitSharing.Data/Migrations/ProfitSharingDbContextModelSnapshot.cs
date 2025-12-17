@@ -725,6 +725,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)26,
                             Name = "Forfeit Administrative"
+                        },
+                        new
+                        {
+                            Id = (byte)27,
+                            Name = "Administrative - taking money from under 21"
                         });
                 });
 
@@ -3662,6 +3667,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             Id = 7,
                             Description = "The Employee's Zero Contribution Flag is set at 7",
                             Message = "*** EMPLOYEE MAY BE 100% - CHECK DATES ***",
+                            Severity = "Information"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Employee is currently under 21 and has a current or vested balance greater than zero.",
+                            Message = "Employee under 21 w/ balance > 0",
                             Severity = "Information"
                         });
                 });

@@ -571,6 +571,12 @@ const DistributionInquirySearchFilter: React.FC<SearchFilterProps> = ({
 - `SearchAndReset` button component from `smart-ui-library`
 - Validation logic (optional)
 
+**Numeric Inputs (Badge Number, Profit Year, etc.)**:
+
+- Do **NOT** rely on native browser up/down spinner controls for number entry. They are disabled as a UI standard.
+- Prefer a text input with `inputMode="numeric"` (and optional numeric `pattern`) for badge/SSN-style fields; validate/parse on submit.
+- Only use `type="number"` when numeric semantics are truly required; never expect spinners to be available.
+
 ---
 
 ### 5. Grid Column Definitions
@@ -590,7 +596,7 @@ import {
 } from "../../utils/gridColumnFactory";
 
 export const GetProfallGridColumns = (
-  navFunction: (badgeNumber: string) => void,
+  navFunction: (badgeNumber: string) => void
 ): ColDef[] => {
   return [
     createStoreColumn({ minWidth: 80, sortable: true }),
@@ -783,10 +789,10 @@ Complex state or state shared across pages stored in Redux slices.
 ```typescript
 // Reading from Redux
 const { profitSharingEdit, profitSharingUpdate } = useSelector(
-  (state: RootState) => state.yearsEnd,
+  (state: RootState) => state.yearsEnd
 );
 const currentMember = useSelector(
-  (state: RootState) => state.distribution.currentMember,
+  (state: RootState) => state.distribution.currentMember
 );
 
 // Dispatching actions
@@ -976,10 +982,10 @@ const fetchData = useCallback(
         sortBy: sort ?? sortBy,
         isSortDescending: desc ?? isSortDescending,
       },
-      false,
+      false
     );
   },
-  [triggerQuery, sortBy, isSortDescending],
+  [triggerQuery, sortBy, isSortDescending]
 );
 
 const handlePageChange = (page: number, size: number) => {

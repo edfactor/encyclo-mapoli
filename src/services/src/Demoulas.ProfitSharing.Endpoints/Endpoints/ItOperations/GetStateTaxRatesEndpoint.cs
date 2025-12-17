@@ -30,7 +30,7 @@ public sealed class GetStateTaxRatesEndpoint : ProfitSharingResultResponseEndpoi
         {
             s.Summary = "Gets all state tax rates.";
         });
-        Group<ItDevOpsGroup>();
+        Group<AdministrationGroup>();
     }
 
     public override Task<Results<Ok<IReadOnlyList<StateTaxRateDto>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)

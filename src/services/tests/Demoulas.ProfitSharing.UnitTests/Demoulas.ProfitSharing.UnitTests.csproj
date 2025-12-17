@@ -8,6 +8,7 @@
     <IsTestProject>true</IsTestProject>
     <Configurations>Debug;Release</Configurations>
     <ExcludeFromCodeCoverage>true</ExcludeFromCodeCoverage>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,8 +18,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Demoulas.Common.Data.Services" />
-    <PackageReference Include="IdGen" />
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
     <PackageReference Include="JetBrains.Annotations" />
+
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
@@ -36,6 +38,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj" />
+    <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Analyzers\Demoulas.ProfitSharing.Analyzers.csproj" />
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Endpoints\Demoulas.ProfitSharing.Endpoints.csproj" />
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.OracleHcm\Demoulas.ProfitSharing.OracleHcm.csproj" />
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Security\Demoulas.ProfitSharing.Security.csproj" />

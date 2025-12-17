@@ -22,14 +22,17 @@ public static class PolicyRoleMap
         // New, clearer name for beneficiary CRUD; keep mapping identical.
         [Policy.CanManageBeneficiaries] = [Role.FINANCEMANAGER, Role.HARDSHIPADMINISTRATOR, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.BENEFICIARY_ADMINISTRATOR],
 
-        // IT roles can freeze and add demographics to support data integrity and operational needs.
-        [Policy.CanFreezeDemographics] = [Role.ITDEVOPS, Role.ITOPERATIONS],
+        // Freeze is an operational integrity action; restrict to IT DevOps only.
+        [Policy.CanFreezeDemographics] = [Role.ITDEVOPS],
 
         // Distribution views are read-only; allow Finance, Clerks, Admin, and Auditor.
         [Policy.CanViewDistributions] = [Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR],
 
         // Reversing profit details is a sensitive operation; restrict to Finance and Admin.
         [Policy.CanReverseProfitDetails] = [Role.FINANCEMANAGER, Role.ADMINISTRATOR],
+
+        // Administration pages/actions are restricted to IT DevOps + System Admin.
+        [Policy.CanManageAdministration] = [Role.ITDEVOPS, Role.ADMINISTRATOR],
 
         // Audit viewing for security and compliance teams.
         [Policy.CanViewAudits] = [Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS],

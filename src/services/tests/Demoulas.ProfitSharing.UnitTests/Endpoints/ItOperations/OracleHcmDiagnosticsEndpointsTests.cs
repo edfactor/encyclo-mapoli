@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Net.Http.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
@@ -9,7 +8,7 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using Microsoft.EntityFrameworkCore;
+using FastEndpoints;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
@@ -26,12 +25,12 @@ public class GetOracleHcmSyncMetadataEndpointTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
         // Act
-        var httpResponse = await ApiClient.GetAsync("/api/itdevops/oracleHcm/metadata");
-        var result = await httpResponse.Content.ReadFromJsonAsync<OracleHcmSyncMetadataResponse>();
+        TestResult<OracleHcmSyncMetadataResponse> response = await ApiClient
+            .GETAsync<GetOracleHcmSyncMetadataEndpoint, EmptyRequest, OracleHcmSyncMetadataResponse>(new EmptyRequest());
 
         // Assert - Verify endpoint returned 200 success
-        httpResponse.IsSuccessStatusCode.ShouldBeTrue(httpResponse.ReasonPhrase);
-        result.ShouldNotBeNull();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
+        response.Result.ShouldNotBeNull();
     }
 
     [Fact]
@@ -41,10 +40,11 @@ public class GetOracleHcmSyncMetadataEndpointTests : ApiTestBase<Program>
         // Arrange - No token assigned
 
         // Act
-        var response = await ApiClient.GetAsync("/api/itdevops/oracleHcm/metadata");
+        TestResult<OracleHcmSyncMetadataResponse> response = await ApiClient
+            .GETAsync<GetOracleHcmSyncMetadataEndpoint, EmptyRequest, OracleHcmSyncMetadataResponse>(new EmptyRequest());
 
         // Assert
-        ((int)response.StatusCode).ShouldBe(401);
+        ((int)response.Response.StatusCode).ShouldBe(401);
     }
 }
 
@@ -59,16 +59,24 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
+        var request = new SortedPaginationRequestDto
+        {
+            Skip = 0,
+            Take = 50,
+            SortBy = "Created",
+            IsSortDescending = true
+        };
+
         // Act
-        var httpResponse = await ApiClient.GetAsync("/api/itdevops/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
-        var result = await httpResponse.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>();
+        TestResult<PaginatedResponseDto<DemographicSyncAuditRecordResponse>> response = await ApiClient
+            .GETAsync<GetDemographicSyncAuditEndpoint, SortedPaginationRequestDto, PaginatedResponseDto<DemographicSyncAuditRecordResponse>>(request);
 
         // Assert - Verify endpoint returns valid paginated response structure
-        httpResponse.IsSuccessStatusCode.ShouldBeTrue(httpResponse.ReasonPhrase);
-        result.ShouldNotBeNull();
-        result.Total.ShouldBe(5); // Mock factory seeds 5 DemographicSyncAudit records
-        result.Results.ShouldNotBeNull();
-        result.Results.Count().ShouldBe(5);
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
+        response.Result.ShouldNotBeNull();
+        response.Result.Total.ShouldBe(5); // Mock factory seeds 5 DemographicSyncAudit records
+        response.Result.Results.ShouldNotBeNull();
+        response.Result.Results.Count().ShouldBe(5);
     }
 
     [Fact]
@@ -78,18 +86,26 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
+        var request = new SortedPaginationRequestDto
+        {
+            Skip = 0,
+            Take = 50,
+            SortBy = "Created",
+            IsSortDescending = true
+        };
+
         // Act
-        var httpResponse = await ApiClient.GetAsync("/api/itdevops/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
-        var result = await httpResponse.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>();
+        TestResult<PaginatedResponseDto<DemographicSyncAuditRecordResponse>> response = await ApiClient
+            .GETAsync<GetDemographicSyncAuditEndpoint, SortedPaginationRequestDto, PaginatedResponseDto<DemographicSyncAuditRecordResponse>>(request);
 
         // Assert - Verify audit records returned from mock data factory
-        httpResponse.IsSuccessStatusCode.ShouldBeTrue(httpResponse.ReasonPhrase);
-        result.ShouldNotBeNull();
-        result.Results.ShouldNotBeNull();
-        var records = result.Results.ToList();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
+        response.Result.ShouldNotBeNull();
+        response.Result.Results.ShouldNotBeNull();
+        var records = response.Result.Results.ToList();
         records.ShouldNotBeEmpty();
         records.Count.ShouldBe(5); // DemographicSyncAuditFaker generates 5 records
-        result.Total.ShouldBe(5);
+        response.Result.Total.ShouldBe(5);
         records.All(r => r.Id > 0).ShouldBeTrue();
         records.All(r => r.BadgeNumber > 0).ShouldBeTrue();
         records.All(r => !string.IsNullOrWhiteSpace(r.Message)).ShouldBeTrue();
@@ -102,15 +118,23 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
+        var request = new SortedPaginationRequestDto
+        {
+            Skip = 0,
+            Take = 50,
+            SortBy = "Created",
+            IsSortDescending = true
+        };
+
         // Act
-        var httpResponse = await ApiClient.GetAsync("/api/itdevops/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
-        var result = await httpResponse.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>();
+        TestResult<PaginatedResponseDto<DemographicSyncAuditRecordResponse>> response = await ApiClient
+            .GETAsync<GetDemographicSyncAuditEndpoint, SortedPaginationRequestDto, PaginatedResponseDto<DemographicSyncAuditRecordResponse>>(request);
 
         // Assert - Verify results are ordered by Created desc (newest first)
-        httpResponse.IsSuccessStatusCode.ShouldBeTrue(httpResponse.ReasonPhrase);
-        result.ShouldNotBeNull();
-        result.Total.ShouldBe(5);
-        var results = result.Results.ToList();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
+        response.Result.ShouldNotBeNull();
+        response.Result.Total.ShouldBe(5);
+        var results = response.Result.Results.ToList();
         results.Count.ShouldBe(5);
         results.Zip(results.Skip(1), (a, b) => a.Created >= b.Created).All(x => x).ShouldBeTrue();
     }
@@ -121,11 +145,20 @@ public class GetDemographicSyncAuditEndpointTests : ApiTestBase<Program>
     {
         // Arrange - No token assigned
 
+        var request = new SortedPaginationRequestDto
+        {
+            Skip = 0,
+            Take = 50,
+            SortBy = "Created",
+            IsSortDescending = true
+        };
+
         // Act
-        var response = await ApiClient.GetAsync("/api/itdevops/oracleHcm/audit?skip=0&take=50&sortBy=Created&isSortDescending=true");
+        TestResult<PaginatedResponseDto<DemographicSyncAuditRecordResponse>> response = await ApiClient
+            .GETAsync<GetDemographicSyncAuditEndpoint, SortedPaginationRequestDto, PaginatedResponseDto<DemographicSyncAuditRecordResponse>>(request);
 
         // Assert
-        ((int)response.StatusCode).ShouldBe(401);
+        ((int)response.Response.StatusCode).ShouldBe(401);
     }
 }
 
@@ -141,13 +174,13 @@ public class ClearDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
 
         // Act - Clear endpoint (seeded with audit records)
-        var httpResponse = await ApiClient.PostAsync("/api/itdevops/oracleHcm/audit/clear", content: null);
-        var result = await httpResponse.Content.ReadFromJsonAsync<ClearAuditResponse>();
+        TestResult<ClearAuditResponse> response = await ApiClient
+            .POSTAsync<ClearDemographicSyncAuditEndpoint, EmptyRequest, ClearAuditResponse>(new EmptyRequest());
 
         // Assert - Verify endpoint returns valid response
-        httpResponse.IsSuccessStatusCode.ShouldBeTrue(httpResponse.ReasonPhrase);
-        result.ShouldNotBeNull();
-        result.DeletedCount.ShouldBe(5);
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
+        response.Result.ShouldNotBeNull();
+        response.Result.DeletedCount.ShouldBe(5);
     }
 
     [Fact]
@@ -157,9 +190,10 @@ public class ClearDemographicSyncAuditEndpointTests : ApiTestBase<Program>
         // Arrange - No token assigned
 
         // Act
-        var response = await ApiClient.PostAsync("/api/itdevops/oracleHcm/audit/clear", content: null);
+        TestResult<ClearAuditResponse> response = await ApiClient
+            .POSTAsync<ClearDemographicSyncAuditEndpoint, EmptyRequest, ClearAuditResponse>(new EmptyRequest());
 
         // Assert
-        ((int)response.StatusCode).ShouldBe(401);
+        ((int)response.Response.StatusCode).ShouldBe(401);
     }
 }

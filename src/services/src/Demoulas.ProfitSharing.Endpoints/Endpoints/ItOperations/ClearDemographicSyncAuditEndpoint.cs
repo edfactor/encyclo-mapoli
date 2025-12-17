@@ -48,7 +48,7 @@ public class ClearDemographicSyncAuditEndpoint
                 }
             };
         });
-        Group<ItDevOpsGroup>();
+        Group<AdministrationGroup>();
     }
 
     public override Task<Results<Ok<ClearAuditResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(EmptyRequest req, CancellationToken ct)

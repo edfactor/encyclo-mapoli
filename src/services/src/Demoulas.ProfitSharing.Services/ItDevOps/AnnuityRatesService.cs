@@ -39,14 +39,27 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
         _logger = logger;
     }
 
-    public Task<Result<IReadOnlyList<AnnuityRateDto>>> GetAnnuityRatesAsync(CancellationToken cancellationToken)
+    public Task<Result<IReadOnlyList<AnnuityRateDto>>> GetAnnuityRatesAsync(GetAnnuityRatesRequest request, CancellationToken cancellationToken)
     {
         return _contextFactory.UseReadOnlyContext(async ctx =>
         {
-            var results = await ctx.AnnuityRates
-                .TagWith("ItDevOps-GetAnnuityRates")
-                .OrderBy(x => x.Year)
-                .ThenBy(x => x.Age)
+            var sortBy = request.SortBy;
+            var isSortDescending = request.IsSortDescending is true;
+
+            var query = ctx.AnnuityRates
+                .TagWith("ItDevOps-GetAnnuityRates");
+
+            query = sortBy switch
+            {
+                "Age" => isSortDescending
+                    ? query.OrderByDescending(x => x.Age).ThenByDescending(x => x.Year)
+                    : query.OrderBy(x => x.Age).ThenBy(x => x.Year),
+                _ => isSortDescending
+                    ? query.OrderByDescending(x => x.Year).ThenBy(x => x.Age)
+                    : query.OrderBy(x => x.Year).ThenBy(x => x.Age),
+            };
+
+            var results = await query
                 .Select(x => new AnnuityRateDto
                 {
                     Year = x.Year,

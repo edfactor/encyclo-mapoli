@@ -26,10 +26,33 @@ public static class SsnExtensions
 
     public static string MaskSsn(this object ssn)
     {
-        string _ssn = ssn.ToString() ?? string.Empty;
+        if (ssn is null)
+        {
+            return string.Empty;
+        }
+
+        string raw = ssn as string ?? ssn.ToString() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return string.Empty;
+        }
+
+        // Normalize: keep only digits. This supports formatted inputs like "123-45-6789".
+        string digitsOnly = new string(raw.Where(char.IsDigit).ToArray());
+        if (digitsOnly.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        // Keep the last 9 digits (handles cases where the value includes extra digits/characters).
+        if (digitsOnly.Length > 9)
+        {
+            digitsOnly = digitsOnly[^9..];
+        }
+
         Span<char> ssnSpan = stackalloc char[9];
-        _ssn.AsSpan().CopyTo(ssnSpan[(9 - _ssn.Length)..]);
-        ssnSpan[..(9 - _ssn.Length)].Fill('0');
+        digitsOnly.AsSpan().CopyTo(ssnSpan[(9 - digitsOnly.Length)..]);
+        ssnSpan[..(9 - digitsOnly.Length)].Fill('0');
 
         Span<char> resultSpan = stackalloc char[11];
         "XXX-XX-".AsSpan().CopyTo(resultSpan);
