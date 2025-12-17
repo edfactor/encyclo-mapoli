@@ -60,11 +60,11 @@ const ProfitSharingAdjustmentsContent = () => {
 
   const [selectedRow, setSelectedRow] = useState<ProfitSharingAdjustmentRowDto | null>(null);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState<boolean>(false);
-  const [adjustmentDraft, setAdjustmentDraft] = useState<{ contribution: number; earnings: number; forfeiture: number }>(
+  const [adjustmentDraft, setAdjustmentDraft] = useState<{ contribution: string; earnings: string; forfeiture: string }>(
     {
-      contribution: 0,
-      earnings: 0,
-      forfeiture: 0
+      contribution: "0",
+      earnings: "0",
+      forfeiture: "0"
     }
   );
 
@@ -198,9 +198,9 @@ const ProfitSharingAdjustmentsContent = () => {
     }
 
     setAdjustmentDraft({
-      contribution: -selectedRow.contribution,
-      earnings: -selectedRow.earnings,
-      forfeiture: -selectedRow.forfeiture
+      contribution: String(-selectedRow.contribution),
+      earnings: String(-selectedRow.earnings),
+      forfeiture: String(-selectedRow.forfeiture)
     });
 
     setIsAdjustModalOpen(true);
@@ -215,11 +215,6 @@ const ProfitSharingAdjustmentsContent = () => {
     }
 
     const existingDraft = rowData.find((r) => r.profitDetailId == null);
-
-    if (!existingDraft && rowData.length >= 18) {
-      setErrorMessage("A maximum of 18 rows can be displayed/saved.");
-      return;
-    }
 
     const now = new Date();
     const todayIso = now.toISOString().slice(0, 10);
@@ -236,10 +231,10 @@ const ProfitSharingAdjustmentsContent = () => {
       profitYearIteration: 3,
       profitCodeId: seedRow?.profitCodeId ?? 0,
       profitCodeName: seedRow?.profitCodeName ?? "",
-      contribution: adjustmentDraft.contribution,
-      earnings: adjustmentDraft.earnings,
+      contribution: Number.parseFloat(adjustmentDraft.contribution) || 0,
+      earnings: Number.parseFloat(adjustmentDraft.earnings) || 0,
       payment: 0,
-      forfeiture: adjustmentDraft.forfeiture,
+      forfeiture: Number.parseFloat(adjustmentDraft.forfeiture) || 0,
       federalTaxes: 0,
       stateTaxes: 0,
       taxCodeId: `${seedRow?.taxCodeId ?? ""}`,
@@ -250,14 +245,25 @@ const ProfitSharingAdjustmentsContent = () => {
 
     setRowData((prev) => {
       const withoutExistingDraft = prev.filter((r) => r.profitDetailId != null);
-      const next = [...withoutExistingDraft, draftRow];
-      return next
-        .sort((a, b) => a.rowNumber - b.rowNumber)
-        .map((r, idx) => ({ ...r, rowNumber: idx + 1 }));
+      // Put draft row first, then sort remaining rows by profitYear descending
+      const next = [draftRow, ...withoutExistingDraft.sort((a, b) => b.profitYear - a.profitYear)];
+      return next.map((r, idx) => ({ ...r, rowNumber: idx + 1 }));
     });
 
-    upsertStageForRow({ ...draftRow, rowNumber });
+    upsertStageForRow({ ...draftRow, rowNumber: 1 }); // Draft is always row 1 now
     setIsAdjustModalOpen(false);
+
+    // Select and scroll to the draft row at the top
+    setTimeout(() => {
+      const api = gridApiRef.current;
+      if (api) {
+        const firstNode = api.getDisplayedRowAtIndex(0);
+        if (firstNode) {
+          firstNode.setSelected(true);
+          api.ensureIndexVisible(0, "top");
+        }
+      }
+    }, 0);
   };
 
   const onCellValueChanged = (event: CellValueChangedEvent) => {
@@ -504,7 +510,7 @@ const ProfitSharingAdjustmentsContent = () => {
               onChange={(e) =>
                 setAdjustmentDraft((prev) => ({
                   ...prev,
-                  contribution: Number.parseFloat(e.target.value ?? "") || 0
+                  contribution: e.target.value
                 }))
               }
               inputProps={{ inputMode: "decimal" }}
@@ -518,7 +524,7 @@ const ProfitSharingAdjustmentsContent = () => {
               onChange={(e) =>
                 setAdjustmentDraft((prev) => ({
                   ...prev,
-                  earnings: Number.parseFloat(e.target.value ?? "") || 0
+                  earnings: e.target.value
                 }))
               }
               inputProps={{ inputMode: "decimal" }}
@@ -532,7 +538,7 @@ const ProfitSharingAdjustmentsContent = () => {
               onChange={(e) =>
                 setAdjustmentDraft((prev) => ({
                   ...prev,
-                  forfeiture: Number.parseFloat(e.target.value ?? "") || 0
+                  forfeiture: e.target.value
                 }))
               }
               inputProps={{ inputMode: "decimal" }}
