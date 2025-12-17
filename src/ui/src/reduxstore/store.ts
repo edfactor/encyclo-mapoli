@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
 import EnvironmentUtils from "../utils/environmentUtils";
+import { AdhocProfLetter73Api } from "./api/AdhocProfLetter73Api";
 import { AdhocApi } from "./api/AdhocApi";
 import { AdjustmentsApi } from "./api/AdjustmentsApi";
 import { AppSupportApi } from "./api/AppSupportApi";
@@ -53,6 +54,7 @@ const API_INSTANCES = [
   AdjustmentsApi,
   ProfitDetailsApi,
   DistributionApi,
+  AdhocProfLetter73Api,
   validationApi
 ] as const;
 

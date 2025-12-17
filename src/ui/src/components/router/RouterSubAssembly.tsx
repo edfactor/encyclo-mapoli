@@ -106,8 +106,9 @@ const AccountHistoryReport = lazy(() => import("../../pages/Reports/AccountHisto
 const PayBeNext = lazy(() => import("../../pages/Reports/PayBeNext/PayBeNext"));
 const PayBenReport = lazy(() => import("../../pages/Reports/PayBenReport/PayBenReport"));
 const QPAY066xAdHocReports = lazy(() => import("../../pages/Reports/QPAY066xAdHocReports/QPAY066xAdHocReports"));
-const RecentlyTerminated = lazy(() => import("../../pages/Reports/RecentlyTerminated/RecentlyTerminated"));
+const AdhocProfLetter73 = lazy(() => import("../../pages/Reports/AdhocProfLetter73/AdhocProfLetter73"));
 const TerminatedLetters = lazy(() => import("../../pages/Reports/TerminatedLetters/TerminatedLetters"));
+const RecentlyTerminated = lazy(() => import("../../pages/Reports/RecentlyTerminated/RecentlyTerminated"));
 
 const ImpersonatingRolesStorageKey = "impersonatingRoles";
 
@@ -709,6 +710,10 @@ const RouterSubAssembly: React.FC = () => {
                       <QPAY066B />
                     </Suspense>
                   }
+                />
+                <Route
+                  path={ROUTES.ADHOC_PROF_LETTER73}
+                  element={<AdhocProfLetter73 />}
                 />
                 <Route
                   path={ROUTES.PRINT_PROFIT_CERTS}
