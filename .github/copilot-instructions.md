@@ -1,3 +1,69 @@
+# AI Assistant Instructions — Smart Profit Sharing
+
+This concise guide explains the must-know patterns, commands, and files for AI coding agents working in this repository.
+
+**Quick summary:**
+- Backend: .NET Aspire-hosted solution under `src/services/` (FastEndpoints + services + EF Core).
+- Frontend: Vite + React + TypeScript under `src/ui/` (Redux Toolkit + RTK Query + smart-ui-library).
+- Telemetry, PII masking, EF Core conventions, and grid/column factories are enforced repo-wide.
+
+**Start here (authoritative references)**
+- [.github/CODE_REVIEW_CHECKLIST.md](.github/CODE_REVIEW_CHECKLIST.md) — master patterns, security, auto-reject rules (age calc, PII).
+- [.github/instructions/pages.instructions.md](.github/instructions/pages.instructions.md) — frontend page patterns and examples.
+- [src/ui/public/docs/TELEMETRY_GUIDE.md](src/ui/public/docs/TELEMETRY_GUIDE.md) — telemetry + masking examples.
+
+**Architecture & boundaries (big picture)**
+- Endpoints (FastEndpoints) must call service layer methods; services own EF Core usage and return `Result<T>`.
+- Frontend pages live in `src/ui/src/pages/*`. Use `Page`, `DSMAccordion`, and `DSMGrid` from `smart-ui-library`.
+- Telemetry and security are cross-cutting: record sensitive-field accesses and mask PII before logging.
+
+**Critical, project-specific rules (always follow)**
+- Endpoints → Services only: do NOT use `DbContext` in endpoints. Move DB logic to services under `src/services/src/`.
+- EF Core: Always use async APIs, call `UseReadOnlyContext()` for read-only queries, avoid `??` inside EF query expressions (Oracle provider), use `TagWith()` for complex ops.
+- Bulk ops: use `ExecuteUpdateAsync` / `ExecuteDeleteAsync` instead of loading entities.
+- Demographics keys: never use `Ssn` alone as a dictionary key — use composite `(Ssn, OracleHcmId)` or a `ToLookup()`.
+- Financial rounding: use `MidpointRounding.AwayFromZero`.
+- Age calculation: compute on backend only (frontend must not calculate age).
+
+**Frontend conventions & examples**
+- Grid columns: always use factory functions in `src/ui/src/utils/gridColumnFactory.ts` (badge/name columns are specialized).
+- Server-side pagination: parent manages `pageNumber` (0-based UI → API 1-based), `pageSize`, `sortBy`, and `isSortDescending`; grids call parent handlers via props.
+- Use RTK Query lazy hooks for user-initiated searches (e.g., `useLazySearchDistributionsQuery`).
+
+**Common developer commands**
+- Full app (API + UI):
+```pwsh
+aspire run
+```
+- Backend build & tests:
+```pwsh
+cd src/services
+dotnet build Demoulas.ProfitSharing.slnx
+dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --no-build
+```
+- Frontend dev/build/tests:
+```bash
+cd src/ui
+npm run dev
+npm run build:qa
+npm test
+```
+
+**Telemetry & logging**
+- Prefer `ExecuteWithTelemetry` wrapper in endpoints; declare sensitive fields (e.g., `"Ssn"`) when recording metrics. See [src/ui/public/docs/TELEMETRY_GUIDE.md](src/ui/public/docs/TELEMETRY_GUIDE.md).
+
+**AI agent rules (operational constraints)**
+- Do not open or merge PRs automatically. Provide a suggested branch name, commit message, and exact `git` commands; stop before pushing.
+- Make minimal/surgical changes. Update tests and docs if behavior or public APIs change.
+
+**Files to inspect for pattern examples**
+- Endpoints: `src/services/src/Demoulas.ProfitSharing.Endpoints/**`
+- Services: `src/services/src/Demoulas.ProfitSharing.Services/**`
+- Frontend pages: `src/ui/src/pages/**` (see `MasterInquiry`, `DistributionInquiry`)
+- Grid factories: `src/ui/src/utils/gridColumnFactory.ts`
+- Telemetry docs: `src/ui/public/docs/TELEMETRY_GUIDE.md`
+
+If you want, I can also produce a suggested PR body and branch name for this change — tell me whether to prepare that next.
 # AI Assistant Project Instructions
 
 **Quick navigation guide for AI coding agents** working in this repository. Detailed patterns are in separate documents (see references below).
