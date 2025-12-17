@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -17,15 +18,18 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly ITotalService _totalService;
     private readonly ILogger<ProfitSharingAdjustmentsService> _logger;
 
     public ProfitSharingAdjustmentsService(
         IProfitSharingDataContextFactory dbContextFactory,
         IDemographicReaderService demographicReaderService,
+        ITotalService totalService,
         ILogger<ProfitSharingAdjustmentsService> logger)
     {
         _dbContextFactory = dbContextFactory;
         _demographicReaderService = demographicReaderService;
+        _totalService = totalService;
         _logger = logger;
     }
 
@@ -62,7 +66,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var demographic = await demographicQuery
                 .TagWith($"ProfitSharingAdjustments-Get-Demographic-{request.BadgeNumber}")
                 .Where(d => d.BadgeNumber == request.BadgeNumber)
-                .Select(d => new { d.Ssn, d.DateOfBirth })
+                .Select(d => new { d.Id, d.Ssn, d.DateOfBirth, d.HireDate })
                 .FirstOrDefaultAsync(ct);
 
             if (demographic is null)
@@ -71,8 +75,15 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             }
 
             var ssn = demographic.Ssn;
+            var demographicId = demographic.Id;
             var profitYear = request.ProfitYear;
             var canEditYearExtension = IsUnderAgeAtContributionYearEnd(demographic.DateOfBirth, profitYear, underAgeThreshold: 18);
+            var isOver21AtInitialHire = IsOverAgeAtDate(demographic.DateOfBirth, demographic.HireDate, ageThreshold: 21);
+
+            var balances = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, new HashSet<int> { ssn }, profitYear, ct);
+            var balance = balances.FirstOrDefault();
+            var currentBalance = balance?.CurrentBalance ?? 0m;
+            var vestedBalance = balance?.VestedBalance ?? 0m;
 
             var profitDetails = await ctx.ProfitDetails
                 .TagWith($"ProfitSharingAdjustments-Get-ProfitDetails-{profitYear}-{request.SequenceNumber}")
@@ -141,6 +152,10 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
             {
                 ProfitYear = request.ProfitYear,
+                DemographicId = demographicId,
+                IsOver21AtInitialHire = isOver21AtInitialHire,
+                CurrentBalance = currentBalance,
+                VestedBalance = vestedBalance,
                 BadgeNumber = request.BadgeNumber,
                 SequenceNumber = request.SequenceNumber,
                 Rows = responseRows
@@ -216,7 +231,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 var demographic = await demographicQuery
                     .TagWith($"ProfitSharingAdjustments-Save-Demographic-{request.BadgeNumber}")
                     .Where(d => d.BadgeNumber == request.BadgeNumber)
-                    .Select(d => new { d.Ssn, d.DateOfBirth })
+                    .Select(d => new { d.Id, d.Ssn, d.DateOfBirth, d.HireDate })
                     .FirstOrDefaultAsync(ct);
 
                 if (demographic is null)
@@ -225,8 +240,15 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 }
 
                 var ssn = demographic.Ssn;
+                var demographicId = demographic.Id;
                 var profitYear = request.ProfitYear;
                 var canEditYearExtension = IsUnderAgeAtContributionYearEnd(demographic.DateOfBirth, profitYear, underAgeThreshold: 18);
+                var isOver21AtInitialHire = IsOverAgeAtDate(demographic.DateOfBirth, demographic.HireDate, ageThreshold: 21);
+
+                var balances = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, new HashSet<int> { ssn }, profitYear, ct);
+                var balance = balances.FirstOrDefault();
+                var currentBalance = balance?.CurrentBalance ?? 0m;
+                var vestedBalance = balance?.VestedBalance ?? 0m;
 
                 var idsToUpdate = request.Rows
                     .Where(r => r.ProfitDetailId.HasValue)
@@ -369,6 +391,10 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
                 {
                     ProfitYear = request.ProfitYear,
+                    DemographicId = demographicId,
+                    IsOver21AtInitialHire = isOver21AtInitialHire,
+                    CurrentBalance = currentBalance,
+                    VestedBalance = vestedBalance,
                     BadgeNumber = request.BadgeNumber,
                     SequenceNumber = request.SequenceNumber,
                     Rows = []
@@ -407,6 +433,17 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
         }
 
         return age < underAgeThreshold;
+    }
+
+    private static bool IsOverAgeAtDate(DateOnly dateOfBirth, DateOnly asOf, int ageThreshold)
+    {
+        var age = asOf.Year - dateOfBirth.Year;
+        if (dateOfBirth > asOf.AddYears(-age))
+        {
+            age--;
+        }
+
+        return age > ageThreshold;
     }
 
     private static DateOnly? GetActivityDateOrNull(ProfitDetail pd)

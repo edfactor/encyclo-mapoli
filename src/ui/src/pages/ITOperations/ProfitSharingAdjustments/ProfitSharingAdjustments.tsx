@@ -1,17 +1,20 @@
 import { Box, Button, Divider, Grid, TextField, Typography } from "@mui/material";
 import { CellValueChangedEvent, ColDef, ValueParserParams } from "ag-grid-community";
+import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
 import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
+import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import {
-    useLazyGetProfitSharingAdjustmentsQuery,
-    useSaveProfitSharingAdjustmentsMutation
+  useLazyGetProfitSharingAdjustmentsQuery,
+  useSaveProfitSharingAdjustmentsMutation
 } from "../../../reduxstore/api/ProfitDetailsApi";
 import {
-    ProfitSharingAdjustmentRowDto,
-    ProfitSharingAdjustmentsKey,
-    SaveProfitSharingAdjustmentRowRequest
+  ProfitSharingAdjustmentRowDto,
+  ProfitSharingAdjustmentsKey,
+  SaveProfitSharingAdjustmentRowRequest
 } from "../../../reduxstore/types";
 
 const isValidIsoDate = (value: string): boolean => {
@@ -28,9 +31,10 @@ const toNumberOrOld = (params: ValueParserParams): number => {
   return Number.isFinite(parsed) ? parsed : (params.oldValue as number);
 };
 
-const ProfitSharingAdjustments = () => {
+const ProfitSharingAdjustmentsContent = () => {
   const [triggerGet, { data, isFetching: isFetchingAdjustments }] = useLazyGetProfitSharingAdjustmentsQuery();
   const [saveAdjustments, { isLoading: isSaving }] = useSaveProfitSharingAdjustmentsMutation();
+  const { clearAlerts } = useMissiveAlerts();
 
   const [profitYear, setProfitYear] = useState<number>(new Date().getFullYear());
   const [badgeNumber, setBadgeNumber] = useState<number>(0);
@@ -50,6 +54,8 @@ const ProfitSharingAdjustments = () => {
       return;
     }
 
+    clearAlerts();
+
     setLoadedKey({ profitYear: data.profitYear, badgeNumber: data.badgeNumber, sequenceNumber: data.sequenceNumber });
 
     // DSMGrid/AG Grid edits mutate row objects; make sure data isn't frozen.
@@ -65,7 +71,7 @@ const ProfitSharingAdjustments = () => {
 
     setStagedByRowNumber({});
     setErrorMessage(null);
-  }, [data]);
+  }, [data, clearAlerts]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
     const isExistingRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId != null;
@@ -162,6 +168,7 @@ const ProfitSharingAdjustments = () => {
 
   const loadAdjustments = async () => {
     setErrorMessage(null);
+    clearAlerts();
 
     if (hasUnsavedChanges) {
       setErrorMessage("Discard changes before loading different adjustments.");
@@ -308,13 +315,21 @@ const ProfitSharingAdjustments = () => {
   };
 
   return (
-    <Page label={CAPTIONS.PROFIT_SHARING_ADJUSTMENTS}>
+    <Grid
+      container
+      rowSpacing={3}>
+      {data?.demographicId != null && (
+        <StandaloneMemberDetails
+          memberType={1}
+          id={data.demographicId}
+          profitYear={data.profitYear}
+        />
+      )}
+
       <Grid
-        container
-        rowSpacing={3}>
-        <Grid width="100%">
-          <Divider />
-        </Grid>
+        width="100%">
+        <Divider />
+      </Grid>
 
         <Grid width="100%">
           <Box
@@ -403,7 +418,16 @@ const ProfitSharingAdjustments = () => {
             }}
           />
         </Grid>
-      </Grid>
+    </Grid>
+  );
+};
+
+const ProfitSharingAdjustments = () => {
+  return (
+    <Page label={CAPTIONS.PROFIT_SHARING_ADJUSTMENTS}>
+      <MissiveAlertProvider>
+        <ProfitSharingAdjustmentsContent />
+      </MissiveAlertProvider>
     </Page>
   );
 };

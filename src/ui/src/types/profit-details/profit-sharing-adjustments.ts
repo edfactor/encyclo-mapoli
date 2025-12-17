@@ -21,6 +21,10 @@ export type ProfitSharingAdjustmentRowDto = {
 export type GetProfitSharingAdjustmentsRequest = ProfitSharingAdjustmentsKey;
 
 export type GetProfitSharingAdjustmentsResponse = ProfitSharingAdjustmentsKey & {
+  demographicId: number | null;
+  isOver21AtInitialHire: boolean;
+  currentBalance: number;
+  vestedBalance: number;
   rows: ProfitSharingAdjustmentRowDto[];
 };
 
