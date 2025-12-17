@@ -216,11 +216,6 @@ const ProfitSharingAdjustmentsContent = () => {
 
     const existingDraft = rowData.find((r) => r.profitDetailId == null);
 
-    if (!existingDraft && rowData.length >= 18) {
-      setErrorMessage("A maximum of 18 rows can be displayed/saved.");
-      return;
-    }
-
     const now = new Date();
     const todayIso = now.toISOString().slice(0, 10);
 
