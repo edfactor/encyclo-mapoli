@@ -29,6 +29,8 @@ public sealed record ProfitSharingAdjustmentRowResponse
 
     public required byte ProfitCodeId { get; init; }
 
+    public required string ProfitCodeName { get; init; }
+
     public required decimal Contribution { get; init; }
 
     public required decimal Earnings { get; init; }

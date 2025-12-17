@@ -326,7 +326,7 @@ SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
    SELECT SSN, MIN(profit_year) INITIAL_CONTR_YEAR
             FROM PROFIT_DETAIL
             WHERE PROFIT_CODE_ID = 0 /*ProfitCode.Constants.IncomingContributions*/ AND CONTRIBUTION !=0
-            AND PROFIT_YEAR_ITERATION <> 3
+                AND PROFIT_YEAR_ITERATION <> 3
             GROUP BY SSN";
         return query;
     }

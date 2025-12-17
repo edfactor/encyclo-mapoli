@@ -90,15 +90,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var currentBalance = balance?.CurrentBalance ?? 0m;
             var vestedBalance = balance?.VestedBalance ?? 0m;
 
-            var payProfit = await ctx.PayProfits
-                .TagWith($"ProfitSharingAdjustments-Get-PayProfit-{profitYear}-{demographicId}")
-                .Where(pp => pp.DemographicId == demographicId && pp.ProfitYear == profitYear)
-                .Select(pp => new { pp.CurrentHoursYear, pp.CurrentIncomeYear })
-                .FirstOrDefaultAsync(ct);
-
-            var currentHoursYear = payProfit?.CurrentHoursYear ?? 0m;
-            var currentIncomeYear = payProfit?.CurrentIncomeYear ?? 0m;
-
             // Confluence rule: default to only show rows for accounts under 21 as of today.
             // Users can override via GetAllRows.
             var includeRowsForYear = includeAllRows || IsUnderAgeAtDate(demographic.DateOfBirth, today, underAgeThreshold: 21);
@@ -134,6 +125,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         RowNumber = 0, // assigned after materialization
                         ProfitYear = pd.ProfitYear,
                         ProfitCodeId = pd.ProfitCodeId,
+                        ProfitCodeName = pd.ProfitCode != null ? pd.ProfitCode.Name : string.Empty,
                         Contribution = pd.Contribution,
                         Earnings = pd.Earnings,
                         Forfeiture = !paymentProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
@@ -149,8 +141,8 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         CommentRelatedCheckNumber = pd.CommentRelatedCheckNumber,
                         CommentRelatedState = pd.CommentRelatedState,
                         CommentIsPartialTransaction = pd.CommentIsPartialTransaction == true,
-                        CurrentHoursYear = currentHoursYear,
-                        CurrentIncomeYear = currentIncomeYear,
+                        CurrentHoursYear = 0m, // assigned after materialization (per ProfitYear)
+                        CurrentIncomeYear = 0m, // assigned after materialization (per ProfitYear)
                         ActivityDate = pd.MonthToDate > 0 && pd.YearToDate > 0
                             ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1)
                             : null,
@@ -160,9 +152,34 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     .ToListAsync(ct)
                 : new List<ProfitSharingAdjustmentRowResponse>();
 
-            for (var i = 0; i < profitDetails.Count; i++)
+            if (profitDetails.Count > 0)
             {
-                profitDetails[i] = profitDetails[i] with { RowNumber = i + 1 };
+                var profitYears = profitDetails
+                    .Select(r => r.ProfitYear)
+                    .Distinct()
+                    .ToArray();
+
+                var payProfitsByYear = await ctx.PayProfits
+                    .TagWith($"ProfitSharingAdjustments-Get-PayProfits-ByYear-{demographicId}")
+                    .Where(pp => pp.DemographicId == demographicId && profitYears.Contains(pp.ProfitYear))
+                    .Select(pp => new { pp.ProfitYear, pp.CurrentHoursYear, pp.CurrentIncomeYear })
+                    .ToListAsync(ct);
+
+                var payProfitLookup = payProfitsByYear
+                    .GroupBy(pp => pp.ProfitYear)
+                    .ToDictionary(g => g.Key, g => g.First());
+
+                for (var i = 0; i < profitDetails.Count; i++)
+                {
+                    payProfitLookup.TryGetValue(profitDetails[i].ProfitYear, out var pp);
+
+                    profitDetails[i] = profitDetails[i] with
+                    {
+                        RowNumber = i + 1,
+                        CurrentHoursYear = pp?.CurrentHoursYear ?? 0m,
+                        CurrentIncomeYear = pp?.CurrentIncomeYear ?? 0m
+                    };
+                }
             }
 
             return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
