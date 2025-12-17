@@ -8,9 +8,11 @@ public sealed record ForfeituresAndPointsForYearResponseWithTotals : ReportRespo
     public decimal TotalForfeitures { get; set; }
 
     [MaskSensitive]
+    [YearEndArchiveProperty]
     public int TotalForfeitPoints { get; set; }
 
     [MaskSensitive]
+    [YearEndArchiveProperty]
     public int TotalEarningPoints { get; set; }
 
     [YearEndArchiveProperty]

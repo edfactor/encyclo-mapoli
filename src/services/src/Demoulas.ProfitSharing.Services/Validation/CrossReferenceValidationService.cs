@@ -90,6 +90,9 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
             var balanceEquationGroup = await ValidateBalanceEquationGroupAsync(
                 profitYear, currentValues, cancellationToken);
 
+            var forfeitPointsGroup = await ValidateForfeitPointsGroupAsync(
+                profitYear, currentValues, validatedReports, cancellationToken);
+
             // Combine all validation groups
             var validationGroups = new List<CrossReferenceValidationGroup>
             {
@@ -99,7 +102,8 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
                 contributionsGroup,
                 earningsGroup,
                 allocTransfersGroup,
-                balanceEquationGroup
+                balanceEquationGroup,
+                forfeitPointsGroup
             };
 
             int totalValidations, passedValidations, failedValidations;
@@ -440,6 +444,37 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
             Summary = summary,
             Priority = "High",
             ValidationRule = "PAY444.EARNINGS = PAY443.TotalEarnings"
+        };
+    }
+
+    private async Task<CrossReferenceValidationGroup> ValidateForfeitPointsGroupAsync(
+        short profitYear,
+        Dictionary<string, decimal> currentValues,
+        HashSet<string> validatedReports,
+        CancellationToken cancellationToken)
+    {
+        var validations = new List<CrossReferenceValidation>();
+
+        // PAY443.TotalEarnings (if it exists - need to add to response DTO)
+        var pay443Validation = await ValidateSingleFieldAsync(
+            profitYear, "PAY443", "TotalForfeitPoints", currentValues, cancellationToken);
+        validations.Add(pay443Validation);
+        validatedReports.Add("PAY443");
+
+        bool allValid = validations.All(v => v.IsValid);
+        string summary = allValid
+            ? "Forfeit point totals are in sync."
+            : "Forfeit point totals mismatch detected.";
+
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "Total Forfeit Points",
+            Description = "Cross-validation of forfeit point totals",
+            IsValid = allValid,
+            Validations = validations,
+            Summary = summary,
+            Priority = "High",
+            ValidationRule = "PAY444.FORFEIT_POINTS = PAY443.TotalForfeitPoints"
         };
     }
 

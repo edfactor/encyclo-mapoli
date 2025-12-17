@@ -157,7 +157,8 @@ export const useProfitShareEditUpdate = () => {
           OutgoingAllocations: profitSharingUpdate.profitShareUpdateTotals.paidAllocations,
           NetAllocTransfer:
             (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
-            (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
+            (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
+          TotalForfeitPoints: profitSharingUpdate.profitShareUpdateTotals.contributionPoints
         }
       : undefined
   });

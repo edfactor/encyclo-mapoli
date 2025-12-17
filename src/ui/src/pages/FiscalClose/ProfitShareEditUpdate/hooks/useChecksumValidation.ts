@@ -20,6 +20,7 @@ export interface ChecksumValidationConfig {
     IncomingAllocations?: number;
     OutgoingAllocations?: number;
     NetAllocTransfer?: number;
+    TotalForfeitPoints: number;  
   };
   /** Optional callback when validation data is loaded */
   onValidationLoaded?: (data: MasterUpdateCrossReferenceValidationResponse) => void;
@@ -66,7 +67,9 @@ const enrichValidationWithCurrentValues = (
                   ? currentValues.OutgoingAllocations
                   : fieldName === "NetAllocTransfer"
                     ? currentValues.NetAllocTransfer
-                    : null;
+                    : fieldName === "TotalForfeitPoints"
+                      ? currentValues.TotalForfeitPoints
+                      : 0
 
   if (currentValue === null || currentValue === undefined) {
     // Current value not available for this field
