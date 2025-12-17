@@ -68,6 +68,7 @@ const ProfitSharingAdjustmentsContent = () => {
       forfeiture: "0"
     }
   );
+  const [memberDetailsRefreshTrigger, setMemberDetailsRefreshTrigger] = useState<number>(0);
 
   const hasUnsavedChanges = Object.keys(stagedByRowNumber).length > 0;
   const { showDialog: showUnsavedDialog, onStay, onLeave } = useUnsavedChangesGuard(hasUnsavedChanges, true);
@@ -319,6 +320,9 @@ const ProfitSharingAdjustmentsContent = () => {
 
       // Refresh to ensure server-calculated fields stay in sync.
       await triggerGet({ ...loadedKey, getAllRows: loadedGetAllRows }).unwrap();
+
+      // Trigger refresh of member details to show updated balance.
+      setMemberDetailsRefreshTrigger((prev) => prev + 1);
     } catch (e) {
       console.error("Failed to save profit sharing adjustments", e);
       setErrorMessage("Failed to save changes. Please try again.");
@@ -421,6 +425,7 @@ const ProfitSharingAdjustmentsContent = () => {
           memberType={1}
           id={data.demographicId}
           profitYear={data.profitYear}
+          refreshTrigger={memberDetailsRefreshTrigger}
         />
       )}
 
