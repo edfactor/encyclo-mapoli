@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import type { ProfitSharingAdjustmentRowDto } from "../../../types/profitSharingAdjustments";
+import type { ProfitSharingAdjustmentRowDto } from "../../../reduxstore/types";
 import {
     createCurrencyColumn,
     createTaxCodeColumn,
@@ -21,7 +21,7 @@ const toNumberOrOld = (params: { newValue: string | number; oldValue: number }):
  * Helper to determine if a row is a draft insert row (editable)
  */
 const isDraftInsertRow = (data: ProfitSharingAdjustmentRowDto | undefined): boolean => {
-  return data?.id === undefined || data.id === 0;
+  return data?.profitDetailId === undefined || data.profitDetailId === null;
 };
 
 /**
@@ -41,9 +41,11 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: false
     },
-    createYearColumn({
-      headerName: "Profit Year",
-      field: "profitYear",
+    {
+      ...createYearColumn({
+        headerName: "Profit Year",
+        field: "profitYear"
+      }),
       sortable: false,
       filter: false,
       editable: false,
@@ -55,7 +57,7 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
         if (iter === undefined || iter === null) return `${year}`;
         return `${year}.${iter}`;
       }
-    }),
+    },
     {
       headerName: "Profit Code",
       field: "profitCodeId",
@@ -78,44 +80,30 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
         return name || "";
       }
     },
-    createCurrencyColumn({
-      headerName: "Contribution",
-      field: "contribution",
+    {
+      ...createCurrencyColumn({
+        headerName: "Contribution",
+        field: "contribution"
+      }),
       editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
       valueParser: toNumberOrOld
-    }),
-    createCurrencyColumn({
-      headerName: "Earnings",
-      field: "earnings",
+    },
+    {
+      ...createCurrencyColumn({
+        headerName: "Earnings",
+        field: "earnings"
+      }),
       editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
       valueParser: toNumberOrOld
-    }),
-    createCurrencyColumn({
-      headerName: "Forfeiture",
-      field: "forfeiture",
+    },
+    {
+      ...createCurrencyColumn({
+        headerName: "Forfeiture",
+        field: "forfeiture"
+      }),
       editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
       valueParser: toNumberOrOld
-    }),
-    createCurrencyColumn({
-      headerName: "Payment",
-      field: "payment",
-      editable: false
-    }),
-    createCurrencyColumn({
-      headerName: "Federal Tax",
-      field: "federalTaxes",
-      minWidth: 120,
-      editable: false
-    }),
-    createCurrencyColumn({
-      headerName: "State Tax",
-      field: "stateTaxes",
-      minWidth: 120,
-      editable: false
-    }),
-    createTaxCodeColumn({
-      editable: false
-    }),
+    },
     {
       headerName: "Activity Date",
       field: "activityDate",
@@ -126,6 +114,33 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
+    },
+    {
+      ...createCurrencyColumn({
+        headerName: "Payment",
+        field: "payment"
+      }),
+      editable: false
+    },
+    {
+      ...createCurrencyColumn({
+        headerName: "Federal Tax",
+        field: "federalTaxes"
+      }),
+      minWidth: 120,
+      editable: false
+    },
+    {
+      ...createCurrencyColumn({
+        headerName: "State Tax",
+        field: "stateTaxes"
+      }),
+      minWidth: 120,
+      editable: false
+    },
+    {
+      ...createTaxCodeColumn(),
+      editable: false
     },
     {
       headerName: "Comment",
