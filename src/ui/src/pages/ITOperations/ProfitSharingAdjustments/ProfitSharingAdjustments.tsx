@@ -245,14 +245,25 @@ const ProfitSharingAdjustmentsContent = () => {
 
     setRowData((prev) => {
       const withoutExistingDraft = prev.filter((r) => r.profitDetailId != null);
-      const next = [...withoutExistingDraft, draftRow];
-      return next
-        .sort((a, b) => a.rowNumber - b.rowNumber)
-        .map((r, idx) => ({ ...r, rowNumber: idx + 1 }));
+      // Put draft row first, then sort remaining rows by profitYear descending
+      const next = [draftRow, ...withoutExistingDraft.sort((a, b) => b.profitYear - a.profitYear)];
+      return next.map((r, idx) => ({ ...r, rowNumber: idx + 1 }));
     });
 
-    upsertStageForRow({ ...draftRow, rowNumber });
+    upsertStageForRow({ ...draftRow, rowNumber: 1 }); // Draft is always row 1 now
     setIsAdjustModalOpen(false);
+
+    // Select and scroll to the draft row at the top
+    setTimeout(() => {
+      const api = gridApiRef.current;
+      if (api) {
+        const firstNode = api.getDisplayedRowAtIndex(0);
+        if (firstNode) {
+          firstNode.setSelected(true);
+          api.ensureIndexVisible(0, "top");
+        }
+      }
+    }, 0);
   };
 
   const onCellValueChanged = (event: CellValueChangedEvent) => {
