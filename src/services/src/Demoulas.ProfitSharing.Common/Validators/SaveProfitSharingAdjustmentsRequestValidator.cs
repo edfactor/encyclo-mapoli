@@ -58,10 +58,6 @@ public sealed class SaveProfitSharingAdjustmentsRequestValidator : Validator<Sav
                 .InclusiveBetween(1, MaxRows)
                 .WithMessage($"RowNumber must be between 1 and {MaxRows}.");
 
-            row.RuleFor(r => r.ProfitYearIteration)
-                .Must(v => v is 0 or 3)
-                .WithMessage("ProfitYearIteration (EXT) must be 0 or 3.");
-
             row.RuleFor(r => r.ProfitCodeId)
                 .Equal((byte)0)
                 .WithMessage("ProfitCodeId must be 0.");

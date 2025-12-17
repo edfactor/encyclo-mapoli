@@ -42,7 +42,6 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         var insertRow = result.Value.Rows.FirstOrDefault(r => r.ProfitDetailId is null && r.ActivityDate is not null);
         insertRow.ShouldNotBeNull();
 
-        insertRow!.ProfitYearIteration.ShouldBe((byte)3);
         insertRow.ProfitCodeId.ShouldBe(ProfitCode.Constants.IncomingContributions.Id);
         insertRow.Comment.ShouldBe("ADMINISTRATIVE");
         insertRow.ActivityDate.ShouldBe(DateOnly.FromDateTime(DateTime.Today));
@@ -79,10 +78,9 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         getResult.Value.ShouldNotBeNull();
 
         var existingRow = getResult.Value!.Rows
-            .Where(r => r.ProfitDetailId is not null)
-            .FirstOrDefault(r => r.ProfitYearIteration is 0 or 3);
+            .FirstOrDefault(r => r.ProfitDetailId is not null);
 
-        existingRow.ShouldNotBeNull("Test data did not contain an existing row with ProfitYearIteration (EXT) 0 or 3.");
+        existingRow.ShouldNotBeNull("Test data did not contain an existing row.");
 
         var saveResult = await _service.SaveAsync(new SaveProfitSharingAdjustmentsRequest
         {
@@ -95,7 +93,6 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                 {
                     ProfitDetailId = existingRow!.ProfitDetailId,
                     RowNumber = existingRow.RowNumber,
-                    ProfitYearIteration = existingRow.ProfitYearIteration,
                     ProfitCodeId = existingRow.ProfitCodeId,
                     Contribution = existingRow.Contribution + 1,
                     Earnings = existingRow.Earnings,
@@ -147,7 +144,6 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                 {
                     ProfitDetailId = null,
                     RowNumber = insertRow.RowNumber,
-                    ProfitYearIteration = 3,
                     ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
                     Contribution = 1,
                     Earnings = 0,
@@ -159,7 +155,6 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                 {
                     ProfitDetailId = null,
                     RowNumber = fillerRow.RowNumber,
-                    ProfitYearIteration = 3,
                     ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
                     Contribution = 2,
                     Earnings = 0,
@@ -196,7 +191,6 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                 {
                     ProfitDetailId = null,
                     RowNumber = 1,
-                    ProfitYearIteration = 3,
                     ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
                     Contribution = 0,
                     Earnings = 0,
@@ -261,7 +255,7 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                 .ToListAsync();
 
             var candidate = candidates.FirstOrDefault();
-            candidate.ShouldNotBeNull("Test data did not contain a ProfitDetail group with < 18 rows for ProfitCodeId 0, ProfitYearIteration 0/3, and a matching Demographic.");
+            candidate.ShouldNotBeNull("Test data did not contain a ProfitDetail group with < 18 rows for ProfitCodeId 0 and a matching Demographic.");
 
             return (candidate!.ProfitYear, candidate.BadgeNumber, candidate.SequenceNumber, candidate.Ssn);
         }, CancellationToken.None);

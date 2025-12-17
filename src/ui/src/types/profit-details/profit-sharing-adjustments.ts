@@ -8,7 +8,6 @@ export type ProfitSharingAdjustmentRowDto = {
   profitDetailId: number | null;
   rowNumber: number;
   profitYear: number;
-  profitYearIteration: number;
   profitCodeId: number;
   contribution: number;
   earnings: number;
@@ -33,7 +32,6 @@ export type GetProfitSharingAdjustmentsResponse = ProfitSharingAdjustmentsKey & 
 export type SaveProfitSharingAdjustmentRowRequest = {
   profitDetailId: number | null;
   rowNumber: number;
-  profitYearIteration: number;
   profitCodeId: number;
   contribution: number;
   earnings: number;

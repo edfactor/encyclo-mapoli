@@ -112,7 +112,6 @@ const ProfitSharingAdjustmentsContent = () => {
     }
 
     const changed =
-      row.profitYearIteration !== original.profitYearIteration ||
       row.profitCodeId !== original.profitCodeId ||
       row.contribution !== original.contribution ||
       row.earnings !== original.earnings ||
@@ -130,7 +129,6 @@ const ProfitSharingAdjustmentsContent = () => {
       next[row.rowNumber] = {
         profitDetailId: row.profitDetailId,
         rowNumber: row.rowNumber,
-        profitYearIteration: row.profitYearIteration,
         profitCodeId: row.profitCodeId,
         contribution: row.contribution,
         earnings: row.earnings,
@@ -146,8 +144,6 @@ const ProfitSharingAdjustmentsContent = () => {
   const columnDefs = useMemo<ColDef[]>(() => {
     const isExistingRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId != null;
     const isInsertRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId == null && row?.activityDate != null;
-    const canEditExtOnExistingRow = (row?: ProfitSharingAdjustmentRowDto): boolean =>
-      isExistingRow(row) && row?.isEditable === true;
 
     return [
       {
@@ -165,21 +161,6 @@ const ProfitSharingAdjustmentsContent = () => {
         filter: false,
         editable: false,
         width: 90
-      },
-      {
-        headerName: "EXT",
-        field: "profitYearIteration",
-        sortable: false,
-        filter: false,
-        editable: (params) => canEditExtOnExistingRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        width: 60,
-        valueParser: (params: ValueParserParams) => {
-          const parsed = Number.parseInt(String(params.newValue ?? ""), 10);
-          if (parsed === 0 || parsed === 3) {
-            return parsed;
-          }
-          return params.oldValue;
-        }
       },
       {
         headerName: "Profit Code",
@@ -315,7 +296,6 @@ const ProfitSharingAdjustmentsContent = () => {
 
     const updatedRow: ProfitSharingAdjustmentRowDto = {
       ...insertRow,
-      profitYearIteration: 3,
       contribution: adjustmentDraft.contribution,
       earnings: adjustmentDraft.earnings,
       forfeiture: adjustmentDraft.forfeiture
@@ -362,7 +342,6 @@ const ProfitSharingAdjustmentsContent = () => {
     const rowsToSave: SaveProfitSharingAdjustmentRowRequest[] = rowData.map((r) => ({
       profitDetailId: r.profitDetailId,
       rowNumber: r.rowNumber,
-      profitYearIteration: r.profitYearIteration,
       profitCodeId: r.profitCodeId,
       contribution: r.contribution,
       earnings: r.earnings,
@@ -372,11 +351,6 @@ const ProfitSharingAdjustmentsContent = () => {
     }));
 
     for (const row of rowsToSave) {
-      if (row.profitYearIteration !== 0 && row.profitYearIteration !== 3) {
-        setErrorMessage("EXT must be 0 or 3.");
-        return;
-      }
-
       if (row.activityDate && !isValidIsoDate(row.activityDate)) {
         setErrorMessage("Activity Date must be in YYYY-MM-DD format.");
         return;
