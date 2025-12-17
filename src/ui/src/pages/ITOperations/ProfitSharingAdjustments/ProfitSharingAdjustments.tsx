@@ -1,7 +1,20 @@
-import { Box, Button, Checkbox, Divider, FormControlLabel, Grid, TextField, Typography } from "@mui/material";
-import { CellValueChangedEvent, ColDef, ValueParserParams } from "ag-grid-community";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Grid,
+  TextField,
+  Typography
+} from "@mui/material";
+import { CellValueChangedEvent, ColDef, GridApi, SelectionChangedEvent, ValueParserParams } from "ag-grid-community";
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
@@ -36,6 +49,8 @@ const ProfitSharingAdjustmentsContent = () => {
   const [saveAdjustments, { isLoading: isSaving }] = useSaveProfitSharingAdjustmentsMutation();
   const { clearAlerts } = useMissiveAlerts();
 
+  const gridApiRef = useRef<GridApi | null>(null);
+
   const [profitYear, setProfitYear] = useState<number>(new Date().getFullYear());
   const [badgeNumber, setBadgeNumber] = useState<string>("");
   const [sequenceNumber, setSequenceNumber] = useState<number>(0);
@@ -47,6 +62,16 @@ const ProfitSharingAdjustmentsContent = () => {
   const [originalByRowNumber, setOriginalByRowNumber] = useState<Record<number, ProfitSharingAdjustmentRowDto>>({});
   const [stagedByRowNumber, setStagedByRowNumber] = useState<Record<number, SaveProfitSharingAdjustmentRowRequest>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [selectedRow, setSelectedRow] = useState<ProfitSharingAdjustmentRowDto | null>(null);
+  const [isAdjustModalOpen, setIsAdjustModalOpen] = useState<boolean>(false);
+  const [adjustmentDraft, setAdjustmentDraft] = useState<{ contribution: number; earnings: number; forfeiture: number }>(
+    {
+      contribution: 0,
+      earnings: 0,
+      forfeiture: 0
+    }
+  );
 
   const hasUnsavedChanges = Object.keys(stagedByRowNumber).length > 0;
   useUnsavedChangesGuard(hasUnsavedChanges);
@@ -74,7 +99,49 @@ const ProfitSharingAdjustmentsContent = () => {
 
     setStagedByRowNumber({});
     setErrorMessage(null);
+
+    // Reset row selection when loading new data.
+    setSelectedRow(null);
+    gridApiRef.current?.deselectAll();
   }, [data, clearAlerts]);
+
+  const upsertStageForRow = (row: ProfitSharingAdjustmentRowDto) => {
+    const original = originalByRowNumber[row.rowNumber];
+    if (!original) {
+      return;
+    }
+
+    const changed =
+      row.profitYearIteration !== original.profitYearIteration ||
+      row.profitCodeId !== original.profitCodeId ||
+      row.contribution !== original.contribution ||
+      row.earnings !== original.earnings ||
+      row.forfeiture !== original.forfeiture ||
+      row.activityDate !== original.activityDate ||
+      row.comment !== original.comment;
+
+    setStagedByRowNumber((prev) => {
+      const next = { ...prev };
+      if (!changed) {
+        delete next[row.rowNumber];
+        return next;
+      }
+
+      next[row.rowNumber] = {
+        profitDetailId: row.profitDetailId,
+        rowNumber: row.rowNumber,
+        profitYearIteration: row.profitYearIteration,
+        profitCodeId: row.profitCodeId,
+        contribution: row.contribution,
+        earnings: row.earnings,
+        forfeiture: row.forfeiture,
+        activityDate: row.activityDate,
+        comment: row.comment
+      };
+
+      return next;
+    });
+  };
 
   const columnDefs = useMemo<ColDef[]>(() => {
     const isExistingRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId != null;
@@ -215,6 +282,50 @@ const ProfitSharingAdjustmentsContent = () => {
     setStagedByRowNumber({});
   };
 
+  const clearSelection = () => {
+    setSelectedRow(null);
+    gridApiRef.current?.deselectAll();
+  };
+
+  const openAdjustModal = () => {
+    setErrorMessage(null);
+
+    if (!selectedRow || selectedRow.profitDetailId == null) {
+      setErrorMessage("Select an existing row before making an adjustment.");
+      return;
+    }
+
+    setAdjustmentDraft({
+      contribution: -selectedRow.contribution,
+      earnings: -selectedRow.earnings,
+      forfeiture: -selectedRow.forfeiture
+    });
+
+    setIsAdjustModalOpen(true);
+  };
+
+  const applyAdjustmentDraftToInsertRow = () => {
+    setErrorMessage(null);
+
+    const insertRow = rowData.find((r) => r.profitDetailId == null && r.activityDate != null);
+    if (!insertRow) {
+      setErrorMessage("No insert row is available. Load adjustments first.");
+      return;
+    }
+
+    const updatedRow: ProfitSharingAdjustmentRowDto = {
+      ...insertRow,
+      profitYearIteration: 3,
+      contribution: adjustmentDraft.contribution,
+      earnings: adjustmentDraft.earnings,
+      forfeiture: adjustmentDraft.forfeiture
+    };
+
+    setRowData((prev) => prev.map((r) => (r.rowNumber === updatedRow.rowNumber ? updatedRow : r)));
+    upsertStageForRow(updatedRow);
+    setIsAdjustModalOpen(false);
+  };
+
   const onCellValueChanged = (event: CellValueChangedEvent) => {
     const row = event.data as ProfitSharingAdjustmentRowDto | undefined;
     if (!row) {
@@ -233,42 +344,7 @@ const ProfitSharingAdjustmentsContent = () => {
       }
     }
 
-    const original = originalByRowNumber[row.rowNumber];
-    if (!original) {
-      return;
-    }
-
-    const changed =
-      row.profitYearIteration !== original.profitYearIteration ||
-      row.profitCodeId !== original.profitCodeId ||
-      row.contribution !== original.contribution ||
-      row.earnings !== original.earnings ||
-      row.forfeiture !== original.forfeiture ||
-      row.activityDate !== original.activityDate ||
-      row.comment !== original.comment;
-
-    setStagedByRowNumber((prev) => {
-      const next = { ...prev };
-
-      if (!changed) {
-        delete next[row.rowNumber];
-        return next;
-      }
-
-      next[row.rowNumber] = {
-        profitDetailId: row.profitDetailId,
-        rowNumber: row.rowNumber,
-        profitYearIteration: row.profitYearIteration,
-        profitCodeId: row.profitCodeId,
-        contribution: row.contribution,
-        earnings: row.earnings,
-        forfeiture: row.forfeiture,
-        activityDate: row.activityDate,
-        comment: row.comment
-      };
-
-      return next;
-    });
+    upsertStageForRow(row);
   };
 
   const saveChanges = async () => {
@@ -392,6 +468,26 @@ const ProfitSharingAdjustmentsContent = () => {
             Load
           </Button>
 
+          <Button
+            variant="outlined"
+            disabled={!selectedRow || isSaving || isFetchingAdjustments}
+            onClick={clearSelection}>
+            Clear selection
+          </Button>
+
+          <Button
+            variant="contained"
+            disabled={
+              !selectedRow ||
+              selectedRow.profitDetailId == null ||
+              isSaving ||
+              isFetchingAdjustments ||
+              rowData.length === 0
+            }
+            onClick={openAdjustModal}>
+            Adjust…
+          </Button>
+
           <Box sx={{ flex: 1 }}>
             {errorMessage && (
               <Typography
@@ -432,16 +528,106 @@ const ProfitSharingAdjustmentsContent = () => {
           preferenceKey={GRID_KEYS.PROFIT_SHARING_ADJUSTMENTS}
           isLoading={isFetchingAdjustments || isSaving}
           providedOptions={{
+            onGridReady: (params) => {
+              gridApiRef.current = params.api as GridApi;
+            },
             rowData,
             columnDefs,
             suppressMultiSort: true,
             stopEditingWhenCellsLoseFocus: true,
             enterNavigatesVertically: true,
             enterNavigatesVerticallyAfterEdit: true,
+            rowSelection: {
+              mode: "singleRow",
+              checkboxes: true,
+              enableClickSelection: false
+            },
+            onSelectionChanged: ((event: SelectionChangedEvent<ProfitSharingAdjustmentRowDto>) => {
+              const selected = event.api.getSelectedNodes().map((n) => n.data ?? null)[0] ?? null;
+              setSelectedRow(selected);
+            }) as (event: unknown) => void,
             onCellValueChanged
           }}
         />
       </Grid>
+
+      <Dialog
+        open={isAdjustModalOpen}
+        onClose={() => setIsAdjustModalOpen(false)}
+        fullWidth
+        maxWidth="sm">
+        <DialogTitle>Make adjustment</DialogTitle>
+        <DialogContent>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 2 }}>
+            Creates an administrative adjustment row (EXT=3) using the values below.
+          </Typography>
+
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap"
+            }}>
+            <TextField
+              label="Contribution"
+              size="small"
+              type="text"
+              value={adjustmentDraft.contribution}
+              onChange={(e) =>
+                setAdjustmentDraft((prev) => ({
+                  ...prev,
+                  contribution: Number.parseFloat(e.target.value ?? "") || 0
+                }))
+              }
+              inputProps={{ inputMode: "decimal" }}
+              sx={{ width: 180 }}
+            />
+            <TextField
+              label="Earnings"
+              size="small"
+              type="text"
+              value={adjustmentDraft.earnings}
+              onChange={(e) =>
+                setAdjustmentDraft((prev) => ({
+                  ...prev,
+                  earnings: Number.parseFloat(e.target.value ?? "") || 0
+                }))
+              }
+              inputProps={{ inputMode: "decimal" }}
+              sx={{ width: 180 }}
+            />
+            <TextField
+              label="Forfeiture"
+              size="small"
+              type="text"
+              value={adjustmentDraft.forfeiture}
+              onChange={(e) =>
+                setAdjustmentDraft((prev) => ({
+                  ...prev,
+                  forfeiture: Number.parseFloat(e.target.value ?? "") || 0
+                }))
+              }
+              inputProps={{ inputMode: "decimal" }}
+              sx={{ width: 180 }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            onClick={() => setIsAdjustModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={applyAdjustmentDraftToInsertRow}>
+            Apply to insert row
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };
