@@ -99,7 +99,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             // Confluence rule: default to only show rows for accounts under 21 as of today.
             // Users can override via GetAllRows.
             var includeRowsForYear = includeAllRows || IsUnderAgeAtDate(demographic.DateOfBirth, today, underAgeThreshold: 21);
-            
+
             if (!includeRowsForYear)
             {
                 return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
