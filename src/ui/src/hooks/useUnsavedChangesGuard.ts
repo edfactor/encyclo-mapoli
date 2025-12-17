@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { UNSAFE_NavigationContext as NavigationContext } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { UNSAFE_NavigationContext as NavigationContext, useNavigate } from "react-router-dom";
 
 const UNSAVED_CHANGES_MESSAGE = "Please save your changes. Do you want to leave without saving?";
 
