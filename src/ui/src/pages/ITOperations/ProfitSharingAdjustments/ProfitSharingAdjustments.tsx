@@ -373,7 +373,16 @@ const ProfitSharingAdjustmentsContent = () => {
                 disabled={isFetchingAdjustments || isSaving || hasUnsavedChanges}
               />
             }
-            label="Get all rows"
+            label={
+              <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <span>Show all rows (ignore under-21 filter)</span>
+                <Typography
+                  variant="caption"
+                  color="text.secondary">
+                  Default: only rows where the member is under 21 as of today.
+                </Typography>
+              </Box>
+            }
           />
 
           <Button

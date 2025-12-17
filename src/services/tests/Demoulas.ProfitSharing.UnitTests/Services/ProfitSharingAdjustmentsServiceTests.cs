@@ -25,6 +25,8 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
     public async Task GetAsync_ShouldReturn18Rows_WithInsertRowDefaults()
     {
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
+        // Default GetAsync now returns rows only when the member is under 21 as of today.
+        await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 20);
 
         var result = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
         {
@@ -63,9 +65,8 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
     public async Task SaveAsync_WhenExistingRowAmountChanged_ShouldReturnValidationFailure()
     {
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
-        // Default GetAsync now returns only years where the member was under 22 (age <= 21 at year-end).
-        // Seed DOB accordingly so test data includes at least one existing EXT row.
-        await SetDemographicDobForAgeAsync(candidate.Ssn, candidate.ProfitYear, ageAtYearEnd: 21);
+        // Default GetAsync now returns rows only when the member is under 21 as of today.
+        await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 20);
 
         var getResult = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
         {
@@ -118,13 +119,15 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
     public async Task SaveAsync_WhenMultipleInsertRows_ShouldReturnValidationFailure()
     {
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
-        await SetDemographicDobForAgeAsync(candidate.Ssn, candidate.ProfitYear, ageAtYearEnd: 22);
+        // Ensure age-based guard does not trigger first; focus this test on insert-row validation.
+        await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 20);
 
         var getResult = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
         {
             ProfitYear = candidate.ProfitYear,
             BadgeNumber = candidate.BadgeNumber,
-            SequenceNumber = candidate.SequenceNumber
+            SequenceNumber = candidate.SequenceNumber,
+            GetAllRows = true
         }, CancellationToken.None);
 
         getResult.IsSuccess.ShouldBeTrue();
@@ -176,11 +179,11 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
     }
 
     [Fact]
-    [Description("PS-0000 : SaveAsync rejects save when member age is over 22 for adjusted year")]
-    public async Task SaveAsync_WhenAgeOver22_ShouldReturnValidationFailure()
+    [Description("PS-0000 : SaveAsync rejects save when member is not under 21 as of today")]
+    public async Task SaveAsync_WhenNotUnder21AsOfToday_ShouldReturnValidationFailure()
     {
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
-        await SetDemographicDobForAgeAsync(candidate.Ssn, candidate.ProfitYear, ageAtYearEnd: 23);
+        await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 22);
 
         var saveResult = await _service.SaveAsync(new SaveProfitSharingAdjustmentsRequest
         {
@@ -209,7 +212,27 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         saveResult.Error!.ValidationErrors.ShouldNotBeNull();
         saveResult.Error.ValidationErrors!.ShouldContainKey(nameof(SaveProfitSharingAdjustmentsRequest.ProfitYear));
         saveResult.Error.ValidationErrors[nameof(SaveProfitSharingAdjustmentsRequest.ProfitYear)][0]
-            .ShouldContain("22 or younger");
+            .ShouldContain("under 21 as of today");
+    }
+
+    [Fact]
+    [Description("PS-0000 : GetAsync returns zero rows by default when member is not under 21 as of today")]
+    public async Task GetAsync_WhenNotUnder21AsOfTodayAndGetAllRowsFalse_ShouldReturnZeroRows()
+    {
+        var candidate = await FindCandidateWithLessThanMaxRowsAsync();
+        await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 22);
+
+        var result = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
+        {
+            ProfitYear = candidate.ProfitYear,
+            BadgeNumber = candidate.BadgeNumber,
+            SequenceNumber = candidate.SequenceNumber,
+            GetAllRows = false
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value!.Rows.Count.ShouldBe(0);
     }
 
     private Task<(short ProfitYear, int BadgeNumber, int SequenceNumber, int Ssn)> FindCandidateWithLessThanMaxRowsAsync()
@@ -244,14 +267,16 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         }, CancellationToken.None);
     }
 
-    private Task SetDemographicDobForAgeAsync(int ssn, short profitYear, int ageAtYearEnd)
+    private Task SetDemographicDobForAgeAsOfTodayAsync(int ssn, int yearsOldAsOfToday)
     {
         return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             var demographic = await ctx.Demographics.FirstOrDefaultAsync(d => d.Ssn == ssn);
             demographic.ShouldNotBeNull("Test data did not contain a Demographic row for the selected SSN.");
 
-            demographic!.DateOfBirth = new DateOnly(profitYear - (short)ageAtYearEnd, 1, 1);
+            // Use Jan 1 to avoid birthday edge cases.
+            var birthYear = DateTime.Today.Year - yearsOldAsOfToday;
+            demographic!.DateOfBirth = new DateOnly(birthYear, 1, 1);
         }, CancellationToken.None);
     }
 }

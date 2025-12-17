@@ -24,19 +24,22 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
     private readonly ITotalService _totalService;
     private readonly IAuditService _auditService;
     private readonly ILogger<ProfitSharingAdjustmentsService> _logger;
+    private readonly TimeProvider _timeProvider;
 
     public ProfitSharingAdjustmentsService(
         IProfitSharingDataContextFactory dbContextFactory,
         IDemographicReaderService demographicReaderService,
         ITotalService totalService,
         IAuditService auditService,
-        ILogger<ProfitSharingAdjustmentsService> logger)
+        ILogger<ProfitSharingAdjustmentsService> logger,
+        TimeProvider? timeProvider = null)
     {
         _dbContextFactory = dbContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
         _auditService = auditService;
         _logger = logger;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public Task<Result<GetProfitSharingAdjustmentsResponse>> GetAsync(GetProfitSharingAdjustmentsRequest request, CancellationToken ct)
@@ -84,6 +87,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var demographicId = demographic.Id;
             var profitYear = request.ProfitYear;
             var includeAllRows = request.GetAllRows;
+            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
             var canEditYearExtension = IsUnderAgeAtContributionYearEnd(demographic.DateOfBirth, profitYear, underAgeThreshold: 18);
             var isOver21AtInitialHire = IsOverAgeAtDate(demographic.DateOfBirth, demographic.HireDate, ageThreshold: 21);
 
@@ -92,7 +96,24 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var currentBalance = balance?.CurrentBalance ?? 0m;
             var vestedBalance = balance?.VestedBalance ?? 0m;
 
-            var includeRowsForYear = includeAllRows || IsUnderAgeAtContributionYearEnd(demographic.DateOfBirth, profitYear, underAgeThreshold: 22);
+            // Confluence rule: default to only show rows for accounts under 21 as of today.
+            // Users can override via GetAllRows.
+            var includeRowsForYear = includeAllRows || IsUnderAgeAtDate(demographic.DateOfBirth, today, underAgeThreshold: 21);
+            
+            if (!includeRowsForYear)
+            {
+                return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
+                {
+                    ProfitYear = request.ProfitYear,
+                    DemographicId = demographicId,
+                    IsOver21AtInitialHire = isOver21AtInitialHire,
+                    CurrentBalance = currentBalance,
+                    VestedBalance = vestedBalance,
+                    BadgeNumber = request.BadgeNumber,
+                    SequenceNumber = request.SequenceNumber,
+                    Rows = new List<ProfitSharingAdjustmentRowResponse>()
+                });
+            }
 
             var profitDetails = includeRowsForYear
                 ? await ctx.ProfitDetails
@@ -153,7 +174,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     Contribution = 0,
                     Earnings = 0,
                     Forfeiture = 0,
-                    ActivityDate = isInsertRow ? DateOnly.FromDateTime(DateTime.Today) : null,
+                    ActivityDate = isInsertRow ? today : null,
                     Comment = isInsertRow ? AdministrativeComment : string.Empty,
                     // For the insert row: EXT is not editable.
                     IsEditable = false
@@ -254,14 +275,15 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 var demographicId = demographic.Id;
                 var profitYear = request.ProfitYear;
 
-                // New requirement: block save if member is over 22 as of Dec 31 of the adjusted year.
-                // Defense-in-depth: enforced here even though request validation also checks.
-                var ageAtYearEnd = profitYear - (short)demographic.DateOfBirth.Year;
-                if (ageAtYearEnd > 22)
+                var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
+
+                // Confluence rule: under-21 adjustment eligibility is based on age as of today.
+                // Defense-in-depth: enforce here even if the UI filters/labels.
+                if (!IsUnderAgeAtDate(demographic.DateOfBirth, today, underAgeThreshold: 21))
                 {
                     return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                     {
-                        [nameof(request.ProfitYear)] = ["Member age must be 22 or younger for the selected ProfitYear."]
+                        [nameof(request.ProfitYear)] = ["Member must be under 21 as of today to use this screen."]
                     });
                 }
 
@@ -398,7 +420,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         });
                     }
 
-                    var activityDate = DateOnly.FromDateTime(DateTime.Today);
+                    var activityDate = today;
 
                     var newProfitDetail = new ProfitDetail
                     {
@@ -507,6 +529,11 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
     {
         var asOf = new DateOnly(profitYear, 12, 31);
 
+        return IsUnderAgeAtDate(dateOfBirth, asOf, underAgeThreshold);
+    }
+
+    private static bool IsUnderAgeAtDate(DateOnly dateOfBirth, DateOnly asOf, int underAgeThreshold)
+    {
         var age = asOf.Year - dateOfBirth.Year;
         if (dateOfBirth > asOf.AddYears(-age))
         {
