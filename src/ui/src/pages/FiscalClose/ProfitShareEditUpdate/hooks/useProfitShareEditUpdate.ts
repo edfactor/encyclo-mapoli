@@ -158,7 +158,8 @@ export const useProfitShareEditUpdate = () => {
           NetAllocTransfer:
             (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
             (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
-          TotalForfeitPoints: profitSharingUpdate.profitShareUpdateTotals.contributionPoints
+          TotalForfeitPoints: profitSharingUpdate.profitShareUpdateTotals.contributionPoints,
+          TotalEarningPoints: profitSharingUpdate.profitShareUpdateTotals.earningPoints
         }
       : undefined
   });

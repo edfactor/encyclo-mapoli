@@ -147,7 +147,7 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               <td className="px-3 py-2 text-left font-medium">Point</td>
               <td className="px-3 py-2 text-right"></td>
               <td className="px-3 py-2 text-right">{renderHeaderValidationIcon("TotalForfeitPoints")}&nbsp;{formatNumberWithComma(totals.contributionPoints || 0)}</td>
-              <td className="px-3 py-2 text-right">{formatNumberWithComma(totals.earningPoints || 0)}</td>
+              <td className="px-3 py-2 text-right">{renderHeaderValidationIcon("TotalEarningPoints")}&nbsp;{formatNumberWithComma(totals.earningPoints || 0)}</td>
               <td className="px-3 py-2 text-right"></td>
               <td className="px-3 py-2 text-right"></td>
               <td className="px-3 py-2 text-right"></td>
@@ -419,6 +419,41 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                   <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                   <td className="px-2 py-1 text-right">
                     {formatNumberWithComma(getFieldValidation("TotalForfeitPoints")?.expectedValue || 0)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Forfeiture points Validation Popup */}
+      {openValidationField === "TotalEarningPoints" && getFieldValidation("TotalEarningPoints") && (
+        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+          <div className="p-2 px-4 pb-4">
+            <Typography
+              variant="subtitle2"
+              sx={{ p: 1 }}>
+              Earning Points
+            </Typography>
+            <table className="w-full border-collapse text-[0.95rem]">
+              <thead>
+                <tr>
+                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
+                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
+                  <td className="border-b border-gray-100 px-2 py-1 text-right">
+                    {formatNumberWithComma(totals.earningPoints || 0)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                  <td className="px-2 py-1 text-right">
+                    {formatNumberWithComma(getFieldValidation("TotalEarningPoints")?.expectedValue || 0)}
                   </td>
                 </tr>
               </tbody>
