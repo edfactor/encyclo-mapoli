@@ -37,7 +37,7 @@ const ProfitSharingAdjustmentsContent = () => {
   const { clearAlerts } = useMissiveAlerts();
 
   const [profitYear, setProfitYear] = useState<number>(new Date().getFullYear());
-  const [badgeNumber, setBadgeNumber] = useState<number>(0);
+  const [badgeNumber, setBadgeNumber] = useState<string>("");
   const [sequenceNumber, setSequenceNumber] = useState<number>(0);
 
   const [loadedKey, setLoadedKey] = useState<ProfitSharingAdjustmentsKey | null>(null);
@@ -57,6 +57,7 @@ const ProfitSharingAdjustmentsContent = () => {
     clearAlerts();
 
     setLoadedKey({ profitYear: data.profitYear, badgeNumber: data.badgeNumber, sequenceNumber: data.sequenceNumber });
+    setBadgeNumber(String(data.badgeNumber));
 
     // DSMGrid/AG Grid edits mutate row objects; make sure data isn't frozen.
     const copy = (data.rows ?? []).map((r) => ({ ...r }));
@@ -180,7 +181,8 @@ const ProfitSharingAdjustmentsContent = () => {
       return;
     }
 
-    if (!Number.isFinite(badgeNumber) || badgeNumber <= 0) {
+    const parsedBadgeNumber = Number.parseInt(badgeNumber, 10);
+    if (!Number.isFinite(parsedBadgeNumber) || parsedBadgeNumber <= 0) {
       setErrorMessage("Badge Number must be greater than zero.");
       return;
     }
@@ -191,7 +193,7 @@ const ProfitSharingAdjustmentsContent = () => {
     }
 
     try {
-      await triggerGet({ profitYear, badgeNumber, sequenceNumber }).unwrap();
+      await triggerGet({ profitYear, badgeNumber: parsedBadgeNumber, sequenceNumber }).unwrap();
     } catch (e) {
       console.error("Failed to load profit sharing adjustments", e);
       setErrorMessage("Failed to load adjustments. Please try again.");
@@ -318,6 +320,82 @@ const ProfitSharingAdjustmentsContent = () => {
     <Grid
       container
       rowSpacing={3}>
+      <Grid width="100%">
+        <Divider />
+      </Grid>
+
+      <Grid width="100%">
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+            width: "100%",
+            px: 1,
+            flexWrap: "wrap"
+          }}>
+          <TextField
+            label="Profit Year"
+            size="small"
+            type="text"
+            value={profitYear}
+            onChange={(e) => setProfitYear(Number.parseInt(e.target.value ?? "", 10) || 0)}
+            sx={{ width: 130 }}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          />
+          <TextField
+            label="Badge Number"
+            size="small"
+            type="text"
+            value={badgeNumber}
+            onChange={(e) => setBadgeNumber(e.target.value ?? "")}
+            sx={{ width: 150 }}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          />
+          <TextField
+            label="Sequence #"
+            size="small"
+            type="text"
+            value={sequenceNumber}
+            onChange={(e) => setSequenceNumber(Number.parseInt(e.target.value ?? "", 10) || 0)}
+            sx={{ width: 120 }}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          />
+
+          <Button
+            variant="contained"
+            disabled={isFetchingAdjustments || isSaving}
+            onClick={loadAdjustments}>
+            Load
+          </Button>
+
+          <Box sx={{ flex: 1 }}>
+            {errorMessage && (
+              <Typography
+                variant="body2"
+                color="error">
+                {errorMessage}
+              </Typography>
+            )}
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+            <Button
+              variant="contained"
+              disabled={!hasUnsavedChanges || isSaving || isFetchingAdjustments}
+              onClick={saveChanges}>
+              Save
+            </Button>
+            <Button
+              variant="outlined"
+              disabled={!hasUnsavedChanges || isSaving || isFetchingAdjustments}
+              onClick={discardChanges}>
+              Discard
+            </Button>
+          </Box>
+        </Box>
+      </Grid>
+
       {data?.demographicId != null && (
         <StandaloneMemberDetails
           memberType={1}
@@ -326,98 +404,21 @@ const ProfitSharingAdjustmentsContent = () => {
         />
       )}
 
-      <Grid
-        width="100%">
-        <Divider />
+      <Grid width="100%">
+        <DSMGrid
+          preferenceKey={GRID_KEYS.PROFIT_SHARING_ADJUSTMENTS}
+          isLoading={isFetchingAdjustments || isSaving}
+          providedOptions={{
+            rowData,
+            columnDefs,
+            suppressMultiSort: true,
+            stopEditingWhenCellsLoseFocus: true,
+            enterNavigatesVertically: true,
+            enterNavigatesVerticallyAfterEdit: true,
+            onCellValueChanged
+          }}
+        />
       </Grid>
-
-        <Grid width="100%">
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              alignItems: "center",
-              width: "100%",
-              px: 1,
-              flexWrap: "wrap"
-            }}>
-            <TextField
-              label="Profit Year"
-              size="small"
-              type="text"
-              value={profitYear}
-              onChange={(e) => setProfitYear(Number.parseInt(e.target.value ?? "", 10) || 0)}
-              sx={{ width: 130 }}
-              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-            />
-            <TextField
-              label="Badge Number"
-              size="small"
-              type="text"
-              value={badgeNumber}
-              onChange={(e) => setBadgeNumber(Number.parseInt(e.target.value ?? "", 10) || 0)}
-              sx={{ width: 150 }}
-              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-            />
-            <TextField
-              label="Sequence #"
-              size="small"
-              type="text"
-              value={sequenceNumber}
-              onChange={(e) => setSequenceNumber(Number.parseInt(e.target.value ?? "", 10) || 0)}
-              sx={{ width: 120 }}
-              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-            />
-
-            <Button
-              variant="contained"
-              disabled={isFetchingAdjustments || isSaving}
-              onClick={loadAdjustments}>
-              Load
-            </Button>
-
-            <Box sx={{ flex: 1 }}>
-              {errorMessage && (
-                <Typography
-                  variant="body2"
-                  color="error">
-                  {errorMessage}
-                </Typography>
-              )}
-            </Box>
-
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-              <Button
-                variant="contained"
-                disabled={!hasUnsavedChanges || isSaving || isFetchingAdjustments}
-                onClick={saveChanges}>
-                Save
-              </Button>
-              <Button
-                variant="outlined"
-                disabled={!hasUnsavedChanges || isSaving || isFetchingAdjustments}
-                onClick={discardChanges}>
-                Discard
-              </Button>
-            </Box>
-          </Box>
-        </Grid>
-
-        <Grid width="100%">
-          <DSMGrid
-            preferenceKey={GRID_KEYS.PROFIT_SHARING_ADJUSTMENTS}
-            isLoading={isFetchingAdjustments || isSaving}
-            providedOptions={{
-              rowData,
-              columnDefs,
-              suppressMultiSort: true,
-              stopEditingWhenCellsLoseFocus: true,
-              enterNavigatesVertically: true,
-              enterNavigatesVerticallyAfterEdit: true,
-              onCellValueChanged
-            }}
-          />
-        </Grid>
     </Grid>
   );
 };
