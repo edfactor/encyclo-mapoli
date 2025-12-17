@@ -20,6 +20,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
     private const int MaxRows = 18;
     private const string AdministrativeComment = "ADMINISTRATIVE";
     private const byte AdministrativeProfitYearIteration = 3;
+    private const int AdministrativeDistributionSequence = 0;
 
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
@@ -61,14 +62,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                 {
                     [nameof(request.BadgeNumber)] = ["BadgeNumber must be greater than zero."]
-                });
-            }
-
-            if (request.SequenceNumber < 0)
-            {
-                return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
-                {
-                    [nameof(request.SequenceNumber)] = ["SequenceNumber must be zero or greater."]
                 });
             }
 
@@ -122,20 +115,18 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     CurrentBalance = currentBalance,
                     VestedBalance = vestedBalance,
                     BadgeNumber = request.BadgeNumber,
-                    SequenceNumber = request.SequenceNumber,
                     Rows = new List<ProfitSharingAdjustmentRowResponse>()
                 });
             }
 
             var profitDetails = includeRowsForYear
                 ? await ctx.ProfitDetails
-                    .TagWith($"ProfitSharingAdjustments-Get-ProfitDetails-{profitYear}-{request.SequenceNumber}")
+                    .TagWith($"ProfitSharingAdjustments-Get-ProfitDetails-AllYears")
                     .Where(pd =>
                         pd.Ssn == ssn &&
-                        pd.ProfitYear == profitYear &&
-                        pd.DistributionSequence == request.SequenceNumber &&
                         pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
-                    .OrderBy(pd => pd.CreatedAtUtc)
+                    .OrderByDescending(pd => pd.ProfitYear)
+                    .ThenByDescending(pd => pd.CreatedAtUtc)
                     .Take(MaxRows)
                     .Select(pd => new ProfitSharingAdjustmentRowResponse
                     {
@@ -174,48 +165,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 profitDetails[i] = profitDetails[i] with { RowNumber = i + 1 };
             }
 
-            var responseRows = new List<ProfitSharingAdjustmentRowResponse>(MaxRows);
-            responseRows.AddRange(profitDetails);
-
-            while (responseRows.Count < MaxRows)
-            {
-                var rowNumber = responseRows.Count + 1;
-
-                // For 008-22 parity, we expose exactly one "new row" for inserts.
-                // Only amount fields are intended to be editable on that row; the UI enforces that.
-                // We keep additional filler rows non-editable and blank.
-                bool isInsertRow = rowNumber == profitDetails.Count + 1;
-
-                responseRows.Add(new ProfitSharingAdjustmentRowResponse
-                {
-                    ProfitDetailId = null,
-                    RowNumber = rowNumber,
-                    ProfitYear = request.ProfitYear,
-                    ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
-                    Contribution = 0,
-                    Earnings = 0,
-                    Forfeiture = 0,
-                    Payment = 0,
-                    MonthToDate = isInsertRow ? (byte)today.Month : null,
-                    YearToDate = isInsertRow ? (short)today.Year : null,
-                    FederalTaxes = 0,
-                    StateTaxes = 0,
-                    TaxCodeId = TaxCode.Constants.Unknown.Id,
-                    TaxCodeName = TaxCode.Constants.Unknown.Name,
-                    CommentTypeId = null,
-                    CommentTypeName = string.Empty,
-                    CommentRelatedCheckNumber = null,
-                    CommentRelatedState = null,
-                    CommentIsPartialTransaction = false,
-                    CurrentHoursYear = currentHoursYear,
-                    CurrentIncomeYear = currentIncomeYear,
-                    ActivityDate = isInsertRow ? today : null,
-                    Comment = isInsertRow ? AdministrativeComment : string.Empty,
-                    // For the insert row: EXT is not editable.
-                    IsEditable = false
-                });
-            }
-
             return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
             {
                 ProfitYear = request.ProfitYear,
@@ -224,8 +173,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 CurrentBalance = currentBalance,
                 VestedBalance = vestedBalance,
                 BadgeNumber = request.BadgeNumber,
-                SequenceNumber = request.SequenceNumber,
-                Rows = responseRows
+                Rows = profitDetails
             });
         }, ct);
     }
@@ -330,7 +278,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 List<ProfitDetail> existing = idsToUpdate.Length == 0
                     ? new List<ProfitDetail>()
                     : await ctx.ProfitDetails
-                        .TagWith($"ProfitSharingAdjustments-Save-LoadExisting-{profitYear}-{request.SequenceNumber}")
+                        .TagWith($"ProfitSharingAdjustments-Save-LoadExisting-{profitYear}")
                         .Where(pd => idsToUpdate.Contains(pd.Id))
                         .ToListAsync(ct);
 
@@ -350,11 +298,11 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         });
                     }
 
-                    if (pd.Ssn != ssn || pd.ProfitYear != profitYear || pd.DistributionSequence != request.SequenceNumber)
+                    if (pd.Ssn != ssn || pd.ProfitYear != profitYear)
                     {
                         return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
                         {
-                            [nameof(ProfitSharingAdjustmentRowRequest.ProfitDetailId)] = [$"ProfitDetailId {id} does not belong to the requested employee/year/sequence."]
+                            [nameof(ProfitSharingAdjustmentRowRequest.ProfitDetailId)] = [$"ProfitDetailId {id} does not belong to the requested employee/year."]
                         });
                     }
 
@@ -427,7 +375,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         Ssn = ssn,
                         ProfitYear = profitYear,
                         ProfitYearIteration = AdministrativeProfitYearIteration,
-                        DistributionSequence = request.SequenceNumber,
+                        DistributionSequence = AdministrativeDistributionSequence,
                         ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
                         Contribution = row.Contribution,
                         Earnings = row.Earnings,
@@ -481,7 +429,6 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     CurrentBalance = currentBalance,
                     VestedBalance = vestedBalance,
                     BadgeNumber = request.BadgeNumber,
-                    SequenceNumber = request.SequenceNumber,
                     Rows = []
                 });
             }, ct);
@@ -494,14 +441,13 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             return await GetAsync(new GetProfitSharingAdjustmentsRequest
             {
                 ProfitYear = request.ProfitYear,
-                BadgeNumber = request.BadgeNumber,
-                SequenceNumber = request.SequenceNumber
+                BadgeNumber = request.BadgeNumber
             }, ct);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save profit sharing adjustments for BadgeNumber {BadgeNumber} year {ProfitYear} seq {SequenceNumber}",
-                request.BadgeNumber, request.ProfitYear, request.SequenceNumber);
+            _logger.LogError(ex, "Failed to save profit sharing adjustments for BadgeNumber {BadgeNumber} year {ProfitYear}",
+                request.BadgeNumber, request.ProfitYear);
 
             return Result<GetProfitSharingAdjustmentsResponse>.Failure(Error.Unexpected("Failed to save profit sharing adjustments."));
         }

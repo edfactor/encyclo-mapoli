@@ -8,7 +8,5 @@ public sealed record GetProfitSharingAdjustmentsRequest : IProfitYearRequest
 
     public required int BadgeNumber { get; init; }
 
-    public required int SequenceNumber { get; init; }
-
     public bool GetAllRows { get; init; }
 }

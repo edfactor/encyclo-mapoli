@@ -26,10 +26,6 @@ public sealed class SaveProfitSharingAdjustmentsRequestValidator : Validator<Sav
             .GreaterThan(0)
             .WithMessage("BadgeNumber must be greater than zero.");
 
-        RuleFor(x => x.SequenceNumber)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("SequenceNumber must be zero or greater.");
-
         RuleFor(x => x)
             .MustAsync(async (req, ct) =>
             {

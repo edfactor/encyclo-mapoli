@@ -1,7 +1,6 @@
 export type ProfitSharingAdjustmentsKey = {
   profitYear: number;
   badgeNumber: number;
-  sequenceNumber: number;
 };
 
 export type ProfitSharingAdjustmentRowDto = {

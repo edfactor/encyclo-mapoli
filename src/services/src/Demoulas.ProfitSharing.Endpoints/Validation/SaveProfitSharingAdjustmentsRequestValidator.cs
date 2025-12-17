@@ -17,10 +17,6 @@ public sealed class LegacySaveProfitSharingAdjustmentsRequestValidator : Abstrac
             .GreaterThan(0)
             .WithMessage("BadgeNumber must be greater than zero.");
 
-        RuleFor(x => x.SequenceNumber)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("SequenceNumber must be zero or greater.");
-
         RuleFor(x => x.Rows)
             .NotNull()
             .Must(x => x.Count is > 0 and <= MaxRows)

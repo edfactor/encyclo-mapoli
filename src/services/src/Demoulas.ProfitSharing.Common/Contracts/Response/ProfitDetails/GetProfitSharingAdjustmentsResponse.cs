@@ -16,8 +16,6 @@ public sealed record GetProfitSharingAdjustmentsResponse : IProfitYearRequest
 
     public required int BadgeNumber { get; init; }
 
-    public required int SequenceNumber { get; init; }
-
     public required IReadOnlyList<ProfitSharingAdjustmentRowResponse> Rows { get; init; }
 }
 

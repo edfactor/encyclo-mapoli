@@ -8,8 +8,6 @@ public sealed record SaveProfitSharingAdjustmentsRequest : IProfitYearRequest
 
     public required int BadgeNumber { get; init; }
 
-    public required int SequenceNumber { get; init; }
-
     public required IReadOnlyList<ProfitSharingAdjustmentRowRequest> Rows { get; init; }
 }
 
