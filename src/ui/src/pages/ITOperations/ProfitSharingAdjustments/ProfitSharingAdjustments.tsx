@@ -1,16 +1,16 @@
 import {
-  Box,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControlLabel,
-  Grid,
-  TextField,
-  Typography
+    Box,
+    Button,
+    Checkbox,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControlLabel,
+    Grid,
+    TextField,
+    Typography
 } from "@mui/material";
 import { CellValueChangedEvent, ColDef, GridApi, SelectionChangedEvent, ValueParserParams } from "ag-grid-community";
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
@@ -21,14 +21,19 @@ import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import {
-  useLazyGetProfitSharingAdjustmentsQuery,
-  useSaveProfitSharingAdjustmentsMutation
+    useLazyGetProfitSharingAdjustmentsQuery,
+    useSaveProfitSharingAdjustmentsMutation
 } from "../../../reduxstore/api/ProfitDetailsApi";
 import {
-  ProfitSharingAdjustmentRowDto,
-  ProfitSharingAdjustmentsKey,
-  SaveProfitSharingAdjustmentRowRequest
+    ProfitSharingAdjustmentRowDto,
+    ProfitSharingAdjustmentsKey,
+    SaveProfitSharingAdjustmentRowRequest
 } from "../../../reduxstore/types";
+import {
+    createCurrencyColumn,
+    createTaxCodeColumn,
+    createYearColumn
+} from "../../../utils/gridColumnFactory";
 
 const isValidIsoDate = (value: string): boolean => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -155,106 +160,91 @@ const ProfitSharingAdjustmentsContent = () => {
         sortable: false,
         filter: false,
         editable: false,
-        width: 55
+        width: 70,
+        headerClass: "right-align",
+        cellClass: "right-align"
       },
-      {
+      createYearColumn({
         headerName: "Profit Year",
         field: "profitYear",
+        minWidth: 100,
+        alignment: "right",
         sortable: false,
-        filter: false,
         editable: false,
-        width: 90
-      },
-      {
-        headerName: "Iteration",
-        field: "profitYearIteration",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 90
-      },
+        valueFormatter: (params) => {
+          const year = params.data.profitYear;
+          const iter = params.data.profitYearIteration;
+          return `${year}.${iter}`;
+        }
+      }),
       {
         headerName: "Profit Code",
-        field: "profitCodeName",
+        field: "profitCodeId",
+        colId: "profitCodeId",
+        minWidth: 150,
+        headerClass: "left-align",
+        cellClass: "left-align",
         sortable: false,
         filter: false,
         editable: false,
-        width: 150,
-        valueGetter: (params) => {
-          const row = params.data as ProfitSharingAdjustmentRowDto | undefined;
-          if (!row) {
-            return "";
-          }
-
-          return row.profitCodeName || String(row.profitCodeId);
+        resizable: true,
+        tooltipValueGetter: (params) => {
+          return params.data?.profitCodeName;
+        },
+        valueFormatter: (params) => {
+          const id = params.data.profitCodeId;
+          const name = params.data.profitCodeName;
+          return `[${id}] ${name}`;
         }
       },
-      {
+      createCurrencyColumn({
         headerName: "Contribution",
         field: "contribution",
-        sortable: false,
-        filter: false,
         editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        width: 110,
         valueParser: toNumberOrOld
-      },
-      {
+      }),
+      createCurrencyColumn({
         headerName: "Earnings",
         field: "earnings",
-        sortable: false,
-        filter: false,
         editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        width: 110,
         valueParser: toNumberOrOld
-      },
-      {
-        headerName: "Payment",
-        field: "payment",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 110
-      },
-      {
+      }),
+      createCurrencyColumn({
         headerName: "Forfeiture",
         field: "forfeiture",
-        sortable: false,
-        filter: false,
         editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        width: 110,
         valueParser: toNumberOrOld
-      },
-      {
-        headerName: "Fed Tax",
+      }),
+      createCurrencyColumn({
+        headerName: "Payment",
+        field: "payment",
+        editable: false
+      }),
+      createCurrencyColumn({
+        headerName: "Federal Tax",
         field: "federalTaxes",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 110
-      },
-      {
+        minWidth: 120,
+        editable: false
+      }),
+      createCurrencyColumn({
         headerName: "State Tax",
         field: "stateTaxes",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 110
-      },
-      {
-        headerName: "Tax Code",
-        field: "taxCodeId",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 90
-      },
+        minWidth: 120,
+        editable: false
+      }),
+      createTaxCodeColumn({
+        editable: false
+      }),
       {
         headerName: "Activity Date",
         field: "activityDate",
         sortable: false,
         filter: false,
         editable: false,
-        width: 120
+        minWidth: 120,
+        headerClass: "left-align",
+        cellClass: "left-align",
+        resizable: true
       },
       {
         headerName: "Comment",
@@ -263,7 +253,10 @@ const ProfitSharingAdjustmentsContent = () => {
         filter: false,
         editable: false,
         flex: 1,
-        minWidth: 160
+        minWidth: 160,
+        headerClass: "left-align",
+        cellClass: "left-align",
+        resizable: true
       }
     ];
   }, []);
