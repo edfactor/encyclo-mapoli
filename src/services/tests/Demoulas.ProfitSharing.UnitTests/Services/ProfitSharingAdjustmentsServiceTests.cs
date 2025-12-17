@@ -63,6 +63,7 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
     public async Task SaveAsync_WhenExistingRowAmountChanged_ShouldReturnValidationFailure()
     {
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
+        await SetDemographicDobForAgeAsync(candidate.Ssn, candidate.ProfitYear, ageAtYearEnd: 22);
 
         var getResult = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
         {
@@ -115,6 +116,7 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
     public async Task SaveAsync_WhenMultipleInsertRows_ShouldReturnValidationFailure()
     {
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
+        await SetDemographicDobForAgeAsync(candidate.Ssn, candidate.ProfitYear, ageAtYearEnd: 22);
 
         var getResult = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
         {
@@ -171,7 +173,44 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
             .ShouldContain("Only one new adjustment row");
     }
 
-    private Task<(short ProfitYear, int BadgeNumber, int SequenceNumber)> FindCandidateWithLessThanMaxRowsAsync()
+    [Fact]
+    [Description("PS-0000 : SaveAsync rejects save when member age is over 22 for adjusted year")]
+    public async Task SaveAsync_WhenAgeOver22_ShouldReturnValidationFailure()
+    {
+        var candidate = await FindCandidateWithLessThanMaxRowsAsync();
+        await SetDemographicDobForAgeAsync(candidate.Ssn, candidate.ProfitYear, ageAtYearEnd: 23);
+
+        var saveResult = await _service.SaveAsync(new SaveProfitSharingAdjustmentsRequest
+        {
+            ProfitYear = candidate.ProfitYear,
+            BadgeNumber = candidate.BadgeNumber,
+            SequenceNumber = candidate.SequenceNumber,
+            Rows =
+            [
+                new ProfitSharingAdjustmentRowRequest
+                {
+                    ProfitDetailId = null,
+                    RowNumber = 1,
+                    ProfitYearIteration = 3,
+                    ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
+                    Contribution = 0,
+                    Earnings = 0,
+                    Forfeiture = 0,
+                    ActivityDate = null,
+                    Comment = string.Empty
+                }
+            ]
+        }, CancellationToken.None);
+
+        saveResult.IsSuccess.ShouldBeFalse();
+        saveResult.Error.ShouldNotBeNull();
+        saveResult.Error!.ValidationErrors.ShouldNotBeNull();
+        saveResult.Error.ValidationErrors!.ShouldContainKey(nameof(SaveProfitSharingAdjustmentsRequest.ProfitYear));
+        saveResult.Error.ValidationErrors[nameof(SaveProfitSharingAdjustmentsRequest.ProfitYear)][0]
+            .ShouldContain("22 or younger");
+    }
+
+    private Task<(short ProfitYear, int BadgeNumber, int SequenceNumber, int Ssn)> FindCandidateWithLessThanMaxRowsAsync()
     {
         return MockDbContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -183,12 +222,13 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                 where pd.ProfitCodeId == profitCodeId
                 where pd.ProfitYearIteration == 0 || pd.ProfitYearIteration == 3
                 where d.BadgeNumber > 0
-                group pd by new { pd.ProfitYear, d.BadgeNumber, pd.DistributionSequence } into g
+                group pd by new { pd.ProfitYear, d.BadgeNumber, pd.DistributionSequence, pd.Ssn } into g
                 select new
                 {
                     g.Key.ProfitYear,
                     g.Key.BadgeNumber,
                     SequenceNumber = g.Key.DistributionSequence,
+                    g.Key.Ssn,
                     Count = g.Count()
                 })
                 .Where(x => x.Count > 0 && x.Count < 18)
@@ -198,7 +238,18 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
             var candidate = candidates.FirstOrDefault();
             candidate.ShouldNotBeNull("Test data did not contain a ProfitDetail group with < 18 rows for ProfitCodeId 0, ProfitYearIteration 0/3, and a matching Demographic.");
 
-            return (candidate!.ProfitYear, candidate.BadgeNumber, candidate.SequenceNumber);
+            return (candidate!.ProfitYear, candidate.BadgeNumber, candidate.SequenceNumber, candidate.Ssn);
+        }, CancellationToken.None);
+    }
+
+    private Task SetDemographicDobForAgeAsync(int ssn, short profitYear, int ageAtYearEnd)
+    {
+        return MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var demographic = await ctx.Demographics.FirstOrDefaultAsync(d => d.Ssn == ssn);
+            demographic.ShouldNotBeNull("Test data did not contain a Demographic row for the selected SSN.");
+
+            demographic!.DateOfBirth = new DateOnly(profitYear - (short)ageAtYearEnd, 1, 1);
         }, CancellationToken.None);
     }
 }

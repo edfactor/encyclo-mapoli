@@ -1,13 +1,13 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using FluentValidation;
 
-namespace Demoulas.ProfitSharing.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Endpoints.Validation.Legacy;
 
-public sealed class SaveProfitSharingAdjustmentsRequestValidator : AbstractValidator<SaveProfitSharingAdjustmentsRequest>
+public sealed class LegacySaveProfitSharingAdjustmentsRequestValidator : AbstractValidator<SaveProfitSharingAdjustmentsRequest>
 {
     private const int MaxRows = 18;
 
-    public SaveProfitSharingAdjustmentsRequestValidator()
+    public LegacySaveProfitSharingAdjustmentsRequestValidator()
     {
         RuleFor(x => x.ProfitYear)
             .Must(y => y is >= 1900 and <= 2500)

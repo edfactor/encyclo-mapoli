@@ -381,6 +381,8 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     });
                 }
 
+                ProfitDetail? insertedProfitDetail = null;
+
                 foreach (var row in insertCandidates)
                 {
                     if (row.ProfitYearIteration != 3)
@@ -393,7 +395,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
                     var activityDate = DateOnly.FromDateTime(DateTime.Today);
 
-                    var insertedProfitDetail = new ProfitDetail
+                    var newProfitDetail = new ProfitDetail
                     {
                         Ssn = ssn,
                         ProfitYear = profitYear,
@@ -411,14 +413,10 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         YearsOfServiceCredit = 0
                     };
 
-                    ctx.ProfitDetails.Add(insertedProfitDetail);
+                    ctx.ProfitDetails.Add(newProfitDetail);
 
                     // At most one insert is allowed; keep reference for auditing after SaveChanges.
-                    insertCandidates[0] = insertCandidates[0];
-
-                    // Audit create after SaveChanges so we have the generated Id.
-                    // (stored in a local variable in the outer scope)
-                    _ = insertedProfitDetail;
+                    insertedProfitDetail = newProfitDetail;
                 }
 
                 await ctx.SaveChangesAsync(ct);
@@ -439,6 +437,29 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                                 OriginalValue = update.OriginalValue.ToString(),
                                 NewValue = update.NewValue.ToString(),
                             },
+                        ],
+                        cancellationToken: ct);
+                }
+
+                if (insertedProfitDetail is not null)
+                {
+                    await _auditService.LogDataChangeAsync(
+                        operationName: "Create Profit Sharing Adjustment",
+                        tableName: "PROFIT_DETAIL",
+                        auditOperation: AuditEvent.AuditOperations.Create,
+                        primaryKey: $"Id:{insertedProfitDetail.Id}",
+                        changes:
+                        [
+                            new AuditChangeEntryInput { ColumnName = "PROFIT_YEAR", NewValue = insertedProfitDetail.ProfitYear.ToString() },
+                            new AuditChangeEntryInput { ColumnName = "DISTRIBUTION_SEQUENCE", NewValue = insertedProfitDetail.DistributionSequence.ToString() },
+                            new AuditChangeEntryInput { ColumnName = "PROFIT_CODE_ID", NewValue = insertedProfitDetail.ProfitCodeId.ToString() },
+                            new AuditChangeEntryInput { ColumnName = "PROFIT_YEAR_ITERATION", NewValue = insertedProfitDetail.ProfitYearIteration.ToString() },
+                            new AuditChangeEntryInput { ColumnName = "CONTRIBUTION", NewValue = insertedProfitDetail.Contribution.ToString() },
+                            new AuditChangeEntryInput { ColumnName = "EARNINGS", NewValue = insertedProfitDetail.Earnings.ToString() },
+                            new AuditChangeEntryInput { ColumnName = "FORFEITURE", NewValue = insertedProfitDetail.Forfeiture.ToString() },
+                            new AuditChangeEntryInput { ColumnName = "MONTH_TO_DATE", NewValue = insertedProfitDetail.MonthToDate.ToString() },
+                            new AuditChangeEntryInput { ColumnName = "YEAR_TO_DATE", NewValue = insertedProfitDetail.YearToDate.ToString() },
+                            new AuditChangeEntryInput { ColumnName = "REMARK", NewValue = insertedProfitDetail.Remark },
                         ],
                         cancellationToken: ct);
                 }

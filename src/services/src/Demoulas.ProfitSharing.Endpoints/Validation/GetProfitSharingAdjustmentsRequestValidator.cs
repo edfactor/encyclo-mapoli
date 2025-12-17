@@ -1,11 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using FluentValidation;
 
-namespace Demoulas.ProfitSharing.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Endpoints.Validation.Legacy;
 
-public sealed class GetProfitSharingAdjustmentsRequestValidator : AbstractValidator<GetProfitSharingAdjustmentsRequest>
+public sealed class LegacyGetProfitSharingAdjustmentsRequestValidator : AbstractValidator<GetProfitSharingAdjustmentsRequest>
 {
-    public GetProfitSharingAdjustmentsRequestValidator()
+    public LegacyGetProfitSharingAdjustmentsRequestValidator()
     {
         RuleFor(x => x.ProfitYear)
             .Must(y => y is >= 1900 and <= 2100)
