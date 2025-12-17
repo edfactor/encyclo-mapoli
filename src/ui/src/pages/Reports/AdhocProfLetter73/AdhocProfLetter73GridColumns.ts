@@ -1,8 +1,7 @@
 import { ColDef, IRowNode } from "ag-grid-community";
 import { createCountColumn, createCurrencyColumn } from "../../../utils/gridColumnFactory";
-import { PayServicesDto } from "../../../types/reports/payservices";
 
-export function GetAdhocProfLetter73GridColumns(): ColDef<PayServicesDto>[] {
+export function GetAdhocProfLetter73GridColumns(): ColDef[] {
   return [
     {
       headerName: "Years of Service",
@@ -12,8 +11,8 @@ export function GetAdhocProfLetter73GridColumns(): ColDef<PayServicesDto>[] {
       comparator: (
         _valueA: string,
         _valueB: string,
-        nodeA: IRowNode<PayServicesDto>,
-        nodeB: IRowNode<PayServicesDto>
+        nodeA: IRowNode,
+        nodeB: IRowNode
       ) => {
         // Custom comparator to sort by numeric yearsOfService instead of string label
         const numA = nodeA.data?.yearsOfService ?? 0;
