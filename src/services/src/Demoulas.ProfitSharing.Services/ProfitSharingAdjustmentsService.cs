@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -96,9 +97,20 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var currentBalance = balance?.CurrentBalance ?? 0m;
             var vestedBalance = balance?.VestedBalance ?? 0m;
 
+            var payProfit = await ctx.PayProfits
+                .TagWith($"ProfitSharingAdjustments-Get-PayProfit-{profitYear}-{demographicId}")
+                .Where(pp => pp.DemographicId == demographicId && pp.ProfitYear == profitYear)
+                .Select(pp => new { pp.CurrentHoursYear, pp.CurrentIncomeYear })
+                .FirstOrDefaultAsync(ct);
+
+            var currentHoursYear = payProfit?.CurrentHoursYear ?? 0m;
+            var currentIncomeYear = payProfit?.CurrentIncomeYear ?? 0m;
+
             // Confluence rule: default to only show rows for accounts under 21 as of today.
             // Users can override via GetAllRows.
             var includeRowsForYear = includeAllRows || IsUnderAgeAtDate(demographic.DateOfBirth, today, underAgeThreshold: 21);
+
+            byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
             if (!includeRowsForYear)
             {
@@ -133,7 +145,21 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         ProfitCodeId = pd.ProfitCodeId,
                         Contribution = pd.Contribution,
                         Earnings = pd.Earnings,
-                        Forfeiture = pd.Forfeiture,
+                        Forfeiture = !paymentProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
+                        Payment = paymentProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
+                        MonthToDate = pd.MonthToDate > 0 && pd.YearToDate > 0 ? pd.MonthToDate : null,
+                        YearToDate = pd.MonthToDate > 0 && pd.YearToDate > 0 ? pd.YearToDate : null,
+                        FederalTaxes = pd.FederalTaxes,
+                        StateTaxes = pd.StateTaxes,
+                        TaxCodeId = pd.TaxCodeId != null ? pd.TaxCodeId.Value : TaxCode.Constants.Unknown.Id,
+                        TaxCodeName = pd.TaxCode != null ? pd.TaxCode.Name : TaxCode.Constants.Unknown.Name,
+                        CommentTypeId = pd.CommentTypeId,
+                        CommentTypeName = pd.CommentType != null ? pd.CommentType.Name : string.Empty,
+                        CommentRelatedCheckNumber = pd.CommentRelatedCheckNumber,
+                        CommentRelatedState = pd.CommentRelatedState,
+                        CommentIsPartialTransaction = pd.CommentIsPartialTransaction == true,
+                        CurrentHoursYear = currentHoursYear,
+                        CurrentIncomeYear = currentIncomeYear,
                         ActivityDate = pd.MonthToDate > 0 && pd.YearToDate > 0
                             ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1)
                             : null,
@@ -169,6 +195,20 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     Contribution = 0,
                     Earnings = 0,
                     Forfeiture = 0,
+                    Payment = 0,
+                    MonthToDate = isInsertRow ? (byte)today.Month : null,
+                    YearToDate = isInsertRow ? (short)today.Year : null,
+                    FederalTaxes = 0,
+                    StateTaxes = 0,
+                    TaxCodeId = TaxCode.Constants.Unknown.Id,
+                    TaxCodeName = TaxCode.Constants.Unknown.Name,
+                    CommentTypeId = null,
+                    CommentTypeName = string.Empty,
+                    CommentRelatedCheckNumber = null,
+                    CommentRelatedState = null,
+                    CommentIsPartialTransaction = false,
+                    CurrentHoursYear = currentHoursYear,
+                    CurrentIncomeYear = currentIncomeYear,
                     ActivityDate = isInsertRow ? today : null,
                     Comment = isInsertRow ? AdministrativeComment : string.Empty,
                     // For the insert row: EXT is not editable.

@@ -142,7 +142,6 @@ const ProfitSharingAdjustmentsContent = () => {
   };
 
   const columnDefs = useMemo<ColDef[]>(() => {
-    const isExistingRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId != null;
     const isInsertRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId == null && row?.activityDate != null;
 
     return [
@@ -171,6 +170,22 @@ const ProfitSharingAdjustmentsContent = () => {
         width: 90
       },
       {
+        headerName: "Month",
+        field: "monthToDate",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 75
+      },
+      {
+        headerName: "Year",
+        field: "yearToDate",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 75
+      },
+      {
         headerName: "Contribution",
         field: "contribution",
         sortable: false,
@@ -189,6 +204,14 @@ const ProfitSharingAdjustmentsContent = () => {
         valueParser: toNumberOrOld
       },
       {
+        headerName: "Payment",
+        field: "payment",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 110
+      },
+      {
         headerName: "Forfeiture",
         field: "forfeiture",
         sortable: false,
@@ -196,6 +219,78 @@ const ProfitSharingAdjustmentsContent = () => {
         editable: (params) => isInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
         width: 110,
         valueParser: toNumberOrOld
+      },
+      {
+        headerName: "Hours YTD",
+        field: "currentHoursYear",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 110
+      },
+      {
+        headerName: "Wages YTD",
+        field: "currentIncomeYear",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 110
+      },
+      {
+        headerName: "Fed Tax",
+        field: "federalTaxes",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 110
+      },
+      {
+        headerName: "State Tax",
+        field: "stateTaxes",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 110
+      },
+      {
+        headerName: "Tax Code",
+        field: "taxCodeName",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 120
+      },
+      {
+        headerName: "Comment Type",
+        field: "commentTypeName",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 140
+      },
+      {
+        headerName: "Related Check",
+        field: "commentRelatedCheckNumber",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 120
+      },
+      {
+        headerName: "Related State",
+        field: "commentRelatedState",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 120
+      },
+      {
+        headerName: "Partial",
+        field: "commentIsPartialTransaction",
+        sortable: false,
+        filter: false,
+        editable: false,
+        width: 90
       },
       {
         headerName: "Activity Date",
