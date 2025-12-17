@@ -2,15 +2,13 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -18,12 +16,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
 public sealed class DistributionStatusEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<DistributionStatusResponse>>
 {
-    private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IDistributionStatusLookupService _distributionStatusLookupService;
     private readonly ILogger<DistributionStatusEndpoint> _logger;
 
-    public DistributionStatusEndpoint(IProfitSharingDataContextFactory dataContextFactory, ILogger<DistributionStatusEndpoint> logger) : base(Navigation.Constants.Inquiries)
+    public DistributionStatusEndpoint(IDistributionStatusLookupService distributionStatusLookupService, ILogger<DistributionStatusEndpoint> logger) : base(Navigation.Constants.Inquiries)
     {
-        _dataContextFactory = dataContextFactory;
+        _distributionStatusLookupService = distributionStatusLookupService;
         _logger = logger;
     }
 
@@ -33,13 +31,17 @@ public sealed class DistributionStatusEndpoint : ProfitSharingResultResponseEndp
         Summary(s =>
         {
             s.Summary = "Gets all available distribution status values";
-            s.ResponseExamples = new Dictionary<int, object> {
+            s.ResponseExamples = new Dictionary<int, object>
             {
-                200, new List<DistributionStatusResponse>
                 {
-                    new DistributionStatusResponse { Id = DistributionStatus.Constants.OkayToPay, Name="Okay to Pay"}
+                    200,
+                    ListResponseDto<DistributionStatusResponse>.From(
+                        new List<DistributionStatusResponse>
+                        {
+                            new() { Id = 'O', Name = "Okay to Pay" }
+                        })
                 }
-            } };
+            };
         });
         Group<LookupGroup>();
 
@@ -59,24 +61,20 @@ public sealed class DistributionStatusEndpoint : ProfitSharingResultResponseEndp
         {
             this.RecordRequestMetrics(HttpContext, _logger, new { });
 
-            var items = await _dataContextFactory.UseReadOnlyContext(c => c.DistributionStatuses
-                .OrderBy(x => x.Name)
-                .Select(x => new DistributionStatusResponse { Id = x.Id, Name = x.Name })
-                .ToListAsync(ct), ct);
+            var dto = await _distributionStatusLookupService.GetDistributionStatusesAsync(ct);
 
             // Business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "distribution-status-lookup"),
                 new("endpoint", "DistributionStatusEndpoint"));
 
-            EndpointTelemetry.RecordCountsProcessed.Record(items.Count,
+            EndpointTelemetry.RecordCountsProcessed.Record(dto.Items.Count,
                 new("record_type", "distribution-statuses"),
                 new("endpoint", "DistributionStatusEndpoint"));
 
             _logger.LogInformation("Distribution status lookup completed, returned {StatusCount} statuses (correlation: {CorrelationId})",
-                items.Count, HttpContext.TraceIdentifier);
+                dto.Items.Count, HttpContext.TraceIdentifier);
 
-            var dto = ListResponseDto<DistributionStatusResponse>.From(items);
             var result = Result<ListResponseDto<DistributionStatusResponse>>.Success(dto);
             var httpResult = result.ToHttpResult();
 

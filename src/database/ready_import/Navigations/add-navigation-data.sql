@@ -103,7 +103,6 @@ DECLARE
     PAY_BENEFICIARY_REPORT CONSTANT NUMBER := 134;
     ADHOC_BENEFICIARIES_REPORT CONSTANT NUMBER := 135;
     TERMINATED_LETTERS CONSTANT NUMBER := 136;
-    QPAY600 CONSTANT NUMBER := 137;
     PAY426N_DECEMBER CONSTANT NUMBER := 138;
     PROFIT_SUMMARY CONSTANT NUMBER := 139;
     PAY426_2 CONSTANT NUMBER := 140;
@@ -270,7 +269,6 @@ BEGIN
     insert_navigation_item(VESTING_REPORTS_GROUP, ADHOC_GROUP, 'Vesting Reports', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(TERMINATED_LETTERS, VESTING_REPORTS_GROUP, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(RECENTLY_TERMINATED, VESTING_REPORTS_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(QPAY600, ADHOC_GROUP, 'QPAY600', '', 'qpay600', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
@@ -343,7 +341,6 @@ BEGIN
 -- Adhoc Beneficiaries Report (Pay Be Next) (Year End / Fiscal Close)
 
 
--- QPAY600 (Year End child)
     insert_navigation_item(GET_ELIGIBLE_EMPLOYEES, FISCAL_CLOSE, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS', 'eligible-employees', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARE_FORFEIT, FISCAL_CLOSE, 'Profit Share Forfeit', 'PAY443', 'forfeit', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MASTER_UPDATE, FISCAL_CLOSE, 'Master Update', 'PAY444|PAY447', 'profit-share-update', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
@@ -657,8 +654,6 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(TERMINATED_LETTERS, FINANCE_MANAGER);
     assign_navigation_role(PROFIT_SUMMARY, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_SUMMARY, FINANCE_MANAGER);
-    assign_navigation_role(QPAY600, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(QPAY600, FINANCE_MANAGER);
     assign_navigation_role(DIVORCE_REPORT, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DIVORCE_REPORT, FINANCE_MANAGER);
     assign_navigation_role(DIVORCE_REPORT, DISTRIBUTIONS_CLERK);
@@ -746,7 +741,6 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(PAY_BENEFICIARY_REPORT, IT_DEVOPS);
     assign_navigation_role(ADHOC_BENEFICIARIES_REPORT, IT_DEVOPS);
     -- assign_navigation_role(UNDER_21_REPORT, IT_DEVOPS); -- COMMENTED OUT - navigation item doesn't exist
-    assign_navigation_role(QPAY600, IT_DEVOPS);
     assign_navigation_role(DIVORCE_REPORT, IT_DEVOPS);
     assign_navigation_role(PROFIT_SUMMARY, IT_DEVOPS);
 
