@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { CellValueChangedEvent, ColDef, GridApi, SelectionChangedEvent, ValueParserParams } from "ag-grid-community";
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
@@ -29,11 +29,7 @@ import {
     ProfitSharingAdjustmentsKey,
     SaveProfitSharingAdjustmentRowRequest
 } from "../../../reduxstore/types";
-import {
-    createCurrencyColumn,
-    createTaxCodeColumn,
-    createYearColumn
-} from "../../../utils/gridColumnFactory";
+import { GetProfitSharingAdjustmentsGridColumns } from "./ProfitSharingAdjustmentsGridColumns";
 
 const isValidIsoDate = (value: string): boolean => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -42,11 +38,6 @@ const isValidIsoDate = (value: string): boolean => {
 
   const parsed = new Date(`${value}T00:00:00Z`);
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().startsWith(value);
-};
-
-const toNumberOrOld = (params: ValueParserParams): number => {
-  const parsed = Number.parseFloat(String(params.newValue ?? ""));
-  return Number.isFinite(parsed) ? parsed : (params.oldValue as number);
 };
 
 const ProfitSharingAdjustmentsContent = () => {
@@ -150,116 +141,7 @@ const ProfitSharingAdjustmentsContent = () => {
     });
   };
 
-  const columnDefs = useMemo<ColDef[]>(() => {
-    const isDraftInsertRow = (row?: ProfitSharingAdjustmentRowDto): boolean => row?.profitDetailId == null;
-
-    return [
-      {
-        headerName: "Row",
-        field: "rowNumber",
-        sortable: false,
-        filter: false,
-        editable: false,
-        width: 70,
-        headerClass: "right-align",
-        cellClass: "right-align"
-      },
-      createYearColumn({
-        headerName: "Profit Year",
-        field: "profitYear",
-        minWidth: 100,
-        alignment: "right",
-        sortable: false,
-        editable: false,
-        valueFormatter: (params) => {
-          const year = params.data.profitYear;
-          const iter = params.data.profitYearIteration;
-          return `${year}.${iter}`;
-        }
-      }),
-      {
-        headerName: "Profit Code",
-        field: "profitCodeId",
-        colId: "profitCodeId",
-        minWidth: 150,
-        headerClass: "left-align",
-        cellClass: "left-align",
-        sortable: false,
-        filter: false,
-        editable: false,
-        resizable: true,
-        tooltipValueGetter: (params) => {
-          return params.data?.profitCodeName;
-        },
-        valueFormatter: (params) => {
-          const id = params.data.profitCodeId;
-          const name = params.data.profitCodeName;
-          return `[${id}] ${name}`;
-        }
-      },
-      createCurrencyColumn({
-        headerName: "Contribution",
-        field: "contribution",
-        editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        valueParser: toNumberOrOld
-      }),
-      createCurrencyColumn({
-        headerName: "Earnings",
-        field: "earnings",
-        editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        valueParser: toNumberOrOld
-      }),
-      createCurrencyColumn({
-        headerName: "Forfeiture",
-        field: "forfeiture",
-        editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-        valueParser: toNumberOrOld
-      }),
-      createCurrencyColumn({
-        headerName: "Payment",
-        field: "payment",
-        editable: false
-      }),
-      createCurrencyColumn({
-        headerName: "Federal Tax",
-        field: "federalTaxes",
-        minWidth: 120,
-        editable: false
-      }),
-      createCurrencyColumn({
-        headerName: "State Tax",
-        field: "stateTaxes",
-        minWidth: 120,
-        editable: false
-      }),
-      createTaxCodeColumn({
-        editable: false
-      }),
-      {
-        headerName: "Activity Date",
-        field: "activityDate",
-        sortable: false,
-        filter: false,
-        editable: false,
-        minWidth: 120,
-        headerClass: "left-align",
-        cellClass: "left-align",
-        resizable: true
-      },
-      {
-        headerName: "Comment",
-        field: "comment",
-        sortable: false,
-        filter: false,
-        editable: false,
-        flex: 1,
-        minWidth: 160,
-        headerClass: "left-align",
-        cellClass: "left-align",
-        resizable: true
-      }
-    ];
-  }, []);
+  const columnDefs = GetProfitSharingAdjustmentsGridColumns();
 
   const loadAdjustments = async () => {
     setErrorMessage(null);
