@@ -38,6 +38,14 @@ const getIneligibilityReason = (data: { profitCodeId: number; monthToDate: numbe
     if (rowDate < twoMonthsAgo) {
       return "Transaction too old for reversal";
     }
+
+    // January rule: if current month is January, transaction month must be > 1 and < 12
+    const currentMonth = new Date().getMonth() + 1; // getMonth() is 0-based
+    if (currentMonth === 1) {
+      if (!(monthToDate > 1 && monthToDate < 12)) {
+        return "Transaction not eligible for reversal in January";
+      }
+    }
   }
 
   return "This row cannot be reversed";

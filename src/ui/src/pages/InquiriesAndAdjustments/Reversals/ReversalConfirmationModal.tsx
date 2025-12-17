@@ -4,7 +4,7 @@ import { numberToCurrency } from "smart-ui-library";
 
 export interface ReversalItem {
   id: number;
-  contribution: number;
+  payment: number;
 }
 
 interface ReversalConfirmationModalProps {
@@ -28,7 +28,7 @@ const ReversalConfirmationModal: React.FC<ReversalConfirmationModalProps> = memo
 
     const title = isMultiple ? `Reverse Transaction (${currentIndex + 1}/${totalCount})` : "Reverse Transaction";
 
-    const formattedAmount = numberToCurrency(currentItem?.contribution ?? 0);
+    const formattedAmount = numberToCurrency(currentItem?.payment ?? 0);
 
     return (
       <Dialog

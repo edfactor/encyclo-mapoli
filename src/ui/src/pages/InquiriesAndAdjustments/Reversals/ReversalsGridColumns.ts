@@ -30,6 +30,14 @@ export const isRowReversible = (data: { profitCodeId: number; monthToDate: numbe
     if (rowDate < twoMonthsAgo) {
       return false;
     }
+
+    // January rule: if current month is January, transaction month must be > 1 and < 12
+    const currentMonth = new Date().getMonth() + 1; // getMonth() is 0-based
+    if (currentMonth === 1) {
+      if (!(monthToDate > 1 && monthToDate < 12)) {
+        return false;
+      }
+    }
   }
 
   return true;

@@ -1,5 +1,6 @@
 import { useCallback, useReducer, useRef } from "react";
 import { useDispatch } from "react-redux";
+import { numberToCurrency } from "smart-ui-library";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import {
@@ -278,7 +279,7 @@ export function useReversals() {
             contribution: typeof item.contribution === "number" ? item.contribution : 0,
             earnings: item.earnings,
             forfeiture: item.forfeiture,
-            payment: item.payment,
+            payment: item.payment ?? 0,
             monthToDate: item.monthToDate,
             yearToDate: item.yearToDate,
             currentHoursYear: item.currentHoursYear,
@@ -348,7 +349,7 @@ export function useReversals() {
           contribution: typeof item.contribution === "number" ? item.contribution : 0,
           earnings: item.earnings,
           forfeiture: item.forfeiture,
-          payment: item.payment,
+          payment: item.payment ?? 0,
           monthToDate: item.monthToDate,
           yearToDate: item.yearToDate,
           currentHoursYear: item.currentHoursYear,
@@ -376,7 +377,7 @@ export function useReversals() {
   const initiateReversal = useCallback((selectedRows: ProfitDetailRow[]) => {
     const items: ReversalItem[] = selectedRows.map((row) => ({
       id: row.id,
-      contribution: row.contribution
+      payment: row.payment
     }));
     dispatch({ type: "OPEN_CONFIRMATION", payload: items });
   }, []);
@@ -396,12 +397,19 @@ export function useReversals() {
         await reverseProfitDetails({ ids: allIds, onlyNetworkToastErrors: true }).unwrap();
 
         dispatch({ type: "CLOSE_CONFIRMATION" });
+
+        // Build success message with profit detail IDs and payment amounts
+        const reversalDetails = selectedItems
+          .map((item) => `Profit Detail ${item.id}: ${numberToCurrency(item.payment)}`)
+          .join("\n");
+
         reduxDispatch(
           setMessage({
             key: REVERSALS_MESSAGE_KEY,
             message: {
               type: "success",
-              title: `Successfully reversed ${allIds.length} transaction${allIds.length > 1 ? "s" : ""}.`
+              title: `Successfully reversed ${allIds.length} transaction${allIds.length > 1 ? "s" : ""}.`,
+              message: reversalDetails
             }
           })
         );
@@ -430,7 +438,7 @@ export function useReversals() {
                 contribution: typeof item.contribution === "number" ? item.contribution : 0,
                 earnings: item.earnings,
                 forfeiture: item.forfeiture,
-                payment: item.payment,
+                payment: item.payment ?? 0,
                 monthToDate: item.monthToDate,
                 yearToDate: item.yearToDate,
                 currentHoursYear: item.currentHoursYear,

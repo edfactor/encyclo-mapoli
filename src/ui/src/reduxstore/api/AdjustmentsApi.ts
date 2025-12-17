@@ -40,7 +40,7 @@ export const AdjustmentsApi = createApi({
       query: (request) => {
         const { onlyNetworkToastErrors, ...requestData } = request;
         return {
-          url: "adjustments/reverse-profit-details",
+          url: "profitdetails/reversals",
           method: "POST",
           body: requestData,
           meta: { onlyNetworkToastErrors }

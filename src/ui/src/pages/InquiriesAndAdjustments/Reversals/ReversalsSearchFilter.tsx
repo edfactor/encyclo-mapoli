@@ -14,7 +14,6 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../../constants";
-import { badgeNumberOrPSNValidator, ssnValidator } from "../../../utils/FormValidators";
 
 export interface ReversalsSearchParams {
   socialSecurity?: string | null;
@@ -28,9 +27,9 @@ interface ReversalsSearchFormData {
   memberType: "all" | "employees" | "beneficiaries";
 }
 
-const schema = yup.object().shape({
-  socialSecurity: ssnValidator,
-  badgeNumber: badgeNumberOrPSNValidator,
+const schema: yup.ObjectSchema<ReversalsSearchFormData> = yup.object({
+  socialSecurity: yup.string().nullable().defined(),
+  badgeNumber: yup.number().nullable().defined(),
   memberType: yup
     .string()
     .oneOf(["all", "employees", "beneficiaries"] as const)
