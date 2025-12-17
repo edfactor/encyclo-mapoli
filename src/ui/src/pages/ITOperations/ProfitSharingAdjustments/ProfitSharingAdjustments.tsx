@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Divider, FormControlLabel, Grid, TextField, Typography } from "@mui/material";
 import { CellValueChangedEvent, ColDef, ValueParserParams } from "ag-grid-community";
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
 import { useEffect, useMemo, useState } from "react";
@@ -39,6 +39,8 @@ const ProfitSharingAdjustmentsContent = () => {
   const [profitYear, setProfitYear] = useState<number>(new Date().getFullYear());
   const [badgeNumber, setBadgeNumber] = useState<string>("");
   const [sequenceNumber, setSequenceNumber] = useState<number>(0);
+  const [getAllRows, setGetAllRows] = useState<boolean>(false);
+  const [loadedGetAllRows, setLoadedGetAllRows] = useState<boolean>(false);
 
   const [loadedKey, setLoadedKey] = useState<ProfitSharingAdjustmentsKey | null>(null);
   const [rowData, setRowData] = useState<ProfitSharingAdjustmentRowDto[]>([]);
@@ -193,7 +195,8 @@ const ProfitSharingAdjustmentsContent = () => {
     }
 
     try {
-      await triggerGet({ profitYear, badgeNumber: parsedBadgeNumber, sequenceNumber }).unwrap();
+      setLoadedGetAllRows(getAllRows);
+      await triggerGet({ profitYear, badgeNumber: parsedBadgeNumber, sequenceNumber, getAllRows }).unwrap();
     } catch (e) {
       console.error("Failed to load profit sharing adjustments", e);
       setErrorMessage("Failed to load adjustments. Please try again.");
@@ -309,7 +312,7 @@ const ProfitSharingAdjustmentsContent = () => {
       setStagedByRowNumber({});
 
       // Refresh to ensure server-calculated fields stay in sync.
-      await triggerGet(loadedKey).unwrap();
+      await triggerGet({ ...loadedKey, getAllRows: loadedGetAllRows }).unwrap();
     } catch (e) {
       console.error("Failed to save profit sharing adjustments", e);
       setErrorMessage("Failed to save changes. Please try again.");
@@ -360,6 +363,17 @@ const ProfitSharingAdjustmentsContent = () => {
             onChange={(e) => setSequenceNumber(Number.parseInt(e.target.value ?? "", 10) || 0)}
             sx={{ width: 120 }}
             inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          />
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={getAllRows}
+                onChange={(_e, checked) => setGetAllRows(checked)}
+                disabled={isFetchingAdjustments || isSaving || hasUnsavedChanges}
+              />
+            }
+            label="Get all rows"
           />
 
           <Button

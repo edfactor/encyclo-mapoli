@@ -18,7 +18,9 @@ export type ProfitSharingAdjustmentRowDto = {
   isEditable: boolean;
 };
 
-export type GetProfitSharingAdjustmentsRequest = ProfitSharingAdjustmentsKey;
+export type GetProfitSharingAdjustmentsRequest = ProfitSharingAdjustmentsKey & {
+  getAllRows?: boolean;
+};
 
 export type GetProfitSharingAdjustmentsResponse = ProfitSharingAdjustmentsKey & {
   demographicId: number | null;

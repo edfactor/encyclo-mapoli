@@ -63,7 +63,9 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
     public async Task SaveAsync_WhenExistingRowAmountChanged_ShouldReturnValidationFailure()
     {
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
-        await SetDemographicDobForAgeAsync(candidate.Ssn, candidate.ProfitYear, ageAtYearEnd: 22);
+        // Default GetAsync now returns only years where the member was under 22 (age <= 21 at year-end).
+        // Seed DOB accordingly so test data includes at least one existing EXT row.
+        await SetDemographicDobForAgeAsync(candidate.Ssn, candidate.ProfitYear, ageAtYearEnd: 21);
 
         var getResult = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
         {

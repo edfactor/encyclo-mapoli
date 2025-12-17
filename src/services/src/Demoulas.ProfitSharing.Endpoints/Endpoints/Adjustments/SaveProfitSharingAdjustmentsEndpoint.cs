@@ -29,7 +29,7 @@ public sealed class SaveProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint
 
     public override void Configure()
     {
-        Post("/");
+        Post("under21");
         Group<AdjustmentsGroup>();
         Validator<SaveProfitSharingAdjustmentsRequestValidator>();
 

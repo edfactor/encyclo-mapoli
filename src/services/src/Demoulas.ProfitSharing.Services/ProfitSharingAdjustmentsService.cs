@@ -83,6 +83,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var ssn = demographic.Ssn;
             var demographicId = demographic.Id;
             var profitYear = request.ProfitYear;
+            var includeAllRows = request.GetAllRows;
             var canEditYearExtension = IsUnderAgeAtContributionYearEnd(demographic.DateOfBirth, profitYear, underAgeThreshold: 18);
             var isOver21AtInitialHire = IsOverAgeAtDate(demographic.DateOfBirth, demographic.HireDate, ageThreshold: 21);
 
@@ -91,35 +92,39 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
             var currentBalance = balance?.CurrentBalance ?? 0m;
             var vestedBalance = balance?.VestedBalance ?? 0m;
 
-            var profitDetails = await ctx.ProfitDetails
-                .TagWith($"ProfitSharingAdjustments-Get-ProfitDetails-{profitYear}-{request.SequenceNumber}")
-                .Where(pd =>
-                    pd.Ssn == ssn &&
-                    pd.ProfitYear == profitYear &&
-                    pd.DistributionSequence == request.SequenceNumber &&
-                    pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
-                .OrderBy(pd => pd.ProfitYearIteration)
-                .ThenBy(pd => pd.CreatedAtUtc)
-                .Take(MaxRows)
-                .Select(pd => new ProfitSharingAdjustmentRowResponse
-                {
-                    ProfitDetailId = pd.Id,
-                    RowNumber = 0, // assigned after materialization
-                    ProfitYear = pd.ProfitYear,
-                    ProfitYearIteration = pd.ProfitYearIteration,
-                    ProfitCodeId = pd.ProfitCodeId,
-                    Contribution = pd.Contribution,
-                    Earnings = pd.Earnings,
-                    Forfeiture = pd.Forfeiture,
-                    ActivityDate = pd.MonthToDate > 0 && pd.YearToDate > 0
-                        ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1)
-                        : null,
-                    Comment = pd.Remark != null ? pd.Remark : string.Empty,
-                    // For 008-22 parity: only the EXT (ProfitYearIteration) field is editable, and only
-                    // when the account holder is under 18 as of Dec 31 of the contribution year.
-                    IsEditable = canEditYearExtension
-                })
-                .ToListAsync(ct);
+            var includeRowsForYear = includeAllRows || IsUnderAgeAtContributionYearEnd(demographic.DateOfBirth, profitYear, underAgeThreshold: 22);
+
+            var profitDetails = includeRowsForYear
+                ? await ctx.ProfitDetails
+                    .TagWith($"ProfitSharingAdjustments-Get-ProfitDetails-{profitYear}-{request.SequenceNumber}")
+                    .Where(pd =>
+                        pd.Ssn == ssn &&
+                        pd.ProfitYear == profitYear &&
+                        pd.DistributionSequence == request.SequenceNumber &&
+                        pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
+                    .OrderBy(pd => pd.ProfitYearIteration)
+                    .ThenBy(pd => pd.CreatedAtUtc)
+                    .Take(MaxRows)
+                    .Select(pd => new ProfitSharingAdjustmentRowResponse
+                    {
+                        ProfitDetailId = pd.Id,
+                        RowNumber = 0, // assigned after materialization
+                        ProfitYear = pd.ProfitYear,
+                        ProfitYearIteration = pd.ProfitYearIteration,
+                        ProfitCodeId = pd.ProfitCodeId,
+                        Contribution = pd.Contribution,
+                        Earnings = pd.Earnings,
+                        Forfeiture = pd.Forfeiture,
+                        ActivityDate = pd.MonthToDate > 0 && pd.YearToDate > 0
+                            ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1)
+                            : null,
+                        Comment = pd.Remark != null ? pd.Remark : string.Empty,
+                        // For 008-22 parity: only the EXT (ProfitYearIteration) field is editable, and only
+                        // when the account holder is under 18 as of Dec 31 of the contribution year.
+                        IsEditable = canEditYearExtension
+                    })
+                    .ToListAsync(ct)
+                : new List<ProfitSharingAdjustmentRowResponse>();
 
             for (var i = 0; i < profitDetails.Count; i++)
             {
