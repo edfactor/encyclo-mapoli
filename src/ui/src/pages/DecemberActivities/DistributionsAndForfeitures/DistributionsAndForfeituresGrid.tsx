@@ -537,10 +537,9 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           )}
         </>
       )}
-      {!isGridExpanded &&
-        !isFetching &&
+      {!isFetching &&
         !!distributionsAndForfeitures &&
-        distributionsAndForfeitures.response.results.length > 0 && (
+        distributionsAndForfeitures.response?.total > 0 && (
           <Pagination
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
