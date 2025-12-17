@@ -16,6 +16,7 @@ import { CellValueChangedEvent, GridApi, SelectionChangedEvent } from "ag-grid-c
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
 import { useEffect, useRef, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
+import { UnsavedChangesDialog } from "../../../components/ConfirmationDialog";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
@@ -69,7 +70,7 @@ const ProfitSharingAdjustmentsContent = () => {
   );
 
   const hasUnsavedChanges = Object.keys(stagedByRowNumber).length > 0;
-  useUnsavedChangesGuard(hasUnsavedChanges);
+  const { showDialog: showUnsavedDialog, onStay, onLeave } = useUnsavedChangesGuard(hasUnsavedChanges, true);
 
   useEffect(() => {
     if (!data) {
@@ -559,6 +560,13 @@ const ProfitSharingAdjustmentsContent = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Unsaved changes navigation guard dialog */}
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onStay={onStay}
+        onLeave={onLeave}
+      />
     </Grid>
   );
 };
