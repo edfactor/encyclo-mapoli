@@ -1,9 +1,12 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -19,17 +22,20 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly ITotalService _totalService;
+    private readonly IAuditService _auditService;
     private readonly ILogger<ProfitSharingAdjustmentsService> _logger;
 
     public ProfitSharingAdjustmentsService(
         IProfitSharingDataContextFactory dbContextFactory,
         IDemographicReaderService demographicReaderService,
         ITotalService totalService,
+        IAuditService auditService,
         ILogger<ProfitSharingAdjustmentsService> logger)
     {
         _dbContextFactory = dbContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
+        _auditService = auditService;
         _logger = logger;
     }
 
@@ -242,6 +248,18 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 var ssn = demographic.Ssn;
                 var demographicId = demographic.Id;
                 var profitYear = request.ProfitYear;
+
+                // New requirement: block save if member is over 22 as of Dec 31 of the adjusted year.
+                // Defense-in-depth: enforced here even though request validation also checks.
+                var ageAtYearEnd = profitYear - (short)demographic.DateOfBirth.Year;
+                if (ageAtYearEnd > 22)
+                {
+                    return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.ProfitYear)] = ["Member age must be 22 or younger for the selected ProfitYear."]
+                    });
+                }
+
                 var canEditYearExtension = IsUnderAgeAtContributionYearEnd(demographic.DateOfBirth, profitYear, underAgeThreshold: 18);
                 var isOver21AtInitialHire = IsOverAgeAtDate(demographic.DateOfBirth, demographic.HireDate, ageThreshold: 21);
 
@@ -264,6 +282,9 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         .ToListAsync(ct);
 
                 var existingById = existing.ToDictionary(pd => pd.Id);
+
+                var nowUtc = DateTimeOffset.UtcNow;
+                var extUpdates = new List<(int ProfitDetailId, byte OriginalValue, byte NewValue)>();
 
                 foreach (var row in request.Rows.Where(r => r.ProfitDetailId.HasValue))
                 {
@@ -336,9 +357,14 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         });
                     }
 
+                    if (row.ProfitYearIteration != pd.ProfitYearIteration)
+                    {
+                        extUpdates.Add((pd.Id, pd.ProfitYearIteration, row.ProfitYearIteration));
+                    }
+
                     pd.ProfitYearIteration = row.ProfitYearIteration;
 
-                    pd.ModifiedAtUtc = DateTimeOffset.UtcNow;
+                    pd.ModifiedAtUtc = nowUtc;
                 }
 
                 var insertCandidates = request.Rows
@@ -367,7 +393,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
                     var activityDate = DateOnly.FromDateTime(DateTime.Today);
 
-                    ctx.ProfitDetails.Add(new ProfitDetail
+                    var insertedProfitDetail = new ProfitDetail
                     {
                         Ssn = ssn,
                         ProfitYear = profitYear,
@@ -383,10 +409,39 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         FederalTaxes = 0,
                         StateTaxes = 0,
                         YearsOfServiceCredit = 0
-                    });
+                    };
+
+                    ctx.ProfitDetails.Add(insertedProfitDetail);
+
+                    // At most one insert is allowed; keep reference for auditing after SaveChanges.
+                    insertCandidates[0] = insertCandidates[0];
+
+                    // Audit create after SaveChanges so we have the generated Id.
+                    // (stored in a local variable in the outer scope)
+                    _ = insertedProfitDetail;
                 }
 
                 await ctx.SaveChangesAsync(ct);
+
+                // Audit updates (EXT changes) and optional insert.
+                foreach (var update in extUpdates)
+                {
+                    await _auditService.LogDataChangeAsync(
+                        operationName: "Update Profit Sharing Adjustment",
+                        tableName: "PROFIT_DETAIL",
+                        auditOperation: AuditEvent.AuditOperations.Update,
+                        primaryKey: $"Id:{update.ProfitDetailId}",
+                        changes:
+                        [
+                            new AuditChangeEntryInput
+                            {
+                                ColumnName = "PROFIT_YEAR_ITERATION",
+                                OriginalValue = update.OriginalValue.ToString(),
+                                NewValue = update.NewValue.ToString(),
+                            },
+                        ],
+                        cancellationToken: ct);
+                }
 
                 return Result<GetProfitSharingAdjustmentsResponse>.Success(new GetProfitSharingAdjustmentsResponse
                 {

@@ -1,9 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import {
-    GetProfitSharingAdjustmentsRequest,
-    GetProfitSharingAdjustmentsResponse,
-    SaveProfitSharingAdjustmentsRequest
+  GetProfitSharingAdjustmentsRequest,
+  GetProfitSharingAdjustmentsResponse,
+  SaveProfitSharingAdjustmentsRequest
 } from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
