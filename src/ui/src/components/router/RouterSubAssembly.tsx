@@ -74,6 +74,9 @@ const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDW
 const DemographicFreeze = lazy(() => import("../../pages/ITOperations/DemographicFreeze/DemographicFreeze"));
 const ManageStateTaxes = lazy(() => import("../../pages/ITOperations/ManageStateTaxes/ManageStateTaxes"));
 const ManageAnnuityRates = lazy(() => import("../../pages/ITOperations/ManageAnnuityRates/ManageAnnuityRates"));
+const ProfitSharingAdjustments = lazy(
+  () => import("../../pages/ITOperations/ProfitSharingAdjustments/ProfitSharingAdjustments")
+);
 const OracleHcmDiagnostics = lazy(() => import("../../pages/ITOperations/OracleHcmDiagnostics/OracleHcmDiagnostics"));
 
 const PayMasterUpdateSummary = lazy(() => import("@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary"));
@@ -103,7 +106,6 @@ const AccountHistoryReport = lazy(() => import("../../pages/Reports/AccountHisto
 const PayBeNext = lazy(() => import("../../pages/Reports/PayBeNext/PayBeNext"));
 const PayBenReport = lazy(() => import("../../pages/Reports/PayBenReport/PayBenReport"));
 const QPAY066xAdHocReports = lazy(() => import("../../pages/Reports/QPAY066xAdHocReports/QPAY066xAdHocReports"));
-const QPAY600 = lazy(() => import("../../pages/Reports/QPAY600/QPAY600"));
 const RecentlyTerminated = lazy(() => import("../../pages/Reports/RecentlyTerminated/RecentlyTerminated"));
 const TerminatedLetters = lazy(() => import("../../pages/Reports/TerminatedLetters/TerminatedLetters"));
 
@@ -609,7 +611,8 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.MANAGE_STATE_TAXES}
                   element={
-                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageStateTaxes />
                       </Suspense>
@@ -619,9 +622,21 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.MANAGE_ANNUITY_RATES}
                   element={
-                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageAnnuityRates />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.PROFIT_SHARING_ADJUSTMENTS}
+                  element={
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <ProfitSharingAdjustments />
                       </Suspense>
                     </ProtectedRoute>
                   }
@@ -692,14 +707,6 @@ const RouterSubAssembly: React.FC = () => {
                   element={
                     <Suspense fallback={<PageLoadingFallback />}>
                       <QPAY066B />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path={ROUTES.QPAY600}
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <QPAY600 />
                     </Suspense>
                   }
                 />

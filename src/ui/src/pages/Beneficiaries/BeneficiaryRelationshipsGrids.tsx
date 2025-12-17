@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { setDistributionHome } from "reduxstore/slices/distributionSlice";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { CAPTIONS, ROUTES } from "../../constants";
+import { GRID_KEYS, ROUTES } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
 import { GetBeneficiariesListGridColumns } from "./BeneficiariesListGridColumns";
@@ -44,7 +44,8 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "psnSuffix",
-    initialSortDescending: true
+    initialSortDescending: true,
+    persistenceKey: GRID_KEYS.BENEFICIARIES_LIST
   });
 
   const relationships = useBeneficiaryRelationshipData({
@@ -224,7 +225,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={CAPTIONS.BENEFICIARY_OF}
+            preferenceKey={GRID_KEYS.BENEFICIARY_OF}
             isLoading={relationships.isLoading}
             providedOptions={{
               rowData: relationships.beneficiaryOfList?.results,
@@ -244,7 +245,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={CAPTIONS.BENEFICIARIES_LIST}
+            preferenceKey={GRID_KEYS.BENEFICIARIES_LIST}
             isLoading={relationships.isLoading}
             handleSortChanged={sortEventHandler}
             providedOptions={{

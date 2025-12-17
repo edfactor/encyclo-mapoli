@@ -31,20 +31,24 @@ This document provides a comprehensive guide to all extension methods available 
 Converts the first character of a string to uppercase while leaving the rest unchanged.
 
 **Syntax:**
+
 ```csharp
 public static string FirstCharToUpper(this string input)
 ```
 
 **Parameters:**
+
 - `input` (string): The input string to process
 
 **Returns:** A string with its first character converted to uppercase
 
 **Exceptions:**
+
 - `ArgumentNullException`: Thrown when input is null
 - `ArgumentException`: Thrown when input is empty
 
 **Example:**
+
 ```csharp
 string text = "hello world";
 string result = text.FirstCharToUpper(); // "Hello world"
@@ -59,11 +63,13 @@ string result = text.FirstCharToUpper(); // "Hello world"
 Performs a culture-sensitive string containment check.
 
 **Syntax:**
+
 ```csharp
 public static bool Contains(this string input, string searched, StringComparison comparison)
 ```
 
 **Parameters:**
+
 - `input` (string): The source string to search in
 - `searched` (string): The substring to search for
 - `comparison` (StringComparison): The comparison type (e.g., `OrdinalIgnoreCase`)
@@ -71,6 +77,7 @@ public static bool Contains(this string input, string searched, StringComparison
 **Returns:** True if the substring is found; otherwise, false
 
 **Example:**
+
 ```csharp
 string text = "Hello World";
 bool found = text.Contains("world", StringComparison.OrdinalIgnoreCase); // true
@@ -83,16 +90,19 @@ bool found = text.Contains("world", StringComparison.OrdinalIgnoreCase); // true
 Encodes a plain text string to Base64.
 
 **Syntax:**
+
 ```csharp
 public static string Base64Encode(this string plainText)
 ```
 
 **Parameters:**
+
 - `plainText` (string): The plain text string to encode
 
 **Returns:** A Base64-encoded string
 
 **Example:**
+
 ```csharp
 string encoded = "Hello World".Base64Encode(); // "SGVsbG8gV29ybGQ="
 ```
@@ -104,16 +114,19 @@ string encoded = "Hello World".Base64Encode(); // "SGVsbG8gV29ybGQ="
 Decodes a Base64-encoded string back to plain text.
 
 **Syntax:**
+
 ```csharp
 public static string Base64Decode(this string base64EncodedData)
 ```
 
 **Parameters:**
+
 - `base64EncodedData` (string): The Base64-encoded string to decode
 
 **Returns:** The decoded plain text string
 
 **Example:**
+
 ```csharp
 string decoded = "SGVsbG8gV29ybGQ=".Base64Decode(); // "Hello World"
 ```
@@ -130,16 +143,19 @@ string decoded = "SGVsbG8gV29ybGQ=".Base64Decode(); // "Hello World"
 Calculates the end of the given date (23:59:59).
 
 **Syntax:**
+
 ```csharp
 public static DateTime ToEndOfDay(this DateTime dateTime)
 ```
 
 **Parameters:**
+
 - `dateTime` (DateTime): The date to process
 
 **Returns:** A DateTime representing 11:59:59 PM on the given date
 
 **Example:**
+
 ```csharp
 DateTime date = new DateTime(2024, 12, 13, 10, 30, 0);
 DateTime endDay = date.ToEndOfDay(); // 2024-12-13 23:59:59
@@ -152,16 +168,19 @@ DateTime endDay = date.ToEndOfDay(); // 2024-12-13 23:59:59
 Gets a date with the time zeroed out (00:00:00).
 
 **Syntax:**
+
 ```csharp
 public static DateTime ZeroTime(this DateTime dateTime)
 ```
 
 **Parameters:**
+
 - `dateTime` (DateTime): The date to process
 
 **Returns:** A DateTime with time set to 00:00:00
 
 **Example:**
+
 ```csharp
 DateTime date = new DateTime(2024, 12, 13, 10, 30, 45);
 DateTime zeroed = date.ZeroTime(); // 2024-12-13 00:00:00
@@ -174,16 +193,19 @@ DateTime zeroed = date.ZeroTime(); // 2024-12-13 00:00:00
 Returns null if the date is on or before January 1, 1970 (Unix epoch).
 
 **Syntax:**
+
 ```csharp
 public static DateTime? NullOnUnixStart(this DateTime? date)
 ```
 
 **Parameters:**
+
 - `date` (DateTime?): The nullable date to check
 
 **Returns:** The original date if after Unix epoch, otherwise null
 
 **Example:**
+
 ```csharp
 DateTime? oldDate = new DateTime(1960, 1, 1);
 DateTime? result = oldDate.NullOnUnixStart(); // null
@@ -199,16 +221,19 @@ DateTime? result2 = validDate.NullOnUnixStart(); // 2024-12-13
 Calculates the corresponding date of the same day and week number in the previous year.
 
 **Syntax:**
+
 ```csharp
 public static DateTime LastYearDay(this DateTime todayDate)
 ```
 
 **Parameters:**
+
 - `todayDate` (DateTime): The current date
 
 **Returns:** The date of the same day and week number in the previous year
 
 **Example:**
+
 ```csharp
 DateTime date = new DateTime(2024, 12, 13); // Friday, week 50
 DateTime lastYear = date.LastYearDay(); // Friday of week 50 in 2023
@@ -221,6 +246,7 @@ DateTime lastYear = date.LastYearDay(); // Friday of week 50 in 2023
 Calculates the age in years based on a birth date.
 
 **Syntax:**
+
 ```csharp
 // Overload 1: Using DateTime with current date
 public static short Age(this DateTime birthDate)
@@ -236,12 +262,14 @@ public static short Age(this DateTimeOffset birthDate, DateTimeOffset fromDateTi
 ```
 
 **Parameters:**
+
 - `birthDate` (DateTime/DateTimeOffset): The date of birth
 - `fromDateTime` (DateTime/DateTimeOffset, optional): Reference date for calculation (defaults to today/now)
 
 **Returns:** The calculated age as a short integer
 
 **Example:**
+
 ```csharp
 DateTime birthDate = new DateTime(2000, 5, 15);
 short age = birthDate.Age(); // Current age
@@ -256,6 +284,7 @@ short ageAt = birthDate.Age(new DateTime(2024, 12, 13)); // Age at specific date
 Gets the Demoulas system minimum date (January 1, 1917). This is the founding date of Market Basket.
 
 **Syntax:**
+
 ```csharp
 public static DateTime DsmMinDate()
 ```
@@ -263,6 +292,7 @@ public static DateTime DsmMinDate()
 **Returns:** A DateTime representing January 1, 1917
 
 **Example:**
+
 ```csharp
 DateTime minDate = DateTimeExtension.DsmMinDate(); // 1917-01-01
 ```
@@ -279,6 +309,7 @@ DateTime minDate = DateTimeExtension.DsmMinDate(); // 1917-01-01
 Converts DateTime or DateTimeOffset to DateOnly.
 
 **Syntax:**
+
 ```csharp
 // Overload 1: From DateTime (uses local kind by default)
 public static DateOnly ToDateOnly(this DateTime dateTime)
@@ -294,6 +325,7 @@ public static DateOnly ToDateOnly(this DateTimeOffset dateTimeOffset, DateTimeKi
 ```
 
 **Parameters:**
+
 - `dateTime` (DateTime): The DateTime to convert
 - `dateTimeOffset` (DateTimeOffset): The DateTimeOffset to convert
 - `kind` (DateTimeKind, optional): The DateTimeKind to use for conversion
@@ -301,6 +333,7 @@ public static DateOnly ToDateOnly(this DateTimeOffset dateTimeOffset, DateTimeKi
 **Returns:** A DateOnly representation of the provided date/time
 
 **Example:**
+
 ```csharp
 DateTime dt = new DateTime(2024, 12, 13, 10, 30, 0);
 DateOnly dateOnly = dt.ToDateOnly(); // 2024-12-13
@@ -321,17 +354,20 @@ DateOnly dateOnly2 = dto.ToDateOnly(); // 2024-12-13
 Dynamically retrieves the value of a property from an object.
 
 **Syntax:**
+
 ```csharp
 public static object? GetPropertyValue(this object source, string propertyName)
 ```
 
 **Parameters:**
+
 - `source` (object): The object to retrieve the property from
 - `propertyName` (string): The name of the property
 
 **Returns:** The property value, or null if the property doesn't exist
 
 **Example:**
+
 ```csharp
 var customer = new { Name = "John", Age = 30 };
 object? name = customer.GetPropertyValue("Name"); // "John"
@@ -344,17 +380,20 @@ object? name = customer.GetPropertyValue("Name"); // "John"
 Retrieves a property value and converts it to a string.
 
 **Syntax:**
+
 ```csharp
 public static string? GetPropertyValueAsString(this object source, string propertyName)
 ```
 
 **Parameters:**
+
 - `source` (object): The object to retrieve the property from
 - `propertyName` (string): The name of the property
 
 **Returns:** A string representation of the property value, or null
 
 **Example:**
+
 ```csharp
 var product = new { Price = 19.99m };
 string? price = product.GetPropertyValueAsString("Price"); // "19.99"
@@ -367,11 +406,13 @@ string? price = product.GetPropertyValueAsString("Price"); // "19.99"
 Retrieves a property value and converts it to a decimal.
 
 **Syntax:**
+
 ```csharp
 public static decimal? GetPropertyValueAsDecimal(this object source, string propertyName, decimal defaultValue = 0)
 ```
 
 **Parameters:**
+
 - `source` (object): The object to retrieve the property from
 - `propertyName` (string): The name of the property
 - `defaultValue` (decimal, optional): Default value if conversion fails
@@ -379,6 +420,7 @@ public static decimal? GetPropertyValueAsDecimal(this object source, string prop
 **Returns:** A decimal representation of the property value, or the default value
 
 **Example:**
+
 ```csharp
 var order = new { Total = "150.50" };
 decimal? total = order.GetPropertyValueAsDecimal("Total"); // 150.50
@@ -398,18 +440,21 @@ decimal? invalid = order.GetPropertyValueAsDecimal("NonExistent", 0); // 0
 Orders IQueryable results by a property name dynamically.
 
 **Syntax:**
+
 ```csharp
 public static IQueryable<TEntity> OrderByProperty<TEntity>(
-    this IQueryable<TEntity> source, 
-    string orderByProperty, 
+    this IQueryable<TEntity> source,
+    string orderByProperty,
     bool descending = false,
     bool ignoreNullValues = false)
 ```
 
 **Type Parameters:**
+
 - `TEntity`: The type of elements in the sequence
 
 **Parameters:**
+
 - `source` (IQueryable<TEntity>): The source queryable
 - `orderByProperty` (string): The property name to order by (case-insensitive for strings)
 - `descending` (bool, optional): Whether to sort in descending order
@@ -418,14 +463,17 @@ public static IQueryable<TEntity> OrderByProperty<TEntity>(
 **Returns:** An ordered IQueryable<TEntity>
 
 **Exceptions:**
+
 - `ArgumentException`: Thrown if the property doesn't exist on the entity type
 
 **Features:**
+
 - Case-insensitive sorting for string properties
 - Null value handling to push them to bottom of results
 - Supports multi-column sorting with comma-separated property names
 
 **Example:**
+
 ```csharp
 var customers = dbContext.Customers.AsQueryable();
 
@@ -454,23 +502,27 @@ var multiSort = customers.OrderByProperty("LastName,FirstName");
 Generates a cURL command string from an HttpRequestMessage.
 
 **Syntax:**
+
 ```csharp
 public static string GenerateCurlCommand(this HttpRequestMessage request, string url)
 ```
 
 **Parameters:**
+
 - `request` (HttpRequestMessage): The HTTP request message
 - `url` (string): The complete URL being requested
 
 **Returns:** A formatted cURL command string that can be copied to Postman or terminal
 
 **Features:**
+
 - Includes all headers
 - Properly escapes quotes in header values
 - Adds compression and insecure flags for testing
 - Ready to paste into terminal or Postman
 
 **Example:**
+
 ```csharp
 using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.example.com/users");
 request.Headers.Add("Authorization", "Bearer token123");
@@ -491,6 +543,7 @@ string curl = request.GenerateCurlCommand("https://api.example.com/users");
 Determines if the current environment is a test environment and updates the environment name to "Testing".
 
 **Syntax:**
+
 ```csharp
 // Overload 1: For IHostEnvironment
 public static bool IsTestEnvironment(this IHostEnvironment environment)
@@ -500,18 +553,22 @@ public static bool IsTestEnvironment(this IWebHostEnvironment environment)
 ```
 
 **Parameters:**
+
 - `environment` (IHostEnvironment/IWebHostEnvironment): The host environment
 
 **Returns:** True if the environment is a test environment, otherwise false
 
 **Recognized Test Environments:**
+
 - Environment name: "Testing" or "Test"
 - Application names: "ReSharperTestRunner" or "testHost"
 
 **Side Effect:**
+
 - Sets the environment name to "Testing" if a test environment is detected
 
 **Example:**
+
 ```csharp
 public void Configure(IHostEnvironment environment)
 {
@@ -535,6 +592,7 @@ public void Configure(IHostEnvironment environment)
 Bulk inserts a list of entities into the database asynchronously.
 
 **Syntax:**
+
 ```csharp
 public static async Task BulkInsertAsync<T>(
     this DbContext context,
@@ -546,9 +604,11 @@ public static async Task BulkInsertAsync<T>(
 ```
 
 **Type Parameters:**
+
 - `T`: The entity type to bulk insert
 
 **Parameters:**
+
 - `context` (DbContext): The database context
 - `itemsToInsert` (List<T>): The entities to insert
 - `cancellationToken` (CancellationToken): Cancellation token for the operation
@@ -556,12 +616,14 @@ public static async Task BulkInsertAsync<T>(
 - `converters` (Dictionary<string, Func<dynamic, dynamic>>, optional): Custom value converters
 
 **Features:**
+
 - Manages database connection automatically
 - Supports column type conversions for schema compatibility
 - Supports custom value converters
 - Asynchronous operation with cancellation support
 
 **Example:**
+
 ```csharp
 var customers = new List<Customer>
 {
@@ -586,6 +648,7 @@ await dbContext.BulkInsertAsync(
 Paginates EF Core query results with sorting, timeout support, and telemetry. Runs count and data queries in parallel for efficiency.
 
 **Syntax:**
+
 ```csharp
 // Basic pagination
 public static async Task<PaginatedResponseDto<TEntity>> ToPaginationResultsAsync<TEntity>(
@@ -605,10 +668,12 @@ public static async Task<PaginatedResponseDto<TResult>> ToPaginationResultsAsync
 ```
 
 **Type Parameters:**
+
 - `TEntity`: The database entity type
 - `TResult`: The result type (for mapping overload)
 
 **Parameters:**
+
 - `source` (IQueryable<TEntity>): The source query
 - `request` (PaginationRequestDto): Pagination request with Skip, Take, and optional SortBy
 - `mapper` (Func, optional): A function to transform/project entities to results
@@ -617,6 +682,7 @@ public static async Task<PaginatedResponseDto<TResult>> ToPaginationResultsAsync
 **Returns:** A PaginatedResponseDto<T> containing results, total count, and metadata
 
 **Features:**
+
 - Automatic parallel execution (count and data queries run simultaneously)
 - Dynamic sorting with type-safe validation
 - Query timeout with graceful degradation
@@ -625,6 +691,7 @@ public static async Task<PaginatedResponseDto<TResult>> ToPaginationResultsAsync
 - Support for both entity and mapped/projected results
 
 **Example:**
+
 ```csharp
 // Simple pagination
 var request = new PaginationRequestDto { Skip = 0, Take = 20 };
@@ -633,12 +700,12 @@ var result = await dbContext.Customers
     .ToPaginationResultsAsync(request);
 
 // With sorting
-var requestWithSort = new SortedPaginationRequestDto 
-{ 
-    Skip = 0, 
+var requestWithSort = new SortedPaginationRequestDto
+{
+    Skip = 0,
     Take = 20,
     SortBy = "LastName",
-    IsSortDescending = false 
+    IsSortDescending = false
 };
 var sorted = await dbContext.Customers.ToPaginationResultsAsync(requestWithSort);
 
@@ -654,9 +721,9 @@ var result = await dbContext.Customers
         }));
 
 // With timeout
-var timedRequest = new PaginationRequestDto 
-{ 
-    Skip = 0, 
+var timedRequest = new PaginationRequestDto
+{
+    Skip = 0,
     Take = 20,
     QueryTimeoutSeconds = 5
 };
@@ -675,6 +742,7 @@ var timedResult = await dbContext.Customers.ToPaginationResultsAsync(timedReques
 Configures default endpoints and services for a WebApplicationBuilder with comprehensive security, logging, and API documentation settings.
 
 **Syntax:**
+
 ```csharp
 public static WebApplicationBuilder ConfigureDefaultEndpoints(
     this WebApplicationBuilder builder,
@@ -692,6 +760,7 @@ public static WebApplicationBuilder ConfigureDefaultEndpoints(
 ```
 
 **Parameters:**
+
 - `builder` (WebApplicationBuilder): The builder to configure
 - `addOktaSecurity` (bool, optional): Enable Okta authentication
 - `meterNames` (string[], optional): Meter names for telemetry
@@ -708,6 +777,7 @@ public static WebApplicationBuilder ConfigureDefaultEndpoints(
 **Returns:** The configured WebApplicationBuilder
 
 **Configured Components:**
+
 - Kestrel HTTP/HTTPS settings
 - Authentication (JWT and optionally Okta)
 - Authorization and role-based permissions
@@ -721,6 +791,7 @@ public static WebApplicationBuilder ConfigureDefaultEndpoints(
 - API versioning
 
 **Example:**
+
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
@@ -747,6 +818,7 @@ var app = builder.Build();
 Converts an exception to an HTTP ProblemDetails response.
 
 **Syntax:**
+
 ```csharp
 // Overload 1: For general exceptions
 public static ProblemDetails ToProblemDetails(
@@ -767,6 +839,7 @@ public static ValidationProblemDetails ToProblemDetails(
 ```
 
 **Parameters:**
+
 - `ex` (Exception/ValidationException): The exception to convert
 - `title` (string, optional): Custom title (defaults to exception message)
 - `details` (string, optional): Additional details
@@ -777,6 +850,7 @@ public static ValidationProblemDetails ToProblemDetails(
 **Returns:** ProblemDetails or ValidationProblemDetails
 
 **Default Status Code Mapping:**
+
 - ValidationException → 400 (Bad Request)
 - ArgumentException → 400 (Bad Request)
 - KeyNotFoundException → 404 (Not Found)
@@ -787,6 +861,7 @@ public static ValidationProblemDetails ToProblemDetails(
 - All others → 500 (Internal Server Error)
 
 **Example:**
+
 ```csharp
 try
 {
@@ -797,7 +872,7 @@ catch (ValidationException ex)
     var problemDetails = ex.ToProblemDetails(
         title: "Validation Failed",
         instance: "/api/customers");
-    
+
     return BadRequest(problemDetails);
 }
 ```
@@ -814,21 +889,25 @@ catch (ValidationException ex)
 Adds custom middleware to the request pipeline including server timing and version headers.
 
 **Syntax:**
+
 ```csharp
 public static IApplicationBuilder UseCommonMiddleware(this IApplicationBuilder builder)
 ```
 
 **Parameters:**
+
 - `builder` (IApplicationBuilder): The application builder
 
 **Returns:** The configured IApplicationBuilder
 
 **Middleware Added:**
+
 - Status code pages middleware
 - Server timing middleware (for performance metrics)
 - Version middleware (adds version header to responses)
 
 **Example:**
+
 ```csharp
 var app = builder.Build();
 
@@ -850,6 +929,7 @@ app.Run();
 Adds Swagger/OpenAPI documentation to a WebApplicationBuilder with comprehensive configuration options.
 
 **Syntax:**
+
 ```csharp
 public static WebApplicationBuilder AddSwagger(
     this WebApplicationBuilder builder,
@@ -866,6 +946,7 @@ public static WebApplicationBuilder AddSwagger(
 ```
 
 **Parameters:**
+
 - `builder` (WebApplicationBuilder): The builder to configure
 - `version` (int, optional): API version (default: 1)
 - `title` (string, optional): API title
@@ -879,6 +960,7 @@ public static WebApplicationBuilder AddSwagger(
 - `logger` (ILogger, optional): Logger for registration info
 
 **Features:**
+
 - Generates description from app name, environment, and build number
 - Configures API versioning if version > 1
 - JWT Bearer authentication setup
@@ -887,6 +969,7 @@ public static WebApplicationBuilder AddSwagger(
 - Tag case and schema customization
 
 **Example:**
+
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
@@ -894,8 +977,8 @@ builder.AddSwagger(
     version: 2,
     title: "Customer API",
     description: "API for managing customers",
-    contactDetails: new ContactDetails 
-    { 
+    contactDetails: new ContactDetails
+    {
         Name = "Support Team",
         Email = "support@example.com"
     },
@@ -918,11 +1001,13 @@ var app = builder.Build();
 Converts System.Drawing.Color to QuestPDF color with special handling for black.
 
 **Syntax:**
+
 ```csharp
 internal static QColor GetQuestColor(this Color color)
 ```
 
 **Parameters:**
+
 - `color` (Color): The System.Drawing.Color to convert
 
 **Returns:** A QuestPDF Color (QColor)
@@ -930,6 +1015,7 @@ internal static QColor GetQuestColor(this Color color)
 **Note:** Special handling for black color due to QuestPDF's color handling quirks.
 
 **Example:**
+
 ```csharp
 Color drawingColor = Color.Black;
 QColor questColor = drawingColor.GetQuestColor();
@@ -942,6 +1028,7 @@ QColor questColor = drawingColor.GetQuestColor();
 Adds a standardized Demoulas header to a PDF document container.
 
 **Syntax:**
+
 ```csharp
 public static void AddDemoulasHeader(
     this IContainer container,
@@ -952,6 +1039,7 @@ public static void AddDemoulasHeader(
 ```
 
 **Parameters:**
+
 - `container` (IContainer): The PDF container
 - `title` (string): The header title (displayed in center)
 - `leftHeaderString` (string, optional): Text for left column
@@ -959,12 +1047,14 @@ public static void AddDemoulasHeader(
 - `showPageNumber` (bool, optional): Show page number in right column
 
 **Features:**
+
 - Three-column header layout
 - Black borders on header row
 - Optional page numbering
 - Configurable left/right header text
 
 **Example:**
+
 ```csharp
 container.AddDemoulasHeader(
     title: "Invoice Report",
@@ -980,15 +1070,18 @@ container.AddDemoulasHeader(
 Adds a standardized centered title to the document container.
 
 **Syntax:**
+
 ```csharp
 public static void AddDemoulasTitle(this IContainer container, string title)
 ```
 
 **Parameters:**
+
 - `container` (IContainer): The PDF container
 - `title` (string): The title text to display
 
 **Example:**
+
 ```csharp
 container.AddDemoulasTitle("Quarterly Report");
 ```
@@ -1000,14 +1093,17 @@ container.AddDemoulasTitle("Quarterly Report");
 Adds default 0.635 cm (1/4 inch) margin to all sides of the page.
 
 **Syntax:**
+
 ```csharp
 public static void AddDefaultMargin(this PageDescriptor pageDescriptor)
 ```
 
 **Parameters:**
+
 - `pageDescriptor` (PageDescriptor): The page descriptor to configure
 
 **Example:**
+
 ```csharp
 page.AddDefaultMargin();
 ```
@@ -1019,20 +1115,24 @@ page.AddDefaultMargin();
 Applies default page configurations including size, color, text style, and margins.
 
 **Syntax:**
+
 ```csharp
 public static void AddPageDefaults(this PageDescriptor pageDescriptor)
 ```
 
 **Parameters:**
+
 - `pageDescriptor` (PageDescriptor): The page descriptor to configure
 
 **Default Settings:**
+
 - Page size: Letter (portrait)
 - Page color: White
 - Text style: Default Demoulas style
 - Margins: 0.635 cm on all sides
 
 **Example:**
+
 ```csharp
 page.AddPageDefaults();
 ```

@@ -14,7 +14,7 @@ import { LookupsApi } from "./api/LookupsApi";
 import { MilitaryApi } from "./api/MilitaryApi";
 import { NavigationApi } from "./api/NavigationApi";
 import { NavigationStatusApi } from "./api/NavigationStatusApi";
-import { PayServicesApi } from "./api/PayServicesApi";
+import { ProfitDetailsApi } from "./api/ProfitDetailsApi";
 import { SecurityApi } from "./api/SecurityApi";
 import { validationApi } from "./api/ValidationApi";
 import { YearsEndApi } from "./api/YearsEndApi";
@@ -51,8 +51,8 @@ const API_INSTANCES = [
   NavigationStatusApi,
   BeneficiariesApi,
   AdjustmentsApi,
+  ProfitDetailsApi,
   DistributionApi,
-  PayServicesApi,
   validationApi
 ] as const;
 

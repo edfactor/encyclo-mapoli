@@ -1,6 +1,6 @@
 import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { PayBenReportResponse } from "../../../types";
@@ -54,7 +54,7 @@ const PayBenReportGrid = ({
       {showData && data?.results && (
         <div ref={innerRef}>
           <DSMGrid
-            preferenceKey={CAPTIONS.PAYBEN_REPORT}
+            preferenceKey={GRID_KEYS.PAY_BEN_REPORT}
             isLoading={isLoading}
             maxHeight={gridMaxHeight}
             handleSortChanged={handleSortChanged}

@@ -14,7 +14,7 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ record, onClose }) 
       onClose={onClose}
       maxWidth="sm"
       fullWidth>
-      <DialogTitle>Demographic Sync Audit Details</DialogTitle>
+      <DialogTitle>Demographic Sync Errors Details</DialogTitle>
       <DialogContent>
         <Box sx={{ paddingTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
           {/* Badge Number */}

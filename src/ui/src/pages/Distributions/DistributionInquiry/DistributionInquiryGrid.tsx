@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { DistributionSearchResponse } from "../../../types";
@@ -24,6 +24,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.DISTRIBUTION_INQUIRY,
     onPaginationChange: useCallback(
       async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         onPaginationChange(pageNum, pageSz, sortPrms);
@@ -75,7 +76,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
       </div>
 
       <DSMGrid
-        preferenceKey={CAPTIONS.DISTRIBUTIONS_INQUIRY}
+        preferenceKey={GRID_KEYS.DISTRIBUTION_INQUIRY}
         isLoading={isLoading}
         handleSortChanged={handleSortChange}
         maxHeight={gridMaxHeight}

@@ -2,7 +2,7 @@ import { Box, Button, Divider, Grid, Typography } from "@mui/material";
 import { CellValueChangedEvent, ColDef, ValueFormatterParams, ValueParserParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { useGetAnnuityRatesQuery, useUpdateAnnuityRateMutation } from "../../../reduxstore/api/ItOperationsApi";
 import { AnnuityRateDto } from "../../../reduxstore/types";
@@ -25,7 +25,7 @@ const getRowKey = (row: Pick<AnnuityRateDto, "year" | "age">): string => {
 };
 
 const ManageAnnuityRates = () => {
-  const { data, isFetching, refetch } = useGetAnnuityRatesQuery();
+  const { data, isFetching, refetch } = useGetAnnuityRatesQuery({ sortBy: "Year", isSortDescending: true });
   const [updateAnnuityRate, { isLoading: isSaving }] = useUpdateAnnuityRateMutation();
 
   const [rowData, setRowData] = useState<AnnuityRateDto[]>([]);
@@ -248,7 +248,7 @@ const ManageAnnuityRates = () => {
 
         <Grid width="100%">
           <DSMGrid
-            preferenceKey={CAPTIONS.MANAGE_ANNUITY_RATES}
+            preferenceKey={GRID_KEYS.MANAGE_ANNUITY_RATES}
             isLoading={isFetching || isSaving}
             providedOptions={{
               rowData,
@@ -257,7 +257,7 @@ const ManageAnnuityRates = () => {
               stopEditingWhenCellsLoseFocus: true,
               enterNavigatesVertically: true,
               enterNavigatesVerticallyAfterEdit: true,
-              onCellValueChanged
+              onCellValueChanged,
             }}
           />
         </Grid>

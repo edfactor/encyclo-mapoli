@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -35,8 +37,8 @@ public sealed class DtoNamePropertyAnalyzer : DiagnosticAnalyzer
         description: Description);
 
     // Property names that indicate a person's name but use non-standard naming
-    // Note: "Name" alone is NOT included - it's too generic and used for many legitimate purposes
-    // (e.g., DepartmentName, BeneficiaryTypeName, etc.)
+    // Note: "Name" alone is generally too generic; we only flag it in Contracts DTOs where it is
+    // commonly (mis)used as a person's display name and should be `FullName`.
     private static readonly HashSet<string> NonStandardPersonNameProperties = new(StringComparer.Ordinal)
     {
         "EmployeeName",   // Should be FullName
@@ -85,12 +87,15 @@ public sealed class DtoNamePropertyAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        var isContractsResponseDto = IsContractsResponse(typeDecl);
+        var hasPersonSignals = HasPersonDetailSignals(typeDecl);
+
         // Check all properties in the type
         foreach (var member in typeDecl.Members)
         {
             if (member is PropertyDeclarationSyntax property)
             {
-                AnalyzeProperty(context, property, typeName);
+                AnalyzeProperty(context, property, typeName, isContractsResponseDto, hasPersonSignals);
             }
         }
 
@@ -121,12 +126,19 @@ public sealed class DtoNamePropertyAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeProperty(
         SyntaxNodeAnalysisContext context,
         PropertyDeclarationSyntax property,
-        string typeName)
+        string typeName,
+        bool isContractsResponseDto,
+        bool hasPersonSignals)
     {
         var propertyName = property.Identifier.Text;
 
-        // Only flag non-standard person name properties
-        if (!NonStandardPersonNameProperties.Contains(propertyName))
+        var isNonStandard = NonStandardPersonNameProperties.Contains(propertyName);
+        // 'Name' is allowed for lookup/reference DTOs. Only flag it when the DTO also contains
+        // other strong signals that it's representing a person (SSN/DOB/Age/FirstName/LastName/etc.).
+        var isGenericNameInContractsDto = isContractsResponseDto && propertyName == "Name" && hasPersonSignals;
+
+        // Only flag non-standard person name properties (and "Name" in Contracts DTOs)
+        if (!(isNonStandard || isGenericNameInContractsDto))
         {
             return;
         }
@@ -141,11 +153,40 @@ public sealed class DtoNamePropertyAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(diagnostic);
     }
 
+    private static bool IsContractsResponse(TypeDeclarationSyntax typeDecl)
+    {
+        var ns = typeDecl.FirstAncestorOrSelf<NamespaceDeclarationSyntax>()?.Name.ToString()
+                 ?? typeDecl.FirstAncestorOrSelf<FileScopedNamespaceDeclarationSyntax>()?.Name.ToString();
+
+        return ns is not null
+               && ns.Contains("Contracts.Response", StringComparison.Ordinal);
+    }
+
     private static bool IsPersonRelatedDto(string typeName)
     {
         // Check if the type name contains any person-related indicators
         return PersonTypeIndicators.Any(indicator =>
             typeName.IndexOf(indicator, StringComparison.OrdinalIgnoreCase) >= 0);
+    }
+
+    private static bool HasPersonDetailSignals(TypeDeclarationSyntax typeDecl)
+    {
+        // Heuristic: treat 'Name' as a person display name only when the DTO also carries other
+        // person details (PII/identity/name parts). This avoids flagging lookup DTOs like
+        // EmployeeTypeResponseDto { Name = "Part Time" }.
+        var memberNames = new HashSet<string>(
+            typeDecl.Members
+                .OfType<PropertyDeclarationSyntax>()
+                .Select(p => p.Identifier.Text),
+            StringComparer.Ordinal);
+
+        return memberNames.Contains("Ssn")
+               || memberNames.Contains("DateOfBirth")
+               || memberNames.Contains("Age")
+               || memberNames.Contains("FirstName")
+               || memberNames.Contains("LastName")
+               || memberNames.Contains("MiddleName")
+               || memberNames.Contains("BadgeNumber");
     }
 
     private static bool IsStringType(SyntaxNodeAnalysisContext context, TypeSyntax? typeSyntax)

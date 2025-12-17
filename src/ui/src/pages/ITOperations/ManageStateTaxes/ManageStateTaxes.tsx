@@ -2,7 +2,7 @@ import { Box, Button, Divider, Grid, Typography } from "@mui/material";
 import { CellValueChangedEvent, ColDef, ValueFormatterParams, ValueParserParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { useGetStateTaxRatesQuery, useUpdateStateTaxRateMutation } from "../../../reduxstore/api/ItOperationsApi";
 import { StateTaxRateDto } from "../../../reduxstore/types";
@@ -190,7 +190,7 @@ const ManageStateTaxes = () => {
 
         <Grid width="100%">
           <DSMGrid
-            preferenceKey={CAPTIONS.MANAGE_STATE_TAX_RATES}
+            preferenceKey={GRID_KEYS.MANAGE_STATE_TAX_RATES}
             isLoading={isFetching || isSaving}
             providedOptions={{
               rowData,

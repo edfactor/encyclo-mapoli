@@ -12,8 +12,8 @@ definitions:
     uat_app_server: &uat_app_server "appt24d"
 
   steps:
-    build-and-test-backend: &build-and-test-backend
-      name: Build and Test Backend API
+    build-and-test-backend-unit: &build-and-test-backend-unit
+      name: Build and Test Backend API (UnitTests)
       runs-on:
         - windows
         - self.hosted
@@ -21,7 +21,7 @@ definitions:
         # Set environment variables
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
 
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
@@ -55,6 +55,57 @@ definitions:
         # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
         # VSTest is no longer supported - must run the executable directly
         - echo "Running unit tests..."
+        - |
+          $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
+          Write-Host "Executing test runner: $testExe"
+          & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+
+      artifacts:
+        - test-reports/**
+
+    build-and-test-backend-architecture: &build-and-test-backend-architecture
+      name: Build and Test Backend API (Architecture)
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        # Set environment variables
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
+        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/architecture-tests"
+
+        # Ensure the REPORTS_PATH directory exists
+        - mkdir -Force -Path $env:REPORTS_PATH
+
+        # Verify required .NET SDK is available (do not attempt installation)
+        - echo "Checking for required .NET SDK version..."
+        - |
+          $dotnetSdkList = dotnet --list-sdks;
+          Write-Output "Installed .NET SDKs:";
+          Write-Output $dotnetSdkList;
+
+          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+          if (-not $dotnetSdkRequired) {
+              Write-Error "FAILED: .NET 10 SDK is required but not available.";
+              Write-Error "Please ensure .NET 10 SDK is installed on the build agent.";
+              exit 1;
+          }
+
+        # Clean any previous build artifacts to ensure deterministic builds
+        - echo "Cleaning previous build artifacts..."
+        - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+
+        # Restore packages explicitly
+        - echo "Restoring NuGet packages..."
+        - dotnet restore src/services/Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+
+        # Build without incremental compilation to avoid stale artifacts
+        - echo "Building solution..."
+        - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
+
+        # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
+        # VSTest is no longer supported - must run the executable directly
+        - echo "Running architecture tests..."
         - |
           $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
           Write-Host "Executing test runner: $testExe"
@@ -742,11 +793,18 @@ pipelines:
   branches:
     release:
       # Stage 1: Build and test
+             # Stage 1: Code quality checks (fail fast)
+      - step: *frontend-lint
+      # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
-          - step: *build-and-test-backend
-          - step: *test-frontend
           - step: *audit-frontend
           - step: *audit-backend
+          - step: *secret-scan
+      # Stage 3: Build and test
+      - parallel:
+          - step: *build-and-test-backend-unit
+          - step: *build-and-test-backend-architecture
+          - step: *test-frontend     
       # Stage 2: Generate build information (Windows, ~30 seconds)
       - step: *generate-buildinfo
       # Stage 3: Create artifacts (API/services on Windows, UI builds in parallel on cloud)
@@ -880,11 +938,18 @@ pipelines:
       - step: *uat-validate-import
 
     develop:
+      # Stage 1: Code quality checks (fail fast)
+      - step: *frontend-lint
+      # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
-          - step: *build-and-test-backend
-          - step: *test-frontend
           - step: *audit-frontend
           - step: *audit-backend
+          - step: *secret-scan
+      # Stage 3: Build and test
+      - parallel:
+          - step: *build-and-test-backend-unit
+          - step: *build-and-test-backend-architecture
+          - step: *test-frontend         
 
   pull-requests:
     "**":
@@ -895,9 +960,10 @@ pipelines:
           - step: *audit-frontend
           - step: *audit-backend
           - step: *secret-scan
-   # Stage 3: Build and test
+      # Stage 3: Build and test
       - parallel:
-          - step: *build-and-test-backend
+          - step: *build-and-test-backend-unit
+          - step: *build-and-test-backend-architecture
           - step: *test-frontend
 
   custom:

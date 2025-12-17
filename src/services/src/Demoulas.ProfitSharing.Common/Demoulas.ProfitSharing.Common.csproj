@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <Compile Remove="Telemetry\CacheTelemetryWrapper.cs" />
     <Compile Remove="Contracts\InternalDto\**" />
     <EmbeddedResource Remove="Contracts\InternalDto\**" />
     <None Remove="Contracts\InternalDto\**" />

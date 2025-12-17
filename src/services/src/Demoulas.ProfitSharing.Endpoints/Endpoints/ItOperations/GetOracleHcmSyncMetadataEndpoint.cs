@@ -51,7 +51,7 @@ public class GetOracleHcmSyncMetadataEndpoint
                 }
             };
         });
-        Group<ItDevOpsGroup>();
+        Group<AdministrationGroup>();
     }
 
     public override Task<Results<Ok<OracleHcmSyncMetadataResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(

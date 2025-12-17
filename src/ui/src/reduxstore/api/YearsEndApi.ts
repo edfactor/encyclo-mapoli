@@ -282,10 +282,10 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending,
+          Take: params.pagination.take,
+          Skip: params.pagination.skip,
+          SortBy: params.pagination.sortBy,
+          IsSortDescending: params.pagination.isSortDescending,
           minGrossAmount: params.minGrossAmount
         }
       }),
@@ -294,7 +294,7 @@ export const YearsEndApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setGrossWagesReport(data));
         } catch (err) {
-          console.log("Err: " + err);
+          console.error("Error fetching Gross Wages Report:", err);
         }
       }
     }),

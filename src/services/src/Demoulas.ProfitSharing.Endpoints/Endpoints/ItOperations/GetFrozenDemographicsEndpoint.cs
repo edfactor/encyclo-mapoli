@@ -51,7 +51,7 @@ public class GetFrozenDemographicsEndpoint : ProfitSharingEndpoint<SortedPaginat
                 }
             };
         });
-        Group<ItDevOpsAllUsersGroup>();
+        Group<ItDevOpsGroup>();
 
         // Output caching: Frozen demographics are immutable snapshots - excellent caching candidate  
         // Cache disabled in test environments to ensure test data freshness
