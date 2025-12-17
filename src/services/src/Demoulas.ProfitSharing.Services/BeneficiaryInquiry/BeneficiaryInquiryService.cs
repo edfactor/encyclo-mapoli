@@ -93,16 +93,16 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             Ssn = x.Ssn.ToString().MaskSsn(),
             Age = x.DateOfBirth.Age(),
             BadgeNumber = x.BadgeNumber,
+            PsnSuffix = 0, // Employees don't have PsnSuffix
             City = x.AddressCity,
             FullName = x.FullName,
             State = x.AddressState,
             Street = x.Address,
             Zip = x.AddressZipCode
-        });
+        }).AsQueryable();
 
-        // Use AsQueryable to work with ToPaginationResultsAsync extension
-        // Note: Data is already in memory from _masterInquiryService call
-        return await mapped.AsQueryable().ToPaginationResultsAsync(request, cancellationToken);
+        // Use ToPaginationResultsAsync with in-memory queryable
+        return await mapped.ToPaginationResultsAsync(request, cancellationToken);
     }
 
     private IQueryable<BeneficiarySearchFilterRow> GetBeneficiaryQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)

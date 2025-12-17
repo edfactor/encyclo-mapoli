@@ -32,7 +32,7 @@ const BeneficiaryInquiryContent = () => {
   const { addAlert, clearAlerts, missiveAlerts } = useMissiveAlerts();
 
   // Use custom hook for pagination and sort state
-  const search = useBeneficiarySearch({ defaultPageSize: 10, defaultSortBy: "name" });
+  const search = useBeneficiarySearch({ defaultPageSize: 10, defaultSortBy: "FullName" });
 
   // Set distribution home when component mounts
   useEffect(() => {

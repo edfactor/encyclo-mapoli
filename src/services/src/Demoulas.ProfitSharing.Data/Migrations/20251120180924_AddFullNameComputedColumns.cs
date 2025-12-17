@@ -25,7 +25,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             // DEMOGRAPHIC.FULL_NAME
             migrationBuilder.Sql(@"
-                ALTER TABLE DEMOGRAPHIC DROP COLUMN FULL_NAME");
+                BEGIN
+                    EXECUTE IMMEDIATE 'ALTER TABLE DEMOGRAPHIC DROP COLUMN FULL_NAME';
+                EXCEPTION
+                    WHEN OTHERS THEN
+                        IF SQLCODE != -904 THEN -- ORA-00904: invalid identifier (column doesn't exist)
+                            RAISE;
+                        END IF;
+                END;");
 
             migrationBuilder.Sql(@"
                 ALTER TABLE DEMOGRAPHIC ADD (
@@ -35,7 +42,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             // BENEFICIARY_CONTACT_ARCHIVE.FULL_NAME
             migrationBuilder.Sql(@"
-                ALTER TABLE BENEFICIARY_CONTACT_ARCHIVE DROP COLUMN FULL_NAME");
+                BEGIN
+                    EXECUTE IMMEDIATE 'ALTER TABLE BENEFICIARY_CONTACT_ARCHIVE DROP COLUMN FULL_NAME';
+                EXCEPTION
+                    WHEN OTHERS THEN
+                        IF SQLCODE != -904 THEN -- ORA-00904: invalid identifier (column doesn't exist)
+                            RAISE;
+                        END IF;
+                END;");
 
             migrationBuilder.Sql(@"
                 ALTER TABLE BENEFICIARY_CONTACT_ARCHIVE ADD (
@@ -45,7 +59,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             // BENEFICIARY_CONTACT.FULL_NAME
             migrationBuilder.Sql(@"
-                ALTER TABLE BENEFICIARY_CONTACT DROP COLUMN FULL_NAME");
+                BEGIN
+                    EXECUTE IMMEDIATE 'ALTER TABLE BENEFICIARY_CONTACT DROP COLUMN FULL_NAME';
+                EXCEPTION
+                    WHEN OTHERS THEN
+                        IF SQLCODE != -904 THEN -- ORA-00904: invalid identifier (column doesn't exist)
+                            RAISE;
+                        END IF;
+                END;");
 
             migrationBuilder.Sql(@"
                 ALTER TABLE BENEFICIARY_CONTACT ADD (
@@ -71,7 +92,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             // DEMOGRAPHIC.FULL_NAME
             migrationBuilder.Sql(@"
-                ALTER TABLE DEMOGRAPHIC DROP COLUMN FULL_NAME");
+                BEGIN
+                    EXECUTE IMMEDIATE 'ALTER TABLE DEMOGRAPHIC DROP COLUMN FULL_NAME';
+                EXCEPTION
+                    WHEN OTHERS THEN
+                        IF SQLCODE != -904 THEN -- ORA-00904: invalid identifier (column doesn't exist)
+                            RAISE;
+                        END IF;
+                END;");
 
             migrationBuilder.Sql(@"
                 ALTER TABLE DEMOGRAPHIC ADD (
@@ -81,7 +109,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             // BENEFICIARY_CONTACT_ARCHIVE.FULL_NAME
             migrationBuilder.Sql(@"
-                ALTER TABLE BENEFICIARY_CONTACT_ARCHIVE DROP COLUMN FULL_NAME");
+                BEGIN
+                    EXECUTE IMMEDIATE 'ALTER TABLE BENEFICIARY_CONTACT_ARCHIVE DROP COLUMN FULL_NAME';
+                EXCEPTION
+                    WHEN OTHERS THEN
+                        IF SQLCODE != -904 THEN -- ORA-00904: invalid identifier (column doesn't exist)
+                            RAISE;
+                        END IF;
+                END;");
 
             migrationBuilder.Sql(@"
                 ALTER TABLE BENEFICIARY_CONTACT_ARCHIVE ADD (
@@ -91,7 +126,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             // BENEFICIARY_CONTACT.FULL_NAME
             migrationBuilder.Sql(@"
-                ALTER TABLE BENEFICIARY_CONTACT DROP COLUMN FULL_NAME");
+                BEGIN
+                    EXECUTE IMMEDIATE 'ALTER TABLE BENEFICIARY_CONTACT DROP COLUMN FULL_NAME';
+                EXCEPTION
+                    WHEN OTHERS THEN
+                        IF SQLCODE != -904 THEN -- ORA-00904: invalid identifier (column doesn't exist)
+                            RAISE;
+                        END IF;
+                END;");
 
             migrationBuilder.Sql(@"
                 ALTER TABLE BENEFICIARY_CONTACT ADD (
