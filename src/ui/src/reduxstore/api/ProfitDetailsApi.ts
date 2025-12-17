@@ -19,7 +19,7 @@ export const ProfitDetailsApi = createApi({
   endpoints: (builder) => ({
     getProfitSharingAdjustments: builder.query<GetProfitSharingAdjustmentsResponse, GetProfitSharingAdjustmentsRequest>({
       query: (params) => ({
-        url: "administration/adjustments",
+          url: "adjustments",
         method: "GET",
         params
       }),
@@ -35,7 +35,7 @@ export const ProfitDetailsApi = createApi({
       SaveProfitSharingAdjustmentsRequest
     >({
       query: (body) => ({
-        url: "administration/adjustments",
+          url: "adjustments",
         method: "POST",
         body
       }),

@@ -4,15 +4,15 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Endpoints.Validation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ProfitDetails;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Adjustments;
 
 public sealed class SaveProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint<SaveProfitSharingAdjustmentsRequest, Results<Ok<GetProfitSharingAdjustmentsResponse>, NotFound, ProblemHttpResult>>
 {
@@ -29,8 +29,8 @@ public sealed class SaveProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint
 
     public override void Configure()
     {
-        Post("/adjustments");
-        Group<AdministrationGroup>();
+        Post("/");
+        Group<AdjustmentsGroup>();
         Validator<SaveProfitSharingAdjustmentsRequestValidator>();
 
         Summary(s =>
