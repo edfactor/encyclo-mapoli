@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetEligibleEmployeesQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { setEligibleEmployeesQueryParams } from "../../../../reduxstore/slices/yearsEndSlice";
@@ -61,6 +62,7 @@ const useEligibleEmployees = () => {
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.ELIGIBLE_EMPLOYEES,
     onPaginationChange: handlePaginationChange
   });
 

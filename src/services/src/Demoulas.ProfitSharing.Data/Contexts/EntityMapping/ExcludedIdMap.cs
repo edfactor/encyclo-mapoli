@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class ExcludedIdMap : IEntityTypeConfiguration<ExcludedId>
 {
     public void Configure(EntityTypeBuilder<ExcludedId> builder)

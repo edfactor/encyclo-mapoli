@@ -16,7 +16,7 @@ internal static class TimingHelper
         var duration = sw.ElapsedMilliseconds;
         return (result, duration);
     }
-    
+
     public static async Task<(T Result, long DurationMs)> TimeAndLogAsync<T>(
         this ILogger logger,
         string operationName,
@@ -24,17 +24,17 @@ internal static class TimingHelper
         Func<T, int>? getCount = null)
     {
         var (result, duration) = await TimeAsync(operation);
-        
+
         if (getCount != null)
         {
-            logger.LogInformation("{Name} completed in {DurationMs:F2}ms with {RecordCount} entries", 
+            logger.LogInformation("{Name} completed in {DurationMs:F2}ms with {RecordCount} entries",
                 operationName, duration, getCount(result));
         }
         else
         {
             logger.LogInformation("{Name} completed in {DurationMs:F2}ms", operationName, duration);
         }
-        
+
         return (result, duration);
     }
 }

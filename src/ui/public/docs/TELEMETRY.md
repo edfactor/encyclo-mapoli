@@ -7,7 +7,7 @@ This document describes the telemetry and metrics implementation added to the Pr
 The telemetry system provides comprehensive monitoring and observability for the application while protecting sensitive data. It includes:
 
 - **Performance monitoring** with request duration and response size tracking
-- **Error tracking** by type and endpoint category  
+- **Error tracking** by type and endpoint category
 - **User access patterns** (by role, not individual users)
 - **Sensitive field access** monitoring (configurable)
 - **Large response detection** and alerting
@@ -57,16 +57,19 @@ The telemetry system provides comprehensive monitoring and observability for the
 ## Metrics Captured
 
 ### Request Metrics
+
 - `ps_endpoint_requests_total` - Total endpoint requests by category, method, status, user role
 - `ps_endpoint_duration_seconds` - Request duration histogram
 - `ps_response_size_bytes` - Response size histogram
 
-### Security & Monitoring Metrics  
+### Security & Monitoring Metrics
+
 - `ps_sensitive_field_access_total` - Sensitive field access counts (when enabled)
 - `ps_large_responses_total` - Large response counter
 - `ps_endpoint_errors_total` - Error counter by type and category
 
 ### Endpoint Categories (Low Cardinality)
+
 - `demographics` - Demographics endpoints
 - `beneficiaries` - Beneficiary management
 - `reports` - Reporting endpoints
@@ -78,12 +81,14 @@ The telemetry system provides comprehensive monitoring and observability for the
 ## Logging and Tracing
 
 ### Structured Logging
+
 - Correlation IDs for request tracking
 - Masked sensitive data (SSNs, user IDs)
 - Error details with context
 - Performance metrics
 
 ### Example Log Entry
+
 ```json
 {
   "timestamp": "2025-01-20T10:30:45.123Z",
@@ -97,6 +102,7 @@ The telemetry system provides comprehensive monitoring and observability for the
 ```
 
 ### Distributed Tracing
+
 - Activity source: `demoulas.profitsharing`
 - Operation tags: `operation`, `success`, `error_type`
 - Masked sensitive data in tags
@@ -105,12 +111,14 @@ The telemetry system provides comprehensive monitoring and observability for the
 ## Security & Privacy
 
 ### Data Protection
+
 - **SSN masking**: Only first 3 digits + hash shown in telemetry
 - **User ID masking**: First 3 chars + hash for correlation
 - **No PII in metrics**: Only role-based aggregation
 - **Configurable sensitive tracking**: Disabled by default in production
 
 ### Example Masked Data
+
 - SSN `123456789` → `123***A1B2C3D4` (in logs/traces)
 - User ID `john.doe@company.com` → `joh***A1B2C3D4` (in traces)
 
@@ -131,11 +139,11 @@ public override async Task<Results<Ok<Response>, NotFound, ProblemHttpResult>> E
         _logger.LogInformation("Starting operation for entity {EntityId}", req.Id);
 
         var result = await _service.DoOperation(req, ct);
-        
+
         _logger.LogInformation("Successfully completed operation with ID {ResultId}", result.Id);
         activity?.SetTag("result_id", result.Id.ToString());
         activity?.SetTag("success", true);
-        
+
         return TypedResults.Ok(result);
     }
     catch (InvalidOperationException ex) when (ex.Message.Contains("Entity not found"))
@@ -175,11 +183,13 @@ EndpointTelemetry.EndpointErrorsTotal.Add(1,
 ### Recommended Alerts
 
 #### Performance Alerts
+
 - High request duration (95th percentile > 5 seconds)
 - Large response threshold exceeded (> 5MB responses)
 - Error rate spike (> 5% errors in 5 minutes)
 
-#### Security Alerts  
+#### Security Alerts
+
 - Excessive sensitive field access (when enabled)
 - Unusual access patterns by user role
 - High volume of failed requests from single user
@@ -193,7 +203,7 @@ rate(ps_endpoint_errors_total[5m]) > 0.05
 # Large responses
 increase(ps_large_responses_total[10m]) > 5
 
-# Slow requests  
+# Slow requests
 histogram_quantile(0.95, rate(ps_endpoint_duration_seconds_bucket[5m])) > 5
 
 # Sensitive field access spike (when enabled)
@@ -203,12 +213,14 @@ increase(ps_sensitive_field_access_total[1h]) > 100
 ## Development vs Production
 
 ### Development Environment
+
 - Higher trace sampling rate (0.5)
 - Sensitive field tracking enabled
 - Lower large response threshold (1MB)
 - Detailed logging enabled
 
-### Production Environment  
+### Production Environment
+
 - Conservative trace sampling (0.1)
 - Sensitive field tracking disabled by default
 - Higher large response threshold (5MB)
@@ -240,7 +252,7 @@ The telemetry configuration is validated at startup. Invalid configurations will
 ## Future Enhancements
 
 - Integration with APM platforms (DataDog, New Relic)
-- Custom dashboards and visualizations  
+- Custom dashboards and visualizations
 - Machine learning-based anomaly detection
 - Enhanced security telemetry and threat detection
 - Performance optimization recommendations

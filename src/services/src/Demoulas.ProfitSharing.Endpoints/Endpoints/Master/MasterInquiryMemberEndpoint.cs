@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
@@ -45,7 +44,7 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
                         IsEmployee = true,
                         BadgeNumber = 12345,
                         PsnSuffix = 1,
-                        Ssn = "123456789",
+                        Ssn = "123456789".MaskSsn(),
                         FirstName = "John",
                         MiddleName = "J",
                         LastName = "Doe",

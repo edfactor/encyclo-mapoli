@@ -4,8 +4,8 @@ import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DSMGrid, Pagination, SmartModal } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { CAPTIONS } from "../../../constants";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { ExecutiveHoursAndDollars, PagedReportResponse } from "../../../reduxstore/types";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
@@ -112,7 +112,9 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   const currentData = isModal ? modalResults : gridData;
   const currentPagination = isModal ? modalGridPagination : mainGridPagination;
   const sortEventHandler = currentPagination?.handleSortChange;
-  const gridMaxHeight = useDynamicGridHeight();
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: currentData?.response?.results?.length ?? 0
+  });
   // Pass canEdit to column definitions - editing requires page status "In Progress" AND ExecutiveAdministrator role
   const columnDefs = useMemo(
     () => GetManageExecutiveHoursAndDollarsColumns({ mini: isModal, canEdit }),
@@ -258,7 +260,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           </>
         )}
         <DSMGrid
-          preferenceKey={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
+          preferenceKey={GRID_KEYS.MANAGE_EXECUTIVE_HOURS}
           isLoading={isSearching}
           handleSortChanged={sortEventHandler}
           maxHeight={gridMaxHeight}

@@ -74,7 +74,6 @@ src/ui/src/pages/
 │   ├── PayBeNext/
 │   ├── PayBenReport/
 │   ├── QPAY066AdHocReports/
-│   ├── QPAY600/
 │   ├── RecentlyTerminated/
 │   └── TerminatedLetters/
 └── Unauthorized/             # Unauthorized access page
@@ -108,9 +107,7 @@ const Profall = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.PROFALL}
-      actionNode={renderActionNode()}>
+    <Page label={CAPTIONS.PROFALL} actionNode={renderActionNode()}>
       <Grid container rowSpacing="24px">
         <Grid width="100%">
           <Divider />
@@ -128,6 +125,7 @@ const Profall = () => {
 ```
 
 **Key Characteristics**:
+
 - Wraps content in `<Page>` component from `smart-ui-library`
 - Provides `label` (page title) and optional `actionNode` (usually StatusDropdownActionNode)
 - Uses Material-UI `Grid` for layout
@@ -145,9 +143,11 @@ const Profall = () => {
 ```typescript
 const DistributionInquiryContent = () => {
   const dispatch = useDispatch();
-  const [searchData, setSearchData] = useState<DistributionSearchRequest | null>(null);
+  const [searchData, setSearchData] =
+    useState<DistributionSearchRequest | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
+  const [triggerSearch, { data, isFetching }] =
+    useLazySearchDistributionsQuery();
   const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
 
   const handleSearch = async (formData: DistributionSearchFormData) => {
@@ -195,7 +195,10 @@ const DistributionInquiryContent = () => {
 
 const DistributionInquiry = () => {
   return (
-    <Page label={CAPTIONS.DISTRIBUTIONS_INQUIRY} actionNode={<StatusDropdownActionNode />}>
+    <Page
+      label={CAPTIONS.DISTRIBUTIONS_INQUIRY}
+      actionNode={<StatusDropdownActionNode />}
+    >
       <MissiveAlertProvider>
         <DistributionInquiryContent />
       </MissiveAlertProvider>
@@ -205,6 +208,7 @@ const DistributionInquiry = () => {
 ```
 
 **Key Characteristics**:
+
 - Separates page wrapper (`DistributionInquiry`) from content (`DistributionInquiryContent`)
 - Uses `MissiveAlertProvider` context for user messages
 - Collapsible filter section using `DSMAccordion`
@@ -235,7 +239,7 @@ const MasterInquiryContent = memo(() => {
     showProfitDetails,
     executeSearch,
     selectMember,
-    resetAll
+    resetAll,
   } = useMasterInquiry(); // Custom hook encapsulates all logic
 
   return (
@@ -282,7 +286,8 @@ const MasterInquiry = () => {
 ```typescript
 const useMasterInquiry = () => {
   const [state, dispatch] = useReducer(masterInquiryReducer, initialState);
-  const [triggerSearch, { isLoading }] = useLazySearchProfitMasterInquiryQuery();
+  const [triggerSearch, { isLoading }] =
+    useLazySearchProfitMasterInquiryQuery();
   const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
   const { addAlert, clearAlerts } = useMissiveAlerts();
 
@@ -309,6 +314,7 @@ const useMasterInquiry = () => {
 ```
 
 **Key Characteristics**:
+
 - Complex state managed via `useReducer` pattern
 - Custom hook encapsulates all business logic
 - Component focuses purely on rendering
@@ -328,7 +334,13 @@ const useMasterInquiry = () => {
 const FrozenSummary = () => {
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const tabs = ["Summary", "Distributions", "Contributions", "Forfeitures", "Balance"];
+  const tabs = [
+    "Summary",
+    "Distributions",
+    "Contributions",
+    "Forfeitures",
+    "Balance",
+  ];
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -358,6 +370,7 @@ const FrozenSummary = () => {
 ```
 
 **Key Characteristics**:
+
 - Material-UI `Tabs` component for navigation
 - Conditional rendering based on `selectedTab` state
 - Different content for each tab
@@ -377,7 +390,9 @@ const ProfitShareEditUpdate = () => {
   const profitYear = useFiscalCloseProfitYear();
   const [changesApplied, setChangesApplied] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitSharingEdit, profitSharingUpdate } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const [applyMaster] = useGetMasterApplyMutation();
   const [triggerRevert] = useLazyGetMasterRevertQuery();
@@ -400,7 +415,10 @@ const ProfitShareEditUpdate = () => {
 
   return (
     <PrerequisiteGuard prerequisites={["FrozenData"]}>
-      <Page label="PROFIT SHARE EDIT/UPDATE" actionNode={<StatusDropdownActionNode />}>
+      <Page
+        label="PROFIT SHARE EDIT/UPDATE"
+        actionNode={<StatusDropdownActionNode />}
+      >
         <Grid container rowSpacing="24px">
           {/* Checksum validation alerts */}
           {checksumValidation && <ValidationAlert data={checksumValidation} />}
@@ -434,6 +452,7 @@ const ProfitShareEditUpdate = () => {
 ```
 
 **Key Characteristics**:
+
 - Uses `PrerequisiteGuard` to ensure required data is loaded
 - Multiple RTK Query hooks (mutations and lazy queries)
 - Complex state orchestration (Redux + local state)
@@ -452,14 +471,15 @@ The `Page` component is the top-level container for all pages.
 
 ```typescript
 <Page
-  label="DISTRIBUTION INQUIRY"        // Page title (displayed in header)
-  actionNode={<StatusDropdownActionNode />}  // Optional action area (right side of header)
+  label="DISTRIBUTION INQUIRY" // Page title (displayed in header)
+  actionNode={<StatusDropdownActionNode />} // Optional action area (right side of header)
 >
   {/* Page content */}
 </Page>
 ```
 
 **Props**:
+
 - `label`: Page title (string)
 - `actionNode`: Optional React node for header actions (typically `StatusDropdownActionNode`)
 
@@ -496,6 +516,7 @@ Standardized grid component wrapping AG Grid.
 ```
 
 **Features**:
+
 - Automatic pagination
 - Sorting
 - Loading states
@@ -544,10 +565,17 @@ const DistributionInquirySearchFilter: React.FC<SearchFilterProps> = ({
 ```
 
 **Common Pattern**:
+
 - Local state for form fields
 - Callback props for `onSearch` and `onReset`
 - `SearchAndReset` button component from `smart-ui-library`
 - Validation logic (optional)
+
+**Numeric Inputs (Badge Number, Profit Year, etc.)**:
+
+- Do **NOT** rely on native browser up/down spinner controls for number entry. They are disabled as a UI standard.
+- Prefer a text input with `inputMode="numeric"` (and optional numeric `pattern`) for badge/SSN-style fields; validate/parse on submit.
+- Only use `type="number"` when numeric semantics are truly required; never expect spinners to be available.
 
 ---
 
@@ -564,10 +592,12 @@ import { ColDef } from "ag-grid-community";
 import {
   createBadgeColumn,
   createNameColumn,
-  createStoreColumn
+  createStoreColumn,
 } from "../../utils/gridColumnFactory";
 
-export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export const GetProfallGridColumns = (
+  navFunction: (badgeNumber: string) => void
+): ColDef[] => {
   return [
     createStoreColumn({ minWidth: 80, sortable: true }),
     createBadgeColumn({ headerName: "Badge", navigateFunction: navFunction }),
@@ -580,13 +610,14 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: true
-    }
+      sortable: true,
+    },
   ];
 };
 ```
 
 **Grid Column Factory** (`utils/gridColumnFactory.ts`):
+
 - Provides factory functions for common column types
 - Ensures consistency across grids
 - Common factories: `createBadgeColumn`, `createNameColumn`, `createStoreColumn`, `createStateColumn`, `createZipColumn`, `createAddressColumn`
@@ -609,6 +640,7 @@ const renderActionNode = () => {
 ```
 
 **Features**:
+
 - Fetches current navigation status from API
 - Allows users to update status (Not Started, In Progress, Completed)
 - Automatically disabled in read-only mode
@@ -624,20 +656,22 @@ Application-wide alert/message system.
 // In page wrapper:
 <MissiveAlertProvider>
   <PageContent />
-</MissiveAlertProvider>
+</MissiveAlertProvider>;
 
 // In page content:
 const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
 
 // Display alerts:
-{missiveAlerts.length > 0 && <MissiveAlerts />}
+{
+  missiveAlerts.length > 0 && <MissiveAlerts />;
+}
 
 // Add alert:
 addAlert({
   id: 911,
   severity: "success",
   message: "Distribution Saved Successfully",
-  description: "Distribution for John Doe has been saved."
+  description: "Distribution for John Doe has been saved.",
 });
 
 // Clear alerts:
@@ -645,6 +679,7 @@ clearAlerts();
 ```
 
 **Predefined Messages** (`MissiveMessages.ts`):
+
 - `DISTRIBUTION_INQUIRY_MESSAGES.MEMBER_NOT_FOUND`
 - `DISTRIBUTION_INQUIRY_MESSAGES.SAVE_SUCCESS`
 - etc.
@@ -666,6 +701,7 @@ Confirmation dialogs, data entry dialogs, etc.
 ```
 
 **Common Props**:
+
 - `open`: Boolean state
 - `onConfirm`: Callback for confirmation
 - `onCancel`: Callback for cancellation
@@ -739,6 +775,7 @@ const [selectedTab, setSelectedTab] = useState(0);
 ```
 
 **Use When**:
+
 - State is purely UI-related
 - State doesn't need to be shared across components
 - State doesn't persist across navigation
@@ -751,8 +788,12 @@ Complex state or state shared across pages stored in Redux slices.
 
 ```typescript
 // Reading from Redux
-const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
-const currentMember = useSelector((state: RootState) => state.distribution.currentMember);
+const { profitSharingEdit, profitSharingUpdate } = useSelector(
+  (state: RootState) => state.yearsEnd
+);
+const currentMember = useSelector(
+  (state: RootState) => state.distribution.currentMember
+);
 
 // Dispatching actions
 const dispatch = useDispatch();
@@ -761,6 +802,7 @@ dispatch(clearProfitSharingUpdate());
 ```
 
 **Use When**:
+
 - Data needs to be shared across multiple pages
 - Data persists across navigation
 - Centralized state management is beneficial
@@ -773,7 +815,8 @@ Server data automatically cached by RTK Query.
 
 ```typescript
 // Lazy query (manual trigger)
-const [triggerSearch, { data, isFetching, error }] = useLazySearchDistributionsQuery();
+const [triggerSearch, { data, isFetching, error }] =
+  useLazySearchDistributionsQuery();
 
 // Trigger
 await triggerSearch({ badgeNumber: 12345 });
@@ -784,6 +827,7 @@ await deleteDistribution(distributionId);
 ```
 
 **Use When**:
+
 - Fetching server data
 - Automatic caching and deduplication needed
 - Loading/error states needed
@@ -803,7 +847,10 @@ const masterInquiryReducer = (state: State, action: Action): State => {
     case "SEARCH_START":
       return { ...state, search: { ...state.search, isLoading: true } };
     case "SEARCH_SUCCESS":
-      return { ...state, search: { results: action.payload, isLoading: false } };
+      return {
+        ...state,
+        search: { results: action.payload, isLoading: false },
+      };
     case "SELECT_MEMBER":
       return { ...state, selection: { selectedMember: action.payload } };
     default:
@@ -813,6 +860,7 @@ const masterInquiryReducer = (state: State, action: Action): State => {
 ```
 
 **Use When**:
+
 - State transitions are complex
 - Multiple related pieces of state update together
 - State logic is testable in isolation
@@ -827,13 +875,14 @@ Context for cross-component communication within a page.
 // Page wrapper
 <MissiveAlertProvider>
   <PageContent />
-</MissiveAlertProvider>
+</MissiveAlertProvider>;
 
 // In any child component
 const { addAlert, clearAlerts } = useMissiveAlerts();
 ```
 
 **Common Contexts**:
+
 - `MissiveAlertProvider`: Alert/message system
 - Custom contexts for complex pages
 
@@ -882,7 +931,7 @@ const selectMember = useCallback(async (member: Member) => {
   // Second fetch: profit data (depends on member details)
   const profitData = await triggerProfitDetails({
     id: member.id,
-    memberType: member.memberType
+    memberType: member.memberType,
   }).unwrap();
   dispatch({ type: "PROFIT_DATA_SUCCESS", payload: profitData });
 }, []);
@@ -899,7 +948,7 @@ useEffect(() => {
   Promise.all([
     triggerStates().unwrap(),
     triggerTaxCodes().unwrap(),
-    triggerMissives().unwrap()
+    triggerMissives().unwrap(),
   ]);
 }, []);
 ```
@@ -908,24 +957,290 @@ useEffect(() => {
 
 ---
 
-### 5. Pagination & Sorting
+### 5. Pagination & Sorting (Server-Side)
+
+**CRITICAL**: All grids with pagination MUST use server-side pagination and sorting. Never load all data client-side.
+
+#### Complete Setup Pattern
+
+**Parent Component State:**
 
 ```typescript
-const handlePaginationChange = async (pageNumber: number, pageSize: number, sortParams: SortParams) => {
-  if (searchData) {
-    const request = {
-      ...searchData,
-      skip: pageNumber * pageSize,
-      take: pageSize,
-      sortBy: sortParams.sortBy,
-      isSortDescending: sortParams.isSortDescending
-    };
-    await triggerSearch(request);
-  }
+import { SortParams } from "../../../hooks/useGridPagination";
+
+const [pageNumber, setPageNumber] = useState(0); // 0-based for UI
+const [pageSize, setPageSize] = useState(10); // Default page size
+const [sortBy, setSortBy] = useState<string>("Created"); // Default sort column
+const [isSortDescending, setIsSortDescending] = useState<boolean>(true); // Default sort order
+
+const fetchData = useCallback(
+  (page: number, size: number, sort?: string, desc?: boolean) => {
+    triggerQuery(
+      {
+        pageNumber: page + 1, // API expects 1-based
+        pageSize: size,
+        sortBy: sort ?? sortBy,
+        isSortDescending: desc ?? isSortDescending,
+      },
+      false
+    );
+  },
+  [triggerQuery, sortBy, isSortDescending]
+);
+
+const handlePageChange = (page: number, size: number) => {
+  setPageNumber(page);
+  setPageSize(size);
+  fetchData(page, size);
+};
+
+const handleSortChange = (sortParams: SortParams) => {
+  setSortBy(sortParams.sortBy);
+  setIsSortDescending(sortParams.isSortDescending);
+  setPageNumber(0); // Reset to first page on sort
+  fetchData(0, pageSize, sortParams.sortBy, sortParams.isSortDescending);
 };
 ```
 
+**Child Grid Component Props:**
+
+```typescript
+interface GridProps {
+  data?: PaginatedData;
+  isLoading: boolean;
+  pageNumber: number;
+  pageSize: number;
+  onPageChange: (page: number, pageSize: number) => void;
+  onSortChange: (sortParams: SortParams) => void;
+}
+
+const Grid: React.FC<GridProps> = ({
+  data,
+  isLoading,
+  pageNumber,
+  pageSize,
+  onPageChange,
+  onSortChange,
+}) => {
+  const columnDefs = useMemo(() => GetGridColumns(), []);
+
+  return (
+    <>
+      <DSMGrid
+        preferenceKey="MY_GRID"
+        isLoading={isLoading}
+        handleSortChanged={onSortChange} // CRITICAL: enables server-side sorting
+        providedOptions={{
+          rowData: data?.results || [],
+          columnDefs: columnDefs,
+        }}
+      />
+      <Pagination
+        pageNumber={pageNumber}
+        setPageNumber={(value: number) => onPageChange(value - 1, pageSize)} // Convert 1-based to 0-based
+        pageSize={pageSize}
+        setPageSize={(value: number) => onPageChange(0, value)} // Reset to page 0 on size change
+        recordCount={data?.total || 0}
+      />
+    </>
+  );
+};
+```
+
+**RTK Query API Endpoint:**
+
+```typescript
+getData: builder.query<
+  PaginatedData,
+  {
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    isSortDescending?: boolean;
+  }
+>({
+  query: ({
+    pageNumber = 1,
+    pageSize = 10,
+    sortBy = "Created",
+    isSortDescending = true,
+  }) => ({
+    url: "my-endpoint",
+    method: "GET",
+    params: { pageNumber, pageSize, sortBy, isSortDescending },
+  }),
+});
+```
+
+#### Common Pagination Mistakes
+
+1. **Missing `handleSortChanged`**: Grid won't trigger API calls on column header clicks
+2. **Missing `onSortChange` prop**: Grid component can't pass sort events to parent
+3. **Wrong page number base**: UI uses 0-based, API uses 1-based - must convert
+4. **Not resetting page on sort**: Should always go to page 0 when sorting changes
+5. **Client-side pagination**: Never load all records and paginate in browser
+6. **Missing sort state**: Parent must track `sortBy` and `isSortDescending`
+
 **Pattern**: Grid pagination/sort triggers new API call with updated parameters.
+
+---
+
+## Grid Column Factories (MANDATORY)
+
+### Always Use Grid Column Factories
+
+**NEVER manually define column objects**. Always use the grid column factory functions from `src/ui/src/utils/gridColumnFactory.ts`.
+
+#### Why Use Factories?
+
+1. **Consistent rendering**: Badge hyperlinks, date formatting, currency display
+2. **Master Inquiry integration**: Badge columns automatically link to Master Inquiry
+3. **Accessibility**: Standard tooltips, screen reader support
+4. **Maintainability**: Change once, applies everywhere
+
+#### Common Factory Functions
+
+```typescript
+import {
+  createBadgeColumn,
+  createNameColumn,
+  createDateColumn,
+  createCurrencyColumn,
+  createSSNColumn,
+  createStateColumn,
+  createStoreColumn,
+  createStatusColumn,
+} from "../../../utils/gridColumnFactory";
+
+export const GetMyGridColumns = (): ColDef[] => {
+  return [
+    // Badge column with automatic Master Inquiry hyperlink
+    createBadgeColumn({
+      headerName: "Badge Number",
+      field: "badgeNumber",
+      minWidth: 120,
+    }),
+
+    // Name column
+    createNameColumn({
+      field: "fullName",
+    }),
+
+    // Date column with automatic formatting
+    createDateColumn({
+      headerName: "Hire Date",
+      field: "hireDate",
+    }),
+
+    // Currency column with $ formatting
+    createCurrencyColumn({
+      headerName: "Balance",
+      field: "netBalance",
+    }),
+
+    // SSN column with masking
+    createSSNColumn({
+      field: "ssn",
+    }),
+
+    // Custom column (when factory doesn't exist)
+    {
+      headerName: "Custom Field",
+      field: "customField",
+      sortable: true,
+      filter: false, // ALWAYS false by default
+      flex: 1,
+      minWidth: 150,
+    },
+  ];
+};
+```
+
+#### Grid Column File Pattern
+
+**File**: `MyGridColumns.ts` (colocated with grid component)
+
+```typescript
+import { ColDef } from "ag-grid-community";
+import {
+  createBadgeColumn,
+  createDateColumn,
+} from "../../../utils/gridColumnFactory";
+import { myCustomFormatter } from "../../../utils/dateUtils";
+
+export const GetMyGridColumns = (): ColDef[] => {
+  return [
+    createBadgeColumn({ field: "badgeNumber" }),
+    {
+      headerName: "Created",
+      field: "created",
+      sortable: true,
+      filter: false,
+      width: 200,
+      valueFormatter: (params: any) =>
+        params.value ? myCustomFormatter(params.value) : "",
+    },
+  ];
+};
+```
+
+**Usage in Grid Component:**
+
+```typescript
+import { GetMyGridColumns } from "./MyGridColumns";
+
+const MyGrid = () => {
+  const columnDefs = useMemo(() => GetMyGridColumns(), []);
+
+  return (
+    <DSMGrid
+      providedOptions={{
+        columnDefs: columnDefs,
+        rowData: data,
+      }}
+    />
+  );
+};
+```
+
+#### AG Grid Configuration Rules
+
+1. **Filter disabled by default**: `filter: false` on all columns unless specific business requirement
+2. **Sortable enabled**: `sortable: true` for most columns
+3. **Width options**: Use `minWidth`, `maxWidth`, or `width` (fixed), or `flex` (responsive)
+4. **No `enableRangeSelection`**: Requires AG Grid Enterprise license - never set to `true`
+
+**Common Mistakes:**
+
+```typescript
+// ❌ WRONG: Manual column definitions, no hyperlinks
+const columnDefs = [
+  {
+    headerName: "Badge Number",
+    field: "badgeNumber",
+    width: 120,
+  },
+];
+
+// ❌ WRONG: Enabling all filters
+const columnDefs = Object.keys(data).map((key) => ({
+  headerName: key,
+  field: key,
+  filter: true, // WRONG
+}));
+
+// ❌ WRONG: Enabling range selection (requires Enterprise license)
+<DSMGrid
+  providedOptions={{
+    columnDefs: cols,
+    enableRangeSelection: true, // WRONG
+  }}
+/>;
+
+// ✅ RIGHT: Use factory, disable filters, no range selection
+const columnDefs = useMemo(() => GetMyGridColumns(), []);
+<DSMGrid providedOptions={{ columnDefs, rowData: data }} />;
+```
 
 ---
 
@@ -957,6 +1272,53 @@ const handlePaginationChange = async (pageNumber: number, pageSize: number, sort
 
 ---
 
+## Route Path Patterns (CRITICAL)
+
+### Route Constants Location
+
+All route paths are defined in `src/ui/src/constants.ts`. When creating a new page:
+
+1. **Add route constant** to constants.ts:
+
+   ```typescript
+   export const ORACLE_HCM_DIAGNOSTICS = "oracle-hcm-diagnostics"; // NO leading slash!
+   ```
+
+2. **NEVER include path prefixes** in route constants:
+
+   ```typescript
+   // ❌ WRONG - includes prefix, will break routing
+   export const MY_PAGE = "/it-operations/my-page";
+
+   // ✅ RIGHT - just the page path, no prefix
+   export const MY_PAGE = "my-page";
+   ```
+
+3. **Use constant in RouterSubAssembly**:
+   ```typescript
+   <Route
+     path={Navigation.Constants.ORACLE_HCM_DIAGNOSTICS}
+     element={<LazyOracleHcmDiagnostics />}
+   />
+   ```
+
+### Common Routing Mistakes
+
+1. **Wrong path prefix**: Including group path in constant (e.g., `/it-operations/page` instead of `page`)
+2. **Leading slash**: Adding `/` to route constant when it's not needed
+3. **Inconsistent path**: Route constant doesn't match component file location
+
+### Route Path Examples by Page Type
+
+| Page Category  | Correct Path             | Wrong Path                              |
+| -------------- | ------------------------ | --------------------------------------- |
+| IT Operations  | `oracle-hcm-diagnostics` | `/it-operations/oracle-hcm-diagnostics` |
+| Reports        | `audit-search`           | `/reports/audit-search`                 |
+| Year-End       | `duplicate-names`        | `/december-activities/duplicate-names`  |
+| Master Inquiry | `master-inquiry`         | `/inquiries/master-inquiry`             |
+
+---
+
 ## Navigation Patterns
 
 ### 1. Programmatic Navigation
@@ -974,8 +1336,8 @@ navigate("/view-distribution", {
   state: {
     showSuccessMessage: true,
     memberName: "John Doe",
-    amount: 5000
-  }
+    amount: 5000,
+  },
 });
 
 // Navigate back
@@ -1006,8 +1368,8 @@ navigate("/distribution-inquiry", {
   state: {
     showSuccessMessage: true,
     operationType: "added",
-    memberName: "John Doe"
-  }
+    memberName: "John Doe",
+  },
 });
 
 // In page B
@@ -1036,7 +1398,7 @@ const isReadOnly = useReadOnlyNavigation();
 
 <Button disabled={isReadOnly} onClick={handleEdit}>
   EDIT
-</Button>
+</Button>;
 ```
 
 **Pattern**: Disable actions when user has read-only permissions.
@@ -1080,6 +1442,7 @@ const QPAY600 = () => {
 ```
 
 **Components**:
+
 - `Page` wrapper with status dropdown
 - `DSMAccordion` for filter
 - `QPAY600FilterSection` (search form)
@@ -1113,15 +1476,15 @@ const AddDistribution = () => {
     if (selectedMember && formData) {
       await createDistribution({
         memberId: selectedMember.id,
-        ...formData
+        ...formData,
       }).unwrap();
 
       navigate("/distribution-inquiry", {
         state: {
           showSuccessMessage: true,
           memberName: selectedMember.name,
-          amount: formData.amount
-        }
+          amount: formData.amount,
+        },
       });
     }
   };
@@ -1170,13 +1533,16 @@ const PROF130 = () => {
     forfeitures: <ForfeituresByAge />,
     balanceByAge: <BalanceByAge />,
     balanceByYears: <BalanceByYears />,
-    vestedAmounts: <VestedAmountsByAge />
+    vestedAmounts: <VestedAmountsByAge />,
   };
 
   return (
     <Page label="PROF130 REPORTS" actionNode={<StatusDropdownActionNode />}>
       <Grid container rowSpacing="24px">
-        <Tabs value={selectedReport} onChange={(e, val) => setSelectedReport(val)}>
+        <Tabs
+          value={selectedReport}
+          onChange={(e, val) => setSelectedReport(val)}
+        >
           <Tab value="distributions" label="Distributions by Age" />
           <Tab value="contributions" label="Contributions by Age" />
           <Tab value="forfeitures" label="Forfeitures by Age" />
@@ -1185,9 +1551,7 @@ const PROF130 = () => {
           <Tab value="vestedAmounts" label="Vested Amounts by Age" />
         </Tabs>
 
-        <Grid width="100%">
-          {reports[selectedReport]}
-        </Grid>
+        <Grid width="100%">{reports[selectedReport]}</Grid>
       </Grid>
     </Page>
   );
@@ -1198,33 +1562,10 @@ const PROF130 = () => {
 
 ---
 
+## Code Review Checklist
 
-## Frontend Code Review Checklist
+Use the master checklist for all PR reviews (including frontend pages):
 
-Use this checklist when reviewing frontend page components and UI changes:
+- [CODE_REVIEW_CHECKLIST.md](../CODE_REVIEW_CHECKLIST.md)
 
-### Design & UX Review
-- [ ] **Consistent with design system** - Uses `smart-ui-library` components, not custom recreations
-- [ ] **Responsive layout** - Works on mobile, tablet, desktop (Material-UI Grid system used)
-- [ ] **Accessibility** - WCAG 2.1 AA compliant (labels, ARIA attributes, keyboard navigation)
-- [ ] **Loading states** - Loaders/spinners shown during async operations
-- [ ] **Error handling** - User-friendly error messages displayed (no stack traces)
-- [ ] **Empty states** - Graceful handling when no data available
-- [ ] **Consistent spacing** - Uses design tokens, not magic numbers
-
-### CRITICAL Security Requirements
-- [ ] **⚠️ CRITICAL: Age NEVER calculated in frontend** - Age MUST come from backend, never computed from DOB. Frontend calculation breaks:
-  1. Consistency with backend calculations (timezone/timing differences)
-  2. Sensitive data masking (age is masked for unprivileged users)
-  3. Access control (backend determines what fields are visible)
-  - RED FLAG: Any code calculating age from `dateOfBirth` using `Date.now()` or arithmetic
-  - CORRECT PATTERN: Display DOB only, let backend provide age if required by business logic
-
-### Critical Violations (Auto-Reject)
-
-PRs with these issues should be rejected immediately without further review:
-
-1. **⚠️ CRITICAL: Age calculated in frontend** - Any computation of age from DOB is a BLOCKER
-   - REJECT with comment: 'CRITICAL: Age must be calculated backend-only. Remove the age calculation and use backend-provided value instead. (See pages.instructions.md for details.)'
-   - ROOT CAUSE: Frontend calculation diverges from backend due to timezone/timing differences
-   - SECURITY IMPACT: Age is sensitive data that must be masked for unprivileged users
+For frontend-specific review, see **“Frontend - React/TypeScript”** and the **auto-reject** security items in the Security section.

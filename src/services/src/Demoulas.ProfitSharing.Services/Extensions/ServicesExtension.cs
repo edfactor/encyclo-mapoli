@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using Demoulas.Common.Data.Contexts.Configuration;
-using Demoulas.Common.Data.Services.Interfaces;
+﻿using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -21,7 +19,6 @@ using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Demoulas.ProfitSharing.Services.MergeProfitDetails;
 using Demoulas.ProfitSharing.Services.Military;
 using Demoulas.ProfitSharing.Services.Navigations;
-using Demoulas.ProfitSharing.Services.PayServices;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -70,6 +67,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IBeneficiaryService, BeneficiaryService>();
         _ = builder.Services.AddScoped<IAdhocBeneficiariesReport, AdhocBeneficiariesReport>();
         _ = builder.Services.AddScoped<IAdhocTerminatedEmployeesService, AdhocTerminatedEmployeesService>();
+        _ = builder.Services.AddScoped<IEmployeesWithProfitsOver73Service, EmployeesWithProfitsOver73Service>();
 
 
         _ = builder.Services.AddScoped<IAuditService, AuditService>();
@@ -93,6 +91,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IPayProfitUpdateService, PayProfitUpdateService>();
         _ = builder.Services.AddScoped<IProfitDetailReversalsService, ProfitDetailReversalsService>();
+        _ = builder.Services.AddScoped<IProfitSharingAdjustmentsService, ProfitSharingAdjustmentsService>();
         _ = builder.Services.AddScoped<IBreakdownService, BreakdownReportService>();
         _ = builder.Services.AddScoped<INavigationService, NavigationService>();
         _ = builder.Services.AddScoped<IBeneficiaryInquiryService, BeneficiaryInquiryService>();
@@ -101,6 +100,9 @@ public static class ServicesExtension
 
 
         _ = builder.Services.AddScoped<ITableMetadataService, TableMetadataService>();
+        _ = builder.Services.AddScoped<IOracleHcmDiagnosticsService, OracleHcmDiagnosticsService>();
+        _ = builder.Services.AddScoped<IStateTaxRatesService, StateTaxRatesService>();
+        _ = builder.Services.AddScoped<IAnnuityRatesService, AnnuityRatesService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         _ = builder.Services.AddScoped<IUnmaskingService, UnmaskingService>();
@@ -109,6 +111,10 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
         _ = builder.Services.AddScoped<IStateTaxLookupService, StateTaxLookupService>();
+        _ = builder.Services.AddScoped<ICommentTypeLookupService, CommentTypeLookupService>();
+        _ = builder.Services.AddScoped<IDistributionFrequencyLookupService, DistributionFrequencyLookupService>();
+        _ = builder.Services.AddScoped<IDistributionStatusLookupService, DistributionStatusLookupService>();
+        _ = builder.Services.AddScoped<ITaxCodeLookupService, TaxCodeLookupService>();
         _ = builder.Services.AddScoped<IStateService, StateService>();
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
         _ = builder.Services.AddScoped<IBeneficiaryDisbursementService, BeneficiaryDisbursementService>();
@@ -131,9 +137,6 @@ public static class ServicesExtension
         {
             _ = builder.Services.AddHostedService<StateTaxCacheWarmerHostedService>();
         }
-
-        // PayServicees
-        _ = builder.Services.AddScoped<IPayService, PayService>();
 
         return builder;
     }

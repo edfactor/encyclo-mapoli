@@ -1,6 +1,8 @@
 import { Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { DistributionSearchResponse } from "../../../types";
 import { GetDisbursementGridColumns } from "./DisbursementGridColumns";
@@ -28,6 +30,7 @@ const DisbursementGrid: React.FC<DisbursementGridProps> = ({
     initialPageSize,
     initialSortBy: "paymentSequence",
     initialSortDescending: false,
+    persistenceKey: `${GRID_KEYS.DISBURSEMENT_PREFIX}${title}`,
     onPaginationChange: useCallback(
       async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         onPaginationChange(pageNum, pageSz, sortPrms);
@@ -37,6 +40,11 @@ const DisbursementGrid: React.FC<DisbursementGridProps> = ({
   });
 
   const columnDefs = useMemo(() => GetDisbursementGridColumns(), []);
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: data?.length ?? 0
+  });
 
   return (
     <>
@@ -49,10 +57,10 @@ const DisbursementGrid: React.FC<DisbursementGridProps> = ({
       </div>
 
       <DSMGrid
-        preferenceKey={title}
+        preferenceKey={`${GRID_KEYS.DISBURSEMENT_PREFIX}${title}`}
         isLoading={isLoading}
         handleSortChanged={handleSortChange}
-        maxHeight="300px"
+        maxHeight={gridMaxHeight}
         providedOptions={{
           rowData: data,
           columnDefs: columnDefs,

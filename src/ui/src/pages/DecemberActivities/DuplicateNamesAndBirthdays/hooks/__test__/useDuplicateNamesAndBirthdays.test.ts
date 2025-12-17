@@ -13,11 +13,11 @@ const { mockTriggerSearch, mockUseGridPagination } = vi.hoisted(() => ({
 }));
 
 // Mock RTK Query hook - this must return [triggerFunction, stateObject]
-vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
+vi.mock("../../../../../reduxstore/api/YearsEndApi", () => ({
   useLazyGetDuplicateNamesAndBirthdaysQuery: vi.fn(() => [mockTriggerSearch, { isFetching: false }])
 }));
 
-vi.mock("../../../../hooks/useGridPagination", () => ({
+vi.mock("../../../../../hooks/useGridPagination", () => ({
   useGridPagination: mockUseGridPagination
 }));
 
@@ -53,7 +53,7 @@ function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreStat
       impersonating: []
     },
     yearsEnd: {
-      selectedProfitYearForDecemberActivities: 2024,
+      selectedProfitYearForDecemberActivities: 0,
       selectedProfitYearForFiscalClose: 2024,
       invalidProfitShareEditYear: false,
       totalForfeituresGreaterThanZero: false,
@@ -163,7 +163,8 @@ const mockPaginationObject = {
   sortParams: { sortBy: "name", isSortDescending: false },
   handlePaginationChange: vi.fn(),
   handleSortChange: vi.fn(),
-  resetPagination: vi.fn()
+  resetPagination: vi.fn(),
+  clearPersistedState: vi.fn()
 };
 
 const mockDuplicateData = {
@@ -181,7 +182,7 @@ const mockDuplicateData = {
 
 // Define defaultYearsEndState at module scope so it can be used by all tests
 const defaultYearsEndState: YearsEndState = {
-  selectedProfitYearForDecemberActivities: 2024,
+  selectedProfitYearForDecemberActivities: 0,
   selectedProfitYearForFiscalClose: 2024,
   invalidProfitShareEditYear: false,
   totalForfeituresGreaterThanZero: false,
@@ -382,104 +383,6 @@ describe("useDuplicateNamesAndBirthdays", () => {
   it("should return null searchParams initially", () => {
     // Setup mocks
     mockUseGridPagination.mockReturnValue(mockPaginationObject);
-
-    const defaultYearsEndState: YearsEndState = {
-      selectedProfitYearForDecemberActivities: 2024,
-      selectedProfitYearForFiscalClose: 2024,
-      invalidProfitShareEditYear: false,
-      totalForfeituresGreaterThanZero: false,
-      profitShareEditUpdateShowSearch: true,
-      profitShareApplyOrRevertLoading: false,
-      resetYearEndPage: false,
-      profitMasterStatus: null,
-      additionalExecutivesChosen: null,
-      additionalExecutivesGrid: null,
-      balanceByAgeFullTime: null,
-      balanceByAgePartTime: null,
-      balanceByAgeTotal: null,
-      balanceByAgeQueryParams: null,
-      balanceByYearsFullTime: null,
-      balanceByYearsPartTime: null,
-      balanceByYearsTotal: null,
-      balanceByYearsQueryParams: null,
-      contributionsByAgeFullTime: null,
-      contributionsByAgePartTime: null,
-      contributionsByAgeTotal: null,
-      contributionsByAgeQueryParams: null,
-      demographicBadges: null,
-      distributionsAndForfeitures: null,
-      distributionsAndForfeituresQueryParams: null,
-      distributionsByAgeFullTime: null,
-      distributionsByAgePartTime: null,
-      distributionsByAgeTotal: null,
-      distributionsByAgeQueryParams: null,
-      duplicateSSNsData: null,
-      duplicateNamesAndBirthdays: null,
-      duplicateNamesAndBirthdaysQueryParams: null,
-      eligibleEmployees: null,
-      eligibleEmployeesQueryParams: null,
-      employeeWagesForYear: null,
-      employeeWagesForYearQueryParams: null,
-      executiveHoursAndDollars: null,
-      executiveHoursAndDollarsGrid: null,
-      executiveRowsSelected: null,
-      executiveHoursAndDollarsQueryParams: null,
-      executiveHoursAndDollarsAddQueryParams: null,
-      forfeituresByAgeFullTime: null,
-      forfeituresByAgePartTime: null,
-      forfeituresByAgeTotal: null,
-      forfeituresByAgeQueryParams: null,
-      forfeituresAndPoints: null,
-      forfeituresAndPointsQueryParams: null,
-      grossWagesReport: null,
-      grossWagesReportQueryParams: null,
-      rehireQueryParams: null,
-      militaryEntryAndModification: null,
-      recentlyTerminated: null,
-      recentlyTerminatedQueryParams: null,
-      terminatedLetters: null,
-      terminatedLettersQueryParams: null,
-      unForfeits: null,
-      unForfeitsQueryParams: null,
-      rehireProfitSummaryQueryParams: null,
-      negativeEtvaForSSNsOnPayprofit: null,
-      negativeEtvaForSSNsOnPayprofitParams: null,
-      profitSharingUpdate: null,
-      profitSharingUpdateQueryParams: null,
-      profitSharingEditQueryParams: null,
-      profitSharingEdit: null,
-      profitSharingMaster: null,
-      profitSharingRevert: null,
-      profitSharingUpdateAdjustmentSummary: null,
-      profitEditUpdateChangesAvailable: false,
-      profitEditUpdateRevertChangesAvailable: false,
-      termination: null,
-      terminationQueryParams: null,
-      vestedAmountsByAge: null,
-      vestedAmountsByAgeQueryParams: null,
-      yearEndProfitSharingReportLive: null,
-      yearEndProfitSharingReportFrozen: null,
-      yearEndProfitSharingReportQueryParams: null,
-      yearEndProfitSharingReportTotals: null,
-      breakdownByStore: null,
-      breakdownByStoreManagement: null,
-      breakdownByStoreTotals: null,
-      storeManagementBreakdown: null,
-      breakdownByStoreQueryParams: null,
-      under21BreakdownByStore: null,
-      under21BreakdownByStoreQueryParams: null,
-      under21Inactive: null,
-      under21InactiveQueryParams: null,
-      under21Totals: null,
-      under21TotalsQueryParams: null,
-      profitShareSummaryReport: null,
-      updateSummary: null,
-      profitSharingLabels: null,
-      controlSheet: null,
-      breakdownGrandTotals: null,
-      certificates: null,
-      profitSharingUnder21Report: null
-    };
 
     const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
       security: {

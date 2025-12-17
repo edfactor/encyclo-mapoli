@@ -2,16 +2,18 @@ import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { formatNumberWithComma } from "smart-ui-library";
 import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
+import { GRID_KEYS } from "../../../../constants";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../../hooks/useReadOnlyNavigation";
+import { useLazyGetForfeitureAdjustmentsQuery } from "../../../../reduxstore/api/AdhocApi";
 import {
   InquiryApi,
   useLazyGetProfitMasterInquiryMemberDetailsQuery,
   useLazyGetProfitMasterInquiryMemberQuery
 } from "../../../../reduxstore/api/InquiryApi";
-import { useLazyGetForfeitureAdjustmentsQuery } from "../../../../reduxstore/api/YearsEndApi";
+import { EmployeeDetails } from "../../../../types/employee/employee";
 import { MasterInquiryResponseDto } from "../../../../types/master-inquiry/master-inquiry";
 import {
   ForfeitureAdjustmentSearchParams,
@@ -114,6 +116,7 @@ const useForfeituresAdjustment = () => {
     initialPageSize: 50,
     initialSortBy: "profitYear",
     initialSortDescending: true,
+    persistenceKey: GRID_KEYS.FORFEITURES_ADJUSTMENT,
     onPaginationChange: handleTransactionPaginationChange
   });
 
@@ -258,6 +261,9 @@ const useForfeituresAdjustment = () => {
     clearAlerts();
   }, [transactionPagination, clearAlerts]);
 
+  const memberDetails = state.memberDetails.details as unknown as EmployeeDetails | null;
+  const currentBalance = memberDetails?.currentPSAmount ?? 0;
+
   return {
     // State
     searchParams: state.search.params,
@@ -268,6 +274,7 @@ const useForfeituresAdjustment = () => {
     isFetchingMemberDetails: state.memberDetails.isFetching,
     isFetchingTransactions: state.transactions.isFetching,
     isAddForfeitureModalOpen: state.modal.isAddForfeitureOpen,
+    currentBalance,
 
     // Computed state
     showEmployeeData: selectShowEmployeeData(state),

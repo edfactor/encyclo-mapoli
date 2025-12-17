@@ -9,26 +9,6 @@ const LandingPage = () => {
         Welcome to Profit Sharing
       </h1>
 
-      {/* <h2 className="mb-4 text-xl text-dsm-secondary">Quick Links</h2>
-
-      <div className="mb-8 flex gap-4">
-        <button
-          className="rounded border-2 border-dsm-action px-4 py-2 uppercase text-dsm-action hover:border-dsm-action-hover hover:bg-dsm-action-secondary-hover"
-          onClick={() => navigate(ROUTES.FORFEIT)}>
-          Forfeits
-        </button>
-        <button
-          className="rounded border-2 border-dsm-action px-4 py-2 uppercase text-dsm-action hover:border-dsm-action-hover hover:bg-dsm-action-secondary-hover"
-          onClick={() => navigate(ROUTES.MASTER_INQUIRY)}>
-          Master Inquiry
-        </button>
-        <button
-          className="rounded border-2 border-dsm-action px-4 py-2 uppercase text-dsm-action hover:border-dsm-action-hover hover:bg-dsm-action-secondary-hover"
-          onClick={() => navigate(ROUTES.DISTRIBUTIONS_AND_FORFEITURES)}>
-          Distributions
-        </button>
-      </div> */}
-
       <div className="pb-10">
         <img
           src={storefront}

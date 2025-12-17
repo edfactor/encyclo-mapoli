@@ -1,9 +1,7 @@
-using Bogus;
-using Demoulas.ProfitSharing.Api;
+﻿using Bogus;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
-using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.Extensions.DependencyInjection;
@@ -220,7 +218,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
         result.Results.ShouldAllBe(e =>
             e.TableName != null && e.TableName.Contains("NAVIGATION") &&
             e.Operation.Contains("Update"));
-        
+
         // Verify we have at least one matching event (created deterministically in CreateMockAuditEvents)
         result.Total.ShouldBeGreaterThanOrEqualTo(1);
         result.Results.Count().ShouldBeGreaterThanOrEqualTo(1);
@@ -254,7 +252,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     {
         // Use a fixed seed for deterministic random data generation
         Randomizer.Seed = new Random(42);
-        
+
         var faker = new Faker();
         var auditEvents = new List<AuditEvent>();
         long currentId = 1;
@@ -288,7 +286,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
         auditEvents.AddRange(navigationFaker.Generate(4));
-        
+
         // Add one guaranteed NAVIGATION Update event for the multiple filters test
         auditEvents.Add(new AuditEvent
         {

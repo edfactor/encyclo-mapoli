@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
 public static class TestConstants
 {

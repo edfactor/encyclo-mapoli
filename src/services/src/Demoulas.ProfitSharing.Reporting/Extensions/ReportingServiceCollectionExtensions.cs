@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Reporting.Core;
+﻿using Demoulas.ProfitSharing.Reporting.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Reporting.Extensions;

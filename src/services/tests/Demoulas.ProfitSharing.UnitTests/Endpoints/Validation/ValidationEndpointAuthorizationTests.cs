@@ -1,3 +1,5 @@
+﻿using System.ComponentModel;
+using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Validation;
@@ -6,9 +8,6 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Shouldly;
-using System.ComponentModel;
-using System.Net;
-using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Validation;
 

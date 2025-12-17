@@ -128,9 +128,10 @@ export const useBeneficiaryPercentageUpdate = (onUpdateSuccess?: () => void): Us
         onUpdateSuccess?.();
 
         // Return success with optional warning message
-        const warningMessage = currentList.length > 1 && sum !== 100 
-          ? `Percentage updated to ${newPercentage}%. Total is now ${sum}%. ${sum < 100 ? 'Please ensure all percentages sum to 100%.' : ''}` 
-          : undefined;
+        const warningMessage =
+          currentList.length > 1 && sum !== 100
+            ? `Percentage updated to ${newPercentage}%. Total is now ${sum}%. ${sum < 100 ? "Please ensure all percentages sum to 100%." : ""}`
+            : undefined;
 
         return { success: true, warning: warningMessage };
       } catch (error) {

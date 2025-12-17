@@ -5,6 +5,7 @@ import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItO
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
+import { GRID_KEYS } from "../../../constants";
 import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
 
 interface DemoFreezeSearchProps {
@@ -29,6 +30,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
       initialPageSize: 25,
       initialSortBy: "createdDateTime",
       initialSortDescending: true,
+      persistenceKey: GRID_KEYS.DEMOGRAPHIC_FREEZE,
       onPaginationChange: useCallback(
         (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded) {
@@ -84,7 +86,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"FREEZE"}
+            preferenceKey={GRID_KEYS.DEMOGRAPHIC_FREEZE}
             isLoading={isFetching}
             handleSortChanged={handleSortChange}
             providedOptions={{

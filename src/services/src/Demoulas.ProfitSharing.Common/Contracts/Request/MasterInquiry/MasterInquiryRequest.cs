@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
+
 public record MasterInquiryRequest : MasterInquiryMemberRequest
 {
     [DefaultValue(2025)]

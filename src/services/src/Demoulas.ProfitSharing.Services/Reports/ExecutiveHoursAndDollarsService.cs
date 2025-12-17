@@ -3,12 +3,10 @@ using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +16,23 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
+
+    private sealed record ExecutiveHoursAndDollarsRow
+    {
+        public required int BadgeNumber { get; init; }
+        public required string FullName { get; init; }
+        public required short StoreNumber { get; init; }
+        public required string Ssn { get; init; }
+        public required decimal HoursExecutive { get; init; }
+        public required decimal IncomeExecutive { get; init; }
+        public required decimal CurrentHoursYear { get; init; }
+        public required decimal CurrentIncomeYear { get; init; }
+        public required byte PayFrequencyId { get; init; }
+        public required string PayFrequencyName { get; init; }
+        public required char EmploymentStatusId { get; init; }
+        public required string EmploymentStatusName { get; init; }
+        public required bool IsExecutive { get; init; }
+    }
 
     public ExecutiveHoursAndDollarsService(IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService)
@@ -44,48 +59,51 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                 .ThenInclude(d => d!.EmploymentStatus)
                 .AsQueryable();
 
-            if (request.HasExecutiveHoursAndDollars.HasValue && request.HasExecutiveHoursAndDollars.Value && request.IsMonthlyPayroll.HasValue && request.IsMonthlyPayroll.Value)
+            if (request.HasExecutiveHoursAndDollars is true && request.IsMonthlyPayroll is true)
             {
-                query = query.Where(p => (p.HoursExecutive > 0 || p.IncomeExecutive > 0) || (p.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly));
+                query = query.Where(p =>
+                    p.HoursExecutive > 0
+                    || p.IncomeExecutive > 0
+                    || p.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly);
             }
             else
             {
-                if (request.HasExecutiveHoursAndDollars.HasValue && request.HasExecutiveHoursAndDollars.Value)
+                if (request.HasExecutiveHoursAndDollars is true)
                 {
                     query = query.Where(p => p.HoursExecutive > 0 || p.IncomeExecutive > 0);
                 }
-                // Executives often have a pay frequency value of 2
-                if (request.IsMonthlyPayroll.HasValue && request.IsMonthlyPayroll.Value)
+
+                if (request.IsMonthlyPayroll is true)
                 {
                     query = query.Where(pp => pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly);
                 }
             }
-
 
             if (request.BadgeNumber.HasValue)
             {
                 query = query.Where(pp => pp.Demographic!.BadgeNumber == request.BadgeNumber);
             }
 
-            if (request.Ssn != null)
+            if (request.Ssn is not null)
             {
                 query = query.Where(pp => pp.Demographic!.Ssn == request.Ssn);
             }
-            if (request.FullNameContains != null)
+
+            if (request.FullNameContains is not null)
             {
                 // Use Contains for in-memory compatibility (unit tests)
                 var searchValue = request.FullNameContains.ToUpperInvariant();
                 query = query.Where(pp => pp.Demographic!.ContactInfo!.FullName!.ToUpper().Contains(searchValue));
             }
 
-            // Select unmasked SSN for sorting, then mask after pagination
+            // Project to a non-response type so we never assign an unmasked SSN into a response DTO.
             var paginatedResult = await query
-                .Select(p => new ExecutiveHoursAndDollarsResponse
+                .Select(p => new ExecutiveHoursAndDollarsRow
                 {
                     BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic.ContactInfo.FullName ?? string.Empty,
                     StoreNumber = p.Demographic.StoreNumber,
-                    Ssn = p.Demographic.Ssn.ToString(), // Keep unmasked for sorting
+                    Ssn = p.Demographic.Ssn.ToString(),
                     HoursExecutive = p.HoursExecutive,
                     IncomeExecutive = p.IncomeExecutive,
                     CurrentHoursYear = p.CurrentHoursYear,
@@ -94,17 +112,35 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     PayFrequencyName = p.Demographic.PayFrequency!.Name,
                     EmploymentStatusId = p.Demographic.EmploymentStatusId,
                     EmploymentStatusName = p.Demographic.EmploymentStatus!.Name,
-                    IsExecutive = p.Demographic.PayFrequencyId == 2,
+                    IsExecutive = p.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
                 })
-                .ToPaginationResultsAsync(request, cancellationToken);
+                .ToPaginationResultsAsync(request, cancellationToken)
+                .ConfigureAwait(false);
 
-            // Mask SSN after pagination/sorting
-            var results = paginatedResult.Results.Select(r => r with { Ssn = r.Ssn.MaskSsn() }).ToList();
+            var results = paginatedResult.Results.Select(r => new ExecutiveHoursAndDollarsResponse
+            {
+                BadgeNumber = r.BadgeNumber,
+                FullName = r.FullName,
+                StoreNumber = r.StoreNumber,
+                Ssn = r.Ssn.MaskSsn(),
+                HoursExecutive = r.HoursExecutive,
+                IncomeExecutive = r.IncomeExecutive,
+                CurrentHoursYear = r.CurrentHoursYear,
+                CurrentIncomeYear = r.CurrentIncomeYear,
+                PayFrequencyId = r.PayFrequencyId,
+                EmploymentStatusId = r.EmploymentStatusId,
+                PayFrequencyName = r.PayFrequencyName,
+                EmploymentStatusName = r.EmploymentStatusName,
+                IsExecutive = r.IsExecutive,
+            }).ToList();
 
             return new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>
             {
                 Results = results,
-                Total = paginatedResult.Total
+                Total = paginatedResult.Total,
+                IsPartialResult = paginatedResult.IsPartialResult,
+                ResultHash = paginatedResult.ResultHash,
+                TimeoutOccurred = paginatedResult.TimeoutOccurred,
             };
         }, cancellationToken);
 
@@ -119,22 +155,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             Response = result
         };
 
-        // DEBUG: Validate the response data before serialization
-        if (result?.Results?.Any() == true)
-        {
-            foreach (var record in result.Results)
-            {
-                System.Diagnostics.Debug.WriteLine($"[ExecutiveHoursAndDollars] Badge {record.BadgeNumber}:");
-                System.Diagnostics.Debug.WriteLine($"  HoursExecutive: {record.HoursExecutive}");
-                System.Diagnostics.Debug.WriteLine($"  IncomeExecutive: {record.IncomeExecutive}");
-                System.Diagnostics.Debug.WriteLine($"  CurrentHoursYear: {record.CurrentHoursYear}");
-                System.Diagnostics.Debug.WriteLine($"  CurrentIncomeYear: {record.CurrentIncomeYear}");
-                System.Diagnostics.Debug.WriteLine($"  FullName: {record.FullName}");
-            }
-        }
-
         return finalResponse;
-
     }
 
 

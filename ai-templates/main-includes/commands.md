@@ -1,6 +1,7 @@
 ## Quick Commands
 
 ### PowerShell
+
 ```pwsh
 # Build services
 cd src/services; dotnet build Demoulas.ProfitSharing.slnx
@@ -11,6 +12,7 @@ cd src/ui; npm run dev
 ```
 
 ### Frontend (UI) - Run from `src/ui/`
+
 ```bash
 # Install dependencies
 npm install
@@ -34,6 +36,7 @@ npx playwright test # Run E2E tests
 ```
 
 ### Backend (Services) - Run from `src/services/`
+
 ```bash
 # Build solution
 dotnet build Demoulas.ProfitSharing.slnx

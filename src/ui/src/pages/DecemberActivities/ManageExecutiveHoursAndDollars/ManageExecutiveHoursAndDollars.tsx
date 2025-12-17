@@ -85,7 +85,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   const isReadOnly = useReadOnlyNavigation();
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
-  
+
   // Editing is only allowed when:
   // 1. Page status is "In Progress" (not read-only by status)
   // 2. Year is not frozen

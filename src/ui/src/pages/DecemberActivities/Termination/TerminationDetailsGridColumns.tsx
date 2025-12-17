@@ -71,7 +71,7 @@ export const GetDetailColumns = (
     createHoursColumn({
       headerName: "YTD PS Hours",
       field: "ytdPsHours",
-      sortable: false
+      sortable: true
     }),
     createAgeColumn({
       maxWidth: 70,

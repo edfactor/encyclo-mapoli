@@ -105,7 +105,7 @@ public class ProfitShareEditEndpoint
         {
             int dex = 0;
             Map(m => m.Psn).Index(dex++).Name("Number");
-            Map(m => m.Name).Index(dex++).Name("Name");
+            Map(m => m.FullName).Index(dex++).Name("Name");
             Map(m => m.Code).Index(dex++).Name("Code");
             Map(m => m.ContributionAmount).Index(dex++).Name("Contribution Amount");
             Map(m => m.EarningsAmount).Index(dex++).Name("Earnings Amount");

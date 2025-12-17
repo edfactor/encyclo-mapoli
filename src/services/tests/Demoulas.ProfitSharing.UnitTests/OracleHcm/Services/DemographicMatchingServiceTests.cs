@@ -1,3 +1,4 @@
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Repositories;
 using Demoulas.ProfitSharing.OracleHcm.Services;
@@ -5,7 +6,6 @@ using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.UnitTests.OracleHcm.Services;
 

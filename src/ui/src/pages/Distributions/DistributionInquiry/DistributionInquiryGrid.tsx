@@ -1,8 +1,8 @@
 import { Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { DistributionSearchResponse } from "../../../types";
 import { GetDistributionInquiryColumns } from "./DistributionInquiryGridColumns";
@@ -24,6 +24,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.DISTRIBUTION_INQUIRY,
     onPaginationChange: useCallback(
       async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         onPaginationChange(pageNum, pageSz, sortPrms);
@@ -32,7 +33,9 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
     )
   });
 
-  const gridMaxHeight = useDynamicGridHeight();
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: postReturnData?.length ?? 0
+  });
   const columnDefs = useMemo(() => GetDistributionInquiryColumns(), []);
 
   // Calculate totals
@@ -73,7 +76,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
       </div>
 
       <DSMGrid
-        preferenceKey={CAPTIONS.DISTRIBUTIONS_INQUIRY}
+        preferenceKey={GRID_KEYS.DISTRIBUTION_INQUIRY}
         isLoading={isLoading}
         handleSortChanged={handleSortChange}
         maxHeight={gridMaxHeight}

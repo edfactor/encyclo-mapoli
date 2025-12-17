@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
 using System.Text;
-using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
@@ -102,7 +103,9 @@ public sealed class Program
             var currentYearOption = new Option<string?>("--current-year");
             var environmentOption = new Option<string?>("--environment");
 
-            var cmds = new[] { upgradeDbCommand, dropRecreateDbCommand, runSqlCommand, runSqlCommandForNavigation, runSqlCommandForUatNavigation, generateDgmlCommand, generateMarkdownCommand, validateImportCommand, generateUpgradeScriptCmd };
+            var updateCalendarSeederCmd = new Command("update-calendar-seeder", "Update CaldarRecordSeeder.cs with latest calendar data from warehouse database");
+
+            var cmds = new[] { upgradeDbCommand, dropRecreateDbCommand, runSqlCommand, runSqlCommandForNavigation, runSqlCommandForUatNavigation, generateDgmlCommand, generateMarkdownCommand, validateImportCommand, generateUpgradeScriptCmd, updateCalendarSeederCmd };
 
             // Use the Options collection directly to avoid relying on extension methods that may not be available
             cmds.Select(c => c.Options).ToList().ForEach(options =>
@@ -156,7 +159,7 @@ public sealed class Program
                 case "generate-upgrade-script":
                     return await ExecuteGenerateUpgradeScript(configuration, args ?? Array.Empty<string>());
                 default:
-                    Console.WriteLine($"Unknown or missing command '{invokedCommand}'.");
+                    Console.WriteLine($"Unknown or missing command '{invokedCommand}'");
                     return 1;
             }
         }
@@ -192,13 +195,8 @@ public sealed class Program
 
             await context.Database.MigrateAsync();
 
-            var existingIds = await context.AccountingPeriods.Select(p => p.WeekendingDate).ToListAsync();
-            var newRecords = CaldarRecordSeeder.Records.Where(p => !existingIds.Contains(p.WeekendingDate)).ToList();
-            if (newRecords.Any())
-            {
-                context.AccountingPeriods.AddRange(newRecords);
-                await context.SaveChangesAsync();
-            }
+            // Note: AccountingPeriods removed from ProfitSharingDbContext as they are
+            // managed in the common library's DemoulasCommonDataContext as a keyless entity
 
             await GatherSchemaStatistics(context);
 

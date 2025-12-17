@@ -1,20 +1,13 @@
 ﻿using System.CommandLine;
-using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
-using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interceptors;
-using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.LogMasking;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -100,7 +93,7 @@ internal static class GenerateScriptHelper
                     sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
                 ]));
             factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
-            factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
+            factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonWarehouseContext>("Warehouse"));
         });
         builder.AddProjectServices();
 

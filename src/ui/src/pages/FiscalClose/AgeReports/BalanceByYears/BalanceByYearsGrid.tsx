@@ -2,6 +2,7 @@ import { Grid } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, TotalsGrid } from "smart-ui-library";
+import { GRID_KEYS } from "../../../../constants";
 import { FrozenReportsByAgeRequestType } from "../../../../reduxstore/types";
 import { GetBalanceByYearsGridColumns } from "./BalanceByYearsGridColumns";
 
@@ -106,7 +107,7 @@ const BalanceByYearsGrid: React.FC = () => {
             rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
-                preferenceKey={"AGE_Total"}
+                preferenceKey={GRID_KEYS.BALANCE_YEARS_TOTAL}
                 isLoading={false}
                 providedOptions={{
                   rowData: balanceByYearsTotal?.response.results ?? [],
@@ -118,7 +119,7 @@ const BalanceByYearsGrid: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
-                preferenceKey={"AGE_FullTime"}
+                preferenceKey={GRID_KEYS.BALANCE_YEARS_FULLTIME}
                 isLoading={false}
                 providedOptions={{
                   rowData: balanceByYearsFullTime?.response.results ?? [],
@@ -130,7 +131,7 @@ const BalanceByYearsGrid: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
-                preferenceKey={"AGE_PartTime"}
+                preferenceKey={GRID_KEYS.BALANCE_YEARS_PARTTIME}
                 isLoading={false}
                 providedOptions={{
                   rowData: balanceByYearsPartTime?.response.results ?? [],

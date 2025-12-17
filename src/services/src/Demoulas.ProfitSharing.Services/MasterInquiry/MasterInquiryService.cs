@@ -1,6 +1,8 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Services.Entities.Entities;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
@@ -528,7 +530,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            // OPTIMIZATION: Defer demographics loading until needed
+            // Demographics are only used for partner (XferQdro) lookup when CommentRelatedOracleHcmId is present
+            IQueryable<Demographic>? demographics = null;
             // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query;
 
@@ -559,7 +563,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 ForfeitureAmount = req.ForfeitureAmount,
                 PaymentAmount = req.PaymentAmount,
                 Name = req.Name,
-                PaymentType = req.PaymentType
+                PaymentType = req.PaymentType,
+                Voids = req.Voids
             };
 
             query = FilterMemberQuery(masterInquiryRequest, query);
@@ -579,10 +584,36 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
             }
 
+            // Apply Voids filter (PS-2253: Missing from member details endpoint)
+            if (req.Voids.HasValue && req.Voids.Value)
+            {
+                query = query.Where(pd => pd.ProfitDetail != null && pd.ProfitDetail.CommentTypeId == CommentType.Constants.Voided.Id);
+            }
+
             byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
+            // Handle custom sorting: when sorting by "monthToDate", we need to sort by YearToDate first, then MonthToDate
+            var sortedQuery = query;
+            bool isMonthToDateSort = req.SortBy != null && "monthToDate".Equals(req.SortBy, StringComparison.OrdinalIgnoreCase);
+            
+            if (isMonthToDateSort)
+            {
+                if (req.IsSortDescending.GetValueOrDefault())
+                {
+                    sortedQuery = query.OrderByDescending(x => x.ProfitDetail != null ? x.ProfitDetail.YearToDate : (short)0)
+                                       .ThenByDescending(x => x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0);
+                }
+                else
+                {
+                    sortedQuery = query.OrderBy(x => x.ProfitDetail != null ? x.ProfitDetail.YearToDate : (short)0)
+                                       .ThenBy(x => x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0);
+                }
+            }
+
+            // Create a modified request without sorting if we already applied it
+            var paginationReq = isMonthToDateSort ? req with { SortBy = null } : req;
             // First projection: SQL-translatable only
-            var rawQuery = await query.Select(x => new MasterInquiryRawDto
+            var rawQuery = await sortedQuery.Select(x => new MasterInquiryRawDto
             {
                 Id = x.ProfitDetail != null ? x.ProfitDetail.Id : 0,
                 Ssn = x.ProfitDetail != null ? x.ProfitDetail.Ssn : x.Member.Ssn,
@@ -618,7 +649,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentIncomeYear = x.Member.CurrentIncomeYear,
                 CurrentHoursYear = x.Member.CurrentHoursYear,
                 IsExecutive = x.Member.IsExecutive,
-            }).ToPaginationResultsAsync(req, cancellationToken);
+            }).ToPaginationResultsAsync(paginationReq, cancellationToken);
 
             var formattedResults = rawQuery.Results.Select(x => new MasterInquiryResponseDto
             {
@@ -674,6 +705,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             if (employeePartnerIds.Any() || beneficiaryPartnerKeys.Any())
             {
+                // OPTIMIZATION: Load demographics only if needed (when there are partner references)
+                if (demographics == null)
+                {
+                    demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+                }
+
                 // Single query to get both employees and beneficiaries
                 var badgeNumbers = employeePartnerIds.Concat(beneficiaryPartnerKeys.Select(k => k.OracleHcmId)).Distinct().ToList();
 
@@ -773,6 +810,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var ssnCollection = memberDetailsMap.Keys.ToHashSet();
         List<BalanceEndpointResponse> currentBalance = [];
         List<BalanceEndpointResponse> previousBalance = [];
+        Dictionary<short, StoreInformation> stores = new();
         try
         {
             var previousBalanceTask =
@@ -783,10 +821,17 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _totalService.GetVestingBalanceForMembersAsync(
                     SearchBy.Ssn, ssnCollection, currentYear, cancellationToken);
 
-            await Task.WhenAll(previousBalanceTask, currentBalanceTask);
+            var storesTask = _dataContextFactory.UseWarehouseContext(c =>
+            {
+                var stores = memberDetailsMap.Values.Select(m => m.StoreNumber).ToHashSet();
+                return c.Stores.Where(s => stores.Contains(s.StoreId)).ToDictionaryAsync(s => s.StoreId, s => s, cancellationToken);
+            });
+
+            await Task.WhenAll(previousBalanceTask, currentBalanceTask, storesTask);
 
             currentBalance = await currentBalanceTask;
             previousBalance = await previousBalanceTask;
+            stores = await storesTask;
         }
         catch (Exception ex)
         {
@@ -798,8 +843,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         foreach (var kvp in memberDetailsMap)
         {
             var memberData = kvp.Value;
-            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn });
+            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn.MaskSsn() });
             var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == kvp.Key);
+            _ = stores.TryGetValue(memberData.StoreNumber, out var store);
 
             detailsList.Add(new MemberProfitPlanDetails
             {
@@ -814,7 +860,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 AddressZipCode = memberData.AddressZipCode,
                 DateOfBirth = memberData.DateOfBirth,
                 Age = memberData.DateOfBirth.Age(),
-                Ssn = memberData.Ssn,
+                Ssn = memberData.Ssn.MaskSsn(),
                 IsExecutive = memberData.IsExecutive,
                 YearToDateProfitSharingHours = memberData.YearToDateProfitSharingHours,
                 HireDate = memberData.HireDate,
@@ -846,7 +892,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
                 PhoneNumber = memberData.PhoneNumber,
-                WorkLocation = memberData.WorkLocation,
+                WorkLocation = store != null ? $"{store.City} {store.State}" : memberData.WorkLocation,
 
                 AllocationToAmount = balance?.AllocationsToBeneficiary ?? 0,
                 AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0,

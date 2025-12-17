@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import {
-    duplicateNamesAndBirthdaysReducer,
-    initialState,
-    selectHasResults,
-    selectShowData
+  duplicateNamesAndBirthdaysReducer,
+  initialState,
+  selectHasResults,
+  selectShowData
 } from "./useDuplicateNamesAndBirthdaysReducer";
 
 export interface DuplicateNamesAndBirthdaysSearchParams {
@@ -61,6 +62,7 @@ const useDuplicateNamesAndBirthdays = (includeFictionalSsnPairs: boolean = false
     initialPageSize: 25,
     initialSortBy: "name",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.DUPLICATE_NAMES,
     onPaginationChange: handlePaginationChange
   });
 

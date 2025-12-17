@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
@@ -83,7 +82,7 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                 Age = 41,
                 BadgeNumber = 703244,
                 City = "PEPPERELL",
-                Name= "DELAROSA, ZOE",
+                FullName = "DELAROSA, ZOE",
                 PsnSuffix= 1000,
                 Ssn ="XXX-XX-0692",
                 State = "MA",

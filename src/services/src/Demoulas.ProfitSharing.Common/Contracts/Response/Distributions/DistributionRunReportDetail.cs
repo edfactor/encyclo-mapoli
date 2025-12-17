@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+
 public sealed record DistributionRunReportDetail
 {
     public int BadgeNumber { get; set; }
@@ -9,7 +10,7 @@ public sealed record DistributionRunReportDetail
     public required string PayClassificationId { get; set; }
     public required string PayClassificationName { get; set; }
     public int StoreNumber { get; set; }
-    public char TaxCodeId { get; set;}
+    public char TaxCodeId { get; set; }
     public required string TaxCodeName { get; set; }
     [MaskSensitive]
     public required string EmployeeName { get; set; }

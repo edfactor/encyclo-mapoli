@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -27,7 +28,7 @@ public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<Star
 
     public override void Configure()
     {
-        Get("adhoc-terminated-employees-report");
+        Get("terminated-employees-report");
         Summary(s =>
         {
             s.Summary = "Adhoc Terminated Employees Report";
@@ -59,7 +60,7 @@ public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<Star
                                 {
                                     BadgeNumber = 12345,
                                     FullName = "John Doe",
-                                    Ssn = "123-45-6789",
+                                    Ssn = "123-45-6789".MaskSsn(),
                                     TerminationDate = new DateOnly(2023, 5, 15),
                                     TerminationCodeId = 'A',
                                     TerminationCode = "Active"
@@ -71,7 +72,7 @@ public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<Star
                 }
             };
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
     public override string ReportFileName => "Adhoc Terminated Employees Report";

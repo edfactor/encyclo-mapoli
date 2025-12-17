@@ -2,16 +2,16 @@
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.Common.Data.Contexts.Interceptor;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -94,8 +94,36 @@ public class FrozenService : IFrozenService
                 ModifiedAtUtc = dh.ValidFrom,
                 StoreNumber = dh.StoreNumber,
                 PayClassificationId = dh.PayClassificationId,
-                ContactInfo = d.ContactInfo,
-                Address = d.Address,
+                ContactInfo = new ContactInfo
+                {
+                    FirstName = dh.FirstName ?? string.Empty,
+                    LastName = dh.LastName ?? string.Empty,
+                    MiddleName = dh.MiddleName,
+                    PhoneNumber = dh.PhoneNumber,
+                    MobileNumber = dh.MobileNumber,
+                    EmailAddress = dh.EmailAddress,
+                    // IMPORTANT: Do NOT use DtoCommonExtensions.ComputeFullNameWithInitial() here!
+                    // This projection is used within EF Core LINQ queries (e.g., FrozenReportService.GetGrossWagesReport)
+                    // and the Oracle provider cannot translate custom C# methods to SQL.
+                    // Using ComputeFullNameWithInitial causes System.InvalidOperationException at runtime.
+                    // See PS-2333 for details. Use inline string concatenation that EF can translate instead.
+                    FullName =
+                        (dh.LastName != null ? dh.LastName : string.Empty)
+                        + ", "
+                        + (dh.FirstName != null ? dh.FirstName : string.Empty)
+                        + (dh.MiddleName != null && dh.MiddleName != string.Empty
+                            ? " " + dh.MiddleName.Substring(0, 1)
+                            : string.Empty)
+                },
+                Address = new Address
+                {
+                    Street = dh.Street ?? string.Empty,
+                    Street2 = dh.Street2,
+                    City = dh.City ?? string.Empty,
+                    State = dh.State ?? string.Empty,
+                    PostalCode = dh.PostalCode ?? string.Empty,
+                    CountryIso = "US"
+                },
                 DateOfBirth = dh.DateOfBirth,
                 FullTimeDate = d.FullTimeDate,
                 HireDate = dh.HireDate,

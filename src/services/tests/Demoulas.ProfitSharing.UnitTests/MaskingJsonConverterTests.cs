@@ -1,10 +1,9 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
-using Xunit.v3;
 
 namespace Demoulas.ProfitSharing.UnitTests.Contracts.Response;
 
@@ -117,7 +116,7 @@ public class MaskingJsonConverterTests
             BadgeNumber = 12345,
             ProfitYear = 2024,
             YearsInPlan = 3,
-            EmployeeName = "Test Employee",
+            FullName = "Test Employee",
             StoreNumber = 1,
             EmployeeTypeCode = 'P',
             EmployeeTypeName = "Part Time",

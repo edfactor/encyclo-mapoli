@@ -36,18 +36,19 @@ vi.mock("../ForfeituresAdjustmentSearchFilter", () => ({
 }));
 
 vi.mock("../ForfeituresAdjustmentPanel", () => ({
-  default: vi.fn(({ onAddForfeiture, isReadOnly }) =>
+  default: vi.fn(({ onAddForfeiture, isReadOnly, currentBalance }) =>
     React.createElement(
       "section",
-      { "aria-label": "forfeiture panel" },
+      { "aria-label": "forfeiture panel", "data-testid": "forfeiture-panel" },
       React.createElement(
         "button",
         {
           onClick: onAddForfeiture,
-          disabled: isReadOnly
+          disabled: isReadOnly || currentBalance === 0
         },
         "Add Forfeiture"
-      )
+      ),
+      React.createElement("span", { "data-testid": "current-balance" }, `Balance: ${currentBalance}`)
     )
   )
 }));
@@ -116,11 +117,13 @@ vi.mock("../hooks/useForfeituresAdjustment", () => ({
       sortParams: { sortBy: "date", isSortDescending: true },
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
+      resetPagination: vi.fn(),
+      clearPersistedState: vi.fn()
     },
     profitYear: 2024,
     isReadOnly: false,
-    memberDetailsRefreshTrigger: 0
+    memberDetailsRefreshTrigger: 0,
+    currentBalance: 0
   }))
 }));
 
@@ -175,7 +178,7 @@ describe("ForfeituresAdjustment", () => {
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
       expect(screen.queryByLabelText("member details")).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: /add forfeiture/i })).not.toBeInTheDocument();
+      expect(screen.queryByTestId("forfeiture-panel")).not.toBeInTheDocument();
       expect(screen.queryByLabelText("transaction grid")).not.toBeInTheDocument();
     });
   });
@@ -236,11 +239,13 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
-        memberDetailsRefreshTrigger: 0
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: 0
       });
 
       const mockStore = createMockStore();
@@ -253,7 +258,7 @@ describe("ForfeituresAdjustment", () => {
   });
 
   describe("Employee data display", () => {
-    it("should display employee data after search succeeds", async () => {
+    it("should display employee data and panel after search succeeds", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         searchParams: {
@@ -286,11 +291,13 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
-        memberDetailsRefreshTrigger: 0
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -298,6 +305,7 @@ describe("ForfeituresAdjustment", () => {
 
       await waitFor(() => {
         expect(screen.getByLabelText("member details")).toBeInTheDocument();
+        expect(screen.getByTestId("forfeiture-panel")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /add forfeiture/i })).toBeInTheDocument();
       });
     });
@@ -335,11 +343,13 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
-        memberDetailsRefreshTrigger: 0
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -347,6 +357,140 @@ describe("ForfeituresAdjustment", () => {
 
       await waitFor(() => {
         expect(screen.getByLabelText("transaction grid")).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Current balance integration", () => {
+    it("should pass currentBalance to ForfeituresAdjustmentPanel", async () => {
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
+      const testBalance = 2500.75;
+
+      vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
+        searchParams: null,
+        employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
+        memberDetails: null,
+        transactionData: null,
+        isSearching: false,
+        isFetchingMemberDetails: false,
+        isFetchingTransactions: false,
+        isAddForfeitureModalOpen: false,
+        showEmployeeData: true,
+        showMemberDetails: false,
+        showTransactions: false,
+        executeSearch: mockExecuteSearch,
+        handleReset: mockHandleReset,
+        handleSaveForfeiture: mockHandleSaveForfeiture,
+        openAddForfeitureModal: mockOpenModal,
+        closeAddForfeitureModal: mockCloseModal,
+        transactionPagination: {
+          pageNumber: 0,
+          pageSize: 25,
+          sortParams: { sortBy: "date", isSortDescending: true },
+          handlePaginationChange: vi.fn(),
+          handleSortChange: vi.fn(),
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
+        },
+        profitYear: 2024,
+        isReadOnly: false,
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: testBalance
+      });
+
+      const mockStore = createMockStore();
+      render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("current-balance")).toHaveTextContent(`Balance: ${testBalance}`);
+      });
+    });
+
+    it("should disable add forfeiture button when balance is zero", async () => {
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
+
+      vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
+        searchParams: null,
+        employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
+        memberDetails: null,
+        transactionData: null,
+        isSearching: false,
+        isFetchingMemberDetails: false,
+        isFetchingTransactions: false,
+        isAddForfeitureModalOpen: false,
+        showEmployeeData: true,
+        showMemberDetails: false,
+        showTransactions: false,
+        executeSearch: mockExecuteSearch,
+        handleReset: mockHandleReset,
+        handleSaveForfeiture: mockHandleSaveForfeiture,
+        openAddForfeitureModal: mockOpenModal,
+        closeAddForfeitureModal: mockCloseModal,
+        transactionPagination: {
+          pageNumber: 0,
+          pageSize: 25,
+          sortParams: { sortBy: "date", isSortDescending: true },
+          handlePaginationChange: vi.fn(),
+          handleSortChange: vi.fn(),
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
+        },
+        profitYear: 2024,
+        isReadOnly: false,
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: 0
+      });
+
+      const mockStore = createMockStore();
+      render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
+
+      await waitFor(() => {
+        const button = screen.getByRole("button", { name: /add forfeiture/i });
+        expect(button).toBeDisabled();
+      });
+    });
+
+    it("should enable add forfeiture button when balance is positive and not read-only", async () => {
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
+
+      vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
+        searchParams: null,
+        employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
+        memberDetails: null,
+        transactionData: null,
+        isSearching: false,
+        isFetchingMemberDetails: false,
+        isFetchingTransactions: false,
+        isAddForfeitureModalOpen: false,
+        showEmployeeData: true,
+        showMemberDetails: false,
+        showTransactions: false,
+        executeSearch: mockExecuteSearch,
+        handleReset: mockHandleReset,
+        handleSaveForfeiture: mockHandleSaveForfeiture,
+        openAddForfeitureModal: mockOpenModal,
+        closeAddForfeitureModal: mockCloseModal,
+        transactionPagination: {
+          pageNumber: 0,
+          pageSize: 25,
+          sortParams: { sortBy: "date", isSortDescending: true },
+          handlePaginationChange: vi.fn(),
+          handleSortChange: vi.fn(),
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
+        },
+        profitYear: 2024,
+        isReadOnly: false,
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: 1000
+      });
+
+      const mockStore = createMockStore();
+      render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
+
+      await waitFor(() => {
+        const button = screen.getByRole("button", { name: /add forfeiture/i });
+        expect(button).toBeEnabled();
       });
     });
   });
@@ -385,11 +529,13 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
-        memberDetailsRefreshTrigger: 0
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -435,11 +581,13 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
-        memberDetailsRefreshTrigger: 0
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -487,11 +635,13 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: false,
-        memberDetailsRefreshTrigger: 0
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();
@@ -540,11 +690,13 @@ describe("ForfeituresAdjustment", () => {
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
-          resetPagination: vi.fn()
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         profitYear: 2024,
         isReadOnly: true,
-        memberDetailsRefreshTrigger: 0
+        memberDetailsRefreshTrigger: 0,
+        currentBalance: 1500.5
       });
 
       const mockStore = createMockStore();

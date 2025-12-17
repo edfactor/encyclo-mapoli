@@ -1,7 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -9,7 +8,6 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
-using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -53,7 +51,7 @@ public class GetFrozenDemographicsEndpoint : ProfitSharingEndpoint<SortedPaginat
                 }
             };
         });
-        Group<ItDevOpsAllUsersGroup>();
+        Group<ItDevOpsGroup>();
 
         // Output caching: Frozen demographics are immutable snapshots - excellent caching candidate  
         // Cache disabled in test environments to ensure test data freshness

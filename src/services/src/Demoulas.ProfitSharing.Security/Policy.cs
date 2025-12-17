@@ -54,5 +54,10 @@ public static class Policy
     /// Can reverse profit detail entries (corrections).
     /// </summary>
     public static readonly string CanReverseProfitDetails = "CAN_REVERSE_PROFIT_DETAILS";
+
+    /// <summary>
+    /// Manage administration pages and actions (state tax rates, annuity rates, Oracle HCM diagnostics, adjustments).
+    /// </summary>
+    public static readonly string CanManageAdministration = "CAN_MANAGE_ADMINISTRATION";
     public static readonly string CanViewAudits = "CAN_VIEW_AUDITS";
 }

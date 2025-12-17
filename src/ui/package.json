@@ -1,7 +1,7 @@
 {
   "name": "smart-profit-sharing",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "overrides": {
     "@babel/runtime": "^7.26.0"
@@ -9,12 +9,12 @@
   "scripts": {
     "dev": "vite --port 3100",
     "build:prod": "tsc -b && vite build --mode production",
-    "build:qa": "vite build --mode qa",
-    "build:uat": "vite build --mode uat",
+    "build:qa": "tsc -b && vite build --mode qa",
+    "build:uat": "tsc -b && vite build --mode uat",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "prettier": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
     "test": "vitest --coverage",
-    "test:windows": "vitest --coverage --threads=1 --fileParallelism=false",
+    "test:windows": "vitest --coverage --run --pool=threads --poolOptions.threads.singleThread",
     "e2e": "playwright test --workers=2",
     "e2e:watch": "playwright test --watch",
     "e2e:ui": "playwright test --ui",
@@ -51,9 +51,9 @@
     "env-cmd": "11.0.0",
     "js-yaml": "^4.1.0",
     "prettier-plugin-tailwindcss": "0.7.1",
-    "react": "19.2.0",
+    "react": "19.2.1",
     "react-datepicker": "8.10.0",
-    "react-dom": "19.2.0",
+    "react-dom": "19.2.1",
     "react-error-boundary": "4.1.2",
     "react-hook-form": "7.66.1",
     "react-markdown": "^10.1.0",
@@ -69,7 +69,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
-    "babel-plugin-react-compiler": "1.0.0",
     "@eslint/compat": "1.2.8",
     "@eslint/eslintrc": "3.3.1",
     "@eslint/js": "9.39.1",
@@ -82,6 +81,7 @@
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "10.4.22",
+    "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-import": "2.32.0",

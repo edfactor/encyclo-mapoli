@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
+﻿// Result, Error
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
@@ -37,7 +36,7 @@ public class UpdateForfeitureAdjustmentEndpoint : ProfitSharingEndpoint<Forfeitu
             s.Responses[403] = $"Forbidden. Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
             s.Responses[404] = "Badge number not found";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
     }
 #pragma warning disable AsyncFixer01 // Method does use async/await inside ExecuteWithTelemetry lambda
     public override async Task<Results<NoContent, ProblemHttpResult>> ExecuteAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken ct)

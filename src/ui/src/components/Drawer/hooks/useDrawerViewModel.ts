@@ -207,10 +207,10 @@ export const useDrawerViewModel = (
   const isItemActive = useCallback(
     (item: NavigationDto): boolean => {
       const itemPath = item.url?.replace(/^\/+/, "");
-      
+
       // First check if URLs match
       if (currentPath !== itemPath) return false;
-      
+
       // URLs match - now check navigation ID for duplicate pages
       const storedNavId = localStorage.getItem("navigationId");
       if (storedNavId) {
@@ -219,7 +219,7 @@ export const useDrawerViewModel = (
         // This allows other non-duplicate pages to work normally
         return item.id === storedId;
       }
-      
+
       // If no stored nav ID, fall back to URL matching (for direct URL navigation)
       return true;
     },

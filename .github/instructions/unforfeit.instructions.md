@@ -1,6 +1,7 @@
 ---
 applyTo: "src/ui/src/pages/DecemberActivities/Unforfeit/**/*.*"
 ---
+
 # UnForfeit Feature - Technical Implementation Guide
 
 ## Overview
@@ -149,13 +150,17 @@ const schema = yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
+    "Ending date must be the same or after the beginning date",
   )
     .required()
-    .test("is-too-early", "Insufficient data for dates before 2024", (value) => {
-      return new Date(value) > new Date(2024, 1, 1);
-    }),
-  profitYear: profitYearValidator()
+    .test(
+      "is-too-early",
+      "Insufficient data for dates before 2024",
+      (value) => {
+        return new Date(value) > new Date(2024, 1, 1);
+      },
+    ),
+  profitYear: profitYearValidator(),
 });
 ```
 
@@ -212,7 +217,7 @@ const validateAndSubmit = (data: StartAndEndDateRequest) => {
       ...data,
       beginningDate: mmDDYYFormat(beginDate),
       endingDate: mmDDYYFormat(endDate),
-      profitYear: selectedProfitYear
+      profitYear: selectedProfitYear,
     };
 
     dispatch(setUnForfeitsQueryParams(updatedData)); // Redux persistence
@@ -289,7 +294,7 @@ const {
   onGridReady,
   paginationHandlers,
   gridRef,
-  gridContext
+  gridContext,
 } = useUnForfeitGrid({
   initialSearchLoaded,
   setInitialSearchLoaded,
@@ -299,7 +304,7 @@ const {
   shouldArchive,
   onArchiveHandled,
   setHasUnsavedChanges,
-  fiscalCalendarYear
+  fiscalCalendarYear,
 });
 ```
 
@@ -947,8 +952,8 @@ generateRowKey(
   {
     badgeNumber: 12345,
     profitYear: 2021,
-    profitDetailId: 98765
-  }
+    profitDetailId: 98765,
+  },
 );
 // Returns: "98765"
 ```
@@ -1164,7 +1169,7 @@ The UnForfeit feature uses shared components from `/src/ui/src/components/Forfei
 cellRenderer: createSaveButtonCellRenderer({
   activityType: "unforfeit",
   selectedProfitYear,
-  isReadOnly
+  isReadOnly,
 });
 ```
 
@@ -1355,7 +1360,7 @@ const detailColumns = useMemo(
   () => GetProfitDetailColumns(/* ... */),
   [
     /* dependencies */
-  ]
+  ],
 );
 ```
 

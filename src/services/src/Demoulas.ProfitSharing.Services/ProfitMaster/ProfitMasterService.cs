@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Diagnostics;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -100,7 +99,7 @@ public class ProfitMasterService : IProfitMasterService
             var openProfitYear = frozenDemographicYear;
 
             (List<ProfitShareEditMemberRecord> records, _, _, _, _) = await _profitShareEditService.ProfitShareEditRecords(profitShareUpdateRequest, ct);
-            
+
             Dictionary<byte, ProfitCode> code2ProfitCode = await ctx.ProfitCodes.ToDictionaryAsync(pc => pc.Id, pc => pc, ct);
 
             // Get the records to be created
@@ -111,7 +110,7 @@ public class ProfitMasterService : IProfitMasterService
             // Insert them in bulk.
             // ctx.ProfitDetails.AddRange(profitDetailRecords); <--- 7 minutes for obfuscated database
             BulkInsertProfitDetails(ctx, transaction, profitDetailRecords);
-            
+
             // This code only runs when the system is "FROZEN" which means in the beginning of a new year, and processing
             // last year's profit sharing.   We currently grab most profit sharing data from PayProfit using the prior year (aka profit year), but
             // the hot ETVA is located in the PayProfit for the wall-clock year (aka profitYear+1) 
@@ -424,7 +423,7 @@ public class ProfitMasterService : IProfitMasterService
 
         bulkCopy.WriteToServer(table);
     }
-    
+
     private static void EnsureNoValuesOutOfBounds(List<ProfitDetail> profitDetailRecords)
     {
         const decimal maxAmount = 9999999.99m;

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { setDistributionHome } from "reduxstore/slices/distributionSlice";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { CAPTIONS, ROUTES } from "../../constants";
+import { GRID_KEYS, ROUTES } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
 import { GetBeneficiariesListGridColumns } from "./BeneficiariesListGridColumns";
@@ -36,7 +36,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const [deleteBeneficiaryId, setDeleteBeneficiaryId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
   const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
-  
+
   // Snackbar state for percentage update feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -46,7 +46,8 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "psnSuffix",
-    initialSortDescending: true
+    initialSortDescending: true,
+    persistenceKey: GRID_KEYS.BENEFICIARIES_LIST
   });
 
   const relationships = useBeneficiaryRelationshipData({
@@ -151,7 +152,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
         setSnackbarMessage(result.error || "Failed to update percentage");
         setSnackbarSeverity("error");
         setSnackbarOpen(true);
-        
+
         // Restore previous value on validation failure
         if (e.target.value) {
           e.target.value = result.previousValue?.toString() || "";
@@ -226,7 +227,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={CAPTIONS.BENEFICIARY_OF}
+            preferenceKey={GRID_KEYS.BENEFICIARY_OF}
             isLoading={relationships.isLoading}
             providedOptions={{
               rowData: relationships.beneficiaryOfList?.results,
@@ -246,7 +247,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={CAPTIONS.BENEFICIARIES_LIST}
+            preferenceKey={GRID_KEYS.BENEFICIARIES_LIST}
             isLoading={relationships.isLoading}
             handleSortChanged={sortEventHandler}
             providedOptions={{
@@ -272,7 +273,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
             recordCount={relationships.beneficiaryList?.total}
           />
         )}
-      
+
       {/* Snackbar for percentage update feedback */}
       <Snackbar
         open={snackbarOpen}

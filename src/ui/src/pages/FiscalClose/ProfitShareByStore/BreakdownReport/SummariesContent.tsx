@@ -3,10 +3,11 @@ import { Grid } from "@mui/material";
 import { ColDef, RowClassParams } from "ag-grid-community";
 import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { useEffect, useState } from "react";
-import { useLazyGetBreakdownGrandTotalsQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetBreakdownGrandTotalsQuery } from "reduxstore/api/AdhocApi";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../reduxstore/store";
+import { GRID_KEYS } from "../../../../constants";
 import { GrandTotalsByStoreResponseDto, GrandTotalsByStoreRowDto } from "../../../../reduxstore/types";
 
 const SummariesContent: React.FC = () => {
@@ -218,7 +219,7 @@ const SummariesContent: React.FC = () => {
           </Grid>
         ) : (
           <DSMGrid
-            preferenceKey={`BREAKDOWN_REPORT_ALL_EMPLOYEES_SUMMARY_STORE`}
+            preferenceKey={GRID_KEYS.BREAKDOWN_REPORT_SUMMARY}
             isLoading={false}
             handleSortChanged={(_params) => {}}
             providedOptions={{

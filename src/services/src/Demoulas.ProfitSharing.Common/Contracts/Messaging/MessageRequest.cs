@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Messaging;
+
 public sealed record MessageRequest<TMessageBody> where TMessageBody : class
 {
     public Guid Id { get; init; } = Guid.NewGuid();

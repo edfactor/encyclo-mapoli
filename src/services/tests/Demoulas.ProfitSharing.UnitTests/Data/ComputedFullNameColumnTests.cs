@@ -1,8 +1,6 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Data;
 
@@ -199,7 +197,7 @@ public class ComputedFullNameColumnTests
         // 3. BeneficiaryContactArchive (in BeneficiaryContactArchiveMap.cs)
 
         var entities = new[] { "Demographic", "BeneficiaryContact", "BeneficiaryContactArchive" };
-        
+
         // Each entity should have the computed column configured in its mapping
         entities.Length.ShouldBe(3);
         entities.ShouldContain("Demographic");

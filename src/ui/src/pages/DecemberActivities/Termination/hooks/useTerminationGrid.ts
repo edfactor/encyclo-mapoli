@@ -1,11 +1,11 @@
 import { GridApi } from "ag-grid-community";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import {
-  useLazyGetTerminationReportQuery,
   useUpdateForfeitureAdjustmentBulkMutation,
   useUpdateForfeitureAdjustmentMutation
-} from "reduxstore/api/YearsEndApi";
+} from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
 import {
   CalendarResponseDto,
@@ -15,6 +15,7 @@ import {
 import { setMessage } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { useEditState } from "../../../../hooks/useEditState";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useRowSelection } from "../../../../hooks/useRowSelection";
 import { generateRowKey } from "../../../../utils/forfeitActivities/gridDataHelpers";
@@ -147,6 +148,7 @@ export const useTerminationGrid = ({
       initialPageSize: 25,
       initialSortBy: "name",
       initialSortDescending: false,
+      persistenceKey: GRID_KEYS.TERMINATION,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded && searchParams) {

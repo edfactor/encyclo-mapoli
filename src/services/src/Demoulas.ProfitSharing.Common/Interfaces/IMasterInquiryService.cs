@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
+
 public interface IMasterInquiryService
 {
     public Task<PaginatedResponseDto<MemberDetails>> GetMembersAsync(MasterInquiryRequest req, CancellationToken cancellationToken = default);

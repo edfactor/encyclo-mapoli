@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -19,14 +19,28 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
 {
     private readonly ProfitSharingDbContext _ctx;
     private readonly ProfitSharingReadOnlyDbContext _readOnlyCtx;
+    private readonly string? _warehouseConnectionString;
+    private readonly bool _debug;
     public string ConnectionString { get; }
 
     public PristineDataContextFactory(bool debug = false)
     {
+        _debug = debug;
+
         var configuration = new ConfigurationBuilder()
             .AddUserSecrets<Api.Program>()
             .Build();
-        ConnectionString = configuration["ConnectionStrings:ProfitSharing"]!;
+
+        string? profitSharingConnectionString = configuration["ConnectionStrings:ProfitSharing"];
+        _warehouseConnectionString = configuration["ConnectionStrings:Warehouse"];
+
+        if (string.IsNullOrWhiteSpace(profitSharingConnectionString))
+        {
+            throw Xunit.Sdk.SkipException.ForSkip(
+                "Integration tests require user-secrets connection string 'ConnectionStrings:ProfitSharing'.");
+        }
+
+        ConnectionString = profitSharingConnectionString;
 
         _readOnlyCtx = setUpReadOnlyCtx(ConnectionString, debug);
         _ctx = setUpWriteCtx(ConnectionString, debug);
@@ -82,9 +96,26 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         return func(_readOnlyCtx);
     }
 
-    public Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrWhiteSpace(_warehouseConnectionString))
+        {
+            throw Xunit.Sdk.SkipException.ForSkip(
+                "Warehouse-backed integration tests require user-secrets connection string 'ConnectionStrings:Warehouse'.");
+        }
+
+        DbContextOptionsBuilder<DemoulasCommonWarehouseContext> optionsBuilder =
+            new DbContextOptionsBuilder<DemoulasCommonWarehouseContext>()
+                .UseOracle(_warehouseConnectionString,
+                    opts => opts.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
+
+        if (_debug)
+        {
+            optionsBuilder.EnableSensitiveDataLogging().LogTo(s => Debug.WriteLine(s));
+        }
+
+        DemoulasCommonWarehouseContext ctx = new(optionsBuilder.Options);
+        return func(ctx);
     }
 
     private static ProfitSharingDbContext setUpWriteCtx(string connectionString, bool debug)

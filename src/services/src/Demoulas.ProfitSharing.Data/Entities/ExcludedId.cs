@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class ExcludedId
 {
     public int Id { get; set; }

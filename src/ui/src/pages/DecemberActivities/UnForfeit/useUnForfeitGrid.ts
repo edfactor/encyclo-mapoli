@@ -1,16 +1,17 @@
 import { GridApi } from "ag-grid-community";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetUnForfeitsQuery } from "reduxstore/api/YearsEndApi";
 import {
-  useLazyGetUnForfeitsQuery,
   useUpdateForfeitureAdjustmentBulkMutation,
   useUpdateForfeitureAdjustmentMutation
-} from "reduxstore/api/YearsEndApi";
+} from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useEditState } from "../../../hooks/useEditState";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useRowSelection } from "../../../hooks/useRowSelection";
 import { flattenMasterDetailData, generateRowKey } from "../../../utils/forfeitActivities/gridDataHelpers";
@@ -113,7 +114,8 @@ export const useUnForfeitGrid = ({
     useGridPagination({
       initialPageSize: 25,
       initialSortBy: "fullName",
-      initialSortDescending: false
+      initialSortDescending: false,
+      persistenceKey: GRID_KEYS.REHIRE_FORFEITURES
     });
 
   const isPaginationChangeRef = useRef<boolean>(false);

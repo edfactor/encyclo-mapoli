@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class DistributionPayeeMap : IEntityTypeConfiguration<DistributionPayee>
 {
     public void Configure(EntityTypeBuilder<DistributionPayee> builder)

@@ -1,11 +1,9 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using MockQueryable;
 using MockQueryable.Moq;
 using Moq;
 
@@ -15,14 +13,14 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
 {
     public Mock<ProfitSharingDbContext> ProfitSharingDbContext { get; }
     public Mock<ProfitSharingReadOnlyDbContext> ProfitSharingReadOnlyDbContext { get; }
-    public Mock<DemoulasCommonDataContext> StoreInfoDbContext { get; }
+    public Mock<DemoulasCommonWarehouseContext> StoreInfoDbContext { get; }
 
 
     public ScenarioDataContextFactory()
     {
         ProfitSharingDbContext = new Mock<ProfitSharingDbContext>();
         ProfitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
-        StoreInfoDbContext = new Mock<DemoulasCommonDataContext>();
+        StoreInfoDbContext = new Mock<DemoulasCommonWarehouseContext>();
     }
 
     /// <summary>
@@ -191,7 +189,7 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
-    public async Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
     {
         try
         {

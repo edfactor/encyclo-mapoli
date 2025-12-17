@@ -8,8 +8,8 @@ https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/272007173/READY+SMART+Year
 
 Go to the checkout directory of the project and add your credentials for READY;
 
-$  dotnet user-secrets set "YEMatchHost:Username" myusernam
-$  dotnet user-secrets set "YEMatchHost:Password" 'mypasswd'
+$ dotnet user-secrets set "YEMatchHost:Username" myusernam
+$ dotnet user-secrets set "YEMatchHost:Password" 'mypasswd'
 
 Also set the connection strings for READY and SMART databases
 
@@ -34,8 +34,3 @@ setup the "setyematch" script. Sets credentials for READY to use.
    Test Certs)".
 
 2. Run the Program.cs
-
-
-
-
-

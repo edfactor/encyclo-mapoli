@@ -2,7 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
 import EnvironmentUtils from "../utils/environmentUtils";
-import { AccountHistoryReportApi } from "./api/AccountHistoryReportApi";
+import { AdhocProfLetter73Api } from "./api/AdhocProfLetter73Api";
+import { AdhocApi } from "./api/AdhocApi";
 import { AdjustmentsApi } from "./api/AdjustmentsApi";
 import { AppSupportApi } from "./api/AppSupportApi";
 import { BeneficiariesApi } from "./api/BeneficiariesApi";
@@ -14,10 +15,11 @@ import { LookupsApi } from "./api/LookupsApi";
 import { MilitaryApi } from "./api/MilitaryApi";
 import { NavigationApi } from "./api/NavigationApi";
 import { NavigationStatusApi } from "./api/NavigationStatusApi";
-import { PayServicesApi } from "./api/PayServicesApi";
+import { ProfitDetailsApi } from "./api/ProfitDetailsApi";
 import { SecurityApi } from "./api/SecurityApi";
 import { validationApi } from "./api/ValidationApi";
 import { YearsEndApi } from "./api/YearsEndApi";
+import { hcmSyncApi } from "./api/hcmSyncApi";
 import navigationStatusSlice from "./slices/NavigationStatusSlice";
 import AppSupportSlice from "./slices/appSupportSlice";
 import beneficiarySlice from "./slices/beneficiarySlice";
@@ -38,7 +40,9 @@ import yearsEndSlice from "./slices/yearsEndSlice";
 const API_INSTANCES = [
   SecurityApi,
   YearsEndApi,
+  AdhocApi,
   ItOperationsApi,
+  hcmSyncApi,
   MilitaryApi,
   InquiryApi,
   LookupsApi,
@@ -48,9 +52,9 @@ const API_INSTANCES = [
   NavigationStatusApi,
   BeneficiariesApi,
   AdjustmentsApi,
+  ProfitDetailsApi,
   DistributionApi,
-  PayServicesApi,
-  AccountHistoryReportApi,
+  AdhocProfLetter73Api,
   validationApi
 ] as const;
 
@@ -74,9 +78,7 @@ export const store = configureStore({
     distribution: distributionSlice,
 
     // Dynamically register all API reducers
-    ...Object.fromEntries(
-      API_INSTANCES.map(api => [api.reducerPath, api.reducer])
-    )
+    ...Object.fromEntries(API_INSTANCES.map((api) => [api.reducerPath, api.reducer]))
   },
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,7 +86,7 @@ export const store = configureStore({
     getDefaultMiddleware({ serializableCheck: false })
       .concat(rtkQueryErrorToastMiddleware(true))
       .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
-      .concat(API_INSTANCES.map(api => api.middleware))
+      .concat(API_INSTANCES.map((api) => api.middleware))
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

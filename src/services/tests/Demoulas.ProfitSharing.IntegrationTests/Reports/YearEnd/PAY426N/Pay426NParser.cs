@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -402,8 +402,8 @@ public static class Pay426NParser
         {
             BadgeNumber = emp.BadgeNumber,
             ProfitYear = profitYear,
-//            PriorProfitYear = (short)(profitYear - 1),
-            EmployeeName = emp.Name,
+            //            PriorProfitYear = (short)(profitYear - 1),
+            FullName = emp.Name,
             StoreNumber = emp.StoreNumber,
             EmployeeTypeCode = emp.EmployeeTypeCode,
             EmployeeTypeName = MapEmployeeTypeName(emp.EmployeeTypeCode),
@@ -411,7 +411,7 @@ public static class Pay426NParser
             Age = age,
             Ssn = emp.Ssn,
             Wages = emp.Wages,
-   //         PriorBalance = 0, // Not available in PAY426 report
+            //         PriorBalance = 0, // Not available in PAY426 report
             // Truncate hours to match SMART's behavior (COBOL uses S-HRS integer part)
             Hours = Math.Truncate(emp.Hours),
             Points = (short)emp.Points,

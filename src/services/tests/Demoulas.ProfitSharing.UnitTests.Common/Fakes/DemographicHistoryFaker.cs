@@ -1,4 +1,4 @@
-using Bogus;
+﻿using Bogus;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
 
@@ -31,6 +31,19 @@ internal sealed class DemographicHistoryFaker : Faker<DemographicHistory>
             .RuleFor(dh => dh.PayFrequencyId, f => currentDemographic.PayFrequencyId)
             .RuleFor(dh => dh.TerminationCodeId, f => currentDemographic.TerminationCodeId)
             .RuleFor(dh => dh.EmploymentStatusId, f => currentDemographic.EmploymentStatusId)
+            // ContactInfo fields
+            .RuleFor(dh => dh.FirstName, f => currentDemographic.ContactInfo.FirstName)
+            .RuleFor(dh => dh.LastName, f => currentDemographic.ContactInfo.LastName)
+            .RuleFor(dh => dh.MiddleName, f => currentDemographic.ContactInfo.MiddleName)
+            .RuleFor(dh => dh.PhoneNumber, f => currentDemographic.ContactInfo.PhoneNumber)
+            .RuleFor(dh => dh.MobileNumber, f => currentDemographic.ContactInfo.MobileNumber)
+            .RuleFor(dh => dh.EmailAddress, f => currentDemographic.ContactInfo.EmailAddress)
+            // Address fields
+            .RuleFor(dh => dh.Street, f => currentDemographic.Address.Street)
+            .RuleFor(dh => dh.Street2, f => currentDemographic.Address.Street2)
+            .RuleFor(dh => dh.City, f => currentDemographic.Address.City)
+            .RuleFor(dh => dh.State, f => currentDemographic.Address.State)
+            .RuleFor(dh => dh.PostalCode, f => currentDemographic.Address.PostalCode)
             .RuleFor(dh => dh.CreatedDateTime, f => DateTime.UtcNow).UseSeed(100);
     }
 }

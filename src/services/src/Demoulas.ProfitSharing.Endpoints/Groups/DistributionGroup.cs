@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
+
 public sealed class DistributionGroup : GroupBase
 {
     public DistributionGroup() : base()

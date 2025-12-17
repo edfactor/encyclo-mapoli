@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class ExcludedIdType : ILookupTable<byte>, IEquatable<ExcludedIdType>
 {
     public required byte Id { get; set; }

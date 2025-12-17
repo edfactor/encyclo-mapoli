@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
-using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -78,7 +71,7 @@ public sealed class DistributionService : IDistributionService
                             dist.StateTaxAmount,
                             dist.CheckAmount,
                             IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly,
-                            DemographicId = dem != null ? (int?)dem.OracleHcmId : null,
+                            DemographicId = dem != null ? (int?)dem.Id : null,
                             BeneficiaryId = ben != null ? (int?)ben.Id : null
                         };
 

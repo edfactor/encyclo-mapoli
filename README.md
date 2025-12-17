@@ -333,7 +333,9 @@ Solution Explanation:
 
 ### 9. Testing
 
-- [ ] **Consolidated test project:** Tests in `Demoulas.ProfitSharing.UnitTests` only
+- [ ] **Backend unit test split (no ad-hoc projects):**
+  - `Demoulas.ProfitSharing.UnitTests` for functional unit/service tests
+  - `Demoulas.ProfitSharing.UnitTests.Architecture` for analyzer/infrastructure/architecture guardrail tests
 - [ ] **`Description` attribute:** Tests tagged with Jira ticket `[Description("PS-1234 : Description")]`
 - [ ] **Async tests:** `async Task` for async operations
 - [ ] **Meaningful test names** describing what's tested

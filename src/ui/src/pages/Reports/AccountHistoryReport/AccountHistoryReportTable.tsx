@@ -1,9 +1,10 @@
 import { Grid } from "@mui/material";
 import { useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { AccountHistoryReportPaginatedResponse } from "../../../types/reports/AccountHistoryReportTypes";
+import { GRID_KEYS } from "../../../constants";
 import { GetAccountHistoryReportColumns } from "./AccountHistoryReportGridColumns";
 
 interface AccountHistoryReportTableProps {
@@ -20,7 +21,9 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
   showData,
   gridPagination
 }) => {
-  const gridMaxHeight = useDynamicGridHeight();
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: data?.response?.results?.length ?? 0
+  });
   const columnDefs = useMemo(() => GetAccountHistoryReportColumns(), []);
 
   const { pageNumber, pageSize, handlePaginationChange } = gridPagination;
@@ -34,7 +37,7 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
           rowSpacing="24px">
           <Grid width="100%">
             <DSMGrid
-              preferenceKey="Account_History_Report"
+              preferenceKey={GRID_KEYS.ACCOUNT_HISTORY_REPORT}
               isLoading={isLoading}
               maxHeight={gridMaxHeight}
               providedOptions={{

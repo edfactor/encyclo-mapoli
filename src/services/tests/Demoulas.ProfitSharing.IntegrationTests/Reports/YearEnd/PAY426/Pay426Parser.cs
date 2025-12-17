@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -303,7 +303,7 @@ public static class Pay426Parser
         {
             BadgeNumber = emp.BadgeNumber,
             ProfitYear = profitYear,
-            EmployeeName = emp.Name,
+            FullName = emp.Name,
             StoreNumber = emp.StoreNumber,
             EmployeeTypeCode = emp.EmployeeTypeCode,
             EmployeeTypeName = MapEmployeeTypeName(emp.EmployeeTypeCode),
@@ -316,7 +316,7 @@ public static class Pay426Parser
             Points = (short)emp.Points,
             IsUnder21 = emp.IsUnder21, // Use from marker field
             IsNew = emp.IsNew,
-            
+
             // Reusing the DTO between PAY426 and PAY426N reports
             EmployeeStatus = null, // Not available in PAY426 report
             Balance = 0, // Not available in PAY426 report

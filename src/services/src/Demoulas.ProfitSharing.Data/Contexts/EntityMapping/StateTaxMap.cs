@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class StateTaxMap : IEntityTypeConfiguration<StateTax>
 {
     public void Configure(EntityTypeBuilder<StateTax> builder)

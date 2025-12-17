@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
+
 internal sealed class ParticipantTotalMap : IEntityTypeConfiguration<ParticipantTotal>
 {
     //This table is virtual in nature.  It uses the FromSql method to access data.

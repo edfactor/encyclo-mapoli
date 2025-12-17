@@ -222,7 +222,7 @@ public class CleanupReportService : ICleanupReportService
                     .Select(g => new
                     {
                         DistributionTotal = g.Sum(x => x.DistributionAmount),
-                        StateTaxTotal = g.Where(x => !string.IsNullOrEmpty(x.State)).Sum(x => x.StateTax),
+                        StateTaxTotal = g.Where(x => !string.IsNullOrEmpty(x.State) && x.StateTax != 0).Sum(x => x.StateTax),
                         FederalTaxTotal = g.Sum(x => x.FederalTax),
                         ForfeitureTotal = g.Sum(x => x.ForfeitAmount),
                         // MAIN-2170: Breakdown forfeitures by type
@@ -256,7 +256,7 @@ public class CleanupReportService : ICleanupReportService
 
                 // Calculate state tax totals by state
                 var allStateTaxRecords = await query
-                    .Where(s => s.StateTax > 0)
+                    .Where(s => !string.IsNullOrEmpty(s.State) && s.StateTax != 0)
                     .ToListAsync(cancellationToken: cancellationToken);
 
                 // Separate unattributed (NULL state) records
@@ -326,7 +326,7 @@ public class CleanupReportService : ICleanupReportService
 
                 var response = new DistributionsAndForfeitureTotalsResponse()
                 {
-                    ReportName = ReportNameInfo.DistributionAndForfeitures.Name,
+                    ReportName = ReportNames.DistributionAndForfeitures.Name,
                     ReportDate = DateTimeOffset.UtcNow,
                     StartDate = startDate,
                     EndDate = endDate,

@@ -7,6 +7,7 @@ import {
   setProfitYearSelectorData
 } from "../../reduxstore/slices/frozenSlice";
 import {
+  AnnuityRateDto,
   AuditChangeEntryDto,
   AuditEventDto,
   AuditSearchRequestDto,
@@ -14,11 +15,20 @@ import {
   FreezeDemographicsRequest,
   FrozenStateResponse,
   RowCountResult,
-  SortedPaginationRequestDto
+  SortedPaginationRequestDto,
+  StateTaxRateDto,
+  UpdateAnnuityRateRequest,
+  UpdateStateTaxRateRequest
 } from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
+
+type GetAnnuityRatesQueryArgs = {
+  sortBy: string;
+  isSortDescending: boolean;
+};
+
 export const ItOperationsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "itOperationsApi",
@@ -27,6 +37,36 @@ export const ItOperationsApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
+    getAnnuityRates: builder.query<AnnuityRateDto[], GetAnnuityRatesQueryArgs>({
+      query: (params) => ({
+        url: "administration/annuity-rates",
+        method: "GET",
+        params: {
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
+      })
+    }),
+    updateAnnuityRate: builder.mutation<AnnuityRateDto, UpdateAnnuityRateRequest>({
+      query: (request) => ({
+        url: "administration/annuity-rates",
+        method: "PUT",
+        body: request
+      })
+    }),
+    getStateTaxRates: builder.query<StateTaxRateDto[], void>({
+      query: () => ({
+        url: "administration/state-tax-rates",
+        method: "GET"
+      })
+    }),
+    updateStateTaxRate: builder.mutation<StateTaxRateDto, UpdateStateTaxRateRequest>({
+      query: (request) => ({
+        url: "administration/state-tax-rates",
+        method: "PUT",
+        body: request
+      })
+    }),
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({
         url: `itdevops/frozen/active`,
@@ -133,6 +173,10 @@ export const ItOperationsApi = createApi({
 });
 
 export const {
+  useGetAnnuityRatesQuery,
+  useUpdateAnnuityRateMutation,
+  useGetStateTaxRatesQuery,
+  useUpdateStateTaxRateMutation,
   useLazyGetFrozenStateResponseQuery,
   useLazyGetHistoricalFrozenStateResponseQuery,
   useLazyGetProfitYearSelectorFrozenDataQuery,

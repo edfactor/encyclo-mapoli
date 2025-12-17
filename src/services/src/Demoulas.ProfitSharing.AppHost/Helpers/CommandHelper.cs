@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Aspire.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.AppHost.Helpers;

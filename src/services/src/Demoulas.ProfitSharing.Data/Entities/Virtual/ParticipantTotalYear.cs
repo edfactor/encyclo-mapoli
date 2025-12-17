@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities.Virtual;
+
 public sealed class ParticipantTotalYear
 {
     public int DemographicId { get; set; }

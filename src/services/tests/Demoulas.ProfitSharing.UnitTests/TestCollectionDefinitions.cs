@@ -1,6 +1,4 @@
-using Xunit;
-
-namespace Demoulas.ProfitSharing.UnitTests;
+﻿namespace Demoulas.ProfitSharing.UnitTests;
 
 /// <summary>
 /// Collection definitions for parallel test execution.
@@ -29,9 +27,6 @@ public class LookupTestCollection { }
 
 [CollectionDefinition("Profit Details Tests", DisableParallelization = false)]
 public class ProfitDetailsTestCollection { }
-
-[CollectionDefinition("Pay Services Tests", DisableParallelization = false)]
-public class PayServicesTestCollection { }
 
 [CollectionDefinition("Adjustments Tests", DisableParallelization = false)]
 public class AdjustmentsTestCollection { }

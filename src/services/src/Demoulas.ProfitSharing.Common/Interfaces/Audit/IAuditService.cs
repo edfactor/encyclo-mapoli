@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces.Audit;
 
@@ -20,8 +21,30 @@ public interface IAuditService
         string reportName,
         short profitYear,
         TRequest request,
+        Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
+        List<Func<TResponse, (string, object)>> additionalChecksums,
+        CancellationToken cancellationToken)
+        where TResponse : class
+        where TRequest : PaginationRequestDto;
+
+
+    Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
+        string reportName,
+        short profitYear,
+        TRequest request,
         bool isArchiveRequest,
         Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
+        CancellationToken cancellationToken)
+        where TResponse : class
+        where TRequest : PaginationRequestDto;
+
+    Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
+        string reportName,
+        short profitYear,
+        TRequest request,
+        bool isArchiveRequest,
+        Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
+        List<Func<TResponse, (string, object)>> additionalChecksums,
         CancellationToken cancellationToken)
         where TResponse : class
         where TRequest : PaginationRequestDto;
@@ -80,4 +103,20 @@ public interface IAuditService
         Func<CancellationToken, Task<TResult>> operation,
         CancellationToken cancellationToken = default)
         where TResult : notnull;
+
+    /// <summary>
+    /// Logs a data change event (typically create/update/delete) for auditing and compliance.
+    /// </summary>
+    /// <param name="operationName">Business operation name (e.g., "Update State Tax Rate").</param>
+    /// <param name="tableName">Database table/entity name.</param>
+    /// <param name="primaryKey">Primary key or identifier of the changed record.</param>
+    /// <param name="changes">List of field changes captured for the operation.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task LogDataChangeAsync(
+        string operationName,
+        string tableName,
+        string auditOperation,
+        string? primaryKey,
+        IReadOnlyList<AuditChangeEntryInput> changes,
+        CancellationToken cancellationToken = default);
 }

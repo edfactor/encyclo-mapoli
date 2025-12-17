@@ -31,11 +31,13 @@ results.
 YEMatch uses **.NET Dependency Injection** with the following lifetime scopes:
 
 - **Singleton Factories**: `IReadySshClientFactory`, `ISmartApiClientFactory`, `IActivityFactory`
+
     - Maintain single SSH/HTTP connections throughout application lifetime
     - Create and register all available activities
     - Implement `IDisposable` for proper cleanup
 
 - **Transient Runs**: All Run classes (BaselineRun, TinkerRun, etc.)
+
     - New instance created per execution
     - Dependencies injected via constructor
 
@@ -127,30 +129,30 @@ Create `appsettings.json` to override defaults:
 
 ```json
 {
-  "YeMatch": {
-    "BaseDataDirectory": "/custom/path/for/logs",
-    "ReadyHost": {
-      "Host": "appt07d",
-      "ConnectionTimeoutSeconds": 30,
-      "Chatty": true
-    },
-    "SmartApi": {
-      "BaseUrl": "https://localhost:7141",
-      "TimeoutHours": 2
-    },
-    "Jwt": {
-      "Issuer": "dotnet-user-jwts",
-      "Audience": "https://localhost:7141",
-      "ExpirationSeconds": 3600
-    },
-    "YearEndDates": {
-      "ProfitYear": 2025,
-      "FirstSaturday": "250104",
-      "LastSaturday": "251227",
-      "CutOffSaturday": "260103",
-      "MoreThanFiveYears": "181231"
+    "YeMatch": {
+        "BaseDataDirectory": "/custom/path/for/logs",
+        "ReadyHost": {
+            "Host": "appt07d",
+            "ConnectionTimeoutSeconds": 30,
+            "Chatty": true
+        },
+        "SmartApi": {
+            "BaseUrl": "https://localhost:7141",
+            "TimeoutHours": 2
+        },
+        "Jwt": {
+            "Issuer": "dotnet-user-jwts",
+            "Audience": "https://localhost:7141",
+            "ExpirationSeconds": 3600
+        },
+        "YearEndDates": {
+            "ProfitYear": 2025,
+            "FirstSaturday": "250104",
+            "LastSaturday": "251227",
+            "CutOffSaturday": "260103",
+            "MoreThanFiveYears": "181231"
+        }
     }
-  }
 }
 ```
 
@@ -163,8 +165,8 @@ Default data directory: `/tmp/ye/<dd-MMM-HH-mm>`
 ### Prerequisites
 
 1. **Configure JWT signing key** in user secrets (see Configuration section above)
-   - The key must match the SMART API server's signing key
-   - If the server uses `dotnet user-jwts`, copy the signing key from the server's user secrets
+    - The key must match the SMART API server's signing key
+    - If the server uses `dotnet user-jwts`, copy the signing key from the server's user secrets
 2. Start the local SMART API with the JWT authentication enabled
 3. Ensure READY environment is accessible via SSH with `setyematch` script configured
 
@@ -424,6 +426,7 @@ directory.
 ## Troubleshooting
 
 **JWT authentication errors (401 Unauthorized)**:
+
 - Verify the JWT signing key in YEMatch user secrets matches the SMART API server's signing key
 - Check the server's user secrets with: `dotnet user-secrets list` (in the SMART API project directory)
 - Look for `Authentication:Schemes:Bearer:SigningKeys` and ensure the `Value` field matches `YeMatch:Jwt:SigningKey`
@@ -431,6 +434,7 @@ directory.
 - Verify the issuer and audience match the server's JWT configuration
 
 **"No SMART authentication" or legacy authentication errors**:
+
 - The old hardcoded test credentials no longer work
 - You MUST configure the JWT signing key in user secrets (see Configuration section)
 

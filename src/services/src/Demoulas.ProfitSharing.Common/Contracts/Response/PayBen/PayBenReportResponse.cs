@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PayBen;
+
 public record PayBenReportResponse
 {
     public string? Ssn { get; set; }

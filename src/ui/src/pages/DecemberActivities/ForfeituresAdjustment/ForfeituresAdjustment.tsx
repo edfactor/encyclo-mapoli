@@ -28,7 +28,8 @@ const ForfeituresAdjustmentContent = memo(() => {
     transactionPagination,
     profitYear,
     isReadOnly,
-    memberDetailsRefreshTrigger
+    memberDetailsRefreshTrigger,
+    currentBalance
   } = useForfeituresAdjustment();
 
   return (
@@ -63,6 +64,7 @@ const ForfeituresAdjustmentContent = memo(() => {
           <ForfeituresAdjustmentPanel
             onAddForfeiture={openAddForfeitureModal}
             isReadOnly={isReadOnly}
+            currentBalance={currentBalance}
           />
         </Grid>
       )}

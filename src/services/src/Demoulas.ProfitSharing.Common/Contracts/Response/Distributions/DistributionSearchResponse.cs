@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+
 public sealed record DistributionSearchResponse : IIsExecutive
 {
     public required long Id { get; set; }

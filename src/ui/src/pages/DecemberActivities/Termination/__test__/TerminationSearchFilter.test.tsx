@@ -57,12 +57,15 @@ vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
 
 vi.mock("smart-ui-library", () => ({
   DSMDatePicker: vi.fn(({ label, onChange, disabled, value }) =>
-    React.createElement("div", {},
+    React.createElement(
+      "div",
+      {},
       React.createElement("label", {}, label),
       React.createElement("input", {
         "aria-label": label,
         "data-testid": `date-picker-${label}`,
-        onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value ? new Date(e.target.value) : null),
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+          onChange(e.target.value ? new Date(e.target.value) : null),
         disabled: disabled,
         placeholder: label,
         type: "date",

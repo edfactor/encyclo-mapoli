@@ -35,7 +35,7 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
   const handleMenuClick = (current: RouteCategory) => {
     // Clear stored navigation ID when switching L0 sections
     localStorage.removeItem("navigationId");
-    
+
     if (drawerOnlySections.includes(current.menuLabel)) {
       // Set the active submenu so the drawer knows which section to show, then open drawer
       dispatch(setActiveSubMenu(current.menuLabel));
@@ -61,8 +61,7 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
   };
 
   return (
-    <div
-      className="menubar fixed w-full overflow-visible z-[2]">
+    <div className="menubar fixed z-[2] w-full overflow-visible">
       <div className="navbuttons ml-2">
         <NavButton
           isUnderlined={homeTabSelected}
@@ -83,7 +82,7 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
               onClick={() => {
                 // Clear stored navigation ID when switching L0 sections from menu bar
                 localStorage.removeItem("navigationId");
-                
+
                 // If this top-level has child items, set them as the active submenu and open drawer
                 if (current.items && current.items.length > 0) {
                   dispatch(setActiveSubMenu(current.menuLabel));

@@ -28,6 +28,7 @@ public sealed record OracleHcmConfig
     public string? PayrollUrl { get; set; }
 
     // Basic Authentication (Legacy - for development only)
+    public bool UseBasicAuth { get; set; } = true;
     public string? Username { get; set; }
     public string? Password { get; set; }
 
@@ -47,7 +48,7 @@ public sealed record OracleHcmConfig
     public string? PfxPassword { get; set; }
 
     public string RestFrameworkVersion { get; set; } = "9";
-    public byte Limit { get; set; } = 75;
+    public ushort Limit { get; set; } = byte.MaxValue;
     public short IntervalInHours { get; set; } = byte.MaxValue;
     public byte PayrollIntervalInHours { get; set; } = 150;
 

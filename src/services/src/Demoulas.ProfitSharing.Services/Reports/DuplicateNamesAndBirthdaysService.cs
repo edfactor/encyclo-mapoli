@@ -92,7 +92,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */";
 
                     dupNameSlashDateOfBirth = ctx.Database.SqlQueryRaw<DemographicMatchDto>(dupQuery);
-                    _logger.LogWarning(3, "Got value in dupNameSlashDateOfBirth");
+                    _logger.LogDebug(3, "Got value in dupNameSlashDateOfBirth");
                 }
 
                 dupInfo = await dupNameSlashDateOfBirth

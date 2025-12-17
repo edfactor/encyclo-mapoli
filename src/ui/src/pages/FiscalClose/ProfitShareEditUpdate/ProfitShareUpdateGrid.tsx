@@ -5,7 +5,8 @@ import { useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { GRID_KEYS } from "../../../constants";
 import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
 import { ProfitShareUpdateGridColumns } from "./ProfitShareUpdateGridColumns";
 
@@ -24,17 +25,21 @@ const ProfitShareEditUpdateGrid = ({
 }: ProfitShareEditUpdateGridProps) => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
   const columnDefs = useMemo(() => ProfitShareUpdateGridColumns(), []);
   const { profitSharingUpdate, profitSharingUpdateQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearchUpdate, { isFetching }] = useLazyGetProfitShareUpdateQuery();
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: profitSharingUpdate?.response?.results?.length ?? 0
+  });
 
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
     useGridPagination({
       initialPageSize: 25,
       initialSortBy: "Name",
       initialSortDescending: false,
+      persistenceKey: GRID_KEYS.PROFIT_SHARE_UPDATE,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded && hasToken) {
@@ -114,7 +119,7 @@ const ProfitShareEditUpdateGrid = ({
       {!!profitSharingUpdate && (
         <>
           <DSMGrid
-            preferenceKey={"ProfitShareUpdateGrid"}
+            preferenceKey={GRID_KEYS.PROFIT_SHARE_UPDATE}
             isLoading={isFetching}
             handleSortChanged={handleSortChange}
             maxHeight={gridMaxHeight}

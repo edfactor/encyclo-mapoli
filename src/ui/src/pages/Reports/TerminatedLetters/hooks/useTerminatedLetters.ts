@@ -2,9 +2,10 @@ import { useCallback, useReducer, useRef, useState } from "react";
 import {
   useLazyGetTerminatedLettersDownloadQuery,
   useLazyGetTerminatedLettersReportQuery
-} from "reduxstore/api/YearsEndApi";
+} from "reduxstore/api/AdhocApi";
 import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { ServiceErrorResponse } from "../../../../types/errors/errors";
@@ -217,6 +218,7 @@ export const useTerminatedLetters = () => {
     initialPageSize: 50,
     initialSortBy: "fullName",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.TERMINATED_LETTERS,
     onPaginationChange: handleReportPaginationChange
   });
 

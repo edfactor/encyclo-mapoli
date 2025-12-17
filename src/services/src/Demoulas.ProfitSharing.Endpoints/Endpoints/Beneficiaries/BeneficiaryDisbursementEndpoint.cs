@@ -1,5 +1,4 @@
-﻿using Demoulas.Common.Api.Contracts;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
+
 public sealed class BeneficiaryDisbursementEndpoint : ProfitSharingEndpoint<BeneficiaryDisbursementRequest, Results<Ok<bool>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly IBeneficiaryDisbursementService _beneficiaryDisbursementService;

@@ -19,7 +19,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import React, { PropsWithChildren, ReactNode } from "react";
 import { Provider } from "react-redux";
-import { AccountHistoryReportApi } from "../../reduxstore/api/AccountHistoryReportApi";
+import { AdhocApi } from "../../reduxstore/api/AdhocApi";
 import { AdjustmentsApi } from "../../reduxstore/api/AdjustmentsApi";
 import { AppSupportApi } from "../../reduxstore/api/AppSupportApi";
 import { BeneficiariesApi } from "../../reduxstore/api/BeneficiariesApi";
@@ -31,7 +31,6 @@ import { LookupsApi } from "../../reduxstore/api/LookupsApi";
 import { MilitaryApi } from "../../reduxstore/api/MilitaryApi";
 import { NavigationApi } from "../../reduxstore/api/NavigationApi";
 import { NavigationStatusApi } from "../../reduxstore/api/NavigationStatusApi";
-import { PayServicesApi } from "../../reduxstore/api/PayServicesApi";
 import { SecurityApi } from "../../reduxstore/api/SecurityApi";
 import { validationApi } from "../../reduxstore/api/ValidationApi";
 import { YearsEndApi } from "../../reduxstore/api/YearsEndApi";
@@ -215,8 +214,7 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
     [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
     [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
     [DistributionApi.reducerPath]: DistributionApi.reducer,
-    [PayServicesApi.reducerPath]: PayServicesApi.reducer,
-    [AccountHistoryReportApi.reducerPath]: AccountHistoryReportApi.reducer,
+    [AdhocApi.reducerPath]: AdhocApi.reducer,
     [validationApi.reducerPath]: validationApi.reducer
   } as const;
 
@@ -238,8 +236,7 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
         .concat(BeneficiariesApi.middleware)
         .concat(AdjustmentsApi.middleware)
         .concat(DistributionApi.middleware)
-        .concat(PayServicesApi.middleware)
-        .concat(AccountHistoryReportApi.middleware)
+        .concat(AdhocApi.middleware)
         .concat(validationApi.middleware)
   });
 };

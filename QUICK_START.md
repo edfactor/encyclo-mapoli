@@ -7,6 +7,7 @@
 ### Steps
 
 1. **Clone the repository**:
+
    ```powershell
    git clone https://bitbucket.org/demoulas/smart-profit-sharing
    cd smart-profit-sharing
@@ -15,11 +16,13 @@
 2. **Open PowerShell as Administrator**
 
 3. **Enable script execution** (one-time):
+
    ```powershell
    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
    ```
 
 4. **Run the setup script**:
+
    ```powershell
    cd developer_setup
    .\Setup-DeveloperEnvironment.ps1
@@ -35,11 +38,13 @@
 ## After Setup
 
 1. **Get secrets.json** from a team member
+
    - Place it in: `src/services/configuration/secrets.json`
 
 2. **Add NuGet source** (see `src/services/README.md` for ArtifactoryCloud details)
 
 3. **Open the solution**:
+
    ```powershell
    cd src/services
    # Open in VS Code
@@ -49,9 +54,17 @@
    ```
 
 4. **Start development**:
+
    ```powershell
    # From project root
    aspire run
+   ```
+
+5. **Verify UI quality checks** (recommended before pushing UI changes):
+   ```powershell
+   cd src/ui
+   npm run lint
+   npm run build:qa
    ```
 
 ---
@@ -59,18 +72,22 @@
 ## Troubleshooting
 
 ### Script won't run
+
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 ```
 
 ### "winget-config.json not found"
+
 - Make sure you're running the script from the `developer_setup` folder
 - Or copy `winget-config.json` to the same folder as the script
 
 ### VS2022 workloads didn't install
+
 - Run manually from VS Installer: **Modify → ASP.NET and web development, Azure development, .NET desktop development**
 
 ### Volta not found
+
 - Restart PowerShell and verify: `volta --version`
 - If still missing, run: `winget install Volta.Volta --accept-package-agreements`
 

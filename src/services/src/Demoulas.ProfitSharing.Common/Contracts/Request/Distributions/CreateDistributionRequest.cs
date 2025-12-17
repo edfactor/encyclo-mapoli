@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+
 public record CreateDistributionRequest
 {
     public long BadgeNumber { get; set; }

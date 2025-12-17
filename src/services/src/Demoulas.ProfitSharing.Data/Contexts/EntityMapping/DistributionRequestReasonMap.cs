@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 public class DistributionRequestReasonMap : IEntityTypeConfiguration<DistributionRequestReason>
 {
     public void Configure(EntityTypeBuilder<DistributionRequestReason> builder)

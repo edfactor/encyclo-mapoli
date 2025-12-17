@@ -20,7 +20,7 @@ public class SampleProfitSharingReport : BasePdfReport
     public override string Title => $"Profit Sharing Report - {_fiscalYear}";
     public override string ReportName => "profit-sharing-statement";
     public override string GeneratedBy => "Profit Sharing System";
-    
+
     public SampleProfitSharingReport(
         string fiscalYear,
         decimal totalEarnings,

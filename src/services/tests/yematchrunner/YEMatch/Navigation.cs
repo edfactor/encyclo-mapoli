@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 // OH BOY.  Copied from 
 // /Users/robertherrmann/prj/smart-profit-sharing/src/services/src/Demoulas.ProfitSharing.Data/Entities/Navigations/Navigation.cs
@@ -64,7 +64,6 @@ public sealed class Navigation
         public const short PayBeneficiaryReport = 134;
         public const short AdhocBeneficiariesReport = 135;
         public const short TerminatedLetters = 136;
-        public const short QPAY600 = 137;
         public const short PAY426N = 138;
         public const short ProfitSummary = 139;
         public const short PAY426_2 = 140;
