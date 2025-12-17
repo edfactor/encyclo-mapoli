@@ -8,6 +8,7 @@ export type ProfitSharingAdjustmentRowDto = {
   rowNumber: number;
   profitYear: number;
   profitCodeId: number;
+  profitCodeName: string;
   contribution: number;
   earnings: number;
   forfeiture: number;

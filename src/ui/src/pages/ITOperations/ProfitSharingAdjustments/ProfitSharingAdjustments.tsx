@@ -167,11 +167,19 @@ const ProfitSharingAdjustmentsContent = () => {
       },
       {
         headerName: "Profit Code",
-        field: "profitCodeId",
+        field: "profitCodeName",
         sortable: false,
         filter: false,
         editable: false,
-        width: 90
+        width: 150,
+        valueGetter: (params) => {
+          const row = params.data as ProfitSharingAdjustmentRowDto | undefined;
+          if (!row) {
+            return "";
+          }
+
+          return row.profitCodeName || String(row.profitCodeId);
+        }
       },
       {
         headerName: "Month",
@@ -407,6 +415,7 @@ const ProfitSharingAdjustmentsContent = () => {
       rowNumber,
       profitYear: loadedKey.profitYear,
       profitCodeId: seedRowForYtd?.profitCodeId ?? 0,
+      profitCodeName: seedRowForYtd?.profitCodeName ?? "",
       contribution: adjustmentDraft.contribution,
       earnings: adjustmentDraft.earnings,
       payment: 0,
