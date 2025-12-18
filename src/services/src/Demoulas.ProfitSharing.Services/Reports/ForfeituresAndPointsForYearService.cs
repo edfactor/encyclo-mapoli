@@ -20,19 +20,22 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
+    private readonly ICrossReferenceValidationService _crossReferenceValidationService;
     private readonly TotalService _totalService;
 
     public ForfeituresAndPointsForYearService(
         IProfitSharingDataContextFactory dataContextFactory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
-        IPayrollDuplicateSsnReportService duplicateSsnReportService
+        IPayrollDuplicateSsnReportService duplicateSsnReportService,
+        ICrossReferenceValidationService crossReferenceValidationService
     )
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
         _duplicateSsnReportService = duplicateSsnReportService;
+        _crossReferenceValidationService = crossReferenceValidationService;
     }
 
 
@@ -177,6 +180,8 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             PaginatedResponseDto<ForfeituresAndPointsForYearResponse> paginatedData =
                 await members.AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
 
+            var crossRefValidation = await _crossReferenceValidationService.ValidateForfeitureAndPointsReport(currentYear, distributionsTotal, forfeitsTotal, cancellationToken);
+
             return new ForfeituresAndPointsForYearResponseWithTotals
             {
                 DistributionTotals = distributionsTotal,
@@ -190,7 +195,9 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
                 ReportName = $"PROFIT SHARING FORFEITURES AND POINTS FOR {currentYear}",
                 StartDate = new DateOnly(currentYear, 1, 1),
                 EndDate = new DateOnly(currentYear, 12, 31),
-                Response = paginatedData
+                Response = paginatedData,
+                CrossReferenceValidation = crossRefValidation
+
             };
         }, cancellationToken);
     }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { GRID_KEYS } from "../../../../constants";
+import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetEmployeeWagesForYearQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { setEmployeeWagesForYearQueryParams } from "../../../../reduxstore/slices/yearsEndSlice";
@@ -11,6 +11,7 @@ import { initialState, selectHasResults, selectShowData, ytdWagesReducer } from 
 export interface YTDWagesSearchParams {
   profitYear: number;
   useFrozenData?: boolean;
+  archive?: boolean;
 }
 
 export interface UseYTDWagesOptions {
@@ -82,6 +83,7 @@ const useYTDWages = (options?: UseYTDWagesOptions) => {
         const request = {
           profitYear: searchParams.profitYear,
           useFrozenData: searchParams.useFrozenData !== undefined ? searchParams.useFrozenData : defaultUseFrozenData,
+          archive: searchParams.archive,
           pagination: {
             skip: pagination.pageNumber * pagination.pageSize,
             take: pagination.pageSize,

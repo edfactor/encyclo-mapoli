@@ -23,13 +23,15 @@ public class UnforfeituresEndpoint :
     private readonly IUnforfeitService _reportService;
     private readonly IAuditService _auditService;
     private readonly ILogger<UnforfeituresEndpoint> _logger;
+    private readonly ICalendarService _calendarService;
 
-    public UnforfeituresEndpoint(IUnforfeitService reportService, IAuditService auditService, ILogger<UnforfeituresEndpoint> logger)
+    public UnforfeituresEndpoint(IUnforfeitService reportService, IAuditService auditService, ILogger<UnforfeituresEndpoint> logger, ICalendarService calendarService)
         : base(Navigation.Constants.Unforfeit)
     {
         _reportService = reportService;
         _auditService = auditService;
         _logger = logger;
+        _calendarService = calendarService;
     }
 
     public override void Configure()
@@ -73,10 +75,21 @@ public class UnforfeituresEndpoint :
     {
         return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
+            var mostRecentProfitYear = req.EndingDate.Year + 1; // Get the profit year containing the ending date.   
+            DateOnly startDate;
+            var iteration = 0;
+            do
+            {
+                mostRecentProfitYear--;
+                var calendarResult = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)mostRecentProfitYear);
+                startDate = calendarResult.FiscalBeginDate;
+            } while (iteration++ < 7 && startDate >= req.EndingDate);
+
+
             // Database queries and business logic are timed inside the service layer
             var result = await _auditService.ArchiveCompletedReportAsync(
                 "Rehire Forfeiture Adjustments Endpoint",
-                (short)req.EndingDate.Year,
+                (short)mostRecentProfitYear,
                 req,
                 (archiveReq, _, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),
                 ct);
