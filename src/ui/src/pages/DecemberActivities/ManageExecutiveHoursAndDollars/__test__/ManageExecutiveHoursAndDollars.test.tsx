@@ -83,6 +83,8 @@ vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
       pageNumber: 1,
       sortParams: { sortBy: "badgeNumber", isSortDescending: false },
       handlePaginationChange: vi.fn(),
+      handlePageNumberChange: vi.fn(),
+      handlePageSizeChange: vi.fn(),
       handleSortChange: vi.fn(),
       resetPagination: vi.fn(),
       clearPersistedState: vi.fn()
@@ -92,6 +94,8 @@ vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
       pageNumber: 1,
       sortParams: { sortBy: "badgeNumber", isSortDescending: false },
       handlePaginationChange: vi.fn(),
+      handlePageNumberChange: vi.fn(),
+      handlePageSizeChange: vi.fn(),
       handleSortChange: vi.fn(),
       resetPagination: vi.fn(),
       clearPersistedState: vi.fn()
@@ -172,6 +176,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           pageNumber: 1,
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -181,6 +187,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           pageNumber: 1,
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -237,6 +245,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           pageNumber: 1,
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -246,6 +256,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           pageNumber: 1,
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -310,6 +322,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           pageNumber: 1,
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -319,6 +333,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
           pageNumber: 1,
           sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()

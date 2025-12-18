@@ -146,6 +146,8 @@ describe("useTerminatedLetters", () => {
           isSortDescending: false
         },
         handlePaginationChange: mockHandlePaginationChange,
+        handlePageNumberChange: vi.fn(),
+        handlePageSizeChange: vi.fn(),
         handleSortChange: vi.fn(),
         resetPagination: mockResetPagination,
         clearPersistedState: vi.fn()

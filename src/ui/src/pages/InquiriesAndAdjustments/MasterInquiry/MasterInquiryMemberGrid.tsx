@@ -33,7 +33,6 @@ interface MasterInquiryMemberGridProps {
     handlePageNumberChange: (pageNumber: number) => void;
     handlePageSizeChange: (pageSize: number) => void;
   };
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
   isLoading?: boolean;
   isGridExpanded?: boolean;
@@ -45,7 +44,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     searchResults,
     onMemberSelect,
     memberGridPagination,
-    onPaginationChange,
     onSortChange,
     isLoading = false,
     isGridExpanded = false,
@@ -148,7 +146,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       prevProps.isLoading === nextProps.isLoading &&
       prevProps.isGridExpanded === nextProps.isGridExpanded &&
       prevProps.onMemberSelect === nextProps.onMemberSelect &&
-      prevProps.onPaginationChange === nextProps.onPaginationChange &&
       prevProps.onSortChange === nextProps.onSortChange &&
       prevProps.onToggleExpand === nextProps.onToggleExpand
     );

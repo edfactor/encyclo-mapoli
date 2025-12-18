@@ -23,22 +23,13 @@ interface MasterInquiryGridProps {
     handlePageNumberChange: (pageNumber: number) => void;
     handlePageSizeChange: (pageSize: number) => void;
   };
-  onPaginationChange?: (pageNumber: number, pageSize: number) => void;
   onSortChange?: (sortParams: SortParams) => void;
   isGridExpanded?: boolean;
   onToggleExpand?: () => void;
 }
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
-  ({
-    profitData,
-    isLoading,
-    profitGridPagination,
-    onPaginationChange,
-    onSortChange,
-    isGridExpanded = false,
-    onToggleExpand
-  }) => {
+  ({ profitData, isLoading, profitGridPagination, onSortChange, isGridExpanded = false, onToggleExpand }) => {
     const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
     const gridMaxHeight = useContentAwareGridHeight({
       rowCount: profitData?.results?.length ?? 0,
@@ -123,7 +114,6 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
       prevProps.profitGridPagination?.pageNumber === nextProps.profitGridPagination?.pageNumber &&
       prevProps.profitGridPagination?.pageSize === nextProps.profitGridPagination?.pageSize &&
       prevProps.profitGridPagination?.sortParams === nextProps.profitGridPagination?.sortParams &&
-      prevProps.onPaginationChange === nextProps.onPaginationChange &&
       prevProps.onSortChange === nextProps.onSortChange &&
       prevProps.onToggleExpand === nextProps.onToggleExpand
     );

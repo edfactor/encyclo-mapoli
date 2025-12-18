@@ -61,6 +61,8 @@ interface MockPagination {
   pageSize: number;
   sortParams: { sortBy: string; isSortDescending: boolean };
   handlePaginationChange: ReturnType<typeof vi.fn>;
+  handlePageNumberChange: ReturnType<typeof vi.fn>;
+  handlePageSizeChange: ReturnType<typeof vi.fn>;
   handleSortChange: ReturnType<typeof vi.fn>;
   setPageNumber: ReturnType<typeof vi.fn>;
   setPageSize: ReturnType<typeof vi.fn>;
@@ -129,6 +131,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -176,6 +180,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -212,6 +218,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -247,6 +255,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -287,6 +297,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -322,6 +334,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -385,6 +399,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -430,7 +446,13 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: mockHandlePaginationChange,
-          handleSortChange: mockHandleSortChange
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
+          handleSortChange: mockHandleSortChange,
+          setPageNumber: vi.fn(),
+          setPageSize: vi.fn(),
+          resetPagination: vi.fn(),
+          clearPersistedState: vi.fn()
         },
         showData: true,
         hasResults: true,
@@ -470,6 +492,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
