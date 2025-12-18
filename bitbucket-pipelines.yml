@@ -589,7 +589,6 @@ definitions:
         - echo "Installing Spectral CLI..."
         - npm install -g @stoplight/spectral-cli
         - echo "Fetching OpenAPI spec from QA environment..."
-        - echo "Target URL: ${QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json"
         - wget "${QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json" -O openapi-qa.json || (echo "❌ Failed to fetch OpenAPI spec from ${QA_BASE_URL}:8443" && exit 1)
         - echo "Running API linting against Zalando guidelines..."
         - spectral lint openapi-qa.json --format junit --output spectral-results.xml || true
