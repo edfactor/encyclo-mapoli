@@ -146,8 +146,14 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
             <tr className="border-b border-gray-200">
               <td className="px-3 py-2 text-left font-medium">Point</td>
               <td className="px-3 py-2 text-right"></td>
-              <td className="px-3 py-2 text-right">{renderHeaderValidationIcon("TotalForfeitPoints")}&nbsp;{formatNumberWithComma(totals.contributionPoints || 0)}</td>
-              <td className="px-3 py-2 text-right">{renderHeaderValidationIcon("TotalEarningPoints")}&nbsp;{formatNumberWithComma(totals.earningPoints || 0)}</td>
+              <td className="px-3 py-2 text-right">
+                {renderHeaderValidationIcon("TotalForfeitPoints")}&nbsp;
+                {formatNumberWithComma(totals.contributionPoints || 0)}
+              </td>
+              <td className="px-3 py-2 text-right">
+                {renderHeaderValidationIcon("TotalEarningPoints")}&nbsp;
+                {formatNumberWithComma(totals.earningPoints || 0)}
+              </td>
               <td className="px-3 py-2 text-right"></td>
               <td className="px-3 py-2 text-right"></td>
               <td className="px-3 py-2 text-right"></td>

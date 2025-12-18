@@ -128,6 +128,8 @@ definitions:
 
         # Update npm to latest version
         - npm install -g npm@latest
+        - npm config list --json
+        - env | grep -i npm_config
 
         # Create .npmrc for JFrog access (uses pipeline variable)
         - |
