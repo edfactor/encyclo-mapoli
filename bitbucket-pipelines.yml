@@ -630,10 +630,10 @@ definitions:
           Write-Host "[OK] Spectral CLI installed" -ForegroundColor Green
           Write-Host ""
           
-          # Run Spectral linting with JUnit output
+          # Run Spectral linting with JUnit output (using npx to avoid PATH issues)
           Write-Host "Running API linting with Spectral..." -ForegroundColor Yellow
-          spectral lint openapi-qa.json --format junit --output spectral-results.xml
-          spectral lint openapi-qa.json --format stylish > spectral-report.txt
+          npx @stoplight/spectral-cli lint openapi-qa.json --format junit --output spectral-results.xml
+          npx @stoplight/spectral-cli lint openapi-qa.json --format stylish > spectral-report.txt
           
           # Check for errors in the stylish report
           $ERROR_COUNT = (Select-String -Path spectral-report.txt -Pattern " error " -AllMatches).Matches.Count
