@@ -1,6 +1,6 @@
 import ReplayIcon from "@mui/icons-material/Replay";
 import { Box, Button, Grid, Typography } from "@mui/material";
-import { GridApi, IRowNode, RowClassParams } from "ag-grid-community";
+import { GridApi, IRowNode } from "ag-grid-community";
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { GRID_KEYS } from "../../../constants";
@@ -187,9 +187,10 @@ const ReversalsGrid: React.FC<ReversalsGridProps> = memo(
               onGridReady: (params) => {
                 gridApiRef.current = params.api;
               },
-              getRowClass: (params: RowClassParams<ProfitDetailRow>) => {
+              getRowClass: (params) => {
                 // Apply gray styling to already-reversed rows
-                if (params.data?.isAlreadyReversed) {
+                const data = params.data as ProfitDetailRow | undefined;
+                if (data?.isAlreadyReversed) {
                   return "row-already-reversed";
                 }
                 return undefined;

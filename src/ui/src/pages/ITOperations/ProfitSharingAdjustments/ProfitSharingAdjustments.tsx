@@ -12,7 +12,7 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { CellValueChangedEvent, GridApi, RowClassParams, SelectionChangedEvent } from "ag-grid-community";
+import { CellValueChangedEvent, GridApi, SelectionChangedEvent } from "ag-grid-community";
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
 import { useEffect, useRef, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
@@ -489,8 +489,9 @@ const ProfitSharingAdjustmentsContent = () => {
               setSelectedRow(selected);
             }) as (event: unknown) => void,
             onCellValueChanged,
-            getRowStyle: (params: RowClassParams<ProfitSharingAdjustmentRowDto>) => {
-              if (params.data?.hasBeenReversed) {
+            getRowStyle: (params) => {
+              const data = params.data as ProfitSharingAdjustmentRowDto | undefined;
+              if (data?.hasBeenReversed) {
                 return { backgroundColor: "#f5f5f5", color: "#9e9e9e" };
               }
               return undefined;
