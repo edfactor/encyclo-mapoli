@@ -15,6 +15,12 @@ public sealed record ProfitSharingAdjustmentRowRequest
 {
     public int? ProfitDetailId { get; init; }
 
+    /// <summary>
+    /// The ID of the profit detail that this adjustment reverses (for tracking purposes).
+    /// When provided, the system will validate that the source has not already been reversed.
+    /// </summary>
+    public int? ReversedFromProfitDetailId { get; init; }
+
     public required int RowNumber { get; init; }
 
     public required byte ProfitCodeId { get; init; }

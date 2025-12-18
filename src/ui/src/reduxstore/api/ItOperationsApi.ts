@@ -1,10 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { Paged } from "smart-ui-library";
-import {
-  setFrozenStateCollectionResponse,
-  setFrozenStateResponse
-} from "../../reduxstore/slices/frozenSlice";
+import { setFrozenStateCollectionResponse, setFrozenStateResponse } from "../../reduxstore/slices/frozenSlice";
 import {
   AnnuityRateDto,
   AuditChangeEntryDto,

@@ -61,6 +61,9 @@ public sealed record Error
     public static Error ClassActionForfeitureCannotBeReversed => new(121, "Class action forfeiture cannot be reversed");
     public static Error InsufficientVestingBalance => new(122, "Insufficient vesting balance for forfeiture adjustment");
 
+    // Reversal protection errors
+    public static Error ProfitDetailAlreadyReversed => new(132, "This profit detail record has already been reversed");
+
     //Validation errors
     public static Error ReportNotFound => new(131, "Report not found for the specified year");
 

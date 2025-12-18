@@ -1,4 +1,17 @@
-import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Tooltip, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  Tooltip,
+  Typography
+} from "@mui/material";
 import { Print } from "@mui/icons-material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
@@ -19,8 +32,8 @@ interface AdhocProfLetter73GridProps {
   onToggleExpand?: () => void;
 }
 
-const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({ 
-  filterParams, 
+const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
+  filterParams,
   onLoadingChange,
   isGridExpanded = false,
   onToggleExpand
@@ -106,16 +119,19 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
       if (apiData.results.length > 0) {
         // Get first row to determine structure
         const sampleData = apiData.results[0];
-        
+
         if (sampleData) {
           const cols: ColDef[] = Object.keys(sampleData).map((key) => ({
-            headerName: key.replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase()),
+            headerName: key
+              .replace(/([A-Z])/g, " $1")
+              .trim()
+              .replace(/^./, (str) => str.toUpperCase()),
             field: key,
             sortable: true,
             filter: true,
             resizable: true
           }));
-          
+
           // Add Print checkbox column
           cols.push({
             headerName: "Print",
@@ -133,7 +149,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
             suppressColumnsToolPanel: true,
             suppressMovable: true
           });
-          
+
           setColumnDefs(cols);
           setRowData(apiData.results);
         }
@@ -151,8 +167,8 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
         <div className="relative">
           {printError && (
             <Box sx={{ padding: "0 24px", marginBottom: "16px" }}>
-              <Alert 
-                severity="error" 
+              <Alert
+                severity="error"
                 onClose={clearError}>
                 {printError}
               </Alert>
@@ -170,9 +186,9 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
                 Adhoc Prof Letter 73
               </Typography>
             </Grid>
-            <Grid sx={{ display: 'flex', gap: 1 }}>
-              <Tooltip 
-                title={selectedRows.length === 0 ? "You must check at least one box" : "Print Prof Letter 73"} 
+            <Grid sx={{ display: "flex", gap: 1 }}>
+              <Tooltip
+                title={selectedRows.length === 0 ? "You must check at least one box" : "Print Prof Letter 73"}
                 placement="top">
                 <span>
                   <Button
@@ -226,12 +242,12 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
                     onSelectionChanged: handleSelectionChanged,
                     onSortChanged: (event) => {
                       const columnState = event.api.getColumnState();
-                      const sortedColumn = columnState.find(col => col.sort !== null && col.sort !== undefined);
-                      
+                      const sortedColumn = columnState.find((col) => col.sort !== null && col.sort !== undefined);
+
                       if (sortedColumn && sortedColumn.colId) {
                         handleSortChange({
                           sortBy: sortedColumn.colId,
-                          isSortDescending: sortedColumn.sort === 'desc'
+                          isSortDescending: sortedColumn.sort === "desc"
                         });
                       }
                     }

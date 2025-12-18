@@ -15,13 +15,13 @@ const AdhocProfLetter73: React.FC = () => {
   const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
   const [searchTrigger, setSearchTrigger] = useState(0);
-  
+
   const dispatch = useDispatch();
   const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
 
   const handleFilterChange = (params: AdhocProfLetter73FilterParams) => {
     setFilterParams(params);
-    setSearchTrigger(prev => prev + 1); // Force a new search even if params are the same
+    setSearchTrigger((prev) => prev + 1); // Force a new search even if params are the same
   };
 
   const handleReset = () => {

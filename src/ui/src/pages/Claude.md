@@ -1048,6 +1048,7 @@ const isReadOnly = useReadOnlyNavigation();
 ---
 
 ## Page Assembly Examples
+
 ### Example 2: Multi-Step Workflow
 
 **File**: `AddDistribution/AddDistribution.tsx`
