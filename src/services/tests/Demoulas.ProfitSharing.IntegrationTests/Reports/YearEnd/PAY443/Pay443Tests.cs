@@ -14,7 +14,7 @@ public class Pay443Tests : PristineBaseTest
 
     public Pay443Tests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _forfeituresAndPointsForYearService = new ForfeituresAndPointsForYearService(DbFactory, TotalService, DemographicReaderService, new Mock<IPayrollDuplicateSsnReportService>().Object);
+        _forfeituresAndPointsForYearService = new ForfeituresAndPointsForYearService(DbFactory, TotalService, DemographicReaderService, new Mock<IPayrollDuplicateSsnReportService>().Object, new Mock<ICrossReferenceValidationService>().Object);
     }
 
     [Fact]
