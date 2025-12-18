@@ -590,7 +590,13 @@ definitions:
         - echo "Installing Spectral CLI..."
         - npm install -g @stoplight/spectral-cli
         - echo "Fetching OpenAPI spec from QA environment..."
-        - wget "${QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json" -O openapi-qa.json --no-check-certificate || (echo "❌ Failed to fetch OpenAPI spec from ${QA_BASE_URL}:8443" && exit 1)
+        - |
+          try {
+            Invoke-WebRequest -Uri "${env:QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json" -OutFile openapi-qa.json -SkipCertificateCheck
+          } catch {
+            Write-Host "❌ Failed to fetch OpenAPI spec from ${env:QA_BASE_URL}:8443"
+            exit 1
+          }
         - echo "Running API linting against Zalando guidelines..."
         - spectral lint openapi-qa.json --format junit --output spectral-results.xml || true
         - echo "Generating human-readable report..."
