@@ -67,24 +67,25 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
   const gridMaxHeight = useDynamicGridHeight({ heightPercentage: isGridExpanded ? 0.85 : 0.4 });
 
   // Pagination hook with server-side sorting support
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "BadgeNumber",
-    initialSortDescending: false,
-    persistenceKey: "ADHOC_PROF_LETTER73",
-    onPaginationChange: (newPageNumber, newPageSize, newSortParams) => {
-      // Server-side pagination and sorting - trigger API call
-      if (profitYear > 0) {
-        trigger({
-          profitYear,
-          skip: newPageNumber * newPageSize,
-          take: newPageSize,
-          sortBy: newSortParams.sortBy,
-          isSortDescending: newSortParams.isSortDescending
-        });
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "BadgeNumber",
+      initialSortDescending: false,
+      persistenceKey: "ADHOC_PROF_LETTER73",
+      onPaginationChange: (newPageNumber, newPageSize, newSortParams) => {
+        // Server-side pagination and sorting - trigger API call
+        if (profitYear > 0) {
+          trigger({
+            profitYear,
+            skip: newPageNumber * newPageSize,
+            take: newPageSize,
+            sortBy: newSortParams.sortBy,
+            isSortDescending: newSortParams.isSortDescending
+          });
+        }
       }
-    }
-  });
+    });
 
   // Trigger API call when profitYear changes (initial load)
   useEffect(() => {
@@ -256,13 +257,9 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
                 {rowData.length > 0 && (
                   <Pagination
                     pageNumber={pageNumber}
-                    setPageNumber={(value: number) => {
-                      handlePaginationChange(value - 1, pageSize);
-                    }}
+                    setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
                     pageSize={pageSize}
-                    setPageSize={(value: number) => {
-                      handlePaginationChange(0, value);
-                    }}
+                    setPageSize={handlePageSizeChange}
                     recordCount={apiData.total || rowData.length}
                   />
                 )}

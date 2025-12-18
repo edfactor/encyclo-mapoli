@@ -25,7 +25,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
     rowCount: qpay066bData?.response?.response?.results?.length ?? 0
   });
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
@@ -137,9 +137,9 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
           {!!qpay066bData?.response?.response?.results?.length && (
             <Pagination
               pageNumber={pageNumber}
-              setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
+              setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
               pageSize={pageSize}
-              setPageSize={(value: number) => handlePaginationChange(0, value)}
+              setPageSize={handlePageSizeChange}
               recordCount={qpay066bData.response.response.total}
             />
           )}

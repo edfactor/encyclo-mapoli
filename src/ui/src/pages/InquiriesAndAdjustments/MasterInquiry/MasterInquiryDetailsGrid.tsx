@@ -20,6 +20,8 @@ interface MasterInquiryGridProps {
     pageNumber: number;
     pageSize: number;
     sortParams: SortParams;
+    handlePageNumberChange: (pageNumber: number) => void;
+    handlePageSizeChange: (pageSize: number) => void;
   };
   onPaginationChange?: (pageNumber: number, pageSize: number) => void;
   onSortChange?: (sortParams: SortParams) => void;
@@ -50,12 +52,6 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
     if (!profitData) {
       return <Typography>No profit details found.</Typography>;
     }
-
-    const handlePaginationChange = (pageNumber: number, pageSize: number) => {
-      if (onPaginationChange) {
-        onPaginationChange(pageNumber, pageSize);
-      }
-    };
 
     const handleSortChange = (sortParams: ISortParams) => {
       if (onSortChange) {
@@ -103,16 +99,12 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
               }
             }}
           />
-          {profitGridPagination && onPaginationChange && (
+          {profitGridPagination && (
             <Pagination
               pageNumber={profitGridPagination.pageNumber}
-              setPageNumber={(value: number) => {
-                handlePaginationChange(value - 1, profitGridPagination.pageSize);
-              }}
+              setPageNumber={(value: number) => profitGridPagination.handlePageNumberChange(value - 1)}
               pageSize={profitGridPagination.pageSize}
-              setPageSize={(value: number) => {
-                handlePaginationChange(0, value);
-              }}
+              setPageSize={profitGridPagination.handlePageSizeChange}
               recordCount={profitData.total}
             />
           )}

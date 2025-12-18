@@ -23,7 +23,8 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
   setPageNumberReset,
   isLoading = false
 }) => {
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange, resetPagination } = gridPagination;
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange, resetPagination } =
+    gridPagination;
 
   useEffect(() => {
     if (pageNumberReset) {
@@ -100,12 +101,10 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
+            handlePageNumberChange(value - 1);
           }}
           pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={handlePageSizeChange}
           recordCount={summaryData.response.total}
         />
       )}

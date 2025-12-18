@@ -22,7 +22,7 @@ const PostFrozenUnder21ReportGrid: React.FC<PostFrozenUnder21ReportGridProps> = 
 }) => {
   const profitSharingUnder21Report = useSelector((state: RootState) => state.yearsEnd.profitSharingUnder21Report);
   const navigate = useNavigate();
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = gridPagination;
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = gridPagination;
 
   // Handle navigation for badge clicks
   const handleNavigation = React.useCallback(
@@ -62,12 +62,12 @@ const PostFrozenUnder21ReportGrid: React.FC<PostFrozenUnder21ReportGridProps> = 
           <Pagination
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
+              handlePageNumberChange(value - 1);
               setInitialSearchLoaded(true);
             }}
             pageSize={pageSize}
             setPageSize={(value: number) => {
-              handlePaginationChange(0, value);
+              handlePageSizeChange(value);
               setInitialSearchLoaded(true);
             }}
             recordCount={profitSharingUnder21Report.response.total || 0}

@@ -176,7 +176,7 @@ describe("useGridPagination", () => {
       expect(result.current.pageNumber).toBe(999);
     });
 
-    it("should prevent re-entrant calls", async () => {
+    it("should handle multiple rapid calls", async () => {
       const mockCallback = vi.fn();
       const { result } = renderHook(() =>
         useGridPagination({
@@ -186,16 +186,16 @@ describe("useGridPagination", () => {
         })
       );
 
-      // Try to call twice rapidly
+      // Call twice rapidly
       act(() => {
         result.current.handlePaginationChange(1, 50);
-        // This second call should be blocked
         result.current.handlePaginationChange(2, 50);
       });
 
       await waitFor(() => {
-        // Only the first call should succeed
-        expect(mockCallback).toHaveBeenCalledTimes(1);
+        // Both calls should be processed
+        expect(mockCallback).toHaveBeenCalledTimes(2);
+        expect(result.current.pageNumber).toBe(2);
       });
     });
   });

@@ -30,6 +30,8 @@ interface MasterInquiryMemberGridProps {
     pageNumber: number;
     pageSize: number;
     sortParams: SortParams;
+    handlePageNumberChange: (pageNumber: number) => void;
+    handlePageSizeChange: (pageSize: number) => void;
   };
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
@@ -65,10 +67,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
         badgeNumber: Number(member.badgeNumber),
         psnSuffix: Number(member.psnSuffix)
       });
-    };
-
-    const handlePaginationChange = (pageNumber: number, pageSize: number) => {
-      onPaginationChange(pageNumber, pageSize);
     };
 
     const handleSortChange = (sortParams: ISortParams) => {
@@ -130,13 +128,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
         <Pagination
           rowsPerPageOptions={[5, 10, 50, 100]}
           pageNumber={memberGridPagination.pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, memberGridPagination.pageSize);
-          }}
+          setPageNumber={(value: number) => memberGridPagination.handlePageNumberChange(value - 1)}
           pageSize={memberGridPagination.pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={memberGridPagination.handlePageSizeChange}
           recordCount={searchResults.total}
         />
       </Box>

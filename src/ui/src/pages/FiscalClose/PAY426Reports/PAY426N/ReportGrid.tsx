@@ -50,7 +50,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
   const frozenData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportFrozen);
   const data = isFrozen ? frozenData : liveData;
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "fullName",
     initialSortDescending: false,
@@ -233,12 +233,10 @@ const ReportGrid: React.FC<ReportGridProps> = ({
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
-                handlePaginationChange(value - 1, pageSize);
+                handlePageNumberChange(value - 1);
               }}
               pageSize={pageSize}
-              setPageSize={(value: number) => {
-                handlePaginationChange(0, value);
-              }}
+              setPageSize={handlePageSizeChange}
               recordCount={data.response.total}
             />
           )}

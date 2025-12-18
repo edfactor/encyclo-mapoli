@@ -41,12 +41,13 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "warning">("success");
 
   // Use custom hooks for data fetching and percentage update
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "psnSuffix",
-    initialSortDescending: true,
-    persistenceKey: GRID_KEYS.BENEFICIARIES_LIST
-  });
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "psnSuffix",
+      initialSortDescending: true,
+      persistenceKey: GRID_KEYS.BENEFICIARIES_LIST
+    });
 
   const relationships = useBeneficiaryRelationshipData({
     selectedMember,
@@ -261,13 +262,9 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
         relationships.beneficiaryList?.results.length > 0 && (
           <Pagination
             pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
-            }}
+            setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
             pageSize={pageSize}
-            setPageSize={(value: number) => {
-              handlePaginationChange(0, value);
-            }}
+            setPageSize={handlePageSizeChange}
             recordCount={relationships.beneficiaryList?.total}
           />
         )}
