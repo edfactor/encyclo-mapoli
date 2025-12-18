@@ -134,7 +134,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
         setValidationData(null);
       }
     }
-  }, [hasToken, params, profitYear, triggerValidation]);
+  }, [hasToken, isFrozen, params, profitYear, triggerValidation]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
