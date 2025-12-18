@@ -1,14 +1,15 @@
-import { Box, Checkbox, Tooltip } from "@mui/material";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { Box, Checkbox, Chip, Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
 import React from "react";
-import { isRowReversible, REVERSIBLE_PROFIT_CODES } from "./ReversalsGridColumns";
+import { getReversalEligibilityStatus, ReversalEligibilityStatus, REVERSIBLE_PROFIT_CODES } from "./ReversalsGridColumns";
 
 interface RowData {
   id: number;
   profitCodeId: number;
   monthToDate: number;
   yearToDate: number;
+  isAlreadyReversed?: boolean;
 }
 
 interface GridContext {
@@ -22,7 +23,17 @@ interface ReversalCheckboxCellRendererProps extends ICellRendererParams {
 }
 
 // Determine why a row cannot be reversed
-const getIneligibilityReason = (data: { profitCodeId: number; monthToDate: number; yearToDate: number }): string => {
+const getIneligibilityReason = (data: {
+  profitCodeId: number;
+  monthToDate: number;
+  yearToDate: number;
+  isAlreadyReversed?: boolean;
+}): string => {
+  // Check if already reversed first
+  if (data.isAlreadyReversed) {
+    return "This transaction has already been reversed";
+  }
+
   // Check profit code first
   if (!REVERSIBLE_PROFIT_CODES.includes(data.profitCodeId)) {
     return "Ineligible code for reversal";
@@ -52,7 +63,7 @@ const getIneligibilityReason = (data: { profitCodeId: number; monthToDate: numbe
 };
 
 export const ReversalCheckboxCellRenderer: React.FC<ReversalCheckboxCellRendererProps> = ({ data, context }) => {
-  const isReversible = isRowReversible(data);
+  const eligibilityStatus: ReversalEligibilityStatus = getReversalEligibilityStatus(data);
 
   const cellStyle: React.CSSProperties = {
     display: "flex",
@@ -62,7 +73,31 @@ export const ReversalCheckboxCellRenderer: React.FC<ReversalCheckboxCellRenderer
     marginTop: "-1px"
   };
 
-  if (!isReversible) {
+  // Show "Reversed" badge for already-reversed rows
+  if (eligibilityStatus === "already-reversed") {
+    return (
+      <Tooltip title="This transaction has already been reversed">
+        <Box sx={cellStyle}>
+          <Chip
+            label="Reversed"
+            size="small"
+            sx={{
+              backgroundColor: "#f5f5f5",
+              color: "#666",
+              fontSize: "0.7rem",
+              height: "20px",
+              "& .MuiChip-label": {
+                padding: "0 6px"
+              }
+            }}
+          />
+        </Box>
+      </Tooltip>
+    );
+  }
+
+  // Show error icon for other ineligible rows
+  if (eligibilityStatus === "ineligible") {
     const tooltipMessage = getIneligibilityReason(data);
     return (
       <Tooltip title={tooltipMessage}>

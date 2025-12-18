@@ -12,7 +12,7 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { CellValueChangedEvent, GridApi, SelectionChangedEvent } from "ag-grid-community";
+import { CellValueChangedEvent, GridApi, RowClassParams, SelectionChangedEvent } from "ag-grid-community";
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
 import { useEffect, useRef, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
@@ -130,6 +130,7 @@ const ProfitSharingAdjustmentsContent = () => {
 
       next[row.rowNumber] = {
         profitDetailId: row.profitDetailId,
+        reversedFromProfitDetailId: row.reversedFromProfitDetailId ?? null,
         rowNumber: row.rowNumber,
         profitCodeId: row.profitCodeId,
         contribution: row.contribution,
@@ -228,6 +229,7 @@ const ProfitSharingAdjustmentsContent = () => {
 
     const draftRow: ProfitSharingAdjustmentRowDto = {
       profitDetailId: null,
+      hasBeenReversed: false,
       rowNumber,
       profitYear: loadedKey.profitYear,
       profitYearIteration: 3,
@@ -242,7 +244,8 @@ const ProfitSharingAdjustmentsContent = () => {
       taxCodeId: `${seedRow?.taxCodeId ?? ""}`,
       activityDate: todayIso,
       comment: "ADMINISTRATIVE",
-      isEditable: false
+      isEditable: false,
+      reversedFromProfitDetailId: selectedRow?.profitDetailId ?? null
     };
 
     setRowData((prev) => {
@@ -450,10 +453,12 @@ const ProfitSharingAdjustmentsContent = () => {
             disabled={
               !selectedRow ||
               selectedRow.profitDetailId == null ||
+              selectedRow.hasBeenReversed ||
               isSaving ||
               isFetchingAdjustments ||
               rowData.length === 0
             }
+            title={selectedRow?.hasBeenReversed ? "This row has already been reversed" : ""}
             onClick={openAdjustModal}>
             Adjust…
           </Button>
@@ -483,7 +488,13 @@ const ProfitSharingAdjustmentsContent = () => {
               const selected = event.api.getSelectedNodes().map((n) => n.data ?? null)[0] ?? null;
               setSelectedRow(selected);
             }) as (event: unknown) => void,
-            onCellValueChanged
+            onCellValueChanged,
+            getRowStyle: (params: RowClassParams<ProfitSharingAdjustmentRowDto>) => {
+              if (params.data?.hasBeenReversed) {
+                return { backgroundColor: "#f5f5f5", color: "#9e9e9e" };
+              }
+              return undefined;
+            }
           }}
         />
       </Grid>

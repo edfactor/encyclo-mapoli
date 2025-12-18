@@ -44,7 +44,7 @@ public sealed class GetProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint<
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            var result = await _service.GetAsync(req, ct);
+            var result = await _service.GetAdjustmentsAsync(req, ct);
 
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "profit-sharing-adjustments-load"),
