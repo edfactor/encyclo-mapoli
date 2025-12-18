@@ -53,6 +53,8 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   currentIncomeYear?: number;
   currentHoursYear?: number;
   psnSuffix?: number;
+  /** Indicates whether this profit detail record has already been reversed. */
+  isAlreadyReversed?: boolean;
 }
 
 export interface MasterInquiryRequest {

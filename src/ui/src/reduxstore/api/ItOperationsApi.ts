@@ -1,11 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { Paged } from "smart-ui-library";
-import {
-  setFrozenStateCollectionResponse,
-  setFrozenStateResponse,
-  setProfitYearSelectorData
-} from "../../reduxstore/slices/frozenSlice";
+import { setFrozenStateCollectionResponse, setFrozenStateResponse } from "../../reduxstore/slices/frozenSlice";
 import {
   AnnuityRateDto,
   AuditChangeEntryDto,
@@ -105,27 +101,6 @@ export const ItOperationsApi = createApi({
         }
       }
     }),
-    getProfitYearSelectorFrozenData: builder.query<Paged<FrozenStateResponse>, SortedPaginationRequestDto>({
-      query: (params) => ({
-        url: `itdevops/frozen`,
-        method: "GET",
-        params: {
-          take: params.take,
-          skip: params.skip,
-          sortBy: params.sortBy,
-          isSortDescending: params.isSortDescending
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setProfitYearSelectorData(data));
-        } catch (err) {
-          console.error("Failed to fetch profit year selector data:", err);
-          dispatch(setProfitYearSelectorData(null)); // Handle API errors
-        }
-      }
-    }),
     freezeDemographics: builder.mutation<void, FreezeDemographicsRequest>({
       query: (request) => ({
         url: "itdevops/freeze",
@@ -179,7 +154,6 @@ export const {
   useUpdateStateTaxRateMutation,
   useLazyGetFrozenStateResponseQuery,
   useLazyGetHistoricalFrozenStateResponseQuery,
-  useLazyGetProfitYearSelectorFrozenDataQuery,
   useFreezeDemographicsMutation,
   useLazyGetMetadataQuery,
   useLazyGetCurrentUserQuery,

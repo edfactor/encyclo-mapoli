@@ -146,6 +146,14 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 {
                     return Result<bool>.Failure(Error.ClassActionForfeitureCannotBeReversed);
                 }
+
+                // Check if this profit detail has already been reversed (double-reversal protection)
+                var alreadyReversed = await context.ProfitDetails
+                    .AnyAsync(pd => pd.ReversedFromProfitDetailId == req.OffsettingProfitDetailId.Value, cancellationToken);
+                if (alreadyReversed)
+                {
+                    return Result<bool>.Failure(Error.ProfitDetailAlreadyReversed);
+                }
             }
 
             // Get vesting balance from the total service
@@ -185,6 +193,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 CreatedAtUtc = DateTimeOffset.UtcNow,
                 ModifiedAtUtc = DateTimeOffset.UtcNow,
                 CommentTypeId = commentType.Id,
+                ReversedFromProfitDetailId = req.OffsettingProfitDetailId, // Track which record was reversed
             };
 
             context.ProfitDetails.Add(profitDetail);

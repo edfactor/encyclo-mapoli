@@ -55,7 +55,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   //  const fiscalData = useFiscalCalendarYear();
   const profitYear = useDecemberFlowProfitYear();
 
- // Get last year date range for default values
+  // Get last year date range for default values
   const { beginDate, endDate: lastYearEndDate } = getLastYearDateRange();
 
   const {

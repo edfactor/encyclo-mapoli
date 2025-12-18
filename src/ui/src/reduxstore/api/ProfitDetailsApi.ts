@@ -17,19 +17,21 @@ export const ProfitDetailsApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
-    getProfitSharingAdjustments: builder.query<GetProfitSharingAdjustmentsResponse, GetProfitSharingAdjustmentsRequest>({
-      query: (params) => ({
-        url: "adjustments/under21",
-        method: "GET",
-        params
-      }),
-      providesTags: (_result, _error, args) => [
-        {
-          type: "ProfitSharingAdjustments" as const,
-          id: `${args.profitYear}-${args.badgeNumber}-${args.sequenceNumber}`
-        }
-      ]
-    }),
+    getProfitSharingAdjustments: builder.query<GetProfitSharingAdjustmentsResponse, GetProfitSharingAdjustmentsRequest>(
+      {
+        query: (params) => ({
+          url: "adjustments/under21",
+          method: "GET",
+          params
+        }),
+        providesTags: (_result, _error, args) => [
+          {
+            type: "ProfitSharingAdjustments" as const,
+            id: `${args.profitYear}-${args.badgeNumber}`
+          }
+        ]
+      }
+    ),
     saveProfitSharingAdjustments: builder.mutation<
       GetProfitSharingAdjustmentsResponse,
       SaveProfitSharingAdjustmentsRequest
@@ -42,7 +44,7 @@ export const ProfitDetailsApi = createApi({
       invalidatesTags: (_result, _error, args) => [
         {
           type: "ProfitSharingAdjustments" as const,
-          id: `${args.profitYear}-${args.badgeNumber}-${args.sequenceNumber}`
+          id: `${args.profitYear}-${args.badgeNumber}`
         }
       ]
     })

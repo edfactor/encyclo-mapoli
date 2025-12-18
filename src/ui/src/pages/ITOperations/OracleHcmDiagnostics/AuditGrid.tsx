@@ -1,14 +1,14 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Typography
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
@@ -134,7 +134,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
         <DialogContent>
           <Box sx={{ paddingTop: "16px" }}>
             <Typography variant="body1">
-                Are you sure you want to delete all {data?.total || 0} sync error records?
+              Are you sure you want to delete all {data?.total || 0} sync error records?
             </Typography>
             <Typography
               variant="body2"

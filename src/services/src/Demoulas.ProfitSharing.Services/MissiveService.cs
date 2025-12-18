@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -144,12 +145,7 @@ internal sealed class MissiveService : IMissiveService
 
     private static bool IsUnderAgeAtDate(DateOnly dateOfBirth, DateOnly asOf, int underAgeThreshold)
     {
-        var age = asOf.Year - dateOfBirth.Year;
-        if (dateOfBirth > asOf.AddYears(-age))
-        {
-            age--;
-        }
-
+        var age = dateOfBirth.Age(asOf.ToDateTime(TimeOnly.MinValue));
         return age < underAgeThreshold;
     }
 }

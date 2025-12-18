@@ -257,7 +257,7 @@ const ManageAnnuityRates = () => {
               stopEditingWhenCellsLoseFocus: true,
               enterNavigatesVertically: true,
               enterNavigatesVerticallyAfterEdit: true,
-              onCellValueChanged,
+              onCellValueChanged
             }}
           />
         </Grid>

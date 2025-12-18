@@ -4920,6 +4920,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(32)")
                         .HasColumnName("REMARK");
 
+                    b.Property<int?>("ReversedFromProfitDetailId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("REVERSED_FROM_PROFIT_DETAIL_ID");
+
                     b.Property<int>("Ssn")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
@@ -4979,6 +4983,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex(new[] { "ProfitCodeId", "Ssn" }, "IX_PROFIT_CODE_SSN")
                         .HasDatabaseName("IX_PROFIT_DETAIL_PROFITCODEID_SSN");
+
+                    b.HasIndex(new[] { "ReversedFromProfitDetailId" }, "IX_REVERSED_FROM_PROFIT_DETAIL_ID")
+                        .HasDatabaseName("IX_PROFIT_DETAIL_REVERSED_FROM_PROFIT_DETAIL_ID")
+                        .HasFilter("REVERSED_FROM_PROFIT_DETAIL_ID IS NOT NULL");
 
                     b.HasIndex(new[] { "Ssn" }, "IX_SSN")
                         .HasDatabaseName("IX_PROFIT_DETAIL_SSN");
@@ -7237,6 +7245,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PROFIT_DETAIL_PROFIT_CODE_PROFITCODEID");
 
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.ProfitDetail", "ReversedFromProfitDetail")
+                        .WithMany()
+                        .HasForeignKey("ReversedFromProfitDetailId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_PROFIT_DETAIL_PROFIT_DETAIL_REVERSEDFROMPROFITDETAILID");
+
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.TaxCode", "TaxCode")
                         .WithMany()
                         .HasForeignKey("TaxCodeId")
@@ -7252,6 +7266,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("CommentType");
 
                     b.Navigation("ProfitCode");
+
+                    b.Navigation("ReversedFromProfitDetail");
 
                     b.Navigation("TaxCode");
 

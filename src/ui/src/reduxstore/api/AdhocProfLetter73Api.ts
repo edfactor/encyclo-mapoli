@@ -34,20 +34,20 @@ export const AdhocProfLetter73Api = createApi({
         const queryParams = new URLSearchParams({
           profitYear: params.profitYear.toString()
         });
-        
+
         if (params.skip !== undefined) {
-          queryParams.append('skip', params.skip.toString());
+          queryParams.append("skip", params.skip.toString());
         }
         if (params.take !== undefined) {
-          queryParams.append('take', params.take.toString());
+          queryParams.append("take", params.take.toString());
         }
         if (params.sortBy) {
-          queryParams.append('sortBy', params.sortBy);
+          queryParams.append("sortBy", params.sortBy);
         }
         if (params.isSortDescending !== undefined) {
-          queryParams.append('isSortDescending', params.isSortDescending.toString());
+          queryParams.append("isSortDescending", params.isSortDescending.toString());
         }
-        
+
         return {
           url: `/adhoc/prof-letter73?${queryParams.toString()}`,
           method: "GET"
@@ -68,8 +68,8 @@ export const AdhocProfLetter73Api = createApi({
   })
 });
 
-export const { 
-  useGetAdhocProfLetter73Query, 
+export const {
+  useGetAdhocProfLetter73Query,
   useLazyGetAdhocProfLetter73Query,
   useLazyDownloadAdhocProfLetter73FormLetterQuery
 } = AdhocProfLetter73Api;

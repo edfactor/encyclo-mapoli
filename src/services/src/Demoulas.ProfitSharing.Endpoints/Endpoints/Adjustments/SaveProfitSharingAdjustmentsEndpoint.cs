@@ -44,7 +44,7 @@ public sealed class SaveProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            var result = await _service.SaveAsync(req, ct);
+            var result = await _service.SaveAdjustmentsAsync(req, ct);
 
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "profit-sharing-adjustments-save"),
@@ -52,6 +52,6 @@ public sealed class SaveProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint
                 new("profit_year", req.ProfitYear.ToString()));
 
             return result.ToHttpResult(Error.EmployeeNotFound);
-        });
+        }, "Ssn", "DateOfBirth", "HireDate");
     }
 }

@@ -21,43 +21,28 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
     }
 
     [Fact]
-    [Description("PS-0000 : GetAsync pads to 18 rows and includes insert row defaults")]
-    public async Task GetAsync_ShouldReturn18Rows_WithInsertRowDefaults()
+    [Description("PS-0000 : GetAsync returns real rows only (no padding), up to 18")]
+    public async Task GetAsync_ShouldReturnRealRowsOnly_UpTo18()
     {
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
         // Default GetAsync now returns rows only when the member is under 21 as of today.
         await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 20);
 
-        var result = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
+        var result = await _service.GetAdjustmentsAsync(new GetProfitSharingAdjustmentsRequest
         {
             ProfitYear = candidate.ProfitYear,
             BadgeNumber = candidate.BadgeNumber,
-            SequenceNumber = candidate.SequenceNumber
         }, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
-        result.Value!.Rows.Count.ShouldBe(18);
 
-        var insertRow = result.Value.Rows.FirstOrDefault(r => r.ProfitDetailId is null && r.ActivityDate is not null);
-        insertRow.ShouldNotBeNull();
+        result.Value!.Rows.Count.ShouldBeGreaterThan(0);
+        result.Value.Rows.Count.ShouldBeLessThanOrEqualTo(18);
 
-        insertRow!.ProfitYearIteration.ShouldBe((byte)3);
-        insertRow.ProfitCodeId.ShouldBe(ProfitCode.Constants.IncomingContributions.Id);
-        insertRow.Comment.ShouldBe("ADMINISTRATIVE");
-        insertRow.ActivityDate.ShouldBe(DateOnly.FromDateTime(DateTime.Today));
-        insertRow.IsEditable.ShouldBeFalse();
-
-        foreach (var fillerRow in result.Value.Rows
-            .Where(r => r.ProfitDetailId is null)
-            .Where(r => r.RowNumber != insertRow.RowNumber))
-        {
-            fillerRow.ActivityDate.ShouldBeNull();
-            fillerRow.Comment.ShouldBe(string.Empty);
-            fillerRow.Contribution.ShouldBe(0);
-            fillerRow.Earnings.ShouldBe(0);
-            fillerRow.Forfeiture.ShouldBe(0);
-        }
+        result.Value.Rows.ShouldAllBe(r => r.ProfitDetailId != null);
+        result.Value.Rows.ShouldAllBe(r => r.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id);
+        result.Value.Rows.Select(r => r.RowNumber).ShouldBe(Enumerable.Range(1, result.Value.Rows.Count));
     }
 
     [Fact]
@@ -68,34 +53,30 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         // Default GetAsync now returns rows only when the member is under 21 as of today.
         await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 20);
 
-        var getResult = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
+        var getResult = await _service.GetAdjustmentsAsync(new GetProfitSharingAdjustmentsRequest
         {
             ProfitYear = candidate.ProfitYear,
             BadgeNumber = candidate.BadgeNumber,
-            SequenceNumber = candidate.SequenceNumber
         }, CancellationToken.None);
 
         getResult.IsSuccess.ShouldBeTrue();
         getResult.Value.ShouldNotBeNull();
 
         var existingRow = getResult.Value!.Rows
-            .Where(r => r.ProfitDetailId is not null)
-            .FirstOrDefault(r => r.ProfitYearIteration is 0 or 3);
+            .FirstOrDefault(r => r.ProfitDetailId != null);
 
-        existingRow.ShouldNotBeNull("Test data did not contain an existing row with ProfitYearIteration (EXT) 0 or 3.");
+        existingRow.ShouldNotBeNull("Test data did not contain an existing row.");
 
-        var saveResult = await _service.SaveAsync(new SaveProfitSharingAdjustmentsRequest
+        var saveResult = await _service.SaveAdjustmentsAsync(new SaveProfitSharingAdjustmentsRequest
         {
             ProfitYear = candidate.ProfitYear,
             BadgeNumber = candidate.BadgeNumber,
-            SequenceNumber = candidate.SequenceNumber,
             Rows = new[]
             {
                 new ProfitSharingAdjustmentRowRequest
                 {
                     ProfitDetailId = existingRow!.ProfitDetailId,
                     RowNumber = existingRow.RowNumber,
-                    ProfitYearIteration = existingRow.ProfitYearIteration,
                     ProfitCodeId = existingRow.ProfitCodeId,
                     Contribution = existingRow.Contribution + 1,
                     Earnings = existingRow.Earnings,
@@ -111,7 +92,7 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         saveResult.Error!.ValidationErrors.ShouldNotBeNull();
         saveResult.Error.ValidationErrors!.ShouldContainKey(nameof(ProfitSharingAdjustmentRowRequest.RowNumber));
         saveResult.Error.ValidationErrors[nameof(ProfitSharingAdjustmentRowRequest.RowNumber)][0]
-            .ShouldContain("Amount fields are read-only");
+            .ShouldContain("Amount fields cannot be changed");
     }
 
     [Fact]
@@ -122,44 +103,27 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         // Ensure age-based guard does not trigger first; focus this test on insert-row validation.
         await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 20);
 
-        var getResult = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
+        var saveResult = await _service.SaveAdjustmentsAsync(new SaveProfitSharingAdjustmentsRequest
         {
             ProfitYear = candidate.ProfitYear,
             BadgeNumber = candidate.BadgeNumber,
-            SequenceNumber = candidate.SequenceNumber,
-            GetAllRows = true
-        }, CancellationToken.None);
-
-        getResult.IsSuccess.ShouldBeTrue();
-        getResult.Value.ShouldNotBeNull();
-
-        var insertRow = getResult.Value!.Rows.First(r => r.ProfitDetailId is null && r.ActivityDate is not null);
-        var fillerRow = getResult.Value.Rows.First(r => r.ProfitDetailId is null && r.ActivityDate is null);
-
-        var saveResult = await _service.SaveAsync(new SaveProfitSharingAdjustmentsRequest
-        {
-            ProfitYear = candidate.ProfitYear,
-            BadgeNumber = candidate.BadgeNumber,
-            SequenceNumber = candidate.SequenceNumber,
             Rows = new[]
             {
                 new ProfitSharingAdjustmentRowRequest
                 {
                     ProfitDetailId = null,
-                    RowNumber = insertRow.RowNumber,
-                    ProfitYearIteration = 3,
+                    RowNumber = 1,
                     ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
                     Contribution = 1,
                     Earnings = 0,
                     Forfeiture = 0,
-                    ActivityDate = insertRow.ActivityDate,
-                    Comment = insertRow.Comment
+                    ActivityDate = DateOnly.FromDateTime(DateTime.Today),
+                    Comment = "ADMINISTRATIVE"
                 },
                 new ProfitSharingAdjustmentRowRequest
                 {
                     ProfitDetailId = null,
-                    RowNumber = fillerRow.RowNumber,
-                    ProfitYearIteration = 3,
+                    RowNumber = 2,
                     ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
                     Contribution = 2,
                     Earnings = 0,
@@ -185,18 +149,16 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
         await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 22);
 
-        var saveResult = await _service.SaveAsync(new SaveProfitSharingAdjustmentsRequest
+        var saveResult = await _service.SaveAdjustmentsAsync(new SaveProfitSharingAdjustmentsRequest
         {
             ProfitYear = candidate.ProfitYear,
             BadgeNumber = candidate.BadgeNumber,
-            SequenceNumber = candidate.SequenceNumber,
             Rows =
             [
                 new ProfitSharingAdjustmentRowRequest
                 {
                     ProfitDetailId = null,
                     RowNumber = 1,
-                    ProfitYearIteration = 3,
                     ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id,
                     Contribution = 0,
                     Earnings = 0,
@@ -222,11 +184,10 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         var candidate = await FindCandidateWithLessThanMaxRowsAsync();
         await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 22);
 
-        var result = await _service.GetAsync(new GetProfitSharingAdjustmentsRequest
+        var result = await _service.GetAdjustmentsAsync(new GetProfitSharingAdjustmentsRequest
         {
             ProfitYear = candidate.ProfitYear,
             BadgeNumber = candidate.BadgeNumber,
-            SequenceNumber = candidate.SequenceNumber,
             GetAllRows = false
         }, CancellationToken.None);
 
@@ -235,7 +196,80 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         result.Value!.Rows.Count.ShouldBe(0);
     }
 
-    private Task<(short ProfitYear, int BadgeNumber, int SequenceNumber, int Ssn)> FindCandidateWithLessThanMaxRowsAsync()
+    [Fact(Skip = "MockQueryable cannot properly support self-referencing FK relationships - test requires integration test with real database")]
+    [Description("PS-2266 : SaveAsync rejects adjustment when source profit detail has already been reversed")]
+    public async Task SaveAsync_WhenSourceAlreadyReversed_ShouldReturnValidationFailure()
+    {
+        var candidate = await FindCandidateWithLessThanMaxRowsAsync();
+        await SetDemographicDobForAgeAsOfTodayAsync(candidate.Ssn, yearsOldAsOfToday: 20);
+
+        // Get an existing row to use as the "source" for reversal
+        var getResult = await _service.GetAdjustmentsAsync(new GetProfitSharingAdjustmentsRequest
+        {
+            ProfitYear = candidate.ProfitYear,
+            BadgeNumber = candidate.BadgeNumber,
+        }, CancellationToken.None);
+
+        getResult.IsSuccess.ShouldBeTrue();
+        var sourceRow = getResult.Value!.Rows
+            .FirstOrDefault(r => r.ProfitDetailId != null && r.ProfitYear == candidate.ProfitYear);
+        sourceRow.ShouldNotBeNull("Test data did not contain an existing row to reverse for the selected profit year.");
+
+        // First adjustment: should succeed
+        var firstSave = await _service.SaveAdjustmentsAsync(new SaveProfitSharingAdjustmentsRequest
+        {
+            ProfitYear = candidate.ProfitYear,
+            BadgeNumber = candidate.BadgeNumber,
+            Rows =
+            [
+                new ProfitSharingAdjustmentRowRequest
+                {
+                    ProfitDetailId = null, // Insert row
+                    RowNumber = 1,
+                    ProfitCodeId = sourceRow.ProfitCodeId,
+                    Contribution = -sourceRow.Contribution,
+                    Earnings = -sourceRow.Earnings,
+                    Forfeiture = -sourceRow.Forfeiture,
+                    ActivityDate = DateOnly.FromDateTime(DateTime.Today),
+                    Comment = "ADMINISTRATIVE",
+                    ReversedFromProfitDetailId = sourceRow.ProfitDetailId // Link to source
+                }
+            ]
+        }, CancellationToken.None);
+
+        firstSave.IsSuccess.ShouldBeTrue("First adjustment should succeed.");
+
+        // Second adjustment: should fail with double-reversal error
+        var secondSave = await _service.SaveAdjustmentsAsync(new SaveProfitSharingAdjustmentsRequest
+        {
+            ProfitYear = candidate.ProfitYear,
+            BadgeNumber = candidate.BadgeNumber,
+            Rows =
+            [
+                new ProfitSharingAdjustmentRowRequest
+                {
+                    ProfitDetailId = null, // Insert row
+                    RowNumber = 1,
+                    ProfitCodeId = sourceRow.ProfitCodeId,
+                    Contribution = -sourceRow.Contribution,
+                    Earnings = -sourceRow.Earnings,
+                    Forfeiture = -sourceRow.Forfeiture,
+                    ActivityDate = DateOnly.FromDateTime(DateTime.Today),
+                    Comment = "ADMINISTRATIVE",
+                    ReversedFromProfitDetailId = sourceRow.ProfitDetailId // Same source as first
+                }
+            ]
+        }, CancellationToken.None);
+
+        secondSave.IsSuccess.ShouldBeFalse("Second adjustment to same source should fail.");
+        secondSave.Error.ShouldNotBeNull();
+        secondSave.Error!.ValidationErrors.ShouldNotBeNull();
+        secondSave.Error.ValidationErrors!.ShouldContainKey(nameof(ProfitSharingAdjustmentRowRequest.ReversedFromProfitDetailId));
+        secondSave.Error.ValidationErrors[nameof(ProfitSharingAdjustmentRowRequest.ReversedFromProfitDetailId)][0]
+            .ShouldContain("already been reversed");
+    }
+
+    private Task<(short ProfitYear, int BadgeNumber, int Ssn)> FindCandidateWithLessThanMaxRowsAsync()
     {
         return MockDbContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -245,14 +279,13 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                 from pd in ctx.ProfitDetails
                 join d in ctx.Demographics on pd.Ssn equals d.Ssn
                 where pd.ProfitCodeId == profitCodeId
-                where pd.ProfitYearIteration == 0 || pd.ProfitYearIteration == 3
+                where pd.ProfitYearIteration == 0
                 where d.BadgeNumber > 0
-                group pd by new { pd.ProfitYear, d.BadgeNumber, pd.DistributionSequence, pd.Ssn } into g
+                group pd by new { pd.ProfitYear, d.BadgeNumber, pd.Ssn } into g
                 select new
                 {
                     g.Key.ProfitYear,
                     g.Key.BadgeNumber,
-                    SequenceNumber = g.Key.DistributionSequence,
                     g.Key.Ssn,
                     Count = g.Count()
                 })
@@ -261,9 +294,9 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                 .ToListAsync();
 
             var candidate = candidates.FirstOrDefault();
-            candidate.ShouldNotBeNull("Test data did not contain a ProfitDetail group with < 18 rows for ProfitCodeId 0, ProfitYearIteration 0/3, and a matching Demographic.");
+            candidate.ShouldNotBeNull("Test data did not contain a ProfitDetail group with < 18 rows for ProfitCodeId 0 and a matching Demographic.");
 
-            return (candidate!.ProfitYear, candidate.BadgeNumber, candidate.SequenceNumber, candidate.Ssn);
+            return (candidate!.ProfitYear, candidate.BadgeNumber, candidate.Ssn);
         }, CancellationToken.None);
     }
 

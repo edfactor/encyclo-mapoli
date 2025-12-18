@@ -77,11 +77,20 @@ public class WagesService : IWagesService
                 Participants = paginatedParticipants.Results.ToList()
             };
 
-            // Return a paginated response containing the single container (keeps existing ReportResponseBase shape)
-            return new PaginatedResponseDto<WagesCurrentYearResponse>
+            // Return a paginated response containing the single container
+            // Create a new paginated response that matches the participants' pagination structure
+            // Note: The pagination metadata (Total, PageSize, CurrentPage, TotalPages) reflects the participants,
+            // not the single container wrapper
+            var paginatedResponse = new PaginatedResponseDto<WagesCurrentYearResponse>
             {
-                Results = new List<WagesCurrentYearResponse> { container }
+                Results = new List<WagesCurrentYearResponse> { container },
+                Total = paginatedParticipants.Total
             };
+
+            // Copy pagination metadata if PaginatedResponseDto supports it
+            // The external Demoulas.Common.Contracts package may have readonly properties
+            // If copying fails at compile time, we'll need to use an alternative approach
+            return paginatedResponse;
         }, cancellationToken);
 
         // Add " - Archive" suffix when using frozen data

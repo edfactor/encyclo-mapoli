@@ -250,15 +250,21 @@ var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
 // Register the API resource with resource manager for lifecycle management during DB operations
 resourceManager.RegisterApiResource(api);
 
-// Use AddViteApp for Vite applications as per the latest CommunityToolkit.Aspire guidance
-var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", scriptName: "dev")
-    .WithHttpEndpoint(port: uiPort, isProxied: false)
+// Use AddViteApp for Vite applications as per the Aspire 13.1 JavaScript integration
+// This automatically handles npm package installation and has Vite-specific defaults
+// Configure the default "http" endpoint to use port 3100 (required for Okta callback)
+var ui = builder.AddViteApp("ProfitSharing-Ui", "../../../ui/")
+    .WithEndpoint("http", endpoint =>
+    {
+        endpoint.Port = uiPort;
+        endpoint.TargetPort = uiPort;
+        endpoint.IsProxied = false;
+    })
     .WithUrlForEndpoint("http", annotation =>
     {
         annotation.DisplayText = "Profit Sharing";
     })
-    .WithOtlpExporter()
-    .WithNpmPackageInstallation();
+    .WithOtlpExporter();
 
 ui.WithReference(api)
     .WaitFor(api)

@@ -68,6 +68,22 @@ public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
                     });
                 }
 
+                // Check if any profit details have already been reversed (duplicate reversal protection)
+                var alreadyReversedIds = await ctx.ProfitDetails
+                    .Where(pd => pd.ReversedFromProfitDetailId != null && profitDetailIds.Contains(pd.ReversedFromProfitDetailId.Value))
+                    .Select(pd => pd.ReversedFromProfitDetailId!.Value)
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+
+                if (alreadyReversedIds.Count > 0)
+                {
+                    _logger.LogWarning("Profit details already reversed for IDs: [{AlreadyReversedIds}]", string.Join(", ", alreadyReversedIds));
+                    return Result<bool>.ValidationFailure(new Dictionary<string, string[]>
+                    {
+                        ["profitDetailIds"] = [$"The following profit details have already been reversed: {string.Join(", ", alreadyReversedIds)}"]
+                    });
+                }
+
                 // Get frozen year for validation
                 var maxFrozenYear = await ctx.FrozenStates.MaxAsync(fy => (int?)fy.ProfitYear, cancellationToken) ?? 0;
                 var currentDate = DateTime.Now;
@@ -158,7 +174,10 @@ public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
                             : $"REV    {currentDate:MM/yy}  ") + state).Trim(),
 
                         ZeroContributionReasonId = null,
-                        CommentRelatedState = pd.CommentRelatedState
+                        CommentRelatedState = pd.CommentRelatedState,
+
+                        // Track the source profit detail to prevent double-reversals
+                        ReversedFromProfitDetailId = pd.Id
                     };
 
                     ctx.ProfitDetails.Add(reverseProfitDetail);
