@@ -138,13 +138,13 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
       render(<MasterUpdateSummaryTable {...defaultProps} />);
       expect(screen.getAllByText("$50,000.00").length).toBeGreaterThan(0); // Total
       expect(screen.getAllByText("$45,000.00").length).toBeGreaterThan(0); // Allocation
-      expect(screen.getAllByText("$12,000.00").length).toBeGreaterThan(0); // Points
+      expect(screen.getAllByText("12,000").length).toBeGreaterThan(0); // Points
     });
 
     it("displays Earnings with total and points", () => {
       render(<MasterUpdateSummaryTable {...defaultProps} />);
       expect(screen.getAllByText("$25,000.00").length).toBeGreaterThan(0); // Total
-      expect(screen.getAllByText("$6,000.00").length).toBeGreaterThan(0); // Points
+      expect(screen.getAllByText("6,000").length).toBeGreaterThan(0); // Points
     });
 
     it("displays Earnings2 correctly", () => {

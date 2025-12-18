@@ -1,9 +1,13 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record WagesCurrentYearResponse
 {
     // Totals for the entire dataset
+    [YearEndArchiveProperty]
     public decimal TotalHoursCurrentYearWages { get; set; }
+    [YearEndArchiveProperty]
     public decimal TotalIncomeCurrentYearWages { get; set; }
 
     // List of participants for this report container (paginated)

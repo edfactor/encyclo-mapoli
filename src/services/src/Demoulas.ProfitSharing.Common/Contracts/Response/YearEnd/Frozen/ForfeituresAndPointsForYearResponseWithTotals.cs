@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
@@ -8,9 +9,11 @@ public sealed record ForfeituresAndPointsForYearResponseWithTotals : ReportRespo
     public decimal TotalForfeitures { get; set; }
 
     [MaskSensitive]
+    [YearEndArchiveProperty]
     public int TotalForfeitPoints { get; set; }
 
     [MaskSensitive]
+    [YearEndArchiveProperty]
     public int TotalEarningPoints { get; set; }
 
     [YearEndArchiveProperty]
@@ -27,6 +30,8 @@ public sealed record ForfeituresAndPointsForYearResponseWithTotals : ReportRespo
 
     [YearEndArchiveProperty]
     public decimal? AllocationsFromTotals { get; set; }
+
+    public ValidationResponse? CrossReferenceValidation { get; set; }
 
     public static ForfeituresAndPointsForYearResponseWithTotals ResponseExample()
     {

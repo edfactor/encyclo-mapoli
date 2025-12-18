@@ -48,7 +48,7 @@ public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<Distribu
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             // Extract profit year from EndDate (or use current year if not provided)
-            var profitYear = req.EndDate?.Year ?? DateTime.Now.Year;
+            var profitYear = (req.EndDate?.Year ?? DateTime.Now.Year) + 1; //Report is run for the prior year.
 
             // Wrap service call with audit archiving
             var serviceResult = await _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
