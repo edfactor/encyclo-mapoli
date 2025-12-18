@@ -65,7 +65,8 @@ Write-Host "Checking for Node.js..." -ForegroundColor Yellow
 try {
     $nodeVersion = node --version 2>$null
     Write-Host "[✓] Node.js is installed: $nodeVersion" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "[✗] Node.js is not installed" -ForegroundColor Red
     
     if ($InstallIfMissing) {
@@ -77,11 +78,13 @@ try {
             Write-Host "[✓] Node.js installation completed" -ForegroundColor Green
             Write-Host "Please restart your terminal and run this script again." -ForegroundColor Yellow
             exit 0
-        } catch {
+        }
+        catch {
             Write-Error "Failed to install Node.js. Please install manually from: https://nodejs.org/"
             exit 1
         }
-    } else {
+    }
+    else {
         Write-Host ""
         Write-Host "Node.js is required for YAML validation." -ForegroundColor Red
         Write-Host "Options:" -ForegroundColor Yellow
@@ -98,7 +101,8 @@ Write-Host "Checking for npx..." -ForegroundColor Yellow
 try {
     $npxVersion = npx --version 2>$null
     Write-Host "[✓] npx is available: $npxVersion" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Error "npx is not available. Please reinstall Node.js."
     exit 1
 }
@@ -122,7 +126,8 @@ try {
         Write-Host "You can safely commit your changes." -ForegroundColor Green
         Write-Host ""
         exit 0
-    } else {
+    }
+    else {
         Write-Host "================================================================" -ForegroundColor Red
         Write-Host "  ✗ YAML SYNTAX VALIDATION FAILED" -ForegroundColor Red
         Write-Host "================================================================" -ForegroundColor Red
@@ -141,7 +146,8 @@ try {
         Write-Host ""
         exit 1
     }
-} catch {
+}
+catch {
     Write-Error "Failed to validate YAML: $($_.Exception.Message)"
     exit 1
 }
