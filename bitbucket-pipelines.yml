@@ -577,90 +577,85 @@ definitions:
         - npx tsc -b --noEmit
 
     api-lint: &api-lint
-      name: API Linting (Zalando Guidelines)
+      name: "API Linting (Zalando Guidelines)"
+      # Runs on self-hosted Windows runner
       runs-on:
-        - windows
         - self.hosted
+        - windows
       max-time: 10
+      caches:
+        - node
+      script:
+        - |
+          Write-Host "📊 API LINTING - Zalando RESTful Guidelines" -ForegroundColor Cyan
+          Write-Host "=============================================" -ForegroundColor Cyan
+          Write-Host ""
+          
+          # Enable TLS 1.2 for HTTPS connections
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+          
+          $uri = "${env:QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json"
+          Write-Host "Fetching OpenAPI spec from: $uri" -ForegroundColor Yellow
+          
+          # Download OpenAPI spec with SSL certificate bypass
+          # Support both PowerShell Core (6+) and Windows PowerShell (5.x)
+          if ($PSVersionTable.PSVersion.Major -ge 6) {
+            # PowerShell Core 6+ has built-in -SkipCertificateCheck
+            Write-Host "Using PowerShell Core $($PSVersionTable.PSVersion)" -ForegroundColor Green
+            Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json -SkipCertificateCheck
+          } else {
+            # Fallback for Windows PowerShell 5.x - use .NET certificate policy
+            Write-Host "Using Windows PowerShell $($PSVersionTable.PSVersion)" -ForegroundColor Green
+            Add-Type @"
+              using System.Net;
+              using System.Security.Cryptography.X509Certificates;
+              public class TrustAllCertsPolicy : ICertificatePolicy {
+                public bool CheckValidationResult(
+                  ServicePoint srvPoint, X509Certificate certificate,
+                  WebRequest request, int certificateProblem) {
+                  return true;
+                }
+              }
+          "@
+            [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+            Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json
+          }
+          
+          Write-Host "✓ OpenAPI spec downloaded successfully" -ForegroundColor Green
+          Write-Host ""
+          
+          # Install Spectral CLI for API linting
+          Write-Host "Installing Spectral CLI..." -ForegroundColor Yellow
+          npm install -g @stoplight/spectral-cli
+          Write-Host "✓ Spectral CLI installed" -ForegroundColor Green
+          Write-Host ""
+          
+          # Run Spectral linting with JUnit output
+          Write-Host "Running API linting with Spectral..." -ForegroundColor Yellow
+          spectral lint openapi-qa.json --format junit --output spectral-results.xml
+          spectral lint openapi-qa.json --format stylish > spectral-report.txt
+          
+          # Check for errors in the stylish report
+          $ERROR_COUNT = (Select-String -Path spectral-report.txt -Pattern " error " -AllMatches).Matches.Count
+          
+          Write-Host ""
+          Write-Host "📊 API LINTING SUMMARY" -ForegroundColor Cyan
+          Write-Host "======================" -ForegroundColor Cyan
+          Write-Host "🔴 Errors: $ERROR_COUNT" -ForegroundColor $(if ($ERROR_COUNT -gt 0) { "Red" } else { "Green" })
+          Write-Host ""
+          
+          if ($ERROR_COUNT -gt 0) {
+            Write-Host "❌ API linting FAILED with $ERROR_COUNT error(s)" -ForegroundColor Red
+            Write-Host "Review spectral-report.txt artifact for details" -ForegroundColor Yellow
+            exit 1
+          } else {
+            Write-Host "✅ API linting PASSED - No errors found" -ForegroundColor Green
+            exit 0
+          }
       artifacts:
         - spectral-results.xml
         - spectral-report.txt
         - openapi-qa.json
-      script:
-        - echo "Installing Spectral CLI..."
-        - npm install -g @stoplight/spectral-cli
-        - echo "Fetching OpenAPI spec from QA environment..."
-        - |
-          try {
-            # Add TLS 1.2 support
-            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-            
-            $uri = "${env:QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json"
-            Write-Host "Fetching from: $uri"
-            
-            # Try with SkipCertificateCheck first (PowerShell 6+)
-            if ($PSVersionTable.PSVersion.Major -ge 6) {
-              Write-Host "Using PowerShell Core with SkipCertificateCheck"
-              Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json -SkipCertificateCheck
-            } else {
-              # Fallback for Windows PowerShell 5.x - use .NET certificate policy
-              Write-Host "Using Windows PowerShell with custom certificate policy"
-              
-              # Define a custom certificate policy that accepts all certificates
-              $code = @'
-                using System.Net;
-                using System.Security.Cryptography.X509Certificates;
-                public class TrustAllCertsPolicy : ICertificatePolicy {
-                    public bool CheckValidationResult(
-                        ServicePoint srvPoint, X509Certificate certificate,
-                        WebRequest request, int certificateProblem) {
-                        return true;
-                    }
-                }
-'@
-              Add-Type -TypeDefinition $code
-              [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-              
-              Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json
-            }
-            
-            Write-Host "✅ Successfully fetched OpenAPI spec"
-          } catch {
-            Write-Host "❌ Failed to fetch OpenAPI spec from ${env:QA_BASE_URL}:8443"
-            Write-Host "Error details: $($_.Exception.Message)"
-            Write-Host "Full error: $($_ | Format-List -Force | Out-String)"
-            exit 1
-          }
-        - echo "Running API linting against Zalando guidelines..."
-        - spectral lint openapi-qa.json --format junit --output spectral-results.xml || true
-        - echo "Generating human-readable report..."
-        - spectral lint openapi-qa.json --format stylish > spectral-report.txt || true
-        - cat spectral-report.txt
-        - echo "Checking for error-level violations..."
-        - |
-          ERROR_COUNT=$(grep -c " error " spectral-report.txt || true)
-          WARNING_COUNT=$(grep -c " warning " spectral-report.txt || true)
-          INFO_COUNT=$(grep -c " information " spectral-report.txt || true)
-          
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📊 API LINTING SUMMARY"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🔴 Errors: $ERROR_COUNT"
-          echo "🟡 Warnings: $WARNING_COUNT"
-          echo "🔵 Info: $INFO_COUNT"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          
-          if [ "$ERROR_COUNT" -gt 0 ]; then
-            echo "❌ API linting FAILED: $ERROR_COUNT error(s) found"
-            echo "See spectral-report.txt artifact for details"
-            echo "Errors must be fixed before deployment"
-            exit 1
-          fi
-          
-          echo "✅ API linting PASSED (no errors)"
-          if [ "$WARNING_COUNT" -gt 0 ]; then
-            echo "⚠️  Note: $WARNING_COUNT warning(s) found (not blocking)"
-          fi
 
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
@@ -682,18 +677,18 @@ definitions:
             if command -v jq >/dev/null 2>&1; then
               findings_count=$(jq 'if type=="array" then length elif (.findings|type? == "array") then (.findings|length) else 0 end' reports/gitleaks.json 2>/dev/null || echo 0)
             else
-              # Fallback - treat literal [] or [ ] as zero, anything else non-empty as 1
+              # Fallback: treat literal [] or [ ] as zero, anything else non-empty as 1
               if grep -q '"Description"' reports/gitleaks.json; then
                 # Some formats include fields; attempt crude count of occurrences of "RuleID"
                 findings_count=$(grep -o '"RuleID"' reports/gitleaks.json | wc -l | tr -d ' ')
               elif grep -Eq '^\s*\[\s*\]\s*$' reports/gitleaks.json; then
                 findings_count=0
               else
-                # Non-empty and not literal empty array - assume at least 1
+                # Non-empty & not literal empty array: assume at least 1
                 findings_count=1
               fi
             fi
-            echo "Gitleaks findings count - $findings_count"
+            echo "Gitleaks findings count: $findings_count"
             if [ "${findings_count}" -gt 0 ]; then
               echo "Leaks found. Failing the build.";
               exit 1;
@@ -878,9 +873,9 @@ definitions:
 pipelines:
   branches:
     release:
+      # Stage 1: Build and test
       # Stage 1: Code quality checks (fail fast)
-      - parallel:
-          - step: *frontend-lint
+      - step: *frontend-lint
       # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
           - step: *audit-frontend
@@ -1272,6 +1267,9 @@ pipelines:
               Write-Host "[OK] IaC operation completed successfully" -ForegroundColor Green
               Write-Host "================================================================" -ForegroundColor Cyan
 
+    api_lint:
+      - step: *api-lint
+
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
@@ -1338,6 +1336,3 @@ pipelines:
       - step: *upgrade-database
     playwright_e2e_qa:
       - step: *run-playwright-tests
-
-    api_lint:
-      - step: *api-lint
