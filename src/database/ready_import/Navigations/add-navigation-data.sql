@@ -163,6 +163,7 @@ DECLARE
     ENABLED CONSTANT NUMBER := 0;
     
     STATUS_NORMAL CONSTANT NUMBER := 1;
+    STATUS_HIDDEN CONSTANT NUMBER := NULL;
     
     -- These are order numbers to help with readability in calls
     ORDER_FIRST CONSTANT NUMBER := 1;
@@ -259,14 +260,14 @@ BEGIN
 
 --Sub values for INQUIRIES
     insert_navigation_item(INQUIRIES_GROUP, INQUIRIES_MENU, 'Inquiries', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(MASTER_INQUIRY_PAGE, INQUIRIES_GROUP, 'MASTER INQUIRY', '', 'master-inquiry', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MASTER_INQUIRY_PAGE, INQUIRIES_GROUP, 'MASTER INQUIRY', '', 'master-inquiry', STATUS_HIDDEN, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     
     insert_navigation_item(ADJUSTMENTS_GROUP, INQUIRIES_MENU, 'Adjustments', '', '', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(ADJUSTMENTS_PAGE, ADJUSTMENTS_GROUP, 'Employee Merge', '', 'adjustments', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ADJUSTMENTS_PAGE, ADJUSTMENTS_GROUP, 'Employee Merge', '', 'adjustments', STATUS_HIDDEN, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Military Contribution', '008-13', 'military-contribution', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(FORFEITURE_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Forfeiture Adjustment', 'TPR008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_DETAILS_REVERSAL, ADJUSTMENTS_GROUP, 'Reversals', '', 'reversals', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_DETAILS_REVERSAL, ADJUSTMENTS_GROUP, 'Reversals', '', 'reversals', STATUS_HIDDEN, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
 
     insert_navigation_item(ADHOC_GROUP, INQUIRIES_MENU, 'Adhoc Reports', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     --insert_navigation_item(PAY_BEN_REPORT, ADHOC_GROUP, 'Pay Ben Report', '', 'payben-report', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -275,7 +276,7 @@ BEGIN
     insert_navigation_item(RECENTLY_TERMINATED, VESTING_REPORTS_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_HIDDEN, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066B, ADHOC_GROUP, 'QPAY066B', '', 'qpay066b', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(ADHOC_PROF_LETTER73, ADHOC_GROUP, 'Prof Letter73', '', 'adhoc-prof-letter73', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
 
@@ -299,7 +300,7 @@ BEGIN
     insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, ADMINISTRATIVE_MENU, 'Demographic Sync Errors', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_ANNUITY_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage Annuity Rates', '', 'manage-annuity-rates', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADJUSTMENTS_GROUP, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADJUSTMENTS_GROUP, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_HIDDEN, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
