@@ -1,4 +1,3 @@
-import { Box, Chip, Tooltip } from "@mui/material";
 import { ColDef } from "ag-grid-community";
 import type { ProfitSharingAdjustmentRowDto } from "../../../reduxstore/types";
 import {
@@ -31,39 +30,6 @@ const isDraftInsertRow = (data: ProfitSharingAdjustmentRowDto | undefined): bool
  */
 export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
   return [
-    {
-      headerName: "Status",
-      field: "hasBeenReversed",
-      sortable: false,
-      filter: false,
-      editable: false,
-      width: 90,
-      resizable: false,
-      cellRenderer: (params: { data?: ProfitSharingAdjustmentRowDto }) => {
-        if (params.data?.hasBeenReversed) {
-          return (
-            <Tooltip title="This row has already been reversed and cannot be adjusted again">
-              <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-                <Chip
-                  label="Reversed"
-                  size="small"
-                  sx={{
-                    backgroundColor: "#ffebee",
-                    color: "#c62828",
-                    fontSize: "0.7rem",
-                    height: "20px",
-                    "& .MuiChip-label": {
-                      padding: "0 6px"
-                    }
-                  }}
-                />
-              </Box>
-            </Tooltip>
-          );
-        }
-        return null;
-      }
-    },
     {
       headerName: "Row",
       valueGetter: "node.rowIndex + 1",
