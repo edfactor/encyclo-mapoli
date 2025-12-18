@@ -592,18 +592,34 @@ definitions:
         - echo "Fetching OpenAPI spec from QA environment..."
         - |
           try {
-            # Add TLS 1.2 support and disable certificate validation for self-signed certs
+            # Add TLS 1.2 support
             [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-            [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
             
             $uri = "${env:QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json"
             Write-Host "Fetching from: $uri"
             
             # Try with SkipCertificateCheck first (PowerShell 6+)
             if ($PSVersionTable.PSVersion.Major -ge 6) {
+              Write-Host "Using PowerShell Core with SkipCertificateCheck"
               Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json -SkipCertificateCheck
             } else {
-              # Fallback for Windows PowerShell 5.x
+              # Fallback for Windows PowerShell 5.x - use .NET certificate policy
+              Write-Host "Using Windows PowerShell with custom certificate policy"
+              
+              # Define a custom certificate policy that accepts all certificates
+              Add-Type -TypeDefinition @"
+                using System.Net;
+                using System.Security.Cryptography.X509Certificates;
+                public class TrustAllCertsPolicy : ICertificatePolicy {
+                    public bool CheckValidationResult(
+                        ServicePoint srvPoint, X509Certificate certificate,
+                        WebRequest request, int certificateProblem) {
+                        return true;
+                    }
+                }
+"@
+              [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+              
               Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json
             }
             
