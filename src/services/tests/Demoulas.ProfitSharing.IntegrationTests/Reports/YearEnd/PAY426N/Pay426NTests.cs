@@ -219,6 +219,13 @@ public class Pay426NTests : PristineBaseTest
 
                 r.Ssn = r.Ssn.Length >= 4 ? r.Ssn.Substring(r.Ssn.Length - 4) : r.Ssn; // Compare last 4 digits only
 
+                // SMART includes middle initials in names (e.g., "ACOSTA, ANNA T"), READY doesn't (e.g., "ACOSTA, ANNA")
+                // Strip middle initial from SMART names for comparison: remove space + single letter at end of name
+                if (!isReady && r.FullName.Length > 2 && r.FullName[^2] == ' ' && char.IsLetter(r.FullName[^1]))
+                {
+                    r.FullName = r.FullName.Substring(0, r.FullName.Length - 2);
+                }
+
                 // READY uses 'H' for employees but '0' for beneficiaries (non-employees with BadgeNumber=0)
                 if (r.BadgeNumber > 0)
                 {
