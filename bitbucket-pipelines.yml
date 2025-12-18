@@ -576,6 +576,55 @@ definitions:
         - npm run lint
         - npx tsc -b --noEmit
 
+    api-lint: &api-lint
+      name: API Linting (Zalando Guidelines)
+      # Run on Bitbucket Cloud to free on-premises resources
+      image: node:22-alpine
+      max-time: 10
+      artifacts:
+        - spectral-results.xml
+        - spectral-report.txt
+        - openapi-qa.json
+      script:
+        - echo "Installing Spectral CLI..."
+        - npm install -g @stoplight/spectral-cli
+
+        - echo "Fetching OpenAPI spec from QA environment..."
+        - wget "${QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json" -O openapi-qa.json || (echo "❌ Failed to fetch OpenAPI spec from ${QA_BASE_URL}:8443" && exit 1)
+
+        - echo "Running API linting against Zalando guidelines..."
+        - spectral lint openapi-qa.json --format junit --output spectral-results.xml || true
+        
+        - echo "Generating human-readable report..."
+        - spectral lint openapi-qa.json --format stylish > spectral-report.txt || true
+        - cat spectral-report.txt
+
+        - echo "Checking for error-level violations..."
+        - |
+          ERROR_COUNT=$(grep -c " error " spectral-report.txt || true)
+          WARNING_COUNT=$(grep -c " warning " spectral-report.txt || true)
+          INFO_COUNT=$(grep -c " information " spectral-report.txt || true)
+          
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📊 API LINTING SUMMARY"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔴 Errors: $ERROR_COUNT"
+          echo "🟡 Warnings: $WARNING_COUNT"
+          echo "🔵 Info: $INFO_COUNT"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          
+          if [ "$ERROR_COUNT" -gt 0 ]; then
+            echo "❌ API linting FAILED: $ERROR_COUNT error(s) found"
+            echo "See spectral-report.txt artifact for details"
+            echo "Errors must be fixed before deployment"
+            exit 1
+          fi
+          
+          echo "✅ API linting PASSED (no errors)"
+          if [ "$WARNING_COUNT" -gt 0 ]; then
+            echo "⚠️  Note: $WARNING_COUNT warning(s) found (not blocking)"
+          fi
+
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
       # Runs on Bitbucket Cloud by default (Docker image)
@@ -792,9 +841,10 @@ definitions:
 pipelines:
   branches:
     release:
-      # Stage 1: Build and test
       # Stage 1: Code quality checks (fail fast)
-      - step: *frontend-lint
+      - parallel:
+          - step: *frontend-lint
+          - step: *api-lint
       # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
           - step: *audit-frontend
