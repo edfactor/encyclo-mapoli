@@ -590,6 +590,7 @@ definitions:
         - npm install -g @stoplight/spectral-cli
 
         - echo "Fetching OpenAPI spec from QA environment..."
+        - echo "Target URL: ${QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json"
         - wget "${QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json" -O openapi-qa.json || (echo "❌ Failed to fetch OpenAPI spec from ${QA_BASE_URL}:8443" && exit 1)
 
         - echo "Running API linting against Zalando guidelines..."
@@ -844,7 +845,6 @@ pipelines:
       # Stage 1: Code quality checks (fail fast)
       - parallel:
           - step: *frontend-lint
-          - step: *api-lint
       # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
           - step: *audit-frontend
@@ -1302,3 +1302,6 @@ pipelines:
       - step: *upgrade-database
     playwright_e2e_qa:
       - step: *run-playwright-tests
+
+    api_lint:
+      - step: *api-lint
