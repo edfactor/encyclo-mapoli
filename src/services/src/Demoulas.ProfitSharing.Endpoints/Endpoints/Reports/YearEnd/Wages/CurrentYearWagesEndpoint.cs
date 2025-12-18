@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
@@ -21,11 +22,17 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<WagesCurrentYearRequ
 {
     private readonly IWagesService _reportService;
     private readonly ILogger<CurrentYearWagesEndpoint> _logger;
+    private readonly IAuditService _auditService;
 
-    public CurrentYearWagesEndpoint(IWagesService reportService, ILogger<CurrentYearWagesEndpoint> logger) : base(Navigation.Constants.YTDWagesExtract)
+    public CurrentYearWagesEndpoint(
+        IWagesService reportService, 
+        ILogger<CurrentYearWagesEndpoint> logger,
+        IAuditService auditService
+    ) : base(Navigation.Constants.YTDWagesExtract)
     {
         _reportService = reportService;
         _logger = logger;
+        _auditService = auditService;
     }
 
     public override void Configure()
@@ -71,8 +78,13 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<WagesCurrentYearRequ
         try
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
-
-            var result = await _reportService.GetWagesReportAsync(req, ct);
+            var reportSuffix = req.UseFrozenData ? "_FROZEN" : string.Empty;
+            var result = await _auditService.ArchiveCompletedReportAsync(
+                ReportFileName + reportSuffix, 
+                req.ProfitYear,
+                req,
+                (archiveReq, _, ct) => _reportService.GetWagesReportAsync(archiveReq, ct),
+                ct);
 
             // Record year-end current year wages report metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

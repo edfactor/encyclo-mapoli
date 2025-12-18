@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages;
 using Demoulas.ProfitSharing.Security;
@@ -36,6 +37,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     {
         var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
         var logger = ServiceProvider!.GetRequiredService<ILogger<CurrentYearWagesEndpoint>>();
+        var auditService = ServiceProvider!.GetRequiredService<IAuditService>();
 
         // Mock IDemographicReaderService to return live demographics
         var mockDemographicReader = new Mock<IDemographicReaderService>();
@@ -44,7 +46,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
             .ReturnsAsync((IProfitSharingDbContext ctx, bool useFrozen) => ctx.Demographics);
 
         WagesService mockService = new WagesService(MockDbContextFactory, calendarService, mockDemographicReader.Object);
-        _endpoint = new CurrentYearWagesEndpoint(mockService, logger);
+        _endpoint = new CurrentYearWagesEndpoint(mockService, logger, auditService);
     }
 
 
