@@ -61,13 +61,15 @@ const ProfitSharingAdjustmentsContent = () => {
 
   const [selectedRow, setSelectedRow] = useState<ProfitSharingAdjustmentRowDto | null>(null);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState<boolean>(false);
-  const [adjustmentDraft, setAdjustmentDraft] = useState<{ contribution: string; earnings: string; forfeiture: string }>(
-    {
-      contribution: "0",
-      earnings: "0",
-      forfeiture: "0"
-    }
-  );
+  const [adjustmentDraft, setAdjustmentDraft] = useState<{
+    contribution: string;
+    earnings: string;
+    forfeiture: string;
+  }>({
+    contribution: "0",
+    earnings: "0",
+    forfeiture: "0"
+  });
   const [memberDetailsRefreshTrigger, setMemberDetailsRefreshTrigger] = useState<number>(0);
 
   const hasUnsavedChanges = Object.keys(stagedByRowNumber).length > 0;

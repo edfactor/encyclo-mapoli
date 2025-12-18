@@ -8,12 +8,7 @@ export function GetAdhocProfLetter73GridColumns(): ColDef[] {
       field: "yearsOfServiceLabel",
       sortable: true,
       filter: "agTextColumnFilter",
-      comparator: (
-        _valueA: string,
-        _valueB: string,
-        nodeA: IRowNode,
-        nodeB: IRowNode
-      ) => {
+      comparator: (_valueA: string, _valueB: string, nodeA: IRowNode, nodeB: IRowNode) => {
         // Custom comparator to sort by numeric yearsOfService instead of string label
         const numA = nodeA.data?.yearsOfService ?? 0;
         const numB = nodeB.data?.yearsOfService ?? 0;

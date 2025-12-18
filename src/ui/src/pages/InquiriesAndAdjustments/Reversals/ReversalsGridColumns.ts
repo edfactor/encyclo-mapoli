@@ -1,10 +1,10 @@
 import { ColDef } from "ag-grid-community";
 import {
-    createCurrencyColumn,
-    createHoursColumn,
-    createStatusColumn,
-    createTaxCodeColumn,
-    createYearColumn
+  createCurrencyColumn,
+  createHoursColumn,
+  createStatusColumn,
+  createTaxCodeColumn,
+  createYearColumn
 } from "../../../utils/gridColumnFactory";
 import { ReversalCheckboxCellRenderer } from "./ReversalCheckboxCellRenderer";
 

@@ -57,7 +57,7 @@ export const useUnsavedChangesGuard = (
       return (...args: Parameters<typeof navigator.push>) => {
         if (useStyledDialog) {
           // Store pending navigation and show dialog
-          const to = typeof args[0] === "string" ? args[0] : (args[0] as { pathname?: string })?.pathname ?? "/";
+          const to = typeof args[0] === "string" ? args[0] : ((args[0] as { pathname?: string })?.pathname ?? "/");
           pendingNavigationRef.current = { to, replace: isReplace };
           setShowDialog(true);
         } else {

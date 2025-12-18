@@ -112,9 +112,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0,
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
-  
-  const handleStateTaxPopoverOpen = () => {
 
+  const handleStateTaxPopoverOpen = () => {
     if (stateTaxTimeout) {
       clearTimeout(stateTaxTimeout);
       setStateTaxTimeout(null);
@@ -537,24 +536,22 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           )}
         </>
       )}
-      {!isFetching &&
-        !!distributionsAndForfeitures &&
-        distributionsAndForfeitures.response?.total > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
-              setInitialSearchLoaded(true);
-            }}
-            pageSize={pageSize}
-            setPageSize={(value: number) => {
-              setInitialPageSize(value);
-              handlePaginationChange(0, value);
-              setInitialSearchLoaded(true);
-            }}
-            recordCount={distributionsAndForfeitures.response.total}
-          />
-        )}
+      {!isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response?.total > 0 && (
+        <Pagination
+          pageNumber={pageNumber}
+          setPageNumber={(value: number) => {
+            handlePaginationChange(value - 1, pageSize);
+            setInitialSearchLoaded(true);
+          }}
+          pageSize={pageSize}
+          setPageSize={(value: number) => {
+            setInitialPageSize(value);
+            handlePaginationChange(0, value);
+            setInitialSearchLoaded(true);
+          }}
+          recordCount={distributionsAndForfeitures.response.total}
+        />
+      )}
     </>
   );
 };

@@ -352,7 +352,6 @@ export const CAPTIONS = {
 
   YTD_WAGES_EXTRACT_LIVE: "YTD Wages Extract Live (PROF-DOLLAR-EXTRACT)",
   YTD_WAGES_EXTRACT_LIVE_SHORT: "YTD Wages Extract Live"
-  
 } as const;
 
 export const VIEW = "View";

@@ -1,10 +1,6 @@
 import { ColDef, ITooltipParams } from "ag-grid-community";
 import type { ProfitSharingAdjustmentRowDto } from "../../../reduxstore/types";
-import {
-    createCurrencyColumn,
-    createTaxCodeColumn,
-    createYearColumn
-} from "../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createTaxCodeColumn, createYearColumn } from "../../../utils/gridColumnFactory";
 
 /**
  * Helper to parse string to number or keep old value

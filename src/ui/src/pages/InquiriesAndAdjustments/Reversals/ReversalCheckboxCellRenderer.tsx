@@ -2,7 +2,11 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { Box, Checkbox, Chip, Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
 import React from "react";
-import { getReversalEligibilityStatus, ReversalEligibilityStatus, REVERSIBLE_PROFIT_CODES } from "./ReversalsGridColumns";
+import {
+  getReversalEligibilityStatus,
+  ReversalEligibilityStatus,
+  REVERSIBLE_PROFIT_CODES
+} from "./ReversalsGridColumns";
 
 interface RowData {
   id: number;

@@ -154,62 +154,62 @@ const ReversalsGrid: React.FC<ReversalsGridProps> = memo(
                   textTransform: "none"
                 }}>
                 REVERSE{selectedRows.length > 0 ? ` (${selectedRows.length})` : ""}
-            </Button>
-          </Box>
-        </Grid>
+              </Button>
+            </Box>
+          </Grid>
 
-        {/* Grid Title */}
-        <Grid size={{ xs: 12 }}>
-          <Typography
-            variant="h2"
-            sx={{ color: "#0258A5", marginY: "8px" }}>
-            Transactions
-          </Typography>
-        </Grid>
+          {/* Grid Title */}
+          <Grid size={{ xs: 12 }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5", marginY: "8px" }}>
+              Transactions
+            </Typography>
+          </Grid>
 
-        {/* Grid */}
-        <Grid size={{ xs: 12 }}>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.REVERSALS}
-            isLoading={isLoading}
-            providedOptions={{
-              rowData: profitData.results,
-              columnDefs: columnDefs,
-              context: gridContext,
-              rowSelection: {
-                mode: "multiRow",
-                checkboxes: false,
-                headerCheckbox: false,
-                enableClickSelection: false,
-                isRowSelectable: isRowSelectable
-              },
-              suppressRowClickSelection: true,
-              onGridReady: (params) => {
-                gridApiRef.current = params.api;
-              },
-              getRowClass: (params) => {
-                // Apply gray styling to already-reversed rows
-                const data = params.data as ProfitDetailRow | undefined;
-                if (data?.isAlreadyReversed) {
-                  return "row-already-reversed";
+          {/* Grid */}
+          <Grid size={{ xs: 12 }}>
+            <DSMGrid
+              preferenceKey={GRID_KEYS.REVERSALS}
+              isLoading={isLoading}
+              providedOptions={{
+                rowData: profitData.results,
+                columnDefs: columnDefs,
+                context: gridContext,
+                rowSelection: {
+                  mode: "multiRow",
+                  checkboxes: false,
+                  headerCheckbox: false,
+                  enableClickSelection: false,
+                  isRowSelectable: isRowSelectable
+                },
+                suppressRowClickSelection: true,
+                onGridReady: (params) => {
+                  gridApiRef.current = params.api;
+                },
+                getRowClass: (params) => {
+                  // Apply gray styling to already-reversed rows
+                  const data = params.data as ProfitDetailRow | undefined;
+                  if (data?.isAlreadyReversed) {
+                    return "row-already-reversed";
+                  }
+                  return undefined;
                 }
-                return undefined;
-              }
-            }}
-          />
-        </Grid>
+              }}
+            />
+          </Grid>
 
-        {/* Pagination */}
-        <Grid size={{ xs: 12 }}>
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={handlePageChange}
-            pageSize={pageSize}
-            setPageSize={handlePageSizeChange}
-            recordCount={profitData.total}
-          />
+          {/* Pagination */}
+          <Grid size={{ xs: 12 }}>
+            <Pagination
+              pageNumber={pageNumber}
+              setPageNumber={handlePageChange}
+              pageSize={pageSize}
+              setPageSize={handlePageSizeChange}
+              recordCount={profitData.total}
+            />
+          </Grid>
         </Grid>
-      </Grid>
       </>
     );
   }
