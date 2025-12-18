@@ -682,18 +682,18 @@ definitions:
             if command -v jq >/dev/null 2>&1; then
               findings_count=$(jq 'if type=="array" then length elif (.findings|type? == "array") then (.findings|length) else 0 end' reports/gitleaks.json 2>/dev/null || echo 0)
             else
-              # Fallback: treat literal [] or [ ] as zero, anything else non-empty as 1
+              # Fallback - treat literal [] or [ ] as zero, anything else non-empty as 1
               if grep -q '"Description"' reports/gitleaks.json; then
                 # Some formats include fields; attempt crude count of occurrences of "RuleID"
                 findings_count=$(grep -o '"RuleID"' reports/gitleaks.json | wc -l | tr -d ' ')
               elif grep -Eq '^\s*\[\s*\]\s*$' reports/gitleaks.json; then
                 findings_count=0
               else
-                # Non-empty & not literal empty array: assume at least 1
+                # Non-empty and not literal empty array - assume at least 1
                 findings_count=1
               fi
             fi
-            echo "Gitleaks findings count: $findings_count"
+            echo "Gitleaks findings count - $findings_count"
             if [ "${findings_count}" -gt 0 ]; then
               echo "Leaks found. Failing the build.";
               exit 1;
