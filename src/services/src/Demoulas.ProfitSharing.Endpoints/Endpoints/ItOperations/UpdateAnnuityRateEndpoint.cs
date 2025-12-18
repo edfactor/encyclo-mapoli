@@ -37,7 +37,7 @@ public sealed class UpdateAnnuityRateEndpoint : ProfitSharingEndpoint<UpdateAnnu
             s.Summary = "Updates a single annuity rate.";
             s.ExampleRequest = new UpdateAnnuityRateRequest { Year = 2024, Age = 65, SingleRate = 13.0000m, JointRate = 15.0000m };
         });
-        Group<ItDevOpsGroup>();
+        Group<AdministrationGroup>();
     }
 
     public override Task<Results<Ok<AnnuityRateDto>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(UpdateAnnuityRateRequest req, CancellationToken ct)

@@ -1,15 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -17,12 +15,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
 public sealed class DistributionFrequencyEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<DistributionFrequencyResponse>>
 {
-    private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IDistributionFrequencyLookupService _distributionFrequencyLookupService;
     private readonly ILogger<DistributionFrequencyEndpoint> _logger;
 
-    public DistributionFrequencyEndpoint(IProfitSharingDataContextFactory dataContextFactory, ILogger<DistributionFrequencyEndpoint> logger) : base(Navigation.Constants.Inquiries)
+    public DistributionFrequencyEndpoint(IDistributionFrequencyLookupService distributionFrequencyLookupService, ILogger<DistributionFrequencyEndpoint> logger) : base(Navigation.Constants.Inquiries)
     {
-        _dataContextFactory = dataContextFactory;
+        _distributionFrequencyLookupService = distributionFrequencyLookupService;
         _logger = logger;
     }
 
@@ -32,13 +30,17 @@ public sealed class DistributionFrequencyEndpoint : ProfitSharingResultResponseE
         Summary(s =>
         {
             s.Summary = "Gets all available distribution frequency values";
-            s.ResponseExamples = new Dictionary<int, object> {
+            s.ResponseExamples = new Dictionary<int, object>
             {
-                200, new List<DistributionFrequencyResponse>
                 {
-                    new DistributionFrequencyResponse { Id = DistributionFrequency.Constants.Monthly, Name="Monthly"}
+                    200,
+                    ListResponseDto<DistributionFrequencyResponse>.From(
+                        new List<DistributionFrequencyResponse>
+                        {
+                            new() { Id = 'M', Name = "Monthly" }
+                        })
                 }
-            } };
+            };
         });
         Group<LookupGroup>();
 
@@ -59,10 +61,7 @@ public sealed class DistributionFrequencyEndpoint : ProfitSharingResultResponseE
             // Record request metrics
             this.RecordRequestMetrics(HttpContext, _logger, new { });
 
-            var items = await _dataContextFactory.UseReadOnlyContext(c => c.DistributionFrequencies
-                .OrderBy(x => x.Name)
-                .Select(x => new DistributionFrequencyResponse { Id = x.Id, Name = x.Name })
-                .ToListAsync(ct), ct);
+            var dto = await _distributionFrequencyLookupService.GetDistributionFrequenciesAsync(ct);
 
             // Record business metrics
             Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
@@ -70,14 +69,13 @@ public sealed class DistributionFrequencyEndpoint : ProfitSharingResultResponseE
                 new KeyValuePair<string, object?>("endpoint.category", "lookups"));
 
             // Record result count
-            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(items.Count,
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(dto.Items.Count,
                 new KeyValuePair<string, object?>("operation", "distribution-frequency-lookup"),
                 new KeyValuePair<string, object?>("endpoint.category", "lookups"));
 
             _logger.LogInformation("Distribution frequency lookup completed, returned {Count} frequencies (correlation: {CorrelationId})",
-                items.Count, HttpContext.TraceIdentifier);
+                dto.Items.Count, HttpContext.TraceIdentifier);
 
-            var dto = ListResponseDto<DistributionFrequencyResponse>.From(items);
             var result = Result<ListResponseDto<DistributionFrequencyResponse>>.Success(dto);
 
             // Record successful response

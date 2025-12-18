@@ -52,9 +52,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const { data: statesData, isLoading: isLoadingStates } = useGetStatesQuery();
   const { data: taxCodesData, isLoading: isLoadingTaxCodes } = useGetTaxCodesQuery();
   const dispatch = useDispatch();
+  //  const fiscalData = useFiscalCalendarYear();
   const profitYear = useDecemberFlowProfitYear();
 
-  // Get last year date range for default values
+ // Get last year date range for default values
   const { beginDate, endDate: lastYearEndDate } = getLastYearDateRange();
 
   const {
@@ -110,6 +111,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
 
     // Clear the form fields
     reset({
+      // PROFIT_DETAIL transactions historically have month/year - so this date range is the profit_year
       startDate: beginDate,
       endDate: lastYearEndDate,
       states: [],

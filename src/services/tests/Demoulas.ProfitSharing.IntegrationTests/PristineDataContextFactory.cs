@@ -19,6 +19,7 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
 {
     private readonly ProfitSharingDbContext _ctx;
     private readonly ProfitSharingReadOnlyDbContext _readOnlyCtx;
+    private readonly DemoulasCommonWarehouseContext _warehouseCtx;
     public string ConnectionString { get; }
 
     public PristineDataContextFactory(bool debug = false)
@@ -26,10 +27,24 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         var configuration = new ConfigurationBuilder()
             .AddUserSecrets<Api.Program>()
             .Build();
-        ConnectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-
+        ConnectionString = OrSkip(configuration,"ConnectionStrings:ProfitSharing");
+        var warehouseConnectionString = OrSkip(configuration,"ConnectionStrings:Warehouse");
+        
         _readOnlyCtx = setUpReadOnlyCtx(ConnectionString, debug);
         _ctx = setUpWriteCtx(ConnectionString, debug);
+        _warehouseCtx = setUpWarehouseCtx(warehouseConnectionString, debug);
+    }
+
+    private static string OrSkip(IConfigurationRoot configuration, string str)
+    {
+        var cs = configuration[str];
+        if (string.IsNullOrWhiteSpace(cs))
+        {
+            throw Xunit.Sdk.SkipException.ForSkip(
+                $"Integration tests require user-secrets connection string '{str}'.");
+        }
+
+        return cs;
     }
 
     public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func,
@@ -84,7 +99,7 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
 
     public Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
     {
-        throw new NotImplementedException();
+        return func(_warehouseCtx);
     }
 
     private static ProfitSharingDbContext setUpWriteCtx(string connectionString, bool debug)
@@ -114,5 +129,19 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         ProfitSharingReadOnlyDbContext readOnlyCtx = new(optionsBuilder.Options);
 
         return readOnlyCtx;
+    }
+
+    private static DemoulasCommonWarehouseContext setUpWarehouseCtx(string connectionString, bool debug)
+    {
+        DbContextOptionsBuilder<DemoulasCommonWarehouseContext> optionsBuilder = new DbContextOptionsBuilder<DemoulasCommonWarehouseContext>()
+            .UseOracle(connectionString, opts => opts.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
+        if (debug)
+        {
+            optionsBuilder.EnableSensitiveDataLogging().LogTo(s => Debug.WriteLine(s));
+        }
+
+        DemoulasCommonWarehouseContext warehouseCtx = new(optionsBuilder.Options);
+
+        return warehouseCtx;
     }
 }

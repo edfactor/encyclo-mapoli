@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 
 public interface IAnnuityRatesService
 {
-    Task<Result<IReadOnlyList<AnnuityRateDto>>> GetAnnuityRatesAsync(CancellationToken cancellationToken);
+    Task<Result<IReadOnlyList<AnnuityRateDto>>> GetAnnuityRatesAsync(GetAnnuityRatesRequest request, CancellationToken cancellationToken);
 
     Task<Result<IReadOnlyList<AnnuityRateDto>>> GetAnnuityRatesByYearAsync(short year, CancellationToken cancellationToken);
 

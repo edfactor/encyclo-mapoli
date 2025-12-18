@@ -75,6 +75,13 @@ public class MissiveMap : IEntityTypeConfiguration<Missive>
                 Message = "*** EMPLOYEE MAY BE 100% - CHECK DATES ***",
                 Description = "The Employee's Zero Contribution Flag is set at 7",
                 Severity = "Information"
+            },
+            new Missive()
+            {
+                Id = Missive.Constants.EmployeeUnder21WithBalance,
+                Message = "Employee under 21 w/ balance > 0",
+                Description = "Employee is currently under 21 and has a current or vested balance greater than zero.",
+                Severity = "Information"
             }
         );
     }

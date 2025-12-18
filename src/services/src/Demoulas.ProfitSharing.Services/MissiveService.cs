@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -46,6 +47,15 @@ internal sealed class MissiveService : IMissiveService
             {
                 // Pre-fetch demographics for all SSNs
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var dobList = await demographics
+                    .Where(d => ssnSet.Contains(d.Ssn))
+                    .Select(d => new { d.Ssn, d.DateOfBirth })
+                    .ToListAsync(cancellation);
+
+                var dobBySsn = dobList
+                    .GroupBy(d => d.Ssn)
+                    .ToDictionary(g => g.Key, g => g.First().DateOfBirth);
+
                 var employeeList = await demographics.Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
                     .Where(empl => ssnSet.Contains(empl.d.Ssn))
                     .Where(emp => emp.pp.ProfitYear == profitYear)
@@ -103,6 +113,14 @@ internal sealed class MissiveService : IMissiveService
                         missives.Add(Missive.Constants.VestingIsNow100Percent);
                     }
 
+                    if (dobBySsn.TryGetValue(ssn, out var dob) &&
+                        balanceMap.TryGetValue(ssn, out var balance) &&
+                        IsUnderAgeAtDate(dob, DateOnly.FromDateTime(DateTime.Today), underAgeThreshold: 21) &&
+                        (balance.CurrentBalance > 0 || balance.VestedBalance > 0))
+                    {
+                        missives.Add(Missive.Constants.EmployeeUnder21WithBalance);
+                    }
+
                     if (beneficiaryContacts.Contains(ssn))
                     {
                         missives.Add(Missive.Constants.EmployeeIsAlsoABeneficiary);
@@ -123,5 +141,11 @@ internal sealed class MissiveService : IMissiveService
     public Task<List<MissiveResponse>> GetAllMissives(CancellationToken token)
     {
         return _dataContextFactory.UseReadOnlyContext(ctx => ctx.Missives.Select(x => new MissiveResponse { Id = x.Id, Message = x.Message, Description = x.Description, Severity = x.Severity }).ToListAsync(token), token);
+    }
+
+    private static bool IsUnderAgeAtDate(DateOnly dateOfBirth, DateOnly asOf, int underAgeThreshold)
+    {
+        var age = dateOfBirth.Age(asOf.ToDateTime(TimeOnly.MinValue));
+        return age < underAgeThreshold;
     }
 }

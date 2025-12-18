@@ -36,6 +36,7 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
     private Timer? _watchdogTimer;
     private DateTime _lastHeartbeat;
     private int _missedHeartbeats;
+    private bool _alertRaised;
     private int _errorCount;
     private string? _lastErrorMessage;
     private DateTime? _lastErrorTime;
@@ -59,6 +60,7 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
         _processId = Environment.ProcessId;
         _lastHeartbeat = DateTime.UtcNow;
         _missedHeartbeats = 0;
+        _alertRaised = false;
         _errorCount = 0;
         _lastErrorMessage = null;
         _lastErrorTime = null;
@@ -115,6 +117,7 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
                 "Heartbeat received after {MissedHeartbeats} missed heartbeats. Service is healthy.",
                 _missedHeartbeats);
             _missedHeartbeats = 0;
+            _alertRaised = false;
         }
     }
 
@@ -210,8 +213,10 @@ internal sealed class ProcessWatchdogService : IProcessWatchdog, IHostedService
                 _config.HeartbeatTimeoutSeconds,
                 _missedHeartbeats);
 
-            if (_missedHeartbeats >= _config.AlertOnMissedHeartbeats)
+            if (_missedHeartbeats >= _config.AlertOnMissedHeartbeats && !_alertRaised)
             {
+                _alertRaised = true;
+
                 int elapsedSeconds = (int)timeSinceLastHeartbeat.TotalSeconds;
                 _logger.LogCritical(
                     "WATCHDOG ALERT: {ServiceName} ({EnvironmentName}) on {MachineName} PID {ProcessId} appears to be unresponsive. Missed {MissedCount} heartbeat checks (threshold: {Threshold}). Last heartbeat (UTC): {LastHeartbeatUtc:O} ({ElapsedSeconds}s ago). Timeout: {TimeoutSeconds}s.",

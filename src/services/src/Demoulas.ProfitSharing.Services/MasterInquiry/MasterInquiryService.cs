@@ -592,8 +592,28 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
+            // Handle custom sorting: when sorting by "monthToDate", we need to sort by YearToDate first, then MonthToDate
+            var sortedQuery = query;
+            bool isMonthToDateSort = req.SortBy != null && "monthToDate".Equals(req.SortBy, StringComparison.OrdinalIgnoreCase);
+            
+            if (isMonthToDateSort)
+            {
+                if (req.IsSortDescending.GetValueOrDefault())
+                {
+                    sortedQuery = query.OrderByDescending(x => x.ProfitDetail != null ? x.ProfitDetail.YearToDate : (short)0)
+                                       .ThenByDescending(x => x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0);
+                }
+                else
+                {
+                    sortedQuery = query.OrderBy(x => x.ProfitDetail != null ? x.ProfitDetail.YearToDate : (short)0)
+                                       .ThenBy(x => x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0);
+                }
+            }
+
+            // Create a modified request without sorting if we already applied it
+            var paginationReq = isMonthToDateSort ? req with { SortBy = null } : req;
             // First projection: SQL-translatable only
-            var rawQuery = await query.Select(x => new MasterInquiryRawDto
+            var rawQuery = await sortedQuery.Select(x => new MasterInquiryRawDto
             {
                 Id = x.ProfitDetail != null ? x.ProfitDetail.Id : 0,
                 Ssn = x.ProfitDetail != null ? x.ProfitDetail.Ssn : x.Member.Ssn,
@@ -629,7 +649,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentIncomeYear = x.Member.CurrentIncomeYear,
                 CurrentHoursYear = x.Member.CurrentHoursYear,
                 IsExecutive = x.Member.IsExecutive,
-            }).ToPaginationResultsAsync(req, cancellationToken);
+            }).ToPaginationResultsAsync(paginationReq, cancellationToken);
 
             var formattedResults = rawQuery.Results.Select(x => new MasterInquiryResponseDto
             {
@@ -812,7 +832,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             currentBalance = await currentBalanceTask;
             previousBalance = await previousBalanceTask;
             stores = await storesTask;
-        }   
+        }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssnCollection);
@@ -823,7 +843,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         foreach (var kvp in memberDetailsMap)
         {
             var memberData = kvp.Value;
-            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn });
+            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn.MaskSsn() });
             var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == kvp.Key);
             _ = stores.TryGetValue(memberData.StoreNumber, out var store);
 
@@ -840,7 +860,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 AddressZipCode = memberData.AddressZipCode,
                 DateOfBirth = memberData.DateOfBirth,
                 Age = memberData.DateOfBirth.Age(),
-                Ssn = memberData.Ssn,
+                Ssn = memberData.Ssn.MaskSsn(),
                 IsExecutive = memberData.IsExecutive,
                 YearToDateProfitSharingHours = memberData.YearToDateProfitSharingHours,
                 HireDate = memberData.HireDate,

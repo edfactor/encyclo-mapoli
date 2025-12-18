@@ -282,10 +282,10 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending,
+          Take: params.pagination.take,
+          Skip: params.pagination.skip,
+          SortBy: params.pagination.sortBy,
+          IsSortDescending: params.pagination.isSortDescending,
           minGrossAmount: params.minGrossAmount
         }
       }),
@@ -294,7 +294,7 @@ export const YearsEndApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setGrossWagesReport(data));
         } catch (err) {
-          console.log("Err: " + err);
+          console.error("Error fetching Gross Wages Report:", err);
         }
       }
     }),
@@ -390,7 +390,10 @@ export const YearsEndApi = createApi({
       }
     }),
     getEmployeeWagesForYear: builder.query<
-      PagedReportResponse<EmployeeWagesForYear>,
+      PagedReportResponse<EmployeeWagesForYear> & {
+        totalHoursCurrentYearWages?: number;
+        totalIncomeCurrentYearWages?: number;
+      },
       EmployeeWagesForYearRequestDto & { acceptHeader: string }
     >({
       query: (params) => ({
@@ -421,8 +424,15 @@ export const YearsEndApi = createApi({
               participants: EmployeeWagesForYear[];
               totalHoursCurrentYearWages: number;
               totalIncomeCurrentYearWages: number;
-            }>
-      ) => {
+            }>,
+        _meta,
+        arg
+      ): PagedReportResponse<EmployeeWagesForYear> & {
+        totalHoursCurrentYearWages?: number;
+        totalIncomeCurrentYearWages?: number;
+      } => {
+        console.log("YTD Wages API Response:", JSON.stringify(response, null, 2));
+        
         // Check if response has nested structure with participants
         if (
           "response" in response &&
@@ -434,19 +444,57 @@ export const YearsEndApi = createApi({
             totalHoursCurrentYearWages: number;
             totalIncomeCurrentYearWages: number;
           };
-          return {
+          
+          const participants = firstResult.participants;
+          const total = response.response.total || participants.length;
+          const pageSize = arg.pagination.take || 25;
+          const currentPage = Math.floor((arg.pagination.skip || 0) / pageSize);
+          const totalPages = Math.ceil(total / pageSize);
+          
+          const transformedResponse = {
             ...response,
             totalHoursCurrentYearWages: firstResult.totalHoursCurrentYearWages,
             totalIncomeCurrentYearWages: firstResult.totalIncomeCurrentYearWages,
             response: {
               ...response.response,
-              results: firstResult.participants
+              results: participants,
+              total: total,
+              pageSize: pageSize,
+              currentPage: currentPage,
+              totalPages: totalPages
             }
           } as PagedReportResponse<EmployeeWagesForYear> & {
             totalHoursCurrentYearWages: number;
             totalIncomeCurrentYearWages: number;
           };
+          console.log("YTD Wages Transformed Response:", JSON.stringify(transformedResponse, null, 2));
+          return transformedResponse;
         }
+        
+        // Handle standard response - calculate pagination if missing
+        if ("response" in response && response.response) {
+          const results = response.response.results || [];
+          const total = response.response.total || results.length;
+          const pageSize = arg.pagination.take || 25;
+          const currentPage = Math.floor((arg.pagination.skip || 0) / pageSize);
+          const totalPages = Math.ceil(total / pageSize);
+          
+          const enhancedResponse = {
+            ...response,
+            response: {
+              ...response.response,
+              results: results,
+              total: total,
+              pageSize: response.response.pageSize || pageSize,
+              currentPage: response.response.currentPage ?? currentPage,
+              totalPages: response.response.totalPages || totalPages
+            }
+          };
+          console.log("YTD Wages Enhanced Response:", JSON.stringify(enhancedResponse, null, 2));
+          return enhancedResponse as PagedReportResponse<EmployeeWagesForYear>;
+        }
+        
+        console.log("YTD Wages - No transformation needed");
         return response as PagedReportResponse<EmployeeWagesForYear>;
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {

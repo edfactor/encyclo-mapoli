@@ -31,7 +31,6 @@ import { LookupsApi } from "../../reduxstore/api/LookupsApi";
 import { MilitaryApi } from "../../reduxstore/api/MilitaryApi";
 import { NavigationApi } from "../../reduxstore/api/NavigationApi";
 import { NavigationStatusApi } from "../../reduxstore/api/NavigationStatusApi";
-import { PayServicesApi } from "../../reduxstore/api/PayServicesApi";
 import { SecurityApi } from "../../reduxstore/api/SecurityApi";
 import { validationApi } from "../../reduxstore/api/ValidationApi";
 import { YearsEndApi } from "../../reduxstore/api/YearsEndApi";
@@ -58,27 +57,13 @@ interface MockRootState {
         isReadOnly?: boolean;
       }>;
     };
-    profitYearSelectorData?: {
-      profitYears?: Array<{
-        profitYear: number;
-        fiscalBeginDate: string;
-        fiscalEndDate: string;
-        isCurrent?: boolean;
-      }>;
-      currentProfitYear?: number;
-    };
   };
   frozen?: {
-    profitYearSelectorData?: Array<{
-      profitYear: number;
-      isFrozen?: boolean;
-    }> | null;
     [key: string]: unknown;
   };
   yearsEnd?: {
     selectedProfitYear?: number | null;
     selectedProfitYearForDecemberActivities?: number | null;
-    profitYearSelectorData?: unknown[];
     yearsEndData?: unknown | null;
     [key: string]: unknown;
   };
@@ -126,26 +111,14 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
     navigation: {
       navigationData: {
         navigation: []
-      },
-      profitYearSelectorData: {
-        profitYears: [
-          {
-            profitYear: 2024,
-            fiscalBeginDate: "2024-01-01",
-            fiscalEndDate: "2024-12-31",
-            isCurrent: true
-          }
-        ],
-        currentProfitYear: 2024
       }
     },
     frozen: {
-      profitYearSelectorData: null
+      // Intentionally minimal; tests can override via preloadedState when needed.
     },
     yearsEnd: {
       selectedProfitYear: 2024,
       selectedProfitYearForDecemberActivities: 2024,
-      profitYearSelectorData: [],
       yearsEndData: null
     },
     distribution: {},
@@ -171,14 +144,7 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
   // Deep merge preloaded state with defaults to preserve nested properties
   const mergedState: MockRootState = {
     security: { ...defaultState.security, ...preloadedState?.security },
-    navigation: {
-      ...defaultState.navigation,
-      ...preloadedState?.navigation,
-      profitYearSelectorData: {
-        ...(defaultState.navigation?.profitYearSelectorData ?? {}),
-        ...preloadedState?.navigation?.profitYearSelectorData
-      }
-    },
+    navigation: { ...defaultState.navigation, ...preloadedState?.navigation },
     frozen: { ...defaultState.frozen, ...preloadedState?.frozen },
     yearsEnd: { ...defaultState.yearsEnd, ...preloadedState?.yearsEnd },
     distribution: { ...defaultState.distribution, ...preloadedState?.distribution },
@@ -215,7 +181,6 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
     [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
     [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
     [DistributionApi.reducerPath]: DistributionApi.reducer,
-    [PayServicesApi.reducerPath]: PayServicesApi.reducer,
     [AdhocApi.reducerPath]: AdhocApi.reducer,
     [validationApi.reducerPath]: validationApi.reducer
   } as const;
@@ -238,7 +203,6 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
         .concat(BeneficiariesApi.middleware)
         .concat(AdjustmentsApi.middleware)
         .concat(DistributionApi.middleware)
-        .concat(PayServicesApi.middleware)
         .concat(AdhocApi.middleware)
         .concat(validationApi.middleware)
   });

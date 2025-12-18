@@ -46,11 +46,12 @@ DECLARE
     -- RECONCILIATION_MENU CONSTANT NUMBER := 5; -- REMOVED
     YEAR_END_MENU CONSTANT NUMBER := 6;
     IT_DEVOPS_MENU CONSTANT NUMBER := 7;
+    ADMINISTRATIVE_MENU CONSTANT NUMBER := 8;
 
 
     -- These are the secondary drawer top-level menus
-    FISCAL_CLOSE CONSTANT NUMBER := 8;
-    DECEMBER_ACTIVITIES CONSTANT NUMBER := 9;
+    FISCAL_CLOSE CONSTANT NUMBER := 9;
+    DECEMBER_ACTIVITIES CONSTANT NUMBER := 10;
     
     -- Third-level under December Activities
     CLEANUP_REPORTS CONSTANT NUMBER := 10;
@@ -102,7 +103,7 @@ DECLARE
     -- PAY_BENEFICIARY_REPORT CONSTANT NUMBER := 134; -- REMOVED (was under FISCAL_CLOSE)
     -- ADHOC_BENEFICIARIES_REPORT CONSTANT NUMBER := 135; -- REMOVED (was under FISCAL_CLOSE)
     -- TERMINATED_LETTERS CONSTANT NUMBER := 136; -- REMOVED (was under FISCAL_CLOSE)
-    -- QPAY600 CONSTANT NUMBER := 137; -- REMOVED (was under FISCAL_CLOSE)
+    
     PAY426N_DECEMBER CONSTANT NUMBER := 138;
     PROFIT_SUMMARY CONSTANT NUMBER := 139;
     -- PAY426_2 CONSTANT NUMBER := 140;
@@ -117,6 +118,12 @@ DECLARE
     MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE CONSTANT NUMBER := 162;
     PAY426N_FISCAL_CLOSE CONSTANT NUMBER := 153;
 
+    -- Administrative pages
+    ORACLE_HCM_DIAGNOSTICS CONSTANT NUMBER := 167;
+    MANAGE_STATE_TAX_RATES_PAGE CONSTANT NUMBER := 173;
+    MANAGE_ANNUITY_RATES_PAGE CONSTANT NUMBER := 174;
+    PROFIT_SHARING_ADJUSTMENTS_PAGE CONSTANT NUMBER := 175;
+
     -- PROFIT_SHARE_REPORT_FINAL_RUN CONSTANT NUMBER := 149; -- REMOVED (was under FISCAL_CLOSE)
     -- PRINT_PROFIT_CERTS CONSTANT NUMBER := 150; -- REMOVED (was under FISCAL_CLOSE)
     -- PROFIT_SHARE_REPORT_EDIT_RUN CONSTANT NUMBER := 151; -- REMOVED (was under FISCAL_CLOSE)
@@ -126,7 +133,6 @@ DECLARE
     -- PRINT_PS_JOBS CONSTANT NUMBER :=155; -- REMOVED
 
     -- Adhoc Reports
-    QPAY600 CONSTANT NUMBER := 137;
     TERMINATED_LETTERS CONSTANT NUMBER := 136;
     RECENTLY_TERMINATED CONSTANT NUMBER := 133;
     -- QPAY066_AD_HOC_REPORTS CONSTANT NUMBER := 132; -- REMOVED
@@ -244,7 +250,8 @@ BEGIN
     -- insert_navigation_item(DISTRIBUTIONS_MENU, TOP_LEVEL_MENU, 'DISTRIBUTIONS', 'Distributions', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     -- RECONCILIATION REMOVED
     insert_navigation_item(YEAR_END_MENU, TOP_LEVEL_MENU, 'YEAR END', 'Year End', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(IT_DEVOPS_MENU, TOP_LEVEL_MENU, 'IT DEVOPS', 'IT DevOps', '', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ADMINISTRATIVE_MENU, TOP_LEVEL_MENU, 'ADMINISTRATIVE', 'Administrative', '', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(IT_DEVOPS_MENU, TOP_LEVEL_MENU, 'IT DEVOPS', 'IT DevOps', '', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
 
 --Sub values for INQUIRIES
     insert_navigation_item(INQUIRIES_GROUP, INQUIRIES_MENU, 'Inquiries', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -261,7 +268,12 @@ BEGIN
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS_MENU, 'Oracle HCM Sync Diagnostics', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+
+--Administrative Operations
+    insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, ADMINISTRATIVE_MENU, 'Demographic Sync Errors', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_ANNUITY_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage Annuity Rates', '', 'manage-annuity-rates', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADMINISTRATIVE_MENU, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -284,7 +296,6 @@ BEGIN
 
 -- Adhoc Reports Group
     insert_navigation_item(ADHOC_GROUP, INQUIRIES_MENU, 'Adhoc Reports', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(QPAY600, ADHOC_GROUP, 'QPAY600', '', 'qpay600', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(TERMINATED_LETTERS, ADHOC_GROUP, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     -- insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE); -- REMOVED
@@ -307,6 +318,11 @@ BEGIN
 --  NOTE: IT-DevOps navigation should be accessible only to members of the IT-DevOps role (role id 6).
 --  Remove other role assignments so the IT menu is exclusive to IT-DevOps.
     assign_navigation_role(IT_DEVOPS_MENU, IT_DEVOPS);
+
+-- Inserting value for Administrative menu for role management
+--  NOTE: Administrative navigation should be accessible to members of the IT-DevOps and System-Administrator roles.
+    assign_navigation_role(ADMINISTRATIVE_MENU, IT_DEVOPS);
+    assign_navigation_role(ADMINISTRATIVE_MENU, SYSTEM_ADMINISTRATOR);
 
 -- Print PS Jobs - REMOVED
     -- assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);
@@ -474,8 +490,6 @@ BEGIN
     -- assign_navigation_role(TERMINATED_LETTERS, FINANCE_MANAGER);
     -- assign_navigation_role(PROFIT_SUMMARY, SYSTEM_ADMINISTRATOR);
     -- assign_navigation_role(PROFIT_SUMMARY, FINANCE_MANAGER);
-    -- assign_navigation_role(QPAY600, SYSTEM_ADMINISTRATOR);
-    -- assign_navigation_role(QPAY600, FINANCE_MANAGER);
     -- assign_navigation_role(PAY426N_FROZEN, SYSTEM_ADMINISTRATOR);
     -- assign_navigation_role(PAY426N_FROZEN, FINANCE_MANAGER);
     -- assign_navigation_role(PAY426_2, SYSTEM_ADMINISTRATOR);
@@ -487,10 +501,6 @@ BEGIN
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, FINANCE_MANAGER);
 
     -- Adhoc Reports role assignments
-    assign_navigation_role(QPAY600, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(QPAY600, FINANCE_MANAGER);
-    assign_navigation_role(QPAY600, DISTRIBUTIONS_CLERK);
-    
     assign_navigation_role(TERMINATED_LETTERS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(TERMINATED_LETTERS, FINANCE_MANAGER);
     assign_navigation_role(TERMINATED_LETTERS, DISTRIBUTIONS_CLERK);
@@ -516,6 +526,14 @@ BEGIN
     assign_navigation_role(INQUIRIES_GROUP, IT_DEVOPS);
     -- assign_navigation_role(ADJUSTMENTS_GROUP, IT_DEVOPS); -- REMOVED
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS);
+    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, IT_DEVOPS);
+    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     -- assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS); -- REMOVED
@@ -548,7 +566,6 @@ BEGIN
 
     -- Adhoc Reports IT_DEVOPS role assignments
     assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
-    assign_navigation_role(QPAY600, IT_DEVOPS);
     assign_navigation_role(TERMINATED_LETTERS, IT_DEVOPS);
     assign_navigation_role(RECENTLY_TERMINATED, IT_DEVOPS);
     -- assign_navigation_role(QPAY066_AD_HOC_REPORTS, IT_DEVOPS); -- REMOVED
@@ -585,7 +602,6 @@ BEGIN
     -- assign_navigation_role(PAY_BENEFICIARY_REPORT, IT_DEVOPS);
     -- assign_navigation_role(ADHOC_BENEFICIARIES_REPORT, IT_DEVOPS);
     -- assign_navigation_role(UNDER_21_REPORT, IT_DEVOPS);
-    -- assign_navigation_role(QPAY600, IT_DEVOPS);
     -- assign_navigation_role(PROFIT_SUMMARY, IT_DEVOPS);
 
 

@@ -74,6 +74,9 @@ const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDW
 const DemographicFreeze = lazy(() => import("../../pages/ITOperations/DemographicFreeze/DemographicFreeze"));
 const ManageStateTaxes = lazy(() => import("../../pages/ITOperations/ManageStateTaxes/ManageStateTaxes"));
 const ManageAnnuityRates = lazy(() => import("../../pages/ITOperations/ManageAnnuityRates/ManageAnnuityRates"));
+const ProfitSharingAdjustments = lazy(
+  () => import("../../pages/ITOperations/ProfitSharingAdjustments/ProfitSharingAdjustments")
+);
 const OracleHcmDiagnostics = lazy(() => import("../../pages/ITOperations/OracleHcmDiagnostics/OracleHcmDiagnostics"));
 
 const PayMasterUpdateSummary = lazy(() => import("@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary"));
@@ -99,13 +102,14 @@ const FrozenProfitSummaryWrapper = lazy(() =>
 const QPAY066B = lazy(() => import("../../pages/FiscalClose/QPAY066B/QPAY066B"));
 const ReprintCertificates = lazy(() => import("../../pages/FiscalClose/ReprintCertificates/ReprintCertificates"));
 const Adjustments = lazy(() => import("../../pages/InquiriesAndAdjustments/Adjustments"));
+const Reversals = lazy(() => import("../../pages/InquiriesAndAdjustments/Reversals/Reversals"));
 const AccountHistoryReport = lazy(() => import("../../pages/Reports/AccountHistoryReport/AccountHistoryReport"));
 const PayBeNext = lazy(() => import("../../pages/Reports/PayBeNext/PayBeNext"));
 const PayBenReport = lazy(() => import("../../pages/Reports/PayBenReport/PayBenReport"));
 const QPAY066xAdHocReports = lazy(() => import("../../pages/Reports/QPAY066xAdHocReports/QPAY066xAdHocReports"));
-const QPAY600 = lazy(() => import("../../pages/Reports/QPAY600/QPAY600"));
-const RecentlyTerminated = lazy(() => import("../../pages/Reports/RecentlyTerminated/RecentlyTerminated"));
+const AdhocProfLetter73 = lazy(() => import("../../pages/Reports/AdhocProfLetter73/AdhocProfLetter73"));
 const TerminatedLetters = lazy(() => import("../../pages/Reports/TerminatedLetters/TerminatedLetters"));
+const RecentlyTerminated = lazy(() => import("../../pages/Reports/RecentlyTerminated/RecentlyTerminated"));
 
 const ImpersonatingRolesStorageKey = "impersonatingRoles";
 
@@ -419,6 +423,13 @@ const RouterSubAssembly: React.FC = () => {
                     </Suspense>
                   }></Route>
                 <Route
+                  path={ROUTES.REVERSALS}
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <Reversals />
+                    </Suspense>
+                  }></Route>
+                <Route
                   path={ROUTES.DISTRIBUTIONS_BY_AGE}
                   element={
                     <Suspense fallback={<PageLoadingFallback />}>
@@ -609,7 +620,8 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.MANAGE_STATE_TAXES}
                   element={
-                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageStateTaxes />
                       </Suspense>
@@ -619,9 +631,21 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.MANAGE_ANNUITY_RATES}
                   element={
-                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageAnnuityRates />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.PROFIT_SHARING_ADJUSTMENTS}
+                  element={
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <ProfitSharingAdjustments />
                       </Suspense>
                     </ProtectedRoute>
                   }
@@ -696,12 +720,8 @@ const RouterSubAssembly: React.FC = () => {
                   }
                 />
                 <Route
-                  path={ROUTES.QPAY600}
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <QPAY600 />
-                    </Suspense>
-                  }
+                  path={ROUTES.ADHOC_PROF_LETTER73}
+                  element={<AdhocProfLetter73 />}
                 />
                 <Route
                   path={ROUTES.PRINT_PROFIT_CERTS}

@@ -11,6 +11,7 @@ public class Missive
         public const int EmployeeBadgeIsNotOnFile = 5;
         public const int EmployeeSsnIsNotOnFile = 6;
         public const int EmployeeMayBe100Percent = 7;
+        public const int EmployeeUnder21WithBalance = 8;
     }
 
     public int Id { get; set; }

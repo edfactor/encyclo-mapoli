@@ -3,8 +3,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { Paged } from "smart-ui-library";
 import {
   setFrozenStateCollectionResponse,
-  setFrozenStateResponse,
-  setProfitYearSelectorData
+  setFrozenStateResponse
 } from "../../reduxstore/slices/frozenSlice";
 import {
   AnnuityRateDto,
@@ -23,6 +22,12 @@ import {
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
+
+type GetAnnuityRatesQueryArgs = {
+  sortBy: string;
+  isSortDescending: boolean;
+};
+
 export const ItOperationsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "itOperationsApi",
@@ -31,28 +36,32 @@ export const ItOperationsApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
-    getAnnuityRates: builder.query<AnnuityRateDto[], void>({
-      query: () => ({
-        url: "itdevops/annuity-rates",
-        method: "GET"
+    getAnnuityRates: builder.query<AnnuityRateDto[], GetAnnuityRatesQueryArgs>({
+      query: (params) => ({
+        url: "administration/annuity-rates",
+        method: "GET",
+        params: {
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
       })
     }),
     updateAnnuityRate: builder.mutation<AnnuityRateDto, UpdateAnnuityRateRequest>({
       query: (request) => ({
-        url: "itdevops/annuity-rates",
+        url: "administration/annuity-rates",
         method: "PUT",
         body: request
       })
     }),
     getStateTaxRates: builder.query<StateTaxRateDto[], void>({
       query: () => ({
-        url: "itdevops/state-tax-rates",
+        url: "administration/state-tax-rates",
         method: "GET"
       })
     }),
     updateStateTaxRate: builder.mutation<StateTaxRateDto, UpdateStateTaxRateRequest>({
       query: (request) => ({
-        url: "itdevops/state-tax-rates",
+        url: "administration/state-tax-rates",
         method: "PUT",
         body: request
       })
@@ -92,27 +101,6 @@ export const ItOperationsApi = createApi({
         } catch (err) {
           console.error("Failed to fetch frozen state collection:", err);
           dispatch(setFrozenStateCollectionResponse(null)); // Handle API errors
-        }
-      }
-    }),
-    getProfitYearSelectorFrozenData: builder.query<Paged<FrozenStateResponse>, SortedPaginationRequestDto>({
-      query: (params) => ({
-        url: `itdevops/frozen`,
-        method: "GET",
-        params: {
-          take: params.take,
-          skip: params.skip,
-          sortBy: params.sortBy,
-          isSortDescending: params.isSortDescending
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setProfitYearSelectorData(data));
-        } catch (err) {
-          console.error("Failed to fetch profit year selector data:", err);
-          dispatch(setProfitYearSelectorData(null)); // Handle API errors
         }
       }
     }),
@@ -169,7 +157,6 @@ export const {
   useUpdateStateTaxRateMutation,
   useLazyGetFrozenStateResponseQuery,
   useLazyGetHistoricalFrozenStateResponseQuery,
-  useLazyGetProfitYearSelectorFrozenDataQuery,
   useFreezeDemographicsMutation,
   useLazyGetMetadataQuery,
   useLazyGetCurrentUserQuery,

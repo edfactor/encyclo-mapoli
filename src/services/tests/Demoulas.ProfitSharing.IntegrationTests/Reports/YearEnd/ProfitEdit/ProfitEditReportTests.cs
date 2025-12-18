@@ -82,7 +82,7 @@ public class ProfitEditReportTests : PristineBaseTest
                 re.ForfeitureAmount,
                 re.RecordChangeSummary?.ToUpper() ?? "",
                 re.DisplayedZeroContStatus,
-                Pay443Tests.RemoveMiddleInitial(re.Name!)!
+                Pay443Tests.RemoveMiddleInitial(re.FullName!)!
             )
         ).ToList();
 

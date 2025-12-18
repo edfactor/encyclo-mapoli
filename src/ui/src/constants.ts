@@ -46,6 +46,7 @@ export const ROUTES = {
   BENEFICIARY_INQUIRY: "beneficiary",
   PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
+  REVERSALS: "reversals",
   PAY_BEN_REPORT: "payben-report",
   DISTRIBUTIONS_INQUIRY: "distributions-inquiry",
   VIEW_DISTRIBUTION: "view-distribution",
@@ -57,7 +58,6 @@ export const ROUTES = {
   PAY426N_FROZEN: "pay426n",
   QPAY066_ADHOC: "qpay066-adhoc",
   QPAY066B: "qpay066b",
-  QPAY600: "qpay600",
   PROFIT_SHARE_BY_STORE: "profit-share-by-store",
   PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
   RECENTLY_TERMINATED: "recently-terminated",
@@ -74,16 +74,19 @@ export const ROUTES = {
   DEMO_FREEZE: "demographic-freeze",
   MANAGE_STATE_TAXES: "manage-state-taxes",
   MANAGE_ANNUITY_RATES: "manage-annuity-rates",
+  PROFIT_SHARING_ADJUSTMENTS: "profit-sharing-adjustments",
   AUDIT_SEARCH: "audit-search",
   ORACLE_HCM_DIAGNOSTICS: "oracle-hcm-diagnostics",
   DEV_DEBUG: "dev-debug",
   DOCUMENTATION: "documentation",
-  DIVORCE_REPORT: "divorce-report"
+  DIVORCE_REPORT: "divorce-report",
+  ADHOC_PROF_LETTER73: "adhoc-prof-letter73"
 } as const;
 
 export const CAPTIONS = {
   ADD_DISTRIBUTION: "Add Distribution (008-14A)",
   ADD_DISTRIBUTION_SHORT: "Add Distribution",
+  ADHOC_PROF_LETTER73: "Adhoc Prof Letter 73",
 
   ADJUSTMENTS: "Adjustments",
   ADJUSTMENTS_SHORT: "Adjustments",
@@ -186,6 +189,9 @@ export const CAPTIONS = {
 
   MANAGE_ANNUITY_RATES: "Manage Annuity Rates",
   MANAGE_ANNUITY_RATES_SHORT: "Manage Annuity Rates",
+
+  PROFIT_SHARING_ADJUSTMENTS: "Profit Sharing Adjustments (008-22)",
+  PROFIT_SHARING_ADJUSTMENTS_SHORT: "Profit Sharing Adjustments",
 
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
   MANAGE_EXECUTIVE_HOURS_SHORT: "Manage Executive Hours",
@@ -317,9 +323,6 @@ export const CAPTIONS = {
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA_UNDER21_SHORT: "QPAY066TA Under 21",
 
-  QPAY600: "QPAY600",
-  QPAY600_SHORT: "QPAY600",
-
   RECENTLY_TERMINATED: "Recently Terminated (PROF-VESTED|PAY508)",
   RECENTLY_TERMINATED_SHORT: "Recently Terminated",
 
@@ -328,6 +331,9 @@ export const CAPTIONS = {
 
   REPRINT_CERTIFICATES: "Reprint Certificates",
   REPRINT_CERTIFICATES_SHORT: "Reprint Certificates",
+
+  REVERSALS: "Reversals",
+  REVERSALS_SHORT: "Reversals",
 
   TERMINATED_LETTERS: "Terminated Letters (QPROF003-1)",
   TERMINATED_LETTERS_SHORT: "Terminated Letters",
@@ -346,6 +352,7 @@ export const CAPTIONS = {
 
   YTD_WAGES_EXTRACT_LIVE: "YTD Wages Extract Live (PROF-DOLLAR-EXTRACT)",
   YTD_WAGES_EXTRACT_LIVE_SHORT: "YTD Wages Extract Live"
+  
 } as const;
 
 export const VIEW = "View";
@@ -459,6 +466,7 @@ export const GRID_KEYS = {
   // Inquiries and Adjustments
   MASTER_INQUIRY_MEMBER: "MASTER-INQUIRY-MEMBER-GRID",
   MASTER_INQUIRY: "MASTER-INQUIRY-DETAILS-GRID",
+  REVERSALS: "REVERSALS-GRID",
 
   // IT Operations
   AUDIT_SEARCH: "AUDIT-SEARCH",
@@ -466,6 +474,7 @@ export const GRID_KEYS = {
   DEMOGRAPHIC_SYNC_AUDIT: "DEMOGRAPHIC-SYNC-AUDIT",
   MANAGE_STATE_TAX_RATES: "MANAGE-STATE-TAX-RATES",
   MANAGE_ANNUITY_RATES: "MANAGE-ANNUITY-RATES",
+  PROFIT_SHARING_ADJUSTMENTS: "PROFIT-SHARING-ADJUSTMENTS",
 
   // Distributions
   DISTRIBUTION_INQUIRY: "DISTRIBUTION-INQUIRY",
@@ -473,7 +482,6 @@ export const GRID_KEYS = {
 
   // Reports
   ACCOUNT_HISTORY_REPORT: "ACCOUNT-HISTORY-REPORT",
-  QPAY600_PREFIX: "QPAY600-",
   QPAY066_ADHOC_REPORT: "QPAY066-ADHOC-REPORT",
   TERMINATED_LETTERS: "TERMINATED-LETTERS",
   RECENTLY_TERMINATED: "RECENTLY-TERMINATED",

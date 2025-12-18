@@ -1186,6 +1186,19 @@ SET CREATED_AT_UTC = TO_TIMESTAMP(
                      ) AT TIME ZONE 'UTC'
 WHERE YEAR_TO_DATE > 1900 AND MONTH_TO_DATE BETWEEN 1 AND 12;
 
+-- Approximate the creation date when month/year-to-date are missing (0)
+-- Use PROFIT_YEAR as year and PROFIT_YEAR_ITERATION as month (iteration 0 => month 1)
+UPDATE PROFIT_DETAIL
+SET CREATED_AT_UTC = TO_TIMESTAMP(
+                TRUNC(PROFIT_YEAR) || '-' ||
+                LPAD(CASE WHEN PROFIT_YEAR_ITERATION = 0 THEN 1 ELSE PROFIT_YEAR_ITERATION END, 2, '0') || '-01 00:00:00',
+                'YYYY-MM-DD HH24:MI:SS'
+                                         ) AT TIME ZONE 'UTC'
+WHERE YEAR_TO_DATE = 0
+    AND MONTH_TO_DATE = 0
+    AND PROFIT_YEAR > 1900
+    AND PROFIT_YEAR_ITERATION BETWEEN 0 AND 12;
+
 --Add known exclusion ids
 INSERT ALL
   INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (01,1,023202688)
