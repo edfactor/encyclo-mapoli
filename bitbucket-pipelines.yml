@@ -607,7 +607,7 @@ definitions:
               Write-Host "Using Windows PowerShell with custom certificate policy"
               
               # Define a custom certificate policy that accepts all certificates
-              Add-Type -TypeDefinition @"
+              $code = @'
                 using System.Net;
                 using System.Security.Cryptography.X509Certificates;
                 public class TrustAllCertsPolicy : ICertificatePolicy {
@@ -617,7 +617,8 @@ definitions:
                         return true;
                     }
                 }
-"@
+'@
+              Add-Type -TypeDefinition $code
               [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
               
               Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json
