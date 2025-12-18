@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Pre-push hook: Run lint, test, and tsc if UI files changed
+
+# Determine what to compare against:
+# 1. If upstream exists, compare against it
+# 2. Otherwise, compare against origin/develop (main branch)
+if git rev-parse --verify @{u} >/dev/null 2>&1; then
+    compare_ref="@{u}"
+else
+    compare_ref="origin/develop"
+fi
+
+# Check if any files in src/ui/src have changed compared to the reference
+if git diff --name-only "$compare_ref"..HEAD 2>/dev/null | grep -q '^src/ui/src/'; then
+    echo "🔍 UI files changed - running checks..."
+
+    cd src/ui || exit 1
+
+    echo ""
+    echo "📋 Running lint..."
+    if ! npm run lint; then
+        echo "❌ Lint failed! Push aborted."
+        exit 1
+    fi
+
+    echo ""
+    echo "🧪 Running tests..."
+    if ! npm run test; then
+        echo "❌ Tests failed! Push aborted."
+        exit 1
+    fi
+
+    echo ""
+    echo "📝 Running TypeScript check..."
+    if ! npx tsc -b --noEmit; then
+        echo "❌ TypeScript check failed! Push aborted."
+        exit 1
+    fi
+
+    echo ""
+    echo "✅ All checks passed!"
+    cd - > /dev/null
+fi
+
+exit 0
