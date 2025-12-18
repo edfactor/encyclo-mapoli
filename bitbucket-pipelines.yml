@@ -578,8 +578,9 @@ definitions:
 
     api-lint: &api-lint
       name: API Linting (Zalando Guidelines)
-      # Run on Bitbucket Cloud to free on-premises resources
-      image: node:22-alpine
+      runs-on:
+        - windows
+        - self.hosted
       max-time: 10
       artifacts:
         - spectral-results.xml
@@ -589,7 +590,7 @@ definitions:
         - echo "Installing Spectral CLI..."
         - npm install -g @stoplight/spectral-cli
         - echo "Fetching OpenAPI spec from QA environment..."
-        - wget "${QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json" -O openapi-qa.json || (echo "❌ Failed to fetch OpenAPI spec from ${QA_BASE_URL}:8443" && exit 1)
+        - wget "${QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json" -O openapi-qa.json --no-check-certificate || (echo "❌ Failed to fetch OpenAPI spec from ${QA_BASE_URL}:8443" && exit 1)
         - echo "Running API linting against Zalando guidelines..."
         - spectral lint openapi-qa.json --format junit --output spectral-results.xml || true
         - echo "Generating human-readable report..."
