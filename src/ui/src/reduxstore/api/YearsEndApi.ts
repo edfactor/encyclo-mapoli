@@ -563,9 +563,9 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getEligibleEmployees: builder.query<EligibleEmployeeResponseDto, EligibleEmployeesRequestDto>({
+    getEligibleEmployees: builder.query<EligibleEmployeeResponseDto, EligibleEmployeesRequestDto & { archive?: boolean }>({
       query: (params) => ({
-        url: "yearend/eligible-employees",
+        url: `yearend/eligible-employees${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
