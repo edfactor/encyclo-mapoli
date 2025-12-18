@@ -394,10 +394,10 @@ export const YearsEndApi = createApi({
         totalHoursCurrentYearWages?: number;
         totalIncomeCurrentYearWages?: number;
       },
-      EmployeeWagesForYearRequestDto & { acceptHeader: string }
+      EmployeeWagesForYearRequestDto & { acceptHeader: string } & { archive?: boolean }
     >({
       query: (params) => ({
-        url: "yearend/wages-current-year",
+        url: `yearend/wages-current-year${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
