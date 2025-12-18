@@ -592,9 +592,26 @@ definitions:
         - echo "Fetching OpenAPI spec from QA environment..."
         - |
           try {
-            Invoke-WebRequest -Uri "${env:QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json" -OutFile openapi-qa.json -SkipCertificateCheck
+            # Add TLS 1.2 support and disable certificate validation for self-signed certs
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+            [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+            
+            $uri = "${env:QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json"
+            Write-Host "Fetching from: $uri"
+            
+            # Try with SkipCertificateCheck first (PowerShell 6+)
+            if ($PSVersionTable.PSVersion.Major -ge 6) {
+              Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json -SkipCertificateCheck
+            } else {
+              # Fallback for Windows PowerShell 5.x
+              Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json
+            }
+            
+            Write-Host "✅ Successfully fetched OpenAPI spec"
           } catch {
             Write-Host "❌ Failed to fetch OpenAPI spec from ${env:QA_BASE_URL}:8443"
+            Write-Host "Error details: $($_.Exception.Message)"
+            Write-Host "Full error: $($_ | Format-List -Force | Out-String)"
             exit 1
           }
         - echo "Running API linting against Zalando guidelines..."
