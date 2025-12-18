@@ -1,6 +1,10 @@
 import { renderHook } from "@testing-library/react";
+import { ReactNode } from "react";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";
+
+const wrapper = ({ children }: { children: ReactNode }) => <MemoryRouter>{children}</MemoryRouter>;
 
 describe("useUnsavedChangesGuard", () => {
   beforeEach(() => {
@@ -17,7 +21,7 @@ describe("useUnsavedChangesGuard", () => {
     it("should add beforeunload listener when hasUnsavedChanges is true", () => {
       const addEventListenerSpy = vi.spyOn(window, "addEventListener");
 
-      renderHook(() => useUnsavedChangesGuard(true));
+      renderHook(() => useUnsavedChangesGuard(true), { wrapper });
 
       expect(addEventListenerSpy).toHaveBeenCalledWith("beforeunload", expect.any(Function));
     });
@@ -25,7 +29,7 @@ describe("useUnsavedChangesGuard", () => {
     it("should remove beforeunload listener on unmount", () => {
       const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
 
-      const { unmount } = renderHook(() => useUnsavedChangesGuard(true));
+      const { unmount } = renderHook(() => useUnsavedChangesGuard(true), { wrapper });
 
       unmount();
 
@@ -33,7 +37,7 @@ describe("useUnsavedChangesGuard", () => {
     });
 
     it("should prevent default when hasUnsavedChanges is true", () => {
-      renderHook(() => useUnsavedChangesGuard(true));
+      renderHook(() => useUnsavedChangesGuard(true), { wrapper });
 
       const event = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
       const preventDefaultSpy = vi.spyOn(event, "preventDefault");
@@ -44,7 +48,7 @@ describe("useUnsavedChangesGuard", () => {
     });
 
     it("should not prevent default when hasUnsavedChanges is false", () => {
-      renderHook(() => useUnsavedChangesGuard(false));
+      renderHook(() => useUnsavedChangesGuard(false), { wrapper });
 
       const event = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
       const preventDefaultSpy = vi.spyOn(event, "preventDefault");
@@ -59,7 +63,7 @@ describe("useUnsavedChangesGuard", () => {
     it("should add popstate listener when hasUnsavedChanges is true", () => {
       const addEventListenerSpy = vi.spyOn(window, "addEventListener");
 
-      renderHook(() => useUnsavedChangesGuard(true));
+      renderHook(() => useUnsavedChangesGuard(true), { wrapper });
 
       expect(addEventListenerSpy).toHaveBeenCalledWith("popstate", expect.any(Function));
     });
@@ -67,7 +71,7 @@ describe("useUnsavedChangesGuard", () => {
     it("should remove popstate listener on unmount", () => {
       const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
 
-      const { unmount } = renderHook(() => useUnsavedChangesGuard(true));
+      const { unmount } = renderHook(() => useUnsavedChangesGuard(true), { wrapper });
 
       unmount();
 
@@ -77,7 +81,7 @@ describe("useUnsavedChangesGuard", () => {
     it("should show confirm dialog when user navigates back", () => {
       const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
 
-      renderHook(() => useUnsavedChangesGuard(true));
+      renderHook(() => useUnsavedChangesGuard(true), { wrapper });
 
       const event = new PopStateEvent("popstate");
       window.dispatchEvent(event);
@@ -88,114 +92,29 @@ describe("useUnsavedChangesGuard", () => {
     it("should push state to history when hasUnsavedChanges is true", () => {
       const pushStateSpy = vi.spyOn(window.history, "pushState");
 
-      renderHook(() => useUnsavedChangesGuard(true));
+      renderHook(() => useUnsavedChangesGuard(true), { wrapper });
 
       expect(pushStateSpy).toHaveBeenCalled();
     });
   });
 
-  describe("click event (link navigation)", () => {
-    it("should add click listener when hasUnsavedChanges is true", () => {
-      const addEventListenerSpy = vi.spyOn(document, "addEventListener");
+  describe("styled dialog mode", () => {
+    it("should return showDialog as false initially", () => {
+      const { result } = renderHook(() => useUnsavedChangesGuard(true, true), { wrapper });
 
-      renderHook(() => useUnsavedChangesGuard(true));
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith("click", expect.any(Function), true);
+      expect(result.current.showDialog).toBe(false);
     });
 
-    it("should remove click listener on unmount", () => {
-      const removeEventListenerSpy = vi.spyOn(document, "removeEventListener");
+    it("should provide onStay callback", () => {
+      const { result } = renderHook(() => useUnsavedChangesGuard(true, true), { wrapper });
 
-      const { unmount } = renderHook(() => useUnsavedChangesGuard(true));
-
-      unmount();
-
-      expect(removeEventListenerSpy).toHaveBeenCalledWith("click", expect.any(Function), true);
+      expect(typeof result.current.onStay).toBe("function");
     });
 
-    it("should show confirm dialog when clicking on link with different href", () => {
-      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+    it("should provide onLeave callback", () => {
+      const { result } = renderHook(() => useUnsavedChangesGuard(true, true), { wrapper });
 
-      renderHook(() => useUnsavedChangesGuard(true));
-
-      const link = document.createElement("a");
-      link.href = "/different-page";
-      document.body.appendChild(link);
-
-      const event = new MouseEvent("click", { bubbles: true, cancelable: true });
-      Object.defineProperty(event, "target", { value: link, writable: false });
-
-      link.dispatchEvent(event);
-
-      expect(confirmSpy).toHaveBeenCalled();
-
-      document.body.removeChild(link);
-    });
-
-    it("should not show confirm dialog when clicking on link with same href", () => {
-      const confirmSpy = vi.spyOn(window, "confirm");
-
-      // Set the current pathname
-      Object.defineProperty(window, "location", {
-        value: { pathname: "/current-page" },
-        writable: true
-      });
-
-      renderHook(() => useUnsavedChangesGuard(true));
-
-      const link = document.createElement("a");
-      link.href = "/current-page";
-      document.body.appendChild(link);
-
-      const event = new MouseEvent("click", { bubbles: true, cancelable: true });
-      Object.defineProperty(event, "target", { value: link, writable: false });
-
-      link.dispatchEvent(event);
-
-      expect(confirmSpy).not.toHaveBeenCalled();
-
-      document.body.removeChild(link);
-    });
-
-    it("should not show confirm dialog when clicking on hash link", () => {
-      const confirmSpy = vi.spyOn(window, "confirm");
-
-      renderHook(() => useUnsavedChangesGuard(true));
-
-      const link = document.createElement("a");
-      link.href = "#";
-      document.body.appendChild(link);
-
-      const event = new MouseEvent("click", { bubbles: true, cancelable: true });
-      Object.defineProperty(event, "target", { value: link, writable: false });
-
-      link.dispatchEvent(event);
-
-      expect(confirmSpy).not.toHaveBeenCalled();
-
-      document.body.removeChild(link);
-    });
-
-    it("should prevent navigation when user cancels confirm dialog", () => {
-      vi.spyOn(window, "confirm").mockReturnValue(false);
-
-      renderHook(() => useUnsavedChangesGuard(true));
-
-      const link = document.createElement("a");
-      link.href = "/different-page";
-      document.body.appendChild(link);
-
-      const event = new MouseEvent("click", { bubbles: true, cancelable: true });
-      const preventDefaultSpy = vi.spyOn(event, "preventDefault");
-      const stopPropagationSpy = vi.spyOn(event, "stopPropagation");
-      Object.defineProperty(event, "target", { value: link, writable: false });
-
-      link.dispatchEvent(event);
-
-      expect(preventDefaultSpy).toHaveBeenCalled();
-      expect(stopPropagationSpy).toHaveBeenCalled();
-
-      document.body.removeChild(link);
+      expect(typeof result.current.onLeave).toBe("function");
     });
   });
 
@@ -204,7 +123,8 @@ describe("useUnsavedChangesGuard", () => {
       const addEventListenerSpy = vi.spyOn(window, "addEventListener");
 
       const { rerender } = renderHook(({ hasChanges }) => useUnsavedChangesGuard(hasChanges), {
-        initialProps: { hasChanges: false }
+        initialProps: { hasChanges: false },
+        wrapper
       });
 
       const initialCallCount = addEventListenerSpy.mock.calls.length;
@@ -218,53 +138,13 @@ describe("useUnsavedChangesGuard", () => {
       const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
 
       const { rerender } = renderHook(({ hasChanges }) => useUnsavedChangesGuard(hasChanges), {
-        initialProps: { hasChanges: true }
+        initialProps: { hasChanges: true },
+        wrapper
       });
 
       rerender({ hasChanges: false });
 
       expect(removeEventListenerSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe("button clicks", () => {
-    it("should handle clicks on buttons with role attribute", () => {
-      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
-
-      renderHook(() => useUnsavedChangesGuard(true));
-
-      const button = document.createElement("div");
-      button.setAttribute("role", "button");
-      button.setAttribute("href", "/different-page");
-      document.body.appendChild(button);
-
-      const event = new MouseEvent("click", { bubbles: true, cancelable: true });
-      Object.defineProperty(event, "target", { value: button, writable: false });
-
-      button.dispatchEvent(event);
-
-      expect(confirmSpy).toHaveBeenCalled();
-
-      document.body.removeChild(button);
-    });
-
-    it("should handle clicks on actual button elements", () => {
-      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
-
-      renderHook(() => useUnsavedChangesGuard(true));
-
-      const button = document.createElement("button");
-      button.setAttribute("href", "/different-page");
-      document.body.appendChild(button);
-
-      const event = new MouseEvent("click", { bubbles: true, cancelable: true });
-      Object.defineProperty(event, "target", { value: button, writable: false });
-
-      button.dispatchEvent(event);
-
-      expect(confirmSpy).toHaveBeenCalled();
-
-      document.body.removeChild(button);
     });
   });
 });

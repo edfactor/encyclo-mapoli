@@ -11,13 +11,31 @@ import { ReversalCheckboxCellRenderer } from "./ReversalCheckboxCellRenderer";
 // Profit codes that are allowed to be reversed
 export const REVERSIBLE_PROFIT_CODES = [1, 3, 5, 6, 9];
 
-// Check if a row is selectable for reversal
-export const isRowReversible = (data: { profitCodeId: number; monthToDate: number; yearToDate: number }): boolean => {
-  if (!data) return false;
+/** Possible statuses for a row's reversal eligibility */
+export type ReversalEligibilityStatus = "reversible" | "already-reversed" | "ineligible";
+
+interface ReversalCheckData {
+  profitCodeId: number;
+  monthToDate: number;
+  yearToDate: number;
+  isAlreadyReversed?: boolean;
+}
+
+/**
+ * Determines the reversal eligibility status of a row.
+ * @returns "reversible" if can be reversed, "already-reversed" if already has a reversal, "ineligible" otherwise
+ */
+export const getReversalEligibilityStatus = (data: ReversalCheckData): ReversalEligibilityStatus => {
+  if (!data) return "ineligible";
+
+  // Check if this record has already been reversed (double-reversal protection)
+  if (data.isAlreadyReversed) {
+    return "already-reversed";
+  }
 
   // Check if profit code is in the allowed list
   if (!REVERSIBLE_PROFIT_CODES.includes(data.profitCodeId)) {
-    return false;
+    return "ineligible";
   }
 
   // Check if Month/Year is not more than 2 months ago
@@ -28,19 +46,24 @@ export const isRowReversible = (data: { profitCodeId: number; monthToDate: numbe
     twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
     if (rowDate < twoMonthsAgo) {
-      return false;
+      return "ineligible";
     }
 
     // January rule: if current month is January, transaction month must be > 1 and < 12
     const currentMonth = new Date().getMonth() + 1; // getMonth() is 0-based
     if (currentMonth === 1) {
       if (!(monthToDate > 1 && monthToDate < 12)) {
-        return false;
+        return "ineligible";
       }
     }
   }
 
-  return true;
+  return "reversible";
+};
+
+// Check if a row is selectable for reversal (backwards compatible wrapper)
+export const isRowReversible = (data: ReversalCheckData): boolean => {
+  return getReversalEligibilityStatus(data) === "reversible";
 };
 
 export const GetReversalsGridColumns = (): ColDef[] => {

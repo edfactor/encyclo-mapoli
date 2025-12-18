@@ -17,6 +17,12 @@ public sealed record ProfitSharingAdjustmentRowResponse
 {
     public int? ProfitDetailId { get; init; }
 
+    /// <summary>
+    /// Indicates whether this profit detail has already been reversed (another row references it).
+    /// When true, the user should not be allowed to reverse this row again.
+    /// </summary>
+    public required bool HasBeenReversed { get; init; }
+
     public required int RowNumber { get; init; }
 
     public required short ProfitYear { get; init; }

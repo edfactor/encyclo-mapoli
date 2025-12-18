@@ -1,10 +1,6 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ITooltipParams } from "ag-grid-community";
 import type { ProfitSharingAdjustmentRowDto } from "../../../reduxstore/types";
-import {
-    createCurrencyColumn,
-    createTaxCodeColumn,
-    createYearColumn
-} from "../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createTaxCodeColumn, createYearColumn } from "../../../utils/gridColumnFactory";
 
 /**
  * Helper to parse string to number or keep old value
@@ -25,6 +21,17 @@ const isDraftInsertRow = (data: ProfitSharingAdjustmentRowDto | undefined): bool
 };
 
 /**
+ * Tooltip for reversed rows - shows explanation when hovering
+ */
+const reversedRowTooltip = (params: ITooltipParams): string | undefined => {
+  const data = params.data as ProfitSharingAdjustmentRowDto | undefined;
+  if (data?.hasBeenReversed) {
+    return "This row has already been reversed and cannot be adjusted again";
+  }
+  return undefined;
+};
+
+/**
  * Returns column definitions for the Profit Sharing Adjustments grid.
  * Formatted to match Master Inquiry profit details grid standards.
  */
@@ -39,7 +46,8 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
       width: 70,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: false
+      resizable: false,
+      tooltipValueGetter: reversedRowTooltip
     },
     {
       ...createYearColumn({
@@ -50,6 +58,7 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
       filter: false,
       editable: false,
       minWidth: 115,
+      tooltipValueGetter: reversedRowTooltip,
       valueFormatter: (params) => {
         const year = params.data.profitYear;
         const iter = params.data.profitYearIteration;
@@ -86,7 +95,8 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
         field: "contribution"
       }),
       editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-      valueParser: toNumberOrOld
+      valueParser: toNumberOrOld,
+      tooltipValueGetter: reversedRowTooltip
     },
     {
       ...createCurrencyColumn({
@@ -94,7 +104,8 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
         field: "earnings"
       }),
       editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-      valueParser: toNumberOrOld
+      valueParser: toNumberOrOld,
+      tooltipValueGetter: reversedRowTooltip
     },
     {
       ...createCurrencyColumn({
@@ -102,7 +113,8 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
         field: "forfeiture"
       }),
       editable: (params) => isDraftInsertRow(params.data as ProfitSharingAdjustmentRowDto | undefined),
-      valueParser: toNumberOrOld
+      valueParser: toNumberOrOld,
+      tooltipValueGetter: reversedRowTooltip
     },
     {
       headerName: "Activity Date",
@@ -113,14 +125,16 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      tooltipValueGetter: reversedRowTooltip
     },
     {
       ...createCurrencyColumn({
         headerName: "Payment",
         field: "payment"
       }),
-      editable: false
+      editable: false,
+      tooltipValueGetter: reversedRowTooltip
     },
     {
       ...createCurrencyColumn({
@@ -128,7 +142,8 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
         field: "federalTaxes"
       }),
       minWidth: 120,
-      editable: false
+      editable: false,
+      tooltipValueGetter: reversedRowTooltip
     },
     {
       ...createCurrencyColumn({
@@ -136,11 +151,13 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
         field: "stateTaxes"
       }),
       minWidth: 120,
-      editable: false
+      editable: false,
+      tooltipValueGetter: reversedRowTooltip
     },
     {
       ...createTaxCodeColumn(),
-      editable: false
+      editable: false,
+      tooltipValueGetter: reversedRowTooltip
     },
     {
       headerName: "Comment",
@@ -152,7 +169,8 @@ export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
       minWidth: 160,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      tooltipValueGetter: reversedRowTooltip
     }
   ];
 };

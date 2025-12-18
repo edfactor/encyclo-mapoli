@@ -29,40 +29,35 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     rowCount: grossWagesReport?.response?.results?.length ?? 0
   });
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "BadgeNumber",
-      initialSortDescending: false,
-      persistenceKey: GRID_KEYS.PROFIT_SHARE_GROSS_REPORT,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          // Match the behavior of Duplicate Names & Birthdays: once search params exist,
-          // page/sort changes trigger a server call.
-          if (!grossWagesReportQueryParams?.profitYear) {
-            return;
-          }
+  const { pageNumber, pageSize, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "BadgeNumber",
+    initialSortDescending: false,
+    persistenceKey: GRID_KEYS.PROFIT_SHARE_GROSS_REPORT,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        // Match the behavior of Duplicate Names & Birthdays: once search params exist,
+        // page/sort changes trigger a server call.
+        if (!grossWagesReportQueryParams?.profitYear) {
+          return;
+        }
 
-          const request: GrossWagesReportDto = {
-            profitYear: grossWagesReportQueryParams.profitYear,
-            pagination: {
-              skip: pageNum * pageSz,
-              take: pageSz,
-              sortBy: sortPrms.sortBy,
-              isSortDescending: sortPrms.isSortDescending
-            },
-            minGrossAmount: grossWagesReportQueryParams.minGrossAmount ?? 0
-          };
+        const request: GrossWagesReportDto = {
+          profitYear: grossWagesReportQueryParams.profitYear,
+          pagination: {
+            skip: pageNum * pageSz,
+            take: pageSz,
+            sortBy: sortPrms.sortBy,
+            isSortDescending: sortPrms.isSortDescending
+          },
+          minGrossAmount: grossWagesReportQueryParams.minGrossAmount ?? 0
+        };
 
-          await triggerSearch(request, false);
-        },
-        [
-          grossWagesReportQueryParams?.profitYear,
-          grossWagesReportQueryParams?.minGrossAmount,
-          triggerSearch
-        ]
-      )
-    });
+        await triggerSearch(request, false);
+      },
+      [grossWagesReportQueryParams?.profitYear, grossWagesReportQueryParams?.minGrossAmount, triggerSearch]
+    )
+  });
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {

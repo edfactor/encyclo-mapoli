@@ -19,7 +19,11 @@ interface AdhocProfLetter73FilterSectionProps {
   isLoading?: boolean;
 }
 
-const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionProps> = ({ onSearch, onReset, isLoading = false }) => {
+const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionProps> = ({
+  onSearch,
+  onReset,
+  isLoading = false
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     control,

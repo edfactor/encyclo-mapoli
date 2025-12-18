@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IProfitSharingAdjustmentsService
 {
-    Task<Result<GetProfitSharingAdjustmentsResponse>> GetAsync(GetProfitSharingAdjustmentsRequest request, CancellationToken ct);
+    Task<Result<GetProfitSharingAdjustmentsResponse>> GetAdjustmentsAsync(GetProfitSharingAdjustmentsRequest request, CancellationToken ct);
 
-    Task<Result<GetProfitSharingAdjustmentsResponse>> SaveAsync(SaveProfitSharingAdjustmentsRequest request, CancellationToken ct);
+    Task<Result<GetProfitSharingAdjustmentsResponse>> SaveAdjustmentsAsync(SaveProfitSharingAdjustmentsRequest request, CancellationToken ct);
 }

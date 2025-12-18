@@ -38,4 +38,17 @@ public class ProfitDetail : ModifiedBase
     public short? CommentRelatedPsnSuffix { get; set; }
     public bool? CommentIsPartialTransaction { get; set; }
     public sbyte YearsOfServiceCredit { get; set; }
+
+    /// <summary>
+    /// References the original ProfitDetail record that this record reverses.
+    /// Used to prevent double-reversals of the same source record.
+    /// A reversal chain is allowed (A → REV(A) → REV(REV(A))), but a single
+    /// source record cannot have multiple direct reversals.
+    /// </summary>
+    public int? ReversedFromProfitDetailId { get; set; }
+
+    /// <summary>
+    /// Navigation property to the original ProfitDetail that was reversed.
+    /// </summary>
+    public ProfitDetail? ReversedFromProfitDetail { get; set; }
 }
