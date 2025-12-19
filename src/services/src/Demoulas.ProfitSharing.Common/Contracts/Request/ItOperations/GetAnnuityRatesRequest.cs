@@ -11,4 +11,13 @@ public sealed class GetAnnuityRatesRequest
     /// When true, sorts descending.
     /// </summary>
     public bool? IsSortDescending { get; init; }
+
+    public static GetAnnuityRatesRequest RequestExample()
+    {
+        return new GetAnnuityRatesRequest
+        {
+            SortBy = "Year",
+            IsSortDescending = false
+        };
+    }
 }

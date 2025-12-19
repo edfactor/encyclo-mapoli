@@ -35,4 +35,21 @@ public sealed record AuditSearchRequestDto : SortedPaginationRequestDto
     /// Filter by events created before or at this time.
     /// </summary>
     public DateTimeOffset? EndTime { get; init; }
+
+    public static AuditSearchRequestDto RequestExample()
+    {
+        return new AuditSearchRequestDto
+        {
+            TableName = "Member",
+            Operation = "UPDATE",
+            UserName = "admin",
+            SessionId = "abc123-def456",
+            StartTime = DateTimeOffset.UtcNow.AddDays(-7),
+            EndTime = DateTimeOffset.UtcNow,
+            Skip = 0,
+            Take = 50,
+            SortBy = "CreatedAt",
+            IsSortDescending = true
+        };
+    }
 }

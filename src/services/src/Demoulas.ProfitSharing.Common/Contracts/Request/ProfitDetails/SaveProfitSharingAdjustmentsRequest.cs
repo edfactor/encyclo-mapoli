@@ -9,6 +9,19 @@ public sealed record SaveProfitSharingAdjustmentsRequest : IProfitYearRequest
     public required int BadgeNumber { get; init; }
 
     public required IReadOnlyList<ProfitSharingAdjustmentRowRequest> Rows { get; init; }
+
+    public static SaveProfitSharingAdjustmentsRequest RequestExample()
+    {
+        return new SaveProfitSharingAdjustmentsRequest
+        {
+            ProfitYear = 2024,
+            BadgeNumber = 1001,
+            Rows = new List<ProfitSharingAdjustmentRowRequest>
+            {
+                ProfitSharingAdjustmentRowRequest.RequestExample()
+            }
+        };
+    }
 }
 
 public sealed record ProfitSharingAdjustmentRowRequest
@@ -34,4 +47,20 @@ public sealed record ProfitSharingAdjustmentRowRequest
     public required DateOnly? ActivityDate { get; init; }
 
     public required string Comment { get; init; }
+
+    public static ProfitSharingAdjustmentRowRequest RequestExample()
+    {
+        return new ProfitSharingAdjustmentRowRequest
+        {
+            ProfitDetailId = null,
+            ReversedFromProfitDetailId = null,
+            RowNumber = 1,
+            ProfitCodeId = 1,
+            Contribution = 5000.00m,
+            Earnings = 2500.00m,
+            Forfeiture = 0.00m,
+            ActivityDate = new DateOnly(2024, 12, 15),
+            Comment = "New profit sharing contribution"
+        };
+    }
 }

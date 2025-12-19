@@ -40,4 +40,21 @@ public sealed record AuditEventDto
     /// Only populated when TableName is "NAVIGATION".
     /// </summary>
     public List<AuditChangeEntryDto>? ChangesJson { get; init; }
+
+    public static AuditEventDto ResponseExample()
+    {
+        return new AuditEventDto
+        {
+            AuditEventId = 1234,
+            TableName = "NAVIGATION",
+            Operation = "Update",
+            PrimaryKey = "5",
+            UserName = "admin@example.com",
+            CreatedAt = DateTimeOffset.UtcNow,
+            ChangesJson = new List<AuditChangeEntryDto>
+            {
+                AuditChangeEntryDto.ResponseExample()
+            }
+        };
+    }
 }

@@ -7,4 +7,14 @@ public sealed record AuditChangeEntryInput
     public string? OriginalValue { get; init; }
 
     public string? NewValue { get; init; }
+
+    public static AuditChangeEntryInput RequestExample()
+    {
+        return new AuditChangeEntryInput
+        {
+            ColumnName = "BadgeNumber",
+            OriginalValue = "1001",
+            NewValue = "1002"
+        };
+    }
 }

@@ -12,4 +12,16 @@ public sealed record Address : ICity
     public string? State { get; set; }
     public string? PostalCode { get; set; }
     public string? CountryIso { get; set; } = "US";
+
+    public static Address RequestExample()
+    {        return new Address
+        {
+            Street = "123 Main Street",
+            Street2 = "Apt 4B",
+            City = "Tewksbury",
+            State = "MA",
+            PostalCode = "01876",
+            CountryIso = "US"
+        };
+    }
 }
