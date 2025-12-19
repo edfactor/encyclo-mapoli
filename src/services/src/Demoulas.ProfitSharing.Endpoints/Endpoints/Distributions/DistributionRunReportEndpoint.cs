@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -30,6 +30,7 @@ public sealed class DistributionRunReportEndpoint : ProfitSharingEndpoint<Distri
         {
             s.Description = "Gets the distribution run report.";
             s.Summary = "Distribution run report";
+            s.ExampleRequest = DistributionRunReportRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object> {
             {
                 200, new List<DistributionRunReportDetail>()
