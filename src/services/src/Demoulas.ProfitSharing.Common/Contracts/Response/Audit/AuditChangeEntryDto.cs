@@ -24,4 +24,15 @@ public sealed record AuditChangeEntryDto
     /// The new value after the change as a JSON string.
     /// </summary>
     public string? NewValue { get; init; }
+
+    public static AuditChangeEntryDto ResponseExample()
+    {
+        return new AuditChangeEntryDto
+        {
+            Id = 1,
+            ColumnName = "Status",
+            OriginalValue = "\"Active\"",
+            NewValue = "\"Completed\""
+        };
+    }
 }

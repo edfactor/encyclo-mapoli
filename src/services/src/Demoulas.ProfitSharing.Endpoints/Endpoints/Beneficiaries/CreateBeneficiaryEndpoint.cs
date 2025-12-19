@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -27,6 +27,7 @@ public class CreateBeneficiaryAndContactEndpoint : ProfitSharingEndpoint<CreateB
         Summary(s =>
         {
             s.Summary = "Adds a new beneficiary";
+            s.ExampleRequest = CreateBeneficiaryRequest.SampleRequest();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 { 200, CreateBeneficiaryResponse.SampleResponse()}

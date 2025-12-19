@@ -12,5 +12,21 @@ public record BeneficiarySearchFilterRequest : SortedPaginationRequestDto
     public int? Ssn { get; set; }
 #pragma warning restore DSM001
     public byte MemberType { get; set; }
+
+    public static BeneficiarySearchFilterRequest RequestExample()
+    {
+        return new BeneficiarySearchFilterRequest
+        {
+            BadgeNumber = 1001,
+            PsnSuffix = 1,
+            Name = "Doe",
+            Ssn = 123456789,
+            MemberType = 1,
+            Skip = 0,
+            Take = 50,
+            SortBy = "BadgeNumber",
+            IsSortDescending = false
+        };
+    }
 }
 

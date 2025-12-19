@@ -29,4 +29,16 @@ public class FieldValidationResult
     /// Descriptive message about this field's validation
     /// </summary>
     public string Message { get; init; } = string.Empty;
+
+    public static FieldValidationResult ResponseExample()
+    {
+        return new FieldValidationResult
+        {
+            Matches = true,
+            ProvidedValue = 1000000.00m,
+            ProvidedChecksum = "abc123def456",
+            ArchivedChecksum = "abc123def456",
+            Message = "Field value matches archived checksum"
+        };
+    }
 }

@@ -40,4 +40,21 @@ public class CrossReferenceValidationGroup
     /// The validation rule being enforced (e.g., "PAY444.DISTRIB = PAY443.TotalDistributions = QPAY129.Distributions")
     /// </summary>
     public string? ValidationRule { get; init; }
+
+    public static CrossReferenceValidationGroup ResponseExample()
+    {
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "Total Distributions",
+            Description = "Validates total distribution amounts across reports",
+            IsValid = true,
+            Validations = new List<CrossReferenceValidation>
+            {
+                CrossReferenceValidation.ResponseExample()
+            },
+            Summary = "All distribution validations passed",
+            Priority = "High",
+            ValidationRule = "PAY444.DISTRIB = PAY443.TotalDistributions = QPAY129.Distributions"
+        };
+    }
 }

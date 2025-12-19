@@ -16,4 +16,19 @@ public class DemographicSyncAuditRecordResponse
     public string? InvalidValue { get; set; }
     public string? UserName { get; set; }
     public DateTimeOffset Created { get; set; }
+
+    public static DemographicSyncAuditRecordResponse ResponseExample()
+    {
+        return new DemographicSyncAuditRecordResponse
+        {
+            Id = 1001,
+            BadgeNumber = 12345,
+            OracleHcmId = 567890,
+            Message = "SSN mismatch detected during sync",
+            PropertyName = "SocialSecurityNumber",
+            InvalidValue = "XXX-XX-6789",
+            UserName = "system_sync",
+            Created = DateTimeOffset.UtcNow
+        };
+    }
 }

@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -36,6 +36,7 @@ public sealed class GetProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint<
         Summary(s =>
         {
             s.Summary = "Get Profit Sharing Adjustments";
+            s.ExampleRequest = GetProfitSharingAdjustmentsRequest.RequestExample();
             s.Description = "Loads Profit Detail rows for the Profit Sharing Adjustments screen (TPR008-22 parity).";
         });
     }

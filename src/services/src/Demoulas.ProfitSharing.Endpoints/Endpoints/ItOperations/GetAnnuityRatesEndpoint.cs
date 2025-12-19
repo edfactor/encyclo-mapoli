@@ -30,6 +30,7 @@ public sealed class GetAnnuityRatesEndpoint : ProfitSharingEndpoint<GetAnnuityRa
         Summary(s =>
         {
             s.Summary = "Gets all annuity rates.";
+            s.ExampleRequest = GetAnnuityRatesRequest.RequestExample();
         });
         Group<AdministrationGroup>();
     }

@@ -52,4 +52,47 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
 
     public List<int> Missives { get; set; } = [];
     public List<int> BadgesOfDuplicateSsns { get; set; } = [];
+
+    public static MemberDetails ResponseExample()
+    {
+        return new MemberDetails
+        {
+            Id = 1,
+            IsEmployee = true,
+            BadgeNumber = 1001,
+            PsnSuffix = 0,
+            PayFrequencyId = 1,
+            IsExecutive = false,
+            Ssn = "123456789",
+            FirstName = "John",
+            LastName = "Doe",
+            MiddleName = "M",
+            Address = "123 Main St",
+            AddressCity = "Boston",
+            AddressState = "MA",
+            AddressZipCode = "02101",
+            Age = 35,
+            DateOfBirth = new DateOnly(1989, 1, 15),
+            HireDate = new DateOnly(2015, 3, 1),
+            TerminationDate = null,
+            ReHireDate = null,
+            EmploymentStatus = "Active",
+            YearToDateProfitSharingHours = 1040.00m,
+            EnrollmentId = 1,
+            Enrollment = "Eligible",
+            StoreNumber = 5,
+            CurrentEtva = 50000.00m,
+            PreviousEtva = 48000.00m,
+            Department = "Grocery",
+            PayClassification = "Full Time",
+            Gender = "M",
+            PhoneNumber = "555-1234",
+            WorkLocation = "Store 5",
+            ReceivedContributionsLastYear = true,
+            FullTimeDate = new DateOnly(2015, 3, 1),
+            TerminationReason = null,
+            Missives = [],
+            BadgesOfDuplicateSsns = []
+        };
+    }
 }

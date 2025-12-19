@@ -34,7 +34,7 @@ public sealed class ProfitSharingLabelsExportEndpoint : ProfitSharingEndpoint<Pr
             s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>()
             {
-                {200, ProfitSharingLabelResponse.SampleResponse() }
+                {200, ProfitSharingLabelResponse.ResponseExample() }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });

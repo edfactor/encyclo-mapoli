@@ -33,7 +33,7 @@ public class ProfitSharingUnder21TotalsEndpoint : ProfitSharingEndpoint<ProfitYe
             s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
-                {200,  ProfitSharingUnder21TotalsResponse.SampleResponse()}
+                {200,  ProfitSharingUnder21TotalsResponse.ResponseExample()}
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });

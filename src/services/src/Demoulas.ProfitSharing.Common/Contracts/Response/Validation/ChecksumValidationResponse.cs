@@ -48,4 +48,22 @@ public class ChecksumValidationResponse : IProfitYearRequest
     /// When the validation was performed
     /// </summary>
     public DateTimeOffset ValidatedAt { get; init; } = DateTimeOffset.UtcNow;
+
+    public static ChecksumValidationResponse ResponseExample()
+    {
+        return new ChecksumValidationResponse
+        {
+            ProfitYear = 2024,
+            ReportType = "PAY443",
+            IsValid = true,
+            FieldResults = new Dictionary<string, FieldValidationResult>
+            {
+                { "TotalDistributions", FieldValidationResult.ResponseExample() }
+            },
+            MismatchedFields = new List<string>(),
+            Message = "All fields match archived checksums",
+            ArchivedAt = DateTimeOffset.UtcNow.AddDays(-1),
+            ValidatedAt = DateTimeOffset.UtcNow
+        };
+    }
 }

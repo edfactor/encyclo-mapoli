@@ -57,6 +57,26 @@ public record ValidationResponse : IProfitYearRequest
     /// </summary>
     public List<string> CriticalIssues { get; init; } = new();
 
+    public static ValidationResponse ResponseExample()
+    {
+        return new ValidationResponse
+        {
+            ProfitYear = 2024,
+            IsValid = true,
+            Message = "All cross-reference validations passed",
+            ValidationGroups = new List<CrossReferenceValidationGroup>
+            {
+                CrossReferenceValidationGroup.ResponseExample()
+            },
+            TotalValidations = 10,
+            PassedValidations = 10,
+            FailedValidations = 0,
+            ValidatedReports = new List<string> { "PAY443", "QPAY129", "PAY444" },
+            ValidatedAt = DateTimeOffset.UtcNow,
+            CriticalIssues = new List<string>()
+        };
+    }
+
     /// <summary>
     /// Additional warnings that don't block the operation but should be reviewed
     /// </summary>
