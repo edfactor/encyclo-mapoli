@@ -17,6 +17,16 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, string AName
 
     public string Name()
     {
+        // Parse AName like "A1", "A13A", "A24B" and return zero-padded "R01", "R13A", "R24B"
+        Match match = Regex.Match(AName, @"^A(\d+)(\D*)$");
+        if (match.Success)
+        {
+            string number = match.Groups[1].Value.PadLeft(2, '0');
+            string suffix = match.Groups[2].Value;
+            return $"R{number}{suffix}";
+        }
+
+        // Fallback to original behavior
         return AName.Substring(0, 1).Replace("A", "R") + AName.Substring(1);
     }
 

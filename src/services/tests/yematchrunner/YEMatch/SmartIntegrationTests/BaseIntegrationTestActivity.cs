@@ -29,7 +29,7 @@ public abstract class BaseIntegrationTestActivity : BaseActivity
 
     public override async Task<Outcome> Execute()
     {
-        string args = $"test --filter FullyQualifiedName~{_testFilter}";
+        string args = $"test --filter-method {_testFilter}";
 
         ProcessStartInfo psi = new()
         {
@@ -59,9 +59,10 @@ public abstract class BaseIntegrationTestActivity : BaseActivity
             status = OutcomeStatus.Error;
         }
 
-        string magicString = "Failed:     0,";
+        string magicString = "Test run summary: Passed!";
         if (!stdout.Contains(magicString))
         {
+            Console.WriteLine($"Executed: cd {_integrationTestPath};dotnet {args}");
             Console.WriteLine($"!!! Missing magic string! '{magicString}'");
             status = OutcomeStatus.Error;
         }
