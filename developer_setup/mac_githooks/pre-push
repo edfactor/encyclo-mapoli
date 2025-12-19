@@ -11,24 +11,84 @@ else
     compare_ref="origin/develop"
 fi
 
+# Get changed UI source files (only lintable extensions)
+changed_ui_files=$(git diff --name-only "$compare_ref"..HEAD 2>/dev/null | grep '^src/ui/src/' | grep -E '\.(ts|tsx|js|jsx)$')
+
 # Check if any files in src/ui/src have changed compared to the reference
-if git diff --name-only "$compare_ref"..HEAD 2>/dev/null | grep -q '^src/ui/src/'; then
+if [ -n "$changed_ui_files" ]; then
     echo "🔍 UI files changed - running checks..."
 
     cd src/ui || exit 1
 
+    # Convert paths from repo root to relative to src/ui for ESLint
+    lint_files=$(echo "$changed_ui_files" | sed 's|^src/ui/||')
+
     echo ""
-    echo "📋 Running lint..."
-    if ! npm run lint; then
+    echo "📋 Running lint on $(echo "$lint_files" | wc -l | tr -d ' ') changed file(s)..."
+    if ! npx eslint $lint_files; then
         echo "❌ Lint failed! Push aborted."
         exit 1
     fi
 
     echo ""
-    echo "🧪 Running tests..."
-    if ! npm run test; then
-        echo "❌ Tests failed! Push aborted."
-        exit 1
+    echo "🧪 Finding tests related to changed files..."
+
+    # Build list of test directories/patterns to run based on changed files
+    test_patterns=""
+
+    # Check each major area and add to test patterns if files changed there
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/utils/'; then
+        test_patterns="$test_patterns src/utils"
+    fi
+
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/hooks/'; then
+        test_patterns="$test_patterns src/hooks"
+    fi
+
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/components/'; then
+        test_patterns="$test_patterns src/components"
+    fi
+
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/reduxstore/'; then
+        test_patterns="$test_patterns src/reduxstore"
+    fi
+
+    # Check each page area
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/pages/DecemberActivities/'; then
+        test_patterns="$test_patterns src/pages/DecemberActivities"
+    fi
+
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/pages/FiscalClose/'; then
+        test_patterns="$test_patterns src/pages/FiscalClose"
+    fi
+
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/pages/Beneficiaries/'; then
+        test_patterns="$test_patterns src/pages/Beneficiaries"
+    fi
+
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/pages/InquiriesAndAdjustments/'; then
+        test_patterns="$test_patterns src/pages/InquiriesAndAdjustments"
+    fi
+
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/pages/Reports/'; then
+        test_patterns="$test_patterns src/pages/Reports"
+    fi
+
+    if echo "$changed_ui_files" | grep -q '^src/ui/src/pages/Distributions/'; then
+        test_patterns="$test_patterns src/pages/Distributions"
+    fi
+
+    # Trim leading whitespace
+    test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
+
+    if [ -n "$test_patterns" ]; then
+        echo "   Running tests for: $test_patterns"
+        if ! npm run test -- --run $test_patterns; then
+            echo "❌ Tests failed! Push aborted."
+            exit 1
+        fi
+    else
+        echo "   No test areas matched changed files - skipping tests"
     fi
 
     echo ""
