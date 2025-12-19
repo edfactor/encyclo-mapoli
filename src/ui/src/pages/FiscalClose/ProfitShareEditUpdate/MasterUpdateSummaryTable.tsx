@@ -34,17 +34,17 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
    */
   const renderHeaderValidationIcon = (keysToValidate: string | string[]) => {
     var keys = Array.isArray(keysToValidate) ? keysToValidate : [keysToValidate];
-    
-    const validations=[];
+
+    const validations = [];
     for (const key of keys) {
       const validation = getFieldValidation(key);
       validations.push(validation);
     }
-    if (validations.every(v => v === null)) {
+    if (validations.every((v) => v === null)) {
       return null;
     }
-    
-    const isValid = validations.every(v => v !== null && v.isValid);
+
+    const isValid = validations.every((v) => v !== null && v.isValid);
 
     return (
       <div
@@ -103,7 +103,7 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               <th className="px-3 py-2 text-right text-sm font-semibold">
                 <div className="flex items-center justify-end gap-1">
                   <span>Distributions</span>
-                  {renderHeaderValidationIcon(["DistributionTotals","QPAY129_DistributionTotals"])}
+                  {renderHeaderValidationIcon(["DistributionTotals", "QPAY129_DistributionTotals"])}
                 </div>
               </th>
 
