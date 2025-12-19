@@ -126,6 +126,9 @@ definitions:
         - cd src/ui
         - echo "Running frontend tests on cloud runner..."
 
+        # Install git for Alpine (needed for diff comparison in PRs)
+        - apk add --no-cache git
+
         # Update npm to latest version
         - npm install -g npm@latest
         - npm config list --json
@@ -138,9 +141,74 @@ definitions:
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
 
-        # Install dependencies and run tests
+        # Install dependencies
         - npm ci
-        - npm run test
+
+        # Run tests - only changed areas for PRs, all tests for branch builds
+        - |
+          if [ -n "$BITBUCKET_PR_DESTINATION_BRANCH" ]; then
+              echo "PR build detected - checking for changed files..."
+              cd ..  # Go to repo root for git operations
+              git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=1
+              changed_files=$(git diff --name-only "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' || true)
+              cd src/ui
+
+              # Build test patterns based on changed areas
+              test_patterns=""
+
+              if echo "$changed_files" | grep -q '^src/ui/src/utils/'; then
+                  test_patterns="$test_patterns src/utils"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/hooks/'; then
+                  test_patterns="$test_patterns src/hooks"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/components/'; then
+                  test_patterns="$test_patterns src/components"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/reduxstore/'; then
+                  test_patterns="$test_patterns src/reduxstore"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/DecemberActivities/'; then
+                  test_patterns="$test_patterns src/pages/DecemberActivities"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/FiscalClose/'; then
+                  test_patterns="$test_patterns src/pages/FiscalClose"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/Beneficiaries/'; then
+                  test_patterns="$test_patterns src/pages/Beneficiaries"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/InquiriesAndAdjustments/'; then
+                  test_patterns="$test_patterns src/pages/InquiriesAndAdjustments"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/Reports/'; then
+                  test_patterns="$test_patterns src/pages/Reports"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/Distributions/'; then
+                  test_patterns="$test_patterns src/pages/Distributions"
+              fi
+
+              # Trim leading whitespace
+              test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
+
+              if [ -n "$test_patterns" ]; then
+                  echo "Running tests for changed areas: $test_patterns"
+                  npm run test -- --run $test_patterns
+              else
+                  echo "No test areas matched changed files - skipping tests"
+              fi
+          else
+              echo "Branch build - running all tests..."
+              npm run test
+          fi
 
     generate-buildinfo: &generate-buildinfo
       name: Generate Build Information
@@ -563,6 +631,9 @@ definitions:
         - cd src/ui
         - echo "Running frontend tsc and linting on cloud runner..."
 
+        # Install git for Alpine (needed for diff comparison in PRs)
+        - apk add --no-cache git
+
         # Update npm to latest version
         - npm install -g npm@latest
 
@@ -573,9 +644,30 @@ definitions:
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
 
-        # Install dependencies and run linting
+        # Install dependencies
         - npm ci
-        - npm run lint
+
+        # Run lint - only changed files for PRs, all files for branch builds
+        - |
+          if [ -n "$BITBUCKET_PR_DESTINATION_BRANCH" ]; then
+              echo "PR build detected - checking for changed files..."
+              cd ..  # Go to repo root for git operations
+              git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=1
+              changed_files=$(git diff --name-only "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' | grep -E '\.(ts|tsx|js|jsx)$' | sed 's|^src/ui/||' || true)
+              cd src/ui
+
+              if [ -n "$changed_files" ]; then
+                  file_count=$(echo "$changed_files" | wc -l | tr -d ' ')
+                  echo "Linting $file_count changed file(s)..."
+                  echo "$changed_files" | xargs npx eslint
+              else
+                  echo "No lintable files changed in src/ui/src/"
+              fi
+          else
+              echo "Branch build - linting all files..."
+              npm run lint
+          fi
+
         - npx tsc -b --noEmit
 
     api-lint: &api-lint
