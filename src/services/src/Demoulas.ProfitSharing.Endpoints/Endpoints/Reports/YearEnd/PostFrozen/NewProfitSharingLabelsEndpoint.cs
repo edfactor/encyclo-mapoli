@@ -33,7 +33,7 @@ public class NewProfitSharingLabelsEndpoint : ProfitSharingEndpoint<ProfitYearRe
             s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>()
             {
-                {200, NewProfitSharingLabelResponse.SampleResponse() }
+                {200, NewProfitSharingLabelResponse.ResponseExample() }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });

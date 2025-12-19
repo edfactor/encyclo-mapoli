@@ -41,7 +41,7 @@ public sealed class ProfitSharingUnder21InactiveNoBalanceEndpoint :
             s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
-                {200,  ProfitSharingUnder21InactiveNoBalanceResponse.SampleResponse()}
+                {200,  ProfitSharingUnder21InactiveNoBalanceResponse.ResponseExample()}
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
