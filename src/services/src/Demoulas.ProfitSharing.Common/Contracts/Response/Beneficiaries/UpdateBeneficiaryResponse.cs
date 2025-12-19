@@ -11,7 +11,7 @@ public sealed record UpdateBeneficiaryResponse : UpdateBeneficiaryContactRespons
     public int DemographicId { get; set; }
     public int BadgeNumber { get; set; }
 
-    public static UpdateBeneficiaryResponse SampleResponse()
+    public static new UpdateBeneficiaryResponse SampleResponse()
     {
         return new UpdateBeneficiaryResponse
         {
@@ -20,20 +20,22 @@ public sealed record UpdateBeneficiaryResponse : UpdateBeneficiaryContactRespons
             Percentage = 100.00m,
             DemographicId = 123,
             BadgeNumber = 1001,
-            BeneficiaryId = 456,
+            // Properties from UpdateBeneficiaryContactResponse base class
+            Id = 456,
+            Ssn = "XXX-XX-6789",
+            DateOfBirth = new DateOnly(1985, 5, 15),
+            Street1 = "123 Main St",
+            Street2 = "Apt 4B",
+            City = "Boston",
+            State = "MA",
+            PostalCode = "02101",
+            FullName = "Doe, Jane M",
             FirstName = "Jane",
             LastName = "Doe",
             MiddleName = "M",
-            Ssn = "123456789",
-            DateOfBirth = new DateOnly(1985, 5, 15),
-            HomePhoneNumber = "555-0100",
-            CellPhoneNumber = "555-0101",
-            Email = "jane.doe@example.com",
-            Address1 = "123 Main St",
-            Address2 = "Apt 4B",
-            City = "Boston",
-            State = "MA",
-            ZipCode = "02101"
+            PhoneNumber = "555-0100",
+            MobileNumber = "555-0101",
+            EmailAddress = "jane.doe@example.com"
         };
     }
 }

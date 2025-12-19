@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 /// Comprehensive cross-reference validation results for Master Update (PAY444|PAY447).
 /// Validates that all prerequisite report values match their archived checksums.
 /// </summary>
-public record MasterUpdateCrossReferenceValidationResponse: ValidationResponse
+public record MasterUpdateCrossReferenceValidationResponse : ValidationResponse
 {
 
     /// <summary>

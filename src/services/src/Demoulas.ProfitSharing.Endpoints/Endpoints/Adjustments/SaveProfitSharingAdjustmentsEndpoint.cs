@@ -36,6 +36,7 @@ public sealed class SaveProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint
         Summary(s =>
         {
             s.Summary = "Save Profit Sharing Adjustments";
+            s.ExampleRequest = SaveProfitSharingAdjustmentsRequest.RequestExample();
             s.Description = "Updates existing Profit Detail rows and inserts new rows for the Profit Sharing Adjustments screen (TPR008-22 parity).";
         });
     }

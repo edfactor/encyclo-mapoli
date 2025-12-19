@@ -14,7 +14,8 @@ public sealed record Address : ICity
     public string? CountryIso { get; set; } = "US";
 
     public static Address RequestExample()
-    {        return new Address
+    {
+        return new Address
         {
             Street = "123 Main Street",
             Street2 = "Apt 4B",

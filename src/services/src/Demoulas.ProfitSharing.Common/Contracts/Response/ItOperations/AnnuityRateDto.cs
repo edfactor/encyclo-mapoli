@@ -11,4 +11,15 @@ public sealed record AnnuityRateDto
     [UnmaskSensitive] public required decimal SingleRate { get; init; }
 
     [UnmaskSensitive] public required decimal JointRate { get; init; }
+
+    public static AnnuityRateDto ResponseExample()
+    {
+        return new AnnuityRateDto
+        {
+            Year = 2024,
+            Age = 65,
+            SingleRate = 0.0525m,
+            JointRate = 0.0475m
+        };
+    }
 }
