@@ -13,7 +13,6 @@ interface ValidationResult {
 
 interface MasterUpdateSummaryTableProps {
   totals: ProfitShareUpdateTotals;
-  validationResponse: ValidationResult | null | undefined;
   getFieldValidation: (fieldKey: string) => ValidationResult | null;
   openValidationField: string | null;
   onValidationToggle: (fieldName: string) => void;
@@ -26,7 +25,6 @@ interface MasterUpdateSummaryTableProps {
  */
 export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> = ({
   totals,
-  validationResponse,
   getFieldValidation,
   openValidationField,
   onValidationToggle
