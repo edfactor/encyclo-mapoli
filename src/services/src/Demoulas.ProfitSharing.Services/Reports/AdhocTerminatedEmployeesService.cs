@@ -31,32 +31,67 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var query = (from d in demographic.Include(d => d.TerminationCode)
-                         where d.TerminationDate != null
-                            && d.TerminationDate.Value >= startDate
-                            && d.TerminationDate.Value <= endDate
-                            && d.TerminationCodeId != TerminationCode.Constants.Retired
-                         select new AdhocTerminatedEmployeeResponse
-                         {
-                             BadgeNumber = d.BadgeNumber,
-                             FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : string.Empty,
-                             FirstName = d.ContactInfo.FirstName,
-                             LastName = d.ContactInfo.LastName,
-                             MiddleInitial = !string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? d.ContactInfo.MiddleName[0].ToString() : string.Empty,
-                             Ssn = d.Ssn.MaskSsn(),
-                             TerminationDate = d.TerminationDate!.Value,
-                             TerminationCodeId = d.TerminationCodeId,
-                             TerminationCode = d.TerminationCode != null ? d.TerminationCode.Name : string.Empty,
-                             IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
-                             Address = d.Address.Street,
-                             Address2 = !string.IsNullOrEmpty(d.Address.Street2) ? d.Address.Street2 : string.Empty,
-                             City = !string.IsNullOrEmpty(d.Address.City) ? d.Address.City : string.Empty,
-                             State = !string.IsNullOrEmpty(d.Address.State) ? d.Address.State : string.Empty,
-                             PostalCode = !string.IsNullOrEmpty(d.Address.PostalCode) ? d.Address.PostalCode : string.Empty
-                         }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+            var sortReq = req with
+            {
+                SortBy = req.SortBy?.ToLowerInvariant() switch
+                {
+                    "ssn" => "RawSsn",
+                    _ => req.SortBy
+                }
+            };
 
-            return await query;
+            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var query = from d in demographic.Include(d => d.TerminationCode)
+                        where d.TerminationDate != null
+                           && d.TerminationDate.Value >= startDate
+                           && d.TerminationDate.Value <= endDate
+                           && d.TerminationCodeId != TerminationCode.Constants.Retired
+                        select new
+                        {
+                            d.BadgeNumber,
+                            FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : string.Empty,
+                            d.ContactInfo.FirstName,
+                            d.ContactInfo.LastName,
+                            MiddleInitial = !string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? d.ContactInfo.MiddleName[0].ToString() : string.Empty,
+                            RawSsn = d.Ssn,
+                            TerminationDate = d.TerminationDate!.Value,
+                            d.TerminationCodeId,
+                            TerminationCode = d.TerminationCode != null ? d.TerminationCode.Name : string.Empty,
+                            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                            Address = d.Address.Street,
+                            Address2 = !string.IsNullOrEmpty(d.Address.Street2) ? d.Address.Street2 : string.Empty,
+                            City = !string.IsNullOrEmpty(d.Address.City) ? d.Address.City : string.Empty,
+                            State = !string.IsNullOrEmpty(d.Address.State) ? d.Address.State : string.Empty,
+                            PostalCode = !string.IsNullOrEmpty(d.Address.PostalCode) ? d.Address.PostalCode : string.Empty
+                        };
+
+            var paginatedResults = await query.ToPaginationResultsAsync(sortReq, cancellationToken: cancellationToken);
+
+            // Project to response type and mask SSN after materialization
+            return new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<AdhocTerminatedEmployeeResponse>
+            {
+                Results = paginatedResults.Results.Select(x => new AdhocTerminatedEmployeeResponse
+                {
+                    BadgeNumber = x.BadgeNumber,
+                    FullName = x.FullName,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    MiddleInitial = x.MiddleInitial,
+                    Ssn = x.RawSsn.MaskSsn(),
+                    TerminationDate = x.TerminationDate,
+                    TerminationCodeId = x.TerminationCodeId,
+                    TerminationCode = x.TerminationCode,
+                    IsExecutive = x.IsExecutive,
+                    Address = x.Address,
+                    Address2 = x.Address2,
+                    City = x.City,
+                    State = x.State,
+                    PostalCode = x.PostalCode
+                }).ToList(),
+                Total = paginatedResults.Total,
+                IsPartialResult = paginatedResults.IsPartialResult,
+                TimeoutOccurred = paginatedResults.TimeoutOccurred
+            };
         }, cancellationToken);
 
         return new ReportResponseBase<AdhocTerminatedEmployeeResponse>()
