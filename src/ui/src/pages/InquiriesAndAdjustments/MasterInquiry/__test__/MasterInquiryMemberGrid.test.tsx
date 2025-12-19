@@ -22,11 +22,12 @@ describe("MasterInquiryMemberGrid - Badge Link Styling", { timeout: 40000 }, () 
     sortParams: {
       sortBy: "badgeNumber",
       isSortDescending: false
-    }
+    },
+    handlePageNumberChange: vi.fn(),
+    handlePageSizeChange: vi.fn()
   };
 
   const mockOnMemberSelect = vi.fn();
-  const mockOnPaginationChange = vi.fn();
   const mockOnSortChange = vi.fn();
 
   describe("CSS Styling for Badge Links", () => {
@@ -36,7 +37,6 @@ describe("MasterInquiryMemberGrid - Badge Link Styling", { timeout: 40000 }, () 
           searchResults={mockSearchResults}
           onMemberSelect={mockOnMemberSelect}
           memberGridPagination={mockPagination}
-          onPaginationChange={mockOnPaginationChange}
           onSortChange={mockOnSortChange}
         />
       );
@@ -66,7 +66,6 @@ describe("MasterInquiryMemberGrid - Badge Link Styling", { timeout: 40000 }, () 
           searchResults={mockSearchResults}
           onMemberSelect={mockOnMemberSelect}
           memberGridPagination={mockPagination}
-          onPaginationChange={mockOnPaginationChange}
           onSortChange={mockOnSortChange}
         />
       );
@@ -86,7 +85,6 @@ describe("MasterInquiryMemberGrid - Badge Link Styling", { timeout: 40000 }, () 
           searchResults={mockSearchResults}
           onMemberSelect={mockOnMemberSelect}
           memberGridPagination={mockPagination}
-          onPaginationChange={mockOnPaginationChange}
           onSortChange={mockOnSortChange}
         />
       );
@@ -116,7 +114,6 @@ describe("MasterInquiryMemberGrid - Badge Link Styling", { timeout: 40000 }, () 
           searchResults={mockSearchResults}
           onMemberSelect={mockOnMemberSelect}
           memberGridPagination={mockPagination}
-          onPaginationChange={mockOnPaginationChange}
           onSortChange={mockOnSortChange}
         />
       );

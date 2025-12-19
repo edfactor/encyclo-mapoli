@@ -37,9 +37,16 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
 
-  const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number) => {
-      contributionsGridPagination.handlePaginationChange(pageNumber, pageSize);
+  const handlePageNumberChange = useCallback(
+    (pageNumber: number) => {
+      contributionsGridPagination.handlePageNumberChange(pageNumber);
+    },
+    [contributionsGridPagination]
+  );
+
+  const handlePageSizeChange = useCallback(
+    (pageSize: number) => {
+      contributionsGridPagination.handlePageSizeChange(pageSize);
     },
     [contributionsGridPagination]
   );
@@ -115,12 +122,10 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             <Pagination
               pageNumber={contributionsGridPagination.pageNumber}
               setPageNumber={(value: number) => {
-                handlePaginationChange(value - 1, contributionsGridPagination.pageSize);
+                handlePageNumberChange(value - 1);
               }}
               pageSize={contributionsGridPagination.pageSize}
-              setPageSize={(value: number) => {
-                handlePaginationChange(0, value);
-              }}
+              setPageSize={handlePageSizeChange}
               recordCount={militaryContributionsData?.total}
             />
           )}

@@ -26,7 +26,7 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
   });
   const columnDefs = useMemo(() => GetAccountHistoryReportColumns(), []);
 
-  const { pageNumber, pageSize, handlePaginationChange } = gridPagination;
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange } = gridPagination;
   const recordCount = data?.response?.total ?? 0;
 
   return (
@@ -50,11 +50,9 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
             <Grid width="100%">
               <Pagination
                 pageNumber={pageNumber}
-                setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
+                setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
                 pageSize={pageSize}
-                setPageSize={(value: number) => {
-                  handlePaginationChange(0, value);
-                }}
+                setPageSize={handlePageSizeChange}
                 recordCount={recordCount}
               />
             </Grid>

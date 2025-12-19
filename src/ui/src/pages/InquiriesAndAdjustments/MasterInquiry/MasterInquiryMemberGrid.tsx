@@ -30,8 +30,9 @@ interface MasterInquiryMemberGridProps {
     pageNumber: number;
     pageSize: number;
     sortParams: SortParams;
+    handlePageNumberChange: (pageNumber: number) => void;
+    handlePageSizeChange: (pageSize: number) => void;
   };
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
   isLoading?: boolean;
   isGridExpanded?: boolean;
@@ -43,7 +44,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     searchResults,
     onMemberSelect,
     memberGridPagination,
-    onPaginationChange,
     onSortChange,
     isLoading = false,
     isGridExpanded = false,
@@ -65,10 +65,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
         badgeNumber: Number(member.badgeNumber),
         psnSuffix: Number(member.psnSuffix)
       });
-    };
-
-    const handlePaginationChange = (pageNumber: number, pageSize: number) => {
-      onPaginationChange(pageNumber, pageSize);
     };
 
     const handleSortChange = (sortParams: ISortParams) => {
@@ -130,13 +126,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
         <Pagination
           rowsPerPageOptions={[5, 10, 50, 100]}
           pageNumber={memberGridPagination.pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, memberGridPagination.pageSize);
-          }}
+          setPageNumber={(value: number) => memberGridPagination.handlePageNumberChange(value - 1)}
           pageSize={memberGridPagination.pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={memberGridPagination.handlePageSizeChange}
           recordCount={searchResults.total}
         />
       </Box>
@@ -154,7 +146,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       prevProps.isLoading === nextProps.isLoading &&
       prevProps.isGridExpanded === nextProps.isGridExpanded &&
       prevProps.onMemberSelect === nextProps.onMemberSelect &&
-      prevProps.onPaginationChange === nextProps.onPaginationChange &&
       prevProps.onSortChange === nextProps.onSortChange &&
       prevProps.onToggleExpand === nextProps.onToggleExpand
     );

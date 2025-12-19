@@ -26,7 +26,7 @@ const DisbursementGrid: React.FC<DisbursementGridProps> = ({
   rowsPerPageOptions = [10, 25, 50, 100],
   onPaginationChange
 }) => {
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
     initialPageSize,
     initialSortBy: "paymentSequence",
     initialSortDescending: false,
@@ -72,12 +72,10 @@ const DisbursementGrid: React.FC<DisbursementGridProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
+            handlePageNumberChange(value - 1);
           }}
           pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={handlePageSizeChange}
           rowsPerPageOptions={rowsPerPageOptions}
           recordCount={totalRecords}
         />

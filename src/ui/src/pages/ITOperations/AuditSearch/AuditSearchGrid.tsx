@@ -21,7 +21,7 @@ const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({
   onPaginationChange,
   navigationStatusList
 }) => {
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "createdAt",
     initialSortDescending: true,
@@ -57,13 +57,9 @@ const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({
       {data && data.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-          }}
+          setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
           pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={handlePageSizeChange}
           recordCount={total}
         />
       )}

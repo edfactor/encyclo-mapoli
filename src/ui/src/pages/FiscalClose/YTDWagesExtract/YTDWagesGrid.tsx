@@ -1,9 +1,8 @@
-import { useMemo } from "react";
-import { RefObject } from "react";
-import { RowClassParams } from "ag-grid-community";
-import { Box, Grid, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { Box, Grid, IconButton, Typography } from "@mui/material";
+import { RowClassParams } from "ag-grid-community";
+import { RefObject, useMemo } from "react";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
@@ -92,7 +91,7 @@ const YTDWagesGrid = ({
                 <Typography
                   variant="h2"
                   sx={{ color: "#0258A5" }}>
-                  {clonedData.reportName || "YTD Wages Extract"}
+                  {clonedData.reportName || "hello"}
                 </Typography>
                 {!isGridExpanded && (
                   <>

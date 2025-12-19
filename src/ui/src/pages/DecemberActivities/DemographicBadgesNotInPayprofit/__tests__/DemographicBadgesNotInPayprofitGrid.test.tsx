@@ -80,6 +80,8 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     pageSize: 25,
     sortParams: { sortBy: "badgeNumber", isSortDescending: true },
     handlePaginationChange: vi.fn(),
+    handlePageNumberChange: vi.fn(),
+    handlePageSizeChange: vi.fn(),
     handleSortChange: vi.fn(),
     setPageNumber: vi.fn(),
     setPageSize: vi.fn(),

@@ -46,7 +46,7 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
   storeNumber,
   gridPagination
 }) => {
-  const { pageNumber, pageSize, handlePaginationChange } = gridPagination;
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange } = gridPagination;
 
   const breakdownByStoreManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreManagement);
   const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
@@ -294,13 +294,9 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
         <Grid size={{ xs: 12 }}>
           <Pagination
             pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
-            }}
+            setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
             pageSize={pageSize}
-            setPageSize={(value: number) => {
-              handlePaginationChange(0, value);
-            }}
+            setPageSize={handlePageSizeChange}
             recordCount={totalRecords}
           />
         </Grid>

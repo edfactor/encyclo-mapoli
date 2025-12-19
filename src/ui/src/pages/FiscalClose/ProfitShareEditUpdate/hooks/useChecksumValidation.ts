@@ -21,7 +21,7 @@ export interface ChecksumValidationConfig {
     OutgoingAllocations?: number;
     NetAllocTransfer?: number;
     TotalForfeitPoints?: number;
-    TotalEarningPoints?: number;  
+    TotalEarningPoints?: number;
   };
   /** Optional callback when validation data is loaded */
   onValidationLoaded?: (data: MasterUpdateCrossReferenceValidationResponse) => void;

@@ -44,7 +44,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   printContent,
   printTerminatedLetters
 }) => {
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = gridPagination;
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = gridPagination;
 
   const handleSelectionChanged = useCallback(
     (event: SelectionChangedEvent) => {
@@ -117,13 +117,9 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
       {reportData && reportData.response && reportData.response.results && reportData.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-          }}
+          setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
           pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={handlePageSizeChange}
           recordCount={reportData.response.total}
         />
       )}

@@ -61,10 +61,12 @@ interface MockPagination {
   pageNumber: number;
   pageSize: number;
   sortParams: { sortBy: string; isSortDescending: boolean };
-  handlePaginationChange: (...args: unknown[]) => void;
-  handleSortChange: (...args: unknown[]) => void;
-  setPageNumber: (n: number) => void;
-  setPageSize: (n: number) => void;
+  handlePaginationChange: (pageNumber: number, pageSize: number) => void;
+  handlePageNumberChange: (pageNumber: number) => void;
+  handlePageSizeChange: (pageSize: number) => void;
+  handleSortChange: (sortParams: { sortBy: string; isSortDescending: boolean }) => void;
+  setPageNumber: (pageNumber: number) => void;
+  setPageSize: (pageSize: number) => void;
   resetPagination: () => void;
   clearPersistedState: () => void;
 }
@@ -130,6 +132,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -143,11 +147,15 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
       } as MockHookReturn);
 
       vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        (<div data-testid="grid">Grid Component</div>) as unknown as ReturnType<typeof DemographicBadgesNotInPayprofitGrid>
+        (<div data-testid="grid">Grid Component</div>) as unknown as ReturnType<
+          typeof DemographicBadgesNotInPayprofitGrid
+        >
       );
 
       vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        (<div data-testid="status-dropdown">Status Dropdown</div>) as unknown as ReturnType<typeof StatusDropdownActionNode>
+        (<div data-testid="status-dropdown">Status Dropdown</div>) as unknown as ReturnType<
+          typeof StatusDropdownActionNode
+        >
       );
 
       const store = createMockStore();
@@ -181,6 +189,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -221,6 +231,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -238,7 +250,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
       );
 
       vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        (<div data-testid="status-dropdown">Status Dropdown</div>) as unknown as ReturnType<typeof StatusDropdownActionNode>
+        (<div data-testid="status-dropdown">Status Dropdown</div>) as unknown as ReturnType<
+          typeof StatusDropdownActionNode
+        >
       );
 
       const store = createMockStore();
@@ -260,6 +274,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -273,7 +289,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
       } as MockHookReturn);
 
       vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        (<div data-testid="grid">Grid Component</div>) as unknown as ReturnType<typeof DemographicBadgesNotInPayprofitGrid>
+        (<div data-testid="grid">Grid Component</div>) as unknown as ReturnType<
+          typeof DemographicBadgesNotInPayprofitGrid
+        >
       );
 
       vi.mocked(StatusDropdownActionNode).mockReturnValue(
@@ -304,6 +322,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -343,6 +363,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -410,6 +432,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -459,6 +483,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: mockHandlePaginationChange,
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: mockHandleSortChange,
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
@@ -513,6 +539,8 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           setPageNumber: vi.fn(),
           setPageSize: vi.fn(),
