@@ -216,10 +216,10 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
       expect(orangeIcon).toBeDefined();
     });
 
-    it("does not render validation icon when validationResponse is null", () => {
+    it("does not render validation icon when getFieldValidation returns null", () => {
       const propsWithoutValidation = {
         ...defaultProps,
-        validationResponse: null
+        getFieldValidation: () => null
       };
 
       render(<MasterUpdateSummaryTable {...propsWithoutValidation} />);

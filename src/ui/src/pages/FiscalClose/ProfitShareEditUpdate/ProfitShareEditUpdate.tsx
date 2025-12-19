@@ -36,7 +36,6 @@ const ProfitShareEditUpdate = () => {
     profitSharingEditQueryParams,
     profitMasterStatus,
     totalForfeituresGreaterThanZero,
-    validationData: validationResponse,
     getFieldValidation,
     saveAction,
     revertAction,
@@ -163,9 +162,6 @@ const ProfitShareEditUpdate = () => {
                 {/* Unified Summary Table (PAY444) */}
                 <MasterUpdateSummaryTable
                   totals={profitSharingUpdate.profitShareUpdateTotals}
-                  validationResponse={
-                    validationResponse as Parameters<typeof MasterUpdateSummaryTable>[0]["validationResponse"]
-                  }
                   getFieldValidation={
                     getFieldValidation as Parameters<typeof MasterUpdateSummaryTable>[0]["getFieldValidation"]
                   }
