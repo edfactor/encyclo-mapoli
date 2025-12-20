@@ -3,6 +3,11 @@
 # Pre-push hook: Run lint, test, and tsc if UI files changed
 #                Run build and selective tests if backend files changed
 
+echo ""
+echo "========================================"
+echo "🚀 Pre-push hook starting..."
+echo "========================================"
+
 # Determine what to compare against:
 # 1. If upstream exists, compare against it
 # 2. Otherwise, compare against origin/develop (main branch)
@@ -12,9 +17,8 @@ else
     compare_ref="origin/develop"
 fi
 
-# =============================================================================
-# UI CHECKS - Run if UI files changed
-# =============================================================================
+echo "Comparing against: $compare_ref"
+echo ""
 
 # Get changed UI source files (only lintable extensions)
 changed_ui_files=$(git diff --name-only "$compare_ref"..HEAD 2>/dev/null | grep '^src/ui/src/' | grep -E '\.(ts|tsx|js|jsx)$')
@@ -106,6 +110,8 @@ if [ -n "$changed_ui_files" ]; then
     echo ""
     echo "✅ All UI checks passed!"
     cd - > /dev/null
+else
+    echo "ℹ️  No UI files changed - skipping UI checks"
 fi
 
 # =============================================================================
@@ -244,6 +250,16 @@ if [ -n "$changed_backend_files" ]; then
     cd - > /dev/null
     echo ""
     echo "✅ All backend checks passed!"
+else
+    echo "ℹ️  No backend files changed - skipping backend checks"
 fi
+
+echo ""
+echo "========================================"
+echo "✅ Pre-push hook completed successfully"
+echo "========================================"
+echo ""
+echo "⏳ Pushing to remote (this may take a moment)..."
+echo ""
 
 exit 0
