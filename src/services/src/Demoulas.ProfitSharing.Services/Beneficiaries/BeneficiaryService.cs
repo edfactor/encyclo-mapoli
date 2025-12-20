@@ -38,7 +38,7 @@ public class BeneficiaryService : IBeneficiaryService
     }
     public async Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
-        // Validate request using FluentValidation
+        // Validate request using FluentValidation framework
         var validationResult = await _createBeneficiaryValidator.ValidateAsync(req, cancellationToken);
         if (!validationResult.IsValid)
         {
