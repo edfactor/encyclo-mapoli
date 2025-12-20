@@ -1132,7 +1132,10 @@ pipelines:
           condition:
             changesets:
               includePaths:
-                - "src/ui/**"
+                - "src/ui/**/*.ts"
+                - "src/ui/**/*.tsx"
+                - "src/ui/**/*.js"
+                - "src/ui/**/*.jsx"
       # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
           - step:
@@ -1146,7 +1149,12 @@ pipelines:
               condition:
                 changesets:
                   includePaths:
-                    - "src/services/**"
+                    - "src/services/**/*.cs"
+                    - "src/services/**/*.csproj"
+                    - "src/services/**/*.sln"
+                    - "src/services/**/*.slnx"
+                    - "src/services/**/*.json"
+                    - "src/services/**/*.config"
           - step: *secret-scan
       # Stage 3: Build and test
       - parallel:
@@ -1155,19 +1163,32 @@ pipelines:
               condition:
                 changesets:
                   includePaths:
-                    - "src/services/**"
+                    - "src/services/**/*.cs"
+                    - "src/services/**/*.csproj"
+                    - "src/services/**/*.sln"
+                    - "src/services/**/*.slnx"
+                    - "src/services/**/*.json"
+                    - "src/services/**/*.config"
           - step:
               <<: *build-and-test-backend-architecture
               condition:
                 changesets:
                   includePaths:
-                    - "src/services/**"
+                    - "src/services/**/*.cs"
+                    - "src/services/**/*.csproj"
+                    - "src/services/**/*.sln"
+                    - "src/services/**/*.slnx"
+                    - "src/services/**/*.json"
+                    - "src/services/**/*.config"
           - step:
               <<: *test-frontend
               condition:
                 changesets:
                   includePaths:
-                    - "src/ui/**"
+                    - "src/ui/**/*.ts"
+                    - "src/ui/**/*.tsx"
+                    - "src/ui/**/*.js"
+                    - "src/ui/**/*.jsx"
 
   custom:
     infrastructure_as_code:
