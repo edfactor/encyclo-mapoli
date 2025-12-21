@@ -7,14 +7,7 @@ import {
   getReversalEligibilityStatus,
   ReversalEligibilityStatus
 } from "./ReversalsGridColumns";
-
-interface RowData {
-  id: number;
-  profitCodeId: number;
-  monthToDate: number;
-  yearToDate: number;
-  isAlreadyReversed?: boolean;
-}
+import { ProfitDetailRow } from "./ReversalsGrid";
 
 interface GridContext {
   getSelectedIds: () => Set<number>;
@@ -22,7 +15,7 @@ interface GridContext {
 }
 
 interface ReversalCheckboxCellRendererProps extends ICellRendererParams {
-  data: RowData;
+  data: ProfitDetailRow;
   context: GridContext;
 }
 
