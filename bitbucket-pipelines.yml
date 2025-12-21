@@ -148,7 +148,7 @@ definitions:
         - |
           if [ -n "$BITBUCKET_PR_DESTINATION_BRANCH" ]; then
               echo "PR build detected - checking for changed files..."
-              cd ..  # Go to repo root for git operations
+              cd ../..  # Go to repo root for git operations (from src/ui)
               git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=1
               changed_files=$(git diff --name-only "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' || true)
               cd src/ui
@@ -651,7 +651,7 @@ definitions:
         - |
           if [ -n "$BITBUCKET_PR_DESTINATION_BRANCH" ]; then
               echo "PR build detected - checking for changed files..."
-              cd ..  # Go to repo root for git operations
+              cd ../..  # Go to repo root for git operations (from src/ui)
               git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=1
               changed_files=$(git diff --name-only "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' | grep -E '\.(ts|tsx|js|jsx)$' | sed 's|^src/ui/||' || true)
               cd src/ui

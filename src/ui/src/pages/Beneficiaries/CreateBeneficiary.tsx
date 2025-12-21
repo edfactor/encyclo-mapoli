@@ -7,9 +7,9 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import {
-  useLazyCreateBeneficiariesQuery,
-  useLazyCreateBeneficiaryContactQuery,
-  useLazyUpdateBeneficiaryQuery
+  useCreateBeneficiariesMutation,
+  useCreateBeneficiaryContactMutation,
+  useUpdateBeneficiaryMutation
 } from "reduxstore/api/BeneficiariesApi";
 import {
   BeneficiaryDetail,
@@ -68,9 +68,9 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   selectedBeneficiary,
   selectedMember
 }) => {
-  const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
-  const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
-  const [triggerUpdateBeneficiary] = useLazyUpdateBeneficiaryQuery();
+  const [triggerAdd, { isLoading }] = useCreateBeneficiariesMutation();
+  const [triggerCreateBeneficiaryContact] = useCreateBeneficiaryContactMutation();
+  const [triggerUpdateBeneficiary] = useUpdateBeneficiaryMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   //adding this comment to create the draft PR to review.
 
@@ -111,10 +111,10 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   });
 
   useEffect(() => {
-    if (!isFetching) {
+    if (!isLoading) {
       setIsSubmitting(false);
     }
-  }, [isFetching]);
+  }, [isLoading]);
 
   const handleReset = () => {
     reset();
@@ -472,8 +472,8 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               <SearchAndReset
                 handleReset={handleReset}
                 handleSearch={validateAndSubmit}
-                isFetching={isFetching || isSubmitting}
-                disabled={!isValid || isFetching || isSubmitting}
+                isFetching={isLoading || isSubmitting}
+                disabled={!isValid || isLoading || isSubmitting}
                 searchButtonText="Submit"
               />
             </Grid>

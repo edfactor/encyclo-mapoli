@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
+import { useUpdateBeneficiaryMutation } from "reduxstore/api/BeneficiariesApi";
 import { BeneficiaryDto } from "../../../types";
 
 /**
@@ -57,7 +57,7 @@ export interface UseBeneficiaryPercentageUpdateReturn {
  * }
  */
 export const useBeneficiaryPercentageUpdate = (onUpdateSuccess?: () => void): UseBeneficiaryPercentageUpdateReturn => {
-  const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
+  const [triggerUpdate] = useUpdateBeneficiaryMutation();
   const [isUpdating, setIsUpdating] = useState(false);
 
   /**
@@ -122,7 +122,7 @@ export const useBeneficiaryPercentageUpdate = (onUpdateSuccess?: () => void): Us
       setIsUpdating(true);
 
       try {
-        await triggerUpdate({ id, percentage: newPercentage }, false).unwrap();
+        await triggerUpdate({ id, percentage: newPercentage }).unwrap();
 
         // Call success callback if provided (typically to refresh data)
         onUpdateSuccess?.();

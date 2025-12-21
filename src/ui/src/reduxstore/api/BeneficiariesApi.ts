@@ -73,7 +73,7 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    createBeneficiaries: builder.query<Paged<CreateBeneficiaryResponse>, CreateBeneficiaryRequest>({
+    createBeneficiaries: builder.mutation<Paged<CreateBeneficiaryResponse>, CreateBeneficiaryRequest>({
       query: (request) => ({
         url: `/beneficiaries`,
         method: "POST",
@@ -88,7 +88,7 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    createBeneficiaryContact: builder.query<CreateBeneficiaryContactResponse, CreateBeneficiaryContactRequest>({
+    createBeneficiaryContact: builder.mutation<CreateBeneficiaryContactResponse, CreateBeneficiaryContactRequest>({
       query: (request) => ({
         url: `/beneficiaries/contact`,
         method: "POST",
@@ -103,7 +103,7 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    updateBeneficiary: builder.query<UpdateBeneficiaryResponse, UpdateBeneficiaryRequest>({
+    updateBeneficiary: builder.mutation<UpdateBeneficiaryResponse, UpdateBeneficiaryRequest>({
       query: (request) => ({
         url: `/beneficiaries`,
         method: "PUT",
@@ -134,7 +134,7 @@ export const BeneficiariesApi = createApi({
       }
     }),
 
-    deleteBeneficiary: builder.query<{ success: boolean; message?: string }, DeleteBeneficiaryRequest>({
+    deleteBeneficiary: builder.mutation<{ success: boolean; message?: string }, DeleteBeneficiaryRequest>({
       query: (request) => ({
         url: `/beneficiaries/${request.id}`,
         method: "DELETE"
@@ -152,12 +152,14 @@ export const BeneficiariesApi = createApi({
 });
 
 export const {
+  // Queries (GET operations)
   useLazyGetBeneficiaryDetailQuery,
   useLazyBeneficiarySearchFilterQuery,
-  useLazyDeleteBeneficiaryQuery,
-  useLazyUpdateBeneficiaryQuery,
   useLazyGetBeneficiariesQuery,
-  useLazyCreateBeneficiariesQuery,
   useLazyGetBeneficiarytypesQuery,
-  useLazyCreateBeneficiaryContactQuery
+  // Mutations (POST/PUT/DELETE operations)
+  useCreateBeneficiariesMutation,
+  useCreateBeneficiaryContactMutation,
+  useUpdateBeneficiaryMutation,
+  useDeleteBeneficiaryMutation
 } = BeneficiariesApi;

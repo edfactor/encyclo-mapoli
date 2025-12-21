@@ -66,6 +66,46 @@ export const isRowReversible = (data: ReversalCheckData): boolean => {
   return getReversalEligibilityStatus(data) === "reversible";
 };
 
+/**
+ * Returns a human-readable reason why a row cannot be reversed.
+ * Uses the same logic as getReversalEligibilityStatus to ensure consistency.
+ */
+export const getIneligibilityReason = (data: ReversalCheckData): string => {
+  if (!data) return "This row cannot be reversed";
+
+  // Check if this record has already been reversed
+  if (data.isAlreadyReversed) {
+    return "This transaction has already been reversed";
+  }
+
+  // Check profit code
+  if (!REVERSIBLE_PROFIT_CODES.includes(data.profitCodeId)) {
+    return "Ineligible code for reversal";
+  }
+
+  // Check if transaction is too old (more than 2 months ago)
+  const { monthToDate, yearToDate } = data;
+  if (yearToDate && monthToDate) {
+    const rowDate = new Date(yearToDate, monthToDate - 1);
+    const twoMonthsAgo = new Date();
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+    if (rowDate < twoMonthsAgo) {
+      return "Transaction too old for reversal";
+    }
+
+    // January rule: if current month is January, transaction month must be > 1 and < 12
+    const currentMonth = new Date().getMonth() + 1;
+    if (currentMonth === 1) {
+      if (!(monthToDate > 1 && monthToDate < 12)) {
+        return "Transaction not eligible for reversal in January";
+      }
+    }
+  }
+
+  return "This row cannot be reversed";
+};
+
 export const GetReversalsGridColumns = (): ColDef[] => {
   return [
     {

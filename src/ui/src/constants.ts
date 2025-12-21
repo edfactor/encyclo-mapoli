@@ -487,3 +487,21 @@ export const GRID_KEYS = {
   PAY_BEN_REPORT: "PAY-BEN-REPORT",
   BENEFICIARY_INQUIRY: "BENEFICIARY-INQUIRY"
 } as const;
+
+/**
+ * Common pagination defaults used across grids
+ */
+export const PAGINATION = {
+  /** Default page size for most grids */
+  DEFAULT_PAGE_SIZE: 25,
+  /** Smaller page size for selection grids (e.g., member selection) */
+  SMALL_PAGE_SIZE: 10,
+  /** Larger page size for detailed data grids */
+  LARGE_PAGE_SIZE: 50,
+  /** Minimal page size for compact views */
+  MINIMAL_PAGE_SIZE: 5,
+  /** Standard page size options for pagination controls */
+  PAGE_SIZE_OPTIONS: [10, 25, 50] as const,
+  /** Compact page size options for selection grids */
+  COMPACT_PAGE_SIZE_OPTIONS: [5, 10, 25] as const
+} as const;

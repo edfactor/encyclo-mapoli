@@ -137,6 +137,13 @@ const documentationFiles = [
     filename: "REPORT_CROSSREFERENCE_QUICK.md",
     description:
       "Visual quick reference guide showing report value matching patterns, validation priority order, and field names for API validation - ideal for developers implementing cross-report validation"
+  },
+  {
+    key: "front-end-patterns",
+    title: "Frontend Code Patterns - Code Review Guide",
+    filename: "FRONT_END_PATTERNS.md",
+    description:
+      "Established patterns and conventions used throughout the frontend codebase for components, state management, hooks, APIs, testing, forms, grids, styling, and types - use for code reviews"
   }
 ];
 
