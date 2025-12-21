@@ -116,7 +116,7 @@ Manages search pagination and sort state for member search grid.
 ```typescript
 const search = useBeneficiarySearch({
   defaultPageSize: 10,
-  defaultSortBy: "name"
+  defaultSortBy: "name",
 });
 // Returns: pageNumber, pageSize, sortParams, handlePaginationChange, reset
 ```
@@ -131,7 +131,7 @@ const relationships = useBeneficiaryRelationshipData({
   pageNumber,
   pageSize,
   sortParams,
-  externalRefreshTrigger: count
+  externalRefreshTrigger: count,
 });
 // Returns: beneficiaryList, beneficiaryOfList, isLoading, refresh()
 ```
@@ -142,7 +142,11 @@ Validates and updates beneficiary percentage allocations.
 
 ```typescript
 const percentageUpdate = useBeneficiaryPercentageUpdate(onRefresh);
-const result = await percentageUpdate.validateAndUpdate(id, newValue, beneficiaryList);
+const result = await percentageUpdate.validateAndUpdate(
+  id,
+  newValue,
+  beneficiaryList,
+);
 // Validates: 0-100 range, sum <= 100%
 // Returns: { success, previousValue, error?, warning? }
 ```
