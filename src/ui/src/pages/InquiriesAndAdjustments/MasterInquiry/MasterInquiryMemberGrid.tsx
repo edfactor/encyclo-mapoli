@@ -1,8 +1,7 @@
 import { useContentAwareGridHeight } from "@/hooks/useContentAwareGridHeight";
-import { Box, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { RowClickedEvent } from "ag-grid-community";
+import { Box, IconButton, Typography } from "@mui/material";
 import React, { memo, useMemo } from "react";
 import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
 import { GRID_KEYS } from "../../../constants";
@@ -49,8 +48,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     isGridExpanded = false,
     onToggleExpand
   }: MasterInquiryMemberGridProps) => {
-    const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
-
     // Use content-aware grid height - shrinks for small result sets
     const gridMaxHeight = useContentAwareGridHeight({
       rowCount: searchResults.results?.length ?? 0,
@@ -67,9 +64,33 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       });
     };
 
+    const handleNavigate = (path: string) => {
+      console.log(`Navigating to ${path}`);
+      const i = path.lastIndexOf('/');
+      const badgeNumberParameter = path.substring(i + 1);
+
+      const employee = searchResults.results.find(emp => {
+        const badgeNumberPlusSuffix = emp.psnSuffix > 0 
+        ? `${emp.badgeNumber}${String(emp.psnSuffix).padStart(4, "0")}` 
+        : emp.badgeNumber.toString();
+        return badgeNumberPlusSuffix === badgeNumberParameter;
+      });
+
+      if (employee) {
+        handleMemberClick(employee);
+      } else {
+        console.warn(`Employee with badge number and suffix ${badgeNumberParameter} not found in current results.`);
+      }
+    }
+
     const handleSortChange = (sortParams: ISortParams) => {
       onSortChange(sortParams);
     };
+
+    const columns = useMemo(
+      () => GetMasterInquiryMemberGridColumns(handleNavigate), 
+      [handleNavigate]
+    );
 
     return (
       <Box sx={{ width: "100%", paddingTop: "24px" }}>
@@ -115,12 +136,12 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
           providedOptions={{
             rowData: searchResults.results.filter((row) => row && Object.keys(row).length > 0),
             columnDefs: columns,
-            context: { onBadgeClick: handleMemberClick },
-            onRowClicked: ((event: RowClickedEvent<EmployeeDetails>) => {
-              if (event.data) {
-                handleMemberClick(event.data);
-              }
-            }) as (event: unknown) => void
+            // context: { onBadgeClick: handleMemberClick },
+            // onRowClicked: ((event: RowClickedEvent<EmployeeDetails>) => {
+            //   if (event.data) {
+            //     handleMemberClick(event.data);
+            //   }
+            // }) as (event: unknown) => void
           }}
         />
         <Pagination
