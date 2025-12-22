@@ -8,6 +8,13 @@ public sealed class CommentType : ModifiedBase, ILookupTable<byte>, IEquatable<C
     public required byte Id { get; set; }
     public required string Name { get; set; }
 
+    /// <summary>
+    /// Indicates whether this comment type is used in business logic and must not be changed.
+    /// Once set to true, can only be unset via direct database update outside this application.
+    /// This flag helps protect critical comment types from accidental name changes that would break business logic.
+    /// </summary>
+    public bool IsProtected { get; set; }
+
     public static class Constants
     {
         public static CommentType TransferOut => new() { Id = 1, Name = "Transfer Out" };

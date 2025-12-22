@@ -49,6 +49,7 @@ public sealed class CommentTypeService : ICommentTypeService
                 {
                     Id = x.Id,
                     Name = x.Name,
+                    IsProtected = x.IsProtected,
                     ModifiedAtUtc = x.ModifiedAtUtc,
                     UserName = x.UserName,
                 })
@@ -90,47 +91,76 @@ public sealed class CommentTypeService : ICommentTypeService
                     return Result<CommentTypeDto>.Failure(s_commentTypeNotFound);
                 }
 
+                // Validate one-way protection: Cannot remove protected flag once set
+                if (commentType.IsProtected && !request.IsProtected)
+                {
+                    return Result<CommentTypeDto>.Failure(Error.Validation(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.IsProtected)] = ["Cannot remove protected flag from CommentType. Protected comment types are used in business logic and require direct database update to unprotect."],
+                    }));
+                }
+
                 var originalName = commentType.Name;
-                if (originalName == trimmedName)
+                var originalIsProtected = commentType.IsProtected;
+                if (originalName == trimmedName && originalIsProtected == request.IsProtected)
                 {
                     return Result<CommentTypeDto>.Success(new CommentTypeDto
                     {
                         Id = commentType.Id,
                         Name = commentType.Name,
+                        IsProtected = commentType.IsProtected,
                         ModifiedAtUtc = commentType.ModifiedAtUtc,
                         UserName = commentType.UserName,
                     });
                 }
 
                 commentType.Name = trimmedName;
+                commentType.IsProtected = request.IsProtected;
                 commentType.UserName = _appUser.UserName ?? "";
                 commentType.ModifiedAtUtc = DateTimeOffset.UtcNow;
                 await ctx.SaveChangesAsync(cancellationToken);
 
-                await _auditService.LogDataChangeAsync(
-                    operationName: "Update Comment Type",
-                    tableName: "COMMENT_TYPE",
-                    auditOperation: AuditEvent.AuditOperations.Update,
-                    primaryKey: $"Id:{request.Id}",
-                    changes:
-                    [
-                        new AuditChangeEntryInput
-                        {
-                            ColumnName = "NAME",
-                            OriginalValue = originalName,
-                            NewValue = trimmedName,
-                        },
-                    ],
-                    cancellationToken);
+                // Build audit changes list
+                var changes = new List<AuditChangeEntryInput>();
+                if (originalName != trimmedName)
+                {
+                    changes.Add(new AuditChangeEntryInput
+                    {
+                        ColumnName = "NAME",
+                        OriginalValue = originalName,
+                        NewValue = trimmedName,
+                    });
+                }
+                if (originalIsProtected != request.IsProtected)
+                {
+                    changes.Add(new AuditChangeEntryInput
+                    {
+                        ColumnName = "IS_PROTECTED",
+                        OriginalValue = originalIsProtected.ToString(),
+                        NewValue = request.IsProtected.ToString(),
+                    });
+                }
+
+                if (changes.Count > 0)
+                {
+                    await _auditService.LogDataChangeAsync(
+                        operationName: "Update Comment Type",
+                        tableName: "COMMENT_TYPE",
+                        auditOperation: AuditEvent.AuditOperations.Update,
+                        primaryKey: $"Id:{request.Id}",
+                        changes: changes,
+                        cancellationToken);
+                }
 
                 _logger.LogInformation(
-                    "Updated comment type {Id}: '{OldName}' → '{NewName}'",
-                    commentType.Id, originalName, trimmedName);
+                    "Updated comment type {Id}: '{OldName}' → '{NewName}', IsProtected: {OldProtected} → {NewProtected}",
+                    commentType.Id, originalName, trimmedName, originalIsProtected, request.IsProtected);
 
                 return Result<CommentTypeDto>.Success(new CommentTypeDto
                 {
                     Id = commentType.Id,
                     Name = commentType.Name,
+                    IsProtected = commentType.IsProtected,
                     ModifiedAtUtc = commentType.ModifiedAtUtc,
                     UserName = commentType.UserName,
                 });

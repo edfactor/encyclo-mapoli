@@ -9,6 +9,12 @@ public sealed record CommentTypeDto
     [UnmaskSensitive]
     public required string Name { get; init; }
 
+    /// <summary>
+    /// Indicates whether this comment type is protected from name changes.
+    /// Once set to true, can only be unset via direct database update.
+    /// </summary>
+    public bool IsProtected { get; init; }
+
     public DateTimeOffset? ModifiedAtUtc { get; init; }
 
     public string? UserName { get; init; }
@@ -19,6 +25,7 @@ public sealed record CommentTypeDto
         {
             Id = 1,
             Name = "Example Comment Type",
+            IsProtected = false,
             ModifiedAtUtc = DateTimeOffset.UtcNow,
             UserName = "admin_user"
         };
