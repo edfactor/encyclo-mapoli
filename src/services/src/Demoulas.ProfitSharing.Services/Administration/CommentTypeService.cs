@@ -59,6 +59,92 @@ public sealed class CommentTypeService : ICommentTypeService
         }, cancellationToken);
     }
 
+    public async Task<Result<CommentTypeDto>> CreateCommentTypeAsync(CreateCommentTypeRequest request, CancellationToken cancellationToken)
+    {
+        using (_commitGuardOverride.AllowFor(roles: Role.ITDEVOPS))
+        {
+            return await _contextFactory.UseWritableContext(async ctx =>
+            {
+                var trimmedName = (request.Name ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(trimmedName))
+                {
+                    return Result<CommentTypeDto>.Failure(Error.Validation(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.Name)] = ["Name is required."],
+                    }));
+                }
+
+                if (trimmedName.Length > 255)
+                {
+                    return Result<CommentTypeDto>.Failure(Error.Validation(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.Name)] = ["Name must be 255 characters or less."],
+                    }));
+                }
+
+                // Check for duplicate name
+                var exists = await ctx.CommentTypes
+                    .TagWith("Administration-CheckDuplicateCommentType")
+                    .AnyAsync(x => x.Name == trimmedName, cancellationToken);
+
+                if (exists)
+                {
+                    return Result<CommentTypeDto>.Failure(Error.Validation(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.Name)] = ["A comment type with this name already exists."],
+                    }));
+                }
+
+                var commentType = new Data.Entities.CommentType
+                {
+                    Name = trimmedName,
+                    IsProtected = request.IsProtected,
+                    UserName = _appUser.UserName ?? "",
+                    ModifiedAtUtc = DateTimeOffset.UtcNow
+                };
+
+                ctx.CommentTypes.Add(commentType);
+                await ctx.SaveChangesAsync(cancellationToken);
+
+                // Audit log creation
+                await _auditService.LogDataChangeAsync(
+                    operationName: "Create Comment Type",
+                    tableName: "COMMENT_TYPE",
+                    auditOperation: AuditEvent.AuditOperations.Insert,
+                    primaryKey: $"Id:{commentType.Id}",
+                    changes:
+                    [
+                        new AuditChangeEntryInput
+                        {
+                            ColumnName = "NAME",
+                            OriginalValue = null,
+                            NewValue = trimmedName,
+                        },
+                        new AuditChangeEntryInput
+                        {
+                            ColumnName = "IS_PROTECTED",
+                            OriginalValue = null,
+                            NewValue = request.IsProtected.ToString(),
+                        }
+                    ],
+                    cancellationToken);
+
+                _logger.LogInformation(
+                    "Created comment type {Id}: '{Name}', IsProtected: {IsProtected}",
+                    commentType.Id, trimmedName, request.IsProtected);
+
+                return Result<CommentTypeDto>.Success(new CommentTypeDto
+                {
+                    Id = commentType.Id,
+                    Name = commentType.Name,
+                    IsProtected = commentType.IsProtected,
+                    ModifiedAtUtc = commentType.ModifiedAtUtc,
+                    UserName = commentType.UserName,
+                });
+            }, cancellationToken);
+        }
+    }
+
     public async Task<Result<CommentTypeDto>> UpdateCommentTypeAsync(UpdateCommentTypeRequest request, CancellationToken cancellationToken)
     {
         using (_commitGuardOverride.AllowFor(roles: Role.ITDEVOPS))

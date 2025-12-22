@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { CommentTypeDto, UpdateCommentTypeRequest } from "../types";
+import { CommentTypeDto, CreateCommentTypeRequest, UpdateCommentTypeRequest } from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -26,6 +26,14 @@ export const AdministrationApi = createApi({
       },
       providesTags: ["CommentTypes"]
     }),
+    createCommentType: builder.mutation<CommentTypeDto, CreateCommentTypeRequest>({
+      query: (body) => ({
+        url: "/administration/comment-types",
+        method: "POST",
+        body
+      }),
+      invalidatesTags: ["CommentTypes"]
+    }),
     updateCommentType: builder.mutation<CommentTypeDto, UpdateCommentTypeRequest>({
       query: (body) => ({
         url: "/administration/comment-types",
@@ -37,4 +45,6 @@ export const AdministrationApi = createApi({
   })
 });
 
-export const { useGetCommentTypesQuery, useUpdateCommentTypeMutation } = AdministrationApi;
+export const { useGetCommentTypesQuery, useCreateCommentTypeMutation, useUpdateCommentTypeMutation } =
+  AdministrationApi;
+

@@ -11,6 +11,15 @@ export interface CommentTypeDto {
 }
 
 /// <summary>
+/// Request to create a new comment type.
+/// </summary>
+export interface CreateCommentTypeRequest {
+  name: string;
+  /** Indicates whether this comment type is protected from changes. Defaults to false. */
+  isProtected: boolean;
+}
+
+/// <summary>
 /// Request to update a comment type name and protection status.
 /// </summary>
 export interface UpdateCommentTypeRequest {
@@ -19,3 +28,4 @@ export interface UpdateCommentTypeRequest {
   /** Can be set from false to true, but cannot be set from true to false (one-way protection) */
   isProtected: boolean;
 }
+

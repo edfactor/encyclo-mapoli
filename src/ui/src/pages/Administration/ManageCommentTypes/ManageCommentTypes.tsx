@@ -6,6 +6,7 @@ import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { useGetCommentTypesQuery, useUpdateCommentTypeMutation } from "../../../reduxstore/api/administrationApi";
 import { CommentTypeDto } from "../../../types";
+import { AddCommentTypeDialog } from "./AddCommentTypeDialog";
 
 const ManageCommentTypes = () => {
   const { data, isFetching, refetch } = useGetCommentTypesQuery();
@@ -17,6 +18,7 @@ const ManageCommentTypes = () => {
   const [originalProtectionByID, setOriginalProtectionByID] = useState<Record<number, boolean>>({});
   const [stagedProtectionByID, setStagedProtectionByID] = useState<Record<number, boolean>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const hasUnsavedChanges = Object.keys(stagedNamesByID).length > 0 || Object.keys(stagedProtectionByID).length > 0;
   useUnsavedChangesGuard(hasUnsavedChanges);
@@ -187,6 +189,11 @@ const ManageCommentTypes = () => {
     }
   };
 
+  const handleCreateSuccess = async () => {
+    await refetch();
+    setErrorMessage(null);
+  };
+
   return (
     <Page label={CAPTIONS.MANAGE_COMMENT_TYPES}>
       <Grid
@@ -194,6 +201,16 @@ const ManageCommentTypes = () => {
         rowSpacing={3}>
         <Grid width="100%">
           <Divider />
+        </Grid>
+        <Grid width="100%">
+          <Box sx={{ px: 1 }}>
+            <Button
+              variant="contained"
+              onClick={() => setIsAddDialogOpen(true)}
+            >
+              Add New Comment Type
+            </Button>
+          </Box>
         </Grid>
 
         <Grid width="100%">
@@ -248,6 +265,11 @@ const ManageCommentTypes = () => {
           />
         </Grid>
       </Grid>
+      <AddCommentTypeDialog
+        open={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
     </Page>
   );
 };

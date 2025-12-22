@@ -8,5 +8,7 @@ public interface ICommentTypeService
 {
     Task<Result<IReadOnlyList<CommentTypeDto>>> GetCommentTypesAsync(CancellationToken cancellationToken);
 
+    Task<Result<CommentTypeDto>> CreateCommentTypeAsync(CreateCommentTypeRequest request, CancellationToken cancellationToken);
+
     Task<Result<CommentTypeDto>> UpdateCommentTypeAsync(UpdateCommentTypeRequest request, CancellationToken cancellationToken);
 }
