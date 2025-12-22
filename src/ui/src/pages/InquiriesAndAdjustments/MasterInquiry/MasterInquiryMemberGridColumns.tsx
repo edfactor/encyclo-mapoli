@@ -17,9 +17,6 @@ export const GetMasterInquiryMemberGridColumns = (
     navigateFunction: navigateFunction,
   });
 
-  // Add CSS class to make badge look like a link
-  badgeColumn.cellClass = "badge-link-style";
-
   return [
     badgeColumn,
     createNameColumn({ field: "fullName" }),
