@@ -181,39 +181,47 @@ definitions:
             exit 0
           }
 
-        # Install dotnet-affected tool
-        - Write-Host "Installing dotnet-affected tool..." -ForegroundColor Cyan
+        # Get changed files via Bitbucket API (git fetch hangs on Windows runners)
         - |
+          Write-Host "Getting changed files via Bitbucket API..." -ForegroundColor Cyan
+
           try {
-            dotnet tool install --global dotnet-affected --version 6.1.0
-            Write-Host "[OK] dotnet-affected installed" -ForegroundColor Green
-          }
-          catch {
-            Write-Host "[WARN] Tool install had issues, checking if already installed..." -ForegroundColor Yellow
-            $toolList = dotnet tool list --global
-            if ($toolList -match "dotnet-affected") {
-              Write-Host "[OK] dotnet-affected already installed" -ForegroundColor Green
-            } else {
-              Write-Host "[ERROR] Failed to install dotnet-affected: $_" -ForegroundColor Red
-              @{ decision = "RUN_ALL"; reason = "Tool installation failed" } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+            # Use Bitbucket API to get the list of changed files in the PR
+            $prId = $env:BITBUCKET_PR_ID
+            $workspace = $env:BITBUCKET_WORKSPACE
+            $repoSlug = $env:BITBUCKET_REPO_SLUG
+
+            if (-not $prId -or -not $workspace -or -not $repoSlug) {
+              Write-Host "Missing Bitbucket environment variables - falling back to run all tests" -ForegroundColor Yellow
+              @{
+                decision = "RUN_ALL"
+                reason = "Missing Bitbucket PR environment variables"
+              } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
               exit 0
             }
-          }
 
-        # Fetch destination branch for comparison
-        - Write-Host "Fetching destination branch for comparison..." -ForegroundColor Cyan
-        - git fetch origin "$env:BITBUCKET_PR_DESTINATION_BRANCH" --depth=50
+            $apiUrl = "https://api.bitbucket.org/2.0/repositories/$workspace/$repoSlug/pullrequests/$prId/diffstat"
+            Write-Host "Calling API: $apiUrl"
 
-        # Run dotnet-affected analysis
-        - |
-          Write-Host "Analyzing affected projects..." -ForegroundColor Cyan
+            # Bitbucket Pipelines provides BITBUCKET_ACCESS_TOKEN automatically
+            $headers = @{
+              "Authorization" = "Bearer $env:BITBUCKET_ACCESS_TOKEN"
+              "Accept" = "application/json"
+            }
 
-          $fromRef = "origin/$env:BITBUCKET_PR_DESTINATION_BRANCH"
-          $toRef = "HEAD"
+            $changedFiles = @()
+            $nextUrl = $apiUrl
 
-          try {
-            # Check for global configuration changes first
-            $changedFiles = git diff --name-only "$fromRef...$toRef"
+            # Handle pagination
+            while ($nextUrl) {
+              $response = Invoke-RestMethod -Uri $nextUrl -Headers $headers -Method Get
+              $changedFiles += $response.values | ForEach-Object { $_.new.path }
+              $nextUrl = $response.next
+            }
+
+            Write-Host "Found $($changedFiles.Count) changed files" -ForegroundColor Cyan
+
+            # Check for global configuration changes
             $globalChanges = $changedFiles | Where-Object {
               $_ -match "src/services/Directory\.Build\.props" -or
               $_ -match "src/services/Directory\.Packages\.props" -or
@@ -233,40 +241,39 @@ definitions:
               exit 0
             }
 
-            # Run dotnet-affected analysis
-            Write-Host "Running dotnet-affected from $fromRef to $toRef..." -ForegroundColor Cyan
+            # Check if any backend files changed
+            $backendChanges = $changedFiles | Where-Object { $_ -match "^src/services/.*\.(cs|csproj)$" }
 
-            Push-Location src/services
-            $affectedOutput = dotnet affected --from $fromRef --to $toRef --format text 2>&1
-            $exitCode = $LASTEXITCODE
-            Pop-Location
-
-            Write-Host "dotnet-affected exit code: $exitCode"
-            Write-Host "Output:"
-            Write-Host $affectedOutput
-
-            if ($exitCode -eq 166) {
-              Write-Host "No affected projects detected (exit code 166)" -ForegroundColor Green
+            if (-not $backendChanges) {
+              Write-Host "No backend files changed" -ForegroundColor Green
               @{
                 decision = "SKIP_ALL"
-                reason = "No backend projects affected by changes"
+                reason = "No backend files changed"
                 runUnitTests = $false
                 runArchitectureTests = $false
               } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
               exit 0
             }
-            elseif ($exitCode -ne 0) {
-              Write-Host "dotnet-affected returned non-zero exit code: $exitCode" -ForegroundColor Yellow
-              Write-Host "Falling back to running ALL tests for safety" -ForegroundColor Yellow
-              @{
-                decision = "RUN_ALL"
-                reason = "dotnet-affected failed with exit code $exitCode"
-              } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
-              exit 0
-            }
 
-            # Parse affected projects from output
-            $affectedProjects = $affectedOutput -split "`n" | Where-Object { $_ -match "\.csproj$" }
+            Write-Host "Backend files changed:" -ForegroundColor Yellow
+            $backendChanges | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+
+            # Determine affected projects from changed file paths
+            $affectedProjects = @()
+            foreach ($file in $backendChanges) {
+              if ($file -match "src/services/src/([^/]+)/") {
+                $projectFolder = $matches[1]
+                if ($projectFolder -notin $affectedProjects) {
+                  $affectedProjects += $projectFolder
+                }
+              }
+              if ($file -match "src/services/tests/([^/]+)/") {
+                $testProjectFolder = $matches[1]
+                if ($testProjectFolder -notin $affectedProjects) {
+                  $affectedProjects += $testProjectFolder
+                }
+              }
+            }
 
             Write-Host "`nAffected projects:" -ForegroundColor Yellow
             $affectedProjects | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
@@ -276,25 +283,33 @@ definitions:
             $runArchitectureTests = $false
 
             # Check if UnitTests project itself is affected
-            if ($affectedProjects -match "UnitTests\.csproj") {
+            if ($affectedProjects -contains "Demoulas.ProfitSharing.UnitTests") {
               $runUnitTests = $true
               Write-Host "UnitTests project directly affected" -ForegroundColor Cyan
             }
 
             # Check if Architecture tests project is affected
-            if ($affectedProjects -match "UnitTests\.Architecture\.csproj") {
+            if ($affectedProjects -contains "Demoulas.ProfitSharing.UnitTests.Architecture") {
               $runArchitectureTests = $true
               Write-Host "Architecture tests project directly affected" -ForegroundColor Cyan
             }
 
             # Check if any source project changed (triggers UnitTests)
-            $sourceProjects = @(
-              "Api", "Endpoints", "Services", "Data", "Common",
-              "Security", "Reporting", "OracleHcm", "CachingServices", "Analyzers"
+            $sourceProjectFolders = @(
+              "Demoulas.ProfitSharing.Api",
+              "Demoulas.ProfitSharing.Endpoints",
+              "Demoulas.ProfitSharing.Services",
+              "Demoulas.ProfitSharing.Data",
+              "Demoulas.ProfitSharing.Common",
+              "Demoulas.ProfitSharing.Security",
+              "Demoulas.ProfitSharing.Reporting",
+              "Demoulas.ProfitSharing.OracleHcm",
+              "Demoulas.ProfitSharing.CachingServices",
+              "Demoulas.ProfitSharing.Analyzers"
             )
 
-            foreach ($proj in $sourceProjects) {
-              if ($affectedProjects -match "Demoulas\.ProfitSharing\.$proj\.csproj") {
+            foreach ($proj in $sourceProjectFolders) {
+              if ($affectedProjects -contains $proj) {
                 $runUnitTests = $true
                 Write-Host "Source project $proj affected - will run unit tests" -ForegroundColor Cyan
                 break
@@ -302,9 +317,15 @@ definitions:
             }
 
             # Architecture tests run if structural projects change
-            $structuralProjects = @("Common", "Endpoints", "Api", "Services", "Data")
-            foreach ($proj in $structuralProjects) {
-              if ($affectedProjects -match "Demoulas\.ProfitSharing\.$proj\.csproj") {
+            $structuralProjectFolders = @(
+              "Demoulas.ProfitSharing.Common",
+              "Demoulas.ProfitSharing.Endpoints",
+              "Demoulas.ProfitSharing.Api",
+              "Demoulas.ProfitSharing.Services",
+              "Demoulas.ProfitSharing.Data"
+            )
+            foreach ($proj in $structuralProjectFolders) {
+              if ($affectedProjects -contains $proj) {
                 $runArchitectureTests = $true
                 Write-Host "Structural project $proj affected - will run architecture tests" -ForegroundColor Cyan
                 break

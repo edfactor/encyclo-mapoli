@@ -1,7 +1,7 @@
 # Selective Backend Test Execution via Dependency Graph
 
 **Created:** December 22, 2025
-**Status:** Implemented (Option 1 - dotnet-affected)
+**Status:** Implemented (Bitbucket API approach)
 **Author:** Claude Code Analysis
 **Implementation Date:** December 22, 2025
 
@@ -9,15 +9,15 @@
 
 ## Implementation Summary
 
-Option 1 (dotnet-affected) has been implemented with the following changes to `bitbucket-pipelines.yml`:
+A Bitbucket API-based approach has been implemented with the following changes to `bitbucket-pipelines.yml`:
 
 ### Changes Made
 
-1. **New Step Definition: `selective-backend-analysis`** (lines 141-288)
+1. **New Step Definition: `selective-backend-analysis`** (lines 165-345)
 
-   - Installs `dotnet-affected` tool (version 6.1.0)
+   - Uses Bitbucket API (`/pullrequests/{id}/diffstat`) to get changed files (avoids git fetch which hangs on Windows runners)
    - Detects global configuration changes (Directory.Build.props, Directory.Packages.props, global.json)
-   - Runs dotnet-affected to identify affected projects
+   - Maps changed file paths to affected projects
    - Writes decision to `selective-test-decision.json` artifact
    - Decision values: `RUN_ALL`, `SKIP_ALL`, or `SELECTIVE`
 
@@ -45,8 +45,9 @@ PR Build Pipeline Flow:
 │ Stage 2: Audits + Secret Scan (parallel)                        │
 ├─────────────────────────────────────────────────────────────────┤
 │ Stage 2.5: Selective Backend Analysis ◄─── NEW                  │
+│   ├─ Call Bitbucket API to get changed files                    │
 │   ├─ Check for global config changes → RUN_ALL                  │
-│   ├─ Run dotnet-affected → identify affected projects           │
+│   ├─ Map file paths to affected projects                        │
 │   └─ Write decision to selective-test-decision.json             │
 ├─────────────────────────────────────────────────────────────────┤
 │ Stage 3: Tests (parallel)                                       │
