@@ -138,7 +138,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     from priorBal in priorBalTmp.DefaultIfEmpty()
                     select new
                     {
-                        Hours = pp.TotalHours,
+                        Hours = Math.Truncate(pp.TotalHours),
                         Wages = pp.TotalIncome,
                         Points = (int)Math.Round(pp.TotalIncome / 100, 0, MidpointRounding.AwayFromZero),
                         DateOfBirth = d.DateOfBirth,
