@@ -111,14 +111,8 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
 
-            // Load pensioner SSNs ONCE - PERFORMANCE OPTIMIZATION
-            int[] pensionerSsns = await ctx.ExcludedIds
-                .Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
-                .Select(x => x.ExcludedIdValue)
-                .ToArrayAsync(cancellationToken);
-
             // Aggregate per-store and per-vesting-bucket sums in a SINGLE database query
-            var baseQuery = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate, pensionerSsns);
+            var baseQuery = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate);
 
             // Single query that gets all aggregations needed
             var aggregatedData = await baseQuery
@@ -209,15 +203,8 @@ public sealed class BreakdownReportService : IBreakdownService
             ValidateStoreNumber(request);
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
 
-            // Load pensioner SSNs ONCE - PERFORMANCE OPTIMIZATION
-            int[] pensionerSsns = await ctx.ExcludedIds
-                .TagWith($"GetTotalsByStore-PensionerSsns-{request.ProfitYear}")
-                .Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
-                .Select(x => x.ExcludedIdValue)
-                .ToArrayAsync(cancellationToken);
-
             //  ── Query ------------------------------------------------------------------
-            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate, pensionerSsns);
+            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate);
 
             if (request.StoreNumber != null && request.StoreNumber != -1)
             {
@@ -394,14 +381,8 @@ public sealed class BreakdownReportService : IBreakdownService
                 ValidateStoreNumber(request);
             }
 
-            // Load pensioner SSNs ONCE (not inside query builder) - PERFORMANCE OPTIMIZATION
-            int[] pensionerSsns = await ctx.ExcludedIds
-                .Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
-                .Select(x => x.ExcludedIdValue)
-                .ToArrayAsync(cancellationToken);
-
             // Get composable query - CRITICAL PERFORMANCE FIX
-            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate, pensionerSsns);
+            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate);
             var startEndDateRequest = request as IStartEndDateRequest;
 
             // Apply status filter BEFORE materialization - PERFORMANCE OPTIMIZATION
@@ -626,7 +607,7 @@ public sealed class BreakdownReportService : IBreakdownService
     /// – Returns the sequence already filtered to the store requested by the UI
     /// </summary>
     private async Task<IQueryable<ActiveMemberDto>> BuildEmployeesBaseQuery(
-        ProfitSharingReadOnlyDbContext ctx, short profitYear, DateOnly fiscalEndDate, int[] pensionerSsns)
+        ProfitSharingReadOnlyDbContext ctx, short profitYear, DateOnly fiscalEndDate)
     {
         /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
         var balances =
@@ -676,6 +657,11 @@ public sealed class BreakdownReportService : IBreakdownService
            Monthly payroll (900) is simply anyone with FREQ = 2.
        */
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        
+        var pensionerSsns = from ei in ctx.ExcludedIds
+                           where ei.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions
+                           select ei.ExcludedIdValue;
+
         var query =
             from d in demographics.Include(x => x.Address)
 
@@ -904,13 +890,6 @@ public sealed class BreakdownReportService : IBreakdownService
         // Fallback for missing snapshot (should not happen if dictionaries are aligned)
         snap ??= new EmployeeFinancialSnapshot(member.Ssn, 0, new ProfitDetailRollup(), 0);
 
-        var endBal = snap.BeginningBalance
-                   + snap.Txn.TotalContributions
-                   + snap.Txn.TotalEarnings
-                   + snap.Txn.TotalForfeitures
-                   + snap.Txn.Distribution
-                   + snap.Txn.BeneficiaryAllocation;
-
         return new MemberYearSummaryDto
         {
             BadgeNumber = member.BadgeNumber,
@@ -921,10 +900,10 @@ public sealed class BreakdownReportService : IBreakdownService
             Contributions = snap.Txn.TotalContributions,
             Distributions = snap.Txn.Distribution,
             Forfeitures = snap.Txn.TotalForfeitures,
-            EndingBalance = endBal,
+            EndingBalance = member.CurrentBalance ?? 0,
             BeneficiaryAllocation = snap.Txn.BeneficiaryAllocation,
-            VestedAmount = endBal * snap.VestingRatio,
-            VestedPercent = (byte)(snap.VestingRatio * 100),
+            VestedAmount = member.VestedBalance ?? 0,
+            VestedPercent = (byte)(member.VestedPercent ?? 0),
             PayClassificationId = member.PayClassificationId,
             PayClassificationName = member.PayClassificationName,
             HireDate = member.HireDate,
