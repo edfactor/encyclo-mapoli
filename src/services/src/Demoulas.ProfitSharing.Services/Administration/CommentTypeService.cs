@@ -95,9 +95,15 @@ public sealed class CommentTypeService : ICommentTypeService
                     }));
                 }
 
+                // Get next ID by finding max existing ID and incrementing
+                var maxId = await ctx.CommentTypes
+                    .TagWith("Administration-GetMaxCommentTypeId")
+                    .MaxAsync(x => (byte?)x.Id, cancellationToken) ?? 0;
+                var nextId = (byte)(maxId + 1);
+
                 var commentType = new Data.Entities.CommentType
                 {
-                    Id = default, // Required member - EF Core will assign actual value after SaveChanges
+                    Id = nextId, // Manually assign next ID since Oracle doesn't have sequence/identity for this table
                     Name = trimmedName,
                     IsProtected = request.IsProtected,
                     UserName = _appUser.UserName ?? "",
