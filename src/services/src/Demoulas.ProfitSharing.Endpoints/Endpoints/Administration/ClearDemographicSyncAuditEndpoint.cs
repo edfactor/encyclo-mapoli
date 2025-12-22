@@ -11,7 +11,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
 /// <summary>
 /// Clears all records from the DEMOGRAPHIC_SYNC_AUDIT table.

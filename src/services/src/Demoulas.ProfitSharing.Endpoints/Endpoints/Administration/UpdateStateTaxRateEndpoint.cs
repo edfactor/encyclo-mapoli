@@ -12,7 +12,7 @@ using Demoulas.ProfitSharing.Endpoints.Validation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
 public sealed class UpdateStateTaxRateEndpoint : ProfitSharingEndpoint<UpdateStateTaxRateRequest, Results<Ok<StateTaxRateDto>, NotFound, BadRequest, ProblemHttpResult>>
 {

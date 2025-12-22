@@ -11,7 +11,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
 /// <summary>
 /// Gets OracleHcm sync metadata including the most recent create and modify timestamps

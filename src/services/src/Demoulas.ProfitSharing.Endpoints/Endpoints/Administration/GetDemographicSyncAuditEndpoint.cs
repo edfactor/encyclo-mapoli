@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
 /// <summary>
 /// Gets demographic sync audit records with pagination support, ordered by creation date (descending).

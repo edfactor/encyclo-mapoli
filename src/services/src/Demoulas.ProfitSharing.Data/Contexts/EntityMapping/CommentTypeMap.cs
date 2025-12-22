@@ -46,7 +46,8 @@ internal sealed class CommentTypeMap : IEntityTypeConfiguration<CommentType>
             CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
             CommentType.Constants.ForfeitClassAction,
             CommentType.Constants.ForfeitAdministrative,
-            CommentType.Constants.UnforfeitUnder21
+            CommentType.Constants.UnforfeitUnder21,
+            CommentType.Constants.ForfeitClassActionAdjustment
         ];
     }
 }

@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
 public sealed class GetAnnuityRatesEndpoint : ProfitSharingEndpoint<GetAnnuityRatesRequest, Results<Ok<IReadOnlyList<AnnuityRateDto>>, NotFound, ProblemHttpResult>>
 {
