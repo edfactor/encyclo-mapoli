@@ -44,7 +44,7 @@ public class Pay426NTests : PristineBaseTest
     public async Task Pay426NReport_ShouldMatchReady(YearEndProfitSharingReportId reportId, int resourceNumber)
     {
         // Arrange - load expected data from READY report
-        string resourceName = $"Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R8-PAY426N-{resourceNumber}";
+        string resourceName = $"Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R08-PAY426N-{resourceNumber}";
         string expectedReportText = ReadEmbeddedResource(resourceName).Trim();
         YearEndProfitSharingReportResponse expected = Pay426NParser.Parse(expectedReportText, 2025);
 
