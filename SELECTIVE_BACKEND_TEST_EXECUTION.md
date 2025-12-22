@@ -1,7 +1,7 @@
 # Selective Backend Test Execution via Dependency Graph
 
 **Created:** December 22, 2025
-**Status:** Implemented (Bitbucket API approach)
+**Status:** Implemented (git diff approach)
 **Author:** Claude Code Analysis
 **Implementation Date:** December 22, 2025
 
@@ -9,13 +9,13 @@
 
 ## Implementation Summary
 
-A Bitbucket API-based approach has been implemented with the following changes to `bitbucket-pipelines.yml`:
+A git diff-based approach has been implemented with the following changes to `bitbucket-pipelines.yml`:
 
 ### Changes Made
 
 1. **New Step Definition: `selective-backend-analysis`** (lines 165-345)
 
-   - Uses Bitbucket API (`/pullrequests/{id}/diffstat`) to get changed files (avoids git fetch which hangs on Windows runners)
+   - Uses `git diff --name-only "origin/$targetBranch" HEAD` to get changed files (no fetch needed - origin refs are already available in Bitbucket Pipeline clones)
    - Detects global configuration changes (Directory.Build.props, Directory.Packages.props, global.json)
    - Maps changed file paths to affected projects
    - Writes decision to `selective-test-decision.json` artifact
@@ -45,7 +45,7 @@ PR Build Pipeline Flow:
 │ Stage 2: Audits + Secret Scan (parallel)                        │
 ├─────────────────────────────────────────────────────────────────┤
 │ Stage 2.5: Selective Backend Analysis ◄─── NEW                  │
-│   ├─ Call Bitbucket API to get changed files                    │
+│   ├─ Run git diff against origin/$targetBranch                  │
 │   ├─ Check for global config changes → RUN_ALL                  │
 │   ├─ Map file paths to affected projects                        │
 │   └─ Write decision to selective-test-decision.json             │

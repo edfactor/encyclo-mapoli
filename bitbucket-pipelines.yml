@@ -181,44 +181,29 @@ definitions:
             exit 0
           }
 
-        # Get changed files via Bitbucket API (git fetch hangs on Windows runners)
+        # Get changed files using git diff (no fetch needed - origin refs already available in pipeline clone)
         - |
-          Write-Host "Getting changed files via Bitbucket API..." -ForegroundColor Cyan
+          Write-Host "Getting changed files..." -ForegroundColor Cyan
 
           try {
-            # Use Bitbucket API to get the list of changed files in the PR
-            $prId = $env:BITBUCKET_PR_ID
-            $workspace = $env:BITBUCKET_WORKSPACE
-            $repoSlug = $env:BITBUCKET_REPO_SLUG
+            $targetBranch = $env:BITBUCKET_PR_DESTINATION_BRANCH
+            Write-Host "Target branch: origin/$targetBranch"
 
-            if (-not $prId -or -not $workspace -or -not $repoSlug) {
-              Write-Host "Missing Bitbucket environment variables - falling back to run all tests" -ForegroundColor Yellow
+            # Get changed files directly - no fetch needed in Bitbucket Pipelines
+            $changedFiles = git diff --name-only "origin/$targetBranch" HEAD 2>&1
+
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "git diff failed: $changedFiles" -ForegroundColor Yellow
+              Write-Host "Falling back to ALL tests" -ForegroundColor Yellow
               @{
                 decision = "RUN_ALL"
-                reason = "Missing Bitbucket PR environment variables"
+                reason = "git diff failed"
               } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
               exit 0
             }
 
-            $apiUrl = "https://api.bitbucket.org/2.0/repositories/$workspace/$repoSlug/pullrequests/$prId/diffstat"
-            Write-Host "Calling API: $apiUrl"
-
-            # Bitbucket Pipelines provides BITBUCKET_ACCESS_TOKEN automatically
-            $headers = @{
-              "Authorization" = "Bearer $env:BITBUCKET_ACCESS_TOKEN"
-              "Accept" = "application/json"
-            }
-
-            $changedFiles = @()
-            $nextUrl = $apiUrl
-
-            # Handle pagination
-            while ($nextUrl) {
-              $response = Invoke-RestMethod -Uri $nextUrl -Headers $headers -Method Get
-              $changedFiles += $response.values | ForEach-Object { $_.new.path }
-              $nextUrl = $response.next
-            }
-
+            # Convert to array and filter
+            $changedFiles = $changedFiles -split "`n" | Where-Object { $_ }
             Write-Host "Found $($changedFiles.Count) changed files" -ForegroundColor Cyan
 
             # Check for global configuration changes
