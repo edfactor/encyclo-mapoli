@@ -17,33 +17,33 @@ public sealed class CommentType : ModifiedBase, ILookupTable<byte>, IEquatable<C
 
     public static class Constants
     {
-        public static CommentType TransferOut => new() { Id = 1, Name = "Transfer Out" };
-        public static CommentType TransferIn => new() { Id = 2, Name = "Transfer In" };
-        public static CommentType QdroOut => new() { Id = 3, Name = "QDRO Out" };
-        public static CommentType QdroIn => new() { Id = 4, Name = "QDRO In" };
-        public static CommentType VOnly => new() { Id = 5, Name = "V-Only" };
-        public static CommentType Forfeit => new() { Id = 6, Name = "Forfeit" };
-        public static CommentType Unforfeit => new() { Id = 7, Name = "Un-Forfeit" };
-        public static CommentType ClassAction => new() { Id = 8, Name = "Class Action" };
-        public static CommentType Voided => new() { Id = 9, Name = "Voided" };
-        public static CommentType Hardship => new() { Id = 10, Name = "Hardship" };
-        public static CommentType Distribution => new() { Id = 11, Name = "Distribution" };
-        public static CommentType Payoff => new() { Id = 12, Name = "Payoff" };
+        public static CommentType TransferOut => new() { Id = 1, Name = "Transfer Out", IsProtected = true };
+        public static CommentType TransferIn => new() { Id = 2, Name = "Transfer In", IsProtected = true };
+        public static CommentType QdroOut => new() { Id = 3, Name = "QDRO Out", IsProtected = true };
+        public static CommentType QdroIn => new() { Id = 4, Name = "QDRO In", IsProtected = true };
+        public static CommentType VOnly => new() { Id = 5, Name = "V-Only", IsProtected = true };
+        public static CommentType Forfeit => new() { Id = 6, Name = "Forfeit", IsProtected = true };
+        public static CommentType Unforfeit => new() { Id = 7, Name = "Un-Forfeit", IsProtected = true };
+        public static CommentType ClassAction => new() { Id = 8, Name = "Class Action", IsProtected = true };
+        public static CommentType Voided => new() { Id = 9, Name = "Voided", IsProtected = true };
+        public static CommentType Hardship => new() { Id = 10, Name = "Hardship", IsProtected = true };
+        public static CommentType Distribution => new() { Id = 11, Name = "Distribution", IsProtected = true };
+        public static CommentType Payoff => new() { Id = 12, Name = "Payoff", IsProtected = true };
         public static CommentType Dirpay => new() { Id = 13, Name = "Dirpay" };
-        public static CommentType Rollover => new() { Id = 14, Name = "Rollover" };
-        public static CommentType RothIra => new() { Id = 15, Name = "Roth IRA" };
+        public static CommentType Rollover => new() { Id = 14, Name = "Rollover", IsProtected = true };
+        public static CommentType RothIra => new() { Id = 15, Name = "Roth IRA", IsProtected = true };
         public static CommentType Over64OneYearVested => new() { Id = 16, Name = "> 64 - 1 Year Vested" };
         public static CommentType Over64TwoYearsVested => new() { Id = 17, Name = "> 64 - 2 Year Vested" };
         public static CommentType Over64ThreeYearsVested => new() { Id = 18, Name = "> 64 - 3 Year Vested" };
-        public static CommentType Military => new() { Id = 19, Name = "Military" };
+        public static CommentType Military => new() { Id = 19, Name = "Military", IsProtected = true };
         public static CommentType Other => new() { Id = 20, Name = "Other" };
-        public static CommentType Reversal => new() { Id = 21, Name = "Rev" };
-        public static CommentType UndoReversal => new() { Id = 22, Name = "Unrev" };
-        public static CommentType OneHundredPercentEarnings => new() { Id = 23, Name = "100% Earnings" };
+        public static CommentType Reversal => new() { Id = 21, Name = "Rev", IsProtected = true };
+        public static CommentType UndoReversal => new() { Id = 22, Name = "Unrev", IsProtected = true };
+        public static CommentType OneHundredPercentEarnings => new() { Id = 23, Name = "100% Earnings", IsProtected = true };
         // The variable name here purposely corresponds to the ZeroContrbutionReason.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested name
-        public static CommentType SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested => new() { Id = 24, Name = ">64 & >5 100%" };
-        public static CommentType ForfeitClassAction => new() { Id = 25, Name = "Forfeit Class Action" }; //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/402817082/008-12+to+forfeit+Class+Action+-+Mockup
-        public static CommentType ForfeitAdministrative => new() { Id = 26, Name = "Forfeit Administrative" }; // MAIN-2170 Administrative forfeitures
+        public static CommentType SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested => new() { Id = 24, Name = ">64 & >5 100%", IsProtected = true };
+        public static CommentType ForfeitClassAction => new() { Id = 25, Name = "Forfeit Class Action", IsProtected = true }; //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/402817082/008-12+to+forfeit+Class+Action+-+Mockup
+        public static CommentType ForfeitAdministrative => new() { Id = 26, Name = "Forfeit Administrative", IsProtected = true }; // MAIN-2170 Administrative forfeitures
         public static CommentType UnforfeitUnder21 => new() { Id = 27, Name = "Administrative - taking money from under 21" }; // PS-2152
         public static CommentType ForfeitClassActionAdjustment => new() { Id = 28, Name = "Forfeiture adjustment for Class Action" }; // PS-2152
     }
