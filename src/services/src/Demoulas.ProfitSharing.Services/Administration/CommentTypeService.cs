@@ -2,10 +2,12 @@ using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
+using Demoulas.ProfitSharing.Data.Entities.Comments;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +50,8 @@ public sealed class CommentTypeService : ICommentTypeService
                 {
                     Id = x.Id,
                     Name = x.Name,
+                    DateModified = x.DateModified,
+                    UserModified = x.UserModified,
                 })
                 .ToListAsync(cancellationToken);
 
@@ -57,7 +61,7 @@ public sealed class CommentTypeService : ICommentTypeService
 
     public async Task<Result<CommentTypeDto>> UpdateCommentTypeAsync(UpdateCommentTypeRequest request, CancellationToken cancellationToken)
     {
-        using (_commitGuardOverride.AllowFor(roles: Role.ITDEVOPS, Role.SYSTEMADMINISTRATOR))
+        using (_commitGuardOverride.AllowFor(roles: Role.ITDEVOPS))
         {
             return await _contextFactory.UseWritableContext(async ctx =>
             {
@@ -94,29 +98,43 @@ public sealed class CommentTypeService : ICommentTypeService
                     {
                         Id = commentType.Id,
                         Name = commentType.Name,
+                        DateModified = commentType.DateModified,
+                        UserModified = commentType.UserModified,
                     });
                 }
 
                 commentType.Name = trimmedName;
+                commentType.UserModified = _appUser.UserName ?? "";
+                commentType.DateModified = DateOnly.FromDateTime(DateTime.UtcNow);
 
                 await ctx.SaveChangesAsync(cancellationToken);
 
-                await _auditService.AuditAsync(AuditableAction.Update, new AuditDetail
-                {
-                    EntityType = "CommentType",
-                    EntityId = commentType.Id.ToString(),
-                    Detail = $"Changed name from '{originalName}' to '{trimmedName}'",
-                    User = _appUser.Id,
-                }, cancellationToken);
+                await _auditService.LogDataChangeAsync(
+                    operationName: "Update Comment Type",
+                    tableName: "COMMENT_TYPE",
+                    auditOperation: AuditEvent.AuditOperations.Update,
+                    primaryKey: $"Id:{request.Id}",
+                    changes:
+                    [
+                        new AuditChangeEntryInput
+                        {
+                            ColumnName = "NAME",
+                            OriginalValue = originalName,
+                            NewValue = trimmedName,
+                        },
+                    ],
+                    cancellationToken);
 
                 _logger.LogInformation(
-                    "Updated comment type {Id}: '{OldName}' → '{NewName}' by user {User}",
-                    commentType.Id, originalName, trimmedName, _appUser.Id);
+                    "Updated comment type {Id}: '{OldName}' → '{NewName}'",
+                    commentType.Id, originalName, trimmedName);
 
                 return Result<CommentTypeDto>.Success(new CommentTypeDto
                 {
                     Id = commentType.Id,
                     Name = commentType.Name,
+                    DateModified = commentType.DateModified,
+                    UserModified = commentType.UserModified,
                 });
             }, cancellationToken);
         }
