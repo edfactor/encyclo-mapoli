@@ -11,8 +11,8 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
 import { GRID_KEYS } from "../../../../constants";
+import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { RootState } from "../../../../reduxstore/store";
 import { ValidationResponse } from "../../../../types/validation/cross-reference-validation";
@@ -50,7 +50,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
   const frozenData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportFrozen);
   const data = isFrozen ? frozenData : liveData;
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "fullName",
     initialSortDescending: false,
@@ -122,7 +122,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
       const presetNumber = matchingPreset ? Number(matchingPreset.id) : 0;
 
       if (presetNumber >= 1 && presetNumber <= 8) {
-        triggerValidation({ profitYear, reportSuffix: presetNumber })
+        triggerValidation({ profitYear, reportSuffix: presetNumber, useFrozenData: isFrozen })
           .unwrap()
           .then((response) => {
             setValidationData(response);
@@ -134,7 +134,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
         setValidationData(null);
       }
     }
-  }, [hasToken, params, profitYear, triggerValidation]);
+  }, [hasToken, isFrozen, params, profitYear, triggerValidation]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -233,12 +233,10 @@ const ReportGrid: React.FC<ReportGridProps> = ({
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
-                handlePaginationChange(value - 1, pageSize);
+                handlePageNumberChange(value - 1);
               }}
               pageSize={pageSize}
-              setPageSize={(value: number) => {
-                handlePaginationChange(0, value);
-              }}
+              setPageSize={handlePageSizeChange}
               recordCount={data.response.total}
             />
           )}

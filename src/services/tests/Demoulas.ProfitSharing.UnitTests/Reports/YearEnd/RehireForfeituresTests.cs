@@ -36,7 +36,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         IUnforfeitService mockService = ServiceProvider?.GetRequiredService<IUnforfeitService>()!;
         IAuditService auditService = ServiceProvider?.GetRequiredService<IAuditService>()!;
         var logger = ServiceProvider?.GetRequiredService<ILogger<UnforfeituresEndpoint>>()!;
-        _endpoint = new UnforfeituresEndpoint(mockService, auditService, logger);
+        var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
+        _endpoint = new UnforfeituresEndpoint(mockService, auditService, logger, calendarService);
     }
 
 

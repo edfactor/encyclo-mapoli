@@ -67,6 +67,7 @@ public class FrozenService : IFrozenService
 
     /// <summary>
     /// Returns a query object representing Demographic data as-of an explicit timestamp.
+    /// NOTE ContactInfo and Address are alwasy the current, not historical version.
     /// </summary>
     /// <param name="ctx">The data context used for querying</param>
     /// <param name="asOf">Point-in-time for the snapshot (UTC offset preserved)</param>
@@ -94,36 +95,12 @@ public class FrozenService : IFrozenService
                 ModifiedAtUtc = dh.ValidFrom,
                 StoreNumber = dh.StoreNumber,
                 PayClassificationId = dh.PayClassificationId,
-                ContactInfo = new ContactInfo
-                {
-                    FirstName = dh.FirstName ?? string.Empty,
-                    LastName = dh.LastName ?? string.Empty,
-                    MiddleName = dh.MiddleName,
-                    PhoneNumber = dh.PhoneNumber,
-                    MobileNumber = dh.MobileNumber,
-                    EmailAddress = dh.EmailAddress,
-                    // IMPORTANT: Do NOT use DtoCommonExtensions.ComputeFullNameWithInitial() here!
-                    // This projection is used within EF Core LINQ queries (e.g., FrozenReportService.GetGrossWagesReport)
-                    // and the Oracle provider cannot translate custom C# methods to SQL.
-                    // Using ComputeFullNameWithInitial causes System.InvalidOperationException at runtime.
-                    // See PS-2333 for details. Use inline string concatenation that EF can translate instead.
-                    FullName =
-                        (dh.LastName != null ? dh.LastName : string.Empty)
-                        + ", "
-                        + (dh.FirstName != null ? dh.FirstName : string.Empty)
-                        + (dh.MiddleName != null && dh.MiddleName != string.Empty
-                            ? " " + dh.MiddleName.Substring(0, 1)
-                            : string.Empty)
-                },
-                Address = new Address
-                {
-                    Street = dh.Street ?? string.Empty,
-                    Street2 = dh.Street2,
-                    City = dh.City ?? string.Empty,
-                    State = dh.State ?? string.Empty,
-                    PostalCode = dh.PostalCode ?? string.Empty,
-                    CountryIso = "US"
-                },
+                // We use the hot name and address info during the YE.  So if Mary changes her name leaves and move to Ohio on Feb 2, 
+                // we use her current info to mail her her year end statement.
+                ContactInfo = d.ContactInfo,
+                // We dont use the address in the Fiscal Close, so we could probably use the dh version here - but for consistancy with
+                // contact info, we use the latest.
+                Address = d.Address,
                 DateOfBirth = dh.DateOfBirth,
                 FullTimeDate = d.FullTimeDate,
                 HireDate = dh.HireDate,

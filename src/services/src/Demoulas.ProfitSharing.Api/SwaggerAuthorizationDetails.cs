@@ -9,7 +9,7 @@ namespace Demoulas.ProfitSharing.Api;
 /// <summary>
 /// Adds authorization details (required policies and allowed roles) to each Swagger operation.
 /// Information is derived from endpoint metadata and registered AuthorizationOptions.
-/// </summary>
+/// </summary> 
 public sealed class SwaggerAuthorizationDetails : IOperationProcessor
 {
     public bool Process(OperationProcessorContext context)

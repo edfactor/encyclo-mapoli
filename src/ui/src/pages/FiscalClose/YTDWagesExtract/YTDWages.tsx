@@ -1,9 +1,10 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../reduxstore/store";
 import useYTDWages from "./hooks/useYTDWages";
@@ -17,6 +18,7 @@ interface YTDWagesProps {
 const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   const componentRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const { searchResults, isSearching, pagination, showData, hasResults, executeSearch } = useYTDWages({
     defaultUseFrozenData: useFrozenData
   });
@@ -26,8 +28,19 @@ const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   // Get current drawer state from Redux
   const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
 
+  // Handle status change - refresh grid with archive=true when status changes to Complete
+  const handleStatusChange = useCallback(
+    (_newStatus: string, statusName?: string) => {
+      if (statusName === "Complete" && fiscalCloseProfitYear) {
+        // Refresh the grid with archive=true to archive the results
+        executeSearch({ profitYear: fiscalCloseProfitYear, useFrozenData, archive: true }, "status-complete");
+      }
+    },
+    [fiscalCloseProfitYear, useFrozenData, executeSearch]
+  );
+
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
 
   // Handler to toggle grid expansion

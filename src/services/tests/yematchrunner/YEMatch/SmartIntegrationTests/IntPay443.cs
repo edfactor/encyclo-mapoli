@@ -6,7 +6,7 @@
 public class IntPay443 : BaseIntegrationTestActivity
 {
     public IntPay443(string integrationTestPath)
-        : base(integrationTestPath, "PAY443", "Pay443Test")
+        : base(integrationTestPath, "PAY443", "Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443.Pay443Tests.TestPay443")
     {
     }
 }

@@ -10,4 +10,17 @@ public record PayBenReportResponse
     public int? BadgeNumber { get; set; }
     [MaskSensitive] public string? DemographicFullName { get; set; }
     public decimal? Percentage { get; set; }
+
+    public static PayBenReportResponse ResponseExample()
+    {
+        return new PayBenReportResponse
+        {
+            Ssn = "xxx-xx-1234",
+            BeneficiaryFullName = "Doe, Jane",
+            Psn = "B12345",
+            BadgeNumber = 700123,
+            DemographicFullName = "Smith, John",
+            Percentage = 50.00m
+        };
+    }
 }

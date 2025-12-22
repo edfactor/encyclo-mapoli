@@ -284,9 +284,9 @@ public sealed class YearEndService : IYearEndService
                         pp.EmployeeTypeId == EmployeeType.Constants.NewLastYear &&
                         demographicIdsThatAreNoLongerNew.Contains(pp.DemographicId))
             .ExecuteUpdateAsync(
-                setters => setters.SetProperty(
-                    pp => pp.EmployeeTypeId,
-                    EmployeeType.Constants.NotNewLastYear),
+                setters => setters
+                    .SetProperty(pp => pp.EmployeeTypeId, EmployeeType.Constants.NotNewLastYear)
+                    .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                 ct);
     }
 
@@ -343,7 +343,8 @@ public sealed class YearEndService : IYearEndService
                     setters => setters
                         .SetProperty(pp => pp.ZeroContributionReasonId, (byte)0)
                         .SetProperty(pp => pp.PointsEarned, 0m)
-                        .SetProperty(pp => pp.PsCertificateIssuedDate, (DateOnly?)null),
+                        .SetProperty(pp => pp.PsCertificateIssuedDate, (DateOnly?)null)
+                        .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                     ct);
         }
     }

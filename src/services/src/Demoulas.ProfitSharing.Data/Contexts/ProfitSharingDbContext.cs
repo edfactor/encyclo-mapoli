@@ -43,6 +43,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<BeneficiaryContact> BeneficiaryContacts { get; set; }
     public virtual DbSet<BeneficiaryContactArchive> BeneficiaryContactArchives { get; set; }
     public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
+    public virtual DbSet<CommentType> CommentTypes { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
     public virtual DbSet<Distribution> Distributions { get; set; }
     public virtual DbSet<DistributionFrequency> DistributionFrequencies { get; set; }

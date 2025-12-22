@@ -1,5 +1,6 @@
 ---
 applyTo: "src/services/src/Demoulas.ProfitSharing.Services/**/*.*"
+paths: "src/services/src/Demoulas.ProfitSharing.Services/**/*.*"
 ---
 
 # Service Layer Architecture

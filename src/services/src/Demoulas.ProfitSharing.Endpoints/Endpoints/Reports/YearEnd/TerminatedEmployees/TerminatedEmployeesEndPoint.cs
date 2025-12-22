@@ -90,7 +90,7 @@ public class TerminatedEmployeesEndPoint
         try
         {
             var result = await _auditService.ArchiveCompletedReportAsync(ReportFileName,
-                (short)req.EndingDate.Year,
+                (short)(req.EndingDate.Year + 1), //Report is run for the prior year.
                 req,
                 (archiveReq, _, cancellationToken) => _terminatedEmployeeService.GetReportAsync(archiveReq, cancellationToken),
                 ct);

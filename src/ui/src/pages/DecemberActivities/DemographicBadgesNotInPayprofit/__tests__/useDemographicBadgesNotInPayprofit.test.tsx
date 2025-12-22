@@ -50,6 +50,8 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       pageSize: 25,
       sortParams: { sortBy: "badgeNumber", isSortDescending: true },
       handlePaginationChange: vi.fn(),
+      handlePageNumberChange: vi.fn(),
+      handlePageSizeChange: vi.fn(),
       handleSortChange: vi.fn(),
       resetPagination: vi.fn(),
       clearPersistedState: vi.fn()

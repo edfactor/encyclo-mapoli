@@ -8,8 +8,8 @@ using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -42,7 +42,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
-    public Task<Result<GetProfitSharingAdjustmentsResponse>> GetAsync(GetProfitSharingAdjustmentsRequest request, CancellationToken ct)
+    public Task<Result<GetProfitSharingAdjustmentsResponse>> GetAdjustmentsAsync(GetProfitSharingAdjustmentsRequest request, CancellationToken ct)
     {
         return _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -110,6 +110,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     .Select(pd => new ProfitSharingAdjustmentRowResponse
                     {
                         ProfitDetailId = pd.Id,
+                        HasBeenReversed = false, // Will be updated after lookup
                         RowNumber = 0, // assigned after materialization
                         ProfitYear = pd.ProfitYear,
                         ProfitYearIteration = pd.ProfitYearIteration,
@@ -131,11 +132,33 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     .ToListAsync(ct)
                 : new List<ProfitSharingAdjustmentRowResponse>();
 
+            // Determine which profit details have already been reversed
+            // (i.e., another profit detail has ReversedFromProfitDetailId pointing to them)
+            var profitDetailIds = profitDetails
+                .Where(pd => pd.ProfitDetailId.HasValue)
+                .Select(pd => pd.ProfitDetailId!.Value)
+                .ToList();
+
+            var alreadyReversedIds = profitDetailIds.Count > 0
+                ? await ctx.ProfitDetails
+                    .TagWith($"ProfitSharingAdjustments-CheckReversed-{ssn}")
+                    .Where(pd => pd.ReversedFromProfitDetailId != null && profitDetailIds.Contains(pd.ReversedFromProfitDetailId.Value))
+                    .Select(pd => pd.ReversedFromProfitDetailId!.Value)
+                    .Distinct()
+                    .ToListAsync(ct)
+                : [];
+
+            var alreadyReversedSet = alreadyReversedIds.ToHashSet();
+
             for (var i = 0; i < profitDetails.Count; i++)
             {
+                var hasBeenReversed = profitDetails[i].ProfitDetailId.HasValue
+                    && alreadyReversedSet.Contains(profitDetails[i].ProfitDetailId!.Value);
+
                 profitDetails[i] = profitDetails[i] with
                 {
-                    RowNumber = i + 1
+                    RowNumber = i + 1,
+                    HasBeenReversed = hasBeenReversed
                 };
             }
 
@@ -149,7 +172,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
         }, ct);
     }
 
-    public async Task<Result<GetProfitSharingAdjustmentsResponse>> SaveAsync(SaveProfitSharingAdjustmentsRequest request, CancellationToken ct)
+    public async Task<Result<GetProfitSharingAdjustmentsResponse>> SaveAdjustmentsAsync(SaveProfitSharingAdjustmentsRequest request, CancellationToken ct)
     {
         if (request.Rows is null || request.Rows.Count == 0)
         {
@@ -328,6 +351,33 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                     });
                 }
 
+                // Double-reversal protection: check if any source profit details have already been reversed.
+                var sourceIdsToReverse = insertCandidates
+                    .Where(r => r.ReversedFromProfitDetailId.HasValue)
+                    .Select(r => r.ReversedFromProfitDetailId!.Value)
+                    .Distinct()
+                    .ToList();
+
+                if (sourceIdsToReverse.Count > 0)
+                {
+                    var alreadyReversedIds = await ctx.ProfitDetails
+                        .TagWith($"ProfitSharingAdjustments-CheckDoubleReversal-{profitYear}")
+                        .Where(pd => pd.ReversedFromProfitDetailId != null && sourceIdsToReverse.Contains(pd.ReversedFromProfitDetailId.Value))
+                        .Select(pd => pd.ReversedFromProfitDetailId!.Value)
+                        .Distinct()
+                        .ToListAsync(ct);
+
+                    if (alreadyReversedIds.Count > 0)
+                    {
+                        return Result<GetProfitSharingAdjustmentsResponse>.ValidationFailure(new Dictionary<string, string[]>
+                        {
+                            [nameof(ProfitSharingAdjustmentRowRequest.ReversedFromProfitDetailId)] = [
+                                $"The following profit detail IDs have already been reversed and cannot be reversed again: {string.Join(", ", alreadyReversedIds)}"
+                            ]
+                        });
+                    }
+                }
+
                 ProfitDetail? insertedProfitDetail = null;
 
                 foreach (var row in insertCandidates)
@@ -349,7 +399,8 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                         Remark = AdministrativeComment,
                         FederalTaxes = 0,
                         StateTaxes = 0,
-                        YearsOfServiceCredit = 0
+                        YearsOfServiceCredit = 0,
+                        ReversedFromProfitDetailId = row.ReversedFromProfitDetailId // Track which record was reversed
                     };
 
                     ctx.ProfitDetails.Add(newProfitDetail);
@@ -381,6 +432,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                             new AuditChangeEntryInput { ColumnName = "MONTH_TO_DATE", NewValue = insertedProfitDetail.MonthToDate.ToString() },
                             new AuditChangeEntryInput { ColumnName = "YEAR_TO_DATE", NewValue = insertedProfitDetail.YearToDate.ToString() },
                             new AuditChangeEntryInput { ColumnName = "REMARK", NewValue = insertedProfitDetail.Remark },
+                            new AuditChangeEntryInput { ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID", NewValue = insertedProfitDetail.ReversedFromProfitDetailId?.ToString() },
                         ],
                         cancellationToken: ct);
                 }
@@ -399,7 +451,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 return result;
             }
 
-            return await GetAsync(new GetProfitSharingAdjustmentsRequest
+            return await GetAdjustmentsAsync(new GetProfitSharingAdjustmentsRequest
             {
                 ProfitYear = request.ProfitYear,
                 BadgeNumber = request.BadgeNumber

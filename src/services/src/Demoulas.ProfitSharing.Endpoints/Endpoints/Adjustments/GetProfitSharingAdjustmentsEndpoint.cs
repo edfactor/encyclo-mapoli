@@ -36,6 +36,7 @@ public sealed class GetProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint<
         Summary(s =>
         {
             s.Summary = "Get Profit Sharing Adjustments";
+            s.ExampleRequest = GetProfitSharingAdjustmentsRequest.RequestExample();
             s.Description = "Loads Profit Detail rows for the Profit Sharing Adjustments screen (TPR008-22 parity).";
         });
     }
@@ -44,7 +45,7 @@ public sealed class GetProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint<
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            var result = await _service.GetAsync(req, ct);
+            var result = await _service.GetAdjustmentsAsync(req, ct);
 
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "profit-sharing-adjustments-load"),

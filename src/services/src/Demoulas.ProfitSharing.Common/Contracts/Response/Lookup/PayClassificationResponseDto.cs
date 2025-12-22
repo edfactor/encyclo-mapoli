@@ -9,4 +9,13 @@ public sealed record PayClassificationResponseDto : ILookupTable<string>
     public required string Id { get; set; }
 
     public required string Name { get; set; }
+
+    public static PayClassificationResponseDto ResponseExample()
+    {
+        return new PayClassificationResponseDto
+        {
+            Id = "01",
+            Name = "Hourly"
+        };
+    }
 }

@@ -12,4 +12,15 @@ public sealed record StateTaxRateDto
     public DateOnly? DateModified { get; init; }
 
     public string? UserModified { get; init; }
+
+    public static StateTaxRateDto ResponseExample()
+    {
+        return new StateTaxRateDto
+        {
+            Abbreviation = "MA",
+            Rate = 0.05m,
+            DateModified = DateOnly.FromDateTime(DateTime.Today),
+            UserModified = "admin_user"
+        };
+    }
 }

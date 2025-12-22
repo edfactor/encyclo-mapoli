@@ -1,4 +1,4 @@
-using ArchUnitNET.Domain;
+﻿using ArchUnitNET.Domain;
 using ArchUnitNET.Loader;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Contexts;

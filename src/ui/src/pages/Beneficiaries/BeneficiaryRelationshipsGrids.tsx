@@ -2,7 +2,7 @@ import { Alert, Snackbar, TextField, Typography } from "@mui/material";
 import { FocusEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
+import { useDeleteBeneficiaryMutation } from "reduxstore/api/BeneficiariesApi";
 import { setDistributionHome } from "reduxstore/slices/distributionSlice";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { GRID_KEYS, ROUTES } from "../../constants";
@@ -33,7 +33,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
   const [deleteBeneficiaryId, setDeleteBeneficiaryId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
-  const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
+  const [triggerDeleteBeneficiary] = useDeleteBeneficiaryMutation();
 
   // Snackbar state for percentage update feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -41,12 +41,13 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "warning">("success");
 
   // Use custom hooks for data fetching and percentage update
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "psnSuffix",
-    initialSortDescending: true,
-    persistenceKey: GRID_KEYS.BENEFICIARIES_LIST
-  });
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "psnSuffix",
+      initialSortDescending: true,
+      persistenceKey: GRID_KEYS.BENEFICIARIES_LIST
+    });
 
   const relationships = useBeneficiaryRelationshipData({
     selectedMember,
@@ -261,13 +262,9 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
         relationships.beneficiaryList?.results.length > 0 && (
           <Pagination
             pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
-            }}
+            setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
             pageSize={pageSize}
-            setPageSize={(value: number) => {
-              handlePaginationChange(0, value);
-            }}
+            setPageSize={handlePageSizeChange}
             recordCount={relationships.beneficiaryList?.total}
           />
         )}

@@ -57,64 +57,70 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   // Make the initial page size configurable via state so it can be updated if needed
   const [initialPageSize, setInitialPageSize] = useState<number>(25);
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize,
-      initialSortBy: "employeeName, date",
-      initialSortDescending: false,
-      persistenceKey: GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (hasToken && initialSearchLoaded) {
-            const request = {
-              profitYear: profitYear || 0,
-              ...(distributionsAndForfeituresQueryParams?.startDate && {
-                startDate: distributionsAndForfeituresQueryParams?.startDate
+  const {
+    pageNumber,
+    pageSize,
+    sortParams,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange,
+    resetPagination
+  } = useGridPagination({
+    initialPageSize,
+    initialSortBy: "employeeName, date",
+    initialSortDescending: false,
+    persistenceKey: GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (hasToken && initialSearchLoaded) {
+          const request = {
+            profitYear: profitYear || 0,
+            ...(distributionsAndForfeituresQueryParams?.startDate && {
+              startDate: distributionsAndForfeituresQueryParams?.startDate
+            }),
+            ...(distributionsAndForfeituresQueryParams?.endDate && {
+              endDate: distributionsAndForfeituresQueryParams?.endDate
+            }),
+            ...(distributionsAndForfeituresQueryParams?.states &&
+              distributionsAndForfeituresQueryParams.states.length > 0 && {
+                states: distributionsAndForfeituresQueryParams?.states
               }),
-              ...(distributionsAndForfeituresQueryParams?.endDate && {
-                endDate: distributionsAndForfeituresQueryParams?.endDate
+            ...(distributionsAndForfeituresQueryParams?.taxCodes &&
+              distributionsAndForfeituresQueryParams.taxCodes.length > 0 && {
+                taxCodes: distributionsAndForfeituresQueryParams?.taxCodes
               }),
-              ...(distributionsAndForfeituresQueryParams?.states &&
-                distributionsAndForfeituresQueryParams.states.length > 0 && {
-                  states: distributionsAndForfeituresQueryParams?.states
-                }),
-              ...(distributionsAndForfeituresQueryParams?.taxCodes &&
-                distributionsAndForfeituresQueryParams.taxCodes.length > 0 && {
-                  taxCodes: distributionsAndForfeituresQueryParams?.taxCodes
-                }),
-              ...(shouldArchive && { archive: true }),
-              pagination: {
-                skip: pageNum * pageSz,
-                take: pageSz,
-                sortBy: sortPrms.sortBy,
-                isSortDescending: sortPrms.isSortDescending
-              }
-            };
-            await triggerSearch(request, false);
-          }
-        },
-        [
-          hasToken,
-          initialSearchLoaded,
-          profitYear,
-          distributionsAndForfeituresQueryParams?.startDate,
-          distributionsAndForfeituresQueryParams?.endDate,
-          distributionsAndForfeituresQueryParams?.states,
-          distributionsAndForfeituresQueryParams?.taxCodes,
-          shouldArchive,
-          triggerSearch
-        ]
-      )
-    });
+            ...(shouldArchive && { archive: true }),
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            }
+          };
+          await triggerSearch(request, false);
+        }
+      },
+      [
+        hasToken,
+        initialSearchLoaded,
+        profitYear,
+        distributionsAndForfeituresQueryParams?.startDate,
+        distributionsAndForfeituresQueryParams?.endDate,
+        distributionsAndForfeituresQueryParams?.states,
+        distributionsAndForfeituresQueryParams?.taxCodes,
+        shouldArchive,
+        triggerSearch
+      ]
+    )
+  });
 
   // Use content-aware grid height utility hook - updated to use heightPercentage based on expand state
   const gridMaxHeight = useContentAwareGridHeight({
     rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0,
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
-  
-  const handleStateTaxPopoverOpen = () => {
 
+  const handleStateTaxPopoverOpen = () => {
     if (stateTaxTimeout) {
       clearTimeout(stateTaxTimeout);
       setStateTaxTimeout(null);
@@ -537,24 +543,22 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           )}
         </>
       )}
-      {!isFetching &&
-        !!distributionsAndForfeitures &&
-        distributionsAndForfeitures.response?.total > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
-              setInitialSearchLoaded(true);
-            }}
-            pageSize={pageSize}
-            setPageSize={(value: number) => {
-              setInitialPageSize(value);
-              handlePaginationChange(0, value);
-              setInitialSearchLoaded(true);
-            }}
-            recordCount={distributionsAndForfeitures.response.total}
-          />
-        )}
+      {!isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response?.total > 0 && (
+        <Pagination
+          pageNumber={pageNumber}
+          setPageNumber={(value: number) => {
+            handlePageNumberChange(value - 1);
+            setInitialSearchLoaded(true);
+          }}
+          pageSize={pageSize}
+          setPageSize={(value: number) => {
+            setInitialPageSize(value);
+            handlePageSizeChange(value);
+            setInitialSearchLoaded(true);
+          }}
+          recordCount={distributionsAndForfeitures.response.total}
+        />
+      )}
     </>
   );
 };

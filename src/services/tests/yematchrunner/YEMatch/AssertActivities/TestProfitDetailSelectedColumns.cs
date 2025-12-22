@@ -51,7 +51,8 @@ public class TestProfitDetailSelectedColumns : BaseSqlActivity
 
         if (differences != 0)
         {
-            return new Outcome(Name(), "test", "", OutcomeStatus.Error, $"{differences} differences", null, false);
+            string sql = QueryDiffRows("ready", "smart", queryA, queryB, "ssn");
+            return new Outcome(Name(), "test", "", OutcomeStatus.Error, $"{differences} differences\n " + sql, null, false);
         }
 
         return new Outcome(Name(), "test", "", OutcomeStatus.Ok, "", null, false);

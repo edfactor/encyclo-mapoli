@@ -3,4 +3,12 @@
 public sealed record StateTaxLookupRequest
 {
     public required string State { get; init; }
+
+    public static StateTaxLookupRequest RequestExample()
+    {
+        return new StateTaxLookupRequest
+        {
+            State = "MA"
+        };
+    }
 }

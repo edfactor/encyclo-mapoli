@@ -78,4 +78,10 @@ public sealed class MasterInquiryRawDto
     public decimal Payment { get; set; }
     public bool IsExecutive { get; set; }
     public char? EmploymentStatusId { get; init; }
+
+    /// <summary>
+    /// Indicates whether this profit detail record has already been reversed.
+    /// Populated by checking if any other ProfitDetail has ReversedFromProfitDetailId pointing to this record.
+    /// </summary>
+    public bool IsAlreadyReversed { get; init; }
 }

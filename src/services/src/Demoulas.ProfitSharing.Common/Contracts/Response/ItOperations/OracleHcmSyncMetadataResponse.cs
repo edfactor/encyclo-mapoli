@@ -19,4 +19,15 @@ public class OracleHcmSyncMetadataResponse
 
     /// <summary>Most recent modify timestamp from PayProfit table (UTC).</summary>
     public DateTimeOffset? PayProfitModifiedAtUtc { get; set; }
+
+    public static OracleHcmSyncMetadataResponse ResponseExample()
+    {
+        return new OracleHcmSyncMetadataResponse
+        {
+            DemographicCreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-7),
+            DemographicModifiedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            PayProfitCreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-30),
+            PayProfitModifiedAtUtc = DateTimeOffset.UtcNow.AddDays(-2)
+        };
+    }
 }

@@ -103,13 +103,9 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
           {searchResults.response.results.length > 0 && (
             <Pagination
               pageNumber={pagination.pageNumber}
-              setPageNumber={(value: number) => {
-                pagination.handlePaginationChange(value - 1, pagination.pageSize);
-              }}
+              setPageNumber={(value: number) => pagination.handlePageNumberChange(value - 1)}
               pageSize={pagination.pageSize}
-              setPageSize={(value: number) => {
-                pagination.handlePaginationChange(0, value);
-              }}
+              setPageSize={pagination.handlePageSizeChange}
               recordCount={searchResults.response.total}
             />
           )}

@@ -49,6 +49,12 @@ public sealed record MasterInquiryResponseDto : IdRequest, IIsExecutive, IProfit
     [MaskSensitive]
     public string? XFerQdroName { get; set; }
 
+    /// <summary>
+    /// Indicates whether this profit detail record has already been reversed.
+    /// Used to disable reversal operations for records that have already been reversed.
+    /// </summary>
+    public bool IsAlreadyReversed { get; set; }
+
     public static MasterInquiryResponseDto ResponseExample()
     {
         return new MasterInquiryResponseDto

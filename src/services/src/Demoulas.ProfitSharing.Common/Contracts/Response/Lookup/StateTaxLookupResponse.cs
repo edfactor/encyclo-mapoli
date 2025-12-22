@@ -7,4 +7,13 @@ public sealed record StateTaxLookupResponse
 {
     public required string State { get; init; }
     public required decimal StateTaxRate { get; init; }
+
+    public static StateTaxLookupResponse ResponseExample()
+    {
+        return new StateTaxLookupResponse
+        {
+            State = "MA",
+            StateTaxRate = 0.05m
+        };
+    }
 }

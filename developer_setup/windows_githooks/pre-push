@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "Executing PowerShell hook..."
+exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File '.git\hooks\pre-push.ps1'
+exit $LASTEXITCODE

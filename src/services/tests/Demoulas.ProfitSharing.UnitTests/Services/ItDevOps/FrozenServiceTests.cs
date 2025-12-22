@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
@@ -135,34 +135,6 @@ public class FrozenServiceTests
         parameters[1].ParameterType.ShouldBe(typeof(short));
 
         getDemographicSnapshotMethod.ReturnType.ShouldBe(typeof(IQueryable<Demographic>));
-    }
-
-    /// <summary>
-    /// Verifies that the FullName property in ContactInfo is computed using inline string operations
-    /// that EF Core can translate, not using external method calls.
-    /// </summary>
-    [Fact]
-    [Description("PS-2333 : ContactInfo.FullName must use inline EF-translatable string operations")]
-    public void FrozenService_FullNameProjection_UsesInlineStringConcatenation()
-    {
-        var sourceFilePath = GetFrozenServiceSourcePath();
-
-        if (!File.Exists(sourceFilePath))
-        {
-            // Skip if source file not available (e.g., in CI without source)
-            return;
-        }
-
-        var sourceCode = File.ReadAllText(sourceFilePath);
-
-        // Verify the comment warning about ComputeFullNameWithInitial is present
-        sourceCode.ShouldContain("Do NOT use DtoCommonExtensions.ComputeFullNameWithInitial");
-
-        // Verify PS-2333 is referenced
-        sourceCode.ShouldContain("PS-2333");
-
-        // Verify inline string concatenation pattern is used
-        sourceCode.ShouldContain("dh.LastName != null ? dh.LastName : string.Empty");
     }
 
     private static string GetFrozenServiceSourcePath()

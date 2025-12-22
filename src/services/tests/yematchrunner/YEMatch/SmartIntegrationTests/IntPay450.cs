@@ -3,7 +3,7 @@
 public class IntPay450 : BaseIntegrationTestActivity
 {
     public IntPay450(string integrationTestPath)
-        : base(integrationTestPath, "IntPay450", "Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary.UpdateSummaryTests.ValidateReport2")
+        : base(integrationTestPath, "IntPay450", "Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary.UpdateSummaryTests.ValidatePay450Report")
     {
     }
 }

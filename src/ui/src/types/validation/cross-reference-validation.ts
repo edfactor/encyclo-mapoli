@@ -5,7 +5,7 @@
  * @see PS-MASTER_UPDATE_CROSSREF_VALIDATION_IMPLEMENTATION.md
  */
 
-import { ProfitYearRequest } from "../common/api";
+import { FrozenProfitYearRequest } from "../common/api";
 
 /**
  * Individual field validation result showing if a specific report field matches its archived value
@@ -65,7 +65,7 @@ export interface CrossReferenceValidationGroup {
   validationRule: string | null;
 }
 
-export interface ProfitSharingReportValidationRequest extends ProfitYearRequest {
+export interface ProfitSharingReportValidationRequest extends FrozenProfitYearRequest {
   reportSuffix: number;
 }
 

@@ -36,7 +36,7 @@ public sealed class GetProfitSharingReportValidationEndpoint
 
     public override void Configure()
     {
-        Get("checksum/profit-sharing-report/{profitYear}/{reportSuffix}");
+        Get("checksum/profit-sharing-report/{profitYear}/{reportSuffix}/{useFrozenData}");
         Summary(s =>
         {
             s.Summary = "Get Profit Sharing Report validation data for a specific profit year and report suffix";
@@ -76,6 +76,7 @@ public sealed class GetProfitSharingReportValidationEndpoint
             var result = await _crossReferenceValidationService.ValidateProfitSharingReport(
                 profitYear,
                 reportSuffix,
+                req.UseFrozenData,
                 ct);
 
             if (result.IsSuccess && result.Value != null)

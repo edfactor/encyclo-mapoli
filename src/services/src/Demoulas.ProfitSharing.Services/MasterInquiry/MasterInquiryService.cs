@@ -595,7 +595,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             // Handle custom sorting: when sorting by "monthToDate", we need to sort by YearToDate first, then MonthToDate
             var sortedQuery = query;
             bool isMonthToDateSort = req.SortBy != null && "monthToDate".Equals(req.SortBy, StringComparison.OrdinalIgnoreCase);
-            
+
             if (isMonthToDateSort)
             {
                 if (req.IsSortDescending.GetValueOrDefault())
@@ -649,6 +649,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentIncomeYear = x.Member.CurrentIncomeYear,
                 CurrentHoursYear = x.Member.CurrentHoursYear,
                 IsExecutive = x.Member.IsExecutive,
+                // Check if this profit detail has already been reversed (double-reversal protection)
+                IsAlreadyReversed = x.ProfitDetail != null && ctx.ProfitDetails.Any(pd => pd.ReversedFromProfitDetailId == x.ProfitDetail.Id),
             }).ToPaginationResultsAsync(paginationReq, cancellationToken);
 
             var formattedResults = rawQuery.Results.Select(x => new MasterInquiryResponseDto
@@ -688,6 +690,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentHoursYear = x.CurrentHoursYear,
                 IsExecutive = x.IsExecutive,
                 EmploymentStatusId = x.EmploymentStatusId ?? '\0',
+                IsAlreadyReversed = x.IsAlreadyReversed,
             }).ToList();
 
             // Collect all partner references (both employees and beneficiaries)

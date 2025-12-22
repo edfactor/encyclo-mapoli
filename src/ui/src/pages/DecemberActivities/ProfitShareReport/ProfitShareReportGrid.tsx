@@ -46,29 +46,30 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
     [searchParams]
   );
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    persistenceKey: GRID_KEYS.PROFIT_SHARE_REPORT,
-    onPaginationChange: useCallback(
-      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-        if (isInitialSearchLoaded && searchParams) {
-          const params = createRequest(
-            pageNum * pageSz,
-            sortPrms.sortBy,
-            sortPrms.isSortDescending,
-            profitYear,
-            pageSz
-          );
-          if (params) {
-            triggerSearch(params, false);
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: false,
+      persistenceKey: GRID_KEYS.PROFIT_SHARE_REPORT,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+          if (isInitialSearchLoaded && searchParams) {
+            const params = createRequest(
+              pageNum * pageSz,
+              sortPrms.sortBy,
+              sortPrms.isSortDescending,
+              profitYear,
+              pageSz
+            );
+            if (params) {
+              triggerSearch(params, false);
+            }
           }
-        }
-      },
-      [isInitialSearchLoaded, searchParams, createRequest, profitYear, triggerSearch]
-    )
-  });
+        },
+        [isInitialSearchLoaded, searchParams, createRequest, profitYear, triggerSearch]
+      )
+    });
 
   // Initial search effect - trigger search when component first loads with search params
   useEffect(() => {
@@ -129,12 +130,10 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
+            handlePageNumberChange(value - 1);
           }}
           pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={handlePageSizeChange}
           recordCount={recordCount}
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
         />

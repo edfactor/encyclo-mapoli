@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/pages/**/*.*"
+paths: "src/ui/src/pages/**/*.*"
 ---
 
 # Page Component Architecture
@@ -596,7 +597,7 @@ import {
 } from "../../utils/gridColumnFactory";
 
 export const GetProfallGridColumns = (
-  navFunction: (badgeNumber: string) => void
+  navFunction: (badgeNumber: string) => void,
 ): ColDef[] => {
   return [
     createStoreColumn({ minWidth: 80, sortable: true }),
@@ -789,10 +790,10 @@ Complex state or state shared across pages stored in Redux slices.
 ```typescript
 // Reading from Redux
 const { profitSharingEdit, profitSharingUpdate } = useSelector(
-  (state: RootState) => state.yearsEnd
+  (state: RootState) => state.yearsEnd,
 );
 const currentMember = useSelector(
-  (state: RootState) => state.distribution.currentMember
+  (state: RootState) => state.distribution.currentMember,
 );
 
 // Dispatching actions
@@ -982,10 +983,10 @@ const fetchData = useCallback(
         sortBy: sort ?? sortBy,
         isSortDescending: desc ?? isSortDescending,
       },
-      false
+      false,
     );
   },
-  [triggerQuery, sortBy, isSortDescending]
+  [triggerQuery, sortBy, isSortDescending],
 );
 
 const handlePageChange = (page: number, size: number) => {

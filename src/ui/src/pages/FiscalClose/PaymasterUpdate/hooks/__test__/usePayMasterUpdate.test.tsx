@@ -126,6 +126,8 @@ describe("usePayMasterUpdate", () => {
         isSortDescending: false
       },
       handlePaginationChange: vi.fn(),
+      handlePageNumberChange: vi.fn(),
+      handlePageSizeChange: vi.fn(),
       handleSortChange: vi.fn(),
       resetPagination: mockResetPagination,
       clearPersistedState: vi.fn()

@@ -72,16 +72,17 @@ const ForfeituresByAge = lazy(() => import("../../pages/FiscalClose/AgeReports/F
 const ProfitShareEditUpdate = lazy(() => import("../../pages/FiscalClose/ProfitShareEditUpdate/ProfitShareEditUpdate"));
 const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDWages"));
 const DemographicFreeze = lazy(() => import("../../pages/ITOperations/DemographicFreeze/DemographicFreeze"));
-const ManageStateTaxes = lazy(() => import("../../pages/ITOperations/ManageStateTaxes/ManageStateTaxes"));
-const ManageAnnuityRates = lazy(() => import("../../pages/ITOperations/ManageAnnuityRates/ManageAnnuityRates"));
+const ManageStateTaxes = lazy(() => import("../../pages/Administration/ManageStateTaxes/ManageStateTaxes"));
+const ManageAnnuityRates = lazy(() => import("../../pages/Administration/ManageAnnuityRates/ManageAnnuityRates"));
+const ManageCommentTypes = lazy(() => import("../../pages/Administration/ManageCommentTypes/ManageCommentTypes"));
 const ProfitSharingAdjustments = lazy(
-  () => import("../../pages/ITOperations/ProfitSharingAdjustments/ProfitSharingAdjustments")
+  () => import("../../pages/Administration/ProfitSharingAdjustments/ProfitSharingAdjustments")
 );
-const OracleHcmDiagnostics = lazy(() => import("../../pages/ITOperations/OracleHcmDiagnostics/OracleHcmDiagnostics"));
+const OracleHcmDiagnostics = lazy(() => import("../../pages/Administration/OracleHcmDiagnostics/OracleHcmDiagnostics"));
 
 const PayMasterUpdateSummary = lazy(() => import("@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary"));
 const ProfitSharingControlSheet = lazy(() => import("@/pages/FiscalClose/PaymasterUpdate/ProfitSharingControlSheet"));
-const AuditSearch = lazy(() => import("@/pages/ITOperations/AuditSearch/AuditSearch"));
+const AuditSearch = lazy(() => import("@/pages/Administration/AuditSearch/AuditSearch"));
 const DistributionInquiry = lazy(() => import("../../pages//Distributions/DistributionInquiry/DistributionInquiry"));
 const EditDistribution = lazy(() => import("../../pages//Distributions/EditDistribution/EditDistribution"));
 const BeneficiaryInquiry = lazy(() => import("../../pages/Beneficiaries/BeneficiaryInquiry"));
@@ -635,6 +636,17 @@ const RouterSubAssembly: React.FC = () => {
                       requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageAnnuityRates />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.MANAGE_COMMENT_TYPES}
+                  element={
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <ManageCommentTypes />
                       </Suspense>
                     </ProtectedRoute>
                   }

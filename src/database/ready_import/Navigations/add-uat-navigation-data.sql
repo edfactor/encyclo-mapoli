@@ -263,7 +263,7 @@ BEGIN
 
 
 --distribution items - REMOVED
-    -- insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14l)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_ELEVENTH, '', DISABLED, IS_NAVIGABLE);
+    -- insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14L)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_ELEVENTH, '', DISABLED, IS_NAVIGABLE);
 
 
 --It Operations

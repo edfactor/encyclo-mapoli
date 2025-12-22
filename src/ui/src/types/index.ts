@@ -14,6 +14,9 @@ export * from "./it-operations/annuity-rates";
 export * from "./it-operations/oracle-hcm-diagnostics";
 export * from "./it-operations/state-taxes";
 
+// Administration types
+export * from "./administration/comment-types";
+
 // Employee types
 export * from "./employee/employee";
 

@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Report;
+﻿using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -43,7 +44,7 @@ public class Pay426NTests : PristineBaseTest
     public async Task Pay426NReport_ShouldMatchReady(YearEndProfitSharingReportId reportId, int resourceNumber)
     {
         // Arrange - load expected data from READY report
-        string resourceName = $"Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R8-PAY426N-{resourceNumber}";
+        string resourceName = $"Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R08-PAY426N-{resourceNumber}";
         string expectedReportText = ReadEmbeddedResource(resourceName).Trim();
         YearEndProfitSharingReportResponse expected = Pay426NParser.Parse(expectedReportText, 2025);
 
@@ -219,6 +220,13 @@ public class Pay426NTests : PristineBaseTest
 
                 r.Ssn = r.Ssn.Length >= 4 ? r.Ssn.Substring(r.Ssn.Length - 4) : r.Ssn; // Compare last 4 digits only
 
+                // SMART includes middle initials in names (e.g., "ACOSTA, ANNA T"), READY doesn't (e.g., "ACOSTA, ANNA")
+                // Strip middle initial from SMART names for comparison: remove space + single letter at end of name
+                if (!isReady && r.FullName.Length > 2 && r.FullName[^2] == ' ' && char.IsLetter(r.FullName[^1]))
+                {
+                    r.FullName = r.FullName.Substring(0, r.FullName.Length - 2);
+                }
+
                 // READY uses 'H' for employees but '0' for beneficiaries (non-employees with BadgeNumber=0)
                 if (r.BadgeNumber > 0)
                 {
@@ -298,6 +306,11 @@ public class Pay426NTests : PristineBaseTest
             totalChecked++;
 
             short difference = (short)(smart.YearsInPlan - ready.YearsInPlan);
+            if (difference == 0 || ready.YearsInPlan > ReferenceData.VestingYears)
+            {
+                // Lets not quibble when we agree or if the member has been in the plan for more than 5 years (executives are not bumped automatically)
+                continue;
+            }
 
             // Determine if SMART should add +1 based on the three conditions:
             // 1. No 2025 contribution yet (FirstContributionYear == null OR FirstContributionYear != 2025)

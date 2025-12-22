@@ -31,42 +31,49 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
   const profitYear = useDecemberFlowProfitYear();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 10,
-      initialSortBy: "badgeNumber",
-      initialSortDescending: false,
-      persistenceKey: `${GRID_KEYS.BREAKDOWN_REPORT_ASSOCIATES_PREFIX}${store}`,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (hasToken) {
-            const params = {
-              profitYear: queryParams?.profitYear || profitYear,
-              storeNumber: store,
-              storeManagement: false,
-              badgeNumber: queryParams?.badgeNumber,
-              employeeName: queryParams?.employeeName,
-              pagination: {
-                skip: pageNum * pageSz,
-                take: pageSz,
-                sortBy: sortPrms.sortBy,
-                isSortDescending: sortPrms.isSortDescending
-              }
-            };
-            await fetchBreakdownByStore(params);
-          }
-        },
-        [
-          hasToken,
-          queryParams?.profitYear,
-          profitYear,
-          store,
-          queryParams?.badgeNumber,
-          queryParams?.employeeName,
-          fetchBreakdownByStore
-        ]
-      )
-    });
+  const {
+    pageNumber,
+    pageSize,
+    sortParams,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange,
+    resetPagination
+  } = useGridPagination({
+    initialPageSize: 10,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    persistenceKey: `${GRID_KEYS.BREAKDOWN_REPORT_ASSOCIATES_PREFIX}${store}`,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (hasToken) {
+          const params = {
+            profitYear: queryParams?.profitYear || profitYear,
+            storeNumber: store,
+            storeManagement: false,
+            badgeNumber: queryParams?.badgeNumber,
+            employeeName: queryParams?.employeeName,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            }
+          };
+          await fetchBreakdownByStore(params);
+        }
+      },
+      [
+        hasToken,
+        queryParams?.profitYear,
+        profitYear,
+        store,
+        queryParams?.badgeNumber,
+        queryParams?.employeeName,
+        fetchBreakdownByStore
+      ]
+    )
+  });
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -149,9 +156,9 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
         {breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0 && (
           <Pagination
             pageNumber={pageNumber}
-            setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
+            setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
             pageSize={pageSize}
-            setPageSize={(value: number) => handlePaginationChange(0, value)}
+            setPageSize={handlePageSizeChange}
             recordCount={breakdownByStore.response.total || 0}
           />
         )}

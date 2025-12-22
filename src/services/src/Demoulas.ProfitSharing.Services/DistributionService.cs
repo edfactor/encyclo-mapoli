@@ -511,6 +511,7 @@ public sealed class DistributionService : IDistributionService
             }
 
             distribution.StatusId = DistributionStatus.Constants.PurgeRecord;
+            distribution.ModifiedAtUtc = DateTimeOffset.UtcNow;
 
             await ctx.SaveChangesAsync(cancellationToken);
             return Result<bool>.Success(true);

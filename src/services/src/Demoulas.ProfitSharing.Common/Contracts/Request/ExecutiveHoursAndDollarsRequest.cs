@@ -9,4 +9,17 @@ public sealed record ExecutiveHoursAndDollarsRequest : ProfitYearRequest
     public string? FullNameContains { get; set; }
     public bool? HasExecutiveHoursAndDollars { get; set; }
     public bool? IsMonthlyPayroll { get; set; }
+
+    public static new ExecutiveHoursAndDollarsRequest RequestExample()
+    {
+        return new ExecutiveHoursAndDollarsRequest
+        {
+            ProfitYear = 2024,
+            BadgeNumber = 123456,
+            Ssn = 123456789,
+            FullNameContains = "Smith",
+            HasExecutiveHoursAndDollars = true,
+            IsMonthlyPayroll = true
+        };
+    }
 }

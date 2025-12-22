@@ -29,7 +29,9 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
     {
         using (_logger.BeginScope("Beginning Set Zero Contribution Reason to {0}", zeroContributionReasonId))
         {
-            await records.ExecuteUpdateAsync(x => x.SetProperty(pp => pp.ZeroContributionReasonId, zeroContributionReasonId), cancellationToken);
+            await records.ExecuteUpdateAsync(x => x
+                .SetProperty(pp => pp.ZeroContributionReasonId, zeroContributionReasonId)
+                .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow), cancellationToken);
         }
     }
 

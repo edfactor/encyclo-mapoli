@@ -371,6 +371,144 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         result.Error.ShouldNotBeNull();
     }
 
+    [Fact]
+    [Description("PS-2543 : Should reject un-forfeit when profit detail has already been reversed")]
+    public async Task UpdateForfeitureAdjustmentAsync_WhenProfitDetailAlreadyReversed_ReturnsFailure()
+    {
+        // Arrange
+        // Create a forfeiture record that we want to un-forfeit
+        var forfeitureRecord = new ProfitDetailFaker([_demographic1]).UseSeed(20).Generate();
+        forfeitureRecord.Id = 200;
+        forfeitureRecord.Ssn = _demographic1.Ssn;
+        forfeitureRecord.ProfitYear = 2025;
+        forfeitureRecord.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
+        forfeitureRecord.Forfeiture = 1000m;
+        forfeitureRecord.CommentTypeId = CommentType.Constants.Forfeit.Id;
+        forfeitureRecord.ReversedFromProfitDetailId = null;
+
+        // Create an existing reversal that already points to the forfeiture record
+        var existingReversal = new ProfitDetailFaker([_demographic1]).UseSeed(21).Generate();
+        existingReversal.Id = 201;
+        existingReversal.Ssn = _demographic1.Ssn;
+        existingReversal.ProfitYear = 2025;
+        existingReversal.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
+        existingReversal.Forfeiture = -1000m;
+        existingReversal.CommentTypeId = CommentType.Constants.Unforfeit.Id;
+        existingReversal.ReversedFromProfitDetailId = forfeitureRecord.Id; // This reversal came from the forfeiture
+
+        ScenarioDataContextFactory mockDbContextFactory = (ScenarioDataContextFactory)new ScenarioFactory
+        {
+            Demographics = [_demographic1, _demographic2],
+            PayProfits = [_payProfit1, _payProfit2],
+            ProfitDetails = [_profitDetail1, _profitDetail2, forfeitureRecord, existingReversal]
+        }.BuildMocks();
+
+        var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
+        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FrozenStateResponse
+            {
+                Id = 1,
+                ProfitYear = 2025,
+                IsActive = true,
+                AsOfDateTime = DateTimeOffset.UtcNow,
+                CreatedDateTime = DateTimeOffset.UtcNow
+            });
+
+        var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
+        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+            .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
+
+        var service = new ForfeitureAdjustmentService(
+            mockDbContextFactory,
+            _totalService,
+            frozenServiceMock.Object,
+            demographicReaderMock.Object
+        );
+
+        var request = new ForfeitureAdjustmentUpdateRequest
+        {
+            BadgeNumber = _demographic1.BadgeNumber,
+            ProfitYear = 2025,
+            ForfeitureAmount = -1000m, // Un-forfeit (negative = un-forfeit)
+            ClassAction = false,
+            OffsettingProfitDetailId = forfeitureRecord.Id // Try to reverse this already-reversed record
+        };
+
+        // Act
+        var result = await service.UpdateForfeitureAdjustmentAsync(request, CancellationToken.None);
+
+        // Assert
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldNotBeNull();
+        result.Error.Code.ShouldBe(132); // ProfitDetailAlreadyReversed error code
+        result.Error.Description.ShouldContain("already been reversed");
+    }
+
+    [Fact]
+    [Description("PS-2543 : Should allow un-forfeit when profit detail has not been reversed")]
+    public async Task UpdateForfeitureAdjustmentAsync_WhenProfitDetailNotReversed_Succeeds()
+    {
+        // Arrange
+        // Create a forfeiture record that has not been reversed
+        var forfeitureRecord = new ProfitDetailFaker([_demographic1]).UseSeed(30).Generate();
+        forfeitureRecord.Id = 300;
+        forfeitureRecord.Ssn = _demographic1.Ssn;
+        forfeitureRecord.ProfitYear = 2025;
+        forfeitureRecord.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
+        forfeitureRecord.Forfeiture = 1000m;
+        forfeitureRecord.CommentTypeId = CommentType.Constants.Forfeit.Id;
+        forfeitureRecord.ReversedFromProfitDetailId = null;
+
+        ScenarioDataContextFactory mockDbContextFactory = (ScenarioDataContextFactory)new ScenarioFactory
+        {
+            Demographics = [_demographic1, _demographic2],
+            PayProfits = [_payProfit1, _payProfit2],
+            ProfitDetails = [_profitDetail1, _profitDetail2, forfeitureRecord]
+        }.BuildMocks();
+
+        var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
+        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FrozenStateResponse
+            {
+                Id = 1,
+                ProfitYear = 2025,
+                IsActive = true,
+                AsOfDateTime = DateTimeOffset.UtcNow,
+                CreatedDateTime = DateTimeOffset.UtcNow
+            });
+
+        var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
+        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+            .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
+
+        var service = new ForfeitureAdjustmentService(
+            mockDbContextFactory,
+            _totalService,
+            frozenServiceMock.Object,
+            demographicReaderMock.Object
+        );
+
+        var request = new ForfeitureAdjustmentUpdateRequest
+        {
+            BadgeNumber = _demographic1.BadgeNumber,
+            ProfitYear = 2025,
+            ForfeitureAmount = -1000m, // Un-forfeit (negative = un-forfeit)
+            ClassAction = false,
+            OffsettingProfitDetailId = forfeitureRecord.Id // This record has not been reversed
+        };
+
+        // Act
+        var result = await service.UpdateForfeitureAdjustmentAsync(request, CancellationToken.None);
+
+        // Assert
+        // The call should not fail due to "already reversed" error
+        // It may fail for other reasons (vesting balance, etc.), but not for double-reversal
+        if (result.IsError)
+        {
+            result.Error!.Code.ShouldNotBe(132, "Should not fail with 'already reversed' error");
+        }
+    }
+
     #endregion
 
     #region UpdateForfeitureAdjustmentBulkAsync Tests

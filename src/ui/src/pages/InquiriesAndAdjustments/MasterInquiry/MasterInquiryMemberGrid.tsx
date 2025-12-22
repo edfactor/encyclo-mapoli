@@ -1,8 +1,7 @@
 import { useContentAwareGridHeight } from "@/hooks/useContentAwareGridHeight";
-import { Box, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { RowClickedEvent } from "ag-grid-community";
+import { Box, IconButton, Typography } from "@mui/material";
 import React, { memo, useMemo } from "react";
 import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
 import { GRID_KEYS } from "../../../constants";
@@ -30,8 +29,9 @@ interface MasterInquiryMemberGridProps {
     pageNumber: number;
     pageSize: number;
     sortParams: SortParams;
+    handlePageNumberChange: (pageNumber: number) => void;
+    handlePageSizeChange: (pageSize: number) => void;
   };
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
   isLoading?: boolean;
   isGridExpanded?: boolean;
@@ -43,54 +43,59 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     searchResults,
     onMemberSelect,
     memberGridPagination,
-    onPaginationChange,
     onSortChange,
     isLoading = false,
     isGridExpanded = false,
     onToggleExpand
   }: MasterInquiryMemberGridProps) => {
-    const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
-
     // Use content-aware grid height - shrinks for small result sets
     const gridMaxHeight = useContentAwareGridHeight({
       rowCount: searchResults.results?.length ?? 0,
       heightPercentage: isGridExpanded ? 0.85 : 0.5
     });
 
-    const handleMemberClick = (member: EmployeeDetails) => {
-      onMemberSelect({
-        memberType: member.isEmployee ? 1 : 2,
-        id: Number(member.id),
-        ssn: Number(member.ssn),
-        badgeNumber: Number(member.badgeNumber),
-        psnSuffix: Number(member.psnSuffix)
-      });
-    };
-
-    const handlePaginationChange = (pageNumber: number, pageSize: number) => {
-      onPaginationChange(pageNumber, pageSize);
-    };
-
     const handleSortChange = (sortParams: ISortParams) => {
       onSortChange(sortParams);
     };
 
+    const columns = useMemo(
+      () => {
+        const handleMemberClick = (member: EmployeeDetails) => {
+          onMemberSelect({
+            memberType: member.isEmployee ? 1 : 2,
+            id: Number(member.id),
+            ssn: Number(member.ssn),
+            badgeNumber: Number(member.badgeNumber),
+            psnSuffix: Number(member.psnSuffix)
+          });
+        };
+
+        const handleNavigate = (path: string) => {
+          console.log(`Navigating to ${path}`);
+          const i = path.lastIndexOf('/');
+          const badgeNumberParameter = path.substring(i + 1);
+
+          const employee = searchResults.results.find(emp => {
+            const badgeNumberPlusSuffix = emp.psnSuffix > 0 
+            ? `${emp.badgeNumber}${String(emp.psnSuffix).padStart(4, "0")}` 
+            : emp.badgeNumber.toString();
+            return badgeNumberPlusSuffix === badgeNumberParameter;
+          });
+
+          if (employee) {
+            handleMemberClick(employee);
+          } else {
+            console.warn(`Employee with badge number and suffix ${badgeNumberParameter} not found in current results.`);
+          }
+        };
+
+        return GetMasterInquiryMemberGridColumns(handleNavigate);
+      },
+      [searchResults.results, onMemberSelect]
+    );
+
     return (
       <Box sx={{ width: "100%", paddingTop: "24px" }}>
-        {/* CSS for badge link styling */}
-        <style>
-          {`
-            .badge-link-style {
-              color: #0258A5 !important;
-              text-decoration: underline !important;
-              cursor: pointer !important;
-              font-weight: 500 !important;
-            }
-            .badge-link-style:hover {
-              color: #014073 !important;
-            }
-          `}
-        </style>
         <Box
           sx={{
             display: "flex",
@@ -119,24 +124,14 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
           providedOptions={{
             rowData: searchResults.results.filter((row) => row && Object.keys(row).length > 0),
             columnDefs: columns,
-            context: { onBadgeClick: handleMemberClick },
-            onRowClicked: ((event: RowClickedEvent<EmployeeDetails>) => {
-              if (event.data) {
-                handleMemberClick(event.data);
-              }
-            }) as (event: unknown) => void
           }}
         />
         <Pagination
           rowsPerPageOptions={[5, 10, 50, 100]}
           pageNumber={memberGridPagination.pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, memberGridPagination.pageSize);
-          }}
+          setPageNumber={(value: number) => memberGridPagination.handlePageNumberChange(value - 1)}
           pageSize={memberGridPagination.pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={memberGridPagination.handlePageSizeChange}
           recordCount={searchResults.total}
         />
       </Box>
@@ -154,7 +149,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       prevProps.isLoading === nextProps.isLoading &&
       prevProps.isGridExpanded === nextProps.isGridExpanded &&
       prevProps.onMemberSelect === nextProps.onMemberSelect &&
-      prevProps.onPaginationChange === nextProps.onPaginationChange &&
       prevProps.onSortChange === nextProps.onSortChange &&
       prevProps.onToggleExpand === nextProps.onToggleExpand
     );

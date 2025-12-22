@@ -29,7 +29,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     rowCount: grossWagesReport?.response?.results?.length ?? 0
   });
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange, resetPagination } =
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange, resetPagination } =
     useGridPagination({
       initialPageSize: 25,
       initialSortBy: "BadgeNumber",
@@ -56,11 +56,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
 
           await triggerSearch(request, false);
         },
-        [
-          grossWagesReportQueryParams?.profitYear,
-          grossWagesReportQueryParams?.minGrossAmount,
-          triggerSearch
-        ]
+        [grossWagesReportQueryParams?.profitYear, grossWagesReportQueryParams?.minGrossAmount, triggerSearch]
       )
     });
 
@@ -125,13 +121,9 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
       {!!grossWagesReport && grossWagesReport.response.results.length && (
         <Pagination
           pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-          }}
+          setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
           pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={handlePageSizeChange}
           recordCount={grossWagesReport.response.total}
         />
       )}

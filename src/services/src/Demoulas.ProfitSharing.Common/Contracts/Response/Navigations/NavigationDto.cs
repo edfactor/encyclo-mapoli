@@ -26,4 +26,26 @@ public record NavigationDto : IdRequest
     /// This is used by the UI to disable or hide action buttons for users in read-only roles.
     /// </summary>
     public bool IsReadOnly { get; set; }
+
+    public static NavigationDto ResponseExample()
+    {
+        return new NavigationDto
+        {
+            Id = 1,
+            ParentId = null,
+            Title = "Year End",
+            SubTitle = "Year-end processing",
+            Url = "/year-end",
+            StatusId = 1,
+            StatusName = "In Progress",
+            OrderNumber = 1,
+            Icon = "calendar",
+            RequiredRoles = new List<string> { "ADMINISTRATOR", "FINANCEMANAGER" },
+            Disabled = false,
+            IsNavigable = true,
+            PrerequisiteNavigations = null,
+            Items = null,
+            IsReadOnly = false
+        };
+    }
 }

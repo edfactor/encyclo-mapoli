@@ -1,0 +1,285 @@
+# Spectral API Linting Configuration
+# Purpose: Validate OpenAPI specifications against Zalando RESTful API Guidelines
+# Related Ticket: PS-2069 - Set Up API Linting in CI/CD Pipeline
+#
+# Documentation:
+# - Spectral: https://docs.stoplight.io/docs/spectral
+# - Zalando Guidelines: https://opensource.zalando.com/restful-api-guidelines/
+#
+# Usage:
+#   spectral lint openapi.json
+#   spectral lint openapi.json --format stylish
+#   spectral lint openapi.json --format json > lint-results.json
+
+extends:
+  - spectral:oas
+
+# Rule severity levels: error, warn, info, hint, off
+rules:
+  # ============================================================================
+  # OpenAPI Spec Quality (Baseline)
+  # ============================================================================
+
+  info-contact: error # MUST have contact information
+  info-description: error # MUST have description
+  license-url: off # Internal API - license not required
+  openapi-tags: warn # SHOULD use tags for organization
+  operation-description: error # MUST have operation descriptions
+  operation-operationId: error # MUST have unique operationId
+  operation-tags: warn # Operations SHOULD have tags
+  tag-description: warn # Tags SHOULD have descriptions
+
+  # ============================================================================
+  # Zalando RESTful API Guidelines
+  # Reference: https://opensource.zalando.com/restful-api-guidelines/
+  # ============================================================================
+
+  # [MUST] Use HTTP Methods Correctly [148]
+  no-http-verbs-in-path:
+    description: Avoid HTTP verbs in URL paths (use HTTP methods instead)
+    message: "{{property}} contains HTTP verb '{{error}}'. Use HTTP methods (GET, POST, PUT, DELETE) instead."
+    severity: error
+    given: $.paths[*]~
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: /\/(get|post|put|delete|patch|create|update|remove|fetch|retrieve|set)/i
+
+  # [MUST] Use Kebab-Case for Path Segments [129]
+  path-kebab-case:
+    description: Path segments must use kebab-case (lowercase with hyphens)
+    message: "{{property}} should use kebab-case (lowercase with hyphens, no underscores or camelCase)"
+    severity: error
+    given: $.paths[*]~
+    then:
+      function: pattern
+      functionOptions:
+        match: ^\/([a-z0-9]+(-[a-z0-9]+)*(\/{[a-zA-Z0-9_]+})?)*$
+
+  # [MUST] Pluralize Resource Names [134]
+  path-plural-resources:
+    description: Resource names should be plural
+    message: "{{property}} should use plural resource names (e.g., /users not /user)"
+    severity: warn
+    given: $.paths[*]~
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: /\/(user|member|employee|beneficiary|distribution|report|certificate)\/(?![{])/i
+
+  # [MUST] Not Use Trailing Slashes [136]
+  path-no-trailing-slash:
+    description: Paths must not end with trailing slashes
+    message: "{{property}} has trailing slash - remove it"
+    severity: error
+    given: $.paths[*]~
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: \/$/
+
+  # [MUST] Use Semantic Versioning [116]
+  semver-version:
+    description: API version should follow semantic versioning (MAJOR.MINOR.PATCH)
+    message: "API version '{{value}}' should follow semantic versioning format (e.g., 1.0.0)"
+    severity: warn
+    given: $.info.version
+    then:
+      function: pattern
+      functionOptions:
+        match: ^\d+\.\d+\.\d+$
+
+  # [MUST] Property Names Must Be snake_case [118]
+  # Note: This project uses PascalCase/camelCase for C# compatibility
+  # Marking as 'info' instead of 'error' due to .NET conventions
+  schema-property-naming:
+    description: Property names should follow project conventions
+    message: "Schema property '{{property}}' naming - ensure consistency with project standards"
+    severity: info
+    given: $.components.schemas[*].properties[*]~
+    then:
+      function: pattern
+      functionOptions:
+        match: ^[a-zA-Z0-9_]+$
+
+  # [MUST] Use Common HTTP Status Codes [243]
+  operation-success-response:
+    description: Operations must define success responses (2xx)
+    message: "Operation '{{property}}' must have at least one success response (200-299)"
+    severity: error
+    given: $.paths[*][*].responses
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            "200": {}
+            "201": {}
+            "202": {}
+            "204": {}
+          minProperties: 1
+
+  # [MUST] Return JSON as Default Content Type [167]
+  operation-response-json:
+    description: Success responses should include application/json content type
+    message: "Response should include 'application/json' content type"
+    severity: warn
+    given: $.paths[*][*].responses[?(@property >= 200 && @property < 300)].content
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            "application/json": {}
+
+  # [SHOULD] Provide API Audience [219]
+  api-audience:
+    description: API should declare its intended audience
+    message: "Consider adding 'x-audience' field to declare API audience (component-internal, business-unit-internal, company-internal, external-partner, external-public)"
+    severity: info
+    given: $.info
+    then:
+      field: x-audience
+      function: truthy
+
+  # [MUST] Secure Endpoints [104]
+  operation-security-defined:
+    description: Operations should have security requirements
+    message: "Operation '{{property}}' should define security requirements"
+    severity: warn
+    given: $.paths[*][*]
+    then:
+      field: security
+      function: truthy
+
+  # [SHOULD] Limit Number of Resource Types [147]
+  max-path-depth:
+    description: Avoid deeply nested resource paths (max 4 levels recommended)
+    message: "Path '{{property}}' is deeply nested ({{error}} levels). Consider flattening the resource hierarchy."
+    severity: warn
+    given: $.paths[*]~
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: ^(\/[^\/]+){5,}$
+
+  # ============================================================================
+  # Error Handling & Response Quality
+  # ============================================================================
+
+  # [MUST] Define Error Responses
+  operation-error-response:
+    description: Operations should define error responses (4xx, 5xx)
+    message: "Operation '{{property}}' should define error responses (400, 401, 403, 404, 500)"
+    severity: warn
+    given: $.paths[*][*].responses
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            "400": {}
+            "401": {}
+            "403": {}
+            "404": {}
+            "500": {}
+
+  # [MUST] Support Problem JSON [176]
+  error-response-problem-json:
+    description: Error responses should support application/problem+json
+    message: "Error response should include 'application/problem+json' content type for RFC 7807 compliance"
+    severity: info
+    given: $.paths[*][*].responses[?(@property >= 400)].content
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            "application/problem+json": {}
+
+  # ============================================================================
+  # Documentation Quality
+  # ============================================================================
+
+  # Operations should have examples
+  operation-request-example:
+    description: Request bodies should include examples
+    message: "Request body should include example for better API documentation"
+    severity: info
+    given: $.paths[*][*].requestBody.content[*]
+    then:
+      - field: example
+        function: truthy
+      - field: examples
+        function: truthy
+
+  operation-response-example:
+    description: Success responses should include examples
+    message: "Response should include example for better API documentation"
+    severity: info
+    given: $.paths[*][*].responses[?(@property >= 200 && @property < 300)].content[*]
+    then:
+      - field: example
+        function: truthy
+      - field: examples
+        function: truthy
+
+  # ============================================================================
+  # Performance & Pagination
+  # ============================================================================
+
+  # [MUST] Support Pagination [159]
+  # Note: This is a custom rule - checks for pagination parameters
+  pagination-parameters:
+    description: Collection endpoints should support pagination
+    message: "Collection endpoint '{{property}}' should support pagination (e.g., limit, offset, cursor parameters)"
+    severity: info
+    given: $.paths[*].get
+    then:
+      field: parameters
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          contains:
+            anyOf:
+              - properties:
+                  name:
+                    enum: [limit, offset, skip, take, page, pageSize, cursor]
+
+  # ============================================================================
+  # Custom Project-Specific Rules
+  # ============================================================================
+
+  # Ensure operations have authorization details
+  operation-authorization-documented:
+    description: Operations should document authorization requirements in description
+    message: "Operation description should include 'Authorization:' section documenting required roles/policies"
+    severity: info
+    given: $.paths[*][*].description
+    then:
+      function: pattern
+      functionOptions:
+        match: /Authorization:/i
+
+# ============================================================================
+# Overrides for Known Exceptions
+# ============================================================================
+overrides:
+  # Relax rules for health check endpoints
+  - files:
+      - "**/*health*"
+    rules:
+      operation-description: warn
+      operation-security-defined: off
+
+  # Relax rules for legacy endpoints during migration
+  - files:
+      - "**/openapi.json#/paths/~1api~1legacy*"
+    rules:
+      path-kebab-case: warn
+      no-http-verbs-in-path: warn

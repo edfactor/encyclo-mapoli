@@ -22,4 +22,18 @@ public record AccountHistoryReportRequest : SortedPaginationRequestDto
     /// The ending date for the report date range (optional, defaults to today).
     /// </summary>
     public DateOnly? EndDate { get; set; }
+
+    public static AccountHistoryReportRequest RequestExample()
+    {
+        return new AccountHistoryReportRequest
+        {
+            BadgeNumber = 123456,
+            StartDate = new DateOnly(2024, 1, 1),
+            EndDate = new DateOnly(2024, 12, 31),
+            Skip = 0,
+            Take = 50,
+            SortBy = "Date",
+            IsSortDescending = true
+        };
+    }
 }

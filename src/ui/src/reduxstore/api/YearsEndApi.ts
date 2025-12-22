@@ -394,10 +394,10 @@ export const YearsEndApi = createApi({
         totalHoursCurrentYearWages?: number;
         totalIncomeCurrentYearWages?: number;
       },
-      EmployeeWagesForYearRequestDto & { acceptHeader: string }
+      EmployeeWagesForYearRequestDto & { acceptHeader: string } & { archive?: boolean }
     >({
       query: (params) => ({
-        url: "yearend/wages-current-year",
+        url: `yearend/wages-current-year${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -432,7 +432,7 @@ export const YearsEndApi = createApi({
         totalIncomeCurrentYearWages?: number;
       } => {
         console.log("YTD Wages API Response:", JSON.stringify(response, null, 2));
-        
+
         // Check if response has nested structure with participants
         if (
           "response" in response &&
@@ -444,13 +444,13 @@ export const YearsEndApi = createApi({
             totalHoursCurrentYearWages: number;
             totalIncomeCurrentYearWages: number;
           };
-          
+
           const participants = firstResult.participants;
           const total = response.response.total || participants.length;
           const pageSize = arg.pagination.take || 25;
           const currentPage = Math.floor((arg.pagination.skip || 0) / pageSize);
           const totalPages = Math.ceil(total / pageSize);
-          
+
           const transformedResponse = {
             ...response,
             totalHoursCurrentYearWages: firstResult.totalHoursCurrentYearWages,
@@ -470,7 +470,7 @@ export const YearsEndApi = createApi({
           console.log("YTD Wages Transformed Response:", JSON.stringify(transformedResponse, null, 2));
           return transformedResponse;
         }
-        
+
         // Handle standard response - calculate pagination if missing
         if ("response" in response && response.response) {
           const results = response.response.results || [];
@@ -478,7 +478,7 @@ export const YearsEndApi = createApi({
           const pageSize = arg.pagination.take || 25;
           const currentPage = Math.floor((arg.pagination.skip || 0) / pageSize);
           const totalPages = Math.ceil(total / pageSize);
-          
+
           const enhancedResponse = {
             ...response,
             response: {
@@ -493,7 +493,7 @@ export const YearsEndApi = createApi({
           console.log("YTD Wages Enhanced Response:", JSON.stringify(enhancedResponse, null, 2));
           return enhancedResponse as PagedReportResponse<EmployeeWagesForYear>;
         }
-        
+
         console.log("YTD Wages - No transformation needed");
         return response as PagedReportResponse<EmployeeWagesForYear>;
       },
@@ -563,9 +563,12 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getEligibleEmployees: builder.query<EligibleEmployeeResponseDto, EligibleEmployeesRequestDto>({
+    getEligibleEmployees: builder.query<
+      EligibleEmployeeResponseDto,
+      EligibleEmployeesRequestDto & { archive?: boolean }
+    >({
       query: (params) => ({
-        url: "yearend/eligible-employees",
+        url: `yearend/eligible-employees${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           profitYear: params.profitYear,

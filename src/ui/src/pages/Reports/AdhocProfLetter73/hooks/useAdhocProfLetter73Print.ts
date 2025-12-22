@@ -7,7 +7,7 @@ export const useAdhocProfLetter73Print = (
   selectedRows: Record<string, unknown>[]
 ) => {
   const [triggerDownload] = useLazyDownloadAdhocProfLetter73FormLetterQuery();
-  
+
   // Print dialog state
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [printContent, setPrintContent] = useState<string>("");
@@ -29,36 +29,36 @@ export const useAdhocProfLetter73Print = (
     setError(null);
 
     const profitYear = filterParams.profitYear.getFullYear();
-    
+
     // Find badge number field (could be badgeNumber, Badge Number, Badge_Number, etc.)
     const findBadgeNumberField = (row: Record<string, unknown>): string | null => {
       // Try exact matches first
-      if (typeof row.badgeNumber === 'string' && row.badgeNumber.length > 0) return row.badgeNumber;
-      if (typeof row.BadgeNumber === 'string' && row.BadgeNumber.length > 0) return row.BadgeNumber;
-      if (typeof row.badge_number === 'string' && row.badge_number.length > 0) return row.badge_number;
-      
+      if (typeof row.badgeNumber === "string" && row.badgeNumber.length > 0) return row.badgeNumber;
+      if (typeof row.BadgeNumber === "string" && row.BadgeNumber.length > 0) return row.BadgeNumber;
+      if (typeof row.badge_number === "string" && row.badge_number.length > 0) return row.badge_number;
+
       // Try case-insensitive search
-      const badgeKey = Object.keys(row).find(key => 
-        key.toLowerCase().replace(/[_\s]/g, '') === 'badgenumber'
-      );
-      
-      if (badgeKey && typeof row[badgeKey] === 'string' && (row[badgeKey] as string).length > 0) {
+      const badgeKey = Object.keys(row).find((key) => key.toLowerCase().replace(/[_\s]/g, "") === "badgenumber");
+
+      if (badgeKey && typeof row[badgeKey] === "string" && (row[badgeKey] as string).length > 0) {
         return row[badgeKey] as string;
       }
-      
+
       // Try numeric badge numbers
-      if (typeof row.badgeNumber === 'number') return String(row.badgeNumber);
-      if (typeof row.BadgeNumber === 'number') return String(row.BadgeNumber);
-      
+      if (typeof row.badgeNumber === "number") return String(row.badgeNumber);
+      if (typeof row.BadgeNumber === "number") return String(row.BadgeNumber);
+
       return null;
     };
-    
+
     const badgeNumbers = selectedRows
       .map(findBadgeNumberField)
       .filter((badge): badge is string => badge !== null && badge.length > 0);
 
     if (badgeNumbers.length === 0) {
-      setError("No valid badge numbers found in selected rows. Please ensure the data includes badge number information.");
+      setError(
+        "No valid badge numbers found in selected rows. Please ensure the data includes badge number information."
+      );
       return;
     }
 
@@ -90,7 +90,7 @@ export const useAdhocProfLetter73Print = (
 
   const printFormLetter = useCallback((content: string) => {
     const escapeHtml = (text: string) => {
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.textContent = text;
       return div.innerHTML;
     };

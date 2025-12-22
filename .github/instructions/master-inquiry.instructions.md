@@ -1,5 +1,7 @@
 ---
-applyTo: "src/ui/src/pages/MasterInquiry/**/*.*"
+name: "Master Inquiry Page - Technical Documentation"
+applyTo: "src/ui/src/pages/InquiriesAndAdjustments/MasterInquiry/**/*.*"
+paths: "src/ui/src/pages/InquiriesAndAdjustments/MasterInquiry/**/*.*"
 ---
 
 # Master Inquiry Page - Technical Documentation
@@ -1268,7 +1270,6 @@ MasterInquiry/
 │   ├── MasterInquiryFunctions.test.ts         # Helper function tests
 │   └── transformSearchParams.test.ts          # Transformation tests
 ├── MasterInquiryMemberDetails.test.tsx        # Component tests
-├── MasterInquiryMemberGrid.test.tsx           # Grid component tests
 └── MasterInquiryMemberGridColumns.test.tsx    # Column definition tests
 ```
 

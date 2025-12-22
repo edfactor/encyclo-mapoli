@@ -6,7 +6,7 @@
 public class IntTestPay426DataUpdates : BaseIntegrationTestActivity
 {
     public IntTestPay426DataUpdates(string integrationTestPath)
-        : base(integrationTestPath, "TestPay426DataUpdates", "TestPay426DataUpdates")
+        : base(integrationTestPath, "TestPay426DataUpdates", "Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.YearEndServiceTests.TestPay426DataUpdates")
     {
     }
 }

@@ -8,4 +8,12 @@ public sealed record DuplicateNamesAndBirthdaysRequest : ProfitYearRequest
 {
     /// <inheritdoc />
     public override string ToString() => base.ToString()!;
+
+    public static new DuplicateNamesAndBirthdaysRequest RequestExample()
+    {
+        return new DuplicateNamesAndBirthdaysRequest
+        {
+            ProfitYear = 2024
+        };
+    }
 }

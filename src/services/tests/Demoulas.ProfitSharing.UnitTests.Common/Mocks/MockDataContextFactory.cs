@@ -247,10 +247,10 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         var stateTaxes = new List<StateTax>()
         {
-            new StateTax() { Abbreviation = "NH", Rate = 0.00m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) },
-            new StateTax() { Abbreviation = "CA", Rate = 13.30m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) },
-            new StateTax() { Abbreviation = "TX", Rate = 0.00m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) },
-            new StateTax() { Abbreviation = "NY", Rate = 8.82m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) }
+            new StateTax() { Abbreviation = "NH", Rate = 0.00m, UserName = "TestUser", ModifiedAtUtc = DateTimeOffset.UtcNow },
+            new StateTax() { Abbreviation = "CA", Rate = 13.30m, UserName = "TestUser", ModifiedAtUtc = DateTimeOffset.UtcNow },
+            new StateTax() { Abbreviation = "TX", Rate = 0.00m, UserName = "TestUser", ModifiedAtUtc = DateTimeOffset.UtcNow },
+            new StateTax() { Abbreviation = "NY", Rate = 8.82m, UserName = "TestUser", ModifiedAtUtc = DateTimeOffset.UtcNow }
         };
         var mockStateTaxes = stateTaxes.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);

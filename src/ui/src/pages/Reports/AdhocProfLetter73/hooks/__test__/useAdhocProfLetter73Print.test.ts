@@ -6,7 +6,7 @@ import { useAdhocProfLetter73Print } from "../useAdhocProfLetter73Print";
 vi.mock("../../../../../reduxstore/api/AdhocProfLetter73Api", () => ({
   useLazyDownloadAdhocProfLetter73FormLetterQuery: vi.fn(() => [
     vi.fn(),
-    { 
+    {
       isFetching: false,
       isLoading: false,
       isSuccess: false,
@@ -28,9 +28,7 @@ describe("useAdhocProfLetter73Print", () => {
     };
     const selectedRows: Record<string, unknown>[] = [];
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     expect(result.current.isDownloading).toBe(false);
     expect(result.current.isPrintDialogOpen).toBe(false);
@@ -46,19 +44,28 @@ describe("useAdhocProfLetter73Print", () => {
     const filterParams = {
       profitYear: null
     };
-    const selectedRows: Record<string, unknown>[] = [
-      { badgeNumber: "123456" }
-    ];
+    const selectedRows: Record<string, unknown>[] = [{ badgeNumber: "123456" }];
 
     const mockTriggerDownload = vi.fn();
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
-    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([mockTriggerDownload, { isFetching: false, isLoading: false, isSuccess: false, isError: false, error: null, data: undefined, currentData: undefined, isUninitialized: true, reset: vi.fn() }, { lastArg: undefined as never }]);
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
+    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
+      mockTriggerDownload,
+      {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        data: undefined,
+        currentData: undefined,
+        isUninitialized: true,
+        reset: vi.fn()
+      },
+      { lastArg: undefined as never }
+    ]);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     await result.current.handlePrint();
 
@@ -72,14 +79,25 @@ describe("useAdhocProfLetter73Print", () => {
     const selectedRows: Record<string, unknown>[] = [];
 
     const mockTriggerDownload = vi.fn();
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
-    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([mockTriggerDownload, { isFetching: false, isLoading: false, isSuccess: false, isError: false, error: null, data: undefined, currentData: undefined, isUninitialized: true, reset: vi.fn() }, { lastArg: undefined as never }]);
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
+    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
+      mockTriggerDownload,
+      {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        data: undefined,
+        currentData: undefined,
+        isUninitialized: true,
+        reset: vi.fn()
+      },
+      { lastArg: undefined as never }
+    ]);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     await result.current.handlePrint();
 
@@ -102,14 +120,25 @@ describe("useAdhocProfLetter73Print", () => {
       data: mockBlob
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
-    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([mockTriggerDownload, { isFetching: false, isLoading: false, isSuccess: false, isError: false, error: null, data: undefined, currentData: undefined, isUninitialized: true, reset: vi.fn() }, { lastArg: undefined as never }]);
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
+    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
+      mockTriggerDownload,
+      {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        data: undefined,
+        currentData: undefined,
+        isUninitialized: true,
+        reset: vi.fn()
+      },
+      { lastArg: undefined as never }
+    ]);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     await result.current.handlePrint();
 
@@ -139,14 +168,25 @@ describe("useAdhocProfLetter73Print", () => {
       data: mockBlob
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
-    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([mockTriggerDownload, { isFetching: false, isLoading: false, isSuccess: false, isError: false, error: null, data: undefined, currentData: undefined, isUninitialized: true, reset: vi.fn() }, { lastArg: undefined as never }]);
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
+    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
+      mockTriggerDownload,
+      {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        data: undefined,
+        currentData: undefined,
+        isUninitialized: true,
+        reset: vi.fn()
+      },
+      { lastArg: undefined as never }
+    ]);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     await act(async () => {
       await result.current.handlePrint();
@@ -164,9 +204,7 @@ describe("useAdhocProfLetter73Print", () => {
     const filterParams = {
       profitYear: new Date(2023, 0, 1)
     };
-    const selectedRows: Record<string, unknown>[] = [
-      { badgeNumber: "123456" }
-    ];
+    const selectedRows: Record<string, unknown>[] = [{ badgeNumber: "123456" }];
 
     const mockContent = "Form letter content";
     const mockBlob = {
@@ -176,14 +214,25 @@ describe("useAdhocProfLetter73Print", () => {
       data: mockBlob
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
-    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([mockTriggerDownload, { isFetching: false, isLoading: false, isSuccess: false, isError: false, error: null, data: undefined, currentData: undefined, isUninitialized: true, reset: vi.fn() }, { lastArg: undefined as never }]);
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
+    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
+      mockTriggerDownload,
+      {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        data: undefined,
+        currentData: undefined,
+        isUninitialized: true,
+        reset: vi.fn()
+      },
+      { lastArg: undefined as never }
+    ]);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     await act(async () => {
       await result.current.handlePrint();
@@ -199,31 +248,37 @@ describe("useAdhocProfLetter73Print", () => {
     const filterParams = {
       profitYear: new Date(2023, 0, 1)
     };
-    const selectedRows: Record<string, unknown>[] = [
-      { badgeNumber: "123456" }
-    ];
+    const selectedRows: Record<string, unknown>[] = [{ badgeNumber: "123456" }];
 
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const mockTriggerDownload = vi.fn().mockRejectedValue(new Error("API Error"));
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
-    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([mockTriggerDownload, { isFetching: false, isLoading: false, isSuccess: false, isError: false, error: null, data: undefined, currentData: undefined, isUninitialized: true, reset: vi.fn() }, { lastArg: undefined as never }]);
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
+    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
+      mockTriggerDownload,
+      {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        data: undefined,
+        currentData: undefined,
+        isUninitialized: true,
+        reset: vi.fn()
+      },
+      { lastArg: undefined as never }
+    ]);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     await act(async () => {
       await result.current.handlePrint();
     });
 
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error downloading prof letter 73 form letter:",
-        expect.any(Error)
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Error downloading prof letter 73 form letter:", expect.any(Error));
       expect(result.current.isPrintDialogOpen).toBe(false);
       expect(result.current.error).toBe("An unexpected error occurred. Please try again.");
     });
@@ -237,9 +292,7 @@ describe("useAdhocProfLetter73Print", () => {
     };
     const selectedRows: Record<string, unknown>[] = [];
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     act(() => {
       result.current.setIsPrintDialogOpen(true);
@@ -270,9 +323,7 @@ describe("useAdhocProfLetter73Print", () => {
 
     const openSpy = vi.spyOn(window, "open").mockReturnValue(mockPrintWindow as unknown as Window);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     const testContent = "Test form letter\nWith multiple lines";
     result.current.printFormLetter(testContent);
@@ -297,9 +348,7 @@ describe("useAdhocProfLetter73Print", () => {
 
     const openSpy = vi.spyOn(window, "open").mockReturnValue(null);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     // Should not throw error
     act(() => {
@@ -322,43 +371,65 @@ describe("useAdhocProfLetter73Print", () => {
     ];
 
     const mockTriggerDownload = vi.fn();
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
-    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([mockTriggerDownload, { isFetching: false, isLoading: false, isSuccess: false, isError: false, error: null, data: undefined, currentData: undefined, isUninitialized: true, reset: vi.fn() }, { lastArg: undefined as never }]);
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
+    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
+      mockTriggerDownload,
+      {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        data: undefined,
+        currentData: undefined,
+        isUninitialized: true,
+        reset: vi.fn()
+      },
+      { lastArg: undefined as never }
+    ]);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     await act(async () => {
       await result.current.handlePrint();
     });
 
     expect(mockTriggerDownload).not.toHaveBeenCalled();
-    expect(result.current.error).toBe("No valid badge numbers found in selected rows. Please ensure the data includes badge number information.");
+    expect(result.current.error).toBe(
+      "No valid badge numbers found in selected rows. Please ensure the data includes badge number information."
+    );
   });
 
   it("should set error when API returns error response", async () => {
     const filterParams = {
       profitYear: new Date(2023, 0, 1)
     };
-    const selectedRows: Record<string, unknown>[] = [
-      { badgeNumber: "123456" }
-    ];
+    const selectedRows: Record<string, unknown>[] = [{ badgeNumber: "123456" }];
 
     const mockTriggerDownload = vi.fn().mockResolvedValue({
       error: { status: 500, data: "Server error" }
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
-    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([mockTriggerDownload, { isFetching: false, isLoading: false, isSuccess: false, isError: false, error: null, data: undefined, currentData: undefined, isUninitialized: true, reset: vi.fn() }, { lastArg: undefined as never }]);
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
+    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
+      mockTriggerDownload,
+      {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        data: undefined,
+        currentData: undefined,
+        isUninitialized: true,
+        reset: vi.fn()
+      },
+      { lastArg: undefined as never }
+    ]);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     await act(async () => {
       await result.current.handlePrint();
@@ -374,9 +445,7 @@ describe("useAdhocProfLetter73Print", () => {
     };
     const selectedRows: Record<string, unknown>[] = [];
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     // Manually set error state (in real use, it would be set by handlePrint)
     act(() => {
@@ -402,9 +471,7 @@ describe("useAdhocProfLetter73Print", () => {
     const filterParams = {
       profitYear: new Date(2023, 0, 1)
     };
-    const selectedRows: Record<string, unknown>[] = [
-      { badgeNumber: "123456" }
-    ];
+    const selectedRows: Record<string, unknown>[] = [{ badgeNumber: "123456" }];
 
     const mockBlob = {
       text: vi.fn().mockResolvedValue("Test content")
@@ -413,14 +480,25 @@ describe("useAdhocProfLetter73Print", () => {
       data: mockBlob
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
-    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([mockTriggerDownload, { isFetching: false, isLoading: false, isSuccess: false, isError: false, error: null, data: undefined, currentData: undefined, isUninitialized: true, reset: vi.fn() }, { lastArg: undefined as never }]);
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
+    vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
+      mockTriggerDownload,
+      {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        data: undefined,
+        currentData: undefined,
+        isUninitialized: true,
+        reset: vi.fn()
+      },
+      { lastArg: undefined as never }
+    ]);
 
-    const { result } = renderHook(() => 
-      useAdhocProfLetter73Print(filterParams, selectedRows)
-    );
+    const { result } = renderHook(() => useAdhocProfLetter73Print(filterParams, selectedRows));
 
     // Simulate error by calling printFormLetter with null window
     const openSpy = vi.spyOn(window, "open").mockReturnValue(null);
@@ -431,7 +509,7 @@ describe("useAdhocProfLetter73Print", () => {
 
     // Restore window.open and call handlePrint
     openSpy.mockRestore();
-    
+
     await act(async () => {
       await result.current.handlePrint();
     });

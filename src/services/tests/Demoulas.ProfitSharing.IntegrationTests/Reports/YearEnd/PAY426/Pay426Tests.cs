@@ -19,7 +19,7 @@ public class Pay426Tests : PristineBaseTest
     public async Task Pay426Test()
     {
         // Get expected totals by parsing READY Report (full PAY426 main report format)
-        string expectedReportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R8-PAY426").Trim();
+        string expectedReportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R08-PAY426").Trim();
         YearEndProfitSharingReportResponse expectedResponse = Pay426Parser.Parse(expectedReportText);
 
         // Get actual totals from SMART using GetYearEndProfitSharingTotalsAsync

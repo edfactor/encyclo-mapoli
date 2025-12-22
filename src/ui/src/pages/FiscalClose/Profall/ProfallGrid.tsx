@@ -23,32 +23,39 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
   const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
   const profitYear = useFiscalCloseProfitYear();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "badgeNumber",
-      initialSortDescending: false,
-      persistenceKey: GRID_KEYS.PROFALL_REPORT,
-      onPaginationChange: useCallback(
-        (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (profitYear && securityState.token) {
-            const yearToUse = profitYear || new Date().getFullYear();
-            const skip = pageNum * pageSz;
-            getProfitSharingLabels({
-              profitYear: yearToUse,
-              useFrozenData: true,
-              pagination: {
-                take: pageSz,
-                skip: skip,
-                sortBy: sortPrms.sortBy || "badgeNumber",
-                isSortDescending: sortPrms.isSortDescending
-              }
-            });
-          }
-        },
-        [profitYear, securityState.token, getProfitSharingLabels]
-      )
-    });
+  const {
+    pageNumber,
+    pageSize,
+    sortParams,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange,
+    resetPagination
+  } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    persistenceKey: GRID_KEYS.PROFALL_REPORT,
+    onPaginationChange: useCallback(
+      (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (profitYear && securityState.token) {
+          const yearToUse = profitYear || new Date().getFullYear();
+          const skip = pageNum * pageSz;
+          getProfitSharingLabels({
+            profitYear: yearToUse,
+            useFrozenData: true,
+            pagination: {
+              take: pageSz,
+              skip: skip,
+              sortBy: sortPrms.sortBy || "badgeNumber",
+              isSortDescending: sortPrms.isSortDescending
+            }
+          });
+        }
+      },
+      [profitYear, securityState.token, getProfitSharingLabels]
+    )
+  });
 
   const fetchData = useCallback(() => {
     const yearToUse = profitYear || new Date().getFullYear();
@@ -116,13 +123,9 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
       {recordCount > 0 && (
         <Pagination
           pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-          }}
+          setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
           pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={handlePageSizeChange}
           recordCount={recordCount}
         />
       )}

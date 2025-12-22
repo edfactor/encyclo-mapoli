@@ -9,7 +9,7 @@
         public decimal? Balance { get; set; }
         public byte? Years { get; set; }
 
-        public static new NewProfitSharingLabelResponse SampleResponse()
+        public static new NewProfitSharingLabelResponse ResponseExample()
         {
             return new NewProfitSharingLabelResponse()
             {

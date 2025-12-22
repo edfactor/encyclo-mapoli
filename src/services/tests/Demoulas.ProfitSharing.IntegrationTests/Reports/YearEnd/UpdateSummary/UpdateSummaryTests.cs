@@ -43,9 +43,23 @@ public class UpdateSummaryTests : PristineBaseTest
         CountBreakdown("Smart", smart);
 
         List<Pay450Record> smartOnly = smart.ExceptBy(ready.Select(r => r.BadgeAndStore), r => r.BadgeAndStore).ToList();
-        // smartOnly.Count.ShouldBe(0) BOBH FIX THIS!!!
         List<Pay450Record> readyOnly = ready.ExceptBy(smart.Select(r => r.BadgeAndStore), r => r.BadgeAndStore).ToList();
-        // readyOnly.Count.ShouldBe(0) BOBH FIX THIS!!!
+
+        // Ignore people with no money in READY
+        foreach (Pay450Record pay450Record in readyOnly)
+        {
+            pay450Record.BeforeAmount.ShouldBe(0);
+            pay450Record.AfterAmount.ShouldBe(0);
+        }
+
+        TestOutputHelper.WriteLine("");
+        // Ignore people with no money in SMART
+        foreach (Pay450Record pay450Record in smartOnly)
+        {
+            pay450Record.BeforeAmount.ShouldBe(0);
+            pay450Record.AfterAmount.ShouldBe(0);
+        }
+
         List<Pay450Record> intersection = smart.IntersectBy(ready.Select(r => r.BadgeAndStore), r => r.BadgeAndStore).ToList();
         Dictionary<string, Pay450Record> readyByBadgeAndStore = ready.ToDictionary(k => k.BadgeAndStore, v => v);
 
@@ -84,14 +98,19 @@ public class UpdateSummaryTests : PristineBaseTest
             }
 
             // Common badges that appear on both TotalService and PAY450 reports
+            // IE. these individuals have problems on both reports
             HashSet<string> commonBadges = new() { "700173", "700569", "700655", "702489", "706161" };
-            Dictionary<int, decimal> readyEtvaByBadge = await ReadyPayProfitLoader.GetReadyEtvaByBadge(DbFactory.ConnectionString, comparisons.Select(vci => int.Parse(ExtractBadge(vci.Actual.BadgeAndStore))).ToList());
+
+            // Get ETVA values for both Ready and Smart
+            List<int> badgesForEtva = comparisons.Select(vci => int.Parse(ExtractBadge(vci.Actual.BadgeAndStore))).ToList();
+            Dictionary<int, decimal> readyEtvaByBadge = await ReadyPayProfitLoader.GetReadyEtvaByBadge(DbFactory.ConnectionString, badgesForEtva);
+            Dictionary<int, decimal> smartEtvaByBadge = await GetSmartEtvaByBadge(badgesForEtva);
 
             MarkdownTable detailedTable = new([
                 "Badge",
                 "Before Amt (R→S)", "Before Vested (R→S)", "Before Years (R→S)", "Before Enrl (R→S)",
                 "After Amt (R→S)", "After Vested (R→S)", "After Years (R→S)", "After Enrl (R→S)",
-                "R ETVA"
+                "ETVA (R→S)"
             ]);
 
             // Sort by Before Years for easier analysis
@@ -106,6 +125,7 @@ public class UpdateSummaryTests : PristineBaseTest
                 // Highlight common badges in grey
                 string? cssClass = commonBadges.Contains(badge) ? "highlight" : null;
 
+                int badgeInt = int.Parse(badge);
                 detailedTable.AddRow(
                     cssClass,
                     badge,
@@ -117,7 +137,7 @@ public class UpdateSummaryTests : PristineBaseTest
                     FormatDifferenceMoney(expected.AfterVested, actual.AfterVested),
                     FormatDifference(expected.AfterYears, actual.AfterYears),
                     FormatDifference(expected.AfterEnroll, actual.AfterEnroll),
-                    $"{readyEtvaByBadge[int.Parse(badge)]:N2}"
+                    FormatDifferenceMoney(readyEtvaByBadge[badgeInt], smartEtvaByBadge[badgeInt])
                 );
             }
 
@@ -134,8 +154,10 @@ public class UpdateSummaryTests : PristineBaseTest
 #if false
             // Save HTML version
             string title = $"PAY450 Discrepancies - Count of {comparisons.Count} of {intersection.Count:N0} considered";
-            detailedTable.SaveAsHtml("/Users/robertherrmann/Desktop/demos/sprint-38/update-summary-discrepancies.html", title, summaryStats);
-            TestOutputHelper.WriteLine("HTML report saved to: /Users/robertherrmann/Desktop/demos/sprint-37/update-summary-discrepancies.html");
+            string outputfile = "/Users/robertherrmann/Desktop/demos/sprint-38/update-summary-discrepancies.html";
+            detailedTable.SaveAsHtml(outputfile, title, summaryStats);
+            TestOutputHelper.WriteLine($"HTML report saved to: {outputfile}");
+
 #endif
             TestOutputHelper.WriteLine($"Sum of After Vested Differences (Smart - Ready): ${totalAfterVestedDifference:N2} across {afterVestedDifferenceCount} records");
 
@@ -241,6 +263,17 @@ public class UpdateSummaryTests : PristineBaseTest
         return records;
     }
 
+    private Task<Dictionary<int, decimal>> GetSmartEtvaByBadge(List<int> badges)
+    {
+        return DbFactory.UseReadOnlyContext(async ctx =>
+        {
+            return await ctx.PayProfits
+                .Include(pp => pp.Demographic)
+                .Where(pp => pp.ProfitYear == TestConstants.OpenProfitYear && badges.Contains(pp.Demographic!.BadgeNumber))
+                .ToDictionaryAsync(pp => pp.Demographic!.BadgeNumber, pp => pp.Etva, CancellationToken.None);
+        });
+    }
+
     public async Task<string> VestDetailsBadgeSimple(long badge, short profitYear)
     {
         DateOnly fiscalEndDate = (await CalendarService.GetYearStartAndEndAccountingDatesAsync(profitYear)).FiscalEndDate;
@@ -344,5 +377,4 @@ public class UpdateSummaryTests : PristineBaseTest
 
         return $"{ready:N2} → {smart:N2}";
     }
-
 }
