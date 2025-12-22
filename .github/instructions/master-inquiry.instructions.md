@@ -1270,7 +1270,6 @@ MasterInquiry/
 │   ├── MasterInquiryFunctions.test.ts         # Helper function tests
 │   └── transformSearchParams.test.ts          # Transformation tests
 ├── MasterInquiryMemberDetails.test.tsx        # Component tests
-├── MasterInquiryMemberGrid.test.tsx           # Grid component tests
 └── MasterInquiryMemberGridColumns.test.tsx    # Column definition tests
 ```
 

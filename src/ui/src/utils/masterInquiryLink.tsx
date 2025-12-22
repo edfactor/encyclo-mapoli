@@ -46,8 +46,12 @@ export function viewBadgeLinkRenderer(
     return (
       <Button
         href={`/master-inquiry/${safeValue}`}
+        className="px-0 underline"
         variant="text"
-        onClick={() => navigateFunction(`/master-inquiry/${safeValue}`)}>
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+          e.preventDefault();
+          navigateFunction(`/master-inquiry/${safeValue}`);
+        }}>
         {displayValue}
       </Button>
     );
