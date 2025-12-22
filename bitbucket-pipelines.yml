@@ -367,6 +367,22 @@ definitions:
                 $testFilters += "Common"
                 $matched = $true
               }
+              # Api project root files (Swagger, Program.cs, etc.) - typically infrastructure
+              elseif ($file -match "Demoulas\.ProfitSharing\.Api/") {
+                # Swagger and startup files are infrastructure - run all endpoint tests
+                $testFilters += "Endpoints"
+                $matched = $true
+              }
+              # CachingServices
+              elseif ($file -match "CachingServices/") {
+                $testFilters += "Services"
+                $matched = $true
+              }
+              # Analyzers - typically don't need runtime tests
+              elseif ($file -match "Analyzers/") {
+                # Analyzers are compile-time only, skip tests
+                $matched = $true
+              }
 
               if (-not $matched) {
                 Write-Host "[UNKNOWN] No mapping for: $file - Running ALL tests" -ForegroundColor Yellow
