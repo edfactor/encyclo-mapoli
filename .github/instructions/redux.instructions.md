@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/reduxstore/**/*.*"
+paths: "src/ui/src/reduxstore/**/*.*"
 ---
 
 # Redux & RTK Query Architecture Guide

@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/pages/**/*.*"
+paths: "src/ui/src/pages/**/*.*"
 ---
 
 # Page Component Architecture
@@ -286,8 +287,7 @@ const MasterInquiry = () => {
 ```typescript
 const useMasterInquiry = () => {
   const [state, dispatch] = useReducer(masterInquiryReducer, initialState);
-  const [triggerSearch, { isLoading }] =
-    useLazySearchProfitMasterInquiryQuery();
+  const [triggerSearch, { isLoading }] = useLazySearchProfitMasterInquiryQuery();
   const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
   const { addAlert, clearAlerts } = useMissiveAlerts();
 
@@ -307,7 +307,7 @@ const useMasterInquiry = () => {
     searchResults: state.search.results,
     selectedMember: state.selection.selectedMember,
     executeSearch,
-    selectMember,
+    selectMember
     // ... other state/actions
   };
 };
@@ -589,15 +589,9 @@ Pattern: Grid columns defined in separate files for reusability and testability.
 
 ```typescript
 import { ColDef } from "ag-grid-community";
-import {
-  createBadgeColumn,
-  createNameColumn,
-  createStoreColumn,
-} from "../../utils/gridColumnFactory";
+import { createBadgeColumn, createNameColumn, createStoreColumn } from "../../utils/gridColumnFactory";
 
-export const GetProfallGridColumns = (
-  navFunction: (badgeNumber: string) => void,
-): ColDef[] => {
+export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     createStoreColumn({ minWidth: 80, sortable: true }),
     createBadgeColumn({ headerName: "Badge", navigateFunction: navFunction }),
@@ -610,8 +604,8 @@ export const GetProfallGridColumns = (
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: true,
-    },
+      sortable: true
+    }
   ];
 };
 ```
@@ -788,12 +782,8 @@ Complex state or state shared across pages stored in Redux slices.
 
 ```typescript
 // Reading from Redux
-const { profitSharingEdit, profitSharingUpdate } = useSelector(
-  (state: RootState) => state.yearsEnd,
-);
-const currentMember = useSelector(
-  (state: RootState) => state.distribution.currentMember,
-);
+const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
+const currentMember = useSelector((state: RootState) => state.distribution.currentMember);
 
 // Dispatching actions
 const dispatch = useDispatch();
@@ -815,8 +805,7 @@ Server data automatically cached by RTK Query.
 
 ```typescript
 // Lazy query (manual trigger)
-const [triggerSearch, { data, isFetching, error }] =
-  useLazySearchDistributionsQuery();
+const [triggerSearch, { data, isFetching, error }] = useLazySearchDistributionsQuery();
 
 // Trigger
 await triggerSearch({ badgeNumber: 12345 });
@@ -849,7 +838,7 @@ const masterInquiryReducer = (state: State, action: Action): State => {
     case "SEARCH_SUCCESS":
       return {
         ...state,
-        search: { results: action.payload, isLoading: false },
+        search: { results: action.payload, isLoading: false }
       };
     case "SELECT_MEMBER":
       return { ...state, selection: { selectedMember: action.payload } };
@@ -931,7 +920,7 @@ const selectMember = useCallback(async (member: Member) => {
   // Second fetch: profit data (depends on member details)
   const profitData = await triggerProfitDetails({
     id: member.id,
-    memberType: member.memberType,
+    memberType: member.memberType
   }).unwrap();
   dispatch({ type: "PROFIT_DATA_SUCCESS", payload: profitData });
 }, []);
@@ -945,11 +934,7 @@ const selectMember = useCallback(async (member: Member) => {
 
 ```typescript
 useEffect(() => {
-  Promise.all([
-    triggerStates().unwrap(),
-    triggerTaxCodes().unwrap(),
-    triggerMissives().unwrap(),
-  ]);
+  Promise.all([triggerStates().unwrap(), triggerTaxCodes().unwrap(), triggerMissives().unwrap()]);
 }, []);
 ```
 
@@ -980,12 +965,12 @@ const fetchData = useCallback(
         pageNumber: page + 1, // API expects 1-based
         pageSize: size,
         sortBy: sort ?? sortBy,
-        isSortDescending: desc ?? isSortDescending,
+        isSortDescending: desc ?? isSortDescending
       },
-      false,
+      false
     );
   },
-  [triggerQuery, sortBy, isSortDescending],
+  [triggerQuery, sortBy, isSortDescending]
 );
 
 const handlePageChange = (page: number, size: number) => {
@@ -1059,16 +1044,11 @@ getData: builder.query<
     isSortDescending?: boolean;
   }
 >({
-  query: ({
-    pageNumber = 1,
-    pageSize = 10,
-    sortBy = "Created",
-    isSortDescending = true,
-  }) => ({
+  query: ({ pageNumber = 1, pageSize = 10, sortBy = "Created", isSortDescending = true }) => ({
     url: "my-endpoint",
     method: "GET",
-    params: { pageNumber, pageSize, sortBy, isSortDescending },
-  }),
+    params: { pageNumber, pageSize, sortBy, isSortDescending }
+  })
 });
 ```
 
@@ -1109,7 +1089,7 @@ import {
   createSSNColumn,
   createStateColumn,
   createStoreColumn,
-  createStatusColumn,
+  createStatusColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetMyGridColumns = (): ColDef[] => {
@@ -1118,29 +1098,29 @@ export const GetMyGridColumns = (): ColDef[] => {
     createBadgeColumn({
       headerName: "Badge Number",
       field: "badgeNumber",
-      minWidth: 120,
+      minWidth: 120
     }),
 
     // Name column
     createNameColumn({
-      field: "fullName",
+      field: "fullName"
     }),
 
     // Date column with automatic formatting
     createDateColumn({
       headerName: "Hire Date",
-      field: "hireDate",
+      field: "hireDate"
     }),
 
     // Currency column with $ formatting
     createCurrencyColumn({
       headerName: "Balance",
-      field: "netBalance",
+      field: "netBalance"
     }),
 
     // SSN column with masking
     createSSNColumn({
-      field: "ssn",
+      field: "ssn"
     }),
 
     // Custom column (when factory doesn't exist)
@@ -1150,8 +1130,8 @@ export const GetMyGridColumns = (): ColDef[] => {
       sortable: true,
       filter: false, // ALWAYS false by default
       flex: 1,
-      minWidth: 150,
-    },
+      minWidth: 150
+    }
   ];
 };
 ```
@@ -1162,10 +1142,7 @@ export const GetMyGridColumns = (): ColDef[] => {
 
 ```typescript
 import { ColDef } from "ag-grid-community";
-import {
-  createBadgeColumn,
-  createDateColumn,
-} from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createDateColumn } from "../../../utils/gridColumnFactory";
 import { myCustomFormatter } from "../../../utils/dateUtils";
 
 export const GetMyGridColumns = (): ColDef[] => {
@@ -1177,9 +1154,8 @@ export const GetMyGridColumns = (): ColDef[] => {
       sortable: true,
       filter: false,
       width: 200,
-      valueFormatter: (params: any) =>
-        params.value ? myCustomFormatter(params.value) : "",
-    },
+      valueFormatter: (params: any) => (params.value ? myCustomFormatter(params.value) : "")
+    }
   ];
 };
 ```
@@ -1336,8 +1312,8 @@ navigate("/view-distribution", {
   state: {
     showSuccessMessage: true,
     memberName: "John Doe",
-    amount: 5000,
-  },
+    amount: 5000
+  }
 });
 
 // Navigate back
@@ -1368,8 +1344,8 @@ navigate("/distribution-inquiry", {
   state: {
     showSuccessMessage: true,
     operationType: "added",
-    memberName: "John Doe",
-  },
+    memberName: "John Doe"
+  }
 });
 
 // In page B

@@ -1,5 +1,7 @@
 ---
-applyTo: "src/ui/src/pages/MasterInquiry/**/*.*"
+name: "Master Inquiry Page - Technical Documentation"
+applyTo: "src/ui/src/pages/InquiriesAndAdjustments/MasterInquiry/**/*.*"
+paths: "src/ui/src/pages/InquiriesAndAdjustments/MasterInquiry/**/*.*"
 ---
 
 # Master Inquiry Page - Technical Documentation
