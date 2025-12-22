@@ -136,12 +136,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
           providedOptions={{
             rowData: searchResults.results.filter((row) => row && Object.keys(row).length > 0),
             columnDefs: columns,
-            // context: { onBadgeClick: handleMemberClick },
-            // onRowClicked: ((event: RowClickedEvent<EmployeeDetails>) => {
-            //   if (event.data) {
-            //     handleMemberClick(event.data);
-            //   }
-            // }) as (event: unknown) => void
           }}
         />
         <Pagination
