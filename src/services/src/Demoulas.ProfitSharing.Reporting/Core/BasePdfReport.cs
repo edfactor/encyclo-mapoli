@@ -3,6 +3,7 @@ using QuestPDF.Infrastructure;
 
 namespace Demoulas.ProfitSharing.Reporting.Core;
 
+/// <summary>
 /// Abstract base class for all PDF reports in the Profit Sharing application.
 /// Provides consistent structure: header, content, and footer with standardized formatting.
 /// 
