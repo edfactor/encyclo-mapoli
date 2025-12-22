@@ -96,7 +96,7 @@ public class UpdateSummaryTests : PristineBaseTest
                     afterVestedDifferenceCount++;
                 }
             }
-            
+
             // Common badges that appear on both TotalService and PAY450 reports
             // IE. these individuals have problems on both reports
             HashSet<string> commonBadges = new() { "700173", "700569", "700655", "702489", "706161" };

@@ -4,7 +4,7 @@ using System.Linq;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;

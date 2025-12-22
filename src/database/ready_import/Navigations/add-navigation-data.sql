@@ -143,6 +143,7 @@ DECLARE
     MANAGE_ANNUITY_RATES_PAGE CONSTANT NUMBER := 174;
     PROFIT_SHARING_ADJUSTMENTS_PAGE CONSTANT NUMBER := 175;
     ADHOC_PROF_LETTER73 CONSTANT NUMBER := 176;
+    MANAGE_COMMENT_TYPES_PAGE CONSTANT NUMBER := 177;
 
     --- These are the role IDs from the ROLES table
     SYSTEM_ADMINISTRATOR CONSTANT NUMBER := 1;
@@ -294,13 +295,14 @@ BEGIN
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(AUDIT_SEARCH_PAGE, IT_DEVOPS_MENU, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
 
 --Administrative Operations
     insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, ADMINISTRATIVE_MENU, 'Demographic Sync Errors', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_ANNUITY_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage Annuity Rates', '', 'manage-annuity-rates', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADJUSTMENTS_GROUP, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_HIDDEN, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADMINISTRATIVE_MENU, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(AUDIT_SEARCH_PAGE, ADMINISTRATIVE_MENU, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_COMMENT_TYPES_PAGE, ADMINISTRATIVE_MENU, 'Manage Comment Types', '', 'manage-comment-types', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -698,6 +700,8 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, IT_DEVOPS);
     assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, IT_DEVOPS);
     assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(AUDIT_SEARCH_PAGE, SYSTEM_ADMINISTRATOR);

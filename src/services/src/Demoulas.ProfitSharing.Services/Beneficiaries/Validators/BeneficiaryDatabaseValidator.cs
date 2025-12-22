@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Contexts;
+﻿using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +25,7 @@ public class BeneficiaryDatabaseValidator
         // Validate beneficiary contact exists
         var beneficiaryContactExists = await ctx.BeneficiaryContacts
             .AnyAsync(x => x.Id == beneficiaryContactId, cancellationToken);
-        
+
         if (!beneficiaryContactExists)
         {
             result.Errors.Add(new ValidationFailure(
@@ -37,7 +37,7 @@ public class BeneficiaryDatabaseValidator
         var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
         var demographicExists = await demographicQuery
             .AnyAsync(x => x.BadgeNumber == employeeBadgeNumber, cancellationToken);
-        
+
         if (!demographicExists)
         {
             result.Errors.Add(new ValidationFailure(
@@ -58,7 +58,7 @@ public class BeneficiaryDatabaseValidator
         // Check if SSN already exists
         var ssnExists = await ctx.BeneficiaryContacts
             .AnyAsync(x => x.Ssn == contactSsn, cancellationToken);
-        
+
         if (ssnExists)
         {
             result.Errors.Add(new ValidationFailure(
@@ -78,7 +78,7 @@ public class BeneficiaryDatabaseValidator
 
         var contactExists = await ctx.BeneficiaryContacts
             .AnyAsync(x => x.Id == beneficiaryContactId, cancellationToken);
-        
+
         if (!contactExists)
         {
             result.Errors.Add(new ValidationFailure(

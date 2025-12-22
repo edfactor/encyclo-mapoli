@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -12,7 +12,7 @@ using Demoulas.ProfitSharing.Endpoints.Validation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
 public sealed class UpdateAnnuityRateEndpoint : ProfitSharingEndpoint<UpdateAnnuityRateRequest, Results<Ok<AnnuityRateDto>, NotFound, BadRequest, ProblemHttpResult>>
 {

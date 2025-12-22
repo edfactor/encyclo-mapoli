@@ -2,8 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
 import EnvironmentUtils from "../utils/environmentUtils";
-import { AdhocProfLetter73Api } from "./api/AdhocProfLetter73Api";
 import { AdhocApi } from "./api/AdhocApi";
+import { AdhocProfLetter73Api } from "./api/AdhocProfLetter73Api";
 import { AdjustmentsApi } from "./api/AdjustmentsApi";
 import { AppSupportApi } from "./api/AppSupportApi";
 import { BeneficiariesApi } from "./api/BeneficiariesApi";
@@ -19,6 +19,7 @@ import { ProfitDetailsApi } from "./api/ProfitDetailsApi";
 import { SecurityApi } from "./api/SecurityApi";
 import { validationApi } from "./api/ValidationApi";
 import { YearsEndApi } from "./api/YearsEndApi";
+import { AdministrationApi } from "./api/administrationApi";
 import { hcmSyncApi } from "./api/hcmSyncApi";
 import navigationStatusSlice from "./slices/NavigationStatusSlice";
 import AppSupportSlice from "./slices/appSupportSlice";
@@ -41,6 +42,7 @@ const API_INSTANCES = [
   SecurityApi,
   YearsEndApi,
   AdhocApi,
+  AdministrationApi,
   ItOperationsApi,
   hcmSyncApi,
   MilitaryApi,

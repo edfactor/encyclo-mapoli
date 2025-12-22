@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
@@ -136,7 +136,7 @@ public class FrozenServiceTests
 
         getDemographicSnapshotMethod.ReturnType.ShouldBe(typeof(IQueryable<Demographic>));
     }
-    
+
     private static string GetFrozenServiceSourcePath()
     {
         // Prefer a repo-relative resolution so tests work across machines and CI.

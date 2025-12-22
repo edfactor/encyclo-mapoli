@@ -27,9 +27,9 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         var configuration = new ConfigurationBuilder()
             .AddUserSecrets<Api.Program>()
             .Build();
-        ConnectionString = OrSkip(configuration,"ConnectionStrings:ProfitSharing");
-        var warehouseConnectionString = OrSkip(configuration,"ConnectionStrings:Warehouse");
-        
+        ConnectionString = OrSkip(configuration, "ConnectionStrings:ProfitSharing");
+        var warehouseConnectionString = OrSkip(configuration, "ConnectionStrings:Warehouse");
+
         _readOnlyCtx = setUpReadOnlyCtx(ConnectionString, debug);
         _ctx = setUpWriteCtx(ConnectionString, debug);
         _warehouseCtx = setUpWarehouseCtx(warehouseConnectionString, debug);

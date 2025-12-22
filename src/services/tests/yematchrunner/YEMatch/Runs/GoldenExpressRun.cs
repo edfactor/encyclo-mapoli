@@ -34,12 +34,12 @@ public class GoldenExpressRun : Runnable
          P00_BuildDatabase, // init both dbs
             DropBadBenesReady, // in READY, get rid of the two Bene/Employees w/o Demographics rows
             ActivityName.SanityCheckEmployeeAndBenes,
-            
+
             R08_ProfitShareReport,
             IntPay426,
             IntPay426N,
             IntPay426N9,
-            
+
             R13A_PayProfitShiftPartTime, // PAYPROFIT-SHIFT
             R13B_PayProfitShiftWeekly, // PAYPROFIT-SHIFT
             R14_ZeroPyPdPayProfit, // ZERO-PY-PD-PAYPROFIT
@@ -47,7 +47,7 @@ public class GoldenExpressRun : Runnable
 
             // PAY426
             R18_ProfitShareReportFinalRun, // "PROF-SHARE sw[2]=1 CDATE=251227 YEAREND=Y" on READY
-            // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
+                                           // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
             IntTestPay426DataUpdates,
             S18_ProfitShareReportFinalRun, // Run YearEndService on SMART  - update EarnPoints
 
@@ -73,7 +73,7 @@ public class GoldenExpressRun : Runnable
 
             IntPay450, // Does the FrozenService produce the same report as READY?
             TestEnrollmentComparison // Does READY's enrollments match SMART 2025 ?  
-         
+
         ));
     }
 }
