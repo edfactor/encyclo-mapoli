@@ -1,103 +1,91 @@
-﻿namespace YEMatch;
+namespace YEMatch;
 
 public static class ActivityToReports
 {
-    // This maps a Activty Name to a unix proccess id.   as orginally extracted from a YE Run.
-    private static readonly Dictionary<string, string> _processIdByActivity = new()
+    // Maps activity name to its generated report files (base names without PID)
+    // Prefix with "=" for files that don't have a PID suffix (e.g., "=EXCELCONTN")
+    private static readonly Dictionary<string, string[]> _reportsByActivity = new()
     {
-        ["R1"] = "13604",
-        ["R2"] = "13694",
-        ["R3"] = "7777",
-        ["R4"] = "7217",
-        ["R5"] = "18007", // EJR PROF-DOLLAR-EXEC-EXTRACT
-        // ["R6"] Clear EXEC hours dollars
-        // ["R7"] Ready Screen
-        ["R8"] = "18182", // PROF-SHARE PAY426 ...
-        // ["R9"] YE-Oracle-Payroll-Processing
-        // ["R10"] Load-Oracle-PAYPROFIT(weekly job)
-        ["R11"] = "564", // A11: Profit sharing YTD Wages Extract (PROF-DOLLAR-EXTRACT)
-        // ["R12"] =  PROF-LOAD-YREND-DEMO-PROFSHARE
-
-        ["R15"] = "12228",
-        ["R17"] = "18182",
-        ["R18"] = "24515",
-        ["R19"] = "3719",
-        ["R20"] = "7670",
-        ["R21"] = "12105",
-        ["R22"] = "20718",
-        ["R23"] = "20799",
-        ["R24"] = "21279",
-        ["R24B"] = "8855",
-        ["R25"] = "3110",
-        ["R26"] = "8074",
-        ["R27"] = "12201",
-        ["R28"] = "19155"
+        ["R01"] = [
+            "ETVA-LESS-THAN-ZERO.csv",
+            "DUPLICATE-PAYPROF-SSNS.csv",
+            "DUPLICATE-DEM-SSNS.csv",
+            "MISMATCHED-PAYPROF-DEM-SSNS.csv",
+            "MISSING-DEMOGRAPHICS-RECS.csv",
+            "MISSING-PAYPROFIT-RECS.csv",
+            "DUP-NAMES-DOB.csv",
+            "MISS-COMMA-IN-NAM.csv"
+        ],
+        ["R02"] = [
+            "QPAY511",
+            "PREVPROF",
+            "PREVPROF.csv"
+        ],
+        ["R03"] = ["QPAY066", "QPAY066.csv"],
+        ["R04"] = ["QPAY129"],
+        ["R05"] = ["PROF-EXEC-HOURS-DOLLARS.CSV"],
+        ["R08"] = [
+            "PAY426-TOT",
+            "PAY426",
+            "PAY426N-1", "PAY426N-2", "PAY426N-3", "PAY426N-4", "PAY426N-5",
+            "PAY426N-6", "PAY426N-7", "PAY426N-8", "PAY426N-9", "PAY426N-10"
+        ],
+        ["R11"] = ["PROF-HOURS-DOLLARS.CSV"],
+        ["R13A"] = ["PROFIT-SHIFT-RPT"],
+        ["R13B"] = ["PROFIT-SHIFT-RPT"],
+        ["R15"] = ["PROF-HOURS-DOLLARS.CSV"],
+        ["R17"] = [
+            "PAY426-TOT",
+            "PAY426",
+            "PAY426N-1", "PAY426N-2", "PAY426N-3", "PAY426N-4", "PAY426N-5",
+            "PAY426N-6", "PAY426N-7", "PAY426N-8", "PAY426N-9", "PAY426N-10"
+        ],
+        ["R18"] = [
+            // Note: R18 (Final Run) does not generate PAY426-TOT unlike R8 and R17
+            "PAY426",
+            "PAY426N-1", "PAY426N-2", "PAY426N-3", "PAY426N-4", "PAY426N-5",
+            "PAY426N-6", "PAY426N-7", "PAY426N-8", "PAY426N-9", "PAY426N-10"
+        ],
+        ["R19"] = ["PROFIT-ELIGIBLE.csv"],
+        ["R20"] = ["PAY443"],
+        ["R21"] = ["PAY444", "PAY444L"],
+        ["R22"] = ["PAY447"],
+        ["R24"] = ["PAY450", "PROF-CNTRL-SHEET"],
+        ["R24B"] = ["PAY450", "PROF-CNTRL-SHEET"],
+        ["R25"] = ["PROF130Y", "PROF130", "PROF130B", "PROF130V"],
+        ["R26"] = ["QPAY501"],
+        ["R27"] = ["QPAY066-UNDR21", "QPAY066TA-UNDR21", "QPAY066TA", "NEWPSLABELS", "=EXCELCONTN"],
+        ["R28"] = ["SSNORDER", "QPAY066TA", "PAYCERT"]
     };
 
-    private static readonly List<string> _referenceLogfiles =
-    [
-        // These are names of generated reports.  Then end with a unix process id.  This keeps the reports
-        // unique in a directory of reports.     We use this map to figure out for a given activity, like R22 which has
-        // a single specific unix id assigned at run time, what file or files to go grab on the remote server.
-
-        "ETVA-LESS-THAN-ZERO-13604.csv",
-        "DUPLICATE-PAYPROF-SSNS-13604.csv",
-        "DUPLICATE-DEM-SSNS-13604.csv",
-        "MISMATCHED-PAYPROF-DEM-SSNS-13604.csv",
-        "MISSING-DEMOGRAPHICS-RECS-13604.csv",
-        "MISSING-PAYPROFIT-RECS-13604.csv",
-        "DUP-NAMES-DOB-13604.csv",
-        "MISS-COMMA-IN-NAM-13604.csv",
-        "QPAY511-13694",
-        "PREVPROF-13694",
-        "PREVPROF-13694.csv",
-        "QPAY066-7777",
-        "QPAY129-7217",
-        "PROF-EXEC-HOURS-DOLLARS-18007.CSV",
-        "PAY426-TOT-18182",
-        "PAY426-18182",
-        "PAY426N-6-18182",
-        "PAY426N-2-18182",
-        "PAY426N-1-18182",
-        "PAY426N-10-18182",
-        "PAY426N-8-18182",
-        "PAY426N-7-18182",
-        "PAY426N-3-18182",
-        "PAY426N-5-18182",
-        "PAY426N-4-18182",
-        "PAY426N-9-18182",
-        "PROF-HOURS-DOLLARS-564.CSV",
-        "PROFIT-ELIGIBLE-3719.csv",
-        "PAY443-7670",
-        "PAY444-12105",
-        "PAY444L-12105",
-        "PAY447-20718",
-        "PAY450-21279",
-        "PROF-CNTRL-SHEET-21279",
-        "PROF-CNTRL-SHEET-8855",
-        "PROF130Y-3110",
-        "PROF130-3110",
-        "PROF130B-3110",
-        "PROF130V-3110",
-        "QPAY501-8074",
-        "QPAY066-UNDR21-12201",
-        "QPAY066TA-UNDR21-12201",
-        "QPAY066TA-12201",
-        "NEWPSLABELS-12201",
-        "SSNORDER-19155",
-        "QPAY066TA-19155",
-        "PAYCERT-19155"
-    ];
-
-    public static List<(string, string)> GetReportFilenamesForActivity(string activityName, string processId)
+    public static List<(string Filename, string BaseName)> GetReportFilenamesForActivity(string activityName, string processId)
     {
-        if (!_processIdByActivity.ContainsKey(activityName))
+        if (!_reportsByActivity.TryGetValue(activityName, out var patterns))
         {
-            return new List<(string, string)>();
+            return [];
         }
 
-        string referenceProcessId = _processIdByActivity[activityName];
-        return _referenceLogfiles.Where(r => r.Contains(referenceProcessId)).Select(r => (r.Replace(referenceProcessId, processId), r.Replace("-" + referenceProcessId, "")))
+        return patterns
+            .Select(p =>
+            {
+                // Files prefixed with "=" don't get a PID suffix
+                if (p.StartsWith('='))
+                {
+                    string baseName = p[1..];
+                    return (Filename: baseName, BaseName: baseName);
+                }
+
+                return (Filename: InsertPid(p, processId), BaseName: p);
+            })
             .ToList();
+    }
+
+    // Insert PID before extension if present, otherwise append
+    private static string InsertPid(string pattern, string pid)
+    {
+        var dotIndex = pattern.LastIndexOf('.');
+        return dotIndex >= 0
+            ? $"{pattern[..dotIndex]}-{pid}{pattern[dotIndex..]}"
+            : $"{pattern}-{pid}";
     }
 }

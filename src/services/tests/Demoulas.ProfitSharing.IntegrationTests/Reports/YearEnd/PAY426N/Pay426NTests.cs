@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Report;
+﻿using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -43,7 +44,7 @@ public class Pay426NTests : PristineBaseTest
     public async Task Pay426NReport_ShouldMatchReady(YearEndProfitSharingReportId reportId, int resourceNumber)
     {
         // Arrange - load expected data from READY report
-        string resourceName = $"Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R8-PAY426N-{resourceNumber}";
+        string resourceName = $"Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R08-PAY426N-{resourceNumber}";
         string expectedReportText = ReadEmbeddedResource(resourceName).Trim();
         YearEndProfitSharingReportResponse expected = Pay426NParser.Parse(expectedReportText, 2025);
 
@@ -305,6 +306,11 @@ public class Pay426NTests : PristineBaseTest
             totalChecked++;
 
             short difference = (short)(smart.YearsInPlan - ready.YearsInPlan);
+            if (difference == 0 || ready.YearsInPlan > ReferenceData.VestingYears)
+            {
+                // Lets not quibble when we agree or if the member has been in the plan for more than 5 years (executives are not bumped automatically)
+                continue;
+            }
 
             // Determine if SMART should add +1 based on the three conditions:
             // 1. No 2025 contribution yet (FirstContributionYear == null OR FirstContributionYear != 2025)

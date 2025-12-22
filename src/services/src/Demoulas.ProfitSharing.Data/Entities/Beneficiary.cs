@@ -4,7 +4,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 
 public sealed class Beneficiary : Member
 {
-    public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)
+    public required short PsnSuffix { get; set; } // Suffix for hierarchy: (1000, 2000, etc.)
     public required int DemographicId { get; set; }
 
     // Reconstruct the full PSN dynamically

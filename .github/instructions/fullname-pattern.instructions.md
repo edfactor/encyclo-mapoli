@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # FullName Consolidation Pattern - Implementation Rules
 
 ## Overview

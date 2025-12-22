@@ -22,6 +22,7 @@ internal static class TestActivityFactory
             new TestEtvaNow(),
             new TestEtvaPrior(),
             new TestViews(),
+            new TestEnrollmentComparison(),
 
             // Arrange
             new ImportReadyDbToSmartDb(),

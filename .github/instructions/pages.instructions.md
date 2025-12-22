@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/pages/**/*.*"
+paths: "src/ui/src/pages/**/*.*"
 ---
 
 # Page Component Architecture

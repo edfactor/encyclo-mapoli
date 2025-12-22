@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/pages/Reports/QPAY066xAdHocReports/**/*.*"
+paths: "src/ui/src/pages/Reports/QPAY066xAdHocReports/**/*.*"
 ---
 
 # QPAY066x Ad Hoc Reports - Technical Summary

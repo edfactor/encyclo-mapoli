@@ -23,6 +23,39 @@ definitions:
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
 
+        # Check selective test decision and set filters
+        - |
+          $script:testFilters = @()
+          $script:runAllTests = $true
+          $script:skipTests = $false
+
+          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
+            Write-Host "Checking selective test decision..." -ForegroundColor Cyan
+            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
+
+            if ($decision.decision -eq "SKIP_ALL") {
+              Write-Host "SKIP: No backend files changed" -ForegroundColor Yellow
+              $script:skipTests = $true
+            }
+            elseif ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -eq 0) {
+              Write-Host "SKIP: No test filters (only test files changed)" -ForegroundColor Yellow
+              $script:skipTests = $true
+            }
+            elseif ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -gt 0) {
+              $script:runAllTests = $false
+              $script:testFilters = $decision.testFilters
+              Write-Host "SELECTIVE: Running tests for: $($script:testFilters -join ', ')" -ForegroundColor Green
+            }
+            else {
+              Write-Host "RUN ALL: $($decision.reason)" -ForegroundColor Yellow
+            }
+          }
+
+          if ($script:skipTests) {
+            Write-Host "Exiting - no tests to run" -ForegroundColor Yellow
+            exit 0
+          }
+
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
 
@@ -53,12 +86,43 @@ definitions:
         - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
         # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
-        # VSTest is no longer supported - must run the executable directly
         - echo "Running unit tests..."
         - |
           $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-          Write-Host "Executing test runner: $testExe"
-          & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+
+          # Check if we have selective filters from the decision file
+          $testFilters = @()
+          $runAllTests = $true
+
+          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
+            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
+            if ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -gt 0) {
+              $runAllTests = $false
+              $testFilters = $decision.testFilters
+            }
+          }
+
+          if ($runAllTests) {
+            Write-Host "========================================" -ForegroundColor Cyan
+            Write-Host "Running ALL unit tests" -ForegroundColor Cyan
+            Write-Host "========================================" -ForegroundColor Cyan
+            & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+          } else {
+            Write-Host "========================================" -ForegroundColor Green
+            Write-Host "Running SELECTIVE tests" -ForegroundColor Green
+            Write-Host "Filters: $($testFilters -join ', ')" -ForegroundColor Yellow
+            Write-Host "========================================" -ForegroundColor Green
+
+            # Build namespace filter args for xUnit v3: -namespace *Pattern* -namespace *Pattern2*
+            $namespaceArgs = @("-jUnit", "$env:REPORTS_PATH/junit.xml")
+            foreach ($filter in $testFilters) {
+              $namespaceArgs += "-namespace"
+              $namespaceArgs += "*$filter*"
+            }
+
+            Write-Host "Running: $testExe $($namespaceArgs -join ' ')"
+            & $testExe @namespaceArgs
+          }
 
       artifacts:
         - test-reports/**
@@ -72,6 +136,26 @@ definitions:
         # Set environment variables
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
+
+        # Check selective test decision (PR builds only)
+        - |
+          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
+            Write-Host "Checking selective test decision..." -ForegroundColor Cyan
+            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
+
+            if ($decision.decision -eq "SKIP_ALL") {
+              Write-Host "SKIP: No backend files changed" -ForegroundColor Yellow
+              exit 0
+            }
+
+            if ($decision.runArchitectureTests -eq $false) {
+              Write-Host "SKIP: Architecture tests not needed (no structural changes)" -ForegroundColor Yellow
+              exit 0
+            }
+
+            Write-Host "RUN: Architecture tests will execute" -ForegroundColor Green
+          }
+
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/architecture-tests"
 
         # Ensure the REPORTS_PATH directory exists
@@ -114,6 +198,245 @@ definitions:
       artifacts:
         - test-reports/**
 
+    # Selective backend test analysis - determines which tests to run based on changed files
+    # Uses dotnet-affected tool to build dependency graph and identify impacted projects
+    selective-backend-analysis: &selective-backend-analysis
+      name: Analyze Backend Changes (Selective Testing)
+      runs-on:
+        - windows
+        - self.hosted
+      artifacts:
+        - selective-test-decision.json
+      script:
+        # Only run selective analysis for PR builds
+        - |
+          if (-not $env:BITBUCKET_PR_DESTINATION_BRANCH) {
+            Write-Host "Branch build detected - skipping selective analysis (will run all tests)" -ForegroundColor Yellow
+            # Write RUN_ALL decision so downstream steps run all tests
+            @{ decision = "RUN_ALL"; reason = "Branch build" } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+            exit 0
+          }
+
+        # Get changed files using git diff (no fetch needed - origin refs already available in pipeline clone)
+        - |
+          Write-Host "Getting changed files..." -ForegroundColor Cyan
+
+          try {
+            $targetBranch = $env:BITBUCKET_PR_DESTINATION_BRANCH
+            Write-Host "Target branch: origin/$targetBranch"
+
+            # Get changed files directly - no fetch needed in Bitbucket Pipelines
+            $changedFiles = git diff --name-only "origin/$targetBranch" HEAD 2>&1
+
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "git diff failed: $changedFiles" -ForegroundColor Yellow
+              Write-Host "Falling back to ALL tests" -ForegroundColor Yellow
+              @{
+                decision = "RUN_ALL"
+                reason = "git diff failed"
+              } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+              exit 0
+            }
+
+            # Convert to array and filter
+            $changedFiles = $changedFiles -split "`n" | Where-Object { $_ }
+            Write-Host "Found $($changedFiles.Count) changed files" -ForegroundColor Cyan
+
+            # Check for global configuration changes
+            $globalChanges = $changedFiles | Where-Object {
+              $_ -match "src/services/Directory\.Build\.props" -or
+              $_ -match "src/services/Directory\.Packages\.props" -or
+              $_ -match "src/services/global\.json" -or
+              $_ -match "src/services/\.editorconfig"
+            }
+
+            if ($globalChanges) {
+              Write-Host "Global configuration changes detected - will run ALL tests" -ForegroundColor Yellow
+              Write-Host "Changed global files:"
+              $globalChanges | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+              @{
+                decision = "RUN_ALL"
+                reason = "Global configuration changes detected"
+                globalChanges = @($globalChanges)
+              } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+              exit 0
+            }
+
+            # Check if any backend files changed
+            $backendChanges = $changedFiles | Where-Object { $_ -match "^src/services/.*\.(cs|csproj)$" }
+
+            if (-not $backendChanges) {
+              Write-Host "No backend files changed" -ForegroundColor Green
+              @{
+                decision = "SKIP_ALL"
+                reason = "No backend files changed"
+                runUnitTests = $false
+                runArchitectureTests = $false
+              } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+              exit 0
+            }
+
+            Write-Host "Backend files changed:" -ForegroundColor Yellow
+            $backendChanges | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+
+            # Map changed files to test namespace filters
+            $testFilters = @()
+            $runAllTests = $false
+
+            foreach ($file in $backendChanges) {
+              $file = $file -replace '\\', '/'
+
+              # Skip test files - they don't affect which tests to run
+              if ($file -match "/tests/") { continue }
+
+              # Critical files that affect everything - run ALL tests
+              if ($file -match "Endpoints/Base/|Extensions/TelemetryExtensions|Common/Contracts/Result|Common/Contracts/Error|Data/Contexts/|Data/Migrations/") {
+                Write-Host "[CRITICAL] $file - Running ALL tests" -ForegroundColor Red
+                $runAllTests = $true
+                break
+              }
+
+              # Map file paths to test namespaces
+              $matched = $false
+
+              if ($file -match "Endpoints/Beneficiaries/|Services/Beneficiaries/") {
+                $testFilters += "Beneficiaries"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Lookups/|Services/Lookup/") {
+                $testFilters += "Lookups"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Distributions/|Services/Distribution") {
+                $testFilters += "Distributions"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Adjustments/|Services/Adjustment") {
+                $testFilters += "Adjustments"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/YearEnd/|Services/YearEnd|Services/ProfitShareEdit") {
+                $testFilters += "YearEnd"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Military/|Services/Military/") {
+                $testFilters += "Military"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Validation/|Services/Validation/") {
+                $testFilters += "Validation"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/ItOperations/|Services/ItDevOps/") {
+                $testFilters += "ItOperations"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Navigations/|Services/Navigations/") {
+                $testFilters += "Navigation"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/BeneficiaryInquiry/|Services/BeneficiaryInquiry/") {
+                $testFilters += "BeneficiaryInquiry"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/ProfitDetails/") {
+                $testFilters += "ProfitDetails"
+                $matched = $true
+              }
+              elseif ($file -match "OracleHcm/") {
+                $testFilters += "OracleHcm"
+                $matched = $true
+              }
+              elseif ($file -match "Services/Reports/|Endpoints/Reports/|Reporting/") {
+                $testFilters += "Reports"
+                $matched = $true
+              }
+              elseif ($file -match "Data/Entities/") {
+                $testFilters += "Services"
+                $matched = $true
+              }
+              elseif ($file -match "Services/Pay/|Services/Total") {
+                $testFilters += "Services"
+                $matched = $true
+              }
+              elseif ($file -match "Security/") {
+                $testFilters += "Security"
+                $matched = $true
+              }
+              elseif ($file -match "Common/") {
+                $testFilters += "Common"
+                $matched = $true
+              }
+              # Api project root files (Swagger, Program.cs, etc.) - typically infrastructure
+              elseif ($file -match "Demoulas\.ProfitSharing\.Api/") {
+                # Swagger and startup files are infrastructure - run all endpoint tests
+                $testFilters += "Endpoints"
+                $matched = $true
+              }
+              # CachingServices
+              elseif ($file -match "CachingServices/") {
+                $testFilters += "Services"
+                $matched = $true
+              }
+              # Analyzers - typically don't need runtime tests
+              elseif ($file -match "Analyzers/") {
+                # Analyzers are compile-time only, skip tests
+                $matched = $true
+              }
+
+              if (-not $matched) {
+                Write-Host "[UNKNOWN] No mapping for: $file - Running ALL tests" -ForegroundColor Yellow
+                $runAllTests = $true
+                break
+              }
+            }
+
+            # Get unique filters
+            $testFilters = $testFilters | Select-Object -Unique
+
+            Write-Host "`nTest filters:" -ForegroundColor Yellow
+            if ($runAllTests) {
+              Write-Host "  Running ALL tests (critical or unmapped files changed)" -ForegroundColor Red
+            } elseif ($testFilters.Count -eq 0) {
+              Write-Host "  No test filters (only test files changed)" -ForegroundColor Green
+            } else {
+              $testFilters | ForEach-Object { Write-Host "  - $_" -ForegroundColor Cyan }
+            }
+
+            # Determine if architecture tests should run
+            $runArchitectureTests = $false
+            $structuralPatterns = @("Common", "Endpoints", "Services", "Data")
+            foreach ($pattern in $structuralPatterns) {
+              if ($testFilters -contains $pattern -or $runAllTests) {
+                $runArchitectureTests = $true
+                break
+              }
+            }
+
+            # Write decision to artifact
+            $decision = @{
+              decision = if ($runAllTests) { "RUN_ALL" } else { "SELECTIVE" }
+              runAllTests = $runAllTests
+              testFilters = @($testFilters)
+              runArchitectureTests = $runArchitectureTests
+              reason = if ($runAllTests) { "Critical or unmapped files changed" } else { "Selective filters applied" }
+            }
+
+            $decision | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+
+            Write-Host "`nTest Execution Decision:" -ForegroundColor Cyan
+            Write-Host "  Unit Tests: $(if ($runAllTests) { 'ALL' } elseif ($testFilters.Count -gt 0) { 'SELECTIVE (' + ($testFilters -join ', ') + ')' } else { 'SKIP' })" -ForegroundColor $(if ($runAllTests) { 'Yellow' } elseif ($testFilters.Count -gt 0) { 'Green' } else { 'Yellow' })
+            Write-Host "  Architecture Tests: $(if ($runArchitectureTests) { 'RUN' } else { 'SKIP' })" -ForegroundColor $(if ($runArchitectureTests) { 'Green' } else { 'Yellow' })
+          }
+          catch {
+            Write-Host "Error during selective analysis: $_" -ForegroundColor Red
+            Write-Host "Falling back to running ALL tests for safety" -ForegroundColor Yellow
+            @{
+              decision = "RUN_ALL"
+              reason = "Analysis error: $_"
+            } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+          }
+
     test-frontend: &test-frontend
       name: Build and Test Frontend UI
       # Run on Bitbucket Cloud to free on-premises resources
@@ -148,7 +471,7 @@ definitions:
         - |
           if [ -n "$BITBUCKET_PR_DESTINATION_BRANCH" ]; then
               echo "PR build detected - checking for changed files..."
-              cd ..  # Go to repo root for git operations
+              cd ../..  # Go to repo root for git operations (from src/ui)
               git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=1
               changed_files=$(git diff --name-only "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' || true)
               cd src/ui
@@ -651,7 +974,7 @@ definitions:
         - |
           if [ -n "$BITBUCKET_PR_DESTINATION_BRANCH" ]; then
               echo "PR build detected - checking for changed files..."
-              cd ..  # Go to repo root for git operations
+              cd ../..  # Go to repo root for git operations (from src/ui)
               git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=1
               changed_files=$(git diff --name-only "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' | grep -E '\.(ts|tsx|js|jsx)$' | sed 's|^src/ui/||' || true)
               cd src/ui
@@ -1132,7 +1455,10 @@ pipelines:
           condition:
             changesets:
               includePaths:
-                - "src/ui/**"
+                - "src/ui/**/*.ts"
+                - "src/ui/**/*.tsx"
+                - "src/ui/**/*.js"
+                - "src/ui/**/*.jsx"
       # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
           - step:
@@ -1146,8 +1472,25 @@ pipelines:
               condition:
                 changesets:
                   includePaths:
-                    - "src/services/**"
+                    - "src/services/**/*.cs"
+                    - "src/services/**/*.csproj"
+                    - "src/services/**/*.sln"
+                    - "src/services/**/*.slnx"
+                    - "src/services/**/*.json"
+                    - "src/services/**/*.config"
           - step: *secret-scan
+      # Stage 2.5: Selective backend analysis (determines which tests to run)
+      - step:
+          <<: *selective-backend-analysis
+          condition:
+            changesets:
+              includePaths:
+                - "src/services/**/*.cs"
+                - "src/services/**/*.csproj"
+                - "src/services/**/*.sln"
+                - "src/services/**/*.slnx"
+                - "src/services/**/*.json"
+                - "src/services/**/*.config"
       # Stage 3: Build and test
       - parallel:
           - step:
@@ -1155,19 +1498,32 @@ pipelines:
               condition:
                 changesets:
                   includePaths:
-                    - "src/services/**"
+                    - "src/services/**/*.cs"
+                    - "src/services/**/*.csproj"
+                    - "src/services/**/*.sln"
+                    - "src/services/**/*.slnx"
+                    - "src/services/**/*.json"
+                    - "src/services/**/*.config"
           - step:
               <<: *build-and-test-backend-architecture
               condition:
                 changesets:
                   includePaths:
-                    - "src/services/**"
+                    - "src/services/**/*.cs"
+                    - "src/services/**/*.csproj"
+                    - "src/services/**/*.sln"
+                    - "src/services/**/*.slnx"
+                    - "src/services/**/*.json"
+                    - "src/services/**/*.config"
           - step:
               <<: *test-frontend
               condition:
                 changesets:
                   includePaths:
-                    - "src/ui/**"
+                    - "src/ui/**/*.ts"
+                    - "src/ui/**/*.tsx"
+                    - "src/ui/**/*.js"
+                    - "src/ui/**/*.jsx"
 
   custom:
     infrastructure_as_code:

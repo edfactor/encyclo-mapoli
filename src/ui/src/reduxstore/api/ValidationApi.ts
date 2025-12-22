@@ -1,4 +1,5 @@
 import {
+  CrossReferenceValidationGroup,
   MasterUpdateCrossReferenceValidationResponse,
   ProfitSharingReportValidationRequest,
   ValidationResponse
@@ -43,6 +44,35 @@ export const validationApi = createApi({
       providesTags: (_result, _error, request) => [
         { type: "MasterUpdateValidation", id: `${request.profitYear}-${request.reportSuffix}` }
       ]
+    }),
+
+    /**
+     * Get balance validation data (ALLOC/PAID ALLOC transfers) for a specific profit year.
+     * Returns validation results that can be used to display validation icons in the UI.
+     *
+     * Note: This endpoint uses a different base path (/api/balance-validation/) than other
+     * validation endpoints (/api/validation/), hence the relative path navigation.
+     *
+     * @param profitYear - The profit year to validate (e.g., 2024)
+     * @returns CrossReferenceValidationGroup with ALLOC transfer validation results, or null if no data
+     *
+     * @example
+     * ```typescript
+     * const { data, isLoading, error } = useGetBalanceValidationQuery(2024);
+     * if (data) {
+     *   const allocValidation = data.validations.find(v => v.fieldName === 'NetAllocTransfer');
+     * }
+     * ```
+     */
+    getBalanceValidation: builder.query<CrossReferenceValidationGroup | null, number>({
+      query: (profitYear) => `../balance-validation/alloc-transfers/${profitYear}`,
+      // Handle 404 gracefully - no validation data available for this year
+      transformErrorResponse: (response) => {
+        if (response.status === 404) {
+          return { status: 404, data: null };
+        }
+        return response;
+      }
     })
   })
 });
@@ -51,5 +81,7 @@ export const {
   useGetMasterUpdateValidationQuery,
   useLazyGetMasterUpdateValidationQuery,
   useGetProfitSharingReportValidationQuery,
-  useLazyGetProfitSharingReportValidationQuery
+  useLazyGetProfitSharingReportValidationQuery,
+  useGetBalanceValidationQuery,
+  useLazyGetBalanceValidationQuery
 } = validationApi;

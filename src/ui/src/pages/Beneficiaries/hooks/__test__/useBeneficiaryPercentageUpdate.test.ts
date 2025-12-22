@@ -14,7 +14,7 @@ const mockTriggerUpdate = vi.fn();
 
 // Mock the API
 vi.mock("reduxstore/api/BeneficiariesApi", () => ({
-  useLazyUpdateBeneficiaryQuery: () => [mockTriggerUpdate, {}]
+  useUpdateBeneficiaryMutation: () => [mockTriggerUpdate, {}]
 }));
 
 const mockBeneficiaries: BeneficiaryDto[] = [
@@ -89,7 +89,7 @@ describe("useBeneficiaryPercentageUpdate", () => {
       });
 
       expect(validationResult?.success).toBe(true);
-      expect(mockTriggerUpdate).toHaveBeenCalledWith({ id: 1, percentage: 50 }, false);
+      expect(mockTriggerUpdate).toHaveBeenCalledWith({ id: 1, percentage: 50 });
     });
 
     it("should fail when new percentage would exceed 100%", async () => {

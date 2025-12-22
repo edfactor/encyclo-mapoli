@@ -13,7 +13,6 @@ interface ValidationResult {
 
 interface MasterUpdateSummaryTableProps {
   totals: ProfitShareUpdateTotals;
-  validationResponse: ValidationResult | null | undefined;
   getFieldValidation: (fieldKey: string) => ValidationResult | null;
   openValidationField: string | null;
   onValidationToggle: (fieldName: string) => void;
@@ -26,7 +25,6 @@ interface MasterUpdateSummaryTableProps {
  */
 export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> = ({
   totals,
-  validationResponse,
   getFieldValidation,
   openValidationField,
   onValidationToggle
@@ -34,18 +32,26 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
   /**
    * Renders a validation icon in a column header with proper styling
    */
-  const renderHeaderValidationIcon = (fieldKey: string) => {
-    const validation = getFieldValidation(fieldKey);
-    if (!validationResponse || !validation) {
+  const renderHeaderValidationIcon = (keysToValidate: string | string[]) => {
+    var keys = Array.isArray(keysToValidate) ? keysToValidate : [keysToValidate];
+
+    const validations = [];
+    for (const key of keys) {
+      const validation = getFieldValidation(key);
+      validations.push(validation);
+    }
+    if (validations.every((v) => v === null)) {
       return null;
     }
+
+    const isValid = validations.every((v) => v !== null && v.isValid);
 
     return (
       <div
         className="inline-block cursor-pointer"
-        onClick={() => onValidationToggle(fieldKey)}>
+        onClick={() => onValidationToggle(keys[0])}>
         <InfoOutlinedIcon
-          className={`${validation.isValid ? "text-green-500" : "text-orange-500"}`}
+          className={`${isValid ? "text-green-500" : "text-orange-500"}`}
           fontSize="small"
         />
       </div>
@@ -97,7 +103,7 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               <th className="px-3 py-2 text-right text-sm font-semibold">
                 <div className="flex items-center justify-end gap-1">
                   <span>Distributions</span>
-                  {renderHeaderValidationIcon("DistributionTotals")}
+                  {renderHeaderValidationIcon(["DistributionTotals", "QPAY129_DistributionTotals"])}
                 </div>
               </th>
 
