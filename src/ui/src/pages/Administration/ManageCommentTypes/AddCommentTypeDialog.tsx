@@ -1,4 +1,13 @@
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, TextField } from "@mui/material";
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  TextField
+} from "@mui/material";
 import { useState } from "react";
 
 import { useCreateCommentTypeMutation } from "../../../reduxstore/api/administrationApi";
@@ -18,7 +27,7 @@ export const AddCommentTypeDialog = ({ open, onClose, onSuccess }: AddCommentTyp
 
   const handleSave = async () => {
     const trimmedName = name.trim();
-    
+
     if (!trimmedName) {
       setError("Name is required");
       return;
@@ -32,12 +41,13 @@ export const AddCommentTypeDialog = ({ open, onClose, onSuccess }: AddCommentTyp
       await createCommentType(request).unwrap();
       onSuccess();
       handleClose();
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Handle validation errors from backend
-      if (e?.data?.errors?.Name) {
-        setError(e.data.errors.Name[0]);
-      } else if (e?.data?.detail) {
-        setError(e.data.detail);
+      const error = e as { data?: { errors?: { Name?: string[] }; detail?: string } };
+      if (error?.data?.errors?.Name) {
+        setError(error.data.errors.Name[0]);
+      } else if (error?.data?.detail) {
+        setError(error.data.detail);
       } else {
         setError("Failed to create comment type");
       }
@@ -58,7 +68,11 @@ export const AddCommentTypeDialog = ({ open, onClose, onSuccess }: AddCommentTyp
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth>
       <DialogTitle>Add New Comment Type</DialogTitle>
       <DialogContent>
         <TextField
@@ -88,10 +102,15 @@ export const AddCommentTypeDialog = ({ open, onClose, onSuccess }: AddCommentTyp
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} disabled={isLoading}>
+        <Button
+          onClick={handleClose}
+          disabled={isLoading}>
           Cancel
         </Button>
-        <Button onClick={handleSave} variant="contained" disabled={isLoading}>
+        <Button
+          onClick={handleSave}
+          variant="contained"
+          disabled={isLoading}>
           {isLoading ? "Saving..." : "Save"}
         </Button>
       </DialogActions>

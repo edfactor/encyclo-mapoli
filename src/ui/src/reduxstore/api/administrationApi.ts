@@ -47,4 +47,3 @@ export const AdministrationApi = createApi({
 
 export const { useGetCommentTypesQuery, useCreateCommentTypeMutation, useUpdateCommentTypeMutation } =
   AdministrationApi;
-

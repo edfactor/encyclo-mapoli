@@ -206,8 +206,7 @@ const ManageCommentTypes = () => {
           <Box sx={{ px: 1 }}>
             <Button
               variant="contained"
-              onClick={() => setIsAddDialogOpen(true)}
-            >
+              onClick={() => setIsAddDialogOpen(true)}>
               Add New Comment Type
             </Button>
           </Box>

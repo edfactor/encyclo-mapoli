@@ -28,4 +28,3 @@ export interface UpdateCommentTypeRequest {
   /** Can be set from false to true, but cannot be set from true to false (one-way protection) */
   isProtected: boolean;
 }
-
