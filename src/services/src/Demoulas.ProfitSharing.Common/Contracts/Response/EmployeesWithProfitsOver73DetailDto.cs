@@ -72,7 +72,7 @@ public sealed record EmployeesWithProfitsOver73DetailDto
     /// Current profit sharing balance.
     /// </summary>
     public required decimal Balance { get; init; }
-    
+
     /// <summary>
     /// minimum required distribution based on age from the 
     /// </summary>

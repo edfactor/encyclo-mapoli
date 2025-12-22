@@ -97,6 +97,7 @@ public sealed class Navigation
         public const short ManageAnnuityRates = 174;
         public const short ProfitSharingAdjustments = 175;
         public const short AdhocProfLetter73 = 176;
+        public const short ManageCommentTypes = 177;
     }
 
     public short Id { get; set; }

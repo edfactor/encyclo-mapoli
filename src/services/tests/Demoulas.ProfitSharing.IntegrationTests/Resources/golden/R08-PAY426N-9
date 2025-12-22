@@ -2,7 +2,7 @@
 
 TOTAL       0                                                                                  .00
 DJDE JDE=PAY426,JDL=PAYROL,END,;
-PAY426N-S                            DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2025               12/19/25    15:27  PAGE
+PAY426N-S                            DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2025               12/22/25    14:05  PAGE
 
 - PROFIT SHARING SUMMARY TOTAL PAGE
 
@@ -13,9 +13,9 @@ E - ERROR REPORT EMPLOYEES                                        0            .
 ACTIVE AND INACTIVE:
 
 1 -    AGE 18-20 WITH >= 1000 PS HOURS                          205   5,198,074.91        54,116.75
-2 - >= AGE 21 WITH >= 1000 PS HOURS                           4,726 210,475,823.59   504,795,398.63
+2 - >= AGE 21 WITH >= 1000 PS HOURS                           4,734 211,191,778.18   506,124,990.05
 3 - <  AGE 18                                                    19     244,258.01              .00
-4 - >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT        1,129  13,013,031.90    25,127,718.31
+4 - >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT        1,121  12,925,914.29    23,798,126.89
 5 - >= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT       291   3,039,600.49              .00
 
 TERMINATED:
@@ -27,6 +27,6 @@ X - <  AGE 18           NO WAGES :   0                            2      11,052.
 N - NON-EMPLOYEE BENEFICIARIES                                  169            .00     2,564,290.61
 
 
-  - TOTAL ALL REPORTS:                                        8,574 241,863,096.34   613,061,900.98
+  - TOTAL ALL REPORTS:                                        8,574 242,491,933.32   613,061,900.98
 
-    EMPLOYEES WITH NO WAGES                                   1,308            .00    41,183,046.12
+    EMPLOYEES WITH NO WAGES                                   1,305            .00    39,980,547.65

@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
 
 public sealed record ProfitSharingAdjustmentRowResponse
 {

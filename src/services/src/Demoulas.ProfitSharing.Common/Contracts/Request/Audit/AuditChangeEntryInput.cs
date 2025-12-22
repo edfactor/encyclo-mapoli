@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 
 public sealed record AuditChangeEntryInput
 {

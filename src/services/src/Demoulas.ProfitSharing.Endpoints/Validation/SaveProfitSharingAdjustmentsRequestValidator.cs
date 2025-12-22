@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Endpoints.Validation.Legacy;

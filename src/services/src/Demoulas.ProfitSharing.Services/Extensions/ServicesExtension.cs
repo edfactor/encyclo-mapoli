@@ -2,10 +2,12 @@
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Services.Administration;
 using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
@@ -103,6 +105,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IOracleHcmDiagnosticsService, OracleHcmDiagnosticsService>();
         _ = builder.Services.AddScoped<IStateTaxRatesService, StateTaxRatesService>();
         _ = builder.Services.AddScoped<IAnnuityRatesService, AnnuityRatesService>();
+        _ = builder.Services.AddScoped<ICommentTypeService, CommentTypeService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         _ = builder.Services.AddScoped<IUnmaskingService, UnmaskingService>();

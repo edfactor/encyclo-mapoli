@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
 public sealed class GetStateTaxRatesEndpoint : ProfitSharingResultResponseEndpoint<IReadOnlyList<StateTaxRateDto>>
 {

@@ -61,7 +61,8 @@ public class MilitaryService : IMilitaryService
                     Ssn = d.Ssn,
                     YearsOfServiceCredit = (sbyte)(req.IsSupplementalContribution ? 0 : 1),
                     MonthToDate = 12,
-                    YearToDate = (short)req.ContributionDate.Year
+                    YearToDate = (short)req.ContributionDate.Year,
+                    CreatedAtUtc = DateTimeOffset.UtcNow
                 };
                 c.ProfitDetails.Add(pd);
 

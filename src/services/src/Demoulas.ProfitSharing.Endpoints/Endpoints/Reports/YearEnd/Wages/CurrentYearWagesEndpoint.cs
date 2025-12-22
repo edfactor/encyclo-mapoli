@@ -25,7 +25,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<WagesCurrentYearRequ
     private readonly IAuditService _auditService;
 
     public CurrentYearWagesEndpoint(
-        IWagesService reportService, 
+        IWagesService reportService,
         ILogger<CurrentYearWagesEndpoint> logger,
         IAuditService auditService
     ) : base(Navigation.Constants.YTDWagesExtract)
@@ -80,7 +80,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<WagesCurrentYearRequ
             this.RecordRequestMetrics(HttpContext, _logger, req);
             var reportSuffix = req.UseFrozenData ? "_FROZEN" : string.Empty;
             var result = await _auditService.ArchiveCompletedReportAsync(
-                ReportFileName + reportSuffix, 
+                ReportFileName + reportSuffix,
                 req.ProfitYear,
                 req,
                 (archiveReq, _, ct) => _reportService.GetWagesReportAsync(archiveReq, ct),
