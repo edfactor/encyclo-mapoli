@@ -54,7 +54,8 @@ QPAY066xAdHocReports/
 **State Management:**
 
 ```typescript
-const [currentPreset, setCurrentPreset] = useState<QPAY066xAdHocReportPreset | null>(null);
+const [currentPreset, setCurrentPreset] =
+  useState<QPAY066xAdHocReportPreset | null>(null);
 const [storeNumber, setStoreNumber] = useState<string>("");
 const [badgeNumber, setBadgeNumber] = useState<string>("");
 const [employeeName, setEmployeeName] = useState<string>("");
@@ -127,9 +128,15 @@ interface QPAY066xAdHocReportsGridProps {
 The component intelligently selects data from Redux based on the `storeManagement` flag:
 
 ```typescript
-const breakdownByStoreManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreManagement);
-const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
-const breakdownByStoreTotals = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreTotals);
+const breakdownByStoreManagement = useSelector(
+  (state: RootState) => state.yearsEnd.breakdownByStoreManagement,
+);
+const breakdownByStore = useSelector(
+  (state: RootState) => state.yearsEnd.breakdownByStore,
+);
+const breakdownByStoreTotals = useSelector(
+  (state: RootState) => state.yearsEnd.breakdownByStoreTotals,
+);
 
 const rowData = useMemo(() => {
   // Check both locations - data location depends on storeManagement flag
@@ -172,11 +179,15 @@ const showTotals = storeNumber && storeNumber.trim() !== "";
 const summaryData = useMemo(() => {
   if (breakdownByStoreTotals) {
     return {
-      amountInProfitSharing: numberToCurrency(breakdownByStoreTotals.totalBeginningBalances),
+      amountInProfitSharing: numberToCurrency(
+        breakdownByStoreTotals.totalBeginningBalances,
+      ),
       vestedAmount: numberToCurrency(breakdownByStoreTotals.totalVestedBalance),
-      totalForfeitures: numberToCurrency(breakdownByStoreTotals.totalForfeitures),
+      totalForfeitures: numberToCurrency(
+        breakdownByStoreTotals.totalForfeitures,
+      ),
       totalLoans: numberToCurrency(0), // Not provided in API response
-      totalBeneficiaryAllocations: numberToCurrency(0) // Not provided in API response
+      totalBeneficiaryAllocations: numberToCurrency(0), // Not provided in API response
     };
   }
   return {
@@ -288,41 +299,41 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
   createCurrencyColumn({
     headerName: "Beginning Balance",
     field: "beginningBalance",
-    minWidth: 130
+    minWidth: 130,
   }),
   createCurrencyColumn({
     headerName: "Beneficiary Allocation",
-    field: "beneficiaryAllocation"
+    field: "beneficiaryAllocation",
   }),
   createCurrencyColumn({
     headerName: "Distribution Amount",
-    field: "distributions"
+    field: "distributions",
   }),
   createCurrencyColumn({
     headerName: "Forfeit",
-    field: "forfeitures"
+    field: "forfeitures",
   }),
   createCurrencyColumn({
     headerName: "Ending Balance",
-    field: "endingBalance"
+    field: "endingBalance",
   }),
   createCurrencyColumn({
     headerName: "Vesting Balance",
-    field: "vestedAmount"
+    field: "vestedAmount",
   }),
   createDateColumn({
     headerName: "Term Date",
     field: "terminationDate",
-    minWidth: 100
+    minWidth: 100,
   }),
   createHoursColumn({
     headerName: "YTD Hours",
     field: "profitShareHours",
-    minWidth: 90
+    minWidth: 90,
   }),
   createPercentageColumn({
     headerName: "Vested",
-    field: "vestedPercentage"
+    field: "vestedPercentage",
   }),
   createAgeColumn({ field: "dateOfBirth" }),
   createAgeColumn({
@@ -335,12 +346,15 @@ export const GetQPAY066xAdHocGridColumns = (): ColDef[] => [
       const terminationDate = new Date(termDate);
       let age = terminationDate.getFullYear() - birthDate.getFullYear();
       const m = terminationDate.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && terminationDate.getDate() < birthDate.getDate())) {
+      if (
+        m < 0 ||
+        (m === 0 && terminationDate.getDate() < birthDate.getDate())
+      ) {
         age--;
       }
       return age;
-    }
-  })
+    },
+  }),
 ];
 ```
 
@@ -421,30 +435,40 @@ const createSchema = (requiresDateRange: boolean) =>
       .number()
       .nullable()
       .default(null)
-      .test("is-positive", "Store Number must be a positive number", function (value) {
-        if (value === null || value === undefined) return true;
-        return value > 0;
-      }),
+      .test(
+        "is-positive",
+        "Store Number must be a positive number",
+        function (value) {
+          if (value === null || value === undefined) return true;
+          return value > 0;
+        },
+      ),
     startDate: requiresDateRange
-      ? dateStringValidator(2000, 2099, "Start Date").required("Start Date is required")
+      ? dateStringValidator(2000, 2099, "Start Date").required(
+          "Start Date is required",
+        )
       : yup.string().default(""),
     endDate: requiresDateRange
       ? endDateStringAfterStartDateValidator(
           "startDate",
           tryddmmyyyyToDate,
-          "End Date must be equal to or greater than Start Date"
+          "End Date must be equal to or greater than Start Date",
         ).required("End Date is required")
       : yup.string().default(""),
     badgeNumber: yup
       .string()
       .default("")
-      .test("is-valid-badge", "Badge Number must be between 1 and 11 digits", function (value) {
-        if (!value || value === "") return true;
-        const numValue = Number(value);
-        return !isNaN(numValue) && numValue >= 1 && numValue <= 99999999999;
-      }),
+      .test(
+        "is-valid-badge",
+        "Badge Number must be between 1 and 11 digits",
+        function (value) {
+          if (!value || value === "") return true;
+          const numValue = Number(value);
+          return !isNaN(numValue) && numValue >= 1 && numValue <= 99999999999;
+        },
+      ),
     employeeName: yup.string().default(""),
-    storeManagement: yup.boolean().default(false)
+    storeManagement: yup.boolean().default(false),
   });
 
 const requiresDateRange = currentPreset?.requiresDateRange || false;
@@ -455,7 +479,7 @@ const {
   reset,
   watch,
   trigger,
-  formState: { errors, isValid }
+  formState: { errors, isValid },
 } = useForm<QPAY066xAdHocSearchFilterFormData>({
   resolver: yupResolver(createSchema(requiresDateRange)),
   defaultValues: {
@@ -464,8 +488,8 @@ const {
     endDate: "",
     badgeNumber: "",
     employeeName: "",
-    storeManagement: false
-  }
+    storeManagement: false,
+  },
 });
 ```
 
@@ -488,7 +512,10 @@ const hasName = hasValue(nameValue);
 const isBadgeNumberDisabled = hasName;
 const isNameDisabled = hasBadgeNumber;
 
-const getExclusionHelperText = (fieldName: string, isDisabled: boolean): string => {
+const getExclusionHelperText = (
+  fieldName: string,
+  isDisabled: boolean,
+): string => {
   if (!isDisabled) return "";
   if (fieldName === "badgeNumber") {
     return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
@@ -615,10 +642,12 @@ const reports: QPAY066xAdHocReportPreset[] = [
   {
     id: "QPAY066C",
     name: "QPAY066C",
-    description: "Terminated managers and associates for all stores with a balance but not vested",
+    description:
+      "Terminated managers and associates for all stores with a balance but not vested",
     params: { reportId: 1 },
     requiresDateRange: true,
-    apiEndpoint: "/api/yearend/breakdown-by-store/terminated/withcurrentbalance/notvested"
+    apiEndpoint:
+      "/api/yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
   },
   {
     id: "QPAY066-Inactive",
@@ -626,7 +655,7 @@ const reports: QPAY066xAdHocReportPreset[] = [
     description: "Inactive Employees",
     params: { reportId: 2 },
     requiresDateRange: false,
-    apiEndpoint: "/api/yearend/breakdown-by-store/inactive"
+    apiEndpoint: "/api/yearend/breakdown-by-store/inactive",
   },
   {
     id: "QPAY066-I",
@@ -634,7 +663,7 @@ const reports: QPAY066xAdHocReportPreset[] = [
     description: "Inactive with Vested Balance",
     params: { reportId: 3 },
     requiresDateRange: false,
-    apiEndpoint: "/api/yearend/breakdown-by-store/inactive/withvestedbalance"
+    apiEndpoint: "/api/yearend/breakdown-by-store/inactive/withvestedbalance",
   },
   {
     id: "QPAY066B",
@@ -642,7 +671,8 @@ const reports: QPAY066xAdHocReportPreset[] = [
     description: "Terminated with Beneficiary Allocation",
     params: { reportId: 4 },
     requiresDateRange: true, // Note: Date range is optional in implementation
-    apiEndpoint: "/api/yearend/breakdown-by-store/terminated/withbeneficiaryallocation"
+    apiEndpoint:
+      "/api/yearend/breakdown-by-store/terminated/withbeneficiaryallocation",
   },
   {
     id: "QPAY066W",
@@ -650,7 +680,7 @@ const reports: QPAY066xAdHocReportPreset[] = [
     description: "Retired with Balance Activity",
     params: { reportId: 5 },
     requiresDateRange: true, // Note: Date range is optional in implementation
-    apiEndpoint: "/api/yearend/breakdown-by-store/retired/withbalanceactivity"
+    apiEndpoint: "/api/yearend/breakdown-by-store/retired/withbalanceactivity",
   },
   {
     id: "QPAY066TA",
@@ -658,8 +688,8 @@ const reports: QPAY066xAdHocReportPreset[] = [
     description: "Managers and associates for all stores",
     params: { reportId: 6 },
     requiresDateRange: false,
-    apiEndpoint: "/api/yearend/breakdown-by-store"
-  }
+    apiEndpoint: "/api/yearend/breakdown-by-store",
+  },
 ];
 ```
 
@@ -708,13 +738,20 @@ export interface QPAY066xSearchParams {
 **RTK Query Hooks:**
 
 ```typescript
-const [fetchQPAY066TA, { isFetching: isFetchingTA }] = useLazyGetBreakdownByStoreQuery();
-const [fetchQPAY066Inactive, { isFetching: isFetchingInactive }] = useLazyGetBreakdownByStoreInactiveQuery();
-const [fetchQPAY066I, { isFetching: isFetchingI }] = useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery();
-const [fetchQPAY066C, { isFetching: isFetchingC }] = useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery();
-const [fetchQPAY066B, { isFetching: isFetchingB }] = useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery();
-const [fetchQPAY066W, { isFetching: isFetchingW }] = useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery();
-const [fetchTotals, { isFetching: isFetchingTotals }] = useLazyGetBreakdownByStoreTotalsQuery();
+const [fetchQPAY066TA, { isFetching: isFetchingTA }] =
+  useLazyGetBreakdownByStoreQuery();
+const [fetchQPAY066Inactive, { isFetching: isFetchingInactive }] =
+  useLazyGetBreakdownByStoreInactiveQuery();
+const [fetchQPAY066I, { isFetching: isFetchingI }] =
+  useLazyGetBreakdownByStoreInactiveWithVestedBalanceQuery();
+const [fetchQPAY066C, { isFetching: isFetchingC }] =
+  useLazyGetBreakdownByStoreTerminatedBalanceNotVestedQuery();
+const [fetchQPAY066B, { isFetching: isFetchingB }] =
+  useLazyGetBreakdownByStoreTerminatedWithBenAllocationsQuery();
+const [fetchQPAY066W, { isFetching: isFetchingW }] =
+  useLazyGetBreakdownByStoreRetiredWithBalanceActivityQuery();
+const [fetchTotals, { isFetching: isFetchingTotals }] =
+  useLazyGetBreakdownByStoreTotalsQuery();
 ```
 
 **Aggregated Loading State:**
@@ -722,8 +759,22 @@ const [fetchTotals, { isFetching: isFetchingTotals }] = useLazyGetBreakdownBySto
 ```typescript
 const isLoading = useMemo(
   () =>
-    isFetchingTA || isFetchingInactive || isFetchingI || isFetchingC || isFetchingB || isFetchingW || isFetchingTotals,
-  [isFetchingTA, isFetchingInactive, isFetchingI, isFetchingC, isFetchingB, isFetchingW, isFetchingTotals]
+    isFetchingTA ||
+    isFetchingInactive ||
+    isFetchingI ||
+    isFetchingC ||
+    isFetchingB ||
+    isFetchingW ||
+    isFetchingTotals,
+  [
+    isFetchingTA,
+    isFetchingInactive,
+    isFetchingI,
+    isFetchingC,
+    isFetchingB,
+    isFetchingW,
+    isFetchingTotals,
+  ],
 );
 ```
 
@@ -749,8 +800,8 @@ const executeSearch = useCallback(
         skip: 0,
         take: 255,
         sortBy: "badgeNumber",
-        isSortDescending: false
-      }
+        isSortDescending: false,
+      },
     } = searchParams;
 
     setCurrentReportId(reportId);
@@ -761,7 +812,7 @@ const executeSearch = useCallback(
       storeManagement,
       badgeNumber,
       employeeName,
-      pagination
+      pagination,
     };
 
     try {
@@ -811,8 +862,8 @@ const executeSearch = useCallback(
     fetchQPAY066C,
     fetchQPAY066B,
     fetchQPAY066W,
-    fetchTotals
-  ]
+    fetchTotals,
+  ],
 );
 ```
 
@@ -833,7 +884,7 @@ return {
   executeSearch, // Function to trigger search
   isLoading, // Aggregated loading state
   currentReportId, // Currently selected report ID
-  getReportTitle // Function to get report title by ID
+  getReportTitle, // Function to get report title by ID
 };
 ```
 

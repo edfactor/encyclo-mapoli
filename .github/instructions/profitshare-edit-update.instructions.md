@@ -89,7 +89,9 @@ ProfitShareEditUpdate/
 ```typescript
 const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 const [pageNumberReset, setPageNumberReset] = useState(false);
-const [openValidationField, setOpenValidationField] = useState<string | null>(null);
+const [openValidationField, setOpenValidationField] = useState<string | null>(
+  null,
+);
 ```
 
 **Hook Usage**:
@@ -104,7 +106,7 @@ const {
   adjustedBadgeOneValid,
   adjustedBadgeTwoValid,
   updatedBy,
-  updatedTime
+  updatedTime,
   // ... 20+ more values from hook
 } = useProfitShareEditUpdate();
 ```
@@ -259,10 +261,10 @@ it("should validate minimum required fields", () => {
       profitSharingEditQueryParams: {
         contributionPercent: 0,
         earningsPercent: 0,
-        maxAllowedContributions: 0
+        maxAllowedContributions: 0,
         // ... all zero
-      }
-    })
+      },
+    }),
   });
 
   expect(result.current.minimumFieldsEntered).toBe(false);
@@ -454,7 +456,9 @@ profitSharingUpdateAdjustmentSummary: AdjustmentSummary | null;
 Located in `utils/formValidation.ts`:
 
 ```typescript
-export const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams | null): boolean => {
+export const wasFormUsed = (
+  profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams | null,
+): boolean => {
   // Returns true if ANY field > 0
   // Used to detect if user has interacted with form
 };
