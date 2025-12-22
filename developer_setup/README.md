@@ -11,6 +11,7 @@ winget import --import-file .\developer_setup\winget-config.json --disable-inter
 ```
 
 What this installs (highlights):
+
 - .NET 9 SDK, Visual Studio Code
 - Visual Studio 2022 Professional (with workloads, on first launch)
 - Volta (Node tool manager) to pin Node 20.4.0
@@ -39,6 +40,7 @@ dotnet tool update --global dotnet-ef
 ## 3) Restore and build
 
 Services (.NET):
+
 ```pwsh
 # Ensure .NET 9 SDK is active
 dotnet --version
@@ -48,6 +50,7 @@ dotnet --version
 ```
 
 UI (Vite + React):
+
 ```pwsh
 # d:\source\Demoulas\smart-profit-sharing\src\ui
 node --version

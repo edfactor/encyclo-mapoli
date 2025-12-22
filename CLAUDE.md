@@ -28,6 +28,7 @@ AI Assistant Project Instructions for Claude Code (claude.ai/code) when working 
 All FastEndpoints MUST return typed minimal API union results AND internally use the domain `Result<T>` record (`Demoulas.ProfitSharing.Common.Contracts.Result<T>`) for service-layer outcomes.
 
 Patterns:
+
 - Service layer returns/constructs `Result<T>` (Success, Failure, ValidationFailure)
 - Endpoint converts domain result via `Match` (or helper) to: `Results<Ok<T>, NotFound, ProblemHttpResult>` (queries) or `Results<Ok, ProblemHttpResult>` (commands). Include `NotFound` for resource-missing semantics; add `ValidationProblem` only if you propagate structured validation errors directly
 - Helpers: Use `ResultHttpExtensions.ToResultOrNotFound()` + `ToHttpResult()` to reduce boilerplate (e.g., `dto.ToResultOrNotFound(Error.CalendarYearNotFound).ToHttpResult(Error.CalendarYearNotFound)`)
@@ -49,7 +50,9 @@ We use **EF Core 9** with Oracle provider. All DB access MUST follow these patte
 **CRITICAL**: Use `context.UseReadOnlyContext()` for read-only ops—it auto-applies `.AsNoTracking()`. Do NOT add `.AsNoTracking()` when using `UseReadOnlyContext()`.
 
 ### Query Tagging (Recommended)
+
 Tag queries for production traceability:
+
 - `TagWith()`: Add business context (year, user, operation, ticket) - **Required for complex operations**
 
 ```csharp
@@ -67,11 +70,14 @@ var data = await _context.Employees
 ```
 
 ### Oracle-Specific Patterns
+
 - **NO `??` in queries**: Oracle provider fails—use `x != null ? x : "default"` instead
 - **String search**: Use `EF.Functions.Like(m.Name, "%search%")` for case-insensitive
 
 ### Bulk Operations (ExecuteUpdate/ExecuteDelete)
+
 Use EF9 bulk ops—no entity loading, single SQL, efficient:
+
 ```csharp
 await _context.Records
     .TagWith($"BulkUpdate-Status-{year}")
@@ -80,7 +86,9 @@ await _context.Records
 ```
 
 ### Performance Patterns
+
 **Read-only (preferred)**:
+
 ```csharp
 await using var ctx = await _factory.CreateDbContextAsync(ct);
 ctx.UseReadOnlyContext(); // Auto AsNoTracking
@@ -92,23 +100,25 @@ var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
 **Degenerate guard**: Validate inputs (e.g., prevent all-zero badge numbers)
 
 ### Critical Rules
+
 - Services only—NO DbContext in endpoints
 - Always async (`FirstOrDefaultAsync`, `ToListAsync`)
 - Explicit `Include()`/`ThenInclude()`—NO lazy loading
 - Validate inputs to prevent table scans
 
 ### Example Service
-```csharp
+
+````csharp
 public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 {
     await using var ctx = await _factory.CreateDbContextAsync(ct);
     ctx.UseReadOnlyContext();
-    
+
     var member = await ctx.Members
         .TagWith($"GetMember-{id}")
         .FirstOrDefaultAsync(m => m.Id == id, ct);
-    
-    return member is null 
+
+    return member is null
         ? Result<MemberDto>.Failure(Error.MemberNotFound)
         : Result<MemberDto>.Success(member.ToDto());
 }
@@ -130,16 +140,16 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
     {
         // Your business logic here
         var result = await _service.ProcessAsync(req, ct);
-        
+
         // Add business metrics (required for business operations)
         EndpointTelemetry.BusinessOperationsTotal.Add(1,
             new("operation", "year-end-processing"),
             new("endpoint", nameof(MyEndpoint)));
-            
+
         return result;
     }, "Ssn", "OracleHcmId"); // List all sensitive fields accessed
 }
-```
+````
 
 **Manual Pattern (Advanced Control)**: Use individual telemetry methods for fine-grained control:
 
@@ -151,20 +161,20 @@ private readonly ILogger<MyEndpoint> _logger;
 public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationToken ct)
 {
     using var activity = this.StartEndpointActivity(HttpContext);
-    
+
     try
     {
         // Record request metrics (required)
         this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn", "OracleHcmId");
-        
+
         // Business logic
         var response = await _service.ProcessAsync(req, ct);
-        
+
         // Business metrics (required for business operations)
         EndpointTelemetry.BusinessOperationsTotal.Add(1,
             new("operation", "employee-lookup"),
             new("endpoint", nameof(MyEndpoint)));
-            
+
         // Record count metrics (when processing collections)
         if (response.Records?.Count > 0)
         {
@@ -172,10 +182,10 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
                 new("record_type", "employee"),
                 new("endpoint", nameof(MyEndpoint)));
         }
-        
+
         // Record response metrics (required)
         this.RecordResponseMetrics(HttpContext, _logger, response);
-        
+
         return response;
     }
     catch (Exception ex)
@@ -196,7 +206,7 @@ public class MyEndpoint : Endpoint<MyRequest, MyResponse>
 {
     private readonly IMyService _service;
     private readonly ILogger<MyEndpoint> _logger; // Required for telemetry
-    
+
     public MyEndpoint(IMyService service, ILogger<MyEndpoint> logger)
     {
         _service = service;
@@ -210,6 +220,7 @@ public class MyEndpoint : Endpoint<MyRequest, MyResponse>
 Add business operation metrics appropriate to the endpoint category:
 
 **Year-End Operations**:
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "year-end-enrollment"),
@@ -218,6 +229,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ```
 
 **Report Generation**:
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "report-generation"),
@@ -226,6 +238,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ```
 
 **Employee Lookups**:
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "employee-lookup"),
@@ -238,13 +251,15 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 When endpoints access sensitive fields, ALWAYS list them in telemetry calls:
 
 **Common Sensitive Fields**:
+
 - `"Ssn"` - Social Security Numbers
-- `"OracleHcmId"` - Internal employee identifiers  
+- `"OracleHcmId"` - Internal employee identifiers
 - `"BadgeNumber"` - Employee badge numbers
 - `"Salary"` - Salary information
 - `"BeneficiaryInfo"` - Beneficiary details
 
 **Examples**:
+
 ```csharp
 // Single sensitive field
 this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... }, "Ssn");
@@ -259,6 +274,7 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 ### Migration from Legacy Patterns
 
 **Updating Existing Endpoints**:
+
 - Replace ad-hoc OpenTelemetry activity creation with `StartEndpointActivity`
 - Replace manual metrics with `TelemetryExtensions` methods
 - Consolidate scattered telemetry logic using `ExecuteWithTelemetry` wrapper
@@ -268,8 +284,9 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 ### Documentation References
 
 Complete implementation details and examples available in (read when needed):
+
 - TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive reference for developers, QA, and DevOps
-- TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples  
+- TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples
 - TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production monitoring and operations guide
 
 ## Backend Coding Style
@@ -286,6 +303,7 @@ Complete implementation details and examples available in (read when needed):
   - XML doc comments for public & internal APIs
 
 ## Do NOT
+
 - Bypass history tracking for mutable audited entities.
 - Introduce raw SQL without parameters.
 - Duplicate mapping logic already covered by Mapperly profiles.
@@ -308,6 +326,7 @@ Complete implementation details and examples available in (read when needed):
 - Fail operations when cache operations fail—degrade gracefully and log errors.
 
 ---
+
 Provide reasoning in PR descriptions when deviating from these patterns.
 
 ## Validation & Boundary Checks (MANDATORY)
@@ -315,6 +334,7 @@ Provide reasoning in PR descriptions when deviating from these patterns.
 All incoming data MUST be validated with explicit boundary checks at both the server and client boundaries. Validation is a security and correctness concern: never rely solely on client-side checks. The following are required by policy for every endpoint and page that accepts user input.
 
 Server-side requirements (mandatory):
+
 - All request DTOs must have validation attributes or explicit validators that enforce:
   - numeric ranges (min/max) for integers/floats (e.g., page size, amounts, counts)
   - string length limits (min/max) and allowed character sets when applicable
@@ -330,11 +350,13 @@ Server-side requirements (mandatory):
 - All validators must be unit-tested (xUnit). Add tests for happy paths and boundary cases (min, max, empty, null, invalid enum) and at least one large/degenerate input test to assert the system rejects or truncates the request safely.
 
 Client-side requirements (recommended + required UX guardrails):
+
 - All pages must validate user input before submission using the project's front-end validation utilities (React + TypeScript). Client-side validation improves UX but is not a substitute for server-side checks.
 - Mirror server-side constraints in TypeScript types and validators: string lengths, numeric ranges, max collection sizes, allowed enum values, and file size/type checks.
 - Prevent users from requesting excessive data from the UI by enforcing pagination controls (max page size) and disabling controls that could produce wide unfiltered queries.
 
 Edge-case examples to cover (must be tested):
+
 - Empty / null payloads instead of expected objects
 - Oversized arrays (e.g., > 5k items) sent in request bodies
 - Very large numbers (bigger than database column bounds)
@@ -342,6 +364,7 @@ Edge-case examples to cover (must be tested):
 - Invalid enum numeric values or stale enum ids from older UI versions
 
 Developer guidance & patterns:
+
 - Prefer declarative validators (FluentValidation) in DTO classes for clarity and testability.
 - Keep validation logic out of service/business methods; endpoints should validate and then call services with well-formed input.
 - When trimming/normalizing input (for example, truncating an over-long string), document the behavior and return the normalized value or a validation error depending on severity.
@@ -431,17 +454,21 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 When creating documentation for new features, architectural changes, or implementation guides:
 
 ### File Locations
+
 - **Primary Documentation**: Create `.md` files in `docs/` folder at project root
 - **User-Accessible Documentation**: Copy final documents to `src/ui/public/docs/` for web access
 - **Template References**: Use existing documentation structure from `docs/` folder as examples
 
 ### File naming Conventions
+
 - Use `UPPERCASE_WITH_UNDERSCORES.md` for major guides (e.g., `TELEMETRY_GUIDE.md`, `READ_ONLY_FUNCTIONALITY.md`)
-- Use `PascalCase-With-Hyphens.md` for specific features (e.g., `Distribution-Processing-Requirements.md`)  
+- Use `PascalCase-With-Hyphens.md` for specific features (e.g., `Distribution-Processing-Requirements.md`)
 - Use ticket-prefixed names for implementation summaries (e.g., `PS-1623_READ_ONLY_SUMMARY.md`)
 
 ### Required Documentation Updates
+
 When creating new documentation:
+
 1. **Create primary file** in `docs/` folder with comprehensive content
 2. **Update `docs/README.md`** to include new documentation references
 3. **Copy to public folder** for web accessibility: `src/ui/public/docs/`
@@ -450,13 +477,14 @@ When creating new documentation:
    {
      key: "feature-name",
      title: "Feature Documentation Title",
-     filename: "FEATURE_DOCUMENTATION.md", 
+     filename: "FEATURE_DOCUMENTATION.md",
      description: "Brief description of what this documentation covers"
    }
    ```
 5. **Update instruction files** (`copilot-instructions.md` and `CLAUDE.md`) if introducing new patterns
 
 ### Documentation Structure Standards
+
 - **Overview section** with clear objectives and scope
 - **Architecture/Implementation sections** with code examples
 - **Testing/Quality guidelines** with specific checklists
@@ -464,6 +492,7 @@ When creating new documentation:
 - **References section** linking to related documentation
 
 ### Content Guidelines
+
 - Include copy-paste code examples for common patterns
 - Provide checklists for implementation and testing
 - Document both "what to do" and "what NOT to do"
@@ -481,25 +510,27 @@ When creating new documentation:
 
 ## Branching & Jira workflow (team conventions)
 
-  - `fix/PS-1645-military-pre-hire-validation`
-  - `feature/PS-1720-add-reporting-view`
-  ```pwsh
-  # ensure latest develop
-  git checkout develop
-  git pull origin develop
+- `fix/PS-1645-military-pre-hire-validation`
+- `feature/PS-1720-add-reporting-view`
 
-  # create branch from develop
-  git checkout -b fix/PS-1645-military-pre-hire-validation
+```pwsh
+# ensure latest develop
+git checkout develop
+git pull origin develop
 
-  # make edits, stage, commit
-  git add <files>
-  git commit -m "PS-1645: Short description of the change"
+# create branch from develop
+git checkout -b fix/PS-1645-military-pre-hire-validation
 
-  # push and set upstream
-  git push -u origin fix/PS-1645-military-pre-hire-validation
-  ```
-  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
-  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
+# make edits, stage, commit
+git add <files>
+git commit -m "PS-1645: Short description of the change"
+
+# push and set upstream
+git push -u origin fix/PS-1645-military-pre-hire-validation
+```
+
+- When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
+- If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
 
 ## Atlassian MCP & Confluence alignment
 
@@ -526,6 +557,7 @@ This denies-list is an explicit, repository-level policy for AI assistants — m
 ## Quick Commands
 
 ### PowerShell
+
 ```pwsh
 # Build services
 cd src/services; dotnet build Demoulas.ProfitSharing.slnx
@@ -536,6 +568,7 @@ cd src/ui; npm run dev
 ```
 
 ### Frontend (UI) - Run from `src/ui/`
+
 ```bash
 # Install dependencies
 npm install
@@ -558,6 +591,7 @@ npx playwright test # Run E2E tests
 ```
 
 ### Backend (Services) - Run from `src/services/`
+
 ```bash
 # Build solution
 dotnet build Demoulas.ProfitSharing.slnx
@@ -590,7 +624,7 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Include high-cardinality data in cache keys (use role combinations)
 - Fail operations when cache operations fail (degrade gracefully)
 - Create files unless they're absolutely necessary for achieving your goal
-- Proactively create documentation files (*.md) or README files unless explicitly requested
+- Proactively create documentation files (\*.md) or README files unless explicitly requested
 - Load large documentation files into context automatically (read them when needed using file tools)
 
 ## Important Notes
@@ -618,16 +652,19 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 ## Documentation References
 
 **Core Telemetry Documentation** (read when needed):
+
 - TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive 75+ page reference covering developers, QA, and DevOps
 - TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with 3-step implementation process
 - TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production operations guide
 
 **Distributed Caching Documentation** (read when needed):
+
 - DISTRIBUTED_CACHE_MIGRATION_SUMMARY.md - Complete guide to IDistributedCache migration
 - UNIT_TESTS_IDISTRIBUTEDCACHE_COMPLETE.md - Unit test patterns for distributed cache
 - NAVIGATION_CACHING_COMPLETE.md - Detailed example of version-based cache invalidation
 
 **Read-Only Functionality Documentation** (read when needed):
+
 - READ_ONLY_FUNCTIONALITY.md (`src/ui/public/docs/`) - Complete guide to read-only role implementation
 - READ_ONLY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste code examples
 - PS-1623_READ_ONLY_SUMMARY.md - Executive summary of read-only role implementation
@@ -639,6 +676,6 @@ These documents contain essential patterns and examples for implementing telemet
 NEVER use cd commands to change directories during interactions. This is a STRICT rule with NO exceptions. Instead:
 Use relative or absolute paths directly in commands (e.g., ls ./subdirectory or grep pattern ./subdirectory/file.txt instead of cd ./subdirectory && ls or cd ./subdirectory && grep pattern file.txt)
 If you need to run multiple commands in a specific directory, use subshells: (cd /path/to/dir && command1 && command2) which contain the directory change
-When needing to reference multiple files in the same directory, use pattern matching: /path/to/dir/*.py instead of changing into that directory
+When needing to reference multiple files in the same directory, use pattern matching: /path/to/dir/\*.py instead of changing into that directory
 NEVER combine cd with command execution using && or ; outside of a subshell
 If a user explicitly requests you to use cd, explain this policy and suggest the alternatives above

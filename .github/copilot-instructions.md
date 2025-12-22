@@ -3,6 +3,7 @@
 **Quick navigation guide for AI coding agents** working in this repository. Detailed patterns are in separate documents (see references below).
 
 ## Architecture Overview
+
 - **Monorepo** with two primary roots:
   - `src/services/` - .NET 9 multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, RabbitMQ, Mapperly, Shouldly)
     - Hosted using **.NET Aspire** (`Demoulas.ProfitSharing.AppHost`) - do not create ad-hoc hosts
@@ -13,6 +14,7 @@
 - **Cross-cutting**: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`)
 
 ## Key Backend Conventions
+
 - **Startup**: Run/debug `Demoulas.ProfitSharing.AppHost` (Aspire host) - avoid ad-hoc hosts
 - **Endpoints**: FastEndpoints; group logically, use minimal API style, return typed results
 - **Mapping**: Prefer `Mapperly` for DTO<->entity (see `*Mapper.cs`)
@@ -27,15 +29,18 @@
 - **Entity updates**: Use helper methods like `UpdateEntityValues`; avoid scattered per-field assignments
 
 ## Endpoint Results Pattern (MANDATORY)
+
 All FastEndpoints MUST return typed minimal API union results AND use domain `Result<T>` record (`Demoulas.ProfitSharing.Common.Contracts.Result<T>`) for service outcomes.
 
 **Quick Pattern**:
+
 - Service returns `Result<T>` (Success, Failure, ValidationFailure)
 - Endpoint converts via `Match` or helpers to: `Results<Ok<T>, NotFound, ProblemHttpResult>`
 - Use `ResultHttpExtensions.ToResultOrNotFound()` + `ToHttpResult()` to reduce boilerplate
 - Specific error codes for NotFound (e.g., `Error.CalendarYearNotFound`)
 
 **Example**:
+
 ```csharp
 var result = await _svc.GetAsync(req.Id, ct);
 return result.ToHttpResult(Error.SomeEntityNotFound);
@@ -48,7 +53,9 @@ We use **EF Core 9** with Oracle provider. All DB access MUST follow these patte
 **CRITICAL**: Use `context.UseReadOnlyContext()` for read-only ops—it auto-applies `.AsNoTracking()`. Do NOT add `.AsNoTracking()` when using `UseReadOnlyContext()`.
 
 ### Query Tagging (Recommended)
+
 Tag queries for production traceability:
+
 - `TagWith()`: Add business context (year, user, operation, ticket) - **Required for complex operations**
 
 ```csharp
@@ -66,11 +73,14 @@ var data = await _context.Employees
 ```
 
 ### Oracle-Specific Patterns
+
 - **NO `??` in queries**: Oracle provider fails—use `x != null ? x : "default"` instead
 - **String search**: Use `EF.Functions.Like(m.Name, "%search%")` for case-insensitive
 
 ### Bulk Operations (ExecuteUpdate/ExecuteDelete)
+
 Use EF9 bulk ops—no entity loading, single SQL, efficient:
+
 ```csharp
 await _context.Records
     .TagWith($"BulkUpdate-Status-{year}")
@@ -79,8 +89,10 @@ await _context.Records
 ```
 
 ### Performance Patterns
+
 **Read-only (preferred)**:
 **Read-only (preferred)**:
+
 ```csharp
 await using var ctx = await _factory.CreateDbContextAsync(ct);
 ctx.UseReadOnlyContext(); // Auto AsNoTracking
@@ -92,23 +104,25 @@ var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
 **Degenerate guard**: Validate inputs (e.g., prevent all-zero badge numbers)
 
 ### Critical Rules
+
 - Services only—NO DbContext in endpoints
 - Always async (`FirstOrDefaultAsync`, `ToListAsync`)
 - Explicit `Include()`/`ThenInclude()`—NO lazy loading
 - Validate inputs to prevent table scans
 
 ### Example Service
-```csharp
+
+````csharp
 public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 {
     await using var ctx = await _factory.CreateDbContextAsync(ct);
     ctx.UseReadOnlyContext();
-    
+
     var member = await ctx.Members
         .TagWith($"GetMember-{id}")
         .FirstOrDefaultAsync(m => m.Id == id, ct);
-    
-    return member is null 
+
+    return member is null
         ? Result<MemberDto>.Failure(Error.MemberNotFound)
         : Result<MemberDto>.Success(member.ToDto());
 }
@@ -122,24 +136,26 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
     return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
     {
         var result = await _service.ProcessAsync(req, ct);
-        
+
         // Add business metrics
         EndpointTelemetry.BusinessOperationsTotal.Add(1,
             new("operation", "year-end-processing"),
             new("endpoint", nameof(MyEndpoint)));
-            
+
         return result;
     }, "Ssn", "OracleHcmId"); // List sensitive fields accessed
 }
-```
+````
 
 **Required**:
+
 - Inject `ILogger<TEndpoint>` for correlation
 - Use `TelemetryExtensions` patterns (`ExecuteWithTelemetry` or manual methods)
 - Include business metrics appropriate to endpoint category
 - Declare sensitive fields in telemetry calls
 
 **Documentation** (read these files when needed, not loaded by default):
+
 - TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive 75+ page reference for developers, QA, DevOps
 - TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples
 - TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production operations guide
@@ -150,6 +166,7 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
 All incoming data MUST be validated at server and client boundaries. See VALIDATION_PATTERNS.md (`.github/`) for complete reference when needed.
 
 **Quick Pattern**:
+
 ```csharp
 public class SearchRequestValidator : AbstractValidator<SearchRequest>
 {
@@ -163,12 +180,14 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 ```
 
 **Required**:
+
 - Numeric ranges, string lengths, collection sizes
 - Enum validation, date ranges, required fields
 - Unit tests covering boundary cases
 - Client-side validation mirrors server constraints
 
 ## Backend Coding Style (augmenting existing COPILOT_INSTRUCTIONS)
+
 - File-scoped namespaces; one class per file; explicit access modifiers.
 - Prefer explicit types unless initializer makes type obvious.
 - Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase.
@@ -181,13 +200,14 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 These conventions are important project-wide rules. Follow them in addition to the coding style above:
 
 - Public methods use PascalCase naming
-- Private fields start with underscore (_)
+- Private fields start with underscore (\_)
 - Use Task/Task<T> or ValueTask/ValueTask<T> for asynchronous operations
 - Dependencies are injected through constructor parameters (constructor injection)
 - Use Result<T> pattern for error handling instead of throwing exceptions directly
 - Use DTOs/ViewModels for data transfer between layers
 
 ## Database & CLI
+
 - Add a migration (run from repo root PowerShell):
   ```pwsh
   pwsh -NoLogo -Command "cd src/services/src/Demoulas.ProfitSharing.Data; dotnet ef migrations add <MigrationName> --context ProfitSharingDbContext"
@@ -200,6 +220,7 @@ These conventions are important project-wide rules. Follow them in addition to t
   - Docs: `... generate-dgml` / `generate-markdown`.
 
 ## Frontend Conventions
+
 - Node managed via Volta; assume Node 20.x LTS. Do not hardcode npx version hacks.
 - Package registry split: `.npmrc` sets private `smart-ui-library` registry; keep that line when modifying.
 - State mgmt: Centralize API/data logic in `src/reduxstore/`; prefer RTK Query or slices patterns already present.
@@ -207,6 +228,7 @@ These conventions are important project-wide rules. Follow them in addition to t
 - E2E: Playwright tests under `src/ui/e2e`; new tests should support `.playwright.env` driven creds (no hard-coded secrets).
 
 ## Testing & Quality
+
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed.
 - All backend unit & service tests reside in the consolidated test project `Demoulas.ProfitSharing.UnitTests` (do NOT create stray ad-hoc test projects). Mirror source namespaces inside this project; prefer folder structure `Domain/`, `Services/`, `Endpoints/` for organization if adding new areas.
 - **Telemetry Testing**: All endpoint tests should verify telemetry integration (activity creation, metrics recording, business operations tracking). See `TELEMETRY_GUIDE.md` for testing patterns.
@@ -214,10 +236,12 @@ These conventions are important project-wide rules. Follow them in addition to t
 - Security warnings/analyzers treated as errors; keep build green.
 
 ## Logging & Observability
+
 - Use Serilog contextual logging. Critical issues (data mismatch / integrity) use `_logger.LogCritical` (see duplicate SSN guard). For expected fallbacks use Debug/Information.
 - When adding history/audit flows, log both counts & key identifiers (badge, OracleHcmId) for traceability.
 
 ## Performance & Safety Patterns
+
 - For batched upserts (see `AddDemographicsStreamAsync`):
   - Precompute lookups (`ToDictionary`, `ToLookup`) before DB roundtrips.
   - Build dynamic OR expressions instead of N roundtrips.
@@ -225,6 +249,7 @@ These conventions are important project-wide rules. Follow them in addition to t
 - Prefer `ConfigureAwait(false)` in library/service layer asynchronous calls.
 
 ## Secrets & Config
+
 - Never commit secrets—use user secrets (`secrets.json` pattern). Feature flags via .NET Feature Management; wire new flags centrally then inject `IFeatureManager`.
 
 ## Documentation Creation Guidelines
@@ -232,30 +257,35 @@ These conventions are important project-wide rules. Follow them in addition to t
 When creating documentation for new features, architectural changes, or implementation guides:
 
 ### File Locations
+
 - **User-Accessible Documentation**: Copy final documents to `src/ui/public/docs/` for web access
 - **Template References**: Use existing documentation structure from `src/ui/public/docs/` folder as examples
 
 ### File naming Conventions
+
 - Use `UPPERCASE_WITH_UNDERSCORES.md` for major guides (e.g., `TELEMETRY_GUIDE.md`, `READ_ONLY_FUNCTIONALITY.md`)
 - Use `PascalCase-With-Hyphens.md` for specific features (e.g., `Distribution-Processing-Requirements.md`)
 - Use ticket-prefixed names for implementation summaries (e.g., `PS-1623_READ_ONLY_SUMMARY.md`)
 
 ### Required Documentation Updates
+
 When creating new documentation:
+
 1. **Create primary file** in `src/ui/public/docs/` folder with comprehensive content
 2. **Update `README.md`** to include new documentation references
-4. **Update Documentation page** in `src/ui/src/pages/Documentation/Documentation.tsx`:
+3. **Update Documentation page** in `src/ui/src/pages/Documentation/Documentation.tsx`:
    ```typescript
    {
      key: "feature-name",
-     title: "Feature Documentation Title", 
+     title: "Feature Documentation Title",
      filename: "FEATURE_DOCUMENTATION.md",
      description: "Brief description of what this documentation covers"
    }
    ```
-5. **Update instruction files** (`copilot-instructions.md` and `CLAUDE.md`) if introducing new patterns
+4. **Update instruction files** (`copilot-instructions.md` and `CLAUDE.md`) if introducing new patterns
 
 ### Documentation Structure Standards
+
 - **Overview section** with clear objectives and scope
 - **Architecture/Implementation sections** with code examples
 - **Testing/Quality guidelines** with specific checklists
@@ -263,6 +293,7 @@ When creating new documentation:
 - **References section** linking to related documentation
 
 ### Content Guidelines
+
 - Include copy-paste code examples for common patterns
 - Provide checklists for implementation and testing
 - Document both "what to do" and "what NOT to do"
@@ -270,6 +301,7 @@ When creating new documentation:
 - Add cross-references to related documentation files
 
 ## When Extending
+
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root.
 - ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section).
 - Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.).
@@ -282,6 +314,7 @@ When creating new documentation:
 See BRANCHING_AND_WORKFLOW.md (`.github/`) for complete Git, Jira, and PR conventions when needed.
 
 **Quick Summary**:
+
 - Always branch from `develop` (not `main`)
 - Branching and commit message examples:
 
@@ -289,11 +322,13 @@ See BRANCHING_AND_WORKFLOW.md (`.github/`) for complete Git, Jira, and PR conven
 Branch example: feature/PS-1720-add-reporting-view
 Commit example: PS-1720: Add reporting view
 ```
+
 - PR title: Start with Jira key
 - Use Atlassian MCP for all Jira/Confluence interactions
 - AI assistants: Do NOT auto-create or auto-merge PRs (human review required)
 
 **Typical workflow**:
+
 ```pwsh
 git checkout develop && git pull origin develop
 git checkout -b feature/PS-1720-add-reporting-view
@@ -307,23 +342,27 @@ git push -u origin feature/PS-1720-add-reporting-view
 For comprehensive implementation details, see these dedicated guides:
 
 ### Core Patterns (read when needed)
+
 - DISTRIBUTED_CACHING_PATTERNS.md (`.github/`) - IDistributedCache patterns, version-based invalidation, unit testing
 - VALIDATION_PATTERNS.md (`.github/`) - Server & client validation, FluentValidation examples, boundary checks
 - BRANCHING_AND_WORKFLOW.md (`.github/`) - Git branching, Jira workflow, PR guidelines, deny list
 
 ### Telemetry & Observability (read when needed)
+
 - TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive 75+ page reference for developers, QA, DevOps
 - TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples
 - TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production operations, monitoring, alerting
 - SECURITY_TELEMETRY_SETUP.md (`.github/`) - Advanced security monitoring patterns
 
 ### Feature-Specific Guides (read when needed)
+
 - READ_ONLY_FUNCTIONALITY.md (`src/ui/public/docs/`) - Read-only role implementation
 - READ_ONLY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Read-only patterns cheat sheet
 - Distribution-Processing-Requirements.md (`src/ui/public/docs/`) - Distribution processing flows
 - Year-End-Testability-And-Acceptance-Criteria.md (`src/ui/public/docs/`) - Year-end processing tests
 
 ## Quick Commands (PowerShell)
+
 ```pwsh
 # Start the entire application (API + UI) - RUN FROM PROJECT ROOT
 aspire run
@@ -334,6 +373,7 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 ```
 
 ## Do NOT
+
 - Bypass history tracking for mutable audited entities.
 - Introduce raw SQL without parameters.
 - Duplicate mapping logic already covered by Mapperly profiles.
@@ -356,6 +396,7 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 - Fail operations when cache operations fail—degrade gracefully and log errors.
 
 ---
+
 Provide reasoning in PR descriptions when deviating from these patterns.
 
 ## Formatting & EditorConfig (additional guidance)
@@ -383,4 +424,5 @@ Provide reasoning in PR descriptions when deviating from these patterns.
   This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.
 
 ---
+
 Provide reasoning in PR descriptions when deviating from these patterns.

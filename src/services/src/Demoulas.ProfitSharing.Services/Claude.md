@@ -33,6 +33,7 @@
 The Services layer implements all business logic for the Demoulas Profit Sharing application. This layer sits between FastEndpoints (presentation) and EF Core Data contexts (persistence), orchestrating complex profit-sharing calculations, year-end processing, demographic management, reporting, and validation workflows.
 
 **Key Responsibilities**:
+
 - Business logic execution and orchestration
 - Complex profit-sharing calculations (contributions, earnings, vesting, forfeitures)
 - Data transformation between entities and DTOs
@@ -41,6 +42,7 @@ The Services layer implements all business logic for the Demoulas Profit Sharing
 - Integration with external systems (Oracle HCM, reporting engines)
 
 **Design Philosophy**:
+
 - **Single Responsibility**: Each service focuses on a specific domain area
 - **Interface Segregation**: Services expose focused interfaces in `Common.Interfaces`
 - **Dependency Inversion**: Services depend on abstractions (interfaces), not concrete implementations
@@ -54,6 +56,7 @@ The Services layer implements all business logic for the Demoulas Profit Sharing
 ### 1. **Separation of Concerns**
 
 Services are isolated from HTTP concerns. They:
+
 - Do NOT accept `HttpContext` or web-specific types (except specialized middleware services)
 - Return domain objects or DTOs, not HTTP responses
 - Use `CancellationToken` for operation cancellation
@@ -84,6 +87,7 @@ public class CalendarService : ICalendarService
 ```
 
 **Benefits**:
+
 - Consistent context lifecycle management
 - Automatic transaction handling for writable operations
 - Read-only optimizations (no tracking, streaming queries)
@@ -94,11 +98,13 @@ public class CalendarService : ICalendarService
 The `IDemographicReaderService` provides a critical abstraction for accessing demographic data in two modes:
 
 **Live Mode** (default):
+
 ```csharp
 var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
 ```
 
 **Frozen Mode** (for year-end processing):
+
 ```csharp
 var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: true);
 ```
@@ -108,6 +114,7 @@ Frozen demographics represent a **point-in-time snapshot** created during year-e
 ### 4. **Domain-Driven Service Organization**
 
 Services are grouped by domain area:
+
 - **Core Domain**: `TotalService`, `YearEndService`, `ProfitShareUpdateService`
 - **Demographics**: `DemographicReaderService`, `EmployeeLookupService`
 - **Beneficiaries**: `BeneficiaryService`, `BeneficiaryDisbursementService`
@@ -272,6 +279,7 @@ public static class ServicesExtension
 ```
 
 **Lifecycle Guidelines**:
+
 - **Scoped**: Services that depend on request context or DbContext (majority)
 - **Singleton**: Stateless services, caches, configuration services
 - **Transient**: Rarely used; prefer scoped for predictable lifecycle
@@ -283,6 +291,7 @@ public static class ServicesExtension
 ### Pattern 1: Read-Only Query Service
 
 **Characteristics**:
+
 - Returns DTOs or domain objects
 - Uses `UseReadOnlyContext` for optimized queries
 - No state mutations
@@ -351,6 +360,7 @@ public sealed class CalendarService : ICalendarService
 ```
 
 **Key Points**:
+
 - Uses `UseReadOnlyContext` for read operations
 - Implements distributed caching with `IDistributedCache`
 - Tags queries with business context (`TagWith`)
@@ -359,6 +369,7 @@ public sealed class CalendarService : ICalendarService
 ### Pattern 2: Write Service with Transaction
 
 **Characteristics**:
+
 - Mutates database state
 - Uses `UseWritableContextAsync` for automatic transactions
 - Returns success/failure indicators or domain events
@@ -456,6 +467,7 @@ public class BeneficiaryService : IBeneficiaryService
 ```
 
 **Transaction Guarantees**:
+
 - `UseWritableContextAsync` automatically begins a transaction
 - Transaction commits only if no exceptions thrown
 - Automatic rollback on exception
@@ -464,6 +476,7 @@ public class BeneficiaryService : IBeneficiaryService
 ### Pattern 3: Orchestration Service
 
 **Characteristics**:
+
 - Coordinates multiple service calls
 - Implements complex business workflows
 - May call multiple repositories/services
@@ -531,6 +544,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 ```
 
 **Orchestration Best Practices**:
+
 - Break complex workflows into smaller helper classes
 - Use internal DTOs for intermediate results
 - Aggregate results at the end
@@ -539,6 +553,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 ### Pattern 4: Validation Service
 
 **Characteristics**:
+
 - Validates complex business rules
 - Returns structured validation results
 - Often used in year-end or regulatory workflows
@@ -621,6 +636,7 @@ public sealed class ChecksumValidationService : IChecksumValidationService
 ```
 
 **Validation Patterns**:
+
 - Use `Result<T>` for validation outcomes
 - Return detailed field-level validation results
 - Log validation failures for audit trail
@@ -634,13 +650,13 @@ public sealed class ChecksumValidationService : IChecksumValidationService
 
 **Purpose**: Implement critical profit-sharing business logic
 
-| Service | Responsibility | Key Methods |
-|---------|---------------|-------------|
-| `TotalService` | Calculate participant balances, vesting, distributions | `GetVestingBalanceForSingleMemberAsync()`, `TotalVestingBalance()` |
-| `YearEndService` | Year-end processing (PAY426 equivalent) | `RunFinalYearEndUpdates()`, `ComputeChange()` |
-| `ProfitShareUpdateService` | Apply contributions and earnings | `ProfitShareUpdate()`, `ProfitShareUpdateInternal()` |
-| `DistributionService` | Process distributions and withdrawals | `CalculateDistribution()`, `ApplyDistribution()` |
-| `ForfeitureAdjustmentService` | Handle forfeitures and adjustments | `AdjustForfeitures()`, `RecalculateVesting()` |
+| Service                       | Responsibility                                         | Key Methods                                                        |
+| ----------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------ |
+| `TotalService`                | Calculate participant balances, vesting, distributions | `GetVestingBalanceForSingleMemberAsync()`, `TotalVestingBalance()` |
+| `YearEndService`              | Year-end processing (PAY426 equivalent)                | `RunFinalYearEndUpdates()`, `ComputeChange()`                      |
+| `ProfitShareUpdateService`    | Apply contributions and earnings                       | `ProfitShareUpdate()`, `ProfitShareUpdateInternal()`               |
+| `DistributionService`         | Process distributions and withdrawals                  | `CalculateDistribution()`, `ApplyDistribution()`                   |
+| `ForfeitureAdjustmentService` | Handle forfeitures and adjustments                     | `AdjustForfeitures()`, `RecalculateVesting()`                      |
 
 **Example - TotalService**:
 
@@ -699,12 +715,12 @@ public sealed class TotalService : ITotalService
 
 **Purpose**: Manage employee/beneficiary demographic data
 
-| Service | Responsibility |
-|---------|---------------|
-| `DemographicReaderService` | Frozen vs. live demographic abstraction |
-| `EmployeeLookupService` | Search employees by various criteria |
-| `BeneficiaryService` | CRUD operations for beneficiaries |
-| `MasterInquiryService` | Unified search across employees/beneficiaries |
+| Service                    | Responsibility                                |
+| -------------------------- | --------------------------------------------- |
+| `DemographicReaderService` | Frozen vs. live demographic abstraction       |
+| `EmployeeLookupService`    | Search employees by various criteria          |
+| `BeneficiaryService`       | CRUD operations for beneficiaries             |
+| `MasterInquiryService`     | Unified search across employees/beneficiaries |
 
 **Critical Pattern - Frozen Demographics**:
 
@@ -744,6 +760,7 @@ public sealed class DemographicReaderService : IDemographicReaderService
 ```
 
 **Why Frozen Demographics?**
+
 - Year-end calculations require stable demographic data
 - Reports must show consistent results even as employees change
 - Regulatory compliance requires point-in-time snapshots
@@ -752,14 +769,14 @@ public sealed class DemographicReaderService : IDemographicReaderService
 
 **Purpose**: Generate profit-sharing reports and summaries
 
-| Service | Report Type |
-|---------|------------|
-| `ReportRunnerService` | Orchestrates all report generation |
-| `BreakdownReportService` | Store breakdown reports |
-| `FrozenReportService` | Frozen demographic reports |
-| `TerminatedEmployeeReportService` | Termination reports |
-| `ExecutiveHoursAndDollarsService` | Executive compensation |
-| `CleanupReportService` | Data cleanup and integrity |
+| Service                           | Report Type                        |
+| --------------------------------- | ---------------------------------- |
+| `ReportRunnerService`             | Orchestrates all report generation |
+| `BreakdownReportService`          | Store breakdown reports            |
+| `FrozenReportService`             | Frozen demographic reports         |
+| `TerminatedEmployeeReportService` | Termination reports                |
+| `ExecutiveHoursAndDollarsService` | Executive compensation             |
+| `CleanupReportService`            | Data cleanup and integrity         |
 
 **Example - ReportRunnerService**:
 
@@ -829,13 +846,13 @@ public class ReportRunnerService : IReportRunnerService
 
 **Purpose**: Enforce data integrity and cross-reference checks
 
-| Service | Validation Type |
-|---------|----------------|
-| `ChecksumValidationService` | SHA256 checksum validation against archived reports |
-| `CrossReferenceValidationService` | Cross-report field validation orchestration |
-| `ArchivedValueService` | Retrieve archived values for comparison |
-| `AllocTransferValidationService` | Allocation transfer validation |
-| `BalanceEquationValidationService` | Balance equation integrity checks |
+| Service                            | Validation Type                                     |
+| ---------------------------------- | --------------------------------------------------- |
+| `ChecksumValidationService`        | SHA256 checksum validation against archived reports |
+| `CrossReferenceValidationService`  | Cross-report field validation orchestration         |
+| `ArchivedValueService`             | Retrieve archived values for comparison             |
+| `AllocTransferValidationService`   | Allocation transfer validation                      |
+| `BalanceEquationValidationService` | Balance equation integrity checks                   |
 
 **Key Innovation - Checksum-Based Validation**:
 
@@ -883,12 +900,12 @@ if (!validationResult.Value.IsValid)
 
 **Purpose**: Improve performance with distributed caching
 
-| Service | Cache Type |
-|---------|-----------|
-| `LookupCache<TKey, TValue, TEntity>` | Generic version-based lookup cache |
-| `StateTaxCache` | State tax lookup cache |
-| `ProfitCodeCache` | Profit code lookup cache |
-| `NavigationService` | Role-based navigation tree with version invalidation |
+| Service                              | Cache Type                                           |
+| ------------------------------------ | ---------------------------------------------------- |
+| `LookupCache<TKey, TValue, TEntity>` | Generic version-based lookup cache                   |
+| `StateTaxCache`                      | State tax lookup cache                               |
+| `ProfitCodeCache`                    | Profit code lookup cache                             |
+| `NavigationService`                  | Role-based navigation tree with version invalidation |
 
 **Version-Based Cache Invalidation**:
 
@@ -949,6 +966,7 @@ public class LookupCache<TKey, TValue, TEntity> : ILookupCache<TKey, TValue>
 ```
 
 **Benefits**:
+
 - No pattern-based cache deletion needed
 - Version increments invalidate all cached data instantly
 - Version counter persists indefinitely (small 4-byte value)
@@ -958,11 +976,11 @@ public class LookupCache<TKey, TValue, TEntity> : ILookupCache<TKey, TValue>
 
 **Purpose**: Cross-cutting concerns applied via ASP.NET middleware
 
-| Service | Middleware Responsibility |
-|---------|--------------------------|
-| `RoleContextMiddleware` | Capture user roles for JSON serialization masking |
-| `DemographicHeaderMiddleware` | Add frozen/live demographic metadata to response headers |
-| `EndpointInstrumentationMiddleware` | Telemetry and request tracking |
+| Service                             | Middleware Responsibility                                |
+| ----------------------------------- | -------------------------------------------------------- |
+| `RoleContextMiddleware`             | Capture user roles for JSON serialization masking        |
+| `DemographicHeaderMiddleware`       | Add frozen/live demographic metadata to response headers |
+| `EndpointInstrumentationMiddleware` | Telemetry and request tracking                           |
 
 **Example - RoleContextMiddleware**:
 
@@ -1007,6 +1025,7 @@ public sealed class RoleContextMiddleware
 ```
 
 **Why This Pattern?**
+
 - JSON serialization happens deep in the stack (System.Text.Json converters)
 - Converters don't have access to HttpContext
 - Thread-local storage provides ambient context
@@ -1045,6 +1064,7 @@ public async Task<List<EmployeeDto>> GetActiveEmployeesAsync(CancellationToken c
 ```
 
 **Performance Benefits**:
+
 - No change tracking overhead (~30% faster)
 - Reduced memory allocation
 - Ideal for read-heavy operations
@@ -1098,6 +1118,7 @@ public async Task<CreateEmployeeResponse> CreateEmployeeAsync(
 ```
 
 **Transaction Guarantees**:
+
 - Isolation level: Read Committed (Oracle default)
 - Automatic rollback on exception
 - No need for explicit `try/catch` for rollback
@@ -1129,6 +1150,7 @@ public async Task ResetNavigationStatusesAsync(short profitYear, CancellationTok
 ```
 
 **Performance Comparison**:
+
 - **Old Way (Load + Update)**: `SELECT * FROM navigations; UPDATE navigations SET ...` (N roundtrips)
 - **New Way (ExecuteUpdate)**: `UPDATE navigations SET ... WHERE ...` (1 roundtrip)
 - **Speed**: 10-100x faster for large datasets
@@ -1235,6 +1257,7 @@ public async Task ProcessPayProfitBatchAsync(
 ```
 
 **Performance Impact**:
+
 - **Before**: 1000 pay profits × 2 queries each = 2000 DB roundtrips
 - **After**: 2 precompute queries + 1 batch save = 3 DB roundtrips
 - **Speed**: ~600x faster
@@ -1264,6 +1287,7 @@ public async Task<ReportDto> GenerateYearEndReportAsync(short year, Cancellation
 ```
 
 **Benefits**:
+
 - Visible in Oracle's V$SQL and AWR reports
 - Correlates queries to application operations
 - Helps DBAs identify slow queries
@@ -1348,6 +1372,7 @@ public class StateTaxCache
 ```
 
 **How It Works**:
+
 1. Version counter stored in Redis: `lookup:StateTaxes:version = 5`
 2. Cache key includes version: `lookup:StateTaxes:data:v5`
 3. On invalidate, version increments to 6
@@ -1389,6 +1414,7 @@ public async Task<CalendarResponseDto> GetYearDatesAsync(short year, Cancellatio
 ```
 
 **Behavior**:
+
 - **Absolute**: Cache entry removed after 4 hours regardless of access
 - **Sliding**: If accessed within 1 hour, expiration extends by 1 hour (up to 4 hour max)
 - **Result**: Frequently accessed data stays cached; stale data expires
@@ -1753,6 +1779,7 @@ public async Task<BalanceEndpointResponse?> GetVestingBalanceAsync(
 ```
 
 **Log Levels**:
+
 - **LogDebug**: Detailed diagnostic info (disabled in production)
 - **LogInformation**: General flow (method entry/exit, key decisions)
 - **LogWarning**: Unexpected but recoverable (missing data, fallback logic)
@@ -2283,33 +2310,37 @@ public class ChecksumValidationServiceTests
 ### Testing Best Practices
 
 1. **Always use `[Description]` attribute** with Jira ticket number:
-   ```csharp
-   [Description("PS-1234 : Brief description of test scenario")]
-   ```
+
+    ```csharp
+    [Description("PS-1234 : Brief description of test scenario")]
+    ```
 
 2. **Use Shouldly assertions** (not xUnit Assert):
-   ```csharp
-   result.ShouldNotBeNull();
-   result.Value.ShouldBe(expected);
-   collection.ShouldBeEmpty();
-   exception.Message.ShouldContain("error text");
-   ```
+
+    ```csharp
+    result.ShouldNotBeNull();
+    result.Value.ShouldBe(expected);
+    collection.ShouldBeEmpty();
+    exception.Message.ShouldContain("error text");
+    ```
 
 3. **Test boundary cases**:
-   - Minimum/maximum values
-   - Empty collections
-   - Null values (where applicable)
-   - Edge dates (leap years, fiscal year boundaries)
+
+    - Minimum/maximum values
+    - Empty collections
+    - Null values (where applicable)
+    - Edge dates (leap years, fiscal year boundaries)
 
 4. **Isolate tests** - each test should:
-   - Set up its own data
-   - Not depend on other tests
-   - Clean up after itself (or use fresh in-memory DB)
+
+    - Set up its own data
+    - Not depend on other tests
+    - Clean up after itself (or use fresh in-memory DB)
 
 5. **Test negative cases**:
-   - Invalid inputs
-   - Missing entities
-   - Business rule violations
+    - Invalid inputs
+    - Missing entities
+    - Business rule violations
 
 ---
 
@@ -2779,4 +2810,3 @@ public class MilitaryServiceTests
 - [ ] Tests cover happy path and error cases
 - [ ] Tests use Shouldly assertions
 - [ ] Documentation added to this file (if significant pattern)
-

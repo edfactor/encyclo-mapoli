@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/pages/**/*.*"
+paths: "src/ui/src/pages/**/*.*"
 ---
 
 # Page Component Architecture
@@ -128,6 +129,7 @@ const Profall = () => {
 ```
 
 **Key Characteristics**:
+
 - Wraps content in `<Page>` component from `smart-ui-library`
 - Provides `label` (page title) and optional `actionNode` (usually StatusDropdownActionNode)
 - Uses Material-UI `Grid` for layout
@@ -205,6 +207,7 @@ const DistributionInquiry = () => {
 ```
 
 **Key Characteristics**:
+
 - Separates page wrapper (`DistributionInquiry`) from content (`DistributionInquiryContent`)
 - Uses `MissiveAlertProvider` context for user messages
 - Collapsible filter section using `DSMAccordion`
@@ -282,7 +285,8 @@ const MasterInquiry = () => {
 ```typescript
 const useMasterInquiry = () => {
   const [state, dispatch] = useReducer(masterInquiryReducer, initialState);
-  const [triggerSearch, { isLoading }] = useLazySearchProfitMasterInquiryQuery();
+  const [triggerSearch, { isLoading }] =
+    useLazySearchProfitMasterInquiryQuery();
   const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
   const { addAlert, clearAlerts } = useMissiveAlerts();
 
@@ -309,6 +313,7 @@ const useMasterInquiry = () => {
 ```
 
 **Key Characteristics**:
+
 - Complex state managed via `useReducer` pattern
 - Custom hook encapsulates all business logic
 - Component focuses purely on rendering
@@ -358,6 +363,7 @@ const FrozenSummary = () => {
 ```
 
 **Key Characteristics**:
+
 - Material-UI `Tabs` component for navigation
 - Conditional rendering based on `selectedTab` state
 - Different content for each tab
@@ -434,6 +440,7 @@ const ProfitShareEditUpdate = () => {
 ```
 
 **Key Characteristics**:
+
 - Uses `PrerequisiteGuard` to ensure required data is loaded
 - Multiple RTK Query hooks (mutations and lazy queries)
 - Complex state orchestration (Redux + local state)
@@ -460,6 +467,7 @@ The `Page` component is the top-level container for all pages.
 ```
 
 **Props**:
+
 - `label`: Page title (string)
 - `actionNode`: Optional React node for header actions (typically `StatusDropdownActionNode`)
 
@@ -496,6 +504,7 @@ Standardized grid component wrapping AG Grid.
 ```
 
 **Features**:
+
 - Automatic pagination
 - Sorting
 - Loading states
@@ -544,6 +553,7 @@ const DistributionInquirySearchFilter: React.FC<SearchFilterProps> = ({
 ```
 
 **Common Pattern**:
+
 - Local state for form fields
 - Callback props for `onSearch` and `onReset`
 - `SearchAndReset` button component from `smart-ui-library`
@@ -564,10 +574,12 @@ import { ColDef } from "ag-grid-community";
 import {
   createBadgeColumn,
   createNameColumn,
-  createStoreColumn
+  createStoreColumn,
 } from "../../utils/gridColumnFactory";
 
-export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export const GetProfallGridColumns = (
+  navFunction: (badgeNumber: string) => void,
+): ColDef[] => {
   return [
     createStoreColumn({ minWidth: 80, sortable: true }),
     createBadgeColumn({ headerName: "Badge", navigateFunction: navFunction }),
@@ -580,13 +592,14 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: true
-    }
+      sortable: true,
+    },
   ];
 };
 ```
 
 **Grid Column Factory** (`utils/gridColumnFactory.ts`):
+
 - Provides factory functions for common column types
 - Ensures consistency across grids
 - Common factories: `createBadgeColumn`, `createNameColumn`, `createStoreColumn`, `createStateColumn`, `createZipColumn`, `createAddressColumn`
@@ -609,6 +622,7 @@ const renderActionNode = () => {
 ```
 
 **Features**:
+
 - Fetches current navigation status from API
 - Allows users to update status (Not Started, In Progress, Completed)
 - Automatically disabled in read-only mode
@@ -645,6 +659,7 @@ clearAlerts();
 ```
 
 **Predefined Messages** (`MissiveMessages.ts`):
+
 - `DISTRIBUTION_INQUIRY_MESSAGES.MEMBER_NOT_FOUND`
 - `DISTRIBUTION_INQUIRY_MESSAGES.SAVE_SUCCESS`
 - etc.
@@ -666,6 +681,7 @@ Confirmation dialogs, data entry dialogs, etc.
 ```
 
 **Common Props**:
+
 - `open`: Boolean state
 - `onConfirm`: Callback for confirmation
 - `onCancel`: Callback for cancellation
@@ -739,6 +755,7 @@ const [selectedTab, setSelectedTab] = useState(0);
 ```
 
 **Use When**:
+
 - State is purely UI-related
 - State doesn't need to be shared across components
 - State doesn't persist across navigation
@@ -751,8 +768,12 @@ Complex state or state shared across pages stored in Redux slices.
 
 ```typescript
 // Reading from Redux
-const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
-const currentMember = useSelector((state: RootState) => state.distribution.currentMember);
+const { profitSharingEdit, profitSharingUpdate } = useSelector(
+  (state: RootState) => state.yearsEnd,
+);
+const currentMember = useSelector(
+  (state: RootState) => state.distribution.currentMember,
+);
 
 // Dispatching actions
 const dispatch = useDispatch();
@@ -761,6 +782,7 @@ dispatch(clearProfitSharingUpdate());
 ```
 
 **Use When**:
+
 - Data needs to be shared across multiple pages
 - Data persists across navigation
 - Centralized state management is beneficial
@@ -773,7 +795,8 @@ Server data automatically cached by RTK Query.
 
 ```typescript
 // Lazy query (manual trigger)
-const [triggerSearch, { data, isFetching, error }] = useLazySearchDistributionsQuery();
+const [triggerSearch, { data, isFetching, error }] =
+  useLazySearchDistributionsQuery();
 
 // Trigger
 await triggerSearch({ badgeNumber: 12345 });
@@ -784,6 +807,7 @@ await deleteDistribution(distributionId);
 ```
 
 **Use When**:
+
 - Fetching server data
 - Automatic caching and deduplication needed
 - Loading/error states needed
@@ -803,7 +827,10 @@ const masterInquiryReducer = (state: State, action: Action): State => {
     case "SEARCH_START":
       return { ...state, search: { ...state.search, isLoading: true } };
     case "SEARCH_SUCCESS":
-      return { ...state, search: { results: action.payload, isLoading: false } };
+      return {
+        ...state,
+        search: { results: action.payload, isLoading: false },
+      };
     case "SELECT_MEMBER":
       return { ...state, selection: { selectedMember: action.payload } };
     default:
@@ -813,6 +840,7 @@ const masterInquiryReducer = (state: State, action: Action): State => {
 ```
 
 **Use When**:
+
 - State transitions are complex
 - Multiple related pieces of state update together
 - State logic is testable in isolation
@@ -834,6 +862,7 @@ const { addAlert, clearAlerts } = useMissiveAlerts();
 ```
 
 **Common Contexts**:
+
 - `MissiveAlertProvider`: Alert/message system
 - Custom contexts for complex pages
 
@@ -882,7 +911,7 @@ const selectMember = useCallback(async (member: Member) => {
   // Second fetch: profit data (depends on member details)
   const profitData = await triggerProfitDetails({
     id: member.id,
-    memberType: member.memberType
+    memberType: member.memberType,
   }).unwrap();
   dispatch({ type: "PROFIT_DATA_SUCCESS", payload: profitData });
 }, []);
@@ -899,7 +928,7 @@ useEffect(() => {
   Promise.all([
     triggerStates().unwrap(),
     triggerTaxCodes().unwrap(),
-    triggerMissives().unwrap()
+    triggerMissives().unwrap(),
   ]);
 }, []);
 ```
@@ -911,14 +940,18 @@ useEffect(() => {
 ### 5. Pagination & Sorting
 
 ```typescript
-const handlePaginationChange = async (pageNumber: number, pageSize: number, sortParams: SortParams) => {
+const handlePaginationChange = async (
+  pageNumber: number,
+  pageSize: number,
+  sortParams: SortParams,
+) => {
   if (searchData) {
     const request = {
       ...searchData,
       skip: pageNumber * pageSize,
       take: pageSize,
       sortBy: sortParams.sortBy,
-      isSortDescending: sortParams.isSortDescending
+      isSortDescending: sortParams.isSortDescending,
     };
     await triggerSearch(request);
   }
@@ -974,8 +1007,8 @@ navigate("/view-distribution", {
   state: {
     showSuccessMessage: true,
     memberName: "John Doe",
-    amount: 5000
-  }
+    amount: 5000,
+  },
 });
 
 // Navigate back
@@ -1006,8 +1039,8 @@ navigate("/distribution-inquiry", {
   state: {
     showSuccessMessage: true,
     operationType: "added",
-    memberName: "John Doe"
-  }
+    memberName: "John Doe",
+  },
 });
 
 // In page B
@@ -1080,6 +1113,7 @@ const QPAY600 = () => {
 ```
 
 **Components**:
+
 - `Page` wrapper with status dropdown
 - `DSMAccordion` for filter
 - `QPAY600FilterSection` (search form)

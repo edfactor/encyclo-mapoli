@@ -1,6 +1,7 @@
 # Demoulas Profit Sharing Project
 
 ## Project Links
+
 - **Blue QA:** [http://appa84d:8080/home.seam?cid=4413](http://appa84d:8080/home.seam?cid=4413)
 - **Confluence:** [NGDS Profit Sharing Documentation](https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/29853053/NGDS+Profit+Sharing+Documentation)
 - **Jira:** [Project PS Board](https://demoulas.atlassian.net/jira/software/c/projects/PS/boards/24)
@@ -12,6 +13,7 @@
 ## Documentation
 
 ### Technical Documentation
+
 - **[Telemetry Guide](./TELEMETRY_GUIDE.md)** - Comprehensive telemetry implementation for developers, QA, and DevOps
 - **[Telemetry Quick Reference](./TELEMETRY_QUICK_REFERENCE.md)** - Developer cheat sheet with copy-paste examples
 - **[Telemetry DevOps Guide](./TELEMETRY_DEVOPS_GUIDE.md)** - Production operations and monitoring setup
@@ -19,17 +21,21 @@
 - **[Read-Only Quick Reference](./READ_ONLY_QUICK_REFERENCE.md)** - Quick implementation guide for read-only features
 
 ### Project Documentation
+
 - **[PS-1623 Read-Only Summary](./PS-1623_READ_ONLY_SUMMARY.md)** - Executive summary of read-only role implementation
 
 ### Templates
+
 - **[Navigation Setup](../templates/Navigation-Setup.md)** - Navigation system configuration
 - **[Redux Setup](../templates/Redux-Setup.md)** - Redux store and state management
 - **[Front-End Unit Tests](../templates/Front-End-Unit-Tests.md)** - Frontend testing patterns
 
 ## Definition of Ready (DoR)
+
 The Definition of Ready outlines the prerequisites for any user story, task, or bug fix to be considered ready for development. It emphasizes clarity, testability, and quality in our software engineering processes.
 
 ### Criteria
+
 1. **Clearly Defined User Stories**
    - **Title and Description:** Each story must have a clear title and a detailed description of the expected outcome.
    - **Acceptance Criteria:** Provide comprehensive criteria outlining the conditions for story completion.
@@ -47,9 +53,11 @@ The Definition of Ready outlines the prerequisites for any user story, task, or 
    - **Capacity Planning:** Consider team capacity and workload when allocating tasks.
 
 ## Definition of Done (DoD)
+
 The Definition of Done outlines the criteria that must be met for any user story, task, or bug fix to be considered complete and ready for release or deployment.
 
 ### Criteria
+
 1. **Acceptance Criteria Met**
    - All acceptance criteria defined in the user story or task are fully implemented and verified.
 2. **Code Quality**
@@ -83,6 +91,7 @@ Solution Explanation:
 -->
 
 ## Code Review and Pull Request Guidelines
+
 1. **Code Correctness and Functionality**
    - Verify that the code meets its intended functionality.
    - Check for logic errors, edge cases, and potential bugs.
@@ -125,4 +134,5 @@ Solution Explanation:
     - Encourage knowledge sharing and constructive feedback.
 
 ## Project Estimation
+
 ![Workload](./readme_images/estimation.png)

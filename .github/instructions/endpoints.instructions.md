@@ -1,5 +1,6 @@
 ---
 applyTo: "src/services/src/Demoulas.ProfitSharing.Endpoints/**/*.*"
+paths: "src/services/src/Demoulas.ProfitSharing.Endpoints/**/*.*"
 ---
 
 # ENDPOINTS.md
@@ -44,6 +45,7 @@ The `Demoulas.ProfitSharing.Endpoints` project contains all HTTP API endpoints f
 - **Result-oriented error handling** with domain `Result<T>` to HTTP status mapping
 
 **Key Statistics:**
+
 - **100+ endpoints** across 13+ functional areas
 - **~3,900 lines** of endpoint code
 - **Standardized base classes** for consistency
@@ -85,12 +87,12 @@ HTTP Response (Ok<T>, NotFound, ProblemHttpResult, etc.)
 
 ### Layer Responsibilities
 
-| Layer | Responsibility | Examples |
-|-------|---------------|----------|
-| **Endpoints** | HTTP concerns, route config, request/response mapping, telemetry | `StateListEndpoint.cs`, `MasterInquirySearchEndpoint.cs` |
-| **Services** | Business logic, data orchestration, domain `Result<T>` | `IMasterInquiryService`, `IBeneficiaryService` |
-| **Data** | EF Core queries, entity mapping, persistence | `ProfitSharingDbContext`, Repositories |
-| **Common.Contracts** | DTOs, domain errors, `Result<T>` type | `MemberDetails`, `Error.MemberNotFound` |
+| Layer                | Responsibility                                                   | Examples                                                 |
+| -------------------- | ---------------------------------------------------------------- | -------------------------------------------------------- |
+| **Endpoints**        | HTTP concerns, route config, request/response mapping, telemetry | `StateListEndpoint.cs`, `MasterInquirySearchEndpoint.cs` |
+| **Services**         | Business logic, data orchestration, domain `Result<T>`           | `IMasterInquiryService`, `IBeneficiaryService`           |
+| **Data**             | EF Core queries, entity mapping, persistence                     | `ProfitSharingDbContext`, Repositories                   |
+| **Common.Contracts** | DTOs, domain errors, `Result<T>` type                            | `MemberDetails`, `Error.MemberNotFound`                  |
 
 **Critical Rule:** Endpoints MUST NOT directly access `DbContext` or `IDbContextFactory`. All data operations go through services that return `Result<T>`.
 
@@ -140,6 +142,7 @@ Demoulas.ProfitSharing.Endpoints/
 ```
 
 **Directory Conventions:**
+
 - One endpoint per file, named `{Operation}{Entity}Endpoint.cs` (e.g., `CreateBeneficiaryEndpoint.cs`)
 - Group endpoints by business domain, not HTTP verb
 - Validators colocated in `/Validation` folder (shared) or inline as nested classes
@@ -182,6 +185,7 @@ public abstract class ProfitSharingEndpoint<TRequest, TResponse>
 ```
 
 **Usage:**
+
 ```csharp
 public class GetNavigationEndpoint : ProfitSharingEndpoint<NavigationRequestDto, NavigationResponseDto>
 {
@@ -202,6 +206,7 @@ public abstract class ProfitSharingRequestEndpoint<TRequest>
 ```
 
 **Usage:**
+
 ```csharp
 public class YearEndSetEnrollmentEndpoint : ProfitSharingRequestEndpoint<ProfitYearRequest>
 {
@@ -234,6 +239,7 @@ public abstract class ProfitSharingResultResponseEndpoint<TResponse>
 ```
 
 **Usage:**
+
 ```csharp
 public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<StateListResponse>>
 {
@@ -261,18 +267,19 @@ public abstract class ProfitSharingEndpoint : EndpointWithoutRequest, IHasNaviga
 
 ### Choosing the Right Base Class
 
-| Scenario | Base Class | Example |
-|----------|-----------|---------|
-| Query with request/response | `ProfitSharingEndpoint<TRequest, TResponse>` | MasterInquirySearchEndpoint |
-| Command with request, no response | `ProfitSharingRequestEndpoint<TRequest>` | YearEndSetEnrollmentEndpoint |
-| Simple lookup, no request | `ProfitSharingResultResponseEndpoint<TResponse>` | StateListEndpoint |
-| Typed result with request | `ProfitSharingEndpoint<TRequest, Results<...>>` | CreateBeneficiaryEndpoint |
+| Scenario                          | Base Class                                       | Example                      |
+| --------------------------------- | ------------------------------------------------ | ---------------------------- |
+| Query with request/response       | `ProfitSharingEndpoint<TRequest, TResponse>`     | MasterInquirySearchEndpoint  |
+| Command with request, no response | `ProfitSharingRequestEndpoint<TRequest>`         | YearEndSetEnrollmentEndpoint |
+| Simple lookup, no request         | `ProfitSharingResultResponseEndpoint<TResponse>` | StateListEndpoint            |
+| Typed result with request         | `ProfitSharingEndpoint<TRequest, Results<...>>`  | CreateBeneficiaryEndpoint    |
 
 ---
 
 ## Endpoint Categories
 
 ### Lookups (13 endpoints)
+
 **Group:** `LookupGroup` → `/lookup`
 
 Reference data endpoints returning simple lists or single values:
@@ -289,6 +296,7 @@ Reference data endpoints returning simple lists or single values:
 **Pattern:** Most are simple, cacheable endpoints returning `Result<ListResponseDto<T>>`. No sensitive data typically.
 
 ### Master Inquiry (5 endpoints)
+
 **Group:** `MasterInquiryGroup` → `/master-inquiry`
 
 Employee and beneficiary search with advanced filtering:
@@ -302,6 +310,7 @@ Employee and beneficiary search with advanced filtering:
 **Pattern:** Complex queries with pagination, sorting, filtering. Use `RecordCountsProcessed` telemetry.
 
 ### Beneficiaries (7 endpoints)
+
 **Group:** `BeneficiariesGroup` → `/beneficiaries`
 
 CRUD operations for beneficiaries and contacts:
@@ -317,6 +326,7 @@ CRUD operations for beneficiaries and contacts:
 **Pattern:** Mutation operations with validation. Return `CreateBeneficiaryResponse` with ID. Log creation/update events.
 
 ### Beneficiary Inquiry (5 endpoints)
+
 **Group:** `BeneficiaryInquiry` (custom routes)
 
 Beneficiary search and filtering:
@@ -328,6 +338,7 @@ Beneficiary search and filtering:
 - `BeneficiarySearchFilterEndpoint` - Advanced search
 
 ### Distributions (4 endpoints)
+
 **Group:** `DistributionGroup` → `/distributions`
 
 Distribution management (payments to members):
@@ -340,16 +351,19 @@ Distribution management (payments to members):
 **Pattern:** Commands use `Result<T>` with validation. Record `distribution-create`, `distribution-update` operations in telemetry.
 
 ### Year-End (3+ endpoints + 50+ report endpoints)
+
 **Group:** `YearEndGroup` → `/year-end`
 
 Year-end processing and reports:
 
 **Operations:**
+
 - `YearEndSetEnrollmentEndpoint` - Update enrollment IDs
 - `YearEndProcessFinalRunEndpoint` - Execute final year-end run
 - `CertificatesFileEndpoint` - Download certificate file
 
 **Reports (nested under `/year-end/reports/`):**
+
 - **Eligibility:** `GetEligibilityEndpoint`
 - **Executive Hours:** `ExecutiveHoursAndDollarsEndpoint`, `SetExecutiveHoursAndDollarsEndpoint`
 - **Frozen Reports:** `BalanceByAgeEndpoint`, `ContributionsByAgeEndpoint`, `ForfeituresAndPointsForYearEndpoint`, etc.
@@ -360,6 +374,7 @@ Year-end processing and reports:
 **Pattern:** Most reports extend `EndpointWithCsvBase` for CSV export. Use archive support via `IAuditService.ArchiveCompletedReportAsync`.
 
 ### Navigation (3 endpoints)
+
 **Group:** `NavigationGroup` → `/navigation`
 
 Navigation tree and status management:
@@ -371,6 +386,7 @@ Navigation tree and status management:
 **Pattern:** Uses distributed cache with version-based invalidation. See `NavigationService` for caching pattern.
 
 ### IT Operations (4 endpoints)
+
 **Group:** `ItDevOpsGroup` / `ItDevOpsAllUsersGroup`
 
 DevOps and admin tools:
@@ -383,6 +399,7 @@ DevOps and admin tools:
 **Pattern:** Admin-only endpoints. Log all operations. Use `ItDevOpsGroup` for restricted access.
 
 ### Military (2 endpoints)
+
 **Group:** `MilitaryGroup` → `/military`
 
 Military contribution management:
@@ -391,11 +408,13 @@ Military contribution management:
 - `GetMilitaryContributionRecords` - Retrieve contributions
 
 ### Adjustments (1 endpoint)
+
 **Group:** `AdjustmentGroup` → `/adjustments`
 
 - `MergeProfitDetailsEndpoint` - Merge profit detail records
 
 ### Validation (3 endpoints)
+
 **Group:** `ValidationGroup` → `/validation`
 
 Data validation and integrity checks:
@@ -405,6 +424,7 @@ Data validation and integrity checks:
 - `ValidateReportChecksumEndpoint` - Report checksum validation
 
 ### Ad-Hoc Reports (10+ endpoints)
+
 **Group:** Nested under `/reports/adhoc`
 
 Ad-hoc reporting endpoints:
@@ -480,6 +500,7 @@ public class MyEndpoint : ProfitSharingEndpoint<MyRequest, MyResponse>
 ```
 
 **What `ExecuteWithTelemetry` Does:**
+
 1. Starts an OpenTelemetry activity with endpoint name, navigation ID, user role, correlation ID
 2. Records request metrics and sensitive field access
 3. Executes your business logic
@@ -542,6 +563,7 @@ public class MyEndpoint : ProfitSharingEndpoint<MyRequest, MyResponse>
 ```
 
 **Why?** The logger:
+
 - Correlates structured logs with OpenTelemetry traces
 - Enables sensitive field access logging
 - Provides contextual information for debugging
@@ -563,6 +585,7 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 ```
 
 **Common Sensitive Fields:**
+
 - `"Ssn"` - Social Security Numbers
 - `"OracleHcmId"` - Internal employee identifiers
 - `"BadgeNumber"` - Employee badge numbers
@@ -570,6 +593,7 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 - `"BeneficiaryInfo"` - Beneficiary details
 
 **What Happens:**
+
 1. `EndpointTelemetry.SensitiveFieldAccessTotal` counter is incremented
 2. Structured log entry created: `"Sensitive field accessed: {Field} by user role {UserRole}"`
 3. Security team can audit access patterns
@@ -580,6 +604,7 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 Add business operation metrics appropriate to the endpoint category:
 
 **Year-End Operations:**
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "year-end-enrollment"),
@@ -588,6 +613,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ```
 
 **Report Generation:**
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "report-generation"),
@@ -596,6 +622,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ```
 
 **Employee Lookups:**
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "employee-lookup"),
@@ -604,6 +631,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ```
 
 **Distribution Operations:**
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "distribution-create"),
@@ -611,6 +639,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ```
 
 **Record Counts:**
+
 ```csharp
 EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
     new("record_type", "employee"),
@@ -622,10 +651,12 @@ EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
 In addition to endpoint-level telemetry, the `TelemetryProcessor` provides global pre/post-processing:
 
 **Pre-Process (before endpoint execution):**
+
 - Starts activity
 - Stores in `HttpContext.Items` for retrieval
 
 **Post-Process (after endpoint execution):**
+
 - Calculates duration: `EndpointTelemetry.EndpointDurationMs.Record(...)`
 - Records HTTP status-based errors
 - Detects large responses (>5MB)
@@ -657,6 +688,7 @@ public async Task ExecuteAsync_RecordsTelemetry()
 ```
 
 **Integration tests should verify:**
+
 - Activity creation and completion
 - Metrics recording (request, response, business operations)
 - Sensitive field logging
@@ -665,6 +697,7 @@ public async Task ExecuteAsync_RecordsTelemetry()
 ### Telemetry Documentation
 
 For complete telemetry implementation details, see:
+
 - **TELEMETRY_GUIDE.md** (`src/ui/public/docs/`) - Comprehensive 75+ page reference
 - **TELEMETRY_QUICK_REFERENCE.md** (`src/ui/public/docs/`) - Developer cheat sheet
 - **TELEMETRY_DEVOPS_GUIDE.md** (`src/ui/public/docs/`) - Production operations guide
@@ -713,12 +746,14 @@ public static Results<Ok<T>, NotFound, ProblemHttpResult> ToHttpResult<T>(
 ```
 
 **Usage:**
+
 ```csharp
 var result = await _service.GetMemberAsync(req.Id, ct);
 return result.ToHttpResult(Error.MemberNotFound);
 ```
 
 **Mapping Logic:**
+
 - `Result.Success(value)` → `TypedResults.Ok(value)` (HTTP 200)
 - `Result.Failure(Error.MemberNotFound)` → `TypedResults.NotFound()` (HTTP 404)
 - `Result.Failure(otherError)` → `TypedResults.Problem(error.Description)` (HTTP 500 or custom status)
@@ -734,12 +769,14 @@ public static Results<Ok<T>, NotFound, BadRequest, ProblemHttpResult> ToHttpResu
 ```
 
 **Usage:**
+
 ```csharp
 var result = await _service.UpdateDistribution(req, ct);
 return result.ToHttpResultWithValidation(Error.DistributionNotFound, Error.BadgeNumberNotFound);
 ```
 
 **Mapping Logic:**
+
 - `Result.Success(value)` → `Ok(value)` (HTTP 200)
 - `Result.Failure(notFoundError)` → `NotFound()` (HTTP 404)
 - `Result.ValidationFailure(...)` → `BadRequest()` (HTTP 400)
@@ -757,6 +794,7 @@ public static Result<T> ToResultOrNotFound<T>(this T? value, Error notFoundError
 ```
 
 **Usage:**
+
 ```csharp
 var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == id, ct);
 return member.ToResultOrNotFound(Error.MemberNotFound).ToHttpResult(Error.MemberNotFound);
@@ -779,18 +817,19 @@ public static class Error
 
 ### Endpoint Return Type Patterns
 
-| HTTP Scenario | FastEndpoints Return Type | Example Endpoint |
-|---------------|---------------------------|------------------|
-| Query success or not found | `Results<Ok<T>, NotFound, ProblemHttpResult>` | StateListEndpoint |
-| Query with validation | `Results<Ok<T>, NotFound, BadRequest, ProblemHttpResult>` | MasterInquirySearchEndpoint |
-| Command success or validation error | `Results<Ok<T>, BadRequest, ProblemHttpResult>` | CreateBeneficiaryEndpoint |
-| Command with not found | `Results<Ok<T>, NotFound, BadRequest, ProblemHttpResult>` | UpdateDistributionEndpoint |
-| No content command | `Results<NoContent, ProblemHttpResult>` | YearEndSetEnrollmentEndpoint |
-| File download | `Task HandleAsync(...)` with `Send.StreamAsync` | CertificatesFileEndpoint |
+| HTTP Scenario                       | FastEndpoints Return Type                                 | Example Endpoint             |
+| ----------------------------------- | --------------------------------------------------------- | ---------------------------- |
+| Query success or not found          | `Results<Ok<T>, NotFound, ProblemHttpResult>`             | StateListEndpoint            |
+| Query with validation               | `Results<Ok<T>, NotFound, BadRequest, ProblemHttpResult>` | MasterInquirySearchEndpoint  |
+| Command success or validation error | `Results<Ok<T>, BadRequest, ProblemHttpResult>`           | CreateBeneficiaryEndpoint    |
+| Command with not found              | `Results<Ok<T>, NotFound, BadRequest, ProblemHttpResult>` | UpdateDistributionEndpoint   |
+| No content command                  | `Results<NoContent, ProblemHttpResult>`                   | YearEndSetEnrollmentEndpoint |
+| File download                       | `Task HandleAsync(...)` with `Send.StreamAsync`           | CertificatesFileEndpoint     |
 
 ### Example: Complete Result Flow
 
 **Service Layer:**
+
 ```csharp
 public async Task<Result<MemberDetails>> GetMemberAsync(int id, CancellationToken ct)
 {
@@ -808,6 +847,7 @@ public async Task<Result<MemberDetails>> GetMemberAsync(int id, CancellationToke
 ```
 
 **Endpoint Layer:**
+
 ```csharp
 public class GetMemberEndpoint : ProfitSharingEndpoint<GetMemberRequest, Results<Ok<MemberDetails>, NotFound, ProblemHttpResult>>
 {
@@ -844,6 +884,7 @@ public class GetMemberEndpoint : ProfitSharingEndpoint<GetMemberRequest, Results
 ```
 
 **HTTP Outcomes:**
+
 - Member found: `200 OK { "id": 1, "firstName": "John", ... }`
 - Member not found: `404 Not Found`
 - Database error: `500 Internal Server Error { "detail": "Database connection failed" }`
@@ -893,6 +934,7 @@ public class IdsRequestValidator : AbstractValidator<IdsRequest>
 #### Validation Response
 
 When validation fails, FastEndpoints returns:
+
 ```json
 {
   "errors": {
@@ -957,6 +999,7 @@ RuleFor(x => x.Filters)
 ### Validation Testing
 
 **Unit tests MUST cover:**
+
 - Happy path (valid input)
 - Boundary cases (min, max, empty, null)
 - Invalid inputs (negative numbers, oversized strings, invalid enums)
@@ -993,39 +1036,42 @@ public sealed class LookupGroup : GroupBase
 ```
 
 **Resulting Routes:**
+
 - `GET /lookup/states` → StateListEndpoint
 - `GET /lookup/tax-codes` → TaxCodeEndpoint
 
 ### All Groups
 
-| Group | Route Prefix | Purpose | Endpoints |
-|-------|--------------|---------|-----------|
-| `LookupGroup` | `/lookup` | Reference data lookups | 13 |
-| `MasterInquiryGroup` | `/master-inquiry` | Employee/beneficiary search | 5 |
-| `BeneficiariesGroup` | `/beneficiaries` | Beneficiary CRUD | 7 |
-| `DistributionGroup` | `/distributions` | Distribution management | 4 |
-| `YearEndGroup` | `/year-end` | Year-end operations & reports | 50+ |
-| `NavigationGroup` | `/navigation` | Navigation tree | 3 |
-| `MilitaryGroup` | `/military` | Military contributions | 2 |
-| `AdjustmentGroup` | `/adjustments` | Profit detail adjustments | 1 |
-| `ValidationGroup` | `/validation` | Data validation | 3 |
-| `ProfitDetailsGroup` | `/profit-details` | Profit detail operations | 1 |
-| `ItDevOpsGroup` | `/it-operations` | Admin tools (restricted) | 4 |
-| `ItDevOpsAllUsersGroup` | `/it-operations-all` | Admin tools (all users) | - |
-| `JobsGroup` | `/jobs` | Background jobs | - |
-| `BalanceGroup` | `/balance` | Balance inquiries | - |
-| `BeneficiaryKindGroup` | `/beneficiary-kind` | Beneficiary kind lookups | - |
-| `BeneficiaryTypeGroup` | `/beneficiary-type` | Beneficiary type lookups | - |
+| Group                   | Route Prefix         | Purpose                       | Endpoints |
+| ----------------------- | -------------------- | ----------------------------- | --------- |
+| `LookupGroup`           | `/lookup`            | Reference data lookups        | 13        |
+| `MasterInquiryGroup`    | `/master-inquiry`    | Employee/beneficiary search   | 5         |
+| `BeneficiariesGroup`    | `/beneficiaries`     | Beneficiary CRUD              | 7         |
+| `DistributionGroup`     | `/distributions`     | Distribution management       | 4         |
+| `YearEndGroup`          | `/year-end`          | Year-end operations & reports | 50+       |
+| `NavigationGroup`       | `/navigation`        | Navigation tree               | 3         |
+| `MilitaryGroup`         | `/military`          | Military contributions        | 2         |
+| `AdjustmentGroup`       | `/adjustments`       | Profit detail adjustments     | 1         |
+| `ValidationGroup`       | `/validation`        | Data validation               | 3         |
+| `ProfitDetailsGroup`    | `/profit-details`    | Profit detail operations      | 1         |
+| `ItDevOpsGroup`         | `/it-operations`     | Admin tools (restricted)      | 4         |
+| `ItDevOpsAllUsersGroup` | `/it-operations-all` | Admin tools (all users)       | -         |
+| `JobsGroup`             | `/jobs`              | Background jobs               | -         |
+| `BalanceGroup`          | `/balance`           | Balance inquiries             | -         |
+| `BeneficiaryKindGroup`  | `/beneficiary-kind`  | Beneficiary kind lookups      | -         |
+| `BeneficiaryTypeGroup`  | `/beneficiary-type`  | Beneficiary type lookups      | -         |
 
 ### Group Configuration
 
 Groups can specify:
+
 - Route prefix
 - Shared authorization policies
 - Versioning
 - Common response examples
 
 **Example with Authorization:**
+
 ```csharp
 public sealed class ItDevOpsGroup : GroupBase
 {
@@ -1065,16 +1111,20 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType>
 ### CSV Features
 
 1. **Automatic Content Negotiation:**
+
    - `Accept: application/json` → JSON response
    - `Accept: text/csv` → CSV file download
 
 2. **Pagination Override:**
+
    - CSV requests ignore pagination (set `Take = int.MaxValue`)
 
 3. **CSV Mapping:**
+
    - Uses CsvHelper `ClassMap<T>` for column definitions
 
 4. **Report Metadata:**
+
    - CSV includes report name and date header
 
 5. **Output Caching:**
@@ -1200,12 +1250,14 @@ BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS,SSN
 ### Archive Support
 
 Year-end reports use `IAuditService.ArchiveCompletedReportAsync` to:
+
 1. Check if a completed report exists for the profit year
 2. If exists, return archived data (fast)
 3. If not, generate fresh report and archive it
 4. Modify request for archiving (remove user-specific filters)
 
 **Pattern:**
+
 ```csharp
 var result = await _auditService.ArchiveCompletedReportAsync(
     reportName: "My Report",
@@ -1253,6 +1305,7 @@ public static class PolicyRoleMap
 ### Endpoint Authorization
 
 **Option 1: Group-Level (Preferred)**
+
 ```csharp
 public sealed class ItDevOpsGroup : GroupBase
 {
@@ -1265,6 +1318,7 @@ public sealed class ItDevOpsGroup : GroupBase
 ```
 
 **Option 2: Endpoint-Level**
+
 ```csharp
 public override void Configure()
 {
@@ -1287,6 +1341,7 @@ if (isReadOnly)
 ```
 
 **OR** use a pre-processor:
+
 ```csharp
 public class ReadOnlyPreProcessor : IPreProcessor
 {
@@ -1316,6 +1371,7 @@ Admins can impersonate other users via the `x-impersonate-user` header. The auth
 #### 1. Define Request/Response DTOs
 
 **Request DTO:**
+
 ```csharp
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.MyFeature;
 
@@ -1335,6 +1391,7 @@ public sealed record MyFeatureRequest
 ```
 
 **Response DTO:**
+
 ```csharp
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MyFeature;
 
@@ -1472,6 +1529,7 @@ services.AddScoped<IMyFeatureService, MyFeatureService>();
 #### 6. Test Endpoint
 
 **Unit Test:**
+
 ```csharp
 [Fact]
 [Description("PS-1234 : My feature endpoint returns data successfully")]
@@ -1497,6 +1555,7 @@ public async Task ExecuteAsync_ValidRequest_ReturnsData()
 ```
 
 **Integration Test:**
+
 ```csharp
 [Fact]
 public async Task MyFeatureEndpoint_ReturnsOk()
@@ -1522,6 +1581,7 @@ public async Task MyFeatureEndpoint_ReturnsOk()
 ### Unit Testing Pattern
 
 **Endpoint Factory:**
+
 ```csharp
 public class EndpointFactory
 {
@@ -1534,6 +1594,7 @@ public class EndpointFactory
 ```
 
 **Test Example:**
+
 ```csharp
 public class StateListEndpointTests
 {
@@ -1561,6 +1622,7 @@ public class StateListEndpointTests
 ### Integration Testing Pattern
 
 **WebApplicationFactory Setup:**
+
 ```csharp
 public class ProfitSharingApiFactory : WebApplicationFactory<Program>
 {
@@ -1585,6 +1647,7 @@ public class ProfitSharingApiFactory : WebApplicationFactory<Program>
 ```
 
 **Integration Test:**
+
 ```csharp
 public class MasterInquiryEndpointIntegrationTests : IClassFixture<ProfitSharingApiFactory>
 {
@@ -1648,6 +1711,7 @@ public async Task ExecuteAsync_RecordsTelemetryMetrics()
 ### 1. Always Use Typed Results
 
 **DO:**
+
 ```csharp
 public override async Task<Results<Ok<MyResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(...)
 {
@@ -1656,6 +1720,7 @@ public override async Task<Results<Ok<MyResponse>, NotFound, ProblemHttpResult>>
 ```
 
 **DON'T:**
+
 ```csharp
 public override async Task<MyResponse> ExecuteAsync(...)
 {
@@ -1666,6 +1731,7 @@ public override async Task<MyResponse> ExecuteAsync(...)
 ### 2. Inject Logger for Telemetry
 
 **DO:**
+
 ```csharp
 public MyEndpoint(IMyService service, ILogger<MyEndpoint> logger)
     : base(Navigation.Constants.MyId)
@@ -1675,6 +1741,7 @@ public MyEndpoint(IMyService service, ILogger<MyEndpoint> logger)
 ```
 
 **DON'T:**
+
 ```csharp
 public MyEndpoint(IMyService service) // Missing logger
     : base(Navigation.Constants.MyId)
@@ -1683,11 +1750,13 @@ public MyEndpoint(IMyService service) // Missing logger
 ### 3. Declare Sensitive Fields
 
 **DO:**
+
 ```csharp
 return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... }, "Ssn", "OracleHcmId");
 ```
 
 **DON'T:**
+
 ```csharp
 return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... }); // Forgot to declare SSN access
 ```
@@ -1695,12 +1764,14 @@ return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { 
 ### 4. Use Result<T> from Services
 
 **DO:**
+
 ```csharp
 var result = await _service.GetAsync(id, ct);
 return result.ToHttpResult(Error.NotFound);
 ```
 
 **DON'T:**
+
 ```csharp
 var entity = await _service.GetAsync(id, ct);
 return entity == null ? TypedResults.NotFound() : TypedResults.Ok(entity); // Inconsistent error handling
@@ -1709,6 +1780,7 @@ return entity == null ? TypedResults.NotFound() : TypedResults.Ok(entity); // In
 ### 5. Record Business Metrics
 
 **DO:**
+
 ```csharp
 EndpointTelemetry.BusinessOperationsTotal.Add(1,
     new("operation", "year-end-processing"),
@@ -1716,6 +1788,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ```
 
 **DON'T:**
+
 ```csharp
 // No business metrics recorded
 ```
@@ -1723,6 +1796,7 @@ EndpointTelemetry.BusinessOperationsTotal.Add(1,
 ### 6. Validate All Inputs
 
 **DO:**
+
 ```csharp
 public class MyRequestValidator : AbstractValidator<MyRequest>
 {
@@ -1735,6 +1809,7 @@ public class MyRequestValidator : AbstractValidator<MyRequest>
 ```
 
 **DON'T:**
+
 ```csharp
 // No validator - allows unbounded page sizes, invalid years
 ```
@@ -1742,6 +1817,7 @@ public class MyRequestValidator : AbstractValidator<MyRequest>
 ### 7. Use Groups for Route Organization
 
 **DO:**
+
 ```csharp
 public override void Configure()
 {
@@ -1751,6 +1827,7 @@ public override void Configure()
 ```
 
 **DON'T:**
+
 ```csharp
 public override void Configure()
 {
@@ -1761,6 +1838,7 @@ public override void Configure()
 ### 8. Provide Swagger Documentation
 
 **DO:**
+
 ```csharp
 Summary(s =>
 {
@@ -1773,6 +1851,7 @@ Summary(s =>
 ```
 
 **DON'T:**
+
 ```csharp
 Summary(s => { s.Summary = "Get member"; }); // Minimal, unhelpful
 ```
@@ -1780,6 +1859,7 @@ Summary(s => { s.Summary = "Get member"; }); // Minimal, unhelpful
 ### 9. Handle File Downloads Properly
 
 **DO:**
+
 ```csharp
 public override async Task HandleAsync(MyRequest req, CancellationToken ct)
 {
@@ -1790,6 +1870,7 @@ public override async Task HandleAsync(MyRequest req, CancellationToken ct)
 ```
 
 **DON'T:**
+
 ```csharp
 return await _service.GenerateFileAsync(req, ct); // No content disposition, wrong return type
 ```
@@ -1797,6 +1878,7 @@ return await _service.GenerateFileAsync(req, ct); // No content disposition, wro
 ### 10. Use Archive Support for Year-End Reports
 
 **DO:**
+
 ```csharp
 var result = await _auditService.ArchiveCompletedReportAsync(
     ReportFileName,
@@ -1807,6 +1889,7 @@ var result = await _auditService.ArchiveCompletedReportAsync(
 ```
 
 **DON'T:**
+
 ```csharp
 var result = await _service.GenerateAsync(req, ct); // No caching, slow for repeated requests
 ```

@@ -12,7 +12,6 @@ The frontend uses **Vitest** as the test runner with the following companion lib
 - **@testing-library/user-event** - User interaction simulation
 - **jsdom** - DOM implementation for Node.js environment
 
-
 ### Key Configuration Details
 
 - **Environment**: `jsdom` provides browser-like DOM environment
@@ -28,7 +27,6 @@ The frontend uses **Vitest** as the test runner with the following companion lib
 ### Naming Convention
 
 Test files follow the pattern: `[ComponentName].test.tsx`
-
 
 ## Running Tests
 
@@ -61,6 +59,7 @@ npx vitest src/hooks/useFiscalCalendarYear.test.tsx
 ```
 
 Coverage reports are generated in:
+
 - **Terminal**: Text summary
 - **HTML**: `coverage/index.html` (open in browser for detailed view)
 
@@ -79,7 +78,7 @@ describe("useDecemberFlowProfitYear", () => {
   it("should return the selected profit year from Redux store", () => {
     const mockStore = createMockStore(2024);
     const { result } = renderHook(() => useDecemberFlowProfitYear(), {
-      wrapper: wrapper(mockStore)
+      wrapper: wrapper(mockStore),
     });
 
     expect(result.current).toBe(2024);
@@ -142,11 +141,16 @@ describe("useMasterInquiryReducer", () => {
   describe("SEARCH_START", () => {
     it("should set search state to searching", () => {
       const params = {
-        pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false }
+        pagination: {
+          skip: 0,
+          take: 25,
+          sortBy: "name",
+          isSortDescending: false,
+        },
       };
       const action = {
         type: "SEARCH_START" as const,
-        payload: { params, isManual: true }
+        payload: { params, isManual: true },
       };
       const newState = masterInquiryReducer(initialState, action);
 
@@ -170,9 +174,9 @@ describe("selectors", () => {
         ...initialState,
         search: {
           ...initialState.search,
-          results: { results: [{}, {}], total: 2 }
+          results: { results: [{}, {}], total: 2 },
         },
-        view: { mode: "multipleMembers" }
+        view: { mode: "multipleMembers" },
       };
 
       expect(selectShowMemberGrid(state)).toBe(true);
@@ -190,13 +194,13 @@ import { vi } from "vitest";
 
 // Mock custom hooks
 vi.mock("./useDecemberFlowProfitYear", () => ({
-  default: vi.fn()
+  default: vi.fn(),
 }));
 
 // Mock RTK Query hooks
 vi.mock("reduxstore/api/LookupsApi", () => ({
   useLazyGetAccountingYearQuery: vi.fn(),
-  useLazyGetAccountingRangeQuery: vi.fn()
+  useLazyGetAccountingRangeQuery: vi.fn(),
 }));
 ```
 
@@ -209,7 +213,7 @@ import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
 vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([
   mockFetchAccountingYear,
-  { isLoading: false } as any
+  { isLoading: false } as any,
 ]);
 ```
 
@@ -220,7 +224,6 @@ beforeEach(() => {
   vi.clearAllMocks(); // Clear all mock call history
 });
 ```
-
 
 ### Creating Test Wrappers
 
