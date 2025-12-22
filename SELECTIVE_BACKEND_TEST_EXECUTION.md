@@ -15,7 +15,7 @@ Option 1 (dotnet-affected) has been implemented with the following changes to `b
 
 1. **New Step Definition: `selective-backend-analysis`** (lines 141-288)
 
-   - Installs `dotnet-affected` tool (version 6.0.2)
+   - Installs `dotnet-affected` tool (version 6.1.0)
    - Detects global configuration changes (Directory.Build.props, Directory.Packages.props, global.json)
    - Runs dotnet-affected to identify affected projects
    - Writes decision to `selective-test-decision.json` artifact

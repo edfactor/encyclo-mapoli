@@ -185,7 +185,7 @@ definitions:
         - Write-Host "Installing dotnet-affected tool..." -ForegroundColor Cyan
         - |
           try {
-            dotnet tool install --global dotnet-affected --version 6.0.2
+            dotnet tool install --global dotnet-affected --version 6.1.0
             Write-Host "[OK] dotnet-affected installed" -ForegroundColor Green
           }
           catch {
