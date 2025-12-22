@@ -49,8 +49,8 @@ public sealed class CommentTypeService : ICommentTypeService
                 {
                     Id = x.Id,
                     Name = x.Name,
-                    DateModified = x.DateModified,
-                    UserModified = x.UserModified,
+                    ModifiedAtUtc = x.ModifiedAtUtc,
+                    UserName = x.UserName,
                 })
                 .ToListAsync(cancellationToken);
 
@@ -97,15 +97,14 @@ public sealed class CommentTypeService : ICommentTypeService
                     {
                         Id = commentType.Id,
                         Name = commentType.Name,
-                        DateModified = commentType.DateModified,
-                        UserModified = commentType.UserModified,
+                        ModifiedAtUtc = commentType.ModifiedAtUtc,
+                        UserName = commentType.UserName,
                     });
                 }
 
                 commentType.Name = trimmedName;
-                commentType.UserModified = _appUser.UserName ?? "";
-                commentType.DateModified = DateOnly.FromDateTime(DateTime.UtcNow);
-
+                commentType.UserName = _appUser.UserName ?? "";
+                commentType.ModifiedAtUtc = DateTimeOffset.UtcNow;
                 await ctx.SaveChangesAsync(cancellationToken);
 
                 await _auditService.LogDataChangeAsync(
@@ -132,8 +131,8 @@ public sealed class CommentTypeService : ICommentTypeService
                 {
                     Id = commentType.Id,
                     Name = commentType.Name,
-                    DateModified = commentType.DateModified,
-                    UserModified = commentType.UserModified,
+                    ModifiedAtUtc = commentType.ModifiedAtUtc,
+                    UserName = commentType.UserName,
                 });
             }, cancellationToken);
         }

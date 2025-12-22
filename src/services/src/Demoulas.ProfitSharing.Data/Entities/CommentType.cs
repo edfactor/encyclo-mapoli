@@ -1,13 +1,12 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-public sealed class CommentType : ILookupTable<byte>, IEquatable<CommentType>
+public sealed class CommentType : ModifiedBase, ILookupTable<byte>, IEquatable<CommentType>
 {
     public required byte Id { get; set; }
     public required string Name { get; set; }
-    public string? UserModified { get; set; }
-    public DateOnly? DateModified { get; set; }
 
     public static class Constants
     {

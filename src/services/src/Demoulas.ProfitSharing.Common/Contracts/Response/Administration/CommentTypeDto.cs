@@ -9,9 +9,9 @@ public sealed record CommentTypeDto
     [UnmaskSensitive]
     public required string Name { get; init; }
 
-    public DateOnly? DateModified { get; init; }
+    public DateTimeOffset? ModifiedAtUtc { get; init; }
 
-    public string? UserModified { get; init; }
+    public string? UserName { get; init; }
 
     public static CommentTypeDto ResponseExample()
     {
@@ -19,8 +19,8 @@ public sealed record CommentTypeDto
         {
             Id = 1,
             Name = "Example Comment Type",
-            DateModified = DateOnly.FromDateTime(DateTime.Today),
-            UserModified = "admin_user"
+            ModifiedAtUtc = DateTimeOffset.UtcNow,
+            UserName = "admin_user"
         };
     }
 }
