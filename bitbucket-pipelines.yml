@@ -18,34 +18,43 @@ definitions:
         - windows
         - self.hosted
       script:
-        # Check selective test decision (PR builds only)
+        # Set environment variables
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
+        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
+
+        # Check selective test decision and set filters
         - |
+          $script:testFilters = @()
+          $script:runAllTests = $true
+          $script:skipTests = $false
+
           if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
             Write-Host "Checking selective test decision..." -ForegroundColor Cyan
             $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
 
             if ($decision.decision -eq "SKIP_ALL") {
-              Write-Host "SKIP: No backend projects affected by changes" -ForegroundColor Yellow
-              Write-Host "Reason: $($decision.reason)" -ForegroundColor Yellow
-              exit 0
+              Write-Host "SKIP: No backend files changed" -ForegroundColor Yellow
+              $script:skipTests = $true
             }
-
-            if ($decision.decision -eq "SELECTIVE" -and $decision.runUnitTests -eq $false) {
-              Write-Host "SKIP: Unit tests not affected by changes" -ForegroundColor Yellow
-              Write-Host "Reason: $($decision.reason)" -ForegroundColor Yellow
-              exit 0
+            elseif ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -eq 0) {
+              Write-Host "SKIP: No test filters (only test files changed)" -ForegroundColor Yellow
+              $script:skipTests = $true
             }
-
-            Write-Host "RUN: Unit tests will execute" -ForegroundColor Green
-            if ($decision.decision -eq "RUN_ALL") {
-              Write-Host "Reason: $($decision.reason)" -ForegroundColor Cyan
+            elseif ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -gt 0) {
+              $script:runAllTests = $false
+              $script:testFilters = $decision.testFilters
+              Write-Host "SELECTIVE: Running tests for: $($script:testFilters -join ', ')" -ForegroundColor Green
+            }
+            else {
+              Write-Host "RUN ALL: $($decision.reason)" -ForegroundColor Yellow
             }
           }
 
-        # Set environment variables
-        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
+          if ($script:skipTests) {
+            Write-Host "Exiting - no tests to run" -ForegroundColor Yellow
+            exit 0
+          }
 
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
@@ -77,12 +86,43 @@ definitions:
         - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
         # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
-        # VSTest is no longer supported - must run the executable directly
         - echo "Running unit tests..."
         - |
           $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-          Write-Host "Executing test runner: $testExe"
-          & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+
+          # Check if we have selective filters from the decision file
+          $testFilters = @()
+          $runAllTests = $true
+
+          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
+            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
+            if ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -gt 0) {
+              $runAllTests = $false
+              $testFilters = $decision.testFilters
+            }
+          }
+
+          if ($runAllTests) {
+            Write-Host "========================================" -ForegroundColor Cyan
+            Write-Host "Running ALL unit tests" -ForegroundColor Cyan
+            Write-Host "========================================" -ForegroundColor Cyan
+            & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+          } else {
+            Write-Host "========================================" -ForegroundColor Green
+            Write-Host "Running SELECTIVE tests" -ForegroundColor Green
+            Write-Host "Filters: $($testFilters -join ', ')" -ForegroundColor Yellow
+            Write-Host "========================================" -ForegroundColor Green
+
+            # Build namespace filter args for xUnit v3: -namespace *Pattern* -namespace *Pattern2*
+            $namespaceArgs = @("-jUnit", "$env:REPORTS_PATH/junit.xml")
+            foreach ($filter in $testFilters) {
+              $namespaceArgs += "-namespace"
+              $namespaceArgs += "*$filter*"
+            }
+
+            Write-Host "Running: $testExe $($namespaceArgs -join ' ')"
+            & $testExe @namespaceArgs
+          }
 
       artifacts:
         - test-reports/**
@@ -93,6 +133,10 @@ definitions:
         - windows
         - self.hosted
       script:
+        # Set environment variables
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
+
         # Check selective test decision (PR builds only)
         - |
           if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
@@ -100,26 +144,18 @@ definitions:
             $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
 
             if ($decision.decision -eq "SKIP_ALL") {
-              Write-Host "SKIP: No backend projects affected by changes" -ForegroundColor Yellow
-              Write-Host "Reason: $($decision.reason)" -ForegroundColor Yellow
+              Write-Host "SKIP: No backend files changed" -ForegroundColor Yellow
               exit 0
             }
 
-            if ($decision.decision -eq "SELECTIVE" -and $decision.runArchitectureTests -eq $false) {
-              Write-Host "SKIP: Architecture tests not affected by changes" -ForegroundColor Yellow
-              Write-Host "Reason: $($decision.reason)" -ForegroundColor Yellow
+            if ($decision.runArchitectureTests -eq $false) {
+              Write-Host "SKIP: Architecture tests not needed (no structural changes)" -ForegroundColor Yellow
               exit 0
             }
 
             Write-Host "RUN: Architecture tests will execute" -ForegroundColor Green
-            if ($decision.decision -eq "RUN_ALL") {
-              Write-Host "Reason: $($decision.reason)" -ForegroundColor Cyan
-            }
           }
 
-        # Set environment variables
-        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/architecture-tests"
 
         # Ensure the REPORTS_PATH directory exists
@@ -243,93 +279,137 @@ definitions:
             Write-Host "Backend files changed:" -ForegroundColor Yellow
             $backendChanges | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
 
-            # Determine affected projects from changed file paths
-            $affectedProjects = @()
+            # Map changed files to test namespace filters
+            $testFilters = @()
+            $runAllTests = $false
+
             foreach ($file in $backendChanges) {
-              if ($file -match "src/services/src/([^/]+)/") {
-                $projectFolder = $matches[1]
-                if ($projectFolder -notin $affectedProjects) {
-                  $affectedProjects += $projectFolder
-                }
+              $file = $file -replace '\\', '/'
+
+              # Skip test files - they don't affect which tests to run
+              if ($file -match "/tests/") { continue }
+
+              # Critical files that affect everything - run ALL tests
+              if ($file -match "Endpoints/Base/|Extensions/TelemetryExtensions|Common/Contracts/Result|Common/Contracts/Error|Data/Contexts/|Data/Migrations/") {
+                Write-Host "[CRITICAL] $file - Running ALL tests" -ForegroundColor Red
+                $runAllTests = $true
+                break
               }
-              if ($file -match "src/services/tests/([^/]+)/") {
-                $testProjectFolder = $matches[1]
-                if ($testProjectFolder -notin $affectedProjects) {
-                  $affectedProjects += $testProjectFolder
-                }
+
+              # Map file paths to test namespaces
+              $matched = $false
+
+              if ($file -match "Endpoints/Beneficiaries/|Services/Beneficiaries/") {
+                $testFilters += "Beneficiaries"
+                $matched = $true
               }
-            }
+              elseif ($file -match "Endpoints/Lookups/|Services/Lookup/") {
+                $testFilters += "Lookups"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Distributions/|Services/Distribution") {
+                $testFilters += "Distributions"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Adjustments/|Services/Adjustment") {
+                $testFilters += "Adjustments"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/YearEnd/|Services/YearEnd|Services/ProfitShareEdit") {
+                $testFilters += "YearEnd"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Military/|Services/Military/") {
+                $testFilters += "Military"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Validation/|Services/Validation/") {
+                $testFilters += "Validation"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/ItOperations/|Services/ItDevOps/") {
+                $testFilters += "ItOperations"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/Navigations/|Services/Navigations/") {
+                $testFilters += "Navigation"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/BeneficiaryInquiry/|Services/BeneficiaryInquiry/") {
+                $testFilters += "BeneficiaryInquiry"
+                $matched = $true
+              }
+              elseif ($file -match "Endpoints/ProfitDetails/") {
+                $testFilters += "ProfitDetails"
+                $matched = $true
+              }
+              elseif ($file -match "OracleHcm/") {
+                $testFilters += "OracleHcm"
+                $matched = $true
+              }
+              elseif ($file -match "Services/Reports/|Endpoints/Reports/|Reporting/") {
+                $testFilters += "Reports"
+                $matched = $true
+              }
+              elseif ($file -match "Data/Entities/") {
+                $testFilters += "Services"
+                $matched = $true
+              }
+              elseif ($file -match "Services/Pay/|Services/Total") {
+                $testFilters += "Services"
+                $matched = $true
+              }
+              elseif ($file -match "Security/") {
+                $testFilters += "Security"
+                $matched = $true
+              }
+              elseif ($file -match "Common/") {
+                $testFilters += "Common"
+                $matched = $true
+              }
 
-            Write-Host "`nAffected projects:" -ForegroundColor Yellow
-            $affectedProjects | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
-
-            # Determine which test projects to run
-            $runUnitTests = $false
-            $runArchitectureTests = $false
-
-            # Check if UnitTests project itself is affected
-            if ($affectedProjects -contains "Demoulas.ProfitSharing.UnitTests") {
-              $runUnitTests = $true
-              Write-Host "UnitTests project directly affected" -ForegroundColor Cyan
-            }
-
-            # Check if Architecture tests project is affected
-            if ($affectedProjects -contains "Demoulas.ProfitSharing.UnitTests.Architecture") {
-              $runArchitectureTests = $true
-              Write-Host "Architecture tests project directly affected" -ForegroundColor Cyan
-            }
-
-            # Check if any source project changed (triggers UnitTests)
-            $sourceProjectFolders = @(
-              "Demoulas.ProfitSharing.Api",
-              "Demoulas.ProfitSharing.Endpoints",
-              "Demoulas.ProfitSharing.Services",
-              "Demoulas.ProfitSharing.Data",
-              "Demoulas.ProfitSharing.Common",
-              "Demoulas.ProfitSharing.Security",
-              "Demoulas.ProfitSharing.Reporting",
-              "Demoulas.ProfitSharing.OracleHcm",
-              "Demoulas.ProfitSharing.CachingServices",
-              "Demoulas.ProfitSharing.Analyzers"
-            )
-
-            foreach ($proj in $sourceProjectFolders) {
-              if ($affectedProjects -contains $proj) {
-                $runUnitTests = $true
-                Write-Host "Source project $proj affected - will run unit tests" -ForegroundColor Cyan
+              if (-not $matched) {
+                Write-Host "[UNKNOWN] No mapping for: $file - Running ALL tests" -ForegroundColor Yellow
+                $runAllTests = $true
                 break
               }
             }
 
-            # Architecture tests run if structural projects change
-            $structuralProjectFolders = @(
-              "Demoulas.ProfitSharing.Common",
-              "Demoulas.ProfitSharing.Endpoints",
-              "Demoulas.ProfitSharing.Api",
-              "Demoulas.ProfitSharing.Services",
-              "Demoulas.ProfitSharing.Data"
-            )
-            foreach ($proj in $structuralProjectFolders) {
-              if ($affectedProjects -contains $proj) {
+            # Get unique filters
+            $testFilters = $testFilters | Select-Object -Unique
+
+            Write-Host "`nTest filters:" -ForegroundColor Yellow
+            if ($runAllTests) {
+              Write-Host "  Running ALL tests (critical or unmapped files changed)" -ForegroundColor Red
+            } elseif ($testFilters.Count -eq 0) {
+              Write-Host "  No test filters (only test files changed)" -ForegroundColor Green
+            } else {
+              $testFilters | ForEach-Object { Write-Host "  - $_" -ForegroundColor Cyan }
+            }
+
+            # Determine if architecture tests should run
+            $runArchitectureTests = $false
+            $structuralPatterns = @("Common", "Endpoints", "Services", "Data")
+            foreach ($pattern in $structuralPatterns) {
+              if ($testFilters -contains $pattern -or $runAllTests) {
                 $runArchitectureTests = $true
-                Write-Host "Structural project $proj affected - will run architecture tests" -ForegroundColor Cyan
                 break
               }
             }
 
             # Write decision to artifact
             $decision = @{
-              decision = "SELECTIVE"
-              runUnitTests = $runUnitTests
+              decision = if ($runAllTests) { "RUN_ALL" } else { "SELECTIVE" }
+              runAllTests = $runAllTests
+              testFilters = @($testFilters)
               runArchitectureTests = $runArchitectureTests
-              affectedProjects = @($affectedProjects)
-              reason = "Selective analysis completed"
+              reason = if ($runAllTests) { "Critical or unmapped files changed" } else { "Selective filters applied" }
             }
 
             $decision | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
 
             Write-Host "`nTest Execution Decision:" -ForegroundColor Cyan
-            Write-Host "  Unit Tests: $(if ($runUnitTests) { 'RUN' } else { 'SKIP' })" -ForegroundColor $(if ($runUnitTests) { 'Green' } else { 'Yellow' })
+            Write-Host "  Unit Tests: $(if ($runAllTests) { 'ALL' } elseif ($testFilters.Count -gt 0) { 'SELECTIVE (' + ($testFilters -join ', ') + ')' } else { 'SKIP' })" -ForegroundColor $(if ($runAllTests) { 'Yellow' } elseif ($testFilters.Count -gt 0) { 'Green' } else { 'Yellow' })
             Write-Host "  Architecture Tests: $(if ($runArchitectureTests) { 'RUN' } else { 'SKIP' })" -ForegroundColor $(if ($runArchitectureTests) { 'Green' } else { 'Yellow' })
           }
           catch {
