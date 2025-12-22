@@ -23,9 +23,7 @@ internal abstract class ModifiedBaseMap<TType> : IEntityTypeConfiguration<TType>
             .HasDefaultValueSql("SYSTIMESTAMP");
 
         _ = builder.Property(e => e.ModifiedAtUtc)
-            .ValueGeneratedOnUpdate()
             .HasColumnName("MODIFIED_AT_UTC")
-            .HasColumnType("TIMESTAMP WITH TIME ZONE")
-            .HasDefaultValueSql("SYSTIMESTAMP");
+            .HasColumnType("TIMESTAMP WITH TIME ZONE");
     }
 }
