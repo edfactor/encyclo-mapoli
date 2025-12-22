@@ -54,42 +54,44 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       heightPercentage: isGridExpanded ? 0.85 : 0.5
     });
 
-    const handleMemberClick = (member: EmployeeDetails) => {
-      onMemberSelect({
-        memberType: member.isEmployee ? 1 : 2,
-        id: Number(member.id),
-        ssn: Number(member.ssn),
-        badgeNumber: Number(member.badgeNumber),
-        psnSuffix: Number(member.psnSuffix)
-      });
-    };
-
-    const handleNavigate = (path: string) => {
-      console.log(`Navigating to ${path}`);
-      const i = path.lastIndexOf('/');
-      const badgeNumberParameter = path.substring(i + 1);
-
-      const employee = searchResults.results.find(emp => {
-        const badgeNumberPlusSuffix = emp.psnSuffix > 0 
-        ? `${emp.badgeNumber}${String(emp.psnSuffix).padStart(4, "0")}` 
-        : emp.badgeNumber.toString();
-        return badgeNumberPlusSuffix === badgeNumberParameter;
-      });
-
-      if (employee) {
-        handleMemberClick(employee);
-      } else {
-        console.warn(`Employee with badge number and suffix ${badgeNumberParameter} not found in current results.`);
-      }
-    }
-
     const handleSortChange = (sortParams: ISortParams) => {
       onSortChange(sortParams);
     };
 
     const columns = useMemo(
-      () => GetMasterInquiryMemberGridColumns(handleNavigate), 
-      [handleNavigate]
+      () => {
+        const handleMemberClick = (member: EmployeeDetails) => {
+          onMemberSelect({
+            memberType: member.isEmployee ? 1 : 2,
+            id: Number(member.id),
+            ssn: Number(member.ssn),
+            badgeNumber: Number(member.badgeNumber),
+            psnSuffix: Number(member.psnSuffix)
+          });
+        };
+
+        const handleNavigate = (path: string) => {
+          console.log(`Navigating to ${path}`);
+          const i = path.lastIndexOf('/');
+          const badgeNumberParameter = path.substring(i + 1);
+
+          const employee = searchResults.results.find(emp => {
+            const badgeNumberPlusSuffix = emp.psnSuffix > 0 
+            ? `${emp.badgeNumber}${String(emp.psnSuffix).padStart(4, "0")}` 
+            : emp.badgeNumber.toString();
+            return badgeNumberPlusSuffix === badgeNumberParameter;
+          });
+
+          if (employee) {
+            handleMemberClick(employee);
+          } else {
+            console.warn(`Employee with badge number and suffix ${badgeNumberParameter} not found in current results.`);
+          }
+        };
+
+        return GetMasterInquiryMemberGridColumns(handleNavigate);
+      },
+      [searchResults.results, onMemberSelect]
     );
 
     return (
