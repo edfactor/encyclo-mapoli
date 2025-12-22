@@ -1,5 +1,5 @@
 import { Box, Button, Divider, Grid, Typography } from "@mui/material";
-import { CellValueChangedEvent, ColDef, ValueFormatterParams } from "ag-grid-community";
+import { CellValueChangedEvent, ColDef } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
