@@ -15,7 +15,7 @@ internal sealed class CommentTypeMap : ModifiedBaseMap<CommentType>
         builder.HasKey(x => x.Id);
         builder.ToTable("COMMENT_TYPE");
 
-        builder.Property(x => x.Id).IsRequired().ValueGeneratedNever().HasColumnName("ID");
+        builder.Property(x => x.Id).IsRequired().ValueGeneratedOnAdd().HasColumnName("ID");
         builder.Property(x => x.Name).IsRequired().HasMaxLength(128).HasColumnName("NAME");
 
         builder.HasData(GetPredefinedCommentTypes());

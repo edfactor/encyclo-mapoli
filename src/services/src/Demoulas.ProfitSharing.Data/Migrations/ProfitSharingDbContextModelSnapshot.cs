@@ -54,10 +54,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("JOINT_RATE");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<decimal>("SingleRate")
                         .HasPrecision(6, 4)
@@ -325,10 +323,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("KEYFIELDS_CHECKSUM_JSON");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<short>("ProfitYear")
                         .HasPrecision(4)
@@ -398,10 +394,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("DEMOGRAPHIC_ID");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<decimal>("Percent")
                         .HasPrecision(3)
@@ -469,10 +463,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("DATE_OF_BIRTH");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<int>("Ssn")
                         .HasPrecision(9)
@@ -517,10 +509,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<int>("NewSsn")
                         .HasPrecision(9)
@@ -581,8 +571,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.CommentType", b =>
                 {
                     b.Property<byte>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<byte>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -595,10 +588,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("ISPROTECTED");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -623,84 +614,84 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)1,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Transfer Out"
                         },
                         new
                         {
                             Id = (byte)2,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Transfer In"
                         },
                         new
                         {
                             Id = (byte)3,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "QDRO Out"
                         },
                         new
                         {
                             Id = (byte)4,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "QDRO In"
                         },
                         new
                         {
                             Id = (byte)5,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "V-Only"
                         },
                         new
                         {
                             Id = (byte)6,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Forfeit"
                         },
                         new
                         {
                             Id = (byte)7,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Un-Forfeit"
                         },
                         new
                         {
                             Id = (byte)8,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Class Action"
                         },
                         new
                         {
                             Id = (byte)9,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Voided"
                         },
                         new
                         {
                             Id = (byte)10,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Hardship"
                         },
                         new
                         {
                             Id = (byte)11,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Distribution"
                         },
                         new
                         {
                             Id = (byte)12,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Payoff"
                         },
                         new
@@ -714,14 +705,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)14,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Rollover"
                         },
                         new
                         {
                             Id = (byte)15,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Roth IRA"
                         },
                         new
@@ -749,7 +740,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)19,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Military"
                         },
                         new
@@ -763,42 +754,42 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)21,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Rev"
                         },
                         new
                         {
                             Id = (byte)22,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Unrev"
                         },
                         new
                         {
                             Id = (byte)23,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "100% Earnings"
                         },
                         new
                         {
                             Id = (byte)24,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = ">64 & >5 100%"
                         },
                         new
                         {
                             Id = (byte)25,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Forfeit Class Action"
                         },
                         new
                         {
                             Id = (byte)26,
                             CreatedAtUtc = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            IsProtected = false,
+                            IsProtected = true,
                             Name = "Forfeit Administrative"
                         },
                         new
@@ -2299,10 +2290,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasComment("HireDate");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<long>("OracleHcmId")
                         .HasPrecision(15)
@@ -2618,10 +2607,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("DEMOGRAPHIC_ID");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<int>("NewSsn")
                         .HasPrecision(9)
@@ -2824,10 +2811,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("MEMO");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<int?>("PayeeId")
                         .HasColumnType("NUMBER(10)")
@@ -3043,10 +3028,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("DEMOGRAPHIC_ID");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<byte>("ReasonId")
                         .HasColumnType("NUMBER(2)")
@@ -4765,10 +4748,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("INCOME_EXECUTIVE");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<decimal?>("PointsEarned")
                         .HasPrecision(9, 2)
@@ -4977,10 +4958,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("FORFEITURE");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<byte>("MonthToDate")
                         .HasPrecision(2)
@@ -5688,10 +5667,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<decimal>("Rate")
                         .HasPrecision(9, 2)
@@ -6302,10 +6279,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("MAX_ALLOWED_CONTRIBUTIONS");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<short>("ProfitYear")
                         .HasPrecision(4)

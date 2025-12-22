@@ -49,7 +49,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     JOINT_RATE = table.Column<decimal>(type: "DECIMAL(6,4)", precision: 6, scale: 4, nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -113,12 +113,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "COMMENT_TYPE",
                 columns: table => new
                 {
-                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     NAME = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false),
                     ISPROTECTED = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -512,7 +513,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     KEYFIELDS_CHECKSUM_JSON = table.Column<string>(type: "CLOB", nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -539,7 +540,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     RATE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -594,7 +595,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     IS_YEAR_END_COMPLETED = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -639,7 +640,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     CREATED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE"),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -866,7 +867,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     EMPLOYMENT_STATUS_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true),
                     BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false)
                 },
                 constraints: table =>
@@ -945,7 +946,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     REVERSED_FROM_PROFIT_DETAIL_ID = table.Column<int>(type: "NUMBER(10)", nullable: true),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -986,7 +987,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true),
                     OLD_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
                     NEW_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false)
                 },
@@ -1030,7 +1031,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     MANUAL_CHECK_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1150,7 +1151,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true),
                     BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false)
                 },
                 constraints: table =>
@@ -1177,7 +1178,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true),
                     OLD_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
                     NEW_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false)
                 },
@@ -1210,7 +1211,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1264,7 +1265,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     TOTAL_INCOME = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false, computedColumnSql: "INCOME_EXECUTIVE + CURRENT_INCOME_YEAR", stored: true),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1349,37 +1350,37 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "COMMENT_TYPE",
-                columns: new[] { "ID", "ISPROTECTED", "NAME" },
+                columns: new[] { "ID", "ISPROTECTED", "MODIFIED_AT_UTC", "NAME" },
                 values: new object[,]
                 {
-                    { (byte)1, false, "Transfer Out" },
-                    { (byte)2, false, "Transfer In" },
-                    { (byte)3, false, "QDRO Out" },
-                    { (byte)4, false, "QDRO In" },
-                    { (byte)5, false, "V-Only" },
-                    { (byte)6, false, "Forfeit" },
-                    { (byte)7, false, "Un-Forfeit" },
-                    { (byte)8, false, "Class Action" },
-                    { (byte)9, false, "Voided" },
-                    { (byte)10, false, "Hardship" },
-                    { (byte)11, false, "Distribution" },
-                    { (byte)12, false, "Payoff" },
-                    { (byte)13, false, "Dirpay" },
-                    { (byte)14, false, "Rollover" },
-                    { (byte)15, false, "Roth IRA" },
-                    { (byte)16, false, "> 64 - 1 Year Vested" },
-                    { (byte)17, false, "> 64 - 2 Year Vested" },
-                    { (byte)18, false, "> 64 - 3 Year Vested" },
-                    { (byte)19, false, "Military" },
-                    { (byte)20, false, "Other" },
-                    { (byte)21, false, "Rev" },
-                    { (byte)22, false, "Unrev" },
-                    { (byte)23, false, "100% Earnings" },
-                    { (byte)24, false, ">64 & >5 100%" },
-                    { (byte)25, false, "Forfeit Class Action" },
-                    { (byte)26, false, "Forfeit Administrative" },
-                    { (byte)27, false, "Administrative - taking money from under 21" },
-                    { (byte)28, false, "Forfeiture adjustment for Class Action" }
+                    { (byte)1, true, null, "Transfer Out" },
+                    { (byte)2, true, null, "Transfer In" },
+                    { (byte)3, true, null, "QDRO Out" },
+                    { (byte)4, true, null, "QDRO In" },
+                    { (byte)5, true, null, "V-Only" },
+                    { (byte)6, true, null, "Forfeit" },
+                    { (byte)7, true, null, "Un-Forfeit" },
+                    { (byte)8, true, null, "Class Action" },
+                    { (byte)9, true, null, "Voided" },
+                    { (byte)10, true, null, "Hardship" },
+                    { (byte)11, true, null, "Distribution" },
+                    { (byte)12, true, null, "Payoff" },
+                    { (byte)13, false, null, "Dirpay" },
+                    { (byte)14, true, null, "Rollover" },
+                    { (byte)15, true, null, "Roth IRA" },
+                    { (byte)16, false, null, "> 64 - 1 Year Vested" },
+                    { (byte)17, false, null, "> 64 - 2 Year Vested" },
+                    { (byte)18, false, null, "> 64 - 3 Year Vested" },
+                    { (byte)19, true, null, "Military" },
+                    { (byte)20, false, null, "Other" },
+                    { (byte)21, true, null, "Rev" },
+                    { (byte)22, true, null, "Unrev" },
+                    { (byte)23, true, null, "100% Earnings" },
+                    { (byte)24, true, null, ">64 & >5 100%" },
+                    { (byte)25, true, null, "Forfeit Class Action" },
+                    { (byte)26, true, null, "Forfeit Administrative" },
+                    { (byte)27, false, null, "Administrative - taking money from under 21" },
+                    { (byte)28, false, null, "Forfeiture adjustment for Class Action" }
                 });
 
             migrationBuilder.InsertData(
