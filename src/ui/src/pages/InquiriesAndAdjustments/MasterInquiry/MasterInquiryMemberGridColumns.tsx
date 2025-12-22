@@ -8,15 +8,14 @@ import {
   createZipColumn
 } from "../../../utils/gridColumnFactory";
 
-export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
+export const GetMasterInquiryMemberGridColumns = (
+  navigateFunction: (badgeNumber: string) => void
+): ColDef[] => {
   const badgeColumn = createBadgeColumn({
     headerName: "Badge/PSN",
     psnSuffix: true,
-    renderAsLink: false // Don't render as link - row click handles selection
+    navigateFunction: navigateFunction,
   });
-
-  // Add CSS class to make badge look like a link
-  badgeColumn.cellClass = "badge-link-style";
 
   return [
     badgeColumn,
