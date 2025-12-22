@@ -186,6 +186,21 @@ if [ -n "$changed_backend_files" ]; then
         if echo "$changed_backend_files" | grep -qE 'Data/Entities/'; then
             namespace_filters="$namespace_filters Services"
         fi
+        if echo "$changed_backend_files" | grep -qE 'Demoulas\.ProfitSharing\.Api/'; then
+            namespace_filters="$namespace_filters Endpoints"
+        fi
+        if echo "$changed_backend_files" | grep -qE 'CachingServices/'; then
+            namespace_filters="$namespace_filters Services"
+        fi
+        if echo "$changed_backend_files" | grep -qE 'Security/'; then
+            namespace_filters="$namespace_filters Security"
+        fi
+        if echo "$changed_backend_files" | grep -qE 'Common/'; then
+            namespace_filters="$namespace_filters Common"
+        fi
+        if echo "$changed_backend_files" | grep -qE 'Services/Pay/|Services/Total'; then
+            namespace_filters="$namespace_filters Services"
+        fi
 
         # Trim leading whitespace
         namespace_filters=$(echo "$namespace_filters" | sed 's/^ *//')
@@ -197,7 +212,7 @@ if [ -n "$changed_backend_files" ]; then
                 continue
             fi
             # Check if file matches any known pattern
-            if ! echo "$file" | grep -qE '(Endpoints/Beneficiaries/|Services/Beneficiaries/|Endpoints/Lookups/|Services/Lookup/|Endpoints/Distributions/|Endpoints/Adjustments/|Endpoints/YearEnd/|Services/YearEnd|Services/ProfitShareEdit|Endpoints/Military/|Services/Military/|Endpoints/Validation/|Services/Validation/|Endpoints/ItOperations/|Services/ItDevOps/|Endpoints/Navigations/|Services/Navigations/|Endpoints/BeneficiaryInquiry/|Services/BeneficiaryInquiry/|Endpoints/ProfitDetails/|OracleHcm/|Services/Reports/|Endpoints/Reports/|Data/Entities/|Endpoints/Base/|Extensions/TelemetryExtensions|Common/Contracts/Result|Common/Contracts/Error|Data/Contexts/|Data/Migrations/)'; then
+            if ! echo "$file" | grep -qE '(Endpoints/Beneficiaries/|Services/Beneficiaries/|Endpoints/Lookups/|Services/Lookup/|Endpoints/Distributions/|Endpoints/Adjustments/|Endpoints/YearEnd/|Services/YearEnd|Services/ProfitShareEdit|Endpoints/Military/|Services/Military/|Endpoints/Validation/|Services/Validation/|Endpoints/ItOperations/|Services/ItDevOps/|Endpoints/Navigations/|Services/Navigations/|Endpoints/BeneficiaryInquiry/|Services/BeneficiaryInquiry/|Endpoints/ProfitDetails/|OracleHcm/|Services/Reports/|Endpoints/Reports/|Data/Entities/|Endpoints/Base/|Extensions/TelemetryExtensions|Common/Contracts/Result|Common/Contracts/Error|Data/Contexts/|Data/Migrations/|Demoulas\.ProfitSharing\.Api/|CachingServices/|Security/|Common/|Services/Pay/|Services/Total|Reporting/|Analyzers/)'; then
                 echo "⚠️  Unknown file pattern: $file - will run ALL tests"
                 run_all_tests=true
                 break
