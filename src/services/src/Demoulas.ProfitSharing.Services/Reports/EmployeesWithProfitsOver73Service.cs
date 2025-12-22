@@ -102,7 +102,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                         TerminationDate = employee.TerminationDate,
                         Age = age,
                         Balance = balance?.TotalAmount ?? 0,
-                        RequiredMinimumDistributions = 0.0M 
+                        RequiredMinimumDistributions = 0.0M
                     };
                 })
                 .AsQueryable();
@@ -186,7 +186,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
 
             letter.AppendLine();
 
-            letter.AppendLine($"{space7}Federal law dictates that minimum distribution rules apply to all participants in");  
+            letter.AppendLine($"{space7}Federal law dictates that minimum distribution rules apply to all participants in");
             letter.AppendLine($"{space7}the Demoulas Profit Sharing Plan who are over the age of 73.These rules");
             letter.AppendLine($"{space7}establish a mandatory required beginning date for participants to begin");
             letter.AppendLine($"{space7}receiving payments from the Plan.");

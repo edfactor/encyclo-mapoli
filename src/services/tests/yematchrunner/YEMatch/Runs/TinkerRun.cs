@@ -33,22 +33,22 @@ public class TinkerRun : Runnable
             IntPay426,
             IntPay426N,
             IntPay426N9
-            /*
-                        IntProfitMasterUpdateTest, // Runs Contributions on Smart
+        /*
+                    IntProfitMasterUpdateTest, // Runs Contributions on Smart
 
-                        // Ensure that YE update went to plan
-                        TestProfitDetailSelectedColumns, // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont,enrollment_id
-                        TestEtvaNow, // Verify ETVA for 2025
-                        TestEtvaPrior,
+                    // Ensure that YE update went to plan
+                    TestProfitDetailSelectedColumns, // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont,enrollment_id
+                    TestEtvaNow, // Verify ETVA for 2025
+                    TestEtvaPrior,
 
-                        R24_ProfPayMasterUpdate, // Create PAY450 report on READY
-                        // R24B_ProfPayMasterUpdatePartTwo // Updates the YEARS, and enrollment on READY, NOP on SMART
+                    R24_ProfPayMasterUpdate, // Create PAY450 report on READY
+                    // R24B_ProfPayMasterUpdatePartTwo // Updates the YEARS, and enrollment on READY, NOP on SMART
 
-                        S24_ProfPayMasterUpdate, // <--- Writes out update enrollments to the OPEN PROFIT YEAR
-                        IntPay450 // Does the FrozenService produce the same report as READY?
+                    S24_ProfPayMasterUpdate, // <--- Writes out update enrollments to the OPEN PROFIT YEAR
+                    IntPay450 // Does the FrozenService produce the same report as READY?
 
-                        // S24_ProfPayMasterUpdate // <--- Writes out update enrollments
-            */
+                    // S24_ProfPayMasterUpdate // <--- Writes out update enrollments
+        */
         ));
     }
 }
