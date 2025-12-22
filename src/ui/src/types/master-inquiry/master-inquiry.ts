@@ -10,10 +10,10 @@ export interface MasterInquirySearch {
   comment?: string | null;
   paymentType: "all" | "hardship" | "payoffs" | "rollovers";
   memberType: "all" | "employees" | "beneficiaries" | "none";
-  contribution?: number | null;
-  earnings?: number | null;
-  forfeiture?: number | null;
-  payment?: number | null;
+  contribution?: number | string | null;
+  earnings?: number | string | null;
+  forfeiture?: number | string | null;
+  payment?: number | string | null;
   voids: boolean;
   pagination: SortedPaginationRequestDto;
 }
@@ -42,6 +42,8 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   commentRelatedOracleHcmId?: number;
   commentRelatedPsnSuffix?: number;
   commentIsPartialTransaction?: boolean;
+  xFerQdroId?: number;
+  xFerQdroName?: string;
   profitCodeName?: string;
   zeroContributionReasonName?: string;
   taxCodeName?: string;
@@ -51,6 +53,8 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   currentIncomeYear?: number;
   currentHoursYear?: number;
   psnSuffix?: number;
+  /** Indicates whether this profit detail record has already been reversed. */
+  isAlreadyReversed?: boolean;
 }
 
 export interface MasterInquiryRequest {
@@ -70,6 +74,7 @@ export interface MasterInquiryRequest {
   paymentAmount?: number;
   name?: string;
   paymentType?: number;
+  voids?: boolean;
   pagination: SortedPaginationRequestDto;
   _timestamp?: number;
 }
@@ -85,6 +90,7 @@ export interface MasterInquiryMemberRequest {
 }
 
 export interface MasterInquiryResponseDto {
+  [key: string]: unknown;
   isEmployee: boolean;
   id: number;
   ssn: string;
@@ -108,6 +114,8 @@ export interface MasterInquiryResponseDto {
   commentRelatedOracleHcmId?: number;
   commentRelatedPsnSuffix?: number;
   commentIsPartialTransaction?: boolean;
+  xFerQdroId?: number;
+  xFerQdroName?: string;
   badgeNumber?: number;
   profitCodeName?: string;
   zeroContributionReasonName?: string;

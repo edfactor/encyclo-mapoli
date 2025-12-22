@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, FormLabel, Grid, TextField, Typography } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetYearEndProfitSharingReportLiveQuery } from "reduxstore/api/YearsEndApi";
@@ -24,7 +24,7 @@ const schema = yup.object().shape({
 
 interface SearchParams {
   [key: string]: unknown;
-  reportId?: number;
+  reportId: number;
   badgeNumber?: number;
   profitYear?: number;
   pagination?: {
@@ -48,6 +48,7 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const dispatch = useDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentPreset = presets.find((preset) => preset.params.reportId === presetParams.reportId);
 
@@ -63,6 +64,12 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
     }
   });
 
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   // Reset form and clear results when report preset changes
   useEffect(() => {
     reset({ badgeNumber: undefined });
@@ -70,24 +77,27 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
   }, [presetParams, reset, dispatch]);
 
   const validateAndSearch = handleSubmit((data) => {
-    const request = {
-      ...presetParams,
-      badgeNumber: data.badgeNumber,
-      profitYear: profitYear,
-      pagination: {
-        skip: 0,
-        take: 25,
-        sortBy: "badgeNumber",
-        isSortDescending: false
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      const request = {
+        ...presetParams,
+        badgeNumber: data.badgeNumber ?? undefined,
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: 25,
+          sortBy: "badgeNumber",
+          isSortDescending: false
+        }
+      };
+
+      triggerSearch(request, false);
+      dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+
+      // Notify parent component of search parameters
+      if (onSearchParamsUpdate) {
+        onSearchParamsUpdate(request);
       }
-    };
-
-    triggerSearch(request, false);
-    dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
-
-    // Notify parent component of search parameters
-    if (onSearchParamsUpdate) {
-      onSearchParamsUpdate(request);
     }
   });
 
@@ -134,7 +144,8 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
           <SearchAndReset
             handleReset={handleReset}
             handleSearch={validateAndSearch}
-            isFetching={isFetching}
+            isFetching={isFetching || isSubmitting}
+            disabled={isFetching || isSubmitting}
           />
         </Grid>
       </Grid>

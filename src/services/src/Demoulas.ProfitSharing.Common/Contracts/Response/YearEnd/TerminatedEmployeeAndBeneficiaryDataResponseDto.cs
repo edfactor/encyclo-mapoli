@@ -5,38 +5,30 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecutive
 {
-    public required int BadgeNumber { get; set; }
-    public required short PsnSuffix { get; set; }
+    public required long PSN { get; set; }
 
     [MaskSensitive] public required string? Name { get; set; }
 
-    public string BadgePSn
-    {
-        get
-        {
-            if (PsnSuffix == 0)
-            {
-                return BadgeNumber.ToString();
-            }
-            return $"{BadgeNumber}{PsnSuffix:0000}";
-        }
-    }
-
     public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = [];
+
     public bool IsExecutive { get; set; }
+
+    /// <summary>
+    /// YTD Profit Sharing Hours from the first YearDetail, used for sorting.
+    /// </summary>
+    public decimal YtdPsHours { get; set; }
 
     public static TerminatedEmployeeAndBeneficiaryDataResponseDto ResponseExample()
     {
         return new TerminatedEmployeeAndBeneficiaryDataResponseDto
         {
-            BadgeNumber = 777123,
-            PsnSuffix = 100,
+            PSN = 7771230100, // ie. Bene or Empl
             Name = "Example, Joe F",
+            YtdPsHours = 980,
             YearDetails =
             [
                 new TerminatedEmployeeAndBeneficiaryYearDetailDto
                 {
-                    ProfitYear = 2024,
                     BeginningBalance = 100,
                     BeneficiaryAllocation = 200,
                     DistributionAmount = 300,
@@ -52,23 +44,4 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
             ]
         };
     }
-}
-
-public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive, IProfitYearRequest
-{
-    public decimal BeginningBalance { get; set; }
-    public decimal BeneficiaryAllocation { get; set; }
-    public decimal DistributionAmount { get; set; }
-    public decimal Forfeit { get; set; }
-    public decimal EndingBalance { get; set; }
-    public decimal VestedBalance { get; set; }
-    public DateOnly? DateTerm { get; set; }
-    public decimal YtdPsHours { get; set; }
-    public decimal VestedPercent { get; set; }
-    public int? Age { get; set; }
-    public bool HasForfeited { get; set; }
-    public decimal? SuggestedForfeit { get; set; }
-    public bool IsExecutive { get; set; }
-    public short ProfitYear { get; set; }
-    public byte EnrollmentId { get; set; }
 }

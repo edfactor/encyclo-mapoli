@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
+import { GRID_KEYS } from "../../../../constants";
 import { under21InactiveColumnDefs } from "./GetUnder21BreakdownGridColumns";
 
 interface Under21InactiveGridProps {
@@ -58,7 +59,7 @@ const Under21InactiveGrid: React.FC<Under21InactiveGridProps> = ({
       {under21Inactive && <ReportSummary report={under21Inactive} />}
       <Grid width="100%">
         <DSMGrid
-          preferenceKey="UNDER_21_INACTIVE_REPORT"
+          preferenceKey={GRID_KEYS.UNDER_21_INACTIVE_REPORT}
           isLoading={isLoading}
           handleSortChanged={sortEventHandler}
           providedOptions={{

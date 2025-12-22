@@ -4,7 +4,7 @@
     <Authors>NGDS Core Team | $(Company)</Authors>
     <Copyright>Copyright © $(Company) $([System.DateTime]::Now.Year)</Copyright>
 
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
@@ -15,22 +15,23 @@
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
-  <!-- Use portable PDBs for best SourceLink compatibility -->
-  <DebugType>portable</DebugType>
+    <!-- Use portable PDBs for best SourceLink compatibility -->
+    <DebugType>portable</DebugType>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- CS8034 is loading the analyzers more than once -->
-    <NoWarn>CA2227;CA1715;CA1000;IDE0062;IDE1006;IDE0090;VSSpell001;NU1507;NU1900;S1481;IDE0161;VSTHRD200;S3358;S1699</NoWarn>
+    <!-- xUnit1051: Suppress CancellationToken analyzer warning during migration - use TestContext.Current.CancellationToken gradually -->
+    <NoWarn>CA2227;CA1715;CA1000;IDE0062;IDE1006;IDE0090;VSSpell001;NU1507;NU1900;S1481;IDE0161;VSTHRD200;S3358;S1699;xUnit1051</NoWarn>
 
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnforceFIPSPolicy>false</EnforceFIPSPolicy>
     <Deterministic>true</Deterministic>
-  <!-- Keep AssemblyVersion stable to avoid binding issues; vary FileVersion/InformationalVersion per build -->
-  <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <!-- Keep AssemblyVersion stable to avoid binding issues; vary FileVersion/InformationalVersion per build -->
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
 
     <!-- .NET 9 Performance Optimizations -->
     <!-- Server GC is optimized for throughput in multi-core server environments -->

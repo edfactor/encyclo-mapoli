@@ -1,4 +1,4 @@
-import { ValueFormatterParams, ValueGetterParams, ITooltipParams } from "ag-grid-community";
+import { ITooltipParams, ValueFormatterParams, ValueGetterParams } from "ag-grid-community";
 
 // Base interface with common properties
 export interface BaseColumnOptions {
@@ -22,6 +22,10 @@ export interface AlignableColumnOptions extends BaseColumnOptions {
 
 export interface LimitedAlignmentColumnOptions extends BaseColumnOptions {
   alignment?: "left" | "center";
+}
+
+export interface AgeColumnOptions extends LimitedAlignmentColumnOptions {
+  valueGetter?: (params: ValueGetterParams) => number;
 }
 
 export interface AddressColumnOptions extends AlignableColumnOptions {
@@ -66,6 +70,7 @@ export interface DateColumnOptions extends LimitedAlignmentColumnOptions {
 
 export interface YesOrNoColumnOptions extends FormattableColumnOptions {
   useWords?: boolean;
+  cellRenderer?: (params: ValueFormatterParams) => string;
 }
 
 export interface NameColumnOptions extends LimitedAlignmentColumnOptions {
@@ -107,4 +112,9 @@ export interface PSNColumnOptions extends FormattableColumnOptions {
   enableLinking?: boolean;
   navigateFunction?: (badgeNumber: string, psnSuffix?: string) => void;
   linkingStyle?: "simple" | "badge-psn"; // Different PSN linking patterns
+}
+
+export interface BadgeOrPSNOptions extends PSNColumnOptions {
+  badgeField: string;
+  psnField: string;
 }

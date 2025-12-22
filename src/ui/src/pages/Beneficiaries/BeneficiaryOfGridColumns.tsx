@@ -5,31 +5,20 @@ import {
   createDateColumn,
   createNameColumn,
   createSSNColumn,
-  createStateColumn
+  createStateColumn,
+  createZipColumn
 } from "../../utils/gridColumnFactory";
 
-export const BeneficiaryOfGridColumns = (): ColDef[] => {
+export const GetBeneficiaryOfGridColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({}),
-    {
-      headerName: "PSN_SUFFIX",
-      field: "psnSuffix",
-      colId: "psnSuffix",
-      flex: 1,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
+    createBadgeColumn({ headerName: "Badge/Psn", psnSuffix: true }),
     createNameColumn({
-      field: "fullName",
-      valueFormatter: (params) => {
-        return `${params.data.lastName}, ${params.data.firstName}`;
-      }
+      field: "fullName"
     }),
     createSSNColumn({}),
-    createDateColumn({ headerName: "Date of Birth", field: "dateOfBirth", colId: "dateOfBirth" }),
+    createDateColumn({ headerName: "Date of Birth", field: "dateOfBirth" }),
     {
-      headerName: "Address",
+      headerName: "Street",
       field: "street",
       colId: "street",
       flex: 1,
@@ -54,7 +43,7 @@ export const BeneficiaryOfGridColumns = (): ColDef[] => {
     },
     createStateColumn({}),
     {
-      headerName: "Percent",
+      headerName: "Percentage",
       field: "percent",
       colId: "percent",
       flex: 1,
@@ -62,6 +51,7 @@ export const BeneficiaryOfGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true
     },
-    createCurrencyColumn({ headerName: "Current", field: "currentBalance", colId: "currentBalance" })
+    createZipColumn({ field: "postalCode" }),
+    createCurrencyColumn({ headerName: "Current Balance", field: "currentBalance", colId: "currentBalance" })
   ];
 };

@@ -9,4 +9,13 @@ public sealed record CommentTypeResponse : ILookupTable<byte>
     public byte Id { get; set; }
 
     public required string Name { get; set; }
+
+    public static CommentTypeResponse ResponseExample()
+    {
+        return new CommentTypeResponse
+        {
+            Id = 1,
+            Name = "General Comment"
+        };
+    }
 }

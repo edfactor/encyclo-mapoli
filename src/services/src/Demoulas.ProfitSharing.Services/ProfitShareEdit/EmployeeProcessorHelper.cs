@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -17,10 +18,11 @@ internal static class EmployeeProcessorHelper
         AdjustmentsSummaryDto adjustmentsSummaryDto, CancellationToken cancellationToken)
     {
         bool employeeExceededMaxContribution = false;
+        short currentYear = (short)DateTime.Now.Year;
         short profitYear = profitShareUpdateRequest.ProfitYear;
         short priorYear = (short)(profitShareUpdateRequest.ProfitYear - 1);
 
-        // We want everything up to the beginning of this currentYear year, so we use lastYear in this lookup.
+        // We want everything up to the beginning of the profit year year, so we use priorYear in this lookup.
         CalendarResponseDto fiscalDates = await calendarService.GetYearStartAndEndAccountingDatesAsync(priorYear, cancellationToken);
         var employeeFinancialsList = await dbContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -30,7 +32,7 @@ internal static class EmployeeProcessorHelper
                     ppYe => ppYe.DemographicId,
                     ppNow => ppNow.DemographicId,
                     (ppYe, ppNow) => new { ppYE = ppYe, ppNow })
-                .Where(x => x.ppYE.ProfitYear == profitYear && x.ppNow.ProfitYear == profitYear + 1)
+                .Where(x => x.ppYE.ProfitYear == profitYear && x.ppNow.ProfitYear == currentYear)
                 .Join(frozenDemographicQuery, pp => pp.ppNow.DemographicId, d => d.Id, (pp, frozenDemographics) => new { ppYE = pp.ppYE, ppNow = pp.ppNow, frozenDemographics })
                 .Select(x => new
                 {
@@ -85,7 +87,7 @@ internal static class EmployeeProcessorHelper
         foreach (EmployeeFinancials empl in employeeFinancialsList)
         {
             if (empl.EnrolledId != /*0*/ Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId == /*1*/ EmployeeType.Constants.NewLastYear ||
-                empl.HasTransactionAmounts() || empl.ZeroContributionReasonId != /*0*/ ZeroContributionReason.Constants.Normal)
+                empl.HasTransactionAmounts() || empl.ZeroContributionReasonId != /*0*/ ZeroContributionReason.Constants.Normal || empl.CurrentAmount != 0)
             {
                 var profitDetailTotals = new ProfitDetailTotals(empl.DistributionsTotal ?? 0, empl.ForfeitsTotal ?? 0,
                     empl.AllocationsTotal ?? 0, empl.PaidAllocationsTotal ?? 0, empl.MilitaryTotal ?? 0, empl.ClassActionFundTotal ?? 0);
@@ -126,7 +128,7 @@ internal static class EmployeeProcessorHelper
                 + (empl.CurrentAmount - profitDetailTotals.ForfeitsTotal - profitDetailTotals.PaidAllocationsTotal)
                 - profitDetailTotals.DistributionsTotal
                 , 2, MidpointRounding.AwayFromZero);
-            memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
+            memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, 0, MidpointRounding.AwayFromZero);
         }
 
         ComputeEarningsEmployee(empl, memberTotals, profitShareUpdateRequest, adjustmentsSummaryData, profitDetailTotals.ClassActionFundTotal);
@@ -259,9 +261,9 @@ internal static class EmployeeProcessorHelper
             return;
         }
 
-        // Here we scale the Earned interest to report on what portion is in a 0 record (contribution), vs what goes in an 8 record (100% ETVA Earnings) 
+        // Here we scale the Earned interest to report on what portion is in a 0 record (contribution), vs what goes in an 8 record (100% ETVA Earnings)
         decimal etvaScaled = workingEtva / memberTotals.PointsDollars;
-        // The Cobol truncates (and not rounds) to 6 places, so we do the same here. 
+        // The Cobol truncates (and not rounds) to 6 places, so we do the same here.
         etvaScaled = Math.Truncate(etvaScaled * 1_000_000) / 1_000_000;
 
         // Sets Earn and ETVA amounts

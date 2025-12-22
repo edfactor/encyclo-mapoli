@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+
 internal sealed record RehireProfitSummaryQuery
 {
     internal required int BadgeNumber { get; set; }

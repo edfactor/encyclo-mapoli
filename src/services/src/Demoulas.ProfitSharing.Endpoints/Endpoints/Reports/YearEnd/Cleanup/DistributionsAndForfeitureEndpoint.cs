@@ -1,15 +1,14 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -18,12 +17,14 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<DistributionsAndForfeituresRequest, Results<Ok<DistributionsAndForfeitureTotalsResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly ICleanupReportService _cleanupReportService;
+    private readonly IAuditService _auditService;
     private readonly ILogger<DistributionsAndForfeitureEndpoint> _logger;
 
-    public DistributionsAndForfeitureEndpoint(ICleanupReportService cleanupReportService, ILogger<DistributionsAndForfeitureEndpoint> logger)
+    public DistributionsAndForfeitureEndpoint(ICleanupReportService cleanupReportService, IAuditService auditService, ILogger<DistributionsAndForfeitureEndpoint> logger)
         : base(Navigation.Constants.DistributionsAndForfeitures)
     {
         _cleanupReportService = cleanupReportService;
+        _auditService = auditService;
         _logger = logger;
     }
 
@@ -46,16 +47,38 @@ public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<Distribu
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
+            // Extract profit year from EndDate (or use current year if not provided)
+            var profitYear = (req.EndDate?.Year ?? DateTime.Now.Year) + 1; //Report is run for the prior year.
+
+            // Wrap service call with audit archiving
             var serviceResult = await _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
+
+            // Check for errors before archiving
+            if (serviceResult.IsError)
+            {
+                return serviceResult.ToHttpResult(Error.NoPayProfitsDataAvailable);
+            }
+
+            // Archive the successful result
+            var result = await _auditService.ArchiveCompletedReportAsync<DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(
+                ReportNames.DistributionAndForfeitures.ReportCode,
+                (short)profitYear,
+                req,
+                async (archiveReq, _, cancellationToken) =>
+                {
+                    var archiveServiceResult = await _cleanupReportService.GetDistributionsAndForfeitureAsync(archiveReq, cancellationToken);
+                    return archiveServiceResult.Value!;
+                },
+                ct);
 
             // Record year-end cleanup report metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "year-end-cleanup-distributions-forfeitures"),
                 new("endpoint", nameof(DistributionsAndForfeitureEndpoint)));
 
-            if (serviceResult is { IsSuccess: true, Value.Response.Results: not null })
+            if (result.Response?.Results is not null)
             {
-                var resultCount = serviceResult.Value.Response.Results.Count();
+                var resultCount = result.Response.Results.Count();
                 EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
                     new("record_type", "distributions-forfeitures-cleanup"),
                     new("endpoint", nameof(DistributionsAndForfeitureEndpoint)));
@@ -63,10 +86,10 @@ public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<Distribu
                 _logger.LogInformation("Year-end cleanup report for distributions and forfeitures generated, returned {Count} records (correlation: {CorrelationId})",
                     resultCount, HttpContext.TraceIdentifier);
 
-                return serviceResult.ToHttpResult();
+                return Result<DistributionsAndForfeitureTotalsResponse>.Success(result).ToHttpResult();
             }
 
-            return serviceResult.ToHttpResult(Error.NoPayProfitsDataAvailable);
+            return Result<DistributionsAndForfeitureTotalsResponse>.Failure(Error.NoPayProfitsDataAvailable).ToHttpResult();
         });
     }
 }

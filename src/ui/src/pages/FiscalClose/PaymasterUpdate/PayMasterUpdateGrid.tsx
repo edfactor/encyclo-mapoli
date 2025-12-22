@@ -1,81 +1,30 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
-import { useSelector } from "react-redux";
 import { Path } from "react-router";
-import { YearsEndApi } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
+import { UpdateSummaryResponse } from "reduxstore/types";
 import { Pagination } from "smart-ui-library";
 import { DSMGrid } from "../../../components/DSMGrid/DSMGrid";
-import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
+import { GRID_KEYS } from "../../../constants";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetPayMasterUpdateGridColumns } from "./PayMasterUpdateGridColumns";
 
 interface PayMasterUpdateGridProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
-  profitYear: number;
+  summaryData: UpdateSummaryResponse | null;
+  gridPagination: ReturnType<typeof useGridPagination>;
   pageNumberReset: boolean;
   setPageNumberReset: (reset: boolean) => void;
+  isLoading?: boolean;
 }
 
 const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded,
-  profitYear,
+  summaryData,
+  gridPagination,
   pageNumberReset,
-  setPageNumberReset
+  setPageNumberReset,
+  isLoading = false
 }) => {
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isFetching }] = YearsEndApi.endpoints.getUpdateSummary.useLazyQuery();
-
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "name",
-      initialSortDescending: false,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (initialSearchLoaded && hasToken) {
-            try {
-              await triggerSearch({
-                profitYear,
-                pagination: {
-                  skip: pageNum * pageSz,
-                  take: pageSz,
-                  sortBy: sortPrms.sortBy,
-                  isSortDescending: sortPrms.isSortDescending
-                }
-              });
-            } catch (error) {
-              console.error("API call failed:", error);
-            }
-          }
-        },
-        [initialSearchLoaded, hasToken, profitYear, triggerSearch]
-      )
-    });
-
-  const onSearch = useCallback(async () => {
-    try {
-      await triggerSearch({
-        profitYear,
-        pagination: {
-          skip: pageNumber * pageSize,
-          take: pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        }
-      });
-    } catch (error) {
-      console.error("API call failed:", error);
-    }
-  }, [pageNumber, pageSize, sortParams, triggerSearch, profitYear]);
-
-  useEffect(() => {
-    if (initialSearchLoaded && hasToken) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, onSearch, hasToken]);
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange, resetPagination } =
+    gridPagination;
 
   useEffect(() => {
     if (pageNumberReset) {
@@ -95,22 +44,22 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
   );
 
   const getSummaryRow = useCallback(() => {
-    if (!updateSummary) return [];
+    if (!summaryData) return [];
 
     return [
       {
-        psAmountOriginal: updateSummary.totalBeforeProfitSharingAmount,
-        psVestedOriginal: updateSummary.totalBeforeVestedAmount,
-        psAmountUpdated: updateSummary.totalAfterProfitSharingAmount,
-        psVestedUpdated: updateSummary.totalAfterVestedAmount
+        psAmountOriginal: summaryData.totalBeforeProfitSharingAmount,
+        psVestedOriginal: summaryData.totalBeforeVestedAmount,
+        psAmountUpdated: summaryData.totalAfterProfitSharingAmount,
+        psVestedUpdated: summaryData.totalAfterVestedAmount
       }
     ];
-  }, [updateSummary]);
+  }, [summaryData]);
 
   const gridData = useMemo(() => {
-    if (!updateSummary?.response?.results) return [];
+    if (!summaryData?.response?.results) return [];
 
-    return updateSummary.response.results.map((employee) => ({
+    return summaryData.response.results.map((employee) => ({
       badgeNumber: employee.badgeNumber,
       employeeName: employee.name,
       storeNumber: employee.storeNumber === 0 ? "-" : employee.storeNumber,
@@ -123,23 +72,23 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
       yearsUpdated: employee.after.yearsInPlan,
       enrollUpdated: employee.after.enrollmentId
     }));
-  }, [updateSummary]);
+  }, [summaryData]);
 
   return (
     <>
-      {updateSummary?.response && (
+      {summaryData?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`UPDATE SUMMARY FOR PROFIT SHARING (${updateSummary.response.total || 0} records)`}
+              {`UPDATE SUMMARY FOR PROFIT SHARING (${summaryData.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"ELIGIBLE_EMPLOYEES"}
-            isLoading={isFetching}
+            preferenceKey={GRID_KEYS.PAY_MASTER_UPDATE}
             handleSortChanged={handleSortChange}
+            isLoading={isLoading}
             providedOptions={{
               rowData: gridData,
               pinnedTopRowData: getSummaryRow(),
@@ -148,19 +97,15 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
           />
         </>
       )}
-      {!!updateSummary && updateSummary.response.results.length > 0 && (
+      {summaryData?.response && summaryData.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-            setInitialSearchLoaded(true);
+            handlePageNumberChange(value - 1);
           }}
           pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-            setInitialSearchLoaded(true);
-          }}
-          recordCount={updateSummary.response.total}
+          setPageSize={handlePageSizeChange}
+          recordCount={summaryData.response.total}
         />
       )}
     </>

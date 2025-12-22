@@ -1,10 +1,11 @@
 import { Button, Checkbox, FormControlLabel, Grid, TextField, Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
-import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
+import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/AdhocApi";
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 import { SmartModal } from "smart-ui-library";
-import { ServiceErrorResponse } from "../../types/errors/errors";
+import { ServiceErrorResponse } from "@/types/errors/errors";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 
 interface AddForfeitureModalProps {
   open: boolean;
@@ -13,49 +14,65 @@ interface AddForfeitureModalProps {
   suggestedForfeitResponse?: SuggestedForfeitResponse | null;
 }
 
-const handleResponseError = (error: ServiceErrorResponse) => {
+const getErrorDialogContent = (error: ServiceErrorResponse): { title: string; message: string } => {
   const title = error?.data?.title;
 
   if (title) {
     if (title.includes("Employee with badge number")) {
-      alert("Badge Number not found");
+      return {
+        title: "Badge Number Not Found",
+        message: "The specified badge number could not be found in the system."
+      };
     } else if (title.includes("Invalid badge number")) {
-      alert("Invalid Badge Number");
+      return { title: "Invalid Badge Number", message: "The badge number you entered is not valid." };
     } else if (title.includes("Forfeiture amount cannot be zero")) {
-      alert("Forfeiture amount cannot be zero");
+      return { title: "Invalid Amount", message: "Forfeiture amount cannot be zero. Please enter a non-zero value." };
     } else if (title.includes("Validation Error")) {
-      alert("The submission contains data format errors.");
+      return {
+        title: "Validation Error",
+        message: "The submission contains data format errors. Please check your input and try again."
+      };
     } else {
-      alert("An unexpected error occurred. Please try again.");
+      return { title: "Error", message: "An unexpected error occurred. Please try again." };
     }
-  } else {
-    alert("An unexpected error occurred. Please try again.");
   }
+  return { title: "Error", message: "An unexpected error occurred. Please try again." };
 };
 
 const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, onSave, suggestedForfeitResponse }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    badgeNumber: number;
+    forfeitureAmount: number;
+    suggestedForfeitAmount: number | null;
+    classAction: boolean;
+  }>({
     badgeNumber: 0,
     forfeitureAmount: 0,
     suggestedForfeitAmount: null,
     classAction: false
   });
+  // Track the display value as a string to avoid leading zero issues
+  const [forfeitureAmountDisplay, setForfeitureAmountDisplay] = useState<string>("0");
+  const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
   const [updateForfeiture, { isLoading }] = useUpdateForfeitureAdjustmentMutation();
   const profitYear = useFiscalCloseProfitYear();
 
   useEffect(() => {
     if (!open) {
-      setFormData({ badgeNumber: 0, forfeitureAmount: 0, classAction: false });
+      setFormData({ badgeNumber: 0, forfeitureAmount: 0, suggestedForfeitAmount: null, classAction: false });
+      setForfeitureAmountDisplay("0");
       return;
     }
 
     if (suggestedForfeitResponse) {
+      const amount = suggestedForfeitResponse.suggestedForfeitAmount ?? 0;
       setFormData((prev) => ({
         ...prev,
         badgeNumber: suggestedForfeitResponse.badgeNumber,
         suggestedForfeitAmount: suggestedForfeitResponse.suggestedForfeitAmount,
-        forfeitureAmount: suggestedForfeitResponse.suggestedForfeitAmount
+        forfeitureAmount: amount
       }));
+      setForfeitureAmountDisplay(String(amount));
     }
   }, [suggestedForfeitResponse, open]);
 
@@ -63,10 +80,14 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
     const { name, value } = e.target;
 
     if (name === "forfeitureAmount") {
+      // Update display value directly (allows user to type freely)
+      setForfeitureAmountDisplay(value);
       const numericValue = parseFloat(value) || 0;
       setFormData({
         ...formData,
-        forfeitureAmount: numericValue
+        forfeitureAmount: numericValue,
+        // Disable class action if amount is negative
+        classAction: numericValue < 0 ? false : formData.classAction
       });
     } else if (name === "classAction") {
       setFormData({
@@ -99,7 +120,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
       // If the response has an error block, handle it
       if (result.error) {
-        handleResponseError(result.error as ServiceErrorResponse);
+        const errorContent = getErrorDialogContent(result.error as ServiceErrorResponse);
+        setErrorDialog(errorContent);
         return;
       }
 
@@ -112,7 +134,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       onClose();
     } catch (_error) {
       // This needs to be called with a blank set of properties to satisfy the type
-      handleResponseError({} as ServiceErrorResponse);
+      const errorContent = getErrorDialogContent({} as ServiceErrorResponse);
+      setErrorDialog(errorContent);
     }
   };
 
@@ -150,6 +173,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
                 checked={formData.classAction}
                 onChange={handleChange}
                 color="primary"
+                disabled={formData.forfeitureAmount < 0}
               />
             }
             label="Class Action"
@@ -165,7 +189,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
         <Grid size={{ xs: 2 }}>
           <TextField
             name="forfeitureAmount"
-            value={formData.forfeitureAmount}
+            value={forfeitureAmountDisplay}
             onChange={handleChange}
             fullWidth
             size="small"
@@ -174,6 +198,13 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
           />
         </Grid>
       </Grid>
+
+      <ConfirmationDialog
+        open={!!errorDialog}
+        title={errorDialog?.title || "Error"}
+        description={errorDialog?.message || "An error occurred"}
+        onClose={() => setErrorDialog(null)}
+      />
     </SmartModal>
   );
 };

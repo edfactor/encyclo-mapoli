@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Common;
+
 public static class Constants
 {
     public static class Http

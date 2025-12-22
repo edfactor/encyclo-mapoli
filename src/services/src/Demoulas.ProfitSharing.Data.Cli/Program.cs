@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
 using System.Text;
-using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
@@ -38,7 +39,8 @@ public sealed class Program
             new Option<string>("--connection-name") { Description = "The name of the configuration property that holds the connection string" },
             new Option<string>("--sql-file") { Description = "The path to the custom SQL file" },
             new Option<string>("--source-schema") { Description = "Name of the schema that is being used as the source database" },
-            new Option<string>("--output-file") { Description = "The path to save the file (if applicable)" }
+            new Option<string>("--output-file") { Description = "The path to save the file (if applicable)" },
+            new Option<string>("--environment") { Description = "The environment name (e.g., UAT, QA, Production)" }
         };
 
             var upgradeDbCommand = new Command("upgrade-db", "Apply migrations to upgrade the database");
@@ -99,8 +101,11 @@ public sealed class Program
             var sourceSchemaOption = new Option<string?>("--source-schema");
             var outputFileOption = new Option<string?>("--output-file");
             var currentYearOption = new Option<string?>("--current-year");
+            var environmentOption = new Option<string?>("--environment");
 
-            var cmds = new[] { upgradeDbCommand, dropRecreateDbCommand, runSqlCommand, runSqlCommandForNavigation, runSqlCommandForUatNavigation, generateDgmlCommand, generateMarkdownCommand, validateImportCommand, generateUpgradeScriptCmd };
+            var updateCalendarSeederCmd = new Command("update-calendar-seeder", "Update CaldarRecordSeeder.cs with latest calendar data from warehouse database");
+
+            var cmds = new[] { upgradeDbCommand, dropRecreateDbCommand, runSqlCommand, runSqlCommandForNavigation, runSqlCommandForUatNavigation, generateDgmlCommand, generateMarkdownCommand, validateImportCommand, generateUpgradeScriptCmd, updateCalendarSeederCmd };
 
             // Use the Options collection directly to avoid relying on extension methods that may not be available
             cmds.Select(c => c.Options).ToList().ForEach(options =>
@@ -110,6 +115,7 @@ public sealed class Program
                 options.Add(sourceSchemaOption);
                 options.Add(outputFileOption);
                 options.Add(currentYearOption);
+                options.Add(environmentOption);
             });
 
             // Determine which command was invoked. Prefer the first non-option token from args as the command name.
@@ -121,6 +127,7 @@ public sealed class Program
             string? sourceSchema = configuration["source-schema"];
             string? outputFile = configuration["output-file"];
             string? currentYear = configuration["current-year"];
+            string? environment = configuration["environment"];
 
             // Populate environment variables that the existing Execute* methods may read from IConfiguration or Env if required
             if (!string.IsNullOrEmpty(connectionName)) { Environment.SetEnvironmentVariable("connection-name", connectionName); }
@@ -128,6 +135,7 @@ public sealed class Program
             if (!string.IsNullOrEmpty(sourceSchema)) { Environment.SetEnvironmentVariable("source-schema", sourceSchema); }
             if (!string.IsNullOrEmpty(outputFile)) { Environment.SetEnvironmentVariable("output-file", outputFile); }
             if (!string.IsNullOrEmpty(currentYear)) { Environment.SetEnvironmentVariable("current-year", currentYear); }
+            if (!string.IsNullOrEmpty(environment)) { Environment.SetEnvironmentVariable("environment", environment); }
 
             // Dispatch to the appropriate implementation
             switch (invokedCommand)
@@ -151,7 +159,7 @@ public sealed class Program
                 case "generate-upgrade-script":
                     return await ExecuteGenerateUpgradeScript(configuration, args ?? Array.Empty<string>());
                 default:
-                    Console.WriteLine($"Unknown or missing command '{invokedCommand}'.");
+                    Console.WriteLine($"Unknown or missing command '{invokedCommand}'");
                     return 1;
             }
         }
@@ -170,16 +178,30 @@ public sealed class Program
         _ = args;
         await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (_, context) =>
         {
+            var pending = await context.Database.GetPendingMigrationsAsync();
+
+            IEnumerable<string> enumerable = pending as string[] ?? pending.ToArray();
+            if (enumerable.Any())
+            {
+                var startingColor = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine("Pending Migrations");
+                foreach (string p in enumerable)
+                {
+                    Console.WriteLine(p);
+                }
+                Console.ForegroundColor = startingColor;
+            }
+
             await context.Database.MigrateAsync();
 
-            var existingIds = await context.AccountingPeriods.Select(p => p.WeekendingDate).ToListAsync();
-            var newRecords = CaldarRecordSeeder.Records.Where(p => !existingIds.Contains(p.WeekendingDate)).ToList();
-            if (newRecords.Any())
-            {
-                context.AccountingPeriods.AddRange(newRecords);
-                await context.SaveChangesAsync();
-            }
+            // Note: AccountingPeriods removed from ProfitSharingDbContext as they are
+            // managed in the common library's DemoulasCommonDataContext as a keyless entity
+
             await GatherSchemaStatistics(context);
+
+            string? environment = configuration["environment"] ?? Environment.GetEnvironmentVariable("environment");
+            await GrantSelectPermissionsIfUat(context, environment);
         });
         return 0;
     }
@@ -212,6 +234,9 @@ public sealed class Program
             }, sourceSchema);
 
             await GatherSchemaStatistics(context);
+
+            string? environment = configuration["environment"] ?? Environment.GetEnvironmentVariable("environment");
+            await GrantSelectPermissionsIfUat(context, environment);
 
             var rebuildService = sp.GetRequiredService<RebuildEnrollmentAndZeroContService>();
             await rebuildService.ExecuteAsync(CancellationToken.None);
@@ -402,6 +427,64 @@ public sealed class Program
         if (profitDetailsCount == 0)
         {
             throw new InvalidOperationException("ProfitDetails table is empty. Import validation failed.");
+        }
+    }
+
+    private static async Task GrantSelectPermissionsIfUat(ProfitSharingDbContext context, string? environment)
+    {
+        // Only grant permissions in UAT environment
+        if (environment?.Equals(Constants.UAT, StringComparison.OrdinalIgnoreCase) != true)
+        {
+            return;
+        }
+
+        // Get all entity types from the DbContext model
+        var entityTypes = context.Model.GetEntityTypes();
+        if (!entityTypes.Any())
+        {
+            Console.WriteLine("No entity types found in DbContext model.");
+            return;
+        }
+
+        Console.WriteLine($"Granting SELECT permissions on {entityTypes.Count()} tables to SELECT_PROFITSHARE_ROLE...");
+
+        try
+        {
+            int successCount = 0;
+            int skipCount = 0;
+
+            foreach (var entityType in entityTypes)
+            {
+                // Get the table name for this entity
+                var tableName = entityType.GetTableName();
+                if (string.IsNullOrWhiteSpace(tableName))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    // Execute GRANT SELECT statement
+                    // Quote table name for Oracle identifiers (required for names starting with underscores)
+                    string grantSql = $"GRANT SELECT ON PROFITSHARE.\"{tableName}\" TO SELECT_PROFITSHARE_ROLE";
+                    await context.Database.ExecuteSqlRawAsync(grantSql);
+                    Console.WriteLine($"  ✓ Granted SELECT on PROFITSHARE.{tableName}");
+                    successCount++;
+                }
+                catch (Exception ex) when (ex.Message.Contains("ORA-00942"))
+                {
+                    // Table or view does not exist - skip it
+                    Console.WriteLine($"  ⊘ Skipped PROFITSHARE.{tableName} (table does not exist)");
+                    skipCount++;
+                }
+            }
+
+            Console.WriteLine($"Successfully granted SELECT permissions on {successCount} tables to SELECT_PROFITSHARE_ROLE (skipped {skipCount} non-existent tables)");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error granting SELECT permissions: {ex.Message}");
+            throw;
         }
     }
 

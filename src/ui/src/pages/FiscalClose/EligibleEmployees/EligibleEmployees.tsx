@@ -8,10 +8,10 @@ import useEligibleEmployees from "./hooks/useEligibleEmployees";
 
 const EligibleEmployees = () => {
   const componentRef = useRef<HTMLDivElement>(null);
-  const { searchResults, isSearching, pagination, showData, hasResults } = useEligibleEmployees();
+  const { searchResults, isSearching, pagination, showData, hasResults, handleStatusChange } = useEligibleEmployees();
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
 
   return (

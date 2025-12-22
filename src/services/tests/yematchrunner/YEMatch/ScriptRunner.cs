@@ -1,15 +1,17 @@
 ﻿using System.Data;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Text;
 
-namespace YEMatch.YEMatch;
+namespace YEMatch;
 
 public static class ScriptRunner
 {
     public static int Run(bool chatty, string workingDir, string command, string args)
     {
-        Console.WriteLine($"cd {workingDir}; {command} {args}");
+        if (chatty)
+        {
+            Console.WriteLine($"cd {workingDir}; {command} {args}");
+        }
 
         Process process = new()
         {
@@ -34,10 +36,7 @@ public static class ScriptRunner
             }
         };
 
-        process.ErrorDataReceived += (sender, e) =>
-        {
-            Console.Error.WriteLine(e.Data);
-        };
+        process.ErrorDataReceived += (sender, e) => { Console.Error.WriteLine(e.Data); };
 
         process.Start();
 

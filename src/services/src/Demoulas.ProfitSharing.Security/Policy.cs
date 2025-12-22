@@ -36,6 +36,16 @@ public static class Policy
     public static readonly string CanManageBeneficiaries = "CAN_MANAGE_BENEFICIARIES";
 
     /// <summary>
+    /// View duplicate names and birthdays report. Sensitive demographic cleanup data.
+    /// </summary>
+    public static readonly string CanViewDuplicateNamesAndBirthdays = "CAN_VIEW_DUPLICATE_NAMES_AND_BIRTHDAYS";
+
+    /// <summary>
+    /// Unmask SSN values. Highly restricted permission for compliance and verification purposes.
+    /// </summary>
+    public static readonly string CanUnmaskSsn = "CAN_UNMASK_SSN";
+
+    /// <summary>
     /// View member distributions (read-only).
     /// </summary>
     public static readonly string CanViewDistributions = "CAN_VIEW_DISTRIBUTIONS";
@@ -44,4 +54,10 @@ public static class Policy
     /// Can reverse profit detail entries (corrections).
     /// </summary>
     public static readonly string CanReverseProfitDetails = "CAN_REVERSE_PROFIT_DETAILS";
+
+    /// <summary>
+    /// Manage administration pages and actions (state tax rates, annuity rates, Oracle HCM diagnostics, adjustments).
+    /// </summary>
+    public static readonly string CanManageAdministration = "CAN_MANAGE_ADMINISTRATION";
+    public static readonly string CanViewAudits = "CAN_VIEW_AUDITS";
 }

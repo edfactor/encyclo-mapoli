@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
@@ -8,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
+
+[Collection("SharedGlobalState")]
 public sealed class BeneficiaryServiceTests : ApiTestBase<Program>
 {
     private readonly (Demographic demographic, List<PayProfit> payprofit) _demographic;

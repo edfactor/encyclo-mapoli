@@ -163,7 +163,9 @@ export function flattenMasterDetailData<TMaster extends Record<string, unknown>,
   masterData: TMaster[],
   expandedRows: Set<string>,
   config: FlattenConfig<TMaster, TDetail>
-): Array<TMaster & { isExpandable: boolean; isExpanded: boolean; isDetail: boolean } | TDetail & { isDetail: boolean }> {
+): Array<
+  (TMaster & { isExpandable: boolean; isExpanded: boolean; isDetail: boolean }) | (TDetail & { isDetail: boolean })
+> {
   if (!masterData) return [];
 
   return masterData.flatMap((master) => {

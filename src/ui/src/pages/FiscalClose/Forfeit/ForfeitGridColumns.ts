@@ -1,15 +1,22 @@
 import { ColDef } from "ag-grid-community";
 import {
-  createBadgeColumn,
+  createBadgeOrPSNColumn,
   createCountColumn,
   createCurrencyColumn,
   createNameColumn,
   createSSNColumn
 } from "../../../utils/gridColumnFactory";
 
-export const GetProfitShareForfeitColumns = (): ColDef[] => {
+export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
-    createBadgeColumn({}),
+    createBadgeOrPSNColumn({
+      headerName: "Badge/PSN",
+      field: "badgeOrPsn",
+      badgeField: "badgeNumber",
+      psnField: "beneficiaryPsn",
+      navigateFunction: navFunction,
+      enableLinking: true
+    }),
     createNameColumn({
       field: "employeeName"
     }),
@@ -26,10 +33,6 @@ export const GetProfitShareForfeitColumns = (): ColDef[] => {
     createCountColumn({
       headerName: "Earnings Points",
       field: "earningPoints"
-    }),
-    createBadgeColumn({
-      headerName: "Beneficiary PSN",
-      field: "beneficiaryPsn"
     })
   ];
 };

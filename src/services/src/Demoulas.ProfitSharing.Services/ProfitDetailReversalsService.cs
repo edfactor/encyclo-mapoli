@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -70,6 +65,22 @@ public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
                     return Result<bool>.ValidationFailure(new Dictionary<string, string[]>
                     {
                         ["profitDetailIds"] = [$"Profit details not found for IDs: {string.Join(", ", missingIds)}"]
+                    });
+                }
+
+                // Check if any profit details have already been reversed (duplicate reversal protection)
+                var alreadyReversedIds = await ctx.ProfitDetails
+                    .Where(pd => pd.ReversedFromProfitDetailId != null && profitDetailIds.Contains(pd.ReversedFromProfitDetailId.Value))
+                    .Select(pd => pd.ReversedFromProfitDetailId!.Value)
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+
+                if (alreadyReversedIds.Count > 0)
+                {
+                    _logger.LogWarning("Profit details already reversed for IDs: [{AlreadyReversedIds}]", string.Join(", ", alreadyReversedIds));
+                    return Result<bool>.ValidationFailure(new Dictionary<string, string[]>
+                    {
+                        ["profitDetailIds"] = [$"The following profit details have already been reversed: {string.Join(", ", alreadyReversedIds)}"]
                     });
                 }
 
@@ -162,7 +173,11 @@ public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
                             ? $"UN-REV {currentDate:MM/yy}  "
                             : $"REV    {currentDate:MM/yy}  ") + state).Trim(),
 
-                        ZeroContributionReasonId = null
+                        ZeroContributionReasonId = null,
+                        CommentRelatedState = pd.CommentRelatedState,
+
+                        // Track the source profit detail to prevent double-reversals
+                        ReversedFromProfitDetailId = pd.Id
                     };
 
                     ctx.ProfitDetails.Add(reverseProfitDetail);

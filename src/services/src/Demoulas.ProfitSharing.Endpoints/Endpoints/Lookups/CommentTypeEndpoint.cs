@@ -1,16 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
-using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -18,12 +15,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
 public class CommentTypeEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<CommentTypeResponse>>
 {
-    private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly ICommentTypeLookupService _commentTypeLookupService;
     private readonly ILogger<CommentTypeEndpoint> _logger;
 
-    public CommentTypeEndpoint(IProfitSharingDataContextFactory dataContextFactory, ILogger<CommentTypeEndpoint> logger) : base(Navigation.Constants.Inquiries)
+    public CommentTypeEndpoint(ICommentTypeLookupService commentTypeLookupService, ILogger<CommentTypeEndpoint> logger) : base(Navigation.Constants.Inquiries)
     {
-        _dataContextFactory = dataContextFactory;
+        _commentTypeLookupService = commentTypeLookupService;
         _logger = logger;
     }
 
@@ -39,7 +36,7 @@ public class CommentTypeEndpoint : ProfitSharingResultResponseEndpoint<ListRespo
                     200,
                     ListResponseDto<CommentTypeResponse>.From(new List<CommentTypeResponse>
                     {
-                        new() { Name = CommentType.Constants.Military.Name }
+                        new() { Name = "Military" }
                     })
                 }
             };
@@ -62,11 +59,7 @@ public class CommentTypeEndpoint : ProfitSharingResultResponseEndpoint<ListRespo
             // Record request metrics
             this.RecordRequestMetrics(HttpContext, _logger, new { });
 
-            var items = await _dataContextFactory.UseReadOnlyContext(c =>
-                c.CommentTypes
-                 .OrderBy(x => x.Name)
-                 .Select(x => new CommentTypeResponse { Id = x.Id, Name = x.Name })
-                 .ToListAsync(ct), ct);
+            var dto = await _commentTypeLookupService.GetCommentTypesAsync(ct);
 
             // Record business metrics
             Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
@@ -74,14 +67,13 @@ public class CommentTypeEndpoint : ProfitSharingResultResponseEndpoint<ListRespo
                 new KeyValuePair<string, object?>("endpoint.category", "lookups"));
 
             // Record result count
-            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(items.Count,
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(dto.Items.Count,
                 new KeyValuePair<string, object?>("operation", "comment-types-lookup"),
                 new KeyValuePair<string, object?>("endpoint.category", "lookups"));
 
             _logger.LogInformation("Comment types lookup completed, returned {Count} types (correlation: {CorrelationId})",
-                items.Count, HttpContext.TraceIdentifier);
+                dto.Items.Count, HttpContext.TraceIdentifier);
 
-            var dto = ListResponseDto<CommentTypeResponse>.From(items);
             // Always success (lookup); still using Result<T> pattern for uniformity.
             var result = Result<ListResponseDto<CommentTypeResponse>>.Success(dto);
 

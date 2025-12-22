@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+
 public abstract record BalanceByDetailBase
 {
     public required int EmployeeCount { get; init; }

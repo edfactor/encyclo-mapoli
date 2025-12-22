@@ -12,45 +12,132 @@
 
 ## Documentation
 
-### Technical Documentation
+### Quick References
 
-- **[Telemetry Guide](./TELEMETRY_GUIDE.md)** - Comprehensive telemetry implementation for developers, QA, and DevOps
-- **[Telemetry Quick Reference](./TELEMETRY_QUICK_REFERENCE.md)** - Developer cheat sheet with copy-paste examples
-- **[Telemetry DevOps Guide](./TELEMETRY_DEVOPS_GUIDE.md)** - Production operations and monitoring setup
-- **[Read-Only Functionality](./READ_ONLY_FUNCTIONALITY.md)** - Complete guide to read-only role implementation
-- **[Read-Only Quick Reference](./READ_ONLY_QUICK_REFERENCE.md)** - Quick implementation guide for read-only features
+- **[Code Review Checklist](https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/CHECKLIST)** - Master checklist for PR reviews (security, architecture, telemetry, testing)
+- **[Project Instructions](./copilot-instructions.md)** - Core architecture patterns, security requirements, and coding standards
+- **[AI Assistant Guidelines](./CLAUDE.md)** - AI coding agent operational rules and patterns
+
+### Telemetry & Observability
+
+- **[Telemetry Guide](./src/ui/public/docs/TELEMETRY_GUIDE.md)** - Comprehensive telemetry implementation for developers, QA, and DevOps (75+ pages)
+- **[Telemetry Quick Reference](./src/ui/public/docs/TELEMETRY_QUICK_REFERENCE.md)** - Developer cheat sheet with copy-paste examples
+- **[Telemetry DevOps Guide](./src/ui/public/docs/TELEMETRY_DEVOPS_GUIDE.md)** - Production operations, monitoring, and alerting setup
+- **[Security Telemetry Setup](./src/ui/public/docs/SECURITY_TELEMETRY_SETUP.md)** - Advanced security monitoring patterns
+
+### Feature-Specific Guides
+
+- **[Read-Only Functionality](./src/ui/public/docs/READ_ONLY_FUNCTIONALITY.md)** - Complete guide to read-only role implementation
+- **[Read-Only Quick Reference](./src/ui/public/docs/READ_ONLY_QUICK_REFERENCE.md)** - Quick implementation guide
+- **[Distribution Processing Requirements](./src/ui/public/docs/Distribution-Processing-Requirements.md)** - Distribution processing flows
+- **[Year-End Testability and Acceptance Criteria](./src/ui/public/docs/Year-End-Testability-And-Acceptance-Criteria.md)** - Year-end processing tests
+
+### Backend Architecture
+
+- **[RESTful API Guidelines](./src/services/src/Demoulas.ProfitSharing.Endpoints/.github/instructions/restful-api-guidelines.instructions.md)** - Zalando RESTful API design, HTTP semantics, endpoint patterns
+- **[EF Core 10 Patterns](./copilot-instructions.md#ef-core-10-patterns--best-practices-mandatory)** - Database access patterns, query optimization, bulk operations
+- **[Distributed Caching Patterns](./DISTRIBUTED_CACHING_PATTERNS.md)** - IDistributedCache patterns, version-based invalidation
+- **[Validation Patterns](./VALIDATION_PATTERNS.md)** - Server & client validation, FluentValidation examples
+
+### Frontend Development
+
+- **[Frontend Unit Tests](./ai-templates/front-end/fe-unit-tests.md)** - React testing patterns
+- **[Navigation Setup](./ai-templates/front-end/fe-navigation.md)** - Navigation system configuration
+- **[Redux Setup](./ai-templates/front-end/fe-redux-setup.md)** - Redux Toolkit and state management
+- **[Type Patterns](./ai-templates/front-end/fe-types.md)** - TypeScript type definitions and patterns
 
 ### Project Documentation
 
 - **[PS-1623 Read-Only Summary](./PS-1623_READ_ONLY_SUMMARY.md)** - Executive summary of read-only role implementation
+- **[Branching and Workflow](./BRANCHING_AND_WORKFLOW.md)** - Git branching, Jira integration, PR conventions
 
-### Templates
+### Instruction Files (for Developers)
 
-- **[Navigation Setup](../templates/Navigation-Setup.md)** - Navigation system configuration
-- **[Redux Setup](../templates/Redux-Setup.md)** - Redux store and state management
-- **[Front-End Unit Tests](../templates/Front-End-Unit-Tests.md)** - Frontend testing patterns
+- `.github/instructions/endpoints.instructions.md` - FastEndpoints implementation patterns
+- `.github/instructions/services.instructions.md` - Service layer patterns
+- `.github/instructions/pages.instructions.md` - Frontend page development
+- `.github/instructions/redux.instructions.md` - Redux store organization
+- `.github/instructions/beneficiary.instructions.md` - Beneficiary feature development
+- `.github/instructions/master-inquiry.instructions.md` - Master Inquiry implementation
+- `.github/instructions/fullname-pattern.instructions.md` - Standard naming conventions for names
 
 ## Definition of Ready (DoR)
 
-The Definition of Ready outlines the prerequisites for any user story, task, or bug fix to be considered ready for development. It emphasizes clarity, testability, and quality in our software engineering processes.
+The Definition of Ready outlines the prerequisites for any user story, task, or bug fix to be considered ready for development. It emphasizes clarity, testability, quality, security, and observability in our software engineering processes.
 
 ### Criteria
 
-1. **Clearly Defined User Stories**
-   - **Title and Description:** Each story must have a clear title and a detailed description of the expected outcome.
-   - **Acceptance Criteria:** Provide comprehensive criteria outlining the conditions for story completion.
-   - **Auditing Requirements:** Document any necessary auditing requirements.
-2. **UI/UX Designs**
-   - **Design Mockups:** Include complete UI/UX designs for frontend changes (compatible with React when possible).
-   - **Design Review:** Secure approval from the product owner, UI/UX designer, and stakeholders.
-3. **Dependencies Identified**
-   - **Internal Dependencies:** Document dependencies within the project.
-   - **External Dependencies:** List third-party service dependencies. These should also be defined in user tickets and documented in [Confluence](https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/29853053/NGDS+Profit+Sharing+Documentation).
-4. **Data Readiness**
-   - **Test Data:** Ensure that test data is available or can be generated for feature validation.
-5. **Estimation**
-   - **Level of Effort:** Reach consensus on the effort estimation (e.g., story points) by the development team.
-   - **Capacity Planning:** Consider team capacity and workload when allocating tasks.
+#### 1. Clearly Defined Requirements
+
+- **Title and Description:** Clear title and detailed description of expected outcome
+- **Acceptance Criteria:** Comprehensive criteria outlining conditions for story completion
+- **Auditing Requirements:** Document any necessary auditing or compliance requirements
+- **Security Implications:** Identify any OWASP Top 10 2021 concerns (authentication, data exposure, validation, etc.)
+
+#### 2. UI/UX Designs & Requirements
+
+- **Design Mockups:** Complete UI/UX designs for frontend changes (React-compatible)
+- **Design Review:** Approval from product owner, UI/UX designer, and stakeholders
+- **Accessibility Requirements:** WCAG 2.1 Level AA compliance where applicable
+- **Responsive Design:** Mobile, tablet, and desktop considerations documented
+
+#### 3. Architecture & Technical Design
+
+- **Backend Changes:** Documented endpoint designs, database schema changes, or service layer updates
+- **Data Flow:** Clear description of how data flows through the application
+- **API Specification:** OpenAPI/Swagger specifications for any new endpoints
+- **Security Design Review:** Authentication, authorization, PII handling, and validation requirements specified
+
+#### 4. Dependencies Identified
+
+- **Internal Dependencies:** All internal service/component dependencies documented
+- **External Dependencies:** Third-party service dependencies (see [Confluence](https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/29853053/NGDS+Profit+Sharing+Documentation))
+- **Breaking Changes:** Any incompatibilities with existing APIs or data formats
+- **Deployment Order:** For dependent features, deployment sequence documented
+
+#### 5. Data Readiness
+
+- **Test Data:** Test data available or generation process documented
+- **Migration Strategy:** If schema changes required, migration plan documented
+- **Data Validation:** Edge cases and boundary conditions identified
+- **Sample Size:** For reports/bulk operations, representative data volumes documented
+
+#### 6. Observability Requirements
+
+- **Telemetry Plan:** Business metrics and sensitive field access identified
+- **Error Tracking:** Error scenarios and correlation ID requirements specified
+- **Performance Baseline:** Expected performance metrics documented (response time, data volume)
+- **Monitoring Alerts:** Specific monitoring/alerting needs identified
+
+#### 7. Testing Strategy
+
+- **Test Plan:** Unit, integration, and E2E test cases outlined
+- **Test Data:** Specific data scenarios for testing documented
+- **Boundary Cases:** Edge cases and negative scenarios identified
+- **Security Testing:** Any security-specific test scenarios (OWASP, PII handling, access control)
+
+#### 8. Estimation & Capacity
+
+- **Story Points:** Team consensus on effort estimation
+- **Capacity Planning:** Team capacity considered when allocating work
+- **Risk Assessment:** Technical risks and mitigation strategies identified
+- **Complexity Factors:** Factors affecting complexity clearly documented
+
+#### 9. Compliance & Security Checklist
+
+- **OWASP Top 10 Review:** Authentication, authorization, input validation, PII protection considered
+- **PII Handling:** Any PII fields identified and masking/security requirements specified
+- **Role-Based Access:** Access control requirements by user role documented
+- **Age Calculation Rule:** If applicable, confirmed backend-only calculation (CRITICAL)
+- **Data Retention:** Data retention and archival policies understood
+- **Audit Requirements:** Audit logging requirements specified
+
+#### 10. Documentation Requirements
+
+- **Backend Documentation:** API documentation, service patterns, and complex logic documented
+- **Frontend Documentation:** Component purposes and usage patterns documented
+- **Configuration:** Any configuration changes or feature flags required documented
+- **Release Notes:** Key points for release notes prepared
 
 ## Definition of Done (DoD)
 
@@ -92,46 +179,229 @@ Solution Explanation:
 
 ## Code Review and Pull Request Guidelines
 
-1. **Code Correctness and Functionality**
-   - Verify that the code meets its intended functionality.
-   - Check for logic errors, edge cases, and potential bugs.
-   - Ensure that tests cover new changes or functionalities.
-2. **Code Quality**
-   - Assess readability and simplicity.
-   - Review naming conventions for consistency and clarity.
-   - Follow SOLID principles (Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion).
-   - Identify any duplicated code and consider refactoring.
-3. **Performance**
-   - Identify potential performance issues.
-   - Suggest optimizations for inefficient code paths.
-   - Evaluate data structures and algorithms for efficiency.
-4. **Security**
-   - Check for common vulnerabilities (e.g., SQL injection, cross-site scripting).
-   - Ensure that sensitive data is properly encrypted and secured.
-   - Review authentication and authorization mechanisms.
-5. **Testing**
-   - Write and review sufficient tests (unit, integration, end-to-end).
-   - Evaluate test coverage for new code and critical paths.
-   - Use test doubles (mocks, stubs) appropriately.
-6. **Documentation**
-   - Document new methods, classes, or functionalities.
-   - Maintain clear inline comments.
-   - Update READMEs and external documentation as needed.
-7. **Design and Architecture**
-   - Consider how the changes fit within the overall system architecture.
-   - Assess scalability and maintainability.
-   - Use design patterns and architectural principles where appropriate.
-8. **Compatibility and Dependencies**
-   - Ensure backward compatibility.
-   - Review dependency updates and their impacts.
-   - Confirm compatibility across different environments or platforms.
-9. **Compliance and Standards**
-   - Adhere to industry standards and best practices.
-   - Verify compliance with legal and regulatory requirements, as applicable.
-10. **Team and Project Practices**
-    - Follow team or project coding standards and guidelines.
-    - Consider the impact on project timelines or milestones.
-    - Encourage knowledge sharing and constructive feedback.
+> **Use the [Master Code Review Checklist](./CODE_REVIEW_CHECKLIST.md)** for comprehensive PR reviews. It covers all security, architecture, frontend, backend, and telemetry requirements.
+
+### Pre-Submission Checklist (Developer)
+
+- [ ] All acceptance criteria implemented and tested
+- [ ] Code follows `.editorconfig` formatting rules
+- [ ] No security warnings or analyzer violations
+- [ ] No hardcoded secrets or sensitive data in code
+- [ ] Unit/integration tests added with >80% coverage for new code
+- [ ] AsyncFixer01 compliance verified (single awaits return Task directly)
+- [ ] Telemetry implemented on all new endpoints
+- [ ] No PII in logs (mask SSN, email, phone, names)
+- [ ] Documentation updated
+- [ ] Branch up-to-date with `develop`
+
+### Critical Security Requirements (MANDATORY - OWASP Top 10 2021)
+
+**🚨 AUTO-REJECT if any of these are violated:**
+
+#### A01/A07: Authentication & Authorization
+
+- [ ] **Server-side role validation ALWAYS:** Never trust client-provided roles in headers
+  ```csharp
+  // ❌ WRONG: var roles = req.Headers["x-impersonating-roles"];
+  // ✅ RIGHT: var allowedRoles = GetUserAllowedImpersonationRoles(userId);
+  ```
+- [ ] **No localStorage auth elevation:** Tokens/roles never determine access based on localStorage
+- [ ] **Centralized validation:** Use `PolicyRoleMap.cs` for all authorization decisions
+- [ ] **Re-validate impersonation:** When handling impersonation, always re-check authenticated user permissions
+
+#### A02/A05: Transport Security
+
+- [ ] **HTTPS enforcement** (at load balancer)
+- [ ] **Security headers present:** `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `CSP`, `HSTS`
+- [ ] **CORS restricted:** No `AllowAnyOrigin()`; dev uses `localhost:3100` only
+- [ ] **No exposed stack traces** in error responses
+
+#### A03/A09: Input Validation & SQL Injection
+
+- [ ] **Server-side validation MANDATORY:** All user inputs validated (not client-side only)
+- [ ] **Parameterized queries only:** EF Core auto-parameterizes; NEVER build SQL strings manually
+- [ ] **Boundary checks:** Numeric ranges (1-1000), string lengths, collection sizes
+- [ ] **Degenerate query guards:** Prevent queries scanning entire tables (e.g., badge != 0)
+- [ ] **No raw SQL:** If needed, fully parameterized in service layer only
+
+#### A01/A09: PII Protection & Data Exposure
+
+- [ ] **PII masked in logs:** SSN `123-45-6789` → `***-**-6789`, email masked, names masked
+- [ ] **No sensitive data in errors:** Stack traces, SQL, file paths, PII never exposed
+- [ ] **Proper composite keys:** Demographics dictionaries use `(Ssn, OracleHcmId)` not just `Ssn`
+- [ ] **Read-only contexts:** `UseReadOnlyContext()` for query-only operations
+- [ ] **Sensitive fields declared in telemetry:** All PII fields accessed listed ("Ssn", "Email", "FirstName", "LastName", "FullName")
+
+#### Frontend Critical: Age Calculation
+
+- [ ] **❌ AUTO-REJECT: Age NEVER calculated in frontend** (JavaScript/React)
+
+  ```typescript
+  // ❌ WRONG - BLOCKING: Frontend age calculation from DOB
+  const age = Math.floor((Date.now() - new Date(dob).getTime()) / (1000 * 60 * 60 * 24 * 365.25));
+
+  // ✅ RIGHT: Display DOB only, backend provides age if needed
+  const dobDisplay = dateOfBirth ? mmDDYYFormat(dateOfBirth) : "N/A";
+  ```
+
+  **Why:** Frontend age diverges from backend (timezone/timing), bypasses access control, breaks PII masking rules.
+
+### 1. Code Correctness & Functionality
+
+- [ ] Code meets intended functionality with all acceptance criteria met
+- [ ] Logic errors, edge cases, and potential bugs identified and fixed
+- [ ] Boundary conditions handled (null values, empty collections, zero values)
+- [ ] Error handling complete with proper error codes
+- [ ] Test coverage adequate for new/changed code
+
+### 2. Code Quality & Standards
+
+- [ ] **File-scoped namespaces** (not block-scoped)
+- [ ] **One class per file**
+- [ ] **Explicit access modifiers** on all types/members
+- [ ] **Naming conventions:** PascalCase public, `_camelCase` private, `s_` static
+- [ ] **`readonly` used** for immutable fields
+- [ ] **`is null`/`is not null`** preferred, **NO `??` in EF queries**
+- [ ] **XML doc comments** on public/internal APIs
+- [ ] **No duplicate code** (DRY principle)
+- [ ] **SOLID principles** applied
+
+### 3. Backend Architecture
+
+- [ ] **No DbContext in endpoints:** All EF Core in service layer only
+- [ ] **Services return `Result<T>`:** Typed results for error handling
+- [ ] **AsyncFixer01 compliance:** Single awaits return `Task` directly (no async wrapper)
+- [ ] **Async/await used correctly:** `FirstOrDefaultAsync`, `ToListAsync` (not synchronous variants)
+- [ ] **Explicit includes:** `Include()`/`ThenInclude()` used (no lazy loading)
+- [ ] **Query tagging:** `TagWith()` includes business context (year, operation, ticket)
+- [ ] **Bulk operations:** `ExecuteUpdateAsync`/`ExecuteDeleteAsync` for efficiency
+- [ ] **Dependency injection:** Constructor injection for all dependencies
+- [ ] **Mapperly used:** For DTO↔entity mapping (no duplicate mapping logic)
+
+### 4. Frontend Architecture
+
+- [ ] **Functional components:** Hooks, not class components
+- [ ] **TypeScript strict mode:** All props/state typed (no `any`)
+- [ ] **Redux Toolkit:** API/data logic in `reduxstore/`; RTK Query preferred
+- [ ] **Tailwind utilities:** Utility-first; no inline styles for reusable patterns
+- [ ] **No unmasked PII:** Console logs and error messages mask SSN, email, phone, names
+- [ ] **No direct fetch:** Use RTK Query hooks instead
+
+### 5. Database & EF Core (MANDATORY)
+
+- [ ] **`UseReadOnlyContext()`:** For read-only operations (auto-applies `.AsNoTracking()`)
+- [ ] **NO manual `AsNoTracking()`:** When using `UseReadOnlyContext()` (redundant)
+- [ ] **Query tagging present:** `TagWith($"Context-{year}")` for tracing
+- [ ] **Composite keys for Demographics:** Use `(Ssn, OracleHcmId)` not just `Ssn`
+- [ ] **No `??` in queries:** Oracle provider fails; use explicit conditionals instead
+- [ ] **Migrations tested:** Applied to dev database; naming is imperative/singular
+- [ ] **History tracking maintained:** Close current record, insert new row (never overwrite)
+
+### 6. Telemetry & Observability (MANDATORY)
+
+**All new endpoints MUST implement comprehensive telemetry.**
+
+- [ ] **`ExecuteWithTelemetry` used** or manual `TelemetryExtensions` methods called
+- [ ] **Logger injected:** `ILogger<TEndpoint>` in constructor
+- [ ] **Business metrics recorded:** `EndpointTelemetry.BusinessOperationsTotal.Add()` called
+- [ ] **Record counts tracked:** `RecordCountsProcessed.Record()` for data volumes
+- [ ] **Sensitive fields declared:** List ALL PII fields accessed ("Ssn", "Email", "FirstName", "LastName", "FullName", etc.)
+- [ ] **Exception handling:** Errors correlated with activity and logged
+- [ ] **Telemetry tests:** Unit tests verify activity/metrics recording
+- [ ] **Business operation labels** use standard names (year-end, reports, lookups, etc.)
+
+### 7. Validation & Error Handling
+
+- [ ] **FluentValidation** used for all request DTOs
+- [ ] **Server-side validation MANDATORY:** Not just client-side (security)
+- [ ] **Boundary checks:** Ranges (1-1000), lengths, collection sizes validated
+- [ ] **Domain errors used:** `Error.MemberNotFound` instead of generic messages
+- [ ] **Problem JSON format:** RFC 7807 structure for error responses
+- [ ] **No sensitive data in errors:** PII, stack traces, SQL never exposed
+- [ ] **Correlation IDs:** All errors include correlation for tracing
+
+### 8. Performance & Optimization
+
+- [ ] **No N+1 queries:** Lookups pre-computed; explicit `Include()`/`ThenInclude()`
+- [ ] **Projection used:** Select only needed columns for DTOs
+- [ ] **`IDistributedCache` only:** NOT `IMemoryCache`
+- [ ] **Version-based cache invalidation:** Not pattern-based deletion
+- [ ] **Degenerate query guards:** Input validation prevents table scans
+- [ ] **Async throughout:** `ConfigureAwait(false)` in library/service layer
+
+### 9. Testing
+
+- [ ] **Backend unit test split (no ad-hoc projects):**
+  - `Demoulas.ProfitSharing.UnitTests` for functional unit/service tests
+  - `Demoulas.ProfitSharing.UnitTests.Architecture` for analyzer/infrastructure/architecture guardrail tests
+- [ ] **`Description` attribute:** Tests tagged with Jira ticket `[Description("PS-1234 : Description")]`
+- [ ] **Async tests:** `async Task` for async operations
+- [ ] **Meaningful test names** describing what's tested
+- [ ] **Arrange-Act-Assert:** Clear test structure
+- [ ] **Edge cases covered:** Nulls, empty collections, boundary values
+- [ ] **Telemetry verified:** Tests check telemetry integration
+- [ ] **Test coverage:** >80% for new code critical paths
+
+### 10. Documentation
+
+- [ ] **XML doc comments:** Public/internal APIs documented
+- [ ] **Complex logic explained** with inline comments
+- [ ] **README/external docs updated** as needed
+- [ ] **Release notes** prepared if user-facing
+- [ ] **Instruction files updated** if new patterns introduced
+
+### 11. Git Workflow & Branching
+
+- [ ] **Branched from `develop`:** Never from `main`
+- [ ] **Branch naming:** `feature/PS-1234-description` (kebab-case)
+- [ ] **Commit messages:** Start with Jira key `PS-1234: Description`
+- [ ] **PR title:** Starts with Jira key
+- [ ] **PR description:** What changed, why, testing done
+- [ ] **Deviations explained:** Reasoning for any pattern deviations
+- [ ] **No force push:** To shared branches
+- [ ] **Clean history:** Logical commits, rebased if needed
+
+### 12. Compatibility & Dependencies
+
+- [ ] **Backward compatibility:** Existing APIs not broken
+- [ ] **Dependency updates:** Version changes documented and tested
+- [ ] **No unnecessary packages:** Added dependencies justified
+- [ ] **No dev dependencies in production:** Test packages excluded from prod builds
+
+### 13. Compliance & Standards
+
+- [ ] **`.editorconfig` rules followed:** Formatting, naming, braces
+- [ ] **No security analyzer warnings:** Warnings treated as errors
+- [ ] **OWASP Top 10 considerations:** Authentication, validation, data exposure reviewed
+- [ ] **Legal/regulatory compliance:** SOX, GDPR, privacy considerations met
+- [ ] **Data retention policies:** Understood and implemented
+
+---
+
+### Review Workflow
+
+**For Small PRs (< 5 files):** Focus on Security, Code Quality, Testing
+
+**For Medium PRs (5-20 files):** Add Architecture, Telemetry, Validation
+
+**For Large PRs (20+ files/new features):** Review ALL sections including documentation
+
+### Common Rejection Reasons
+
+- ❌ **Age calculated in frontend** (auto-reject—security critical)
+- ❌ **DbContext in endpoints** (move to service layer)
+- ❌ **Client-side auth trust** (re-validate server-side)
+- ❌ **Unmasked PII in logs** (use masking functions)
+- ❌ **Missing telemetry** (required on all endpoints)
+- ❌ **AsyncFixer01 violations** (single awaits return Task directly)
+- ❌ **No server-side validation** (all inputs must be validated)
+- ❌ **Hardcoded secrets** (use Key Vault/user secrets)
+- ❌ **`??` in EF queries** (use explicit conditionals for Oracle compatibility)
+- ❌ **No composite keys for Demographics** (use `(Ssn, OracleHcmId)`)
+
+---
+
+**Reference:** See [Master Code Review Checklist](./CODE_REVIEW_CHECKLIST.md) for detailed guidance on all areas.
 
 ## Project Estimation
 

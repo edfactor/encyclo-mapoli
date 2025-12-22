@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetForfeituresAndPointsQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
@@ -55,6 +56,7 @@ const useForfeit = () => {
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.FORFEIT,
     onPaginationChange: handlePaginationChange
   });
 
@@ -142,13 +144,7 @@ const useForfeit = () => {
 
   // Auto-search on mount if profit year is available
   useEffect(() => {
-    if (
-      fiscalCloseProfitYear &&
-      !state.data &&
-      hasToken &&
-      !state.search.isLoading &&
-      !hasInitiallySearched.current
-    ) {
+    if (fiscalCloseProfitYear && !state.data && hasToken && !state.search.isLoading && !hasInitiallySearched.current) {
       hasInitiallySearched.current = true;
       executeSearch({ profitYear: fiscalCloseProfitYear });
     }

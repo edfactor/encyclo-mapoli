@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
+
 internal sealed class EmploymentStatusFaker : Faker<EmploymentStatus>
 {
     internal EmploymentStatusFaker()

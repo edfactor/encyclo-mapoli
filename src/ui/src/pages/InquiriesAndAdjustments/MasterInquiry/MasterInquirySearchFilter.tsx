@@ -10,7 +10,7 @@ import {
   RadioGroup,
   TextField
 } from "@mui/material";
-import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -29,13 +29,12 @@ import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear"
 import {
   badgeNumberOrPSNValidator,
   monthValidator,
-  positiveNumberValidator,
   profitYearNullableValidator,
   ssnValidator
 } from "../../../utils/FormValidators";
 import { transformSearchParams } from "./utils/transformSearchParams";
 
-const schema = yup.object().shape({
+const schema: yup.ObjectSchema<MasterInquirySearch> = yup.object().shape({
   endProfitYear: profitYearNullableValidator.test(
     "greater-than-start",
     "End year must be after start year",
@@ -48,16 +47,30 @@ const schema = yup.object().shape({
   startProfitMonth: monthValidator,
   endProfitMonth: monthValidator.min(yup.ref("startProfitMonth"), "End month must be after start month"),
   socialSecurity: ssnValidator,
-  name: yup.string().nullable(),
+  name: yup
+    .string()
+    .nullable()
+    .test("min-length", "Name must have at least 2 characters", function (value) {
+      if (!value) return true; // Allow empty/null
+      return value.length >= 2;
+    }),
   badgeNumber: badgeNumberOrPSNValidator,
   comment: yup.string().nullable(),
   paymentType: yup.string().oneOf(["all", "hardship", "payoffs", "rollovers"]).default("all").required(),
   memberType: yup.string().oneOf(["all", "employees", "beneficiaries", "none"]).default("all").required(),
-  contribution: positiveNumberValidator("Contribution"),
-  earnings: positiveNumberValidator("Earnings"),
-  forfeiture: positiveNumberValidator("Forfeiture"),
-  payment: positiveNumberValidator("Payment"),
-  voids: yup.boolean().default(false).required()
+  contribution: yup.number().nullable().typeError("Contribution must be a valid number"),
+  earnings: yup.number().nullable().typeError("Earnings must be a valid number"),
+  forfeiture: yup.number().nullable().typeError("Forfeiture must be a valid number"),
+  payment: yup.number().nullable().typeError("Payment must be a valid number"),
+  voids: yup.boolean().default(false).required(),
+  pagination: yup
+    .object({
+      skip: yup.number().required(),
+      take: yup.number().required(),
+      sortBy: yup.string().required(),
+      isSortDescending: yup.boolean().required()
+    })
+    .required()
 });
 
 interface MasterInquirySearchFilterProps {
@@ -76,16 +89,21 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       badgeNumber: string;
     }>();
 
+    // Local state to immediately disable button on click
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     // Ref to track if URL search has been processed
     const urlSearchProcessedRef = useRef(false);
 
     // profitYear should always start with this year
     const profitYear = useDecemberFlowProfitYear();
 
+    // PS-2258: Only auto-switch to beneficiaries when badge length indicates a beneficiary (>= 8 chars)
+    // Don't auto-switch to employees - let the user choose
     const determineCorrectMemberType = (badgeNum: string | undefined) => {
       if (!badgeNum) return "all";
-      if (badgeNum.length <= MAX_EMPLOYEE_BADGE_LENGTH) return "employees";
-      return "beneficiaries";
+      if (badgeNum.length > MAX_EMPLOYEE_BADGE_LENGTH) return "beneficiaries";
+      return "all"; // Don't force employee type, let user choose
     };
 
     const {
@@ -95,7 +113,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       reset,
       setValue
     } = useForm<MasterInquirySearch>({
-      resolver: yupResolver(schema) as Resolver<MasterInquirySearch>,
+      resolver: yupResolver(schema),
       mode: "onBlur",
       defaultValues: {
         endProfitYear: profitYear,
@@ -113,7 +131,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         voids: false,
         pagination: {
           skip: 0,
-          take: 5,
+          take: 10,
           sortBy: "badgeNumber",
           isSortDescending: true
         }
@@ -132,7 +150,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
           endProfitYear: profitYear,
           pagination: {
             skip: 0,
-            take: 5,
+            take: 10,
             sortBy: "badgeNumber",
             isSortDescending: true
           }
@@ -148,6 +166,13 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         navigate(`/${ROUTES.MASTER_INQUIRY}`, { replace: true });
       }
     }, [badgeNumber, reset, profitYear, onSearch, navigate]);
+
+    // Reset local submitting state when search completes
+    useEffect(() => {
+      if (!isSearching) {
+        setIsSubmitting(false);
+      }
+    }, [isSearching]);
 
     /*
     const selectSx = useMemo(
@@ -167,18 +192,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
 
     const onSubmit = useCallback(
       (data: MasterInquirySearch) => {
-        if (isValid) {
+        if (isValid && !isSubmitting) {
+          setIsSubmitting(true);
           const searchParams = transformSearchParams(data, profitYear);
           onSearch(searchParams);
           dispatch(setMasterInquiryRequestParams(data));
         }
       },
-      [isValid, profitYear, onSearch, dispatch]
+      [isValid, profitYear, onSearch, dispatch, isSubmitting]
     );
 
     const validateAndSearch = handleSubmit(onSubmit);
 
     const handleReset = useCallback(() => {
+      setIsSubmitting(false);
       dispatch(clearMasterInquiryRequestParams());
       dispatch(clearMasterInquiryData());
       dispatch(clearMasterInquiryGroupingData());
@@ -198,7 +225,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         voids: false,
         pagination: {
           skip: 0,
-          take: 5,
+          take: 10,
           sortBy: "badgeNumber",
           isSortDescending: true
         }
@@ -214,7 +241,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
           name="endProfitYear"
           control={control}
           render={({ field }) => (
-            <DsmDatePicker
+            <DSMDatePicker
               id="Profit Year"
               onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
               value={field.value ? new Date(field.value, 0) : null}
@@ -270,20 +297,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       </Grid>
     ));
 */
+    // PS-2258: Only auto-switch to beneficiaries when badge length indicates a beneficiary (>= 8 chars)
+    // Don't auto-switch to employees - let the user choose
     const handleBadgeNumberChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const badgeStr = e.target.value;
-        let memberType: string;
 
         if (badgeStr.length === 0) {
-          memberType = "all";
-        } else if (badgeStr.length >= 8) {
-          memberType = "beneficiaries";
-        } else {
-          memberType = "employees";
+          // Reset to all when cleared
+          setValue("memberType", "all");
+        } else if (badgeStr.length > MAX_EMPLOYEE_BADGE_LENGTH) {
+          // Only auto-switch to beneficiaries when badge is long enough
+          setValue("memberType", "beneficiaries");
         }
-
-        setValue("memberType", memberType as "all" | "employees" | "beneficiaries" | "none");
+        // Don't change memberType for shorter badge numbers - let user choose
       },
       [setValue]
     );
@@ -302,7 +329,19 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         disabled?: boolean;
         helperText?: string;
       }) => (
-        <Grid size={{ xs: 12, sm: 6, md: type === "number" ? 2 : 4 }}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md:
+              type === "number" ||
+              name === "contribution" ||
+              name === "earnings" ||
+              name === "forfeiture" ||
+              name === "payment"
+                ? 2
+                : 4
+          }}>
           <FormLabel>{label}</FormLabel>
           <Controller
             name={name}
@@ -329,6 +368,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                     }
                   }
 
+                  // For dollar amount fields, only allow 0-9, ., and - characters (max 2 decimal places)
+                  if (name === "contribution" || name === "earnings" || name === "forfeiture" || name === "payment") {
+                    // Allow negative numbers for all dollar amount fields, limit to 2 decimal places
+                    if (value !== "" && !/^-?\d*\.?\d{0,2}$/.test(value)) {
+                      return;
+                    }
+                  }
+
                   // Prevent input beyond 11 characters for badgeNumber
                   if (name === "badgeNumber" && value.length > 11) {
                     return;
@@ -337,7 +384,34 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                   if (name === "socialSecurity" && value.length > 9) {
                     return;
                   }
-                  const parsedValue = type === "number" && value !== "" ? Number(value) : value === "" ? null : value;
+
+                  // Parse value for number fields and dollar amount fields
+                  let parsedValue;
+
+                  if (value === "") {
+                    parsedValue = null;
+                  } else if (
+                    name === "contribution" ||
+                    name === "earnings" ||
+                    name === "forfeiture" ||
+                    name === "payment"
+                  ) {
+                    // For dollar fields that allow negative, keep as string while typing (intermediate states)
+                    // Only convert to number when it's a complete valid number AND the string representation matches
+                    const endsWithPeriod = value.endsWith(".");
+                    // Check for trailing zeros after decimal (e.g., "234.0", "234.00", "1.10")
+                    // These should be kept as strings since Number("234.0").toString() === "234" loses precision
+                    const hasTrailingDecimalZero = /\.\d*0$/.test(value);
+                    const isIntermediateState =
+                      value === "-" || value === "." || value === "-." || endsWithPeriod || hasTrailingDecimalZero;
+                    const isValidNumber = !isIntermediateState && !isNaN(Number(value));
+                    parsedValue = isValidNumber ? Number(value) : value;
+                  } else if (type === "number") {
+                    parsedValue = Number(value);
+                  } else {
+                    parsedValue = value;
+                  }
+
                   field.onChange(parsedValue);
 
                   // Auto-update memberType when badgeNumber changes
@@ -524,7 +598,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       [hasSocialSecurity, hasName, hasBadgeNumber]
     );
 
-    const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
+    // PS-2258: Only lock radio button when badge length indicates a beneficiary (>= 8 chars)
+    const isMemberTypeDisabled =
+      badgeNumberValue != null && String(badgeNumberValue).length > MAX_EMPLOYEE_BADGE_LENGTH;
 
     // Determine if search button should be enabled
     const hasSearchCriteria = useMemo(() => {
@@ -602,22 +678,22 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
             <TextInputField
               name="contribution"
               label="Contribution"
-              type="number"
+              type="text"
             />
             <TextInputField
               name="earnings"
               label="Earnings"
-              type="number"
+              type="text"
             />
             <TextInputField
               name="forfeiture"
               label="Forfeiture"
-              type="number"
+              type="text"
             />
             <TextInputField
               name="payment"
               label="Payment"
-              type="number"
+              type="text"
             />
             <VoidsCheckboxField />
           </Grid>
@@ -630,8 +706,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
               <SearchAndReset
                 handleReset={handleReset}
                 handleSearch={validateAndSearch}
-                isFetching={isSearching}
-                disabled={!isValid || isSearching || !hasSearchCriteria}
+                isFetching={isSearching || isSubmitting}
+                disabled={!isValid || isSearching || isSubmitting || !hasSearchCriteria}
               />
             </Grid>
           </Grid>

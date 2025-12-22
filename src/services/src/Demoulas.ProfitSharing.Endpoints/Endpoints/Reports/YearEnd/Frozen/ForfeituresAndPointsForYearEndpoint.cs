@@ -96,11 +96,11 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
                     new("operation", "forfeitures_and_points"),
                     new("metric_type", "total_forfeitures"));
 
-                EndpointTelemetry.RecordCountsProcessed.Record((long)result.TotalForfeitPoints,
+                EndpointTelemetry.RecordCountsProcessed.Record(result.TotalForfeitPoints,
                     new("operation", "forfeitures_and_points"),
                     new("metric_type", "total_forfeit_points"));
 
-                EndpointTelemetry.RecordCountsProcessed.Record((long)result.TotalEarningPoints,
+                EndpointTelemetry.RecordCountsProcessed.Record(result.TotalEarningPoints,
                     new("operation", "forfeitures_and_points"),
                     new("metric_type", "total_earning_points"));
             }

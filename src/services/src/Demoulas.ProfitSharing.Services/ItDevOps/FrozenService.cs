@@ -2,16 +2,16 @@
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.Common.Data.Contexts.Interceptor;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -67,6 +67,7 @@ public class FrozenService : IFrozenService
 
     /// <summary>
     /// Returns a query object representing Demographic data as-of an explicit timestamp.
+    /// NOTE ContactInfo and Address are alwasy the current, not historical version.
     /// </summary>
     /// <param name="ctx">The data context used for querying</param>
     /// <param name="asOf">Point-in-time for the snapshot (UTC offset preserved)</param>
@@ -94,7 +95,11 @@ public class FrozenService : IFrozenService
                 ModifiedAtUtc = dh.ValidFrom,
                 StoreNumber = dh.StoreNumber,
                 PayClassificationId = dh.PayClassificationId,
+                // We use the hot name and address info during the YE.  So if Mary changes her name leaves and move to Ohio on Feb 2, 
+                // we use her current info to mail her her year end statement.
                 ContactInfo = d.ContactInfo,
+                // We dont use the address in the Fiscal Close, so we could probably use the dh version here - but for consistancy with
+                // contact info, we use the latest.
                 Address = d.Address,
                 DateOfBirth = dh.DateOfBirth,
                 FullTimeDate = d.FullTimeDate,
@@ -119,7 +124,7 @@ public class FrozenService : IFrozenService
     /// <param name="userName"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, string? userName, CancellationToken cancellationToken = default)
+    public async Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, string? userName = "Unknown", CancellationToken cancellationToken = default)
     {
         var validator = new InlineValidator<short>();
 
@@ -207,7 +212,7 @@ public class FrozenService : IFrozenService
     /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a list of 
+    /// A task that represents the asynchronous operation. The task result contains a list of
     /// <see cref="FrozenStateResponse"/> objects representing the frozen demographic states.
     /// </returns>
     public Task<PaginatedResponseDto<FrozenStateResponse>> GetFrozenDemographics(SortedPaginationRequestDto request, CancellationToken cancellationToken = default)
@@ -261,7 +266,7 @@ public class FrozenService : IFrozenService
     /// FastEndpoints output cache stores entries with keys that start with "FEEndpointCache:"
     /// followed by the endpoint path and query parameters. Since IDistributedCache doesn't support
     /// pattern-based removal, we need to target specific cache keys or use cache tags.
-    /// 
+    ///
     /// For now, we attempt to remove common cache key patterns. A more robust solution would be
     /// to use cache tags (if supported by the distributed cache provider) or implement a cache
     /// key tracking mechanism.

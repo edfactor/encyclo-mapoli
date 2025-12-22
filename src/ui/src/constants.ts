@@ -22,6 +22,7 @@ export const ROUTES = {
   MANAGE_EXECUTIVE_HOURS: "manage-executive-hours-and-dollars",
   ELIGIBLE_EMPLOYEES: "eligible-employees",
   YTD_WAGES_EXTRACT: "ytd-wages-extract",
+  YTD_WAGES_EXTRACT_LIVE: "ytd-wages-extract-live",
   DISTRIBUTIONS_BY_AGE: "distributions-by-age",
   CONTRIBUTIONS_BY_AGE: "contributions-by-age",
   FORFEITURES_BY_AGE: "forfeitures-by-age",
@@ -31,7 +32,6 @@ export const ROUTES = {
   PROF_TERM: "prof-term",
   MILITARY_CONTRIBUTION: "military-contribution",
 
-  DECEMBER_PROCESS_ACCORDION: "december-process-accordion",
   DEMOGRAPHIC_BADGES: "demographic-badges-not-in-payprofit",
   DUPLICATE_SSNS: "duplicate-ssns-demographics",
   NEGATIVE_ETVA: "negative-etva-for-ssns-on-payprofit",
@@ -39,7 +39,6 @@ export const ROUTES = {
   REHIRE_FORFEITURES: "unforfeitures",
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_UPDATE: "profit-share-update",
-  PROFNEW: "/",
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
@@ -47,30 +46,18 @@ export const ROUTES = {
   BENEFICIARY_INQUIRY: "beneficiary",
   PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
+  REVERSALS: "reversals",
   PAY_BEN_REPORT: "payben-report",
   DISTRIBUTIONS_INQUIRY: "distributions-inquiry",
   VIEW_DISTRIBUTION: "view-distribution",
   ADD_DISTRIBUTION: "add-distribution",
   EDIT_DISTRIBUTION: "edit-distribution",
 
-  PAY426_ACTIVE_18_20: "pay426-1",
-  PAY426_ACTIVE_21_PLUS: "pay426-2",
-  PAY426_ACTIVE_UNDER_18: "pay426-3",
-  PAY426_ACTIVE_PRIOR_SHARING: "pay426-4",
-  PAY426_ACTIVE_NO_PRIOR: "pay426-5",
-  PAY426_TERMINATED_1000_PLUS: "pay426-6",
-  PAY426_TERMINATED_NO_PRIOR: "pay426-7",
-  PAY426_TERMINATED_PRIOR: "pay426-8",
   PAY426_SUMMARY: "pay426-9",
-  PAY426_NON_EMPLOYEE: "pay426-10",
-  PAY426N_LIVE: "pay426n_live",
-  PAY426N_FROZEN: "pay426n_frozen",
+  PAY426N_LIVE: "pay426n",
+  PAY426N_FROZEN: "pay426n",
   QPAY066_ADHOC: "qpay066-adhoc",
   QPAY066B: "qpay066b",
-  QPAY600: "qpay600",
-  REPRINT_CERTIFICATES: "reprint-certificates",
-  FORFEIT: "forfeit",
-  PROFIT_MASTER_UPDATE: "profit-master-update",
   PROFIT_SHARE_BY_STORE: "profit-share-by-store",
   PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
   RECENTLY_TERMINATED: "recently-terminated",
@@ -85,86 +72,286 @@ export const ROUTES = {
   NEW_PS_LABELS: "new-ps-labels",
   PROFALL: "profall",
   DEMO_FREEZE: "demographic-freeze",
+  MANAGE_STATE_TAXES: "manage-state-taxes",
+  MANAGE_ANNUITY_RATES: "manage-annuity-rates",
+  PROFIT_SHARING_ADJUSTMENTS: "profit-sharing-adjustments",
+  AUDIT_SEARCH: "audit-search",
+  ORACLE_HCM_DIAGNOSTICS: "oracle-hcm-diagnostics",
   DEV_DEBUG: "dev-debug",
   DOCUMENTATION: "documentation",
-  PROFIT_SHARE_EDIT: "profit-share-edit",
-  SAVE_PROF_PAYMSTR: "save-prof-paymstr"
+  DIVORCE_REPORT: "divorce-report",
+  ADHOC_PROF_LETTER73: "adhoc-prof-letter73"
 } as const;
 
 export const CAPTIONS = {
-  PAY_BE_NEXT: "Pay Be Next",
-  BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
-  BENEFICIARY_OF: "Beneficiary Of",
-  BENEFICIARY_SEARCH_FILTER: "Beneficiaries",
-  PAYBEN_REPORT: "Pay Beneficiary Report",
-  BALANCE_BY_AGE: "Balance by Age (PROF130B)",
-  BALANCE_BY_YEARS: "Balance by Years (PROF130Y)",
-  CONTRIBUTIONS_BY_AGE: "Contributions by Age (PROF130)",
-  DEMOGRAPHIC_BADGES: "Demographic Badges Not In Payprofit",
-  DECEMBER: "December",
-  FISCAL_CLOSE: MENU_LABELS.FISCAL_CLOSE,
-  POST_FROZEN: "Post Frozen",
-  DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures (QPAY129)",
-  DISTRIBUTIONS_BY_AGE: "Distributions by Age (PROF130)",
-  DISTRIBUTIONS_INQUIRY: "Distribution Inquiry (008-14l)",
-  VIEW_DISTRIBUTION: "View Distribution (008-14V)",
   ADD_DISTRIBUTION: "Add Distribution (008-14A)",
-  EDIT_DISTRIBUTION: "Edit Distribution (008-14E)",
+  ADD_DISTRIBUTION_SHORT: "Add Distribution",
+  ADHOC_PROF_LETTER73: "Adhoc Prof Letter 73",
+
+  ADJUSTMENTS: "Adjustments",
+  ADJUSTMENTS_SHORT: "Adjustments",
+
+  AUDIT_SEARCH: "Audit Search",
+  AUDIT_SEARCH_SHORT: "Audit Search",
+
+  BALANCE_BY_AGE: "Balance by Age (PROF130B)",
+  BALANCE_BY_AGE_SHORT: "Balance by Age",
+
+  BALANCE_BY_YEARS: "Balance by Years (PROF130Y)",
+  BALANCE_BY_YEARS_SHORT: "Balance by Years",
+
+  BENEFICIARIES_LIST: "Beneficiaries List",
+  BENEIFICAIRES_LIST_SHORT: "Beneficiaries List",
+
+  BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
+  BENEFICIARY_INQUIRY_SHORT: "Beneficiary Inquiry",
+
+  BENEFICIARY_OF: "Beneficiary Of",
+  BENEFICIARY_OF_SHORT: "Beneficiary Of",
+
+  BENEFICIARY_SEARCH_FILTER: "Beneficiaries",
+  BENEFICIARY_SEARCH_FILTER_SHORT: "Beneficiaries",
+
+  BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)",
+  BREAKDOWN_REPORT_SHORT: "Breakdown Report",
+
+  CONTRIBUTIONS_BY_AGE: "Contributions by Age (PROF130)",
+  CONTRIBUTIONS_BY_AGE_SHORT: "Contributions by Age",
+
+  DECEMBER: "December",
+  DECEMBER_SHORT: "December",
+
+  DECEMBER_ACTIVITIES_SUMMARY: "December Activities Summary",
+  DECEMBER_ACTIVITIES_SUMMARY_SHORT: "December Activities Summary",
+
+  DEMOGRAPHIC_BADGES: "Demographic Badges Not In Payprofit",
+  DEMOGRAPHIC_BADGES_SHORT: "Demographic Badges",
+
+  DEMOGRAPHIC_FREEZE: "Demographic Freeze",
+  DEMOGRAPHIC_FREEZE_SHORT: "Demographic Freeze",
+
+  DEMOGRAPHIC_FREEZE_EDIT: "Edit Demographic Freeze",
+  DEMOGRAPHIC_FREEZE_EDIT_SHORT: "Edit Demographic Freeze",
+
+  DEV_DEBUG: "Dev Debug",
+  DEV_DEBUG_SHORT: "Dev Debug",
+
+  DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures (QPAY129)",
+  DISTRIBUTIONS_AND_FORFEITURES_SHORT: "Distributions and Forfeitures",
+
+  DISTRIBUTIONS_BY_AGE: "Distributions by Age (PROF130)",
+  DISTRIBUTIONS_BY_AGE_SHORT: "Distributions by Age",
+
+  DISTRIBUTIONS_INQUIRY: "Distribution Inquiry (008-14L)",
+  DISTRIBUTIONS_INQUIRY_SHORT: "Distribution Inquiry",
+
+  DIVORCE_REPORT: "Account History Report",
+  DIVORCE_REPORT_SHORT: "Account History",
+
+  DOCUMENTATION: "Documentation",
+  DOCUMENTATION_SHORT: "Documentation",
+
   DUPLICATE_NAMES: "Duplicate Names and Birthdays",
+  DUPLICATE_NAMES_SHORT: "Duplicate Names and Birthdays",
+
   DUPLICATE_SSNS: "Duplicate SSNs in Demographics",
+  DUPLICATE_SSNS_SHORT: "Duplicate SSNs",
+
+  EDIT_DISTRIBUTION: "Edit Distribution (008-14E)",
+  EDIT_DISTRIBUTION_SHORT: "Edit Distribution",
+
   ELIGIBLE_EMPLOYEES: "Get Eligible Employees",
+  ELIGIBLE_EMPLOYEES_SHORT: "Eligible Employees",
+
   EMPLOYEES_MILITARY: "Employees on Military Leave (QPAY511)",
+  EMPLOYEES_MILITARY_SHORT: "Employees on Military Leave",
+
+  FISCAL_CLOSE: MENU_LABELS.FISCAL_CLOSE,
+  FISCAL_CLOSE_SHORT: "Fiscal Close",
+
   FORFEIT: "Forfeit (PAY443)",
-  FORFEITURES_BY_AGE: "Forfeitures by Age (PROF130)",
+  FORFEIT_SHORT: "Forfeit",
+
   FORFEITURES_ADJUSTMENT: "Forfeitures Adjustment(008-12)",
+  FORFEITURES_ADJUSTMENT_SHORT: "Forfeitures Adjustment",
+
+  FORFEITURES_BY_AGE: "Forfeitures by Age (PROF130)",
+  FORFEITURES_BY_AGE_SHORT: "Forfeitures by Age",
+
+  FROZEN_SUMMARY: "Frozen Summary",
+  FROZEN_SUMMARY_SHORT: "Frozen Summary",
+
+  IT_DEVOPS: "IT DevOps",
+  IT_DEVOPS_SHORT: "IT DevOps",
+
+  MANAGE_STATE_TAX_RATES: "Manage State Tax Rates",
+  MANAGE_STATE_TAX_RATES_SHORT: "Manage State Tax Rates",
+
+  MANAGE_ANNUITY_RATES: "Manage Annuity Rates",
+  MANAGE_ANNUITY_RATES_SHORT: "Manage Annuity Rates",
+
+  PROFIT_SHARING_ADJUSTMENTS: "Profit Sharing Adjustments (008-22)",
+  PROFIT_SHARING_ADJUSTMENTS_SHORT: "Profit Sharing Adjustments",
+
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
+  MANAGE_EXECUTIVE_HOURS_SHORT: "Manage Executive Hours",
+
   MASTER_INQUIRY: "Master Inquiry (008-10)",
+  MASTER_INQUIRY_SHORT: "Master Inquiry",
+
+  MILITARY_AND_REHIRE: "Military and Rehire",
+  MILITARY_AND_REHIRE_SHORT: "Military and Rehire",
+
   MILITARY_CONTRIBUTIONS: "Military Contributions (TPR008-13)",
-  REHIRE_FORFEITURES: "UnForfeit (QPREV-PROF)",
+  MILITARY_CONTRIBUTIONS_SHORT: "Military Contributions",
+
   NEGATIVE_ETVA: "Negative ETVA for SSNs on Payprofit",
+  NEGATIVE_ETVA_SHORT: "Negative ETVA",
+
   NEW_PS_LABELS: "New Labels (QNEWPROFLBL)",
-  PAY_SHARE_BY_STORE_REPORTS: "Pay Share By Store Reports",
+  NEW_PS_LABELS_SHORT: "New Labels",
+
   PAY426_ACTIVE_18_20: "Active/inactive employees age 18 - 20 with 1000 hours or more",
+  PAY426_ACTIVE_18_20_SHORT: "Active/inactive 18-20",
+
   PAY426_ACTIVE_21_PLUS: "Active/inactive employees age 21 & with 1000 hours or more",
+  PAY426_ACTIVE_21_PLUS_SHORT: "Active/inactive 21+",
+
   PAY426_ACTIVE_NO_PRIOR: "Active/inactive employees 18 and older with no prior profit sharing amounts and <1000 hours",
+  PAY426_ACTIVE_NO_PRIOR_SHORT: "Active/inactive no prior",
+
   PAY426_ACTIVE_PRIOR_SHARING:
     "Active/inactive employees 18 and older with prior profit sharing amounts and <1000 hours",
+  PAY426_ACTIVE_PRIOR_SHARING_SHORT: "Active/inactive prior sharing",
+
   PAY426_ACTIVE_UNDER_18: "Active/inactive employees under 18",
-  PAY426_TERMINATED_UNDER_18: "< AGE 18 NO WAGES",
+  PAY426_ACTIVE_UNDER_18_SHORT: "Active/inactive under 18",
+
   PAY426_NON_EMPLOYEE: "All non-employee beneficiaries",
+  PAY426_NON_EMPLOYEE_SHORT: "Non-employee beneficiaries",
+
+  PAY426_NO_WAGE_EMPLOYEES_POSITIVE_BALANCE: "No Wages Employees Positive Balance",
+  PAY426_NO_WAGE_EMPLOYEES_POSITIVE_BALANCE_SHORT: "No Wages Positive Balance",
+
   PAY426_SUMMARY: "Profit Summary",
+  PAY426_SUMMARY_SHORT: "Profit Summary",
+
   PAY426_TERMINATED_1000_PLUS: "Terminated employees 18 and older with 1000 hours or more",
+  PAY426_TERMINATED_1000_PLUS_SHORT: "Terminated 1000+",
+
   PAY426_TERMINATED_NO_PRIOR: "Terminated employees 18 and older with no prior profit sharing amounts and < 1000 hours",
+  PAY426_TERMINATED_NO_PRIOR_SHORT: "Terminated no prior",
+
   PAY426_TERMINATED_PRIOR: "Terminated employees 18 and older with prior profit sharing amounts and < 1000 hours",
+  PAY426_TERMINATED_PRIOR_SHORT: "Terminated prior sharing",
+
+  PAY426_TERMINATED_UNDER_18: "< AGE 18 WAGES > 0 (TERMINATED)",
+  PAY426_TERMINATED_UNDER_18_SHORT: "Terminated under 18",
+
   PAY426N: "Profit Sharing Report (PAY426N)",
-  QPAY066_ADHOC: "QPAY066* Ad Hoc Reports",
-  QPAY066B: "QPAY066B",
-  QPAY600: "QPAY600",
-  REPRINT_CERTIFICATES: "Reprint Certificates",
+  PAY426N_SHORT: "PAY426N",
+
   PAY450_SUMMARY: "Update Summary (PAY450)",
+  PAY450_SUMMARY_SHORT: "Update Summary",
+
+  PAY_BE_NEXT: "Pay Be Next",
+  PAY_BE_NEXT_SHORT: "Pay Be Next",
+
+  PAY_SHARE_BY_STORE_REPORTS: "Pay Share By Store Reports",
+  PAY_SHARE_BY_STORE_REPORTS_SHORT: "Pay Share By Store",
+
+  PAYBEN_REPORT: "Pay Beneficiary Report",
+  PAYBEN_REPORT_SHORT: "Pay Beneficiary Report",
+
   PAYMASTER_UPDATE: "Profit Master Update (PAY460)",
-  PROFIT_MASTER_UPDATE: "Pay Master Update (PAY460)",
-  PROF_CTRLSHEET: "Prof-CTRL-SHEET",
-  PROFALL: "PROFALL Report",
-  PROFNEW: "PROFNEW",
-  PROFIT_SHARE_BY_STORE: "Profit Share by Store (QPAY066TA)",
-  PROFIT_SHARE_GROSS_REPORT: "Profit Share Gross Report (QPAY501)",
-  PROFIT_SHARE_REPORT_FINAL_RUN: "Profit Share Report Final Run (PAY426N)",
-  PROFIT_SHARE_REPORT: "Profit Share Report (PAY426)",
-  PROFIT_SHARE_TOTALS: "Profit Share Totals Report (PAY426)",
-  PROFIT_SHARE_UPDATE: "Master Update (PAY444|PAY447)",
+  PAYMASTER_UPDATE_SHORT: "Profit Master Update",
+
+  POST_FROZEN: "Post Frozen",
+  POST_FROZEN_SHORT: "Post Frozen",
+
   PRINT_PROFIT_CERTS: "Print Profit Certs (PAYCERT)",
+  PRINT_PROFIT_CERTS_SHORT: "Print Profit Certs",
+
+  PROF_CTRLSHEET: "Prof-CTRL-SHEET",
+  PROF_CTRLSHEET_SHORT: "Prof-CTRL-SHEET",
+
+  PROFALL: "PROFALL Report",
+  PROFALL_SHORT: "PROFALL",
+
+  PROFNEW: "PROFNEW",
+  PROFNEW_SHORT: "PROFNEW",
+
+  PROFIT_MASTER_UPDATE: "Pay Master Update (PAY460)",
+  PROFIT_MASTER_UPDATE_SHORT: "Pay Master Update",
+
+  PROFIT_SHARE_BY_STORE: "Profit Share by Store (QPAY066TA)",
+  PROFIT_SHARE_BY_STORE_SHORT: "Profit Share by Store",
+
+  PROFIT_SHARE_GROSS_REPORT: "Profit Share Gross Report (QPAY501)",
+  PROFIT_SHARE_GROSS_REPORT_SHORT: "Profit Share Gross Report",
+
+  PROFIT_SHARE_REPORT: "Profit Share Report (PAY426)",
+  PROFIT_SHARE_REPORT_SHORT: "Profit Share Report",
+
+  PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run",
+  PROFIT_SHARE_REPORT_EDIT_RUN_SHORT: "Profit Share Report Edit Run",
+
+  PROFIT_SHARE_REPORT_FINAL_RUN: "Profit Share Report Final Run (PAY426N)",
+  PROFIT_SHARE_REPORT_FINAL_RUN_SHORT: "Profit Share Report Final Run",
+
+  PROFIT_SHARE_TOTALS: "Profit Share Totals Report (PAY426)",
+  PROFIT_SHARE_TOTALS_SHORT: "Profit Share Totals",
+
+  PROFIT_SHARE_UPDATE: "Master Update (PAY444|PAY447)",
+  PROFIT_SHARE_UPDATE_SHORT: "Master Update",
+
+  PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
+  PROFIT_SHARING_CONTROL_SHEET_SHORT: "Control Sheet",
+
+  QPAY066_ADHOC: "QPAY066* Ad Hoc Reports",
+  QPAY066_ADHOC_SHORT: "QPAY066* Reports",
+
   QPAY066_UNDER21: "QPAY066-UNDR21",
-  QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
+  QPAY066_UNDER21_SHORT: "QPAY066 Under 21",
+
+  QPAY066B: "QPAY066B",
+  QPAY066B_SHORT: "QPAY066B",
+
   QPAY066TA: "QPAY066TA",
+  QPAY066TA_SHORT: "QPAY066TA",
+
+  QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
+  QPAY066TA_UNDER21_SHORT: "QPAY066TA Under 21",
+
   RECENTLY_TERMINATED: "Recently Terminated (PROF-VESTED|PAY508)",
+  RECENTLY_TERMINATED_SHORT: "Recently Terminated",
+
+  REHIRE_FORFEITURES: "UnForfeit (QPREV-PROF)",
+  REHIRE_FORFEITURES_SHORT: "UnForfeit",
+
+  REPRINT_CERTIFICATES: "Reprint Certificates",
+  REPRINT_CERTIFICATES_SHORT: "Reprint Certificates",
+
+  REVERSALS: "Reversals",
+  REVERSALS_SHORT: "Reversals",
+
   TERMINATED_LETTERS: "Terminated Letters (QPROF003-1)",
+  TERMINATED_LETTERS_SHORT: "Terminated Letters",
+
   TERMINATIONS: "Terminations (QPAY066)",
+  TERMINATIONS_SHORT: "Terminations",
+
   VESTED_AMOUNTS_BY_AGE: "Vested Amounts by Age (PROF130V)",
+  VESTED_AMOUNTS_BY_AGE_SHORT: "Vested Amounts by Age",
+
+  VIEW_DISTRIBUTION: "View Distribution (008-14V)",
+  VIEW_DISTRIBUTION_SHORT: "View Distribution",
+
   YTD_WAGES_EXTRACT: "YTD Wages Extract (PROF-DOLLAR-EXTRACT)",
-  BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)",
-  DEMOGRAPHIC_FREEZE: "Demographic Freeze",
-  DEV_DEBUG: "Dev Debug"
+  YTD_WAGES_EXTRACT_SHORT: "YTD Wages Extract",
+
+  YTD_WAGES_EXTRACT_LIVE: "YTD Wages Extract Live (PROF-DOLLAR-EXTRACT)",
+  YTD_WAGES_EXTRACT_LIVE_SHORT: "YTD Wages Extract Live"
 } as const;
 
 export const VIEW = "View";
@@ -210,4 +397,111 @@ export const NAVIGATION_STATUS = {
   IN_PROGRESS: 2,
   ON_HOLD: 3,
   COMPLETE: 4
+} as const;
+
+export const GRID_KEYS = {
+  // December Activities
+  TERMINATION: "TERMINATION",
+  DEMOGRAPHIC_BADGES: "DEMOGRAPHIC-BADGES",
+  REHIRE_FORFEITURES: "REHIRE-FORFEITURES",
+  DUPLICATE_NAMES: "DUPLICATE-NAMES",
+  MANAGE_EXECUTIVE_HOURS: "MANAGE-EXECUTIVE-HOURS",
+  MANAGE_EXECUTIVE_HOURS_MODAL: "MANAGE-EXECUTIVE-HOURS-MODAL",
+  PROFIT_SHARE_REPORT: "PROFIT-SHARE-REPORT",
+  DISTRIBUTIONS_AND_FORFEITURES: "DISTRIBUTIONS-AND-FORFEITURES",
+  DUPLICATE_SSNS: "DUPLICATE-SSNS",
+  NEGATIVE_ETVA: "NEGATIVE-ETVA",
+  FORFEITURES_ADJUSTMENT: "FORFEITURES-ADJUSTMENT-TRANSACTIONS",
+  MILITARY_CONTRIBUTIONS: "MILITARY-CONTRIBUTIONS",
+
+  // Beneficiaries
+  BENEFICIARIES_LIST: "BENEFICIARIES-LIST",
+  BENEFICIARY_OF: "BENEFICIARY-OF",
+  MEMBER_RESULTS: "MEMBER-RESULTS",
+
+  // Fiscal Close
+  PROFALL_REPORT: "PROFALL-REPORT",
+  PROFIT_SHARE_UPDATE: "PROFIT-SHARE-UPDATE",
+  PROFIT_SHARE_EDIT: "PROFIT-SHARE-EDIT",
+  QPAY066B: "QPAY066B-GRID",
+  PROFIT_SHARE_GROSS_REPORT: "PROFIT-SHARE-GROSS-REPORT",
+  ELIGIBLE_EMPLOYEES: "ELIGIBLE-EMPLOYEES",
+  REPRINT_CERTIFICATES: "REPRINT-CERTIFICATES",
+  PAY426N_REPORT: "PAY426N-REPORT",
+  UNDER_21_BREAKDOWN_REPORT: "UNDER-21-BREAKDOWN-REPORT",
+  UNDER_21_INACTIVE_REPORT: "UNDER-21-INACTIVE-REPORT",
+  POST_FROZEN_UNDER_21_REPORT: "POST-FROZEN-UNDER-21-REPORT",
+  BREAKDOWN_REPORT_ASSOCIATES_PREFIX: "BREAKDOWN-REPORT-ASSOCIATES-STORE-",
+  BREAKDOWN_REPORT_SUMMARY: "BREAKDOWN-REPORT-ALL-EMPLOYEES-SUMMARY",
+  STORE_MANAGEMENT_PREFIX: "STORE-MANAGEMENT-STORE-",
+  UNDER_21_REPORT: "UNDER-21-REPORT",
+  FORFEIT: "FORFEIT",
+  YTD_WAGES: "YTD-WAGES",
+  PAY_MASTER_UPDATE: "PAY-MASTER-UPDATE",
+
+  // Age Reports
+  CONTRIBUTIONS_AGE_TOTAL: "CONTRIBUTIONS-AGE-TOTAL",
+  CONTRIBUTIONS_AGE_FULLTIME: "CONTRIBUTIONS-AGE-FULLTIME",
+  CONTRIBUTIONS_AGE_PARTTIME: "CONTRIBUTIONS-AGE-PARTTIME",
+  DISTRIBUTIONS_AGE_TOTAL: "DISTRIBUTIONS-AGE-TOTAL",
+  DISTRIBUTIONS_AGE_FULLTIME: "DISTRIBUTIONS-AGE-FULLTIME",
+  DISTRIBUTIONS_AGE_PARTTIME: "DISTRIBUTIONS-AGE-PARTTIME",
+  BALANCE_YEARS_TOTAL: "BALANCE-YEARS-TOTAL",
+  BALANCE_YEARS_FULLTIME: "BALANCE-YEARS-FULLTIME",
+  BALANCE_YEARS_PARTTIME: "BALANCE-YEARS-PARTTIME",
+  VESTED_AMOUNTS_PREFIX: "VESTED-AMOUNTS-",
+  FORFEITURES_AGE_TOTAL: "FORFEITURES-AGE-TOTAL",
+  FORFEITURES_AGE_FULLTIME: "FORFEITURES-AGE-FULLTIME",
+  FORFEITURES_AGE_PARTTIME: "FORFEITURES-AGE-PARTTIME",
+  BALANCE_AGE_TOTAL: "BALANCE-AGE-TOTAL",
+  BALANCE_AGE_FULLTIME: "BALANCE-AGE-FULLTIME",
+  BALANCE_AGE_PARTTIME: "BALANCE-AGE-PARTTIME",
+
+  // Profit Summary
+  ACTIVE_INACTIVE_SUMMARY: "ACTIVE-INACTIVE-SUMMARY",
+  TERMINATED_SUMMARY: "TERMINATED-SUMMARY",
+  EMPLOYEES_SUMMARY: "EMPLOYEES-SUMMARY",
+
+  // Inquiries and Adjustments
+  MASTER_INQUIRY_MEMBER: "MASTER-INQUIRY-MEMBER-GRID",
+  MASTER_INQUIRY: "MASTER-INQUIRY-DETAILS-GRID",
+  REVERSALS: "REVERSALS-GRID",
+
+  // IT Operations
+  AUDIT_SEARCH: "AUDIT-SEARCH",
+  DEMOGRAPHIC_FREEZE: "FREEZE",
+  DEMOGRAPHIC_SYNC_AUDIT: "DEMOGRAPHIC-SYNC-AUDIT",
+  MANAGE_STATE_TAX_RATES: "MANAGE-STATE-TAX-RATES",
+  MANAGE_ANNUITY_RATES: "MANAGE-ANNUITY-RATES",
+  PROFIT_SHARING_ADJUSTMENTS: "PROFIT-SHARING-ADJUSTMENTS",
+
+  // Distributions
+  DISTRIBUTION_INQUIRY: "DISTRIBUTION-INQUIRY",
+  DISBURSEMENT_PREFIX: "DISBURSEMENT-",
+
+  // Reports
+  ACCOUNT_HISTORY_REPORT: "ACCOUNT-HISTORY-REPORT",
+  QPAY066_ADHOC_REPORT: "QPAY066-ADHOC-REPORT",
+  TERMINATED_LETTERS: "TERMINATED-LETTERS",
+  RECENTLY_TERMINATED: "RECENTLY-TERMINATED",
+  PAY_BEN_REPORT: "PAY-BEN-REPORT",
+  BENEFICIARY_INQUIRY: "BENEFICIARY-INQUIRY"
+} as const;
+
+/**
+ * Common pagination defaults used across grids
+ */
+export const PAGINATION = {
+  /** Default page size for most grids */
+  DEFAULT_PAGE_SIZE: 25,
+  /** Smaller page size for selection grids (e.g., member selection) */
+  SMALL_PAGE_SIZE: 10,
+  /** Larger page size for detailed data grids */
+  LARGE_PAGE_SIZE: 50,
+  /** Minimal page size for compact views */
+  MINIMAL_PAGE_SIZE: 5,
+  /** Standard page size options for pagination controls */
+  PAGE_SIZE_OPTIONS: [10, 25, 50] as const,
+  /** Compact page size options for selection grids */
+  COMPACT_PAGE_SIZE_OPTIONS: [5, 10, 25] as const
 } as const;

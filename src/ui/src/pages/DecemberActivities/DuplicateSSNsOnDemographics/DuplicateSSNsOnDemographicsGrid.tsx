@@ -1,6 +1,6 @@
 import { RefObject, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { DuplicateSSNDetail, PagedReportResponse } from "../../../types";
 import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
@@ -33,7 +33,7 @@ const DuplicateSSNsOnDemographicsGrid = ({
       {showData && data?.response && (
         <div ref={innerRef}>
           <DSMGrid
-            preferenceKey={CAPTIONS.DUPLICATE_SSNS}
+            preferenceKey={GRID_KEYS.DUPLICATE_SSNS}
             isLoading={isLoading}
             handleSortChanged={onSortChange}
             providedOptions={{

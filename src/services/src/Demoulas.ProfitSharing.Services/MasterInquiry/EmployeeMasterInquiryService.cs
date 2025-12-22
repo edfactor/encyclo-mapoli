@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -38,14 +37,14 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         _demographicReaderService = demographicReaderService;
     }
 
-    public async Task<IQueryable<MasterInquiryItem>> GetEmployeeInquiryQueryAsync(
+    public Task<IQueryable<MasterInquiryItem>> GetEmployeeInquiryQueryAsync(
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Building employee inquiry query. EndProfitYear: {EndProfitYear}, PaymentType: {PaymentType}, BadgeNumber: {BadgeNumber}",
             req?.EndProfitYear, req?.PaymentType, req?.BadgeNumber);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             return await GetEmployeeInquiryQueryAsync(ctx, req, cancellationToken);
         }, cancellationToken);
@@ -95,6 +94,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }
 
         _logger.LogInformation("TRACE: About to build query with Include");
+#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
         var query = profitDetailsQuery
             .Include(pd => pd.ProfitCode)
             .Include(pd => pd.ZeroContributionReason)
@@ -136,6 +136,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                             .FirstOrDefault()
                     }
                 });
+#pragma warning restore AsyncFixer02 // Long-running or blocking operations inside an async method
 
         _logger.LogInformation("TRACE: Query built, returning");
         return query;
@@ -165,6 +166,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 {
                     d.Id,
                     d.ContactInfo.FirstName,
+                    d.ContactInfo.MiddleName,
                     d.ContactInfo.LastName,
                     d.ContactInfo.PhoneNumber,
                     d.Address.City,
@@ -218,7 +220,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
             if (memberData == null)
             {
                 _logger.LogInformation("Employee not found for ID: {EmployeeId}", id);
-                return (0, new MemberDetails { Id = 0 });
+                return (0, new MemberDetails { Id = 0, FirstName = "", MiddleName = "", LastName = "" });
             }
 
             _logger.LogDebug("Retrieved employee details for ID: {EmployeeId}, Badge: {BadgeNumber}, SSN: {MaskedSsn}",
@@ -255,6 +257,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 IsEmployee = true,
                 Id = memberData.Id,
                 FirstName = memberData.FirstName,
+                MiddleName = memberData.MiddleName,
                 LastName = memberData.LastName,
                 AddressCity = memberData.City!,
                 AddressState = memberData.State!,
@@ -293,7 +296,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }, cancellationToken);
     }
 
-    public async Task<PaginatedResponseDto<MemberDetails>> GetEmployeeDetailsForSsnsAsync(
+    public Task<PaginatedResponseDto<MemberDetails>> GetEmployeeDetailsForSsnsAsync(
         MasterInquiryRequest req,
         ISet<int> ssns,
         short currentYear,
@@ -304,7 +307,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         _logger.LogDebug("Getting paginated employee details for {SsnCount} SSNs. BadgeNumber: {BadgeNumber}, CurrentYear: {CurrentYear}",
             ssns.Count, req.BadgeNumber, currentYear);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
@@ -325,6 +328,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     d.Id,
                     d.ContactInfo.FullName,
                     d.ContactInfo.FirstName,
+                    d.ContactInfo.MiddleName,
                     d.ContactInfo.LastName,
                     d.ContactInfo.PhoneNumber,
                     d.Address.City,
@@ -413,6 +417,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     IsEmployee = true,
                     Id = memberData.Id,
                     FirstName = memberData.FirstName,
+                    MiddleName = memberData.MiddleName,
                     LastName = memberData.LastName,
                     AddressCity = memberData.City!,
                     AddressState = memberData.State!,
@@ -454,7 +459,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }, cancellationToken);
     }
 
-    public async Task<List<MemberDetails>> GetAllEmployeeDetailsForSsnsAsync(
+    public Task<List<MemberDetails>> GetAllEmployeeDetailsForSsnsAsync(
         ISet<int> ssns,
         short currentYear,
         short previousYear,
@@ -464,7 +469,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         _logger.LogDebug("Getting all employee details for {SsnCount} SSNs (non-paginated). CurrentYear: {CurrentYear}",
             ssns.Count, currentYear);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
@@ -480,6 +485,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     d.Id,
                     d.ContactInfo.FullName,
                     d.ContactInfo.FirstName,
+                    d.ContactInfo.MiddleName,
                     d.ContactInfo.LastName,
                     d.ContactInfo.PhoneNumber,
                     d.Address.City,
@@ -561,6 +567,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     IsEmployee = true,
                     Id = memberData.Id,
                     FirstName = memberData.FirstName,
+                    MiddleName = memberData.MiddleName,
                     LastName = memberData.LastName,
                     AddressCity = memberData.City!,
                     AddressState = memberData.State!,
@@ -599,13 +606,13 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }, cancellationToken);
     }
 
-    public async Task<int> FindEmployeeSsnByBadgeAsync(
+    public Task<int> FindEmployeeSsnByBadgeAsync(
         int badgeNumber,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Finding employee SSN by badge number: {BadgeNumber}", badgeNumber);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             // ReadOnlyDbContext automatically handles AsNoTracking

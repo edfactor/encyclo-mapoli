@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class EnrollmentMap : IEntityTypeConfiguration<Enrollment>
 {
     public void Configure(EntityTypeBuilder<Enrollment> builder)

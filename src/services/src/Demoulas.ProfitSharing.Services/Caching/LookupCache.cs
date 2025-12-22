@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -142,7 +142,7 @@ public class LookupCache<TKey, TValue, TEntity> : ILookupCache<TKey, TValue>
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to invalidate {LookupName} cache", _lookupName);
-            throw;
+            throw new InvalidOperationException($"Cache invalidation failed for {_lookupName}", ex);
         }
     }
 

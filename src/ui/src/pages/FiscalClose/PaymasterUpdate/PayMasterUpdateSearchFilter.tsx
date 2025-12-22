@@ -1,11 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { setUpdateSummary } from "reduxstore/slices/yearsEndSlice";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { profitYearValidator } from "../../../utils/FormValidators";
 
@@ -18,19 +16,20 @@ const schema = yup.object().shape({
 });
 
 interface ProfitYearSearchFilterProps {
-  onSearch?: (data: ProfitYearSearch) => void;
-  isFetching?: boolean;
+  onSearch: (data: ProfitYearSearch) => void;
+  onReset: () => void;
   setPageReset: (reset: boolean) => void;
+  isFetching?: boolean;
 }
 
 const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
   onSearch,
-  isFetching = false,
-  setPageReset
+  onReset,
+  setPageReset,
+  isFetching = false
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
-
-  const dispatch = useDispatch();
 
   const {
     control,
@@ -44,8 +43,15 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
     }
   });
 
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   const validateAndSubmit = handleSubmit((data) => {
-    if (isValid && onSearch) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       setPageReset(true);
       onSearch(data);
     }
@@ -56,7 +62,7 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
     reset({
       profitYear: fiscalCloseProfitYear
     });
-    dispatch(setUpdateSummary(null));
+    onReset();
   };
 
   return (
@@ -71,7 +77,7 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="profitYear"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || null)}
                 value={field.value ? new Date(field.value, 0) : null}
@@ -94,8 +100,8 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
-          isFetching={isFetching}
-          disabled={!isValid}
+          disabled={!isValid || isFetching || isSubmitting}
+          isFetching={isFetching || isSubmitting}
         />
       </Grid>
     </form>

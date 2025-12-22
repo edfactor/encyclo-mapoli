@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Moq; // For ProfitDetail
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
+
 public static class MockEmbeddedSqlService
 {
     internal static IEmbeddedSqlService Initialize()

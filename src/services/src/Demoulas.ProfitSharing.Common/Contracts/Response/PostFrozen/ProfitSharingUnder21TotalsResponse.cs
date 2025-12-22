@@ -23,7 +23,7 @@ public sealed record ProfitSharingUnder21TotalsResponse
     public decimal? TotalEndingBalance { get; set; }
     public decimal? TotalVestingBalance { get; set; }
 
-    public static ProfitSharingUnder21TotalsResponse SampleResponse()
+    public static ProfitSharingUnder21TotalsResponse ResponseExample()
     {
         return new ProfitSharingUnder21TotalsResponse
         {

@@ -10,14 +10,14 @@ import { ActionsCellRenderer } from "./DistributionActions";
 
 export const GetDistributionInquiryColumns = (): ColDef[] => {
   const columns: ColDef[] = [
-    createSSNColumn({
-      maxWidth: 130
-    }),
+    createBadgeColumn({}),
     createNameColumn({
       field: "fullName",
       maxWidth: 250
     }),
-    createBadgeColumn({}),
+    createSSNColumn({
+      maxWidth: 130
+    }),
     {
       headerName: "Frequency",
       field: "frequencyName",

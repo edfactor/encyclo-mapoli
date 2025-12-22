@@ -33,6 +33,11 @@ public sealed class AuditEventMap : IEntityTypeConfiguration<AuditEvent>
             .HasColumnName("USER_NAME")
             .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
+        _ = builder.Property(e => e.SessionId)
+            .HasMaxLength(20)
+            .HasColumnName("SESSION_ID");
+
+        _ = builder.HasIndex(e => new { e.SessionId, e.CreatedAt }, "IX_SessionIdCreatedAt");
 
         _ = builder.Property(e => e.CreatedAt)
             .IsRequired()
@@ -52,5 +57,9 @@ public sealed class AuditEventMap : IEntityTypeConfiguration<AuditEvent>
                 (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
                 c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                 c => c == null ? null : c.ToList()));
+
+        _ = builder.Property(e => e.ChangesHash)
+            .HasMaxLength(64)
+            .HasColumnName("CHANGES_HASH");
     }
 }

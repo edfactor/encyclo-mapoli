@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
@@ -44,6 +45,15 @@ public sealed record MasterInquiryResponseDto : IdRequest, IIsExecutive, IProfit
     public char EmploymentStatusId { get; set; }
     public string? EmploymentStatus { get; set; }
     public bool IsExecutive { get; set; }
+    public long? XFerQdroId { get; set; }
+    [MaskSensitive]
+    public string? XFerQdroName { get; set; }
+
+    /// <summary>
+    /// Indicates whether this profit detail record has already been reversed.
+    /// Used to disable reversal operations for records that have already been reversed.
+    /// </summary>
+    public bool IsAlreadyReversed { get; set; }
 
     public static MasterInquiryResponseDto ResponseExample()
     {

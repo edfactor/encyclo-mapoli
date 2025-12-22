@@ -49,6 +49,9 @@ Generated\ Files/
 TestResult.xml
 nunit-*.xml
 
+# Local Claude
+.claude/settings.json
+
 # Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/
@@ -378,6 +381,8 @@ test-results
 /src/ui/tsconfig.tsbuildinfo
 /src/services/tests/Demoulas.ProfitSharing.UnitTests/.vscode
 /.vscode/mcp.json
-
-# Local subagent files
-.claude/agents/**
+/DEMO_SETUP_STEPS.md
+/src/ui/build
+/src/ui/test-results.txt
+/src/ui/test-output.txt
+/cobol

@@ -126,7 +126,7 @@ public static class OracleEmployeeExtensions
             AssignmentNumber: null,
             AssignmentCategory: null,
             AssignmentCategoryMeaning: null,
-            Frequency: (char?)null
+            Frequency: null
         );
         var assignments = new WorkRelationshipAssignments(
             Items: new List<WorkRelationshipAssignment> { assignment },
@@ -196,7 +196,7 @@ public static class OracleEmployeeExtensions
             PersonId: d.OracleHcmId,
             BadgeNumber: d.BadgeNumber,
             DateOfBirth: d.DateOfBirth,
-            DateOfDeath: null,
+            DateOfDeath: d.DateOfDeath,
             CreatedBy: "faker",
             CreationDate: DateTimeOffset.UtcNow,
             LastUpdatedBy: "faker",

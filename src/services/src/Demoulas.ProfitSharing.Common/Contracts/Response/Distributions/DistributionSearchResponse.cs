@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+
 public sealed record DistributionSearchResponse : IIsExecutive
 {
     public required long Id { get; set; }
     public required int PaymentSequence { get; set; }
     public required string Ssn { get; set; }
-    public int? BadgeNumber { get; set; }
+    public long? BadgeNumber { get; set; }
+    [MaskSensitive]
     public required string FullName { get; set; }
     public bool IsExecutive { get; set; }
     public bool IsEmployee { get; set; }

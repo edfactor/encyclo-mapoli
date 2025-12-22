@@ -47,7 +47,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // Get the most recent PROFIT_CODE = 2 (forfeiture) transaction for this employee
             var lastForfeitureTransaction = await context.ProfitDetails
-                .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitCodeId == 2)
+                .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitCodeId == 2 && pd.CommentTypeId != CommentType.Constants.ForfeitClassAction)
                 .OrderByDescending(pd => pd.ProfitYear)
                 .ThenByDescending(pd => pd.CreatedAtUtc)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -146,13 +146,21 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 {
                     return Result<bool>.Failure(Error.ClassActionForfeitureCannotBeReversed);
                 }
+
+                // Check if this profit detail has already been reversed (double-reversal protection)
+                var alreadyReversed = await context.ProfitDetails
+                    .AnyAsync(pd => pd.ReversedFromProfitDetailId == req.OffsettingProfitDetailId.Value, cancellationToken);
+                if (alreadyReversed)
+                {
+                    return Result<bool>.Failure(Error.ProfitDetailAlreadyReversed);
+                }
             }
 
             // Get vesting balance from the total service
             var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
                 SearchBy.Ssn,
                 employeeData.Ssn,
-                (short)req.ProfitYear,
+                req.ProfitYear,
                 cancellationToken);
 
             // If no vesting balance found, return failure
@@ -175,7 +183,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             var profitDetail = new ProfitDetail
             {
                 Ssn = employeeData.Ssn,
-                ProfitYear = (short)req.ProfitYear,
+                ProfitYear = req.ProfitYear,
                 ProfitYearIteration = 0,
                 ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id, // Code 2 for forfeitures
                 Remark = remarkText,
@@ -185,6 +193,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 CreatedAtUtc = DateTimeOffset.UtcNow,
                 ModifiedAtUtc = DateTimeOffset.UtcNow,
                 CommentTypeId = commentType.Id,
+                ReversedFromProfitDetailId = req.OffsettingProfitDetailId, // Track which record was reversed
             };
 
             context.ProfitDetails.Add(profitDetail);
@@ -195,7 +204,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             if (payProfit != null)
             {
                 // Get Calculated ETVA amount
-                var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, (short)req.ProfitYear).Where(x => x.Ssn == payProfit.Demographic!.Ssn)
+                var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, req.ProfitYear).Where(x => x.Ssn == payProfit.Demographic!.Ssn)
                     .FirstOrDefaultAsync(cancellationToken);
 
                 // Default to zero if no totals found

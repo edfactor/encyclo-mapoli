@@ -57,3 +57,32 @@ export const getMonthDateRange = (date: Date | null): { startDate: Date | null; 
     endDate: getMonthEndDate(date)
   };
 };
+
+/**
+ * Gets the date range for last year (first to last day of last year).
+ * Returns the first day of last year and the last day of last year.
+ *
+ * @returns Object with beginDate (Jan 1 of last year) and endDate (Dec 31 of last year)
+ *
+ * @example
+ * // Called on January 5, 2025
+ * getLastYearDateRange()
+ * // Returns { beginDate: 2024-01-01, endDate: 2024-12-31 }
+ *
+ * @example
+ * // Called on December 15, 2025
+ * getLastYearDateRange()
+ * // Returns { beginDate: 2024-01-01, endDate: 2024-12-31 }
+ */
+export const getLastYearDateRange = (): { beginDate: Date; endDate: Date } => {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+
+  // First day of last year (e.g., Jan 1, 2024 if current is 2025)
+  const beginDate = new Date(currentYear - 1, 0, 1); // Month 0 = January
+
+  // Last day of last year (e.g., Dec 31, 2024 if current is 2025)
+  const endDate = new Date(currentYear - 1, 11, 31); // Month 11 = December
+
+  return { beginDate, endDate };
+};

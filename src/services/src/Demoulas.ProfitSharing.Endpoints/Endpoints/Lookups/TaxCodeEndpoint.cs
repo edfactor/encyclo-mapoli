@@ -3,13 +3,12 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -17,12 +16,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
 public sealed class TaxCodeEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<TaxCodeResponse>>
 {
-    private readonly IProfitSharingDataContextFactory _dataContextFactor;
+    private readonly ITaxCodeLookupService _taxCodeLookupService;
     private readonly ILogger<TaxCodeEndpoint> _logger;
 
-    public TaxCodeEndpoint(IProfitSharingDataContextFactory dataContextFactory, ILogger<TaxCodeEndpoint> logger) : base(Navigation.Constants.Inquiries)
+    public TaxCodeEndpoint(ITaxCodeLookupService taxCodeLookupService, ILogger<TaxCodeEndpoint> logger) : base(Navigation.Constants.Inquiries)
     {
-        _dataContextFactor = dataContextFactory;
+        _taxCodeLookupService = taxCodeLookupService;
         _logger = logger;
     }
 
@@ -34,22 +33,22 @@ public sealed class TaxCodeEndpoint : ProfitSharingResultResponseEndpoint<ListRe
             s.Summary = "Gets all available tax codes";
             s.ResponseExamples = new Dictionary<int, object> {
             {
-                200, new List<TaxCodeResponse>
+                200, ListResponseDto<TaxCodeResponse>.From(new List<TaxCodeResponse>
                 {
-                    new TaxCodeResponse { Id = 'A', Name= "A - Married Filing Jointly or Qualifying Widow(er)" },
-                    new TaxCodeResponse { Id = 'B', Name= "B - Single or Married Filing Separately" },
-                    new TaxCodeResponse { Id = 'C', Name= "C - Head of Household" },
-                    new TaxCodeResponse { Id = 'D', Name= "D - Married Filing Jointly or Qualifying Widow(er) with Two Incomes" },
-                    new TaxCodeResponse { Id = 'E', Name= "E - Single or Married Filing Separately with One Income" },
-                    new TaxCodeResponse { Id = 'F', Name= "F - Head of Household with One Income" },
-                    new TaxCodeResponse { Id = 'G', Name= "G - Married Filing Jointly or Qualifying Widow(er) with Three or More Incomes" },
-                    new TaxCodeResponse { Id = 'H', Name= "H - Single or Married Filing Separately with Two or More Incomes" },
-                    new TaxCodeResponse { Id = 'I', Name= "I - Head of Household with Two or More Incomes" },
-                    new TaxCodeResponse { Id = 'J', Name= "J - Married Filing Jointly or Qualifying Widow(er) with Four or More Incomes" },
-                    new TaxCodeResponse { Id = 'K', Name= "K - Single or Married Filing Separately with Three or More Incomes" },
-                    new TaxCodeResponse { Id = 'L', Name= "L - Head of Household with Three or More Incomes" },
-                    new TaxCodeResponse { Id = 'M', Name= "M - Exempt" }
-                }
+                    new() { Id = 'A', Name = "A - Married Filing Jointly or Qualifying Widow(er)" },
+                    new() { Id = 'B', Name = "B - Single or Married Filing Separately" },
+                    new() { Id = 'C', Name = "C - Head of Household" },
+                    new() { Id = 'D', Name = "D - Married Filing Jointly or Qualifying Widow(er) with Two Incomes" },
+                    new() { Id = 'E', Name = "E - Single or Married Filing Separately with One Income" },
+                    new() { Id = 'F', Name = "F - Head of Household with One Income" },
+                    new() { Id = 'G', Name = "G - Married Filing Jointly or Qualifying Widow(er) with Three or More Incomes" },
+                    new() { Id = 'H', Name = "H - Single or Married Filing Separately with Two or More Incomes" },
+                    new() { Id = 'I', Name = "I - Head of Household with Two or More Incomes" },
+                    new() { Id = 'J', Name = "J - Married Filing Jointly or Qualifying Widow(er) with Four or More Incomes" },
+                    new() { Id = 'K', Name = "K - Single or Married Filing Separately with Three or More Incomes" },
+                    new() { Id = 'L', Name = "L - Head of Household with Three or More Incomes" },
+                    new() { Id = 'M', Name = "M - Exempt" }
+                })
             } };
         });
         Group<LookupGroup>();
@@ -69,24 +68,20 @@ public sealed class TaxCodeEndpoint : ProfitSharingResultResponseEndpoint<ListRe
         {
             this.RecordRequestMetrics(HttpContext, _logger, new { });
 
-            var items = await _dataContextFactor.UseReadOnlyContext(c => c.TaxCodes
-                .OrderBy(x => x.Name)
-                .Select(x => new TaxCodeResponse { Id = x.Id, Name = x.Name })
-                .ToListAsync(ct), ct);
+            var dto = await _taxCodeLookupService.GetTaxCodesAsync(ct);
 
             // Record business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "tax-code-lookup"),
                 new("endpoint", "TaxCodeEndpoint"));
 
-            EndpointTelemetry.RecordCountsProcessed.Record(items.Count,
+            EndpointTelemetry.RecordCountsProcessed.Record(dto.Items.Count,
                 new("record_type", "tax-codes"),
                 new("endpoint", "TaxCodeEndpoint"));
 
             _logger.LogInformation("Tax code lookup completed, returned {TaxCodeCount} tax codes (correlation: {CorrelationId})",
-                items.Count, HttpContext.TraceIdentifier);
+                dto.Items.Count, HttpContext.TraceIdentifier);
 
-            var dto = ListResponseDto<TaxCodeResponse>.From(items);
             var result = Result<ListResponseDto<TaxCodeResponse>>.Success(dto);
             var httpResult = result.ToHttpResult();
 

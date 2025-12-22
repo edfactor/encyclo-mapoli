@@ -1,12 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Demoulas.Security" />
+    <PackageReference Include="Demoulas.Util" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 

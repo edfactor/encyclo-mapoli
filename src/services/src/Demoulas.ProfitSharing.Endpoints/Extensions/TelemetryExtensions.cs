@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using System.Text.Json;
-using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.Util.Extensions;
-using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -19,6 +19,8 @@ namespace Demoulas.ProfitSharing.Endpoints.Extensions;
 public static class TelemetryExtensions
 {
     private const string UserIdKey = "user.id";
+    private const string UserEmailKey = "user.email";
+    private const string SessionIdKey = "session.id";
     private const string UserRoleKey = "user.role";
     private const string EndpointKey = "endpoint.name";
     private const string NavigationIdKey = "navigation.id";
@@ -26,6 +28,7 @@ public static class TelemetryExtensions
 
     /// <summary>
     /// Creates a standardized activity for an endpoint execution with common tags.
+    /// Includes session ID and unique user identifier for journey tracking.
     /// </summary>
     /// <param name="endpoint">The endpoint instance (used for navigation ID and type name)</param>
     /// <param name="httpContext">The current HTTP context</param>
@@ -36,20 +39,50 @@ public static class TelemetryExtensions
         var endpointName = operationName ?? endpoint.GetType().Name;
         var activity = EndpointTelemetry.ActivitySource?.StartActivity($"endpoint.{endpointName}");
 
-        if (activity != null)
+        if (activity != null && httpContext != null)
         {
-            var correlationId = httpContext?.TraceIdentifier ?? "test-correlation";
-            var userId = httpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
-            var userRole = httpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
+            var correlationId = httpContext.TraceIdentifier ?? "test-correlation";
+            var sessionId = GetSessionId(httpContext);
+
+            // Get unique user identifier from IAppUser (email preferred, fallback to username)
+            var appUser = httpContext.RequestServices?.GetService(typeof(Demoulas.Common.Contracts.Interfaces.IAppUser))
+                as Demoulas.Common.Contracts.Interfaces.IAppUser;
+            var userEmail = appUser?.Email ?? appUser?.UserName ?? "anonymous";
+            var userRole = httpContext.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
 
             activity.SetTag(EndpointKey, endpointName);
             activity.SetTag(NavigationIdKey, endpoint.NavigationId.ToString());
             activity.SetTag(CorrelationIdKey, correlationId);
-            activity.SetTag(UserIdKey, userId);
+            activity.SetTag(SessionIdKey, sessionId);
+            activity.SetTag(UserIdKey, userEmail);
+            activity.SetTag(UserEmailKey, userEmail);
             activity.SetTag(UserRoleKey, userRole);
         }
 
         return activity;
+    }
+
+    /// <summary>
+    /// Retrieves the session ID from the HTTP context (set by EndpointInstrumentationMiddleware).
+    /// Session ID correlates all requests within a user session for journey tracking.
+    /// </summary>
+    private static string GetSessionId(HttpContext? httpContext)
+    {
+        // First, try to get from HttpContext.Items (set by middleware in same request)
+        if (httpContext?.Items.TryGetValue(Telemetry.SessionIdKey, out var itemSessionId) == true &&
+            itemSessionId is string itemSessionIdStr && !string.IsNullOrEmpty(itemSessionIdStr))
+        {
+            return itemSessionIdStr;
+        }
+
+        // Fallback: try to get from request cookies (for subsequent requests)
+        if (httpContext?.Request.Cookies.TryGetValue(Telemetry.SessionIdKey, out var sessionId) == true &&
+            !string.IsNullOrEmpty(sessionId))
+        {
+            return sessionId;
+        }
+
+        return "unknown";
     }
 
     /// <summary>
@@ -60,6 +93,8 @@ public static class TelemetryExtensions
     /// <param name="logger">Logger for structured logging</param>
     /// <param name="request">The request object (for size calculation)</param>
     /// <param name="sensitiveFields">Optional list of sensitive field names that were accessed</param>
+    [RequiresUnreferencedCode("Calls EstimateObjectSize which uses reflection")]
+    [RequiresDynamicCode("Calls EstimateObjectSize which may require dynamic code")]
     public static void RecordRequestMetrics<TRequest>(
         this IHasNavigationId endpoint,
         HttpContext? httpContext,
@@ -71,6 +106,12 @@ public static class TelemetryExtensions
         var endpointName = endpoint.GetType().Name;
         var userRole = httpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
         var correlationId = httpContext?.TraceIdentifier ?? "test-correlation";
+        var sessionId = GetSessionId(httpContext);
+
+        // Get user email from IAppUser
+        var appUser = httpContext?.RequestServices?.GetService(typeof(Demoulas.Common.Contracts.Interfaces.IAppUser))
+            as Demoulas.Common.Contracts.Interfaces.IAppUser;
+        var userEmail = appUser?.Email ?? appUser?.UserName ?? "anonymous";
 
         // Calculate request size for monitoring
         var requestSize = EstimateObjectSize(request);
@@ -97,21 +138,24 @@ public static class TelemetryExtensions
                 EndpointTelemetry.SensitiveFieldAccessTotal.Add(1,
                     new("field", field),
                     new(EndpointKey, endpointName),
-                    new(UserRoleKey, userRole));
+                    new(UserRoleKey, userRole),
+                    new(UserEmailKey, userEmail),
+                    new(SessionIdKey, sessionId));
 
-                // Log sensitive field access with masked user info
-                logger?.LogInformation("Sensitive field accessed: {Field} by user role {UserRole} in {Endpoint} (correlation: {CorrelationId})",
-                    field, userRole, endpointName, correlationId);
+                // Log sensitive field access with full user journey context
+                logger?.LogInformation("Sensitive field accessed: {Field} by {UserEmail} ({UserRole}) in {Endpoint} - session: {SessionId}, correlation: {CorrelationId}",
+                    field, userEmail, userRole, endpointName, sessionId, correlationId);
             }
         }
 
-        // Structured log for request processing
-        logger?.LogDebug("Processing request in {Endpoint} for user role {UserRole} (correlation: {CorrelationId}, size: {RequestSize} bytes)",
-            endpointName, userRole, correlationId, requestSize);
+        // Structured log for request processing with user journey context
+        logger?.LogDebug("Processing request in {Endpoint} by {UserEmail} ({UserRole}) - session: {SessionId}, correlation: {CorrelationId}, size: {RequestSize} bytes",
+            endpointName, userEmail, userRole, sessionId, correlationId, requestSize);
     }
 
     /// <summary>
     /// Records response metrics and handles large response detection.
+    /// IMPORTANT: In test environments, skip expensive serialization to prevent timeouts.
     /// </summary>
     /// <param name="endpoint">The endpoint instance</param>
     /// <param name="httpContext">The current HTTP context</param>
@@ -119,6 +163,8 @@ public static class TelemetryExtensions
     /// <param name="response">The response object (for size calculation)</param>
     /// <param name="isSuccess">Whether the response represents a successful operation</param>
     /// <param name="errorType">Optional error type for failure scenarios</param>
+    [RequiresUnreferencedCode("Calls EstimateObjectSize which uses reflection")]
+    [RequiresDynamicCode("Calls EstimateObjectSize which may require dynamic code")]
     public static void RecordResponseMetrics<TResponse>(
         this IHasNavigationId endpoint,
         HttpContext? httpContext,
@@ -132,11 +178,13 @@ public static class TelemetryExtensions
         var userRole = httpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
         var correlationId = httpContext?.TraceIdentifier ?? "test-correlation";
 
-        // Calculate response size
-        var responseSize = EstimateObjectSize(response);
+        // CRITICAL: Skip expensive size estimation in test environments
+        // This prevents integration tests from hanging due to large response serialization
+        var isTest = IsTestEnvironment(httpContext);
+        var responseSize = isTest ? 0 : EstimateObjectSize(response);
 
         // Record response metrics (skip in test environments)
-        if (!IsTestEnvironment(httpContext))
+        if (!isTest)
         {
             // Record response size
             EndpointTelemetry.ResponseSizeBytes.Record(responseSize,
@@ -217,10 +265,50 @@ public static class TelemetryExtensions
 
     /// <summary>
     /// Estimates the size of an object for metrics purposes.
-    /// Uses JSON serialization as a reasonable approximation of payload size.
+    /// For large collections, uses a heuristic to avoid expensive serialization.
+    /// For smaller objects, uses JSON serialization for accuracy.
+    /// 
+    /// This method is critical for performance - it must not block the response pipeline.
+    /// Large response objects (e.g., paginated result sets with thousands of items) can take
+    /// seconds to serialize, causing test timeouts and production performance issues.
     /// </summary>
+    [RequiresUnreferencedCode("This method uses reflection for size estimation, which is only called for telemetry in non-AOT scenarios")]
+    [RequiresDynamicCode("JSON serialization may require dynamic code generation")]
     private static long EstimateObjectSize(object obj)
     {
+        if (obj == null)
+        {
+            return 0;
+        }
+
+        var objType = obj.GetType();
+
+        // Fast path: Check if it's a collection with Count/Length
+        // This avoids serializing large datasets
+        if (typeof(System.Collections.IEnumerable).IsAssignableFrom(objType) &&
+            objType != typeof(string))
+        {
+            try
+            {
+                // Try to get Count property for ICollection types
+                var countProperty = objType.GetProperty("Count",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.IgnoreCase);
+                if (countProperty?.CanRead == true && countProperty.GetValue(obj) is int count)
+                {
+                    // Estimate: assume ~500 bytes per item for complex objects, ~50 for scalars
+                    // This is a conservative heuristic to avoid massive underestimation
+                    return (long)count * 500;
+                }
+            }
+            catch
+            {
+                // Fall through to serialization attempt
+            }
+        }
+
+        // Fallback: attempt JSON serialization for smaller objects
+        // NOTE: Serialization can be expensive for large objects, so this is only called 
+        // after checking IsTestEnvironment and if fast heuristics fail
         try
         {
             var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions
@@ -232,8 +320,9 @@ public static class TelemetryExtensions
         }
         catch
         {
-            // Fallback to a reasonable estimate if serialization fails
-            return 1024; // 1KB default estimate
+            // If serialization fails, use a conservative default estimate
+            // This prevents exceptions from crashing telemetry
+            return 5120; // 5KB default estimate
         }
     }
 
@@ -250,6 +339,8 @@ public static class TelemetryExtensions
     /// <param name="executeFunc">The actual endpoint execution logic</param>
     /// <param name="sensitiveFields">List of sensitive fields accessed during execution</param>
     /// <returns>The response from the execution function</returns>
+    [RequiresUnreferencedCode("Calls telemetry methods that use reflection")]
+    [RequiresDynamicCode("Calls telemetry methods that may require dynamic code")]
     public static async Task<TResponse> ExecuteWithTelemetry<TRequest, TResponse>(
         this IHasNavigationId endpoint,
         HttpContext? httpContext,

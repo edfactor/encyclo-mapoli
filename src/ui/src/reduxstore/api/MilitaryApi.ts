@@ -9,6 +9,9 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const MilitaryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "militaryApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getMilitaryContributions: builder.query<
       Paged<MasterInquiryDetail>,
@@ -24,7 +27,7 @@ export const MilitaryApi = createApi({
           take: request.pagination.take
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setMilitaryContributions(data));

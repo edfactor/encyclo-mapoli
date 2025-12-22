@@ -1,11 +1,9 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -128,6 +126,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
                             },
                             HireDate = x.HireDate,
                             TerminationDate = x.TerminationDate,
+                            CurrentHourYears = x.PayProfits.OrderByDescending(x => x.LastUpdate).Select(x => x.CurrentHoursYear).FirstOrDefault(),
                             RehireDate = x.RehireDate,
                             Status = x.Status == EmploymentStatus.Constants.Active ? 'A' : 'T',
                             EmploymentStatusName = x.EmploymentStatusName,
@@ -142,7 +141,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
         }
 
 
-        private IQueryable<int> GetDuplicateSsnQuery(IQueryable<Demographic> demographics)
+        private static IQueryable<int> GetDuplicateSsnQuery(IQueryable<Demographic> demographics)
         {
             return demographics
                 .GroupBy(x => x.Ssn)

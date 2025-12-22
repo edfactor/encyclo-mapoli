@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -25,6 +26,7 @@ internal class PayrollSyncClient
     private readonly IEmployeeSyncService _employeeSyncService;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly EmployeeFullSyncClient _oracleEmployeeDataSyncClient;
+    private readonly IProcessWatchdog _watchdog;
     private readonly ILogger<PayrollSyncClient> _logger;
     private readonly Channel<MessageRequest<PayrollItem[]>> _payrollSyncBus;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
@@ -35,6 +37,7 @@ internal class PayrollSyncClient
         IEmployeeSyncService employeeSyncService,
         OracleHcmConfig oracleHcmConfig,
         EmployeeFullSyncClient oracleEmployeeDataSyncClient,
+        IProcessWatchdog watchdog,
         ILogger<PayrollSyncClient> logger,
         Channel<MessageRequest<PayrollItem[]>> payrollSyncBus)
     {
@@ -43,6 +46,7 @@ internal class PayrollSyncClient
         _employeeSyncService = employeeSyncService;
         _oracleHcmConfig = oracleHcmConfig;
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
+        _watchdog = watchdog;
         _logger = logger;
         _payrollSyncBus = payrollSyncBus;
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
@@ -124,7 +128,7 @@ internal class PayrollSyncClient
     /// A <see cref="Task"/> representing the asynchronous operation.
     /// </returns>
     /// <remarks>
-    /// This method retrieves payroll process results in a paginated manner, processes them using the provided callback, 
+    /// This method retrieves payroll process results in a paginated manner, processes them using the provided callback,
     /// and continues fetching until all results are processed or an error occurs.
     /// </remarks>
     private async Task GetPayrollProcessResultsAsync(CancellationToken cancellationToken)
@@ -148,13 +152,24 @@ internal class PayrollSyncClient
 
             // Queue Here
             const string requestedBy = "System";
+            int payrollChunkCounter = 0;
             foreach (PayrollItem[] items in results!.Items.Chunk(15))
             {
                 MessageRequest<PayrollItem[]> message = new() { ApplicationName = nameof(PayrollSyncClient), Body = items, UserId = requestedBy };
 
                 await _payrollSyncBus.Writer.WriteAsync(message, cancellationToken).ConfigureAwait(false);
+
+                // Record heartbeat every 20 chunks to prevent watchdog timeout during long-running payroll sync
+                if (++payrollChunkCounter % 20 == 0)
+                {
+                    _watchdog.RecordHeartbeat();
+                    _logger.LogDebug("PayrollSync: Queued {ChunkCount} payroll chunks ({ItemCount} items)",
+                        payrollChunkCounter, payrollChunkCounter * 15);
+                }
             }
 
+            // Record heartbeat before attempting missing employee sync (can take time)
+            _watchdog.RecordHeartbeat();
             await TrySyncMissingEmployees(results!.Items, cancellationToken).ConfigureAwait(false);
 
             if (!results.HasMore)
@@ -206,7 +221,7 @@ internal class PayrollSyncClient
     /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
     /// </param>
     /// <returns>
-    /// A <see cref="Task{TResult}"/> representing the asynchronous operation, 
+    /// A <see cref="Task{TResult}"/> representing the asynchronous operation,
     /// with a result of the constructed URL as a <see cref="string"/>.
     /// </returns>
     /// <remarks>
@@ -240,7 +255,7 @@ internal class PayrollSyncClient
     /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
     /// </param>
     /// <returns>
-    /// A <see cref="Task{TResult}"/> representing the asynchronous operation, containing the 
+    /// A <see cref="Task{TResult}"/> representing the asynchronous operation, containing the
     /// <see cref="HttpResponseMessage"/> returned by the Oracle Payroll API.
     /// </returns>
     /// <exception cref="HttpRequestException">
@@ -252,15 +267,31 @@ internal class PayrollSyncClient
     /// </remarks>
     private async Task<HttpResponseMessage> GetOraclePayrollValue(string url, CancellationToken cancellationToken)
     {
+        await Task.Delay(new TimeSpan(0, 0, 15), cancellationToken).ConfigureAwait(false);
+
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
         if (!response.IsSuccessStatusCode && Debugger.IsAttached)
         {
+            string errorResponse = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            _logger.LogWarning("Oracle HCM API request failed: {ErrorResponse} / {ReasonPhrase}", errorResponse, response.ReasonPhrase);
+
+            // Generate and display cURL command for manual testing
+            string curlCommand = request.GenerateCurlCommand(url);
+
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine();
-            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+            Console.WriteLine("=== API REQUEST FAILED ===");
+            Console.WriteLine(errorResponse);
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=== cURL Command for Postman/Manual Testing ===");
+            Console.WriteLine(curlCommand);
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
+
+            _logger.LogInformation("cURL command for manual testing: {CurlCommand}", curlCommand);
         }
 
         _ = response.EnsureSuccessStatusCode();

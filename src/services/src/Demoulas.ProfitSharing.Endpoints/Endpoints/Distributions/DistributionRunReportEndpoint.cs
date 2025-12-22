@@ -1,22 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Api.Contracts;
 using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Endpoints.Validation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -40,6 +30,7 @@ public sealed class DistributionRunReportEndpoint : ProfitSharingEndpoint<Distri
         {
             s.Description = "Gets the distribution run report.";
             s.Summary = "Distribution run report";
+            s.ExampleRequest = DistributionRunReportRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object> {
             {
                 200, new List<DistributionRunReportDetail>()

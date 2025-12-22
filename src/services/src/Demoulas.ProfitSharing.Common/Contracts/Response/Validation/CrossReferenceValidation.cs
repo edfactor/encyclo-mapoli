@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 /// <summary>
 /// Represents the validation status for a specific field cross-reference between reports.
@@ -50,4 +50,20 @@ public class CrossReferenceValidation
     /// Additional context or notes about this validation
     /// </summary>
     public string? Notes { get; init; }
+
+    public static CrossReferenceValidation ResponseExample()
+    {
+        return new CrossReferenceValidation
+        {
+            FieldName = "TotalDistributions",
+            ReportCode = "PAY443",
+            IsValid = true,
+            CurrentValue = 1000000.00m,
+            ExpectedValue = 1000000.00m,
+            Variance = 0.00m,
+            Message = "Values match",
+            ArchivedAt = DateTimeOffset.UtcNow.AddDays(-1),
+            Notes = "Validated successfully"
+        };
+    }
 }

@@ -11,11 +11,6 @@ export interface BeneficiaryContactDto {
   createdDate: Date;
 }
 
-export interface BeneficiaryKindDto {
-  id: string;
-  name?: string;
-}
-
 export interface BeneficiaryDto {
   id: number;
   psnSuffix: number;
@@ -25,8 +20,12 @@ export interface BeneficiaryDto {
   // Contact information
   ssn: string;
   dateOfBirth: Date;
-  address?: AddressDto;
   contactInfo?: ContactInfoDto;
+
+  street?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
   createdDate: Date;
   // Contact Info fields
   fullName?: string;
@@ -39,44 +38,46 @@ export interface BeneficiaryDto {
 
   beneficiaryContactId: number;
   relationship?: string;
-  kindId?: number;
-  kind?: BeneficiaryKindDto;
   percent: number;
   currentBalance?: number;
 }
 
-export interface BeneficiaryResponse {
+export interface BeneficiariesGetAPIResponse {
   beneficiaries: Paged<BeneficiaryDto>;
   beneficiaryOf: Paged<BeneficiaryDto>;
 }
 
-export interface BeneficiarySearchFilterRequest extends SortedPaginationRequestDto {
+export interface BeneficiarySearchForm {
   badgeNumber?: number;
   psn?: number;
   name?: string;
   ssn?: string;
-  memberType: string;
+  memberType: 0 | 1 | 2; // 0=all, 1=employees, 2=beneficiaries
 }
 
-export interface BeneficiarySearchFilterResponse {
+export interface BeneficiaryDetailAPIRequest extends SortedPaginationRequestDto {
   badgeNumber: number;
-  psn: number;
-  name?: string;
-  ssn?: string;
-  street?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  age?: string;
+  psnSuffix: number;
 }
 
-export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
+export interface BeneficiaryDetail {
+  badgeNumber: number;
+  psnSuffix: number;
+  fullName?: string | null;
+  ssn?: string | null;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  age?: string | null;
+}
+
+export interface BeneficiarySearchAPIRequest extends SortedPaginationRequestDto {
   badgeNumber?: number;
   psnSuffix?: number;
-}
-
-export interface BeneficiaryResponseDto {
-  beneficiaryList?: Paged<BeneficiaryDto>;
+  name?: string;
+  ssn?: string;
+  memberType: number;
 }
 
 export interface CreateBeneficiaryRequest {
@@ -86,7 +87,6 @@ export interface CreateBeneficiaryRequest {
   secondLevelBeneficiaryNumber: number | null;
   thirdLevelBeneficiaryNumber: number | null;
   relationship: string;
-  kindId: string;
 }
 
 export interface CreateBeneficiaryResponse {
@@ -96,7 +96,6 @@ export interface CreateBeneficiaryResponse {
   demographicId: number;
   beneficiaryContactId: number;
   relationship: string | null;
-  kindId: string | null;
   percent: number;
 }
 
@@ -122,7 +121,6 @@ export interface UpdateBeneficiaryContactRequest {
 
 export interface UpdateBeneficiaryRequest extends UpdateBeneficiaryContactRequest {
   relationship?: string;
-  kindId?: string;
   percentage?: number;
 }
 
@@ -131,7 +129,6 @@ export interface UpdateBeneficiaryResponse {
   demographicId: number;
   beneficiaryContactId: number;
   relationship: string | null;
-  kindId: string | null;
   percent: number;
 }
 
@@ -191,14 +188,6 @@ export interface BeneficiaryTypesResponseDto {
   beneficiaryTypeList?: BeneficiaryTypeDto[];
 }
 
-export interface BeneficiaryKindRequestDto {
-  id?: number;
-}
-
-export interface BeneficiaryKindResponseDto {
-  beneficiaryKindList?: BeneficiaryKindDto[];
-}
-
 export interface AdhocBeneficiariesReportRequest extends ProfitYearRequest, SortedPaginationRequestDto {
   isAlsoEmployee: boolean;
 }
@@ -240,7 +229,7 @@ export interface PayBenReport {
   demographicFullName: string;
   percentage: number;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+
 export interface PayBenReportResponse extends Paged<PayBenReport> {
   // PayBenReportResponse extends Paged interface
 }

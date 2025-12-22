@@ -2,7 +2,7 @@ import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-com
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
 import { createSaveButtonCellRenderer } from "../../../components/ForfeitActivities";
-import { ForfeitureAdjustmentUpdateRequest } from "types";
+import { ForfeitureAdjustmentUpdateRequest } from "@/types/december-activities/forfeitures";
 import {
   createCommentColumn,
   createCurrencyColumn,
@@ -11,7 +11,7 @@ import {
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./UnForfeitHeaderComponent";
 
-function isTransactionEditable(params, isReadOnly: boolean = false): boolean {
+function isTransactionEditable(params: EditableCallbackParams, isReadOnly: boolean = false): boolean {
   return params.data.suggestedUnforfeiture != null && !isReadOnly;
 }
 
@@ -65,9 +65,17 @@ export const GetProfitDetailColumns = (
       editable: (params: EditableCallbackParams) => isTransactionEditable(params, isReadOnly),
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) => {
+        // If value is 0, show blank
+        const rowKey = params.data.profitDetailId?.toString();
+        const editedValue = params.context?.editedValues?.[rowKey]?.value;
+        const currentValue = editedValue ?? params.data.suggestedUnforfeiture;
+        if (currentValue === 0) {
+          return null;
+        }
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
       },
-      valueFormatter: (params) => numberToCurrency(params.data.suggestedUnforfeiture)
+      valueFormatter: (params) =>
+        params.data.suggestedUnforfeiture !== 0 ? numberToCurrency(params.data.suggestedUnforfeiture) : ""
     },
 
     createCommentColumn({

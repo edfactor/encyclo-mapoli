@@ -50,19 +50,11 @@ export const createDataSourceAwareBaseQuery = (
       }
       if (impersonating && impersonating.length > 0) {
         headers.set("impersonation", impersonating.join(" | "));
-      } else {
-        const storedRoles = localStorage.getItem("impersonatingRoles");
-        if (storedRoles) {
-          try {
-            const roles = JSON.parse(storedRoles);
-            if (Array.isArray(roles) && roles.length > 0) {
-              headers.set("impersonation", roles.join(" | "));
-            }
-          } catch (e) {
-            console.error("Error parsing impersonating roles from localStorage:", e);
-          }
-        }
       }
+      // Add cache-busting headers to prevent browser caching
+      headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      headers.set("Pragma", "no-cache");
+      headers.set("Expires", "0");
       return headers;
     }
   });

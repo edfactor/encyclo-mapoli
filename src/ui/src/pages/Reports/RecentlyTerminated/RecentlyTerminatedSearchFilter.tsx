@@ -1,20 +1,12 @@
-import { useLazyGetRecentlyTerminatedReportQuery } from "@/reduxstore/api/YearsEndApi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useLazyGetAccountingRangeToCurrent } from "hooks/useFiscalCalendarYear";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  clearRecentlyTerminated,
-  clearRecentlyTerminatedQueryParams,
-  setRecentlyTerminatedQueryParams
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
+import { getLastYearDateRange } from "utils/dateRangeUtils";
 import * as yup from "yup";
 import {
   dateStringValidator,
@@ -34,21 +26,24 @@ const schema = yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
+    "Date must be equal to or greater than begin date"
   ).required("End Date is required")
 });
 
 interface RecentlyTerminatedSearchFilterProps {
-  setInitialSearchLoaded: (include: boolean) => void;
+  onSearch: (beginningDate: string, endingDate: string) => Promise<boolean>;
+  onReset: () => void;
 }
 
-const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterProps> = ({ setInitialSearchLoaded }) => {
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerSearch, { isFetching }] = useLazyGetRecentlyTerminatedReportQuery();
+const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterProps> = ({ onSearch, onReset }) => {
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
-  const dispatch = useDispatch();
-  const { recentlyTerminatedQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
+  const [isSearching, setIsSearching] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get last year date range for default values
+  const { beginDate, endDate } = getLastYearDateRange();
+
   const {
     control,
     handleSubmit,
@@ -58,69 +53,41 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
   } = useForm<RecentlyTerminatedSearch>({
     resolver: yupResolver(schema) as Resolver<RecentlyTerminatedSearch>,
     defaultValues: {
-      profitYear: profitYear || recentlyTerminatedQueryParams?.profitYear || undefined,
-      beginningDate:
-        recentlyTerminatedQueryParams?.beginningDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : ""),
-      endingDate:
-        recentlyTerminatedQueryParams?.endingDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "")
+      profitYear: profitYear || undefined,
+      beginningDate: mmDDYYFormat(beginDate),
+      endingDate: mmDDYYFormat(endDate)
     }
   });
 
   const validateAndSearch = handleSubmit(async (data) => {
-    if (isValid && hasToken) {
-      const pagination = { skip: 0, take: 25, sortBy: "fullName, terminationDate", isSortDescending: false };
-
-      dispatch(
-        setRecentlyTerminatedQueryParams({
-          profitYear: data.profitYear,
-          beginningDate: data.beginningDate,
-          endingDate: data.endingDate,
-          pagination
-        })
-      );
-
-      // Perform the search
-      await triggerSearch({
-        profitYear: data.profitYear,
-        beginningDate: data.beginningDate,
-        endingDate: data.endingDate,
-        pagination
-      });
-
-      setInitialSearchLoaded(true);
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
+      setIsSearching(true);
+      try {
+        await onSearch(data.beginningDate, data.endingDate);
+      } finally {
+        setIsSearching(false);
+        setIsSubmitting(false);
+      }
     }
   });
 
   const handleReset = () => {
-    setInitialSearchLoaded(false);
-
     // Clear the form fields
     reset({
       profitYear: profitYear || undefined,
-      beginningDate: fiscalData ? (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") : "",
-      endingDate: fiscalData ? (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") : ""
+      beginningDate: mmDDYYFormat(beginDate),
+      endingDate: mmDDYYFormat(endDate)
     });
 
-    // Clear the data in Redux store
-    dispatch(clearRecentlyTerminated());
-    dispatch(clearRecentlyTerminatedQueryParams());
+    // Call parent reset
+    onReset();
     trigger();
   };
 
   useEffect(() => {
     fetchAccountingRange();
   }, [fetchAccountingRange]);
-
-  useEffect(() => {
-    if (fiscalData && fiscalData.fiscalBeginDate && fiscalData.fiscalEndDate) {
-      reset({
-        profitYear: profitYear || recentlyTerminatedQueryParams?.profitYear || undefined,
-        beginningDate: recentlyTerminatedQueryParams?.beginningDate || mmDDYYFormat(fiscalData.fiscalBeginDate),
-        endingDate: recentlyTerminatedQueryParams?.endingDate || mmDDYYFormat(fiscalData.fiscalEndDate)
-      });
-      trigger();
-    }
-  }, [fiscalData, profitYear, recentlyTerminatedQueryParams, reset, trigger]);
 
   return (
     <form onSubmit={validateAndSearch}>
@@ -133,7 +100,7 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="profitYear"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                 value={field.value ? new Date(field.value, 0) : null}
@@ -153,7 +120,7 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
             name="beginningDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -176,7 +143,7 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
             name="endingDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="endingDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -201,8 +168,8 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid}
+          isFetching={isSearching || isSubmitting}
+          disabled={!isValid || isSearching || isSubmitting}
         />
       </Grid>
     </form>

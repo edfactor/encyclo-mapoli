@@ -47,6 +47,7 @@ const validationSchema = yup
   );
 
 interface SearchData {
+  [key: string]: unknown;
   profitYear: number;
   badgeNumber?: number;
   socialSecurity?: string | undefined;
@@ -100,8 +101,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     formState: { errors, isValid },
     reset,
     watch,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    trigger // need this unused param to prevent console errors. No idea why - EL
+    trigger: _trigger // need this unused param to prevent console errors. No idea why - EL
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(validationSchema) as Resolver<ExecutiveHoursAndDollarsSearch>,
     mode: "onBlur",
@@ -140,8 +140,17 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     }
   }, [profitYear, reset]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isSearching) {
+      setIsSubmitting(false);
+    }
+  }, [isSearching]);
+
   const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       const searchData = {
         ...data,
         badgeNumber: data.badgeNumber ? Number(data.badgeNumber) : undefined
@@ -346,10 +355,10 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
         width="100%"
         paddingX="24px">
         <SearchAndReset
-          disabled={!oneAddSearchFilterEntered}
+          disabled={!oneAddSearchFilterEntered || isSearching || isSubmitting}
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isSearching}
+          isFetching={isSearching || isSubmitting}
         />
       </Grid>
     </form>

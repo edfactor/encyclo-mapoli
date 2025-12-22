@@ -71,6 +71,20 @@ export const mmDDYYFormat = (date: string | Date | undefined | null) => {
   return parsedDate ? format(parsedDate, dateForm) : "";
 };
 
+/**
+ * Converts a date from MM/dd/yyyy format to yyyy-MM-dd ISO format for API calls
+ * @param date - Date in MM/dd/yyyy format (e.g., "11/20/2019")
+ * @returns Date in yyyy-MM-dd format (e.g., "2019-11-20"), or undefined if invalid
+ */
+export const convertToISODateString = (date: string | undefined): string | undefined => {
+  if (!date || date.trim() === "") {
+    return undefined;
+  }
+
+  const parsedDate = tryddmmyyyyToDate(date);
+  return parsedDate ? format(parsedDate, DATE_FORMAT_YYYYMMDD) : undefined;
+};
+
 //Takes in date and returns it in MM/yyyy format if date exists.
 //Returns masked display if date is masked by backend permissions.
 export const mmYYFormat = (date: string | Date | undefined | null) => {

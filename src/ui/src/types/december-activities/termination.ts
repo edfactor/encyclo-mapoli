@@ -1,11 +1,10 @@
 import type { PagedReportResponse } from "../common/api";
 
 export interface TerminationDetail {
-  badgeNumber: number;
-  psnSuffix: number;
+  psn: number;
   name: string | null;
-  badgePSn: string;
   yearDetails: TerminationYearDetail[];
+  [key: string]: unknown;
 }
 
 export interface TerminationYearDetail {
@@ -20,8 +19,9 @@ export interface TerminationYearDetail {
   ytdPsHours: number;
   vestedPercent: number;
   suggestedForfeiture: number | null;
-  age: number | null;
+  age: string | null;
   enrollmentCode: number | null;
+  [key: string]: unknown;
 }
 
 export interface TerminationResponse extends PagedReportResponse<TerminationDetail> {

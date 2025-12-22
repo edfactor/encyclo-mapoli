@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+
 public sealed record UpdateSummaryReportResponse : ReportResponseBase<UpdateSummaryReportDetail>
 {
     [YearEndArchiveProperty]

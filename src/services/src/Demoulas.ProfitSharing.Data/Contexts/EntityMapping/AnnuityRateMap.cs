@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class AnnuityRateMap : ModifiedBaseMap<AnnuityRate>
 {
     public override void Configure(EntityTypeBuilder<AnnuityRate> builder)

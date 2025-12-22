@@ -12,4 +12,17 @@ public sealed record FrozenStateResponse : IdRequest, IProfitYearRequest
     public DateTimeOffset AsOfDateTime { get; set; }
     public DateTimeOffset CreatedDateTime { get; set; }
     public bool IsActive { get; set; }
+
+    public static FrozenStateResponse ResponseExample()
+    {
+        return new FrozenStateResponse
+        {
+            Id = 1,
+            ProfitYear = 2024,
+            FrozenBy = "admin",
+            AsOfDateTime = DateTimeOffset.UtcNow,
+            CreatedDateTime = DateTimeOffset.UtcNow,
+            IsActive = true
+        };
+    }
 }

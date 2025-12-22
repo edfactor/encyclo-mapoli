@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployees;
 
 public class TerminatedEmployeesEndPoint
-    : EndpointWithCsvTotalsBase<StartAndEndDateRequest,
+    : EndpointWithCsvTotalsBase<FilterableStartAndEndDateRequest,
         TerminatedEmployeeAndBeneficiaryResponse,
         TerminatedEmployeeAndBeneficiaryDataResponseDto,
         TerminatedEmployeesEndPoint.TerminatedEmployeeCsvMap>
@@ -46,9 +46,10 @@ public class TerminatedEmployeesEndPoint
             s.Summary = "Get the Terminated Employees (QPAY066) report as JSON or CSV.";
             s.Description =
                 "Returns a report of beneficiaries with a non-zero balance and employees who were terminated (and not retired) in the specified date range. " +
+                "Optionally filter by vested balance using VestedBalanceValue and VestedBalanceOperator (Equals=0, LessThan=1, LessThanOrEqual=2, GreaterThan=3, GreaterThanOrEqual=4). " +
                 "The endpoint supports both JSON and CSV output based on the Accept header. " +
                 "Requires roles: ADMINISTRATOR or FINANCEMANAGER.";
-            s.ExampleRequest = StartAndEndDateRequest.RequestExample();
+            s.ExampleRequest = FilterableStartAndEndDateRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -81,7 +82,7 @@ public class TerminatedEmployeesEndPoint
         base.Configure();
     }
 
-    public override async Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
+    public override async Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(FilterableStartAndEndDateRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
         this.RecordRequestMetrics(HttpContext, _logger, req);
@@ -89,7 +90,7 @@ public class TerminatedEmployeesEndPoint
         try
         {
             var result = await _auditService.ArchiveCompletedReportAsync(ReportFileName,
-                (short)req.EndingDate.Year,
+                (short)(req.EndingDate.Year + 1), //Report is run for the prior year.
                 req,
                 (archiveReq, _, cancellationToken) => _terminatedEmployeeService.GetReportAsync(archiveReq, cancellationToken),
                 ct);
@@ -142,7 +143,6 @@ public class TerminatedEmployeesEndPoint
         // Write the headers for the flattened structure
         csvWriter.WriteField("BADGE_PSN");
         csvWriter.WriteField("NAME");
-        csvWriter.WriteField("PROFIT_YEAR");
         csvWriter.WriteField("BEGINNING_BALANCE");
         csvWriter.WriteField("BENEFICIARY_ALLOCATION");
         csvWriter.WriteField("DISTRIBUTION_AMOUNT");
@@ -161,9 +161,8 @@ public class TerminatedEmployeesEndPoint
         {
             foreach (var yd in employee.YearDetails)
             {
-                csvWriter.WriteField(employee.BadgePSn);
+                csvWriter.WriteField(employee.PSN);
                 csvWriter.WriteField(employee.Name);
-                csvWriter.WriteField(yd.ProfitYear);
                 csvWriter.WriteField(yd.BeginningBalance);
                 csvWriter.WriteField(yd.BeneficiaryAllocation);
                 csvWriter.WriteField(yd.DistributionAmount);
@@ -185,7 +184,7 @@ public class TerminatedEmployeesEndPoint
         public TerminatedEmployeeCsvMap()
         {
             // This ClassMap is required by the base class but won't be used since we override GenerateCsvContent
-            Map(m => m.BadgePSn).Name("BADGE_PSN");
+            Map(m => m.PSN).Name("BADGE_PSN");
             Map(m => m.Name).Name("NAME");
         }
     }

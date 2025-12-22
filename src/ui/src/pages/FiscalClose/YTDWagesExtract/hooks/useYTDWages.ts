@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { GRID_KEYS } from "../../../../constants";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetEmployeeWagesForYearQuery } from "../../../../reduxstore/api/YearsEndApi";
@@ -9,9 +10,16 @@ import { initialState, selectHasResults, selectShowData, ytdWagesReducer } from 
 
 export interface YTDWagesSearchParams {
   profitYear: number;
+  useFrozenData?: boolean;
+  archive?: boolean;
 }
 
-const useYTDWages = () => {
+export interface UseYTDWagesOptions {
+  defaultUseFrozenData?: boolean;
+}
+
+const useYTDWages = (options?: UseYTDWagesOptions) => {
+  const defaultUseFrozenData = options?.defaultUseFrozenData ?? true;
   const [state, dispatch] = useReducer(ytdWagesReducer, initialState);
   const reduxDispatch = useDispatch();
 
@@ -25,6 +33,7 @@ const useYTDWages = () => {
         try {
           const request = {
             profitYear: fiscalCloseProfitYear,
+            useFrozenData: state.search.useFrozenData !== undefined ? state.search.useFrozenData : defaultUseFrozenData,
             pagination: {
               skip: pageNumber * pageSize,
               take: pageSize,
@@ -50,13 +59,14 @@ const useYTDWages = () => {
         }
       }
     },
-    [fiscalCloseProfitYear, hasToken, triggerSearch, reduxDispatch]
+    [fiscalCloseProfitYear, hasToken, triggerSearch, reduxDispatch, state.search.useFrozenData, defaultUseFrozenData]
   );
 
   const pagination = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "storeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.YTD_WAGES,
     onPaginationChange: handlePaginationChange
   });
 
@@ -64,11 +74,16 @@ const useYTDWages = () => {
     async (searchParams: YTDWagesSearchParams, _source?: string) => {
       if (!hasToken) return;
 
-      dispatch({ type: "SEARCH_START", payload: { profitYear: searchParams.profitYear } });
+      dispatch({
+        type: "SEARCH_START",
+        payload: { profitYear: searchParams.profitYear, useFrozenData: searchParams.useFrozenData }
+      });
 
       try {
         const request = {
           profitYear: searchParams.profitYear,
+          useFrozenData: searchParams.useFrozenData !== undefined ? searchParams.useFrozenData : defaultUseFrozenData,
+          archive: searchParams.archive,
           pagination: {
             skip: pagination.pageNumber * pagination.pageSize,
             take: pagination.pageSize,
@@ -86,7 +101,7 @@ const useYTDWages = () => {
         dispatch({ type: "SEARCH_ERROR" });
       }
     },
-    [hasToken, pagination, triggerSearch, reduxDispatch]
+    [hasToken, pagination, triggerSearch, reduxDispatch, defaultUseFrozenData]
   );
 
   const hasInitiallySearched = useRef(false);
@@ -94,11 +109,19 @@ const useYTDWages = () => {
   useEffect(() => {
     if (fiscalCloseProfitYear && !state.data && hasToken && !state.search.isLoading && !hasInitiallySearched.current) {
       hasInitiallySearched.current = true;
-      executeSearch({ profitYear: fiscalCloseProfitYear }, "auto-initial");
+      executeSearch({ profitYear: fiscalCloseProfitYear, useFrozenData: defaultUseFrozenData }, "auto-initial");
     }
     // Note: executeSearch is intentionally excluded from dependencies to prevent infinite loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalCloseProfitYear, state.data, hasToken, state.search.isLoading]);
+
+  // Cleanup function to prevent AbortController errors on unmount
+  useEffect(() => {
+    return () => {
+      // Reset the search flag on unmount to allow re-initialization
+      hasInitiallySearched.current = false;
+    };
+  }, []);
 
   return {
     searchResults: state.data,

@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 using Demoulas.ProfitSharing.Security;
@@ -11,6 +10,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
 
+[Collection("IT Operations Tests")]
 public class GetActiveFrozenDemographicEndpointTests : ApiTestBase<Program>
 {
     [Fact]

@@ -1,14 +1,14 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, Divider, FormLabel, Grid, MenuItem, Select, Typography } from "@mui/material";
-import { ICellRendererParams } from "ag-grid-community";
-import { useMemo, useState } from "react";
+import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { CAPTIONS } from "../../../constants";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
-import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/YearsEndApi";
+import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/AdhocApi";
 import {
   AdhocBeneficiariesReportRequest,
   adhocBeneficiariesReportResponse,
@@ -36,9 +36,13 @@ const PayBeNext = () => {
     sortBy: "psnSuffix",
     isSortDescending: true
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
 
   const mainColumns = useMemo(() => PayBeNextGridColumns(), []);
   const detailColumns = useMemo(() => ProfitDetailGridColumns(), []);
@@ -91,6 +95,11 @@ const PayBeNext = () => {
     return rows;
   }, [adhocBeneficiariesReport, expandedRows]);
 
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: gridData?.length ?? 0
+  });
+
   // Handle row expansion toggle
   const handleRowExpansion = (badgeNumber: string) => {
     setExpandedRows((prev) => ({
@@ -100,9 +109,9 @@ const PayBeNext = () => {
   };
 
   // Create column definitions with expand/collapse functionality
-  const columnDefs = useMemo(() => {
+  const columnDefs = useMemo((): ColDef[] => {
     // Add an expansion column
-    const expansionColumn = {
+    const expansionColumn: ColDef = {
       headerName: "",
       field: "isExpandable",
       width: 50,
@@ -112,7 +121,7 @@ const PayBeNext = () => {
         }
         return "";
       },
-      onCellClicked: (event: ICellRendererParams) => {
+      onCellClicked: (event: CellClickedEvent) => {
         if (event.data && !event.data.isDetail && event.data.isExpandable) {
           handleRowExpansion(event.data.badgeNumber.toString() + event.data.beneficiaryId.toString());
         }
@@ -164,21 +173,24 @@ const PayBeNext = () => {
   };
 
   const onSubmit = (data: bRequest) => {
-    const request = createAdhocBeneficiariesReportReqeust(
-      0,
-      "",
-      false,
-      50,
-      data.isAlsoEmployee ?? true,
-      parseInt(data.profitYear)
-    );
-    triggerReport(request)
-      .unwrap()
-      .then((res) => {
-        console.log(res);
-        setAdhocBeneficiariesReport(res);
-      })
-      .catch((err) => console.log(err));
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      const request = createAdhocBeneficiariesReportReqeust(
+        0,
+        "",
+        false,
+        50,
+        data.isAlsoEmployee ?? true,
+        parseInt(data.profitYear)
+      );
+      triggerReport(request)
+        .unwrap()
+        .then((res) => {
+          console.log(res);
+          setAdhocBeneficiariesReport(res);
+        })
+        .catch((err) => console.log(err));
+    }
   };
 
   const validateAndSubmit = handleSubmit(onSubmit);
@@ -237,8 +249,10 @@ const PayBeNext = () => {
                   </Grid>
                   <Grid size={{ xs: 12, sm: 3, md: 3 }}>
                     <FormLabel>&nbsp;</FormLabel>
-                    <div className="flex items-center" style={{ marginLeft: '5px' }}>
-                      <FormLabel style={{ marginRight: '8px' }}>Is Also Employee</FormLabel>
+                    <div
+                      className="flex items-center"
+                      style={{ marginLeft: "5px" }}>
+                      <FormLabel style={{ marginRight: "8px" }}>Is Also Employee</FormLabel>
                       <Controller
                         name="isAlsoEmployee"
                         control={control}
@@ -265,8 +279,8 @@ const PayBeNext = () => {
                     <SearchAndReset
                       handleReset={handleReset}
                       handleSearch={validateAndSubmit}
-                      isFetching={isFetching}
-                      disabled={!isValid}
+                      isFetching={isFetching || isSubmitting}
+                      disabled={!isValid || isFetching || isSubmitting}
                     />
                   </Grid>
                 </Grid>
@@ -288,7 +302,7 @@ const PayBeNext = () => {
                 </Typography>
                 <strong>Ending Balance</strong> ${adhocBeneficiariesReport?.totalEndingBalance}
                 <DSMGrid
-                  preferenceKey={CAPTIONS.BENEFICIARY_INQUIRY}
+                  preferenceKey={GRID_KEYS.BENEFICIARY_INQUIRY}
                   isLoading={isFetching}
                   maxHeight={gridMaxHeight}
                   handleSortChanged={sortEventHandler}

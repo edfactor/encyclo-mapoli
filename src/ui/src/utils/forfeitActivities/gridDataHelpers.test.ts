@@ -232,13 +232,13 @@ describe("gridDataHelpers", () => {
   });
 
   describe("flattenMasterDetailData", () => {
-    interface TestMaster {
+    interface TestMaster extends Record<string, unknown> {
       id: number;
       name: string;
       details?: TestDetail[];
     }
 
-    interface TestDetail {
+    interface TestDetail extends Record<string, unknown> {
       detailId: number;
       value: number;
     }

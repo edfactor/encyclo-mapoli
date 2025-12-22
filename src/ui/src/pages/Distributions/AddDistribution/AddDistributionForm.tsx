@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, TextField, Typography } from "@mui/material";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { CreateDistributionRequest } from "../../../types";
 
@@ -51,7 +51,7 @@ interface AddDistributionFormProps {
   onReset: () => void;
   isSubmitting: boolean;
   dateOfBirth?: string | null;
-  age?: number | null;
+  age?: string | null;
   vestedAmount?: number | null;
 }
 
@@ -90,7 +90,7 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
       watch,
       formState: { errors, isValid }
     } = useForm<AddDistributionFormData>({
-      resolver: yupResolver(schema),
+      resolver: yupResolver(schema) as unknown as Resolver<AddDistributionFormData>,
       mode: "onChange",
       defaultValues: {
         paymentFlag: "",
@@ -208,7 +208,7 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
 
     // Auto-set memo when age > 64, tax code is 7, and amount differs from vested amount
     useEffect(() => {
-      const memberAge = age ?? 0;
+      const memberAge = age != null ? Number(age) : 0;
       const requestedAmount = parseFloat(amountRequested) || 0;
       const vested = vestedAmount ?? 0;
 
@@ -294,7 +294,7 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
     // Expose submit and reset methods to parent via ref
     useImperativeHandle(ref, () => ({
       submit: () => {
-        handleSubmit(handleFormSubmit)();
+        handleSubmit(handleFormSubmit as (data: AddDistributionFormData) => Promise<void>)();
       },
       reset: () => {
         handleFormReset();
@@ -304,7 +304,7 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
     }));
 
     return (
-      <form onSubmit={handleSubmit(handleFormSubmit)}>
+      <form onSubmit={handleSubmit(handleFormSubmit as (data: AddDistributionFormData) => Promise<void>)}>
         <Grid
           container
           spacing={3}>

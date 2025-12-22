@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+
 public sealed record InternalProfitDetailDto
 {
     public int Ssn { get; set; }

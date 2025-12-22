@@ -1,14 +1,17 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+
 public sealed record ForfeituresAndPointsForYearResponse : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
-    public string? EmployeeName { get; set; }
+
+    [MaskSensitive] public string? EmployeeName { get; set; }
     public required string Ssn { get; set; }
     public decimal? Forfeitures { get; set; }
-    public required short ContForfeitPoints { get; set; }
-    public required int EarningPoints { get; set; }
+    [MaskSensitive] public required short ContForfeitPoints { get; set; }
+    [MaskSensitive] public required int EarningPoints { get; set; }
     public string? BeneficiaryPsn { get; set; }
     public required bool IsExecutive { get; set; }
 

@@ -10,12 +10,15 @@ export const AppSupportApi = createApi({
     prepareHeaders
   }),
   reducerPath: "appSupportApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getHealth: builder.query<Health, void>({
       query: () => ({
         url: "health"
       }),
-      async onQueryStarted(val: void, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_val: void, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setHealthInfo(data));

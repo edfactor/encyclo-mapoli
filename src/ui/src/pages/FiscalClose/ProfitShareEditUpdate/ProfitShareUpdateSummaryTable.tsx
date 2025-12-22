@@ -2,7 +2,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Typography } from "@mui/material";
 import { useState } from "react";
 import { numberToCurrency } from "smart-ui-library";
-import { MasterUpdateCrossReferenceValidationResponse } from "../../types/validation/cross-reference-validation";
+import { MasterUpdateCrossReferenceValidationResponse } from "@/types/validation/cross-reference-validation";
 
 interface ProfitShareUpdateSummaryTableProps {
   totals: {

@@ -32,10 +32,10 @@ public class BreakdownEndpoint : EndpointWithCsvBase<BreakdownByStoreRequest, Me
         Get("/breakdown-by-store");
         Summary(s =>
         {
-            s.Summary = "Breakdown managers and associates for all stores";
+            s.Summary = "QPAY066TA: Breakdown managers and associates for all stores";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
 

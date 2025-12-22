@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Contracts.Response;
 
@@ -106,5 +106,50 @@ public class MaskingJsonConverterTests
         Console.WriteLine("Decimal_Unmasked_For_NonExec_NonIT => " + json);
         using JsonDocument doc = JsonDocument.Parse(json);
         doc.RootElement.GetProperty("amount").GetDecimal().ShouldBe(123.45m);
+    }
+
+    [Fact]
+    public void YearEndProfitSharingReportDetail_Points_Masked_For_ItDevOps()
+    {
+        var detail = new YearEndProfitSharingReportDetail
+        {
+            BadgeNumber = 12345,
+            ProfitYear = 2024,
+            YearsInPlan = 3,
+            FullName = "Test Employee",
+            StoreNumber = 1,
+            EmployeeTypeCode = 'P',
+            EmployeeTypeName = "Part Time",
+            DateOfBirth = new DateOnly(1990, 1, 1),
+            Age = 34,
+            Ssn = "123-45-6789",
+            Wages = 50000m,
+            Hours = 2000,
+            Points = 100,  // This should be masked as a string when IT-DevOps
+            IsUnder21 = false,
+            IsNew = false,
+            Balance = 15000m
+        };
+
+        bool isItDevOps = true;
+        MaskingAmbientRoleContext.Current = new RoleContextSnapshot(new[] { Role.ITDEVOPS }, isItDevOps, false);
+        try
+        {
+            var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+            options.Converters.Insert(0, new MaskingJsonConverterFactory());
+            string json = JsonSerializer.Serialize(detail, options);
+            _output.WriteLine("YearEndProfitSharingReportDetail_Points_Masked_For_ItDevOps => " + json);
+
+            using JsonDocument doc = JsonDocument.Parse(json);
+            var pointsElement = doc.RootElement.GetProperty("points");
+
+            // Points should be masked as a string "X" or similar
+            pointsElement.ValueKind.ShouldBe(System.Text.Json.JsonValueKind.String);
+            pointsElement.GetString()!.ShouldBe("XXX");  // 100 as "XXX"
+        }
+        finally
+        {
+            MaskingAmbientRoleContext.Clear();
+        }
     }
 }

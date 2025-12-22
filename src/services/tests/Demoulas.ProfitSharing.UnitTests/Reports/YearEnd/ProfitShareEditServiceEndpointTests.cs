@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
@@ -12,6 +11,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
+[Collection("SharedGlobalState")]
 public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
 {
     private readonly short _profitYear = 2024;

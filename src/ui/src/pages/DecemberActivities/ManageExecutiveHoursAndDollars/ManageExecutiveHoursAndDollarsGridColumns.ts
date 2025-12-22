@@ -9,9 +9,23 @@ import {
   createStoreColumn
 } from "../../../utils/gridColumnFactory";
 
+interface GetColumnsOptions {
+  mini?: boolean;
+  canEdit?: boolean;
+}
+
 // The default is to show all columns, but if the mini flag is set to true, only show the
-// badge, name, and ssn columns
-export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef[] => {
+// badge, name, and ssn columns.
+// canEdit controls whether the Executive Hours and Executive Dollars columns are editable.
+// Editing requires: page status "In Progress" AND user has ExecutiveAdministrator role.
+export const GetManageExecutiveHoursAndDollarsColumns = (options?: GetColumnsOptions | boolean): ColDef[] => {
+  // Support legacy boolean argument for backwards compatibility
+  const mini = typeof options === "boolean" ? options : (options?.mini ?? false);
+  const canEdit = typeof options === "boolean" ? !options : (options?.canEdit ?? false);
+
+  // Columns are editable only when NOT in mini mode AND canEdit is true
+  const isEditable = !mini && canEdit;
+
   const columns: ColDef[] = [
     createBadgeColumn({}),
     createNameColumn({
@@ -27,14 +41,14 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerName: "Executive Hours",
       field: "hoursExecutive",
 
-      editable: !mini
+      editable: isEditable
     }),
     {
       ...createCurrencyColumn({
         headerName: "Executive Dollars",
         field: "incomeExecutive"
       }),
-      editable: !mini
+      editable: isEditable
     },
     createHoursColumn({
       headerName: "Oracle Hours",

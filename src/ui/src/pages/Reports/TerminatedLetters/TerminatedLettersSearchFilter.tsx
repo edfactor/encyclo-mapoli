@@ -1,20 +1,12 @@
-import { useLazyGetTerminatedLettersReportQuery } from "@/reduxstore/api/YearsEndApi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useLazyGetAccountingRangeToCurrent } from "hooks/useFiscalCalendarYear";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  clearTerminatedLetters,
-  clearTerminatedLettersQueryParams,
-  setTerminatedLettersQueryParams
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
+import { getLastYearDateRange } from "utils/dateRangeUtils";
 import * as yup from "yup";
 import {
   dateStringValidator,
@@ -34,21 +26,24 @@ const schema = yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
+    "Date must be equal to or greater than begin date"
   ).required("End Date is required")
 });
 
 interface TerminatedLettersSearchFilterProps {
-  setInitialSearchLoaded: (include: boolean) => void;
+  onSearch: (beginningDate: string, endingDate: string) => Promise<boolean>;
+  onReset: () => void;
 }
 
-const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps> = ({ setInitialSearchLoaded }) => {
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerSearch, { isFetching }] = useLazyGetTerminatedLettersReportQuery();
+const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps> = ({ onSearch, onReset }) => {
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
-  const dispatch = useDispatch();
-  const { terminatedLettersQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
+  const [isSearching, setIsSearching] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get last year date range for default values
+  const { beginDate, endDate } = getLastYearDateRange();
+
   const {
     control,
     handleSubmit,
@@ -58,71 +53,38 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
   } = useForm<TerminatedLettersSearch>({
     resolver: yupResolver(schema) as Resolver<TerminatedLettersSearch>,
     defaultValues: {
-      profitYear: profitYear || terminatedLettersQueryParams?.profitYear || undefined,
-      beginningDate:
-        terminatedLettersQueryParams?.beginningDate ||
-        (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") ||
-        "",
-      endingDate:
-        terminatedLettersQueryParams?.endingDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") || ""
+      profitYear: profitYear || undefined,
+      beginningDate: mmDDYYFormat(beginDate),
+      endingDate: mmDDYYFormat(endDate)
     }
   });
 
   const validateAndSearch = handleSubmit(async (data) => {
-    if (isValid && hasToken) {
-      const pagination = { skip: 0, take: 50, sortBy: "fullName", isSortDescending: false };
-
-      dispatch(
-        setTerminatedLettersQueryParams({
-          profitYear: data.profitYear,
-          beginningDate: data.beginningDate,
-          endingDate: data.endingDate,
-          pagination
-        })
-      );
-
-      // Perform the search
-      await triggerSearch({
-        profitYear: data.profitYear,
-        beginningDate: data.beginningDate,
-        endingDate: data.endingDate,
-        pagination
-      });
-
-      setInitialSearchLoaded(true);
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
+      setIsSearching(true);
+      await onSearch(data.beginningDate, data.endingDate);
+      setIsSearching(false);
+      setIsSubmitting(false);
     }
   });
 
   const handleReset = () => {
-    setInitialSearchLoaded(false);
-
     // Clear the form fields
     reset({
       profitYear: profitYear || undefined,
-      beginningDate: fiscalData ? (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") : "",
-      endingDate: fiscalData ? (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") : ""
+      beginningDate: mmDDYYFormat(beginDate),
+      endingDate: mmDDYYFormat(endDate)
     });
 
-    // Clear the data in Redux store
-    dispatch(clearTerminatedLetters());
-    dispatch(clearTerminatedLettersQueryParams());
+    // Call parent reset
+    onReset();
     trigger();
   };
 
   useEffect(() => {
     fetchAccountingRange();
   }, [fetchAccountingRange]);
-
-  useEffect(() => {
-    if (fiscalData && fiscalData.fiscalBeginDate && fiscalData.fiscalEndDate) {
-      reset({
-        profitYear: profitYear || terminatedLettersQueryParams?.profitYear || undefined,
-        beginningDate: terminatedLettersQueryParams?.beginningDate || mmDDYYFormat(fiscalData.fiscalBeginDate),
-        endingDate: terminatedLettersQueryParams?.endingDate || mmDDYYFormat(fiscalData.fiscalEndDate)
-      });
-      trigger();
-    }
-  }, [fiscalData, profitYear, terminatedLettersQueryParams, reset, trigger]);
 
   return (
     <form onSubmit={validateAndSearch}>
@@ -135,7 +97,7 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="profitYear"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                 value={field.value ? new Date(field.value, 0) : null}
@@ -155,7 +117,7 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
             name="beginningDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -178,7 +140,7 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
             name="endingDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="endingDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -203,8 +165,8 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid || isFetching}
+          isFetching={isSearching || isSubmitting}
+          disabled={!isValid || isSearching || isSubmitting}
         />
       </Grid>
     </form>

@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -35,7 +34,7 @@ public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEn
             s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>()
             {
-                {200, NewProfitSharingLabelResponse.SampleResponse() }
+                {200, NewProfitSharingLabelResponse.ResponseExample() }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });

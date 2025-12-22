@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
-using YEMatch.YEMatch.ReadyActivities;
+using YEMatch.ReadyActivities;
 
-namespace YEMatch.YEMatch.AssertActivities;
+namespace YEMatch.AssertActivities;
 
 // The base class for activities which directly interact with the database
 public abstract class BaseSqlActivity : BaseActivity
@@ -21,7 +21,7 @@ public abstract class BaseSqlActivity : BaseActivity
     // Compares two sql statements by subtracting the resuls from each results.  This yields the differences.
     protected static string QueryDiffCount(string queryA, string queryB)
     {
-        return $"select count(*) from ( {queryA} minus {queryB} union all {queryB} minus {queryA} )";
+        return $"select count(*) from ( ({queryA} minus {queryB}) union all ({queryB} minus {queryA}) )";
     }
 
     protected static string QueryDiffRows(string nameA, string nameB, string sqlA, string sqlB, string orderByColumn)

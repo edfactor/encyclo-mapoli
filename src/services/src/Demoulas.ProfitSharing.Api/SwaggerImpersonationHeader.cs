@@ -5,6 +5,7 @@ using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
 namespace Demoulas.ProfitSharing.Api;
+
 public class SwaggerImpersonationHeader : IOperationProcessor
 {
     public bool Process(OperationProcessorContext context)
@@ -20,7 +21,7 @@ public class SwaggerImpersonationHeader : IOperationProcessor
             Schema = new JsonSchema
             {
                 Type = JsonObjectType.String,
-                Enumeration = { Role.BENEFICIARY_ADMINISTRATOR, Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.HARDSHIPADMINISTRATOR, Role.ADMINISTRATOR, Role.ITDEVOPS, Role.EXECUTIVEADMIN, Role.ITOPERATIONS, Role.AUDITOR }
+                Enumeration = { Role.BENEFICIARY_ADMINISTRATOR, Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.HARDSHIPADMINISTRATOR, Role.ADMINISTRATOR, Role.ITDEVOPS, Role.EXECUTIVEADMIN, Role.ITOPERATIONS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING }
             },
         };
 

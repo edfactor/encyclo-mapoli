@@ -1,11 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
-import { useEffect } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useLazyGetUnForfeitsQuery } from "../../../reduxstore/api/YearsEndApi";
 import {
@@ -27,20 +27,17 @@ const schema = yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
-  )
-    .required("Ending Date is required")
-    .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
-      return new Date(value) > new Date(2024, 1, 1);
-    }),
+    "Date must be equal to or greater than begin date"
+  ).required("Ending Date is required"),
+  // Pagination is handled separately, not part of form validation
   pagination: yup
     .object({
-      skip: yup.number().required(),
-      take: yup.number().required(),
-      sortBy: yup.string().required(),
-      isSortDescending: yup.boolean().required()
+      skip: yup.number(),
+      take: yup.number(),
+      sortBy: yup.string(),
+      isSortDescending: yup.boolean()
     })
-    .required(),
+    .nullable(),
   // Hidden field: not shown in search filter, but required in data
   profitYear: profitYearValidator()
 });
@@ -64,16 +61,25 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetUnForfeitsQuery();
   const { unForfeitsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedProfitYear = useDecemberFlowProfitYear();
 
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   const validateAndSubmit = (data: StartAndEndDateRequest) => {
     if (hasUnsavedChanges) {
-      alert("Please save your changes.");
+      setShowUnsavedChangesDialog(true);
       return;
     }
 
-    if (isValid && hasToken) {
+    if (isValid && hasToken && !isSubmitting) {
+      setIsSubmitting(true);
       const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || "";
       const endDate = data.endingDate || fiscalData.fiscalEndDate || "";
 
@@ -98,7 +104,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
     trigger,
     clearErrors
   } = useForm<StartAndEndDateRequest>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<StartAndEndDateRequest>,
     defaultValues: {
       beginningDate:
         unForfeitsQueryParams?.beginningDate ||
@@ -122,7 +128,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
   }, [fiscalData.fiscalBeginDate, fiscalData.fiscalEndDate, trigger]);
 
   // Effect to fetch fiscal data when profit year changes
-  const validateAndSearch = handleSubmit(validateAndSubmit);
+  const validateAndSearch = handleSubmit(validateAndSubmit as (data: StartAndEndDateRequest) => void);
 
   const handleReset = () => {
     setHasUnsavedChanges(false);
@@ -154,7 +160,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
             control={control}
             render={({ field }) => (
               <>
-                <DsmDatePicker
+                <DSMDatePicker
                   id="beginningDate"
                   onChange={(value: Date | null) => {
                     field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -171,7 +177,11 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
                   minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) ?? undefined}
                   maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
                 />
-                <FormHelperText error>{errors.beginningDate?.message || " "}</FormHelperText>
+                <FormHelperText
+                  error
+                  sx={{ minHeight: "20px", visibility: errors.beginningDate ? "visible" : "hidden" }}>
+                  {errors.beginningDate?.message || "\u00A0"}
+                </FormHelperText>
               </>
             )}
           />
@@ -192,7 +202,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
 
               return (
                 <>
-                  <DsmDatePicker
+                  <DSMDatePicker
                     id="endingDate"
                     onChange={(value: Date | null) => {
                       field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -206,7 +216,11 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
                     minDate={effectiveMinDate}
                     maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
                   />
-                  <FormHelperText error>{errors.endingDate?.message || " "}</FormHelperText>
+                  <FormHelperText
+                    error
+                    sx={{ minHeight: "20px", visibility: errors.endingDate ? "visible" : "hidden" }}>
+                    {errors.endingDate?.message || "\u00A0"}
+                  </FormHelperText>
                 </>
               );
             }}
@@ -227,7 +241,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
                   }
                   label="Exclude employees with no current or vested balance"
                 />
-                <FormHelperText>{" "}</FormHelperText>
+                <FormHelperText sx={{ minHeight: "20px" }}>{"\u00A0"}</FormHelperText>
               </>
             )}
           />
@@ -239,10 +253,17 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid || isFetching}
+          isFetching={isFetching || isSubmitting}
+          disabled={!isValid || isFetching || isSubmitting}
         />
       </Grid>
+
+      <ConfirmationDialog
+        open={showUnsavedChangesDialog}
+        title="Unsaved Changes"
+        description="Please save your changes before performing a new search."
+        onClose={() => setShowUnsavedChangesDialog(false)}
+      />
     </form>
   );
 };

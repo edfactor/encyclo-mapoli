@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
 using Shared;
 public record ContactInfoResponseDto : INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress
 {

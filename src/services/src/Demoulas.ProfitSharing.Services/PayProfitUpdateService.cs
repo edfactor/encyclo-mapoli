@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.EnrollmentFlag;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
@@ -149,7 +150,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                     enrollmentUpdates.Count);
 
                 // Mark year end as completed.    
-                YearEndUpdateStatus? yeus = ctx.YearEndUpdateStatuses.FirstOrDefault(yeStatus => yeStatus.ProfitYear == profitYear);
+                YearEndUpdateStatus? yeus = await ctx.YearEndUpdateStatuses.FirstOrDefaultAsync(yeStatus => yeStatus.ProfitYear == profitYear);
                 if (yeus != null)
                 {
                     yeus.IsYearEndCompleted = true;

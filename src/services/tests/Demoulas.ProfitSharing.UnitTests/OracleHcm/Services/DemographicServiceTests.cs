@@ -1,9 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using System.ComponentModel;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm.Commands;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
@@ -18,8 +18,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;
 using Moq;
-using System.ComponentModel;
-using System.Linq;
 
 namespace Demoulas.ProfitSharing.UnitTests.OracleHcm.Services;
 

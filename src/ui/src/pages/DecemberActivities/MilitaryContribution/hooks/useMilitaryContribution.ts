@@ -9,6 +9,7 @@ import { MasterInquiryDetail, MasterInquiryRequest, MissiveResponse } from "redu
 import { Paged } from "smart-ui-library";
 import { MASTER_INQUIRY_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { ServiceErrorResponse } from "../../../../types/errors/errors";
@@ -189,6 +190,7 @@ export const useMilitaryContribution = () => {
     initialPageSize: 25,
     initialSortBy: "contributionDate",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.MILITARY_CONTRIBUTIONS,
     onPaginationChange: handleContributionsPaginationChange
   });
 

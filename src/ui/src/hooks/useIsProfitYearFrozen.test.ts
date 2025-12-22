@@ -13,11 +13,10 @@ vi.mock("react-redux", () => ({
 
 // Mock RTK Query hook
 const mockTriggerFrozenStateSearch = vi.fn();
-const mockUseLazyGetProfitYearSelectorFrozenDataQuery = vi.fn();
+const mockUseLazyGetFrozenStateResponseQuery = vi.fn();
 
 vi.mock("../reduxstore/api/ItOperationsApi", () => ({
-  useLazyGetProfitYearSelectorFrozenDataQuery: () =>
-    mockUseLazyGetProfitYearSelectorFrozenDataQuery()
+  useLazyGetFrozenStateResponseQuery: () => mockUseLazyGetFrozenStateResponseQuery()
 }));
 
 describe("useIsProfitYearFrozen", () => {
@@ -25,23 +24,20 @@ describe("useIsProfitYearFrozen", () => {
     mockUseSelector.mockClear();
     mockUseDispatch.mockClear();
     mockTriggerFrozenStateSearch.mockClear();
-    mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockClear();
+    mockUseLazyGetFrozenStateResponseQuery.mockClear();
   });
 
   describe("when profitYear is not provided", () => {
     it("should return false when profitYear is undefined", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
-          frozen: { profitYearSelectorData: null },
+          frozen: { frozenStateResponseData: null },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(undefined));
 
@@ -51,16 +47,13 @@ describe("useIsProfitYearFrozen", () => {
     it("should return false when profitYear is null", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
-          frozen: { profitYearSelectorData: null },
+          frozen: { frozenStateResponseData: null },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(undefined));
 
@@ -69,57 +62,16 @@ describe("useIsProfitYearFrozen", () => {
   });
 
   describe("when frozen data is not loaded", () => {
-    it("should return false when frozenStates is null", () => {
+    it("should return false when active frozen state is null", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
-          frozen: { profitYearSelectorData: null },
+          frozen: { frozenStateResponseData: null },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
-
-      const { result } = renderHook(() => useIsProfitYearFrozen(2024));
-
-      expect(result.current).toBe(false);
-    });
-
-    it("should return false when frozenStates.results is null", () => {
-      mockUseSelector.mockImplementation((selector) => {
-        const mockState = {
-          frozen: { profitYearSelectorData: { results: null } },
-          security: { token: "test-token" }
-        };
-        return selector(mockState);
-      });
-
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
-
-      const { result } = renderHook(() => useIsProfitYearFrozen(2024));
-
-      expect(result.current).toBe(false);
-    });
-
-    it("should return false when frozenStates.results is undefined", () => {
-      mockUseSelector.mockImplementation((selector) => {
-        const mockState = {
-          frozen: { profitYearSelectorData: {} },
-          security: { token: "test-token" }
-        };
-        return selector(mockState);
-      });
-
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(2024));
 
@@ -132,22 +84,14 @@ describe("useIsProfitYearFrozen", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
           frozen: {
-            profitYearSelectorData: {
-              results: [
-                { profitYear: 2024, isActive: true },
-                { profitYear: 2023, isActive: true }
-              ]
-            }
+            frozenStateResponseData: { profitYear: 2024, isActive: true }
           },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(2024));
 
@@ -158,22 +102,14 @@ describe("useIsProfitYearFrozen", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
           frozen: {
-            profitYearSelectorData: {
-              results: [
-                { profitYear: 2024, isActive: false },
-                { profitYear: 2023, isActive: true }
-              ]
-            }
+            frozenStateResponseData: { profitYear: 2024, isActive: false }
           },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(2024));
 
@@ -184,45 +120,14 @@ describe("useIsProfitYearFrozen", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
           frozen: {
-            profitYearSelectorData: {
-              results: [
-                { profitYear: 2023, isActive: true },
-                { profitYear: 2022, isActive: true }
-              ]
-            }
+            frozenStateResponseData: { profitYear: 2023, isActive: true }
           },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
-
-      const { result } = renderHook(() => useIsProfitYearFrozen(2024));
-
-      expect(result.current).toBe(false);
-    });
-
-    it("should return false when frozen states array is empty", () => {
-      mockUseSelector.mockImplementation((selector) => {
-        const mockState = {
-          frozen: {
-            profitYearSelectorData: {
-              results: []
-            }
-          },
-          security: { token: "test-token" }
-        };
-        return selector(mockState);
-      });
-
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(2024));
 
@@ -234,40 +139,29 @@ describe("useIsProfitYearFrozen", () => {
     it("should trigger fetch when profitYear provided, token exists, no frozenStates, and not loading", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
-          frozen: { profitYearSelectorData: null },
+          frozen: { frozenStateResponseData: null },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       renderHook(() => useIsProfitYearFrozen(2024));
 
-      expect(mockTriggerFrozenStateSearch).toHaveBeenCalledWith({
-        skip: 0,
-        take: 100,
-        sortBy: "createdDateTime",
-        isSortDescending: true
-      });
+      expect(mockTriggerFrozenStateSearch).toHaveBeenCalledWith();
     });
 
     it("should not trigger fetch when profitYear is missing", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
-          frozen: { profitYearSelectorData: null },
+          frozen: { frozenStateResponseData: null },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       renderHook(() => useIsProfitYearFrozen(undefined));
 
@@ -277,16 +171,13 @@ describe("useIsProfitYearFrozen", () => {
     it("should not trigger fetch when token is missing", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
-          frozen: { profitYearSelectorData: null },
+          frozen: { frozenStateResponseData: null },
           security: { token: null }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       renderHook(() => useIsProfitYearFrozen(2024));
 
@@ -297,19 +188,14 @@ describe("useIsProfitYearFrozen", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
           frozen: {
-            profitYearSelectorData: {
-              results: [{ profitYear: 2024, isActive: true }]
-            }
+            frozenStateResponseData: { profitYear: 2024, isActive: true }
           },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       renderHook(() => useIsProfitYearFrozen(2024));
 
@@ -319,16 +205,13 @@ describe("useIsProfitYearFrozen", () => {
     it("should not trigger fetch when already loading", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
-          frozen: { profitYearSelectorData: null },
+          frozen: { frozenStateResponseData: null },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: true }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: true }]);
 
       renderHook(() => useIsProfitYearFrozen(2024));
 
@@ -341,23 +224,14 @@ describe("useIsProfitYearFrozen", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
           frozen: {
-            profitYearSelectorData: {
-              results: [
-                { profitYear: 2024, isActive: true },
-                { profitYear: 2023, isActive: true },
-                { profitYear: 2022, isActive: false }
-              ]
-            }
+            frozenStateResponseData: { profitYear: 2024, isActive: true }
           },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result: result2024 } = renderHook(() => useIsProfitYearFrozen(2024));
       const { result: result2023 } = renderHook(() => useIsProfitYearFrozen(2023));
@@ -365,8 +239,8 @@ describe("useIsProfitYearFrozen", () => {
       const { result: result2021 } = renderHook(() => useIsProfitYearFrozen(2021));
 
       expect(result2024.current).toBe(true);
-      expect(result2023.current).toBe(true);
-      expect(result2022.current).toBe(false); // isActive is false
+      expect(result2023.current).toBe(false);
+      expect(result2022.current).toBe(false);
       expect(result2021.current).toBe(false); // Not in list
     });
   });
@@ -376,19 +250,14 @@ describe("useIsProfitYearFrozen", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
           frozen: {
-            profitYearSelectorData: {
-              results: [{ profitYear: 0, isActive: true }]
-            }
+            frozenStateResponseData: { profitYear: 0, isActive: true }
           },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(0));
 
@@ -401,19 +270,14 @@ describe("useIsProfitYearFrozen", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
           frozen: {
-            profitYearSelectorData: {
-              results: [{ profitYear: -2024, isActive: true }]
-            }
+            frozenStateResponseData: { profitYear: -2024, isActive: true }
           },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(-2024));
 
@@ -424,19 +288,14 @@ describe("useIsProfitYearFrozen", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
           frozen: {
-            profitYearSelectorData: {
-              results: [{ profitYear: 999999, isActive: true }]
-            }
+            frozenStateResponseData: { profitYear: 999999, isActive: true }
           },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(999999));
 
@@ -447,19 +306,14 @@ describe("useIsProfitYearFrozen", () => {
       mockUseSelector.mockImplementation((selector) => {
         const mockState = {
           frozen: {
-            profitYearSelectorData: {
-              results: [{ profitYear: 2024 } as { profitYear: number; isActive: boolean }]
-            }
+            frozenStateResponseData: { profitYear: 2024 } as { profitYear: number; isActive: boolean }
           },
           security: { token: "test-token" }
         };
         return selector(mockState);
       });
 
-      mockUseLazyGetProfitYearSelectorFrozenDataQuery.mockReturnValue([
-        mockTriggerFrozenStateSearch,
-        { isLoading: false }
-      ]);
+      mockUseLazyGetFrozenStateResponseQuery.mockReturnValue([mockTriggerFrozenStateSearch, { isLoading: false }]);
 
       const { result } = renderHook(() => useIsProfitYearFrozen(2024));
 

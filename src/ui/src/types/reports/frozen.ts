@@ -33,7 +33,7 @@ export interface ProfitSharingDistributionsByAge extends PagedReportResponse<Pro
 }
 
 export interface ProfitSharingDistributionsByAgeResponse {
-  age: number;
+  age: string;
   employeeCount: number;
   regularEmployeeCount: number;
   hardshipEmployeeCount: number;
@@ -51,7 +51,7 @@ export interface ContributionsByAge extends PagedReportResponse<ContributionsByA
 }
 
 export interface ContributionsByAgeDetail {
-  age: number;
+  age: string;
   employeeCount: number;
   amount: number;
 }
@@ -84,7 +84,7 @@ export interface ForfeituresAndPointsResponse extends PagedReportResponse<Forfei
 }
 
 export interface ForfeituresByAgeDetail {
-  age: number;
+  age: string;
   employeeCount: number;
   amount: number;
 }
@@ -116,14 +116,13 @@ export interface BalanceByBase<TDetail extends BalanceByDetailBase> extends Page
 }
 
 export interface BalanceByAgeDetail extends BalanceByDetailBase {
-  age: number;
+  age: string;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+
 export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {
   // BalanceByAge extends BalanceByBase with BalanceByAgeDetail
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {
   // BalanceByYears extends BalanceByBase with BalanceByAgeDetail
 }
@@ -143,7 +142,7 @@ export interface VestedAmountsByAge extends PagedReportResponse<VestedAmountsByA
 }
 
 export interface VestedAmountsByAgeDetail {
-  age: number;
+  age: string;
   fullTime100PercentCount: number;
   fullTime100PercentAmount: number;
   fullTimePartialCount: number;

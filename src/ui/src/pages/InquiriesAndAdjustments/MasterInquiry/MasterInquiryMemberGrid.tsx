@@ -1,8 +1,13 @@
-import { Box, Typography } from "@mui/material";
+import { useContentAwareGridHeight } from "@/hooks/useContentAwareGridHeight";
+import { Box, IconButton, Typography } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { RowClickedEvent } from "ag-grid-community";
 import React, { memo, useMemo } from "react";
-import { DSMGrid, formatNumberWithComma, Pagination, ISortParams } from "smart-ui-library";
-import { EmployeeDetails } from "../../../reduxstore/types";
+import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams } from "../../../hooks/useGridPagination";
+import { EmployeeDetails } from "../../../reduxstore/types";
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface SearchResponse {
@@ -25,10 +30,13 @@ interface MasterInquiryMemberGridProps {
     pageNumber: number;
     pageSize: number;
     sortParams: SortParams;
+    handlePageNumberChange: (pageNumber: number) => void;
+    handlePageSizeChange: (pageSize: number) => void;
   };
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
   isLoading?: boolean;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
@@ -36,11 +44,18 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     searchResults,
     onMemberSelect,
     memberGridPagination,
-    onPaginationChange,
     onSortChange,
-    isLoading = false
+    isLoading = false,
+    isGridExpanded = false,
+    onToggleExpand
   }: MasterInquiryMemberGridProps) => {
     const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
+
+    // Use content-aware grid height - shrinks for small result sets
+    const gridMaxHeight = useContentAwareGridHeight({
+      rowCount: searchResults.results?.length ?? 0,
+      heightPercentage: isGridExpanded ? 0.85 : 0.5
+    });
 
     const handleMemberClick = (member: EmployeeDetails) => {
       onMemberSelect({
@@ -50,10 +65,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
         badgeNumber: Number(member.badgeNumber),
         psnSuffix: Number(member.psnSuffix)
       });
-    };
-
-    const handlePaginationChange = (pageNumber: number, pageSize: number) => {
-      onPaginationChange(pageNumber, pageSize);
     };
 
     const handleSortChange = (sortParams: ISortParams) => {
@@ -76,38 +87,48 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
             }
           `}
         </style>
-        <div style={{ padding: "0 24px 0 24px" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "0 24px",
+            marginBottom: "8px"
+          }}>
           <Typography
             variant="h2"
             sx={{ color: "#0258A5" }}>
             {`Search Results (${formatNumberWithComma(searchResults.total)} ${searchResults.total === 1 ? "Record" : "Records"})`}
           </Typography>
-        </div>
+          <IconButton
+            onClick={onToggleExpand}
+            sx={{ zIndex: 1 }}
+            aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+            {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        </Box>
         <DSMGrid
-          preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
+          preferenceKey={GRID_KEYS.MASTER_INQUIRY_MEMBER}
           handleSortChanged={handleSortChange}
           isLoading={isLoading}
+          maxHeight={gridMaxHeight}
           providedOptions={{
-            rowData: searchResults.results,
+            rowData: searchResults.results.filter((row) => row && Object.keys(row).length > 0),
             columnDefs: columns,
             context: { onBadgeClick: handleMemberClick },
-            onRowClicked: (event) => {
+            onRowClicked: ((event: RowClickedEvent<EmployeeDetails>) => {
               if (event.data) {
                 handleMemberClick(event.data);
               }
-            }
+            }) as (event: unknown) => void
           }}
         />
         <Pagination
-          rowsPerPageOptions={[5, 10, 50]}
+          rowsPerPageOptions={[5, 10, 50, 100]}
           pageNumber={memberGridPagination.pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, memberGridPagination.pageSize);
-          }}
+          setPageNumber={(value: number) => memberGridPagination.handlePageNumberChange(value - 1)}
           pageSize={memberGridPagination.pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={memberGridPagination.handlePageSizeChange}
           recordCount={searchResults.total}
         />
       </Box>
@@ -123,9 +144,10 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       prevProps.memberGridPagination.pageSize === nextProps.memberGridPagination.pageSize &&
       prevProps.memberGridPagination.sortParams === nextProps.memberGridPagination.sortParams &&
       prevProps.isLoading === nextProps.isLoading &&
+      prevProps.isGridExpanded === nextProps.isGridExpanded &&
       prevProps.onMemberSelect === nextProps.onMemberSelect &&
-      prevProps.onPaginationChange === nextProps.onPaginationChange &&
-      prevProps.onSortChange === nextProps.onSortChange
+      prevProps.onSortChange === nextProps.onSortChange &&
+      prevProps.onToggleExpand === nextProps.onToggleExpand
     );
   }
 );

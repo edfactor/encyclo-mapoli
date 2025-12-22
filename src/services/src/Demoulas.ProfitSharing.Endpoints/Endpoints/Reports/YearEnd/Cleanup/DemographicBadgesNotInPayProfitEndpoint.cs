@@ -1,5 +1,4 @@
 ﻿using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -55,28 +54,28 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Profi
                                 {
                                     BadgeNumber = 47425,
                                     Ssn = "XXX-XX-7425",
-                                    EmployeeName = "John",
+                                    FullName = "Doe, John",
                                     Status = EmploymentStatus.Constants.Active
                                 },
                                 new DemographicBadgesNotInPayProfitResponse
                                 {
                                     BadgeNumber = 82424,
                                     Ssn = "XXX-XX-2424",
-                                    EmployeeName = "Jane",
+                                    FullName = "Smith, Jane",
                                     Status = EmploymentStatus.Constants.Delete
                                 },
                                 new DemographicBadgesNotInPayProfitResponse
                                 {
                                     BadgeNumber = 85744,
                                     Ssn = "XXX-XX-5744",
-                                    EmployeeName = "Tim",
+                                    FullName = "Johnson, Tim",
                                     Status = EmploymentStatus.Constants.Inactive
                                 },
                                 new DemographicBadgesNotInPayProfitResponse
                                 {
                                     BadgeNumber = 94861,
                                     Ssn = "XXX-XX-4861",
-                                    EmployeeName = "Sally",
+                                    FullName = "Brown, Sally",
                                     Status = EmploymentStatus.Constants.Terminated,
                                     Store = 4
                                 }
@@ -150,7 +149,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Profi
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.BadgeNumber).Index(2).Name("BADGE");
             Map(m => m.Ssn).Index(3).Name("DEM SSN");
-            Map(m => m.EmployeeName).Index(4).Name("Name");
+            Map(m => m.FullName).Index(4).Name("Name");
             Map(m => m.Store).Index(5).Name("Store");
             Map(m => m.Status).Index(6).Name("StatusEnum");
         }

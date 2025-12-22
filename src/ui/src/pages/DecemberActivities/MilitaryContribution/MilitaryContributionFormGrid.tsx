@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import { CAPTIONS } from "../../../constants";
+import { GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 import StandaloneMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
@@ -37,9 +37,16 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
 
-  const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number) => {
-      contributionsGridPagination.handlePaginationChange(pageNumber, pageSize);
+  const handlePageNumberChange = useCallback(
+    (pageNumber: number) => {
+      contributionsGridPagination.handlePageNumberChange(pageNumber);
+    },
+    [contributionsGridPagination]
+  );
+
+  const handlePageSizeChange = useCallback(
+    (pageSize: number) => {
+      contributionsGridPagination.handlePageSizeChange(pageSize);
     },
     [contributionsGridPagination]
   );
@@ -102,7 +109,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
           </div>
 
           <DSMGrid
-            preferenceKey={CAPTIONS.MILITARY_CONTRIBUTIONS}
+            preferenceKey={GRID_KEYS.MILITARY_CONTRIBUTIONS}
             isLoading={isLoadingContributions}
             handleSortChanged={handleSortChange}
             providedOptions={{
@@ -115,12 +122,10 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             <Pagination
               pageNumber={contributionsGridPagination.pageNumber}
               setPageNumber={(value: number) => {
-                handlePaginationChange(value - 1, contributionsGridPagination.pageSize);
+                handlePageNumberChange(value - 1);
               }}
               pageSize={contributionsGridPagination.pageSize}
-              setPageSize={(value: number) => {
-                handlePaginationChange(0, value);
-              }}
+              setPageSize={handlePageSizeChange}
               recordCount={militaryContributionsData?.total}
             />
           )}

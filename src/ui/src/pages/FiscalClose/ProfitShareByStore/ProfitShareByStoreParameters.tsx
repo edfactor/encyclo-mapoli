@@ -1,10 +1,10 @@
 import { FormHelperText } from "@mui/material";
 import { Grid } from "@mui/material";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 
 interface StoreSearchParams {
   yDate: Date;
@@ -19,6 +19,7 @@ const schema = yup.object().shape({
 });
 
 const ProfitShareByStoreParameters = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     control,
     handleSubmit,
@@ -34,9 +35,11 @@ const ProfitShareByStoreParameters = () => {
   });
 
   const validateAndSubmit = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       // TODO: Implement search functionality
       console.log("Search data:", data);
+      setIsSubmitting(false);
     }
   });
 
@@ -60,7 +63,7 @@ const ProfitShareByStoreParameters = () => {
             name="yDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="yDate"
                 onChange={(value: Date | null) => field.onChange(value)}
                 value={field.value ?? null}
@@ -79,7 +82,7 @@ const ProfitShareByStoreParameters = () => {
             name="lastDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="lastDate"
                 onChange={(value: Date | null) => field.onChange(value)}
                 value={field.value ?? null}
@@ -98,7 +101,7 @@ const ProfitShareByStoreParameters = () => {
             name="firstDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="firstDate"
                 onChange={(value: Date | null) => field.onChange(value)}
                 value={field.value ?? null}
@@ -119,8 +122,8 @@ const ProfitShareByStoreParameters = () => {
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
-          isFetching={false}
-          disabled={!isValid}
+          isFetching={isSubmitting}
+          disabled={!isValid || isSubmitting}
         />
       </Grid>
     </form>

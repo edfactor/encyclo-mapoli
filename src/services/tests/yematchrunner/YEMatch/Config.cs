@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace YEMatch.YEMatch;
+namespace YEMatch;
 
 internal static class Config
 {

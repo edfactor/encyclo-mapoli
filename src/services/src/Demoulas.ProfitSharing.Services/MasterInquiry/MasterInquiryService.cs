@@ -1,6 +1,8 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Services.Entities.Entities;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
@@ -223,8 +225,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
                             .Select(g => g.First())
                             .ToList();
 
-                    // Apply sorting based on request
-                    var sortedResults = ApplySorting(allResults.AsQueryable(), req).ToList();
+                    // Apply sorting based on request (in-memory sorting for already-materialized results)
+#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
+#pragma warning disable S6966 // Awaitable method should be used
+                    var sortedResults = allResults.Count > 1 ? ApplySorting(allResults.AsQueryable(), req).ToList() : allResults;
+#pragma warning restore S6966 // Awaitable method should be used
+#pragma warning restore AsyncFixer02 // Long-running or blocking operations inside an async method
 
                     // Apply pagination to the final deduplicated result set
                     int skip = req.Skip ?? 0;
@@ -240,10 +246,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 return detailsList;
             }, timeoutToken);
         }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException oce) when (!cancellationToken.IsCancellationRequested)
         {
             // Timeout occurred (not user cancellation)
-            _logger.LogWarning("Master inquiry search timed out after 30 seconds for profit year {ProfitYear}", req.ProfitYear);
+            _logger.LogWarning(oce, "Master inquiry search timed out after 30 seconds for profit year {ProfitYear}", req.ProfitYear);
 
             // Return empty result with message indicating timeout
             // Note: Add IsPartialResult and Message properties to PaginatedResponseDto if not present
@@ -251,9 +257,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
             {
                 Results = [],
                 Total = 0
-                // TODO: Add IsPartialResult = true and Message properties to PaginatedResponseDto
+#pragma warning disable S1135 // Track: Add IsPartialResult and Message properties for query timeout scenarios
                 // IsPartialResult = true,
                 // Message = "Query timed out after 30 seconds. Please narrow your search criteria."
+#pragma warning restore S1135
             };
         }
     }
@@ -265,6 +272,16 @@ public sealed class MasterInquiryService : IMasterInquiryService
     private static bool ShouldUseOptimizedSsnQuery(MasterInquiryRequest req)
     {
         return MasterInquiryHelpers.ShouldUseOptimizedSsnQuery(req);
+    }
+
+    /// <summary>
+    /// Gets the profit code IDs that represent payments/distributions (used to differentiate forfeitures from payments).
+    /// These are the codes used in GetProfitCodesForBalanceCalc() for balance calculations.
+    /// </summary>
+    /// <returns>Array of profit code IDs for payments/distributions</returns>
+    public static byte[] GetPaymentProfitCodes()
+    {
+        return ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
     }
 
     /// <summary>
@@ -308,24 +325,93 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(pd => pd.ProfitCodeId == req.ProfitCode.Value);
         }
 
+        // Apply Voids filter (PS-2253: Missing from optimized path)
+        if (req.Voids.HasValue && req.Voids.Value)
+        {
+            query = query.Where(pd => pd.CommentTypeId == CommentType.Constants.Voided.Id);
+        }
+
         // Apply SSN filter if provided (most selective)
         if (req.Ssn != 0)
         {
             query = query.Where(pd => pd.Ssn == req.Ssn);
         }
 
-        // PERFORMANCE FIX: If BadgeNumber is provided, filter by SSN from Demographics first
+        // PERFORMANCE FIX: If BadgeNumber is provided, filter by SSN from Demographics or Beneficiary first
         // This makes BadgeNumber searches as fast as SSN searches
+        // Critical fix (PS-1998): Handle both employees and beneficiaries
         if (req.BadgeNumber is > 0)
         {
-            // Get SSN from Demographics for this badge number
-            var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
-            var ssnFromBadge = demographicsForDup
-                .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
-                .Select(d => d.Ssn)
-                .TagWith($"MasterInquiry: Get SSN for BadgeNumber {req.BadgeNumber.Value}");
+            IQueryable<int> ssnFromBadge;
 
-            // Filter ProfitDetails to only this SSN
+            if (req.MemberType == 2) // Beneficiary only
+            {
+                // For beneficiaries, query the Beneficiary table
+                // PS-2258: Query by badge number, optionally filtered by PsnSuffix if provided
+                if (req.PsnSuffix is > 0)
+                {
+                    // PsnSuffix provided - search for specific beneficiary
+                    ssnFromBadge = ctx.Beneficiaries
+                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value && b.PsnSuffix == req.PsnSuffix.Value)
+                        .Include(b => b.Contact)
+                        .Select(b => b.Contact!.Ssn)
+                        .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value} PsnSuffix {req.PsnSuffix}");
+                }
+                else
+                {
+                    // No PsnSuffix - search all beneficiaries for this badge number
+                    ssnFromBadge = ctx.Beneficiaries
+                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
+                        .Include(b => b.Contact)
+                        .Select(b => b.Contact!.Ssn)
+                        .TagWith($"MasterInquiry: Get SSN for all Beneficiaries with BadgeNumber {req.BadgeNumber.Value}");
+                }
+            }
+            else if (req.MemberType == 1) // Employee only
+            {
+                // For employees, query Demographics
+                var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+                ssnFromBadge = demographicsForDup
+                    .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
+                    .Select(d => d.Ssn)
+                    .TagWith($"MasterInquiry: Get SSN for Employee BadgeNumber {req.BadgeNumber.Value}");
+            }
+            else // Search both (MemberType == 0 or null)
+            {
+                // For both, query Beneficiary and employee Demographics
+                // CRITICAL: Beneficiaries MUST have both BadgeNumber and PsnSuffix to uniquely identify
+                IQueryable<int> beneficiarySSNs;
+
+                if (req.PsnSuffix is > 0)
+                {
+                    // PsnSuffix provided - search for beneficiary with this specific PsnSuffix
+                    beneficiarySSNs = ctx.Beneficiaries
+                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value && b.PsnSuffix == req.PsnSuffix.Value)
+                        .Include(b => b.Contact)
+                        .Select(b => b.Contact!.Ssn)
+                        .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value} PsnSuffix {req.PsnSuffix}");
+                }
+                else
+                {
+                    // PS-2258: No PsnSuffix - search all beneficiaries for this badge number
+                    beneficiarySSNs = ctx.Beneficiaries
+                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
+                        .Include(b => b.Contact)
+                        .Select(b => b.Contact!.Ssn)
+                        .TagWith($"MasterInquiry: Get SSN for all Beneficiaries with BadgeNumber {req.BadgeNumber.Value}");
+                }
+
+                var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var employeeSSNs = demographicsForDup
+                    .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
+                    .Select(d => d.Ssn)
+                    .TagWith($"MasterInquiry: Get SSN for Employee BadgeNumber {req.BadgeNumber.Value}");
+
+                // Union both queries
+                ssnFromBadge = beneficiarySSNs.Union(employeeSSNs);
+            }
+
+            // Filter ProfitDetails to only these SSNs
             query = query.Where(pd => ssnFromBadge.Contains(pd.Ssn));
         }
 
@@ -370,16 +456,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
         }
     }
 
-    public async Task<PaginatedResponseDto<GroupedProfitSummaryDto>> GetGroupedProfitDetails(MasterInquiryRequest req, CancellationToken cancellationToken = default)
+    public Task<PaginatedResponseDto<GroupedProfitSummaryDto>> GetGroupedProfitDetails(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
-        // These are the ProfitCode IDs used in GetProfitCodesForBalanceCalc()
-        byte[] balanceProfitCodes =
-        [
-            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingForfeitures.Id, ProfitCode.Constants.OutgoingDirectPayments.Id,
-            ProfitCode.Constants.OutgoingXferBeneficiary.Id, ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-        ];
+        byte[] balanceProfitCodes = GetPaymentProfitCodes();
 
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query;
@@ -439,7 +520,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             2 => await GetBeneficiaryDetails(req.Id, cancellationToken),
             _ => throw new ValidationException("Invalid MemberType provided")
         };
-        Dictionary<int, MemberDetails> memberDetailsMap = new Dictionary<int, MemberDetails> { { members.ssn, members.memberDetails ?? new MemberDetails { Id = 0 } } };
+        Dictionary<int, MemberDetails> memberDetailsMap = new Dictionary<int, MemberDetails> { { members.ssn, members.memberDetails ?? new MemberDetails { Id = 0, FirstName = "", MiddleName = "", LastName = "" } } };
 
         var details = await GetVestingDetails(memberDetailsMap, currentYear, previousYear, cancellationToken);
         return details.FirstOrDefault();
@@ -449,6 +530,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            // OPTIMIZATION: Defer demographics loading until needed
+            // Demographics are only used for partner (XferQdro) lookup when CommentRelatedOracleHcmId is present
+            IQueryable<Demographic>? demographics = null;
             // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query;
 
@@ -479,7 +563,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 ForfeitureAmount = req.ForfeitureAmount,
                 PaymentAmount = req.PaymentAmount,
                 Name = req.Name,
-                PaymentType = req.PaymentType
+                PaymentType = req.PaymentType,
+                Voids = req.Voids
             };
 
             query = FilterMemberQuery(masterInquiryRequest, query);
@@ -499,10 +584,36 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
             }
 
+            // Apply Voids filter (PS-2253: Missing from member details endpoint)
+            if (req.Voids.HasValue && req.Voids.Value)
+            {
+                query = query.Where(pd => pd.ProfitDetail != null && pd.ProfitDetail.CommentTypeId == CommentType.Constants.Voided.Id);
+            }
+
             byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
+            // Handle custom sorting: when sorting by "monthToDate", we need to sort by YearToDate first, then MonthToDate
+            var sortedQuery = query;
+            bool isMonthToDateSort = req.SortBy != null && "monthToDate".Equals(req.SortBy, StringComparison.OrdinalIgnoreCase);
+
+            if (isMonthToDateSort)
+            {
+                if (req.IsSortDescending.GetValueOrDefault())
+                {
+                    sortedQuery = query.OrderByDescending(x => x.ProfitDetail != null ? x.ProfitDetail.YearToDate : (short)0)
+                                       .ThenByDescending(x => x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0);
+                }
+                else
+                {
+                    sortedQuery = query.OrderBy(x => x.ProfitDetail != null ? x.ProfitDetail.YearToDate : (short)0)
+                                       .ThenBy(x => x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0);
+                }
+            }
+
+            // Create a modified request without sorting if we already applied it
+            var paginationReq = isMonthToDateSort ? req with { SortBy = null } : req;
             // First projection: SQL-translatable only
-            var rawQuery = await query.Select(x => new MasterInquiryRawDto
+            var rawQuery = await sortedQuery.Select(x => new MasterInquiryRawDto
             {
                 Id = x.ProfitDetail != null ? x.ProfitDetail.Id : 0,
                 Ssn = x.ProfitDetail != null ? x.ProfitDetail.Ssn : x.Member.Ssn,
@@ -538,7 +649,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentIncomeYear = x.Member.CurrentIncomeYear,
                 CurrentHoursYear = x.Member.CurrentHoursYear,
                 IsExecutive = x.Member.IsExecutive,
-            }).ToPaginationResultsAsync(req, cancellationToken);
+                // Check if this profit detail has already been reversed (double-reversal protection)
+                IsAlreadyReversed = x.ProfitDetail != null && ctx.ProfitDetails.Any(pd => pd.ReversedFromProfitDetailId == x.ProfitDetail.Id),
+            }).ToPaginationResultsAsync(paginationReq, cancellationToken);
 
             var formattedResults = rawQuery.Results.Select(x => new MasterInquiryResponseDto
             {
@@ -577,38 +690,110 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentHoursYear = x.CurrentHoursYear,
                 IsExecutive = x.IsExecutive,
                 EmploymentStatusId = x.EmploymentStatusId ?? '\0',
-            });
+                IsAlreadyReversed = x.IsAlreadyReversed,
+            }).ToList();
+
+            // Collect all partner references (both employees and beneficiaries)
+            var employeePartnerIds = formattedResults
+                .Where(x => x.CommentRelatedOracleHcmId.HasValue && (x.CommentRelatedPsnSuffix == null || x.CommentRelatedPsnSuffix == 0))
+                .Select(x => x.CommentRelatedOracleHcmId!.Value)
+                .Distinct()
+                .ToList();
+
+            var beneficiaryPartnerKeys = formattedResults
+                .Where(x => x is { CommentRelatedOracleHcmId: not null, CommentRelatedPsnSuffix: > 0 })
+                .Select(x => (OracleHcmId: x.CommentRelatedOracleHcmId!.Value, PsnSuffix: x.CommentRelatedPsnSuffix!.Value))
+                .Distinct()
+                .ToList();
+
+            if (employeePartnerIds.Any() || beneficiaryPartnerKeys.Any())
+            {
+                // OPTIMIZATION: Load demographics only if needed (when there are partner references)
+                if (demographics == null)
+                {
+                    demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+                }
+
+                // Single query to get both employees and beneficiaries
+                var badgeNumbers = employeePartnerIds.Concat(beneficiaryPartnerKeys.Select(k => k.OracleHcmId)).Distinct().ToList();
+
+                var allPartnerInfo = await (
+                    from d in demographics
+                    where badgeNumbers.Contains(d.OracleHcmId)
+                    select new
+                    {
+                        d.OracleHcmId,
+                        d.BadgeNumber,
+                        d.ContactInfo!.FullName,
+                        // Left join to beneficiaries - will be null for employees
+                        Beneficiaries = (from b in ctx.Beneficiaries
+                                         join bc in ctx.BeneficiaryContacts on b.BeneficiaryContactId equals bc.Id
+                                         where b.DemographicId == d.Id
+                                         select new { b.PsnSuffix, bc.ContactInfo.FullName }).ToList()
+                    }
+                ).ToListAsync(cancellationToken);
+
+                // Build lookup dictionaries for fast access
+                var employeeLookup = allPartnerInfo.ToDictionary(p => p.OracleHcmId, p => (p.BadgeNumber, p.FullName));
+                var beneficiaryLookup = allPartnerInfo
+                    .SelectMany(p => p.Beneficiaries.Select(b => (Key: (p.OracleHcmId, b.PsnSuffix), p.BadgeNumber, b.FullName)))
+                    .ToDictionary(x => x.Key, x => (x.BadgeNumber, x.FullName));
+
+                // Enrich results in a single loop
+                foreach (var result in formattedResults.Where(x => x.CommentRelatedOracleHcmId.HasValue))
+                {
+                    if (result.CommentRelatedPsnSuffix is null or 0)
+                    {
+                        // Employee lookup
+                        if (employeeLookup.TryGetValue(result.CommentRelatedOracleHcmId!.Value, out var employee))
+                        {
+                            result.XFerQdroId = employee.BadgeNumber;
+                            result.XFerQdroName = employee.FullName;
+                        }
+                    }
+                    else
+                    {
+                        // Beneficiary lookup
+                        var key = (result.CommentRelatedOracleHcmId!.Value, result.CommentRelatedPsnSuffix!.Value);
+                        if (beneficiaryLookup.TryGetValue(key, out var beneficiary))
+                        {
+                            result.XFerQdroId = (((long)beneficiary.BadgeNumber) * 10000) + result.CommentRelatedPsnSuffix!.Value;
+                            result.XFerQdroName = beneficiary.FullName;
+                        }
+                    }
+                }
+            }
 
             return new PaginatedResponseDto<MasterInquiryResponseDto>(req) { Results = formattedResults, Total = rawQuery.Total };
         }, cancellationToken);
     }
 
-    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryDemographics(
+    private Task<IQueryable<MasterInquiryItem>> GetMasterInquiryDemographics(
         ProfitSharingReadOnlyDbContext ctx,
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default)
     {
-        return await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, req, cancellationToken);
+        return _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, req, cancellationToken);
     }
 
-    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryBeneficiary(
+    private Task<IQueryable<MasterInquiryItem>> GetMasterInquiryBeneficiary(
         ProfitSharingReadOnlyDbContext ctx,
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default)
     {
-        return await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, req, cancellationToken);
+        return _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, req, cancellationToken);
     }
 
-    private async Task<(int ssn, MemberDetails? memberDetails)> GetDemographicDetails(
+    private Task<(int ssn, MemberDetails? memberDetails)> GetDemographicDetails(
        int id, short currentYear, short previousYear, CancellationToken cancellationToken = default)
     {
-        return await _employeeInquiryService.GetEmployeeDetailsAsync(id, currentYear, previousYear, cancellationToken);
+        return _employeeInquiryService.GetEmployeeDetailsAsync(id, currentYear, previousYear, cancellationToken);
     }
 
-    private async Task<(int ssn, MemberDetails? memberDetails)> GetBeneficiaryDetails(
+    private Task<(int ssn, MemberDetails? memberDetails)> GetBeneficiaryDetails(
      int id, CancellationToken cancellationToken = default)
     {
-        return await _beneficiaryInquiryService.GetBeneficiaryDetailsAsync(id, cancellationToken);
+        return _beneficiaryInquiryService.GetBeneficiaryDetailsAsync(id, cancellationToken);
     }
 
     private async Task<IEnumerable<MemberProfitPlanDetails>> GetVestingDetails(Dictionary<int, MemberDetails> memberDetailsMap,
@@ -628,6 +813,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var ssnCollection = memberDetailsMap.Keys.ToHashSet();
         List<BalanceEndpointResponse> currentBalance = [];
         List<BalanceEndpointResponse> previousBalance = [];
+        Dictionary<short, StoreInformation> stores = new();
         try
         {
             var previousBalanceTask =
@@ -638,10 +824,17 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _totalService.GetVestingBalanceForMembersAsync(
                     SearchBy.Ssn, ssnCollection, currentYear, cancellationToken);
 
-            await Task.WhenAll(previousBalanceTask, currentBalanceTask);
+            var storesTask = _dataContextFactory.UseWarehouseContext(c =>
+            {
+                var stores = memberDetailsMap.Values.Select(m => m.StoreNumber).ToHashSet();
+                return c.Stores.Where(s => stores.Contains(s.StoreId)).ToDictionaryAsync(s => s.StoreId, s => s, cancellationToken);
+            });
+
+            await Task.WhenAll(previousBalanceTask, currentBalanceTask, storesTask);
 
             currentBalance = await currentBalanceTask;
             previousBalance = await previousBalanceTask;
+            stores = await storesTask;
         }
         catch (Exception ex)
         {
@@ -653,14 +846,16 @@ public sealed class MasterInquiryService : IMasterInquiryService
         foreach (var kvp in memberDetailsMap)
         {
             var memberData = kvp.Value;
-            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn });
+            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn.MaskSsn() });
             var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == kvp.Key);
+            _ = stores.TryGetValue(memberData.StoreNumber, out var store);
 
             detailsList.Add(new MemberProfitPlanDetails
             {
                 IsEmployee = memberData.IsEmployee,
                 Id = memberData.Id,
                 FirstName = memberData.FirstName,
+                MiddleName = memberData.MiddleName,
                 LastName = memberData.LastName,
                 AddressCity = memberData.AddressCity,
                 AddressState = memberData.AddressState,
@@ -668,7 +863,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 AddressZipCode = memberData.AddressZipCode,
                 DateOfBirth = memberData.DateOfBirth,
                 Age = memberData.DateOfBirth.Age(),
-                Ssn = memberData.Ssn,
+                Ssn = memberData.Ssn.MaskSsn(),
                 IsExecutive = memberData.IsExecutive,
                 YearToDateProfitSharingHours = memberData.YearToDateProfitSharingHours,
                 HireDate = memberData.HireDate,
@@ -700,7 +895,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
                 PhoneNumber = memberData.PhoneNumber,
-                WorkLocation = memberData.WorkLocation,
+                WorkLocation = store != null ? $"{store.City} {store.State}" : memberData.WorkLocation,
 
                 AllocationToAmount = balance?.AllocationsToBeneficiary ?? 0,
                 AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0,
@@ -711,9 +906,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return detailsList;
     }
 
-    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken = default)
+    private Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(MasterInquiryRequest req, ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken = default)
     {
-        return await _employeeInquiryService.GetEmployeeDetailsForSsnsAsync((MasterInquiryRequest)req, ssns, currentYear, previousYear, duplicateSsns, cancellationToken);
+        return _employeeInquiryService.GetEmployeeDetailsForSsnsAsync(req, ssns, currentYear, previousYear, duplicateSsns, cancellationToken);
     }
 
     private Task<PaginatedResponseDto<MemberDetails>> GetBeneficiaryDetailsForSsns(
@@ -729,14 +924,14 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return MasterInquiryHelpers.FilterMemberQuery(req, query);
     }
 
-    private async Task<List<MemberDetails>> GetAllDemographicDetailsForSsns(ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken = default)
+    private Task<List<MemberDetails>> GetAllDemographicDetailsForSsns(ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken = default)
     {
-        return await _employeeInquiryService.GetAllEmployeeDetailsForSsnsAsync(ssns, currentYear, previousYear, duplicateSsns, cancellationToken);
+        return _employeeInquiryService.GetAllEmployeeDetailsForSsnsAsync(ssns, currentYear, previousYear, duplicateSsns, cancellationToken);
     }
 
-    private async Task<List<MemberDetails>> GetAllBeneficiaryDetailsForSsns(ISet<int> ssns, CancellationToken cancellationToken = default)
+    private Task<List<MemberDetails>> GetAllBeneficiaryDetailsForSsns(ISet<int> ssns, CancellationToken cancellationToken = default)
     {
-        return await _beneficiaryInquiryService.GetAllBeneficiaryDetailsForSsnsAsync(ssns, cancellationToken);
+        return _beneficiaryInquiryService.GetAllBeneficiaryDetailsForSsnsAsync(ssns, cancellationToken);
     }
 
     private static IQueryable<MemberDetails> ApplySorting(IQueryable<MemberDetails> query, SortedPaginationRequestDto req)

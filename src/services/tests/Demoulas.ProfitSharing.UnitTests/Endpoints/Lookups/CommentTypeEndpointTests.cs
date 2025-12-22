@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
@@ -10,6 +10,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 
+[Collection("Lookup Tests")]
 public class CommentTypeEndpointTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "CommentType - Should return success with ADMINISTRATOR role")]

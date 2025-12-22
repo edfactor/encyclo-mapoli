@@ -1,12 +1,12 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -14,15 +14,17 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
 /// <summary>
 /// Endpoint for retrieving the list of states used in profit sharing operations.
-/// Currently returns a hardcoded list of common states, but designed to be easily
-/// converted to database-driven lookup in the future.
+/// Returns states that are referenced in profit sharing comment records, joined with
+/// full state names from the States lookup table.
 /// </summary>
 public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<StateListResponse>>
 {
     private readonly ILogger<StateListEndpoint> _logger;
+    private readonly IStateService _stateService;
 
-    public StateListEndpoint(ILogger<StateListEndpoint> logger) : base(Navigation.Constants.Inquiries)
+    public StateListEndpoint(IStateService stateService, ILogger<StateListEndpoint> logger) : base(Navigation.Constants.Inquiries)
     {
+        _stateService = stateService;
         _logger = logger;
     }
 
@@ -32,6 +34,7 @@ public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<List
         Summary(s =>
         {
             s.Summary = "Gets all available states for filtering profit sharing transactions";
+            s.Description = "Returns states that are referenced in profit sharing comment records, joined with full state names from the States lookup table";
             s.ResponseExamples = new Dictionary<int, object> {
             {
                 200, new ListResponseDto<StateListResponse>
@@ -51,16 +54,14 @@ public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<List
             } };
         });
         Group<LookupGroup>();
-        // Note: Response caching would be beneficial here since state list rarely changes
-        // Will be added when distributed caching infrastructure is in place
     }
 
     public override async Task<Results<Ok<ListResponseDto<StateListResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
     {
-        return await this.ExecuteWithTelemetry(HttpContext, _logger, new { }, () =>
+        return await this.ExecuteWithTelemetry(HttpContext, _logger, new { }, async () =>
         {
-            // Currently uses hardcoded list; will be replaced with database query in future iteration
-            var states = GetStateList();
+            // Retrieve states from database via StateService
+            var states = await _stateService.GetStatesAsync(ct);
 
             // Record business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
@@ -69,28 +70,10 @@ public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<List
 
             var response = new ListResponseDto<StateListResponse>
             {
-                Items = states
+                Items = states.ToList()
             };
 
-            return Task.FromResult(Result<ListResponseDto<StateListResponse>>.Success(response));
+            return Result<ListResponseDto<StateListResponse>>.Success(response);
         });
-    }
-
-    /// <summary>
-    /// Returns the hardcoded list of states.
-    /// Future enhancement: Replace with database query from States table
-    /// when schema migration is complete.
-    /// </summary>
-    private static List<StateListResponse> GetStateList()
-    {
-        return new List<StateListResponse>
-        {
-            new StateListResponse { Abbreviation = "CT", Name = "Connecticut" },
-            new StateListResponse { Abbreviation = "MA", Name = "Massachusetts" },
-            new StateListResponse { Abbreviation = "ME", Name = "Maine" },
-            new StateListResponse { Abbreviation = "NH", Name = "New Hampshire" },
-            new StateListResponse { Abbreviation = "RI", Name = "Rhode Island" },
-            new StateListResponse { Abbreviation = "VT", Name = "Vermont" }
-        };
     }
 }

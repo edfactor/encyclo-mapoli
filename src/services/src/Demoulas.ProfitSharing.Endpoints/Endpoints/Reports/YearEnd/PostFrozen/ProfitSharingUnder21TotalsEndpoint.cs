@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
@@ -34,7 +33,7 @@ public class ProfitSharingUnder21TotalsEndpoint : ProfitSharingEndpoint<ProfitYe
             s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
-                {200,  ProfitSharingUnder21TotalsResponse.SampleResponse()}
+                {200,  ProfitSharingUnder21TotalsResponse.ResponseExample()}
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });

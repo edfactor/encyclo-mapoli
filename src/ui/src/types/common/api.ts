@@ -2,6 +2,11 @@ import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
 
 export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
+export interface RobustlyPaged<T = unknown> extends Paged<T> {
+  timeoutOccurred?: boolean;
+  isPartialResult?: boolean;
+}
+
 export interface ProfitYearRequest {
   profitYear: number;
 }
@@ -30,7 +35,7 @@ export interface PagedReportResponse<T> {
   startDate: string;
   endDate: string;
   dataSource: string;
-  response: Paged<T>;
+  response: RobustlyPaged<T>;
 }
 
 export interface StartAndEndDateRequest extends ProfitYearRequest {
@@ -38,6 +43,16 @@ export interface StartAndEndDateRequest extends ProfitYearRequest {
   endingDate: string;
   pagination: SortedPaginationRequestDto;
   excludeZeroBalance?: boolean;
+  excludeZeroAndFullyVested?: boolean;
+}
+
+/**
+ * Extends StartAndEndDateRequest with vested balance filtering capabilities.
+ * Mirrors the backend FilterableStartAndEndDateRequest type.
+ */
+export interface FilterableStartAndEndDateRequest extends StartAndEndDateRequest {
+  vestedBalanceValue?: number | null;
+  vestedBalanceOperator?: number | null;
 }
 
 export interface FilterParams {
@@ -56,4 +71,13 @@ export interface ReportPreset {
     employeeStatus?: string;
     priorProfitShare?: string;
   };
+}
+
+export interface QPAY066xAdHocReportPreset {
+  id: string;
+  name: string;
+  description: string;
+  params: FilterParams;
+  requiresDateRange: boolean;
+  apiEndpoint?: string;
 }

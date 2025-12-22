@@ -2,14 +2,10 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
 import {
-  BeneficiaryDetailRequest,
-  BeneficiaryDetailResponse,
-  BeneficiaryKindRequestDto,
-  BeneficiaryKindResponseDto,
-  BeneficiaryRequestDto,
-  BeneficiaryResponse,
-  BeneficiarySearchFilterRequest,
-  BeneficiarySearchFilterResponse,
+  BeneficiariesGetAPIResponse,
+  BeneficiaryDetail,
+  BeneficiaryDetailAPIRequest,
+  BeneficiarySearchAPIRequest,
   BeneficiaryTypesRequestDto,
   BeneficiaryTypesResponseDto,
   CreateBeneficiaryContactRequest,
@@ -27,14 +23,17 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const BeneficiariesApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "beneficiariesApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
-    getBeneficiaries: builder.query<BeneficiaryResponse, BeneficiaryRequestDto>({
+    getBeneficiaries: builder.query<BeneficiariesGetAPIResponse, BeneficiaryDetailAPIRequest>({
       query: (request) => ({
         url: `/beneficiaries`,
         method: "GET",
         params: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
           //dispatch(setBeneficiary(data));
@@ -44,13 +43,13 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    beneficiarySearchFilter: builder.query<Paged<BeneficiarySearchFilterResponse>, BeneficiarySearchFilterRequest>({
+    beneficiarySearchFilter: builder.query<Paged<BeneficiaryDetail>, BeneficiarySearchAPIRequest>({
       query: (request) => ({
         url: `/beneficiaries/search`,
         method: "GET",
         params: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -65,7 +64,7 @@ export const BeneficiariesApi = createApi({
         method: "GET",
         params: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -74,28 +73,13 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    getBeneficiaryKind: builder.query<BeneficiaryKindResponseDto, BeneficiaryKindRequestDto>({
-      query: (request) => ({
-        url: `/beneficiaryKind`,
-        method: "GET",
-        params: request
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-        } catch (err) {
-          console.error("Failed to fetch beneficiaries:", err);
-          dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
-        }
-      }
-    }),
-    createBeneficiaries: builder.query<Paged<CreateBeneficiaryResponse>, CreateBeneficiaryRequest>({
+    createBeneficiaries: builder.mutation<Paged<CreateBeneficiaryResponse>, CreateBeneficiaryRequest>({
       query: (request) => ({
         url: `/beneficiaries`,
         method: "POST",
         body: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -104,13 +88,13 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    createBeneficiaryContact: builder.query<CreateBeneficiaryContactResponse, CreateBeneficiaryContactRequest>({
+    createBeneficiaryContact: builder.mutation<CreateBeneficiaryContactResponse, CreateBeneficiaryContactRequest>({
       query: (request) => ({
         url: `/beneficiaries/contact`,
         method: "POST",
         body: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -119,13 +103,13 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    updateBeneficiary: builder.query<UpdateBeneficiaryResponse, UpdateBeneficiaryRequest>({
+    updateBeneficiary: builder.mutation<UpdateBeneficiaryResponse, UpdateBeneficiaryRequest>({
       query: (request) => ({
         url: `/beneficiaries`,
         method: "PUT",
         body: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -134,13 +118,13 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    getBeneficiaryDetail: builder.query<BeneficiaryDetailResponse, BeneficiaryDetailRequest>({
+    getBeneficiaryDetail: builder.query<BeneficiaryDetail, BeneficiaryDetailAPIRequest>({
       query: (request) => ({
         url: `/beneficiaries/detail`,
         method: "GET",
         params: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -150,12 +134,12 @@ export const BeneficiariesApi = createApi({
       }
     }),
 
-    deleteBeneficiary: builder.query<{ success: boolean; message?: string }, DeleteBeneficiaryRequest>({
+    deleteBeneficiary: builder.mutation<{ success: boolean; message?: string }, DeleteBeneficiaryRequest>({
       query: (request) => ({
         url: `/beneficiaries/${request.id}`,
         method: "DELETE"
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -168,13 +152,14 @@ export const BeneficiariesApi = createApi({
 });
 
 export const {
+  // Queries (GET operations)
   useLazyGetBeneficiaryDetailQuery,
   useLazyBeneficiarySearchFilterQuery,
-  useLazyDeleteBeneficiaryQuery,
-  useLazyUpdateBeneficiaryQuery,
   useLazyGetBeneficiariesQuery,
-  useLazyCreateBeneficiariesQuery,
   useLazyGetBeneficiarytypesQuery,
-  useLazyCreateBeneficiaryContactQuery,
-  useLazyGetBeneficiaryKindQuery
+  // Mutations (POST/PUT/DELETE operations)
+  useCreateBeneficiariesMutation,
+  useCreateBeneficiaryContactMutation,
+  useUpdateBeneficiaryMutation,
+  useDeleteBeneficiaryMutation
 } = BeneficiariesApi;

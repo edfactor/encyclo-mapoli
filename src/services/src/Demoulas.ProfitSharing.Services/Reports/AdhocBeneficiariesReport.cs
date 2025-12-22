@@ -46,8 +46,8 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                     DemographicPayFrequencyId = b.Demographic != null ? b.Demographic.PayFrequencyId : (int?)null
                 });
 
-            baseQuery = req.IsAlsoEmployee 
-                ? baseQuery.Where(b => employeeSsns.Contains(b.ContactSsn)) 
+            baseQuery = req.IsAlsoEmployee
+                ? baseQuery.Where(b => employeeSsns.Contains(b.ContactSsn))
                 : baseQuery.Where(b => !employeeSsns.Contains(b.ContactSsn));
 
             // Apply pagination

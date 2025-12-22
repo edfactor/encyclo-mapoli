@@ -17,11 +17,16 @@ export const GetEligibleEmployeesColumns = (): ColDef[] => {
       field: "departmentId",
 
       valueFormatter: (params) => {
-        const name = params.data.department; // assuming 'statusName' is in the row data
-        const id = params.data.departmentId; // assuming 'status' is in the row data
-        return `[${id}] ${name}`;
+        return params.data.department; // assuming 'statusName' is in the row data
       }
     }),
-    createStoreColumn({})
+    createStoreColumn({}),
+    {
+      headerName: "",
+      field: "",
+      flex: 1,
+      sortable: false,
+      filter: false
+    }
   ];
 };

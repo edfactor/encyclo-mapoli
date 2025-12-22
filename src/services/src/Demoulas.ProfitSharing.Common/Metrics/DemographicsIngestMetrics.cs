@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics.Metrics;
+﻿using System.Diagnostics.Metrics;
 
 namespace Demoulas.ProfitSharing.Common.Metrics;
 

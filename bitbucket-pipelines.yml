@@ -6,9 +6,14 @@
 # ------------------------------------------------------------------------
 
 definitions:
+  # Centralized server variables
+  servers:
+    qa_app_server: &qa_app_server "appt23d"
+    uat_app_server: &uat_app_server "appt24d"
+
   steps:
-    build-and-test-backend: &build-and-test-backend
-      name: Build and Test Backend API
+    build-and-test-backend-unit: &build-and-test-backend-unit
+      name: Build and Test Backend API (UnitTests)
       runs-on:
         - windows
         - self.hosted
@@ -16,36 +21,24 @@ definitions:
         # Set environment variables
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
 
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
 
-        # Check if .NET 9 SDK is installed
-        - echo "Checking installed .NET SDK versions..."
-        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\.(\d+)\.(\d+)"
-        - if ($dotnetSdkInstalled) {
-              $isSdkValid = $false;
-              foreach ($sdk in $dotnetSdkInstalled) {
-                if ($sdk -match "^9\.(\d+)\.(\d+)") {
-                  $minor = [int]$matches[1];
-                  $patch = [int]$matches[2];
-                  if ($minor -gt 0 -or $patch -ge 306) {
-                    $isSdkValid = $true;
-                    break;
-                  }
-                }
-              }
-              if ($isSdkValid) {
-                Write-Output ".NET SDK 9.0.306 or higher is installed.";
-              } else {
-                Write-Output ".NET SDK 9.0.306 or higher is NOT installed.";
-                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.306/dotnet-sdk-9.0.306-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.306-win-x64.exe";
-                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.306-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
-              }
-            } else {
-              Write-Output "No .NET 9.x SDK installed.";
-            }
+        # Verify required .NET SDK is available (do not attempt installation)
+        - echo "Checking for required .NET SDK version..."
+        - |
+          $dotnetSdkList = dotnet --list-sdks;
+          Write-Output "Installed .NET SDKs:";
+          Write-Output $dotnetSdkList;
+
+          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+          if (-not $dotnetSdkRequired) {
+              Write-Error "FAILED: .NET 10 SDK is required but not available.";
+              Write-Error "Please ensure .NET 10 SDK is installed on the build agent.";
+              exit 1;
+          }
 
         # Clean any previous build artifacts to ensure deterministic builds
         - echo "Cleaning previous build artifacts..."
@@ -59,13 +52,68 @@ definitions:
         - echo "Building solution..."
         - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
-        # Run tests against the fresh build
+        # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
+        # VSTest is no longer supported - must run the executable directly
         - echo "Running unit tests..."
-        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --no-build --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
+        - |
+          $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
+          Write-Host "Executing test runner: $testExe"
+          & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
 
       artifacts:
         - test-reports/**
-    
+
+    build-and-test-backend-architecture: &build-and-test-backend-architecture
+      name: Build and Test Backend API (Architecture)
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        # Set environment variables
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
+        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/architecture-tests"
+
+        # Ensure the REPORTS_PATH directory exists
+        - mkdir -Force -Path $env:REPORTS_PATH
+
+        # Verify required .NET SDK is available (do not attempt installation)
+        - echo "Checking for required .NET SDK version..."
+        - |
+          $dotnetSdkList = dotnet --list-sdks;
+          Write-Output "Installed .NET SDKs:";
+          Write-Output $dotnetSdkList;
+
+          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+          if (-not $dotnetSdkRequired) {
+              Write-Error "FAILED: .NET 10 SDK is required but not available.";
+              Write-Error "Please ensure .NET 10 SDK is installed on the build agent.";
+              exit 1;
+          }
+
+        # Clean any previous build artifacts to ensure deterministic builds
+        - echo "Cleaning previous build artifacts..."
+        - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+
+        # Restore packages explicitly
+        - echo "Restoring NuGet packages..."
+        - dotnet restore src/services/Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+
+        # Build without incremental compilation to avoid stale artifacts
+        - echo "Building solution..."
+        - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
+
+        # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
+        # VSTest is no longer supported - must run the executable directly
+        - echo "Running architecture tests..."
+        - |
+          $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
+          Write-Host "Executing test runner: $testExe"
+          & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+
+      artifacts:
+        - test-reports/**
+
     test-frontend: &test-frontend
       name: Build and Test Frontend UI
       # Run on Bitbucket Cloud to free on-premises resources
@@ -77,21 +125,91 @@ definitions:
       script:
         - cd src/ui
         - echo "Running frontend tests on cloud runner..."
-        
+
+        # Install git for Alpine (needed for diff comparison in PRs)
+        - apk add --no-cache git
+
         # Update npm to latest version
         - npm install -g npm@latest
-        
+        - npm config list --json
+        - env | grep -i npm_config
+
         # Create .npmrc for JFrog access (uses pipeline variable)
         - |
           cat > .npmrc << EOF
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
-        
-        # Install dependencies and run tests
+
+        # Install dependencies
         - npm ci
-        - npm run test
-   
+
+        # Run tests - only changed areas for PRs, all tests for branch builds
+        - |
+          if [ -n "$BITBUCKET_PR_DESTINATION_BRANCH" ]; then
+              echo "PR build detected - checking for changed files..."
+              cd ../..  # Go to repo root for git operations (from src/ui)
+              git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=1
+              changed_files=$(git diff --name-only "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' || true)
+              cd src/ui
+
+              # Build test patterns based on changed areas
+              test_patterns=""
+
+              if echo "$changed_files" | grep -q '^src/ui/src/utils/'; then
+                  test_patterns="$test_patterns src/utils"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/hooks/'; then
+                  test_patterns="$test_patterns src/hooks"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/components/'; then
+                  test_patterns="$test_patterns src/components"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/reduxstore/'; then
+                  test_patterns="$test_patterns src/reduxstore"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/DecemberActivities/'; then
+                  test_patterns="$test_patterns src/pages/DecemberActivities"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/FiscalClose/'; then
+                  test_patterns="$test_patterns src/pages/FiscalClose"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/Beneficiaries/'; then
+                  test_patterns="$test_patterns src/pages/Beneficiaries"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/InquiriesAndAdjustments/'; then
+                  test_patterns="$test_patterns src/pages/InquiriesAndAdjustments"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/Reports/'; then
+                  test_patterns="$test_patterns src/pages/Reports"
+              fi
+
+              if echo "$changed_files" | grep -q '^src/ui/src/pages/Distributions/'; then
+                  test_patterns="$test_patterns src/pages/Distributions"
+              fi
+
+              # Trim leading whitespace
+              test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
+
+              if [ -n "$test_patterns" ]; then
+                  echo "Running tests for changed areas: $test_patterns"
+                  npm run test -- --run $test_patterns
+              else
+                  echo "No test areas matched changed files - skipping tests"
+              fi
+          else
+              echo "Branch build - running all tests..."
+              npm run test
+          fi
+
     generate-buildinfo: &generate-buildinfo
       name: Generate Build Information
       runs-on:
@@ -103,7 +221,7 @@ definitions:
         - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - if (!(Test-Path ".buildinfo.json")) { Write-Error "Failed to generate .buildinfo.json"; exit 1; }
-    
+
     create-api-artifacts: &create-api-artifacts
       name: Create API Artifacts
       runs-on:
@@ -122,10 +240,10 @@ definitions:
         - New-Item -ItemType Directory -Path "dist"
 
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
-        
+
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\publishOutput\"
-        
+
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.Api.zip -Force
 
     create-service-artifacts: &create-service-artifacts
@@ -140,7 +258,7 @@ definitions:
         - Write-Host $(Get-Location)
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
-        
+
         # Tool already updated in create-api-artifacts step (runs in parallel)
         # Only update if not already present
         - if (-not (Get-Command Demoulas.Common.Build.Cli -ErrorAction SilentlyContinue)) { dotnet tool update --global Demoulas.Common.Build.Cli --no-cache }
@@ -163,42 +281,63 @@ definitions:
       script:
         # Navigate to UI directory
         - cd src/ui
-        
+
         # Install zip utility and update npm
         - apk add --no-cache zip
         - npm install -g npm@latest
-        
+
         # Create .npmrc for JFrog access (using bash heredoc syntax)
         - |
           cat > .npmrc << 'EOF'
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
-        
+
+        # Update package.json version from .buildinfo.json
+        - |
+          if [ -f ../../.buildinfo.json ]; then
+            BUILD_NUMBER=$(grep -o '"buildNumber":"[^"]*"' ../../.buildinfo.json | cut -d'"' -f4)
+            BUILD_ID=$(grep -o '"buildId":[0-9]*' ../../.buildinfo.json | cut -d':' -f2)
+            if [ -n "$BUILD_NUMBER" ] && [ -n "$BUILD_ID" ]; then
+              # Parse BUILD_NUMBER as YYYYmmDD and convert to YYYY.mmDD
+              if [ ${#BUILD_NUMBER} -eq 8 ]; then
+                YEAR="${BUILD_NUMBER:0:4}"
+                MONTH="${BUILD_NUMBER:4:2}"
+                DAY="${BUILD_NUMBER:6:2}"
+                SEMANTIC_VERSION="${YEAR}.${MONTH}${DAY}.${BUILD_ID}"
+              else
+                # Fallback if format is unexpected
+                SEMANTIC_VERSION="${BUILD_NUMBER}.${BUILD_ID}"
+              fi
+              node -e "const pkg=require('./package.json'); pkg.version='${SEMANTIC_VERSION}'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');"
+              echo "✓ Updated package.json version to $SEMANTIC_VERSION"
+              grep '"version"' package.json
+            fi
+          fi
+
         # Copy buildinfo.json from artifact to public directory
         - echo "Copying .buildinfo.json from artifact..."
         - cp ../../.buildinfo.json ./public/.buildinfo.json
         - echo "✓ Build info copied to public directory"
         - cat ./public/.buildinfo.json
-        
+
         # Install dependencies
         - npm ci
-        
+
         # Build for QA environment
         - npm run build:qa
-        
+
         # Create dist directory at repo root
         - mkdir -p ../../dist
-        
+
         # Package artifact using zip
         - cd build
         - zip -r ../../../dist/Demoulas.ProfitSharing.UI.qa.zip .
         - cd ..
-        
+
         # Verify artifact was created
         - ls -lh ../../dist/Demoulas.ProfitSharing.UI.qa.zip
         - echo "✓ QA artifact created successfully"
-        
 
     create-frontend-artifact-uat: &create-frontend-artifact-uat
       name: Create FrontEnd Artifacts (UAT)
@@ -209,42 +348,63 @@ definitions:
       script:
         # Navigate to UI directory
         - cd src/ui
-        
+
         # Install zip utility and update npm
         - apk add --no-cache zip
         - npm install -g npm@latest
-        
+
         # Create .npmrc for JFrog access (using bash heredoc syntax)
         - |
           cat > .npmrc << 'EOF'
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
-        
+
+        # Update package.json version from .buildinfo.json
+        - |
+          if [ -f ../../.buildinfo.json ]; then
+            BUILD_NUMBER=$(grep -o '"buildNumber":"[^"]*"' ../../.buildinfo.json | cut -d'"' -f4)
+            BUILD_ID=$(grep -o '"buildId":[0-9]*' ../../.buildinfo.json | cut -d':' -f2)
+            if [ -n "$BUILD_NUMBER" ] && [ -n "$BUILD_ID" ]; then
+              # Parse BUILD_NUMBER as YYYYmmDD and convert to YYYY.mmDD
+              if [ ${#BUILD_NUMBER} -eq 8 ]; then
+                YEAR="${BUILD_NUMBER:0:4}"
+                MONTH="${BUILD_NUMBER:4:2}"
+                DAY="${BUILD_NUMBER:6:2}"
+                SEMANTIC_VERSION="${YEAR}.${MONTH}${DAY}.${BUILD_ID}"
+              else
+                # Fallback if format is unexpected
+                SEMANTIC_VERSION="${BUILD_NUMBER}.${BUILD_ID}"
+              fi
+              node -e "const pkg=require('./package.json'); pkg.version='${SEMANTIC_VERSION}'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');"
+              echo "✓ Updated package.json version to $SEMANTIC_VERSION"
+              grep '"version"' package.json
+            fi
+          fi
+
         # Copy buildinfo.json from artifact to public directory
         - echo "Copying .buildinfo.json from artifact..."
         - cp ../../.buildinfo.json ./public/.buildinfo.json
         - echo "✓ Build info copied to public directory"
         - cat ./public/.buildinfo.json
-        
+
         # Install dependencies
         - npm ci
-        
+
         # Build for UAT environment
         - npm run build:uat
-        
+
         # Create dist directory at repo root
         - mkdir -p ../../dist
-        
+
         # Package artifact using zip
         - cd build
         - zip -r ../../../dist/Demoulas.ProfitSharing.UI.uat.zip .
         - cd ..
-        
+
         # Verify artifact was created
         - ls -lh ../../dist/Demoulas.ProfitSharing.UI.uat.zip
         - echo "✓ UAT artifact created successfully"
-
 
     upgrade-database: &upgrade-database
       name: Upgrade Database
@@ -333,7 +493,6 @@ definitions:
             .\output\Demoulas.ProfitSharing.Data.Cli validate-import --connection-name ProfitSharing --sql-file ".\src\database\ready_import\Import Validations.sql" --source-schema $sourceSchema --current-year $currentYear
             if ($LASTEXITCODE -ne 0) { Write-Error "Database import validation failed. Exiting"; exit 1 }
           }
-          
 
     uat-drop-recreate-db: &uat-drop-recreate-db
       name: UAT Drop & Recreate DB
@@ -436,7 +595,6 @@ definitions:
         - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
         - dotnet restore Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
 
-
         - |
           $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
           if ($output -match "has the following vulnerable packages") {
@@ -446,8 +604,7 @@ definitions:
           } else {
             Write-Host "No vulnerabilities found."
             exit 0
-          }        
-
+          }
 
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
@@ -464,15 +621,18 @@ definitions:
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
         - npm audit --audit-level=high --production
-    
+
     frontend-lint: &frontend-lint
-      name: Frontend Lint
+      name: Frontend TSC + Lint
       # Run on Bitbucket Cloud to free on-premises resources
       image: node:22-alpine
       max-time: 10
       script:
         - cd src/ui
-        - echo "Running frontend linting on cloud runner..."
+        - echo "Running frontend tsc and linting on cloud runner..."
+
+        # Install git for Alpine (needed for diff comparison in PRs)
+        - apk add --no-cache git
 
         # Update npm to latest version
         - npm install -g npm@latest
@@ -484,9 +644,112 @@ definitions:
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
 
-        # Install dependencies and run linting
+        # Install dependencies
         - npm ci
-        - npm run lint
+
+        # Run lint - only changed files for PRs, all files for branch builds
+        - |
+          if [ -n "$BITBUCKET_PR_DESTINATION_BRANCH" ]; then
+              echo "PR build detected - checking for changed files..."
+              cd ../..  # Go to repo root for git operations (from src/ui)
+              git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=1
+              changed_files=$(git diff --name-only "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' | grep -E '\.(ts|tsx|js|jsx)$' | sed 's|^src/ui/||' || true)
+              cd src/ui
+
+              if [ -n "$changed_files" ]; then
+                  file_count=$(echo "$changed_files" | wc -l | tr -d ' ')
+                  echo "Linting $file_count changed file(s)..."
+                  echo "$changed_files" | xargs npx eslint
+              else
+                  echo "No lintable files changed in src/ui/src/"
+              fi
+          else
+              echo "Branch build - linting all files..."
+              npm run lint
+          fi
+
+        - npx tsc -b --noEmit
+
+    api-lint: &api-lint
+      name: "API Linting (Zalando Guidelines)"
+      # Runs on self-hosted Windows runner
+      runs-on:
+        - self.hosted
+        - windows
+      max-time: 10
+      caches:
+        - node
+      script:
+        - |
+          Write-Host "API LINTING - Zalando RESTful Guidelines" -ForegroundColor Cyan
+          Write-Host "=============================================" -ForegroundColor Cyan
+          Write-Host ""
+
+          # Enable TLS 1.2 for HTTPS connections
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
+          $uri = "${env:QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json"
+          Write-Host "Fetching OpenAPI spec from: $uri" -ForegroundColor Yellow
+
+          # Download OpenAPI spec with SSL certificate bypass
+          # Support both PowerShell Core (6+) and Windows PowerShell (5.x)
+          if ($PSVersionTable.PSVersion.Major -ge 6) {
+            # PowerShell Core 6+ has built-in -SkipCertificateCheck
+            Write-Host "Using PowerShell Core $($PSVersionTable.PSVersion)" -ForegroundColor Green
+            Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json -SkipCertificateCheck
+          } else {
+            # Fallback for Windows PowerShell 5.x - use .NET certificate policy
+            Write-Host "Using Windows PowerShell $($PSVersionTable.PSVersion)" -ForegroundColor Green
+            Add-Type -TypeDefinition @"
+          using System.Net;
+          using System.Security.Cryptography.X509Certificates;
+          public class TrustAllCertsPolicy : ICertificatePolicy {
+            public bool CheckValidationResult(
+              ServicePoint srvPoint, X509Certificate certificate,
+              WebRequest request, int certificateProblem) {
+              return true;
+            }
+          }
+          "@
+            [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+            Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json
+          }
+
+          Write-Host "[OK] OpenAPI spec downloaded successfully" -ForegroundColor Green
+          Write-Host ""
+
+          # Install Spectral CLI for API linting
+          Write-Host "Installing Spectral CLI..." -ForegroundColor Yellow
+          npm install -g @stoplight/spectral-cli
+          Write-Host "[OK] Spectral CLI installed" -ForegroundColor Green
+          Write-Host ""
+
+          # Run Spectral linting with JUnit output (using npx to avoid PATH issues)
+          Write-Host "Running API linting with Spectral..." -ForegroundColor Yellow
+          npx @stoplight/spectral-cli lint openapi-qa.json --format junit --output spectral-results.xml
+          npx @stoplight/spectral-cli lint openapi-qa.json --format stylish > spectral-report.txt
+
+          # Check for errors in the stylish report
+          $ERROR_COUNT = (Select-String -Path spectral-report.txt -Pattern " error " -AllMatches).Matches.Count
+
+          Write-Host ""
+          Write-Host "API LINTING SUMMARY" -ForegroundColor Cyan
+          Write-Host "======================" -ForegroundColor Cyan
+          Write-Host "Errors: $ERROR_COUNT" -ForegroundColor $(if ($ERROR_COUNT -gt 0) { "Red" } else { "Green" })
+          Write-Host ""
+
+          if ($ERROR_COUNT -gt 0) {
+            Write-Host "[FAIL] API linting FAILED with $ERROR_COUNT error(s)" -ForegroundColor Red
+            Write-Host "Review spectral-report.txt artifact for details" -ForegroundColor Yellow
+            exit 1
+          } else {
+            Write-Host "[PASS] API linting PASSED - No errors found" -ForegroundColor Green
+            exit 0
+          }
+      artifacts:
+        - spectral-results.xml
+        - spectral-report.txt
+        - openapi-qa.json
 
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
@@ -654,17 +917,68 @@ definitions:
 
           Write-Host "[8] Finalize with exit code $pwExit" -ForegroundColor Cyan
           exit $pwExit
-          
+
+    create-release-tag: &create-release-tag
+      name: Create Release Tag
+      script:
+        - |
+          echo "Reading build information..."
+          if [ ! -f ".buildinfo.json" ]; then
+            echo "Error: .buildinfo.json not found"
+            exit 1
+          fi
+
+          # Parse buildNumber and buildId from JSON
+          BUILD_NUMBER=$(grep -o '"buildNumber":"[^"]*"' .buildinfo.json | cut -d'"' -f4)
+          BUILD_ID=$(grep -o '"buildId":[0-9]*' .buildinfo.json | cut -d':' -f2)
+
+          if [ -z "$BUILD_NUMBER" ] || [ -z "$BUILD_ID" ]; then
+            echo "Error: Could not parse buildNumber or buildId from .buildinfo.json"
+            cat .buildinfo.json
+            exit 1
+          fi
+
+          TAG_NAME="${BUILD_NUMBER}.${BUILD_ID}"
+          TAG_MESSAGE="Release build ${BUILD_NUMBER}.${BUILD_ID} deployed to QA"
+
+          echo "Creating release tag: $TAG_NAME"
+          echo "Message: $TAG_MESSAGE"
+
+          git config user.email "bitbucket-pipeline@demoulas.com"
+          git config user.name "Bitbucket Pipeline"
+
+          # Check if tag already exists
+          if git tag -l | grep -q "^${TAG_NAME}$"; then
+            echo "Warning: Tag '$TAG_NAME' already exists locally. Skipping tag creation."
+            exit 0
+          fi
+
+          if git ls-remote --tags origin | grep -q "refs/tags/${TAG_NAME}$"; then
+            echo "Warning: Tag '$TAG_NAME' already exists on remote. Skipping tag creation."
+            exit 0
+          fi
+
+          # Create and push tag
+          git tag -a "$TAG_NAME" -m "$TAG_MESSAGE"
+          git push origin "refs/tags/$TAG_NAME"
+
+          echo "✓ Release tag '$TAG_NAME' created and pushed successfully"
 
 pipelines:
   branches:
     release:
       # Stage 1: Build and test
+      # Stage 1: Code quality checks (fail fast)
+      - step: *frontend-lint
+      # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
-          - step: *build-and-test-backend
-          - step: *test-frontend
           - step: *audit-frontend
           - step: *audit-backend
+      # Stage 3: Build and test
+      - parallel:
+          - step: *build-and-test-backend-unit
+          - step: *build-and-test-backend-architecture
+          - step: *test-frontend
       # Stage 2: Generate build information (Windows, ~30 seconds)
       - step: *generate-buildinfo
       # Stage 3: Create artifacts (API/services on Windows, UI builds in parallel on cloud)
@@ -684,29 +998,50 @@ pipelines:
           script:
             - $env:ENV = "QA"
             - $env:API_SERVER_QA = "appt23d"
-            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
-            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
-            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/Payroll'
-            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/inetpub/wwwroot/api'
-            - echo "Deploying web application..."
-            # Reuse the same API artifact built once in Stage 2
-            - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
-            - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
-            - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
-            - echo "Deploying background service..."
-            - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
+            - |
+              try {
+                pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+                pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+                pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/Payroll'
+                pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/inetpub/wwwroot/api'
+                Write-Host "Deploying web application..." -ForegroundColor Cyan
+                $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
+                $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
+                pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+                Write-Host "Deploying background service..." -ForegroundColor Cyan
+                pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
+                Write-Host "QA deployment completed successfully" -ForegroundColor Green
+                pwsh .\scripts\Notify-Teams.ps1 -Status SUCCESS -Environment QA -Step Deployment
+              }
+              catch {
+                $env:DEPLOY_ERROR = $_.Exception.Message
+                Write-Host "QA deployment failed" -ForegroundColor Red
+                pwsh .\scripts\Notify-Teams.ps1 -Status FAILURE -Environment QA -Step Deployment -ErrorMessage $env:DEPLOY_ERROR
+                exit 1
+              }
       - step: *upgrade-database
-  
       - step:
           name: "Checking API Health"
           runs-on:
             - windows
             - self.hosted
           script:
-            - $env:API_SERVER_QA = "appt23d"
-            - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
+            - |
+              $env:API_SERVER_QA = "appt23d"
+              try {
+                pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
+                Write-Host "API health check passed" -ForegroundColor Green
+              }
+              catch {
+                Write-Host "API health check failed" -ForegroundColor Red
+                pwsh .\scripts\Notify-Teams.ps1 -Status FAILURE -Environment QA -Step HealthCheck -ErrorMessage $_.Exception.Message
+                exit 1
+              }
 
-      # Stage 4: UAT Promotion Gate
+      # Stage 5: Create Release Tag
+      - step: *create-release-tag
+
+      # Stage 6: UAT Promotion Gate
       - step:
           name: "Gate: Promote to UAT"
           runs-on:
@@ -736,9 +1071,10 @@ pipelines:
               Write-Host "  4) Parallel: Validate import + UAT API health check"
 
       - step: *create-frontend-artifact-uat
-      # Stage 5: UAT Deployment (reuses artifacts from Stage 3)
+      # Stage 7a: UAT Drop & Recreate DB (prerequisite)
+      - step: *uat-drop-recreate-db
+      # Stage 7b: UAT Deployment & Import in Parallel
       - parallel:
-          - step: *uat-drop-recreate-db
           - step:
               name: "Application Deployment UAT"
               runs-on:
@@ -746,58 +1082,339 @@ pipelines:
                 - self.hosted
               deployment: UAT
               script:
-                - echo "Deploying application to UAT (reusing API artifact from Stage 2)..."
-                - $env:API_SERVER_UAT = "appt24d"
-                - $env:ENV = "UAT"
-                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
-                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
-                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/Payroll'
-                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/inetpub/wwwroot/api'
-                - echo "Deploying web application..."
-                # Reuse the same API artifact built once in Stage 2
-                - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
-                - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
-                - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
-                - echo "Deploying background service..."
-                - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
-      # Stage 6: UAT Database Import (must run AFTER drop-recreate completes)
-      - step: *uat-import-from-ready
+                - |
+                  try {
+                    Write-Host "Deploying application to UAT (reusing API artifact from Stage 2)..." -ForegroundColor Cyan
+                    $env:API_SERVER_UAT = "appt24d"
+                    $env:ENV = "UAT"
+                    pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+                    pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+                    pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/Payroll'
+                    pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/inetpub/wwwroot/api'
+                    Write-Host "Deploying web application..." -ForegroundColor Cyan
+                    $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
+                    $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
+                    pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+                    Write-Host "Deploying background service..." -ForegroundColor Cyan
+                    pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
+                    Write-Host "UAT deployment completed successfully" -ForegroundColor Green
+                    pwsh .\scripts\Notify-Teams.ps1 -Status SUCCESS -Environment UAT -Step Deployment
+                  }
+                  catch {
+                    $env:DEPLOY_ERROR = $_.Exception.Message
+                    Write-Host "UAT deployment failed" -ForegroundColor Red
+                    pwsh .\scripts\Notify-Teams.ps1 -Status FAILURE -Environment UAT -Step Deployment -ErrorMessage $env:DEPLOY_ERROR
+                    exit 1
+                  }
+          - step: *uat-import-from-ready
+      # Stage 7c: UAT Post-Deployment Steps
       - step: *uat-import-uat-navigation
-      - parallel:
-          - step: *uat-validate-import
-          - step:
-              name: "Checking API Health (UAT)"
-              runs-on:
-                - windows
-                - self.hosted
-              script:
-                - $env:API_SERVER_UAT = "appt24d"
-                - pwsh -File ./scripts/Check-Health.ps1 -Url $env:UAT_BASE_URL -envServerName $env:API_SERVER_UAT
-
+      - step: *uat-validate-import
 
     develop:
-      - parallel:
-          - step: *build-and-test-backend
-          - step: *test-frontend
-          - step: *audit-frontend
-          - step: *audit-backend
-
-
-  pull-requests:
-    '**':
       # Stage 1: Code quality checks (fail fast)
       - step: *frontend-lint
-      # Stage 2: Build and test
-      - parallel:
-          - step: *build-and-test-backend
-          - step: *test-frontend
-      # Stage 3: Run audits and security scans only if build succeeds
+      # Stage 2: Run audits and security scans only if build succeeds
       - parallel:
           - step: *audit-frontend
           - step: *audit-backend
+      # Stage 3: Build and test
+      - parallel:
+          - step: *build-and-test-backend-unit
+          - step: *build-and-test-backend-architecture
+          - step: *test-frontend
+
+  pull-requests:
+    "**":
+      # Stage 1: Code quality checks (fail fast)
+      - step:
+          <<: *frontend-lint
+          condition:
+            changesets:
+              includePaths:
+                - "src/ui/**/*.ts"
+                - "src/ui/**/*.tsx"
+                - "src/ui/**/*.js"
+                - "src/ui/**/*.jsx"
+      # Stage 2: Run audits and security scans only if build succeeds
+      - parallel:
+          - step:
+              <<: *audit-frontend
+              condition:
+                changesets:
+                  includePaths:
+                    - "src/ui/**"
+          - step:
+              <<: *audit-backend
+              condition:
+                changesets:
+                  includePaths:
+                    - "src/services/**/*.cs"
+                    - "src/services/**/*.csproj"
+                    - "src/services/**/*.sln"
+                    - "src/services/**/*.slnx"
+                    - "src/services/**/*.json"
+                    - "src/services/**/*.config"
           - step: *secret-scan
-  
+      # Stage 3: Build and test
+      - parallel:
+          - step:
+              <<: *build-and-test-backend-unit
+              condition:
+                changesets:
+                  includePaths:
+                    - "src/services/**/*.cs"
+                    - "src/services/**/*.csproj"
+                    - "src/services/**/*.sln"
+                    - "src/services/**/*.slnx"
+                    - "src/services/**/*.json"
+                    - "src/services/**/*.config"
+          - step:
+              <<: *build-and-test-backend-architecture
+              condition:
+                changesets:
+                  includePaths:
+                    - "src/services/**/*.cs"
+                    - "src/services/**/*.csproj"
+                    - "src/services/**/*.sln"
+                    - "src/services/**/*.slnx"
+                    - "src/services/**/*.json"
+                    - "src/services/**/*.config"
+          - step:
+              <<: *test-frontend
+              condition:
+                changesets:
+                  includePaths:
+                    - "src/ui/**/*.ts"
+                    - "src/ui/**/*.tsx"
+                    - "src/ui/**/*.js"
+                    - "src/ui/**/*.jsx"
+
   custom:
+    infrastructure_as_code:
+      - variables:
+          - name: ServerEnvironment
+            default: QA
+            allowed-values:
+              - QA
+              - UAT
+          - name: Operation
+            default: install-hosting-bundle
+            allowed-values:
+              - install-hosting-bundle
+              - configure-gzip-compression
+          - name: ForceReinstall
+            default: "false"
+            allowed-values:
+              - "true"
+              - "false"
+      - step:
+          name: Execute IaC Operation
+          runs-on:
+            - windows
+            - self.hosted
+          script:
+            - |
+              # Server mapping from centralized definitions (keep in sync with definitions.servers)
+              $targetServer = switch ($env:ServerEnvironment) {
+                  "QA"  { "appt23d" }
+                  "UAT" { "appt24d" }
+                  default {
+                      Write-Error "Unknown ServerEnvironment: $env:ServerEnvironment (allowed: QA, UAT)"
+                      exit 1
+                  }
+              }
+
+              Write-Host "================================================================" -ForegroundColor Cyan
+              Write-Host "  Infrastructure as Code Operation" -ForegroundColor Cyan
+              Write-Host "================================================================" -ForegroundColor Cyan
+              Write-Host ""
+              Write-Host "Environment: $env:ServerEnvironment" -ForegroundColor Yellow
+              Write-Host "Target Server: $targetServer" -ForegroundColor Yellow
+              Write-Host "Operation: $env:Operation" -ForegroundColor Yellow
+              Write-Host "Force Reinstall: $env:ForceReinstall" -ForegroundColor Yellow
+              Write-Host ""
+
+              # Execute operation
+              switch ($env:Operation) {
+                  "install-hosting-bundle" {
+                      Write-Host "Installing .NET 10 Hosting Bundle on $targetServer..." -ForegroundColor Cyan
+                      
+                      $scriptPath = ".\scripts\IaC\Install-DotNetHostingBundle.ps1"
+                      if (-not (Test-Path $scriptPath)) {
+                          Write-Error "Script not found: $scriptPath"
+                          exit 1
+                      }
+
+                      # Download the installer locally first (runner has internet access)
+                      $downloadUrl = "https://builds.dotnet.microsoft.com/dotnet/aspnetcore/Runtime/10.0.0/dotnet-hosting-10.0.0-win.exe"
+                      $localInstallerPath = "$env:TEMP\dotnet-hosting-10.0.0-win.exe"
+                      
+                      Write-Host "Downloading .NET 10 Hosting Bundle locally..." -ForegroundColor Cyan
+                      try {
+                          Invoke-WebRequest -Uri $downloadUrl -OutFile $localInstallerPath -ErrorAction Stop
+                          $fileSize = (Get-Item $localInstallerPath).Length / 1MB
+                          Write-Host "[OK] Downloaded $('{0:N2}' -f $fileSize) MB" -ForegroundColor Green
+                      }
+                      catch {
+                          Write-Error "Failed to download installer: $_"
+                          exit 1
+                      }
+
+                      # Create remote session (similar to webDeploy.ps1 approach)
+                      try {
+                          $session = New-PSSession $targetServer
+                          
+                          # Copy installer and script to remote server temp location
+                          $remoteInstallerPath = "C:\temp\dotnet-hosting-10.0.0-win.exe"
+                          $remoteScriptPath = "C:\temp\Install-DotNetHostingBundle.ps1"
+                          
+                          Invoke-Command -Session $session -ScriptBlock {
+                              if (-not (Test-Path "C:\temp")) {
+                                  New-Item -ItemType Directory -Path "C:\temp" -Force | Out-Null
+                              }
+                          }
+                          
+                          Write-Host "Copying files to remote server..." -ForegroundColor Cyan
+                          Copy-Item -ToSession $session -Path $localInstallerPath -Destination $remoteInstallerPath -Force
+                          Copy-Item -ToSession $session -Path $scriptPath -Destination $remoteScriptPath -Force
+                          Write-Host "[OK] Files copied to remote server" -ForegroundColor Green
+                          
+                          # Execute hosting bundle installation on remote machine
+                          $forceFlag = ($env:ForceReinstall -eq 'true')
+                          $result = Invoke-Command -Session $session -ScriptBlock {
+                              param($Force, $InstallerPath)
+                              
+                              # Run the installer directly (skip download since we already have the file)
+                              Write-Host ""
+                              Write-Host "Running .NET 10 Hosting Bundle installer..." -ForegroundColor Cyan
+                              
+                              try {
+                                  $process = Start-Process -FilePath $InstallerPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -PassThru
+                                  
+                                  if ($process.ExitCode -eq 0) {
+                                      Write-Host "[OK] Installation completed successfully (exit code: 0)" -ForegroundColor Green
+                                      
+                                      # Verify installation
+                                      Write-Host ""
+                                      Write-Host "Verifying installation..." -ForegroundColor Cyan
+                                      $dotnetInfo = & dotnet --info 2>&1 | Out-String
+                                      
+                                      $hasAspNetCore = $dotnetInfo -match "Microsoft\.AspNetCore\.App 10\.0\.0"
+                                      $hasNETCore = $dotnetInfo -match "Microsoft\.NETCore\.App 10\.0\.0"
+                                      
+                                      if ($hasAspNetCore -and $hasNETCore) {
+                                          Write-Host "[OK] .NET 10.0.0 Runtime verified" -ForegroundColor Green
+                                          Write-Host "  - Microsoft.AspNetCore.App 10.0.0: Found" -ForegroundColor Green
+                                          Write-Host "  - Microsoft.NETCore.App 10.0.0: Found" -ForegroundColor Green
+                                      } else {
+                                          Write-Host "[!] Verification incomplete" -ForegroundColor Yellow
+                                          if ($hasAspNetCore) { Write-Host "  - Microsoft.AspNetCore.App 10.0.0: Found" -ForegroundColor Yellow }
+                                          if ($hasNETCore) { Write-Host "  - Microsoft.NETCore.App 10.0.0: Found" -ForegroundColor Yellow }
+                                      }
+                                      
+                                      # Restart IIS
+                                      Write-Host ""
+                                      Write-Host "Restarting IIS..." -ForegroundColor Cyan
+                                      iisreset /restart | Out-Null
+                                      Write-Host "[OK] IIS restarted" -ForegroundColor Green
+                                      
+                                      return 0
+                                  } else {
+                                      Write-Host "[X] Installation failed with exit code: $($process.ExitCode)" -ForegroundColor Red
+                                      return $process.ExitCode
+                                  }
+                              }
+                              catch {
+                                  Write-Host "[X] Installation error: $_" -ForegroundColor Red
+                                  return 1
+                              }
+                              finally {
+                                  # Cleanup
+                                  Remove-Item -Path $InstallerPath -Force -ErrorAction SilentlyContinue
+                                  Remove-Item -Path C:\temp\Install-DotNetHostingBundle.ps1 -Force -ErrorAction SilentlyContinue
+                              }
+                          } -ArgumentList $forceFlag, $remoteInstallerPath
+                          
+                          if ($result -ne 0) {
+                              Write-Error "Hosting bundle installation failed with exit code: $result"
+                              exit $result
+                          }
+                          Write-Host ""
+                          Write-Host "[OK] .NET 10 Hosting Bundle installation completed" -ForegroundColor Green
+                      }
+                      finally {
+                          # Cleanup local file
+                          Remove-Item -Path $localInstallerPath -Force -ErrorAction SilentlyContinue
+                          Remove-PSSession -Session $session -ErrorAction SilentlyContinue
+                      }
+                  }
+                  "configure-gzip-compression" {
+                      Write-Host "Configuring IIS Gzip Compression on $targetServer..." -ForegroundColor Cyan
+                      
+                      $scriptPath = ".\scripts\IaC\IISGzipConfiguration.ps1"
+                      if (-not (Test-Path $scriptPath)) {
+                          Write-Error "Script not found: $scriptPath"
+                          exit 1
+                      }
+
+                      # Create remote session (similar to webDeploy.ps1 approach)
+                      try {
+                          $session = New-PSSession $targetServer
+                          
+                          # Copy script to remote server temp location
+                          $remoteTempPath = "C:\temp\IISGzipConfiguration.ps1"
+                          Invoke-Command -Session $session -ScriptBlock {
+                              if (-not (Test-Path "C:\temp")) {
+                                  New-Item -ItemType Directory -Path "C:\temp" -Force | Out-Null
+                              }
+                          }
+                          Copy-Item -ToSession $session -Path $scriptPath -Destination $remoteTempPath -Force
+                          
+                          # Execute gzip configuration script on remote machine
+                          $result = Invoke-Command -Session $session -ScriptBlock {
+                              # Source the script
+                              . C:\temp\IISGzipConfiguration.ps1
+                              
+                              # Run initialization
+                              Initialize-IISGzipCompression
+                              
+                              # Display status
+                              Write-Host ""
+                              $healthCheck = Test-IISGzipConfigurationHealth
+                              
+                              # Cleanup
+                              Remove-Item -Path C:\temp\IISGzipConfiguration.ps1 -Force -ErrorAction SilentlyContinue
+                              
+                              # Return health check result
+                              return $healthCheck
+                          }
+                          
+                          if (-not $result.IsHealthy) {
+                              Write-Warning "Gzip compression configured but health check detected issues"
+                              Write-Host "Health check returned: IsHealthy=$($result.IsHealthy)" -ForegroundColor Yellow
+                          }
+                          Write-Host ""
+                          Write-Host "[OK] IIS Gzip Compression configuration completed" -ForegroundColor Green
+                      }
+                      finally {
+                          Remove-PSSession -Session $session -ErrorAction SilentlyContinue
+                      }
+                  }
+                  default {
+                      Write-Error "Unknown operation: $env:Operation"
+                      exit 1
+                  }
+              }
+
+              Write-Host ""
+              Write-Host "================================================================" -ForegroundColor Cyan
+              Write-Host "[OK] IaC operation completed successfully" -ForegroundColor Green
+              Write-Host "================================================================" -ForegroundColor Cyan
+
+    api_lint:
+      - step: *api-lint
+
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
@@ -819,7 +1436,7 @@ pipelines:
             default: PROFITSHARE
             allowed-values:
               - PROFITSHARE
-              - MTPR    
+              - MTPR
               - PROFITSHARE_STAGING
       - step:
           name: Validate SourceSchema
@@ -864,7 +1481,3 @@ pipelines:
       - step: *upgrade-database
     playwright_e2e_qa:
       - step: *run-playwright-tests
-
-
-
-

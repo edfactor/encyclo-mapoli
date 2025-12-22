@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
@@ -9,7 +8,6 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -49,6 +47,7 @@ public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRe
                                 Id = 1,
                                 Ssn = "XXX-XX-1234",
                                 FirstName = "John",
+                                MiddleName = "Q",
                                 LastName = "Doe",
                                 BadgeNumber = 1001,
                                 PayFrequencyId = 1,

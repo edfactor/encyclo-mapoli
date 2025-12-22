@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -15,6 +14,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
+[Collection("SharedGlobalState")]
 public class GetEligibleEmployeesTests : ApiTestBase<Program>
 {
     // This test uses a single employee.   These references let us adjust the employee in each test.

@@ -8,14 +8,12 @@ using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
-using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
-using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
-public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYearRequest, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
+public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateNamesAndBirthdaysRequest, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
 {
     private readonly IDuplicateNamesAndBirthdaysService _duplicateNamesAndBirthdaysService;
     private readonly ILogger<DuplicateNamesAndBirthdaysEndpoint> _logger;
@@ -31,7 +29,8 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
 
     public override void Configure()
     {
-        Get("duplicate-names-and-birthdays");
+        Get("yearend/duplicate-names-and-birthdays");
+        Policies(Security.Policy.CanViewDuplicateNamesAndBirthdays);  // Override group policy with stricter endpoint policy
         Summary(s =>
         {
             s.Summary = "List of duplicate names, and birthdays in the demographics area";
@@ -52,14 +51,12 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                             {
                                 new DuplicateNamesAndBirthdaysResponse
                                 {
-                                    Address = new AddressResponseDto
-                                    {
-                                        State = "MA",
+                                    DemographicId = 12345,
+                                    State = "MA",
                                         PostalCode = "01876",
                                         City = "Tewksbury",
-                                        Street = "1900 Main St",
-                                        CountryIso="US"
-                                    },
+                                        Address = "1900 Main St",
+                                        CountryIso="US",
                                     BadgeNumber = 100110,
                                     Count = 2,
                                     IncomeCurrentYear = 23003,
@@ -80,15 +77,14 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                     }
                 }
             };
-            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
+            s.Responses[403] = $"Forbidden. Requires HR-ReadOnly or Finance roles";
         });
-        Group<YearEndGroup>();
         base.Configure();
     }
 
     public override string ReportFileName => "duplicate-names-and-birthdays";
 
-    public override async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(DuplicateNamesAndBirthdaysRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -96,18 +92,21 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            // Get cached data only
-            _logger.LogInformation("Fetching duplicate names and birthdays data from cache");
+            _logger.LogInformation("Fetching duplicate names and birthdays data (ProfitYear: {ProfitYear})",
+                req.ProfitYear);
+
+            // Get cached data with filtering applied by service
             var cachedResponse = await _duplicateNamesAndBirthdaysService.GetCachedDuplicateNamesAndBirthdaysAsync(req, ct);
 
-            ReportResponseBase<DuplicateNamesAndBirthdaysResponse> result;
+            ReportResponseBase<DuplicateNamesAndBirthdaysResponse> reportResult;
 
             if (cachedResponse != null)
             {
-                _logger.LogInformation("Using cached duplicate names and birthdays data (AsOfDate: {AsOfDate})", cachedResponse.AsOfDate);
+                _logger.LogInformation("Using cached duplicate names and birthdays data (AsOfDate: {AsOfDate})",
+                    cachedResponse.AsOfDate);
 
                 // Convert cached response to ReportResponseBase
-                result = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
+                reportResult = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
                 {
                     ReportName = ReportFileName,
                     ReportDate = cachedResponse.AsOfDate,
@@ -129,7 +128,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                 // Return empty result if cache is not available
                 _logger.LogWarning("Cache not available, returning empty result. Cache will be populated by background service.");
 
-                result = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
+                reportResult = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
                 {
                     ReportName = ReportFileName,
                     StartDate = DateOnly.FromDateTime(DateTime.Today),
@@ -146,7 +145,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                     new("data_source", "cache-miss"));
             }
 
-            var resultCount = result.Response?.Results?.Count() ?? 0;
+            var resultCount = reportResult.Response?.Results?.Count() ?? 0;
             EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
                 new("record_type", "duplicate-names-birthdays-cleanup"),
                 new("endpoint", "DuplicateNamesAndBirthdaysEndpoint"));
@@ -154,8 +153,8 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
             _logger.LogInformation("Year-end cleanup report for duplicate names and birthdays returned {Count} records (correlation: {CorrelationId})",
                 resultCount, HttpContext.TraceIdentifier);
 
-            this.RecordResponseMetrics(HttpContext, _logger, result);
-            return result;
+            this.RecordResponseMetrics(HttpContext, _logger, reportResult);
+            return reportResult;
         }
         catch (Exception ex)
         {
@@ -170,22 +169,23 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
-            Map(m => m.BadgeNumber).Index(2).Name("BADGE");
-            Map(m => m.Ssn).Index(3).Name("SSN");
-            Map(m => m.Name).Index(4).Name("NAME");
-            Map(m => m.DateOfBirth).Index(5).Name("DOB").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.Address.Street).Index(6).Name("ADDRESS");
-            Map(m => m.Address.City).Index(7).Name("CITY");
-            Map(m => m.Address.State).Index(8).Name("ST");
-            Map(m => m.Years).Index(9).Name("YRS");
-            Map(m => m.HireDate).Index(10).Name("HIRE").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.TerminationDate).Index(11).Name("TERM").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.Status).Index(12).Name("ST");
-            Map(m => m.StoreNumber).Index(13).Name("STORE");
-            Map(m => m.Count).Index(14).Name("PS#");
-            Map(m => m.NetBalance).Index(15).Name("PSBAL");
-            Map(m => m.HoursCurrentYear).Index(16).Name("CUR HURS");
-            Map(m => m.IncomeCurrentYear).Index(17).Name("CUR WAGE");
+            Map(m => m.DemographicId).Index(2).Name("DEMOGRAPHIC_ID");
+            Map(m => m.BadgeNumber).Index(3).Name("BADGE");
+            Map(m => m.Ssn).Index(4).Name("SSN");
+            Map(m => m.Name).Index(5).Name("NAME");
+            Map(m => m.DateOfBirth).Index(6).Name("DOB").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.Address).Index(7).Name("ADDRESS");
+            Map(m => m.City).Index(8).Name("CITY");
+            Map(m => m.State).Index(9).Name("ST");
+            Map(m => m.Years).Index(10).Name("YRS");
+            Map(m => m.HireDate).Index(11).Name("HIRE").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.TerminationDate).Index(12).Name("TERM").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.Status).Index(13).Name("ST");
+            Map(m => m.StoreNumber).Index(14).Name("STORE");
+            Map(m => m.Count).Index(15).Name("PS#");
+            Map(m => m.NetBalance).Index(16).Name("PSBAL");
+            Map(m => m.HoursCurrentYear).Index(17).Name("CUR HURS");
+            Map(m => m.IncomeCurrentYear).Index(18).Name("CUR WAGE");
         }
     }
 }

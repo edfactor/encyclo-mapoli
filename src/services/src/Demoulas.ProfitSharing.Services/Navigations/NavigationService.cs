@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -29,29 +30,34 @@ public class NavigationService : INavigationService
 
     public async Task<List<NavigationDto>> GetNavigation(CancellationToken cancellationToken)
     {
-        var roleNamesUpper = _appUser.GetUserAllRoles()
+        List<string> roleNamesUpper = _appUser.GetUserAllRoles()
             .Where(r => !string.IsNullOrWhiteSpace(r))
             .Select(r => r!.Trim().ToUpper()) // Trim whitespace to ensure consistency
             .Distinct() // Remove any duplicate roles
             .OrderBy(r => r) // Sort for consistent cache key
             .ToList();
 
+        // DIAGNOSTIC LOGGING: Log the actual user roles for troubleshooting
+        var rawUserRoles = _appUser.GetUserAllRoles();
+        _logger?.LogInformation("🔍 DIAGNOSTIC: User raw roles from Okta: {RawRoles}", rawUserRoles == null ? "NULL" : string.Join(", ", rawUserRoles));
+        _logger?.LogInformation("🔍 DIAGNOSTIC: User uppercase roles for filtering: {UppercaseRoles}", string.Join(", ", roleNamesUpper));
+
         // Get current cache version to ensure cache is busted when navigation status is updated
         const string versionKey = "navigation-tree-version";
-        var versionBytes = await _distributedCache.GetAsync(versionKey, cancellationToken);
-        var version = versionBytes is { Length: > 0 }
+        byte[]? versionBytes = await _distributedCache.GetAsync(versionKey, cancellationToken);
+        int version = versionBytes is { Length: > 0 }
             ? BitConverter.ToInt32(versionBytes, 0)
             : 0;
 
         // Create cache key based on sorted role names and version for consistent caching
         // Use pipe separator to clearly delimit roles and avoid ambiguity
-        var roleKey = string.Join("|", roleNamesUpper);
-        var cacheKey = $"{NavigationCacheKeyPrefix}v{version}-{roleKey}";
+        string roleKey = string.Join("|", roleNamesUpper);
+        string cacheKey = $"{NavigationCacheKeyPrefix}v{version}-{roleKey}";
 
         _logger?.LogDebug("Navigation cache key generated: {CacheKey} (roles: {Roles})", cacheKey, roleKey);
 
         // Try to get from distributed cache first
-        var cachedBytes = await _distributedCache.GetAsync(cacheKey, cancellationToken);
+        byte[]? cachedBytes = await _distributedCache.GetAsync(cacheKey, cancellationToken);
         if (cachedBytes != null)
         {
             var cachedNavigation = JsonSerializer.Deserialize<List<NavigationDto>>(cachedBytes);
@@ -78,9 +84,30 @@ public class NavigationService : INavigationService
             return query.ToListAsync(cancellationToken);
         }, cancellationToken);
 
+        // DIAGNOSTIC LOGGING: Log all available roles and what was matched
+        var allAvailableRoles = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            return await context.NavigationRoles
+                .Select(nr => new { nr.Id, nr.Name, nr.IsReadOnly })
+                .ToListAsync(cancellationToken);
+        }, cancellationToken);
+
+        _logger?.LogInformation("🔍 DIAGNOSTIC: All available navigation roles in database: {AvailableRoles}",
+            string.Join(", ", allAvailableRoles.Select(r => $"[{r.Id}:{r.Name}(RO={r.IsReadOnly})]")));
+        _logger?.LogInformation("🔍 DIAGNOSTIC: Navigations matched for user roles: {MatchedCount} items", flatList.Count);
+        if (flatList.Any())
+        {
+            var matchedRoles = flatList
+                .SelectMany(n => n.RequiredRoles ?? new List<NavigationRole>())
+                .Select(r => r.Name)
+                .Distinct()
+                .ToList();
+            _logger?.LogInformation("🔍 DIAGNOSTIC: Matched navigation roles: {MatchedRoles}", string.Join(", ", matchedRoles));
+        }
+
         // Check if the current user has any read-only roles based on database configuration
         var userRoles = _appUser.GetUserAllRoles()?.Where(r => !string.IsNullOrWhiteSpace(r)).ToList() ?? new List<string>();
-        var userHasReadOnlyRole = await _dataContextFactory.UseReadOnlyContext(async context =>
+        bool userHasReadOnlyRole = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var readOnlyRoleNames = await context.NavigationRoles
                 .Where(nr => nr.IsReadOnly)
@@ -124,7 +151,7 @@ public class NavigationService : INavigationService
                     else
                     {
                         // intersect child with parent so child cannot have broader permissions
-                        var intersection = entityRolesUpper.Intersect(parentEffectiveRoles).ToList();
+                        List<string> intersection = entityRolesUpper.Intersect(parentEffectiveRoles).ToList();
                         if (intersection.Count != entityRolesUpper.Count)
                         {
                             // log a warning that child's specified roles were broader than parent; note intersection applied
@@ -200,10 +227,10 @@ public class NavigationService : INavigationService
 
         // Store in distributed cache for 15 minutes (half of previous 30 min) with 7.5 min sliding
         // This ensures navigation changes propagate faster to users
-        var serialized = JsonSerializer.SerializeToUtf8Bytes(navigationTree);
-        var cacheOptions = new DistributedCacheEntryOptions
+        byte[] serialized = JsonSerializer.SerializeToUtf8Bytes(navigationTree);
+        DistributedCacheEntryOptions cacheOptions = new DistributedCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15), // Reduced from 30
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
             SlidingExpiration = TimeSpan.FromMinutes(7.5) // Reduced from 15
         };
         await _distributedCache.SetAsync(cacheKey, serialized, cacheOptions, cancellationToken);
@@ -217,7 +244,7 @@ public class NavigationService : INavigationService
     public async Task<List<NavigationStatusDto>> GetNavigationStatus(CancellationToken cancellationToken)
     {
         // Try to get from distributed cache first
-        var cachedBytes = await _distributedCache.GetAsync(NavigationStatusCacheKey, cancellationToken);
+        byte[]? cachedBytes = await _distributedCache.GetAsync(NavigationStatusCacheKey, cancellationToken);
         if (cachedBytes != null)
         {
             var cachedList = JsonSerializer.Deserialize<List<NavigationStatusDto>>(cachedBytes);
@@ -235,8 +262,8 @@ public class NavigationService : INavigationService
 
         // Store in distributed cache for 15 minutes (half of previous 30 min) with 7.5 min sliding
         // This ensures navigation status changes propagate faster
-        var serialized = JsonSerializer.SerializeToUtf8Bytes(navigationStatusList);
-        var cacheOptions = new DistributedCacheEntryOptions
+        byte[] serialized = JsonSerializer.SerializeToUtf8Bytes(navigationStatusList);
+        DistributedCacheEntryOptions cacheOptions = new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15), // Reduced from 30
             SlidingExpiration = TimeSpan.FromMinutes(7.5) // Reduced from 15
@@ -250,7 +277,7 @@ public class NavigationService : INavigationService
 
     public async Task<bool> UpdateNavigation(short navigationId, byte statusId, CancellationToken cancellationToken)
     {
-        var success = await _dataContextFactory.UseWritableContext(async context =>
+        int success = await _dataContextFactory.UseWritableContext(async context =>
         {
             //update navigation status
             var nav = await context.Navigations.FirstOrDefaultAsync(x => x.Id == navigationId, cancellationToken);
@@ -308,14 +335,14 @@ public class NavigationService : INavigationService
         try
         {
             // Get current version (default to 0 if not exists)
-            var currentVersionBytes = await _distributedCache.GetAsync(versionKey, cancellationToken);
-            var currentVersion = currentVersionBytes != null && currentVersionBytes.Length > 0
+            byte[]? currentVersionBytes = await _distributedCache.GetAsync(versionKey, cancellationToken);
+            int currentVersion = currentVersionBytes != null && currentVersionBytes.Length > 0
                 ? BitConverter.ToInt32(currentVersionBytes, 0)
                 : 0;
 
             // Increment version
-            var newVersion = currentVersion + 1;
-            var newVersionBytes = BitConverter.GetBytes(newVersion);
+            int newVersion = currentVersion + 1;
+            byte[] newVersionBytes = BitConverter.GetBytes(newVersion);
 
             // Store new version (never expires - small 4-byte value)
             await _distributedCache.SetAsync(versionKey, newVersionBytes, new DistributedCacheEntryOptions
@@ -341,7 +368,7 @@ public class NavigationService : INavigationService
         {
             // Reset all navigation statuses to 'Not Started' using ExecuteUpdateAsync for efficiency
             // Filter: Only update statuses that are currently set and not already 'Not Started'
-            var rowsUpdated = await context.Navigations
+            int rowsUpdated = await context.Navigations
                 .Where(n => n.StatusId != null && n.StatusId != Data.Entities.Navigations.NavigationStatus.Constants.NotStarted)
                 .ExecuteUpdateAsync(
                     setters => setters.SetProperty(n => n.StatusId, Data.Entities.Navigations.NavigationStatus.Constants.NotStarted),

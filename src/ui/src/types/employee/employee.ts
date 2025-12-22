@@ -14,11 +14,13 @@ export interface EmployeeDetails {
   isEmployee: boolean;
   firstName: string;
   lastName: string;
+  fullName: string;
   address: string;
   addressCity: string;
   addressState: string;
   addressZipCode: string;
   dateOfBirth: string;
+  age?: string;
   ssn: string;
   yearToDateProfitSharingHours: number;
   yearsInPlan: number;
@@ -38,7 +40,7 @@ export interface EmployeeDetails {
   previousEtva: number;
   employmentStatus?: string;
   department: string;
-  PayClassification: string;
+  payClassification: string;
   gender: string;
   phoneNumber: string;
   workLocation: string;
@@ -55,19 +57,31 @@ export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
+export interface WagesCurrentYearParticipant {
+  badgeNumber: number;
+  incomeCurrentYear: number;
+  hoursCurrentYear: number;
+  storeNumber: number;
+  isExecutive: boolean;
+}
+
 export interface EmployeeWagesForYear {
   badgeNumber: number;
   incomeCurrentYear: number;
   hoursCurrentYear: number;
+  storeNumber: number;
   isExecutive: boolean;
 }
 
 export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
+  useFrozenData?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface EmployeeWagesForYearResponse extends PagedReportResponse<EmployeeWagesForYear> {}
+export interface EmployeeWagesForYearResponse extends PagedReportResponse<EmployeeWagesForYear> {
+  totalHoursCurrentYearWages?: number;
+  totalIncomeCurrentYearWages?: number;
+}
 
 export interface EligibleEmployee {
   oracleHcmId: number;
@@ -98,7 +112,7 @@ export interface YearEndProfitSharingEmployee {
   employeeTypeCode: string;
   employmentTypeName: string;
   dateOfBirth: Date;
-  age: number;
+  age: string;
   ssn: string;
   wages: number;
   hours: number;
@@ -138,8 +152,11 @@ export interface YearEndProfitSharingReportSummaryLineItem {
   lineItemPrefix: string;
   lineItemTitle: string;
   numberOfMembers: number;
-  totalWages: number;
-  totalBalance: number;
+  totalWages: number | string;
+  totalBalance: number | string;
+  totalHours: number | string;
+  totalPoints: number | string;
+  totalPriorBalance: number | string;
 }
 
 export interface YearEndProfitSharingReportSummaryResponse {

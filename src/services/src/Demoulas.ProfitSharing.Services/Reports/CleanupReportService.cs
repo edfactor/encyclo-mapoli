@@ -1,5 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
@@ -11,7 +10,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -24,8 +22,6 @@ public class CleanupReportService : ICleanupReportService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
-    private readonly TotalService _totalService;
-    private readonly IHostEnvironment _host;
     private readonly IDemographicReaderService _demographicReaderService;
 
     private readonly byte[] _distributionProfitCodes =
@@ -52,8 +48,6 @@ public class CleanupReportService : ICleanupReportService
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
-        _totalService = totalService;
-        _host = host;
         _demographicReaderService = demographicReaderService;
         _logger = factory.CreateLogger<CleanupReportService>();
     }
@@ -75,7 +69,7 @@ public class CleanupReportService : ICleanupReportService
                             {
                                 dem.BadgeNumber,
                                 dem.Ssn,
-                                EmployeeName = dem.ContactInfo.FullName ?? "",
+                                FullName = dem.ContactInfo.FullName ?? "",
                                 Status = dem.EmploymentStatusId,
                                 StatusName = dem.EmploymentStatus!.Name,
                                 Store = dem.StoreNumber,
@@ -90,7 +84,7 @@ public class CleanupReportService : ICleanupReportService
                 Results = data.Results.Select(x => new DemographicBadgesNotInPayProfitResponse
                 {
                     BadgeNumber = x.BadgeNumber,
-                    EmployeeName = x.EmployeeName,
+                    FullName = x.FullName,
                     Ssn = x.Ssn.MaskSsn(),
                     Status = x.Status,
                     StatusName = x.StatusName,
@@ -188,20 +182,22 @@ public class CleanupReportService : ICleanupReportService
                                    (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                                     (!pd.CommentTypeId.HasValue ||
                                      !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                                      // PROFIT_DETAIL.profitYear <--- is the year selector 
-                                      // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
-                                      (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && pd.MonthToDate >= startDate.Month)) &&
-                                      (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && pd.MonthToDate <= endDate.Month)) &&
-                                      !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)) &&
-                                      // State filter - apply if specified (supports multiple states)
-                                      (req.States == null || req.States.Length == 0 || req.States.Contains(pd.CommentRelatedState)) &&
-                                      // Tax code filter - apply if specified (supports multiple tax codes)
-                                      (req.TaxCodes == null || req.TaxCodes.Length == 0 || (pd.TaxCodeId.HasValue && req.TaxCodes.Contains(pd.TaxCodeId.Value)))
+                                  // PROFIT_DETAIL.profitYear <--- is the year selector 
+                                  // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
+                                  // PS-2275: MonthToDate=0 indicates year-level records that should always be included
+                                  // COBOL only applies month filtering when START-MONTH > 0 OR END-MONTH > 0
+                                  (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && (pd.MonthToDate == 0 || pd.MonthToDate >= startDate.Month))) &&
+                                  (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && (pd.MonthToDate == 0 || pd.MonthToDate <= endDate.Month))) &&
+                                  !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue &&
+                                    transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)) &&
+                                  // State filter - apply if specified (supports multiple states)
+                                  (req.States == null || req.States.Length == 0 || req.States.Contains(pd.CommentRelatedState)) &&
+                                  // Tax code filter - apply if specified (supports multiple tax codes)
+                                  (req.TaxCodes == null || req.TaxCodes.Length == 0 || (pd.TaxCodeId.HasValue && req.TaxCodes.Contains(pd.TaxCodeId.Value)))
 
                             select new
                             {
-                                nameAndDob.BadgeNumber,
-                                nameAndDob.PsnSuffix,
+                                BadgePsn = (long)(nameAndDob.PsnSuffix > 0 ? (nameAndDob.BadgeNumber * 10_000 + nameAndDob.PsnSuffix) : nameAndDob.BadgeNumber),
                                 pd.Ssn,
                                 EmployeeName = nameAndDob.FullName,
                                 DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0m,
@@ -226,7 +222,7 @@ public class CleanupReportService : ICleanupReportService
                     .Select(g => new
                     {
                         DistributionTotal = g.Sum(x => x.DistributionAmount),
-                        StateTaxTotal = g.Sum(x => x.StateTax),
+                        StateTaxTotal = g.Where(x => !string.IsNullOrEmpty(x.State) && x.StateTax != 0).Sum(x => x.StateTax),
                         FederalTaxTotal = g.Sum(x => x.FederalTax),
                         ForfeitureTotal = g.Sum(x => x.ForfeitAmount),
                         // MAIN-2170: Breakdown forfeitures by type
@@ -259,18 +255,43 @@ public class CleanupReportService : ICleanupReportService
                     };
 
                 // Calculate state tax totals by state
-                var stateTaxTotals = await query
-                    .Where(s => s.StateTax > 0)
-                    .GroupBy(x => x.State)
-                    .Select(g => new { State = g.Key, Total = g.Sum(x => x.StateTax) })
-                    .ToDictionaryAsync(x => x.State ?? string.Empty, x => x.Total, cancellationToken);
+                var allStateTaxRecords = await query
+                    .Where(s => !string.IsNullOrEmpty(s.State) && s.StateTax != 0)
+                    .ToListAsync(cancellationToken: cancellationToken);
 
-                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
+                // Separate unattributed (NULL state) records
+                var unattributedRecords = allStateTaxRecords
+                    .Where(r => string.IsNullOrEmpty(r.State))
+                    .ToList();
+
+                var unattributedTotals = new UnattributedTotals
+                {
+                    Count = unattributedRecords.Count,
+                    FederalTax = unattributedRecords.Sum(x => x.FederalTax),
+                    StateTax = unattributedRecords.Sum(x => x.StateTax),
+                    NetProceeds = unattributedRecords.Sum(x => x.DistributionAmount) // Net proceeds from distribution amount
+                };
+
+                // Build state tax totals, excluding NULL states (will be tracked separately)
+                var stateTaxTotals = allStateTaxRecords
+                    .Where(s => !string.IsNullOrEmpty(s.State))
+                    .GroupBy(x => x.State)
+                    .ToDictionary(g => g.Key, g => g.Sum(x => x.StateTax));
+
+                //// Check if sorting by Age - if so, we need to handle pagination manually since Age can't be calculated in SQL
+
+
+                var sortReq = req;
+                if (req.SortBy != null && "Age".Equals(req.SortBy, StringComparison.OrdinalIgnoreCase))
+                {
+                    sortReq = req with { SortBy = "DateOfBirth" };
+                }
+                // Normal database-level pagination for other sort fields
+                var paginated = await query.ToPaginationResultsAsync(sortReq, cancellationToken);
 
                 var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
                 {
-                    BadgeNumber = pd.BadgeNumber,
-                    PsnSuffix = pd.PsnSuffix,
+                    BadgePsn = pd.BadgePsn,
                     Ssn = pd.Ssn.MaskSsn(),
                     EmployeeName = pd.EmployeeName,
                     DistributionAmount = pd.DistributionAmount,
@@ -279,7 +300,6 @@ public class CleanupReportService : ICleanupReportService
                     State = pd.State,
                     FederalTax = pd.FederalTax,
                     ForfeitAmount = pd.ForfeitAmount,
-                    // MAIN-2170: Determine forfeit type indicator
                     ForfeitType = pd.ForfeitAmount != 0
                         ? (pd.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
                            (pd.Remark != null && pd.Remark.Contains("ADMINISTRATIVE")))
@@ -287,10 +307,9 @@ public class CleanupReportService : ICleanupReportService
                             : (pd.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
                                (pd.Remark != null && (pd.Remark.Contains("FORFEIT CA") || pd.Remark.Contains("UN-FORFEIT CA"))))
                                 ? 'C'
-                                : (char?)null
+                                : null
                         : null,
                     Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
-                    // Note, this computes "Age" at time of transaction, or "Age @ Txn"
                     Age = (byte)(pd.MonthToDate is > 0 and < 13
                         ? pd.DateOfBirth.Age(
                             new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
@@ -299,10 +318,15 @@ public class CleanupReportService : ICleanupReportService
                     IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
                 });
 
+                PaginatedResponseDto<DistributionsAndForfeitureResponse> paginatedResponse = new(req)
+                {
+                    Results = apiResponse.ToList(),
+                    Total = paginated.Total
+                };
 
                 var response = new DistributionsAndForfeitureTotalsResponse()
                 {
-                    ReportName = "Distributions and Forfeitures",
+                    ReportName = ReportNames.DistributionAndForfeitures.Name,
                     ReportDate = DateTimeOffset.UtcNow,
                     StartDate = startDate,
                     EndDate = endDate,
@@ -314,12 +338,20 @@ public class CleanupReportService : ICleanupReportService
                     ForfeitureAdministrativeTotal = totals.ForfeitureAdministrative,
                     ForfeitureClassActionTotal = totals.ForfeitureClassAction,
                     StateTaxTotals = stateTaxTotals,
-                    Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
-                    {
-                        Results = apiResponse.ToList(),
-                        Total = paginated.Total
-                    }
+                    UnattributedTotals = unattributedTotals.Count > 0 ? unattributedTotals : null,
+                    HasUnattributedRecords = unattributedTotals.Count > 0,
+                    Response = paginatedResponse
                 };
+
+                // Log unattributed records as business metric (PS-2031)
+                if (unattributedTotals.Count > 0)
+                {
+                    _logger.LogWarning(
+                        "Unattributed state records detected in GetDistributionsAndForfeitureAsync: {UnattributedCount} records with taxes but no state code. " +
+                        "Total unattributed state taxes: {UnattributedStateTax}. This indicates data quality issues in state extraction (PS-2031).",
+                        unattributedTotals.Count,
+                        unattributedTotals.StateTax);
+                }
 
                 return Result<DistributionsAndForfeitureTotalsResponse>.Success(response);
             }, cancellationToken);

@@ -1,7 +1,5 @@
-using System.Reflection;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text.Json;
-using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -18,11 +16,11 @@ namespace Demoulas.ProfitSharing.Services.Validation;
 /// <remarks>
 /// PS-1721: Refactored to focus solely on checksum validation.
 /// This service now has a single, focused responsibility: validating report fields via SHA256 checksums.
-/// 
+///
 /// Related Services:
 /// - <see cref="ICrossReferenceValidationService"/>: Orchestrates cross-reference validation across multiple reports
 /// - <see cref="IArchivedValueService"/>: Retrieves archived report values from stored checksums
-/// 
+///
 /// Responsibilities:
 /// 1. SHA256 checksum calculation and comparison
 /// 2. Per-field validation against archived checksums
@@ -48,7 +46,7 @@ public sealed class ChecksumValidationService : IChecksumValidationService
         short profitYear,
         string reportType,
         Dictionary<string, decimal> fieldsToValidate,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         // Validate inputs
         if (string.IsNullOrWhiteSpace(reportType))
@@ -196,63 +194,6 @@ public sealed class ChecksumValidationService : IChecksumValidationService
             return Result<ChecksumValidationResponse>.Failure(
                 Error.Unexpected($"Failed to validate checksums: {ex.Message}"));
         }
-    }
-
-    /// <summary>
-    /// OPTIMIZATION: Load all archived checksums for a profit year in a single query.
-    /// This eliminates N+1 query problems where each field validation makes a separate DB call.
-    /// </summary>
-    /// <returns>Dictionary keyed by "ReportCode.FieldName" containing archived values and metadata</returns>
-    private async Task<Dictionary<string, ArchivedFieldData>> LoadAllArchivedChecksumsAsync(
-        short profitYear,
-        CancellationToken cancellationToken)
-    {
-        var cache = new Dictionary<string, ArchivedFieldData>(StringComparer.OrdinalIgnoreCase);
-
-        await _dataContextFactory.UseReadOnlyContext(async ctx =>
-        {
-            // Single query to fetch all archived checksums for the year
-            var allArchivedReports = await ctx.ReportChecksums
-                .TagWith($"LoadAllArchivedChecksums-Year{profitYear}")
-                .Where(r => r.ProfitYear == profitYear)
-                .ToListAsync(cancellationToken);
-
-            // Group by report type and take most recent for each
-            var latestByReportType = allArchivedReports
-                .GroupBy(r => r.ReportType)
-                .Select(g => g.OrderByDescending(r => r.CreatedAtUtc).First());
-
-            // Build cache dictionary
-            foreach (var report in latestByReportType)
-            {
-                foreach (var field in report.KeyFieldsChecksumJson)
-                {
-                    string cacheKey = $"{report.ReportType}.{field.Key}";
-                    cache[cacheKey] = new ArchivedFieldData
-                    {
-                        Value = field.Value.Key, // The actual archived value
-                        ChecksumHash = field.Value.Value, // The hash bytes
-                        ArchivedAt = report.CreatedAtUtc.DateTime,
-                        ReportType = report.ReportType
-                    };
-                }
-            }
-
-            return Task.CompletedTask;
-        }, cancellationToken);
-
-        return cache;
-    }
-
-    /// <summary>
-    /// Helper class for caching archived field data to eliminate N+1 queries.
-    /// </summary>
-    private sealed class ArchivedFieldData
-    {
-        public decimal Value { get; init; }
-        public byte[] ChecksumHash { get; init; } = Array.Empty<byte>();
-        public DateTime ArchivedAt { get; init; }
-        public string ReportType { get; init; } = string.Empty;
     }
 
     #endregion

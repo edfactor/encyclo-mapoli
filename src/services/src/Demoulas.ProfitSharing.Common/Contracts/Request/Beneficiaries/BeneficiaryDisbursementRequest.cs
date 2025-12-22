@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 public sealed record BeneficiaryDisbursementRequest
 {
     public required int BadgeNumber { get; init; }
@@ -25,11 +20,4 @@ public sealed record BeneficiaryDisbursementRequest
             }
         };
     }
-}
-
-public sealed record RecipientBeneficiary
-{
-    public short PsnSuffix { get; init; }
-    public decimal? Percentage { get; init; }
-    public decimal? Amount { get; init; }
 }

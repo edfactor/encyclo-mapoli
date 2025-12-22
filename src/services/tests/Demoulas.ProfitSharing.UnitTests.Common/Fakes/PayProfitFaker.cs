@@ -3,11 +3,11 @@ using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 
-internal sealed class PayProfitFaker : Faker<PayProfit>
+public sealed class PayProfitFaker : Faker<PayProfit>
 {
     private readonly HashSet<(long OracleHcmId, short ProfitYear)> _existingCombinations = new HashSet<(long, short)>();
 
-    internal PayProfitFaker(IList<Demographic> demographicFakes)
+    public PayProfitFaker(IList<Demographic> demographicFakes)
     {
         var demographicQueue = new Queue<Demographic>(demographicFakes);
         Demographic currentDemographic = demographicQueue.Peek();
@@ -60,6 +60,9 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
             ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
             ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay
             ))
+        .RuleFor(pc => pc.IncomeExecutive, f => f.Finance.Amount(min: 100, max: 500_000, decimals: 2))
+        .RuleFor(pc => pc.TotalHours, (f, o) => o.CurrentHoursYear + o.HoursExecutive)
+        .RuleFor(pc => pc.TotalIncome, (f, o) => o.CurrentIncomeYear + o.IncomeExecutive)
         .UseSeed(100);
     }
 }

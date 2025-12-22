@@ -3,6 +3,7 @@ using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
@@ -17,15 +18,18 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
 {
     private readonly IGetEligibleEmployeesService _getEligibleEmployeesService;
     private readonly ILogger<GetEligibleEmployeesEndpoint> _logger;
+    private readonly IAuditService _auditService;
     public override string ReportFileName { get; } = "GetEligibleEmployeesReport.csv";
 
     public GetEligibleEmployeesEndpoint(
         IGetEligibleEmployeesService getEligibleEmployeesService,
-        ILogger<GetEligibleEmployeesEndpoint> logger)
+        ILogger<GetEligibleEmployeesEndpoint> logger,
+        IAuditService auditService)
         : base(Navigation.Constants.GetEligibleEmployees)
     {
         _getEligibleEmployeesService = getEligibleEmployeesService;
         _logger = logger;
+        _auditService = auditService;
     }
 
     public override void Configure()
@@ -51,7 +55,12 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var result = await _getEligibleEmployeesService.GetEligibleEmployeesAsync(req, ct);
+            var result = await _auditService.ArchiveCompletedReportAsync(
+                ReportFileName,
+                req.ProfitYear,
+                req,
+                (archiveReq, _, ct) => _getEligibleEmployeesService.GetEligibleEmployeesAsync(archiveReq, ct),
+                ct);
 
             // Record year-end eligible employees report metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

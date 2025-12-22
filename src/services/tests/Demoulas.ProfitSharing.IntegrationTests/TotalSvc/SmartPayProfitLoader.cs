@@ -18,19 +18,31 @@ public static class SmartPayProfitLoader
     {
         return await dbFactory.UseReadOnlyContext(async ctx =>
         {
-            Dictionary<int, byte> yearsOfService = await totalService.GetYearsOfService(ctx, profitYear, asOfDate)
-                .ToDictionaryAsync(y => y.Ssn, y => y.Years);
+
+            var tvbBySsn = await totalService.TotalVestingBalance(ctx, profitYear, asOfDate)
+                .ToDictionaryAsync(y => y.Ssn, y => y);
 
             var result = await ctx.PayProfits
                 .Where(p => p.ProfitYear == profitYear && p.Demographic != null)
-                .Select(p => new { p.Demographic!.BadgeNumber, p.Demographic.Ssn })
+                .Select(p => new { p.Demographic!.BadgeNumber, p.Demographic.Ssn, p.EnrollmentId, p.Demographic.PayFrequencyId, p.Demographic.TerminationDate, p.Demographic.TerminationCodeId })
                 .ToListAsync();
 
             Dictionary<int, PayProfitData> payProfitData = result
-                .Where(r => yearsOfService.ContainsKey(r.Ssn)) // Filter out unmatched SSNs
+                .Where(r => tvbBySsn.ContainsKey(r.Ssn)) // Filter out unmatched SSNs
                 .ToDictionary(
                     r => r.BadgeNumber,
-                    r => new PayProfitData { BadgeNumber = r.BadgeNumber, Years = yearsOfService[r.Ssn] });
+                    r => new PayProfitData
+                    {
+                        BadgeNumber = r.BadgeNumber,
+                        Ssn = r.Ssn,
+                        Amount = (decimal)(tvbBySsn[r.Ssn].CurrentBalance!),
+                        VestedAmount = (decimal)(tvbBySsn[r.Ssn].VestedBalance!),
+                        Years = (byte)(tvbBySsn[r.Ssn].YearsInPlan!),
+                        Enrollment = r.EnrollmentId,
+                        Frequency = r.PayFrequencyId,
+                        TerminationDate = r.TerminationDate,
+                        TerminationCodeId = r.TerminationCodeId
+                    });
 
             return payProfitData;
         });

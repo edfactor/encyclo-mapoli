@@ -1,8 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Page } from "smart-ui-library";
@@ -10,12 +9,10 @@ import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveA
 import { CAPTIONS, ROUTES } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
-import { useDeleteDistributionMutation } from "../../../reduxstore/api/DistributionApi";
 import { setCurrentDistribution } from "../../../reduxstore/slices/distributionSlice";
 import { RootState } from "../../../reduxstore/store";
-import { ServiceErrorResponse } from "../../../types/errors/errors";
+import { isSafePath, isValidRouteParams } from "../../../utils/pathValidation";
 import MasterInquiryMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/MasterInquiryMemberDetails";
-import DeleteDistributionModal from "../DistributionInquiry/DeleteDistributionModal";
 import DisbursementsHistory from "./DisbursementsHistory";
 import DistributionDetailsSection from "./DistributionDetailsSection";
 import useViewDistribution from "./hooks/useViewDistribution";
@@ -29,12 +26,11 @@ const ViewDistributionContent = () => {
   const profitYear = useDecemberFlowProfitYear();
   const isReadOnly = useReadOnlyNavigation();
 
-  const { currentMember, currentDistribution } = useSelector((state: RootState) => state.distribution);
+  const { currentMember, currentDistribution, distributionHome } = useSelector(
+    (state: RootState) => state.distribution
+  );
 
   const { isLoading, fetchMember, clearMemberData } = useViewDistribution();
-
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteDistribution, { isLoading: isDeleting }] = useDeleteDistributionMutation();
 
   // Fetch member data when component mounts or memberId changes
   useEffect(() => {
@@ -54,85 +50,33 @@ const ViewDistributionContent = () => {
 
   const handleEdit = () => {
     // Navigate to edit page using URL parameters
-    if (memberId && memberType) {
+    // Validate parameters to prevent injection attacks
+    if (isValidRouteParams(memberId, memberType)) {
       // Set current distribution if available
       if (currentDistribution) {
         dispatch(setCurrentDistribution(currentDistribution));
       }
-      navigate(`/${ROUTES.EDIT_DISTRIBUTION}/${memberId}/${memberType}`);
+      const path = `/${ROUTES.EDIT_DISTRIBUTION}/${memberId}/${memberType}`;
+
+      // Final path validation before navigation
+      if (isSafePath(path)) {
+        navigate(path);
+      }
     }
   };
 
-  const handleCancel = () => {
-    navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`);
+  const handleClose = () => {
+    // Navigate to the stored distribution home route, fallback to distributions inquiry
+    const homeRoute = distributionHome || ROUTES.DISTRIBUTIONS_INQUIRY;
+    navigate(`/${homeRoute}`);
   };
 
-  const handleDelete = () => {
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setIsDeleteDialogOpen(false);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!currentDistribution) return;
-
-    try {
-      await deleteDistribution(currentDistribution.id).unwrap();
-      handleCloseDeleteDialog();
-
-      // Navigate to inquiry page with success message
-      navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`, {
-        state: {
-          showSuccessMessage: true,
-          operationType: "deleted",
-          memberName: currentDistribution.fullName
-        }
-      });
-    } catch (error) {
-      const serviceError = error as ServiceErrorResponse;
-      const errorMsg = serviceError?.data?.detail || "Failed to delete distribution";
-      console.error("Delete failed:", errorMsg);
-      handleCloseDeleteDialog();
-      // Optionally show error notification here using MissiveAlerts if needed
-    }
-  };
-
-  // Show error if no memberId or memberType parameter
-  if (!memberId || !memberType) {
+  const renderActionNode = () => {
     return (
-      <Grid
-        container
-        padding="24px">
-        <Typography
-          variant="h6"
-          color="error">
-          Member ID and Member Type are required in the URL.
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ marginTop: "8px" }}>
-          Example: /view-distribution/12345/1
-        </Typography>
-      </Grid>
-    );
-  }
-
-  return (
-    <Grid
-      container
-      rowSpacing="24px">
-      <Grid width="100%">
-        <Divider />
-      </Grid>
-
-      {/* Action Buttons */}
-      <Grid
-        width="100%"
-        sx={{ display: "flex", justifyContent: "flex-end", paddingX: "24px", gap: "12px" }}>
+      <div style={{ display: "flex", gap: "12px" }}>
         <Button
           variant="outlined"
+          size="small"
           disabled={isReadOnly || isLoading}
           onClick={handleEdit}
           startIcon={<EditIcon />}>
@@ -140,106 +84,117 @@ const ViewDistributionContent = () => {
         </Button>
         <Button
           variant="outlined"
-          color="error"
-          disabled={isReadOnly || isLoading || isDeleting}
-          onClick={handleDelete}
-          startIcon={<DeleteIcon />}>
-          DELETE
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={handleCancel}
+          size="small"
+          onClick={handleClose}
           startIcon={<CloseIcon />}>
-          CANCEL
+          CLOSE
         </Button>
-      </Grid>
+      </div>
+    );
+  };
 
-      {/* Loading State */}
-      {isLoading && (
+  // Show error if no memberId or memberType parameter
+  if (!memberId || !memberType) {
+    return (
+      <Page
+        label={CAPTIONS.VIEW_DISTRIBUTION}
+        actionNode={null}>
         <Grid
-          width="100%"
-          sx={{ display: "flex", justifyContent: "center", padding: "48px" }}>
-          <CircularProgress />
-        </Grid>
-      )}
-
-      {/* Content - Member and Distribution Details */}
-      {!isLoading && currentMember && (
-        <>
-          <Grid width="100%">
-            <Divider />
-          </Grid>
-          <MasterInquiryMemberDetails
-            //memberType={currentMember.isEmployee ? 1 : 2}
-            //id={memberId as string}
-            profitYear={profitYear}
-            memberDetails={currentMember}
-            isLoading={isLoading}
-          />
-          <Grid width="100%">
-            <Divider />
-          </Grid>
-          {currentDistribution && (
-            <>
-              <DistributionDetailsSection distribution={currentDistribution} />
-              <Grid width="100%">
-                <Divider />
-              </Grid>
-            </>
-          )}
-
-          {/* Pending Disbursements List */}
-          <PendingDisbursementsList
-            badgeNumber={currentMember.badgeNumber}
-            memberType={currentMember.isEmployee ? 1 : 2}
-          />
-
-          {/* Disbursements History */}
-          <DisbursementsHistory
-            badgeNumber={currentMember.badgeNumber}
-            memberType={currentMember.isEmployee ? 1 : 2}
-          />
-        </>
-      )}
-
-      {/* No member found */}
-      {!isLoading && !currentMember && (
-        <Grid
-          width="100%"
+          container
           padding="24px">
           <Typography
             variant="h6"
             color="error">
-            Member not found for ID: {memberId}
+            Member ID and Member Type are required in the URL.
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ marginTop: "8px" }}>
+            Example: /view-distribution/12345/1
           </Typography>
         </Grid>
-      )}
-
-      {/* Delete Distribution Modal */}
-      <DeleteDistributionModal
-        open={isDeleteDialogOpen}
-        distribution={currentDistribution}
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCloseDeleteDialog}
-        isLoading={isDeleting}
-      />
-    </Grid>
-  );
-};
-
-const ViewDistribution = () => {
-  const renderActionNode = () => {
-    return null;
-  };
+      </Page>
+    );
+  }
 
   return (
     <Page
       label={CAPTIONS.VIEW_DISTRIBUTION}
       actionNode={renderActionNode()}>
-      <MissiveAlertProvider>
-        <ViewDistributionContent />
-      </MissiveAlertProvider>
+      <Grid
+        container
+        rowSpacing="24px">
+        <Grid width="100%">
+          <Divider />
+        </Grid>
+
+        {/* Loading State */}
+        {isLoading && (
+          <Grid
+            width="100%"
+            sx={{ display: "flex", justifyContent: "center", padding: "48px" }}>
+            <CircularProgress />
+          </Grid>
+        )}
+
+        {/* Content - Member and Distribution Details */}
+        {!isLoading && currentMember && (
+          <>
+            <MasterInquiryMemberDetails
+              memberType={parseInt(memberType || "0")}
+              id={parseInt(memberId || "0")}
+              profitYear={profitYear}
+              memberDetails={currentMember}
+              isLoading={isLoading}
+            />
+            <Grid width="100%">
+              <Divider />
+            </Grid>
+            {currentDistribution && (
+              <>
+                <DistributionDetailsSection distribution={currentDistribution} />
+                <Grid width="100%">
+                  <Divider />
+                </Grid>
+              </>
+            )}
+
+            {/* Pending Disbursements List */}
+            <PendingDisbursementsList
+              badgeNumber={currentMember.badgeNumber}
+              memberType={currentMember.isEmployee ? 1 : 2}
+            />
+
+            {/* Disbursements History */}
+            <DisbursementsHistory
+              badgeNumber={currentMember.badgeNumber}
+              memberType={currentMember.isEmployee ? 1 : 2}
+            />
+          </>
+        )}
+
+        {/* No member found */}
+        {!isLoading && !currentMember && (
+          <Grid
+            width="100%"
+            padding="24px">
+            <Typography
+              variant="h6"
+              color="error">
+              Member not found for ID: {memberId}
+            </Typography>
+          </Grid>
+        )}
+      </Grid>
     </Page>
+  );
+};
+
+const ViewDistribution = () => {
+  return (
+    <MissiveAlertProvider>
+      <ViewDistributionContent />
+    </MissiveAlertProvider>
   );
 };
 

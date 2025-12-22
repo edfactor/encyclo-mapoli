@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
@@ -13,15 +14,48 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using Xunit.Abstractions;
+
+using ParticipantTotalVestingBalance = Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotalVestingBalance;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Distributions;
 
+[Collection("Distribution Tests")]
 public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 {
     public UpdateDistributionEndpointTests(ITestOutputHelper testOutputHelper)
     {
         // Constructor accepts ITestOutputHelper for xUnit framework compatibility
+    }
+
+    private const decimal HighVestedBalance = 1_000_000m;
+
+    private static void EnsureHighVestedBalanceForSsn(int ssn)
+    {
+        var matches = Constants.FakeParticipantTotalVestingBalances.Object
+            .AsEnumerable()
+            .Where(x => x.Ssn == ssn)
+            .ToList();
+
+        if (matches.Count == 0)
+        {
+            Constants.FakeParticipantTotalVestingBalances.Object.Add(new ParticipantTotalVestingBalance
+            {
+                Ssn = ssn,
+                VestedBalance = HighVestedBalance,
+                CurrentBalance = HighVestedBalance,
+                VestingPercent = 1.0m,
+                YearsInPlan = (byte)40
+            });
+            return;
+        }
+
+        foreach (var match in matches)
+        {
+            match.VestedBalance = HighVestedBalance;
+            match.CurrentBalance = Math.Max(match.CurrentBalance ?? 0m, HighVestedBalance);
+            match.VestingPercent = 1.0m;
+            match.YearsInPlan = (byte)40;
+        }
     }
 
     /// <summary>
@@ -77,6 +111,8 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             var demographic = await ctx.Demographics
                 .Where(d => d.BadgeNumber == badgeNumber)
                 .FirstAsync();
+
+            EnsureHighVestedBalanceForSsn(demographic.Ssn);
 
             var distribution = new Distribution
             {
@@ -219,12 +255,14 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             BadgeNumber = validBadgeNumber,
             StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'R', // Use 'R' for Rollover Direct to allow third party payee
-            FederalTaxPercentage = 20.0m,
-            FederalTaxAmount = 200.00m,
-            StateTaxPercentage = 5.0m,
-            StateTaxAmount = 50.00m,
-            GrossAmount = 1000.00m,
-            CheckAmount = 750.00m,
+            // Rollover Direct requests are normalized server-side to 0 taxes and check amount = gross.
+            // Keep these values aligned to avoid test brittleness.
+            FederalTaxPercentage = 0.0m,
+            FederalTaxAmount = 0.00m,
+            StateTaxPercentage = 0.0m,
+            StateTaxAmount = 0.00m,
+            GrossAmount = 500.00m,
+            CheckAmount = 500.00m,
             TaxCodeId = '1',
             ThirdPartyPayee = new ThirdPartyPayee
             {
@@ -353,9 +391,9 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Theory(DisplayName = "UpdateDistribution - Should accept valid status ID updates")]
-    [InlineData('C')] // ManualCheck
-    [InlineData('D')] // PurgeRecord
-    [InlineData('H')] // RequestOnHold
+    [InlineData(DistributionStatus.Constants.ManualCheck)] // ManualCheck
+    [InlineData(DistributionStatus.Constants.PurgeRecord)] // PurgeRecord
+    [InlineData(DistributionStatus.Constants.RequestOnHold)] // RequestOnHold
     public async Task UpdateDistribution_WithValidStatusIdUpdates_ShouldReturnSuccess(char statusId)
     {
         // Arrange
@@ -368,14 +406,14 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
             StatusId = statusId,
-            FrequencyId = 'M',
+            FrequencyId = DistributionFrequency.Constants.Monthly,
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,
             StateTaxPercentage = 5.0m,
             StateTaxAmount = 50.00m,
             GrossAmount = 1000.00m,
             CheckAmount = 800.00m,
-            TaxCodeId = '1'
+            TaxCodeId = TaxCode.Constants.EarlyDistributionNoException.Id
         };
 
         // Act
@@ -396,10 +434,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Theory(DisplayName = "UpdateDistribution - Should accept valid frequency ID updates")]
-    [InlineData('M')]
-    [InlineData('Q')]
-    [InlineData('H')]
-    [InlineData('R')]
+    [InlineData(DistributionFrequency.Constants.Monthly)]
+    [InlineData(DistributionFrequency.Constants.Quarterly)]
+    [InlineData(DistributionFrequency.Constants.Annually)]
+    [InlineData(DistributionFrequency.Constants.PayDirect)]
     public async Task UpdateDistribution_WithValidFrequencyIdUpdates_ShouldReturnSuccess(char frequencyId)
     {
         // Arrange

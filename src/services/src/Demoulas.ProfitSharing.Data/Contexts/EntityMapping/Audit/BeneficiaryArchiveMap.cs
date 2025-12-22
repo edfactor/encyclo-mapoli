@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
+
 public sealed class BeneficiaryArchiveMap : IEntityTypeConfiguration<BeneficiaryArchive>
 {
     public void Configure(EntityTypeBuilder<BeneficiaryArchive> builder)
@@ -27,7 +28,6 @@ public sealed class BeneficiaryArchiveMap : IEntityTypeConfiguration<Beneficiary
             .ValueGeneratedNever()
             .HasColumnName("DEMOGRAPHIC_ID");
 
-        _ = builder.Property(b => b.KindId).HasColumnName("KIND_ID");
         _ = builder.Property(b => b.BeneficiaryContactId).HasColumnName("BENEFICIARY_CONTACT_ID");
 
         _ = builder.Property(e => e.Percent).HasColumnName("PERCENT")

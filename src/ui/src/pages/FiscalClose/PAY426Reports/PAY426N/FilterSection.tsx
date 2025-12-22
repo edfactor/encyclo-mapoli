@@ -1,5 +1,5 @@
 import { FormControl, FormLabel, Grid, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ReportPreset } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 
@@ -8,6 +8,7 @@ interface FilterSectionProps {
   currentPreset: ReportPreset | null;
   onPresetChange: (preset: ReportPreset | null) => void;
   onReset: () => void;
+  onSearch: () => void;
   isLoading?: boolean;
 }
 
@@ -16,8 +17,17 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   currentPreset,
   onPresetChange,
   onReset,
+  onSearch,
   isLoading = false
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsSubmitting(false);
+    }
+  }, [isLoading]);
+
   const handlePresetChange = (event: SelectChangeEvent<string>) => {
     const presetId = event.target.value;
     const selected = presets.find((p) => p.id === presetId) || null;
@@ -25,7 +35,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const handleApply = () => {
-    // No-op as the actual data fetching is handled by the parent component
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      // Trigger search in parent component
+      onSearch();
+    }
   };
 
   const handleReset = () => {
@@ -136,8 +150,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={handleApply}
-          isFetching={isLoading}
-          disabled={!currentPreset || isLoading}
+          isFetching={isLoading || isSubmitting}
+          disabled={!currentPreset || isLoading || isSubmitting}
         />
       </Grid>
     </form>

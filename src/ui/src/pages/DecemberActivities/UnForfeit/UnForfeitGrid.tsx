@@ -1,14 +1,17 @@
-import { Grid } from "@mui/material";
+import { Grid, IconButton } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
-import { useUnForfeitGrid } from "../../../hooks/useUnForfeitGrid";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { UnForfeitGridColumns } from "./UnForfeitGridColumns";
 import { GetProfitDetailColumns } from "./UnForfeitProfitDetailGridColumns";
+import { useUnForfeitGrid } from "./useUnForfeitGrid";
 
 interface UnForfeitGridSearchProps {
   initialSearchLoaded: boolean;
@@ -20,6 +23,11 @@ interface UnForfeitGridSearchProps {
   onArchiveHandled?: () => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   fiscalCalendarYear: CalendarResponseDto | null;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
+  onCloseLeftPane?: () => void;
+  onShowUnsavedChangesDialog?: () => void;
+  onShowErrorDialog?: (title: string, message: string) => void;
 }
 
 const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
@@ -31,11 +39,13 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
   shouldArchive,
   onArchiveHandled,
   setHasUnsavedChanges,
-  fiscalCalendarYear
+  fiscalCalendarYear,
+  isGridExpanded = false,
+  onToggleExpand,
+  onCloseLeftPane: _onCloseLeftPane,
+  onShowUnsavedChangesDialog,
+  onShowErrorDialog
 }) => {
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
-
   // Check if current navigation should be read-only
   const isReadOnly = useReadOnlyNavigation();
 
@@ -66,8 +76,27 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     shouldArchive,
     onArchiveHandled,
     setHasUnsavedChanges,
-    fiscalCalendarYear
+    fiscalCalendarYear,
+    isReadOnly,
+    onShowUnsavedChangesDialog,
+    onShowErrorDialog
   });
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: gridData?.length ?? 0,
+    heightPercentage: isGridExpanded ? 0.85 : 0.4
+  });
+
+  // Refresh grid cells when read-only status changes
+  // This forces cell renderers to re-read isReadOnly from context
+  useEffect(() => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.refreshCells({ force: true });
+    }
+    // gridRef is a ref and doesn't need to be in the dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReadOnly]);
 
   // Get the main and detail columns
   const mainColumns = useMemo(() => UnForfeitGridColumns(), []);
@@ -183,17 +212,27 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             <Grid>
               <ReportSummary report={unForfeits} />
             </Grid>
+            <Grid style={{ display: "flex", gap: 8 }}>
+              {/* Remove left pane close button, only show expand/collapse */}
+              {onToggleExpand && (
+                <IconButton
+                  onClick={onToggleExpand}
+                  sx={{ zIndex: 1 }}>
+                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              )}
+            </Grid>
           </Grid>
 
           <DSMGrid
-            preferenceKey={"REHIRE-FORFEITURES"}
+            preferenceKey={GRID_KEYS.REHIRE_FORFEITURES}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
-              getRowClass: (params: { data: { isDetail: boolean } }) => (params.data.isDetail ? "detail-row" : ""),
+              getRowClass: (params) => ((params.data as { isDetail?: boolean })?.isDetail ? "detail-row" : ""),
               rowSelection: {
                 mode: "multiRow",
                 checkboxes: false,

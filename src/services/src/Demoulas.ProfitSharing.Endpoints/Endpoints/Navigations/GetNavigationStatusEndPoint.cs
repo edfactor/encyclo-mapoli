@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
+
 public class GetNavigationStatusEndpoint : ProfitSharingEndpoint<GetNavigationStatusRequestDto, Results<Ok<GetNavigationStatusResponseDto>, NotFound, ProblemHttpResult>>
 {
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class CommentTypeMap : IEntityTypeConfiguration<CommentType>
 {
     public void Configure(EntityTypeBuilder<CommentType> builder)
@@ -44,7 +45,8 @@ internal sealed class CommentTypeMap : IEntityTypeConfiguration<CommentType>
             CommentType.Constants.OneHundredPercentEarnings,
             CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
             CommentType.Constants.ForfeitClassAction,
-            CommentType.Constants.ForfeitAdministrative
+            CommentType.Constants.ForfeitAdministrative,
+            CommentType.Constants.UnforfeitUnder21
         ];
     }
 }

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useLazyGetYearEndProfitSharingReportLiveQuery } from "reduxstore/api/YearsEndApi";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
@@ -45,28 +46,30 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
     [searchParams]
   );
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(
-      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-        if (isInitialSearchLoaded && searchParams) {
-          const params = createRequest(
-            pageNum * pageSz,
-            sortPrms.sortBy,
-            sortPrms.isSortDescending,
-            profitYear,
-            pageSz
-          );
-          if (params) {
-            triggerSearch(params, false);
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: false,
+      persistenceKey: GRID_KEYS.PROFIT_SHARE_REPORT,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+          if (isInitialSearchLoaded && searchParams) {
+            const params = createRequest(
+              pageNum * pageSz,
+              sortPrms.sortBy,
+              sortPrms.isSortDescending,
+              profitYear,
+              pageSz
+            );
+            if (params) {
+              triggerSearch(params, false);
+            }
           }
-        }
-      },
-      [isInitialSearchLoaded, searchParams, createRequest, profitYear, triggerSearch]
-    )
-  });
+        },
+        [isInitialSearchLoaded, searchParams, createRequest, profitYear, triggerSearch]
+      )
+    });
 
   // Initial search effect - trigger search when component first loads with search params
   useEffect(() => {
@@ -114,7 +117,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   return (
     <div className="relative">
       <DSMGrid
-        preferenceKey={"ProfitShareReportGrid"}
+        preferenceKey={GRID_KEYS.PROFIT_SHARE_REPORT}
         isLoading={isFetching}
         maxHeight={gridMaxHeight}
         handleSortChanged={handleSortChanged}
@@ -127,12 +130,10 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
+            handlePageNumberChange(value - 1);
           }}
           pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
+          setPageSize={handlePageSizeChange}
           recordCount={recordCount}
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
         />

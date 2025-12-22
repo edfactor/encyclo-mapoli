@@ -4,8 +4,9 @@ import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DSMGrid, Pagination, SmartModal } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { CAPTIONS } from "../../../constants";
-import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
+import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { ExecutiveHoursAndDollars, PagedReportResponse } from "../../../reduxstore/types";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
@@ -77,6 +78,8 @@ interface ManageExecutiveHoursAndDollarsGridSearchProps {
   addExecutivesToMainGrid?: () => void;
   isModalSearching?: boolean;
   isReadOnly?: boolean;
+  // canEdit: true only when page status is "In Progress" AND user has ExecutiveAdministrator role
+  canEdit?: boolean;
   // Props for modal grid (not needed when isModal=false)
   modalResults?: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   modalGridPagination?: GridPaginationState & GridPaginationActions;
@@ -103,15 +106,30 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   modalSelectedExecutives = [],
   addExecutivesToMainGrid = () => {},
   isModalSearching = false,
-  isReadOnly = false
+  isReadOnly = false,
+  canEdit = false
 }) => {
   const currentData = isModal ? modalResults : gridData;
   const currentPagination = isModal ? modalGridPagination : mainGridPagination;
   const sortEventHandler = currentPagination?.handleSortChange;
-  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(isModal), [isModal]);
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: currentData?.response?.results?.length ?? 0
+  });
+  // Pass canEdit to column definitions - editing requires page status "In Progress" AND ExecutiveAdministrator role
+  const columnDefs = useMemo(
+    () => GetManageExecutiveHoursAndDollarsColumns({ mini: isModal, canEdit }),
+    [isModal, canEdit]
+  );
 
   const processEditedRow = useCallback(
     (event: CellValueChangedEvent) => {
+      // Safety guard: prevent editing if canEdit is false
+      // (columns should already be non-editable, but this is a safety measure)
+      if (!canEdit && !isModal) {
+        event.api.refreshCells({ force: true });
+        return;
+      }
+
       const rowInQuestion: IRowNode = event.node;
 
       // Mark that we're editing to prevent data resets
@@ -171,7 +189,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
         isEditingRef.current = false;
       }, 100);
     },
-    [isModal, currentData, updateExecutiveRow]
+    [isModal, currentData, updateExecutiveRow, canEdit]
   );
   const hasData = Boolean(currentData?.response?.results && currentData.response.results.length > 0);
   const isPaginationNeeded = hasData;
@@ -242,9 +260,10 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           </>
         )}
         <DSMGrid
-          preferenceKey={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
+          preferenceKey={GRID_KEYS.MANAGE_EXECUTIVE_HOURS}
           isLoading={isSearching}
           handleSortChanged={sortEventHandler}
+          maxHeight={gridMaxHeight}
           providedOptions={{
             rowData: mutableRowData,
             columnDefs: columnDefs,
@@ -266,7 +285,11 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             onCellValueChanged: processEditedRow,
             getRowStyle: (params) => {
               // Rows with unsaved changes will have yellow color
-              if (!isModal && isRowStagedToSave(params.node.data.badgeNumber)) {
+              if (
+                !isModal &&
+                params.node.data &&
+                isRowStagedToSave((params.node.data as ExecutiveHoursAndDollars).badgeNumber)
+              ) {
                 return { background: "lemonchiffon" };
               } else {
                 return { background: "white" };
@@ -278,21 +301,13 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       {isPaginationNeeded && currentPagination && (
         <Pagination
           pageNumber={currentPagination.pageNumber}
-          setPageNumber={(value: number) =>
-            currentPagination.handlePaginationChange(
-              value - 1,
-              currentPagination.pageSize,
-              currentPagination.sortParams
-            )
-          }
+          setPageNumber={(value: number) => currentPagination.handlePageNumberChange(value - 1)}
           pageSize={currentPagination.pageSize}
-          setPageSize={(value: number) =>
-            currentPagination.handlePaginationChange(0, value, currentPagination.sortParams)
-          }
+          setPageSize={currentPagination.handlePageSizeChange}
           recordCount={currentData?.response.total ?? 0}
         />
       )}
-      {!isModal && (
+      {!isModal && modalGridPagination && (
         <SmartModal
           open={isModalOpen}
           onClose={closeModal}>

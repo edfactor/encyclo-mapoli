@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -76,15 +77,35 @@ internal class PayrollSyncService
         string url = $"{_oracleHcmConfig.PayrollUrl}/{item.ObjectActionId}/child/BalanceView/?onlyData=true&finder=findByBalVar;pBalGroupUsageId1=300007039791698";
         try
         {
-            using HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+            await Task.Delay(new TimeSpan(0, 0, 1), cancellationToken).ConfigureAwait(false);
 
-            if (Debugger.IsAttached)
-            {
-                _logger.LogInformation(url);
-            }
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
+                string errorResponse = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                _logger.LogWarning("Oracle HCM API request failed: {ErrorResponse} / {ReasonPhrase}", errorResponse, response.ReasonPhrase);
+
+                if (Debugger.IsAttached)
+                {
+                    // Generate and display cURL command for manual testing
+                    string curlCommand = request.GenerateCurlCommand(url);
+
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine();
+                    Console.WriteLine("=== API REQUEST FAILED ===");
+                    Console.WriteLine(errorResponse);
+                    Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("=== cURL Command for Postman/Manual Testing ===");
+                    Console.WriteLine(curlCommand);
+                    Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.White;
+
+                    _logger.LogInformation("cURL command for manual testing: {CurlCommand}", curlCommand);
+                }
+
                 _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
                     item.PersonId,
                     item.ObjectActionId,

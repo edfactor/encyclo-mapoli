@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
@@ -12,16 +11,17 @@ namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 
 /// <summary>
 ///   Abstraction for testing api endpoints that use a <c>DbContext</c>.
+///   NOTE: Each test CLASS (not method) gets its own factory instance.
+///   Tests within the same [Collection] share the factory, so they may pollute each other's data.
+///   Implements IAsyncDisposable to clean up ServiceProvider and HTTP clients after test completion.
 /// </summary>
-public class ApiTestBase<TStartup> where TStartup : class
+public class ApiTestBase<TStartup> : IAsyncDisposable where TStartup : class
 {
-
     /// <summary>
     ///   Mock for DbContext.
+    ///   Each test class gets a fresh instance, but tests within a class share this factory.
     /// </summary>
     public IProfitSharingDataContextFactory MockDbContextFactory { get; set; }
-
-
 
     /// <summary>
     ///   The client to invoke api endpoints.
@@ -29,6 +29,13 @@ public class ApiTestBase<TStartup> where TStartup : class
     public HttpClient ApiClient { get; }
 
     public HttpClient DownloadClient { get; }
+
+    /// <summary>
+    ///   Virtual method to allow derived classes to specify a custom HTTP client timeout.
+    ///   Override this method to return a custom timeout value.
+    /// </summary>
+    /// <returns>The HTTP client timeout, or null to use the default 2-minute timeout.</returns>
+    protected virtual TimeSpan? GetHttpClientTimeout() => null;
 
 
     public ServiceProvider? ServiceProvider { get; private set; }
@@ -41,9 +48,14 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// </remarks>
     public ApiTestBase()
     {
+        // Each test class gets its own FRESH factory with 6,500+ fake records
         MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
-        WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 
+        // Note: ASPNETCORE_ENVIRONMENT is set via TestModuleInitializer to ensure
+        // it's configured before any WebApplicationFactory or ASP.NET host is created.
+        // This is required for xUnit v3 / Microsoft Testing Platform compatibility.
+
+        WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 
         WebApplicationFactory<TStartup> builder = webApplicationFactory.WithWebHostBuilder(
             hostBuilder =>
@@ -66,13 +78,13 @@ public class ApiTestBase<TStartup> where TStartup : class
 
         ApiClient = builder.CreateClient();
 
-        // When debugging, the 100-second default goes by quickly.
-        if (Debugger.IsAttached)
-        {
-            ApiClient.Timeout = TimeSpan.FromMinutes(30);
-        }
+        // Set timeout for integration tests - should complete quickly with mocked database
+        // If this timeout is hit, it indicates a performance problem that needs investigation
+        // Derived classes can override GetHttpClientTimeout() to customize this value
+        ApiClient.Timeout = GetHttpClientTimeout() ?? TimeSpan.FromMinutes(2);
 
         DownloadClient = builder.CreateClient();
+        DownloadClient.Timeout = GetHttpClientTimeout() ?? TimeSpan.FromMinutes(2);
         DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }
 
@@ -87,6 +99,22 @@ public class ApiTestBase<TStartup> where TStartup : class
         {
             return await ctx.PayProfits.MaxAsync(pp => pp.ProfitYear, cancellationToken: cancellationToken);
         }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Disposes test resources to reduce memory accumulation during test suite execution.
+    /// Called by xUnit test runner after each test class completes.
+    /// </summary>
+    public ValueTask DisposeAsync()
+    {
+        // Dispose ServiceProvider to release all registered services and their resources
+        ServiceProvider?.Dispose();
+
+        // Dispose HTTP clients to close connections and free resources
+        ApiClient?.Dispose();
+        DownloadClient?.Dispose();
+
+        return ValueTask.CompletedTask;
     }
 
 }

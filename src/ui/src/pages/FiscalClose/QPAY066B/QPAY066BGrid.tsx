@@ -2,29 +2,34 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
-import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../../reduxstore/api/YearsEndApi";
+import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../../reduxstore/api/AdhocApi";
 import { RootState } from "../../../reduxstore/store";
+import { QPAY066BFilterParams } from "./QPAY066BFilterSection";
 import { GetQPAY066BGridColumns } from "./QPAY066BGridColumns";
 
 interface QPAY066BGridProps {
-  //filterParams: QPAY066BFilterParams;
+  filterParams: QPAY066BFilterParams;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ onLoadingChange }) => {
+const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChange }) => {
   //const navigate = useNavigate();
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const [getQPAY066BData, { data: qpay066bData, isFetching }] = useLazyGetQPAY066BTerminatedWithVestedBalanceQuery();
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: qpay066bData?.response?.response?.results?.length ?? 0
+  });
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.QPAY066B,
     onPaginationChange: useCallback(
       (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (hasToken) {
@@ -60,7 +65,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ onLoadingChange }) => {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasToken, getQPAY066BData]);
+  }, [hasToken, getQPAY066BData, filterParams]);
 
   const sortEventHandler = (update: ISortParams) => {
     handleSortChange(update);
@@ -120,7 +125,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ onLoadingChange }) => {
       ) : (
         <>
           <DSMGrid
-            preferenceKey="QPAY066B_GRID"
+            preferenceKey={GRID_KEYS.QPAY066B}
             isLoading={isFetching}
             maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}
@@ -132,9 +137,9 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ onLoadingChange }) => {
           {!!qpay066bData?.response?.response?.results?.length && (
             <Pagination
               pageNumber={pageNumber}
-              setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
+              setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
               pageSize={pageSize}
-              setPageSize={(value: number) => handlePaginationChange(0, value)}
+              setPageSize={handlePageSizeChange}
               recordCount={qpay066bData.response.response.total}
             />
           )}

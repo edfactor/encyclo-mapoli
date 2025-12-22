@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common;
+﻿using System.Runtime.CompilerServices;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -108,42 +109,29 @@ LEFT JOIN (
     public IQueryable<ProfitShareTotal> GetProfitShareTotals(IProfitSharingDbContext ctx, short profitYear, DateOnly fiscalEndDate,
        short min_hours, DateOnly birthdate_21, CancellationToken cancellationToken)
     {
+        var balanceSubquery = GetBalanceSubquery(profitYear);
+
         string query = @$"/*-----------------------------------------------------------
   Bind variables                                             
     :p_profit_year      – Profit year being reported on       
     :p_fiscal_end_date  – End-of-year date (same value used   
                            when the report is built)          
     :p_birthdate_21     – :p_fiscal_end_date – 21 years       
-    :p_min_hours        – ReferenceData.MinimumHoursForContribution()                        
+    :p_min_hours        – ReferenceData.MinimumHoursForContribution                        
 -----------------------------------------------------------*/
 WITH balances AS (
     /* 1️⃣  History-to-date balance per participant --------*/
     SELECT bal.ssn, bal.total
     FROM  (
-        /* identical text as EmbeddedSqlService.GetTotalBalanceQuery */
-        SELECT pd.ssn,
-               SUM(CASE WHEN pd.profit_code_id = 0 THEN  pd.contribution ELSE 0 END) +
-               SUM(CASE WHEN pd.profit_code_id IN (0,2) THEN pd.earnings     ELSE 0 END) +
-               SUM(CASE WHEN pd.profit_code_id = 0 THEN  pd.forfeiture   ELSE 0 END) +
-               SUM(CASE WHEN pd.profit_code_id IN (1,3,5)
-                         THEN -pd.forfeiture ELSE 0 END) +
-               SUM(CASE WHEN pd.profit_code_id = 2
-                         THEN -pd.forfeiture ELSE 0 END) +
-               (  SUM(CASE WHEN pd.profit_code_id = 6 THEN pd.contribution ELSE 0 END)
-                + SUM(CASE WHEN pd.profit_code_id = 8 THEN pd.earnings     ELSE 0 END)
-                + SUM(CASE WHEN pd.profit_code_id = 9 THEN -pd.forfeiture  ELSE 0 END) )
-               AS total
-        FROM   profit_detail pd
-        WHERE  pd.profit_year <= {profitYear}
-        GROUP  BY pd.ssn
+        {balanceSubquery}
     ) bal
 ),
 employees AS (
     /* 2️⃣  One row per employee / beneficiary for this year */
     SELECT  d.ssn,
             /* same formulas the LINQ uses */
-            pp.current_income_year + pp.income_executive   AS wages,
-            pp.current_hours_year  + pp.hours_executive    AS hours,
+            pp.total_income   AS wages,
+            pp.total_hours    AS hours,
             pp.points_earned                                 points_earned,
             d.employment_status_id                          emp_status,
             d.termination_date                              term_date,
@@ -207,8 +195,9 @@ SELECT pd.SSN Ssn   ,
        Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationClassActionFund} THEN pd.EARNINGS ELSE 0 END) CLASS_ACTION_FUND_TOTAL,
        Sum(CASE WHEN (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id})) 
                   OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingXferBeneficiary.Id})) THEN pd.FORFEITURE ELSE 0 END) PAID_ALLOCATIONS_TOTAL,
-       Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id},{ProfitCode.Constants.OutgoingDirectPayments.Id}) 
-                  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id}))) THEN pd.FORFEITURE ELSE 0 END) DISTRIBUTIONS_TOTAL,
+       -- This is the distributions total as used on PAY443, it is not used elsewhere.
+       Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id},{ProfitCode.Constants.OutgoingDirectPayments.Id})
+                  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID NOT IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id}) OR pd.COMMENT_TYPE_ID IS NULL)) THEN pd.FORFEITURE ELSE 0 END) DISTRIBUTIONS_TOTAL,
        Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION ELSE 0 END) ALLOCATIONS_TOTAL,
        Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingForfeitures.Id} THEN pd.FORFEITURE ELSE 0 END) FORFEITS_TOTAL
 FROM PROFIT_DETAIL pd
@@ -220,14 +209,28 @@ GROUP BY pd.SSN";
 
     private static FormattableString GetTotalBalanceQuery(short profitYear)
     {
-        FormattableString query = @$"
-SELECT
+        // Uses the shared balance subquery to ensure consistency across all usages.
+        // Note: This must return a FormattableString for use with FromSqlInterpolated.
+        // The query must start with SELECT (no leading whitespace) to be composable.
+        var balanceSubquery = GetBalanceSubquery(profitYear);
+        FormattableString query = FormattableStringFactory.Create(balanceSubquery);
+        return query;
+    }
+
+    /// <summary>
+    /// Shared balance calculation subquery used by GetTotalBalanceQuery and GetProfitShareTotals.
+    /// SME formula (Cheng Jiang): Current bal = sum 0 + sum 8 + sum 6 - (sum1 + sum 3 + sum9) - sum 5 - sum 2
+    /// Where: sum 0 on (CONT, EARN, FORT), sum 8 on EARN, sum 6 on CONT, sum 1,2,3,5,9 on FORT
+    /// </summary>
+    private static string GetBalanceSubquery(short profitYear)
+    {
+        return @$"SELECT
     pd.SSN as Ssn,
     --Contributions + Earnings + EtvaForfeitures + Distributions + Forfeitures + VestedEarnings
     --Contributions:
     SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.CONTRIBUTION ELSE 0 END)
     --Earnings:
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0,2) THEN pd.EARNINGS ELSE 0 END)
+  + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0) THEN pd.EARNINGS ELSE 0 END)
     --EtvaForfeitures
   + SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.FORFEITURE ELSE 0 END)
     --Distributions
@@ -241,16 +244,15 @@ SELECT
       SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
     ) AS Total
   FROM PROFIT_DETAIL pd
- WHERE pd.PROFIT_YEAR  <= {profitYear}
- GROUP BY pd.SSN
-";
-        return query;
+ WHERE pd.PROFIT_YEAR <= {profitYear}
+ GROUP BY pd.SSN";
     }
+
     private static string GetVestingRatioQuery(short profitYear, DateOnly asOfDate)
     {
         var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
         var birthDate65 = asOfDate.AddYears(-65);
-        var yearsOfCreditQuery = GetYearsOfServiceQuery((short)profitYear, asOfDate);
+        var yearsOfCreditQuery = GetYearsOfServiceQuery(profitYear, asOfDate);
         var initialContributionYearQuery = GetInitialContributionYearQuery();
 
         var query = @$"
@@ -299,15 +301,21 @@ FROM (
         string query = @$"
 SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
                + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
-                  AND ( NVL(pp.HOURS_EXECUTIVE, 0)  + NVL(pp.CURRENT_HOURS_YEAR, 0) >= {ReferenceData.MinimumHoursForContribution()} 
-                        AND d.DATE_OF_BIRTH <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
+                  AND ( NVL(MAX(pp.TOTAL_HOURS), 0) >= {ReferenceData.MinimumHoursForContribution} 
+                        AND MAX(d.DATE_OF_BIRTH) <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
                THEN 1 ELSE 0 END
                  AS YEARS
             FROM PROFIT_DETAIL pd
            INNER JOIN DEMOGRAPHIC d ON pd.SSN = d.SSN
        LEFT JOIN PAY_PROFIT pp ON pp.DEMOGRAPHIC_ID = d.ID AND pp.PROFIT_YEAR = {profitYear}
-           WHERE pd.PROFIT_YEAR <= {profitYear}
-        GROUP BY d.ID, pd.SSN, pp.CURRENT_HOURS_YEAR, pp.HOURS_EXECUTIVE, d.DATE_OF_BIRTH
+                     WHERE pd.PROFIT_YEAR <= {profitYear}
+                         AND pd.PROFIT_YEAR_ITERATION <> 3
+        GROUP BY d.ID, pd.SSN
+        /* MAX() is used for pp.TOTAL_HOURS and d.DATE_OF_BIRTH to satisfy Oracle's GROUP BY requirements.
+           Since the JOIN on PAY_PROFIT uses DEMOGRAPHIC_ID + PROFIT_YEAR (which form a unique key per year),
+           and each DEMOGRAPHIC.ID has exactly one DATE_OF_BIRTH, MAX() will always return a single value
+           per group and does not alter the query logic. This approach avoids including these columns in the
+           GROUP BY clause, which would incorrectly create separate groups for each distinct value. */
 ";
         return query;
     }
@@ -318,6 +326,7 @@ SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
    SELECT SSN, MIN(profit_year) INITIAL_CONTR_YEAR
             FROM PROFIT_DETAIL
             WHERE PROFIT_CODE_ID = 0 /*ProfitCode.Constants.IncomingContributions*/ AND CONTRIBUTION !=0
+                AND PROFIT_YEAR_ITERATION <> 3
             GROUP BY SSN";
         return query;
     }

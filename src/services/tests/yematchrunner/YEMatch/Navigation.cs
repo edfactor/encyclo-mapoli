@@ -1,77 +1,114 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
-public static class Navigation
+
+// OH BOY.  Copied from 
+// /Users/robertherrmann/prj/smart-profit-sharing/src/services/src/Demoulas.ProfitSharing.Data/Entities/Navigations/Navigation.cs
+
+public sealed class Navigation
 {
     public static class Constants
     {
         public const short Unknown = short.MaxValue;
 
-        // Main menu items
-        public const short Inquiries = 50;
-        public const short Beneficiaries = 52;
-        public const short Distributions = 53;
-        public const short Reconciliation = 54;
-        public const short YearEnd = 55;
-        public const short ItDevOps = 56;
+        // Main menu items (ids from 1 to 99)
+        public const short Inquiries = 2;
+        public const short Beneficiaries = 3;
+        public const short Distributions = 4;
+        public const short Reconciliation = 5;
+        public const short YearEnd = 6;
+        public const short ItDevOps = 7;
 
-        // Inquiries sub-items
-        public const short MasterInquiry = 51;
+        // Secondary drawer top-level menus
+        public const short FiscalClose = 8;
+        public const short DecemberActivities = 9;
 
-        // IT Operations sub-items
-        public const short DemographicFreeze = 57;
+        // Third-level menus
+        public const short CleanupReports = 10;
+        public const short ProfShareReportByAge = 11;
+        public const short ProfShareByStore = 12;
 
-        // Year End sub-items
-        public const short DecemberActivities = 1;
-        public const short CleanupReports = 2;
-        public const short FiscalClose = 14;
+        // Available pages (ids starting at 100)
+        public const short MasterInquiry = 100;
+        public const short Adjustments = 101;
+        public const short DemographicFreeze = 102;
+        public const short DistributionInquiry = 103;
+        public const short ManageExecutiveHours = 104;
+        public const short YTDWagesExtract = 105;
+        public const short Forfeitures = 106;
+        public const short DistributionsAndForfeitures = 107;
+        public const short ProfitShareReport = 108;
+        public const short GetEligibleEmployees = 109;
+        public const short ProfitShareForfeit = 110;
+        public const short MasterUpdate = 111;
+        public const short ProfitMasterUpdate = 112;
+        public const short PaymasterUpdate = 113;
+        public const short ProfControlSheet = 114;
+        public const short DistributionsByAge = 115;
+        public const short ContributionsByAge = 116;
+        public const short ForfeituresByAge = 117;
+        public const short BalanceByAge = 118;
+        public const short VestedAmountsByAge = 119;
+        public const short BalanceByYears = 120;
+        public const short ProfShareGrossRpt = 121;
+        public const short Under21Report = 122;
+        public const short QPAY066Under21 = 123;
+        public const short QPAY066TAUnder21 = 124;
+        public const short QPAY066B = 125;
+        public const short QPAY066TA = 126;
+        public const short QNEWPROFLBL = 127;
+        public const short PROFNEW = 128;
+        public const short PROFALL = 129;
+        public const short ReprintCertificates = 130;
+        public const short SaveProfPaymstr = 131;
+        public const short QPAY066AdHocReports = 132;
+        public const short RecentlyTerminated = 133;
+        public const short PayBeneficiaryReport = 134;
+        public const short AdhocBeneficiariesReport = 135;
+        public const short TerminatedLetters = 136;
+        public const short PAY426N = 138;
+        public const short ProfitSummary = 139;
+        public const short PAY426_2 = 140;
+        public const short PAY426_3 = 141;
+        public const short DemographicBadgesNotInPayProfit = 142;
+        public const short DuplicateSSNsInDemographics = 143;
+        public const short NegativeETVA = 144;
+        public const short Terminations = 145;
+        public const short DuplicateNamesAndBirthdays = 146;
+        public const short MilitaryContributions = 147;
+        public const short Unforfeit = 148;
 
-        // Clean up Reports sub-items
-        public const short DemographicBadgesNotInPayProfit = 3;
-        public const short DuplicateSSNsInDemographics = 4;
-        public const short NegativeETVA = 5;
-        public const short DuplicateNamesAndBirthdays = 6;
+        public const short ProfitShareReportFinalRun = 149;
+        public const short PrintProfitCerts = 150;
 
-        // December Activities sub-items
-        public const short MilitaryContributions = 7;
-        public const short Unforfeit = 8;
-        public const short Terminations = 9;
-        public const short Forfeitures = 10;
-        public const short DistributionsAndForfeitures = 11;
-        public const short ProfitShareReport = 13;
+        public const short ProfitShareReportEditRun = 151;
 
-        // Fiscal Close sub-items
-        public const short ManageExecutiveHours = 15;
-        public const short YTDWagesExtract = 16;
-        public const short ProfitShareReportFinalRun = 17;
-        public const short ProfitShareReportEditRun = 18;
-        public const short GetEligibleEmployees = 30;
-        public const short ProfitShareForfeit = 31;
-        public const short ProfPayMasterUpdate = 33;
-        public const short ProfShareReportByAge = 34;
-        public const short ProfShareGrossRpt = 41;
-        public const short ProfShareByStore = 42;
-        public const short PrintProfitCerts = 49;
-        public const short MasterUpdate = 60;
-        public const short ProfitMasterUpdate = 62;
-        public const short SaveProfPaymstr = 63;
-        public const short ProfControlSheet = 64;
-        public const short QPAY066AdHocReports = 65;
+        public const short PayBenReport = 152;
+        public const short ProfitDetailReversals = 154;
+        public const short ViewDistribution = 156;
+        public const short AddDistribution = 157;
 
-        // Prof Share Report By Age sub-items
-        public const short ContributionsByAge = 35;
-        public const short DistributionsByAge = 36;
-        public const short ForfeituresByAge = 37;
-        public const short BalanceByAge = 38;
-        public const short VestedAmountsByAge = 39;
-        public const short BalanceByYears = 40;
-
-        // Prof Share by Store sub-items
-        public const short QPAY066Under21 = 43;
-        public const short QPAY066TAUnder21 = 44;
-        public const short QPAY066TA = 45;
-        public const short PROFALL = 46;
-        public const short QNEWPROFLBL = 47;
-        public const short PROFNEW = 48;
+        public const short DistributionEditRunReport = 160;
+        public const short AccountHistoryReport = 161;
     }
 
+    public short Id { get; set; }
+    public short? ParentId { get; set; }
+    public required string Title { get; set; }
+    public string? SubTitle { get; set; }
+    public string? Url { get; set; }
+    public byte? StatusId { get; set; }
+    public byte OrderNumber { get; set; }
+    public bool? Disabled { get; set; }
+    // When false the page exists in the system but should not be shown in navigation menus/drawers.
+    // Backed by database column IS_NAVIGABLE (NUMBER(1)).
+    public bool? IsNavigable { get; set; }
+    public string? Icon { get; set; }
 
+
+    // Self-referencing many-to-many to represent prerequisite navigation elements.
+    // PrerequisiteNavigations: the items this navigation depends on.
+    // DependentNavigations: the items that depend on this navigation (inverse).
+    public List<Navigation>? PrerequisiteNavigations { get; set; }
+    public List<Navigation>? DependentNavigations { get; set; }
 }
+
+

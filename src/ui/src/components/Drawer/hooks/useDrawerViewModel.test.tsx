@@ -21,7 +21,14 @@ import { useDrawerViewModel } from "./useDrawerViewModel";
 // Test Setup
 // ====================
 
-const createMockStore = (initialState = {}) => {
+interface TestStoreState {
+  general: {
+    isDrawerOpen: boolean;
+    activeSubmenu: string | null;
+  };
+}
+
+const createMockStore = (initialState: Record<string, unknown> = {}) => {
   return configureStore({
     reducer: {
       general: generalReducer
@@ -33,7 +40,7 @@ const createMockStore = (initialState = {}) => {
         ...initialState
       }
     }
-  });
+  } as never);
 };
 
 const createWrapper = (store: ReturnType<typeof createMockStore>) => {
@@ -48,7 +55,7 @@ const mockNavigationData: NavigationResponseDto = {
   navigation: [
     {
       id: 1,
-      parentId: null,
+      parentId: null as unknown as number,
       title: "YEAR END",
       subTitle: "Year End",
       url: "",
@@ -201,7 +208,7 @@ describe("useDrawerViewModel", () => {
         result.current.toggleDrawer();
       });
 
-      expect(store.getState().general.isDrawerOpen).toBe(true);
+      expect((store.getState() as TestStoreState).general.isDrawerOpen).toBe(true);
     });
 
     it("should toggle drawer closed when open and clear submenu", () => {
@@ -220,9 +227,9 @@ describe("useDrawerViewModel", () => {
         result.current.toggleDrawer();
       });
 
-      expect(store.getState().general.isDrawerOpen).toBe(false);
+      expect((store.getState() as TestStoreState).general.isDrawerOpen).toBe(false);
       // Redux clearActiveSubMenu sets to empty string, not null
-      expect(store.getState().general.activeSubmenu).toBe("");
+      expect((store.getState() as TestStoreState).general.activeSubmenu).toBe("");
     });
 
     it("should select menu item and set active submenu", () => {
@@ -237,7 +244,7 @@ describe("useDrawerViewModel", () => {
         result.current.selectMenuItem(menuItem);
       });
 
-      expect(store.getState().general.activeSubmenu).toBe("December Activities");
+      expect((store.getState() as TestStoreState).general.activeSubmenu).toBe("December Activities");
     });
 
     it("should not select disabled menu items", () => {
@@ -251,14 +258,14 @@ describe("useDrawerViewModel", () => {
         wrapper: createWrapper(store)
       });
 
-      const initialSubmenu = store.getState().general.activeSubmenu;
+      const initialSubmenu = (store.getState() as TestStoreState).general.activeSubmenu;
 
       act(() => {
         result.current.selectMenuItem(disabledItem);
       });
 
       // Should not change activeSubmenu when item is disabled
-      expect(store.getState().general.activeSubmenu).toBe(initialSubmenu);
+      expect((store.getState() as TestStoreState).general.activeSubmenu).toBe(initialSubmenu);
     });
 
     it("should go back to main menu from submenu view", () => {
@@ -274,7 +281,7 @@ describe("useDrawerViewModel", () => {
       });
 
       // Redux clearActiveSubMenu action sets activeSubmenu to empty string, not null
-      expect(store.getState().general.activeSubmenu).toBe("");
+      expect((store.getState() as TestStoreState).general.activeSubmenu).toBe("");
     });
   });
 

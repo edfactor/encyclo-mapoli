@@ -14,17 +14,14 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 {
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly ICalendarService _calendarService;
 
     public AdhocTerminatedEmployeesService(
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
-        IDemographicReaderService demographicReaderService,
-        ICalendarService calendarService
+        IDemographicReaderService demographicReaderService
     )
     {
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _demographicReaderService = demographicReaderService;
-        _calendarService = calendarService;
     }
 
     public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployees(StartAndEndDateRequest req, CancellationToken cancellationToken)
@@ -34,25 +31,67 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear);
-            var query = (from d in demographic
-                         where d.TerminationDate != null
-                            && d.TerminationDate.Value <= calInfo.FiscalEndDate
-                            && d.TerminationCodeId != TerminationCode.Constants.Retired
-                         select new AdhocTerminatedEmployeeResponse
-                         {
-                             BadgeNumber = d.BadgeNumber,
-                             FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : string.Empty,
-                             Ssn = d.Ssn.MaskSsn(),
-                             TerminationDate = d.TerminationDate!.Value,
-                             TerminationCodeId = d.TerminationCodeId,
-                             IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
-                         }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+            var sortReq = req with
+            {
+                SortBy = req.SortBy?.ToLowerInvariant() switch
+                {
+                    "ssn" => "RawSsn",
+                    _ => req.SortBy
+                }
+            };
 
-            startDate = calInfo.FiscalBeginDate;
-            endDate = calInfo.FiscalEndDate;
-            return await query;
+            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var query = from d in demographic.Include(d => d.TerminationCode)
+                        where d.TerminationDate != null
+                           && d.TerminationDate.Value >= startDate
+                           && d.TerminationDate.Value <= endDate
+                           && d.TerminationCodeId != TerminationCode.Constants.Retired
+                        select new
+                        {
+                            d.BadgeNumber,
+                            FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : string.Empty,
+                            d.ContactInfo.FirstName,
+                            d.ContactInfo.LastName,
+                            MiddleInitial = !string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? d.ContactInfo.MiddleName[0].ToString() : string.Empty,
+                            RawSsn = d.Ssn,
+                            TerminationDate = d.TerminationDate!.Value,
+                            d.TerminationCodeId,
+                            TerminationCode = d.TerminationCode != null ? d.TerminationCode.Name : string.Empty,
+                            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                            Address = d.Address.Street,
+                            Address2 = !string.IsNullOrEmpty(d.Address.Street2) ? d.Address.Street2 : string.Empty,
+                            City = !string.IsNullOrEmpty(d.Address.City) ? d.Address.City : string.Empty,
+                            State = !string.IsNullOrEmpty(d.Address.State) ? d.Address.State : string.Empty,
+                            PostalCode = !string.IsNullOrEmpty(d.Address.PostalCode) ? d.Address.PostalCode : string.Empty
+                        };
+
+            var paginatedResults = await query.ToPaginationResultsAsync(sortReq, cancellationToken: cancellationToken);
+
+            // Project to response type and mask SSN after materialization
+            return new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<AdhocTerminatedEmployeeResponse>
+            {
+                Results = paginatedResults.Results.Select(x => new AdhocTerminatedEmployeeResponse
+                {
+                    BadgeNumber = x.BadgeNumber,
+                    FullName = x.FullName,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    MiddleInitial = x.MiddleInitial,
+                    Ssn = x.RawSsn.MaskSsn(),
+                    TerminationDate = x.TerminationDate,
+                    TerminationCodeId = x.TerminationCodeId,
+                    TerminationCode = x.TerminationCode,
+                    IsExecutive = x.IsExecutive,
+                    Address = x.Address,
+                    Address2 = x.Address2,
+                    City = x.City,
+                    State = x.State,
+                    PostalCode = x.PostalCode
+                }).ToList(),
+                Total = paginatedResults.Total,
+                IsPartialResult = paginatedResults.IsPartialResult,
+                TimeoutOccurred = paginatedResults.TimeoutOccurred
+            };
         }, cancellationToken);
 
         return new ReportResponseBase<AdhocTerminatedEmployeeResponse>()
@@ -65,7 +104,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         };
     }
 
-    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(StartAndEndDateRequest req, CancellationToken cancellationToken)
+    public Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         // Convert to TerminatedLettersRequest and delegate to the more flexible overload
         var terminatedLettersRequest = new TerminatedLettersRequest
@@ -73,7 +112,6 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             BeginningDate = req.BeginningDate,
             EndingDate = req.EndingDate,
             ExcludeZeroBalance = req.ExcludeZeroBalance,
-            ProfitYear = req.ProfitYear,
             Skip = req.Skip,
             Take = req.Take,
             SortBy = req.SortBy,
@@ -81,7 +119,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             BadgeNumbers = null // No badge filtering for the original method
         };
 
-        return await GetTerminatedEmployeesNeedingFormLetter(terminatedLettersRequest, cancellationToken);
+        return GetTerminatedEmployeesNeedingFormLetter(terminatedLettersRequest, cancellationToken);
     }
 
     public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(TerminatedLettersRequest req, CancellationToken cancellationToken)
@@ -92,13 +130,16 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false /*Want letter to be sent to the most current address*/);
-            var query = (from d in demographic.Include(x => x.Address)
+            var query = (from d in demographic
+                    .Include(x => x.Address)
+                    .Include(x => x.TerminationCode)
                          where d.TerminationDate != null
                             && d.TerminationDate.Value >= beginningDate && d.TerminationDate.Value <= endingDate
                             && d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
                             && d.TerminationCodeId != TerminationCode.Constants.Retired
                             && (req.BadgeNumbers == null || !req.BadgeNumbers.Any() || req.BadgeNumbers.Contains(d.BadgeNumber))
-                         /*TODO : Exclude employees who have already been sent a letter?*/
+#pragma warning disable S1135 // Track: Exclude employees who have already been sent a letter
+#pragma warning restore S1135
                          /*Filter for employees who are not fully vested, and probably have a balance */
                          select new AdhocTerminatedEmployeeResponse
                          {
@@ -112,6 +153,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                              PostalCode = !string.IsNullOrEmpty(d.Address.PostalCode) ? d.Address.PostalCode : string.Empty,
                              TerminationDate = d.TerminationDate!.Value,
                              TerminationCodeId = d.TerminationCodeId,
+                             TerminationCode = d.TerminationCode != null ? d.TerminationCode.Name : string.Empty,
                              FirstName = d.ContactInfo.FirstName,
                              LastName = d.ContactInfo.LastName,
                              MiddleInitial = !string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? d.ContactInfo.MiddleName[0].ToString() : string.Empty
@@ -132,7 +174,16 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 
     public async Task<string> GetFormLetterForTerminatedEmployees(StartAndEndDateRequest startAndEndDateRequest, CancellationToken cancellationToken)
     {
-        var report = await GetTerminatedEmployeesNeedingFormLetter(startAndEndDateRequest, cancellationToken);
+        var filterableRequest = new FilterableStartAndEndDateRequest
+        {
+            BeginningDate = startAndEndDateRequest.BeginningDate,
+            EndingDate = startAndEndDateRequest.EndingDate,
+            Skip = startAndEndDateRequest.Skip,
+            Take = startAndEndDateRequest.Take,
+            SortBy = startAndEndDateRequest.SortBy,
+            IsSortDescending = startAndEndDateRequest.IsSortDescending
+        };
+        var report = await GetTerminatedEmployeesNeedingFormLetter(filterableRequest, cancellationToken);
         return GenerateFormLetterFromReport(report);
     }
 
@@ -150,10 +201,10 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         }
 
         var letter = new System.Text.StringBuilder();
-        var space_7 = new string(' ', 7);
+        var space7 = new string(' ', 7);
         _ = new string(' ', 11);
         _ = new string(' ', 24);
-        var space_25 = new string(' ', 25);
+        var space25 = new string(' ', 25);
         _ = new string(' ', 27);
 
         foreach (var emp in report.Response.Results)
@@ -176,9 +227,9 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Member information
-            letter.AppendLine($"{space_7}{emp.FirstName}{(emp.MiddleInitial != string.Empty ? " " : "")}{emp.MiddleInitial} {emp.LastName}");
-            letter.AppendLine($"{space_7}{emp.Address}");
-            letter.AppendLine($"{space_7}{emp.City}, {emp.State} {emp.PostalCode}");
+            letter.AppendLine($"{space7}{emp.FirstName}{(emp.MiddleInitial != string.Empty ? " " : "")}{emp.MiddleInitial} {emp.LastName}");
+            letter.AppendLine($"{space7}{emp.Address}");
+            letter.AppendLine($"{space7}{emp.City}, {emp.State} {emp.PostalCode}");
             #endregion
 
             #region Spacing
@@ -189,7 +240,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Salutation
-            letter.AppendLine($"{space_7}Dear {emp.FirstName}:");
+            letter.AppendLine($"{space7}Dear {emp.FirstName}:");
             #endregion
 
             #region Spacing
@@ -198,8 +249,8 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Body of letter
-            letter.AppendLine($"{space_7}Attached are the necessary forms needed to be completed by you in order for you to");
-            letter.AppendLine($"{space_7}begin receiving your vested interest in the Demoulas Profit Sharing Plan and Trust.");
+            letter.AppendLine($"{space7}Attached are the necessary forms needed to be completed by you in order for you to");
+            letter.AppendLine($"{space7}begin receiving your vested interest in the Demoulas Profit Sharing Plan and Trust.");
             #endregion
 
             #region Spacing
@@ -208,7 +259,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Instructions
-            letter.AppendLine($"{space_7}Please return the completed forms to the attention of:");
+            letter.AppendLine($"{space7}Please return the completed forms to the attention of:");
             #endregion
 
             #region Spacing
@@ -217,9 +268,9 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Remittance address
-            letter.AppendLine($"{space_25}Demoulas Profit Sharing Plan and Trust");
-            letter.AppendLine($"{space_25}875 East Street");
-            letter.AppendLine($"{space_25}Tewksbury, MA  01876");
+            letter.AppendLine($"{space25}Demoulas Profit Sharing Plan and Trust");
+            letter.AppendLine($"{space25}875 East Street");
+            letter.AppendLine($"{space25}Tewksbury, MA  01876");
             #endregion
 
             #region Spacing
@@ -228,7 +279,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Questions
-            letter.AppendLine($"{space_7}If you have any questions please do not hesitate to call (978) 851-8000.");
+            letter.AppendLine($"{space7}If you have any questions please do not hesitate to call (978) 851-8000.");
             #endregion
 
             #region Spacing
@@ -237,7 +288,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Closing
-            letter.AppendLine($"{space_7}Sincerely,");
+            letter.AppendLine($"{space7}Sincerely,");
             #endregion
 
             #region Spacing
@@ -247,7 +298,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Signature
-            letter.AppendLine($"{space_7}DEMOULAS PROFIT SHARING PLAN & TRUST");
+            letter.AppendLine($"{space7}DEMOULAS PROFIT SHARING PLAN & TRUST");
             #endregion
 
             #region Printer Control

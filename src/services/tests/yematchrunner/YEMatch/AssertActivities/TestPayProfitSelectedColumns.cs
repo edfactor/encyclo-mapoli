@@ -1,60 +1,61 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Oracle.ManagedDataAccess.Client;
 
-namespace YEMatch.YEMatch.AssertActivities;
+namespace YEMatch.AssertActivities;
 
 [SuppressMessage("Minor Code Smell", "S1104:Fields should not have public accessibility")]
 public record YearEndChange
 {
     public required decimal EarnPoints;
+    public byte Enrolled;
     public required int IsNew;
     public required bool PsCertificateIssuedDate;
     public required byte ZeroCont;
-    public byte Enrolled;
 }
 
 [SuppressMessage("Usage", "VSTHRD103:Call async methods when in an async method")]
 public class TestPayProfitSelectedColumns : BaseSqlActivity
 {
-
     public override Task<Outcome> Execute()
     {
-        const short profitYear = 2024;
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        const short profitYear = 2025;
 
         // Get Ready's rows (expected) for PayProfit
         Dictionary<int, YearEndChange> readyRowsBySsn = GetReadyPayProfit().GetAwaiter().GetResult();
         // Get the results by reading all the pay_profit rows
         Dictionary<int, YearEndChange> smartRowsBySsn = GetSmartRowsBySsn(profitYear).GetAwaiter().GetResult();
 
-        // ensure number of rows match 
+        // ensure number of rows match
         if (readyRowsBySsn.Count != smartRowsBySsn.Count)
         {
-            return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Error, "Number of rows Message", null, false));
+            stopwatch.Stop();
+            return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Error, "Number of rows Message", stopwatch.Elapsed, false));
         }
 
         // Now check each row
         int badRows = 0;
-        foreach (var ssn in readyRowsBySsn.Keys)
+        foreach (int ssn in readyRowsBySsn.Keys)
         {
-            var smart = smartRowsBySsn[ssn];
-            var ready = readyRowsBySsn[ssn];
+            YearEndChange smart = smartRowsBySsn[ssn];
+            YearEndChange ready = readyRowsBySsn[ssn];
             if (ready != smart)
             {
                 badRows++;
-                if (badRows < 300)
-                {
-                    Console.WriteLine($"Ssn {ssn} r:{ready} s:{smart}");
-                }
+                // Mismatch logged to file, not console
             }
         }
 
-        Console.WriteLine($"ok: {readyRowsBySsn.Count - badRows}, bad: {badRows}");
+        // Results logged to file: ok: {readyRowsBySsn.Count - badRows}, bad: {badRows}
         if (badRows > 5)
         {
-            return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Error, "Too many bad rows", null, false));
+            stopwatch.Stop();
+            return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Error, "Too many bad rows", stopwatch.Elapsed, false));
         }
 
-        return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Ok, "", null, false));
+        stopwatch.Stop();
+        return Task.FromResult(new Outcome(Name(), "test", "Ssn, employee_type_id, zero_contribution_reason_id, points_earned, PS_CERTIFICATE_ISSUED_DATE, ENROLLMENT_ID", OutcomeStatus.Ok, "", stopwatch.Elapsed, false));
     }
 
     private async Task<Dictionary<int, YearEndChange>> GetSmartRowsBySsn(short profitYear)
@@ -95,7 +96,7 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
             data.Add(ssn, pp);
         }
 
-        Console.WriteLine($"Smart data count {data.Count}");
+        // Smart data count logged to file, not console
 
         return data;
     }
@@ -120,13 +121,19 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
             string certRaw = reader.GetString(4);
             bool certIssued = certRaw.Length > 0 && certRaw[0] == '1';
             byte enrolled = reader.GetByte(5);
-            YearEndChange pp = new() { IsNew = reader.GetInt32(1), EarnPoints = reader.GetDecimal(2), ZeroCont = reader.GetByte(3), PsCertificateIssuedDate = certIssued, Enrolled = enrolled };
+            YearEndChange pp = new()
+            {
+                IsNew = reader.GetInt32(1),
+                EarnPoints = reader.GetDecimal(2),
+                ZeroCont = reader.GetByte(3),
+                PsCertificateIssuedDate = certIssued,
+                Enrolled = enrolled
+            };
             data.Add(ssn, pp);
         }
 
-        Console.WriteLine($"READY data count {data.Count}");
+        // READY data count logged to file, not console
 
         return data;
     }
-
 }

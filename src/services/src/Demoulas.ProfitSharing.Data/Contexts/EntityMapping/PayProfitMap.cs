@@ -21,6 +21,7 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
         // Composite index to support frequent filters by year and joins by demographic
         _ = builder.HasIndex(e => new { e.ProfitYear, e.DemographicId }, "IX_ProfitYear_DemographicId");
         // NOTE: No need for IX_DemographicId_ProfitYear - already covered by PK (DemographicId, ProfitYear)
+        _ = builder.HasIndex(e => new { e.ProfitYear, e.TotalHours }, "IX_ProfitYear_TotalHours");
 
         _ = builder.Property(e => e.DemographicId)
             .HasPrecision(9)
@@ -82,6 +83,17 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
         _ = builder.Property(e => e.PointsEarned)
             .HasColumnName("POINTS_EARNED")
             .HasPrecision(9, 2);
+
+        // Computed columns
+        _ = builder.Property(e => e.TotalHours)
+            .HasPrecision(6, 2)
+            .HasColumnName("TOTAL_HOURS")
+            .HasComputedColumnSql("HOURS_EXECUTIVE + CURRENT_HOURS_YEAR", stored: true);
+
+        _ = builder.Property(e => e.TotalIncome)
+            .HasPrecision(9, 2)
+            .HasColumnName("TOTAL_INCOME")
+            .HasComputedColumnSql("INCOME_EXECUTIVE + CURRENT_INCOME_YEAR", stored: true);
 
         _ = builder.HasOne(e => e.Enrollment)
             .WithMany()

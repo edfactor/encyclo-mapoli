@@ -5,12 +5,14 @@
 ### Add to New Endpoint (3 steps)
 
 1. **Add using statements**:
+
 ```csharp
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Microsoft.Extensions.Logging;
 ```
 
 2. **Inject logger**:
+
 ```csharp
 private readonly ILogger<MyEndpoint> _logger;
 
@@ -25,6 +27,7 @@ public MyEndpoint(IMyService service, ILogger<MyEndpoint> logger)
 3. **Choose your pattern**:
 
 **Option A: Automatic (Recommended)**
+
 ```csharp
 public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationToken ct)
 {
@@ -37,22 +40,23 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
 ```
 
 **Option B: Manual Control**
+
 ```csharp
 public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationToken ct)
 {
     using var activity = this.StartEndpointActivity(HttpContext);
-    
+
     try
     {
         this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn");
-        
+
         var response = await _service.ProcessAsync(req, ct);
-        
+
         // Optional business metrics
         EndpointTelemetry.BusinessOperationsTotal.Add(1,
             new("operation", "my-operation"),
             new("endpoint", "MyEndpoint"));
-        
+
         this.RecordResponseMetrics(HttpContext, _logger, response);
         return response;
     }
@@ -89,6 +93,7 @@ EndpointTelemetry.RecordCountsProcessed.Record(recordCount,
 ## 🔒 Sensitive Fields
 
 Always mark when accessing:
+
 - `"Ssn"` - Social Security Numbers
 - `"Email"` - Email addresses
 - `"BankAccount"` - Banking info
@@ -106,28 +111,33 @@ Always mark when accessing:
 ## 🐛 Troubleshooting
 
 **No telemetry data?**
+
 - Check logger injection
 - Verify using statements
 - Enable console exporter for debugging
 
 **Performance issues?**
+
 - Don't nest ExecuteWithTelemetry calls
 - Check sampling rates
 - Avoid synchronous I/O in telemetry
 
 **High cardinality warnings?**
+
 - Use user_role, not user_id in labels
 - Keep label values low cardinality
 
 ## 📈 What Gets Measured
 
 ✅ **Automatically**:
+
 - Request/response times
-- Request/response sizes  
+- Request/response sizes
 - Error rates and types
 - User activity by role
 
 ✅ **When You Add**:
+
 - Business operation counts
 - Record processing volumes
 - Sensitive data access
@@ -136,6 +146,7 @@ Always mark when accessing:
 ## 🎯 For QA Teams
 
 Monitor during testing:
+
 ```promql
 # Error rate (should be < 1%)
 rate(ps_endpoint_errors_total[5m]) / rate(app_requests_total[5m])
@@ -150,6 +161,7 @@ ps_sensitive_field_access_total{field="Ssn"}
 ## 🚨 For DevOps
 
 Key alerts to set up:
+
 ```yaml
 # High error rate
 rate(ps_endpoint_errors_total[5m]) / rate(app_requests_total[5m]) > 0.05
@@ -164,11 +176,13 @@ rate(ps_sensitive_field_access_total{field="Ssn"}[1h]) > 100
 ## 📝 Log Correlation
 
 Every request gets a correlation ID for debugging:
+
 ```
 correlationId:"abc123-def456"
 ```
 
 All logs include structured data:
+
 - endpoint name
 - user role
 - operation type

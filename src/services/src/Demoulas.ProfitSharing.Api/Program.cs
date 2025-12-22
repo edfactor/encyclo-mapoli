@@ -4,7 +4,6 @@ using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -19,11 +18,10 @@ using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.LogMasking; // retains AddProjectServices & other extension methods
 using Demoulas.ProfitSharing.Services.Middleware;
 using Demoulas.ProfitSharing.Services.Serialization;
-using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
+using QuestPDF;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
@@ -64,25 +62,26 @@ logConfig.MaskingOperators = [
 
 _ = builder.SetDefaultLoggerConfiguration(logConfig);
 
+// Configure QuestPDF license for development and production environments
+// For development and non-commercial use: Community license (free)
+// For commercial use with revenue > $1M USD: requires Commercial license
+// See: https://www.questpdf.com/license/
+Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 _ = builder.AddSecurityServices();
 
-if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariable("YEMATCH_USE_TEST_CERTS") == null)
-{
-    builder.Services.AddOktaSecurity(builder.Configuration);
-}
-else
-{
-#pragma warning disable CS0618 // Type or member is obsolete
-    builder.Services.AddTestingSecurity(builder.Configuration);
-#pragma warning restore CS0618 // Type or member is obsolete
-}
-
-builder.ConfigureSecurityPolicies();
 
 string[] allowedOrigins = [
         "https://ps.qa.demoulas.net",
         "https://ps.uat.demoulas.net",
         "https://ps.demoulas.net"
+];
+
+string[] developmentOrigins = [
+        "http://localhost:3100",
+        "http://127.0.0.1:3100",
+        "https://localhost:3100",
+        "https://127.0.0.1:3100"
 ];
 
 builder.Services.AddCors(options =>
@@ -91,10 +90,12 @@ builder.Services.AddCors(options =>
     {
         if (builder.Environment.IsDevelopment())
         {
-            // Local development: permissive CORS to simplify local testing
-            _ = pol.AllowAnyMethod()
+            // Local development: restrict to localhost origins only (PS-2025)
+            // Prevents MITM attacks on shared networks (e.g., coffee shop WiFi)
+            _ = pol.WithOrigins(developmentOrigins)
+                .AllowAnyMethod()
                 .AllowAnyHeader()
-                .AllowAnyOrigin()
+                .AllowCredentials()
                 .WithExposedHeaders("Location", "x-demographic-data-source");
         }
         else
@@ -112,7 +113,8 @@ builder.Services.AddCors(options =>
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
     // Insert masking converter at index 0 to ensure highest precedence
-    o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory());
+    // Pass the host environment to the converter so it can check IsTestEnvironment()
+    o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory(builder.Environment));
 
     // Add source-generated JSON serializer context for compile-time serialization
     // This reduces reflection overhead and improves startup time
@@ -127,9 +129,9 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<AuditSaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
-        ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR]));
+        ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
-    factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
+    factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonWarehouseContext>("Warehouse"));
 });
 builder.AddProjectServices();
 
@@ -176,15 +178,23 @@ GlobalMeter.RegisterObservableGauges();
 GlobalMeter.RecordDeploymentStartup();
 
 app.UseCors();
+
+// Add no-cache headers to all responses to prevent browser caching of sensitive data
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate, max-age=0";
+        context.Response.Headers.Pragma = "no-cache";
+        context.Response.Headers.Expires = "0";
+        return Task.CompletedTask;
+    });
+    await next();
+});
+
 app.UseDemographicHeaders();
 
 app.UseSensitiveValueMasking();
-
-if (app.Environment.IsProduction())
-{
-    // Breaks swagger, but swagger isn't available in production/UAT anyway
-    app.UseSecurityHeaders();
-}
 
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>

@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -190,19 +190,8 @@ public sealed class BalanceEquationValidationService : IBalanceEquationValidatio
                 Notes = "Error occurred during calculation or data retrieval"
             });
 
-            var errorResult = new CrossReferenceValidationGroup
-            {
-                GroupName = "Balance Equation",
-                Description = $"Error validating balance equation for year {profitYear}",
-                IsValid = false,
-                Validations = validations,
-                Summary = $"❌ Error validating balance equation: {ex.Message}",
-                Priority = "Critical",
-                ValidationRule = "Ending Balance = Beginning Balance + Contributions + ALLOC - Distributions - PAID ALLOC + Earnings - Forfeitures (Balance Matrix Rule 5)"
-            };
-
-            return await Task.FromResult(Result<CrossReferenceValidationGroup>.Failure(
-                Error.Unexpected($"Failed to validate balance equation: {ex.Message}")));
+            return Result<CrossReferenceValidationGroup>.Failure(
+                Error.Unexpected($"Failed to validate balance equation: {ex.Message}"));
         }
     }
 

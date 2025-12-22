@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 
@@ -77,7 +78,10 @@ internal sealed record MemberFinancials
     public decimal Caf { get; set; } // Class Action Fund
 
     // This Years Values
+    [MaskSensitive]
     public int ContributionPoints { get; set; }
+
+    [MaskSensitive]
     public int EarningPoints { get; set; }
 
     public decimal Contributions { get; set; }
@@ -110,6 +114,8 @@ internal sealed record MemberFinancials
 
     // Did this user bust over the yearly Max Contribution amount?
     public decimal MaxOver { get; set; }
+
+    [MaskSensitive]
     public int MaxPoints { get; set; }
 
     public byte? ZeroContributionReasonId { get; set; }

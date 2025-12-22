@@ -1,5 +1,10 @@
+import {
+  CrossReferenceValidationGroup,
+  MasterUpdateCrossReferenceValidationResponse,
+  ProfitSharingReportValidationRequest,
+  ValidationResponse
+} from "@/types/validation/cross-reference-validation";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { MasterUpdateCrossReferenceValidationResponse } from "smart-ui-library";
 import { prepareHeaders, url } from "./api";
 
 /**
@@ -13,6 +18,9 @@ export const validationApi = createApi({
     prepareHeaders
   }),
   tagTypes: ["MasterUpdateValidation"],
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     /**
      * Get Master Update cross-reference validation data for a specific profit year.
@@ -28,9 +36,52 @@ export const validationApi = createApi({
      */
     getMasterUpdateValidation: builder.query<MasterUpdateCrossReferenceValidationResponse, number>({
       query: (profitYear) => `checksum/master-update/${profitYear}`,
-      providesTags: (result, error, profitYear) => [{ type: "MasterUpdateValidation", id: profitYear }]
+      providesTags: (_result, _error, profitYear) => [{ type: "MasterUpdateValidation", id: profitYear }]
+    }),
+    getProfitSharingReportValidation: builder.query<ValidationResponse, ProfitSharingReportValidationRequest>({
+      query: (request) =>
+        `checksum/profit-sharing-report/${request.profitYear}/${request.reportSuffix}/${request.useFrozenData ? "true" : "false"}`,
+      providesTags: (_result, _error, request) => [
+        { type: "MasterUpdateValidation", id: `${request.profitYear}-${request.reportSuffix}` }
+      ]
+    }),
+
+    /**
+     * Get balance validation data (ALLOC/PAID ALLOC transfers) for a specific profit year.
+     * Returns validation results that can be used to display validation icons in the UI.
+     *
+     * Note: This endpoint uses a different base path (/api/balance-validation/) than other
+     * validation endpoints (/api/validation/), hence the relative path navigation.
+     *
+     * @param profitYear - The profit year to validate (e.g., 2024)
+     * @returns CrossReferenceValidationGroup with ALLOC transfer validation results, or null if no data
+     *
+     * @example
+     * ```typescript
+     * const { data, isLoading, error } = useGetBalanceValidationQuery(2024);
+     * if (data) {
+     *   const allocValidation = data.validations.find(v => v.fieldName === 'NetAllocTransfer');
+     * }
+     * ```
+     */
+    getBalanceValidation: builder.query<CrossReferenceValidationGroup | null, number>({
+      query: (profitYear) => `../balance-validation/alloc-transfers/${profitYear}`,
+      // Handle 404 gracefully - no validation data available for this year
+      transformErrorResponse: (response) => {
+        if (response.status === 404) {
+          return { status: 404, data: null };
+        }
+        return response;
+      }
     })
   })
 });
 
-export const { useGetMasterUpdateValidationQuery, useLazyGetMasterUpdateValidationQuery } = validationApi;
+export const {
+  useGetMasterUpdateValidationQuery,
+  useLazyGetMasterUpdateValidationQuery,
+  useGetProfitSharingReportValidationQuery,
+  useLazyGetProfitSharingReportValidationQuery,
+  useGetBalanceValidationQuery,
+  useLazyGetBalanceValidationQuery
+} = validationApi;

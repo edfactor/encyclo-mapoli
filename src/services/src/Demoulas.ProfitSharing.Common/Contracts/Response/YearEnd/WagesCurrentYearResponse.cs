@@ -1,15 +1,28 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record WagesCurrentYearResponse : IIsExecutive
+
+public sealed record WagesCurrentYearResponse
 {
-    public required int BadgeNumber { get; set; }
-    public decimal IncomeCurrentYear { get; set; }
-    public decimal HoursCurrentYear { get; set; }
-    public short StoreNumber { get; set; }
-    public bool IsExecutive { get; set; }
+    // Totals for the entire dataset
+    [YearEndArchiveProperty]
+    public decimal TotalHoursCurrentYearWages { get; set; }
+    [YearEndArchiveProperty]
+    public decimal TotalIncomeCurrentYearWages { get; set; }
+
+    // List of participants for this report container (paginated)
+    public required List<WagesCurrentYearParticipant> Participants { get; set; }
+
     public static WagesCurrentYearResponse ResponseExample()
     {
-        return new WagesCurrentYearResponse { BadgeNumber = 123456, HoursCurrentYear = 3265, IncomeCurrentYear = (decimal)25_325.18 };
+        return new WagesCurrentYearResponse
+        {
+            TotalHoursCurrentYearWages = 100000m,
+            TotalIncomeCurrentYearWages = 2500000m,
+            Participants = new List<WagesCurrentYearParticipant>
+            {
+                new WagesCurrentYearParticipant { BadgeNumber = 123456, HoursCurrentYear = 3265m, IncomeCurrentYear = 25325.18m, StoreNumber = 1, IsExecutive = false }
+            }
+        };
     }
 }

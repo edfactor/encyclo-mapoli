@@ -13,11 +13,14 @@ import { createDataSourceAwareBaseQuery } from "./api";
 // In-flight request tracking to prevent duplicate API calls
 const inFlightRequests = new Map<string, Promise<unknown>>();
 
-const baseQuery = createDataSourceAwareBaseQuery();
+const baseQuery = createDataSourceAwareBaseQuery(15000); // 15 second timeout for user-facing searches
 export const InquiryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "inquiryApi",
   tagTypes: ["MemberDetails", "ProfitDetails"],
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     // Master Inquiry API endpoints
     searchProfitMasterInquiry: builder.query<Paged<EmployeeDetails>, MasterInquiryRequest>({
@@ -40,6 +43,7 @@ export const InquiryApi = createApi({
           paymentType: params.paymentType,
           memberType: params.memberType,
           name: params.name,
+          voids: params.voids,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -148,6 +152,7 @@ export const InquiryApi = createApi({
         startProfitMonth?: number;
         endProfitMonth?: number;
         profitCode?: number;
+        voids?: boolean;
         contributionAmount?: number;
         earningsAmount?: number;
         forfeitureAmount?: number;
@@ -192,6 +197,7 @@ export const InquiryApi = createApi({
           paymentType: params.paymentType,
           memberType: params.memberType,
           name: params.name,
+          voids: params.voids,
           sortBy: params.pagination.sortBy,
           isSortDescending: params.pagination.isSortDescending,
           skip: params.pagination.skip,

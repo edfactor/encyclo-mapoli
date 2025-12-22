@@ -6,7 +6,9 @@ export enum ImpersonationRoles {
   ProfitSharingAdministrator = "System-Administrator",
   ItDevOps = "IT-DevOps",
   ItOperations = "IT-Operations",
-  ExecutiveAdministrator = "Executive-Administrator"
+  ExecutiveAdministrator = "Executive-Administrator",
+  HrReadOnly = "HR-ReadOnly",
+  SsnUnmasking = "SSN-Unmasking"
 }
 
 export enum FrozenReportsByAgeRequestType {

@@ -1,13 +1,13 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { Controller, useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { setGrossWagesReportQueryParams } from "reduxstore/slices/yearsEndSlice";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { profitYearValidator } from "../../../utils/FormValidators";
 
 interface GrossReportParams {
@@ -28,27 +28,35 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetGrossWagesReportQuery();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset
   } = useForm<GrossReportParams>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<GrossReportParams>,
     defaultValues: {
       profitYear: fiscalCloseProfitYear,
       gross: 50000
     }
   });
 
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   const validateAndSubmit = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       setPageReset(true);
       triggerSearch(
         {
           profitYear: data.profitYear,
           minGrossAmount: data.gross,
-          pagination: { skip: 0, take: 25 }
+          pagination: { skip: 0, take: 25, sortBy: "BadgeNumber", isSortDescending: false }
         },
         false
       ).unwrap();
@@ -81,13 +89,14 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="profitYear"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                 value={field.value ? new Date(field.value, 0) : null}
                 required={true}
                 label="Profit Year"
                 disableFuture
+                minDate={new Date(2024, 0, 1)}
                 views={["year"]}
                 error={errors.profitYear?.message}
               />
@@ -118,8 +127,8 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
-          isFetching={isFetching}
-          disabled={!isValid}
+          isFetching={isFetching || isSubmitting}
+          disabled={!isValid || isFetching || isSubmitting}
         />
       </Grid>
     </form>

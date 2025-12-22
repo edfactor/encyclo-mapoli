@@ -1,8 +1,10 @@
 import { Typography } from "@mui/material";
+import { SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useLazyGetCertificatesReportQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import { CertificatePrintRequest } from "../../../reduxstore/types";
@@ -21,11 +23,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     sortBy: "badgeNumber",
     isSortDescending: false
   });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
-
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  const [_selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
   const { certificates } = useSelector((state: RootState) => state.yearsEnd);
   const [getCertificatesReport, { isFetching }] = useLazyGetCertificatesReportQuery();
@@ -95,6 +93,11 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     );
   }, [certificates]);
 
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: gridData?.length ?? 0
+  });
+
   const columnDefs = useMemo(
     () => GetReprintCertificatesGridColumns(),
     //selectedRowIds,
@@ -104,9 +107,11 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
   );
 
   const onSelectionChanged = useCallback(
-    (event: { api: { getSelectedNodes: () => Array<{ data: { badge: number } }> } }) => {
+    (event: SelectionChangedEvent<ReprintCertificateEmployee>) => {
       const selectedNodes = event.api.getSelectedNodes();
-      const selectedIds = selectedNodes.map((node) => node.data.badge);
+      const selectedIds = selectedNodes
+        .map((node) => node.data?.badge)
+        .filter((badge): badge is number => badge !== undefined);
       setSelectedRowIds(selectedIds);
       onSelectionChange?.(selectedIds);
     },
@@ -126,7 +131,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
       </div>
 
       <DSMGrid
-        preferenceKey="REPRINT_CERTIFICATES_GRID"
+        preferenceKey={GRID_KEYS.REPRINT_CERTIFICATES}
         isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         maxHeight={gridMaxHeight}
@@ -139,7 +144,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
             headerCheckbox: true,
             enableClickSelection: false
           },
-          onSelectionChanged: onSelectionChanged
+          onSelectionChanged: onSelectionChanged as (event: unknown) => void
         }}
       />
       {(gridData.length > 0 || totalCount > 0) && (

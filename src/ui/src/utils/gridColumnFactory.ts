@@ -1,9 +1,10 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef, ICellRendererParams, ValueFormatterParams } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import {
+  AgeColumnOptions,
   AlignableColumnOptions,
   BadgeColumnOptions,
-  BaseColumnOptions,
+  BadgeOrPSNOptions,
   CityColumnOptions,
   CommentColumnOptions,
   CurrencyColumnOptions,
@@ -147,7 +148,7 @@ export const createYesOrNoColumn = (options: YesOrNoColumnOptions): ColDef => {
     sortable = true,
     resizable = true,
     useWords = false,
-    valueFormatter
+    cellRenderer
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -161,14 +162,14 @@ export const createYesOrNoColumn = (options: YesOrNoColumnOptions): ColDef => {
     cellClass: alignmentClass,
     resizable,
     sortable,
-    valueFormatter
+    cellRenderer
   };
 
-  if (!valueFormatter) {
+  if (!cellRenderer) {
     if (useWords) {
-      column.valueFormatter = (params) => (params.value ? "Yes" : "No");
+      column.cellRenderer = (params: ICellRendererParams) => (params.value ? "Yes" : "No");
     } else {
-      column.valueFormatter = (params) => (params.value ? "Y" : "N");
+      column.cellRenderer = (params: ICellRendererParams) => (params.value ? "Y" : "N");
     }
   }
 
@@ -315,6 +316,17 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
 
       return viewBadgeLinkRenderer(dataValue, navigateFunction);
     };
+  } else if (psnSuffix) {
+    // PS-2258: When not rendering as link but psnSuffix is enabled, show full PSN (badge + suffix)
+    column.valueFormatter = (params: ValueFormatterParams) => {
+      const badgeNumber = params.data?.badgeNumber;
+      const suffix = params.data?.psnSuffix;
+      if (badgeNumber == null || badgeNumber === 0) return "";
+      if (suffix != null && suffix > 0) {
+        return `${badgeNumber}${String(suffix).padStart(4, "0")}`;
+      }
+      return String(badgeNumber);
+    };
   }
 
   // Add tooltip support
@@ -401,7 +413,7 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
   return column;
 };
 
-export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
+export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
   const {
     headerName = "Age",
     field = "age",
@@ -413,7 +425,8 @@ export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
     tooltip,
     tooltipField,
     tooltipValueGetter,
-    headerTooltip
+    headerTooltip,
+    valueGetter
   } = options;
 
   const column: ColDef = {
@@ -444,6 +457,26 @@ export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
     column.headerTooltip = headerTooltip;
   }
 
+  if (valueGetter) {
+    column.valueGetter = valueGetter;
+  } else {
+    column.valueGetter = (params) => {
+      if (params.data?.[field] && typeof params.data?.[field] === "number" && params.data?.[field] == 0) {
+        return "N/A";
+      } else if (params.data?.[field] && typeof params.data?.[field] === "string") {
+        const age = params.data?.[field];
+        // If age is >= 125 (default Oracle date 1/1/1900), display empty string
+        const ageNumber = typeof age === "string" ? parseInt(age, 10) : age;
+        if (!isNaN(ageNumber) && ageNumber >= 125) {
+          return "";
+        }
+      } else {
+        // This will be used for masked values also
+        return params.data?.[field];
+      }
+    };
+  }
+
   return column;
 };
 
@@ -467,6 +500,10 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
       }
       if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
         return yyyyMMDDToMMDDYYYY(value);
+      }
+      // Handle masked dates (e.g., "XXXX-XX-XX")
+      if (typeof value === "string" && /^[X\d]{4}-[X\d]{2}-[X\d]{2}$/.test(value)) {
+        return value;
       }
       if (value instanceof Date && !isNaN(value.getTime())) {
         // Format as MM/DD/YYYY
@@ -554,7 +591,7 @@ export const createStoreColumn = (options: AlignableColumnOptions = {}): ColDef 
 export const createNameColumn = (options: NameColumnOptions = {}): ColDef => {
   const {
     headerName = "Name",
-    field = "employeeName",
+    field = "fullName",
     colId = field,
     minWidth = 180,
     maxWidth,
@@ -832,7 +869,7 @@ export const createZipColumn = (options: FormattableColumnOptions = {}): ColDef 
     colId = field,
     minWidth = 100,
     maxWidth,
-    alignment = "left",
+    alignment = "right",
     sortable = true,
     resizable = true,
     valueFormatter = (params) => {
@@ -910,7 +947,25 @@ export const createPointsColumn = (options: PointsColumnOptions = {}): ColDef =>
   if (valueFormatter) {
     column.valueFormatter = valueFormatter;
   } else if (includeCommaFormatting) {
-    column.valueFormatter = (params) => formatNumberWithComma(params.value);
+    column.valueFormatter = (params) => {
+      const value = params.value;
+
+      // Handle masked values (security rule: points may be masked as "X")
+      if (value === "X" || value === "x") {
+        return value.toUpperCase();
+      }
+
+      // Handle numeric values (excluding NaN)
+      if (typeof value === "number") {
+        if (isNaN(value)) {
+          return "";
+        }
+        return formatNumberWithComma(value);
+      }
+
+      // Return as-is for other string values or null/undefined
+      return value != null ? String(value) : "";
+    };
   }
 
   return column;
@@ -924,7 +979,7 @@ export const createCityColumn = (options: CityColumnOptions = {}): ColDef => {
     minWidth = 120,
     maxWidth,
     alignment = "left",
-    sortable = false,
+    sortable = true,
     resizable = true,
     nestedPath,
     valueGetter,
@@ -1129,6 +1184,60 @@ export const createPSNColumn = (options: PSNColumnOptions = {}): ColDef => {
       } else {
         // Simple PSN linking
         return viewBadgeLinkRenderer(params.data[field]);
+      }
+    };
+  } else if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  }
+
+  return column;
+};
+
+export const createBadgeOrPSNColumn = (
+  options: BadgeOrPSNOptions = {
+    badgeField: "",
+    psnField: ""
+  }
+): ColDef => {
+  const {
+    headerName = "Badge/PSN",
+    field = "psn",
+    colId = field,
+    badgeField = "badgeNumber",
+    psnField = "psn",
+    minWidth = 80,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+    enableLinking = false,
+    navigateFunction,
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (enableLinking && navigateFunction) {
+    column.cellRenderer = (params: ICellRendererParams) => {
+      if (params.data[badgeField]) {
+        return viewBadgeLinkRenderer(params.data[badgeField]);
+      } else {
+        return viewBadgeLinkRenderer(params.data[psnField]);
       }
     };
   } else if (valueFormatter) {

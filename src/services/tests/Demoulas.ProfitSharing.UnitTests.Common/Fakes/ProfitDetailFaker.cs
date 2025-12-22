@@ -3,11 +3,11 @@ using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 
-internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
+public sealed class ProfitDetailFaker : Faker<ProfitDetail>
 {
     private static int _profitDetailCounter = 1000;
 
-    internal ProfitDetailFaker(IList<Demographic> demographicFakes)
+    public ProfitDetailFaker(IList<Demographic> demographicFakes)
     {
         var demographicQueue = new Queue<Demographic>(demographicFakes);
 

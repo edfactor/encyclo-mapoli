@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.ProfitSharing.Api;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -46,8 +46,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         var appUser = ServiceProvider!.GetService<IAppUser>();
         Mock<IHttpContextAccessor> mockHttpContextAccessor = new();
         Mock<ILogger<ExecutiveHoursAndDollarsEndpoint>> mockLogger = new();
+        Mock<ICommitGuardOverride> mockCommitGuardOverride = new();
         ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
-        IAuditService mockAuditService = new AuditService(MockDbContextFactory, appUser, mockHttpContextAccessor.Object);
+        IAuditService mockAuditService = new AuditService(MockDbContextFactory, mockCommitGuardOverride.Object, appUser, mockHttpContextAccessor.Object);
         _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockAuditService, mockLogger.Object);
     }
 
@@ -248,6 +249,104 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         });
     }
 
+    [Fact(DisplayName = "PS-2162: FullName should be formatted with middle initial")]
+    public Task GetResponse_Should_Format_FullName_With_Middle_Initial()
+    {
+        return MockDbContextFactory.UseWritableContext(async c =>
+        {
+            // Arrange - Create an employee with a middle name
+            PayProfit pp = await c.PayProfits
+                .Include(payProfit => payProfit.Demographic!)
+                .ThenInclude(demographic => demographic.ContactInfo)
+                .Include(p => p.Demographic != null)
+                .FirstAsync(CancellationToken.None);
+            Demographic demo = pp.Demographic!;
+
+            demo.BadgeNumber = 5001;
+            demo.ContactInfo.LastName = "Smith";
+            demo.ContactInfo.FirstName = "John";
+            demo.ContactInfo.MiddleName = "Michael"; // Has middle name
+            demo.ContactInfo.FullName = "Smith, John M"; // Matches computed column format: LastName, FirstName + initial
+            demo.StoreNumber = 1;
+            pp.IncomeExecutive = 100m;
+            pp.HoursExecutive = 10;
+            pp.CurrentIncomeYear = 500m;
+            pp.CurrentHoursYear = 50;
+            demo.PayFrequencyId = 2; // Monthly (Executive)
+            demo.PayFrequency = new PayFrequency { Id = 2, Name = "Monthly" };
+            demo.EmploymentStatusId = 'A'; // Active
+            demo.EmploymentStatus = new EmploymentStatus { Id = 'A', Name = "Active" };
+            pp.ProfitYear = ProfitShareTestYear;
+
+            await c.SaveChangesAsync(CancellationToken.None);
+
+            ExecutiveHoursAndDollarsRequest request = new() { ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10 };
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
+
+            // Act
+            TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
+                await ApiClient
+                    .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
+                        ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(request);
+
+            // Assert - FullName should be formatted as "LastName, FirstName M" (with middle initial only)
+            response.Result.Response.Results.Count().ShouldBeGreaterThan(0);
+            var result = response.Result.Response.Results.FirstOrDefault(r => r.BadgeNumber == 5001);
+            result.ShouldNotBeNull();
+            result!.FullName.ShouldBe("Smith, John M"); // Should have middle initial only, not full middle name
+        });
+    }
+
+    [Fact(DisplayName = "PS-2162: FullName should be formatted without middle initial when no middle name")]
+    public Task GetResponse_Should_Format_FullName_Without_Middle_Initial()
+    {
+        return MockDbContextFactory.UseWritableContext(async c =>
+        {
+            // Arrange - Create an employee without a middle name
+            PayProfit pp = await c.PayProfits
+                .Include(payProfit => payProfit.Demographic!)
+                .ThenInclude(demographic => demographic.ContactInfo)
+                .Include(p => p.Demographic != null)
+                .FirstAsync(CancellationToken.None);
+            Demographic demo = pp.Demographic!;
+
+            demo.BadgeNumber = 5002;
+            demo.ContactInfo.LastName = "Johnson";
+            demo.ContactInfo.FirstName = "Mary";
+            demo.ContactInfo.MiddleName = null; // No middle name
+            demo.ContactInfo.FullName = "Johnson, Mary";
+            demo.StoreNumber = 2;
+            pp.IncomeExecutive = 150m;
+            pp.HoursExecutive = 15;
+            pp.CurrentIncomeYear = 600m;
+            pp.CurrentHoursYear = 60;
+            demo.PayFrequencyId = 2; // Monthly (Executive)
+            demo.PayFrequency = new PayFrequency { Id = 2, Name = "Monthly" };
+            demo.EmploymentStatusId = 'A'; // Active
+            demo.EmploymentStatus = new EmploymentStatus { Id = 'A', Name = "Active" };
+            pp.ProfitYear = ProfitShareTestYear;
+
+            await c.SaveChangesAsync(CancellationToken.None);
+
+            ExecutiveHoursAndDollarsRequest request = new() { ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10 };
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
+
+            // Act
+            TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
+                await ApiClient
+                    .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
+                        ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(request);
+
+            // Assert - FullName should be formatted as "LastName, FirstName" (without middle initial)
+            response.Result.Response.Results.Count().ShouldBeGreaterThan(0);
+            var result = response.Result.Response.Results.FirstOrDefault(r => r.BadgeNumber == 5002);
+            result.ShouldNotBeNull();
+            result!.FullName.ShouldBe("Johnson, Mary"); // Should not have middle initial when no middle name
+        });
+    }
+
+
+
     private ReportResponseBase<ExecutiveHoursAndDollarsResponse> StockResponse()
     {
         return new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
@@ -308,6 +407,8 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         pp.HoursExecutive = 0;
         pp.CurrentIncomeYear = _example.CurrentIncomeYear;
         pp.CurrentHoursYear = _example.CurrentHoursYear;
+        pp.TotalHours = _example.CurrentHoursYear + _example.HoursExecutive;
+        pp.TotalIncome = _example.CurrentIncomeYear + _example.IncomeExecutive;
         demo.PayFrequencyId = _example.PayFrequencyId;
         demo.PayFrequency = new PayFrequency { Id = _example.PayFrequencyId, Name = _example.PayFrequencyName };
         demo.EmploymentStatusId = _example.EmploymentStatusId;

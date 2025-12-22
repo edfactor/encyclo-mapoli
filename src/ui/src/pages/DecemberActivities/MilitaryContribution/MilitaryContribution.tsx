@@ -12,7 +12,6 @@ import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
 import { useIsReadOnlyByStatus } from "../../../hooks/useIsReadOnlyByStatus";
-import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 import { MessageKeys, Messages } from "../../../utils/messageDictonary";
@@ -28,7 +27,6 @@ const MilitaryContributionContent = () => {
   const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
-  const { missiveAlerts } = useMissiveAlerts();
   const isReadOnly = useReadOnlyNavigation();
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
@@ -73,10 +71,7 @@ const MilitaryContributionContent = () => {
     contributionYear: number;
     isSupplementalContribution: boolean;
   }) => {
-    const employeeName =
-      masterInquiryMemberDetails?.firstName && masterInquiryMemberDetails?.lastName
-        ? `${masterInquiryMemberDetails.firstName} ${masterInquiryMemberDetails.lastName}`
-        : "the selected employee";
+    const employeeName = masterInquiryMemberDetails?.fullName || "the selected employee";
 
     const contributionType = contribution.isSupplementalContribution ? "supplemental" : "regular";
     const successMessage = `The ${contributionType} military contribution of $${formatNumberWithComma(contribution.contributionAmount)} for year ${contribution.contributionYear} for ${employeeName} saved successfully`;
@@ -125,7 +120,7 @@ const MilitaryContributionContent = () => {
         </DSMAccordion>
       </Grid>
 
-      {missiveAlerts.length > 0 && <MissiveAlerts />}
+      <MissiveAlerts />
 
       <Grid width="100%">
         {masterInquiryMemberDetails ? (

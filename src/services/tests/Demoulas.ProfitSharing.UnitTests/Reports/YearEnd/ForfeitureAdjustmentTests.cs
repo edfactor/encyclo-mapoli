@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
@@ -25,7 +24,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
             var request = new SuggestedForfeitureAdjustmentRequest { Ssn = demoTest.Ssn };
 
             // Act
-            var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
+            var response = await ApiClient.POSTAsync<GetForfeitureAdjustmentsEndpoint,
                 SuggestedForfeitureAdjustmentRequest, SuggestedForfeitureAdjustmentResponse>(request);
 
             // Assert
@@ -47,7 +46,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
             var request = new SuggestedForfeitureAdjustmentRequest { Ssn = demoTest.Ssn, };
 
             // Act
-            var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
+            var response = await ApiClient.POSTAsync<GetForfeitureAdjustmentsEndpoint,
                 SuggestedForfeitureAdjustmentRequest, SuggestedForfeitureAdjustmentResponse>(request);
 
             // Assert
@@ -65,7 +64,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
         var request = new SuggestedForfeitureAdjustmentRequest { Badge = 3333 };
 
         // Act
-        var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
+        var response = await ApiClient.POSTAsync<GetForfeitureAdjustmentsEndpoint,
             SuggestedForfeitureAdjustmentRequest, SuggestedForfeitureAdjustmentResponse>(request);
 
         // Assert

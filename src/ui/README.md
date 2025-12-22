@@ -46,8 +46,17 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
 ## Development
 
 - **Run**: `npm run dev` (Vite dev server)
-- **Build**: `npm run build`
-- **Lint**: `npm run lint`
+- **Lint**: `npm run lint` (must pass with **0 warnings**)
+- **Build (QA)**: `npm run build:qa`
+
+### Verification (Required)
+
+- `npm run lint` (0 warnings)
+- `npm run build:qa`
+
+### Numeric Inputs (No Spinners)
+
+Do not rely on native numeric input spinners (e.g., `type="number"`) for badge/SSN-style fields. Prefer text inputs with `inputMode="numeric"` + validation.
 
 ## UI Library & Styling
 
@@ -59,7 +68,6 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
 - TypeScript is enforced throughout the codebase.
 - For any issues with `smart-ui-library`, ensure your `.npmrc` is correct and you are authenticated with JFrog.
 - See `src/pages/` for main feature implementations and `src/components/` for reusable UI.
-
 
 ## Playwright
 

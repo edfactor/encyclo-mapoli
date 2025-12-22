@@ -1,5 +1,4 @@
 ﻿using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -15,6 +14,7 @@ using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
 
+[Collection("Navigation Tests")]
 public class NavigationServiceTests : ApiTestBase<Program>
 {
     private readonly INavigationService _navigationService;

@@ -12,7 +12,7 @@ import { ColDef } from "ag-grid-community";
 export const PayBeNextGridColumns = (): ColDef[] => {
   return [
     createPSNColumn({
-      headerName: "Psn-Num",
+      headerName: "PSN",
       field: "badgeNumber",
       enableLinking: true,
       linkingStyle: "badge-psn"

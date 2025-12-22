@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
@@ -10,9 +11,8 @@ import {
   setDuplicateNamesAndBirthdaysQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { profitYearValidator } from "../../../utils/FormValidators";
 
 interface DuplicateNamesAndBirthdaysSearch {
@@ -31,6 +31,7 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { duplicateNamesAndBirthdaysQueryParams, duplicateNamesAndBirthdays } = useSelector(
     (state: RootState) => state.yearsEnd
   );
@@ -48,6 +49,12 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
     }
   });
 
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   // If we do have a profit year set at the December level, and we had a cached
   // grid from a previous visit, trigger a new search with that param
   if (profitYear && !duplicateNamesAndBirthdays) {
@@ -55,7 +62,8 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
   }
 
   const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -87,7 +95,7 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="profitYear"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                 value={field.value ? new Date(field.value, 0) : null}
@@ -109,8 +117,8 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid}
+          isFetching={isFetching || isSubmitting}
+          disabled={!isValid || isFetching || isSubmitting}
         />
       </Grid>
     </form>

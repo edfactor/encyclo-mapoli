@@ -1,17 +1,28 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button, FormHelperText, Grid } from "@mui/material";
-import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  MenuItem,
+  TextField
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { SearchAndReset, SmartModal } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { getLastYearDateRange } from "../../../utils/dateRangeUtils";
 import {
   dateStringValidator,
   endDateStringAfterStartDateValidator,
@@ -24,7 +35,7 @@ const schema = yup.object().shape({
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
-    "Ending date must be the same or after the beginning date"
+    "Date must be equal to or greater than begin date"
   ).required("Ending Date is required"),
   forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
@@ -35,7 +46,21 @@ const schema = yup.object().shape({
       isSortDescending: yup.boolean().required()
     })
     .required(),
-  profitYear: profitYearValidator(2015, 2099)
+  profitYear: profitYearValidator(2015, 2099),
+  excludeZeroAndFullyVested: yup.boolean(),
+  vestedBalanceValue: yup
+    .number()
+    .nullable()
+    .min(0, "Vested Balance must be 0 or greater")
+    .transform((value, originalValue) => (originalValue === "" ? null : value)),
+  vestedBalanceOperator: yup
+    .number()
+    .nullable()
+    .when("vestedBalanceValue", {
+      is: (val: number | null | undefined) => val !== null && val !== undefined,
+      then: (schema) => schema.required("Operator is required when Vested Balance is provided"),
+      otherwise: (schema) => schema.nullable()
+    })
 });
 
 interface TerminationSearchFilterProps {
@@ -43,6 +68,7 @@ interface TerminationSearchFilterProps {
   fiscalData: CalendarResponseDto | null;
   onSearch: (params: TerminationSearchRequest) => void;
   hasUnsavedChanges?: boolean;
+  setHasUnsavedChanges?: (hasChanges: boolean) => void;
   isFetching?: boolean;
 }
 
@@ -51,12 +77,19 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   fiscalData,
   onSearch,
   hasUnsavedChanges,
+  setHasUnsavedChanges,
   isFetching = false
 }) => {
   const [openErrorModal, setOpenErrorModal] = useState(!fiscalData === false);
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
+
+  // Get last year date range (Dec 31 of year before last to Dec 31 of last year)
+  const { beginDate, endDate } = getLastYearDateRange();
+
   const {
     control,
     handleSubmit,
@@ -64,45 +97,68 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     reset,
     trigger
   } = useForm<TerminationSearchRequest>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<TerminationSearchRequest>,
     defaultValues: {
-      beginningDate: termination?.startDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") || "",
-      endingDate: termination?.endDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") || "",
+      beginningDate: termination?.startDate || mmDDYYFormat(beginDate),
+      endingDate: termination?.endDate || mmDDYYFormat(endDate),
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
-      profitYear: selectedProfitYear
+      profitYear: selectedProfitYear,
+      excludeZeroAndFullyVested: false,
+      vestedBalanceValue: null,
+      vestedBalanceOperator: 0
     }
   });
 
+  // Reset local submitting state when search completes
+  useEffect(() => {
+    if (!isFetching) {
+      setIsSubmitting(false);
+    }
+  }, [isFetching]);
+
   const validateAndSubmit = async (data: TerminationSearchRequest) => {
     if (hasUnsavedChanges) {
-      alert("Please save your changes.");
+      setShowUnsavedChangesDialog(true);
       return;
     }
 
-    const params = {
-      ...data,
-      profitYear: selectedProfitYear,
-      beginningDate: data.beginningDate
-        ? mmDDYYFormat(data.beginningDate)
-        : mmDDYYFormat(fiscalData?.fiscalBeginDate || ""),
-      endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData?.fiscalEndDate || "")
-    };
-    // Only update search params and initial loaded state; let the grid trigger the API
-    onSearch(params);
-    setInitialSearchLoaded(true);
+    if (isValid && !isSubmitting) {
+      setIsSubmitting(true);
+
+      const params = {
+        ...data,
+        profitYear: selectedProfitYear,
+        beginningDate: data.beginningDate ? mmDDYYFormat(data.beginningDate) : mmDDYYFormat(beginDate),
+        endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(endDate)
+      };
+
+      // Only include vested balance fields if both are provided
+      if (data.vestedBalanceValue === null || data.vestedBalanceOperator === null) {
+        delete params.vestedBalanceValue;
+        delete params.vestedBalanceOperator;
+      }
+
+      // Only update search params and initial loaded state; let the grid trigger the API
+      onSearch(params);
+      setInitialSearchLoaded(true);
+    }
   };
 
-  const validateAndSearch = handleSubmit(validateAndSubmit);
+  const validateAndSearch = handleSubmit(validateAndSubmit as (data: TerminationSearchRequest) => Promise<void>);
 
   const handleReset = async () => {
+    setHasUnsavedChanges?.(false);
     setInitialSearchLoaded(false);
     reset({
-      beginningDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "",
-      endingDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "",
+      beginningDate: mmDDYYFormat(beginDate),
+      endingDate: mmDDYYFormat(endDate),
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
-      profitYear: selectedProfitYear
+      profitYear: selectedProfitYear,
+      excludeZeroAndFullyVested: false,
+      vestedBalanceValue: null,
+      vestedBalanceOperator: 0
     });
     // Trigger validation after reset to ensure form validity is updated
     await trigger();
@@ -133,13 +189,15 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       <Grid
         container
         paddingX="24px"
-        gap="24px">
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        columnSpacing={2}
+        rowSpacing={1}
+        alignItems="flex-end">
+        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
           <Controller
             name="beginningDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -158,14 +216,18 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
-          {errors.beginningDate && <FormHelperText error>{errors.beginningDate.message}</FormHelperText>}
+          <FormHelperText
+            error
+            sx={{ minHeight: "20px", visibility: errors.beginningDate ? "visible" : "hidden" }}>
+            {errors.beginningDate?.message || "\u00A0"}
+          </FormHelperText>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
           <Controller
             name="endingDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="endingDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value || undefined);
@@ -181,7 +243,93 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
-          {errors.endingDate && <FormHelperText error>{errors.endingDate.message}</FormHelperText>}
+          <FormHelperText
+            error
+            sx={{ minHeight: "20px", visibility: errors.endingDate ? "visible" : "hidden" }}>
+            {errors.endingDate?.message || "\u00A0"}
+          </FormHelperText>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
+          <InputLabel sx={{ mb: 1 }}>Vested Balance</InputLabel>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Controller
+              name="vestedBalanceOperator"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  select
+                  fullWidth
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(value);
+                  }}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  inputRef={field.ref}
+                  error={!!errors.vestedBalanceOperator}>
+                  <MenuItem value=""></MenuItem>
+                  <MenuItem value={0}>=</MenuItem>
+                  <MenuItem value={1}>&lt;</MenuItem>
+                  <MenuItem value={2}>&lt;=</MenuItem>
+                  <MenuItem value={3}>&gt;</MenuItem>
+                  <MenuItem value={4}>&gt;=</MenuItem>
+                </TextField>
+              )}
+            />
+            <Controller
+              name="vestedBalanceValue"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  type="number"
+                  placeholder="Amount"
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(value);
+                  }}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  inputRef={field.ref}
+                  inputProps={{
+                    min: 0,
+                    step: 1
+                  }}
+                  error={!!errors.vestedBalanceValue}
+                />
+              )}
+            />
+          </Box>
+          <FormHelperText
+            error
+            sx={{
+              minHeight: "20px",
+              visibility: errors.vestedBalanceValue || errors.vestedBalanceOperator ? "visible" : "hidden"
+            }}>
+            {errors.vestedBalanceOperator?.message || errors.vestedBalanceValue?.message || "\u00A0"}
+          </FormHelperText>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+          <Controller
+            name="excludeZeroAndFullyVested"
+            control={control}
+            render={({ field }) => (
+              <>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field.value || false}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label="Exclude members with: $0 Ending Balance, 100% Vested, or Forfeited"
+                />
+                <FormHelperText sx={{ minHeight: "20px" }}>{"\u00A0"}</FormHelperText>
+              </>
+            )}
+          />
         </Grid>
       </Grid>
       <Grid
@@ -192,12 +340,19 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
             <SearchAndReset
               handleReset={handleReset}
               handleSearch={validateAndSearch}
-              isFetching={isFetching}
-              disabled={!isValid || !prerequisitesComplete || isFetching}
+              isFetching={isFetching || isSubmitting}
+              disabled={!isValid || !prerequisitesComplete || isFetching || isSubmitting}
             />
           )}
         </DuplicateSsnGuard>
       </Grid>
+
+      <ConfirmationDialog
+        open={showUnsavedChangesDialog}
+        title="Unsaved Changes"
+        description="Please save your changes before performing a new search."
+        onClose={() => setShowUnsavedChangesDialog(false)}
+      />
     </form>
   );
 };

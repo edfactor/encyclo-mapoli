@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import { Path, useNavigate } from "react-router";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { CAPTIONS } from "../../../constants";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { ForfeituresAndPointsResponse } from "../../../types";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
@@ -14,12 +15,38 @@ interface ForfeitGridProps {
 }
 
 const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, isSearching }) => {
-  const columnDefs = useMemo(() => GetProfitShareForfeitColumns(), []);
+  const navigate = useNavigate();
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  const handleNavigationForButton = useCallback(
+    (destination: string | Partial<Path>) => {
+      navigate(destination);
+    },
+    [navigate]
+  );
 
-  const sortEventHandler = (update: ISortParams) => pagination.handleSortChange(update);
+  const columnDefs = useMemo(
+    () => GetProfitShareForfeitColumns(handleNavigationForButton),
+    [handleNavigationForButton]
+  );
+
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: searchResults?.response?.results?.length ?? 0
+  });
+
+  const sortEventHandler = (update: ISortParams) => {
+    // if field is badgeOrPsn, we need to make sortBy equal to badgeNumber,beneficiaryPsn
+    // to get a compound sort
+    if (update.sortBy === "badgeOrPsn") {
+      const newUpdate = {
+        ...update,
+        sortBy: update.isSortDescending ? "beneficiaryPsn" : "badgeNumber"
+      };
+      pagination.handleSortChange(newUpdate);
+      return;
+    }
+    pagination.handleSortChange(update);
+  };
 
   // Some API responses may return numeric totals as strings; coerce safely before formatting.
   const safeNumber = (val: unknown) => {
@@ -63,7 +90,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
 
           <ReportSummary report={searchResults} />
           <DSMGrid
-            preferenceKey={CAPTIONS.FORFEIT}
+            preferenceKey={GRID_KEYS.FORFEIT}
             isLoading={isSearching}
             maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}
@@ -76,13 +103,9 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
           {searchResults.response.results.length > 0 && (
             <Pagination
               pageNumber={pagination.pageNumber}
-              setPageNumber={(value: number) => {
-                pagination.handlePaginationChange(value - 1, pagination.pageSize);
-              }}
+              setPageNumber={(value: number) => pagination.handlePageNumberChange(value - 1)}
               pageSize={pagination.pageSize}
-              setPageSize={(value: number) => {
-                pagination.handlePaginationChange(0, value);
-              }}
+              setPageSize={pagination.handlePageSizeChange}
               recordCount={searchResults.response.total}
             />
           )}

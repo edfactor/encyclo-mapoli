@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { GRID_KEYS } from "../../../../constants";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetEligibleEmployeesQuery } from "../../../../reduxstore/api/YearsEndApi";
@@ -14,6 +15,7 @@ import {
 
 export interface EligibleEmployeesSearchParams {
   profitYear: number;
+  archive?: boolean;
 }
 
 const useEligibleEmployees = () => {
@@ -61,6 +63,7 @@ const useEligibleEmployees = () => {
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.ELIGIBLE_EMPLOYEES,
     onPaginationChange: handlePaginationChange
   });
 
@@ -73,6 +76,7 @@ const useEligibleEmployees = () => {
       try {
         const request = {
           profitYear: searchParams.profitYear,
+          archive: searchParams.archive,
           pagination: {
             skip: pagination.pageNumber * pagination.pageSize,
             take: pagination.pageSize,
@@ -102,6 +106,17 @@ const useEligibleEmployees = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalCloseProfitYear, state.data, hasToken, state.search.isLoading]);
 
+  // Handle status change - refresh grid with archive=true when status changes to Complete
+  const handleStatusChange = useCallback(
+    (_newStatus: string, statusName?: string) => {
+      if (statusName === "Complete" && fiscalCloseProfitYear) {
+        // Refresh the grid with archive=true to archive the results
+        executeSearch({ profitYear: fiscalCloseProfitYear, archive: true }, "status-complete");
+      }
+    },
+    [fiscalCloseProfitYear, executeSearch]
+  );
+
   return {
     searchResults: state.data,
     isSearching: isSearching || state.search.isLoading,
@@ -110,7 +125,8 @@ const useEligibleEmployees = () => {
     hasResults: selectHasResults(state),
     searchParams: state.search.profitYear ? { profitYear: state.search.profitYear } : null,
 
-    executeSearch
+    executeSearch,
+    handleStatusChange
   };
 };
 

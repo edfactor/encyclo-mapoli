@@ -32,7 +32,7 @@ public class BreakdownReportByStoreTests : PristineBaseTest
         ];
 
         string actual = CreateTextReport(1, groupedEmployees);
-        string expected = ProfitShareUpdateTests.LoadExpectedReport("qpay066ta.breakdown-by-store.txt");
+        string expected = ProfitShareUpdateTests.ReadEmbeddedResource(".qpay066ta.breakdown-by-store.txt");
         ProfitShareUpdateTests.AssertReportsAreEquivalent(expected, actual);
     }
 
@@ -52,7 +52,7 @@ public class BreakdownReportByStoreTests : PristineBaseTest
         ];
 
         string actual = CreateTextReport(180, groupedEmployees);
-        string expected = ProfitShareUpdateTests.LoadExpectedReport("qpay066ta.store-700.txt");
+        string expected = ProfitShareUpdateTests.ReadEmbeddedResource(".qpay066ta.store-700.txt");
         ProfitShareUpdateTests.AssertReportsAreEquivalent(expected, actual);
     }
 

@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <!-- RS2007: Suppress analyzer release file format validation - conflicts with markdown formatter -->
+    <NoWarn>$(NoWarn);RS2007</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +21,9 @@
       <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Update="Roslynator.Formatting.Analyzers">
+      <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="SonarAnalyzer.CSharp">
       <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>

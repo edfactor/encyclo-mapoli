@@ -23,9 +23,9 @@ public sealed class PayServicesGroup : GroupBase
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
-                
+
             // PS-868: Group-level policy authorization for pay services viewing
-            ep.Policies(Policy.CanViewYearEndReports); 
+            ep.Policies(Policy.CanViewYearEndReports);
         });
     }
 }

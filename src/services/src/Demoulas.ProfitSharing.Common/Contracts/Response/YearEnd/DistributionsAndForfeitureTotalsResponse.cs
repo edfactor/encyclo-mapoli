@@ -6,33 +6,51 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBase<DistributionsAndForfeitureResponse>
 {
+    [YearEndArchiveProperty("QPAY129_DistributionTotals")]
     public required decimal DistributionTotal { get; init; }
+    [YearEndArchiveProperty]
     public required decimal StateTaxTotal { get; init; }
+    [YearEndArchiveProperty]
     public required decimal FederalTaxTotal { get; init; }
+    [YearEndArchiveProperty]
     public required decimal ForfeitureTotal { get; init; }
 
     /// <summary>
     /// Regular forfeitures (not Administrative or Class Action)
     /// </summary>
+    [YearEndArchiveProperty]
     public decimal ForfeitureRegularTotal { get; init; }
 
     /// <summary>
     /// Administrative forfeitures (MAIN-2170)
     /// </summary>
+    [YearEndArchiveProperty]
     public decimal ForfeitureAdministrativeTotal { get; init; }
 
     /// <summary>
     /// Class Action forfeitures
     /// </summary>
+    [YearEndArchiveProperty]
     public decimal ForfeitureClassActionTotal { get; init; }
 
     public required Dictionary<string, decimal> StateTaxTotals { get; init; }
+
+    /// <summary>
+    /// Records with state taxes but no state code attribution.
+    /// These represent data quality issues in state extraction (PS-2031).
+    /// </summary>
+    public UnattributedTotals? UnattributedTotals { get; init; }
+
+    /// <summary>
+    /// Indicates if any unattributed records were found during this query.
+    /// </summary>
+    public bool HasUnattributedRecords { get; init; }
 
     public static DistributionsAndForfeitureTotalsResponse ResponseExample()
     {
         return new DistributionsAndForfeitureTotalsResponse
         {
-            ReportName = "Distributions and Forfeitures",
+            ReportName = ReportNames.DistributionAndForfeitures.Name,
             ReportDate = DateTimeOffset.Now,
 
             DistributionTotal = 123456.78m,

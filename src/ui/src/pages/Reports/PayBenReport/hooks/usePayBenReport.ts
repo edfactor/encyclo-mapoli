@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyPayBenReportQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
@@ -45,7 +46,8 @@ const usePayBenReport = () => {
     initialPageSize: 25,
     initialSortBy: "ssn",
     initialSortDescending: true,
-    onPaginationChange: handlePaginationChange
+    onPaginationChange: handlePaginationChange,
+    persistenceKey: GRID_KEYS.PAY_BEN_REPORT
   });
 
   const executeSearch = useCallback(async () => {
@@ -74,7 +76,7 @@ const usePayBenReport = () => {
   useEffect(() => {
     if (!state.data && hasToken && !state.search.isLoading && !hasInitiallySearched.current) {
       hasInitiallySearched.current = true;
-      executeSearch("auto-initial");
+      executeSearch();
     }
   }, [state.data, hasToken, state.search.isLoading, executeSearch]);
 

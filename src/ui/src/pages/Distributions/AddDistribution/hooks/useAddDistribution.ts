@@ -312,17 +312,27 @@ export const useAddDistribution = () => {
       try {
         dispatch({ type: "MEMBER_FETCH_START" });
 
-        const identifierNum = parseInt(identifier, 10);
+        let identifierNum = parseInt(identifier, 10);
         const isSSN = identifier.length === 9 && /^\d{9}$/.test(identifier);
 
         let searchResponse;
         let memberId: number;
         let badgeNum = identifierNum;
 
+        // If memberType is 2, we need to create a new variable for psnSuffix that is the last four digits and then use the numbers before that as the badge number
+        let psnSuffix = 0;
+        if (memberType === 2) {
+          const identifierStr = identifier.toString();
+          psnSuffix = parseInt(identifierStr.slice(-4), 10);
+          identifierNum = parseInt(identifierStr.slice(0, -4), 10);
+        }
+
         // Step 1: Try to search for member using identifier (could be badge number or SSN)
         try {
           searchResponse = await triggerSearchMember({
             badgeNumber: identifierNum,
+            // Only use the psnSuffix parameter if it is not 0
+            psnSuffix: psnSuffix !== 0 ? psnSuffix : undefined,
             memberType,
             endProfitYear: profitYear,
             pagination: {
@@ -371,9 +381,24 @@ export const useAddDistribution = () => {
         return memberResponse;
       } catch (error) {
         const serviceError = error as ServiceErrorResponse;
-        const errorMsg = serviceError?.data?.detail || "Failed to fetch member data";
-        dispatch({ type: "MEMBER_FETCH_FAILURE", payload: { error: errorMsg } });
-        throw error;
+        const errorInstance = error as Error;
+
+        // Check for member not found conditions
+        const isMemberNotFound =
+          errorInstance?.message?.includes("Member not found") ||
+          errorInstance?.message?.includes("No member found") ||
+          serviceError?.data?.status === 500 ||
+          serviceError?.data?.status === 400 ||
+          serviceError?.data?.title === "Badge number not found." ||
+          serviceError?.data?.title === "Validation Error";
+
+        if (isMemberNotFound) {
+          dispatch({ type: "MEMBER_FETCH_FAILURE", payload: { error: "MEMBER_NOT_FOUND" } });
+        } else {
+          const errorMsg = serviceError?.data?.detail || "Failed to fetch member data";
+          dispatch({ type: "MEMBER_FETCH_FAILURE", payload: { error: errorMsg } });
+        }
+        // Don't throw - let the component handle the error via state
       }
     },
     [triggerSearchMember, triggerGetMember, calculateSequenceNumber, fetchStateTaxRate]

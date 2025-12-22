@@ -317,24 +317,28 @@ Search button is enabled only when:
 3. Not currently searching
 
 ```typescript
-const hasSearchCriteria = useMemo(() => {
-  const hasFieldValues =
-    hasValue(watchedBadgeNumber) ||
-    hasValue(watchedStartProfitMonth) ||
-    hasValue(watchedEndProfitMonth) ||
-    hasValue(watchedSocialSecurity) ||
-    hasValue(watchedName) ||
-    hasValue(watchedContribution) ||
-    hasValue(watchedEarnings) ||
-    hasValue(watchedForfeiture) ||
-    hasValue(watchedPayment);
+const hasSearchCriteria = useMemo(
+  () => {
+    const hasFieldValues =
+      hasValue(watchedBadgeNumber) ||
+      hasValue(watchedStartProfitMonth) ||
+      hasValue(watchedEndProfitMonth) ||
+      hasValue(watchedSocialSecurity) ||
+      hasValue(watchedName) ||
+      hasValue(watchedContribution) ||
+      hasValue(watchedEarnings) ||
+      hasValue(watchedForfeiture) ||
+      hasValue(watchedPayment);
 
-  const hasNonDefaultSelections =
-    watchedMemberType !== "all" ||
-    watchedPaymentType !== "all";
+    const hasNonDefaultSelections =
+      watchedMemberType !== "all" || watchedPaymentType !== "all";
 
-  return hasFieldValues || hasNonDefaultSelections;
-}, [/* dependencies */]);
+    return hasFieldValues || hasNonDefaultSelections;
+  },
+  [
+    /* dependencies */
+  ]
+);
 
 // In render
 <SearchAndReset
@@ -342,7 +346,7 @@ const hasSearchCriteria = useMemo(() => {
   handleReset={handleReset}
   isFetching={isSearching}
   disabled={!isValid || isSearching || !hasSearchCriteria}
-/>
+/>;
 ```
 
 ### 2. Parameter Transformation
@@ -526,7 +530,7 @@ Shown when search returns 2+ members.
       if (event.data) {
         handleMemberClick(event.data);
       }
-    }
+    },
   }}
 />
 ```
@@ -547,7 +551,7 @@ Shown when search returns 2+ members.
   }}
   pageSize={memberGridPagination.pageSize}
   setPageSize={(value: number) => {
-    handlePaginationChange(0, value);  // Reset to page 0 on size change
+    handlePaginationChange(0, value); // Reset to page 0 on size change
   }}
   recordCount={searchResults.total}
 />
@@ -814,11 +818,12 @@ const personalSection = useMemo(() => {
     }
   }
 
-  // Age calculation
-  const age = dateOfBirth
-    ? Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
-    : 0;
-  const dobDisplay = dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A";
+  // CRITICAL: DO NOT CALCULATE AGE IN FRONTEND
+  // Age must be provided by backend and never calculated in the frontend because:
+  // 1. Frontend calculation will be inconsistent with backend (timezone, calculation timing)
+  // 2. Age is sensitive data that must be masked for unprivileged users
+  // 3. Backend has authoritative date references for age calculation
+  const dobDisplay = dateOfBirth ? mmDDYYFormat(dateOfBirth) : "N/A";
 
   return [
     /* badge/psn fields */,
@@ -880,24 +885,58 @@ const milestoneSection = useMemo(() => {
 
 ```typescript
 const planSection = useMemo(() => {
-  const yearLabel = profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
+  const yearLabel =
+    profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
 
   // Current vested balance highlighted in bold blue (per PS-1897)
-  const formattedCurrentVested = currentVestedAmount == null ? "N/A" : (
-    <Typography component="span" variant="body2" sx={{ fontWeight: "bold", color: "#0258A5" }}>
-      {numberToCurrency(currentVestedAmount)}
-    </Typography>
-  );
+  const formattedCurrentVested =
+    currentVestedAmount == null ? (
+      "N/A"
+    ) : (
+      <Typography
+        component="span"
+        variant="body2"
+        sx={{ fontWeight: "bold", color: "#0258A5" }}
+      >
+        {numberToCurrency(currentVestedAmount)}
+      </Typography>
+    );
 
   return [
-    { label: "Begin Balance", value: beginPSAmount == null ? "N/A" : numberToCurrency(beginPSAmount) },
-    { label: "Begin Vested Balance", value: beginVestedAmount == null ? "N/A" : numberToCurrency(beginVestedAmount) },
-    { label: `${yearLabel} Balance`, value: currentPSAmount == null ? "N/A" : numberToCurrency(currentPSAmount) },
+    {
+      label: "Begin Balance",
+      value: beginPSAmount == null ? "N/A" : numberToCurrency(beginPSAmount),
+    },
+    {
+      label: "Begin Vested Balance",
+      value:
+        beginVestedAmount == null ? "N/A" : numberToCurrency(beginVestedAmount),
+    },
+    {
+      label: `${yearLabel} Balance`,
+      value:
+        currentPSAmount == null ? "N/A" : numberToCurrency(currentPSAmount),
+    },
     { label: `${yearLabel} Vested Balance`, value: formattedCurrentVested },
-    ...(isEmployee ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }] : []),
+    ...(isEmployee
+      ? [
+          {
+            label: "Profit Sharing Hours",
+            value: formatNumberWithComma(yearToDateProfitSharingHours),
+          },
+        ]
+      : []),
     ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
     { label: "Vested Percent", value: formatPercentage(percentageVested) },
-    { label: "Contributions in Last Year", value: receivedContributionsLastYear == null ? "N/A" : receivedContributionsLastYear ? "Y" : "N" }
+    {
+      label: "Contributions in Last Year",
+      value:
+        receivedContributionsLastYear == null
+          ? "N/A"
+          : receivedContributionsLastYear
+          ? "Y"
+          : "N",
+    },
   ];
 }, [memberDetails, profitYear]);
 ```
@@ -930,8 +969,8 @@ Shows year-by-year profit sharing data for the selected member.
       mode: "multiRow",
       checkboxes: false,
       headerCheckbox: false,
-      enableClickSelection: false
-    }
+      enableClickSelection: false,
+    },
   }}
 />
 ```
@@ -1185,7 +1224,9 @@ clearAlerts();
 ### Alert Display
 
 ```typescript
-{missiveAlerts.length > 0 && <MissiveAlerts />}
+{
+  missiveAlerts.length > 0 && <MissiveAlerts />;
+}
 ```
 
 **Location**: Displays at top of page (in search filter accordion area) and at bottom of member details.
@@ -1332,19 +1373,23 @@ dispatch({ type: "SEARCH_SUCCESS", payload: { results } });
 ### 5. Progressive Disclosure Rendering
 
 ```typescript
-{showMemberGrid && searchResults && !isFetchingMembers && (
-  <MasterInquiryMemberGrid {...props} />
-)}
+{
+  showMemberGrid && searchResults && !isFetchingMembers && (
+    <MasterInquiryMemberGrid {...props} />
+  );
+}
 
-{selectedMember && (
-  <Grid sx={{ display: showMemberDetails ? "block" : "none" }}>
-    {!isFetchingMemberDetails && memberDetails ? (
-      <MasterInquiryMemberDetails {...props} />
-    ) : (
-      <CircularProgress />
-    )}
-  </Grid>
-)}
+{
+  selectedMember && (
+    <Grid sx={{ display: showMemberDetails ? "block" : "none" }}>
+      {!isFetchingMemberDetails && memberDetails ? (
+        <MasterInquiryMemberDetails {...props} />
+      ) : (
+        <CircularProgress />
+      )}
+    </Grid>
+  );
+}
 ```
 
 **Pattern**: Render structure always present, use CSS `display: none` to hide. Prevents layout shift during async loads.
@@ -1491,3 +1536,59 @@ dispatch(clearMasterInquiryRequestParams());
 dispatch(clearMasterInquiryData());
 dispatch(clearMasterInquiryGroupingData());
 ```
+
+---
+
+## Critical Security & Data Rules
+
+### DO NOT Calculate Age in Frontend
+
+**CRITICAL VIOLATION**: The following is STRICTLY PROHIBITED:
+
+```typescript
+// WRONG: DO NOT DO THIS
+const age = Math.floor(
+  (Date.now() - new Date(dateOfBirth).getTime()) /
+    (1000 * 60 * 60 * 24 * 365.25),
+);
+const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
+```
+
+**Why This Is Critical**:
+
+1. **Backend Inconsistency**: Frontend age calculations will diverge from backend calculations due to:
+
+   - Different timezones
+   - Timing differences in calculation
+   - Different date references used for calculation
+   - This causes data integrity issues and user confusion
+
+2. **Sensitive Data**: Age is classified as sensitive data that must be:
+
+   - Masked for users without elevated privileges
+   - Calculated centrally by backend with authority
+   - Never exposed via frontend logic where it could be manipulated
+
+3. **Privacy/Security**: Unprivileged users should never see calculated ages; the backend determines what fields are visible based on user role
+
+**Correct Pattern**:
+
+```typescript
+// CORRECT: Display DOB only, let backend handle age if needed
+const dobDisplay = dateOfBirth ? mmDDYYFormat(dateOfBirth) : "N/A";
+
+return [
+  { label: "DOB", value: dobDisplay },
+  // If age display is required by business logic, it MUST come from backend
+  // in the MemberDetails response, never calculated in frontend
+];
+```
+
+**If Age Display Is Required**:
+
+- Add an `Age` field to the `MemberDetails` API response
+- Backend calculates age with authoritative date references
+- Frontend displays the backend-provided value directly
+- Access control applied at backend: mask/exclude age for unprivileged users
+
+---

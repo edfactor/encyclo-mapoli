@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using System.Threading.Tasks;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
@@ -12,7 +10,6 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Demoulas.ProfitSharing.Services.Military;
 
@@ -22,7 +19,7 @@ public class MilitaryService : IMilitaryService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger<MilitaryService> _logger;
     private readonly ICalendarService _calendarService;
-    
+
     public MilitaryService(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
@@ -134,27 +131,27 @@ public class MilitaryService : IMilitaryService
 
             var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-            var query = ctx.ProfitDetails
-                .Include(pd => pd.CommentType)
-                .Join(demographics,
-                    c => c.Ssn,
-                    cm => cm.Ssn,
-                    (pd, d) => new { pd, d })
-                .Where(x => x.pd.CommentTypeId == CommentType.Constants.Military.Id)
-                .OrderByDescending(x => x.pd.ProfitYear)
-                .ThenByDescending(x => x.pd.CreatedAtUtc)
-                .ThenByDescending(x => x.pd.Id)
-                .Select(x => new MilitaryContributionResponse
-                {
-                    BadgeNumber = x.d.BadgeNumber,
-                    ProfitYear = x.pd.ProfitYear,
-                    CommentTypeId = x.pd.CommentTypeId,
-                    ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? x.pd.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 12 : x.pd.MonthToDate, 31),
-                    Amount = x.pd.Contribution,
-                    IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0,
-                    IsExecutive = x.d.PayFrequencyId == Demoulas.ProfitSharing.Data.Entities.PayFrequency.Constants.Monthly
-                });
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var query = ctx.ProfitDetails
+                    .Include(pd => pd.CommentType)
+                    .Join(demographics,
+                        c => c.Ssn,
+                        cm => cm.Ssn,
+                        (pd, d) => new { pd, d })
+                    .Where(x => x.pd.CommentTypeId == CommentType.Constants.Military.Id)
+                    .OrderByDescending(x => x.pd.ProfitYear)
+                    .ThenByDescending(x => x.pd.CreatedAtUtc)
+                    .ThenByDescending(x => x.pd.Id)
+                    .Select(x => new MilitaryContributionResponse
+                    {
+                        BadgeNumber = x.d.BadgeNumber,
+                        ProfitYear = x.pd.ProfitYear,
+                        CommentTypeId = x.pd.CommentTypeId,
+                        ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? x.pd.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 12 : x.pd.MonthToDate, 31),
+                        Amount = x.pd.Contribution,
+                        IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0,
+                        IsExecutive = x.d.PayFrequencyId == Demoulas.ProfitSharing.Data.Entities.PayFrequency.Constants.Monthly
+                    });
 
                 if (!isArchiveRequest)
                 {
@@ -180,19 +177,18 @@ public class MilitaryService : IMilitaryService
     /// <summary>
     /// method to pull out the correct fiscal end date for the contribution year
     /// </summary>
-    /// <param name="query"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     private async Task GetCalendarProfitYearDateForResponses(PaginatedResponseDto<MilitaryContributionResponse> militaryContributions, CancellationToken cancellationToken)
     {
         Dictionary<int, DateOnly> profitYearsMap = new Dictionary<int, DateOnly>();
 
-        foreach ( var contributions in militaryContributions.Results)
+        foreach (var contributions in militaryContributions.Results)
         {
             if (profitYearsMap.ContainsKey(contributions.ContributionDate.Year))
             {
                 contributions.ContributionDate = profitYearsMap.GetValueOrDefault(contributions.ContributionDate.Year);
-            } 
+            }
             else
             {
                 var dates = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)contributions.ContributionDate.Year, cancellationToken);

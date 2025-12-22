@@ -16,6 +16,9 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const LookupsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "lookupsApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
       query: (params) => ({
@@ -25,7 +28,7 @@ export const LookupsApi = createApi({
           profitYear: params.profitYear
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setAccountingYearData(data));
@@ -42,7 +45,7 @@ export const LookupsApi = createApi({
       transformResponse: (response: { items: MissiveResponse[]; count: number }) => {
         return response.items;
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setMissivesData(data));
@@ -72,7 +75,7 @@ export const LookupsApi = createApi({
         url: `/lookup/state-taxes/${state}`,
         method: "GET"
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setStateTaxData(data));

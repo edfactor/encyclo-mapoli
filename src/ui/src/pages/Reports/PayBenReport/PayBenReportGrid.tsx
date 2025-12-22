@@ -1,7 +1,7 @@
 import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { PayBenReportResponse } from "../../../types";
 import { PayBenReportGridColumn } from "./PayBenReportGridColumns";
@@ -29,8 +29,10 @@ const PayBenReportGrid = ({
 }: PayBenReportGridProps) => {
   const columnDefs = useMemo(() => PayBenReportGridColumn(), []);
 
-  // Use dynamic grid height utility hook
-  const gridMaxHeight = useDynamicGridHeight();
+  // Use content-aware grid height utility hook
+  const gridMaxHeight = useContentAwareGridHeight({
+    rowCount: data?.results?.length ?? 0
+  });
 
   const handleSortChanged = useCallback(
     (update: ISortParams) => {
@@ -52,7 +54,7 @@ const PayBenReportGrid = ({
       {showData && data?.results && (
         <div ref={innerRef}>
           <DSMGrid
-            preferenceKey={CAPTIONS.PAYBEN_REPORT}
+            preferenceKey={GRID_KEYS.PAY_BEN_REPORT}
             isLoading={isLoading}
             maxHeight={gridMaxHeight}
             handleSortChanged={handleSortChanged}

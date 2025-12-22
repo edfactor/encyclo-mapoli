@@ -10,7 +10,7 @@ public static class ReadyReportParser
 {
     public static ForfeituresAndPointsForYearResponseWithTotals ParseReport(string expectedReport)
     {
-        const short currentYear = 2024;
+        const short currentYear = 2025;
 
         List<string> lines = expectedReport.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).ToList();
 

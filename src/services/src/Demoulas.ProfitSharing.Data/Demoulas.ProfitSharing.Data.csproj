@@ -1,10 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Configurations>Debug;Release;Russ</Configurations>
-  </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Messaging\**" />
@@ -13,17 +8,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="C:\Users\russh\.nuget\packages\demoulas.common.data.services\3.0.0\contentFiles\any\net8.0\readme.md" />
-  </ItemGroup>
- 
-
-  <ItemGroup>
     <PackageReference Include="Aspire.Oracle.EntityFrameworkCore" />
     <PackageReference Include="Demoulas.Common.Data.Contexts" />
     <PackageReference Include="Demoulas.Common.Data.Services" />
     <PackageReference Include="EFCore.NamingConventions" />
     <PackageReference Include="ErikEJ.EntityFrameworkCore.DgmlBuilder" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

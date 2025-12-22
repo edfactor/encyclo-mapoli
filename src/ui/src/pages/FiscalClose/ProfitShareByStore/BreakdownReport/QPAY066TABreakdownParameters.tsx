@@ -1,11 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import {
   clearBreakdownByStore,
-  clearBreakdownByStoreMangement,
+  clearBreakdownByStoreManagement,
   clearBreakdownByStoreTotals,
   clearBreakdownGrandTotals,
   setBreakdownByStoreQueryParams
@@ -54,6 +54,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 }) => {
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [employeeStatuses] = useState<OptionItem[]>([
     { id: 700, label: "700 - Retired - Drawing Pension" },
@@ -66,6 +67,12 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
   const [viewAllStoreTotals, setViewAllStoreTotals] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (!isLoading) {
+      setIsSubmitting(false);
+    }
+  }, [isLoading]);
+
   const {
     control,
     handleSubmit,
@@ -73,7 +80,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     reset,
     setValue
   } = useForm<BreakdownSearchParams>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<BreakdownSearchParams>,
     defaultValues: {
       store: null,
       employeeStatus: "",
@@ -99,27 +106,30 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   }, [employeeStatus, setValue, onStoreChange]);
 
   const validateAndSubmit = handleSubmit((data) => {
-    console.log("Form data being submitted:", data);
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      console.log("Form data being submitted:", data);
 
-    // Always submit regardless of isValid to enable searching with any combination
-    if (onStoreChange && data.store) {
-      onStoreChange(data.store);
+      // Always submit regardless of isValid to enable searching with any combination
+      if (onStoreChange && data.store) {
+        onStoreChange(data.store);
+      }
+
+      dispatch(
+        setBreakdownByStoreQueryParams({
+          profitYear: profitYear,
+          storeNumber: data.store ?? undefined,
+          badgeNumber: data.badgeId ?? undefined,
+          employeeName: data.employeeName,
+          pagination: {
+            take: 25,
+            skip: 0,
+            sortBy: data.sortBy,
+            isSortDescending: data.isSortDescending
+          }
+        })
+      );
     }
-
-    dispatch(
-      setBreakdownByStoreQueryParams({
-        profitYear: profitYear,
-        storeNumber: data.store,
-        badgeNumber: data.badgeId,
-        employeeName: data.employeeName,
-        pagination: {
-          take: 25,
-          skip: 0,
-          sortBy: data.sortBy,
-          isSortDescending: data.isSortDescending
-        }
-      })
-    );
   });
 
   const handleReset = () => {
@@ -132,7 +142,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
       isSortDescending: true
     });
     dispatch(clearBreakdownByStore());
-    dispatch(clearBreakdownByStoreMangement());
+    dispatch(clearBreakdownByStoreManagement());
     dispatch(clearBreakdownByStoreTotals());
     dispatch(clearBreakdownGrandTotals());
 
@@ -330,8 +340,8 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                 // Call validateAndSubmit which contains the handleSubmit logic
                 validateAndSubmit();
               }}
-              isFetching={isLoading}
-              disabled={!prerequisitesComplete}
+              isFetching={isLoading || isSubmitting}
+              disabled={!prerequisitesComplete || isLoading || isSubmitting}
             />
           )}
         </DuplicateSsnGuard>

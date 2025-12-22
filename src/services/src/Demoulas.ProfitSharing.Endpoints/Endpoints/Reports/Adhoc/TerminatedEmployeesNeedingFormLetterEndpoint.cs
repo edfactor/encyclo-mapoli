@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -18,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 
-public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithCsvBase<StartAndEndDateRequest, AdhocTerminatedEmployeeResponse, TerminatedEmployeesNeedingFormLetterEndpoint.EndpointMap>
+public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithCsvBase<FilterableStartAndEndDateRequest, AdhocTerminatedEmployeeResponse, TerminatedEmployeesNeedingFormLetterEndpoint.EndpointMap>
 {
     private readonly IAdhocTerminatedEmployeesService _adhocTerminatedEmployeesService;
     private readonly ILogger<TerminatedEmployeesNeedingFormLetterEndpoint> _logger;
@@ -32,14 +27,13 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
 
     public override void Configure()
     {
-        Get("adhoc-terminated-employees-report-needing-letter");
+        Get("terminated-employees-report-needing-letter");
         Summary(s =>
         {
             s.Summary = "Adhoc Terminated Employees Report needing a form letter";
             s.Description = "Returns a report of terminated employees who have not yet been sent a form letter to accompany a set of forms to receive vested interest .";
             s.ExampleRequest = new StartAndEndDateRequest
             {
-                ProfitYear = 2023,
                 Skip = 0,
                 Take = 100,
                 SortBy = "TerminationDate",
@@ -65,9 +59,10 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
                                 {
                                     BadgeNumber = 12345,
                                     FullName = "John Doe",
-                                    Ssn = "123-45-6789",
+                                    Ssn = "123-45-6789".MaskSsn(),
                                     TerminationDate = new DateOnly(2023, 5, 15),
                                     TerminationCodeId = 'A',
+                                    TerminationCode = "Active",
                                     Address = "123 Main St",
                                     State = "MA",
                                     City = "Andover",
@@ -80,11 +75,11 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
                 }
             };
         });
-        Group<YearEndGroup>();
+        Group<AdhocReportsGroup>();
         base.Configure();
     }
 
-    public override async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetResponse(FilterableStartAndEndDateRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

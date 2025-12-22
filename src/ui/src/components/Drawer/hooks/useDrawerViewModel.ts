@@ -13,9 +13,9 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { NavigationDto, NavigationResponseDto } from "../../../../reduxstore/types";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../reduxstore/store";
+import { NavigationDto, NavigationResponseDto } from "../../../types";
 import { DrawerConfig } from "../models";
 import { containsActivePath } from "../utils";
 
@@ -202,11 +202,26 @@ export const useDrawerViewModel = (
 
   /**
    * Check if a navigation item's route is currently active
+   * For duplicate pages (same URL, different IDs), also checks the stored navigation ID
    */
   const isItemActive = useCallback(
     (item: NavigationDto): boolean => {
       const itemPath = item.url?.replace(/^\/+/, "");
-      return currentPath === itemPath;
+
+      // First check if URLs match
+      if (currentPath !== itemPath) return false;
+
+      // URLs match - now check navigation ID for duplicate pages
+      const storedNavId = localStorage.getItem("navigationId");
+      if (storedNavId) {
+        const storedId = parseInt(storedNavId);
+        // Only use stored ID if it matches this item's ID
+        // This allows other non-duplicate pages to work normally
+        return item.id === storedId;
+      }
+
+      // If no stored nav ID, fall back to URL matching (for direct URL navigation)
+      return true;
     },
     [currentPath]
   );
@@ -270,8 +285,8 @@ export const useDrawerViewModel = (
 
   return {
     // State
-    isOpen,
-    activeSubmenu,
+    isOpen: isOpen ?? false,
+    activeSubmenu: activeSubmenu ?? null,
     drawerItems,
     currentPath,
     drawerTitle: drawerRootItem?.subTitle || config.rootNavigationTitle, // Use subtitle from L0 item, fallback to title
@@ -283,7 +298,7 @@ export const useDrawerViewModel = (
     goBackToMainMenu,
 
     // Computed
-    activeTopLevelItem,
+    activeTopLevelItem: activeTopLevelItem ?? null,
     visibleItems,
     isInSubmenuView,
 

@@ -11,7 +11,7 @@ public record ProfitSharingLabelResponse : IIsExecutive
     public byte DepartmentId { get; set; }
     public string? DepartmentName { get; set; }
     public int BadgeNumber { get; set; }
-    public required string EmployeeName { get; set; }
+    [MaskSensitive] public required string EmployeeName { get; set; }
     [MaskSensitive] public string? FirstName { get; set; }
     [MaskSensitive] public string? Address1 { get; set; }
     [MaskSensitive] public string? City { get; set; }
@@ -19,7 +19,7 @@ public record ProfitSharingLabelResponse : IIsExecutive
     public string? PostalCode { get; set; }
     public required bool IsExecutive { get; set; }
 
-    public static ProfitSharingLabelResponse SampleResponse()
+    public static ProfitSharingLabelResponse ResponseExample()
     {
         return new ProfitSharingLabelResponse()
         {

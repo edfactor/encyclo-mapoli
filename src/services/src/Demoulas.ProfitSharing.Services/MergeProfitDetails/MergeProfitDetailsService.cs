@@ -1,5 +1,4 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -7,6 +6,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.MergeProfitDetails;
+
 public class MergeProfitDetailsService : IMergeProfitDetailsService
 {
 
@@ -29,7 +29,7 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
 
         try
         {
-            return await _dataContextFactory.UseWritableContext(async ctx =>
+            return await _dataContextFactory.UseWritableContext((Func<Data.Contexts.ProfitSharingDbContext, Task<Result<bool>>>)(async ctx =>
             {
                 var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
                 HashSet<int> ssns = new() { sourceSsn, destinationSsn };
@@ -64,7 +64,7 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
                         cancellationToken);
 
                 return Result<bool>.Success(true);
-            }, cancellationToken);
+            }), cancellationToken);
         }
         catch (Exception ex)
         {

@@ -37,8 +37,7 @@ in the React memo stuff at the bottom and are important for edge cases like thes
   - The component could show stale data for wrong member
 */
 const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = memo(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ({ memberType, id, profitYear, memberDetails, isLoading }) => {
+  ({ memberType: _memberType, id: _id, profitYear, memberDetails, isLoading }) => {
     const { missiveAlerts } = useMissiveAlerts();
 
     // Memoized enrollment status
@@ -55,16 +54,16 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
     const summarySection = useMemo(() => {
       if (!memberDetails) return [];
       const {
-        firstName,
-        lastName,
+        fullName,
         address,
         addressCity,
         addressState,
         addressZipCode,
         phoneNumber,
-        isEmployee,
-        workLocation,
-        storeNumber
+        gender,
+        dateOfBirth,
+        age,
+        ssn
       } = memberDetails;
 
       const formattedCity = addressCity || "";
@@ -74,18 +73,15 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         [formattedCity, formattedState].filter(Boolean).join(", ") + (formattedZip ? ` ${formattedZip}` : "");
 
       return [
-        { label: "Name", value: `${lastName}, ${firstName}` },
+        { label: "Name", value: fullName },
         { label: "Address", value: `${address}` },
         { label: "", value: cityStateZip },
         { label: "Phone #", value: formatPhoneNumber(phoneNumber) },
-        ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
-        ...(isEmployee
-          ? [{ label: "Store", value: typeof storeNumber === "number" && storeNumber > 0 ? storeNumber : "N/A" }]
-          : []),
-        { label: "Enrolled", value: enrollmentStatus.enrolled.replace(/\s*\(\d+\)/, "") }, // Remove code like "(1)"
-        { label: "Forfeited", value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "") } // Remove code like "(1)"
+        { label: "Gender", value: gender || "N/A" },
+        { label: "DOB", value: dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A" },
+        { label: "SSN", value: `${ssn}` }
       ];
-    }, [memberDetails, enrollmentStatus]);
+    }, [memberDetails]);
 
     // Memoized personal section
     const personalSection = useMemo(() => {
@@ -94,12 +90,11 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         badgeNumber,
         psnSuffix,
         isEmployee,
+        workLocation,
+        storeNumber,
         department,
-        PayClassification,
+        payClassification,
         employmentStatus,
-        gender,
-        dateOfBirth,
-        ssn: ssnValue,
         allocationToAmount,
         badgesOfDuplicateSsns
       } = memberDetails;
@@ -110,29 +105,28 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
           duplicateBadgeLink.push({
             label: "Duplicate SSN with",
             value: viewBadgeLinkRenderer(badge),
-            labelColor: "error"
+            labelColor: "error" as const
           });
         }
       }
 
-      const age = dateOfBirth
-        ? Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
-        : 0;
-      const dobDisplay = dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A";
+      const storeNumberDisplay = typeof storeNumber === "number" && storeNumber > 0 ? storeNumber : "N/A";
+      const workLocationDisplay = workLocation
+        ? `${workLocation} (${storeNumberDisplay})`
+        : `N/A (${storeNumberDisplay})`;
 
       return [
         ...(isEmployee ? [{ label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) }] : []),
         ...(!isEmployee ? [{ label: "PSN", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
+        ...(isEmployee ? [{ label: "Work Location", value: workLocationDisplay }] : []),
         ...(isEmployee ? [{ label: "Department", value: department || "N/A" }] : []),
-        ...(isEmployee ? [{ label: "Class", value: PayClassification || "N/A" }] : []),
+        ...(isEmployee ? [{ label: "Class", value: payClassification || "N/A" }] : []),
         ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
-        { label: "Gender", value: gender || "N/A" },
-        { label: "DOB", value: dobDisplay },
-        { label: "SSN", value: `${ssnValue}` },
         ...duplicateBadgeLink,
+        { label: "Forfeited", value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "") }, // Remove code like "(1)"
         { label: "Allocation To", value: numberToCurrency(allocationToAmount) }
       ];
-    }, [memberDetails]);
+    }, [memberDetails, enrollmentStatus]);
 
     // Memoized plan section
     const planSection = useMemo(() => {
@@ -145,8 +139,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         isEmployee,
         yearToDateProfitSharingHours,
         yearsInPlan,
-        percentageVested,
-        receivedContributionsLastYear
+        percentageVested
       } = memberDetails;
 
       const yearLabel = profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
@@ -181,11 +174,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
           ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }]
           : []),
         ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
-        { label: "Vested Percent", value: formatPercentage(percentageVested) },
-        {
-          label: "Contributions in Last Year",
-          value: receivedContributionsLastYear == null ? "N/A" : receivedContributionsLastYear ? "Y" : "N"
-        }
+        { label: "Vested Percent", value: formatPercentage(percentageVested) }
       ];
     }, [memberDetails, profitYear]);
 
@@ -222,9 +211,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
     if (!memberDetails) return <Typography>No details found.</Typography>;
 
     return (
-      <div
-        className="m-[1px] box-border p-[1px]"
-        style={{ width: "100%" }}>
+      <div className="m-[1px] box-border w-full p-[1px]">
         <Grid
           container
           paddingX="24px"

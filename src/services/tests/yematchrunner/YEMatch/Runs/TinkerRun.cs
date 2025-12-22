@@ -1,43 +1,54 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using YEMatch.YEMatch.ArrangeActivites;
-using YEMatch.YEMatch.AssertActivities;
-using YEMatch.YEMatch.SmartIntegrationTests;
+using Microsoft.Extensions.Logging;
+using YEMatch.Activities;
+using YEMatch.ReadyActivities;
+using YEMatch.SmartActivities;
+using static YEMatch.Activities.ActivityName;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
-namespace YEMatch.YEMatch.Runs;
+namespace YEMatch.Runs;
 
 /* A scratch pad for running different Activities on demand */
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class TinkerRun : Runnable
 {
+    public TinkerRun(
+        IActivityFactory activityFactory,
+        IReadySshClientFactory readySshClientFactory,
+        ISmartApiClientFactory smartApiClientFactory,
+        ILogger<TinkerRun> logger)
+        : base(activityFactory, readySshClientFactory, smartApiClientFactory, logger)
+    {
+    }
+
     public override async Task Exec()
     {
         await Run(Specify(
+            P00_BuildDatabase, // init both dbs
+            DropBadBenesReady, // in READY, get rid of the two Bene/Employees w/o Demographics rows
+            ActivityName.SanityCheckEmployeeAndBenes,
+            R08_ProfitShareReport,
+            IntPay426,
+            IntPay426N,
+            IntPay426N9
+            /*
+                        IntProfitMasterUpdateTest, // Runs Contributions on Smart
 
-            // Test the Enrollment change issue.
+                        // Ensure that YE update went to plan
+                        TestProfitDetailSelectedColumns, // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont,enrollment_id
+                        TestEtvaNow, // Verify ETVA for 2025
+                        TestEtvaPrior,
 
-            "R0", // import obfuscated
-            nameof(DropBadBenesReady),
-            nameof(FixFrozenReady),
-            "R15",
-            "R16",
-            "R17",
-            "R18",
-            "R19",
-            "R20",
-            "R21",
-            "R22",
-            "R23",
-            "R24",
-            "R24B",
-            "R25",
-            "R26",
-            "R27",
-            "R28"
-            ));
+                        R24_ProfPayMasterUpdate, // Create PAY450 report on READY
+                        // R24B_ProfPayMasterUpdatePartTwo // Updates the YEARS, and enrollment on READY, NOP on SMART
 
-        // use sql to compare proftitshare2 vs tbherrmann for py_enrollment
+                        S24_ProfPayMasterUpdate, // <--- Writes out update enrollments to the OPEN PROFIT YEAR
+                        IntPay450 // Does the FrozenService produce the same report as READY?
+
+                        // S24_ProfPayMasterUpdate // <--- Writes out update enrollments
+            */
+        ));
     }
 }

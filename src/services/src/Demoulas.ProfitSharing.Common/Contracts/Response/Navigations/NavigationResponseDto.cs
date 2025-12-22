@@ -7,4 +7,14 @@ public class NavigationResponseDto
 {
     public List<NavigationDto>? Navigation { get; set; }
 
+    public static NavigationResponseDto ResponseExample()
+    {
+        return new NavigationResponseDto
+        {
+            Navigation = new List<NavigationDto>
+            {
+                NavigationDto.ResponseExample()
+            }
+        };
+    }
 }

@@ -89,7 +89,7 @@ describe("useGridPagination", () => {
       );
     });
 
-    it("should prevent re-entrant calls", () => {
+    it("should handle multiple rapid calls", () => {
       const mockCallback = vi.fn();
       const { result } = renderHook(() =>
         useGridPagination({
@@ -104,7 +104,9 @@ describe("useGridPagination", () => {
         result.current.handlePaginationChange(2, 25);
       });
 
-      expect(result.current.pageNumber).toBe(1);
+      // Both calls should be processed, with the second one being the final state
+      expect(result.current.pageNumber).toBe(2);
+      expect(mockCallback).toHaveBeenCalledTimes(2);
     });
   });
 

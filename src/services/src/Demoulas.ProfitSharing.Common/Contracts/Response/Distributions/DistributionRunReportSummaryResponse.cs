@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 public sealed record DistributionRunReportSummaryResponse
 {
     public char? DistributionFrequencyId { get; set; }

@@ -12,6 +12,6 @@ public interface IUnforfeitService
     /// <param name="req">The request containing the criteria for finding rehires.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with details of rehires and their potential entitlements.</returns>
-    Task<ReportResponseBase<UnforfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req,
+    Task<ReportResponseBase<UnforfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(FilterableStartAndEndDateRequest req,
         CancellationToken cancellationToken);
 }

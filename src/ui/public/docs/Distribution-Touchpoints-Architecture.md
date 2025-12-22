@@ -13,7 +13,9 @@ This document outlines the system touchpoints, integration points, and architect
 ### Internal System Integrations
 
 #### Oracle HCM Integration
+
 **Purpose**: Employee demographic and organizational data
+
 - **Data Flow**: Bidirectional synchronization of employee information
 - **Key Data Elements**:
   - Employee demographics (name, SSN, address)
@@ -25,7 +27,9 @@ This document outlines the system touchpoints, integration points, and architect
 - **Error Handling**: Comprehensive validation and exception reporting
 
 #### Payroll System Integration
+
 **Purpose**: Compensation and tax withholding data
+
 - **Data Flow**: Inbound compensation data, outbound tax withholding
 - **Key Data Elements**:
   - Salary and compensation history
@@ -37,7 +41,9 @@ This document outlines the system touchpoints, integration points, and architect
 - **Error Handling**: Reconciliation processes and discrepancy reporting
 
 #### Finance System Integration
+
 **Purpose**: Profit pool management and accounting
+
 - **Data Flow**: Profit pool allocations and distribution accounting entries
 - **Key Data Elements**:
   - Annual profit pool amounts
@@ -51,7 +57,9 @@ This document outlines the system touchpoints, integration points, and architect
 ### External System Integrations
 
 #### Banking System Integration
+
 **Purpose**: Direct deposit and ACH processing
+
 - **Data Flow**: Outbound payment instructions and inbound confirmation
 - **Key Data Elements**:
   - Employee banking information
@@ -63,7 +71,9 @@ This document outlines the system touchpoints, integration points, and architect
 - **Error Handling**: Payment rejection handling and re-processing workflows
 
 #### Check Printing Service
+
 **Purpose**: Physical check generation and mailing
+
 - **Data Flow**: Outbound check data and inbound printing confirmation
 - **Key Data Elements**:
   - Check amounts and recipient information
@@ -75,7 +85,9 @@ This document outlines the system touchpoints, integration points, and architect
 - **Error Handling**: Print error handling and reprint capabilities
 
 #### Retirement Plan Administrator
+
 **Purpose**: Direct rollovers to 401(k) and IRA accounts
+
 - **Data Flow**: Rollover instructions and confirmation
 - **Key Data Elements**:
   - Rollover amounts and recipient plans
@@ -87,7 +99,9 @@ This document outlines the system touchpoints, integration points, and architect
 - **Error Handling**: Rollover rejection handling and manual processing fallback
 
 #### Tax Reporting Systems
+
 **Purpose**: IRS and state tax reporting
+
 - **Data Flow**: Distribution and withholding data for tax reporting
 - **Key Data Elements**:
   - 1099-R tax forms
@@ -103,6 +117,7 @@ This document outlines the system touchpoints, integration points, and architect
 ### Architecture Overview
 
 #### Microservices Architecture
+
 - **Distribution Service**: Core distribution processing logic
 - **Employee Service**: Employee data management and validation
 - **Payment Service**: Payment processing and routing
@@ -111,8 +126,9 @@ This document outlines the system touchpoints, integration points, and architect
 - **Reporting Service**: Report generation and delivery
 
 #### Technology Stack
-- **.NET 9**: Primary backend framework with FastEndpoints
-- **Entity Framework Core 9**: Data access with Oracle provider
+
+- **.NET 10**: Primary backend framework with FastEndpoints
+- **Entity Framework Core 10**: Data access with Oracle provider
 - **Oracle Database**: Primary data storage
 - **RabbitMQ**: Message queue for asynchronous processing
 - **Aspire**: Application hosting and lifecycle management
@@ -121,6 +137,7 @@ This document outlines the system touchpoints, integration points, and architect
 ### Data Management
 
 #### Database Design Considerations
+
 - **ACID Compliance**: Ensure transaction integrity for distribution processing
 - **Partitioning**: Table partitioning for large historical data sets
 - **Indexing Strategy**: Optimized indexes for distribution queries
@@ -128,6 +145,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Backup Strategy**: Point-in-time recovery for critical distribution data
 
 #### Data Validation and Integrity
+
 - **Business Rule Engine**: Configurable business rules for distribution processing
 - **Data Validation Framework**: Multi-layer validation (API, service, database)
 - **Referential Integrity**: Comprehensive foreign key relationships
@@ -137,6 +155,7 @@ This document outlines the system touchpoints, integration points, and architect
 ### Processing Architecture
 
 #### Batch Processing Framework
+
 - **Scalable Processing**: Horizontal scaling for large distribution batches
 - **Resume Capability**: Ability to resume interrupted processing
 - **Parallel Processing**: Multi-threaded processing for performance
@@ -144,6 +163,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Progress Tracking**: Real-time progress monitoring and reporting
 
 #### Real-time Processing
+
 - **Individual Distributions**: On-demand processing for individual cases
 - **Status Updates**: Real-time status updates for processing
 - **Exception Handling**: Immediate exception detection and routing
@@ -152,6 +172,7 @@ This document outlines the system touchpoints, integration points, and architect
 ### Security Architecture
 
 #### Authentication and Authorization
+
 - **OAuth 2.0/OpenID Connect**: Modern authentication framework
 - **Role-Based Access Control**: Granular permission management
 - **Service-to-Service Authentication**: Secure inter-service communication
@@ -159,6 +180,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Session Management**: Secure session handling and timeout
 
 #### Data Protection
+
 - **Encryption at Rest**: AES-256 encryption for sensitive data
 - **Encryption in Transit**: TLS 1.2+ for all communications
 - **Key Management**: Enterprise key management system integration
@@ -168,6 +190,7 @@ This document outlines the system touchpoints, integration points, and architect
 ### Performance and Scalability
 
 #### Performance Optimization
+
 - **Caching Strategy**: Redis caching for frequently accessed data
 - **Database Optimization**: Query optimization and execution plan monitoring
 - **Connection Pooling**: Efficient database connection management
@@ -175,6 +198,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Resource Monitoring**: Comprehensive resource utilization monitoring
 
 #### Scalability Design
+
 - **Horizontal Scaling**: Ability to scale processing nodes
 - **Load Balancing**: Intelligent load distribution across services
 - **Auto-scaling**: Automatic scaling based on processing demands
@@ -186,6 +210,7 @@ This document outlines the system touchpoints, integration points, and architect
 ### User Interface Architecture
 
 #### Modern Web Application
+
 - **React 18**: Modern frontend framework with TypeScript
 - **Vite**: Fast build tool and development server
 - **Tailwind CSS**: Utility-first CSS framework
@@ -193,6 +218,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Smart UI Library**: Internal component library
 
 #### Responsive Design
+
 - **Mobile-First**: Mobile-responsive design approach
 - **Progressive Web App**: PWA capabilities for offline access
 - **Accessibility**: WCAG 2.1 AA compliance for accessibility
@@ -202,6 +228,7 @@ This document outlines the system touchpoints, integration points, and architect
 ### User Experience Design
 
 #### Administrative Interface
+
 - **Dashboard Views**: Executive dashboards for distribution oversight
 - **Processing Management**: Distribution processing control and monitoring
 - **Exception Management**: Exception handling and resolution interfaces
@@ -209,6 +236,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **User Management**: Administrative user and role management
 
 #### Employee Self-Service
+
 - **Distribution History**: Personal distribution history and statements
 - **Account Information**: Current account balance and vesting status
 - **Preference Management**: Distribution method and contact preferences
@@ -216,6 +244,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Help and Support**: Self-service help and support resources
 
 #### Security and Access Control
+
 - **Single Sign-On (SSO)**: Integration with corporate authentication
 - **Multi-Factor Authentication**: Additional security for sensitive operations
 - **Session Security**: Secure session management and timeout
@@ -225,6 +254,7 @@ This document outlines the system touchpoints, integration points, and architect
 ### Integration Patterns
 
 #### API Integration
+
 - **RESTful APIs**: Modern REST API design with OpenAPI documentation
 - **GraphQL**: Flexible data querying for complex frontend needs
 - **Real-time Updates**: WebSocket connections for real-time status updates
@@ -232,6 +262,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Caching**: Client-side caching for improved performance
 
 #### State Management
+
 - **Redux Toolkit**: Centralized state management with RTK Query
 - **Optimistic Updates**: Optimistic UI updates for better user experience
 - **Offline Support**: Offline capability for critical functions
@@ -241,6 +272,7 @@ This document outlines the system touchpoints, integration points, and architect
 ### Performance Optimization
 
 #### Loading and Rendering
+
 - **Code Splitting**: Dynamic imports for optimal bundle sizes
 - **Lazy Loading**: Lazy loading of components and routes
 - **Image Optimization**: Optimized image loading and caching
@@ -248,6 +280,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **CDN Integration**: Content delivery network for static assets
 
 #### User Experience
+
 - **Loading States**: Clear loading indicators for async operations
 - **Error Boundaries**: Graceful error handling and recovery
 - **Skeleton Screens**: Skeleton loading for better perceived performance
@@ -257,6 +290,7 @@ This document outlines the system touchpoints, integration points, and architect
 ## Integration Patterns and Protocols
 
 ### Message Queue Architecture
+
 - **RabbitMQ Integration**: Asynchronous message processing
 - **Event-Driven Architecture**: Event sourcing for distribution events
 - **Dead Letter Queues**: Failed message handling and retry logic
@@ -264,6 +298,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Monitoring**: Queue monitoring and alerting
 
 ### File Transfer Protocols
+
 - **SFTP**: Secure file transfer for banking and external systems
 - **API Integration**: RESTful APIs for real-time data exchange
 - **File Validation**: Comprehensive file format and content validation
@@ -271,6 +306,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Audit Trail**: Complete audit trail for all file transfers
 
 ### Data Synchronization
+
 - **Change Data Capture**: Real-time data change detection
 - **Conflict Resolution**: Data conflict detection and resolution
 - **Versioning**: Data versioning for historical tracking
@@ -280,6 +316,7 @@ This document outlines the system touchpoints, integration points, and architect
 ## Monitoring and Observability
 
 ### Application Monitoring
+
 - **OpenTelemetry**: Comprehensive telemetry and tracing
 - **Business Metrics**: Distribution-specific business metrics
 - **Performance Metrics**: Application performance monitoring
@@ -287,6 +324,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Health Checks**: Service health monitoring and reporting
 
 ### Infrastructure Monitoring
+
 - **Resource Utilization**: CPU, memory, and disk monitoring
 - **Network Monitoring**: Network performance and connectivity
 - **Database Monitoring**: Database performance and health
@@ -296,6 +334,7 @@ This document outlines the system touchpoints, integration points, and architect
 ## Deployment and DevOps
 
 ### CI/CD Pipeline
+
 - **Automated Testing**: Comprehensive automated testing suite
 - **Security Scanning**: Automated security vulnerability scanning
 - **Quality Gates**: Code quality and coverage gates
@@ -303,6 +342,7 @@ This document outlines the system touchpoints, integration points, and architect
 - **Rollback Capabilities**: Quick rollback for failed deployments
 
 ### Environment Management
+
 - **Development**: Local development environment setup
 - **QA**: Quality assurance testing environment
 - **Staging**: Production-like staging environment

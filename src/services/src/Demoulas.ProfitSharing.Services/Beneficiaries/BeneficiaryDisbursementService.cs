@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Beneficiaries;
@@ -73,12 +67,12 @@ public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementSer
             }
 
             // -- Does each Beneficiary exist
-            foreach (var beneficiary in request.Beneficiaries)
+            foreach (var beneficiary in request.Beneficiaries.Select(x => x.PsnSuffix))
             {
                 // Validate with suffix
-                if (await context.Beneficiaries.AnyAsync(b => b.BadgeNumber == request.BadgeNumber && b.PsnSuffix == beneficiary.PsnSuffix, cancellationToken) == false)
+                if (!await context.Beneficiaries.AnyAsync(b => b.BadgeNumber == request.BadgeNumber && b.PsnSuffix == beneficiary, cancellationToken))
                 {
-                    return Result<bool>.Failure(Error.BeneficiaryDoesNotExist($"{request.BadgeNumber}-{beneficiary.PsnSuffix}"));
+                    return Result<bool>.Failure(Error.BeneficiaryDoesNotExist($"{request.BadgeNumber}-{beneficiary}"));
                 }
             }
 

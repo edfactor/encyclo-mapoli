@@ -28,6 +28,16 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
     createStateColumn({
       valueGetter: (params) => params.data.address?.state || ""
     }),
+    {
+      headerName: "Current Hour Year",
+      field: "currentHourYear",
+      colId: "currentHourYear",
+      maxWidth: 150
+    },
+    createDateColumn({
+      headerName: "Termination Date",
+      field: "terminationDate"
+    }),
     createDateColumn({
       headerName: "Hired Date",
       field: "hireDate"

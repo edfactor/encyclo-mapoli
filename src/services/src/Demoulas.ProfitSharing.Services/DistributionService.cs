@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -27,13 +22,15 @@ public sealed class DistributionService : IDistributionService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IAppUser? _appUser;
     private readonly TotalService _totalService;
+    private readonly ICalendarService _calendarService;
 
-    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, IAppUser? appUser, TotalService totalService)
+    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, IAppUser? appUser, TotalService totalService, ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _appUser = appUser;
         _totalService = totalService;
+        _calendarService = calendarService;
     }
 
     public async Task<PaginatedResponseDto<DistributionSearchResponse>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken)
@@ -54,8 +51,14 @@ public sealed class DistributionService : IDistributionService
                             dist.Id,
                             dist.PaymentSequence,
                             dist.Ssn,
-                            BadgeNumber = dem != null ? (int?)dem.BadgeNumber : null,
+                            BadgeNumber = dem != null ? (long?)dem.BadgeNumber : null,
+                            DemLastName = dem != null ? dem.ContactInfo.LastName : null,
+                            DemFirstName = dem != null ? dem.ContactInfo.FirstName : null,
+                            DemMiddleName = dem != null ? dem.ContactInfo.MiddleName : null,
                             DemFullName = dem != null ? dem.ContactInfo.FullName : null,
+                            BeneLastName = ben != null ? ben.Contact!.ContactInfo.LastName : null,
+                            BeneFirstName = ben != null ? ben.Contact!.ContactInfo.FirstName : null,
+                            BeneMiddleName = ben != null ? ben.Contact!.ContactInfo.MiddleName : null,
                             BeneFullName = ben != null ? ben.Contact!.ContactInfo.FullName : null,
                             dist.FrequencyId,
                             Frequency = freq,
@@ -68,7 +71,7 @@ public sealed class DistributionService : IDistributionService
                             dist.StateTaxAmount,
                             dist.CheckAmount,
                             IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly,
-                            DemographicId = dem != null ? (int?)dem.OracleHcmId : null,
+                            DemographicId = dem != null ? (int?)dem.Id : null,
                             BeneficiaryId = ben != null ? (int?)ben.Id : null
                         };
 
@@ -190,7 +193,11 @@ public sealed class DistributionService : IDistributionService
                 PaymentSequence = d.PaymentSequence,
                 Ssn = d.Ssn.MaskSsn(),
                 BadgeNumber = d.BadgeNumber,
-                FullName = d.DemFullName ?? d.BeneFullName,
+                FullName = !string.IsNullOrWhiteSpace(d.DemFullName)
+                    ? d.DemFullName
+                    : (!string.IsNullOrWhiteSpace(d.BeneFullName)
+                        ? d.BeneFullName
+                        : string.Empty),
                 FrequencyId = d.FrequencyId,
                 FrequencyName = d.Frequency!.Name,
                 StatusId = d.StatusId,
@@ -211,12 +218,15 @@ public sealed class DistributionService : IDistributionService
         return result;
     }
 
-    public async Task<CreateOrUpdateDistributionResponse> CreateDistribution(CreateDistributionRequest request, CancellationToken cancellationToken)
+    public Task<CreateOrUpdateDistributionResponse> CreateDistribution(CreateDistributionRequest request, CancellationToken cancellationToken)
     {
+        var validationResult = ValidateDistributionRequest(request);
+        if (!validationResult.IsSuccess)
+        {
+            throw new InvalidOperationException(string.Join("; ", validationResult.Error?.ValidationErrors.SelectMany(e => e.Value) ?? []));
+        }
 
-        ValidateDistributionRequest(request);
-
-        return await _dataContextFactory.UseWritableContext(async ctx =>
+        return _dataContextFactory.UseWritableContext(async ctx =>
         {
             var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             var dem = await demographic.Where(d => d.BadgeNumber == request.BadgeNumber).FirstOrDefaultAsync(cancellationToken);
@@ -226,12 +236,9 @@ public sealed class DistributionService : IDistributionService
             }
 
             var balance = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, dem.Ssn, (short)DateTime.Today.Year, cancellationToken);
-            if (request.TaxCodeId == TaxCode.Constants.NormalDistribution.Id && dem.DateOfBirth.Age() > 64)
+            if (request.TaxCodeId == TaxCode.Constants.NormalDistribution.Id && dem.DateOfBirth.Age() > 64 && balance != default && balance.VestedBalance != request.GrossAmount && string.IsNullOrEmpty(request.Memo))
             {
-                if (balance != default && balance.VestedBalance != request.GrossAmount && string.IsNullOrEmpty(request.Memo))
-                {
-                    request.Memo = "AGE>64 - OVERRIDE";
-                }
+                request.Memo = "AGE>64 - OVERRIDE";
             }
 
             if (request.GrossAmount > (balance?.VestedBalance ?? 0))
@@ -248,7 +255,7 @@ public sealed class DistributionService : IDistributionService
                 request.CheckAmount = request.GrossAmount;
             }
 
-            var maxSequence = await ctx.Distributions.Where(d => d.Ssn == dem.Ssn).MaxAsync(d => (byte?)d.PaymentSequence) ?? 0;
+            var maxSequence = await ctx.Distributions.Where(d => d.Ssn == dem.Ssn).MaxAsync(d => (byte?)d.PaymentSequence, cancellationToken: cancellationToken) ?? 0;
             var distribution = new Distribution
             {
                 Ssn = dem.Ssn,
@@ -371,12 +378,9 @@ public sealed class DistributionService : IDistributionService
                 return Result<CreateOrUpdateDistributionResponse>.Failure(Error.BadgeNumberNotFound);
             }
             var balance = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, dem.Ssn, (short)DateTime.Today.Year, cancellationToken);
-            if (request.TaxCodeId == TaxCode.Constants.NormalDistribution.Id && dem.DateOfBirth.Age() > 64)
+            if (request.TaxCodeId == TaxCode.Constants.NormalDistribution.Id && dem.DateOfBirth.Age() > 64 && balance != default && balance.VestedBalance != request.GrossAmount && string.IsNullOrEmpty(request.Memo))
             {
-                if (balance != default && balance.VestedBalance != request.GrossAmount && string.IsNullOrEmpty(request.Memo))
-                {
-                    request.Memo = "AGE>64 - OVERRIDE";
-                }
+                request.Memo = "AGE>64 - OVERRIDE";
             }
             var originalGrossAmount = distribution.GrossAmount;
             if (request.GrossAmount > (balance != default ? balance.VestedBalance - originalGrossAmount : originalGrossAmount))
@@ -513,11 +517,11 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken)
+    public Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, Array.Empty<char>());
+            var distributionQuery = GetDistributionExtract(ctx, Array.Empty<char>());
 
             var groupedResults = await distributionQuery
                 .TagWith($"DistributionSummaryReport-{DateTime.UtcNow:yyyyMMddHHmm}")
@@ -585,15 +589,15 @@ public sealed class DistributionService : IDistributionService
             groupedResults.AddRange(manualAndOnHoldDistributions);
             groupedResults.AddRange(missingStatuses);
 
-            groupedResults.Sort((a, b) => a.DistributionTypeName.CompareTo(b.DistributionTypeName));
+            groupedResults.Sort((a, b) => a.DistributionTypeName.CompareTo(b.DistributionTypeName, StringComparison.OrdinalIgnoreCase));
 
             return Result<DistributionRunReportSummaryResponse[]>.Success(groupedResults.ToArray());
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = from dist in ctx.Distributions.Include(x => x.Payee)
                         where dist.StatusId == DistributionStatus.Constants.RequestOnHold
@@ -624,9 +628,9 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = from dist in ctx.Distributions.Include(x => x.Payee)
                         where dist.StatusId == DistributionStatus.Constants.ManualCheck
@@ -665,12 +669,12 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, request.DistributionFrequencies ?? Array.Empty<char>());
+            var distributionQuery = GetDistributionExtract(ctx, request.DistributionFrequencies ?? Array.Empty<char>());
             var query = from dist in distributionQuery
                         join dem in demographicQuery.Include(x => x.PayClassification)
                                                     .Include(x => x.Address)
@@ -724,13 +728,45 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    private Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
+    public Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReport(ProfitYearRequest request, CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var distributionQuery = GetDistributionExtract(ctx, new[] { DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Quarterly });
+            var query = from dist in distributionQuery
+                        join dem in demographicQuery on dist.Ssn equals dem.Ssn into demJoin
+                        from dem in demJoin.DefaultIfEmpty()
+                        join bc in ctx.BeneficiaryContacts on dist.Ssn equals bc.Ssn into benJoin
+                        from ben in benJoin.DefaultIfEmpty()
+                        join vb in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on dist.Ssn equals vb.Ssn into vbJoin
+                        from vest in vbJoin.DefaultIfEmpty()
+                        select new DisbursementReportDetailResponse
+                        {
+                            DistributionFrequencyId = dist.FrequencyId,
+                            DistributionFrequencyName = dist.Frequency!.Name,
+                            Ssn = dist.Ssn.MaskSsn(),
+                            BadgeNumber = dem != null ? dem.BadgeNumber : 0,
+                            EmployeeName = dem.ContactInfo!.FullName ?? ben.ContactInfo.FullName ?? "?",
+                            VestedBalance = vest != null ? vest.VestedBalance ?? 0 : 0,
+                            OriginalAmount = dist.GrossAmount,
+                            RemainingBalance = (vest != null ? vest.VestedBalance ?? 0 : 0) - dist.GrossAmount
+                        };
+            // Add query tagging for disbursement report
+            query = query.TagWith($"DisbursementReport-{DateTime.UtcNow:yyyyMMddHHmm}");
+            var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
+            return Result<PaginatedResponseDto<DisbursementReportDetailResponse>>.Success(paginatedResults);
+        }, cancellationToken);
+    }
+
+    private static Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
     {
         var validationErrors = new Dictionary<string, string[]>();
 
-        if (request.BadgeNumber < 9_999 || request.BadgeNumber > 9_999_999)
+        if (request.BadgeNumber < 9_999 || request.BadgeNumber > 99_999_999_999)
         {
-            validationErrors[nameof(request.BadgeNumber)] = ["BadgeNumber must be a 7-digit number."];
+            validationErrors[nameof(request.BadgeNumber)] = ["BadgeNumber must be between 5 and 11 digits."];
         }
         if (request.GrossAmount <= 0)
         {
@@ -754,7 +790,7 @@ public sealed class DistributionService : IDistributionService
             : Result<bool>.Success(true);
     }
 
-    private IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, CancellationToken cancellationToken, char[] distributionFrequencies)
+    private static IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, char[] distributionFrequencies)
     {
         var distributionQuery = ctx.Distributions
             .Include(d => d.Frequency)

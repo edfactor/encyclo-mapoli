@@ -21,9 +21,10 @@ public record DemographicsRequest : IMemberRequest
     public required ContactInfoRequestDto ContactInfo { get; set; }
     public required AddressRequestDto Address { get; set; }
     public required DateOnly DateOfBirth { get; set; }
+    public DateOnly? DateOfDeath { get; set; }
 
     /// <summary>
-    /// Date of full-time status 
+    /// Date of full-time status
     /// </summary>
     public DateOnly? FullTimeDate { get; set; }
 

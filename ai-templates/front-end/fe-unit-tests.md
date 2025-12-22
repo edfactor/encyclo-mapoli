@@ -63,11 +63,125 @@ Coverage reports are generated in:
 - **Terminal**: Text summary
 - **HTML**: `coverage/index.html` (open in browser for detailed view)
 
-## Test Structure Patterns
+# React Unit Testing Strategy Guide
 
-### Basic Hook Test
+**Based on lessons learned from test refactoring and mock implementation patterns in the Smart Profit Sharing application**
 
-Testing custom React hooks using `renderHook`:
+## Table of Contents
+
+1. [Philosophy & Principles](#philosophy--principles)
+2. [Test Organization](#test-organization)
+3. [Mocking Strategies](#mocking-strategies)
+4. [Redux & State Management Testing](#redux--state-management-testing)
+5. [Form Testing with React Hook Form](#form-testing-with-react-hook-form)
+6. [Component Testing Patterns](#component-testing-patterns)
+7. [Hook Testing Patterns](#hook-testing-patterns)
+8. [Common Pitfalls & Solutions](#common-pitfalls--solutions)
+9. [Test File Structure](#test-file-structure)
+10. [Real-World Examples](#real-world-examples)
+
+---
+
+## Philosophy & Principles
+
+### 1. Test What Users Do, Not Implementation Details
+
+**Good ❌ → Better ✅**
+
+```typescript
+// ❌ BAD: Testing implementation details
+it("should call setState with value", () => {
+  const setStateSpy = vi.spyOn(React, 'useState');
+  // ... tests internals
+});
+
+// ✅ GOOD: Testing user behavior
+it("should update search results when user enters badge number", async () => {
+  const user = userEvent.setup();
+  render(<SearchFilter />);
+
+  const input = screen.getByLabelText("Badge Number");
+  await user.type(input, "12345");
+  await user.click(screen.getByRole("button", { name: /search/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText("Employee Found")).toBeInTheDocument();
+  });
+});
+```
+
+**Why**: Implementation details change frequently. User behavior is stable and what actually matters.
+
+### 2. Use Selectors Based on Accessibility
+
+**Priority Order** (best to worst):
+
+1. **Accessible roles**: `screen.getByRole("button", { name: "Search" })`
+2. **Labels & text**: `screen.getByLabelText("Email")`, `screen.getByText("Save")`
+3. **Placeholders**: `screen.getByPlaceholderText("Enter date")`
+4. **Test IDs**: `screen.getByTestId("submit-button")` (last resort)
+5. **❌ Never use**: Class names, styles, component implementation details
+
+```typescript
+// ✅ Accessible and maintainable
+const searchButton = screen.getByRole("button", { name: /search/i });
+const dateInput = screen.getByLabelText("Rehire Begin Date");
+const checkBox = screen.getByRole("checkbox", {
+  name: /exclude zero balance/i
+});
+
+// ❌ Brittle and inaccessible
+const searchButton = screen.getByTestId("date-picker-Rehire Begin Date");
+const dateInput = document.querySelector(".MuiInput");
+```
+
+### 3. Test Behavior, Not State
+
+Always query the DOM for the current state, not internal component state.
+
+```typescript
+// ❌ BAD: Checking internal state
+const { result } = renderHook(() => useMyHook());
+expect(result.current.isLoading).toBe(false);
+
+// ✅ GOOD: Checking DOM state
+render(<MyComponent />);
+expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
+// or
+expect(screen.getByRole("button")).not.toBeDisabled();
+```
+
+---
+
+## Test Organization
+
+### Directory Structure
+
+```
+src/pages/DecemberActivities/UnForfeit/
+├── UnForfeit.tsx                              # Component
+├── UnForfeitSearchFilter.tsx                  # Sub-component
+├── UnForfeitGrid.tsx                          # Sub-component
+├── hooks/
+│   ├── useUnForfeitGrid.ts                    # Custom hook
+│   └── __test__/                              # Tests for hooks
+│       └── useUnForfeitGrid.test.ts
+└── __test__/                                  # Tests for components
+    ├── UnForfeit.test.tsx
+    ├── UnForfeitSearchFilter.test.tsx
+    └── UnForfeitGrid.test.tsx
+```
+
+**Best Practice**: Tests go in `__test__` subdirectories, organized parallel to source structure.
+
+### Test File Naming Convention
+
+- **Component**: `ComponentName.test.tsx`
+- **Hook**: `useHookName.test.ts`
+- **Utility**: `utilityName.test.ts`
+- **Location**: `src/pages/Feature/__test__/FileName.test.tsx`
+
+### Test Grouping with Describe Blocks
 
 ```typescript
 import { renderHook } from "@testing-library/react";
@@ -78,7 +192,7 @@ describe("useDecemberFlowProfitYear", () => {
   it("should return the selected profit year from Redux store", () => {
     const mockStore = createMockStore(2024);
     const { result } = renderHook(() => useDecemberFlowProfitYear(), {
-      wrapper: wrapper(mockStore),
+      wrapper: wrapper(mockStore)
     });
 
     expect(result.current).toBe(2024);
@@ -86,52 +200,141 @@ describe("useDecemberFlowProfitYear", () => {
 });
 ```
 
-### Hook Test with Redux Store
+---
 
-Testing hooks that use Redux state:
+## Mocking Strategies
+
+### Core Principle: Mock External Dependencies, Not Your Code
 
 ```typescript
-import { configureStore } from "@reduxjs/toolkit";
-import { renderHook } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+// ✅ DO: Mock external libraries and APIs
+vi.mock("smart-ui-library"); // Third-party UI library
+vi.mock("../../../utils/FormValidators"); // Utility module
+vi.mock("../../../reduxstore/api/YearsEndApi"); // API
 
-describe("useFiscalCalendarYear", () => {
-  let mockStore: ReturnType<typeof configureStore>;
+// ❌ DON'T: Mock your own components/hooks unless necessary
+// Don't mock: UnForfeitSearchFilter, useUnForfeitState, etc.
+```
 
-  const createMockStore = (hasToken: boolean, accountingYearData = null) => {
-    return configureStore({
-      reducer: {
-        security: () => ({ token: hasToken ? "mock-token" : null }),
-        lookups: () => ({ accountingYearData })
-      }
-    });
+### 1. Mocking Library Modules (Utilities)
+
+**Pattern**: Use `async` to import real module, then override specific exports.
+
+```typescript
+vi.mock("../../../utils/FormValidators", async () => {
+  const yup = await import("yup");
+
+  return {
+    dateStringValidator: (minYear, maxYear, fieldName) => {
+      return yup.default
+        .string()
+        .nullable()
+        .required(`${fieldName} is required`)
+        .test("valid-date", `${fieldName} must be valid`, function (value) {
+          if (!value) return false;
+          return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value) || /^\d{4}-\d{2}-\d{2}$/.test(value);
+        });
+    },
+    mmDDYYFormat: (date) => {
+      if (!date) return "";
+      // Implementation
+      return formattedDate;
+    }
   };
+});
+```
 
-  const wrapper = ({ children }: { children: React.ReactNode }) =>
-    <Provider store={mockStore}>{children}</Provider>;
+**Why this works**: You're providing real validation behavior (using Yup) while controlling implementation.
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+### 2. Mocking UI Library Components
+
+**Pattern**: Create a minimal mock component that preserves props.
+
+```typescript
+vi.mock("smart-ui-library", () => ({
+  SearchAndReset: vi.fn(({
+    handleSearch,
+    handleReset,
+    disabled,
+    isFetching
+  }) => (
+    <div data-testid="search-and-reset">
+      <button
+        data-testid="search-btn"
+        onClick={handleSearch}
+        disabled={disabled || isFetching}
+      >
+        Search
+      </button>
+      <button
+        data-testid="reset-btn"
+        onClick={handleReset}
+      >
+        Reset
+      </button>
+      {isFetching && <span data-testid="loading">Loading...</span>}
+    </div>
+  ))
+}));
+```
+
+**Key Points**:
+
+- Pass through all props your component uses
+- Make mock testable (include data-testid attributes)
+- Keep it simple - no need to replicate full component
+- Preserve event handlers (onClick, onChange, etc.)
+
+### 3. Mocking RTK Query Hooks (Advanced)
+
+**⚠️ Most Complex Pattern - Requires Careful Setup**
+
+RTK Query hooks are async and need proper promise handling.
+
+```typescript
+// Step 1: Create mock functions at module scope using vi.hoisted()
+const { mockTriggerSearch, mockTriggerStatus } = vi.hoisted(() => ({
+  mockTriggerSearch: vi.fn(),
+  mockTriggerStatus: vi.fn()
+}));
+
+// Step 2: Mock the entire module
+vi.mock("../../../reduxstore/api/YearsEndApi", () => ({
+  useLazyGetUnForfeitsQuery: vi.fn(() => [
+    mockTriggerSearch, // The trigger function
+    { isFetching: false } // The hook state
+  ]),
+  useLazyGetProfitMasterStatusQuery: vi.fn(() => [mockTriggerStatus, { isFetching: false }])
+}));
+
+// Step 3: Set up return values in beforeEach
+beforeEach(() => {
+  vi.clearAllMocks();
+
+  mockTriggerSearch.mockReturnValue({
+    unwrap: vi.fn().mockResolvedValue({
+      results: mockData,
+      total: 1
+    })
   });
 
-  it("should return accounting year data from Redux store", () => {
-    const mockData = {
-      fiscalBeginDate: "2024-01-01",
-      fiscalEndDate: "2024-12-31"
-    };
-    mockStore = createMockStore(true, mockData);
-
-    const { result } = renderHook(() => useFiscalCalendarYear(), { wrapper });
-
-    expect(result.current).toEqual(mockData);
+  mockTriggerStatus.mockReturnValue({
+    unwrap: vi.fn().mockResolvedValue({
+      updatedBy: "John Doe",
+      updatedTime: "2024-01-15"
+    })
   });
 });
 ```
 
-### Reducer Testing
+**Critical Points**:
 
-Testing state management reducers:
+- Use `vi.hoisted()` before `vi.mock()` - this allows using mock variables in the mock definition
+- RTK Query lazy hooks return `[triggerFunction, stateObject]` - replicate this structure
+- Return value must have `.unwrap()` method that returns a Promise
+- Set up different return values for success/error cases
+
+**Testing RTK Query Calls**:
 
 ```typescript
 import { describe, expect, it } from "vitest";
@@ -145,12 +348,12 @@ describe("useMasterInquiryReducer", () => {
           skip: 0,
           take: 25,
           sortBy: "name",
-          isSortDescending: false,
-        },
+          isSortDescending: false
+        }
       };
       const action = {
         type: "SEARCH_START" as const,
-        payload: { params, isManual: true },
+        payload: { params, isManual: true }
       };
       const newState = masterInquiryReducer(initialState, action);
 
@@ -162,9 +365,13 @@ describe("useMasterInquiryReducer", () => {
 });
 ```
 
-### Selector Testing
+---
 
-Testing selector functions:
+## Redux & State Management Testing
+
+### 1. Creating a Test Store
+
+**Pattern**: Use `createMockStoreAndWrapper` helper or manually configure.
 
 ```typescript
 describe("selectors", () => {
@@ -174,9 +381,9 @@ describe("selectors", () => {
         ...initialState,
         search: {
           ...initialState.search,
-          results: { results: [{}, {}], total: 2 },
+          results: { results: [{}, {}], total: 2 }
         },
-        view: { mode: "multipleMembers" },
+        view: { mode: "multipleMembers" }
       };
 
       expect(selectShowMemberGrid(state)).toBe(true);
@@ -185,43 +392,212 @@ describe("selectors", () => {
 });
 ```
 
-## Mocking Patterns
+### 2. Form Components
 
-### Mocking External Modules
+Focus on user interactions and validation.
+
+```typescript
+describe("MilitaryContributionForm", () => {
+  it("should accept user input and submit", async () => {
+    const mockOnSubmit = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <MilitaryContributionForm onSubmit={mockOnSubmit} />,
+      { wrapper }
+    );
+
+    // Fill form
+    const amountInput = screen.getByLabelText(/amount/i);
+    await user.type(amountInput, "1000");
+
+    const typeSelect = screen.getByLabelText(/contribution type/i);
+    await user.selectOption(typeSelect, "hourly");
+
+    // Submit
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+    await user.click(submitButton);
+
+    expect(mockOnSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        amount: 1000,
+        type: "hourly"
+      })
+    );
+  });
+
+  it("should prevent submission when amount is zero", async () => {
+    const mockOnSubmit = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <MilitaryContributionForm onSubmit={mockOnSubmit} />,
+      { wrapper }
+    );
+
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+
+    // Try to submit with zero amount
+    await user.click(submitButton);
+
+    // Should show validation error
+    expect(screen.getByText(/amount must be greater than zero/i)).toBeInTheDocument();
+
+    // Should not call submit
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+});
+```
+
+---
+
+## Hook Testing Patterns
+
+### 1. Basic Hook Testing
+
+Use `renderHook` with proper Redux setup.
+
+```typescript
+it("should return initial state", () => {
+  const { wrapper } = createMockStoreAndWrapper({
+    yearsEnd: { selectedProfitYear: 2024 }
+  });
+
+  const { result } = renderHook(() => useUnForfeitState(), { wrapper });
+
+  expect(result.current.state.initialSearchLoaded).toBe(false);
+  expect(result.current.state.resetPageFlag).toBe(false);
+});
+```
+
+### 2. Hook State Updates
+
+```typescript
+it("should update state when setInitialSearchLoaded called", () => {
+  const { wrapper } = createMockStoreAndWrapper({});
+  const { result } = renderHook(() => useUnForfeitState(), { wrapper });
+
+  // Initial state
+  expect(result.current.state.initialSearchLoaded).toBe(false);
+
+  // Update state
+  act(() => {
+    result.current.actions.setInitialSearchLoaded(true);
+  });
+
+  // Check updated state
+  expect(result.current.state.initialSearchLoaded).toBe(true);
+});
+```
+
+### 3. Hook with Side Effects
 
 ```typescript
 import { vi } from "vitest";
 
 // Mock custom hooks
 vi.mock("./useDecemberFlowProfitYear", () => ({
-  default: vi.fn(),
+  default: vi.fn()
 }));
 
 // Mock RTK Query hooks
 vi.mock("reduxstore/api/LookupsApi", () => ({
   useLazyGetAccountingYearQuery: vi.fn(),
-  useLazyGetAccountingRangeQuery: vi.fn(),
+  useLazyGetAccountingRangeQuery: vi.fn()
 }));
 ```
 
-### Setting Mock Return Values
+### Pitfall 6: Not Clearing Mocks Between Tests
+
+**❌ TEST POLLUTION**:
+
+```typescript
+describe("Tests", () => {
+  const mockFn = vi.fn();
+
+  it("first test", () => {
+    mockFn();
+  });
+
+  it("second test", () => {
+    // ❌ mockFn was called in first test!
+    expect(mockFn).toHaveBeenCalledTimes(1); // Fails!
+  });
+});
+```
+
+**✅ CLEAN TESTS**:
+
+```typescript
+describe("Tests", () => {
+  const mockFn = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks(); // ✅ Clear between tests
+  });
+
+  it("first test", () => {
+    mockFn();
+  });
+
+  it("second test", () => {
+    expect(mockFn).toHaveBeenCalledTimes(0); // Passes!
+  });
+});
+```
+
+---
+
+## Test File Structure
+
+### Complete Example: UnForfeitSearchFilter Test
 
 ```typescript
 import { useLazyGetAccountingYearQuery } from "reduxstore/api/LookupsApi";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 
 vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([
-  mockFetchAccountingYear,
-  { isLoading: false } as any,
-]);
+vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false } as any]);
 ```
 
-### Clearing Mocks
+---
+
+## Real-World Examples
+
+### Example 1: Testing RTK Query with Hook
+
+From `useProfitShareEditUpdate.test.tsx`:
 
 ```typescript
+const { mockApplyMaster } = vi.hoisted(() => ({
+  mockApplyMaster: vi.fn()
+}));
+
+vi.mock("../../../reduxstore/api/YearsEndApi", () => ({
+  useGetMasterApplyMutation: vi.fn(() => [mockApplyMaster])
+}));
+
 beforeEach(() => {
-  vi.clearAllMocks(); // Clear all mock call history
+  mockApplyMaster.mockReturnValue({
+    unwrap: vi.fn().mockResolvedValue({
+      employeesEffected: 100,
+      beneficiariesEffected: 50,
+      etvasEffected: 150
+    })
+  });
+});
+
+it("should handle save success", async () => {
+  const { wrapper } = createMockStoreAndWrapper({});
+  const { result } = renderHook(() => useProfitShareEditUpdate(), { wrapper });
+
+  expect(result.current.changesApplied).toBe(false);
+
+  await act(async () => {
+    await result.current.saveAction();
+  });
+
+  expect(result.current.changesApplied).toBe(true);
 });
 ```
 
@@ -230,8 +606,21 @@ beforeEach(() => {
 Common pattern for providing Redux store to tests:
 
 ```typescript
-const wrapper = ({ children }: { children: React.ReactNode }) =>
-  <Provider store={mockStore}>{children}</Provider>;
+it("should not fetch when token is missing", () => {
+  const { wrapper } = createMockStoreAndWrapper({
+    security: { token: null, user: null },
+    yearsEnd: {
+      selectedProfitYearForDecemberActivities: 2024,
+      yearsEndData: null
+    }
+  });
 
-const { result } = renderHook(() => useMyHook(), { wrapper });
+  const { result } = renderHook(() => useDuplicateNamesAndBirthdays(), {
+    wrapper
+  });
+
+  expect(result.current.isSearching).toBe(false);
+});
 ```
+
+---

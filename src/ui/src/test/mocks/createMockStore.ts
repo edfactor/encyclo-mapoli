@@ -1,0 +1,297 @@
+/**
+ * Mock Redux Store Factory
+ *
+ * Creates properly-configured Redux stores for testing with all required slices
+ * and sensible defaults. This ensures tests have access to all necessary state
+ * and don't fail due to missing reducers or undefined state properties.
+ *
+ * Usage:
+ *   const store = createMockStore();
+ *   const wrapper = ({ children }) => <Provider store={store}>{children}</Provider>;
+ *   render(<Component />, { wrapper });
+ *
+ * With custom preloaded state:
+ *   const store = createMockStore({
+ *     yearsEnd: { selectedProfitYear: 2024 }
+ *   });
+ */
+
+import { configureStore } from "@reduxjs/toolkit";
+import React, { PropsWithChildren, ReactNode } from "react";
+import { Provider } from "react-redux";
+import { AdhocApi } from "../../reduxstore/api/AdhocApi";
+import { AdjustmentsApi } from "../../reduxstore/api/AdjustmentsApi";
+import { AppSupportApi } from "../../reduxstore/api/AppSupportApi";
+import { BeneficiariesApi } from "../../reduxstore/api/BeneficiariesApi";
+import { CommonApi } from "../../reduxstore/api/CommonApi";
+import { DistributionApi } from "../../reduxstore/api/DistributionApi";
+import { InquiryApi } from "../../reduxstore/api/InquiryApi";
+import { ItOperationsApi } from "../../reduxstore/api/ItOperationsApi";
+import { LookupsApi } from "../../reduxstore/api/LookupsApi";
+import { MilitaryApi } from "../../reduxstore/api/MilitaryApi";
+import { NavigationApi } from "../../reduxstore/api/NavigationApi";
+import { NavigationStatusApi } from "../../reduxstore/api/NavigationStatusApi";
+import { SecurityApi } from "../../reduxstore/api/SecurityApi";
+import { validationApi } from "../../reduxstore/api/ValidationApi";
+import { YearsEndApi } from "../../reduxstore/api/YearsEndApi";
+
+/**
+ * Mock store for testing with RTK Query support
+ *
+ * Includes all RTK Query API middleware to prevent middleware warnings
+ * in tests that use RTK Query hooks.
+ *
+ * For test isolation, we use simple reducers that return initial state.
+ */
+
+interface MockRootState {
+  security?: {
+    token?: string | null;
+    user?: { id: string; name: string } | null;
+  };
+  navigation?: {
+    navigationData?: {
+      navigation?: Array<{
+        id?: number;
+        statusId?: number;
+        isReadOnly?: boolean;
+      }>;
+    };
+  };
+  frozen?: {
+    [key: string]: unknown;
+  };
+  yearsEnd?: {
+    selectedProfitYear?: number | null;
+    selectedProfitYearForDecemberActivities?: number | null;
+    yearsEndData?: unknown | null;
+    [key: string]: unknown;
+  };
+  distribution?: {
+    [key: string]: unknown;
+  };
+  inquiry?: {
+    masterInquiryMemberDetails?: unknown;
+    [key: string]: unknown;
+  };
+  lookups?: {
+    missives?: unknown[];
+    [key: string]: unknown;
+  };
+  general?: {
+    isDrawerOpen?: boolean;
+    isFullscreen?: boolean;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Creates a Redux store for testing with all required reducers
+ *
+ * @param preloadedState - Custom initial state (merged with defaults)
+ * @returns Configured Redux store with mock reducers
+ *
+ * @example
+ * // Basic usage
+ * const store = createMockStore();
+ *
+ * // Custom state
+ * const store = createMockStore({
+ *   yearsEnd: { selectedProfitYear: 2024 }
+ * });
+ */
+export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
+  // Default state for each slice
+  const defaultState: MockRootState = {
+    security: {
+      token: "mock-token",
+      user: null
+    },
+    navigation: {
+      navigationData: {
+        navigation: []
+      }
+    },
+    frozen: {
+      // Intentionally minimal; tests can override via preloadedState when needed.
+    },
+    yearsEnd: {
+      selectedProfitYear: 2024,
+      selectedProfitYearForDecemberActivities: 2024,
+      yearsEndData: null
+    },
+    distribution: {},
+    inquiry: {
+      masterInquiryMemberDetails: null
+    },
+    lookups: {
+      missives: []
+    },
+    general: {
+      isDrawerOpen: false,
+      isFullscreen: false
+    }
+  };
+
+  // Create simple reducers that just return state
+  // In real code, these would be actual slice reducers
+  const createSliceReducer =
+    (initialState: unknown) =>
+    (state = initialState, _action: unknown) =>
+      state;
+
+  // Deep merge preloaded state with defaults to preserve nested properties
+  const mergedState: MockRootState = {
+    security: { ...defaultState.security, ...preloadedState?.security },
+    navigation: { ...defaultState.navigation, ...preloadedState?.navigation },
+    frozen: { ...defaultState.frozen, ...preloadedState?.frozen },
+    yearsEnd: { ...defaultState.yearsEnd, ...preloadedState?.yearsEnd },
+    distribution: { ...defaultState.distribution, ...preloadedState?.distribution },
+    inquiry: { ...defaultState.inquiry, ...preloadedState?.inquiry },
+    lookups: { ...defaultState.lookups, ...preloadedState?.lookups },
+    general: { ...defaultState.general, ...preloadedState?.general }
+  };
+
+  const baseReducers = {
+    security: createSliceReducer(mergedState.security),
+    navigation: createSliceReducer(mergedState.navigation),
+    frozen: createSliceReducer(mergedState.frozen),
+    yearsEnd: createSliceReducer(mergedState.yearsEnd),
+    distribution: createSliceReducer(mergedState.distribution),
+    inquiry: createSliceReducer(mergedState.inquiry),
+    lookups: createSliceReducer(mergedState.lookups),
+    general: createSliceReducer(mergedState.general)
+  };
+
+  // Add RTK Query API reducers that tests commonly mock
+  // When tests mock these APIs with vi.mock(), these fallback reducers prevent errors
+  const reducers = {
+    ...baseReducers,
+    [SecurityApi.reducerPath]: SecurityApi.reducer,
+    [YearsEndApi.reducerPath]: YearsEndApi.reducer,
+    [ItOperationsApi.reducerPath]: ItOperationsApi.reducer,
+    [MilitaryApi.reducerPath]: MilitaryApi.reducer,
+    [InquiryApi.reducerPath]: InquiryApi.reducer,
+    [LookupsApi.reducerPath]: LookupsApi.reducer,
+    [CommonApi.reducerPath]: CommonApi.reducer,
+    [NavigationApi.reducerPath]: NavigationApi.reducer,
+    [AppSupportApi.reducerPath]: AppSupportApi.reducer,
+    [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer,
+    [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
+    [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
+    [DistributionApi.reducerPath]: DistributionApi.reducer,
+    [AdhocApi.reducerPath]: AdhocApi.reducer,
+    [validationApi.reducerPath]: validationApi.reducer
+  } as const;
+
+  return configureStore({
+    reducer: reducers,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({ serializableCheck: false })
+        // Add all RTK Query API middleware - critical to prevent warnings
+        .concat(SecurityApi.middleware)
+        .concat(YearsEndApi.middleware)
+        .concat(ItOperationsApi.middleware)
+        .concat(MilitaryApi.middleware)
+        .concat(InquiryApi.middleware)
+        .concat(LookupsApi.middleware)
+        .concat(CommonApi.middleware)
+        .concat(NavigationApi.middleware)
+        .concat(AppSupportApi.middleware)
+        .concat(NavigationStatusApi.middleware)
+        .concat(BeneficiariesApi.middleware)
+        .concat(AdjustmentsApi.middleware)
+        .concat(DistributionApi.middleware)
+        .concat(AdhocApi.middleware)
+        .concat(validationApi.middleware)
+  });
+};
+
+type MockStore = ReturnType<typeof createMockStore>;
+
+/**
+ * Creates a wrapper component that provides Redux store
+ *
+ * @param store - Redux store to provide
+ * @returns Wrapper component for test rendering
+ *
+ * @example
+ * const store = createMockStore();
+ * const wrapper = createProviderWrapper(store);
+ * render(<Component />, { wrapper });
+ */
+type ProviderProps = PropsWithChildren<Record<string, unknown>>;
+
+export const createProviderWrapper = (store: MockStore) => {
+  const Wrapper = ({ children }: ProviderProps) => {
+    return React.createElement(Provider, { store, children });
+  };
+  return Wrapper;
+};
+
+/**
+ * Combined helper: creates store and wrapper in one call
+ *
+ * @param preloadedState - Custom initial state
+ * @returns Object with store and wrapper
+ *
+ * @example
+ * const { store, wrapper } = createMockStoreAndWrapper({
+ *   yearsEnd: { selectedProfitYear: 2025 }
+ * });
+ * render(<Component />, { wrapper });
+ */
+export const createMockStoreAndWrapper = (preloadedState?: Partial<MockRootState>) => {
+  const store = createMockStore(preloadedState);
+  const wrapper = createProviderWrapper(store);
+
+  return { store, wrapper };
+};
+
+/**
+ * Utility for common test wrapper patterns
+ *
+ * Combines Redux Provider with any additional providers (Alerts, Router, etc.)
+ *
+ * @example
+ * const wrapper = createTestWrapper(store, [
+ *   MissiveAlertProvider,
+ *   BrowserRouter
+ * ]);
+ * render(<Component />, { wrapper });
+ */
+export const createTestWrapper = (
+  store: MockStore,
+  additionalProviders?: Array<(props: { children: ReactNode }) => ReactNode>
+) => {
+  return ({ children }: ProviderProps) => {
+    let content: ReactNode = React.createElement(Provider, { store, children });
+
+    // Wrap with additional providers in order
+    if (additionalProviders) {
+      for (const ProviderComponent of additionalProviders) {
+        content = React.createElement(ProviderComponent, { children: content });
+      }
+    }
+
+    return content;
+  };
+};
+
+/**
+ * Creates a selector mock that returns specific state
+ *
+ * Useful for testing components that use useSelector
+ *
+ * @example
+ * const selector = createSelectorMock({
+ *   yearsEnd: { selectedProfitYear: 2024 }
+ * });
+ * vi.mocked(useSelector).mockImplementation(selector);
+ */
+export const createSelectorMock = (state: MockRootState) => {
+  return (selector: (state: MockRootState) => unknown) => {
+    return selector(state);
+  };
+};

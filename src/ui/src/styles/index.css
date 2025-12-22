@@ -10,6 +10,18 @@
   --dsm-app-banner: #f2f2f2;
 }
 
+/* Hide number input spinners (UI standard) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 @layer utilities {
   html {
     color: var(--dsm-grey);

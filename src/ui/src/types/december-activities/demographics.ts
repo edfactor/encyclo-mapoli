@@ -5,7 +5,7 @@ export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<Demogr
 export interface DemographicBadgesNotInPayprofit {
   badgeNumber: number;
   ssn: number;
-  employeeName: string;
+  fullName: string;
   store: number;
   status: string;
   statusName: string;
@@ -47,6 +47,7 @@ export interface DuplicateSSNsRequestDto extends ProfitYearRequest {
 
 export interface DuplicateNameAndBirthdayRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
+  includeFictionalSsnPairs?: boolean;
 }
 
 export interface DuplicateNameBirthdayAddress {
@@ -59,6 +60,7 @@ export interface DuplicateNameBirthdayAddress {
 }
 
 export interface DuplicateNameAndBirthday {
+  demographicId: number;
   badgeNumber: number;
   ssn: string;
   name: string;

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetDuplicateSSNsQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
@@ -56,8 +57,9 @@ const useDuplicateSSNsOnDemographics = () => {
 
   const pagination = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "badgeNumber",
+    initialSortBy: "name",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.DUPLICATE_SSNS,
     onPaginationChange: handlePaginationChange
   });
 

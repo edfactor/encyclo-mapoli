@@ -1,31 +1,36 @@
 import { Grid } from "@mui/material";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
+import { GRID_KEYS } from "../../../../constants";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownGridColumns";
 
 interface Under21BreakdownGridProps {
   isLoading?: boolean;
-
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumber: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
 }
 
 const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   isLoading = false,
-
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  pageNumber,
+  pageSize,
+  onPageChange
 }) => {
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
+    persistenceKey: GRID_KEYS.UNDER_21_BREAKDOWN_REPORT,
     onPaginationChange: () => {
       // This component doesn't trigger API calls on pagination change
       // The data is already loaded from the parent component
@@ -33,12 +38,14 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   });
 
   // Handle navigation for badge clicks
+  /*
   const handleNavigation = React.useCallback(
     (path: string) => {
       navigate(path);
     },
     [navigate]
   );
+  */
 
   const sortEventHandler = (update: ISortParams) => {
     if (update.sortBy === "") {
@@ -49,7 +56,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
     setInitialSearchLoaded(true);
   };
 
-  const columnDefs = useMemo(() => GetUnder21BreakdownColumnDefs(handleNavigation), [handleNavigation]);
+  const columnDefs = useMemo(() => GetUnder21BreakdownColumnDefs(), []);
 
   return (
     <Grid
@@ -59,7 +66,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
       {under21Breakdown && <ReportSummary report={under21Breakdown} />}
       <Grid width="100%">
         <DSMGrid
-          preferenceKey="UNDER_21_BREAKDOWN_REPORT"
+          preferenceKey={GRID_KEYS.UNDER_21_BREAKDOWN_REPORT}
           isLoading={isLoading}
           handleSortChanged={sortEventHandler}
           providedOptions={{
@@ -71,12 +78,12 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
           <Pagination
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
+              onPageChange(value - 1);
               setInitialSearchLoaded(true);
             }}
             pageSize={pageSize}
-            setPageSize={(value: number) => {
-              handlePaginationChange(0, value);
+            setPageSize={(_value: number) => {
+              onPageChange(0);
               setInitialSearchLoaded(true);
             }}
             recordCount={under21Breakdown.response.total || 0}

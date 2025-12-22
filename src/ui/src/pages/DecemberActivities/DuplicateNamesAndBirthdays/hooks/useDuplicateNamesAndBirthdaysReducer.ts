@@ -112,5 +112,5 @@ export const duplicateNamesAndBirthdaysReducer = (
 export const selectShowData = (state: DuplicateNamesAndBirthdaysState) =>
   state.data !== null && state.search.hasSearched;
 
-export const selectHasResults = (state: DuplicateNamesAndBirthdaysState) =>
-  state.data?.response?.results && state.data.response.results.length > 0;
+export const selectHasResults = (state: DuplicateNamesAndBirthdaysState): boolean =>
+  !!(state.data?.response?.results && state.data.response.results.length > 0);

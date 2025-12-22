@@ -12,29 +12,31 @@ public class TerminatedEmployeeService : ITerminatedEmployeeService
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly ILogger<TerminatedEmployeeReportService> _logger;
+    private readonly ILoggerFactory _loggerFactory;
     private readonly TotalService _totalService;
     private readonly IYearEndService _yearEndService;
 
     public TerminatedEmployeeService(IProfitSharingDataContextFactory dataContextFactory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
-        ILogger<TerminatedEmployeeReportService> logger,
+        ILoggerFactory loggerFactory,
         ICalendarService calendarService,
         IYearEndService yearEndService)
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
-        _logger = logger;
+        _loggerFactory = loggerFactory;
         _calendarService = calendarService;
         _yearEndService = yearEndService;
     }
 
 
-    public Task<TerminatedEmployeeAndBeneficiaryResponse> GetReportAsync(StartAndEndDateRequest req, CancellationToken ct)
+    public Task<TerminatedEmployeeAndBeneficiaryResponse> GetReportAsync(FilterableStartAndEndDateRequest req, CancellationToken ct)
     {
-        TerminatedEmployeeReportService reportServiceGenerator = new(_dataContextFactory, _totalService, _demographicReaderService, _logger, _calendarService, _yearEndService);
+        var logger = _loggerFactory.CreateLogger<TerminatedEmployeeReportService>();
+        TerminatedEmployeeReportService reportServiceGenerator = new(_dataContextFactory, _totalService, _demographicReaderService, logger, _calendarService, _yearEndService);
+
         return reportServiceGenerator.CreateDataAsync(req, ct);
     }
 }

@@ -7,17 +7,17 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYea
 {
     public required int BadgeNumber { get; set; }
     public required short ProfitYear { get; set; }
-    public required short PriorProfitYear { get; set; }
-    [MaskSensitive] public required string EmployeeName { get; set; }
+    [MaskSensitive] public required string FullName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
     public required string EmployeeTypeName { get; set; }
     [MaskSensitive] public required DateOnly DateOfBirth { get; set; }
-    public required byte Age { get; set; }
+    [MaskSensitive] public required short Age { get; set; }
     public required string Ssn { get; set; }
     public required decimal Wages { get; set; }
-    public required decimal PriorBalance { get; set; }
     public required decimal Hours { get; set; }
+
+    [MaskSensitive]
     public short Points { get; set; }
     public required bool IsUnder21 { get; set; }
     public required bool IsNew { get; set; }
@@ -33,9 +33,8 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYea
         return new YearEndProfitSharingReportDetail()
         {
             BadgeNumber = 135,
-            PriorProfitYear = 2023,
             ProfitYear = 2024,
-            EmployeeName = "John Doe",
+            FullName = "John Doe",
             StoreNumber = 23,
             EmployeeTypeCode = 'p',
             EmployeeTypeName = "Part Time",
@@ -43,7 +42,6 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYea
             Age = 28,
             Ssn = "XXX-XX-1234",
             Wages = 26527,
-            PriorBalance = 12345,
             Hours = 1475,
             Points = 2653,
             IsUnder21 = false,

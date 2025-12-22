@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { YearsEndApi } from "reduxstore/api/YearsEndApi";
+import { AdhocApi } from "reduxstore/api/AdhocApi";
 
 import {
   BalanceByAge,
   BalanceByYears,
+  BreakdownByStoreEmployee,
   BreakdownByStoreRequest,
-  BreakdownByStoreResponse,
   BreakdownByStoreTotals,
   CertificatesReportResponse,
   ContributionsByAge,
@@ -38,6 +38,7 @@ import {
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
+  ProfitSharingUnder21ReportResponse,
   ProfitYearRequest,
   RecentlyTerminatedResponse,
   ReportsByAgeParams,
@@ -126,6 +127,7 @@ export interface YearsEndState {
   profitSharingMaster: ProfitShareMasterResponse | null;
   profitSharingRevert: ProfitShareMasterResponse | null;
   profitSharingUpdateAdjustmentSummary: ProfitShareAdjustmentSummary | null;
+  profitSharingUnder21Report: ProfitSharingUnder21ReportResponse | null;
   termination: TerminationResponse | null;
   recentlyTerminated: RecentlyTerminatedResponse | null;
   recentlyTerminatedQueryParams: StartAndEndDateRequest | null;
@@ -138,10 +140,10 @@ export interface YearsEndState {
   yearEndProfitSharingReportFrozen: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReportTotals: YearEndProfitSharingReportTotalsResponse | null;
-  breakdownByStore: BreakdownByStoreResponse | null;
-  breakdownByStoreMangement: BreakdownByStoreResponse | null;
+  breakdownByStore: PagedReportResponse<BreakdownByStoreEmployee> | null;
+  breakdownByStoreManagement: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreTotals: BreakdownByStoreTotals | null;
-  storeManagementBreakdown: BreakdownByStoreResponse | null;
+  storeManagementBreakdown: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreQueryParams: BreakdownByStoreRequest | null;
   under21BreakdownByStore: Under21BreakdownByStoreResponse | null;
   under21BreakdownByStoreQueryParams: Under21BreakdownByStoreRequest | null;
@@ -229,6 +231,7 @@ const initialState: YearsEndState = {
   profitSharingMaster: null,
   profitSharingRevert: null,
   profitSharingUpdateAdjustmentSummary: null,
+  profitSharingUnder21Report: null,
   profitEditUpdateChangesAvailable: false,
   profitEditUpdateRevertChangesAvailable: false,
   termination: null,
@@ -240,7 +243,7 @@ const initialState: YearsEndState = {
   yearEndProfitSharingReportQueryParams: null,
   yearEndProfitSharingReportTotals: null,
   breakdownByStore: null,
-  breakdownByStoreMangement: null,
+  breakdownByStoreManagement: null,
   breakdownByStoreTotals: null,
   storeManagementBreakdown: null,
   breakdownByStoreQueryParams: null,
@@ -291,6 +294,12 @@ export const yearsEndSlice = createSlice({
     },
     setProfitSharingUpdateAdjustmentSummary: (state, action: PayloadAction<ProfitShareAdjustmentSummary>) => {
       state.profitSharingUpdateAdjustmentSummary = action.payload;
+    },
+    clearProfitSharingUnder21Report: (state) => {
+      state.profitSharingUnder21Report = null;
+    },
+    setProfitSharingUnder21Report: (state, action: PayloadAction<ProfitSharingUnder21ReportResponse>) => {
+      state.profitSharingUnder21Report = action.payload;
     },
     addBadgeNumberToUpdateAdjustmentSummary: (state, action: PayloadAction<number>) => {
       if (state.profitSharingUpdateAdjustmentSummary) {
@@ -348,11 +357,9 @@ export const yearsEndSlice = createSlice({
       // on another year
 
       // Distributions And Forfeitures
-      if (
-        state.distributionsAndForfeituresQueryParams?.profitYear &&
-        state.distributionsAndForfeituresQueryParams?.profitYear !== action.payload
-      ) {
-        state.distributionsAndForfeituresQueryParams.profitYear = action.payload;
+      // DistributionsAndForfeituresQueryParams uses date ranges, not profitYear
+      // Clear the data when the year changes
+      if (state.distributionsAndForfeituresQueryParams) {
         state.distributionsAndForfeitures = null;
       }
 
@@ -394,9 +401,9 @@ export const yearsEndSlice = createSlice({
       }
 
       // Military and Rehire Profit Summary
-      // StartAndEndDateRequest does not have profitYear, so just clear the data if the year changes
+      // StartAndEndDateRequest does not have profitYear, so just clear the query params if the year changes
       if (state.rehireProfitSummaryQueryParams) {
-        state.rehire = null;
+        state.rehireProfitSummaryQueryParams = null;
       }
 
       // Year End Profit Sharing Report
@@ -405,7 +412,7 @@ export const yearsEndSlice = createSlice({
         state.yearEndProfitSharingReportQueryParams?.profitYear !== action.payload
       ) {
         state.yearEndProfitSharingReportQueryParams.profitYear = action.payload;
-        state.yearEndProfitSharingReport = null;
+        state.yearEndProfitSharingReportLive = null;
       }
 
       // Termination
@@ -947,18 +954,25 @@ export const yearsEndSlice = createSlice({
     setYearEndProfitSharingReportTotals: (state, action: PayloadAction<YearEndProfitSharingReportTotalsResponse>) => {
       state.yearEndProfitSharingReportTotals = action.payload;
     },
-    setBreakdownByStore: (state, action: PayloadAction<BreakdownByStoreResponse>) => {
+
+    // ********************
+    // Breakdown Reports
+    // ********************
+    setBreakdownByStore: (state, action: PayloadAction<PagedReportResponse<BreakdownByStoreEmployee>>) => {
       state.breakdownByStore = action.payload;
     },
     clearBreakdownByStore: (state) => {
       state.breakdownByStore = null;
     },
-    setBreakdownByStoreMangement: (state, action: PayloadAction<BreakdownByStoreResponse>) => {
-      state.breakdownByStoreMangement = action.payload;
+    setBreakdownByStoreManagement: (state, action: PayloadAction<PagedReportResponse<BreakdownByStoreEmployee>>) => {
+      state.breakdownByStoreManagement = action.payload;
     },
-    clearBreakdownByStoreMangement: (state) => {
-      state.breakdownByStoreMangement = null;
+    clearBreakdownByStoreManagement: (state) => {
+      state.breakdownByStoreManagement = null;
     },
+
+    //
+
     setBreakdownByStoreTotals: (state, action: PayloadAction<BreakdownByStoreTotals>) => {
       state.breakdownByStoreTotals = action.payload;
     },
@@ -971,6 +985,7 @@ export const yearsEndSlice = createSlice({
     clearBreakdownGrandTotals: (state) => {
       state.breakdownGrandTotals = null;
     },
+
     setCertificates: (state, action: PayloadAction<CertificatesReportResponse>) => {
       state.certificates = action.payload;
     },
@@ -1034,12 +1049,12 @@ export const yearsEndSlice = createSlice({
       state.controlSheet = null;
     }
   },
-  // In yearsEndSlice.ts - find the extraReducers section
+
   extraReducers: (builder) => {
     // Your existing matchers
 
     // Add this new matcher for the getBreakdownByStore endpoint
-    builder.addMatcher(YearsEndApi.endpoints.getBreakdownByStore.matchFulfilled, (state, action) => {
+    builder.addMatcher(AdhocApi.endpoints.getBreakdownByStore.matchFulfilled, (state, action) => {
       // Store data in different state variables based on storeManagement parameter
       if (action.meta.arg.originalArgs.storeManagement) {
         state.storeManagementBreakdown = action.payload;
@@ -1103,7 +1118,6 @@ export const {
   setGrossWagesReportQueryParams,
   setUnForfeitsDetails,
   setUnForfeitsQueryParams,
-  setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
   setProfitMasterRevert,
@@ -1117,8 +1131,8 @@ export const {
   updateExecutiveHoursAndDollarsGridRow,
   setBreakdownByStore,
   clearBreakdownByStore,
-  setBreakdownByStoreMangement,
-  clearBreakdownByStoreMangement,
+  setBreakdownByStoreManagement,
+  clearBreakdownByStoreManagement,
   setBreakdownByStoreTotals,
   clearBreakdownByStoreTotals,
   setBreakdownGrandTotals,
@@ -1151,6 +1165,8 @@ export const {
   clearProfitSharingEditQueryParams,
   updateProfitSharingEditQueryParam,
   setProfitSharingUpdateAdjustmentSummary,
+  clearProfitSharingUnder21Report,
+  setProfitSharingUnder21Report,
   addBadgeNumberToUpdateAdjustmentSummary,
   clearExecutiveHoursAndDollarsAddQueryParams,
   setExecutiveHoursAndDollarsAddQueryParams,

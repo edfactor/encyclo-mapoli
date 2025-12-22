@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, TextField, Typography } from "@mui/material";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { DistributionSearchResponse, EditDistributionRequest } from "../../../types";
 
@@ -10,6 +10,7 @@ export interface EditDistributionFormRef {
   reset: () => void;
   isFormValid: () => boolean;
   isThirdPartyAddressRequired: () => boolean;
+  isFormDirty: () => boolean;
 }
 
 interface EditDistributionFormData {
@@ -50,7 +51,7 @@ interface EditDistributionFormProps {
   onReset: () => void;
   isSubmitting: boolean;
   dateOfBirth?: string | null;
-  age?: number | null;
+  age?: string | null;
   vestedAmount?: number | null;
 }
 
@@ -90,9 +91,9 @@ const EditDistributionForm = forwardRef<EditDistributionFormRef, EditDistributio
       reset,
       setValue,
       watch,
-      formState: { errors, isValid }
+      formState: { errors, isValid, isDirty }
     } = useForm<EditDistributionFormData>({
-      resolver: yupResolver(schema),
+      resolver: yupResolver(schema) as unknown as Resolver<EditDistributionFormData>,
       mode: "onChange",
       defaultValues: {
         paymentFlag: distribution.statusId || "",
@@ -202,7 +203,7 @@ const EditDistributionForm = forwardRef<EditDistributionFormRef, EditDistributio
 
     // Auto-set memo when age > 64, tax code is 7, and amount differs from vested amount
     useEffect(() => {
-      const memberAge = age ?? 0;
+      const memberAge = age != null ? Number(age) : 0;
       const requestedAmount = parseFloat(amountRequested) || 0;
       const vested = vestedAmount ?? 0;
 
@@ -296,7 +297,8 @@ const EditDistributionForm = forwardRef<EditDistributionFormRef, EditDistributio
         handleFormReset();
       },
       isFormValid: () => isValid,
-      isThirdPartyAddressRequired: () => thirdPartyTouched && !thirdPartyAddressValid
+      isThirdPartyAddressRequired: () => thirdPartyTouched && !thirdPartyAddressValid,
+      isFormDirty: () => isDirty
     }));
 
     return (

@@ -1,5 +1,4 @@
-using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -15,7 +14,7 @@ public sealed class ProfitCodeCache : LookupCache<byte, ProfitCode, ProfitCode>
     public ProfitCodeCache(
         IDistributedCache cache,
         IProfitSharingDataContextFactory contextFactory,
-        ILogger<LookupCache<byte, ProfitCode, ProfitCode>> logger)
+        ILogger<ProfitCodeCache> logger)
         : base(
             cache,
             contextFactory,

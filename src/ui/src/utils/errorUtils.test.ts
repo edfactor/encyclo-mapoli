@@ -9,12 +9,12 @@ describe("errorUtils", () => {
         data: {
           title: "Validation Failed",
           detail: "One or more validation errors occurred.",
+          status: 400,
           errors: {
             BadgeNumber: ["Badge number is required", "Badge number must be positive"],
             Name: ["Name is required"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -32,11 +32,11 @@ describe("errorUtils", () => {
         data: {
           title: "Validation Error",
           detail: "Invalid input",
+          status: 400,
           errors: {
             Email: ["Email format is invalid"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -50,9 +50,9 @@ describe("errorUtils", () => {
       const errorResponse: ServiceErrorResponse = {
         data: {
           title: "Bad Request",
-          detail: "The request was malformed"
-        },
-        status: 400
+          detail: "The request was malformed",
+          status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -65,9 +65,9 @@ describe("errorUtils", () => {
       const errorResponse: ServiceErrorResponse = {
         data: {
           title: "Error",
-          detail: "Something went wrong"
-        },
-        status: 500
+          detail: "Something went wrong",
+          status: 500
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -81,13 +81,13 @@ describe("errorUtils", () => {
         data: {
           title: "Multiple Validation Errors",
           detail: "Request validation failed",
+          status: 400,
           errors: {
             FirstName: ["First name is required", "First name must be at least 2 characters"],
             LastName: ["Last name is required", "Last name must be at least 2 characters"],
             Age: ["Age must be at least 18"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -108,9 +108,9 @@ describe("errorUtils", () => {
         data: {
           title: "Empty Validation",
           detail: "No specific errors",
+          status: 400,
           errors: {}
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -125,12 +125,12 @@ describe("errorUtils", () => {
         data: {
           title: "Validation Error",
           detail: "Invalid data",
+          status: 400,
           errors: {
             "User.Email": ["Invalid email format"],
             "User.Password": ["Password too short", "Password must contain numbers"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -147,11 +147,11 @@ describe("errorUtils", () => {
         data: {
           title: "Validation Failed",
           detail: "Error with special chars",
+          status: 400,
           errors: {
             Field: ["Error with 'quotes' and \"double quotes\"", "Error with <tags>"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);

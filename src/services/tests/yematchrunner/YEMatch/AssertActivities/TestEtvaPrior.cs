@@ -1,6 +1,6 @@
 ﻿using Oracle.ManagedDataAccess.Client;
 
-namespace YEMatch.YEMatch.AssertActivities;
+namespace YEMatch.AssertActivities;
 
 public class TestEtvaPrior : BaseSqlActivity
 {
@@ -9,51 +9,40 @@ public class TestEtvaPrior : BaseSqlActivity
         OracleConnection connection = new(SmartConnString);
         await connection.OpenAsync();
 
-        string queryA = """
+        string queryA = $"""
                         SELECT d.id AS demographic_id, pp.Etva
                         FROM profit_detail pd
                         JOIN demographic d ON pd.ssn = d.ssn
                         JOIN pay_profit pp ON d.id = pp.demographic_id
                         WHERE pd.profit_code_id = 8
-                          AND pd.profit_year = 2024
+                          AND pd.profit_year = {TestConstants.OpenProfitYear - 1}
                           AND pd.comment_type_id = 23
-                          AND pp.profit_year = 2025
+                          AND pp.profit_year = {TestConstants.OpenProfitYear}
                         """;
 
-        string queryB = """
+        string queryB = $"""
                         SELECT d.id AS demographic_id, pp.Etva
                         FROM profit_detail pd
                         JOIN demographic d ON pd.ssn = d.ssn
                         JOIN pay_profit pp ON d.id = pp.demographic_id
                         WHERE pd.profit_code_id = 8
-                          AND pd.profit_year = 2024
+                          AND pd.profit_year = {TestConstants.OpenProfitYear - 1}
                           AND pd.comment_type_id = 23
-                          AND pp.profit_year = 2025
+                          AND pp.profit_year = {TestConstants.OpenProfitYear}
                         """;
 
         OracleCommand command = new(QueryDiffCount(queryA, queryB), connection);
-        OracleDataReader? reader = await command.ExecuteReaderAsync();
+        OracleDataReader? countReader = await command.ExecuteReaderAsync();
 
-        int data = 0;
-        while (await reader.ReadAsync())
+        await countReader.ReadAsync();
+        long differences = countReader.GetInt64(0);
+        await countReader.CloseAsync();
+
+        if (differences != 0)
         {
-            for (int i = 0; i < reader.FieldCount; i++)
-            {
-                string columnName = reader.GetName(i);
-                object value = await reader.IsDBNullAsync(i) ? "NULL" : reader.GetValue(i);
-                Console.Write($"{columnName} = {value}; ");
-            }
-
-            data++;
-            Console.WriteLine();
+            return new Outcome(Name(), "test", "", OutcomeStatus.Error, "", null, false);
         }
 
-        Console.WriteLine($"Compare data count {data}");
-
-        if (data > 2)
-        {
-            return new Outcome(Name(), Name(), "", OutcomeStatus.Error, "Too many bad rows", null, false);
-        }
 
         return new Outcome(Name(), Name(), "", OutcomeStatus.Ok, "", null, false);
     }

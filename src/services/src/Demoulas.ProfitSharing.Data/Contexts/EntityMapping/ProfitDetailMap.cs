@@ -20,6 +20,7 @@ internal sealed class ProfitDetailMap : ModifiedBaseMap<ProfitDetail>
         _ = builder.HasIndex(p => new { p.ProfitYear, p.ProfitCodeId }, "IX_PROFIT_CODE_ID_PROFIT_YEAR");
         _ = builder.HasIndex(p => new { p.ProfitYear, p.MonthToDate }, "IX_PROFIT_CODE_ID_MONTHTODATE");
         _ = builder.HasIndex(p => new { p.Ssn, p.ProfitYear, p.ProfitCodeId }, "IX_SSN_YEAR_PROFIT_CODE_ID");
+        _ = builder.HasIndex(p => new { p.ProfitCodeId, p.Ssn }, "IX_PROFIT_CODE_SSN"); // Optimizes GetFirstContributionYear query (WHERE PROFIT_CODE_ID = 0 GROUP BY SSN)
 
         _ = builder.Property(e => e.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         _ = builder.Property(x => x.ProfitYear).IsRequired().HasColumnName("PROFIT_YEAR");
@@ -46,12 +47,22 @@ internal sealed class ProfitDetailMap : ModifiedBaseMap<ProfitDetail>
             .HasColumnName("COMMENT_RELATED_CHECK_NUMBER");
         _ = builder.Property(x => x.CommentIsPartialTransaction).HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
         _ = builder.Property(x => x.YearsOfServiceCredit).HasColumnName("YEARS_OF_SERVICE_CREDIT").HasDefaultValue(0).IsRequired();
+        _ = builder.Property(x => x.ReversedFromProfitDetailId).HasColumnName("REVERSED_FROM_PROFIT_DETAIL_ID");
 
+        // Index for checking if a profit detail has already been reversed
+        _ = builder.HasIndex(p => p.ReversedFromProfitDetailId, "IX_REVERSED_FROM_PROFIT_DETAIL_ID")
+            .HasFilter("REVERSED_FROM_PROFIT_DETAIL_ID IS NOT NULL");
 
         _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);
         _ = builder.HasOne(x => x.CommentType).WithMany().HasForeignKey(x => x.CommentTypeId);
         _ = builder.HasOne(x => x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
         _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);
+
+        // Self-referencing FK for reversal tracking
+        _ = builder.HasOne(x => x.ReversedFromProfitDetail)
+            .WithMany()
+            .HasForeignKey(x => x.ReversedFromProfitDetailId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         _ = builder.HasOne(d => d.ZeroContributionReason)
             .WithMany()

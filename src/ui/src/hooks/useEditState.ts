@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-interface EditValue {
+export interface EditValue {
   value: number;
   hasError: boolean;
 }

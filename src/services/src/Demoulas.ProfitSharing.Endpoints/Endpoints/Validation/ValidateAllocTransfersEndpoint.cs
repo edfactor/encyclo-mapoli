@@ -1,10 +1,8 @@
-using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -14,7 +12,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Validation;
 
 /// <summary>
 /// Endpoint for validating ALLOC/PAID ALLOC transfer balance per Balance Matrix Rule 2.
-/// Validates that incoming QDRO beneficiary allocations (ALLOC) and outgoing XFER beneficiary 
+/// Validates that incoming QDRO beneficiary allocations (ALLOC) and outgoing XFER beneficiary
 /// allocations (PAID ALLOC) sum to zero for data integrity.
 /// </summary>
 public sealed class ValidateAllocTransfersEndpoint

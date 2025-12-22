@@ -74,6 +74,12 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
 
+        _ = builder.Property(e => e.DateOfDeath)
+            .HasComment("DateOfDeath")
+            .HasColumnName("DATE_OF_DEATH")
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>();
+
         _ = builder.Property(e => e.HireDate)
             .HasComment("HireDate")
             .HasColumnType("DATE")
@@ -142,10 +148,13 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         {
             contact.HasIndex(e => e.FullName, "IX_FULL_NAME");
             _ = contact.Property(e => e.FullName)
-                .HasMaxLength(84)
-                .HasComment("FullName")
-                .HasColumnName("FULL_NAME")
-                .IsRequired();
+                .HasColumnType("NVARCHAR2(128)")
+                .HasComputedColumnSql(
+                    "LAST_NAME || ', ' || FIRST_NAME || CASE WHEN MIDDLE_NAME IS NOT NULL THEN ' ' || SUBSTR(MIDDLE_NAME,1,1) ELSE NULL END",
+                    stored: true)
+                .HasMaxLength(128)
+                .HasComment("Automatically computed from LastName, FirstName, and MiddleName with middle initial")
+                .HasColumnName("FULL_NAME");
 
             _ = contact.Property(e => e.LastName)
                 .HasMaxLength(30)

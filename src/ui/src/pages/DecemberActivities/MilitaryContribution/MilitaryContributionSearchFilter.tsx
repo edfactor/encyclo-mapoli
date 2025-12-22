@@ -18,11 +18,6 @@ interface SearchFormData {
   badgeNumber?: string;
 }
 
-interface ExecuteSearchData {
-  socialSecurity?: string;
-  badgeNumber?: number;
-}
-
 // Define schema with proper typing for our form
 const validationSchema = yup
   .object({
@@ -63,13 +58,20 @@ const MilitaryContributionSearchFilter: React.FC = () => {
     }
   }, [socialSecurity, badgeNumber]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isSearching) {
+      setIsSubmitting(false);
+    }
+  }, [isSearching]);
+
   const onSubmit = async (data: SearchFormData) => {
-    // Convert badgeNumber string to number for API if it exists
-    const searchData: ExecuteSearchData = {
-      socialSecurity: data.socialSecurity,
-      badgeNumber: data.badgeNumber ? Number(data.badgeNumber) : undefined
-    };
-    await executeSearch(searchData, defaultProfitYear);
+    if (!isSubmitting) {
+      setIsSubmitting(true);
+      // executeSearch will handle the conversion internally
+      await executeSearch(data, defaultProfitYear);
+    }
   };
 
   const handleReset = () => {
@@ -152,8 +154,8 @@ const MilitaryContributionSearchFilter: React.FC = () => {
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={handleSubmit(onSubmit)}
-          isFetching={isSearching}
-          disabled={!isValid || (!socialSecurity && !badgeNumber)}
+          isFetching={isSearching || isSubmitting}
+          disabled={!isValid || (!socialSecurity && !badgeNumber) || isSearching || isSubmitting}
         />
       </Grid>
     </form>

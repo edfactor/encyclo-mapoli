@@ -3,6 +3,7 @@ using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,7 @@ public sealed class ScenarioFactory
     public List<FrozenState> FrozenStates { get; set; } = [];
     public List<DemographicHistory> DemographicHistories { get; set; } = [];
     public List<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; } = [];
+    public List<AuditEvent> AuditEvents { get; set; } = [];
 
     // populate ProfitCode dictionary object from the Constants
     public List<ProfitCode> ProfitCodes { get; set; } = typeof(ProfitCode.Constants)
@@ -44,6 +46,13 @@ public sealed class ScenarioFactory
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
         .Where(f => f.FieldType == typeof(byte))
         .Select(f => new Department { Id = (byte)f.GetValue(null)!, Name = f.Name })
+        .ToList();
+
+    // populate TerminationCodes from Constants
+    public List<TerminationCode> TerminationCodes { get; set; } = typeof(TerminationCode.Constants)
+        .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+        .Where(f => f.FieldType == typeof(char))
+        .Select(f => new TerminationCode { Id = (char)f.GetValue(null)!, Name = f.Name })
         .ToList();
 
     // collects ctx.ProfitDetail.AddRange() rows for inspection by test
@@ -168,7 +177,27 @@ public sealed class ScenarioFactory
                 OracleHcmId = 44,
                 DepartmentId = 5,
                 TerminationCodeId = 'a',
-                DateOfBirth = DateTime.Now.AddYears(-40).ToDateOnly()
+                DateOfBirth = DateTime.Now.AddYears(-40).ToDateOnly(),
+                // Contact/Address fields copied from Demographics[0]
+                FirstName = Demographics[0].ContactInfo?.FirstName,
+                LastName = Demographics[0].ContactInfo?.LastName,
+                MiddleName = Demographics[0].ContactInfo?.MiddleName,
+                PhoneNumber = Demographics[0].ContactInfo?.PhoneNumber,
+                MobileNumber = Demographics[0].ContactInfo?.MobileNumber,
+                EmailAddress = Demographics[0].ContactInfo?.EmailAddress,
+                Street = Demographics[0].Address?.Street,
+                Street2 = Demographics[0].Address?.Street2,
+                City = Demographics[0].Address?.City,
+                State = Demographics[0].Address?.State,
+                PostalCode = Demographics[0].Address?.PostalCode,
+                HireDate = Demographics[0].HireDate,
+                ReHireDate = Demographics[0].ReHireDate,
+                TerminationDate = Demographics[0].TerminationDate,
+                EmploymentTypeId = Demographics[0].EmploymentTypeId,
+                PayFrequencyId = Demographics[0].PayFrequencyId,
+                EmploymentStatusId = Demographics[0].EmploymentStatusId,
+                ValidFrom = DateTime.UtcNow.AddDays(-1),
+                ValidTo = DateTime.UtcNow.AddYears(1)
             }
         ];
         return this;
@@ -192,8 +221,7 @@ public sealed class ScenarioFactory
         _sdb.ProfitSharingDbContext.Setup(m => m.Database).Returns(databaseFacadeMock.Object);
 
         Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.ToList().BuildMockDbSet();
-        _sdb.ProfitSharingDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
-        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
+        _sdb.StoreInfoDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
 
         // Take care of Beneficiaries and child table BeneficiaryContacts
         Mock<DbSet<Beneficiary>> mockBeneficiaries = Beneficiaries.BuildMockDbSet();
@@ -207,6 +235,11 @@ public sealed class ScenarioFactory
         Mock<DbSet<Demographic>> mockDemograhpics = Demographics.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.Demographics).Returns(mockDemograhpics.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.Demographics).Returns(mockDemograhpics.Object);
+
+        // TerminationCodes
+        Mock<DbSet<TerminationCode>> mockTerminationCodes = TerminationCodes.BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.TerminationCodes).Returns(mockTerminationCodes.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.TerminationCodes).Returns(mockTerminationCodes.Object);
 
         // PayProfits
         Mock<DbSet<PayProfit>> mockPayProfits = PayProfits.BuildMockDbSet();
@@ -244,6 +277,11 @@ public sealed class ScenarioFactory
         Mock<DbSet<YearEndUpdateStatus>> mockYearEndUpdateStatuses = YearEndUpdateStatuses.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
+
+        // AuditEvents
+        Mock<DbSet<AuditEvent>> mockAuditEvents = AuditEvents.BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.AuditEvents).Returns(mockAuditEvents.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.AuditEvents).Returns(mockAuditEvents.Object);
 
 
         return _sdb;

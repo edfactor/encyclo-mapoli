@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
+
 internal sealed class CountryFaker : Faker<Country>
 {
     internal CountryFaker()

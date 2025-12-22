@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
+
 public sealed class ParticipantTotalFaker : Faker<ParticipantTotal>
 {
     public ParticipantTotalFaker(IList<Demographic> demographicFakes, IList<Beneficiary> beneficiaryFakes)

@@ -25,7 +25,7 @@ describe("PageSearch", () => {
     navigation: [
       {
         id: 1,
-        parentId: null,
+        parentId: 0,
         title: "Year End",
         subTitle: "",
         url: "",
@@ -79,7 +79,7 @@ describe("PageSearch", () => {
       },
       {
         id: 2,
-        parentId: null,
+        parentId: 0,
         title: "Reports",
         subTitle: "",
         url: "",
@@ -239,7 +239,7 @@ describe("PageSearch", () => {
       navigation: [
         {
           id: 1,
-          parentId: null,
+          parentId: 0,
           title: "Test",
           subTitle: "",
           url: "",
@@ -352,7 +352,7 @@ describe("PageSearch", () => {
       navigation: [
         {
           id: 1,
-          parentId: null,
+          parentId: 0,
           title: "Test",
           subTitle: "",
           url: "",

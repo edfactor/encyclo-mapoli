@@ -3,10 +3,11 @@ import { Grid } from "@mui/material";
 import { useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GRID_KEYS } from "../../../../constants";
 import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
 import { GetStoreManagementGridColumns } from "./StoreManagementGridColumns";
 
@@ -30,41 +31,49 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useDecemberFlowProfitYear();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 10,
-      initialSortBy: "badgeNumber",
-      initialSortDescending: false,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (hasToken) {
-            const params = {
-              profitYear: queryParams?.profitYear || profitYear,
-              storeNumber: store,
-              storeManagement: true,
-              badgeNumber: queryParams?.badgeNumber,
-              employeeName: queryParams?.employeeName,
-              pagination: {
-                skip: pageNum * pageSz,
-                take: pageSz,
-                sortBy: sortPrms.sortBy,
-                isSortDescending: sortPrms.isSortDescending
-              }
-            };
-            await fetchStoreManagement(params);
-          }
-        },
-        [
-          hasToken,
-          queryParams?.profitYear,
-          profitYear,
-          store,
-          queryParams?.badgeNumber,
-          queryParams?.employeeName,
-          fetchStoreManagement
-        ]
-      )
-    });
+  const {
+    pageNumber,
+    pageSize,
+    sortParams,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange,
+    resetPagination
+  } = useGridPagination({
+    initialPageSize: 10,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    persistenceKey: `${GRID_KEYS.STORE_MANAGEMENT_PREFIX}${store}`,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (hasToken) {
+          const params = {
+            profitYear: queryParams?.profitYear || profitYear,
+            storeNumber: store,
+            storeManagement: true,
+            badgeNumber: queryParams?.badgeNumber,
+            employeeName: queryParams?.employeeName,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            }
+          };
+          await fetchStoreManagement(params);
+        }
+      },
+      [
+        hasToken,
+        queryParams?.profitYear,
+        profitYear,
+        store,
+        queryParams?.badgeNumber,
+        queryParams?.employeeName,
+        fetchStoreManagement
+      ]
+    )
+  });
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -136,7 +145,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
       </Grid>
       <Grid width="100%">
         <DSMGrid
-          preferenceKey={`STORE_MANAGEMENT_STORE_${store}`}
+          preferenceKey={`${GRID_KEYS.STORE_MANAGEMENT_PREFIX}${store}`}
           isLoading={isFetching}
           handleSortChanged={handleSortChange}
           providedOptions={{
@@ -147,9 +156,9 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
         {storeManagement?.response?.results && storeManagement.response.results.length > 0 && (
           <Pagination
             pageNumber={pageNumber}
-            setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
+            setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
             pageSize={pageSize}
-            setPageSize={(value: number) => handlePaginationChange(0, value)}
+            setPageSize={handlePageSizeChange}
             recordCount={storeManagement.response.total || 0}
           />
         )}

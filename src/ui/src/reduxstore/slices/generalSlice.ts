@@ -11,6 +11,7 @@ export interface GeneralState {
   loading: boolean;
   isDrawerOpen?: boolean;
   activeSubmenu?: string;
+  isFullscreen?: boolean;
 }
 
 const getStoredDrawerState = (): { isDrawerOpen: boolean; activeSubmenu: string } => {
@@ -34,7 +35,8 @@ const initialState: GeneralState = {
   onFlatDateBlur: { onBlur: false },
   loading: false,
   isDrawerOpen,
-  activeSubmenu
+  activeSubmenu,
+  isFullscreen: false
 };
 
 export const generalSlice = createSlice({
@@ -110,7 +112,7 @@ export const generalSlice = createSlice({
         }
         return;
       }
-      if (payload.error || payload === "") {
+      if (payload.error) {
         state.error = String(payload.error || "");
         return;
       }
@@ -141,6 +143,9 @@ export const generalSlice = createSlice({
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
+    },
+    setFullscreen: (state, action: PayloadAction<boolean>) => {
+      state.isFullscreen = action.payload;
     }
   }
 });
@@ -154,6 +159,7 @@ export const {
   openDrawer,
   closeDrawer,
   setActiveSubMenu,
-  clearActiveSubMenu
+  clearActiveSubMenu,
+  setFullscreen
 } = generalSlice.actions;
 export default generalSlice.reducer;

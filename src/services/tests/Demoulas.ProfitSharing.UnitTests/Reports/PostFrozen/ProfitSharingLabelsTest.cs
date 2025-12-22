@@ -1,5 +1,4 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
@@ -10,6 +9,7 @@ using FastEndpoints;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
+
 public sealed class ProfitSharingLabelsTest : ApiTestBase<Program>
 {
     [Fact(DisplayName = "PS-764 - Profit Sharing labels")]

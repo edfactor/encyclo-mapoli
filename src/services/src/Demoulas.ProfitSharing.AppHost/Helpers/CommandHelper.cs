@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Aspire.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.AppHost.Helpers;
@@ -293,5 +292,88 @@ public static class CommandHelper
             }
         }
         return result;
+    }
+
+    /// <summary>
+    /// Runs a database operation with automatic API stop/restart to prevent lock conflicts.
+    /// Stops the API before the operation and restarts it afterward (on success).
+    /// </summary>
+    public static async Task<ExecuteCommandResult> RunDatabaseOperationWithApiManagementAsync(
+        string projectPath,
+        string launchProfile,
+        ILogger logger,
+        string? operationName,
+        IInteractionService? interactionService,
+        Func<Task<bool>>? stopApiCallback = null,
+        Func<Task<bool>>? startApiCallback = null)
+    {
+        try
+        {
+            // Stop the API before database operation
+            if (stopApiCallback != null)
+            {
+                logger.LogInformation("[{Operation}] Stopping API...", operationName ?? "DB Operation");
+                if (interactionService?.IsAvailable == true)
+                {
+                    _ = interactionService.PromptNotificationAsync(
+                        title: $"Preparing: {operationName}",
+                        message: "Stopping API to prevent database locks...",
+                        options: new NotificationInteractionOptions { Intent = MessageIntent.Information });
+                }
+
+                bool apiStopped = await stopApiCallback();
+                if (!apiStopped)
+                {
+                    logger.LogWarning("[{Operation}] Failed to stop API, but continuing with operation", operationName);
+                }
+                else
+                {
+                    logger.LogInformation("[{Operation}] API stopped successfully", operationName);
+                }
+
+                // Give database locks time to release
+                await Task.Delay(TimeSpan.FromSeconds(2));
+            }
+
+            // Run the database operation
+            var result = await RunConsoleAppAsync(projectPath, launchProfile, logger, operationName, interactionService);
+
+            // Restart the API after successful operation
+            if (result.Success && startApiCallback != null)
+            {
+                logger.LogInformation("[{Operation}] Restarting API...", operationName ?? "DB Operation");
+                if (interactionService?.IsAvailable == true)
+                {
+                    _ = interactionService.PromptNotificationAsync(
+                        title: $"Completing: {operationName}",
+                        message: "Restarting API after database operation...",
+                        options: new NotificationInteractionOptions { Intent = MessageIntent.Information });
+                }
+
+                bool apiStarted = await startApiCallback();
+                if (!apiStarted)
+                {
+                    logger.LogWarning("[{Operation}] Failed to automatically restart API. Please restart manually.", operationName);
+                }
+                else
+                {
+                    logger.LogInformation("[{Operation}] API restarted successfully", operationName);
+                }
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "[{Operation}] Unexpected error during database operation", operationName);
+            if (interactionService?.IsAvailable == true)
+            {
+                _ = interactionService.PromptNotificationAsync(
+                    title: "Error",
+                    message: $"Database operation failed: {ex.Message}",
+                    options: new NotificationInteractionOptions { Intent = MessageIntent.Error });
+            }
+            return new ExecuteCommandResult { Success = false, ErrorMessage = ex.Message };
+        }
     }
 }

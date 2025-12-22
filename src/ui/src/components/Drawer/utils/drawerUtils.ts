@@ -4,7 +4,7 @@
  * Helper functions for working with navigation data in the drawer.
  */
 
-import { NavigationDto } from "../../reduxstore/types";
+import { NavigationDto } from "../../../types";
 
 /**
  * Find a navigation item by ID in a recursive tree structure
@@ -33,6 +33,7 @@ export const findNavigationById = (items: NavigationDto[] | undefined, id: numbe
 
 /**
  * Check if a navigation tree contains a specific path
+ * For duplicate pages (same URL, different IDs), also checks the stored navigation ID
  *
  * @param items Array of navigation items to search
  * @param pathname Path to search for (without leading slash)
@@ -40,12 +41,23 @@ export const findNavigationById = (items: NavigationDto[] | undefined, id: numbe
  */
 export const containsActivePath = (items: NavigationDto[], pathname: string): boolean => {
   const cleanPath = pathname.replace(/^\/+/, "");
+  const storedNavId = localStorage.getItem("navigationId");
 
   for (const item of items) {
     const itemPath = item.url?.replace(/^\/+/, "");
 
+    // Check if paths match
     if (cleanPath === itemPath) {
-      return true;
+      // If we have a stored nav ID, check if this specific item matches
+      if (storedNavId) {
+        const targetId = parseInt(storedNavId);
+        if (item.id === targetId) {
+          return true;
+        }
+      } else {
+        // No stored nav ID, match by URL only
+        return true;
+      }
     }
 
     // Recursively check children

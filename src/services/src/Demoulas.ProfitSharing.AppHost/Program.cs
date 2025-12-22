@@ -1,5 +1,4 @@
-﻿using Aspire.Hosting;
-using Demoulas.ProfitSharing.AppHost;
+﻿using Demoulas.ProfitSharing.AppHost;
 using Demoulas.ProfitSharing.AppHost.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,22 +17,35 @@ if (PortHelper.IsTcpPortInUse(uiPort))
 }
 
 var database = builder.AddConnectionString("ProfitSharing", "ConnectionStrings:ProfitSharing");
+var warehouse = builder.AddConnectionString("Warehouse", "ConnectionStrings:Warehouse").WithParentRelationship(database);
 
 Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
+
+// Create resource manager for API lifecycle management during database operations
+var resourceManager = new ResourceManager(builder, logger);
 
 var cliRunner = builder.AddExecutable("Database-Cli",
         "dotnet",
         projectPath!,
         "run", "--no-build", "--launch-profile", "upgrade-db")
     .WithReference(database)
+    .WithReference(warehouse)
+    .WithParentRelationship(database)
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
         executeCommand: async (c) =>
         {
             var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-            return await CommandHelper.RunConsoleAppAsync(projectPath!, "upgrade-db", logger, "Upgrade Database", interactionService);
+            return await CommandHelper.RunDatabaseOperationWithApiManagementAsync(
+                projectPath!,
+                "upgrade-db",
+                logger,
+                "Upgrade Database",
+                interactionService,
+                stopApiCallback: () => resourceManager.StopApiAsync(),
+                startApiCallback: () => resourceManager.StartApiAsync());
         },
         commandOptions: new CommandOptions { IconName = "ArrowUp", IconVariant = IconVariant.Filled })
     .WithCommand(
@@ -64,7 +76,14 @@ var cliRunner = builder.AddExecutable("Database-Cli",
                 }
             }
 
-            return await CommandHelper.RunConsoleAppAsync(projectPath!, "drop-recreate-db", logger, "Drop & Recreate Database", interactionService);
+            return await CommandHelper.RunDatabaseOperationWithApiManagementAsync(
+                projectPath!,
+                "drop-recreate-db",
+                logger,
+                "Drop & Recreate Database",
+                interactionService,
+                stopApiCallback: () => resourceManager.StopApiAsync(),
+                startApiCallback: () => resourceManager.StartApiAsync());
         },
         commandOptions: new CommandOptions { IconName = "DatabaseWarning", IconVariant = IconVariant.Filled })
     .WithCommand(
@@ -73,7 +92,14 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         executeCommand: async (c) =>
         {
             var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-            return await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-ready", logger, "Import from READY", interactionService);
+            return await CommandHelper.RunDatabaseOperationWithApiManagementAsync(
+                projectPath!,
+                "import-from-ready",
+                logger,
+                "Import from READY",
+                interactionService,
+                stopApiCallback: () => resourceManager.StopApiAsync(),
+                startApiCallback: () => resourceManager.StartApiAsync());
         },
         commandOptions: new CommandOptions { IconName = "ArrowDownload", IconVariant = IconVariant.Filled })
     .WithCommand(
@@ -82,7 +108,30 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         executeCommand: async (c) =>
         {
             var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-            return await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-navigation", logger, "Import Navigation", interactionService);
+            return await CommandHelper.RunDatabaseOperationWithApiManagementAsync(
+                projectPath!,
+                "import-from-navigation",
+                logger,
+                "Import Navigation",
+                interactionService,
+                stopApiCallback: () => resourceManager.StopApiAsync(),
+                startApiCallback: () => resourceManager.StartApiAsync());
+        },
+        commandOptions: new CommandOptions { IconName = "Navigation", IconVariant = IconVariant.Filled })
+    .WithCommand(
+        name: "import-uat-navigation",
+        displayName: "Import UAT navigation",
+        executeCommand: async (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+            return await CommandHelper.RunDatabaseOperationWithApiManagementAsync(
+                projectPath!,
+                "import-uat-navigation",
+                logger,
+                "Import UAT Navigation",
+                interactionService,
+                stopApiCallback: () => resourceManager.StopApiAsync(),
+                startApiCallback: () => resourceManager.StartApiAsync());
         },
         commandOptions: new CommandOptions { IconName = "Navigation", IconVariant = IconVariant.Filled })
     .WithCommand(
@@ -141,22 +190,22 @@ var cliRunner = builder.AddExecutable("Database-Cli",
                     });
             }
 
-            // Step 1: Drop and recreate
-            var step1 = await CommandHelper.RunConsoleAppAsync(projectPath!, "drop-recreate-db", logger, "Step 1/3: Drop & Recreate Database", interactionService);
+            // Step 1: Drop and recreate (with API management)
+            var step1 = await CommandHelper.RunDatabaseOperationWithApiManagementAsync(projectPath!, "drop-recreate-db", logger, "Step 1/3: Drop & Recreate Database", interactionService, () => resourceManager.StopApiAsync(), () => resourceManager.StartApiAsync());
             if (!step1.Success)
             {
                 return CommandResults.Failure($"Nuclear Option failed at step 1: {step1.ErrorMessage}");
             }
 
-            // Step 2: Import from READY
-            var step2 = await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-ready", logger, "Step 2/3: Import from READY", interactionService);
+            // Step 2: Import from READY (with API management)
+            var step2 = await CommandHelper.RunDatabaseOperationWithApiManagementAsync(projectPath!, "import-from-ready", logger, "Step 2/3: Import from READY", interactionService, () => resourceManager.StopApiAsync(), () => resourceManager.StartApiAsync());
             if (!step2.Success)
             {
                 return CommandResults.Failure($"Nuclear Option failed at step 2: {step2.ErrorMessage}");
             }
 
-            // Step 3: Import navigation
-            var step3 = await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-navigation", logger, "Step 3/3: Import Navigation", interactionService);
+            // Step 3: Import navigation (with API management)
+            var step3 = await CommandHelper.RunDatabaseOperationWithApiManagementAsync(projectPath!, "import-from-navigation", logger, "Step 3/3: Import Navigation", interactionService, () => resourceManager.StopApiAsync(), () => resourceManager.StartApiAsync());
             if (!step3.Success)
             {
                 return CommandResults.Failure($"Nuclear Option failed at step 3: {step3.ErrorMessage}");
@@ -188,6 +237,7 @@ var configuration = new ConfigurationBuilder()
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithParentRelationship(database)
     .WithReference(database)
+    .WithReference(warehouse)
     .WithSwaggerUi()
     .WithRedoc()
     .WithScalar()
@@ -197,15 +247,24 @@ var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
         annotation.DisplayText = "Swagger UI";
     });
 
-// Use AddViteApp for Vite applications as per the latest CommunityToolkit.Aspire guidance
-var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", scriptName: "dev")
-    .WithHttpEndpoint(port: uiPort, isProxied: false)
+// Register the API resource with resource manager for lifecycle management during DB operations
+resourceManager.RegisterApiResource(api);
+
+// Use AddViteApp for Vite applications as per the Aspire 13.1 JavaScript integration
+// This automatically handles npm package installation and has Vite-specific defaults
+// Configure the default "http" endpoint to use port 3100 (required for Okta callback)
+var ui = builder.AddViteApp("ProfitSharing-Ui", "../../../ui/")
+    .WithEndpoint("http", endpoint =>
+    {
+        endpoint.Port = uiPort;
+        endpoint.TargetPort = uiPort;
+        endpoint.IsProxied = false;
+    })
     .WithUrlForEndpoint("http", annotation =>
     {
         annotation.DisplayText = "Profit Sharing";
     })
-    .WithOtlpExporter()
-    .WithNpmPackageInstallation();
+    .WithOtlpExporter();
 
 ui.WithReference(api)
     .WaitFor(api)
@@ -216,16 +275,22 @@ ui.WithReference(api)
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
      .WaitFor(api)
      .WithParentRelationship(database)
+     .WithReference(database)
+     .WithReference(warehouse)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
      .WaitFor(api)
      .WithParentRelationship(database)
+     .WithReference(database)
+     .WithReference(warehouse)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
      .WaitFor(api)
      .WithParentRelationship(database)
+     .WithReference(database)
+     .WithReference(warehouse)
     .WithExplicitStart();
 
 // Playwright E2E test runner as an executable resource

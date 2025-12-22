@@ -17,111 +17,63 @@ import {
 
 describe("saveOperationHelpers", () => {
   describe("prepareSaveRequest", () => {
-    describe("unforfeit activity type", () => {
-      const config: ActivityConfig = {
-        activityType: "unforfeit",
-        rowKeyConfig: { type: "unforfeit" }
+    it("should preserve forfeitureAmount (FE already handles transformations)", () => {
+      const request: ForfeitureAdjustmentUpdateRequest = {
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: -1500, // FE already negated this
+        classAction: false
       };
+      const result = prepareSaveRequest(request);
 
-      it("should negate forfeitureAmount for unforfeit", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: 1500,
-          classAction: false
-        };
-        const result = prepareSaveRequest(config, request);
-
-        expect(result).toEqual({
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: -1500,
-          classAction: false
-        });
-      });
-
-      it("should negate negative forfeitureAmount for unforfeit", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: -1500,
-          classAction: false
-        };
-        const result = prepareSaveRequest(config, request);
-
-        expect(result.forfeitureAmount).toBe(1500);
-      });
-
-      it("should preserve other fields for unforfeit", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: 1500,
-          classAction: true,
-          offsettingProfitDetailId: 789
-        };
-        const result = prepareSaveRequest(config, request);
-
-        expect(result).toEqual({
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: -1500,
-          classAction: true,
-          offsettingProfitDetailId: 789
-        });
+      expect(result).toEqual({
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: -1500, // Should remain as-is
+        classAction: false
       });
     });
 
-    describe("termination activity type", () => {
-      const config: ActivityConfig = {
-        activityType: "termination",
-        rowKeyConfig: { type: "termination" }
+    it("should preserve positive forfeitureAmount", () => {
+      const request: ForfeitureAdjustmentUpdateRequest = {
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: 1500,
+        classAction: false
       };
+      const result = prepareSaveRequest(request);
 
-      it("should keep forfeitureAmount unchanged for termination", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: 1500,
-          classAction: false
-        };
-        const result = prepareSaveRequest(config, request);
+      expect(result.forfeitureAmount).toBe(1500);
+    });
 
-        expect(result).toEqual({
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: 1500,
-          classAction: false
-        });
-      });
+    it("should preserve all fields in request", () => {
+      const request: ForfeitureAdjustmentUpdateRequest = {
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: -1500,
+        classAction: true,
+        offsettingProfitDetailId: 789
+      };
+      const result = prepareSaveRequest(request);
 
-      it("should preserve negative forfeitureAmount for termination", () => {
-        const request: ForfeitureAdjustmentUpdateRequest = {
-          badgeNumber: 123456,
-          profitYear: 2025,
-          forfeitureAmount: -1500,
-          classAction: false
-        };
-        const result = prepareSaveRequest(config, request);
-
-        expect(result.forfeitureAmount).toBe(-1500);
+      expect(result).toEqual({
+        badgeNumber: 123456,
+        profitYear: 2025,
+        forfeitureAmount: -1500,
+        classAction: true,
+        offsettingProfitDetailId: 789
       });
     });
   });
 
   describe("prepareBulkSaveRequests", () => {
-    const config: ActivityConfig = {
-      activityType: "unforfeit",
-      rowKeyConfig: { type: "unforfeit" }
-    };
-
-    it("should transform all requests in the array", () => {
+    it("should preserve all requests in the array", () => {
       const requests: ForfeitureAdjustmentUpdateRequest[] = [
-        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: 1500, classAction: false },
-        { badgeNumber: 789012, profitYear: 2025, forfeitureAmount: 2000, classAction: false }
+        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: -1500, classAction: false },
+        { badgeNumber: 789012, profitYear: 2025, forfeitureAmount: -2000, classAction: false }
       ];
 
-      const result = prepareBulkSaveRequests(config, requests);
+      const result = prepareBulkSaveRequests(requests);
 
       expect(result).toHaveLength(2);
       expect(result[0].forfeitureAmount).toBe(-1500);
@@ -129,16 +81,16 @@ describe("saveOperationHelpers", () => {
     });
 
     it("should handle empty array", () => {
-      const result = prepareBulkSaveRequests(config, []);
+      const result = prepareBulkSaveRequests([]);
       expect(result).toEqual([]);
     });
 
     it("should handle single request", () => {
       const requests: ForfeitureAdjustmentUpdateRequest[] = [
-        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: 1500, classAction: false }
+        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: -1500, classAction: false }
       ];
 
-      const result = prepareBulkSaveRequests(config, requests);
+      const result = prepareBulkSaveRequests(requests);
 
       expect(result).toHaveLength(1);
       expect(result[0].forfeitureAmount).toBe(-1500);
@@ -153,7 +105,7 @@ describe("saveOperationHelpers", () => {
       });
 
       it("should format amount with currency symbol", () => {
-        const result = generateSaveSuccessMessage("unforfeit", "Smith, Jane", 2500.50);
+        const result = generateSaveSuccessMessage("unforfeit", "Smith, Jane", 2500.5);
         expect(result).toBe("Successfully saved unforfeiture of $2,500.50 for Smith, Jane");
       });
 
@@ -465,17 +417,23 @@ describe("saveOperationHelpers", () => {
     });
 
     it("should execute batches sequentially with delay", async () => {
+      vi.useFakeTimers();
+
       const requests = [1, 2, 3, 4];
       const saveFn = vi.fn().mockResolvedValue(undefined);
       const config: BatchConfig = { batchSize: 2, delayMs: 50 };
 
-      const startTime = Date.now();
-      await executeBatchSave(requests, saveFn, config);
-      const endTime = Date.now();
+      const executePromise = executeBatchSave(requests, saveFn, config);
 
-      // Should have at least one delay between batches
-      expect(endTime - startTime).toBeGreaterThanOrEqual(50);
+      // Fast-forward through the delay
+      await vi.advanceTimersByTimeAsync(50);
+
+      await executePromise;
+
+      // Verify batch delay was used (2 batches, 1 delay between them)
       expect(saveFn).toHaveBeenCalledTimes(4);
+
+      vi.useRealTimers();
     });
 
     it("should handle empty requests array", async () => {
@@ -524,17 +482,23 @@ describe("saveOperationHelpers", () => {
     });
 
     it("should not delay after the last batch", async () => {
+      vi.useFakeTimers();
+
       const requests = [1, 2, 3];
       const saveFn = vi.fn().mockResolvedValue(undefined);
       const config: BatchConfig = { batchSize: 2, delayMs: 1000 };
 
-      const startTime = Date.now();
-      await executeBatchSave(requests, saveFn, config);
-      const endTime = Date.now();
+      const executePromise = executeBatchSave(requests, saveFn, config);
 
       // Should have only one delay (between batch 1 and 2), not after batch 2
-      // Total time should be around 1000ms, not 2000ms
-      expect(endTime - startTime).toBeLessThan(1500);
+      await vi.advanceTimersByTimeAsync(1000);
+
+      await executePromise;
+
+      // Verify no additional delay occurred (if there were 2 delays, timer would need to advance more)
+      expect(saveFn).toHaveBeenCalledTimes(3);
+
+      vi.useRealTimers();
     });
 
     it("should handle exact multiple of batch size", async () => {

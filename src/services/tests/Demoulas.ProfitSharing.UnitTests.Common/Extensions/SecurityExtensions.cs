@@ -18,7 +18,9 @@ public static class SecurityExtensions
 
         foreach (var role in roles)
         {
-            claims.Add(new Claim("groups", $"SMART-PS-QA-{role}"));
+            // Use "Testing" environment prefix to match the claims transformation in ImpersonationAndEnvironmentAwareClaimsTransformation
+            // The GetEnvironment() method returns "Testing" when ASPNETCORE_ENVIRONMENT is "Testing"
+            claims.Add(new Claim("groups", $"SMART-PS-Testing-{role}"));
         }
 
         var token = new JwtSecurityToken(

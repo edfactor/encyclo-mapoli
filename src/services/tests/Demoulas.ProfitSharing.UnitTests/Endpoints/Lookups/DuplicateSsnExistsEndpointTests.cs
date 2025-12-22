@@ -7,6 +7,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 
+[Collection("Lookup Tests")]
 public class DuplicateSsnExistsEndpointTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "Lookup: Duplicate SSN exists - returns success")]

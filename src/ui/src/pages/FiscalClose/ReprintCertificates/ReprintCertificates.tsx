@@ -6,6 +6,7 @@ import { useLazyDownloadCertificatesFileQuery } from "reduxstore/api/YearsEndApi
 import { DSMAccordion, Page } from "smart-ui-library";
 import { downloadFileFromResponse } from "utils/fileDownload";
 import { CAPTIONS } from "../../../constants";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import ReprintCertificatesFilterSection, { ReprintCertificatesFilterParams } from "./ReprintCertificatesFilterSection";
 import ReprintCertificatesGrid from "./ReprintCertificatesGrid";
 
@@ -19,6 +20,7 @@ const ReprintCertificates: React.FC = () => {
 
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedBadgeNumbers, setSelectedBadgeNumbers] = useState<number[]>([]);
+  const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
 
   const [downloadCertificatesFile] = useLazyDownloadCertificatesFileQuery();
 
@@ -52,7 +54,10 @@ const ReprintCertificates: React.FC = () => {
       }
     } catch (error) {
       console.error("Test print failed:", error);
-      alert("Test print failed");
+      setErrorDialog({
+        title: "Test Print Failed",
+        message: "Unable to generate the test print file. Please verify your selections and try again."
+      });
     }
   };
 
@@ -68,7 +73,10 @@ const ReprintCertificates: React.FC = () => {
       }
     } catch (error) {
       console.error("Print failed:", error);
-      alert("Print failed");
+      setErrorDialog({
+        title: "Print Failed",
+        message: "Unable to generate the certificate file. Please verify your selections and try again."
+      });
     }
   };
 
@@ -122,6 +130,13 @@ const ReprintCertificates: React.FC = () => {
           </Grid>
         )}
       </Grid>
+
+      <ConfirmationDialog
+        open={!!errorDialog}
+        title={errorDialog?.title || "Error"}
+        description={errorDialog?.message || "An error occurred"}
+        onClose={() => setErrorDialog(null)}
+      />
     </Page>
   );
 };

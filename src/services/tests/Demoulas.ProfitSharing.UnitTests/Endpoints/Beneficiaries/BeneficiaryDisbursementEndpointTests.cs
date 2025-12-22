@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Net;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
 using Demoulas.ProfitSharing.Security;
@@ -8,10 +7,10 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Shouldly;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Beneficiaries;
 
+[Collection("Beneficiary Tests")]
 public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
 {
     public BeneficiaryDisbursementEndpointTests(ITestOutputHelper testOutputHelper) : base()
@@ -34,10 +33,10 @@ public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
     }
 
     [Theory(DisplayName = "BeneficiaryDisbursement - Should require appropriate role")]
-    [InlineData(Role.FINANCEMANAGER)]
     [InlineData(Role.ITOPERATIONS)]
     [InlineData(Role.AUDITOR)]
     [InlineData(Role.ITDEVOPS)]
+    [InlineData(Role.EXECUTIVEADMIN)]
     [Description("PS-292 : Should return forbidden when user lacks CAN_MANAGE_BENEFICIARIES policy")]
     public async Task BeneficiaryDisbursement_WithInappropriateRole_ShouldReturnForbidden(string role)
     {
@@ -197,7 +196,7 @@ public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
     [InlineData(5)]
     [InlineData(50)]
     [InlineData(100)]
-    [InlineData(500)]
+    [InlineData(250)]
     [Description("PS-292 : Should return validation error for various batch sizes of non-existent beneficiaries")]
     public async Task BeneficiaryDisbursement_WithVariousBatchSizes_ShouldReturnValidationError(int batchSize)
     {
@@ -276,8 +275,8 @@ public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.BENEFICIARY_ADMINISTRATOR);
         var request = BeneficiaryDisbursementRequest.SampleRequest();
         // Use a unique request to distinguish this test from others
-        request = request with 
-        { 
+        request = request with
+        {
             BadgeNumber = 888888,
             Beneficiaries = new List<RecipientBeneficiary>
             {

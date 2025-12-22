@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using FastEndpoints;
@@ -28,7 +29,7 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
     {
         if (context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<EndpointDefinition>() is { } def &&
             def.EndpointType.IsAssignableTo(typeof(IHasNavigationId)) &&
-            Activator.CreateInstance(def.EndpointType, args: new object[] { (short)0 }) is IHasNavigationId endpoint)
+            Activator.CreateInstance(def.EndpointType, args: [(short)0]) is IHasNavigationId endpoint)
         {
             // Start activity and store it in HttpContext for later retrieval
             var activity = endpoint.StartEndpointActivity(context.HttpContext);
@@ -49,9 +50,9 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
     public Task PostProcessAsync(IPostProcessorContext context, CancellationToken ct)
     {
         // Retrieve telemetry context from HttpContext
-        if (context.HttpContext.Items.TryGetValue("TelemetryActivity", out var activityObj) &&
-            context.HttpContext.Items.TryGetValue("TelemetryEndpoint", out var endpointObj) &&
-            context.HttpContext.Items.TryGetValue("TelemetryStartTime", out var startTimeObj) &&
+        if (context.HttpContext.Items.TryGetValue("TelemetryActivity", out object? activityObj) &&
+            context.HttpContext.Items.TryGetValue("TelemetryEndpoint", out object? endpointObj) &&
+            context.HttpContext.Items.TryGetValue("TelemetryStartTime", out object? startTimeObj) &&
             activityObj is Activity activity &&
             endpointObj is IHasNavigationId endpoint &&
             startTimeObj is long startTime)
@@ -59,20 +60,28 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
             try
             {
                 // Calculate execution duration
-                var endTime = Stopwatch.GetTimestamp();
-                var elapsedMs = (double)(endTime - startTime) / Stopwatch.Frequency * 1000;
+                long endTime = Stopwatch.GetTimestamp();
+                double elapsedMs = (double)(endTime - startTime) / Stopwatch.Frequency * 1000;
+
+                // Get session ID and user info for correlation across requests
+                var sessionId = GetSessionId(context.HttpContext);
+                var appUser = context.HttpContext.RequestServices?.GetService(typeof(Demoulas.Common.Contracts.Interfaces.IAppUser))
+                    as Demoulas.Common.Contracts.Interfaces.IAppUser;
+                var userEmail = appUser?.Email ?? appUser?.UserName ?? "unknown";
 
                 // Record execution duration
                 Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.EndpointDurationMs.Record(elapsedMs,
                     new KeyValuePair<string, object?>("endpoint.name", endpoint.GetType().Name),
-                    new KeyValuePair<string, object?>("navigation.id", endpoint.NavigationId.ToString()));
+                    new KeyValuePair<string, object?>("navigation.id", endpoint.NavigationId.ToString()),
+                    new KeyValuePair<string, object?>("session.id", sessionId),
+                    new KeyValuePair<string, object?>("user.id", userEmail));
 
                 // Determine if the response was successful based on HTTP status code
-                var isSuccess = context.HttpContext.Response.StatusCode >= 200 && context.HttpContext.Response.StatusCode < 400;
-                var errorType = isSuccess ? null : $"HTTP_{context.HttpContext.Response.StatusCode}";
+                bool isSuccess = context.HttpContext.Response.StatusCode is >= 200 and < 400;
+                string? errorType = isSuccess ? null : $"HTTP_{context.HttpContext.Response.StatusCode}";
 
                 // Get user role once for all metrics
-                var userRole = context.HttpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "unknown";
+                string userRole = context.HttpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "unknown";
 
                 if (!isSuccess)
                 {
@@ -80,23 +89,25 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
                     Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.EndpointErrorsTotal.Add(1,
                         new KeyValuePair<string, object?>("endpoint.name", endpoint.GetType().Name),
                         new KeyValuePair<string, object?>("error.type", errorType ?? "unknown"),
-                        new KeyValuePair<string, object?>("user.role", userRole));
+                        new KeyValuePair<string, object?>("user.role", userRole),
+                        new KeyValuePair<string, object?>("user.id", userEmail),
+                        new KeyValuePair<string, object?>("session.id", sessionId));
 
                     // Set activity error status
                     activity.SetStatus(ActivityStatusCode.Error, $"HTTP {context.HttpContext.Response.StatusCode}");
                     activity.SetTag("error.type", errorType);
                     activity.SetTag("http.status_code", context.HttpContext.Response.StatusCode);
 
-                    _logger.LogWarning("Endpoint execution failed: {Endpoint} returned {StatusCode} (correlation: {CorrelationId}, duration: {DurationMs}ms)",
-                        endpoint.GetType().Name, context.HttpContext.Response.StatusCode, context.HttpContext.TraceIdentifier, elapsedMs);
+                    _logger.LogWarning("Endpoint execution failed: {Endpoint} returned {StatusCode} by {UserEmail} ({UserRole}) - session: {SessionId}, correlation: {CorrelationId}, duration: {DurationMs}ms",
+                        endpoint.GetType().Name, context.HttpContext.Response.StatusCode, userEmail, userRole, sessionId, context.HttpContext.TraceIdentifier, elapsedMs);
                 }
                 else
                 {
                     // Record successful execution
                     activity.SetTag("http.status_code", context.HttpContext.Response.StatusCode);
 
-                    _logger.LogDebug("Endpoint execution completed: {Endpoint} returned {StatusCode} (correlation: {CorrelationId}, duration: {DurationMs}ms)",
-                        endpoint.GetType().Name, context.HttpContext.Response.StatusCode, context.HttpContext.TraceIdentifier, elapsedMs);
+                    _logger.LogDebug("Endpoint execution completed: {Endpoint} returned {StatusCode} by {UserEmail} ({UserRole}) - session: {SessionId}, correlation: {CorrelationId}, duration: {DurationMs}ms",
+                        endpoint.GetType().Name, context.HttpContext.Response.StatusCode, userEmail, userRole, sessionId, context.HttpContext.TraceIdentifier, elapsedMs);
                 }
 
                 // Record user activity metrics (aggregated by role for low cardinality)
@@ -108,7 +119,7 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
                 // Estimate response size if available
                 if (context.HttpContext.Response.ContentLength.HasValue)
                 {
-                    var responseSize = context.HttpContext.Response.ContentLength.Value;
+                    long responseSize = context.HttpContext.Response.ContentLength.Value;
                     Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.ResponseSizeBytes.Record(responseSize,
                         new KeyValuePair<string, object?>("endpoint.name", endpoint.GetType().Name),
                         new KeyValuePair<string, object?>("navigation.id", endpoint.NavigationId.ToString()));
@@ -154,5 +165,27 @@ public class TelemetryProcessor : IPreProcessor, IPostProcessor
             var name when name.Contains("health") => "health",
             _ => "other"
         };
+    }
+
+    /// <summary>
+    /// Retrieves the session ID from cookies for user journey tracking across requests.
+    /// </summary>
+    private static string GetSessionId(HttpContext? context)
+    {
+        // First, try to get from HttpContext.Items (set by middleware in same request)
+        if (context?.Items.TryGetValue(Telemetry.SessionIdKey, out var itemSessionId) == true &&
+            itemSessionId is string itemSessionIdStr && !string.IsNullOrEmpty(itemSessionIdStr))
+        {
+            return itemSessionIdStr;
+        }
+
+        // Fallback: try to get from request cookies (for subsequent requests)
+        if (context?.Request.Cookies.TryGetValue(Telemetry.SessionIdKey, out var sessionId) == true &&
+            !string.IsNullOrEmpty(sessionId))
+        {
+            return sessionId;
+        }
+
+        return "unknown";
     }
 }

@@ -11,7 +11,7 @@ public class ProfitYearRequestValidator : AbstractValidator<IProfitYearRequest>
             .NotEmpty()
             .WithMessage("Profit year is required.")
             .GreaterThanOrEqualTo((short)2020)
-            .WithMessage("Profit years less than 2020 is not supported in this application")
+            .WithMessage("Profit years less than 2020 are not supported in this application")
             .LessThanOrEqualTo((short)(DateTime.UtcNow.Year + 1))
             .WithMessage($"Profit year cannot be greater than {DateTime.UtcNow.Year + 1}.");
     }

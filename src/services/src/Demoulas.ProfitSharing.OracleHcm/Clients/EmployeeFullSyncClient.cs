@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Clients;
@@ -125,7 +126,7 @@ internal sealed class EmployeeFullSyncClient
     private async Task<string> BuildUrl(int offset = 0, long? oracleHcmId = null, CancellationToken cancellationToken = default)
     {
         // Oracle will limit us to 500, but we run the risk of timeout well below that, so we need to be conservative.
-        ushort limit = ushort.Min(75, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(500, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>()
         {
             { "limit", $"{limit}" },
@@ -158,15 +159,31 @@ internal sealed class EmployeeFullSyncClient
 
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)
     {
+        // Per the Oracle Consultants, we need to slow this operation down, or continue to risk 401 errors as a way of handling too many requests.
+        await Task.Delay(new TimeSpan(0, 0, 20), cancellationToken).ConfigureAwait(false);
+
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode && Debugger.IsAttached)
         {
+            string errorResponse = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            _logger.LogWarning("Oracle HCM API request failed: {ErrorResponse} / {ReasonPhrase}", errorResponse, response.ReasonPhrase);
+
+            // Generate and display cURL command for manual testing
+            string curlCommand = request.GenerateCurlCommand(url);
+
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine();
-            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+            Console.WriteLine("=== API REQUEST FAILED ===");
+            Console.WriteLine(errorResponse);
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=== cURL Command for Postman/Manual Testing ===");
+            Console.WriteLine(curlCommand);
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
+
+            _logger.LogInformation("cURL command for manual testing: {CurlCommand}", curlCommand);
         }
 
         _ = response.EnsureSuccessStatusCode();

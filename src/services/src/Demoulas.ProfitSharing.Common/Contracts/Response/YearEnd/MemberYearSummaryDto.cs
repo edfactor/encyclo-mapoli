@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -18,11 +19,46 @@ public record MemberYearSummaryDto : IIsExecutive
     public decimal Forfeitures { get; init; }
     public decimal Distributions { get; init; }
     public decimal EndingBalance { get; init; }
+    public decimal BeneficiaryAllocation { get; init; }
     public decimal VestedAmount { get; init; }
     public byte VestedPercent { get; init; }
     [MaskSensitive] public DateOnly DateOfBirth { get; init; }
     public DateOnly HireDate { get; init; }
     public DateOnly? TerminationDate { get; init; }
+
+    /// <summary>
+    /// Calculated current age. Returns 0 if DateOfBirth is default.
+    /// </summary>
+    [MaskSensitive]
+    public short Age
+    {
+        get
+        {
+            if (DateOfBirth == default)
+            {
+                return 0;
+            }
+
+            return DateOfBirth.Age();
+        }
+    }
+
+    /// <summary>
+    /// Calculated age at termination. Returns 0 if DateOfBirth is default or TerminationDate is null.
+    /// </summary>
+    [MaskSensitive]
+    public short AgeAtTermination
+    {
+        get
+        {
+            if (DateOfBirth == default || TerminationDate is null)
+            {
+                return 0;
+            }
+
+            return DateOfBirth.Age(TerminationDate.Value.ToDateTime(TimeOnly.MinValue));
+        }
+    }
     public byte? EnrollmentId { get; init; }
     public decimal ProfitShareHours { get; init; }
     [MaskSensitive] public string Street1 { get; set; } = string.Empty;

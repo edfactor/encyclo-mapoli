@@ -18,8 +18,8 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
     const rawInput = event.target.value;
 
     // Prevent more than 2 decimal places for currency (dollars and cents)
-    if (rawInput.includes('.')) {
-      const parts = rawInput.split('.');
+    if (rawInput.includes(".")) {
+      const parts = rawInput.split(".");
       if (parts[1] && parts[1].length > 2) {
         return; // Don't update if trying to add a third decimal place
       }
@@ -32,9 +32,18 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
     const newError = validateSuggestedForfeit(numericValue, Math.abs(forfeitValue));
     setError(newError);
 
-    const rowKey = props.data.profitDetailId
-      ? props.data.profitDetailId
-      : `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ""}-${props.node?.id || "unknown"}`;
+    // Generate row key consistent with column definitions and SharedSaveButtonCellRenderer
+    let rowKey: string;
+    const isTermination = props.data.suggestedForfeit != null;
+
+    if (isTermination) {
+      // Termination: use composite key (badgeNumber-profitYear)
+      // Must match the key used in TerminationDetailsGridColumns valueGetter
+      rowKey = `${props.data.badgeNumber}-${props.data.profitYear}`;
+    } else {
+      // UnForfeit: use profitDetailId
+      rowKey = props.data.profitDetailId?.toString() || "";
+    }
 
     props.context?.updateEditedValue?.(rowKey, numericValue, !!newError);
   };
@@ -55,7 +64,7 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
         <Tooltip
           title={error}
           placement="top">
-          <ErrorOutline sx={{ color: "#d32f2f", fontSize: 20, marginRight: "8px" }} />
+          <ErrorOutline sx={{ color: "#1976d2", fontSize: 20, marginRight: "8px" }} />
         </Tooltip>
       )}
       <TextField

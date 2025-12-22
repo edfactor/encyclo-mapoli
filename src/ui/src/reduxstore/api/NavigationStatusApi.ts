@@ -15,13 +15,16 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const NavigationStatusApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "navigationStatusApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getNavigationStatus: builder.query<GetNavigationStatusResponseDto, GetNavigationStatusRequestDto>({
       query: (_request) => ({
         url: `/navigation/status`,
         method: "GET"
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setNavigationStatus(data));
@@ -37,7 +40,7 @@ export const NavigationStatusApi = createApi({
         method: "PUT",
         body: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           if (data.isSuccessful) {

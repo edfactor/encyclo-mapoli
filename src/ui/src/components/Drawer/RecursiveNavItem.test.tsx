@@ -209,7 +209,7 @@ describe("RecursiveNavItem - Collapsible Menu Tests", () => {
   });
 
   it("should remain collapsed after user manually collapses it, even if it contains active child", async () => {
-    // This tests the fix for the collapse bug
+    // This tests that all menus start collapsed by default
     const navItem = createNestedNavItems();
 
     // Mock useLocation to return active child path
@@ -224,17 +224,23 @@ describe("RecursiveNavItem - Collapsible Menu Tests", () => {
       </MemoryRouter>
     );
 
-    // Should auto-expand because it contains active child
+    // Should be collapsed by default, even though it contains active child
+    expect(screen.queryByText("Child Menu 1")).not.toBeInTheDocument();
+
+    const parentButton = screen.getByText("Parent Menu").closest("div")?.parentElement;
+
+    // User manually expands
+    fireEvent.click(parentButton!);
+
+    // Should now be expanded
     await waitFor(() => {
       expect(screen.getByText("Child Menu 1")).toBeInTheDocument();
     });
 
-    const parentButton = screen.getByText("Parent Menu").closest("div")?.parentElement;
-
-    // User manually collapses
+    // User manually collapses again
     fireEvent.click(parentButton!);
 
-    // Should remain collapsed (this is the fix for the bug)
+    // Should remain collapsed
     await waitFor(() => {
       expect(screen.queryByText("Child Menu 1")).not.toBeInTheDocument();
     });
@@ -244,7 +250,7 @@ describe("RecursiveNavItem - Collapsible Menu Tests", () => {
     expect(storedValue).toBe("false");
   });
 
-  it("should respect maxAutoExpandDepth prop", () => {
+  it("should start collapsed regardless of maxAutoExpandDepth prop (collapsed by default behavior)", () => {
     const deeplyNestedItem: NavigationDto = {
       id: 1,
       parentId: 0,
@@ -294,8 +300,9 @@ describe("RecursiveNavItem - Collapsible Menu Tests", () => {
       </MemoryRouter>
     );
 
-    // Level 0 should be auto-expanded (level 0 <= maxAutoExpandDepth 1)
-    expect(screen.getByText("Level 1")).toBeInTheDocument();
+    // All levels should be collapsed by default, even with maxAutoExpandDepth set
+    expect(screen.queryByText("Level 1")).not.toBeInTheDocument();
+    expect(screen.queryByText("Level 2")).not.toBeInTheDocument();
   });
 
   it("should call onNavigate callback when navigable item is clicked", () => {

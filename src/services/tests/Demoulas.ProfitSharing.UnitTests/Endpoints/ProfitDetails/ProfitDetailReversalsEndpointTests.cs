@@ -11,10 +11,10 @@ using FastEndpoints;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ProfitDetails;
 
+[Collection("Profit Details Tests")]
 public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 {
     public ProfitDetailReversalsEndpointTests(ITestOutputHelper testOutputHelper)

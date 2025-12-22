@@ -13,6 +13,7 @@ public static class StockFactory
 
     public static Beneficiary CreateBeneficiary()
     {
+        var contactId = _id++;
         return new Beneficiary
         {
             Id = _id++,
@@ -29,13 +30,13 @@ public static class StockFactory
                     MiddleName = "",
                     PhoneNumber = ""
                 },
-                Id = 0,
+                Id = contactId,
                 Ssn = 555,
                 DateOfBirth = default,
                 CreatedDate = default
             },
             DemographicId = 0,
-            BeneficiaryContactId = 0,
+            BeneficiaryContactId = contactId,
             Percent = 0
         };
     }
@@ -87,7 +88,7 @@ public static class StockFactory
             PayFrequencyId = 0,
             PayFrequency = null,
             TerminationCodeId = null,
-            TerminationCode = null,
+            TerminationCode = new TerminationCode { Id = TerminationCode.Constants.AnotherJob, Name = "AnotherJob" },
             EmploymentStatusId = '\0',
             EmploymentStatus = null,
             PayProfits = [],
