@@ -369,6 +369,7 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 req.PhoneNumber = req.PhoneNumber.Trim();
             }
+            contact.ContactInfo!.PhoneNumber = req.PhoneNumber;
         }
         if (req.MobileNumber != null)
         {
@@ -380,6 +381,7 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 req.MobileNumber = req.MobileNumber.Trim();
             }
+            contact.ContactInfo!.MobileNumber = req.MobileNumber;
         }
         if (req.EmailAddress != null)
         {
@@ -391,9 +393,10 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 req.EmailAddress = req.EmailAddress.Trim();
             }
+            contact.ContactInfo!.EmailAddress = req.EmailAddress;
         }
 
-        //Update the ModifiedAtUtc timestamp
+        //Update the ModifiedAtUtc timestamp - now that ValueGeneratedOnUpdate is removed, this will work
         contact.ModifiedAtUtc = DateTimeOffset.UtcNow;
 
         response.Id = contact.Id;
