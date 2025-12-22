@@ -78,6 +78,18 @@ public class BeneficiaryService : IBeneficiaryService
             };
 
             ctx.Add(beneficiary);
+
+            // Validate percentage sum before saving
+            var percentageValidationResult = await BeneficiaryPercentageValidator.ValidateBeneficiaryPercentageSumAsync(
+                req.EmployeeBadgeNumber,
+                ctx,
+                cancellationToken);
+
+            if (!percentageValidationResult.IsValid)
+            {
+                throw new ValidationException(percentageValidationResult.Errors);
+            }
+
             await ctx.SaveChangesAsync(cancellationToken);
             if (transaction != default)
             {
@@ -199,6 +211,21 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 beneficiary.Percent = req.Percentage.Value;
             }
+
+            // Validate percentage sum before saving if percentage was updated
+            if (req.Percentage.HasValue)
+            {
+                var percentageValidationResult = await BeneficiaryPercentageValidator.ValidateBeneficiaryPercentageSumAsync(
+                    beneficiary.BadgeNumber,
+                    ctx,
+                    cancellationToken);
+
+                if (!percentageValidationResult.IsValid)
+                {
+                    throw new ValidationException(percentageValidationResult.Errors);
+                }
+            }
+
             var response = new UpdateBeneficiaryResponse()
             {
                 Id = beneficiary.Id,
