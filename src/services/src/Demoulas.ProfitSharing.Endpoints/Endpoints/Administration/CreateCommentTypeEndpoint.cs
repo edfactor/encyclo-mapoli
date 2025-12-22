@@ -1,17 +1,17 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Administration;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
-using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
-public sealed class CreateCommentTypeEndpoint : ProfitSharingEndpoint<CreateCommentTypeRequest, Results<Ok<CommentTypeDto>, BadRequest, ProblemHttpResult>>
+public sealed class CreateCommentTypeEndpoint : ProfitSharingEndpoint<CreateCommentTypeRequest, Results<Ok<CommentTypeDto>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly ICommentTypeService _commentTypeService;
     private readonly ILogger<CreateCommentTypeEndpoint> _logger;
@@ -39,11 +39,11 @@ public sealed class CreateCommentTypeEndpoint : ProfitSharingEndpoint<CreateComm
         });
     }
 
-    public override async Task<Results<Ok<CommentTypeDto>, BadRequest, ProblemHttpResult>> ExecuteAsync(
+    public override Task<Results<Ok<CommentTypeDto>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(
         CreateCommentTypeRequest req,
         CancellationToken ct)
     {
-        return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var result = await _commentTypeService.CreateCommentTypeAsync(req, ct);
 

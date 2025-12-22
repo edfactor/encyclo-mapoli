@@ -97,6 +97,7 @@ public sealed class CommentTypeService : ICommentTypeService
 
                 var commentType = new Data.Entities.CommentType
                 {
+                    Id = default, // Required member - EF Core will assign actual value after SaveChanges
                     Name = trimmedName,
                     IsProtected = request.IsProtected,
                     UserName = _appUser.UserName ?? "",
@@ -110,7 +111,7 @@ public sealed class CommentTypeService : ICommentTypeService
                 await _auditService.LogDataChangeAsync(
                     operationName: "Create Comment Type",
                     tableName: "COMMENT_TYPE",
-                    auditOperation: AuditEvent.AuditOperations.Insert,
+                    auditOperation: AuditEvent.AuditOperations.Create,
                     primaryKey: $"Id:{commentType.Id}",
                     changes:
                     [
