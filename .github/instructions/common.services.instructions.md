@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Demoulas Common Services - Extension Methods Guide
 
 This document provides a comprehensive guide to all extension methods available in the `demoulas.common` solution. These extensions enhance functionality across various .NET types and services.

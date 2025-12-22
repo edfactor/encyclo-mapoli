@@ -10,10 +10,10 @@ Install 3rd Party Libraries:
 
 1. Visual Studio Professional 2026 (18.1.0) or higher installed - https://visualstudio.microsoft.com/downloads/
 
-   ![Workload](./setup_images/workload.PNG)
+    ![Workload](./setup_images/workload.PNG)
 
-   - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads
-   - If VS requires any additional workloads or packages, you will be prompted at startup.
+    - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads
+    - If VS requires any additional workloads or packages, you will be prompted at startup.
 
 1.1. OPTIONAL: JetBrains Rider 2025.3 or higher installed - https://www.jetbrains.com/rider/ 3. OPTIONAL - Latest version of Chrome web browser - https://www.google.com/chrome/
 
@@ -21,17 +21,17 @@ Install 3rd Party Libraries:
 
 1. Clone the git repository https://bitbucket.org/demoulas/smart-profit-sharing
 2. Open the Demoulas.ProfitSharing solution
-   - API Navigate to the \src\Services folder
-   - Locate Demoulas.ProfitSharing.slnx and open with Visual Studio.
+    - API Navigate to the \src\Services folder
+    - Locate Demoulas.ProfitSharing.slnx and open with Visual Studio.
 3. Set the 'Demoulas.ProfitSharing.AppHost' project as your startup project
-   - Find the project, right click and choose "set as startup project"
+    - Find the project, right click and choose "set as startup project"
 4. Check for ArtifactoryCloud NuGet package source
-   - Open a command prompt or terminal window.
-   - run dotnet nuget list source
-   - If "ArtifactoryCloud" is not in the list, read this [guide](https://demoulas.atlassian.net/wiki/spaces/JFD/pages/133726274/Add+Custom+NuGet+source+for+JFrog+Cloud) to add it.
-     - reach out to a team member and get the connection details if needed.
+    - Open a command prompt or terminal window.
+    - run dotnet nuget list source
+    - If "ArtifactoryCloud" is not in the list, read this [guide](https://demoulas.atlassian.net/wiki/spaces/JFD/pages/133726274/Add+Custom+NuGet+source+for+JFrog+Cloud) to add it.
+        - reach out to a team member and get the connection details if needed.
 5. Get secrets.json from one of the team members
-   - [Safe storage of app secrets in development](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#manage-user-secrets-with-visual-studio)
+    - [Safe storage of app secrets in development](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#manage-user-secrets-with-visual-studio)
 6. F5/Run, it's that simple.
 
 # Note-worthy technology

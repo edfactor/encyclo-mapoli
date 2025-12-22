@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/pages/Beneficiaries/**/*.*"
+paths: "src/ui/src/pages/Beneficiaries/**/*.*"
 ---
 
 # Beneficiaries Module Technical Documentation

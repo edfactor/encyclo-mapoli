@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/Demoulas.ProfitSharing.Endpoints/**/*.*"
+paths: "src/services/src/Demoulas.ProfitSharing.Endpoints/**/*.*"
+---
+
 # RESTful API Guidelines Instructions
 
 **Reference:** [RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/)  
