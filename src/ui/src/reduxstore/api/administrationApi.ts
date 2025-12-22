@@ -1,9 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
-import {
-    CommentTypeDto,
-    UpdateCommentTypeRequest
-} from "../types";
+import { CommentTypeDto, UpdateCommentTypeRequest } from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -40,7 +37,4 @@ export const AdministrationApi = createApi({
   })
 });
 
-export const {
-  useGetCommentTypesQuery,
-  useUpdateCommentTypeMutation
-} = AdministrationApi;
+export const { useGetCommentTypesQuery, useUpdateCommentTypeMutation } = AdministrationApi;

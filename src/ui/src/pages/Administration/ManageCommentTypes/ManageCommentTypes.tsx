@@ -18,8 +18,7 @@ const ManageCommentTypes = () => {
   const [stagedProtectionByID, setStagedProtectionByID] = useState<Record<number, boolean>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const hasUnsavedChanges =
-    Object.keys(stagedNamesByID).length > 0 || Object.keys(stagedProtectionByID).length > 0;
+  const hasUnsavedChanges = Object.keys(stagedNamesByID).length > 0 || Object.keys(stagedProtectionByID).length > 0;
   useUnsavedChangesGuard(hasUnsavedChanges);
 
   useEffect(() => {
@@ -81,8 +80,6 @@ const ManageCommentTypes = () => {
     const field = event.colDef.field;
     if (!id || !field) return;
 
-    setErrorMessage(null);
-
     // Handle Name changes
     if (field === "name") {
       const newName = String(event.newValue ?? "").trim();
@@ -93,6 +90,9 @@ const ManageCommentTypes = () => {
 
       const originalName = originalNamesByID[id];
       if (!originalName) return;
+
+      // Valid name change - clear any previous errors
+      setErrorMessage(null);
 
       setStagedNamesByID((prev) => {
         const next = { ...prev };
@@ -112,9 +112,7 @@ const ManageCommentTypes = () => {
 
       // Prevent removing protection flag via UI
       if (originalProtection === true && newValue === false) {
-        setErrorMessage(
-          "Cannot remove protected flag. This must be done via direct database update."
-        );
+        setErrorMessage("Cannot remove protected flag. This must be done via direct database update.");
         // Revert the change in the grid
         event.node.setDataValue("isProtected", true);
         return;
@@ -126,6 +124,8 @@ const ManageCommentTypes = () => {
           delete next[id];
         } else {
           next[id] = newValue;
+          // Only clear error when actually staging a change
+          setErrorMessage(null);
         }
         return next;
       });
@@ -144,10 +144,7 @@ const ManageCommentTypes = () => {
     setErrorMessage(null);
 
     // Collect all IDs that have changes (names or protection)
-    const allChangedIds = new Set([
-      ...Object.keys(stagedNamesByID),
-      ...Object.keys(stagedProtectionByID)
-    ]);
+    const allChangedIds = new Set([...Object.keys(stagedNamesByID), ...Object.keys(stagedProtectionByID)]);
 
     if (allChangedIds.size === 0) return;
 
@@ -176,9 +173,7 @@ const ManageCommentTypes = () => {
         const id = Number.parseInt(idStr, 10);
         const name = stagedNamesByID[id] || originalNamesByID[id];
         const isProtected =
-          stagedProtectionByID[id] !== undefined
-            ? stagedProtectionByID[id]
-            : originalProtectionByID[id];
+          stagedProtectionByID[id] !== undefined ? stagedProtectionByID[id] : originalProtectionByID[id];
 
         await updateCommentType({ id, name, isProtected }).unwrap();
       }
