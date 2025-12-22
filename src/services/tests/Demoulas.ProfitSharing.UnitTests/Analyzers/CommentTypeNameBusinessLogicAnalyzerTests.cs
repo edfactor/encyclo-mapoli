@@ -32,7 +32,8 @@ namespace Demoulas.ProfitSharing.Services.Test
 }";
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
-            .WithSpan(14, 20, 14, 56)
+            .WithSpan(14, 20, 14, 54)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
@@ -60,7 +61,8 @@ namespace Demoulas.ProfitSharing.Services.Test
 }";
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
-            .WithSpan(14, 20, 14, 56)
+            .WithSpan(14, 20, 14, 54)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
@@ -88,7 +90,8 @@ namespace Demoulas.ProfitSharing.Services.Test
 }";
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
-            .WithSpan(14, 20, 14, 52)
+            .WithSpan(14, 20, 14, 49)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
@@ -121,7 +124,8 @@ namespace Demoulas.ProfitSharing.Services.Test
 }";
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
-            .WithSpan(14, 20, 18, 14)
+            .WithSpan(14, 20, 19, 14)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
@@ -158,6 +162,7 @@ namespace Demoulas.ProfitSharing.Services.Test
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
             .WithSpan(14, 13, 22, 14)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
@@ -185,7 +190,8 @@ namespace Demoulas.ProfitSharing.Services.Test
 }";
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
-            .WithSpan(14, 20, 14, 61)
+            .WithSpan(14, 20, 14, 57)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
@@ -213,7 +219,8 @@ namespace Demoulas.ProfitSharing.Services.Test
 }";
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
-            .WithSpan(14, 20, 14, 64)
+            .WithSpan(14, 20, 14, 59)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
@@ -241,7 +248,8 @@ namespace Demoulas.ProfitSharing.Services.Test
 }";
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
-            .WithSpan(14, 20, 14, 56)
+            .WithSpan(14, 20, 14, 52)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
@@ -251,6 +259,8 @@ namespace Demoulas.ProfitSharing.Services.Test
     public Task Dsm010_ShouldFlagStringEquals_WhenUsingStaticMethod()
     {
         var source = @"
+using System;
+
 namespace Demoulas.ProfitSharing.Services.Test
 {
     public class CommentType
@@ -263,13 +273,14 @@ namespace Demoulas.ProfitSharing.Services.Test
     {
         public bool IsTransferOut(CommentType commentType)
         {
-            return string.Equals(commentType.Name, ""Transfer Out"");
+            return String.Equals(commentType.Name, ""Transfer Out"");
         }
     }
 }";
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
-            .WithSpan(14, 20, 14, 72)
+            .WithSpan(16, 20, 16, 67)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
@@ -302,7 +313,8 @@ namespace Demoulas.ProfitSharing.Services.Test
 }";
 
         var expected = AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.Diagnostic("DSM010")
-            .WithSpan(19, 20, 19, 67)
+            .WithSpan(19, 20, 19, 61)
+            .WithSeverity(DiagnosticSeverity.Error)
             .WithArguments();
 
         return AnalyzerVerifier<CommentTypeNameBusinessLogicAnalyzer>.VerifyAnalyzerAsync(source, expected);
