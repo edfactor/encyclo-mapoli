@@ -18,6 +18,30 @@ definitions:
         - windows
         - self.hosted
       script:
+        # Check selective test decision (PR builds only)
+        - |
+          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
+            Write-Host "Checking selective test decision..." -ForegroundColor Cyan
+            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
+
+            if ($decision.decision -eq "SKIP_ALL") {
+              Write-Host "SKIP: No backend projects affected by changes" -ForegroundColor Yellow
+              Write-Host "Reason: $($decision.reason)" -ForegroundColor Yellow
+              exit 0
+            }
+
+            if ($decision.decision -eq "SELECTIVE" -and $decision.runUnitTests -eq $false) {
+              Write-Host "SKIP: Unit tests not affected by changes" -ForegroundColor Yellow
+              Write-Host "Reason: $($decision.reason)" -ForegroundColor Yellow
+              exit 0
+            }
+
+            Write-Host "RUN: Unit tests will execute" -ForegroundColor Green
+            if ($decision.decision -eq "RUN_ALL") {
+              Write-Host "Reason: $($decision.reason)" -ForegroundColor Cyan
+            }
+          }
+
         # Set environment variables
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
@@ -69,6 +93,30 @@ definitions:
         - windows
         - self.hosted
       script:
+        # Check selective test decision (PR builds only)
+        - |
+          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
+            Write-Host "Checking selective test decision..." -ForegroundColor Cyan
+            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
+
+            if ($decision.decision -eq "SKIP_ALL") {
+              Write-Host "SKIP: No backend projects affected by changes" -ForegroundColor Yellow
+              Write-Host "Reason: $($decision.reason)" -ForegroundColor Yellow
+              exit 0
+            }
+
+            if ($decision.decision -eq "SELECTIVE" -and $decision.runArchitectureTests -eq $false) {
+              Write-Host "SKIP: Architecture tests not affected by changes" -ForegroundColor Yellow
+              Write-Host "Reason: $($decision.reason)" -ForegroundColor Yellow
+              exit 0
+            }
+
+            Write-Host "RUN: Architecture tests will execute" -ForegroundColor Green
+            if ($decision.decision -eq "RUN_ALL") {
+              Write-Host "Reason: $($decision.reason)" -ForegroundColor Cyan
+            }
+          }
+
         # Set environment variables
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
@@ -113,6 +161,179 @@ definitions:
 
       artifacts:
         - test-reports/**
+
+    # Selective backend test analysis - determines which tests to run based on changed files
+    # Uses dotnet-affected tool to build dependency graph and identify impacted projects
+    selective-backend-analysis: &selective-backend-analysis
+      name: Analyze Backend Changes (Selective Testing)
+      runs-on:
+        - windows
+        - self.hosted
+      artifacts:
+        - selective-test-decision.json
+      script:
+        # Only run selective analysis for PR builds
+        - |
+          if (-not $env:BITBUCKET_PR_DESTINATION_BRANCH) {
+            Write-Host "Branch build detected - skipping selective analysis (will run all tests)" -ForegroundColor Yellow
+            # Write RUN_ALL decision so downstream steps run all tests
+            @{ decision = "RUN_ALL"; reason = "Branch build" } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+            exit 0
+          }
+
+        # Install dotnet-affected tool
+        - Write-Host "Installing dotnet-affected tool..." -ForegroundColor Cyan
+        - |
+          try {
+            dotnet tool install --global dotnet-affected --version 6.0.2
+            Write-Host "[OK] dotnet-affected installed" -ForegroundColor Green
+          }
+          catch {
+            Write-Host "[WARN] Tool install had issues, checking if already installed..." -ForegroundColor Yellow
+            $toolList = dotnet tool list --global
+            if ($toolList -match "dotnet-affected") {
+              Write-Host "[OK] dotnet-affected already installed" -ForegroundColor Green
+            } else {
+              Write-Host "[ERROR] Failed to install dotnet-affected: $_" -ForegroundColor Red
+              @{ decision = "RUN_ALL"; reason = "Tool installation failed" } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+              exit 0
+            }
+          }
+
+        # Fetch destination branch for comparison
+        - Write-Host "Fetching destination branch for comparison..." -ForegroundColor Cyan
+        - git fetch origin "$env:BITBUCKET_PR_DESTINATION_BRANCH" --depth=50
+
+        # Run dotnet-affected analysis
+        - |
+          Write-Host "Analyzing affected projects..." -ForegroundColor Cyan
+
+          $fromRef = "origin/$env:BITBUCKET_PR_DESTINATION_BRANCH"
+          $toRef = "HEAD"
+
+          try {
+            # Check for global configuration changes first
+            $changedFiles = git diff --name-only "$fromRef...$toRef"
+            $globalChanges = $changedFiles | Where-Object {
+              $_ -match "src/services/Directory\.Build\.props" -or
+              $_ -match "src/services/Directory\.Packages\.props" -or
+              $_ -match "src/services/global\.json" -or
+              $_ -match "src/services/\.editorconfig"
+            }
+
+            if ($globalChanges) {
+              Write-Host "Global configuration changes detected - will run ALL tests" -ForegroundColor Yellow
+              Write-Host "Changed global files:"
+              $globalChanges | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+              @{
+                decision = "RUN_ALL"
+                reason = "Global configuration changes detected"
+                globalChanges = @($globalChanges)
+              } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+              exit 0
+            }
+
+            # Run dotnet-affected analysis
+            Write-Host "Running dotnet-affected from $fromRef to $toRef..." -ForegroundColor Cyan
+
+            Push-Location src/services
+            $affectedOutput = dotnet affected --from $fromRef --to $toRef --format text 2>&1
+            $exitCode = $LASTEXITCODE
+            Pop-Location
+
+            Write-Host "dotnet-affected exit code: $exitCode"
+            Write-Host "Output:"
+            Write-Host $affectedOutput
+
+            if ($exitCode -eq 166) {
+              Write-Host "No affected projects detected (exit code 166)" -ForegroundColor Green
+              @{
+                decision = "SKIP_ALL"
+                reason = "No backend projects affected by changes"
+                runUnitTests = $false
+                runArchitectureTests = $false
+              } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+              exit 0
+            }
+            elseif ($exitCode -ne 0) {
+              Write-Host "dotnet-affected returned non-zero exit code: $exitCode" -ForegroundColor Yellow
+              Write-Host "Falling back to running ALL tests for safety" -ForegroundColor Yellow
+              @{
+                decision = "RUN_ALL"
+                reason = "dotnet-affected failed with exit code $exitCode"
+              } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+              exit 0
+            }
+
+            # Parse affected projects from output
+            $affectedProjects = $affectedOutput -split "`n" | Where-Object { $_ -match "\.csproj$" }
+
+            Write-Host "`nAffected projects:" -ForegroundColor Yellow
+            $affectedProjects | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+
+            # Determine which test projects to run
+            $runUnitTests = $false
+            $runArchitectureTests = $false
+
+            # Check if UnitTests project itself is affected
+            if ($affectedProjects -match "UnitTests\.csproj") {
+              $runUnitTests = $true
+              Write-Host "UnitTests project directly affected" -ForegroundColor Cyan
+            }
+
+            # Check if Architecture tests project is affected
+            if ($affectedProjects -match "UnitTests\.Architecture\.csproj") {
+              $runArchitectureTests = $true
+              Write-Host "Architecture tests project directly affected" -ForegroundColor Cyan
+            }
+
+            # Check if any source project changed (triggers UnitTests)
+            $sourceProjects = @(
+              "Api", "Endpoints", "Services", "Data", "Common",
+              "Security", "Reporting", "OracleHcm", "CachingServices", "Analyzers"
+            )
+
+            foreach ($proj in $sourceProjects) {
+              if ($affectedProjects -match "Demoulas\.ProfitSharing\.$proj\.csproj") {
+                $runUnitTests = $true
+                Write-Host "Source project $proj affected - will run unit tests" -ForegroundColor Cyan
+                break
+              }
+            }
+
+            # Architecture tests run if structural projects change
+            $structuralProjects = @("Common", "Endpoints", "Api", "Services", "Data")
+            foreach ($proj in $structuralProjects) {
+              if ($affectedProjects -match "Demoulas\.ProfitSharing\.$proj\.csproj") {
+                $runArchitectureTests = $true
+                Write-Host "Structural project $proj affected - will run architecture tests" -ForegroundColor Cyan
+                break
+              }
+            }
+
+            # Write decision to artifact
+            $decision = @{
+              decision = "SELECTIVE"
+              runUnitTests = $runUnitTests
+              runArchitectureTests = $runArchitectureTests
+              affectedProjects = @($affectedProjects)
+              reason = "Selective analysis completed"
+            }
+
+            $decision | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+
+            Write-Host "`nTest Execution Decision:" -ForegroundColor Cyan
+            Write-Host "  Unit Tests: $(if ($runUnitTests) { 'RUN' } else { 'SKIP' })" -ForegroundColor $(if ($runUnitTests) { 'Green' } else { 'Yellow' })
+            Write-Host "  Architecture Tests: $(if ($runArchitectureTests) { 'RUN' } else { 'SKIP' })" -ForegroundColor $(if ($runArchitectureTests) { 'Green' } else { 'Yellow' })
+          }
+          catch {
+            Write-Host "Error during selective analysis: $_" -ForegroundColor Red
+            Write-Host "Falling back to running ALL tests for safety" -ForegroundColor Yellow
+            @{
+              decision = "RUN_ALL"
+              reason = "Analysis error: $_"
+            } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
+          }
 
     test-frontend: &test-frontend
       name: Build and Test Frontend UI
@@ -1156,6 +1377,18 @@ pipelines:
                     - "src/services/**/*.json"
                     - "src/services/**/*.config"
           - step: *secret-scan
+      # Stage 2.5: Selective backend analysis (determines which tests to run)
+      - step:
+          <<: *selective-backend-analysis
+          condition:
+            changesets:
+              includePaths:
+                - "src/services/**/*.cs"
+                - "src/services/**/*.csproj"
+                - "src/services/**/*.sln"
+                - "src/services/**/*.slnx"
+                - "src/services/**/*.json"
+                - "src/services/**/*.config"
       # Stage 3: Build and test
       - parallel:
           - step:
