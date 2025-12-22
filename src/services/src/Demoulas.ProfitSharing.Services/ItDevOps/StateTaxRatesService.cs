@@ -104,8 +104,8 @@ public sealed class StateTaxRatesService : IStateTaxRatesService
                 }
 
                 stateTax.Rate = roundedRate;
-                stateTax.UserModified = _appUser.UserName ?? "";
-                stateTax.DateModified = DateOnly.FromDateTime(DateTime.UtcNow);
+                stateTax.UserName = _appUser.UserName ?? "";
+                stateTax.ModifiedAtUtc = DateTimeOffset.UtcNow;
 
                 await ctx.SaveChangesAsync(cancellationToken);
 

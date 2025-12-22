@@ -14,9 +14,12 @@ const ManageCommentTypes = () => {
   const [rowData, setRowData] = useState<CommentTypeDto[]>([]);
   const [originalNamesByID, setOriginalNamesByID] = useState<Record<number, string>>({});
   const [stagedNamesByID, setStagedNamesByID] = useState<Record<number, string>>({});
+  const [originalProtectionByID, setOriginalProtectionByID] = useState<Record<number, boolean>>({});
+  const [stagedProtectionByID, setStagedProtectionByID] = useState<Record<number, boolean>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const hasUnsavedChanges = Object.keys(stagedNamesByID).length > 0;
+  const hasUnsavedChanges =
+    Object.keys(stagedNamesByID).length > 0 || Object.keys(stagedProtectionByID).length > 0;
   useUnsavedChangesGuard(hasUnsavedChanges);
 
   useEffect(() => {
@@ -27,6 +30,12 @@ const ManageCommentTypes = () => {
     setOriginalNamesByID(
       data.reduce<Record<number, string>>((acc, cur) => {
         acc[cur.id] = cur.name;
+        return acc;
+      }, {})
+    );
+    setOriginalProtectionByID(
+      data.reduce<Record<number, boolean>>((acc, cur) => {
+        acc[cur.id] = cur.isProtected;
         return acc;
       }, {})
     );
@@ -52,6 +61,16 @@ const ManageCommentTypes = () => {
         filter: false,
         editable: true,
         flex: 1
+      },
+      {
+        headerName: "Protected",
+        field: "isProtected",
+        sortable: true,
+        filter: false,
+        editable: true,
+        width: 130,
+        cellEditor: "agCheckboxCellEditor",
+        cellRenderer: "agCheckboxCellRenderer"
       }
     ];
   }, []);
@@ -59,50 +78,88 @@ const ManageCommentTypes = () => {
   const onCellValueChanged = (event: CellValueChangedEvent) => {
     const row = event.data as CommentTypeDto | undefined;
     const id = row?.id;
-    if (!id) return;
+    const field = event.colDef.field;
+    if (!id || !field) return;
 
     setErrorMessage(null);
 
-    const newName = String(event.newValue ?? "").trim();
-    if (!newName) {
-      setErrorMessage("Name cannot be empty.");
-      return;
+    // Handle Name changes
+    if (field === "name") {
+      const newName = String(event.newValue ?? "").trim();
+      if (!newName) {
+        setErrorMessage("Name cannot be empty.");
+        return;
+      }
+
+      const originalName = originalNamesByID[id];
+      if (!originalName) return;
+
+      setStagedNamesByID((prev) => {
+        const next = { ...prev };
+        if (newName === originalName) {
+          delete next[id];
+        } else {
+          next[id] = newName;
+        }
+        return next;
+      });
     }
 
-    const originalName = originalNamesByID[id];
-    if (!originalName) return;
+    // Handle IsProtected changes (one-way: can set to true, cannot unset)
+    if (field === "isProtected") {
+      const newValue = Boolean(event.newValue);
+      const originalProtection = originalProtectionByID[id];
 
-    setStagedNamesByID((prev) => {
-      const next = { ...prev };
-      if (newName === originalName) {
-        delete next[id];
-      } else {
-        next[id] = newName;
+      // Prevent removing protection flag via UI
+      if (originalProtection === true && newValue === false) {
+        setErrorMessage(
+          "Cannot remove protected flag. This must be done via direct database update."
+        );
+        // Revert the change in the grid
+        event.node.setDataValue("isProtected", true);
+        return;
       }
-      return next;
-    });
+
+      setStagedProtectionByID((prev) => {
+        const next = { ...prev };
+        if (newValue === originalProtection) {
+          delete next[id];
+        } else {
+          next[id] = newValue;
+        }
+        return next;
+      });
+    }
   };
 
   const discardChanges = () => {
     if (!data) return;
     setRowData(data.map((r) => ({ ...r })));
     setStagedNamesByID({});
+    setStagedProtectionByID({});
     setErrorMessage(null);
   };
 
   const saveChanges = async () => {
     setErrorMessage(null);
 
-    const entries = Object.entries(stagedNamesByID);
-    if (entries.length === 0) return;
+    // Collect all IDs that have changes (names or protection)
+    const allChangedIds = new Set([
+      ...Object.keys(stagedNamesByID),
+      ...Object.keys(stagedProtectionByID)
+    ]);
 
-    for (const [idStr, name] of entries) {
+    if (allChangedIds.size === 0) return;
+
+    // Validate all changes
+    for (const idStr of allChangedIds) {
       const id = Number.parseInt(idStr, 10);
       if (!Number.isFinite(id) || id <= 0) {
         setErrorMessage("Invalid comment type ID.");
         return;
       }
 
+      const name = stagedNamesByID[id] || originalNamesByID[id];
       if (!name || name.trim().length === 0) {
         setErrorMessage("Name cannot be empty.");
         return;
@@ -115,12 +172,19 @@ const ManageCommentTypes = () => {
     }
 
     try {
-      for (const [idStr, name] of entries) {
+      for (const idStr of allChangedIds) {
         const id = Number.parseInt(idStr, 10);
-        await updateCommentType({ id, name }).unwrap();
+        const name = stagedNamesByID[id] || originalNamesByID[id];
+        const isProtected =
+          stagedProtectionByID[id] !== undefined
+            ? stagedProtectionByID[id]
+            : originalProtectionByID[id];
+
+        await updateCommentType({ id, name, isProtected }).unwrap();
       }
 
       setStagedNamesByID({});
+      setStagedProtectionByID({});
       await refetch();
     } catch (e) {
       console.error("Failed to update comment types", e);
