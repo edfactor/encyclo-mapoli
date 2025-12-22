@@ -26,7 +26,7 @@ echo ""
 # =============================================================================
 
 # Get changed UI source files (only lintable extensions)
-changed_ui_files=$(git diff --name-only "$compare_ref"..HEAD 2>/dev/null | grep '^src/ui/src/' | grep -E '\.(ts|tsx|js|jsx)$')
+changed_ui_files=$(git diff --name-only --diff-filter=ACMR "$compare_ref"..HEAD 2>/dev/null | grep '^src/ui/src/' | grep -E '\.(ts|tsx|js|jsx)$')
 
 # Check if any files in src/ui/src have changed compared to the reference
 if [ -n "$changed_ui_files" ]; then
@@ -124,7 +124,7 @@ fi
 # =============================================================================
 
 # Get changed backend files (specific extensions like pipeline)
-changed_backend_files=$(git diff --name-only "$compare_ref"..HEAD 2>/dev/null | \
+changed_backend_files=$(git diff --name-only --diff-filter=ACMR "$compare_ref"..HEAD 2>/dev/null | \
     grep '^src/services/' | \
     grep -E '\.(cs|csproj|sln|slnx|json|config)$' | \
     grep -v '/tests/')
