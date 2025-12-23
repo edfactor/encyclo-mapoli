@@ -1,23 +1,23 @@
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  Tooltip,
-  Typography
-} from "@mui/material";
 import { Print } from "@mui/icons-material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import {
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
+    IconButton,
+    Tooltip,
+    Typography
+} from "@mui/material";
 import { ColDef, SelectionChangedEvent } from "ag-grid-community";
 import React, { useEffect, useState } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
@@ -231,39 +231,36 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
             </Box>
           ) : apiData && !errorMessage ? (
             columnDefs.length > 0 ? (
-              <>
-                <DSMGrid
-                  preferenceKey="ADHOC_PROF_LETTER73"
-                  isLoading={isFetching}
-                  maxHeight={gridMaxHeight}
-                  providedOptions={{
-                    rowData: rowData,
-                    columnDefs: columnDefs,
-                    rowSelection: "multiple",
-                    onSelectionChanged: handleSelectionChanged,
-                    onSortChanged: (event) => {
-                      const columnState = event.api.getColumnState();
-                      const sortedColumn = columnState.find((col) => col.sort !== null && col.sort !== undefined);
-
-                      if (sortedColumn && sortedColumn.colId) {
-                        handleSortChange({
-                          sortBy: sortedColumn.colId,
-                          isSortDescending: sortedColumn.sort === "desc"
-                        });
-                      }
-                    }
-                  }}
-                />
-                {rowData.length > 0 && (
-                  <Pagination
-                    pageNumber={pageNumber}
-                    setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-                    pageSize={pageSize}
-                    setPageSize={handlePageSizeChange}
-                    recordCount={apiData.total || rowData.length}
-                  />
-                )}
-              </>
+              <DSMPaginatedGrid
+                preferenceKey="ADHOC_PROF_LETTER73"
+                data={rowData}
+                columnDefs={columnDefs}
+                totalRecords={apiData.total || rowData.length}
+                isLoading={isFetching}
+                pagination={{
+                  pageNumber,
+                  pageSize,
+                  sortParams,
+                  handlePageNumberChange,
+                  handlePageSizeChange,
+                  handleSortChange
+                }}
+                onSortChange={(update) => {
+                  handleSortChange({
+                    sortBy: update.sortBy,
+                    isSortDescending: update.isSortDescending
+                  });
+                }}
+                heightConfig={{
+                  mode: "content-aware",
+                  maxHeight: gridMaxHeight
+                }}
+                gridOptions={{
+                  rowSelection: "multiple",
+                  onSelectionChanged: handleSelectionChanged
+                }}
+                showPagination={rowData.length > 0}
+              />
             ) : (
               <Box sx={{ padding: "24px" }}>
                 <Typography>No data available for the selected profit year.</Typography>

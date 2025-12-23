@@ -1,15 +1,16 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
-import { useSelector } from "react-redux";
 
-import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import { GetProfallGridColumns } from "./ProfallGridColumns";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { RootState } from "reduxstore/store";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
+import { ProfitSharingLabel } from "../../../types";
+import { GetProfallGridColumns } from "./ProfallGridColumns";
 
 interface ProfallGridProps {
   pageNumberReset: boolean;
@@ -23,15 +24,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
   const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
   const profitYear = useFiscalCloseProfitYear();
 
-  const {
-    pageNumber,
-    pageSize,
-    sortParams,
-    handlePageNumberChange,
-    handlePageSizeChange,
-    handleSortChange,
-    resetPagination
-  } = useGridPagination({
+  const pagination = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
@@ -56,6 +49,9 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
       [profitYear, securityState.token, getProfitSharingLabels]
     )
   });
+
+  // Destructure for internal use
+  const { pageNumber, pageSize, sortParams, resetPagination } = pagination;
 
   const fetchData = useCallback(() => {
     const yearToUse = profitYear || new Date().getFullYear();
@@ -103,33 +99,22 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
   const recordCount = profitSharingLabels?.total || 0;
 
   return (
-    <>
-      <div style={{ padding: "0 24px 0 24px" }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
+    <DSMPaginatedGrid<ProfitSharingLabel>
+      preferenceKey={GRID_KEYS.PROFALL_REPORT}
+      data={rowData}
+      columnDefs={columnDefs}
+      totalRecords={recordCount}
+      isLoading={isFetching}
+      pagination={pagination}
+      onSortChange={pagination.handleSortChange}
+      showPagination={recordCount > 0}
+      header={
+        <Typography variant="h2" sx={{ color: "#0258A5" }}>
           {`PROFALL REPORT (${recordCount} records)`}
         </Typography>
-      </div>
-      <DSMGrid
-        preferenceKey={GRID_KEYS.PROFALL_REPORT}
-        isLoading={isFetching}
-        handleSortChanged={handleSortChange}
-        providedOptions={{
-          rowData: rowData,
-          columnDefs: columnDefs
-        }}
-      />
-      {recordCount > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-          pageSize={pageSize}
-          setPageSize={handlePageSizeChange}
-          recordCount={recordCount}
-        />
-      )}
-    </>
+      }
+      slotClassNames={{ headerClassName: "px-6" }}
+    />
   );
 };
 

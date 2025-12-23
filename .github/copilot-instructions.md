@@ -17,7 +17,7 @@ This concise guide explains the must-know patterns, commands, and files for AI c
 **Architecture & boundaries (big picture)**
 
 - Endpoints (FastEndpoints) must call service layer methods; services own EF Core usage and return `Result<T>`.
-- Frontend pages live in `src/ui/src/pages/*`. Use `Page`, `DSMAccordion`, and `DSMGrid` from `smart-ui-library`.
+- Frontend pages live in `src/ui/src/pages/*`. Use `Page`, `DSMAccordion`, and `DSMPaginatedGrid` (for paginated data) or `DSMGrid` (for non-paginated data) from `smart-ui-library`.
 - Telemetry and security are cross-cutting: record sensitive-field accesses and mask PII before logging.
 
 **Critical, project-specific rules (always follow)**

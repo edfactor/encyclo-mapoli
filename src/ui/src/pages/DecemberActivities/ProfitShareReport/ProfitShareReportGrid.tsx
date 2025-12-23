@@ -1,9 +1,10 @@
 import { Box, CircularProgress } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useLazyGetYearEndProfitSharingReportLiveQuery } from "reduxstore/api/YearsEndApi";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { ISortParams } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
@@ -105,6 +106,15 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
     [handleSortChange]
   );
 
+  const paginationProps = {
+    pageNumber,
+    pageSize,
+    sortParams,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange
+  };
+
   // Show loading spinner when fetching data
   if (isFetching && data.length === 0) {
     return (
@@ -116,28 +126,21 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
 
   return (
     <div className="relative">
-      <DSMGrid
+      <DSMPaginatedGrid
         preferenceKey={GRID_KEYS.PROFIT_SHARE_REPORT}
+        data={data}
+        columnDefs={columnDefs}
+        totalRecords={recordCount}
         isLoading={isFetching}
-        maxHeight={gridMaxHeight}
-        handleSortChanged={handleSortChanged}
-        providedOptions={{
-          rowData: data,
-          columnDefs: columnDefs
+        pagination={paginationProps}
+        onSortChange={handleSortChanged}
+        heightConfig={{
+          mode: "content-aware",
+          maxHeight: gridMaxHeight
         }}
+        showPagination={data.length > 0}
+        rowsPerPageOptions={[5, 10, 25, 50, 100]}
       />
-      {data.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePageNumberChange(value - 1);
-          }}
-          pageSize={pageSize}
-          setPageSize={handlePageSizeChange}
-          recordCount={recordCount}
-          rowsPerPageOptions={[5, 10, 25, 50, 100]}
-        />
-      )}
     </div>
   );
 };

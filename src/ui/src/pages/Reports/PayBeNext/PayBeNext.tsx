@@ -3,16 +3,17 @@ import { Checkbox, Divider, FormLabel, Grid, MenuItem, Select, Typography } from
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
+import { DSMAccordion, ISortParams, Page, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/AdhocApi";
 import {
-  AdhocBeneficiariesReportRequest,
-  adhocBeneficiariesReportResponse,
-  BeneficiaryReportDto
+    AdhocBeneficiariesReportRequest,
+    adhocBeneficiariesReportResponse,
+    BeneficiaryReportDto
 } from "../../../reduxstore/types";
 import { PayBeNextGridColumns, ProfitDetailGridColumns } from "./PayBeNextGridColumns";
 
@@ -301,14 +302,32 @@ const PayBeNext = () => {
                   {`Employee Beneficiaries Control Sheet Starting at Year ${profitYear}`}
                 </Typography>
                 <strong>Ending Balance</strong> ${adhocBeneficiariesReport?.totalEndingBalance}
-                <DSMGrid
+                <DSMPaginatedGrid<BeneficiaryReportDto>
                   preferenceKey={GRID_KEYS.BENEFICIARY_INQUIRY}
+                  data={gridData}
+                  columnDefs={columnDefs}
+                  totalRecords={adhocBeneficiariesReport?.response?.total ?? 0}
                   isLoading={isFetching}
-                  maxHeight={gridMaxHeight}
-                  handleSortChanged={sortEventHandler}
-                  providedOptions={{
-                    rowData: gridData,
-                    columnDefs: columnDefs,
+                  onSortChange={sortEventHandler}
+                  heightConfig={{ maxHeight: gridMaxHeight }}
+                  pagination={{
+                    pageNumber,
+                    pageSize,
+                    sortParams: { sortBy: "", isSortDescending: false },
+                    handlePageNumberChange: (value: number) => {
+                      setPageNumber(value);
+                    },
+                    handlePageSizeChange: (value: number) => {
+                      setPageSize(value);
+                      setPageNumber(0);
+                    },
+                    handleSortChange: () => {}
+                  }}
+                  showPagination={
+                    adhocBeneficiariesReport?.response?.results &&
+                    adhocBeneficiariesReport.response.results.length > 0
+                  }
+                  gridOptions={{
                     suppressMultiSort: true,
                     masterDetail: true,
                     detailCellRenderer: (params: BeneficiaryReportDto) => {
@@ -350,22 +369,6 @@ const PayBeNext = () => {
                     }
                   }}
                 />
-                {adhocBeneficiariesReport &&
-                  adhocBeneficiariesReport.response &&
-                  adhocBeneficiariesReport.response.results.length > 0 && (
-                    <Pagination
-                      pageNumber={pageNumber}
-                      setPageNumber={(value: number) => {
-                        setPageNumber(value - 1);
-                      }}
-                      pageSize={pageSize}
-                      setPageSize={(value: number) => {
-                        setPageSize(value);
-                        setPageNumber(1);
-                      }}
-                      recordCount={adhocBeneficiariesReport.response.total}
-                    />
-                  )}
               </div>
             </div>
           )}

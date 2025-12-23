@@ -1,10 +1,10 @@
 import { Grid } from "@mui/material";
 import { useMemo } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
+import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
-import { AccountHistoryReportPaginatedResponse } from "../../../types/reports/AccountHistoryReportTypes";
-import { GRID_KEYS } from "../../../constants";
+import { AccountHistoryReportPaginatedResponse, AccountHistoryReportResponse } from "../../../types/reports/AccountHistoryReportTypes";
 import { GetAccountHistoryReportColumns } from "./AccountHistoryReportGridColumns";
 
 interface AccountHistoryReportTableProps {
@@ -26,7 +26,7 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
   });
   const columnDefs = useMemo(() => GetAccountHistoryReportColumns(), []);
 
-  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange } = gridPagination;
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } = gridPagination;
   const recordCount = data?.response?.total ?? 0;
 
   return (
@@ -36,27 +36,24 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
           container
           rowSpacing="24px">
           <Grid width="100%">
-            <DSMGrid
+            <DSMPaginatedGrid<AccountHistoryReportResponse>
               preferenceKey={GRID_KEYS.ACCOUNT_HISTORY_REPORT}
+              data={data.response.results ?? []}
+              columnDefs={columnDefs}
+              totalRecords={recordCount}
               isLoading={isLoading}
-              maxHeight={gridMaxHeight}
-              providedOptions={{
-                rowData: data.response.results ?? [],
-                columnDefs: columnDefs
+              heightConfig={{ maxHeight: gridMaxHeight }}
+              pagination={{
+                pageNumber,
+                pageSize,
+                sortParams: sortParams ?? { sortBy: "", isSortDescending: false },
+                handlePageNumberChange,
+                handlePageSizeChange,
+                handleSortChange: handleSortChange ?? (() => {})
               }}
+              showPagination={recordCount > 0}
             />
           </Grid>
-          {recordCount > 0 && (
-            <Grid width="100%">
-              <Pagination
-                pageNumber={pageNumber}
-                setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-                pageSize={pageSize}
-                setPageSize={handlePageSizeChange}
-                recordCount={recordCount}
-              />
-            </Grid>
-          )}
         </Grid>
       )}
     </>

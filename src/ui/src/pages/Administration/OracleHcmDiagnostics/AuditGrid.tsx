@@ -1,17 +1,18 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Typography
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { DSMGrid, Paged, Pagination } from "smart-ui-library";
+import { Paged } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { SortParams } from "../../../hooks/useGridPagination";
 import { useClearDemographicSyncAudit } from "../../../reduxstore/api/hcmSyncApi";
@@ -24,6 +25,7 @@ interface AuditGridProps {
   onClearSuccess: () => void;
   pageNumber: number;
   pageSize: number;
+  sortParams: SortParams;
   onPageChange: (page: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
@@ -34,6 +36,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
   onClearSuccess,
   pageNumber,
   pageSize,
+  sortParams,
   onPageChange,
   onSortChange
 }) => {
@@ -90,32 +93,26 @@ const AuditGrid: React.FC<AuditGridProps> = ({
       {isLoading ? (
         <CircularProgress />
       ) : data && (data.results?.length ?? 0) > 0 ? (
-        <>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.DEMOGRAPHIC_SYNC_AUDIT}
-            isLoading={isLoading}
-            handleSortChanged={onSortChange}
-            providedOptions={{
-              rowData: data.results,
-              columnDefs: columnDefs,
-              suppressMoveWhenRowDragging: true,
-              enableCellTextSelection: true
-            }}
-          />
-          {data && (data.results?.length ?? 0) > 0 && (
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={(value: number) => {
-                onPageChange(value - 1, pageSize);
-              }}
-              pageSize={pageSize}
-              setPageSize={(value: number) => {
-                onPageChange(0, value);
-              }}
-              recordCount={data.total}
-            />
-          )}
-        </>
+        <DSMPaginatedGrid
+          preferenceKey={GRID_KEYS.DEMOGRAPHIC_SYNC_AUDIT}
+          data={data.results ?? []}
+          columnDefs={columnDefs}
+          totalRecords={data.total}
+          isLoading={isLoading}
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams,
+            handlePageNumberChange: (value: number) => onPageChange(value, pageSize),
+            handlePageSizeChange: (value: number) => onPageChange(0, value),
+            handleSortChange: onSortChange,
+          }}
+          showPagination={(data.results?.length ?? 0) > 0}
+          gridOptions={{
+            suppressMoveWhenRowDragging: true,
+            enableCellTextSelection: true
+          }}
+        />
       ) : (
         <Typography
           variant="body1"

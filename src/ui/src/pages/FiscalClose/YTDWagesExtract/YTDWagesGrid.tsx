@@ -1,9 +1,10 @@
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { Box, Grid, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import { RowClassParams } from "ag-grid-community";
 import { RefObject, useMemo } from "react";
-import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
+import { numberToCurrency } from "smart-ui-library";
+import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
@@ -74,103 +75,91 @@ const YTDWagesGrid = ({
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
 
+  // Create pagination props for DSMPaginatedGrid
+  const paginationProps = useMemo(
+    () => ({
+      pageNumber: pagination.pageNumber,
+      pageSize: pagination.pageSize,
+      sortParams: pagination.sortParams,
+      handlePageNumberChange: (value: number) => onPaginationChange(value, pagination.pageSize),
+      handlePageSizeChange: (value: number) => onPaginationChange(0, value),
+      handleSortChange: onSortChange
+    }),
+    [pagination, onPaginationChange, onSortChange]
+  );
+
+  // Header content with title and totals (when not expanded)
+  const headerContent = useMemo(
+    () => (
+      <Box display="flex" alignItems="center" gap={3}>
+        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+          {clonedData?.reportName || "YTD Wages Extract"}
+        </Typography>
+        {!isGridExpanded && (
+          <>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="body2" fontWeight="semibold">
+                Total Hours:
+              </Typography>
+              <Typography variant="body2">
+                {clonedData?.totalHoursCurrentYearWages?.toFixed(2) ??
+                  totalsRow?.hoursCurrentYear.toFixed(2) ??
+                  "0.00"}
+              </Typography>
+            </Box>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="body2" fontWeight="semibold">
+                Total Income:
+              </Typography>
+              <Typography variant="body2">
+                {numberToCurrency(clonedData?.totalIncomeCurrentYearWages ?? totalsRow?.incomeCurrentYear ?? 0)}
+              </Typography>
+            </Box>
+          </>
+        )}
+      </Box>
+    ),
+    [clonedData?.reportName, clonedData?.totalHoursCurrentYearWages, clonedData?.totalIncomeCurrentYearWages, isGridExpanded, totalsRow]
+  );
+
+  if (!showData || !clonedData?.response) {
+    return null;
+  }
+
   return (
-    <div className="relative">
-      {showData && clonedData?.response && (
-        <div ref={innerRef}>
-          <Grid
-            container
-            justifyContent="space-between"
-            alignItems="center"
-            marginBottom={2}>
-            <Grid>
-              <Box
-                display="flex"
-                alignItems="center"
-                gap={3}>
-                <Typography
-                  variant="h2"
-                  sx={{ color: "#0258A5" }}>
-                  {clonedData.reportName || "hello"}
-                </Typography>
-                {!isGridExpanded && (
-                  <>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={1}>
-                      <Typography
-                        variant="body2"
-                        fontWeight="semibold">
-                        Total Hours:
-                      </Typography>
-                      <Typography variant="body2">
-                        {clonedData.totalHoursCurrentYearWages?.toFixed(2) ??
-                          totalsRow?.hoursCurrentYear.toFixed(2) ??
-                          "0.00"}
-                      </Typography>
-                    </Box>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={1}>
-                      <Typography
-                        variant="body2"
-                        fontWeight="semibold">
-                        Total Income:
-                      </Typography>
-                      <Typography variant="body2">
-                        {numberToCurrency(clonedData.totalIncomeCurrentYearWages ?? totalsRow?.incomeCurrentYear ?? 0)}
-                      </Typography>
-                    </Box>
-                  </>
-                )}
-              </Box>
-            </Grid>
-            <Grid>
-              {onToggleExpand && (
-                <IconButton
-                  onClick={onToggleExpand}
-                  sx={{ zIndex: 1 }}
-                  aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
-                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
-                </IconButton>
-              )}
-            </Grid>
-          </Grid>
-          {!isGridExpanded && <ReportSummary report={clonedData} />}
-          <DSMGrid
-            preferenceKey={GRID_KEYS.YTD_WAGES}
-            isLoading={isLoading}
-            maxHeight={gridMaxHeight}
-            handleSortChanged={onSortChange}
-            providedOptions={{
-              rowData: clonedData.response.results,
-              pinnedTopRowData: totalsRow ? [totalsRow] : [],
-              columnDefs: columnDefs,
-              getRowStyle: (params: RowClassParams) => {
-                if (params.node.rowPinned) {
-                  return { background: "#f0f0f0", fontWeight: "bold" };
-                }
-                return undefined;
-              }
-            }}
-          />
-        </div>
-      )}
-      {!isGridExpanded && hasResults && data?.response && (
-        <Pagination
-          pageNumber={pagination.pageNumber}
-          setPageNumber={(value: number) => {
-            onPaginationChange(value - 1, pagination.pageSize);
-          }}
-          pageSize={pagination.pageSize}
-          setPageSize={(value: number) => {
-            onPaginationChange(0, value);
-          }}
-          recordCount={data.response.total || 0}
-        />
-      )}
+    <div ref={innerRef}>
+      <DSMPaginatedGrid
+        preferenceKey={GRID_KEYS.YTD_WAGES}
+        data={clonedData.response.results}
+        columnDefs={columnDefs}
+        isLoading={isLoading}
+        pagination={paginationProps}
+        totalRecords={hasResults ? (data?.response?.total ?? 0) : 0}
+        showPagination={!isGridExpanded && hasResults}
+        onSortChange={onSortChange}
+        heightConfig={{ maxHeight: gridMaxHeight }}
+        header={headerContent}
+        headerActions={
+          onToggleExpand ? (
+            <IconButton
+              onClick={onToggleExpand}
+              sx={{ zIndex: 1 }}
+              aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+              {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </IconButton>
+          ) : null
+        }
+        beforeGrid={!isGridExpanded ? <ReportSummary report={clonedData} /> : undefined}
+        gridOptions={{
+          pinnedTopRowData: totalsRow ? [totalsRow] : [],
+          getRowStyle: (params: RowClassParams) => {
+            if (params.node.rowPinned) {
+              return { background: "#f0f0f0", fontWeight: "bold" };
+            }
+            return undefined;
+          }
+        }}
+      />
     </div>
   );
 };
