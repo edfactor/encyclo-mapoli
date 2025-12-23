@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { GRID_KEYS } from "../../../../constants";
 import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
@@ -144,24 +144,22 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
         </Typography>
       </Grid>
       <Grid width="100%">
-        <DSMGrid
+        <DSMPaginatedGrid
           preferenceKey={`${GRID_KEYS.STORE_MANAGEMENT_PREFIX}${store}`}
+          data={storeManagement?.response?.results || []}
+          columnDefs={columnDefs}
+          totalRecords={storeManagement?.response?.total || 0}
           isLoading={isFetching}
-          handleSortChanged={handleSortChange}
-          providedOptions={{
-            rowData: storeManagement?.response?.results || [],
-            columnDefs: columnDefs
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams,
+            handlePageNumberChange: (value: number) => handlePageNumberChange(value - 1),
+            handlePageSizeChange,
+            handleSortChange,
           }}
+          showPagination={storeManagement?.response?.results && storeManagement.response.results.length > 0}
         />
-        {storeManagement?.response?.results && storeManagement.response.results.length > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-            pageSize={pageSize}
-            setPageSize={handlePageSizeChange}
-            recordCount={storeManagement.response.total || 0}
-          />
-        )}
       </Grid>
     </Grid>
   );

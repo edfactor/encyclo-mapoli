@@ -4,7 +4,8 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { CircularProgress, Grid, IconButton, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { ISortParams, numberToCurrency, TotalsGrid } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
@@ -529,35 +530,39 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
               </Typography>
             </div>
           ) : (
-            <DSMGrid
+            <DSMPaginatedGrid
               preferenceKey={GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES}
+              data={distributionsAndForfeitures?.response.results ?? []}
+              columnDefs={columnDefs}
+              totalRecords={distributionsAndForfeitures?.response?.total ?? 0}
               isLoading={false}
-              handleSortChanged={sortEventHandler}
-              maxHeight={gridMaxHeight}
-              providedOptions={{
-                rowData: distributionsAndForfeitures?.response.results,
-                columnDefs: columnDefs,
+              pagination={{
+                pageNumber,
+                pageSize,
+                sortParams,
+                handlePageNumberChange: (value: number) => {
+                  handlePageNumberChange(value - 1);
+                  setInitialSearchLoaded(true);
+                },
+                handlePageSizeChange: (value: number) => {
+                  setInitialPageSize(value);
+                  handlePageSizeChange(value);
+                  setInitialSearchLoaded(true);
+                },
+                handleSortChange
+              }}
+              onSortChange={sortEventHandler}
+              heightConfig={{
+                mode: "content-aware",
+                maxHeight: gridMaxHeight
+              }}
+              gridOptions={{
                 suppressMultiSort: true
               }}
+              showPagination={!!distributionsAndForfeitures && distributionsAndForfeitures.response?.total > 0}
             />
           )}
         </>
-      )}
-      {!isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response?.total > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePageNumberChange(value - 1);
-            setInitialSearchLoaded(true);
-          }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            setInitialPageSize(value);
-            handlePageSizeChange(value);
-            setInitialSearchLoaded(true);
-          }}
-          recordCount={distributionsAndForfeitures.response.total}
-        />
       )}
     </>
   );

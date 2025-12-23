@@ -82,6 +82,7 @@ const OracleHcmDiagnostics = () => {
           onClearSuccess={handleClearSuccess}
           pageNumber={pageNumber}
           pageSize={pageSize}
+          sortParams={{ sortBy, isSortDescending }}
           onPageChange={handlePageChange}
           onSortChange={handleSortChange}
         />

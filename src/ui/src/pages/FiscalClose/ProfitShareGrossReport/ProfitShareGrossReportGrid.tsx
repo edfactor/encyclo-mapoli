@@ -5,7 +5,8 @@ import { Path, useNavigate } from "react-router";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
-import { DSMGrid, Pagination, TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
@@ -104,28 +105,29 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
               topRowHeaders={["Totals"]}
             />
           )}
-          <DSMGrid
+          <DSMPaginatedGrid
             preferenceKey={GRID_KEYS.PROFIT_SHARE_GROSS_REPORT}
+            data={grossWagesReport?.response.results ?? []}
+            columnDefs={columnDefs}
+            totalRecords={grossWagesReport?.response.total ?? 0}
             isLoading={isFetching}
-            maxHeight={gridMaxHeight}
-            handleSortChanged={handleSortChange}
-            providedOptions={{
-              rowData: grossWagesReport?.response.results,
-              columnDefs: columnDefs,
+            onSortChange={handleSortChange}
+            heightConfig={{ maxHeight: gridMaxHeight }}
+            pagination={{
+              pageNumber,
+              pageSize,
+              sortParams: { sortBy: "", isSortDescending: false },
+              handlePageNumberChange: (value: number) => handlePageNumberChange(value - 1),
+              handlePageSizeChange,
+              handleSortChange: () => {}
+            }}
+            showPagination={!!grossWagesReport && grossWagesReport.response.results.length > 0}
+            gridOptions={{
               suppressHorizontalScroll: true,
               suppressColumnVirtualisation: true
             }}
           />
         </>
-      )}
-      {!!grossWagesReport && grossWagesReport.response.results.length && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-          pageSize={pageSize}
-          setPageSize={handlePageSizeChange}
-          recordCount={grossWagesReport.response.total}
-        />
       )}
     </div>
   );

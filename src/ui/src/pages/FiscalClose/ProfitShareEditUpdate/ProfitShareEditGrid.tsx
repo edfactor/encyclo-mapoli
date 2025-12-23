@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useLazyGetProfitShareEditQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GRID_KEYS } from "../../../constants";
 import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
@@ -125,31 +125,29 @@ const ProfitShareEditGrid = ({
         </Typography>
       </div>
       {!!profitSharingEdit && (
-        <>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.PROFIT_SHARE_EDIT}
-            isLoading={isFetching}
-            handleSortChanged={handleSortChange}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: "response" in profitSharingEdit ? profitSharingEdit.response?.results : [],
-              columnDefs: editColumnDefs
-            }}
-          />
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
+        <DSMPaginatedGrid
+          preferenceKey={GRID_KEYS.PROFIT_SHARE_EDIT}
+          data={"response" in profitSharingEdit ? (profitSharingEdit.response?.results ?? []) : []}
+          columnDefs={editColumnDefs}
+          totalRecords={profitSharingEdit?.response.total ?? 0}
+          isLoading={isFetching}
+          heightConfig={{ maxHeight: gridMaxHeight }}
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams,
+            handlePageNumberChange: (value: number) => {
               handlePageNumberChange(value - 1);
               setInitialSearchLoaded(true);
-            }}
-            pageSize={pageSize}
-            setPageSize={(value: number) => {
+            },
+            handlePageSizeChange: (value: number) => {
               handlePageSizeChange(value);
               setInitialSearchLoaded(true);
-            }}
-            recordCount={profitSharingEdit?.response.total ?? 0}
-          />
-        </>
+            },
+            handleSortChange,
+          }}
+          showPagination
+        />
       )}
     </>
   );

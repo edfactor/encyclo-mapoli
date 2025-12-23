@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GRID_KEYS } from "../../../constants";
 import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
@@ -124,31 +124,30 @@ const ProfitShareEditUpdateGrid = ({
         </Typography>
       </div>
       {!!profitSharingUpdate && (
-        <>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.PROFIT_SHARE_UPDATE}
-            isLoading={isFetching}
-            handleSortChanged={handleSortChange}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: "response" in profitSharingUpdate ? profitSharingUpdate.response?.results : [],
-              columnDefs: columnDefs
-            }}
-          />
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
+        <DSMPaginatedGrid
+          preferenceKey={GRID_KEYS.PROFIT_SHARE_UPDATE}
+          data={"response" in profitSharingUpdate ? (profitSharingUpdate.response?.results ?? []) : []}
+          columnDefs={columnDefs}
+          totalRecords={profitSharingUpdate?.response.total ?? 0}
+          isLoading={isFetching}
+          onSortChange={handleSortChange}
+          heightConfig={{ maxHeight: gridMaxHeight }}
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams: sortParams ?? { sortBy: "", isSortDescending: false },
+            handlePageNumberChange: (value: number) => {
               handlePageNumberChange(value - 1);
               setInitialSearchLoaded(true);
-            }}
-            pageSize={pageSize}
-            setPageSize={(value: number) => {
+            },
+            handlePageSizeChange: (value: number) => {
               handlePageSizeChange(value);
               setInitialSearchLoaded(true);
-            }}
-            recordCount={profitSharingUpdate?.response.total ?? 0}
-          />
-        </>
+            },
+            handleSortChange: () => {}
+          }}
+          showPagination
+        />
       )}
     </>
   );

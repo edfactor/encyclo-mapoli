@@ -2,7 +2,8 @@ import { AddOutlined } from "@mui/icons-material";
 import { Button, Tooltip, Typography } from "@mui/material";
 import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DSMGrid, Pagination, SmartModal } from "smart-ui-library";
+import { SmartModal } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
@@ -111,7 +112,6 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 }) => {
   const currentData = isModal ? modalResults : gridData;
   const currentPagination = isModal ? modalGridPagination : mainGridPagination;
-  const sortEventHandler = currentPagination?.handleSortChange;
   const gridMaxHeight = useContentAwareGridHeight({
     rowCount: currentData?.response?.results?.length ?? 0
   });
@@ -259,14 +259,30 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             </div>
           </>
         )}
-        <DSMGrid
+        <DSMPaginatedGrid
           preferenceKey={GRID_KEYS.MANAGE_EXECUTIVE_HOURS}
+          data={mutableRowData}
+          columnDefs={columnDefs}
+          totalRecords={currentData?.response?.total ?? 0}
           isLoading={isSearching}
-          handleSortChanged={sortEventHandler}
-          maxHeight={gridMaxHeight}
-          providedOptions={{
-            rowData: mutableRowData,
-            columnDefs: columnDefs,
+          heightConfig={{ maxHeight: gridMaxHeight }}
+          pagination={currentPagination ? {
+            pageNumber: currentPagination.pageNumber,
+            pageSize: currentPagination.pageSize,
+            sortParams: currentPagination.sortParams,
+            handlePageNumberChange: (value: number) => currentPagination.handlePageNumberChange(value - 1),
+            handlePageSizeChange: currentPagination.handlePageSizeChange,
+            handleSortChange: currentPagination.handleSortChange,
+          } : {
+            pageNumber: 0,
+            pageSize: 25,
+            sortParams: { sortBy: "", isSortDescending: false },
+            handlePageNumberChange: () => {},
+            handlePageSizeChange: () => {},
+            handleSortChange: () => {},
+          }}
+          showPagination={isPaginationNeeded && !!currentPagination}
+          gridOptions={{
             suppressMultiSort: true,
             rowSelection: isModal
               ? {
@@ -298,15 +314,6 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           }}
         />
       </>
-      {isPaginationNeeded && currentPagination && (
-        <Pagination
-          pageNumber={currentPagination.pageNumber}
-          setPageNumber={(value: number) => currentPagination.handlePageNumberChange(value - 1)}
-          pageSize={currentPagination.pageSize}
-          setPageSize={currentPagination.handlePageSizeChange}
-          recordCount={currentData?.response.total ?? 0}
-        />
-      )}
       {!isModal && modalGridPagination && (
         <SmartModal
           open={isModalOpen}

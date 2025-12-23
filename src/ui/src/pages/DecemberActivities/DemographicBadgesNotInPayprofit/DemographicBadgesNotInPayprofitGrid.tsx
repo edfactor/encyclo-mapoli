@@ -1,5 +1,6 @@
 import { RefObject, useCallback, useMemo } from "react";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { ISortParams } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { DemographicBadgesNotInPayprofit, PagedReportResponse } from "../../../types";
@@ -43,35 +44,32 @@ const DemographicBadgesNotInPayprofitGrid = ({
     [onPaginationChange, onSortChange, pagination.pageSize]
   );
 
+  const paginationProps = {
+    pageNumber: pagination.pageNumber,
+    pageSize: pagination.pageSize,
+    sortParams: pagination.sortParams,
+    handlePageNumberChange: (value: number) => onPaginationChange(value, pagination.pageSize),
+    handlePageSizeChange: (value: number) => onPaginationChange(0, value),
+    handleSortChange: onSortChange
+  };
+
+  if (!showData || !data?.response) {
+    return null;
+  }
+
   return (
-    <>
-      {showData && data?.response && (
-        <div ref={innerRef}>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.DEMOGRAPHIC_BADGES}
-            isLoading={isLoading}
-            handleSortChanged={handleSortChanged}
-            providedOptions={{
-              rowData: data.response.results,
-              columnDefs: columnDefs
-            }}
-          />
-        </div>
-      )}
-      {hasResults && data?.response && (
-        <Pagination
-          pageNumber={pagination.pageNumber}
-          setPageNumber={(value: number) => {
-            onPaginationChange(value - 1, pagination.pageSize);
-          }}
-          pageSize={pagination.pageSize}
-          setPageSize={(value: number) => {
-            onPaginationChange(0, value);
-          }}
-          recordCount={data.response.total || 0}
-        />
-      )}
-    </>
+    <div ref={innerRef}>
+      <DSMPaginatedGrid
+        preferenceKey={GRID_KEYS.DEMOGRAPHIC_BADGES}
+        data={data.response.results}
+        columnDefs={columnDefs}
+        totalRecords={data.response.total || 0}
+        isLoading={isLoading}
+        pagination={paginationProps}
+        onSortChange={handleSortChanged}
+        showPagination={hasResults}
+      />
+    </div>
   );
 };
 
