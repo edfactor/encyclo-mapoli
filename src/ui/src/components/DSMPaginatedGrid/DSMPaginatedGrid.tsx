@@ -23,6 +23,8 @@ export interface MinimalPaginationProps {
  * Configuration options for content-aware grid height calculation
  */
 export interface ContentAwareHeightConfig {
+  /** Height calculation mode. "content-aware" calculates based on row count. */
+  mode?: "content-aware" | "fixed";
   /** Height of each row in pixels. Default: 41 (AG Grid default) */
   rowHeight?: number;
   /** Height of the header row in pixels. Default: 41 */

@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from "react";
 import { Path, useNavigate } from "react-router";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { numberToCurrency, TotalsGrid } from "smart-ui-library";
+import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
-import { useGridPagination } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { ForfeituresAndPointsResponse } from "../../../types";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 
@@ -29,24 +29,23 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
     [handleNavigationForButton]
   );
 
-  // Use content-aware grid height utility hook
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: searchResults?.response?.results?.length ?? 0
-  });
-
-  const sortEventHandler = (update: ISortParams) => {
-    // if field is badgeOrPsn, we need to make sortBy equal to badgeNumber,beneficiaryPsn
-    // to get a compound sort
-    if (update.sortBy === "badgeOrPsn") {
-      const newUpdate = {
-        ...update,
-        sortBy: update.isSortDescending ? "beneficiaryPsn" : "badgeNumber"
-      };
-      pagination.handleSortChange(newUpdate);
-      return;
-    }
-    pagination.handleSortChange(update);
-  };
+  // Custom sort handler for compound sort on badgeOrPsn column
+  const handleSortChange = useCallback(
+    (update: SortParams) => {
+      // if field is badgeOrPsn, we need to make sortBy equal to badgeNumber,beneficiaryPsn
+      // to get a compound sort
+      if (update.sortBy === "badgeOrPsn") {
+        const newUpdate = {
+          ...update,
+          sortBy: update.isSortDescending ? "beneficiaryPsn" : "badgeNumber"
+        };
+        pagination.handleSortChange(newUpdate);
+        return;
+      }
+      pagination.handleSortChange(update);
+    },
+    [pagination]
+  );
 
   // Some API responses may return numeric totals as strings; coerce safely before formatting.
   const safeNumber = (val: unknown) => {
@@ -57,61 +56,58 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
   const totalForfeitPoints = safeNumber(searchResults?.totalForfeitPoints);
   const totalEarningPoints = safeNumber(searchResults?.totalEarningPoints);
 
-  const totalsRow = {
-    forfeitures: totalForfeituresRaw.toFixed(2),
-    contForfeitPoints: totalForfeitPoints,
-    earningPoints: totalEarningPoints
-  };
+  const totalsRow = useMemo(
+    () => ({
+      forfeitures: totalForfeituresRaw.toFixed(2),
+      contForfeitPoints: totalForfeitPoints,
+      earningPoints: totalEarningPoints
+    }),
+    [totalForfeituresRaw, totalForfeitPoints, totalEarningPoints]
+  );
 
   if (!searchResults?.response) return null;
 
   return (
-    <div className="relative">
-      {searchResults?.response && (
+    <DSMPaginatedGrid
+      preferenceKey={GRID_KEYS.FORFEIT}
+      data={searchResults.response.results}
+      columnDefs={columnDefs}
+      totalRecords={searchResults.response.total}
+      isLoading={isSearching}
+      pagination={pagination}
+      onSortChange={handleSortChange}
+      beforeGrid={
         <>
           <div className="sticky top-0 z-10 flex bg-white">
             <TotalsGrid
               displayData={[[numberToCurrency(searchResults.totalProfitSharingBalance || 0)]]}
               leftColumnHeaders={["Profit Sharing Amount"]}
-              topRowHeaders={[]}></TotalsGrid>
+              topRowHeaders={[]}
+            />
             <TotalsGrid
               displayData={[[numberToCurrency(searchResults.distributionTotals || 0)]]}
               leftColumnHeaders={["Distribution Amount"]}
-              topRowHeaders={[]}></TotalsGrid>
+              topRowHeaders={[]}
+            />
             <TotalsGrid
               displayData={[[numberToCurrency(searchResults.allocationToTotals || 0)]]}
               leftColumnHeaders={["Allocations To"]}
-              topRowHeaders={[]}></TotalsGrid>
+              topRowHeaders={[]}
+            />
             <TotalsGrid
               displayData={[[numberToCurrency(searchResults.allocationsFromTotals || 0)]]}
               leftColumnHeaders={["Allocations From"]}
-              topRowHeaders={[]}></TotalsGrid>
-          </div>
-
-          <ReportSummary report={searchResults} />
-          <DSMGrid
-            preferenceKey={GRID_KEYS.FORFEIT}
-            isLoading={isSearching}
-            maxHeight={gridMaxHeight}
-            handleSortChanged={sortEventHandler}
-            providedOptions={{
-              rowData: searchResults.response.results,
-              pinnedTopRowData: [totalsRow],
-              columnDefs: columnDefs
-            }}
-          />
-          {searchResults.response.results.length > 0 && (
-            <Pagination
-              pageNumber={pagination.pageNumber}
-              setPageNumber={(value: number) => pagination.handlePageNumberChange(value - 1)}
-              pageSize={pagination.pageSize}
-              setPageSize={pagination.handlePageSizeChange}
-              recordCount={searchResults.response.total}
+              topRowHeaders={[]}
             />
-          )}
+          </div>
+          <ReportSummary report={searchResults} />
         </>
-      )}
-    </div>
+      }
+      gridOptions={{
+        pinnedTopRowData: [totalsRow]
+      }}
+      className="relative"
+    />
   );
 };
 

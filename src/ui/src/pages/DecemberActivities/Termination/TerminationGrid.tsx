@@ -1,11 +1,12 @@
-import { useEffect, useMemo } from "react";
-import { Grid, IconButton } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { IconButton } from "@mui/material";
+import { AgGridReact } from "ag-grid-react";
+import { useEffect, useMemo, useRef } from "react";
+import { numberToCurrency, TotalsGrid } from "smart-ui-library";
+import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { useTerminationGrid } from "./hooks/useTerminationGrid";
@@ -49,9 +50,13 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   // Check if current navigation should be read-only
   const isReadOnly = useReadOnlyNavigation();
 
+  // Local ref for grid API access (cell refresh)
+  const localGridRef = useRef<AgGridReact | null>(null);
+
   const {
     pageNumber,
     pageSize,
+    sortParams,
     gridData,
     isFetching,
 
@@ -82,17 +87,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     onShowUnsavedChangesDialog
   });
 
-  // Use content-aware grid height utility hook
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: gridData?.length ?? 0,
-    heightPercentage: isGridExpanded ? 0.85 : 0.4
-  });
-
   // Refresh grid cells when read-only status changes
   // This forces cell renderers to re-read isReadOnly from context
   useEffect(() => {
-    if (gridRef.current?.api) {
-      gridRef.current.api.refreshCells({ force: true });
+    const api = localGridRef.current?.api ?? gridRef.current?.api;
+    if (api) {
+      api.refreshCells({ force: true });
     }
     // gridRef is a ref and doesn't need to be in the dependency array
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,87 +125,83 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     return [...mainColumns, ...detailColumns];
   }, [mainColumns, detailColumns]);
 
+  if (!termination?.response) return null;
+
   return (
-    <div className="relative">
-      {termination?.response && (
-        <>
-          <Grid
-            container
-            justifyContent="space-between"
-            alignItems="center"
-            marginBottom={2}>
-            <Grid>
-              <ReportSummary report={termination} />
-            </Grid>
-            <Grid style={{ display: "flex", gap: 8 }}>
-              {onToggleExpand && (
-                <IconButton
-                  onClick={onToggleExpand}
-                  sx={{ zIndex: 1 }}>
-                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
-                </IconButton>
-              )}
-            </Grid>
-          </Grid>
-
-          <div className="sticky top-0 z-10 flex bg-white">
-            <TotalsGrid
-              displayData={[[numberToCurrency(termination.totalEndingBalance || 0)]]}
-              leftColumnHeaders={["Amount in Profit Sharing"]}
-              topRowHeaders={[]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[[numberToCurrency(termination.totalVested || 0)]]}
-              leftColumnHeaders={["Vested Amount"]}
-              topRowHeaders={[]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[[numberToCurrency(termination.totalForfeit || 0)]]}
-              leftColumnHeaders={["Total Forfeitures"]}
-              topRowHeaders={[]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[[numberToCurrency(termination.totalBeneficiaryAllocation || 0)]]}
-              leftColumnHeaders={["Total Beneficiary Allocations"]}
-              topRowHeaders={[]}></TotalsGrid>
-          </div>
-
-          <DSMGrid
-            preferenceKey={GRID_KEYS.TERMINATION}
-            handleSortChanged={sortEventHandler}
-            maxHeight={gridMaxHeight}
-            isLoading={isFetching}
-            providedOptions={{
-              onGridReady: (params) => {
-                gridRef.current = params;
-                onGridReady(params);
-              },
-              rowData: gridData,
-              columnDefs: columnDefs,
-              rowSelection: {
-                mode: "multiRow",
-                checkboxes: false,
-                headerCheckbox: false,
-                enableClickSelection: false
-              },
-              rowHeight: 40,
-              suppressMultiSort: true,
-              defaultColDef: {
-                resizable: true
-              },
-              context: gridContext
-            }}
+    <DSMPaginatedGrid
+      preferenceKey={GRID_KEYS.TERMINATION}
+      data={gridData ?? []}
+      columnDefs={columnDefs}
+      totalRecords={termination.response.total || 0}
+      isLoading={isFetching}
+      pagination={{
+        pageNumber,
+        pageSize,
+        sortParams,
+        handlePageNumberChange: paginationHandlers.setPageNumber,
+        handlePageSizeChange: paginationHandlers.setPageSize,
+        handleSortChange: sortEventHandler
+      }}
+      onSortChange={sortEventHandler}
+      header={<ReportSummary report={termination} />}
+      headerActions={
+        onToggleExpand && (
+          <IconButton
+            onClick={onToggleExpand}
+            sx={{ zIndex: 1 }}>
+            {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        )
+      }
+      beforeGrid={
+        <div className="sticky top-0 z-10 flex bg-white">
+          <TotalsGrid
+            displayData={[[numberToCurrency(termination.totalEndingBalance || 0)]]}
+            leftColumnHeaders={["Amount in Profit Sharing"]}
+            topRowHeaders={[]}
           />
-
-          {!!termination && termination.response.results.length > 0 && (
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={paginationHandlers.setPageNumber}
-              pageSize={pageSize}
-              setPageSize={paginationHandlers.setPageSize}
-              recordCount={termination.response.total || 0}
-            />
-          )}
-        </>
-      )}
-    </div>
+          <TotalsGrid
+            displayData={[[numberToCurrency(termination.totalVested || 0)]]}
+            leftColumnHeaders={["Vested Amount"]}
+            topRowHeaders={[]}
+          />
+          <TotalsGrid
+            displayData={[[numberToCurrency(termination.totalForfeit || 0)]]}
+            leftColumnHeaders={["Total Forfeitures"]}
+            topRowHeaders={[]}
+          />
+          <TotalsGrid
+            displayData={[[numberToCurrency(termination.totalBeneficiaryAllocation || 0)]]}
+            leftColumnHeaders={["Total Beneficiary Allocations"]}
+            topRowHeaders={[]}
+          />
+        </div>
+      }
+      heightConfig={{
+        mode: "content-aware",
+        heightPercentage: isGridExpanded ? 0.85 : 0.4
+      }}
+      gridOptions={{
+        onGridReady: (params) => {
+          gridRef.current = params;
+          localGridRef.current = params as unknown as AgGridReact;
+          onGridReady(params);
+        },
+        rowSelection: {
+          mode: "multiRow",
+          checkboxes: false,
+          headerCheckbox: false,
+          enableClickSelection: false
+        },
+        rowHeight: 40,
+        suppressMultiSort: true,
+        defaultColDef: {
+          resizable: true
+        },
+        context: gridContext
+      }}
+      className="relative"
+    />
   );
 };
 
