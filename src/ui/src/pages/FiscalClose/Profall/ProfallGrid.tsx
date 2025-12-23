@@ -1,16 +1,16 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
-import { useSelector } from "react-redux";
 
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { RootState } from "reduxstore/store";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
-import { GetProfallGridColumns } from "./ProfallGridColumns";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { GRID_KEYS } from "../../../constants";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { ProfitSharingLabel } from "../../../types";
+import { GetProfallGridColumns } from "./ProfallGridColumns";
 
 interface ProfallGridProps {
   pageNumberReset: boolean;

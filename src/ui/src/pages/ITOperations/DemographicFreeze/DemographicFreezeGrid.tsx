@@ -1,13 +1,13 @@
 import { Typography } from "@mui/material";
-import { useMemo, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { RootState } from "reduxstore/store";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
-import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
 import { GRID_KEYS } from "../../../constants";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { FrozenStateResponse } from "../../../types";
+import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
 
 interface DemoFreezeSearchProps {
   initialSearchLoaded: boolean;

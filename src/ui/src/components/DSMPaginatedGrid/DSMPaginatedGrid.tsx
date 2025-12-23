@@ -6,6 +6,20 @@ import { GridPaginationActions, GridPaginationState, SortParams } from "../../ho
 import { ISortParams } from "../DSMGrid/types";
 
 /**
+ * Minimal pagination interface required by DSMPaginatedGrid.
+ * This allows components that don't use useGridPagination to still use DSMPaginatedGrid
+ * by providing only the necessary properties.
+ */
+export interface MinimalPaginationProps {
+  pageNumber: number;
+  pageSize: number;
+  sortParams: SortParams;
+  handlePageNumberChange: (pageNumber: number) => void;
+  handlePageSizeChange: (pageSize: number) => void;
+  handleSortChange: (sortParams: SortParams) => void;
+}
+
+/**
  * Configuration options for content-aware grid height calculation
  */
 export interface ContentAwareHeightConfig {
@@ -74,14 +88,28 @@ export interface DSMPaginatedGridProps<T = unknown> {
   isLoading: boolean;
 
   /**
-   * Pagination state and handlers from useGridPagination hook.
-   * Spread the return value of useGridPagination here.
+   * Pagination state and handlers from useGridPagination hook or a compatible object.
+   * Spread the return value of useGridPagination here, or provide a compatible object
+   * with the required properties.
    *
    * @example
+   * // Using useGridPagination (recommended)
    * const pagination = useGridPagination({ ... });
    * <DSMPaginatedGrid pagination={pagination} ... />
+   *
+   * @example
+   * // Custom pagination object (when parent manages state)
+   * const paginationProps = useMemo(() => ({
+   *   pageNumber,
+   *   pageSize,
+   *   sortParams: { sortBy: "", isSortDescending: false },
+   *   handlePageNumberChange: (n: number) => setPageNumber(n),
+   *   handlePageSizeChange: (s: number) => setPageSize(s),
+   *   handleSortChange: () => {}
+   * }), [pageNumber, pageSize]);
+   * <DSMPaginatedGrid pagination={paginationProps} ... />
    */
-  pagination: GridPaginationState & GridPaginationActions;
+  pagination: MinimalPaginationProps | (GridPaginationState & GridPaginationActions);
 
   // ============ Optional Render Slots ============
 

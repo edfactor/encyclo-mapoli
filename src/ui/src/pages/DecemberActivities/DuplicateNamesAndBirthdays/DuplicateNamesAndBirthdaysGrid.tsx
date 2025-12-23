@@ -1,12 +1,12 @@
-import { RefObject, useMemo } from "react";
-import { IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { IconButton, Typography } from "@mui/material";
+import { RefObject, useMemo } from "react";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
+import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { DuplicateNameAndBirthday, PagedReportResponse } from "../../../types";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
-import { GridPaginationState, GridPaginationActions, SortParams } from "../../../hooks/useGridPagination";
 
 interface DuplicateNamesAndBirthdaysGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
