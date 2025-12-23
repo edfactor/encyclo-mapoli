@@ -22,6 +22,7 @@ public class BeneficiaryService : IBeneficiaryService
     private readonly CreateBeneficiaryContactRequestValidator _createBeneficiaryContactValidator;
     private readonly UpdateBeneficiaryContactRequestValidator _updateBeneficiaryContactValidator;
     private readonly BeneficiaryDatabaseValidator _databaseValidator;
+    private readonly BeneficiaryPercentageValidator _percentageValidator;
 
     public BeneficiaryService(
         IProfitSharingDataContextFactory dataContextFactory,
@@ -35,6 +36,7 @@ public class BeneficiaryService : IBeneficiaryService
         _createBeneficiaryContactValidator = new CreateBeneficiaryContactRequestValidator();
         _updateBeneficiaryContactValidator = new UpdateBeneficiaryContactRequestValidator();
         _databaseValidator = new BeneficiaryDatabaseValidator(demographicReaderService);
+        _percentageValidator = new BeneficiaryPercentageValidator();
     }
     public async Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
@@ -80,7 +82,7 @@ public class BeneficiaryService : IBeneficiaryService
             ctx.Add(beneficiary);
 
             // Validate percentage sum before saving
-            var percentageValidationResult = await BeneficiaryPercentageValidator.ValidateBeneficiaryPercentageSumAsync(
+            var percentageValidationResult = await _percentageValidator.ValidateBeneficiaryPercentageSumAsync(
                 req.EmployeeBadgeNumber,
                 ctx,
                 cancellationToken);
@@ -215,7 +217,7 @@ public class BeneficiaryService : IBeneficiaryService
             // Validate percentage sum before saving if percentage was updated
             if (req.Percentage.HasValue)
             {
-                var percentageValidationResult = await BeneficiaryPercentageValidator.ValidateBeneficiaryPercentageSumAsync(
+                var percentageValidationResult = await _percentageValidator.ValidateBeneficiaryPercentageSumAsync(
                     beneficiary.BadgeNumber,
                     ctx,
                     cancellationToken);

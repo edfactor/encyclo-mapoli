@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Beneficiaries.Validators;
 
-public static class BeneficiaryPercentageValidator
+public class BeneficiaryPercentageValidator
 {
     /// <summary>
     /// Validates that the sum of all beneficiary percentages for a badge number does not exceed 100%.
@@ -14,7 +14,7 @@ public static class BeneficiaryPercentageValidator
     /// <param name="ctx">Database context</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>ValidationResult indicating success or failure</returns>
-    public static async Task<ValidationResult> ValidateBeneficiaryPercentageSumAsync(
+    public async Task<ValidationResult> ValidateBeneficiaryPercentageSumAsync(
         int badgeNumber,
         ProfitSharingDbContext ctx,
         CancellationToken cancellationToken)
@@ -68,7 +68,7 @@ public static class BeneficiaryPercentageValidator
     /// <param name="ctx">Database context</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>ValidationResult indicating success or failure</returns>
-    public static async Task<ValidationResult> ValidateBeneficiaryPercentageWithNewValueAsync(
+    public async Task<ValidationResult> ValidateBeneficiaryPercentageWithNewValueAsync(
         int badgeNumber,
         decimal newPercentage,
         int? beneficiaryIdToExclude,
