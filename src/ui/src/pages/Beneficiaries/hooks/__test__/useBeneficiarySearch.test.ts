@@ -8,7 +8,7 @@ describe("useBeneficiarySearch", () => {
 
     expect(result.current.pageNumber).toBe(0);
     expect(result.current.pageSize).toBe(10);
-    expect(result.current.sortParams.sortBy).toBe("name");
+    expect(result.current.sortParams.sortBy).toBe("fullName");
     expect(result.current.sortParams.isSortDescending).toBe(false);
   });
 
