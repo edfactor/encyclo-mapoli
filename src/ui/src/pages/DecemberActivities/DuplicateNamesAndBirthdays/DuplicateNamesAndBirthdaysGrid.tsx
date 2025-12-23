@@ -1,10 +1,9 @@
 import { RefObject, useMemo } from "react";
-import { Grid, IconButton, Typography } from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { DuplicateNameAndBirthday, PagedReportResponse } from "../../../types";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
 import { GridPaginationState, GridPaginationActions, SortParams } from "../../../hooks/useGridPagination";
@@ -36,65 +35,45 @@ const DuplicateNamesAndBirthdaysGrid = ({
 }: DuplicateNamesAndBirthdaysGridProps) => {
   const columnDefs = useMemo(() => GetDuplicateNamesAndBirthdayColumns(), []);
 
-  // Use content-aware grid height utility hook
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: data?.response?.results?.length ?? 0,
-    heightPercentage: isGridExpanded ? 0.85 : 0.5
-  });
+  if (!showData || !data?.response) {
+    return null;
+  }
 
   return (
-    <>
-      {showData && data?.response && (
-        <div ref={innerRef}>
-          <Grid
-            container
-            justifyContent="space-between"
-            alignItems="center"
-            marginBottom={2}>
-            <Grid>
-              <Typography
-                variant="h2"
-                sx={{ color: "#0258A5" }}>
-                {`${CAPTIONS.DUPLICATE_NAMES} (${data.response.total || 0} records)`}
-              </Typography>
-            </Grid>
-            <Grid>
-              {onToggleExpand && (
-                <IconButton
-                  onClick={onToggleExpand}
-                  sx={{ zIndex: 1 }}
-                  aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
-                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
-                </IconButton>
-              )}
-            </Grid>
-          </Grid>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.DUPLICATE_NAMES}
-            isLoading={isLoading}
-            maxHeight={gridMaxHeight}
-            handleSortChanged={onSortChange}
-            providedOptions={{
-              rowData: data.response.results,
-              columnDefs: columnDefs
-            }}
-          />
-        </div>
-      )}
-      {!isGridExpanded && hasResults && data?.response && (
-        <Pagination
-          pageNumber={pagination.pageNumber}
-          setPageNumber={(value: number) => {
-            onPaginationChange(value - 1, pagination.pageSize);
-          }}
-          pageSize={pagination.pageSize}
-          setPageSize={(value: number) => {
-            onPaginationChange(0, value);
-          }}
-          recordCount={data.response.total || 0}
-        />
-      )}
-    </>
+    <DSMPaginatedGrid<DuplicateNameAndBirthday>
+      innerRef={innerRef}
+      preferenceKey={GRID_KEYS.DUPLICATE_NAMES}
+      data={data.response.results}
+      columnDefs={columnDefs}
+      totalRecords={data.response.total || 0}
+      isLoading={isLoading}
+      pagination={{
+        ...pagination,
+        handlePageNumberChange: (pageNum: number) => onPaginationChange(pageNum, pagination.pageSize),
+        handlePageSizeChange: (pageSz: number) => onPaginationChange(0, pageSz)
+      }}
+      onSortChange={onSortChange}
+      showPagination={!isGridExpanded && hasResults}
+      heightConfig={{
+        heightPercentage: isGridExpanded ? 0.85 : 0.5
+      }}
+      header={
+        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+          {`${CAPTIONS.DUPLICATE_NAMES} (${data.response.total || 0} records)`}
+        </Typography>
+      }
+      headerActions={
+        onToggleExpand && (
+          <IconButton
+            onClick={onToggleExpand}
+            sx={{ zIndex: 1 }}
+            aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        )
+      }
+    />
   );
 };
 

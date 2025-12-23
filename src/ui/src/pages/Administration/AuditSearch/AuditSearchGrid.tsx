@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { AuditEventDto, NavigationStatusDto } from "../../../types";
@@ -21,7 +21,7 @@ const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({
   onPaginationChange,
   navigationStatusList
 }) => {
-  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
+  const pagination = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "createdAt",
     initialSortDescending: true,
@@ -37,33 +37,22 @@ const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({
   const columnDefs = useMemo(() => GetAuditSearchColumns(navigationStatusList), [navigationStatusList]);
 
   return (
-    <>
-      <div style={{ padding: "0 24px 0 24px" }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
+    <DSMPaginatedGrid<AuditEventDto>
+      preferenceKey={GRID_KEYS.AUDIT_SEARCH}
+      data={data}
+      columnDefs={columnDefs}
+      totalRecords={total}
+      isLoading={isLoading}
+      pagination={pagination}
+      onSortChange={pagination.handleSortChange}
+      showPagination={data && data.length > 0}
+      header={
+        <Typography variant="h2" sx={{ color: "#0258A5" }}>
           Audit Events
         </Typography>
-      </div>
-      <DSMGrid
-        preferenceKey={GRID_KEYS.AUDIT_SEARCH}
-        isLoading={isLoading}
-        handleSortChanged={handleSortChange}
-        providedOptions={{
-          rowData: data,
-          columnDefs: columnDefs
-        }}
-      />
-      {data && data.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-          pageSize={pageSize}
-          setPageSize={handlePageSizeChange}
-          recordCount={total}
-        />
-      )}
-    </>
+      }
+      slotClassNames={{ headerClassName: "px-6" }}
+    />
   );
 };
 
