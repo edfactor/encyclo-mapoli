@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { adhocBeneficiariesReportResponse, BeneficiaryReportDto } from "@/types/beneficiary/beneficiary";
 import {
   initialState,
   payBeNextReducer,
@@ -9,6 +10,37 @@ import {
   selectTotalEndingBalance,
   selectTotalRecords
 } from "../usePayBeNextReducer";
+
+// Helper to create a complete mock response with required properties
+const createMockResponse = (
+  results: BeneficiaryReportDto[] = [],
+  total = 0,
+  totalEndingBalance = 0
+): adhocBeneficiariesReportResponse => ({
+  reportName: "Test Report",
+  reportDate: "2025-01-01",
+  startDate: "2025-01-01",
+  endDate: "2025-12-31",
+  dataSource: "test",
+  response: {
+    results,
+    total,
+    totalPages: Math.ceil(total / 25) || 1,
+    pageSize: 25,
+    currentPage: 1
+  },
+  totalEndingBalance
+});
+
+// Helper to create a complete mock BeneficiaryReportDto
+const createMockBeneficiary = (overrides: Partial<BeneficiaryReportDto> = {}): BeneficiaryReportDto => ({
+  beneficiaryId: 1,
+  fullName: "Test User",
+  ssn: "***-**-1234",
+  badgeNumber: 123,
+  psnSuffix: 1,
+  ...overrides
+});
 
 describe("usePayBeNextReducer", () => {
   describe("initialState", () => {
@@ -53,15 +85,11 @@ describe("usePayBeNextReducer", () => {
   });
 
   describe("SEARCH_SUCCESS action", () => {
-    const mockPayload = {
-      response: {
-        results: [
-          { badgeNumber: 123, beneficiaryId: 1, fullName: "Test User" }
-        ],
-        total: 1
-      },
-      totalEndingBalance: 5000
-    };
+    const mockPayload = createMockResponse(
+      [createMockBeneficiary({ badgeNumber: 123, beneficiaryId: 1, fullName: "Test User" })],
+      1,
+      5000
+    );
 
     it("should set data to payload", () => {
       const result = payBeNextReducer(initialState, {
@@ -116,10 +144,7 @@ describe("usePayBeNextReducer", () => {
     it("should preserve data from previous search", () => {
       const stateWithData: PayBeNextState = {
         ...initialState,
-        data: {
-          response: { results: [], total: 0 },
-          totalEndingBalance: 0
-        },
+        data: createMockResponse([], 0, 0),
         search: { isLoading: true, hasSearched: true }
       };
 
@@ -261,7 +286,7 @@ describe("usePayBeNextReducer", () => {
     it("should preserve other state properties", () => {
       const stateWithData: PayBeNextState = {
         ...initialState,
-        data: { response: { results: [], total: 0 }, totalEndingBalance: 0 },
+        data: createMockResponse([], 0, 0),
         formData: { profitYear: 2022, isAlsoEmployee: false },
         pagination: { pageNumber: 10, pageSize: 50, sortParams: { sortBy: "test", isSortDescending: false } }
       };
@@ -276,7 +301,7 @@ describe("usePayBeNextReducer", () => {
   describe("RESET_ALL action", () => {
     it("should reset all state to initial values", () => {
       const modifiedState: PayBeNextState = {
-        data: { response: { results: [], total: 5 }, totalEndingBalance: 1000 },
+        data: createMockResponse([], 5, 1000),
         pagination: {
           pageNumber: 10,
           pageSize: 100,
@@ -323,7 +348,7 @@ describe("Selectors", () => {
     it("should return false when hasSearched is false", () => {
       const state: PayBeNextState = {
         ...initialState,
-        data: { response: { results: [], total: 0 }, totalEndingBalance: 0 },
+        data: createMockResponse([], 0, 0),
         search: { isLoading: false, hasSearched: false }
       };
 
@@ -333,7 +358,7 @@ describe("Selectors", () => {
     it("should return true when data exists and hasSearched is true", () => {
       const state: PayBeNextState = {
         ...initialState,
-        data: { response: { results: [], total: 0 }, totalEndingBalance: 0 },
+        data: createMockResponse([], 0, 0),
         search: { isLoading: false, hasSearched: true }
       };
 
@@ -349,7 +374,7 @@ describe("Selectors", () => {
     it("should return false when results array is empty", () => {
       const state: PayBeNextState = {
         ...initialState,
-        data: { response: { results: [], total: 0 }, totalEndingBalance: 0 }
+        data: createMockResponse([], 0, 0)
       };
 
       expect(selectHasResults(state)).toBe(false);
@@ -358,13 +383,11 @@ describe("Selectors", () => {
     it("should return true when results array has items", () => {
       const state: PayBeNextState = {
         ...initialState,
-        data: {
-          response: {
-            results: [{ badgeNumber: 123, beneficiaryId: 1 }],
-            total: 1
-          },
-          totalEndingBalance: 1000
-        }
+        data: createMockResponse(
+          [createMockBeneficiary({ badgeNumber: 123, beneficiaryId: 1 })],
+          1,
+          1000
+        )
       };
 
       expect(selectHasResults(state)).toBe(true);
@@ -379,7 +402,7 @@ describe("Selectors", () => {
     it("should return totalEndingBalance from data", () => {
       const state: PayBeNextState = {
         ...initialState,
-        data: { response: { results: [], total: 0 }, totalEndingBalance: 5000.50 }
+        data: createMockResponse([], 0, 5000.50)
       };
 
       expect(selectTotalEndingBalance(state)).toBe(5000.50);
@@ -394,7 +417,7 @@ describe("Selectors", () => {
     it("should return total from response", () => {
       const state: PayBeNextState = {
         ...initialState,
-        data: { response: { results: [], total: 42 }, totalEndingBalance: 0 }
+        data: createMockResponse([], 42, 0)
       };
 
       expect(selectTotalRecords(state)).toBe(42);
@@ -408,11 +431,11 @@ describe("Selectors", () => {
 
     it("should return results array from data", () => {
       const mockResults = [
-        { badgeNumber: 123, beneficiaryId: 1, fullName: "Test User" }
+        createMockBeneficiary({ badgeNumber: 123, beneficiaryId: 1, fullName: "Test User" })
       ];
       const state: PayBeNextState = {
         ...initialState,
-        data: { response: { results: mockResults, total: 1 }, totalEndingBalance: 0 }
+        data: createMockResponse(mockResults, 1, 0)
       };
 
       expect(selectResults(state)).toEqual(mockResults);
