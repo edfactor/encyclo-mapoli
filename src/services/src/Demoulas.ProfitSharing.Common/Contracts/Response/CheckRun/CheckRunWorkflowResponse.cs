@@ -1,71 +1,68 @@
-using Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
-
-namespace Demoulas.ProfitSharing.Data.Entities.CheckRun;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
 
 /// <summary>
-/// Tracks the workflow state of a check printing run, including step progression and reprint limits.
-/// Enforces business rules: max 2 reprints per day, step sequence tracking, temporal constraints.
+/// DTO for check run workflow information exposed through service APIs.
 /// </summary>
-public sealed class CheckRunWorkflow
+public sealed class CheckRunWorkflowResponse
 {
     /// <summary>
     /// Unique identifier for this workflow run.
     /// </summary>
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
     /// <summary>
     /// The profit year this check run is for.
     /// </summary>
-    public int ProfitYear { get; set; }
+    public int ProfitYear { get; init; }
 
     /// <summary>
     /// The date this check run was initiated. Used to enforce same-day reprint constraints.
     /// </summary>
-    public DateOnly CheckRunDate { get; set; }
+    public DateOnly CheckRunDate { get; init; }
 
     /// <summary>
     /// Current step number in the workflow (1-based).
     /// </summary>
-    public int StepNumber { get; set; }
+    public int StepNumber { get; init; }
 
     /// <summary>
     /// Status of the current step.
     /// </summary>
-    public CheckRunStepStatus StepStatus { get; set; }
+    public CheckRunStepStatus StepStatus { get; init; }
 
     /// <summary>
     /// Starting check number for this run (randomly generated between 5,000-10,000).
     /// Null for partial steps (e.g., DJDE template generation only).
     /// </summary>
-    public int? CheckNumber { get; set; }
+    public int? CheckNumber { get; init; }
 
     /// <summary>
     /// Number of times this run has been reprinted (max 2 per business rules).
     /// </summary>
-    public int ReprintCount { get; set; }
+    public int ReprintCount { get; init; }
 
     /// <summary>
     /// Maximum allowed reprints for this run (default 2).
     /// </summary>
-    public int MaxReprintCount { get; set; }
+    public int MaxReprintCount { get; init; }
 
     /// <summary>
     /// User who created this workflow run.
     /// </summary>
-    public Guid CreatedByUserId { get; set; }
+    public Guid CreatedByUserId { get; init; }
 
     /// <summary>
     /// Timestamp when this workflow run was created.
     /// </summary>
-    public DateTimeOffset CreatedDate { get; set; }
+    public DateTimeOffset CreatedDate { get; init; }
 
     /// <summary>
     /// User who last modified this workflow run (step updates, reprint increments).
     /// </summary>
-    public Guid? ModifiedByUserId { get; set; }
+    public Guid? ModifiedByUserId { get; init; }
 
     /// <summary>
     /// Timestamp when this workflow run was last modified.
     /// </summary>
-    public DateTimeOffset? ModifiedDate { get; set; }
+    public DateTimeOffset? ModifiedDate { get; init; }
 }

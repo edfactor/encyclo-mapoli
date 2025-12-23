@@ -1,5 +1,7 @@
 using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
+using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
+using Demoulas.ProfitSharing.Data.Entities.CheckRun;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -9,7 +11,7 @@ namespace Demoulas.ProfitSharing.Services.CheckRun;
 /// <summary>
 /// Service for managing check run workflows including state tracking and reprint limit enforcement.
 /// </summary>
-public class CheckRunWorkflowService : ICheckRunWorkflowService
+public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
 {
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly ILogger<CheckRunWorkflowService> _logger;
@@ -23,7 +25,7 @@ public class CheckRunWorkflowService : ICheckRunWorkflowService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<CheckRunWorkflow>> GetCurrentRunAsync(int profitYear, CancellationToken cancellationToken = default)
+    public async Task<Result<CheckRunWorkflowResponse>> GetCurrentRunAsync(int profitYear, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -32,50 +34,53 @@ public class CheckRunWorkflowService : ICheckRunWorkflowService
             return await _factory.UseReadOnlyContext(async context =>
             {
                 var workflow = await context.CheckRunWorkflows
-                    .FirstOrDefaultAsync(w => w.ProfitYear == profitYear && w.StepStatus != CheckRunStepStatus.Completed, cancellationToken);
+                    .FirstOrDefaultAsync(w => w.ProfitYear == profitYear && w.StepStatus != CheckRunStepStatus.Failed, cancellationToken);
 
                 if (workflow is null)
                 {
                     _logger.LogWarning("No active check run workflow found for profit year {ProfitYear}", profitYear);
-                    return Result<CheckRunWorkflow>.Failure(new Error(
-                        "CheckRunWorkflow.NotFound",
+                    return Result<CheckRunWorkflowResponse>.Failure(Error.EntityNotFound(
                         $"No active check run found for profit year {profitYear}"));
                 }
 
                 _logger.LogInformation("Found active check run workflow {RunId} for profit year {ProfitYear} at step {StepNumber} with status {StepStatus}",
                     workflow.Id, profitYear, workflow.StepNumber, workflow.StepStatus);
 
-                return Result<CheckRunWorkflow>.Success(workflow);
-            }, CancellationToken.None);
+                return Result<CheckRunWorkflowResponse>.Success(MapToDto(workflow));
+            }, cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving check run workflow for profit year {ProfitYear}: {ErrorMessage}",
                 profitYear, ex.Message);
-            return Result<CheckRunWorkflow>.Failure(Error.Unexpected(ex.Message));
+            return Result<CheckRunWorkflowResponse>.Failure(Error.Unexpected(ex.Message));
         }
     }
 
     /// <inheritdoc/>
-    public async Task<Result<CheckRunWorkflow>> StartNewRunAsync(int profitYear, int initialCheckNumber, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<CheckRunWorkflowResponse>> StartNewRunAsync(
+        int profitYear,
+        DateOnly checkRunDate,
+        int checkNumber,
+        Guid userId,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Starting new check run workflow for profit year {ProfitYear} with initial check number {CheckNumber} by user {UserId}",
-                profitYear, initialCheckNumber, userId);
+            _logger.LogInformation("Starting new check run workflow for profit year {ProfitYear} with check number {CheckNumber} on {CheckRunDate} by user {UserId}",
+                profitYear, checkNumber, checkRunDate, userId);
 
-            return await _factory.UseContext(async context =>
+            return await _factory.UseWritableContext(async context =>
             {
                 // Validate no active run exists for this year
                 var existingRun = await context.CheckRunWorkflows
-                    .FirstOrDefaultAsync(w => w.ProfitYear == profitYear && w.StepStatus != CheckRunStepStatus.Completed, cancellationToken);
+                    .FirstOrDefaultAsync(w => w.ProfitYear == profitYear && w.StepStatus != CheckRunStepStatus.Failed, cancellationToken);
 
                 if (existingRun is not null)
                 {
                     _logger.LogWarning("Active check run workflow {RunId} already exists for profit year {ProfitYear}",
                         existingRun.Id, profitYear);
-                    return Result<CheckRunWorkflow>.Failure(new Error(
-                        "CheckRunWorkflow.AlreadyExists",
+                    return Result<CheckRunWorkflowResponse>.Failure(Error.Unexpected(
                         $"An active check run already exists for profit year {profitYear}"));
                 }
 
@@ -84,10 +89,10 @@ public class CheckRunWorkflowService : ICheckRunWorkflowService
                 {
                     Id = Guid.NewGuid(),
                     ProfitYear = profitYear,
-                    CheckRunDate = DateOnly.FromDateTime(DateTime.Today),
+                    CheckRunDate = checkRunDate,
                     StepNumber = 1,
                     StepStatus = CheckRunStepStatus.Pending,
-                    CheckNumber = initialCheckNumber,
+                    CheckNumber = checkNumber,
                     ReprintCount = 0,
                     MaxReprintCount = 2,
                     CreatedByUserId = userId,
@@ -98,36 +103,39 @@ public class CheckRunWorkflowService : ICheckRunWorkflowService
                 await context.SaveChangesAsync(cancellationToken);
 
                 _logger.LogInformation("Created new check run workflow {RunId} for profit year {ProfitYear} with check number {CheckNumber}",
-                    workflow.Id, profitYear, initialCheckNumber);
+                    workflow.Id, profitYear, checkNumber);
 
-                return Result<CheckRunWorkflow>.Success(workflow);
-            }, CancellationToken.None);
+                return Result<CheckRunWorkflowResponse>.Success(MapToDto(workflow));
+            }, cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error starting new check run workflow for profit year {ProfitYear}: {ErrorMessage}",
                 profitYear, ex.Message);
-            return Result<CheckRunWorkflow>.Failure(Error.Unexpected(ex.Message));
+            return Result<CheckRunWorkflowResponse>.Failure(Error.Unexpected(ex.Message));
         }
     }
 
     /// <inheritdoc/>
-    public async Task<Result> RecordStepCompletionAsync(Guid runId, int stepNumber, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> RecordStepCompletionAsync(
+        Guid runId,
+        int stepNumber,
+        Guid userId,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.LogInformation("Recording step {StepNumber} completion for check run workflow {RunId} by user {UserId}",
                 stepNumber, runId, userId);
 
-            return await _factory.UseContext(async context =>
+            return await _factory.UseWritableContext(async context =>
             {
                 var workflow = await context.CheckRunWorkflows.FirstOrDefaultAsync(w => w.Id == runId, cancellationToken);
 
                 if (workflow is null)
                 {
                     _logger.LogWarning("Check run workflow {RunId} not found", runId);
-                    return Result.Failure(new Error(
-                        "CheckRunWorkflow.NotFound",
+                    return Result<bool>.Failure(Error.EntityNotFound(
                         $"Check run workflow {runId} not found"));
                 }
 
@@ -142,14 +150,14 @@ public class CheckRunWorkflowService : ICheckRunWorkflowService
                 _logger.LogInformation("Completed step {StepNumber} for check run workflow {RunId}, advanced to step {NextStepNumber}",
                     stepNumber, runId, workflow.StepNumber);
 
-                return Result.Success();
-            }, CancellationToken.None);
+                return Result<bool>.Success(true);
+            }, cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error recording step completion for check run workflow {RunId}: {ErrorMessage}",
                 runId, ex.Message);
-            return Result.Failure(Error.Unexpected(ex.Message));
+            return Result<bool>.Failure(Error.Unexpected(ex.Message));
         }
     }
 
@@ -182,7 +190,7 @@ public class CheckRunWorkflowService : ICheckRunWorkflowService
                     DateOnly.FromDateTime(DateTime.Today), canReprint);
 
                 return Result<bool>.Success(canReprint);
-            }, CancellationToken.None);
+            }, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -193,22 +201,24 @@ public class CheckRunWorkflowService : ICheckRunWorkflowService
     }
 
     /// <inheritdoc/>
-    public async Task<Result> IncrementReprintCountAsync(Guid runId, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> IncrementReprintCountAsync(
+        Guid runId,
+        Guid userId,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.LogInformation("Incrementing reprint count for check run workflow {RunId} by user {UserId}",
                 runId, userId);
 
-            return await _factory.UseContext(async context =>
+            return await _factory.UseWritableContext(async context =>
             {
                 var workflow = await context.CheckRunWorkflows.FirstOrDefaultAsync(w => w.Id == runId, cancellationToken);
 
                 if (workflow is null)
                 {
                     _logger.LogWarning("Check run workflow {RunId} not found", runId);
-                    return Result.Failure(new Error(
-                        "CheckRunWorkflow.NotFound",
+                    return Result<bool>.Failure(Error.EntityNotFound(
                         $"Check run workflow {runId} not found"));
                 }
 
@@ -222,14 +232,36 @@ public class CheckRunWorkflowService : ICheckRunWorkflowService
                 _logger.LogInformation("Incremented reprint count to {ReprintCount} for check run workflow {RunId}",
                     workflow.ReprintCount, runId);
 
-                return Result.Success();
-            }, CancellationToken.None);
+                return Result<bool>.Success(true);
+            }, cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error incrementing reprint count for check run workflow {RunId}: {ErrorMessage}",
                 runId, ex.Message);
-            return Result.Failure(Error.Unexpected(ex.Message));
+            return Result<bool>.Failure(Error.Unexpected(ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Maps a CheckRunWorkflow entity to a CheckRunWorkflowResponse DTO.
+    /// </summary>
+    private static CheckRunWorkflowResponse MapToDto(CheckRunWorkflow workflow)
+    {
+        return new CheckRunWorkflowResponse
+        {
+            Id = workflow.Id,
+            ProfitYear = workflow.ProfitYear,
+            CheckRunDate = workflow.CheckRunDate,
+            StepNumber = workflow.StepNumber,
+            StepStatus = workflow.StepStatus,
+            CheckNumber = workflow.CheckNumber,
+            ReprintCount = workflow.ReprintCount,
+            MaxReprintCount = workflow.MaxReprintCount,
+            CreatedByUserId = workflow.CreatedByUserId,
+            CreatedDate = workflow.CreatedDate,
+            ModifiedByUserId = workflow.ModifiedByUserId,
+            ModifiedDate = workflow.ModifiedDate
+        };
     }
 }

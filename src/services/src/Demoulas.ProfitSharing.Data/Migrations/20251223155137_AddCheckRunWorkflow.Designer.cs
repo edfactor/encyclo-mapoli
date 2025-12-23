@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251223155137_AddCheckRunWorkflow")]
+    partial class AddCheckRunWorkflow
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3628,57 +3631,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_FAKE_SSNS_SSN");
 
                     b.ToTable("FAKE_SSNS", (string)null);
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FileTransfer.FtpOperationLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("ID");
-
-                    b.Property<Guid>("CheckRunWorkflowId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("CHECKRUNWORKFLOWID");
-
-                    b.Property<string>("Destination")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("DESTINATION");
-
-                    b.Property<long>("DurationMs")
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("DURATIONMS");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("ERRORMESSAGE");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("FILENAME");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("ISSUCCESS");
-
-                    b.Property<int>("OperationType")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("OPERATIONTYPE");
-
-                    b.Property<DateTimeOffset>("Timestamp")
-                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
-                        .HasColumnName("TIMESTAMP");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("USERID");
-
-                    b.HasKey("Id")
-                        .HasName("PK_FTPOPERATIONLOGS");
-
-                    b.ToTable("FTPOPERATIONLOGS", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FileTransferAudit", b =>
