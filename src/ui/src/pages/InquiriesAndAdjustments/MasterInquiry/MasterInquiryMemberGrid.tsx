@@ -3,7 +3,8 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { Box, IconButton, Typography } from "@mui/material";
 import React, { memo, useMemo } from "react";
-import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
+import { formatNumberWithComma, ISortParams } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { SortParams } from "../../../hooks/useGridPagination";
 import { EmployeeDetails } from "../../../reduxstore/types";
@@ -116,23 +117,27 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
             {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
           </IconButton>
         </Box>
-        <DSMGrid
+        <DSMPaginatedGrid
           preferenceKey={GRID_KEYS.MASTER_INQUIRY_MEMBER}
-          handleSortChanged={handleSortChange}
+          data={searchResults.results.filter((row) => row && Object.keys(row).length > 0)}
+          columnDefs={columns}
+          totalRecords={searchResults.total}
           isLoading={isLoading}
-          maxHeight={gridMaxHeight}
-          providedOptions={{
-            rowData: searchResults.results.filter((row) => row && Object.keys(row).length > 0),
-            columnDefs: columns,
+          pagination={{
+            pageNumber: memberGridPagination.pageNumber,
+            pageSize: memberGridPagination.pageSize,
+            sortParams: memberGridPagination.sortParams,
+            handlePageNumberChange: memberGridPagination.handlePageNumberChange,
+            handlePageSizeChange: memberGridPagination.handlePageSizeChange,
+            handleSortChange: onSortChange
           }}
-        />
-        <Pagination
+          onSortChange={handleSortChange}
+          heightConfig={{
+            mode: "content-aware",
+            maxHeight: gridMaxHeight
+          }}
           rowsPerPageOptions={[5, 10, 50, 100]}
-          pageNumber={memberGridPagination.pageNumber}
-          setPageNumber={(value: number) => memberGridPagination.handlePageNumberChange(value - 1)}
-          pageSize={memberGridPagination.pageSize}
-          setPageSize={memberGridPagination.handlePageSizeChange}
-          recordCount={searchResults.total}
+          showPagination={searchResults.total > 0}
         />
       </Box>
     );

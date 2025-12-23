@@ -1,11 +1,10 @@
-import { Grid } from "@mui/material";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../../components/DSMPaginatedGrid";
 import ReportSummary from "../../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../../constants";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownGridColumns";
 
 interface Under21BreakdownGridProps {
@@ -24,9 +23,8 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   onPageChange
 }) => {
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
-  //const navigate = useNavigate();
 
-  const { handleSortChange } = useGridPagination({
+  const { sortParams, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
@@ -37,60 +35,49 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
     }
   });
 
-  // Handle navigation for badge clicks
-  /*
-  const handleNavigation = React.useCallback(
-    (path: string) => {
-      navigate(path);
-    },
-    [navigate]
-  );
-  */
-
-  const sortEventHandler = (update: ISortParams) => {
-    if (update.sortBy === "") {
-      update.sortBy = "badgeNumber";
-      update.isSortDescending = false;
-    }
-    handleSortChange(update);
-    setInitialSearchLoaded(true);
-  };
-
   const columnDefs = useMemo(() => GetUnder21BreakdownColumnDefs(), []);
 
+  // Create pagination object for DSMPaginatedGrid
+  const pagination = useMemo(
+    () => ({
+      pageNumber,
+      pageSize,
+      sortParams,
+      handlePageNumberChange: (newPageNumber: number) => {
+        onPageChange(newPageNumber);
+        setInitialSearchLoaded(true);
+      },
+      handlePageSizeChange: (_newPageSize: number) => {
+        onPageChange(0);
+        setInitialSearchLoaded(true);
+      },
+      handleSortChange: (update: SortParams) => {
+        const normalizedUpdate = {
+          ...update,
+          sortBy: update.sortBy === "" ? "badgeNumber" : update.sortBy,
+          isSortDescending: update.sortBy === "" ? false : update.isSortDescending
+        };
+        handleSortChange(normalizedUpdate);
+        setInitialSearchLoaded(true);
+      }
+    }),
+    [pageNumber, pageSize, sortParams, onPageChange, handleSortChange, setInitialSearchLoaded]
+  );
+
+  if (!under21Breakdown?.response) {
+    return null;
+  }
+
   return (
-    <Grid
-      container
-      direction="column"
-      width="100%">
-      {under21Breakdown && <ReportSummary report={under21Breakdown} />}
-      <Grid width="100%">
-        <DSMGrid
-          preferenceKey={GRID_KEYS.UNDER_21_BREAKDOWN_REPORT}
-          isLoading={isLoading}
-          handleSortChanged={sortEventHandler}
-          providedOptions={{
-            rowData: under21Breakdown?.response?.results || [],
-            columnDefs
-          }}
-        />
-        {under21Breakdown?.response?.results && under21Breakdown.response.results.length > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              onPageChange(value - 1);
-              setInitialSearchLoaded(true);
-            }}
-            pageSize={pageSize}
-            setPageSize={(_value: number) => {
-              onPageChange(0);
-              setInitialSearchLoaded(true);
-            }}
-            recordCount={under21Breakdown.response.total || 0}
-          />
-        )}
-      </Grid>
-    </Grid>
+    <DSMPaginatedGrid
+      preferenceKey={GRID_KEYS.UNDER_21_BREAKDOWN_REPORT}
+      data={under21Breakdown.response.results || []}
+      columnDefs={columnDefs}
+      totalRecords={under21Breakdown.response.total || 0}
+      isLoading={isLoading}
+      pagination={pagination}
+      beforeGrid={<ReportSummary report={under21Breakdown} />}
+    />
   );
 };
 

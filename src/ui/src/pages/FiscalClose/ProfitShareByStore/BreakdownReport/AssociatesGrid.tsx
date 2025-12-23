@@ -1,13 +1,12 @@
-import { Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { DSMPaginatedGrid } from "../../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../../constants";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetAssociatesColumns } from "./AssociatesGridColumns";
 
@@ -144,24 +143,22 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
         </Typography>
       </Grid>
       <Grid width="100%">
-        <DSMGrid
+        <DSMPaginatedGrid
           preferenceKey={`${GRID_KEYS.BREAKDOWN_REPORT_ASSOCIATES_PREFIX}${store}`}
+          data={breakdownByStore?.response?.results || []}
+          columnDefs={columnDefs}
+          totalRecords={breakdownByStore?.response?.total || 0}
           isLoading={isFetching}
-          handleSortChanged={handleSortChange}
-          providedOptions={{
-            rowData: breakdownByStore?.response?.results || [],
-            columnDefs: columnDefs
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams,
+            handlePageNumberChange,
+            handlePageSizeChange,
+            handleSortChange,
           }}
+          showPagination={breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0}
         />
-        {breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-            pageSize={pageSize}
-            setPageSize={handlePageSizeChange}
-            recordCount={breakdownByStore.response.total || 0}
-          />
-        )}
       </Grid>
     </Grid>
   );

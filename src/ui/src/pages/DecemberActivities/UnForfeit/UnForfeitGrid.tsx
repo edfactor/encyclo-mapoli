@@ -1,12 +1,12 @@
-import { Grid, IconButton } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { IconButton } from "@mui/material";
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
-import React, { useEffect, useMemo } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { AgGridReact } from "ag-grid-react";
+import React, { useEffect, useMemo, useRef } from "react";
+import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { UnForfeitGridColumns } from "./UnForfeitGridColumns";
@@ -49,9 +49,13 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
   // Check if current navigation should be read-only
   const isReadOnly = useReadOnlyNavigation();
 
+  // Local ref for grid API access (cell refresh)
+  const localGridRef = useRef<AgGridReact | null>(null);
+
   const {
     pageNumber,
     pageSize,
+    sortParams,
     gridData,
     isFetching,
 
@@ -82,17 +86,12 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     onShowErrorDialog
   });
 
-  // Use content-aware grid height utility hook
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: gridData?.length ?? 0,
-    heightPercentage: isGridExpanded ? 0.85 : 0.4
-  });
-
   // Refresh grid cells when read-only status changes
   // This forces cell renderers to re-read isReadOnly from context
   useEffect(() => {
-    if (gridRef.current?.api) {
-      gridRef.current.api.refreshCells({ force: true });
+    const api = localGridRef.current?.api ?? gridRef.current?.api;
+    if (api) {
+      api.refreshCells({ force: true });
     }
     // gridRef is a ref and doesn't need to be in the dependency array
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -189,8 +188,10 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     return finalColumns;
   }, [mainColumns, detailColumns, handleRowExpansion]);
 
+  if (!unForfeits?.response) return null;
+
   return (
-    <div>
+    <>
       <style>
         {`
           .detail-row {
@@ -202,68 +203,57 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
         `}
       </style>
 
-      {unForfeits?.response && (
-        <>
-          <Grid
-            container
-            justifyContent="space-between"
-            alignItems="center"
-            marginBottom={2}>
-            <Grid>
-              <ReportSummary report={unForfeits} />
-            </Grid>
-            <Grid style={{ display: "flex", gap: 8 }}>
-              {/* Remove left pane close button, only show expand/collapse */}
-              {onToggleExpand && (
-                <IconButton
-                  onClick={onToggleExpand}
-                  sx={{ zIndex: 1 }}>
-                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
-                </IconButton>
-              )}
-            </Grid>
-          </Grid>
-
-          <DSMGrid
-            preferenceKey={GRID_KEYS.REHIRE_FORFEITURES}
-            isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: gridData,
-              columnDefs: columnDefs,
-              getRowClass: (params) => ((params.data as { isDetail?: boolean })?.isDetail ? "detail-row" : ""),
-              rowSelection: {
-                mode: "multiRow",
-                checkboxes: false,
-                headerCheckbox: false,
-                enableClickSelection: false
-              },
-              rowHeight: 40,
-              suppressMultiSort: true,
-              defaultColDef: {
-                resizable: true
-              },
-              onGridReady: (params) => {
-                gridRef.current = params;
-                onGridReady(params);
-              },
-              context: gridContext
-            }}
-          />
-
-          {!!unForfeits && unForfeits.response.results.length > 0 && (
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={paginationHandlers.setPageNumber}
-              pageSize={pageSize}
-              setPageSize={paginationHandlers.setPageSize}
-              recordCount={unForfeits.response.total || 0}
-            />
-          )}
-        </>
-      )}
-    </div>
+      <DSMPaginatedGrid
+        preferenceKey={GRID_KEYS.REHIRE_FORFEITURES}
+        data={gridData ?? []}
+        columnDefs={columnDefs}
+        totalRecords={unForfeits.response.total || 0}
+        isLoading={isFetching}
+        pagination={{
+          pageNumber,
+          pageSize,
+          sortParams,
+          handlePageNumberChange: paginationHandlers.setPageNumber,
+          handlePageSizeChange: paginationHandlers.setPageSize,
+          handleSortChange: sortEventHandler
+        }}
+        onSortChange={sortEventHandler}
+        header={<ReportSummary report={unForfeits} />}
+        headerActions={
+          onToggleExpand && (
+            <IconButton
+              onClick={onToggleExpand}
+              sx={{ zIndex: 1 }}>
+              {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </IconButton>
+          )
+        }
+        heightConfig={{
+          mode: "content-aware",
+          heightPercentage: isGridExpanded ? 0.85 : 0.4
+        }}
+        gridOptions={{
+          getRowClass: (params) => ((params.data as { isDetail?: boolean })?.isDetail ? "detail-row" : ""),
+          rowSelection: {
+            mode: "multiRow",
+            checkboxes: false,
+            headerCheckbox: false,
+            enableClickSelection: false
+          },
+          rowHeight: 40,
+          suppressMultiSort: true,
+          defaultColDef: {
+            resizable: true
+          },
+          onGridReady: (params) => {
+            gridRef.current = params;
+            localGridRef.current = params as unknown as AgGridReact;
+            onGridReady(params);
+          },
+          context: gridContext
+        }}
+      />
+    </>
   );
 };
 

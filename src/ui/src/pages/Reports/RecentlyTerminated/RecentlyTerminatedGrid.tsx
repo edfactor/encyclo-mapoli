@@ -1,7 +1,8 @@
 import { Typography } from "@mui/material";
 import React, { useMemo } from "react";
 import { RecentlyTerminatedResponse } from "reduxstore/types";
-import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
+import { formatNumberWithComma, ISortParams } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetRecentlyTerminatedColumns } from "./RecentlyTerminatedGridColumns";
@@ -13,45 +14,45 @@ interface RecentlyTerminatedGridProps {
 }
 
 const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridProps> = ({ reportData, isLoading, gridPagination }) => {
-  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = gridPagination;
+  const { sortParams, handleSortChange } = gridPagination;
 
   const sortEventHandler = (update: ISortParams) => handleSortChange(update);
   const columnDefs = useMemo(() => GetRecentlyTerminatedColumns(), []);
 
+  if (!reportData?.response) {
+    return null;
+  }
+
   return (
-    <>
-      {reportData && reportData.response && (
-        <>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <Typography
-              variant="h6"
-              component="h2"
-              sx={{ marginLeft: "20px", marginRight: "10px" }}>
-              TERMINATED EMPLOYEES ({formatNumberWithComma(reportData.response.total)} Records)
-            </Typography>
-          </div>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.RECENTLY_TERMINATED}
-            isLoading={isLoading}
-            handleSortChanged={sortEventHandler}
-            providedOptions={{
-              rowData: reportData.response.results,
-              columnDefs: columnDefs,
-              suppressMultiSort: true
-            }}
-          />
-        </>
-      )}
-      {reportData && reportData.response && reportData.response.results && reportData.response.results.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-          pageSize={pageSize}
-          setPageSize={handlePageSizeChange}
-          recordCount={reportData.response.total}
-        />
-      )}
-    </>
+    <DSMPaginatedGrid
+      preferenceKey={GRID_KEYS.RECENTLY_TERMINATED}
+      data={reportData.response.results}
+      columnDefs={columnDefs}
+      totalRecords={reportData.response.total}
+      isLoading={isLoading}
+      pagination={{
+        pageNumber: gridPagination.pageNumber,
+        pageSize: gridPagination.pageSize,
+        sortParams,
+        handlePageNumberChange: gridPagination.handlePageNumberChange,
+        handlePageSizeChange: gridPagination.handlePageSizeChange,
+        handleSortChange
+      }}
+      onSortChange={sortEventHandler}
+      gridOptions={{
+        suppressMultiSort: true
+      }}
+      header={
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <Typography
+            variant="h6"
+            component="h2"
+            sx={{ marginLeft: "20px", marginRight: "10px" }}>
+            TERMINATED EMPLOYEES ({formatNumberWithComma(reportData.response.total)} Records)
+          </Typography>
+        </div>
+      }
+    />
   );
 };
 
