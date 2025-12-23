@@ -1,3 +1,4 @@
+#pragma warning disable S1135 // Complete the task associated to this 'TODO' comment
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Microsoft.Extensions.Logging;

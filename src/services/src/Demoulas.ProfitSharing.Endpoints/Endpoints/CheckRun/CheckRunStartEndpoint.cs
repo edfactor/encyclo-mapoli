@@ -1,15 +1,16 @@
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.CheckRun;
 using Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -19,7 +20,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.CheckRun;
 /// Endpoint to start a new profit sharing check run.
 /// Orchestrates: workflow creation → file generation (MICR, DJDE, PositivePay) → FTP transfer → audit logging → status update.
 /// </summary>
-public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartRequest, Results<Ok<CheckRunWorkflowResponse>, BadRequest, ProblemHttpResult>>
+public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartRequest, Results<Ok<CheckRunWorkflowResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly ICheckRunWorkflowService _workflowService;
     private readonly ICheckRunOrchestrator _orchestrator;
@@ -55,24 +56,24 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
         Group<CheckRunGroup>();
     }
 
-    public override async Task<Results<Ok<CheckRunWorkflowResponse>, BadRequest, ProblemHttpResult>> ExecuteAsync(
+    public override Task<Results<Ok<CheckRunWorkflowResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
         CheckRunStartRequest req,
         CancellationToken ct)
     {
-        return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             // Step 1: Start new workflow (creates workflow record in Pending state)
             var workflowResult = await _workflowService.StartNewRunAsync(
-                req.ProfitYear, 
-                req.CheckRunDate, 
-                req.CheckNumber, 
-                req.UserId, 
+                req.ProfitYear,
+                req.CheckRunDate,
+                req.CheckNumber,
+                req.UserId,
                 ct);
             if (!workflowResult.IsSuccess)
             {
                 _logger.LogError("Failed to start new check run workflow: {Error} (correlation: {CorrelationId})",
                     workflowResult.Error, HttpContext.TraceIdentifier);
-                return workflowResult;
+                return workflowResult.ToHttpResult(Error.Unexpected("Failed to start workflow"));
             }
 
             var runId = workflowResult.Value!.Id;
@@ -97,7 +98,7 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
                     // Step 3a: Record failure in workflow
                     await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserId, ct);
 
-                    return Result<CheckRunWorkflowResponse>.Failure(orchestrationResult.Error!);
+                    return TypedResults.Problem(orchestrationResult.Error!.Description, statusCode: 500);
                 }
 
                 // Step 3b: Record success in workflow
@@ -117,8 +118,11 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
                     "Check run completed successfully for profit year {ProfitYear}, runId: {RunId}, check number: {CheckNumber} (correlation: {CorrelationId})",
                     req.ProfitYear, runId, req.CheckNumber, HttpContext.TraceIdentifier);
 
-                return finalWorkflowResult;
+                return finalWorkflowResult.IsSuccess 
+                    ? TypedResults.Ok(finalWorkflowResult.Value!)
+                    : TypedResults.Problem(finalWorkflowResult.Error!.Description);
             }
+#pragma warning disable S2139 // Exception is logged with full context before rethrowing
             catch (Exception ex)
             {
                 _logger.LogError(ex,
@@ -137,6 +141,7 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
 
                 throw;
             }
+#pragma warning restore S2139
         });
     }
 }
