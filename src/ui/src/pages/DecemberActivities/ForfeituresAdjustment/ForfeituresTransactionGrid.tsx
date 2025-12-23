@@ -15,12 +15,11 @@ interface ForfeituresTransactionGridProps {
   transactionData: TransactionData | null;
   isLoading: boolean;
   pagination: ReturnType<typeof useGridPagination>;
-  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
 
 const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = memo(
-  ({ transactionData, isLoading, pagination, onPaginationChange, onSortChange }) => {
+  ({ transactionData, isLoading, pagination, onSortChange }) => {
     const columnDefs = useMemo(() => GetForfeituresTransactionGridColumns(), []);
 
     const handleSortChangeInternal = useCallback(
@@ -36,15 +35,6 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
 
     const displayData = transactionData || { results: [], total: 0 };
 
-    const paginationProps = {
-      pageNumber: pagination.pageNumber,
-      pageSize: pagination.pageSize,
-      sortParams: pagination.sortParams,
-      handlePageNumberChange: (value: number) => onPaginationChange(value, pagination.pageSize, pagination.sortParams),
-      handlePageSizeChange: (value: number) => onPaginationChange(0, value, pagination.sortParams),
-      handleSortChange: onSortChange
-    };
-
     return (
       <div style={{ height: "400px", width: "100%" }}>
         <DSMPaginatedGrid
@@ -53,7 +43,7 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
           columnDefs={columnDefs}
           totalRecords={displayData.total}
           isLoading={!!isLoading}
-          pagination={paginationProps}
+          pagination={pagination}
           onSortChange={handleSortChangeInternal}
           gridOptions={{
             suppressMultiSort: true,
@@ -85,7 +75,6 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
       prevProps.pagination.pageNumber === nextProps.pagination.pageNumber &&
       prevProps.pagination.pageSize === nextProps.pagination.pageSize &&
       prevProps.pagination.sortParams === nextProps.pagination.sortParams &&
-      prevProps.onPaginationChange === nextProps.onPaginationChange &&
       prevProps.onSortChange === nextProps.onSortChange
     );
   }

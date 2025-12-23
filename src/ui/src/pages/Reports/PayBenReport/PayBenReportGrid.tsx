@@ -1,5 +1,4 @@
-import { RefObject, useCallback, useMemo } from "react";
-import { ISortParams } from "smart-ui-library";
+import { RefObject, useMemo } from "react";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
@@ -14,7 +13,6 @@ interface PayBenReportGridProps {
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
 
@@ -25,7 +23,6 @@ const PayBenReportGrid = ({
   showData,
   hasResults,
   pagination,
-  onPaginationChange,
   onSortChange
 }: PayBenReportGridProps) => {
   const columnDefs = useMemo(() => PayBenReportGridColumn(), []);
@@ -35,29 +32,7 @@ const PayBenReportGrid = ({
     rowCount: data?.results?.length ?? 0
   });
 
-  const handleSortChanged = useCallback(
-    (update: ISortParams) => {
-      // Handle empty sortBy case - set default (preserving original logic)
-      if (update.sortBy === "") {
-        update.sortBy = "ssn";
-        update.isSortDescending = true;
-      }
 
-      // Reset to page 0 when sorting changes (preserving original logic)
-      onPaginationChange(0, pagination.pageSize);
-      onSortChange(update);
-    },
-    [onPaginationChange, onSortChange, pagination.pageSize]
-  );
-
-  const paginationProps = {
-    pageNumber: pagination.pageNumber,
-    pageSize: pagination.pageSize,
-    sortParams: pagination.sortParams,
-    handlePageNumberChange: (value: number) => onPaginationChange(value, pagination.pageSize),
-    handlePageSizeChange: (value: number) => onPaginationChange(0, value),
-    handleSortChange: onSortChange
-  };
 
   if (!showData || !data?.results) {
     return null;
@@ -73,8 +48,8 @@ const PayBenReportGrid = ({
         columnDefs={columnDefs}
         totalRecords={data.total || 0}
         isLoading={isLoading}
-        pagination={paginationProps}
-        onSortChange={handleSortChanged}
+        pagination={pagination}
+        onSortChange={onSortChange}
         heightConfig={{
           mode: "content-aware",
           maxHeight: gridMaxHeight

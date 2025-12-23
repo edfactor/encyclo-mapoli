@@ -34,7 +34,6 @@ const DemographicBadgesNotInPayprofit = () => {
             showData={showData}
             hasResults={hasResults ?? false}
             pagination={pagination}
-            onPaginationChange={pagination.handlePaginationChange}
             onSortChange={pagination.handleSortChange}
           />
         </Grid>
