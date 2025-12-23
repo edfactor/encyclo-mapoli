@@ -1,9 +1,11 @@
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
 
 /// <summary>
 /// DTO for check run workflow information exposed through service APIs.
 /// </summary>
-public sealed class CheckRunWorkflowResponse
+public sealed class CheckRunWorkflowResponse : IProfitYearRequest
 {
     /// <summary>
     /// Unique identifier for this workflow run.
@@ -13,7 +15,7 @@ public sealed class CheckRunWorkflowResponse
     /// <summary>
     /// The profit year this check run is for.
     /// </summary>
-    public int ProfitYear { get; init; }
+    public short ProfitYear { get; init; }
 
     /// <summary>
     /// The date this check run was initiated. Used to enforce same-day reprint constraints.

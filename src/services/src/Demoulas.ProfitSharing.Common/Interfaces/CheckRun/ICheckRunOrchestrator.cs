@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 
@@ -18,8 +18,7 @@ public interface ICheckRunOrchestrator
     /// <param name="runId">The workflow run ID for correlation.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure with error details.</returns>
-    Task<Result<bool>> ExecuteCheckRunAsync(
-        int profitYear,
+    Task<Result<bool>> ExecuteCheckRunAsync(short profitYear,
         string checkNumber,
         Guid userId,
         Guid runId,

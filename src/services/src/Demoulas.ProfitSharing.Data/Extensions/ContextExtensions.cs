@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping;
+﻿using Demoulas.ProfitSharing.Data.Configurations.FileTransfer;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
@@ -45,6 +45,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ExcludedIdTypeMap());
         modelBuilder.ApplyConfiguration(new EnrollmentMap());
         modelBuilder.ApplyConfiguration(new FrozenStateMap());
+        modelBuilder.ApplyConfiguration(new FtpOperationLogConfiguration());
         modelBuilder.ApplyConfiguration(new GenderMap());
         modelBuilder.ApplyConfiguration(new HealthCheckStatusHistoryMap());
         modelBuilder.ApplyConfiguration(new JobMap());

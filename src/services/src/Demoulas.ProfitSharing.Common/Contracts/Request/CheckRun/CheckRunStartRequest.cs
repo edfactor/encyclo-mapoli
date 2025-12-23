@@ -1,16 +1,18 @@
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.CheckRun;
 
 /// <summary>
 /// Request to start a new profit sharing check run.
 /// Initiates the complete workflow: file generation (MICR, DJDE, PositivePay) → FTP transfer → audit logging.
 /// </summary>
-public sealed record CheckRunStartRequest
+public sealed record CheckRunStartRequest : IProfitYearRequest
 {
     /// <summary>
     /// The profit year for which checks are being issued (e.g., 2024).
     /// Must be a valid year between 2000 and 2100.
     /// </summary>
-    public required int ProfitYear { get; init; }
+    public required short ProfitYear { get; init; }
 
     /// <summary>
     /// The date on which checks are issued (e.g., 2024-12-25).

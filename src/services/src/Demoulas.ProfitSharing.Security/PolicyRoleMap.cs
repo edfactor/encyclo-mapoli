@@ -42,6 +42,8 @@ public static class PolicyRoleMap
 
         // Unmask SSN values: highly restricted to SSN-Unmasking role only.
         [Policy.CanUnmaskSsn] = [Role.SSN_UNMASKING],
+
+        [Policy.CanProcessChecks] = [Role.FINANCEMANAGER, Role.ADMINISTRATOR, Role.DISTRIBUTIONSCLERK, Role.ITDEVOPS, Role.HARDSHIPADMINISTRATOR]
     };
 
     public static string[] GetRoles(string policyName) => Map.TryGetValue(policyName, out var roles) ? roles : [];

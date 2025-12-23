@@ -32,8 +32,7 @@ public sealed class CheckRunOrchestrator : ICheckRunOrchestrator
     /// TODO: Integrate with IMicrFileGenerator, IDjdeFileGenerator, IPositivePayFileGenerator, and IFileTransferService
     /// when Todos #1-4 are fully implemented.
     /// </summary>
-    public Task<Result<bool>> ExecuteCheckRunAsync(
-        int profitYear,
+    public Task<Result<bool>> ExecuteCheckRunAsync(short profitYear,
         string checkNumber,
         Guid userId,
         Guid runId,

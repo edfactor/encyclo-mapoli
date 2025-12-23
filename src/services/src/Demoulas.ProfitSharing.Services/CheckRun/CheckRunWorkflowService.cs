@@ -58,8 +58,7 @@ public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<CheckRunWorkflowResponse>> StartNewRunAsync(
-        int profitYear,
+    public async Task<Result<CheckRunWorkflowResponse>> StartNewRunAsync(short profitYear,
         DateOnly checkRunDate,
         int checkNumber,
         Guid userId,

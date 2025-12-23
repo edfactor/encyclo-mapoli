@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
@@ -25,11 +25,10 @@ public interface ICheckRunWorkflowService
     /// <param name="userId">The user ID initiating the check run.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The newly created check run workflow.</returns>
-    Task<Result<CheckRunWorkflowResponse>> StartNewRunAsync(
-        int profitYear, 
-        DateOnly checkRunDate, 
-        int checkNumber, 
-        Guid userId, 
+    Task<Result<CheckRunWorkflowResponse>> StartNewRunAsync(short profitYear,
+        DateOnly checkRunDate,
+        int checkNumber,
+        Guid userId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -41,9 +40,9 @@ public interface ICheckRunWorkflowService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success if the step was recorded, failure if the workflow was not found.</returns>
     Task<Result<bool>> RecordStepCompletionAsync(
-        Guid runId, 
-        int stepNumber, 
-        Guid userId, 
+        Guid runId,
+        int stepNumber,
+        Guid userId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -62,7 +61,7 @@ public interface ICheckRunWorkflowService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success if the reprint count was incremented, failure if the workflow was not found.</returns>
     Task<Result<bool>> IncrementReprintCountAsync(
-        Guid runId, 
-        Guid userId, 
+        Guid runId,
+        Guid userId,
         CancellationToken cancellationToken = default);
 }
