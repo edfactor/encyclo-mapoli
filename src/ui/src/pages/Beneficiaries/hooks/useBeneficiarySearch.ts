@@ -48,7 +48,7 @@ export const useBeneficiarySearch = (config?: UseBeneficiarySearchConfig): UseBe
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(config?.defaultPageSize ?? 10);
   const [sortParams, setSortParams] = useState<SortParams>({
-    sortBy: config?.defaultSortBy ?? "name",
+    sortBy: config?.defaultSortBy ?? "fullName",
     isSortDescending: false
   });
 
@@ -65,7 +65,7 @@ export const useBeneficiarySearch = (config?: UseBeneficiarySearchConfig): UseBe
     setPageNumber(0);
     setPageSize(config?.defaultPageSize ?? 10);
     setSortParams({
-      sortBy: config?.defaultSortBy ?? "name",
+      sortBy: config?.defaultSortBy ?? "fullName",
       isSortDescending: false
     });
   }, [config?.defaultPageSize, config?.defaultSortBy]);

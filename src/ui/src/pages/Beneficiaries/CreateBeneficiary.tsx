@@ -230,6 +230,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.firstName}
+                  autoComplete="off"
                   onChange={(e) => {
                     field.onChange(e.target.value);
                   }}
@@ -252,6 +253,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.lastName}
+                  autoComplete="off"
                   onChange={(e) => {
                     field.onChange(e.target.value);
                   }}
@@ -274,6 +276,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                   value={field.value ?? ""}
                   error={!!errors.beneficiarySsn}
                   helperText={errors.beneficiarySsn?.message}
+                  autoComplete="off"
                   onChange={(e) => {
                     const value = e.target.value;
                     // Only allow numeric input
@@ -344,6 +347,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.street}
+                  autoComplete="off"
                   onChange={(e) => {
                     field.onChange(e.target.value);
                   }}
@@ -368,6 +372,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     variant="outlined"
                     value={field.value ?? ""}
                     error={!!errors.city}
+                    autoComplete="off"
                     onChange={(e) => {
                       field.onChange(e.target.value);
                     }}
@@ -388,6 +393,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     variant="outlined"
                     value={field.value ?? ""}
                     error={!!errors.state}
+                    autoComplete="off"
                     onChange={(e) => {
                       field.onChange(e.target.value);
                     }}
@@ -408,6 +414,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     variant="outlined"
                     value={field.value ?? ""}
                     error={!!errors.postalCode}
+                    autoComplete="off"
                     onChange={(e) => {
                       field.onChange(e.target.value);
                     }}
@@ -434,6 +441,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     variant="outlined"
                     value={field.value ?? ""}
                     error={!!errors.relationship}
+                    autoComplete="off"
                     onChange={(e) => {
                       field.onChange(e.target.value);
                     }}
