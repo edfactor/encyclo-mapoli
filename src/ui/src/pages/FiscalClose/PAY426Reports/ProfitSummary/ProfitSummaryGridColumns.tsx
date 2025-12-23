@@ -2,7 +2,7 @@ import Link from "@mui/material/Link";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { ROUTES } from "../../../../constants";
-import { createCurrencyColumn, createHoursColumn, createPointsColumn } from "../../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createPointsColumn } from "../../../../utils/gridColumnFactory";
 
 /**
  * Maps lineItemPrefix to PAY426N preset number
@@ -92,36 +92,6 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
           return params.value;
         }
         return numberToCurrency(params.value);
-      }
-    }),
-    createHoursColumn({
-      headerName: "Hours",
-      field: "totalHours",
-      minWidth: 80,
-      sortable: false,
-      valueFormatter: (params) => {
-        if (params.value === null || params.value === undefined) {
-          return "";
-        }
-        if (typeof params.value === "string" && params.value.includes("X")) {
-          return params.value;
-        }
-        return formatNumberWithComma(params.value);
-      }
-    }),
-    createPointsColumn({
-      headerName: "Points",
-      field: "totalPoints",
-      minWidth: 100,
-      sortable: false,
-      valueFormatter: (params) => {
-        if (params.value === null || params.value === undefined) {
-          return "";
-        }
-        if (typeof params.value === "string" && params.value.includes("X")) {
-          return params.value;
-        }
-        return formatNumberWithComma(params.value);
       }
     })
   ];

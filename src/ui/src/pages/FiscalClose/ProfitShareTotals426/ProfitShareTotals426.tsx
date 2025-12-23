@@ -19,7 +19,9 @@ const ProfitShareTotals426 = () => {
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const [triggerSearch, { isLoading }] = useLazyGetYearEndProfitSharingReportLiveQuery();
-  const { yearEndProfitSharingReportTotals } = useSelector((state: RootState) => state.yearsEnd);
+  const { yearEndProfitSharingReportTotalsFrozen: yearEndProfitSharingReportTotals } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {

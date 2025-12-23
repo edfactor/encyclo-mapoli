@@ -41,17 +41,20 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
     contributionsByAgePartTime
   } = useSelector((state: RootState) => state.yearsEnd);
 
-  const [fetchFrozenState, { data: frozenState }] = useLazyGetFrozenStateResponseQuery();
+  // Use Redux-cached frozen state for persistence across navigation
+  const cachedFrozenState = useSelector((state: RootState) => state.frozen.frozenStateResponseData);
+  const [fetchFrozenState] = useLazyGetFrozenStateResponseQuery();
 
+  // Only fetch frozen state if not already in Redux cache
   useEffect(() => {
-    if (hasToken) {
+    if (hasToken && !cachedFrozenState) {
       fetchFrozenState(undefined, false);
     }
-  }, [fetchFrozenState, hasToken]);
+  }, [fetchFrozenState, hasToken, cachedFrozenState]);
 
   useEffect(() => {
-    if (hasToken && frozenState?.profitYear) {
-      const profitYear = frozenState.profitYear;
+    if (hasToken && cachedFrozenState?.profitYear) {
+      const profitYear = cachedFrozenState.profitYear;
 
       triggerBalanceSearch(
         {
@@ -155,7 +158,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
     }
   }, [
     hasToken,
-    frozenState,
+    cachedFrozenState,
     triggerBalanceSearch,
     triggerContributionsSearch,
     triggerDistributionsSearch,
@@ -257,7 +260,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
           sx={{
             color: "#0258A5"
           }}>
-          {`Frozen Summary As Of ${frozenState?.asOfDateTime ? new Date(frozenState.asOfDateTime).toLocaleDateString() : "Loading..."}`}
+          {`Frozen Summary As Of ${cachedFrozenState?.asOfDateTime ? new Date(cachedFrozenState.asOfDateTime).toLocaleDateString() : "Loading..."}`}
         </Typography>
       </Grid>
 
