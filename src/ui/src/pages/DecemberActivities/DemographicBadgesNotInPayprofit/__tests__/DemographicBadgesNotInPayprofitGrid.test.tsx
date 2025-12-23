@@ -98,7 +98,6 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     showData: true,
     hasResults: true,
     pagination: mockPagination,
-    onPaginationChange: vi.fn(),
     onSortChange: vi.fn()
   };
 
@@ -168,7 +167,9 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
       const nextBtn = screen.getByTestId("next-page");
       nextBtn.click();
 
-      expect(defaultProps.onPaginationChange).toHaveBeenCalledWith(0, 25);
+      // DSMPaginatedGrid wraps setPageNumber to call handlePageNumberChange(value - 1)
+      // When mock Pagination calls setPageNumber(1), it triggers handlePageNumberChange(0)
+      expect(mockPagination.handlePageNumberChange).toHaveBeenCalledWith(0);
     });
 
     it("should call pagination handler when page size changes", () => {
@@ -177,7 +178,8 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
       const sizeBtn = screen.getByTestId("size-50");
       sizeBtn.click();
 
-      expect(defaultProps.onPaginationChange).toHaveBeenCalledWith(0, 50);
+      // DSMPaginatedGrid passes handlePageSizeChange directly as setPageSize
+      expect(mockPagination.handlePageSizeChange).toHaveBeenCalledWith(50);
     });
   });
 
@@ -223,8 +225,8 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
       );
 
       // The component should reset pagination on sort change
-      // This is verified through callback invocation
-      expect(defaultProps.onPaginationChange).toBeDefined();
+      // This is verified through callback invocation - onSortChange is defined
+      expect(defaultProps.onSortChange).toBeDefined();
     });
 
     it("should default to badgeNumber sort when empty sortBy provided", () => {
