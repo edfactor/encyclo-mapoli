@@ -67,11 +67,13 @@ public class BeneficiaryService : IBeneficiaryService
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
             // Validate database-dependent business rules
-            var dbValidationResult = await _databaseValidator.ValidateCreateBeneficiaryAsync(
-                req.BeneficiaryContactId,
-                req.EmployeeBadgeNumber,
-                ctx,
-                cancellationToken);
+            var dbValidationModel = new BeneficiaryDatabaseValidationModel
+            {
+                BeneficiaryContactId = req.BeneficiaryContactId,
+                EmployeeBadgeNumber = req.EmployeeBadgeNumber,
+                Context = ctx
+            };
+            var dbValidationResult = await _databaseValidator.ValidateAsync(dbValidationModel, cancellationToken);
 
             if (!dbValidationResult.IsValid)
             {
