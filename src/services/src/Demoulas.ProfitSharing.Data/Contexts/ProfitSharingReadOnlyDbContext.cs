@@ -2,6 +2,7 @@
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
+using Demoulas.ProfitSharing.Data.Entities.CheckRun;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
@@ -46,6 +47,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<BeneficiaryContact> BeneficiaryContacts { get; set; }
     public virtual DbSet<BeneficiaryContactArchive> BeneficiaryContactArchives { get; set; }
     public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
+    public virtual DbSet<CheckRunWorkflow> CheckRunWorkflows { get; set; }
     public virtual DbSet<Enrollment> Enrollments { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
     public virtual DbSet<Distribution> Distributions { get; set; }

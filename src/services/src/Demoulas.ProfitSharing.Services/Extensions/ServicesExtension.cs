@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Services.Administration;
@@ -14,7 +15,7 @@ using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Demoulas.ProfitSharing.Services.Certificates;
-using Demoulas.ProfitSharing.Services.FileTransfer;
+using Demoulas.ProfitSharing.Services.CheckRun;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Lookup;
@@ -43,6 +44,7 @@ public static class ServicesExtension
     {
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
+        _ = builder.Services.AddScoped<ICheckRunWorkflowService, CheckRunWorkflowService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
         _ = builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
         _ = builder.Services.AddScoped<IDistributionService, DistributionService>();
@@ -122,12 +124,6 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IStateService, StateService>();
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
         _ = builder.Services.AddScoped<IBeneficiaryDisbursementService, BeneficiaryDisbursementService>();
-
-        // PS-1790: PROFDIST FTP modernization services
-        _ = builder.Services.AddScoped<Services.PrintFormatting.IMicrFormatterFactory, Services.PrintFormatting.MicrFormatterFactory>();
-        _ = builder.Services.AddScoped<IFileTransferService, Services.FileTransfer.MockFileTransferService>();
-        _ = builder.Services.AddScoped<IPositivePayFileService, Services.PositivePay.PositivePayFileService>();
-        _ = builder.Services.AddScoped<ICheckRunWorkflowService, Services.CheckRun.CheckRunWorkflowService>();
 
         // Validation services
         _ = builder.Services.AddScoped<IChecksumValidationService, ChecksumValidationService>();
