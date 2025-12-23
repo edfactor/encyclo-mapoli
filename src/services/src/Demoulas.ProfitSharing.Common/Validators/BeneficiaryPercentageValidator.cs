@@ -2,6 +2,7 @@ using System.Diagnostics.Metrics;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using FastEndpoints;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
@@ -19,14 +20,16 @@ namespace Demoulas.ProfitSharing.Common.Validators;
 public class BeneficiaryPercentageValidator : Validator<dynamic>
 {
     private readonly IBeneficiaryService _beneficiaryService;
+    private readonly ILogger<BeneficiaryPercentageValidator> _logger;
     private static readonly Meter s_meter = new("Demoulas.ProfitSharing.Validators");
     private static readonly Counter<long> s_validationFailures = s_meter.CreateCounter<long>(
         "ps_validation_failures_total",
         description: "Counts of validation failures by validator and rule");
 
-    public BeneficiaryPercentageValidator(IBeneficiaryService beneficiaryService)
+    public BeneficiaryPercentageValidator(IBeneficiaryService beneficiaryService, ILogger<BeneficiaryPercentageValidator> logger)
     {
         _beneficiaryService = beneficiaryService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -68,9 +71,11 @@ public class BeneficiaryPercentageValidator : Validator<dynamic>
 
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // If an error occurs, allow validation to pass (database error will be caught separately)
+            // Log the error for debugging but allow validation to pass (database error will be caught separately)
+            _logger.LogError(ex, "Error validating beneficiary percentage for badge {BadgeNumber} with percentage {NewPercentage}", 
+                badgeNumber, newPercentage);
             return true;
         }
     }
