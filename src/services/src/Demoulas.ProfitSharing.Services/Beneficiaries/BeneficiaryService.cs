@@ -2,7 +2,6 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -11,6 +10,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Demoulas.ProfitSharing.Common.Validators;
 
 namespace Demoulas.ProfitSharing.Services.Beneficiaries;
 
@@ -46,9 +46,20 @@ public class BeneficiaryService : IBeneficiaryService
             throw new ValidationException(validationResult.Errors);
         }
 
-        // Validate percentage sum before creating beneficiary
+        // Validate percentage constraints before creating beneficiary
+        if (req.EmployeeBadgeNumber <= 0)
+        {
+            throw new ValidationException("Badge number must be greater than 0.");
+        }
+        
+        if (req.Percentage <= 0 || req.Percentage > 100m)
+        {
+            throw new ValidationException("Percentage must be between 0 and 100%.");
+        }
+
+        // Check that sum of percentages doesn't exceed 100%
         var existingPercentageSum = await GetBeneficiaryPercentageSumAsync(req.EmployeeBadgeNumber, null, cancellationToken);
-        if (existingPercentageSum >= 0 && existingPercentageSum + req.Percentage > 100m)
+        if (existingPercentageSum >= 0 && (existingPercentageSum + req.Percentage) > 100m)
         {
             throw new ValidationException("The sum of all beneficiary percentages would exceed 100%.");
         }
@@ -205,13 +216,15 @@ public class BeneficiaryService : IBeneficiaryService
 
             if (req.Percentage.HasValue)
             {
-                // Validate percentage sum before saving if percentage was updated
-                var existingPercentageSum = await GetBeneficiaryPercentageSumAsync(
-                    beneficiary.BadgeNumber,
-                    beneficiary.Id, // Exclude current beneficiary from calculation
-                    cancellationToken);
+                // Validate percentage constraints if percentage was updated
+                if (req.Percentage.Value <= 0 || req.Percentage.Value > 100m)
+                {
+                    throw new ValidationException("Percentage must be between 0 and 100%.");
+                }
 
-                if (existingPercentageSum >= 0 && existingPercentageSum + req.Percentage.Value > 100m)
+                // Check that sum of percentages doesn't exceed 100%
+                var existingPercentageSum = await GetBeneficiaryPercentageSumAsync(beneficiary.BadgeNumber, beneficiary.Id, cancellationToken);
+                if (existingPercentageSum >= 0 && (existingPercentageSum + req.Percentage.Value) > 100m)
                 {
                     throw new ValidationException("The sum of all beneficiary percentages would exceed 100%.");
                 }
@@ -579,7 +592,6 @@ public class BeneficiaryService : IBeneficiaryService
 
     /// <summary>
     /// Gets the total beneficiary percentage sum for a specific badge number, optionally excluding one beneficiary by ID.
-    /// Used by BeneficiaryPercentageValidator to validate percentage sums.
     /// </summary>
     /// <param name="badgeNumber">The employee badge number</param>
     /// <param name="beneficiaryIdToExclude">Optional: Beneficiary ID to exclude (e.g., when updating)</param>
