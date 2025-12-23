@@ -14,6 +14,7 @@ using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Demoulas.ProfitSharing.Services.Certificates;
+using Demoulas.ProfitSharing.Services.FileTransfer;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Lookup;
@@ -121,6 +122,12 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IStateService, StateService>();
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
         _ = builder.Services.AddScoped<IBeneficiaryDisbursementService, BeneficiaryDisbursementService>();
+
+        // PS-1790: PROFDIST FTP modernization services
+        _ = builder.Services.AddScoped<Services.PrintFormatting.IMicrFormatterFactory, Services.PrintFormatting.MicrFormatterFactory>();
+        _ = builder.Services.AddScoped<IFileTransferService, Services.FileTransfer.MockFileTransferService>();
+        _ = builder.Services.AddScoped<IPositivePayFileService, Services.PositivePay.PositivePayFileService>();
+        _ = builder.Services.AddScoped<ICheckRunWorkflowService, Services.CheckRun.CheckRunWorkflowService>();
 
         // Validation services
         _ = builder.Services.AddScoped<IChecksumValidationService, ChecksumValidationService>();
