@@ -1,4 +1,4 @@
-import { FormLabel, Grid, TextField } from "@mui/material";
+import { FormControlLabel, FormLabel, Grid, TextField } from "@mui/material";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import Checkbox from "@mui/material/Checkbox";
@@ -317,22 +317,24 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             />
           </Grid>
           <Grid size={{ md: 12, xs: 12 }}>
-            <FormLabel>
-              <Controller
-                name="addressSameAsBeneficiary"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    {...field}
-                    checked={!!field.value} // Ensure it's a boolean
-                    onChange={(e) => {
-                      field.onChange(e.target.checked); // Use checked, not value
-                    }}
-                  />
-                )}
-              />
-              Address the same as employee ?
-            </FormLabel>
+            <Controller
+              name="addressSameAsBeneficiary"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      {...field}
+                      checked={!!field.value}
+                      onChange={(e) => {
+                        field.onChange(e.target.checked);
+                      }}
+                    />
+                  }
+                  label="Is Beneficiary Address the same as Employee Address?"
+                />
+              )}
+            />
           </Grid>
           <Grid size={{ md: 5, xs: 12 }}>
             <FormLabel>Address</FormLabel>
