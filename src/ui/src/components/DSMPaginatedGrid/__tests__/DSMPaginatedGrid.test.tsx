@@ -8,7 +8,6 @@ import { DSMPaginatedGrid } from "../DSMPaginatedGrid";
 
 // Store references to mock callbacks for assertions
 let mockSetPageNumber: ((value: number) => void) | null = null;
-let mockSetPageSize: ((value: number) => void) | null = null;
 
 interface DSMGridProps {
   providedOptions?: { rowData?: unknown[]; columnDefs?: ColDef[] };
@@ -47,7 +46,7 @@ vi.mock("smart-ui-library", () => ({
   Pagination: ({ pageNumber, setPageNumber, pageSize, setPageSize, recordCount, rowsPerPageOptions }: MockPaginationProps) => {
     // Capture the callbacks for testing
     mockSetPageNumber = setPageNumber ?? null;
-    mockSetPageSize = setPageSize ?? null;
+    // Note: setPageSize is available but not captured as tests don't currently assert on it
     
     return (
       <div data-testid="pagination">
@@ -126,7 +125,6 @@ describe("DSMPaginatedGrid", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSetPageNumber = null;
-    mockSetPageSize = null;
   });
 
   afterEach(() => {

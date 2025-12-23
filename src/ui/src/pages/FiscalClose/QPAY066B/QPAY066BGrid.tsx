@@ -1,7 +1,8 @@
 import { Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { DSMPaginatedGrid, ISortParams, numberToCurrency, TotalsGrid } from "smart-ui-library";
+import { ISortParams, numberToCurrency, TotalsGrid } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
@@ -118,10 +119,8 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
         preferenceKey={GRID_KEYS.QPAY066B}
         isLoading={isFetching}
         onSortChange={sortEventHandler}
-        providedOptions={{
-          rowData: qpay066bData?.response?.response?.results || [],
-          columnDefs: columnDefs
-        }}
+        data={qpay066bData?.response?.response?.results || []}
+        columnDefs={columnDefs}
         pagination={{
           pageNumber,
           pageSize,
