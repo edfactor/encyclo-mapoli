@@ -11,9 +11,9 @@ import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHei
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/AdhocApi";
 import {
-  AdhocBeneficiariesReportRequest,
-  adhocBeneficiariesReportResponse,
-  BeneficiaryReportDto
+    AdhocBeneficiariesReportRequest,
+    adhocBeneficiariesReportResponse,
+    BeneficiaryReportDto
 } from "../../../reduxstore/types";
 import { PayBeNextGridColumns, ProfitDetailGridColumns } from "./PayBeNextGridColumns";
 

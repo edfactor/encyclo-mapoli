@@ -1,13 +1,13 @@
 import {
-  Box,
-  CircularProgress,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Typography
+    Box,
+    CircularProgress,
+    Grid,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableRow,
+    Typography
 } from "@mui/material";
 import { ColDef } from "ag-grid-community";
 import React, { useMemo } from "react";
@@ -19,17 +19,17 @@ import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import {
-  GetQPAY066xAdHocCommonGridColumns,
-  GetQPAY066xAgeAtTerminationColumn,
-  GetQPAY066xAgeColumn,
-  GetQPAY066xBeneficiaryAllocationColumn,
-  GetQPAY066xDistributionAmountColumn,
-  GetQPAY066xEnrollmentCodeColumn,
-  GetQPAY066xInactiveDateColumn,
-  GetQPAY066xPSYearsColumn,
-  GetQPAY066xTerminationCodeColumn,
-  GetQPAY066xTerminationDateColumn,
-  GetQPAY066xVestedPercentageColumn
+    GetQPAY066xAdHocCommonGridColumns,
+    GetQPAY066xAgeAtTerminationColumn,
+    GetQPAY066xAgeColumn,
+    GetQPAY066xBeneficiaryAllocationColumn,
+    GetQPAY066xDistributionAmountColumn,
+    GetQPAY066xEnrollmentCodeColumn,
+    GetQPAY066xInactiveDateColumn,
+    GetQPAY066xPSYearsColumn,
+    GetQPAY066xTerminationCodeColumn,
+    GetQPAY066xTerminationDateColumn,
+    GetQPAY066xVestedPercentageColumn
 } from "./QPAY066xAdHocGridColumns";
 
 interface QPAY066xAdHocReportsGridProps {

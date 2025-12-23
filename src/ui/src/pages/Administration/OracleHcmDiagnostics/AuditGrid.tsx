@@ -1,14 +1,14 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Typography
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { Paged } from "smart-ui-library";

@@ -5,9 +5,9 @@ import { useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GRID_KEYS } from "../../../constants";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { ProfitShareUpdateGridColumns } from "./ProfitShareUpdateGridColumns";
 
 interface ProfitShareEditUpdateGridProps {

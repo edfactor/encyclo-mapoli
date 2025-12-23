@@ -1,6 +1,6 @@
-import { Box, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { Box, IconButton, Typography } from "@mui/material";
 import { memo, useMemo } from "react";
 import { ISortParams } from "smart-ui-library";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
