@@ -1,7 +1,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.CheckRun;
 using FluentValidation;
 
-namespace Demoulas.ProfitSharing.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Common.Validators;
 
 /// <summary>
 /// Validates CheckRunStartRequest to ensure all required fields are present and valid.
@@ -11,7 +11,7 @@ public sealed class CheckRunStartRequestValidator : AbstractValidator<CheckRunSt
     public CheckRunStartRequestValidator()
     {
         RuleFor(x => x.ProfitYear)
-            .InclusiveBetween(2000, 2100)
+            .InclusiveBetween((short)2000, (short)2100)
             .WithMessage("ProfitYear must be between 2000 and 2100.");
 
         RuleFor(x => x.CheckRunDate)
@@ -24,8 +24,10 @@ public sealed class CheckRunStartRequestValidator : AbstractValidator<CheckRunSt
             .GreaterThan(0)
             .WithMessage("CheckNumber must be a positive integer.");
 
-        RuleFor(x => x.UserId)
+        RuleFor(x => x.UserName)
             .NotEmpty()
-            .WithMessage("UserId is required.");
+            .WithMessage("UserName is required.")
+            .MaximumLength(50)
+            .WithMessage("UserName cannot exceed 50 characters.");
     }
 }

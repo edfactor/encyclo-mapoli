@@ -16,7 +16,7 @@ public sealed class CheckRunWorkflow
     /// <summary>
     /// The profit year this check run is for.
     /// </summary>
-    public int ProfitYear { get; set; }
+    public short ProfitYear { get; set; }
 
     /// <summary>
     /// The date this check run was initiated. Used to enforce same-day reprint constraints.
@@ -52,7 +52,7 @@ public sealed class CheckRunWorkflow
     /// <summary>
     /// User who created this workflow run.
     /// </summary>
-    public Guid CreatedByUserId { get; set; }
+    public string? CreatedByUserName { get; set; }
 
     /// <summary>
     /// Timestamp when this workflow run was created.
@@ -62,7 +62,7 @@ public sealed class CheckRunWorkflow
     /// <summary>
     /// User who last modified this workflow run (step updates, reprint increments).
     /// </summary>
-    public Guid? ModifiedByUserId { get; set; }
+    public string? ModifiedByUserName { get; set; }
 
     /// <summary>
     /// Timestamp when this workflow run was last modified.

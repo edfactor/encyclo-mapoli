@@ -27,10 +27,10 @@ public sealed record CheckRunStartRequest : IProfitYearRequest
     public required int CheckNumber { get; init; }
 
     /// <summary>
-    /// The unique identifier of the user initiating the check run.
+    /// The username of the user initiating the check run.
     /// Used for audit logging and authorization tracking.
     /// </summary>
-    public required Guid UserId { get; init; }
+    public required string UserName { get; init; }
 
     /// <summary>
     /// Example request for documentation and testing.
@@ -40,6 +40,6 @@ public sealed record CheckRunStartRequest : IProfitYearRequest
         ProfitYear = 2024,
         CheckRunDate = new DateOnly(2024, 12, 25),
         CheckNumber = 7542,
-        UserId = Guid.NewGuid()
+        UserName = "jdoe"
     };
 }

@@ -1,5 +1,6 @@
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Interfaces.FileTransfer;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.FileTransfer;
@@ -29,9 +30,9 @@ public sealed class MockFileTransferService : IFileTransferService
 
     /// <summary>
     /// Transfers file content to destination via SFTP (mocked).
-    /// Creates FtpOperationLog entry for audit trail.
+    /// Creates FtpOperationLog and FileTransferAudit entries for audit trail.
     /// </summary>
-    public async Task<Result<FileTransferAudit>> TransferFileAsync(
+    public async Task<Result<bool>> TransferFileAsync(
         Stream content,
         string destination,
         string fileName,
@@ -40,24 +41,16 @@ public sealed class MockFileTransferService : IFileTransferService
         var startTime = DateTimeOffset.UtcNow;
         Guid? checkRunWorkflowId = null; // Will be set when check run context is available
 
-        var audit = new FileTransferAudit
-        {
-            Id = Guid.NewGuid(),
-            Timestamp = startTime,
-            FileName = fileName,
-            Destination = destination,
-            UserId = Guid.Empty, // Will be set from HTTP context in production
-            IsSuccess = false
-        };
+        long fileSize = 0;
+        byte[] csvContent = [];
 
         try
         {
             // Read content into byte array for audit storage and file size calculation
             await using var memoryStream = new MemoryStream();
             await content.CopyToAsync(memoryStream, cancellationToken);
-            var csvContent = memoryStream.ToArray();
-            audit.CsvContent = csvContent;
-            audit.FileSize = csvContent.Length;
+            csvContent = memoryStream.ToArray();
+            fileSize = csvContent.Length;
 
             // Execute transfer with retry logic (3 attempts)
             var maxAttempts = 3;
@@ -67,7 +60,7 @@ public sealed class MockFileTransferService : IFileTransferService
                 {
                     _logger.LogInformation(
                         "MOCK: Transferring file {FileName} ({FileSize} bytes) to {Destination} (attempt {Attempt}/{MaxAttempts})",
-                        fileName, csvContent.Length, destination, attempt, maxAttempts);
+                        fileName, fileSize, destination, attempt, maxAttempts);
 
                     // Simulate network latency
                     await Task.Delay(100, cancellationToken);
@@ -89,12 +82,23 @@ public sealed class MockFileTransferService : IFileTransferService
                 }
             }
 
-            audit.IsSuccess = true;
-            audit.TransferDurationMs = (long)(DateTimeOffset.UtcNow - startTime).TotalMilliseconds;
+            var durationMs = (long)(DateTimeOffset.UtcNow - startTime).TotalMilliseconds;
 
             _logger.LogInformation(
                 "File transfer completed successfully in {Duration}ms. File: {FileName}, Size: {FileSize} bytes",
-                audit.TransferDurationMs, fileName, audit.FileSize);
+                durationMs, fileName, fileSize);
+
+            // Create FileTransferAudit entry for successful transfer
+            await CreateFileTransferAuditAsync(
+                checkRunWorkflowId,
+                fileName,
+                destination,
+                csvContent,
+                fileSize,
+                isSuccess: true,
+                errorMessage: null,
+                durationMs,
+                cancellationToken);
 
             // Create FtpOperationLog entry for successful transfer
             await CreateFtpOperationLogAsync(
@@ -104,21 +108,30 @@ public sealed class MockFileTransferService : IFileTransferService
                 destination,
                 isSuccess: true,
                 errorMessage: null,
-                durationMs: audit.TransferDurationMs,
-                userId: audit.UserId,
+                durationMs,
                 cancellationToken);
 
-            return Result<FileTransferAudit>.Success(audit);
+            return Result<bool>.Success(true);
         }
         catch (Exception ex)
         {
-            audit.IsSuccess = false;
-            audit.ErrorMessage = ex.Message;
-            audit.TransferDurationMs = (long)(DateTimeOffset.UtcNow - startTime).TotalMilliseconds;
+            var durationMs = (long)(DateTimeOffset.UtcNow - startTime).TotalMilliseconds;
 
             _logger.LogError(ex,
                 "File transfer failed after retries. File: {FileName}, Destination: {Destination}, Error: {Error}",
                 fileName, destination, ex.Message);
+
+            // Create FileTransferAudit entry for failed transfer
+            await CreateFileTransferAuditAsync(
+                checkRunWorkflowId,
+                fileName,
+                destination,
+                csvContent,
+                fileSize,
+                isSuccess: false,
+                errorMessage: ex.Message,
+                durationMs,
+                cancellationToken);
 
             // Create FtpOperationLog entry for failed transfer
             await CreateFtpOperationLogAsync(
@@ -128,12 +141,63 @@ public sealed class MockFileTransferService : IFileTransferService
                 destination,
                 isSuccess: false,
                 errorMessage: ex.Message,
-                durationMs: audit.TransferDurationMs,
-                userId: audit.UserId,
+                durationMs,
                 cancellationToken);
 
-            return Result<FileTransferAudit>.Failure(
+            return Result<bool>.Failure(
                 Error.FileTransferFailed with { Description = $"Failed to transfer file {fileName}: {ex.Message}" });
+        }
+    }
+
+    /// <summary>
+    /// Creates a FileTransferAudit entry in the database for detailed audit trail.
+    /// </summary>
+    private async Task CreateFileTransferAuditAsync(
+        Guid? checkRunWorkflowId,
+        string fileName,
+        string destination,
+        byte[] csvContent,
+        long fileSize,
+        bool isSuccess,
+        string? errorMessage,
+        long durationMs,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _contextFactory.UseWritableContext(async context =>
+            {
+                var audit = new FileTransferAudit
+                {
+                    Id = Guid.NewGuid(),
+                    Timestamp = DateTimeOffset.UtcNow,
+                    FileName = fileName,
+                    Destination = destination,
+                    CsvContent = csvContent,
+                    FileSize = fileSize,
+                    IsSuccess = isSuccess,
+                    ErrorMessage = errorMessage,
+                    TransferDurationMs = durationMs,
+                    CheckRunWorkflowId = checkRunWorkflowId,
+                    UserName = null // Will be set from HTTP context in production
+                };
+
+                context.FileTransferAudits.Add(audit);
+                await context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation(
+                    "FileTransferAudit created: File={FileName}, Success={IsSuccess}, Duration={Duration}ms, Size={FileSize} bytes",
+                    fileName, isSuccess, durationMs, fileSize);
+
+                return Result<bool>.Success(true);
+            }, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the entire transfer if audit logging fails
+            _logger.LogError(ex,
+                "Failed to create FileTransferAudit entry for file {FileName}. Transfer completed but audit logging failed.",
+                fileName);
         }
     }
 
@@ -148,7 +212,6 @@ public sealed class MockFileTransferService : IFileTransferService
         bool isSuccess,
         string? errorMessage,
         long durationMs,
-        Guid userId,
         CancellationToken cancellationToken)
     {
         try
@@ -165,7 +228,7 @@ public sealed class MockFileTransferService : IFileTransferService
                     ErrorMessage = errorMessage,
                     DurationMs = durationMs,
                     Timestamp = DateTimeOffset.UtcNow,
-                    UserId = userId
+                    UserName = null // Will be set from HTTP context in production
                 };
 
                 context.FtpOperationLogs.Add(operationLog);

@@ -52,7 +52,7 @@ public sealed class FtpOperationLog
     public DateTimeOffset Timestamp { get; set; }
 
     /// <summary>
-    /// User ID who initiated the operation.
+    /// User who initiated the operation.
     /// </summary>
-    public Guid UserId { get; set; }
+    public string? UserName { get; set; }
 }

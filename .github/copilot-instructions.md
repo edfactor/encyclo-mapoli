@@ -310,10 +310,14 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
 
 All incoming data MUST be validated at server and client boundaries. See VALIDATION_PATTERNS.md (`.github/`) for complete reference when needed.
 
+**CRITICAL**: All request validators MUST be placed in `Demoulas.ProfitSharing.Common.Validators` namespace, NOT in `Endpoints.Validation`. This ensures validators are accessible across all layers (endpoints, services, tests).
+
 **Quick Pattern**:
 
 ```csharp
-public class SearchRequestValidator : AbstractValidator<SearchRequest>
+namespace Demoulas.ProfitSharing.Common.Validators;
+
+public sealed class SearchRequestValidator : AbstractValidator<SearchRequest>
 {
     public SearchRequestValidator()
     {
@@ -333,12 +337,14 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 
 ### Backend Coding Style (augmenting existing COPILOT_INSTRUCTIONS)
 
-- File-scoped namespaces; one class per file; explicit access modifiers.
+- **CRITICAL**: One class per file. No nested classes, no multiple classes in the same file. If a class is defined as a private nested class, extract it to its own file in an appropriate namespace (e.g., `Internal.ServiceDto` for service DTOs).
+- File-scoped namespaces; explicit access modifiers.
 - Prefer explicit types unless initializer makes type obvious.
 - Use `readonly` where applicable; private fields `_camelCase` (including `private static readonly`); constants PascalCase.
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`.
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
+- **SSN Masking**: Always use `SsnExtensions.MaskSsn()` extension method (from `Demoulas.ProfitSharing.Common.Extensions`) for masking Social Security Numbers. Never create separate SSN masking utilities.
 
 ### Decimal Rounding (CRITICAL for Financial Calculations)
 
@@ -572,6 +578,7 @@ When creating new documentation:
 - Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.).
 - Declare all sensitive fields accessed in telemetry calls for security auditing.
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs.
+- **Interface Layering**: Interfaces that return entity types (from Data project) should remain in Services layer to avoid circular dependencies. Only move interfaces to Common if they use DTOs or primitive types. Common cannot reference Data (Data already references Common for contracts/interfaces).
 - Update `CLAUDE.md` and this file if introducing a pervasive new pattern.
 
 ## Branching & Workflow
@@ -705,7 +712,7 @@ Provide reasoning in PR descriptions when deviating from these patterns.
 
 - Follow the repository `.editorconfig` for formatting and analyzer rules. This file is the authoritative source for whitespace, naming, and stylistic rules; update it only when you have a clear, repo-wide reason and include rationale in the PR.
 - Preferred style highlights:
-  - File-scoped namespaces and one class per file.
+  - **File-scoped namespaces and ONE CLASS PER FILE** - absolutely required. Extract nested/inner classes to separate files.
   - Use explicit access modifiers for all types and members.
   - Favor `is null` / `is not null` for null checks and `nameof(...)` for member names.
   - Prefer pattern matching and switch expressions where they improve clarity.

@@ -14,13 +14,13 @@ public interface ICheckRunOrchestrator
     /// </summary>
     /// <param name="profitYear">The profit year for the check run.</param>
     /// <param name="checkNumber">The check number identifier.</param>
-    /// <param name="userId">The ID of the user initiating the check run.</param>
+    /// <param name="userName">The username initiating the check run.</param>
     /// <param name="runId">The workflow run ID for correlation.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure with error details.</returns>
     Task<Result<bool>> ExecuteCheckRunAsync(short profitYear,
         string checkNumber,
-        Guid userId,
+        string userName,
         Guid runId,
         CancellationToken cancellationToken);
 }

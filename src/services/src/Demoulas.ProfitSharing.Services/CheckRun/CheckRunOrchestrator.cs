@@ -34,7 +34,7 @@ public sealed class CheckRunOrchestrator : ICheckRunOrchestrator
     /// </summary>
     public Task<Result<bool>> ExecuteCheckRunAsync(short profitYear,
         string checkNumber,
-        Guid userId,
+        string userName,
         Guid runId,
         CancellationToken cancellationToken)
     {

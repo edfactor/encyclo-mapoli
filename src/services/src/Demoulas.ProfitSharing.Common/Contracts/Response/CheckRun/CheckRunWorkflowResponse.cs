@@ -51,7 +51,7 @@ public sealed class CheckRunWorkflowResponse : IProfitYearRequest
     /// <summary>
     /// User who created this workflow run.
     /// </summary>
-    public Guid CreatedByUserId { get; init; }
+    public string? CreatedByUserName { get; init; }
 
     /// <summary>
     /// Timestamp when this workflow run was created.
@@ -61,7 +61,7 @@ public sealed class CheckRunWorkflowResponse : IProfitYearRequest
     /// <summary>
     /// User who last modified this workflow run (step updates, reprint increments).
     /// </summary>
-    public Guid? ModifiedByUserId { get; init; }
+    public string? ModifiedByUserName { get; init; }
 
     /// <summary>
     /// Timestamp when this workflow run was last modified.
@@ -81,9 +81,9 @@ public sealed class CheckRunWorkflowResponse : IProfitYearRequest
         CheckNumber = 7542,
         ReprintCount = 0,
         MaxReprintCount = 2,
-        CreatedByUserId = Guid.Parse("87654321-4321-4321-4321-210987654321"),
+        CreatedByUserName = "jdoe",
         CreatedDate = DateTimeOffset.UtcNow,
-        ModifiedByUserId = null,
+        ModifiedByUserName = null,
         ModifiedDate = null
     };
 }

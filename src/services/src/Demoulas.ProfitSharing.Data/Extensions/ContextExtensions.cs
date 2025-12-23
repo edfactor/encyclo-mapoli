@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Configurations.FileTransfer;
-using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Scheduling;
@@ -14,6 +13,7 @@ internal static class ContextExtensions
     {
         modelBuilder.ApplyConfiguration(new AnnuityRateMap());
         modelBuilder.ApplyConfiguration(new AuditEventMap());
+        modelBuilder.ApplyConfiguration(new CheckRunWorkflowMap());
         modelBuilder.ApplyConfiguration(new FakeSsnMap());
         modelBuilder.ApplyConfiguration(new DataImportRecordMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryContactMap());
@@ -44,8 +44,9 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ExcludedIdMap());
         modelBuilder.ApplyConfiguration(new ExcludedIdTypeMap());
         modelBuilder.ApplyConfiguration(new EnrollmentMap());
+        modelBuilder.ApplyConfiguration(new FileTransferAuditMap());
         modelBuilder.ApplyConfiguration(new FrozenStateMap());
-        modelBuilder.ApplyConfiguration(new FtpOperationLogConfiguration());
+        modelBuilder.ApplyConfiguration(new FtpOperationLogMap());
         modelBuilder.ApplyConfiguration(new GenderMap());
         modelBuilder.ApplyConfiguration(new HealthCheckStatusHistoryMap());
         modelBuilder.ApplyConfiguration(new JobMap());

@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -106,18 +107,5 @@ public sealed class PositivePayFileService : IPositivePayFileService
                 profitYear, ex.Message);
             return Result<Stream>.Failure(Error.Unexpected(ex.Message));
         }
-    }
-
-    /// <summary>
-    /// Record representing a single row in the Positive Pay CSV file.
-    /// CsvHelper auto-maps properties by name. DateOnly automatically converts to string.
-    /// </summary>
-    private sealed class PositivePayRecord
-    {
-        public int CheckNumber { get; init; }
-        public decimal Amount { get; init; }
-        public DateOnly IssueDate { get; init; }
-        public string AccountNumber { get; init; } = string.Empty;
-        public int BadgeNumber { get; init; }
     }
 }

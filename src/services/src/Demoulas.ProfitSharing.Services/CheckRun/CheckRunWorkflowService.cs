@@ -25,7 +25,7 @@ public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<CheckRunWorkflowResponse>> GetCurrentRunAsync(int profitYear, CancellationToken cancellationToken = default)
+    public async Task<Result<CheckRunWorkflowResponse>> GetCurrentRunAsync(short profitYear, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -61,13 +61,13 @@ public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
     public async Task<Result<CheckRunWorkflowResponse>> StartNewRunAsync(short profitYear,
         DateOnly checkRunDate,
         int checkNumber,
-        Guid userId,
+        string userName,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Starting new check run workflow for profit year {ProfitYear} with check number {CheckNumber} on {CheckRunDate} by user {UserId}",
-                profitYear, checkNumber, checkRunDate, userId);
+            _logger.LogInformation("Starting new check run workflow for profit year {ProfitYear} with check number {CheckNumber} on {CheckRunDate} by user {UserName}",
+                profitYear, checkNumber, checkRunDate, userName);
 
             return await _factory.UseWritableContext(async context =>
             {
@@ -94,7 +94,7 @@ public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
                     CheckNumber = checkNumber,
                     ReprintCount = 0,
                     MaxReprintCount = 2,
-                    CreatedByUserId = userId,
+                    CreatedByUserName = userName,
                     CreatedDate = DateTimeOffset.UtcNow
                 };
 
@@ -119,13 +119,13 @@ public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
     public async Task<Result<bool>> RecordStepCompletionAsync(
         Guid runId,
         int stepNumber,
-        Guid userId,
+        string userName,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Recording step {StepNumber} completion for check run workflow {RunId} by user {UserId}",
-                stepNumber, runId, userId);
+            _logger.LogInformation("Recording step {StepNumber} completion for check run workflow {RunId} by user {UserName}",
+                stepNumber, runId, userName);
 
             return await _factory.UseWritableContext(async context =>
             {
@@ -141,7 +141,7 @@ public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
                 // Update workflow step
                 workflow.StepStatus = CheckRunStepStatus.Completed;
                 workflow.StepNumber++;
-                workflow.ModifiedByUserId = userId;
+                workflow.ModifiedByUserName = userName;
                 workflow.ModifiedDate = DateTimeOffset.UtcNow;
 
                 await context.SaveChangesAsync(cancellationToken);
@@ -202,13 +202,13 @@ public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
     /// <inheritdoc/>
     public async Task<Result<bool>> IncrementReprintCountAsync(
         Guid runId,
-        Guid userId,
+        string userName,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Incrementing reprint count for check run workflow {RunId} by user {UserId}",
-                runId, userId);
+            _logger.LogInformation("Incrementing reprint count for check run workflow {RunId} by user {UserName}",
+                runId, userName);
 
             return await _factory.UseWritableContext(async context =>
             {
@@ -223,7 +223,7 @@ public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
 
                 // Increment reprint count
                 workflow.ReprintCount++;
-                workflow.ModifiedByUserId = userId;
+                workflow.ModifiedByUserName = userName;
                 workflow.ModifiedDate = DateTimeOffset.UtcNow;
 
                 await context.SaveChangesAsync(cancellationToken);
@@ -257,9 +257,9 @@ public sealed class CheckRunWorkflowService : ICheckRunWorkflowService
             CheckNumber = workflow.CheckNumber,
             ReprintCount = workflow.ReprintCount,
             MaxReprintCount = workflow.MaxReprintCount,
-            CreatedByUserId = workflow.CreatedByUserId,
+            CreatedByUserName = workflow.CreatedByUserName,
             CreatedDate = workflow.CreatedDate,
-            ModifiedByUserId = workflow.ModifiedByUserId,
+            ModifiedByUserName = workflow.ModifiedByUserName,
             ModifiedDate = workflow.ModifiedDate
         };
     }

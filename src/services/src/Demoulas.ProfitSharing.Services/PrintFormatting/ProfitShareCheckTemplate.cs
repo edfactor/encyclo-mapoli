@@ -1,4 +1,5 @@
 using System.Text;
+using Demoulas.ProfitSharing.Common.Extensions;
 
 namespace Demoulas.ProfitSharing.Services.PrintFormatting;
 
@@ -36,7 +37,7 @@ public sealed class ProfitShareCheckTemplate : IDjdeTemplate
 
         // Check content with MICR line
         var micrLine = _micrFormatter.FormatMicrLine(checkData.CheckNumber, checkData.Amount);
-        var maskedSsn = SsnMaskingUtility.MaskSsn(checkData.Ssn);
+        var maskedSsn = checkData.Ssn.MaskSsn();
 
         sb.AppendLine($"Check #{checkData.CheckNumber}");
         sb.AppendLine($"Date: {checkData.IssueDate:MM/dd/yyyy}");

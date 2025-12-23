@@ -584,32 +584,38 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(10)")
                         .HasColumnName("CHECKRUNDATE");
 
-                    b.Property<Guid>("CreatedByUserId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("CREATEDBYUSERID");
+                    b.Property<string>("CreatedByUserName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATEDBYUSERNAME");
 
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
                         .HasColumnName("CREATEDDATE");
 
                     b.Property<int>("MaxReprintCount")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(10)")
+                        .HasDefaultValue(2)
                         .HasColumnName("MAXREPRINTCOUNT");
 
-                    b.Property<Guid?>("ModifiedByUserId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("MODIFIEDBYUSERID");
+                    b.Property<string>("ModifiedByUserName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("MODIFIEDBYUSERNAME");
 
                     b.Property<DateTimeOffset?>("ModifiedDate")
                         .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
                         .HasColumnName("MODIFIEDDATE");
 
-                    b.Property<int>("ProfitYear")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<short>("ProfitYear")
+                        .HasColumnType("NUMBER(5)")
                         .HasColumnName("PROFITYEAR");
 
                     b.Property<int>("ReprintCount")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(10)")
+                        .HasDefaultValue(0)
                         .HasColumnName("REPRINTCOUNT");
 
                     b.Property<int>("StepNumber")
@@ -621,9 +627,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("STEPSTATUS");
 
                     b.HasKey("Id")
-                        .HasName("PK_CHECKRUNWORKFLOWS");
+                        .HasName("PK_CHECK_RUN_WORKFLOW");
 
-                    b.ToTable("CHECKRUNWORKFLOWS", (string)null);
+                    b.HasIndex("CheckRunDate")
+                        .HasDatabaseName("IX_CHECK_RUN_WORKFLOW_RUN_DATE");
+
+                    b.HasIndex("ProfitYear")
+                        .HasDatabaseName("IX_CHECK_RUN_WORKFLOW_PROFIT_YEAR");
+
+                    b.HasIndex("ProfitYear", "StepStatus")
+                        .HasDatabaseName("IX_CHECK_RUN_WORKFLOW_YEAR_STATUS");
+
+                    b.ToTable("CHECK_RUN_WORKFLOW", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.CommentType", b =>
@@ -3643,7 +3658,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Destination")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
                         .HasColumnName("DESTINATION");
 
                     b.Property<long>("DurationMs")
@@ -3651,12 +3667,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("DURATIONMS");
 
                     b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
                         .HasColumnType("NVARCHAR2(2000)")
                         .HasColumnName("ERRORMESSAGE");
 
                     b.Property<string>("FileName")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)")
                         .HasColumnName("FILENAME");
 
                     b.Property<bool>("IsSuccess")
@@ -3671,14 +3689,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
                         .HasColumnName("TIMESTAMP");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("USERID");
+                    b.Property<string>("UserName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("USERNAME");
 
                     b.HasKey("Id")
-                        .HasName("PK_FTPOPERATIONLOGS");
+                        .HasName("PK_FTP_OPERATION_LOG");
 
-                    b.ToTable("FTPOPERATIONLOGS", (string)null);
+                    b.HasIndex("CheckRunWorkflowId")
+                        .HasDatabaseName("IX_FTP_OPERATION_LOG_WORKFLOW_ID");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_FTP_OPERATION_LOG_TIMESTAMP");
+
+                    b.ToTable("FTP_OPERATION_LOG", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FileTransferAudit", b =>
@@ -3698,16 +3723,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Destination")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
                         .HasColumnName("DESTINATION");
 
                     b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
                         .HasColumnType("NVARCHAR2(2000)")
                         .HasColumnName("ERRORMESSAGE");
 
                     b.Property<string>("FileName")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)")
                         .HasColumnName("FILENAME");
 
                     b.Property<long>("FileSize")
@@ -3726,14 +3754,24 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(19)")
                         .HasColumnName("TRANSFERDURATIONMS");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("USERID");
+                    b.Property<string>("UserName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("USERNAME");
 
                     b.HasKey("Id")
-                        .HasName("PK_FILETRANSFERAUDITS");
+                        .HasName("PK_FILE_TRANSFER_AUDIT");
 
-                    b.ToTable("FILETRANSFERAUDITS", (string)null);
+                    b.HasIndex("CheckRunWorkflowId")
+                        .HasDatabaseName("IX_FILE_TRANSFER_AUDIT_WORKFLOW_ID");
+
+                    b.HasIndex("FileName")
+                        .HasDatabaseName("IX_FILE_TRANSFER_AUDIT_FILENAME");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_FILE_TRANSFER_AUDIT_TIMESTAMP");
+
+                    b.ToTable("FILE_TRANSFER_AUDIT", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FrozenState", b =>

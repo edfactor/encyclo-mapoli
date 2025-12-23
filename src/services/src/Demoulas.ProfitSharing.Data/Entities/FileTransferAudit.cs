@@ -14,7 +14,7 @@ public class FileTransferAudit
     public long TransferDurationMs { get; set; }
     public bool IsSuccess { get; set; }
     public string? ErrorMessage { get; set; }
-    public Guid UserId { get; set; }
+    public string? UserName { get; set; }
 
     /// <summary>
     /// Stored file content for replay capability if transfer fails.

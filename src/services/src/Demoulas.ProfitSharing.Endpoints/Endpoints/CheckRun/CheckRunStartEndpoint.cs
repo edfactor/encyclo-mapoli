@@ -52,7 +52,6 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
             s.Responses[400] = "Bad Request. Invalid input parameters or validation errors.";
             s.Responses[500] = "Internal Server Error. Workflow execution failed.";
         });
-        Policies(Security.Policy.CanRunYearEndProcesses);
         Group<CheckRunGroup>();
     }
 
@@ -67,7 +66,7 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
                 req.ProfitYear,
                 req.CheckRunDate,
                 req.CheckNumber,
-                req.UserId,
+                req.UserName,
                 ct);
             if (!workflowResult.IsSuccess)
             {
@@ -86,7 +85,7 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
                 var orchestrationResult = await _orchestrator.ExecuteCheckRunAsync(
                     req.ProfitYear,
                     req.CheckNumber.ToString(),
-                    req.UserId,
+                    req.UserName,
                     runId,
                     ct);
 
@@ -96,13 +95,13 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
                         runId, orchestrationResult.Error, HttpContext.TraceIdentifier);
 
                     // Step 3a: Record failure in workflow
-                    await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserId, ct);
+                    await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserName, ct);
 
                     return TypedResults.Problem(orchestrationResult.Error!.Description, statusCode: 500);
                 }
 
                 // Step 3b: Record success in workflow
-                await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserId, ct);
+                await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserName, ct);
 
                 // Step 4: Get updated workflow status
                 var finalWorkflowResult = await _workflowService.GetCurrentRunAsync(req.ProfitYear, ct);
@@ -118,7 +117,7 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
                     "Check run completed successfully for profit year {ProfitYear}, runId: {RunId}, check number: {CheckNumber} (correlation: {CorrelationId})",
                     req.ProfitYear, runId, req.CheckNumber, HttpContext.TraceIdentifier);
 
-                return finalWorkflowResult.IsSuccess 
+                return finalWorkflowResult.IsSuccess
                     ? TypedResults.Ok(finalWorkflowResult.Value!)
                     : TypedResults.Problem(finalWorkflowResult.Error!.Description);
             }
@@ -130,7 +129,7 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
                     runId, req.ProfitYear, HttpContext.TraceIdentifier);
 
                 // Record failure in workflow
-                await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserId, ct);
+                await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserName, ct);
 
                 // Record business metrics (failure)
                 EndpointTelemetry.BusinessOperationsTotal.Add(1,

@@ -14,7 +14,7 @@ public interface ICheckRunWorkflowService
     /// <param name="profitYear">The profit year to retrieve the check run for.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The current check run workflow or failure if not found.</returns>
-    Task<Result<CheckRunWorkflowResponse>> GetCurrentRunAsync(int profitYear, CancellationToken cancellationToken = default);
+    Task<Result<CheckRunWorkflowResponse>> GetCurrentRunAsync(short profitYear, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Starts a new check run workflow for the specified profit year.
@@ -22,13 +22,13 @@ public interface ICheckRunWorkflowService
     /// <param name="profitYear">The profit year for the check run.</param>
     /// <param name="checkRunDate">The date of the check run.</param>
     /// <param name="checkNumber">The starting check number for the run.</param>
-    /// <param name="userId">The user ID initiating the check run.</param>
+    /// <param name="userName">The username initiating the check run.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The newly created check run workflow.</returns>
     Task<Result<CheckRunWorkflowResponse>> StartNewRunAsync(short profitYear,
         DateOnly checkRunDate,
         int checkNumber,
-        Guid userId,
+        string userName,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -36,13 +36,13 @@ public interface ICheckRunWorkflowService
     /// </summary>
     /// <param name="runId">The check run workflow ID.</param>
     /// <param name="stepNumber">The step number being completed.</param>
-    /// <param name="userId">The user ID completing the step.</param>
+    /// <param name="userName">The username completing the step.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success if the step was recorded, failure if the workflow was not found.</returns>
     Task<Result<bool>> RecordStepCompletionAsync(
         Guid runId,
         int stepNumber,
-        Guid userId,
+        string userName,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -57,11 +57,11 @@ public interface ICheckRunWorkflowService
     /// Increments the reprint count for a check run workflow.
     /// </summary>
     /// <param name="runId">The check run workflow ID.</param>
-    /// <param name="userId">The user ID initiating the reprint.</param>
+    /// <param name="userName">The username initiating the reprint.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success if the reprint count was incremented, failure if the workflow was not found.</returns>
     Task<Result<bool>> IncrementReprintCountAsync(
         Guid runId,
-        Guid userId,
+        string userName,
         CancellationToken cancellationToken = default);
 }
