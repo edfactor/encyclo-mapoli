@@ -65,4 +65,23 @@ public sealed class CheckRunWorkflowResponse
     /// Timestamp when this workflow run was last modified.
     /// </summary>
     public DateTimeOffset? ModifiedDate { get; init; }
+
+    /// <summary>
+    /// Provides an example response for Swagger/OpenAPI documentation.
+    /// </summary>
+    public static CheckRunWorkflowResponse ResponseExample() => new()
+    {
+        Id = Guid.Parse("12345678-1234-1234-1234-123456789012"),
+        ProfitYear = 2024,
+        CheckRunDate = new DateOnly(2024, 12, 15),
+        StepNumber = 1,
+        StepStatus = CheckRunStepStatus.Completed,
+        CheckNumber = 7542,
+        ReprintCount = 0,
+        MaxReprintCount = 2,
+        CreatedByUserId = Guid.Parse("87654321-4321-4321-4321-210987654321"),
+        CreatedDate = DateTimeOffset.UtcNow,
+        ModifiedByUserId = null,
+        ModifiedDate = null
+    };
 }

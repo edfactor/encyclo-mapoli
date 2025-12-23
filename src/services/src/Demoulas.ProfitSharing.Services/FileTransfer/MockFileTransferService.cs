@@ -1,5 +1,9 @@
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.FileTransfer;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.FileTransfer;
@@ -8,19 +12,24 @@ namespace Demoulas.ProfitSharing.Services.FileTransfer;
 /// Mock implementation of file transfer service for development and testing.
 /// Uses .NET built-in retry logic for resilience.
 /// Production implementation will use SFTP client to transfer to /production/OutBox/VENUS/.
+/// Creates FtpOperationLog entries for audit trail.
 /// </summary>
 public sealed class MockFileTransferService : IFileTransferService
 {
     private readonly ILogger<MockFileTransferService> _logger;
+    private readonly IProfitSharingDataContextFactory _contextFactory;
 
-    public MockFileTransferService(ILogger<MockFileTransferService> logger)
+    public MockFileTransferService(
+        ILogger<MockFileTransferService> logger,
+        IProfitSharingDataContextFactory contextFactory)
     {
         _logger = logger;
+        _contextFactory = contextFactory;
     }
 
     /// <summary>
-    /// Simulates file transfer with retry logic and comprehensive logging.
-    /// In production, this will use SFTP client to transfer to /production/OutBox/VENUS/.
+    /// Transfers file content to destination via SFTP (mocked).
+    /// Creates FtpOperationLog entry for audit trail.
     /// </summary>
     public async Task<Result<FileTransferAudit>> TransferFileAsync(
         Stream content,
@@ -29,6 +38,8 @@ public sealed class MockFileTransferService : IFileTransferService
         CancellationToken cancellationToken)
     {
         var startTime = DateTimeOffset.UtcNow;
+        Guid? checkRunWorkflowId = null; // Will be set when check run context is available
+
         var audit = new FileTransferAudit
         {
             Id = Guid.NewGuid(),
@@ -73,6 +84,7 @@ public sealed class MockFileTransferService : IFileTransferService
                     _logger.LogWarning(ex,
                         "File transfer attempt {Attempt} failed. Retrying in {RetryDelay}s...",
                         attempt, delay.TotalSeconds);
+
                     await Task.Delay(delay, cancellationToken);
                 }
             }
@@ -81,8 +93,20 @@ public sealed class MockFileTransferService : IFileTransferService
             audit.TransferDurationMs = (long)(DateTimeOffset.UtcNow - startTime).TotalMilliseconds;
 
             _logger.LogInformation(
-                "File transfer completed successfully. File: {FileName}, Size: {FileSize} bytes, Duration: {Duration}ms",
-                fileName, audit.FileSize, audit.TransferDurationMs);
+                "File transfer completed successfully in {Duration}ms. File: {FileName}, Size: {FileSize} bytes",
+                audit.TransferDurationMs, fileName, audit.FileSize);
+
+            // Create FtpOperationLog entry for successful transfer
+            await CreateFtpOperationLogAsync(
+                checkRunWorkflowId,
+                FtpOperationType.Upload,
+                fileName,
+                destination,
+                isSuccess: true,
+                errorMessage: null,
+                durationMs: audit.TransferDurationMs,
+                userId: audit.UserId,
+                cancellationToken);
 
             return Result<FileTransferAudit>.Success(audit);
         }
@@ -96,8 +120,70 @@ public sealed class MockFileTransferService : IFileTransferService
                 "File transfer failed after retries. File: {FileName}, Destination: {Destination}, Error: {Error}",
                 fileName, destination, ex.Message);
 
+            // Create FtpOperationLog entry for failed transfer
+            await CreateFtpOperationLogAsync(
+                checkRunWorkflowId,
+                FtpOperationType.Upload,
+                fileName,
+                destination,
+                isSuccess: false,
+                errorMessage: ex.Message,
+                durationMs: audit.TransferDurationMs,
+                userId: audit.UserId,
+                cancellationToken);
+
             return Result<FileTransferAudit>.Failure(
                 Error.FileTransferFailed with { Description = $"Failed to transfer file {fileName}: {ex.Message}" });
+        }
+    }
+
+    /// <summary>
+    /// Creates an FtpOperationLog entry in the database for audit trail.
+    /// </summary>
+    private async Task CreateFtpOperationLogAsync(
+        Guid? checkRunWorkflowId,
+        FtpOperationType operationType,
+        string fileName,
+        string destination,
+        bool isSuccess,
+        string? errorMessage,
+        long durationMs,
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _contextFactory.UseWritableContext(async context =>
+            {
+                var operationLog = new FtpOperationLog
+                {
+                    CheckRunWorkflowId = checkRunWorkflowId ?? Guid.Empty,
+                    OperationType = operationType,
+                    FileName = fileName,
+                    Destination = destination,
+                    IsSuccess = isSuccess,
+                    ErrorMessage = errorMessage,
+                    DurationMs = durationMs,
+                    Timestamp = DateTimeOffset.UtcNow,
+                    UserId = userId
+                };
+
+                context.FtpOperationLogs.Add(operationLog);
+                await context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation(
+                    "FtpOperationLog created: Operation={Operation}, File={FileName}, Success={IsSuccess}, Duration={Duration}ms",
+                    operationType, fileName, isSuccess, durationMs);
+
+                return Result<bool>.Success(true);
+            }, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the entire transfer if audit logging fails
+            _logger.LogError(ex,
+                "Failed to create FtpOperationLog entry for file {FileName}. Transfer completed but audit logging failed.",
+                fileName);
         }
     }
 }
