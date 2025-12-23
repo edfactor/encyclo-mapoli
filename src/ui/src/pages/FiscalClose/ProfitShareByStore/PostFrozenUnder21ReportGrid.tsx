@@ -1,12 +1,11 @@
-import { Grid } from "@mui/material";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
-import { useGridPagination } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetPostFrozenUnder21ReportColumnDefs } from "./PostFrozenUnder21ReportGridColumns";
 
 interface PostFrozenUnder21ReportGridProps {
@@ -22,7 +21,8 @@ const PostFrozenUnder21ReportGrid: React.FC<PostFrozenUnder21ReportGridProps> = 
 }) => {
   const profitSharingUnder21Report = useSelector((state: RootState) => state.yearsEnd.profitSharingUnder21Report);
   const navigate = useNavigate();
-  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = gridPagination;
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
+    gridPagination;
 
   // Handle navigation for badge clicks
   const handleNavigation = React.useCallback(
@@ -32,49 +32,48 @@ const PostFrozenUnder21ReportGrid: React.FC<PostFrozenUnder21ReportGridProps> = 
     [navigate]
   );
 
-  const sortEventHandler = (update: ISortParams) => {
-    if (update.sortBy === "") {
-      update.sortBy = "badgeNumber";
-      update.isSortDescending = false;
-    }
-    handleSortChange(update);
-  };
-
   const columnDefs = useMemo(() => GetPostFrozenUnder21ReportColumnDefs(handleNavigation), [handleNavigation]);
 
+  // Create pagination object for DSMPaginatedGrid with proper sort normalization
+  const pagination = useMemo(
+    () => ({
+      pageNumber,
+      pageSize,
+      sortParams,
+      handlePageNumberChange: (newPageNumber: number) => {
+        handlePageNumberChange(newPageNumber);
+        setInitialSearchLoaded(true);
+      },
+      handlePageSizeChange: (newPageSize: number) => {
+        handlePageSizeChange(newPageSize);
+        setInitialSearchLoaded(true);
+      },
+      handleSortChange: (update: SortParams) => {
+        const normalizedUpdate = {
+          ...update,
+          sortBy: update.sortBy === "" ? "badgeNumber" : update.sortBy,
+          isSortDescending: update.sortBy === "" ? false : update.isSortDescending
+        };
+        handleSortChange(normalizedUpdate);
+      }
+    }),
+    [pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange, setInitialSearchLoaded]
+  );
+
+  if (!profitSharingUnder21Report?.response) {
+    return null;
+  }
+
   return (
-    <Grid
-      container
-      direction="column"
-      width="100%">
-      {profitSharingUnder21Report && <ReportSummary report={profitSharingUnder21Report} />}
-      <Grid width="100%">
-        <DSMGrid
-          preferenceKey={GRID_KEYS.POST_FROZEN_UNDER_21_REPORT}
-          isLoading={isLoading}
-          handleSortChanged={sortEventHandler}
-          providedOptions={{
-            rowData: profitSharingUnder21Report?.response?.results || [],
-            columnDefs
-          }}
-        />
-        {profitSharingUnder21Report?.response?.results && profitSharingUnder21Report.response.results.length > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              handlePageNumberChange(value - 1);
-              setInitialSearchLoaded(true);
-            }}
-            pageSize={pageSize}
-            setPageSize={(value: number) => {
-              handlePageSizeChange(value);
-              setInitialSearchLoaded(true);
-            }}
-            recordCount={profitSharingUnder21Report.response.total || 0}
-          />
-        )}
-      </Grid>
-    </Grid>
+    <DSMPaginatedGrid
+      preferenceKey={GRID_KEYS.POST_FROZEN_UNDER_21_REPORT}
+      data={profitSharingUnder21Report.response.results || []}
+      columnDefs={columnDefs}
+      totalRecords={profitSharingUnder21Report.response.total || 0}
+      isLoading={isLoading}
+      pagination={pagination}
+      beforeGrid={<ReportSummary report={profitSharingUnder21Report} />}
+    />
   );
 };
 

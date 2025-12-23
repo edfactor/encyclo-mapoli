@@ -422,13 +422,46 @@ const { control, handleSubmit, formState: { errors } } = useForm({
 
 ## 7. Grid/Table Patterns
 
-### DSMGrid Configuration
+### DSMGrid vs DSMPaginatedGrid
+
+**For paginated data**, use `DSMPaginatedGrid` which includes built-in pagination controls:
+
+```typescript
+<DSMPaginatedGrid
+  preferenceKey={GRID_KEYS.MY_GRID}
+  isLoading={isFetching}
+  onSortChange={sortEventHandler}
+  providedOptions={{
+    rowData: data?.results || [],
+    columnDefs: columnDefs,
+    context: { isReadOnly }
+  }}
+  pagination={{
+    pageNumber,
+    pageSize,
+    sortParams: { sortBy: "fieldName", isSortDescending: false },
+    handlePageNumberChange,  // Pass directly - NO value - 1
+    handlePageSizeChange,
+    handleSortChange
+  }}
+  heightConfig={{
+    mode: "content-aware",
+    maxHeight: gridMaxHeight
+  }}
+  totalRecords={data?.total ?? 0}
+  showPagination={!!data?.results?.length}
+/>
+```
+
+**CRITICAL:** DSMPaginatedGrid internally converts from 1-based (UI) to 0-based (API) page numbers. **Never subtract 1** from `handlePageNumberChange` - pass handlers directly.
+
+**For non-paginated data**, use `DSMGrid`:
 
 ```typescript
 <DSMGrid
   columnDefs={columnDefs}
   rowData={data}
-  pagination={false}  // External pagination used
+  pagination={false}
   loading={isLoading}
   maxHeight={500}
   rowHeight={40}
@@ -510,11 +543,12 @@ const gridContext = {
 
 ### Review Checklist
 
-- [ ] Uses `DSMGrid` wrapper (not raw AG Grid)
+- [ ] Uses `DSMPaginatedGrid` for paginated data, `DSMGrid` for non-paginated (not raw AG Grid)
 - [ ] Column definitions in separate `*GridColumns.ts` file
 - [ ] Uses factory functions for common column types
 - [ ] Context passed for editable grids
 - [ ] Alignment classes consistent (right-align for numbers)
+- [ ] Pagination handlers passed directly to DSMPaginatedGrid (no `value - 1`)
 
 ---
 

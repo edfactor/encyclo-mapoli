@@ -1,12 +1,12 @@
 import { Button, Tooltip, Typography } from "@mui/material";
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
+import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import StandaloneMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 
@@ -37,28 +37,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
 
-  const handlePageNumberChange = useCallback(
-    (pageNumber: number) => {
-      contributionsGridPagination.handlePageNumberChange(pageNumber);
-    },
-    [contributionsGridPagination]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (pageSize: number) => {
-      contributionsGridPagination.handlePageSizeChange(pageSize);
-    },
-    [contributionsGridPagination]
-  );
-
-  const handleSortChange = useCallback(
-    (sortParams: ISortParams) => {
-      contributionsGridPagination.handleSortChange(sortParams);
-    },
-    [contributionsGridPagination]
-  );
-
-  return (
+  const headerContent = (
     <>
       {masterInquiryMemberDetails && profitYear > 0 && (
         <MissiveAlertProvider>
@@ -72,66 +51,59 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
       )}
 
       {militaryContributionsData && (
-        <>
-          <div
-            style={{
-              padding: "24px 24px 0px 24px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center"
-            }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5", marginTop: "7px" }}>
-              {`Military Contributions (${militaryContributionsData?.total || 0} ${(militaryContributionsData?.total || 0) === 1 ? "Record" : "Records"})`}
-            </Typography>
+        <div
+          style={{
+            padding: "24px 24px 0px 24px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}>
+          <Typography
+            variant="h2"
+            sx={{ color: "#0258A5", marginTop: "7px" }}>
+            {`Military Contributions (${militaryContributionsData?.total || 0} ${(militaryContributionsData?.total || 0) === 1 ? "Record" : "Records"})`}
+          </Typography>
 
-            <Tooltip
-              title={
-                isReadOnly
-                  ? "You are in read-only mode and cannot add contributions."
-                  : masterInquiryMemberDetails?.payFrequencyId == 2
-                    ? "You cannot add a contribution to someone paid monthly."
-                    : ""
-              }
-              placement="top">
-              <span>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  disabled={isReadOnly || masterInquiryMemberDetails?.payFrequencyId == 2}
-                  onClick={isReadOnly ? undefined : onAddContribution}
-                  sx={{ marginTop: "6px" }}>
-                  Add Military Contribution
-                </Button>
-              </span>
-            </Tooltip>
-          </div>
-
-          <DSMGrid
-            preferenceKey={GRID_KEYS.MILITARY_CONTRIBUTIONS}
-            isLoading={isLoadingContributions}
-            handleSortChanged={handleSortChange}
-            providedOptions={{
-              rowData: militaryContributionsData?.results,
-              columnDefs: columnDefs
-            }}
-          />
-
-          {!!militaryContributionsData && militaryContributionsData?.results?.length > 0 && (
-            <Pagination
-              pageNumber={contributionsGridPagination.pageNumber}
-              setPageNumber={(value: number) => {
-                handlePageNumberChange(value - 1);
-              }}
-              pageSize={contributionsGridPagination.pageSize}
-              setPageSize={handlePageSizeChange}
-              recordCount={militaryContributionsData?.total}
-            />
-          )}
-        </>
+          <Tooltip
+            title={
+              isReadOnly
+                ? "You are in read-only mode and cannot add contributions."
+                : masterInquiryMemberDetails?.payFrequencyId == 2
+                  ? "You cannot add a contribution to someone paid monthly."
+                  : ""
+            }
+            placement="top">
+            <span>
+              <Button
+                variant="outlined"
+                color="primary"
+                disabled={isReadOnly || masterInquiryMemberDetails?.payFrequencyId == 2}
+                onClick={isReadOnly ? undefined : onAddContribution}
+                sx={{ marginTop: "6px" }}>
+                Add Military Contribution
+              </Button>
+            </span>
+          </Tooltip>
+        </div>
       )}
     </>
+  );
+
+  // Don't render grid until we have data
+  if (!militaryContributionsData) {
+    return headerContent;
+  }
+
+  return (
+    <DSMPaginatedGrid
+      preferenceKey={GRID_KEYS.MILITARY_CONTRIBUTIONS}
+      data={militaryContributionsData.results}
+      columnDefs={columnDefs}
+      totalRecords={militaryContributionsData.total}
+      isLoading={isLoadingContributions}
+      pagination={contributionsGridPagination}
+      header={headerContent}
+    />
   );
 };
 

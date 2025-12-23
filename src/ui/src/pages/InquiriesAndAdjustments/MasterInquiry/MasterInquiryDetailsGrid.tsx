@@ -1,8 +1,9 @@
-import { Box, IconButton, Typography } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { Box, IconButton, Typography } from "@mui/material";
 import { memo, useMemo } from "react";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { ISortParams } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams } from "../../../hooks/useGridPagination";
@@ -73,14 +74,26 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
               {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
             </IconButton>
           </Box>
-          <DSMGrid
+          <DSMPaginatedGrid
             preferenceKey={GRID_KEYS.MASTER_INQUIRY}
-            handleSortChanged={handleSortChange}
+            data={profitData.results}
+            columnDefs={columnDefs}
+            totalRecords={profitData.total}
             isLoading={!!isLoading}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: profitData.results,
-              columnDefs: columnDefs,
+            pagination={{
+              pageNumber: profitGridPagination?.pageNumber ?? 0,
+              pageSize: profitGridPagination?.pageSize ?? 50,
+              sortParams: profitGridPagination?.sortParams ?? { sortBy: "", isSortDescending: false },
+              handlePageNumberChange: profitGridPagination?.handlePageNumberChange ?? (() => {}),
+              handlePageSizeChange: profitGridPagination?.handlePageSizeChange ?? (() => {}),
+              handleSortChange: onSortChange ?? (() => {})
+            }}
+            onSortChange={handleSortChange}
+            heightConfig={{
+              mode: "content-aware",
+              maxHeight: gridMaxHeight
+            }}
+            gridOptions={{
               suppressMultiSort: true,
               rowSelection: {
                 mode: "multiRow",
@@ -89,16 +102,8 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
                 enableClickSelection: false
               }
             }}
+            showPagination={!!profitGridPagination && profitData.total > 0}
           />
-          {profitGridPagination && (
-            <Pagination
-              pageNumber={profitGridPagination.pageNumber}
-              setPageNumber={(value: number) => profitGridPagination.handlePageNumberChange(value - 1)}
-              pageSize={profitGridPagination.pageSize}
-              setPageSize={profitGridPagination.handlePageSizeChange}
-              recordCount={profitData.total}
-            />
-          )}
         </div>
       </>
     );
