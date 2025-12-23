@@ -12,4 +12,14 @@ public interface IBeneficiaryService
 
     Task DeleteBeneficiary(int id, CancellationToken cancellationToken);
     Task DeleteBeneficiaryContact(int id, CancellationToken cancellation);
+
+    /// <summary>
+    /// Gets the total beneficiary percentage for a specific badge number, excluding a specific beneficiary if provided.
+    /// Used by BeneficiaryPercentageValidator to validate percentage sums.
+    /// </summary>
+    /// <param name="badgeNumber">The employee badge number</param>
+    /// <param name="beneficiaryIdToExclude">Optional: Beneficiary ID to exclude (e.g., when updating)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Total percentage sum, or -1 if badge not found</returns>
+    Task<decimal> GetBeneficiaryPercentageSumAsync(int badgeNumber, int? beneficiaryIdToExclude, CancellationToken cancellationToken);
 }

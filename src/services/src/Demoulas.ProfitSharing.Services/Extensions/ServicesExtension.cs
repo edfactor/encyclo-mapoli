@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Services.Administration;
 using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
@@ -128,6 +129,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IArchivedValueService, ArchivedValueService>();
         _ = builder.Services.AddScoped<IAllocTransferValidationService, AllocTransferValidationService>();
         _ = builder.Services.AddScoped<IBalanceEquationValidationService, BalanceEquationValidationService>();
+        _ = builder.Services.AddScoped<BeneficiaryPercentageValidator>();
 
         // Register lookup caches as singletons (they manage their own distributed cache access)
         _ = builder.Services.AddSingleton<Services.Caching.StateTaxCache>();

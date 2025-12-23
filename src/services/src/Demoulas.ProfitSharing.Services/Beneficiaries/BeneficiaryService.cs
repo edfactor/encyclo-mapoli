@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -22,7 +23,6 @@ public class BeneficiaryService : IBeneficiaryService
     private readonly CreateBeneficiaryContactRequestValidator _createBeneficiaryContactValidator;
     private readonly UpdateBeneficiaryContactRequestValidator _updateBeneficiaryContactValidator;
     private readonly BeneficiaryDatabaseValidator _databaseValidator;
-    private readonly BeneficiaryPercentageValidator _percentageValidator;
 
     public BeneficiaryService(
         IProfitSharingDataContextFactory dataContextFactory,
@@ -36,7 +36,6 @@ public class BeneficiaryService : IBeneficiaryService
         _createBeneficiaryContactValidator = new CreateBeneficiaryContactRequestValidator();
         _updateBeneficiaryContactValidator = new UpdateBeneficiaryContactRequestValidator();
         _databaseValidator = new BeneficiaryDatabaseValidator(demographicReaderService);
-        _percentageValidator = new BeneficiaryPercentageValidator();
     }
     public async Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
@@ -45,6 +44,13 @@ public class BeneficiaryService : IBeneficiaryService
         if (!validationResult.IsValid)
         {
             throw new ValidationException(validationResult.Errors);
+        }
+
+        // Validate percentage sum before creating beneficiary
+        var existingPercentageSum = await GetBeneficiaryPercentageSumAsync(req.EmployeeBadgeNumber, null, cancellationToken);
+        if (existingPercentageSum >= 0 && existingPercentageSum + req.Percentage > 100m)
+        {
+            throw new ValidationException("The sum of all beneficiary percentages would exceed 100%.");
         }
 
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
@@ -80,18 +86,6 @@ public class BeneficiaryService : IBeneficiaryService
             };
 
             ctx.Add(beneficiary);
-
-            // Validate percentage sum before saving
-            var percentageValidationResult = await _percentageValidator.ValidateBeneficiaryPercentageSumAsync(
-                req.EmployeeBadgeNumber,
-                ctx,
-                cancellationToken);
-
-            if (!percentageValidationResult.IsValid)
-            {
-                throw new ValidationException(percentageValidationResult.Errors);
-            }
-
             await ctx.SaveChangesAsync(cancellationToken);
             if (transaction != default)
             {
@@ -211,21 +205,18 @@ public class BeneficiaryService : IBeneficiaryService
 
             if (req.Percentage.HasValue)
             {
-                beneficiary.Percent = req.Percentage.Value;
-            }
-
-            // Validate percentage sum before saving if percentage was updated
-            if (req.Percentage.HasValue)
-            {
-                var percentageValidationResult = await _percentageValidator.ValidateBeneficiaryPercentageSumAsync(
+                // Validate percentage sum before saving if percentage was updated
+                var existingPercentageSum = await GetBeneficiaryPercentageSumAsync(
                     beneficiary.BadgeNumber,
-                    ctx,
+                    beneficiary.Id, // Exclude current beneficiary from calculation
                     cancellationToken);
 
-                if (!percentageValidationResult.IsValid)
+                if (existingPercentageSum >= 0 && existingPercentageSum + req.Percentage.Value > 100m)
                 {
-                    throw new ValidationException(percentageValidationResult.Errors);
+                    throw new ValidationException("The sum of all beneficiary percentages would exceed 100%.");
                 }
+
+                beneficiary.Percent = req.Percentage.Value;
             }
 
             var response = new UpdateBeneficiaryResponse()
@@ -585,4 +576,59 @@ public class BeneficiaryService : IBeneficiaryService
 
         return (short)(minPsn + currentMaxPsn + (psnRange / 10));
     }
+
+    /// <summary>
+    /// Gets the total beneficiary percentage sum for a specific badge number, optionally excluding one beneficiary by ID.
+    /// Used by BeneficiaryPercentageValidator to validate percentage sums.
+    /// </summary>
+    /// <param name="badgeNumber">The employee badge number</param>
+    /// <param name="beneficiaryIdToExclude">Optional: Beneficiary ID to exclude (e.g., when updating)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Total percentage sum, or -1 if badge not found</returns>
+    public async Task<decimal> GetBeneficiaryPercentageSumAsync(int badgeNumber, int? beneficiaryIdToExclude, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                var query = ctx.Beneficiaries.Where(x => x.BadgeNumber == badgeNumber);
+
+                if (beneficiaryIdToExclude.HasValue)
+                {
+                    query = query.Where(x => x.Id != beneficiaryIdToExclude.Value);
+                }
+
+                return await query.SumAsync(x => x.Percent, cancellationToken);
+            }, cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Return -1 to indicate error/not found
+            return -1m;
+        }
+    }
+
+    /// <summary>
+    /// Gets all beneficiaries for a specific badge number, optionally excluding one beneficiary by ID.
+    /// Internal method used by other service methods that need full beneficiary data.
+    /// </summary>
+    /// <param name="badgeNumber">The employee badge number</param>
+    /// <param name="beneficiaryIdToExclude">Optional: Beneficiary ID to exclude (e.g., when updating)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>List of beneficiaries</returns>
+    internal Task<List<Beneficiary>> GetBeneficiariesForBadgeInternalAsync(int badgeNumber, int? beneficiaryIdToExclude, CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var query = ctx.Beneficiaries.Where(x => x.BadgeNumber == badgeNumber);
+
+            if (beneficiaryIdToExclude.HasValue)
+            {
+                query = query.Where(x => x.Id != beneficiaryIdToExclude.Value);
+            }
+
+            return await query.ToListAsync(cancellationToken);
+        }, cancellationToken);
+    }
 }
+

@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
