@@ -117,7 +117,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
               pageNumber,
               pageSize,
               sortParams: { sortBy: "", isSortDescending: false },
-              handlePageNumberChange: (value: number) => handlePageNumberChange(value - 1),
+              handlePageNumberChange,
               handlePageSizeChange,
               handleSortChange: () => {}
             }}

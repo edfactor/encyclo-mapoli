@@ -127,7 +127,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
             pageNumber: memberGridPagination.pageNumber,
             pageSize: memberGridPagination.pageSize,
             sortParams: memberGridPagination.sortParams,
-            handlePageNumberChange: (value: number) => memberGridPagination.handlePageNumberChange(value - 1),
+            handlePageNumberChange: memberGridPagination.handlePageNumberChange,
             handlePageSizeChange: memberGridPagination.handlePageSizeChange,
             handleSortChange: onSortChange
           }}

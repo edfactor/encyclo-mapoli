@@ -289,7 +289,7 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
             pageNumber,
             pageSize,
             sortParams: { sortBy: "", isSortDescending: false },
-            handlePageNumberChange: (value: number) => handlePageNumberChange(value - 1),
+            handlePageNumberChange,
             handlePageSizeChange,
             handleSortChange: () => {}
           }}

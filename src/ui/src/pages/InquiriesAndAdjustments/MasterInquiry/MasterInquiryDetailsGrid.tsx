@@ -84,7 +84,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
               pageNumber: profitGridPagination?.pageNumber ?? 0,
               pageSize: profitGridPagination?.pageSize ?? 50,
               sortParams: profitGridPagination?.sortParams ?? { sortBy: "", isSortDescending: false },
-              handlePageNumberChange: (value: number) => profitGridPagination?.handlePageNumberChange(value - 1),
+              handlePageNumberChange: profitGridPagination?.handlePageNumberChange,
               handlePageSizeChange: profitGridPagination?.handlePageSizeChange ?? (() => {}),
               handleSortChange: onSortChange ?? (() => {})
             }}

@@ -270,7 +270,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             pageNumber: currentPagination.pageNumber,
             pageSize: currentPagination.pageSize,
             sortParams: currentPagination.sortParams,
-            handlePageNumberChange: (value: number) => currentPagination.handlePageNumberChange(value - 1),
+            handlePageNumberChange: currentPagination.handlePageNumberChange,
             handlePageSizeChange: currentPagination.handlePageSizeChange,
             handleSortChange: currentPagination.handleSortChange,
           } : {

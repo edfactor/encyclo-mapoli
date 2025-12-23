@@ -153,7 +153,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
             pageNumber,
             pageSize,
             sortParams,
-            handlePageNumberChange: (value: number) => handlePageNumberChange(value - 1),
+            handlePageNumberChange,
             handlePageSizeChange,
             handleSortChange,
           }}

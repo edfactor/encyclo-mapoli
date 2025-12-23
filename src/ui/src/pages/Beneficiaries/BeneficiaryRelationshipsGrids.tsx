@@ -257,7 +257,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
               pageNumber,
               pageSize,
               sortParams,
-              handlePageNumberChange: (value: number) => handlePageNumberChange(value - 1),
+              handlePageNumberChange,
               handlePageSizeChange,
               handleSortChange
             }}

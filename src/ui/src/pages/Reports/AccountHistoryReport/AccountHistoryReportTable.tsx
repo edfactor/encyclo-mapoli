@@ -47,7 +47,7 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
                 pageNumber,
                 pageSize,
                 sortParams: sortParams ?? { sortBy: "", isSortDescending: false },
-                handlePageNumberChange: (value: number) => handlePageNumberChange(value - 1),
+                handlePageNumberChange,
                 handlePageSizeChange,
                 handleSortChange: handleSortChange ?? (() => {})
               }}

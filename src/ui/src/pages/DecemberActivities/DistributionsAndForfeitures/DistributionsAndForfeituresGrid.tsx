@@ -541,7 +541,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 pageSize,
                 sortParams,
                 handlePageNumberChange: (value: number) => {
-                  handlePageNumberChange(value - 1);
+                  handlePageNumberChange(value);
                   setInitialSearchLoaded(true);
                 },
                 handlePageSizeChange: (value: number) => {

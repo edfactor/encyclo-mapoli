@@ -103,7 +103,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
             pageNumber,
             pageSize,
             sortParams,
-            handlePageNumberChange: (value: number) => onPageChange(value - 1, pageSize),
+            handlePageNumberChange: (value: number) => onPageChange(value, pageSize),
             handlePageSizeChange: (value: number) => onPageChange(0, value),
             handleSortChange: onSortChange,
           }}

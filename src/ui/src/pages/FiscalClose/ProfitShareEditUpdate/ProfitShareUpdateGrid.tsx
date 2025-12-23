@@ -137,7 +137,7 @@ const ProfitShareEditUpdateGrid = ({
             pageSize,
             sortParams: sortParams ?? { sortBy: "", isSortDescending: false },
             handlePageNumberChange: (value: number) => {
-              handlePageNumberChange(value - 1);
+              handlePageNumberChange(value);
               setInitialSearchLoaded(true);
             },
             handlePageSizeChange: (value: number) => {

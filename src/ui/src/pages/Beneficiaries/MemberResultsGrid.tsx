@@ -41,11 +41,11 @@ const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({
         pageSize,
         sortParams: { sortBy: "", isSortDescending: false },
         handlePageNumberChange: (value: number) => {
-          onPageNumberChange(value - 1);
+          onPageNumberChange(value);
         },
         handlePageSizeChange: (value: number) => {
           onPageSizeChange(value);
-          onPageNumberChange(1);
+          onPageNumberChange(0);
         },
         handleSortChange: () => {}
       }}

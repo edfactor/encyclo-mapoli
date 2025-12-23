@@ -153,7 +153,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
             pageNumber,
             pageSize,
             sortParams,
-            handlePageNumberChange: (value: number) => handlePageNumberChange(value - 1),
+            handlePageNumberChange,
             handlePageSizeChange,
             handleSortChange,
           }}

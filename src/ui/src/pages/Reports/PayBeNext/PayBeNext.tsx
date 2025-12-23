@@ -315,11 +315,11 @@ const PayBeNext = () => {
                     pageSize,
                     sortParams: { sortBy: "", isSortDescending: false },
                     handlePageNumberChange: (value: number) => {
-                      setPageNumber(value - 1);
+                      setPageNumber(value);
                     },
                     handlePageSizeChange: (value: number) => {
                       setPageSize(value);
-                      setPageNumber(1);
+                      setPageNumber(0);
                     },
                     handleSortChange: () => {}
                   }}
