@@ -139,7 +139,8 @@ export interface YearsEndState {
   yearEndProfitSharingReportLive: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportFrozen: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
-  yearEndProfitSharingReportTotals: YearEndProfitSharingReportTotalsResponse | null;
+  yearEndProfitSharingReportTotalsLive: YearEndProfitSharingReportTotalsResponse | null;
+  yearEndProfitSharingReportTotalsFrozen: YearEndProfitSharingReportTotalsResponse | null;
   breakdownByStore: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreManagement: PagedReportResponse<BreakdownByStoreEmployee> | null;
   breakdownByStoreTotals: BreakdownByStoreTotals | null;
@@ -151,7 +152,8 @@ export interface YearsEndState {
   under21InactiveQueryParams: Under21InactiveRequest | null;
   under21Totals: Under21TotalsResponse | null;
   under21TotalsQueryParams: Under21TotalsRequest | null;
-  profitShareSummaryReport: YearEndProfitSharingReportSummaryResponse | null;
+  profitShareSummaryReportLive: YearEndProfitSharingReportSummaryResponse | null;
+  profitShareSummaryReportFrozen: YearEndProfitSharingReportSummaryResponse | null;
   updateSummary: UpdateSummaryResponse | null;
   profitSharingLabels: Paged<ProfitSharingLabel> | null;
   controlSheet: ControlSheetResponse | null;
@@ -241,7 +243,8 @@ const initialState: YearsEndState = {
   yearEndProfitSharingReportLive: null,
   yearEndProfitSharingReportFrozen: null,
   yearEndProfitSharingReportQueryParams: null,
-  yearEndProfitSharingReportTotals: null,
+  yearEndProfitSharingReportTotalsLive: null,
+  yearEndProfitSharingReportTotalsFrozen: null,
   breakdownByStore: null,
   breakdownByStoreManagement: null,
   breakdownByStoreTotals: null,
@@ -253,7 +256,8 @@ const initialState: YearsEndState = {
   under21InactiveQueryParams: null,
   under21Totals: null,
   under21TotalsQueryParams: null,
-  profitShareSummaryReport: null,
+  profitShareSummaryReportLive: null,
+  profitShareSummaryReportFrozen: null,
   updateSummary: null,
   profitSharingLabels: null,
   controlSheet: null,
@@ -948,11 +952,17 @@ export const yearsEndSlice = createSlice({
     clearYearEndProfitSharingReportQueryParams: (state) => {
       state.yearEndProfitSharingReportQueryParams = null;
     },
-    clearYearEndProfitSharingReportTotals: (state) => {
-      state.yearEndProfitSharingReportTotals = null;
+    clearYearEndProfitSharingReportTotalsLive: (state) => {
+      state.yearEndProfitSharingReportTotalsLive = null;
     },
-    setYearEndProfitSharingReportTotals: (state, action: PayloadAction<YearEndProfitSharingReportTotalsResponse>) => {
-      state.yearEndProfitSharingReportTotals = action.payload;
+    setYearEndProfitSharingReportTotalsLive: (state, action: PayloadAction<YearEndProfitSharingReportTotalsResponse>) => {
+      state.yearEndProfitSharingReportTotalsLive = action.payload;
+    },
+    clearYearEndProfitSharingReportTotalsFrozen: (state) => {
+      state.yearEndProfitSharingReportTotalsFrozen = null;
+    },
+    setYearEndProfitSharingReportTotalsFrozen: (state, action: PayloadAction<YearEndProfitSharingReportTotalsResponse>) => {
+      state.yearEndProfitSharingReportTotalsFrozen = action.payload;
     },
 
     // ********************
@@ -1027,8 +1037,17 @@ export const yearsEndSlice = createSlice({
     clearUnder21TotalsQueryParams: (state) => {
       state.under21TotalsQueryParams = null;
     },
-    setProfitShareSummaryReport: (state, action: PayloadAction<YearEndProfitSharingReportSummaryResponse>) => {
-      state.profitShareSummaryReport = action.payload;
+    setProfitShareSummaryReportLive: (state, action: PayloadAction<YearEndProfitSharingReportSummaryResponse>) => {
+      state.profitShareSummaryReportLive = action.payload;
+    },
+    setProfitShareSummaryReportFrozen: (state, action: PayloadAction<YearEndProfitSharingReportSummaryResponse>) => {
+      state.profitShareSummaryReportFrozen = action.payload;
+    },
+    clearProfitShareSummaryReportLive: (state) => {
+      state.profitShareSummaryReportLive = null;
+    },
+    clearProfitShareSummaryReportFrozen: (state) => {
+      state.profitShareSummaryReportFrozen = null;
     },
     setUpdateSummary: (state, action: PayloadAction<UpdateSummaryResponse | null>) => {
       state.updateSummary = action.payload;
@@ -1084,7 +1103,8 @@ export const {
   clearUnForfeitsQueryParams,
   clearYearEndProfitSharingReportLive,
   clearYearEndProfitSharingReportFrozen,
-  clearYearEndProfitSharingReportTotals,
+  clearYearEndProfitSharingReportTotalsLive,
+  clearYearEndProfitSharingReportTotalsFrozen,
   removeExecutiveHoursAndDollarsGridRow,
   setAdditionalExecutivesChosen,
   setAdditionalExecutivesGrid,
@@ -1127,7 +1147,8 @@ export const {
   setYearEndProfitSharingReportLive,
   setYearEndProfitSharingReportFrozen,
   setYearEndProfitSharingReportQueryParams,
-  setYearEndProfitSharingReportTotals,
+  setYearEndProfitSharingReportTotalsLive,
+  setYearEndProfitSharingReportTotalsFrozen,
   updateExecutiveHoursAndDollarsGridRow,
   setBreakdownByStore,
   clearBreakdownByStore,
@@ -1148,7 +1169,10 @@ export const {
   clearUnder21Totals,
   checkFiscalCloseParamsAndGridsProfitYears,
   checkDecemberParamsAndGridsProfitYears,
-  setProfitShareSummaryReport,
+  setProfitShareSummaryReportLive,
+  setProfitShareSummaryReportFrozen,
+  clearProfitShareSummaryReportLive,
+  clearProfitShareSummaryReportFrozen,
   setUpdateSummary,
   setProfitEditUpdateChangesAvailable,
   setProfitEditUpdateRevertChangesAvailable,
