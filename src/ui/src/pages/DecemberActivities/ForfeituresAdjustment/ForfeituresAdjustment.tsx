@@ -75,7 +75,6 @@ const ForfeituresAdjustmentContent = memo(() => {
             transactionData={transactionData}
             isLoading={isFetchingTransactions}
             pagination={transactionPagination}
-            onPaginationChange={transactionPagination.handlePaginationChange}
             onSortChange={transactionPagination.handleSortChange}
           />
         </Grid>

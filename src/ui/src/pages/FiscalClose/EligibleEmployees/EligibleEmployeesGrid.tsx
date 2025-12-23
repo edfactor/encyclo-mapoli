@@ -13,7 +13,6 @@ interface EligibleEmployeesGridProps {
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
 
@@ -24,7 +23,6 @@ const EligibleEmployeesGrid = ({
   showData,
   hasResults,
   pagination,
-  onPaginationChange,
   onSortChange
 }: EligibleEmployeesGridProps) => {
   // Clone the data object and modify the reportName to add "Eligible Employees " prefix
@@ -35,16 +33,6 @@ const EligibleEmployeesGrid = ({
   }
 
   const columnDefs = useMemo(() => GetEligibleEmployeesColumns(), []);
-
-  // Create a wrapper pagination object that maps the onPaginationChange callback
-  const wrappedPagination = useMemo(
-    () => ({
-      ...pagination,
-      handlePageNumberChange: (pageNumber: number) => onPaginationChange(pageNumber, pagination.pageSize),
-      handlePageSizeChange: (pageSize: number) => onPaginationChange(0, pageSize)
-    }),
-    [pagination, onPaginationChange]
-  );
 
   // Don't render if we shouldn't show data
   if (!showData || !clonedData?.response) {
@@ -59,7 +47,7 @@ const EligibleEmployeesGrid = ({
       columnDefs={columnDefs}
       totalRecords={clonedData.response.total || 0}
       isLoading={isLoading}
-      pagination={wrappedPagination}
+      pagination={pagination}
       onSortChange={onSortChange}
       showPagination={hasResults}
       beforeGrid={<ReportSummary report={clonedData} />}

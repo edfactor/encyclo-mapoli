@@ -160,9 +160,8 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
       expect(mockCalls.length).toBeGreaterThan(0);
 
       const firstCallProps = mockCalls[0][0];
-      expect(firstCallProps.onPaginationChange).toBeDefined();
+      expect(firstCallProps.pagination).toBeDefined();
       expect(firstCallProps.onSortChange).toBeDefined();
-      expect(typeof firstCallProps.onPaginationChange).toBe("function");
       expect(typeof firstCallProps.onSortChange).toBe("function");
     });
   });

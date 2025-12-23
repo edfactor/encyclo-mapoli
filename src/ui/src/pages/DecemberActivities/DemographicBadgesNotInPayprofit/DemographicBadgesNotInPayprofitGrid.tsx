@@ -1,5 +1,4 @@
-import { RefObject, useCallback, useMemo } from "react";
-import { ISortParams } from "smart-ui-library";
+import { RefObject, useMemo } from "react";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
@@ -13,7 +12,6 @@ interface DemographicBadgesNotInPayprofitGridProps {
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
 
@@ -24,34 +22,11 @@ const DemographicBadgesNotInPayprofitGrid = ({
   showData,
   hasResults,
   pagination,
-  onPaginationChange,
   onSortChange
 }: DemographicBadgesNotInPayprofitGridProps) => {
   const columnDefs = useMemo(() => GetDemographicBadgesNotInPayprofitColumns(), []);
 
-  const handleSortChanged = useCallback(
-    (update: ISortParams) => {
-      // Handle empty sortBy case - set default (preserving original logic)
-      if (update.sortBy === "") {
-        update.sortBy = "badgeNumber";
-        update.isSortDescending = true;
-      }
 
-      // Reset to page 0 when sorting changes (preserving original logic)
-      onPaginationChange(0, pagination.pageSize);
-      onSortChange(update);
-    },
-    [onPaginationChange, onSortChange, pagination.pageSize]
-  );
-
-  const paginationProps = {
-    pageNumber: pagination.pageNumber,
-    pageSize: pagination.pageSize,
-    sortParams: pagination.sortParams,
-    handlePageNumberChange: (value: number) => onPaginationChange(value, pagination.pageSize),
-    handlePageSizeChange: (value: number) => onPaginationChange(0, value),
-    handleSortChange: onSortChange
-  };
 
   if (!showData || !data?.response) {
     return null;
@@ -65,8 +40,8 @@ const DemographicBadgesNotInPayprofitGrid = ({
         columnDefs={columnDefs}
         totalRecords={data.response.total || 0}
         isLoading={isLoading}
-        pagination={paginationProps}
-        onSortChange={handleSortChanged}
+        pagination={pagination}
+        onSortChange={onSortChange}
         showPagination={hasResults}
       />
     </div>

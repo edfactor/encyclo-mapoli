@@ -15,7 +15,6 @@ interface DuplicateNamesAndBirthdaysGridProps {
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
   isGridExpanded?: boolean;
   onToggleExpand?: () => void;
@@ -28,7 +27,6 @@ const DuplicateNamesAndBirthdaysGrid = ({
   showData,
   hasResults,
   pagination,
-  onPaginationChange,
   onSortChange,
   isGridExpanded = false,
   onToggleExpand
@@ -47,11 +45,7 @@ const DuplicateNamesAndBirthdaysGrid = ({
       columnDefs={columnDefs}
       totalRecords={data.response.total || 0}
       isLoading={isLoading}
-      pagination={{
-        ...pagination,
-        handlePageNumberChange: (pageNum: number) => onPaginationChange(pageNum, pagination.pageSize),
-        handlePageSizeChange: (pageSz: number) => onPaginationChange(0, pageSz)
-      }}
+      pagination={pagination}
       onSortChange={onSortChange}
       showPagination={!isGridExpanded && hasResults}
       heightConfig={{

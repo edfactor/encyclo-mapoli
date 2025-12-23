@@ -12,7 +12,6 @@ interface DuplicateSSNsOnDemographicsGridProps {
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
 
@@ -23,7 +22,6 @@ const DuplicateSSNsOnDemographicsGrid = ({
   showData,
   hasResults,
   pagination,
-  onPaginationChange,
   onSortChange
 }: DuplicateSSNsOnDemographicsGridProps) => {
   const columnDefs = useMemo(() => GetDuplicateSSNsOnDemographicsColumns(), []);
@@ -40,11 +38,7 @@ const DuplicateSSNsOnDemographicsGrid = ({
       columnDefs={columnDefs}
       totalRecords={data.response.total || 0}
       isLoading={isLoading}
-      pagination={{
-        ...pagination,
-        handlePageNumberChange: (pageNum: number) => onPaginationChange(pageNum, pagination.pageSize),
-        handlePageSizeChange: (pageSz: number) => onPaginationChange(0, pageSz)
-      }}
+      pagination={pagination}
       onSortChange={onSortChange}
       showPagination={hasResults}
     />

@@ -19,7 +19,6 @@ interface YTDWagesGridProps {
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
   isGridExpanded?: boolean;
   onToggleExpand?: () => void;
@@ -32,7 +31,6 @@ const YTDWagesGrid = ({
   showData,
   hasResults,
   pagination,
-  onPaginationChange,
   onSortChange,
   isGridExpanded = false,
   onToggleExpand
@@ -75,18 +73,7 @@ const YTDWagesGrid = ({
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
 
-  // Create pagination props for DSMPaginatedGrid
-  const paginationProps = useMemo(
-    () => ({
-      pageNumber: pagination.pageNumber,
-      pageSize: pagination.pageSize,
-      sortParams: pagination.sortParams,
-      handlePageNumberChange: (value: number) => onPaginationChange(value, pagination.pageSize),
-      handlePageSizeChange: (value: number) => onPaginationChange(0, value),
-      handleSortChange: onSortChange
-    }),
-    [pagination, onPaginationChange, onSortChange]
-  );
+
 
   // Header content with title and totals (when not expanded)
   const headerContent = useMemo(
@@ -133,7 +120,7 @@ const YTDWagesGrid = ({
         data={clonedData.response.results}
         columnDefs={columnDefs}
         isLoading={isLoading}
-        pagination={paginationProps}
+        pagination={pagination}
         totalRecords={hasResults ? (data?.response?.total ?? 0) : 0}
         showPagination={!isGridExpanded && hasResults}
         onSortChange={onSortChange}
