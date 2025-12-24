@@ -209,14 +209,19 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   };
 
   const saveBeneficiary = (beneficiaryContactId: number, data: cb) => {
+    // Calculate beneficiary hierarchy numbers
+    const firstLevel = Math.floor(psnSuffix / 1000) % 10;
+    const secondLevel = Math.floor(psnSuffix / 100) % 10;
+    const thirdLevel = Math.floor(psnSuffix / 10) % 10;
+
     const request: CreateBeneficiaryRequest = {
       beneficiaryContactId: beneficiaryContactId,
       employeeBadgeNumber: badgeNumber,
-      firstLevelBeneficiaryNumber: Math.floor(psnSuffix / 1000) % 10,
+      firstLevelBeneficiaryNumber: firstLevel === 0 ? null : firstLevel,
       //percentage: data.percentage,
       relationship: data.relationship,
-      secondLevelBeneficiaryNumber: Math.floor(psnSuffix / 100) % 10,
-      thirdLevelBeneficiaryNumber: Math.floor(psnSuffix / 10) % 10
+      secondLevelBeneficiaryNumber: secondLevel === 0 ? null : secondLevel,
+      thirdLevelBeneficiaryNumber: thirdLevel === 0 ? null : thirdLevel
     };
     triggerAdd(request)
       .unwrap()
