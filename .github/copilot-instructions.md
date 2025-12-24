@@ -112,96 +112,29 @@ If you want, I can also produce a suggested PR body and branch name for this cha
 - **Identifiers**: `OracleHcmId` is authoritative; fall back to `(Ssn,BadgeNumber)` only when Oracle id missing
 - **Entity updates**: Use helper methods like `UpdateEntityValues`; avoid scattered per-field assignments
 
-## Security Requirements (MANDATORY - OWASP Top 10 2021 Aligned)
+## Security Requirements (MANDATORY - OWASP Top 10 2021/2025 Aligned)
 
-**ALL NEW CODE must follow these security patterns. Deviations require security review and PR justification.**
+**ALL NEW CODE must follow security patterns. See [security.instructions.md](.github/instructions/security.instructions.md) for complete guidance.**
 
-### Authentication & Authorization (A01/A07)
+**Critical security concepts covered:**
 
-- **Server-side validation ALWAYS**: Never trust client-provided roles or user context. Re-validate on every endpoint:
+- **5 Security Pillars**: Application Security, Infrastructure, IAM, Data Security, Detection & Response
+- **OWASP Top 10**: Broken Access Control, Cryptographic Failures, Injection, Insecure Design, etc.
+- **STRIDE Threat Modeling**: Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation of Privilege
+- **Secure-by-Default Principles**: Least privilege, fail closed, defense in depth
 
-  ```csharp
-  // WRONG: Trust header blindly
-  var roles = req.Headers["x-impersonating-roles"];
+**Quick security checklist** (see security.instructions.md for details):
 
-  // RIGHT: Always re-validate against authenticated user
-  var allowedRoles = GetUserAllowedImpersonationRoles(userId);
-  if (!requestedRoles.All(r => allowedRoles.Contains(r)))
-      throw new UnauthorizedAccessException();
-  ```
+- [ ] **Server-side validation ALWAYS**: Never trust client-provided roles/headers
+- [ ] **Parameterized queries ONLY**: No SQL string concatenation
+- [ ] **PII masked in logs**: SSN, email, phone, names must be masked
+- [ ] **HTTPS enforced**: Security headers present (HSTS, CSP, X-Frame-Options)
+- [ ] **Input validation**: Ranges, lengths, degenerate query guards
+- [ ] **Generic error messages**: No stack traces, SQL, or paths in responses
+- [ ] **Dependency security**: Monthly audits, critical CVEs within 48 hours
+      See `VALIDATION_PATTERNS.md` (`.github/`) for complete patterns
 
-- **No client-side storage for auth state**: Never use `localStorage` for roles/tokens that determine access. Okta JWT tokens (from secure auth flow) are OK; role elevation via localStorage is NOT
-- **Centralized role validation**: Use `PolicyRoleMap.cs` (single source of truth) for all authorization decisions
-- **Principle of least privilege**: Users get minimum required roles; audit role assignments quarterly
-
-### Input Validation & SQL Injection (A03/A09)
-
-- **Validate ALL inputs server-side**: Client validation is UX only, never security
-- **Use parameterized queries**: EF Core does this automatically; NEVER construct SQL strings
-- **Boundary checks**: Numeric ranges, string lengths, collection sizes must be validated
-  ```csharp
-  if (pageSize < 1 || pageSize > 1000)
-      throw new ValidationException("PageSize must be 1-1000");
-  ```
-- **Degenerate query guards**: Prevent queries that scan entire tables
-  ```csharp
-  // WRONG: This will load all demographics if badge == 0 is common
-  if (badge == 0) throw new ValidationException("Badge cannot be zero");
-  ```
-  See `VALIDATION_PATTERNS.md` (`.github/`) for complete patterns
-
-### PII Protection & Data Exposure (A01/A09)
-
-- **Mask PII in logs**: SSN, email, phone, bank account numbers MUST be masked. Use `GetMaskedUserId()` pattern from `TelemetryMiddleware.cs`
-- **Minimize claims used**: Only extract 'sub' (subject) from Okta JWT; avoid extracting unmasked email/identity claims into logs
-- **Secure database access**: Use read-only contexts (`UseReadOnlyContext()`) for queries; principle of least privilege for service accounts
-- **Avoid composite keys with SSN**: When building dictionaries from Demographics, use `(Ssn, OracleHcmId)` not just `Ssn` alone (SSN not unique)
-
-### Transport Security (A02/A05)
-
-- **HTTPS enforcement**: All production endpoints MUST use HTTPS. Use `UseHttpsRedirection()` + `UseHsts()` middleware
-- **Security headers**: Endpoints MUST return:
-  - `X-Frame-Options: DENY` (prevent clickjacking)
-  - `X-Content-Type-Options: nosniff` (prevent MIME sniffing)
-  - `Content-Security-Policy: default-src 'self'` (prevent XSS)
-  - `Strict-Transport-Security: max-age=31536000` (enforce HTTPS 1 year)
-  - See `NetEscapades.AspNetCore.SecurityHeaders` middleware for implementation
-- **CORS restrictions**: In dev, allow only `localhost:3100` / `127.0.0.1:3100`; in prod, allow only specific domains (never `AllowAnyOrigin()`)
-
-### Error Handling (A01/A10)
-
-- **No sensitive data in error messages**: Never expose stack traces, SQL queries, or PII in HTTP responses
-- **Structured error codes**: Use domain errors (e.g., `Error.CalendarYearNotFound`) instead of raw exceptions
-- **Consistent error responses**: All endpoints return `ProblemHttpResult` with standard structure (status, title, detail)
-- **Log exceptions with correlation IDs**: Tie errors to audit trails for security incidents
-
-### Telemetry & Logging (A01)
-
-- **Comprehensive telemetry required**: All endpoints MUST use `ExecuteWithTelemetry` extension or record metrics manually
-- **Declare sensitive fields**: List fields accessed (e.g., `"Ssn", "Email"`) in telemetry calls for security auditing
-- **Correlation IDs**: Generated automatically by middleware; tie logs/metrics together for traceability
-- **Business metrics**: Record operation counts (e.g., year-end runs, report generations) for anomaly detection
-
-### Session & Credential Management
-
-- **No hardcoded secrets**: Use Azure Key Vault or environment variables
-- **Token expiration**: Okta JWT tokens auto-expire; no custom token storage in `localStorage`
-- **Re-authentication for sensitive ops**: Year-end processing, member updates should require re-auth confirmation
-
-### Dependency Security
-
-- **Keep packages patched**: Run `dotnet list package --outdated` monthly; address critical CVEs within 48 hours
-- **No dev dependencies in production**: Exclude test packages from prod builds (already configured)
-- **Analyze new packages**: Check GitHub stars, maintenance, known vulnerabilities before adding
-
-### Related Tickets
-
-- **PS-2021**: Remove localStorage impersonation (privilege escalation fix)
-- **PS-2022**: Add server-side role validation (defense-in-depth)
-- **PS-2023**: Security headers middleware (XSS/clickjacking prevention)
-- **PS-2024**: HTTPS + HSTS enforcement (transport security)
-- **PS-2025**: CORS localhost restriction (MITM prevention in dev)
-- **PS-2026**: Telemetry PII masking audit (data exposure prevention)
+**For detailed security guidance, see [.github/instructions/security.instructions.md](.github/instructions/security.instructions.md)**
 
 ## Endpoint Results Pattern (MANDATORY)
 
@@ -377,10 +310,14 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
 
 All incoming data MUST be validated at server and client boundaries. See VALIDATION_PATTERNS.md (`.github/`) for complete reference when needed.
 
+**CRITICAL**: All request validators MUST be placed in `Demoulas.ProfitSharing.Common.Validators` namespace, NOT in `Endpoints.Validation`. This ensures validators are accessible across all layers (endpoints, services, tests).
+
 **Quick Pattern**:
 
 ```csharp
-public class SearchRequestValidator : AbstractValidator<SearchRequest>
+namespace Demoulas.ProfitSharing.Common.Validators;
+
+public sealed class SearchRequestValidator : AbstractValidator<SearchRequest>
 {
     public SearchRequestValidator()
     {
@@ -400,12 +337,14 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 
 ### Backend Coding Style (augmenting existing COPILOT_INSTRUCTIONS)
 
-- File-scoped namespaces; one class per file; explicit access modifiers.
+- **CRITICAL**: One class per file. No nested classes, no multiple classes in the same file. If a class is defined as a private nested class, extract it to its own file in an appropriate namespace (e.g., `Internal.ServiceDto` for service DTOs).
+- File-scoped namespaces; explicit access modifiers.
 - Prefer explicit types unless initializer makes type obvious.
 - Use `readonly` where applicable; private fields `_camelCase` (including `private static readonly`); constants PascalCase.
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`.
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
+- **SSN Masking**: Always use `SsnExtensions.MaskSsn()` extension method (from `Demoulas.ProfitSharing.Common.Extensions`) for masking Social Security Numbers. Never create separate SSN masking utilities.
 
 ### Decimal Rounding (CRITICAL for Financial Calculations)
 
@@ -639,6 +578,7 @@ When creating new documentation:
 - Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.).
 - Declare all sensitive fields accessed in telemetry calls for security auditing.
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs.
+- **Interface Layering**: Interfaces that return entity types (from Data project) should remain in Services layer to avoid circular dependencies. Only move interfaces to Common if they use DTOs or primitive types. Common cannot reference Data (Data already references Common for contracts/interfaces).
 - Update `CLAUDE.md` and this file if introducing a pervasive new pattern.
 
 ## Branching & Workflow
@@ -772,7 +712,7 @@ Provide reasoning in PR descriptions when deviating from these patterns.
 
 - Follow the repository `.editorconfig` for formatting and analyzer rules. This file is the authoritative source for whitespace, naming, and stylistic rules; update it only when you have a clear, repo-wide reason and include rationale in the PR.
 - Preferred style highlights:
-  - File-scoped namespaces and one class per file.
+  - **File-scoped namespaces and ONE CLASS PER FILE** - absolutely required. Extract nested/inner classes to separate files.
   - Use explicit access modifiers for all types and members.
   - Favor `is null` / `is not null` for null checks and `nameof(...)` for member names.
   - Prefer pattern matching and switch expressions where they improve clarity.

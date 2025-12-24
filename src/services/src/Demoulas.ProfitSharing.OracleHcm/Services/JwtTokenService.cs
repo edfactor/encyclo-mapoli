@@ -92,7 +92,7 @@ public sealed partial class JwtTokenService : IJwtTokenService
 
         var payload = new Dictionary<string, object>
         {
-            ["iss"] = issuer,
+            ["iss"] = "ps.qa.demoulas.net",
             ["sub"] = subject,
             ["aud"] = audience,
             ["iat"] = nowUnix,

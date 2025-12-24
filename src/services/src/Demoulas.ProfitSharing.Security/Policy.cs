@@ -60,4 +60,9 @@ public static class Policy
     /// </summary>
     public static readonly string CanManageAdministration = "CAN_MANAGE_ADMINISTRATION";
     public static readonly string CanViewAudits = "CAN_VIEW_AUDITS";
+
+    /// <summary>
+    /// View balances (participant or aggregated), read-only.
+    /// </summary>
+    public static readonly string CanProcessChecks = "CAN_PROCESS_CHECKS";
 }
