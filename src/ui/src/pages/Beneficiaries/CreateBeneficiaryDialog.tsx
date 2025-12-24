@@ -32,7 +32,7 @@ const CreateBeneficiaryDialog: React.FC<CreateBeneficiaryDialogProps> = ({
   return (
     <Dialog
       open={open}
-      onClose={(event, reason) => {
+      onClose={(_event, reason) => {
         if (reason === "backdropClick" || reason === "escapeKeyDown") {
           return;
         }
