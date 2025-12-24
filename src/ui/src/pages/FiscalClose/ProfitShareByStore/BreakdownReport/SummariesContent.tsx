@@ -1,13 +1,12 @@
-import { Typography, CircularProgress } from "@mui/material";
-import { Grid } from "@mui/material";
+import { CircularProgress, Grid, Typography } from "@mui/material";
 import { ColDef, RowClassParams } from "ag-grid-community";
-import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { useEffect, useState } from "react";
-import { useLazyGetBreakdownGrandTotalsQuery } from "reduxstore/api/AdhocApi";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../../reduxstore/store";
+import { useLazyGetBreakdownGrandTotalsQuery } from "reduxstore/api/AdhocApi";
+import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { GRID_KEYS } from "../../../../constants";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { RootState } from "../../../../reduxstore/store";
 import { GrandTotalsByStoreResponseDto, GrandTotalsByStoreRowDto } from "../../../../reduxstore/types";
 
 const SummariesContent: React.FC = () => {
@@ -139,54 +138,55 @@ const SummariesContent: React.FC = () => {
     {
       headerName: "Category",
       field: "category",
-      width: 150
+      flex: 1,
+      minWidth: 150
     },
     {
       headerName: "STE 1-140",
       field: "ste1",
-      width: 100,
+      flex: 1,
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "700",
       field: "700",
-      width: 70,
+      flex: 1,
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "701",
       field: "701",
-      width: 70,
+      flex: 1,
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "800",
       field: "800",
-      width: 70,
+      flex: 1,
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "801",
       field: "801",
-      width: 70,
+      flex: 1,
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "802",
       field: "802",
-      width: 70,
+      flex: 1,
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "900",
       field: "900",
-      width: 70,
+      flex: 1,
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "Total",
       field: "total",
-      width: 70,
+      flex: 1,
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     }
   ];
