@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Text.Json;
-using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -86,11 +85,11 @@ public class CalendarServiceTests : ApiTestBase<Program>
         // Mock IProfitSharingDataContextFactory to provide warehouse context
         var dataContextFactory = new Mock<IProfitSharingDataContextFactory>();
         dataContextFactory
-            .Setup(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonWarehouseContext, Task<DateOnly>>>()))
-            .Returns<Func<DemoulasCommonWarehouseContext, Task<DateOnly>>>(async func =>
+            .Setup(f => f.UseWarehouseContext(It.IsAny<Func<IDemoulasCommonWarehouseContext, Task<DateOnly>>>()))
+            .Returns<Func<IDemoulasCommonWarehouseContext, Task<DateOnly>>>(async func =>
             {
                 // Create a minimal mock context - the actual context isn't used since IAccountingPeriodsService is mocked
-                var mockContext = new Mock<DemoulasCommonWarehouseContext>();
+                var mockContext = new Mock<IDemoulasCommonWarehouseContext>();
                 return await func(mockContext.Object);
             });
 
@@ -153,7 +152,7 @@ public class CalendarServiceCacheTests
         distributedCache.Verify(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once);
         // Note: Cannot use VerifyNoOtherCalls() when interface has methods with optional parameters
         // as Moq's expression tree compilation fails with CS0854
-        dataContextFactory.Verify(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()), Times.Never);
+        dataContextFactory.Verify(f => f.UseWarehouseContext(It.IsAny<Func<IDemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()), Times.Never);
     }
 
     [Fact]
@@ -168,7 +167,7 @@ public class CalendarServiceCacheTests
             .ReturnsAsync((byte[]?)null);
         var dataContextFactory = new Mock<IProfitSharingDataContextFactory>();
         var accountingPeriodsService = new Mock<IAccountingPeriodsService>();
-        dataContextFactory.Setup(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()))
+        dataContextFactory.Setup(f => f.UseWarehouseContext(It.IsAny<Func<IDemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()))
             .ReturnsAsync(expected);
         var service = new Demoulas.ProfitSharing.Services.CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
 
@@ -179,6 +178,6 @@ public class CalendarServiceCacheTests
         Assert.Equal(expected.FiscalBeginDate, result.FiscalBeginDate);
         Assert.Equal(expected.FiscalEndDate, result.FiscalEndDate);
         distributedCache.Verify(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once);
-        dataContextFactory.Verify(f => f.UseWarehouseContext(It.IsAny<Func<DemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()), Times.Once);
+        dataContextFactory.Verify(f => f.UseWarehouseContext(It.IsAny<Func<IDemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()), Times.Once);
     }
 }

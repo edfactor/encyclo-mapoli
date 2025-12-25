@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Interfaces;
-using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -312,7 +312,7 @@ internal sealed class InMemoryProfitSharingDataContextFactory : IProfitSharingDa
         return await operation(ctx, transaction);
     }
 
-    public Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
+    public Task<T> UseWarehouseContext<T>(Func<IDemoulasCommonWarehouseContext, Task<T>> func)
     {
         throw new NotImplementedException("Warehouse context not needed for tests");
     }
