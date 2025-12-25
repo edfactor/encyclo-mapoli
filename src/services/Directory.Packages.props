@@ -13,9 +13,9 @@
     <!-- ========================================== -->
     <!-- Demoulas Common Libraries                  -->
     <!-- ========================================== -->
-    <PackageVersion Include="Demoulas.Common.Api" Version="3.3.3-beta" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="3.4.0-beta3" />
     <PackageVersion Include="Demoulas.Common.Caching" Version="3.3.1-beta2" />
-    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.13.0-beta3" />
+    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.13.0-beta4" />
     <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.14.0-beta3" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="4.0.1-beta8" />
     <PackageVersion Include="Demoulas.Common.Logging" Version="2.3.2-beta" />
