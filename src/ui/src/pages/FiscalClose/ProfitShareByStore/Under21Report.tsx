@@ -6,6 +6,7 @@ import StatusDropdownActionNode from "../../../components/StatusDropdownActionNo
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useInitialLoad } from "../../../hooks/useInitialLoad";
 import { useLazyGetPostFrozenUnder21Query } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import PostFrozenUnder21ReportGrid from "./PostFrozenUnder21ReportGrid";
@@ -15,7 +16,7 @@ const Under21Report = () => {
   const [fetchProfitSharingUnder21Report, { isLoading: isBreakdownLoading }] = useLazyGetPostFrozenUnder21Query();
   const profitSharingUnder21Data = useSelector((state: RootState) => state.yearsEnd.profitSharingUnder21Report);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const { isLoaded: initialSearchLoaded, setLoaded: setInitialSearchLoaded } = useInitialLoad();
   const [manualLoading, setManualLoading] = useState(false);
 
   const gridPagination = useGridPagination({

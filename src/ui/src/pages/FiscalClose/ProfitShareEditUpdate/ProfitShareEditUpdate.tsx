@@ -5,6 +5,7 @@ import { DSMAccordion, numberToCurrency, Page, SmartModal, TotalsGrid } from "sm
 import PrerequisiteGuard from "../../../components/PrerequisiteGuard";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
+import { useInitialLoad } from "../../../hooks/useInitialLoad";
 import { NavigationStatus, useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { RootState } from "../../../reduxstore/store";
 import { Messages } from "../../../utils/messageDictonary";
@@ -47,7 +48,7 @@ const ProfitShareEditUpdate = () => {
   } = useProfitShareEditUpdate();
 
   // Local state for UI concerns only
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const { isLoaded: initialSearchLoaded, setLoaded: setInitialSearchLoaded } = useInitialLoad();
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const [openValidationField, setOpenValidationField] = useState<string | null>(null);
   // Track current status locally to enable immediate re-evaluation of isReadOnly when status changes

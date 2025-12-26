@@ -10,9 +10,10 @@ import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/year
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { CAPTIONS, MENU_LABELS } from "../../../constants";
+import { useInitialLoad } from "../../../hooks/useInitialLoad";
 
 const ProfitShareTotals426 = () => {
-  const [_initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const { setLoaded: setInitialSearchLoaded } = useInitialLoad();
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
   const navigate = useNavigate();
   const hasToken = !!useSelector((state: RootState) => state.security.token);
@@ -56,7 +57,7 @@ const ProfitShareTotals426 = () => {
           console.error("Initial search failed:", error);
         });
     }
-  }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
+  }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch, setInitialSearchLoaded]);
 
   const renderActionNode = () => {
     return (

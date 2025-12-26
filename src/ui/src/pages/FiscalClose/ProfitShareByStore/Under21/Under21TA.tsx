@@ -5,6 +5,7 @@ import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../../constants";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
+import { useInitialLoad } from "../../../../hooks/useInitialLoad";
 import {
   useLazyGetUnder21BreakdownByStoreQuery,
   useLazyGetUnder21TotalsQuery
@@ -19,7 +20,7 @@ const Under21TA = () => {
   const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
   const under21BreakdownByStore = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const { isLoaded: initialSearchLoaded, setLoaded: setInitialSearchLoaded } = useInitialLoad();
   const [pageNumber, setPageNumber] = useState<number>(0);
   const [pageSize] = useState<number>(25);
   const [sortParams] = useState({

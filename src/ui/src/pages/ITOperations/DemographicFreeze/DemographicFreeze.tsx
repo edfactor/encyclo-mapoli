@@ -2,11 +2,12 @@ import { Divider, Grid } from "@mui/material";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import { useInitialLoad } from "../../../hooks/useInitialLoad";
 import DemographicFreezeGrid from "./DemographicFreezeGrid";
 import DemographicFreezeManager from "./DemographicFreezeManager";
 
 const DemographicFreeze = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const { isLoaded: initialSearchLoaded, setLoaded: setInitialSearchLoaded } = useInitialLoad();
   const [pageNumberReset, setPageNumberReset] = useState(false);
 
   return (
