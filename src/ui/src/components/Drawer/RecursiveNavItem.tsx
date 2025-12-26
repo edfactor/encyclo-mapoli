@@ -103,7 +103,6 @@ export const RecursiveNavItem: FC<RecursiveNavItemProps> = ({ item, level, maxAu
     if (level <= maxAutoExpandDepth || (hasActiveChild && !isActive)) {
       setExpanded(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, item.id, level, maxAutoExpandDepth, hasActiveChild, isActive]);
 
   // Persist expanded state
