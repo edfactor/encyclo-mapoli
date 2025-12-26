@@ -6,14 +6,14 @@ import { useLazyAdhocBeneficiariesReportQuery } from "../../../../reduxstore/api
 import { RootState } from "../../../../reduxstore/store";
 import { AdhocBeneficiariesReportRequest, BeneficiaryReportDto } from "../../../../reduxstore/types";
 import {
-    initialState,
-    PayBeNextFormData,
-    payBeNextReducer,
-    selectHasResults,
-    selectResults,
-    selectShowData,
-    selectTotalEndingBalance,
-    selectTotalRecords
+  initialState,
+  PayBeNextFormData,
+  payBeNextReducer,
+  selectHasResults,
+  selectResults,
+  selectShowData,
+  selectTotalEndingBalance,
+  selectTotalRecords
 } from "./usePayBeNextReducer";
 
 /**

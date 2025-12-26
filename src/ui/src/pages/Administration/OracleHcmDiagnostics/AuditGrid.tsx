@@ -1,14 +1,14 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Typography
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { Paged } from "smart-ui-library";
@@ -105,7 +105,7 @@ const AuditGrid: React.FC<AuditGridProps> = ({
             sortParams,
             handlePageNumberChange: (value: number) => onPageChange(value, pageSize),
             handlePageSizeChange: (value: number) => onPageChange(0, value),
-            handleSortChange: onSortChange,
+            handleSortChange: onSortChange
           }}
           showPagination={(data.results?.length ?? 0) > 0}
           gridOptions={{

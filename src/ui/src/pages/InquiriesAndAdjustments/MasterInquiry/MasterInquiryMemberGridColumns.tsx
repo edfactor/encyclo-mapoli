@@ -8,13 +8,11 @@ import {
   createZipColumn
 } from "../../../utils/gridColumnFactory";
 
-export const GetMasterInquiryMemberGridColumns = (
-  navigateFunction: (badgeNumber: string) => void
-): ColDef[] => {
+export const GetMasterInquiryMemberGridColumns = (navigateFunction: (badgeNumber: string) => void): ColDef[] => {
   const badgeColumn = createBadgeColumn({
     headerName: "Badge/PSN",
     psnSuffix: true,
-    navigateFunction: navigateFunction,
+    navigateFunction: navigateFunction
   });
 
   return [

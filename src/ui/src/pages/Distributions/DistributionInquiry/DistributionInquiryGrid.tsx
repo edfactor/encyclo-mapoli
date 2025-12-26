@@ -75,7 +75,9 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
       onSortChange={pagination.handleSortChange}
       showPagination={postReturnData !== null && postReturnData.length > 0}
       header={
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           {`Distribution Records (${totalRecords} ${totalRecords === 1 ? "Record" : "Records"})`}
         </Typography>
       }
@@ -91,25 +93,33 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
               gap: "16px"
             }}>
             <div>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold" }}>
                 Total Gross Amount (Page {pageNumber + 1}):
               </Typography>
               <Typography variant="body1">{numberToCurrency(totals.grossAmount)}</Typography>
             </div>
             <div>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold" }}>
                 Total Federal Tax (Page {pageNumber + 1}):
               </Typography>
               <Typography variant="body1">{numberToCurrency(totals.federalTax)}</Typography>
             </div>
             <div>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold" }}>
                 Total State Tax (Page {pageNumber + 1}):
               </Typography>
               <Typography variant="body1">{numberToCurrency(totals.stateTax)}</Typography>
             </div>
             <div>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold" }}>
                 Total Check Amount (Page {pageNumber + 1}):
               </Typography>
               <Typography variant="body1">{numberToCurrency(totals.checkAmount)}</Typography>

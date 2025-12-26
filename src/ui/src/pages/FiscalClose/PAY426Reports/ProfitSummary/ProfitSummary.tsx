@@ -136,9 +136,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
 
   // Use the appropriate Redux slice based on frozenData - live and frozen are cached separately
   const summaryData = useSelector((state: RootState) =>
-    frozenData
-      ? state.yearsEnd.profitShareSummaryReportFrozen
-      : state.yearsEnd.profitShareSummaryReportLive
+    frozenData ? state.yearsEnd.profitShareSummaryReportFrozen : state.yearsEnd.profitShareSummaryReportLive
   );
   const totalsData = useSelector((state: RootState) =>
     frozenData
@@ -440,7 +438,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
                 font-weight: 500;
               }
             `}</style>
-            <div className="border border-gray-300 rounded">
+            <div className="rounded border border-gray-300">
               <table className="eligibility-table">
                 <thead>
                   <tr>

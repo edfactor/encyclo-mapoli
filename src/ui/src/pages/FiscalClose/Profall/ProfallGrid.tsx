@@ -109,7 +109,9 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
       onSortChange={pagination.handleSortChange}
       showPagination={recordCount > 0}
       header={
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           {`PROFALL REPORT (${recordCount} records)`}
         </Typography>
       }

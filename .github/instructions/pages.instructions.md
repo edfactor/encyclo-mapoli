@@ -508,6 +508,7 @@ Used for collapsible filter sections.
 #### DSMPaginatedGrid (Recommended for Paginated Data)
 
 Combines grid and pagination into a single component with built-in:
+
 - Integrated pagination controls
 - Content-aware or fixed height modes
 - Loading state handling
@@ -518,7 +519,7 @@ import { DSMPaginatedGrid, ISortParams } from "smart-ui-library";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 
 const MyGrid: React.FC = () => {
-  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = 
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
     useGridPagination({
       initialPageSize: 25,
       initialSortBy: "badgeNumber",
@@ -564,7 +565,7 @@ const MyGrid: React.FC = () => {
 
 Use for small datasets that don't require pagination:
 
-```typescript
+````typescript
 <DSMGrid
   preferenceKey="SMALL_LOOKUP_GRID"
   isLoading={isLoading}
@@ -614,7 +615,7 @@ const DistributionInquirySearchFilter: React.FC<SearchFilterProps> = ({
     </Grid>
   );
 };
-```
+````
 
 **Common Pattern**:
 

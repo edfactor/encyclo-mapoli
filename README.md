@@ -240,7 +240,7 @@ Solution Explanation:
   ```typescript
   // ❌ WRONG - BLOCKING: Frontend age calculation from DOB
   const age = Math.floor(
-    (Date.now() - new Date(dob).getTime()) / (1000 * 60 * 60 * 24 * 365.25)
+    (Date.now() - new Date(dob).getTime()) / (1000 * 60 * 60 * 24 * 365.25),
   );
 
   // ✅ RIGHT: Display DOB only, backend provides age if needed

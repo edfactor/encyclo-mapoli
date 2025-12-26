@@ -65,10 +65,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     persistenceKey: GRID_KEYS.REPRINT_CERTIFICATES,
     onPaginationChange: useCallback(
       async (pageNum: number, pageSz: number, sortPrms: ISortParams) => {
-        if (
-          certificates &&
-          (pageNum > 0 || sortPrms.sortBy !== "badgeNumber" || sortPrms.isSortDescending !== false)
-        ) {
+        if (certificates && (pageNum > 0 || sortPrms.sortBy !== "badgeNumber" || sortPrms.isSortDescending !== false)) {
           const request = buildApiRequest(pageNum, pageSz, sortPrms);
           getCertificatesReport(request);
         }
@@ -135,7 +132,9 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
       onSortChange={pagination.handleSortChange}
       showPagination={gridData.length > 0 || totalCount > 0}
       header={
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           Print Profit Certificates ({totalCount})
         </Typography>
       }

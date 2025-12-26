@@ -266,21 +266,25 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           totalRecords={currentData?.response?.total ?? 0}
           isLoading={isSearching}
           heightConfig={{ maxHeight: gridMaxHeight }}
-          pagination={currentPagination ? {
-            pageNumber: currentPagination.pageNumber,
-            pageSize: currentPagination.pageSize,
-            sortParams: currentPagination.sortParams,
-            handlePageNumberChange: currentPagination.handlePageNumberChange,
-            handlePageSizeChange: currentPagination.handlePageSizeChange,
-            handleSortChange: currentPagination.handleSortChange,
-          } : {
-            pageNumber: 0,
-            pageSize: 25,
-            sortParams: { sortBy: "", isSortDescending: false },
-            handlePageNumberChange: () => {},
-            handlePageSizeChange: () => {},
-            handleSortChange: () => {},
-          }}
+          pagination={
+            currentPagination
+              ? {
+                  pageNumber: currentPagination.pageNumber,
+                  pageSize: currentPagination.pageSize,
+                  sortParams: currentPagination.sortParams,
+                  handlePageNumberChange: currentPagination.handlePageNumberChange,
+                  handlePageSizeChange: currentPagination.handlePageSizeChange,
+                  handleSortChange: currentPagination.handleSortChange
+                }
+              : {
+                  pageNumber: 0,
+                  pageSize: 25,
+                  sortParams: { sortBy: "", isSortDescending: false },
+                  handlePageNumberChange: () => {},
+                  handlePageSizeChange: () => {},
+                  handleSortChange: () => {}
+                }
+          }
           showPagination={isPaginationNeeded && !!currentPagination}
           gridOptions={{
             suppressMultiSort: true,

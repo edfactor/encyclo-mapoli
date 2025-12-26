@@ -29,25 +29,33 @@ interface MockPaginationProps {
 // Mock smart-ui-library components
 vi.mock("smart-ui-library", () => ({
   DSMGrid: ({ providedOptions, isLoading, preferenceKey, handleSortChanged }: DSMGridProps) => (
-    <div data-testid="dsm-grid" data-preference-key={preferenceKey}>
+    <div
+      data-testid="dsm-grid"
+      data-preference-key={preferenceKey}>
       <span data-testid="grid-loading">{isLoading ? "Loading" : "Ready"}</span>
       <span data-testid="grid-row-count">{providedOptions?.rowData?.length ?? 0}</span>
       <span data-testid="grid-column-count">{providedOptions?.columnDefs?.length ?? 0}</span>
       {handleSortChanged && (
         <button
           data-testid="sort-button"
-          onClick={() => handleSortChanged({ sortBy: "name", isSortDescending: true })}
-        >
+          onClick={() => handleSortChanged({ sortBy: "name", isSortDescending: true })}>
           Sort
         </button>
       )}
     </div>
   ),
-  Pagination: ({ pageNumber, setPageNumber, pageSize, setPageSize, recordCount, rowsPerPageOptions }: MockPaginationProps) => {
+  Pagination: ({
+    pageNumber,
+    setPageNumber,
+    pageSize,
+    setPageSize,
+    recordCount,
+    rowsPerPageOptions
+  }: MockPaginationProps) => {
     // Capture the callbacks for testing
     mockSetPageNumber = setPageNumber ?? null;
     // Note: setPageSize is available but not captured as tests don't currently assert on it
-    
+
     return (
       <div data-testid="pagination">
         <span data-testid="page-number">{pageNumber}</span>
@@ -55,28 +63,24 @@ vi.mock("smart-ui-library", () => ({
         <span data-testid="record-count">{recordCount}</span>
         <span data-testid="rows-per-page-options">{rowsPerPageOptions?.join(",") ?? "default"}</span>
         {/* Buttons to simulate user clicking pagination controls */}
-        <button 
-          data-testid="go-to-page-1" 
-          onClick={() => setPageNumber?.(1)}
-        >
+        <button
+          data-testid="go-to-page-1"
+          onClick={() => setPageNumber?.(1)}>
           Go to Page 1
         </button>
-        <button 
-          data-testid="go-to-page-2" 
-          onClick={() => setPageNumber?.(2)}
-        >
+        <button
+          data-testid="go-to-page-2"
+          onClick={() => setPageNumber?.(2)}>
           Go to Page 2
         </button>
-        <button 
-          data-testid="go-to-page-5" 
-          onClick={() => setPageNumber?.(5)}
-        >
+        <button
+          data-testid="go-to-page-5"
+          onClick={() => setPageNumber?.(5)}>
           Go to Page 5
         </button>
         <button
           data-testid="set-page-size-50"
-          onClick={() => setPageSize?.(50)}
-        >
+          onClick={() => setPageSize?.(50)}>
           Set Page Size 50
         </button>
       </div>
@@ -134,7 +138,7 @@ describe("DSMPaginatedGrid", () => {
   describe("Render States", () => {
     it("should not render grid when data is null", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -151,7 +155,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should render grid when data is empty array", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -169,7 +173,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should render grid when data has items", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -188,7 +192,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should pass loading state to grid", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -205,7 +209,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should pass preferenceKey to grid", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="my-custom-preference-key"
@@ -217,17 +221,14 @@ describe("DSMPaginatedGrid", () => {
         />
       );
 
-      expect(screen.getByTestId("dsm-grid")).toHaveAttribute(
-        "data-preference-key", 
-        "my-custom-preference-key"
-      );
+      expect(screen.getByTestId("dsm-grid")).toHaveAttribute("data-preference-key", "my-custom-preference-key");
     });
   });
 
   describe("Pagination Display", () => {
     it("should show pagination when data has items (default behavior)", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -244,7 +245,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should hide pagination when data is empty (default behavior)", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -261,7 +262,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should show pagination when showPagination=true even with empty data", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -279,7 +280,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should hide pagination when showPagination=false even with data", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -297,7 +298,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should pass totalRecords to Pagination component", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -314,7 +315,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should pass rowsPerPageOptions to Pagination component", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -333,17 +334,17 @@ describe("DSMPaginatedGrid", () => {
 
   /**
    * CRITICAL REGRESSION TESTS: Page Number Conversion
-   * 
+   *
    * The DSMPaginatedGrid component converts between:
    * - UI/Pagination component: 1-based page numbers (user sees Page 1, 2, 3...)
    * - API/Internal state: 0-based page numbers (API expects page=0, 1, 2...)
-   * 
+   *
    * The conversion happens at line 424 in DSMPaginatedGrid.tsx:
    *   setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-   * 
+   *
    * This means when Pagination component calls setPageNumber(1), the parent's
    * handlePageNumberChange should receive 0.
-   * 
+   *
    * IMPORTANT: Parent components should NEVER subtract 1 from handlePageNumberChange.
    * The DSMPaginatedGrid handles this conversion internally.
    */
@@ -352,7 +353,7 @@ describe("DSMPaginatedGrid", () => {
       const user = userEvent.setup();
       const handlePageNumberChange = vi.fn();
       const pagination = createMockPagination({ handlePageNumberChange });
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -377,7 +378,7 @@ describe("DSMPaginatedGrid", () => {
       const user = userEvent.setup();
       const handlePageNumberChange = vi.fn();
       const pagination = createMockPagination({ handlePageNumberChange });
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -401,7 +402,7 @@ describe("DSMPaginatedGrid", () => {
       const user = userEvent.setup();
       const handlePageNumberChange = vi.fn();
       const pagination = createMockPagination({ handlePageNumberChange });
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -423,7 +424,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should pass pageNumber directly to Pagination (no conversion on display)", () => {
       const pagination = createMockPagination({ pageNumber: 3 });
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -444,7 +445,7 @@ describe("DSMPaginatedGrid", () => {
       const user = userEvent.setup();
       const handlePageSizeChange = vi.fn();
       const pagination = createMockPagination({ handlePageSizeChange });
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -467,7 +468,7 @@ describe("DSMPaginatedGrid", () => {
     it("should capture the correct setPageNumber callback in Pagination", () => {
       const handlePageNumberChange = vi.fn();
       const pagination = createMockPagination({ handlePageNumberChange });
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -481,14 +482,14 @@ describe("DSMPaginatedGrid", () => {
 
       // Verify the mock captured the callback
       expect(mockSetPageNumber).toBeDefined();
-      
+
       // Directly call the callback with various values to verify the conversion
       mockSetPageNumber!(1); // UI page 1
       expect(handlePageNumberChange).toHaveBeenLastCalledWith(0);
-      
+
       mockSetPageNumber!(10); // UI page 10
       expect(handlePageNumberChange).toHaveBeenLastCalledWith(9);
-      
+
       mockSetPageNumber!(100); // UI page 100
       expect(handlePageNumberChange).toHaveBeenLastCalledWith(99);
     });
@@ -497,7 +498,7 @@ describe("DSMPaginatedGrid", () => {
       const user = userEvent.setup();
       const handlePageNumberChange = vi.fn();
       const pagination = createMockPagination({ handlePageNumberChange });
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -526,7 +527,7 @@ describe("DSMPaginatedGrid", () => {
       const user = userEvent.setup();
       const handleSortChange = vi.fn();
       const pagination = createMockPagination({ handleSortChange });
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -552,7 +553,7 @@ describe("DSMPaginatedGrid", () => {
       const customSortHandler = vi.fn();
       const handleSortChange = vi.fn();
       const pagination = createMockPagination({ handleSortChange });
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -580,7 +581,7 @@ describe("DSMPaginatedGrid", () => {
   describe("Slot Rendering", () => {
     it("should render header slot when provided", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -599,7 +600,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should render headerActions slot when provided", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -618,7 +619,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should render beforeGrid slot when provided", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -636,7 +637,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should render afterGrid slot when provided", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -654,7 +655,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should apply custom className to slots", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -675,7 +676,7 @@ describe("DSMPaginatedGrid", () => {
       // The beforeGrid and afterGrid wrappers should have the custom classes
       const beforeWrapper = screen.getByText("Before").parentElement;
       const afterWrapper = screen.getByText("After").parentElement;
-      
+
       expect(beforeWrapper).toHaveClass("my-before-class");
       expect(afterWrapper).toHaveClass("my-after-class");
     });
@@ -684,7 +685,7 @@ describe("DSMPaginatedGrid", () => {
   describe("Container and Ref", () => {
     it("should apply custom className to container", () => {
       const pagination = createMockPagination();
-      
+
       const { container } = render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -703,7 +704,7 @@ describe("DSMPaginatedGrid", () => {
     it("should forward innerRef to container", () => {
       const pagination = createMockPagination();
       const ref = React.createRef<HTMLDivElement>();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -724,7 +725,7 @@ describe("DSMPaginatedGrid", () => {
     it("should be callable when onGridApiReady is provided", () => {
       const pagination = createMockPagination();
       const onGridApiReady = vi.fn();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -749,7 +750,7 @@ describe("DSMPaginatedGrid", () => {
       // `const hasData = data !== null && data.length > 0`
       // This test verifies null handling works correctly.
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -767,7 +768,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should handle zero totalRecords", () => {
       const pagination = createMockPagination();
-      
+
       render(
         <DSMPaginatedGrid
           preferenceKey="test-grid"
@@ -784,7 +785,7 @@ describe("DSMPaginatedGrid", () => {
 
     it("should pass showColumnControl to grid", () => {
       const pagination = createMockPagination();
-      
+
       // Just verify component renders with this prop without error
       render(
         <DSMPaginatedGrid

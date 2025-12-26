@@ -79,9 +79,7 @@ const DetailCellRenderer = (params: { data: PayBeNextGridRow }) => {
                   currency: "USD"
                 })}
               </td>
-              <td style={{ padding: "8px" }}>
-                {detail.date ? new Date(detail.date).toLocaleDateString() : ""}
-              </td>
+              <td style={{ padding: "8px" }}>{detail.date ? new Date(detail.date).toLocaleDateString() : ""}</td>
               <td style={{ padding: "8px" }}>{detail.comments}</td>
             </tr>
           ))}

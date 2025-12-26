@@ -112,7 +112,7 @@ const PayBeNextSearchFilter: React.FC<PayBeNextSearchFilterProps> = ({
         </Grid>
 
         <Grid size={{ xs: 12, sm: 4, md: 3 }}>
-          <div className="flex items-center h-full">
+          <div className="flex h-full items-center">
             <Controller
               name="isAlsoEmployee"
               control={control}

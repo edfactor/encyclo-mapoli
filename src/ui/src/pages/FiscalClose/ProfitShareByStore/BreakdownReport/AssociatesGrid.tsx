@@ -155,7 +155,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
             sortParams,
             handlePageNumberChange,
             handlePageSizeChange,
-            handleSortChange,
+            handleSortChange
           }}
           showPagination={breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0}
         />

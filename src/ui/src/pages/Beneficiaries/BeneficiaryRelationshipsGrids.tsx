@@ -264,9 +264,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
             gridOptions={{
               suppressMultiSort: true
             }}
-            showPagination={
-              relationships.beneficiaryList?.results && relationships.beneficiaryList.results.length > 0
-            }
+            showPagination={relationships.beneficiaryList?.results && relationships.beneficiaryList.results.length > 0}
           />
         </>
       )}
