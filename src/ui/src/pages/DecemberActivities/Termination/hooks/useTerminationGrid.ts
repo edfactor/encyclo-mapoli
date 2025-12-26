@@ -2,15 +2,15 @@ import { GridApi } from "ag-grid-community";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-    useUpdateForfeitureAdjustmentBulkMutation,
-    useUpdateForfeitureAdjustmentMutation
+  useUpdateForfeitureAdjustmentBulkMutation,
+  useUpdateForfeitureAdjustmentMutation
 } from "reduxstore/api/AdhocApi";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import {
-    CalendarResponseDto,
-    FilterableStartAndEndDateRequest,
-    ForfeitureAdjustmentUpdateRequest
+  CalendarResponseDto,
+  FilterableStartAndEndDateRequest,
+  ForfeitureAdjustmentUpdateRequest
 } from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
 import { GRID_KEYS } from "../../../../constants";
@@ -20,14 +20,14 @@ import { SortParams, useGridPagination } from "../../../../hooks/useGridPaginati
 import { useRowSelection } from "../../../../hooks/useRowSelection";
 import { generateRowKey } from "../../../../utils/forfeitActivities/gridDataHelpers";
 import {
-    clearGridSelectionsForBadges,
-    formatApiError,
-    generateBulkSaveSuccessMessage,
-    generateSaveSuccessMessage,
-    getErrorMessage,
-    getRowKeysForRequests,
-    prepareBulkSaveRequests,
-    prepareSaveRequest
+  clearGridSelectionsForBadges,
+  formatApiError,
+  generateBulkSaveSuccessMessage,
+  generateSaveSuccessMessage,
+  getErrorMessage,
+  getRowKeysForRequests,
+  prepareBulkSaveRequests,
+  prepareSaveRequest
 } from "../../../../utils/forfeitActivities/saveOperationHelpers";
 import { Messages } from "../../../../utils/messageDictonary";
 

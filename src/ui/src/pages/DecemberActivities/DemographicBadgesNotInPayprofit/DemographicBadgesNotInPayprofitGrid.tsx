@@ -26,8 +26,6 @@ const DemographicBadgesNotInPayprofitGrid = ({
 }: DemographicBadgesNotInPayprofitGridProps) => {
   const columnDefs = useMemo(() => GetDemographicBadgesNotInPayprofitColumns(), []);
 
-
-
   if (!showData || !data?.response) {
     return null;
   }

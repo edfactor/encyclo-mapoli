@@ -144,7 +144,7 @@ const ProfitShareEditGrid = ({
               handlePageSizeChange(value);
               setInitialSearchLoaded(true);
             },
-            handleSortChange,
+            handleSortChange
           }}
           showPagination
         />

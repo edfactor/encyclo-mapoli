@@ -48,7 +48,8 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
     )
   });
 
-  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, resetPagination } = pagination;
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, resetPagination } =
+    pagination;
 
   const onSearch = useCallback(async () => {
     const request = {
@@ -112,7 +113,9 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
       onSortChange={pagination.handleSortChange}
       showPagination={freezeResults.results.length > 0}
       header={
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           Previous Freezes
         </Typography>
       }

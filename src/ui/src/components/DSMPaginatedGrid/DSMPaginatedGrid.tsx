@@ -402,20 +402,16 @@ export function DSMPaginatedGrid<T = unknown>({
       );
     }
 
-    return slotClassNames?.headerClassName ? (
-      <div className={slotClassNames.headerClassName}>{header}</div>
-    ) : (
-      header
-    );
+    return slotClassNames?.headerClassName ? <div className={slotClassNames.headerClassName}>{header}</div> : header;
   };
 
   return (
-    <div ref={innerRef} className={className}>
+    <div
+      ref={innerRef}
+      className={className}>
       {renderHeader()}
 
-      {beforeGrid && (
-        <div className={slotClassNames?.beforeGridClassName}>{beforeGrid}</div>
-      )}
+      {beforeGrid && <div className={slotClassNames?.beforeGridClassName}>{beforeGrid}</div>}
 
       {data && (
         <DSMGrid
@@ -446,9 +442,7 @@ export function DSMPaginatedGrid<T = unknown>({
         />
       )}
 
-      {afterGrid && (
-        <div className={slotClassNames?.afterGridClassName}>{afterGrid}</div>
-      )}
+      {afterGrid && <div className={slotClassNames?.afterGridClassName}>{afterGrid}</div>}
     </div>
   );
 }

@@ -47,7 +47,9 @@ const AuditSearchGrid: React.FC<AuditSearchGridProps> = ({
       onSortChange={pagination.handleSortChange}
       showPagination={data && data.length > 0}
       header={
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           Audit Events
         </Typography>
       }

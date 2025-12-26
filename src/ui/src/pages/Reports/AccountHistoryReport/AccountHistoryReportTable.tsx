@@ -4,7 +4,10 @@ import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPagina
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
-import { AccountHistoryReportPaginatedResponse, AccountHistoryReportResponse } from "../../../types/reports/AccountHistoryReportTypes";
+import {
+  AccountHistoryReportPaginatedResponse,
+  AccountHistoryReportResponse
+} from "../../../types/reports/AccountHistoryReportTypes";
 import { GetAccountHistoryReportColumns } from "./AccountHistoryReportGridColumns";
 
 interface AccountHistoryReportTableProps {
@@ -26,7 +29,8 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
   });
   const columnDefs = useMemo(() => GetAccountHistoryReportColumns(), []);
 
-  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } = gridPagination;
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
+    gridPagination;
   const recordCount = data?.response?.total ?? 0;
 
   return (

@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Page } from "smart-ui-library";
 import { SortParams } from "../../../hooks/useGridPagination";
 import {
-    useClearDemographicSyncAudit,
-    useGetOracleHcmSyncMetadata,
-    useLazyGetDemographicSyncAudit
+  useClearDemographicSyncAudit,
+  useGetOracleHcmSyncMetadata,
+  useLazyGetDemographicSyncAudit
 } from "../../../reduxstore/api/hcmSyncApi";
 import AuditGrid from "./AuditGrid";
 import OracleHcmMetadata from "./OracleHcmMetadata";

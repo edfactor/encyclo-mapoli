@@ -155,7 +155,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
             sortParams,
             handlePageNumberChange,
             handlePageSizeChange,
-            handleSortChange,
+            handleSortChange
           }}
           showPagination={storeManagement?.response?.results && storeManagement.response.results.length > 0}
         />

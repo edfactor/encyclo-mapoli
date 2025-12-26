@@ -170,16 +170,13 @@ export const payBeNextReducer = (state: PayBeNextState, action: PayBeNextAction)
 };
 
 // Selectors
-export const selectShowData = (state: PayBeNextState): boolean => 
-  state.data !== null && state.search.hasSearched;
+export const selectShowData = (state: PayBeNextState): boolean => state.data !== null && state.search.hasSearched;
 
 export const selectHasResults = (state: PayBeNextState): boolean =>
   Boolean(state.data?.response?.results && state.data.response.results.length > 0);
 
-export const selectTotalEndingBalance = (state: PayBeNextState): number => 
-  state.data?.totalEndingBalance ?? 0;
+export const selectTotalEndingBalance = (state: PayBeNextState): number => state.data?.totalEndingBalance ?? 0;
 
-export const selectTotalRecords = (state: PayBeNextState): number => 
-  state.data?.response?.total ?? 0;
+export const selectTotalRecords = (state: PayBeNextState): number => state.data?.response?.total ?? 0;
 
 export const selectResults = (state: PayBeNextState) => state.data?.response?.results ?? [];
