@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { QPAY066xAdHocReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import {
@@ -131,47 +132,49 @@ const QPAY066xAdHocReports: React.FC = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.QPAY066_ADHOC}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
-          <DSMAccordion title="Filter">
-            <QPAY066xAdHocSearchFilter
-              presets={reports}
-              currentPreset={currentPreset}
-              onPresetChange={handlePresetChange}
-              onReset={handleReset}
-              onStoreNumberChange={handleStoreNumberChange}
-              onBadgeNumberChange={handleBadgeNumberChange}
-              onEmployeeNameChange={handleEmployeeNameChange}
-              onStoreManagementChange={handleStoreManagementChange}
-              onStartDateChange={handleStartDateChange}
-              onEndDateChange={handleEndDateChange}
-              onSearch={handleSearch}
-              isLoading={isLoading}
-            />
-          </DSMAccordion>
-        </Grid>
+    <PageErrorBoundary pageName="QPAY066x Ad Hoc Reports">
+      <Page
+        label={CAPTIONS.QPAY066_ADHOC}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
+          <Grid width={"100%"}>
+            <DSMAccordion title="Filter">
+              <QPAY066xAdHocSearchFilter
+                presets={reports}
+                currentPreset={currentPreset}
+                onPresetChange={handlePresetChange}
+                onReset={handleReset}
+                onStoreNumberChange={handleStoreNumberChange}
+                onBadgeNumberChange={handleBadgeNumberChange}
+                onEmployeeNameChange={handleEmployeeNameChange}
+                onStoreManagementChange={handleStoreManagementChange}
+                onStartDateChange={handleStartDateChange}
+                onEndDateChange={handleEndDateChange}
+                onSearch={handleSearch}
+                isLoading={isLoading}
+              />
+            </DSMAccordion>
+          </Grid>
 
-        <Grid width="100%">
-          {hasSearched && currentReportId && (
-            <QPAY066xAdHocReportsGrid
-              reportTitle={getReportTitle(currentReportId)}
-              reportId={currentReportId}
-              isLoading={isLoading}
-              storeNumber={storeNumber}
-              gridPagination={gridPagination}
-            />
-          )}
+          <Grid width="100%">
+            {hasSearched && currentReportId && (
+              <QPAY066xAdHocReportsGrid
+                reportTitle={getReportTitle(currentReportId)}
+                reportId={currentReportId}
+                isLoading={isLoading}
+                storeNumber={storeNumber}
+                gridPagination={gridPagination}
+              />
+            )}
+          </Grid>
         </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

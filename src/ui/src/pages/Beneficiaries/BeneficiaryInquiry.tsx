@@ -5,6 +5,7 @@ import { useLazyBeneficiarySearchFilterQuery, useLazyGetBeneficiaryDetailQuery }
 
 import { DSMAccordion, Page, Paged } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import { PageErrorBoundary } from "../../components/PageErrorBoundary";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { BENEFICIARY_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS, ROUTES } from "../../constants";
@@ -180,11 +181,13 @@ const BeneficiaryInquiryContent = () => {
 
 const BeneficiaryInquiry = () => {
   return (
-    <Page label={CAPTIONS.BENEFICIARY_INQUIRY}>
-      <MissiveAlertProvider>
-        <BeneficiaryInquiryContent />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Beneficiary Inquiry">
+      <Page label={CAPTIONS.BENEFICIARY_INQUIRY}>
+        <MissiveAlertProvider>
+          <BeneficiaryInquiryContent />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

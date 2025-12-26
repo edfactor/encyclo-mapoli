@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Box, CircularProgress, Divider, Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -101,53 +102,55 @@ const Under21TA = () => {
   };
 */
   return (
-    <Page
-      label={CAPTIONS.QPAY066TA_UNDER21}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-
-        {initialLoad ? (
-          <Grid width="100%">
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight="200px">
-              <CircularProgress />
-            </Box>
+    <PageErrorBoundary pageName="Under 21 TA">
+      <Page
+        label={CAPTIONS.QPAY066TA_UNDER21}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
           </Grid>
-        ) : (
-          <>
-            {hasData && !isLoading && (
-              <Grid
-                width="100%"
-                paddingX="24px">
-                <Under21Summary
-                  totals={under21Totals}
-                  isLoading={isTotalsLoading}
-                  title="UNDER 21 (QPAY066TA-UNDR21)"
+
+          {initialLoad ? (
+            <Grid width="100%">
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="200px">
+                <CircularProgress />
+              </Box>
+            </Grid>
+          ) : (
+            <>
+              {hasData && !isLoading && (
+                <Grid
+                  width="100%"
+                  paddingX="24px">
+                  <Under21Summary
+                    totals={under21Totals}
+                    isLoading={isTotalsLoading}
+                    title="UNDER 21 (QPAY066TA-UNDR21)"
+                  />
+                </Grid>
+              )}
+
+              <Grid width="100%">
+                <Under21BreakdownGrid
+                  isLoading={isInactiveLoading}
+                  setInitialSearchLoaded={setInitialSearchLoaded}
+                  pageNumber={pageNumber}
+                  pageSize={pageSize}
+                  onPageChange={setPageNumber}
                 />
               </Grid>
-            )}
-
-            <Grid width="100%">
-              <Under21BreakdownGrid
-                isLoading={isInactiveLoading}
-                setInitialSearchLoaded={setInitialSearchLoaded}
-                pageNumber={pageNumber}
-                pageSize={pageSize}
-                onPageChange={setPageNumber}
-              />
-            </Grid>
-          </>
-        )}
-      </Grid>
-    </Page>
+            </>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

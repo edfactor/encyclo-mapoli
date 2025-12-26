@@ -2,6 +2,7 @@ import { Divider, Grid } from "@mui/material";
 import { memo } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import StandaloneMemberDetails from "../MasterInquiry/StandaloneMemberDetails";
@@ -118,11 +119,13 @@ ReversalsContent.displayName = "ReversalsContent";
 
 const Reversals = () => {
   return (
-    <Page label={CAPTIONS.REVERSALS}>
-      <MissiveAlertProvider>
-        <ReversalsContent />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Reversals">
+      <Page label={CAPTIONS.REVERSALS}>
+        <MissiveAlertProvider>
+          <ReversalsContent />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

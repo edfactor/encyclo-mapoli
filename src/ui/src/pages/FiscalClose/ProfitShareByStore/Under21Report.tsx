@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Box, CircularProgress, Divider, Grid } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -105,51 +106,53 @@ const Under21Report = () => {
   }, [profitYear, gridPagination]);
 
   return (
-    <Page
-      label={CAPTIONS.QPAY066_UNDER21}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-
-        {initialLoad ? (
-          <Grid width="100%">
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight="200px">
-              <CircularProgress />
-            </Box>
+    <PageErrorBoundary pageName="Under 21 Report">
+      <Page
+        label={CAPTIONS.QPAY066_UNDER21}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
           </Grid>
-        ) : (
-          <>
-            {hasData && !isLoading && (
-              <Grid
-                width="100%"
-                paddingX="24px">
-                <Under21ReportTotals
-                  totals={profitSharingUnder21Data}
+
+          {initialLoad ? (
+            <Grid width="100%">
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="200px">
+                <CircularProgress />
+              </Box>
+            </Grid>
+          ) : (
+            <>
+              {hasData && !isLoading && (
+                <Grid
+                  width="100%"
+                  paddingX="24px">
+                  <Under21ReportTotals
+                    totals={profitSharingUnder21Data}
+                    isLoading={isLoading}
+                    title="UNDER 21 REPORT (QPAY066-UNDR21)"
+                  />
+                </Grid>
+              )}
+
+              <Grid width="100%">
+                <PostFrozenUnder21ReportGrid
                   isLoading={isLoading}
-                  title="UNDER 21 REPORT (QPAY066-UNDR21)"
+                  setInitialSearchLoaded={setInitialSearchLoaded}
+                  gridPagination={gridPagination}
                 />
               </Grid>
-            )}
-
-            <Grid width="100%">
-              <PostFrozenUnder21ReportGrid
-                isLoading={isLoading}
-                setInitialSearchLoaded={setInitialSearchLoaded}
-                gridPagination={gridPagination}
-              />
-            </Grid>
-          </>
-        )}
-      </Grid>
-    </Page>
+            </>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

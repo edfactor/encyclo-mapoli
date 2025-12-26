@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Divider, Grid } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
@@ -97,57 +98,59 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
   };
 
   return (
-    <Page
-      label={isGridExpanded ? "" : `${CAPTIONS.PAY426N}`}
-      actionNode={isGridExpanded ? undefined : renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        {isFrozen && <FrozenYearWarning profitYear={profitYear} />}
-        {isReadOnlyByStatus && <StatusReadOnlyInfo />}
-        {!isGridExpanded && (
-          <>
-            <Grid width={"100%"}>
-              <Divider />
-            </Grid>
-            <Grid width={"100%"}>
-              <DSMAccordion title="Filter">
-                <FilterSection
-                  presets={presets}
-                  currentPreset={currentPreset}
-                  onPresetChange={handlePresetChange}
-                  onReset={handleReset}
-                  onSearch={handleSearch}
-                  isLoading={isLoading}
-                />
-              </DSMAccordion>
-            </Grid>
-          </>
-        )}
-
-        <Grid width="100%">
-          {currentPreset && !showSummaryReport && (
-            <ReportGrid
-              params={currentPreset.params}
-              onLoadingChange={handleLoadingChange}
-              isFrozen={isFrozen}
-              searchTrigger={searchTrigger}
-              isGridExpanded={isGridExpanded}
-              onToggleExpand={handleToggleGridExpand}
-              profitYear={profitYear}
-            />
+    <PageErrorBoundary pageName="PAY426N">
+      <Page
+        label={isGridExpanded ? "" : `${CAPTIONS.PAY426N}`}
+        actionNode={isGridExpanded ? undefined : renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          {isFrozen && <FrozenYearWarning profitYear={profitYear} />}
+          {isReadOnlyByStatus && <StatusReadOnlyInfo />}
+          {!isGridExpanded && (
+            <>
+              <Grid width={"100%"}>
+                <Divider />
+              </Grid>
+              <Grid width={"100%"}>
+                <DSMAccordion title="Filter">
+                  <FilterSection
+                    presets={presets}
+                    currentPreset={currentPreset}
+                    onPresetChange={handlePresetChange}
+                    onReset={handleReset}
+                    onSearch={handleSearch}
+                    isLoading={isLoading}
+                  />
+                </DSMAccordion>
+              </Grid>
+            </>
           )}
 
-          {showSummaryReport && (
-            <ProfitSummary
-              frozenData={isFrozen}
-              externalIsGridExpanded={isGridExpanded}
-              externalOnToggleExpand={handleToggleGridExpand}
-            />
-          )}
+          <Grid width="100%">
+            {currentPreset && !showSummaryReport && (
+              <ReportGrid
+                params={currentPreset.params}
+                onLoadingChange={handleLoadingChange}
+                isFrozen={isFrozen}
+                searchTrigger={searchTrigger}
+                isGridExpanded={isGridExpanded}
+                onToggleExpand={handleToggleGridExpand}
+                profitYear={profitYear}
+              />
+            )}
+
+            {showSummaryReport && (
+              <ProfitSummary
+                frozenData={isFrozen}
+                externalIsGridExpanded={isGridExpanded}
+                externalOnToggleExpand={handleToggleGridExpand}
+              />
+            )}
+          </Grid>
         </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

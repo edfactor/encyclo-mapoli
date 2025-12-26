@@ -2,6 +2,7 @@ import { Box, Button, Divider, Grid, Typography } from "@mui/material";
 import { CellValueChangedEvent, ColDef } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { useGetCommentTypesQuery, useUpdateCommentTypeMutation } from "../../../reduxstore/api/administrationApi";
@@ -195,81 +196,83 @@ const ManageCommentTypes = () => {
   };
 
   return (
-    <Page label={CAPTIONS.MANAGE_COMMENT_TYPES}>
-      <Grid
-        container
-        rowSpacing={3}>
-        <Grid width="100%">
-          <Divider />
-        </Grid>
-        <Grid width="100%">
-          <Box sx={{ px: 1 }}>
-            <Button
-              variant="contained"
-              onClick={() => setIsAddDialogOpen(true)}>
-              Add New Comment Type
-            </Button>
-          </Box>
-        </Grid>
-
-        <Grid width="100%">
-          <Box
-            sx={{
-              display: "flex",
-              gap: 3,
-              alignItems: "center",
-              width: "100%",
-              px: 1
-            }}>
-            <Box sx={{ flex: 1 }}>
-              {errorMessage && (
-                <Typography
-                  variant="body2"
-                  color="error">
-                  {errorMessage}
-                </Typography>
-              )}
-            </Box>
-
-            <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
+    <PageErrorBoundary pageName="Manage Comment Types">
+      <Page label={CAPTIONS.MANAGE_COMMENT_TYPES}>
+        <Grid
+          container
+          rowSpacing={3}>
+          <Grid width="100%">
+            <Divider />
+          </Grid>
+          <Grid width="100%">
+            <Box sx={{ px: 1 }}>
               <Button
                 variant="contained"
-                disabled={!hasUnsavedChanges || isSaving}
-                onClick={saveChanges}>
-                Save
-              </Button>
-              <Button
-                variant="outlined"
-                disabled={!hasUnsavedChanges || isSaving}
-                onClick={discardChanges}>
-                Discard
+                onClick={() => setIsAddDialogOpen(true)}>
+                Add New Comment Type
               </Button>
             </Box>
-          </Box>
-        </Grid>
+          </Grid>
 
-        <Grid width="100%">
-          <DSMGrid
-            preferenceKey={GRID_KEYS.MANAGE_COMMENT_TYPES}
-            isLoading={isFetching || isSaving}
-            providedOptions={{
-              rowData,
-              columnDefs,
-              suppressMultiSort: true,
-              stopEditingWhenCellsLoseFocus: true,
-              enterNavigatesVertically: true,
-              enterNavigatesVerticallyAfterEdit: true,
-              onCellValueChanged
-            }}
-          />
+          <Grid width="100%">
+            <Box
+              sx={{
+                display: "flex",
+                gap: 3,
+                alignItems: "center",
+                width: "100%",
+                px: 1
+              }}>
+              <Box sx={{ flex: 1 }}>
+                {errorMessage && (
+                  <Typography
+                    variant="body2"
+                    color="error">
+                    {errorMessage}
+                  </Typography>
+                )}
+              </Box>
+
+              <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
+                <Button
+                  variant="contained"
+                  disabled={!hasUnsavedChanges || isSaving}
+                  onClick={saveChanges}>
+                  Save
+                </Button>
+                <Button
+                  variant="outlined"
+                  disabled={!hasUnsavedChanges || isSaving}
+                  onClick={discardChanges}>
+                  Discard
+                </Button>
+              </Box>
+            </Box>
+          </Grid>
+
+          <Grid width="100%">
+            <DSMGrid
+              preferenceKey={GRID_KEYS.MANAGE_COMMENT_TYPES}
+              isLoading={isFetching || isSaving}
+              providedOptions={{
+                rowData,
+                columnDefs,
+                suppressMultiSort: true,
+                stopEditingWhenCellsLoseFocus: true,
+                enterNavigatesVertically: true,
+                enterNavigatesVerticallyAfterEdit: true,
+                onCellValueChanged
+              }}
+            />
+          </Grid>
         </Grid>
-      </Grid>
-      <AddCommentTypeDialog
-        open={isAddDialogOpen}
-        onClose={() => setIsAddDialogOpen(false)}
-        onSuccess={handleCreateSuccess}
-      />
-    </Page>
+        <AddCommentTypeDialog
+          open={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          onSuccess={handleCreateSuccess}
+        />
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

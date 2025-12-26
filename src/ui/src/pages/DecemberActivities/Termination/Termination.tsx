@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
+import PageErrorBoundary from "../../../components/PageErrorBoundary";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 
 import { CircularProgress, Divider, Grid } from "@mui/material";
@@ -69,73 +70,75 @@ const Termination = () => {
   }, [scrollToTop]);
 
   return (
-    <Page
-      label={isGridExpanded ? "" : CAPTIONS.TERMINATIONS}
-      actionNode={isGridExpanded ? undefined : renderActionNode()}>
-      <div>
-        {!isGridExpanded && <ApiMessageAlert commonKey="TerminationSave" />}
-        <Grid
-          container
-          rowSpacing="24px">
-          {!isGridExpanded && (
-            <Grid width={"100%"}>
-              <Divider />
-            </Grid>
-          )}
-          {!isCalendarDataLoaded ? (
-            <Grid
-              width={"100%"}
-              container
-              justifyContent="center"
-              padding={4}>
-              <CircularProgress />
-            </Grid>
-          ) : (
-            <>
-              {!isGridExpanded && (
-                <Grid width={"100%"}>
-                  <DSMAccordion title="Filter">
-                    <TerminationSearchFilter
-                      fiscalData={fiscalData}
-                      onSearch={actions.handleSearch}
-                      setInitialSearchLoaded={actions.setInitialSearchLoaded}
-                      hasUnsavedChanges={state.hasUnsavedChanges}
-                      setHasUnsavedChanges={actions.handleUnsavedChanges}
-                      isFetching={isFetching}
-                    />
-                  </DSMAccordion>
-                </Grid>
-              )}
-              <Grid width="100%">
-                <TerminationGrid
-                  setInitialSearchLoaded={actions.setInitialSearchLoaded}
-                  initialSearchLoaded={state.initialSearchLoaded}
-                  searchParams={state.searchParams}
-                  resetPageFlag={state.resetPageFlag}
-                  onUnsavedChanges={actions.handleUnsavedChanges}
-                  hasUnsavedChanges={state.hasUnsavedChanges}
-                  fiscalData={fiscalData}
-                  shouldArchive={state.shouldArchive}
-                  onArchiveHandled={actions.handleArchiveHandled}
-                  onErrorOccurred={scrollToTop}
-                  onLoadingChange={setIsFetching}
-                  onShowUnsavedChangesDialog={() => setShowUnsavedChangesDialog(true)}
-                  isGridExpanded={isGridExpanded}
-                  onToggleExpand={handleToggleGridExpand}
-                />
+    <PageErrorBoundary pageName="Termination">
+      <Page
+        label={isGridExpanded ? "" : CAPTIONS.TERMINATIONS}
+        actionNode={isGridExpanded ? undefined : renderActionNode()}>
+        <div>
+          {!isGridExpanded && <ApiMessageAlert commonKey="TerminationSave" />}
+          <Grid
+            container
+            rowSpacing="24px">
+            {!isGridExpanded && (
+              <Grid width={"100%"}>
+                <Divider />
               </Grid>
-            </>
-          )}
-        </Grid>
-      </div>
+            )}
+            {!isCalendarDataLoaded ? (
+              <Grid
+                width={"100%"}
+                container
+                justifyContent="center"
+                padding={4}>
+                <CircularProgress />
+              </Grid>
+            ) : (
+              <>
+                {!isGridExpanded && (
+                  <Grid width={"100%"}>
+                    <DSMAccordion title="Filter">
+                      <TerminationSearchFilter
+                        fiscalData={fiscalData}
+                        onSearch={actions.handleSearch}
+                        setInitialSearchLoaded={actions.setInitialSearchLoaded}
+                        hasUnsavedChanges={state.hasUnsavedChanges}
+                        setHasUnsavedChanges={actions.handleUnsavedChanges}
+                        isFetching={isFetching}
+                      />
+                    </DSMAccordion>
+                  </Grid>
+                )}
+                <Grid width="100%">
+                  <TerminationGrid
+                    setInitialSearchLoaded={actions.setInitialSearchLoaded}
+                    initialSearchLoaded={state.initialSearchLoaded}
+                    searchParams={state.searchParams}
+                    resetPageFlag={state.resetPageFlag}
+                    onUnsavedChanges={actions.handleUnsavedChanges}
+                    hasUnsavedChanges={state.hasUnsavedChanges}
+                    fiscalData={fiscalData}
+                    shouldArchive={state.shouldArchive}
+                    onArchiveHandled={actions.handleArchiveHandled}
+                    onErrorOccurred={scrollToTop}
+                    onLoadingChange={setIsFetching}
+                    onShowUnsavedChangesDialog={() => setShowUnsavedChangesDialog(true)}
+                    isGridExpanded={isGridExpanded}
+                    onToggleExpand={handleToggleGridExpand}
+                  />
+                </Grid>
+              </>
+            )}
+          </Grid>
+        </div>
 
-      <ConfirmationDialog
-        open={showUnsavedChangesDialog}
-        title="Unsaved Changes"
-        description="Please save your changes before changing pages."
-        onClose={() => setShowUnsavedChangesDialog(false)}
-      />
-    </Page>
+        <ConfirmationDialog
+          open={showUnsavedChangesDialog}
+          title="Unsaved Changes"
+          description="Please save your changes before changing pages."
+          onClose={() => setShowUnsavedChangesDialog(false)}
+        />
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

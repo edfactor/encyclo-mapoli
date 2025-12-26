@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import FrozenYearWarning from "../../../components/FrozenYearWarning";
+import PageErrorBoundary from "../../../components/PageErrorBoundary";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
@@ -46,82 +47,84 @@ const UnForfeit = () => {
   }, [state.shouldArchive, actions]);
 
   return (
-    <Page
-      label={isGridExpanded ? "" : `${CAPTIONS.REHIRE_FORFEITURES}`}
-      actionNode={isGridExpanded ? undefined : renderActionNode()}>
-      {!isGridExpanded && (
-        <div>
-          <ApiMessageAlert commonKey="UnforfeitSave" />
-        </div>
-      )}
-      <Grid
-        container
-        rowSpacing="24px">
-        {!isGridExpanded && isFrozen && <FrozenYearWarning profitYear={profitYear} />}
+    <PageErrorBoundary pageName="Rehire Forfeitures">
+      <Page
+        label={isGridExpanded ? "" : `${CAPTIONS.REHIRE_FORFEITURES}`}
+        actionNode={isGridExpanded ? undefined : renderActionNode()}>
         {!isGridExpanded && (
-          <Grid width={"100%"}>
-            <Divider />
-          </Grid>
+          <div>
+            <ApiMessageAlert commonKey="UnforfeitSave" />
+          </div>
         )}
-
-        {!isCalendarDataLoaded ? (
-          <Grid
-            width={"100%"}
-            container
-            justifyContent="center"
-            padding={4}>
-            <CircularProgress />
-          </Grid>
-        ) : (
-          <>
-            {!isGridExpanded && (
-              <Grid width={"100%"}>
-                <DSMAccordion title="Filter">
-                  <UnForfeitSearchFilter
-                    setInitialSearchLoaded={actions.setInitialSearchLoaded}
-                    fiscalData={fiscalCalendarYear}
-                    onSearch={actions.handleSearch}
-                    hasUnsavedChanges={state.hasUnsavedChanges}
-                    setHasUnsavedChanges={actions.handleUnsavedChanges}
-                  />
-                </DSMAccordion>
-              </Grid>
-            )}
-            <Grid width="100%">
-              <UnForfeitGrid
-                initialSearchLoaded={state.initialSearchLoaded}
-                setInitialSearchLoaded={actions.setInitialSearchLoaded}
-                resetPageFlag={state.resetPageFlag}
-                onUnsavedChanges={actions.handleUnsavedChanges}
-                hasUnsavedChanges={state.hasUnsavedChanges}
-                shouldArchive={state.shouldArchive}
-                onArchiveHandled={actions.handleArchiveHandled}
-                setHasUnsavedChanges={actions.handleUnsavedChanges}
-                fiscalCalendarYear={fiscalCalendarYear}
-                isGridExpanded={isGridExpanded}
-                onToggleExpand={handleToggleGridExpand}
-                onShowUnsavedChangesDialog={() => setShowUnsavedChangesDialog(true)}
-                onShowErrorDialog={(title, message) => setErrorDialog({ title, message })}
-              />
+        <Grid
+          container
+          rowSpacing="24px">
+          {!isGridExpanded && isFrozen && <FrozenYearWarning profitYear={profitYear} />}
+          {!isGridExpanded && (
+            <Grid width={"100%"}>
+              <Divider />
             </Grid>
-          </>
-        )}
-      </Grid>
+          )}
 
-      <ConfirmationDialog
-        open={showUnsavedChangesDialog}
-        title="Unsaved Changes"
-        description="Please save your changes before changing pages."
-        onClose={() => setShowUnsavedChangesDialog(false)}
-      />
+          {!isCalendarDataLoaded ? (
+            <Grid
+              width={"100%"}
+              container
+              justifyContent="center"
+              padding={4}>
+              <CircularProgress />
+            </Grid>
+          ) : (
+            <>
+              {!isGridExpanded && (
+                <Grid width={"100%"}>
+                  <DSMAccordion title="Filter">
+                    <UnForfeitSearchFilter
+                      setInitialSearchLoaded={actions.setInitialSearchLoaded}
+                      fiscalData={fiscalCalendarYear}
+                      onSearch={actions.handleSearch}
+                      hasUnsavedChanges={state.hasUnsavedChanges}
+                      setHasUnsavedChanges={actions.handleUnsavedChanges}
+                    />
+                  </DSMAccordion>
+                </Grid>
+              )}
+              <Grid width="100%">
+                <UnForfeitGrid
+                  initialSearchLoaded={state.initialSearchLoaded}
+                  setInitialSearchLoaded={actions.setInitialSearchLoaded}
+                  resetPageFlag={state.resetPageFlag}
+                  onUnsavedChanges={actions.handleUnsavedChanges}
+                  hasUnsavedChanges={state.hasUnsavedChanges}
+                  shouldArchive={state.shouldArchive}
+                  onArchiveHandled={actions.handleArchiveHandled}
+                  setHasUnsavedChanges={actions.handleUnsavedChanges}
+                  fiscalCalendarYear={fiscalCalendarYear}
+                  isGridExpanded={isGridExpanded}
+                  onToggleExpand={handleToggleGridExpand}
+                  onShowUnsavedChangesDialog={() => setShowUnsavedChangesDialog(true)}
+                  onShowErrorDialog={(title, message) => setErrorDialog({ title, message })}
+                />
+              </Grid>
+            </>
+          )}
+        </Grid>
 
-      <ConfirmationDialog
-        open={!!errorDialog}
-        title={errorDialog?.title || "Error"}
-        description={errorDialog?.message || "An error occurred"}
-        onClose={() => setErrorDialog(null)}
-      />
-    </Page>
+        <ConfirmationDialog
+          open={showUnsavedChangesDialog}
+          title="Unsaved Changes"
+          description="Please save your changes before changing pages."
+          onClose={() => setShowUnsavedChangesDialog(false)}
+        />
+
+        <ConfirmationDialog
+          open={!!errorDialog}
+          title={errorDialog?.title || "Error"}
+          description={errorDialog?.message || "An error occurred"}
+          onClose={() => setErrorDialog(null)}
+        />
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

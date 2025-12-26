@@ -3,6 +3,7 @@ import { memo, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import PageErrorBoundary from "../../components/PageErrorBoundary/PageErrorBoundary";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { RootState } from "../../reduxstore/store";
 import MasterInquiryDetailsGrid from "./MasterInquiry/MasterInquiryDetailsGrid";
@@ -356,11 +357,13 @@ const Adjustments = memo(() => {
 
 const MasterInquiry = () => {
   return (
-    <Page label="Employee Record Merge">
-      <MissiveAlertProvider>
-        <Adjustments />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Employee Record Merge">
+      <Page label="Employee Record Merge">
+        <MissiveAlertProvider>
+          <Adjustments />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 
