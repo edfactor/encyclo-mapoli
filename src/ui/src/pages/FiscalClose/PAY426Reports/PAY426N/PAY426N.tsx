@@ -3,18 +3,17 @@ import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { closeDrawer, openDrawer, setFullscreen } from "reduxstore/slices/generalSlice";
 import {
   clearYearEndProfitSharingReportFrozen,
   clearYearEndProfitSharingReportLive
 } from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS, ROUTES } from "../../../../constants";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { useGridExpansion } from "../../../../hooks/useGridExpansion";
 import { useIsProfitYearFrozen } from "../../../../hooks/useIsProfitYearFrozen";
 import { useIsReadOnlyByStatus } from "../../../../hooks/useIsReadOnlyByStatus";
 import ProfitSummary from "../ProfitSummary/ProfitSummary";
@@ -27,11 +26,9 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
   const [showSummaryReport, setShowSummaryReport] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTrigger, setSearchTrigger] = useState(0);
-  const [isGridExpanded, setIsGridExpanded] = useState(false);
-  const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
+  const { isGridExpanded, handleToggleGridExpand } = useGridExpansion();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
   const profitYear = useDecemberFlowProfitYear();
   const isFrozen = useIsProfitYearFrozen(profitYear);
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
@@ -93,23 +90,6 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
   const handleSearch = () => {
     // Toggle searchTrigger to force re-search
     setSearchTrigger((prev) => prev + 1);
-  };
-
-  const handleToggleGridExpand = () => {
-    if (!isGridExpanded) {
-      // Expanding: remember current drawer state and close it
-      setWasDrawerOpenBeforeExpand(isDrawerOpen || false);
-      dispatch(closeDrawer());
-      dispatch(setFullscreen(true));
-      setIsGridExpanded(true);
-    } else {
-      // Collapsing: restore previous state
-      dispatch(setFullscreen(false));
-      setIsGridExpanded(false);
-      if (wasDrawerOpenBeforeExpand) {
-        dispatch(openDrawer());
-      }
-    }
   };
 
   const renderActionNode = () => {

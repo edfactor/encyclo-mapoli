@@ -1,46 +1,20 @@
 import { Divider, Grid } from "@mui/material";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
-import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
-import { RootState } from "../../../reduxstore/store";
+import { useGridExpansion } from "../../../hooks/useGridExpansion";
 import DistributionsAndForfeituresGrid from "./DistributionsAndForfeituresGrid";
 import DistributionsAndForfeituresSearchFilter from "./DistributionsAndForfeituresSearchFilter";
 import { useDistributionsAndForfeituresState } from "./useDistributionsAndForfeituresState";
 
 const DistributionsAndForfeitures = () => {
   const { state, actions } = useDistributionsAndForfeituresState();
-  const dispatch = useDispatch();
   const [isFetching, setIsFetching] = useState(false);
-  const [isGridExpanded, setIsGridExpanded] = useState(false);
-  const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
-
-  // Get current drawer state from Redux
-  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
+  const { isGridExpanded, handleToggleGridExpand } = useGridExpansion();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
-  };
-
-  // Handler to toggle grid expansion
-  const handleToggleGridExpand = () => {
-    setIsGridExpanded((prev) => {
-      if (!prev) {
-        // Expanding: remember drawer state and close it
-        setWasDrawerOpenBeforeExpand(isDrawerOpen || false);
-        dispatch(closeDrawer());
-        dispatch(setFullscreen(true));
-      } else {
-        // Collapsing: restore previous drawer state
-        dispatch(setFullscreen(false));
-        if (wasDrawerOpenBeforeExpand) {
-          dispatch(openDrawer());
-        }
-      }
-      return !prev;
-    });
   };
 
   return (

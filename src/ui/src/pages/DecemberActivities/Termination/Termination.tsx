@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
@@ -8,9 +7,8 @@ import { CircularProgress, Divider, Grid } from "@mui/material";
 
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
+import { useGridExpansion } from "../../../hooks/useGridExpansion";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
-import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
-import { RootState } from "../../../reduxstore/store";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
 import { useTerminationState } from "./hooks/useTerminationState";
 import TerminationGrid from "./TerminationGrid";
@@ -26,16 +24,11 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 }
 
 const Termination = () => {
-  const dispatch = useDispatch();
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
   const [isFetching, setIsFetching] = useState(false);
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
-  const [isGridExpanded, setIsGridExpanded] = useState(false);
-  const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
-
-  // Get current drawer state from Redux
-  const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
+  const { isGridExpanded, handleToggleGridExpand } = useGridExpansion();
 
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
@@ -55,25 +48,6 @@ const Termination = () => {
   }, [fetchAccountingRange]);
 
   const isCalendarDataLoaded = !!fiscalData?.fiscalBeginDate && !!fiscalData?.fiscalEndDate;
-
-  // Handler to toggle grid expansion
-  const handleToggleGridExpand = () => {
-    setIsGridExpanded((prev) => {
-      if (!prev) {
-        // Expanding: remember drawer state and close it
-        setWasDrawerOpenBeforeExpand(isDrawerOpen || false);
-        dispatch(closeDrawer());
-        dispatch(setFullscreen(true));
-      } else {
-        // Collapsing: restore previous drawer state
-        dispatch(setFullscreen(false));
-        if (wasDrawerOpenBeforeExpand) {
-          dispatch(openDrawer());
-        }
-      }
-      return !prev;
-    });
-  };
 
   // Add listener for error messages to scroll to top
   useEffect(() => {
