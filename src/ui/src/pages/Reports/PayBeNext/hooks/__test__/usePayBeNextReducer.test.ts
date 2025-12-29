@@ -383,11 +383,7 @@ describe("Selectors", () => {
     it("should return true when results array has items", () => {
       const state: PayBeNextState = {
         ...initialState,
-        data: createMockResponse(
-          [createMockBeneficiary({ badgeNumber: 123, beneficiaryId: 1 })],
-          1,
-          1000
-        )
+        data: createMockResponse([createMockBeneficiary({ badgeNumber: 123, beneficiaryId: 1 })], 1, 1000)
       };
 
       expect(selectHasResults(state)).toBe(true);
@@ -402,10 +398,10 @@ describe("Selectors", () => {
     it("should return totalEndingBalance from data", () => {
       const state: PayBeNextState = {
         ...initialState,
-        data: createMockResponse([], 0, 5000.50)
+        data: createMockResponse([], 0, 5000.5)
       };
 
-      expect(selectTotalEndingBalance(state)).toBe(5000.50);
+      expect(selectTotalEndingBalance(state)).toBe(5000.5);
     });
   });
 
@@ -430,9 +426,7 @@ describe("Selectors", () => {
     });
 
     it("should return results array from data", () => {
-      const mockResults = [
-        createMockBeneficiary({ badgeNumber: 123, beneficiaryId: 1, fullName: "Test User" })
-      ];
+      const mockResults = [createMockBeneficiary({ badgeNumber: 123, beneficiaryId: 1, fullName: "Test User" })];
       const state: PayBeNextState = {
         ...initialState,
         data: createMockResponse(mockResults, 1, 0)

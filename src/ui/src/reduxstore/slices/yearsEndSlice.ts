@@ -955,13 +955,19 @@ export const yearsEndSlice = createSlice({
     clearYearEndProfitSharingReportTotalsLive: (state) => {
       state.yearEndProfitSharingReportTotalsLive = null;
     },
-    setYearEndProfitSharingReportTotalsLive: (state, action: PayloadAction<YearEndProfitSharingReportTotalsResponse>) => {
+    setYearEndProfitSharingReportTotalsLive: (
+      state,
+      action: PayloadAction<YearEndProfitSharingReportTotalsResponse>
+    ) => {
       state.yearEndProfitSharingReportTotalsLive = action.payload;
     },
     clearYearEndProfitSharingReportTotalsFrozen: (state) => {
       state.yearEndProfitSharingReportTotalsFrozen = null;
     },
-    setYearEndProfitSharingReportTotalsFrozen: (state, action: PayloadAction<YearEndProfitSharingReportTotalsResponse>) => {
+    setYearEndProfitSharingReportTotalsFrozen: (
+      state,
+      action: PayloadAction<YearEndProfitSharingReportTotalsResponse>
+    ) => {
       state.yearEndProfitSharingReportTotalsFrozen = action.payload;
     },
 

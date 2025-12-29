@@ -369,9 +369,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             />
           </Grid>
           <Grid size={{ md: 5, xs: 12 }}>
-            <FormLabel>
-              Address {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}
-            </FormLabel>
+            <FormLabel>Address {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}</FormLabel>
             <Controller
               name="street"
               control={control}
@@ -396,9 +394,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             columnSpacing={4}
             size={{ xs: 12, md: 12 }}>
             <Grid size={{ md: 5, xs: 12 }}>
-              <FormLabel>
-                City {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}
-              </FormLabel>
+              <FormLabel>City {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}</FormLabel>
               <Controller
                 name="city"
                 control={control}
@@ -419,9 +415,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               />
             </Grid>
             <Grid size={{ md: 2, xs: 12 }}>
-              <FormLabel>
-                State {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}
-              </FormLabel>
+              <FormLabel>State {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}</FormLabel>
               <Controller
                 name="state"
                 control={control}
@@ -442,9 +436,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               />
             </Grid>
             <Grid size={{ md: 3, xs: 12 }}>
-              <FormLabel>
-                Zipcode {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}
-              </FormLabel>
+              <FormLabel>Zipcode {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}</FormLabel>
               <Controller
                 name="postalCode"
                 control={control}

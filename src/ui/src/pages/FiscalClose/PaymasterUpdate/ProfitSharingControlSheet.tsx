@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Divider, Grid, Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect } from "react";
@@ -33,36 +34,38 @@ const ProfitSharingControlSheet = () => {
   };
 
   return (
-    <Page label={CAPTIONS.PROF_CTRLSHEET}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
+    <PageErrorBoundary pageName="Profit Sharing Control Sheet">
+      <Page label={CAPTIONS.PROF_CTRLSHEET}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
+          <Grid width="100%">
+            <>
+              <div style={{ padding: "0 24px 0 24px" }}>
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5" }}>
+                  {CAPTIONS.PROFIT_SHARING_CONTROL_SHEET}
+                </Typography>
+                <TotalsGrid
+                  displayData={[
+                    ["Payprofit", "P/S Total", formatCurrency(controlSheet?.employeeContributionProfitSharingAmount)],
+                    ["PayBen Non-Emp", "P/S Total", formatCurrency(controlSheet?.nonEmployeeProfitSharingAmount)],
+                    ["PayBen-Emp", "P/S Total", formatCurrency(controlSheet?.employeeBeneficiaryAmount)],
+                    ["Profit Sharing", "Total", formatCurrency(controlSheet?.profitSharingAmount)]
+                  ]}
+                  leftColumnHeaders={[]}
+                  topRowHeaders={[]}
+                />
+              </div>
+            </>
+          </Grid>
         </Grid>
-        <Grid width="100%">
-          <>
-            <div style={{ padding: "0 24px 0 24px" }}>
-              <Typography
-                variant="h2"
-                sx={{ color: "#0258A5" }}>
-                {CAPTIONS.PROFIT_SHARING_CONTROL_SHEET}
-              </Typography>
-              <TotalsGrid
-                displayData={[
-                  ["Payprofit", "P/S Total", formatCurrency(controlSheet?.employeeContributionProfitSharingAmount)],
-                  ["PayBen Non-Emp", "P/S Total", formatCurrency(controlSheet?.nonEmployeeProfitSharingAmount)],
-                  ["PayBen-Emp", "P/S Total", formatCurrency(controlSheet?.employeeBeneficiaryAmount)],
-                  ["Profit Sharing", "Total", formatCurrency(controlSheet?.profitSharingAmount)]
-                ]}
-                leftColumnHeaders={[]}
-                topRowHeaders={[]}
-              />
-            </div>
-          </>
-        </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

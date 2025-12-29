@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Button, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -103,41 +104,43 @@ const ReprintCertificates: React.FC = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.REPRINT_CERTIFICATES}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width="100%">
-          <Divider />
-        </Grid>
-        <Grid width="100%">
-          <DSMAccordion title="Search">
-            <ReprintCertificatesFilterSection
-              onFilterChange={handleFilterChange}
-              onReset={handleReset}
-            />
-          </DSMAccordion>
-        </Grid>
-
-        {hasSearched && (
+    <PageErrorBoundary pageName="Reprint Certificates">
+      <Page
+        label={CAPTIONS.REPRINT_CERTIFICATES}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
           <Grid width="100%">
-            <ReprintCertificatesGrid
-              filterParams={filterParams}
-              onSelectionChange={handleSelectionChange}
-            />
+            <Divider />
           </Grid>
-        )}
-      </Grid>
+          <Grid width="100%">
+            <DSMAccordion title="Search">
+              <ReprintCertificatesFilterSection
+                onFilterChange={handleFilterChange}
+                onReset={handleReset}
+              />
+            </DSMAccordion>
+          </Grid>
 
-      <ConfirmationDialog
-        open={!!errorDialog}
-        title={errorDialog?.title || "Error"}
-        description={errorDialog?.message || "An error occurred"}
-        onClose={() => setErrorDialog(null)}
-      />
-    </Page>
+          {hasSearched && (
+            <Grid width="100%">
+              <ReprintCertificatesGrid
+                filterParams={filterParams}
+                onSelectionChange={handleSelectionChange}
+              />
+            </Grid>
+          )}
+        </Grid>
+
+        <ConfirmationDialog
+          open={!!errorDialog}
+          title={errorDialog?.title || "Error"}
+          description={errorDialog?.message || "An error occurred"}
+          onClose={() => setErrorDialog(null)}
+        />
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

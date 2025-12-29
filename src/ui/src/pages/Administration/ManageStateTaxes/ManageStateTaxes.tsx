@@ -2,6 +2,7 @@ import { Box, Button, Divider, Grid, Typography } from "@mui/material";
 import { CellValueChangedEvent, ColDef, ValueFormatterParams, ValueParserParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { useGetStateTaxRatesQuery, useUpdateStateTaxRateMutation } from "../../../reduxstore/api/ItOperationsApi";
@@ -144,67 +145,69 @@ const ManageStateTaxes = () => {
   };
 
   return (
-    <Page label={CAPTIONS.MANAGE_STATE_TAX_RATES}>
-      <Grid
-        container
-        rowSpacing={3}>
-        <Grid width="100%">
-          <Divider />
-        </Grid>
+    <PageErrorBoundary pageName="Manage State Taxes">
+      <Page label={CAPTIONS.MANAGE_STATE_TAX_RATES}>
+        <Grid
+          container
+          rowSpacing={3}>
+          <Grid width="100%">
+            <Divider />
+          </Grid>
 
-        <Grid width="100%">
-          <Box
-            sx={{
-              display: "flex",
-              gap: 3,
-              alignItems: "center",
-              width: "100%",
-              px: 1
-            }}>
-            <Box sx={{ flex: 1 }}>
-              {errorMessage && (
-                <Typography
-                  variant="body2"
-                  color="error">
-                  {errorMessage}
-                </Typography>
-              )}
+          <Grid width="100%">
+            <Box
+              sx={{
+                display: "flex",
+                gap: 3,
+                alignItems: "center",
+                width: "100%",
+                px: 1
+              }}>
+              <Box sx={{ flex: 1 }}>
+                {errorMessage && (
+                  <Typography
+                    variant="body2"
+                    color="error">
+                    {errorMessage}
+                  </Typography>
+                )}
+              </Box>
+
+              <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
+                <Button
+                  variant="contained"
+                  disabled={!hasUnsavedChanges || isSaving}
+                  onClick={saveChanges}>
+                  Save
+                </Button>
+                <Button
+                  variant="outlined"
+                  disabled={!hasUnsavedChanges || isSaving}
+                  onClick={discardChanges}>
+                  Discard
+                </Button>
+              </Box>
             </Box>
+          </Grid>
 
-            <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
-              <Button
-                variant="contained"
-                disabled={!hasUnsavedChanges || isSaving}
-                onClick={saveChanges}>
-                Save
-              </Button>
-              <Button
-                variant="outlined"
-                disabled={!hasUnsavedChanges || isSaving}
-                onClick={discardChanges}>
-                Discard
-              </Button>
-            </Box>
-          </Box>
+          <Grid width="100%">
+            <DSMGrid
+              preferenceKey={GRID_KEYS.MANAGE_STATE_TAX_RATES}
+              isLoading={isFetching || isSaving}
+              providedOptions={{
+                rowData,
+                columnDefs,
+                suppressMultiSort: true,
+                stopEditingWhenCellsLoseFocus: true,
+                enterNavigatesVertically: true,
+                enterNavigatesVerticallyAfterEdit: true,
+                onCellValueChanged
+              }}
+            />
+          </Grid>
         </Grid>
-
-        <Grid width="100%">
-          <DSMGrid
-            preferenceKey={GRID_KEYS.MANAGE_STATE_TAX_RATES}
-            isLoading={isFetching || isSaving}
-            providedOptions={{
-              rowData,
-              columnDefs,
-              suppressMultiSort: true,
-              stopEditingWhenCellsLoseFocus: true,
-              enterNavigatesVertically: true,
-              enterNavigatesVerticallyAfterEdit: true,
-              onCellValueChanged
-            }}
-          />
-        </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

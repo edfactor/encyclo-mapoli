@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
 import { UnsavedChangesDialog } from "../../../components/ConfirmationDialog";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
@@ -592,11 +593,13 @@ const ProfitSharingAdjustmentsContent = () => {
 
 const ProfitSharingAdjustments = () => {
   return (
-    <Page label={CAPTIONS.PROFIT_SHARING_ADJUSTMENTS}>
-      <MissiveAlertProvider>
-        <ProfitSharingAdjustmentsContent />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Profit Sharing Adjustments">
+      <Page label={CAPTIONS.PROFIT_SHARING_ADJUSTMENTS}>
+        <MissiveAlertProvider>
+          <ProfitSharingAdjustmentsContent />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

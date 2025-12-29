@@ -57,7 +57,15 @@ const PostFrozenUnder21ReportGrid: React.FC<PostFrozenUnder21ReportGridProps> = 
         handleSortChange(normalizedUpdate);
       }
     }),
-    [pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange, setInitialSearchLoaded]
+    [
+      pageNumber,
+      pageSize,
+      sortParams,
+      handlePageNumberChange,
+      handlePageSizeChange,
+      handleSortChange,
+      setInitialSearchLoaded
+    ]
   );
 
   if (!profitSharingUnder21Report?.response) {

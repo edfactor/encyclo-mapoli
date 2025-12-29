@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Alert, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useEffect, useState } from "react";
@@ -41,39 +42,41 @@ const ProfitShareGrossReport = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.PROFIT_SHARE_GROSS_REPORT}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-
-        {frozenStateNotAvailable && (
+    <PageErrorBoundary pageName="Profit Share Gross Report">
+      <Page
+        label={CAPTIONS.PROFIT_SHARE_GROSS_REPORT}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
           <Grid width={"100%"}>
-            <Alert severity="warning">
-              Frozen data for profit year {grossWagesReportQueryParams?.profitYear} is not available. Year-end close
-              processing may not be complete for this year. Please contact IT Operations if this is unexpected.
-            </Alert>
+            <Divider />
           </Grid>
-        )}
 
-        <Grid width={"100%"}>
-          <DSMAccordion title="Filter">
-            <ProfitShareGrossReportParameters setPageReset={setPageNumberReset} />
-          </DSMAccordion>
-        </Grid>
+          {frozenStateNotAvailable && (
+            <Grid width={"100%"}>
+              <Alert severity="warning">
+                Frozen data for profit year {grossWagesReportQueryParams?.profitYear} is not available. Year-end close
+                processing may not be complete for this year. Please contact IT Operations if this is unexpected.
+              </Alert>
+            </Grid>
+          )}
 
-        <Grid width="100%">
-          <ProfitShareGrossReportGrid
-            pageNumberReset={pageNumberReset}
-            setPageNumberReset={setPageNumberReset}
-          />
+          <Grid width={"100%"}>
+            <DSMAccordion title="Filter">
+              <ProfitShareGrossReportParameters setPageReset={setPageNumberReset} />
+            </DSMAccordion>
+          </Grid>
+
+          <Grid width="100%">
+            <ProfitShareGrossReportGrid
+              pageNumberReset={pageNumberReset}
+              setPageNumberReset={setPageNumberReset}
+            />
+          </Grid>
         </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

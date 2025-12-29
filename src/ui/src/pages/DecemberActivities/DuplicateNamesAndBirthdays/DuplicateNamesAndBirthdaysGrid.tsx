@@ -52,7 +52,9 @@ const DuplicateNamesAndBirthdaysGrid = ({
         heightPercentage: isGridExpanded ? 0.85 : 0.5
       }}
       header={
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           {`${CAPTIONS.DUPLICATE_NAMES} (${data.response.total || 0} records)`}
         </Typography>
       }
@@ -61,8 +63,7 @@ const DuplicateNamesAndBirthdaysGrid = ({
           <IconButton
             onClick={onToggleExpand}
             sx={{ zIndex: 1 }}
-            aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}
-          >
+            aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
             {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
           </IconButton>
         )

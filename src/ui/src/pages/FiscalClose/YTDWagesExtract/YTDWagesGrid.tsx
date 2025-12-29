@@ -73,29 +73,40 @@ const YTDWagesGrid = ({
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
 
-
-
   // Header content with title and totals (when not expanded)
   const headerContent = useMemo(
     () => (
-      <Box display="flex" alignItems="center" gap={3}>
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={3}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           {clonedData?.reportName || "YTD Wages Extract"}
         </Typography>
         {!isGridExpanded && (
           <>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="body2" fontWeight="semibold">
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={1}>
+              <Typography
+                variant="body2"
+                fontWeight="semibold">
                 Total Hours:
               </Typography>
               <Typography variant="body2">
-                {clonedData?.totalHoursCurrentYearWages?.toFixed(2) ??
-                  totalsRow?.hoursCurrentYear.toFixed(2) ??
-                  "0.00"}
+                {clonedData?.totalHoursCurrentYearWages?.toFixed(2) ?? totalsRow?.hoursCurrentYear.toFixed(2) ?? "0.00"}
               </Typography>
             </Box>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="body2" fontWeight="semibold">
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={1}>
+              <Typography
+                variant="body2"
+                fontWeight="semibold">
                 Total Income:
               </Typography>
               <Typography variant="body2">
@@ -106,7 +117,13 @@ const YTDWagesGrid = ({
         )}
       </Box>
     ),
-    [clonedData?.reportName, clonedData?.totalHoursCurrentYearWages, clonedData?.totalIncomeCurrentYearWages, isGridExpanded, totalsRow]
+    [
+      clonedData?.reportName,
+      clonedData?.totalHoursCurrentYearWages,
+      clonedData?.totalIncomeCurrentYearWages,
+      isGridExpanded,
+      totalsRow
+    ]
   );
 
   if (!showData || !clonedData?.response) {

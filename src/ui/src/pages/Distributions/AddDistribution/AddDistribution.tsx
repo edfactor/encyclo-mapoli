@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS, ROUTES } from "../../../constants";
@@ -205,138 +206,140 @@ const AddDistributionContent = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.ADD_DISTRIBUTION}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width="100%">
-          <Divider />
-        </Grid>
-
-        {/* Missive Alerts */}
-        {missiveAlerts.length > 0 && (
-          <Grid
-            width="100%"
-            sx={{ paddingX: "24px" }}>
-            <MissiveAlerts />
+    <PageErrorBoundary pageName="Add Distribution">
+      <Page
+        label={CAPTIONS.ADD_DISTRIBUTION}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width="100%">
+            <Divider />
           </Grid>
-        )}
 
-        {/* Error Messages */}
-        {validationError && (
-          <Grid
-            width="100%"
-            sx={{ paddingX: "24px" }}>
-            <Alert
-              severity="error"
-              sx={{
-                "& .MuiAlert-message": {
-                  fontSize: "1.1rem",
-                  fontWeight: "bold"
-                }
-              }}>
-              {validationError}
-            </Alert>
-          </Grid>
-        )}
-
-        {memberError && memberError !== "MEMBER_NOT_FOUND" && (
-          <Grid
-            width="100%"
-            sx={{ paddingX: "24px" }}>
-            <Alert severity="error">{memberError}</Alert>
-          </Grid>
-        )}
-
-        {stateTaxError && (
-          <Grid
-            width="100%"
-            sx={{ paddingX: "24px" }}>
-            <Alert severity="warning">{stateTaxError}</Alert>
-          </Grid>
-        )}
-
-        {sequenceNumberError && (
-          <Grid
-            width="100%"
-            sx={{ paddingX: "24px" }}>
-            <Alert severity="warning">{sequenceNumberError}</Alert>
-          </Grid>
-        )}
-
-        {submissionError && (
-          <Grid
-            width="100%"
-            sx={{ paddingX: "24px" }}>
-            <Alert severity="error">{submissionError}</Alert>
-          </Grid>
-        )}
-
-        {/* Loading Indicator */}
-        {isLoading && (
-          <Grid
-            width="100%"
-            sx={{ display: "flex", justifyContent: "center", padding: "48px" }}>
-            <CircularProgress />
-          </Grid>
-        )}
-
-        {/* Content - Member and Distribution Details */}
-        {!isLoading && memberData && (
-          <>
-            <MasterInquiryMemberDetails
-              memberType={parseInt(memberType || "0", 10)}
-              id={memberId as string}
-              profitYear={profitYear || 0}
-              memberDetails={memberData}
-              isLoading={isLoading}
-            />
-            <Grid width="100%">
-              <Divider />
-            </Grid>
-
-            {/* Distribution Form Section */}
+          {/* Missive Alerts */}
+          {missiveAlerts.length > 0 && (
             <Grid
               width="100%"
               sx={{ paddingX: "24px" }}>
-              <AddDistributionForm
-                ref={formRef}
-                stateTaxRate={stateTaxRate}
-                sequenceNumber={sequenceNumber}
-                badgeNumber={parseInt(memberId || "0", 10)}
-                onSubmit={handleFormSubmit}
-                onReset={handleFormReset}
-                isSubmitting={isSubmitting}
-                dateOfBirth={memberData.dateOfBirth}
-                age={memberData.age}
-                vestedAmount={memberData.currentVestedAmount}
+              <MissiveAlerts />
+            </Grid>
+          )}
+
+          {/* Error Messages */}
+          {validationError && (
+            <Grid
+              width="100%"
+              sx={{ paddingX: "24px" }}>
+              <Alert
+                severity="error"
+                sx={{
+                  "& .MuiAlert-message": {
+                    fontSize: "1.1rem",
+                    fontWeight: "bold"
+                  }
+                }}>
+                {validationError}
+              </Alert>
+            </Grid>
+          )}
+
+          {memberError && memberError !== "MEMBER_NOT_FOUND" && (
+            <Grid
+              width="100%"
+              sx={{ paddingX: "24px" }}>
+              <Alert severity="error">{memberError}</Alert>
+            </Grid>
+          )}
+
+          {stateTaxError && (
+            <Grid
+              width="100%"
+              sx={{ paddingX: "24px" }}>
+              <Alert severity="warning">{stateTaxError}</Alert>
+            </Grid>
+          )}
+
+          {sequenceNumberError && (
+            <Grid
+              width="100%"
+              sx={{ paddingX: "24px" }}>
+              <Alert severity="warning">{sequenceNumberError}</Alert>
+            </Grid>
+          )}
+
+          {submissionError && (
+            <Grid
+              width="100%"
+              sx={{ paddingX: "24px" }}>
+              <Alert severity="error">{submissionError}</Alert>
+            </Grid>
+          )}
+
+          {/* Loading Indicator */}
+          {isLoading && (
+            <Grid
+              width="100%"
+              sx={{ display: "flex", justifyContent: "center", padding: "48px" }}>
+              <CircularProgress />
+            </Grid>
+          )}
+
+          {/* Content - Member and Distribution Details */}
+          {!isLoading && memberData && (
+            <>
+              <MasterInquiryMemberDetails
+                memberType={parseInt(memberType || "0", 10)}
+                id={memberId as string}
+                profitYear={profitYear || 0}
+                memberDetails={memberData}
+                isLoading={isLoading}
               />
+              <Grid width="100%">
+                <Divider />
+              </Grid>
+
+              {/* Distribution Form Section */}
+              <Grid
+                width="100%"
+                sx={{ paddingX: "24px" }}>
+                <AddDistributionForm
+                  ref={formRef}
+                  stateTaxRate={stateTaxRate}
+                  sequenceNumber={sequenceNumber}
+                  badgeNumber={parseInt(memberId || "0", 10)}
+                  onSubmit={handleFormSubmit}
+                  onReset={handleFormReset}
+                  isSubmitting={isSubmitting}
+                  dateOfBirth={memberData.dateOfBirth}
+                  age={memberData.age}
+                  vestedAmount={memberData.currentVestedAmount}
+                />
+              </Grid>
+
+              <Grid width="100%">
+                <Divider />
+              </Grid>
+
+              {/* Pending Disbursements List Section */}
+              <PendingDisbursementsList
+                badgeNumber={parseInt(memberId || "0", 10)}
+                memberType={parseInt(memberType || "0", 10)}
+              />
+            </>
+          )}
+
+          {/* No member found */}
+          {!isLoading && !memberData && !memberError && (
+            <Grid
+              width="100%"
+              sx={{ paddingX: "24px" }}>
+              <Alert severity="info">No member data available. Please check the member ID and type.</Alert>
             </Grid>
-
-            <Grid width="100%">
-              <Divider />
-            </Grid>
-
-            {/* Pending Disbursements List Section */}
-            <PendingDisbursementsList
-              badgeNumber={parseInt(memberId || "0", 10)}
-              memberType={parseInt(memberType || "0", 10)}
-            />
-          </>
-        )}
-
-        {/* No member found */}
-        {!isLoading && !memberData && !memberError && (
-          <Grid
-            width="100%"
-            sx={{ paddingX: "24px" }}>
-            <Alert severity="info">No member data available. Please check the member ID and type.</Alert>
-          </Grid>
-        )}
-      </Grid>
-    </Page>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

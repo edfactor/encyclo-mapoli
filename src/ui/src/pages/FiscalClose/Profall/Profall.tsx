@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useState } from "react";
@@ -13,23 +14,25 @@ const Profall = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.PROFALL}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
+    <PageErrorBoundary pageName="Profall">
+      <Page
+        label={CAPTIONS.PROFALL}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
+          <Grid width="100%">
+            <ProfallGrid
+              pageNumberReset={pageNumberReset}
+              setPageNumberReset={setPageNumberReset}
+            />
+          </Grid>
         </Grid>
-        <Grid width="100%">
-          <ProfallGrid
-            pageNumberReset={pageNumberReset}
-            setPageNumberReset={setPageNumberReset}
-          />
-        </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

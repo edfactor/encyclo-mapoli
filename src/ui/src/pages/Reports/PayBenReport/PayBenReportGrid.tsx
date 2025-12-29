@@ -32,8 +32,6 @@ const PayBenReportGrid = ({
     rowCount: data?.results?.length ?? 0
   });
 
-
-
   if (!showData || !data?.results) {
     return null;
   }

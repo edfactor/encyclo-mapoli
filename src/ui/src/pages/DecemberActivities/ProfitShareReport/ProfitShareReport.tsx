@@ -1,5 +1,6 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import PageErrorBoundary from "components/PageErrorBoundary";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { closeDrawer, openDrawer, setFullscreen } from "reduxstore/slices/generalSlice";
@@ -58,16 +59,17 @@ const ProfitShareReport = () => {
   };
 
   return (
-    <Page
-      label={isGridExpanded ? "" : CAPTIONS.PROFIT_SHARE_REPORT}
-      actionNode={isGridExpanded ? undefined : renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        {/*}
+    <PageErrorBoundary pageName="Profit Share Report">
+      <Page
+        label={isGridExpanded ? "" : CAPTIONS.PROFIT_SHARE_REPORT}
+        actionNode={isGridExpanded ? undefined : renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
+          {/*}
         <Grid width="100%">
 
           <Box sx={{ mb: 3 }}>
@@ -92,18 +94,19 @@ const ProfitShareReport = () => {
 
         </Grid>
         */}
-        <Grid width="100%">
-          <ProfitSummary
-            frozenData={false}
-            externalIsGridExpanded={isGridExpanded}
-            externalOnToggleExpand={handleToggleGridExpand}
-            triggerArchive={triggerArchive}
-            onArchiveComplete={handleArchiveComplete}
-            pageTitle=""
-          />
+          <Grid width="100%">
+            <ProfitSummary
+              frozenData={false}
+              externalIsGridExpanded={isGridExpanded}
+              externalOnToggleExpand={handleToggleGridExpand}
+              triggerArchive={triggerArchive}
+              onArchiveComplete={handleArchiveComplete}
+              pageTitle=""
+            />
+          </Grid>
         </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

@@ -157,7 +157,9 @@ const ReversalsGrid: React.FC<ReversalsGridProps> = memo(
           isLoading={isLoading}
           pagination={paginationProps}
           header={
-            <Typography variant="h2" sx={{ color: "#0258A5", marginY: "8px" }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5", marginY: "8px" }}>
               Transactions
             </Typography>
           }
