@@ -562,6 +562,9 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 -- Assign roles for Profit Details Reversal
     assign_navigation_role(PROFIT_DETAILS_REVERSAL, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_DETAILS_REVERSAL, FINANCE_MANAGER);
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, AUDITOR);
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, IT_DEVOPS);
 
 -- Assign roles for Vesting Reports Group
     assign_navigation_role(VESTING_REPORTS_GROUP, SYSTEM_ADMINISTRATOR);
