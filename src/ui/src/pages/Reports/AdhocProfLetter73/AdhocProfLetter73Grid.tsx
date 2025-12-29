@@ -19,7 +19,6 @@ import { ColDef, SelectionChangedEvent } from "ag-grid-community";
 import React, { useEffect, useState } from "react";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
-import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetAdhocProfLetter73Query } from "../../../reduxstore/api/AdhocProfLetter73Api";
 import { AdhocProfLetter73FilterParams } from "./AdhocProfLetter73SearchFilter.tsx";
@@ -62,9 +61,6 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
     const selectedData = event.api.getSelectedRows();
     setSelectedRows(selectedData);
   };
-
-  // Use dynamic grid height utility hook - increase height when expanded
-  const gridMaxHeight = useDynamicGridHeight({ heightPercentage: isGridExpanded ? 0.85 : 0.4 });
 
   // Pagination hook with server-side sorting support
   const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
@@ -129,8 +125,9 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
               .replace(/^./, (str) => str.toUpperCase()),
             field: key,
             sortable: true,
-            filter: true,
-            resizable: true
+            filter: false,
+            resizable: true,
+            flex: 1
           }));
 
           // Add Print checkbox column
@@ -253,7 +250,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
                 }}
                 heightConfig={{
                   mode: "content-aware",
-                  maxHeight: gridMaxHeight
+                  heightPercentage: isGridExpanded ? 0.85 : 0.4
                 }}
                 gridOptions={{
                   rowSelection: "multiple",
