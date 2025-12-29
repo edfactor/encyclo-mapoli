@@ -223,7 +223,7 @@ public class PostFrozenService : IPostFrozenService
                     d.FullTimeDate,
                     d.TerminationDate,
                     d.DateOfBirth, // Raw birth date - age will be calculated after query
-                    EmploymentStatusId = d.EmploymentStatus!.Name,
+                    EmploymentStatusId = d.EmploymentStatus!.Id,
                     CurrentBalance = (bal.CurrentBalance ?? 0),
                     EnrollmentId = tyPp != null ? tyPp.Enrollment!.Name : "",
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
