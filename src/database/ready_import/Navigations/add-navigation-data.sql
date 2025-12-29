@@ -268,7 +268,6 @@ BEGIN
     insert_navigation_item(MILITARY_CONTRIBUTION_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Military Contribution', '008-13', 'military-contribution', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(FORFEITURE_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Forfeiture Adjustment', 'TPR008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_ADJUSTMENT_PAGE, ADJUSTMENTS_GROUP, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_DETAILS_REVERSAL, ADJUSTMENTS_GROUP, 'Reversals', '', 'reversals', STATUS_HIDDEN, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
 
     insert_navigation_item(ADHOC_GROUP, INQUIRIES_MENU, 'Adhoc Reports', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     --insert_navigation_item(PAY_BEN_REPORT, ADHOC_GROUP, 'Pay Ben Report', '', 'payben-report', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -304,6 +303,7 @@ BEGIN
     insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADMINISTRATIVE_MENU, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(AUDIT_SEARCH_PAGE, ADMINISTRATIVE_MENU, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_COMMENT_TYPES_PAGE, ADMINISTRATIVE_MENU, 'Manage Comment Types', '', 'manage-comment-types', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_DETAILS_REVERSAL, ADMINISTRATIVE_MENU, 'Reversals', '008-23', 'reversals', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);

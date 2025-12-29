@@ -109,6 +109,7 @@ DECLARE
     -- PAY426_2 CONSTANT NUMBER := 140;
     -- PAY426_3 CONSTANT NUMBER := 141;
     DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT CONSTANT NUMBER := 142;
+    PROFIT_DETAILS_REVERSAL CONSTANT NUMBER := 154;
     AUDIT_SEARCH_PAGE CONSTANT NUMBER := 166;
     MANAGE_COMMENT_TYPES_PAGE CONSTANT NUMBER := 177;
     DUPLICATE_SSNS_DEMOGRAPHICS CONSTANT NUMBER := 143;
@@ -279,6 +280,7 @@ BEGIN
     insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADMINISTRATIVE_MENU, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(AUDIT_SEARCH_PAGE, ADMINISTRATIVE_MENU, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_COMMENT_TYPES_PAGE, ADMINISTRATIVE_MENU, 'Manage Comment Types', '', 'manage-comment-types', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_DETAILS_REVERSAL, ADMINISTRATIVE_MENU, 'Reversals', '008-23', 'reversals', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -380,6 +382,10 @@ BEGIN
     assign_navigation_role(MASTER_INQUIRY_PAGE, FINANCE_MANAGER); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
     assign_navigation_role(MASTER_INQUIRY_PAGE, HR_READONLY);
+
+-- Assign roles for Profit Details Reversal
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, FINANCE_MANAGER);
 
 -- Assign roles for ADJUSTMENTS_GROUP - REMOVED
     -- assign_navigation_role(ADJUSTMENTS_GROUP, SYSTEM_ADMINISTRATOR); 
