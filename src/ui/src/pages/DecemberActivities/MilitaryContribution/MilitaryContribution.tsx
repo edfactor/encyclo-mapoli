@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
+import PageErrorBoundary from "components/PageErrorBoundary";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import { useEffect, useState } from "react";
@@ -171,13 +172,15 @@ const MilitaryContribution = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.MILITARY_CONTRIBUTIONS}
-      actionNode={renderActionNode()}>
-      <MissiveAlertProvider>
-        <MilitaryContributionContent />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Military Contribution">
+      <Page
+        label={CAPTIONS.MILITARY_CONTRIBUTIONS}
+        actionNode={renderActionNode()}>
+        <MissiveAlertProvider>
+          <MilitaryContributionContent />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

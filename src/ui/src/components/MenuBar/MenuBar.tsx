@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { openDrawer, setActiveSubMenu } from "../../reduxstore/slices/generalSlice";
@@ -32,82 +32,69 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
   // Determine which L0 section contains the current route
   const activeL0Section = getL0NavigationForRoute(navigationData, location.pathname);
 
-  const handleMenuClick = (current: RouteCategory) => {
-    // Clear stored navigation ID when switching L0 sections
+  // Handler for Home button click
+  const handleHomeClick = useCallback(() => {
     localStorage.removeItem("navigationId");
+    navigate("/");
+  }, [navigate]);
 
-    if (drawerOnlySections.includes(current.menuLabel)) {
-      // Set the active submenu so the drawer knows which section to show, then open drawer
-      dispatch(setActiveSubMenu(current.menuLabel));
-      // Open drawer for drawer-only sections and navigate to first child route
-      dispatch(openDrawer());
+  // Handler for menu item clicks - handles both drawer-only and normal navigation
+  const handleMenuItemClick = useCallback(
+    (current: RouteCategory) => {
+      // Clear stored navigation ID when switching L0 sections
+      localStorage.removeItem("navigationId");
 
-      // Navigate to the first available route in this section
-      const firstRoute = getFirstNavigableRoute(navigationData, current.menuLabel);
-      if (firstRoute) {
-        const absolutePath = firstRoute.startsWith("/") ? firstRoute : `/${firstRoute}`;
+      // Check if this item has children (from menuInfo) - should open drawer
+      const hasMenuChildren = current.items && current.items.length > 0;
+
+      // Check if this is a drawer-only section (from navigationData)
+      const isDrawerOnlySection = drawerOnlySections.includes(current.menuLabel);
+
+      if (hasMenuChildren || isDrawerOnlySection) {
+        // Set the active submenu so the drawer knows which section to show, then open drawer
+        dispatch(setActiveSubMenu(current.menuLabel));
+        dispatch(openDrawer());
+
+        // Navigate to the first available route in this section
+        const firstRoute = getFirstNavigableRoute(navigationData, current.menuLabel);
+        if (firstRoute) {
+          const absolutePath = firstRoute.startsWith("/") ? firstRoute : `/${firstRoute}`;
+          navigate(absolutePath, { replace: false });
+        }
+      } else {
+        // Navigate normally for sections without children
+        const absolutePath = current.parentRoute.startsWith("/") ? current.parentRoute : `/${current.parentRoute}`;
         navigate(absolutePath, { replace: false });
       }
-    } else {
-      // Navigate normally for other sections
-      const absolutePath = current.parentRoute.startsWith("/") ? current.parentRoute : `/${current.parentRoute}`;
-      navigate(absolutePath, { replace: false });
-    }
-  };
+    },
+    [dispatch, drawerOnlySections, navigate, navigationData]
+  );
 
   // Check if a menu item should be underlined (active)
-  const isMenuItemActive = (menuLabel: string): boolean => {
-    return activeL0Section?.title === menuLabel;
-  };
+  const isMenuItemActive = useCallback(
+    (menuLabel: string): boolean => {
+      return activeL0Section?.title === menuLabel;
+    },
+    [activeL0Section]
+  );
 
   return (
     <div className="menubar fixed z-[2] w-full overflow-visible">
       <div className="navbuttons ml-2">
         <NavButton
           isUnderlined={homeTabSelected}
-          onClick={() => {
-            localStorage.removeItem("navigationId");
-            navigate("/");
-          }}
+          onClick={handleHomeClick}
           label="Home"
         />
-        {menuInfo.map((current: RouteCategory, index: number) => {
-          // Render top-level items as NavButton only. Previously some items opened a PopupMenu.
-          // Clicking a top-level item should either open the drawer (and set the active submenu)
-          // or navigate normally.
-          return (
-            <NavButton
-              key={index}
-              isUnderlined={isMenuItemActive(current.menuLabel)}
-              onClick={() => {
-                // Clear stored navigation ID when switching L0 sections from menu bar
-                localStorage.removeItem("navigationId");
-
-                // If this top-level has child items, set them as the active submenu and open drawer
-                if (current.items && current.items.length > 0) {
-                  dispatch(setActiveSubMenu(current.menuLabel));
-                  dispatch(openDrawer());
-
-                  // Navigate to the first available route in this section so
-                  // SmartPSDrawer (which auto-detects the drawer root from route)
-                  // will select the correct L0 section to display.
-                  const firstRoute = getFirstNavigableRoute(navigationData, current.menuLabel);
-                  if (firstRoute) {
-                    const absolutePath = firstRoute.startsWith("/") ? firstRoute : `/${firstRoute}`;
-                    navigate(absolutePath, { replace: false });
-                  }
-
-                  return;
-                }
-
-                // Otherwise, fall back to existing handler (which handles drawer-only sections)
-                handleMenuClick(current);
-              }}
-              label={current.menuLabel}
-              disabled={current.disabled}
-            />
-          );
-        })}
+        {menuInfo.map((current: RouteCategory, index: number) => (
+          <NavButton
+            key={index}
+            isUnderlined={isMenuItemActive(current.menuLabel)}
+            onClick={() => handleMenuItemClick(current)}
+            label={current.menuLabel}
+            disabled={current.disabled}
+          />
+        ))}
       </div>
       <div className="mr-4 flex items-center gap-4">
         <PageSearch navigationData={navigationData} />

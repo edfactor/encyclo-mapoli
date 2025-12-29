@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useCallback, useRef, useState } from "react";
@@ -65,46 +66,48 @@ const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   //const recordCount = searchResults?.response?.total || 0;
 
   return (
-    <Page
-      label={isGridExpanded ? "" : `${CAPTIONS.YTD_WAGES_EXTRACT}`}
-      actionNode={isGridExpanded ? undefined : renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        {!isGridExpanded && (
-          <Grid width={"100%"}>
-            <Divider />
-          </Grid>
-        )}
-        {!isGridExpanded && (
-          <Grid
-            width={"100%"}
-            hidden={true}>
-            <DSMAccordion title="Filter">
-              <YTDWagesSearchFilter
-                onSearch={executeSearch}
-                isSearching={isSearching}
-                defaultUseFrozenData={useFrozenData}
-              />
-            </DSMAccordion>
-          </Grid>
-        )}
+    <PageErrorBoundary pageName="YTD Wages Extract">
+      <Page
+        label={isGridExpanded ? "" : `${CAPTIONS.YTD_WAGES_EXTRACT}`}
+        actionNode={isGridExpanded ? undefined : renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          {!isGridExpanded && (
+            <Grid width={"100%"}>
+              <Divider />
+            </Grid>
+          )}
+          {!isGridExpanded && (
+            <Grid
+              width={"100%"}
+              hidden={true}>
+              <DSMAccordion title="Filter">
+                <YTDWagesSearchFilter
+                  onSearch={executeSearch}
+                  isSearching={isSearching}
+                  defaultUseFrozenData={useFrozenData}
+                />
+              </DSMAccordion>
+            </Grid>
+          )}
 
-        <Grid width="100%">
-          <YTDWagesGrid
-            innerRef={componentRef}
-            data={searchResults}
-            isLoading={isSearching}
-            showData={showData}
-            hasResults={hasResults ?? false}
-            pagination={pagination}
-            onSortChange={pagination.handleSortChange}
-            isGridExpanded={isGridExpanded}
-            onToggleExpand={handleToggleGridExpand}
-          />
+          <Grid width="100%">
+            <YTDWagesGrid
+              innerRef={componentRef}
+              data={searchResults}
+              isLoading={isSearching}
+              showData={showData}
+              hasResults={hasResults ?? false}
+              pagination={pagination}
+              onSortChange={pagination.handleSortChange}
+              isGridExpanded={isGridExpanded}
+              onToggleExpand={handleToggleGridExpand}
+            />
+          </Grid>
         </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

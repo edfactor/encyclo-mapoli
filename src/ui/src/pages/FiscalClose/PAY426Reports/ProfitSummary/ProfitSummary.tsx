@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { Button, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
@@ -366,61 +367,62 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
   }, [activeAndInactiveRowData, terminatedRowData, employeesRowData]);
 
   return (
-    <Page
-      label={pageTitle}
-      actionNode={isGridExpanded ? undefined : renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Grid
-            container
-            justifyContent="space-between"
-            alignItems="center"
-            marginBottom={2}>
-            <Grid />
-            <Grid>
-              <IconButton
-                onClick={handleToggleGridExpand}
-                sx={{ zIndex: 1 }}
-                aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
-                {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
-              </IconButton>
+    <PageErrorBoundary pageName="Profit Summary">
+      <Page
+        label={pageTitle}
+        actionNode={isGridExpanded ? undefined : renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Grid
+              container
+              justifyContent="space-between"
+              alignItems="center"
+              marginBottom={2}>
+              <Grid />
+              <Grid>
+                <IconButton
+                  onClick={handleToggleGridExpand}
+                  sx={{ zIndex: 1 }}
+                  aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              </Grid>
             </Grid>
+            <div className="mb-4 flex items-center gap-6 px-3">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Total Employees:</span>
+                <span>{getGrandTotals[0]?.numberOfMembers?.toLocaleString() ?? 0}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Total Wages:</span>
+                <span>
+                  {typeof getGrandTotals[0]?.totalWages === "string"
+                    ? getGrandTotals[0]?.totalWages
+                    : numberToCurrency(getGrandTotals[0]?.totalWages ?? 0)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Total Balance:</span>
+                <span>
+                  {typeof getGrandTotals[0]?.totalBalance === "string"
+                    ? getGrandTotals[0]?.totalBalance
+                    : numberToCurrency(getGrandTotals[0]?.totalBalance ?? 0)}
+                </span>
+              </div>
+            </div>
           </Grid>
-          <div className="mb-4 flex items-center gap-6 px-3">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Employees:</span>
-              <span>{getGrandTotals[0]?.numberOfMembers?.toLocaleString() ?? 0}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Wages:</span>
-              <span>
-                {typeof getGrandTotals[0]?.totalWages === "string"
-                  ? getGrandTotals[0]?.totalWages
-                  : numberToCurrency(getGrandTotals[0]?.totalWages ?? 0)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Balance:</span>
-              <span>
-                {typeof getGrandTotals[0]?.totalBalance === "string"
-                  ? getGrandTotals[0]?.totalBalance
-                  : numberToCurrency(getGrandTotals[0]?.totalBalance ?? 0)}
-              </span>
-            </div>
-          </div>
-        </Grid>
 
-        <Grid width={"100%"}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, px: 3 }}>
-            Plan Eligibility (18+, 1000+ Hours)
-          </Typography>
-          <div className="px-3">
-            {/* One-off inline styles for this simple table. If we reuse this pattern, move to a shared CSS module. */}
-            <style>{`
+          <Grid width={"100%"}>
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, px: 3 }}>
+              Plan Eligibility (18+, 1000+ Hours)
+            </Typography>
+            <div className="px-3">
+              {/* One-off inline styles for this simple table. If we reuse this pattern, move to a shared CSS module. */}
+              <style>{`
               .eligibility-table {
                 width: 100%;
                 border-collapse: collapse;
@@ -438,105 +440,106 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
                 font-weight: 500;
               }
             `}</style>
-            <div className="rounded border border-gray-300">
-              <table className="eligibility-table">
-                <thead>
-                  <tr>
-                    <th>Total Eligible</th>
-                    <th>New to Plan</th>
-                    <th>Under 21</th>
-                    <th>Already in Plan</th>
-                    <th>Wages</th>
-                    <th>Hours</th>
-                    <th>Points</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{totalsData?.numberOfEmployees?.toLocaleString() ?? "0"}</td>
-                    <td>{totalsData?.numberOfNewEmployees?.toLocaleString() ?? "0"}</td>
-                    <td>{totalsData?.numberOfEmployeesUnder21?.toLocaleString() ?? "0"}</td>
-                    <td>{totalsData?.numberOfEmployeesInPlan?.toLocaleString() ?? "0"}</td>
-                    <td>{numberToCurrency(totalsData?.wagesTotal ?? 0)}</td>
-                    <td>{totalsData?.hoursTotal?.toLocaleString() ?? "0"}</td>
-                    <td>{totalsData?.pointsTotal?.toLocaleString() ?? "0"}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="rounded border border-gray-300">
+                <table className="eligibility-table">
+                  <thead>
+                    <tr>
+                      <th>Total Eligible</th>
+                      <th>New to Plan</th>
+                      <th>Under 21</th>
+                      <th>Already in Plan</th>
+                      <th>Wages</th>
+                      <th>Hours</th>
+                      <th>Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{totalsData?.numberOfEmployees?.toLocaleString() ?? "0"}</td>
+                      <td>{totalsData?.numberOfNewEmployees?.toLocaleString() ?? "0"}</td>
+                      <td>{totalsData?.numberOfEmployeesUnder21?.toLocaleString() ?? "0"}</td>
+                      <td>{totalsData?.numberOfEmployeesInPlan?.toLocaleString() ?? "0"}</td>
+                      <td>{numberToCurrency(totalsData?.wagesTotal ?? 0)}</td>
+                      <td>{totalsData?.hoursTotal?.toLocaleString() ?? "0"}</td>
+                      <td>{totalsData?.pointsTotal?.toLocaleString() ?? "0"}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </Grid>
+          </Grid>
 
-        <Grid width={"100%"}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, px: 3 }}>
-            Active and Inactive
-          </Typography>
-          <div className="px-3">
-            <DSMGrid
-              preferenceKey={GRID_KEYS.ACTIVE_INACTIVE_SUMMARY}
-              isLoading={isFetching}
-              handleSortChanged={() => {}}
-              providedOptions={{
-                rowData: activeAndInactiveRowData,
-                pinnedTopRowData: getActiveAndInactiveTotals,
-                columnDefs: columnDefs
-              }}
-            />
-          </div>
-        </Grid>
-
-        <Grid width={"100%"}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, px: 3 }}>
-            Terminated
-          </Typography>
-          <div className="px-3">
-            <DSMGrid
-              preferenceKey={GRID_KEYS.TERMINATED_SUMMARY}
-              isLoading={isFetching}
-              handleSortChanged={() => {}}
-              providedOptions={{
-                rowData: terminatedRowData,
-                pinnedTopRowData: getTerminatedTotals,
-                columnDefs: columnDefs
-              }}
-            />
-          </div>
-        </Grid>
-
-        {employeesRowData && employeesRowData.length > 0 && (
           <Grid width={"100%"}>
             <Typography
               variant="h6"
               sx={{ mb: 2, px: 3 }}>
-              Employees
+              Active and Inactive
             </Typography>
             <div className="px-3">
               <DSMGrid
-                preferenceKey={GRID_KEYS.EMPLOYEES_SUMMARY}
+                preferenceKey={GRID_KEYS.ACTIVE_INACTIVE_SUMMARY}
                 isLoading={isFetching}
                 handleSortChanged={() => {}}
                 providedOptions={{
-                  rowData: employeesRowData,
-                  pinnedTopRowData: getEmployeesTotals,
+                  rowData: activeAndInactiveRowData,
+                  pinnedTopRowData: getActiveAndInactiveTotals,
                   columnDefs: columnDefs
                 }}
               />
             </div>
           </Grid>
-        )}
-      </Grid>
 
-      <CommitModal
-        open={isModalOpen}
-        onClose={handleCancel}
-        onCommit={handleCommit}
-        isFinalizing={isFinalizing}
-      />
-    </Page>
+          <Grid width={"100%"}>
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, px: 3 }}>
+              Terminated
+            </Typography>
+            <div className="px-3">
+              <DSMGrid
+                preferenceKey={GRID_KEYS.TERMINATED_SUMMARY}
+                isLoading={isFetching}
+                handleSortChanged={() => {}}
+                providedOptions={{
+                  rowData: terminatedRowData,
+                  pinnedTopRowData: getTerminatedTotals,
+                  columnDefs: columnDefs
+                }}
+              />
+            </div>
+          </Grid>
+
+          {employeesRowData && employeesRowData.length > 0 && (
+            <Grid width={"100%"}>
+              <Typography
+                variant="h6"
+                sx={{ mb: 2, px: 3 }}>
+                Employees
+              </Typography>
+              <div className="px-3">
+                <DSMGrid
+                  preferenceKey={GRID_KEYS.EMPLOYEES_SUMMARY}
+                  isLoading={isFetching}
+                  handleSortChanged={() => {}}
+                  providedOptions={{
+                    rowData: employeesRowData,
+                    pinnedTopRowData: getEmployeesTotals,
+                    columnDefs: columnDefs
+                  }}
+                />
+              </div>
+            </Grid>
+          )}
+        </Grid>
+
+        <CommitModal
+          open={isModalOpen}
+          onClose={handleCancel}
+          onCommit={handleCommit}
+          isFinalizing={isFinalizing}
+        />
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Box, CircularProgress, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -58,33 +59,35 @@ const BalanceByAge = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.BALANCE_BY_AGE}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
+    <PageErrorBoundary pageName="Balance By Age">
+      <Page
+        label={CAPTIONS.BALANCE_BY_AGE}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
 
-        {initialLoad ? (
-          <Grid width="100%">
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight="200px">
-              <CircularProgress />
-            </Box>
-          </Grid>
-        ) : (
-          <Grid width="100%">
-            <BalanceByAgeGrid />
-          </Grid>
-        )}
-      </Grid>
-    </Page>
+          {initialLoad ? (
+            <Grid width="100%">
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="200px">
+                <CircularProgress />
+              </Box>
+            </Grid>
+          ) : (
+            <Grid width="100%">
+              <BalanceByAgeGrid />
+            </Grid>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

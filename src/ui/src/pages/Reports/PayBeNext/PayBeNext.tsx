@@ -1,5 +1,6 @@
 import { Divider, Grid } from "@mui/material";
 import { DSMAccordion, Page } from "smart-ui-library";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import usePayBeNext from "./hooks/usePayBeNext";
 import PayBeNextGrid from "./PayBeNextGrid";
 import PayBeNextSearchFilter from "./PayBeNextSearchFilter";
@@ -32,46 +33,48 @@ const PayBeNext = () => {
   } = usePayBeNext();
 
   return (
-    <Page label="PAY BE NEXT">
-      <Grid
-        container
-        rowSpacing="24px">
+    <PageErrorBoundary pageName="Pay Be Next">
+      <Page label="PAY BE NEXT">
         <Grid
-          size={{ xs: 12 }}
-          width="100%">
-          <Divider />
-        </Grid>
+          container
+          rowSpacing="24px">
+          <Grid
+            size={{ xs: 12 }}
+            width="100%">
+            <Divider />
+          </Grid>
 
-        <Grid
-          size={{ xs: 12 }}
-          width="100%">
-          <DSMAccordion title="Filter">
-            <PayBeNextSearchFilter
-              onSearch={executeSearch}
-              onReset={resetSearch}
-              isFetching={isSearching}
-              initialValues={formData}
+          <Grid
+            size={{ xs: 12 }}
+            width="100%">
+            <DSMAccordion title="Filter">
+              <PayBeNextSearchFilter
+                onSearch={executeSearch}
+                onReset={resetSearch}
+                isFetching={isSearching}
+                initialValues={formData}
+              />
+            </DSMAccordion>
+          </Grid>
+
+          <Grid
+            size={{ xs: 12 }}
+            width="100%">
+            <PayBeNextGrid
+              data={searchResults}
+              gridData={gridData}
+              isLoading={isSearching}
+              showData={showData}
+              hasResults={hasResults}
+              totalEndingBalance={totalEndingBalance}
+              profitYear={formData.profitYear}
+              pagination={pagination}
+              onSortChange={pagination.handleSortChange}
             />
-          </DSMAccordion>
+          </Grid>
         </Grid>
-
-        <Grid
-          size={{ xs: 12 }}
-          width="100%">
-          <PayBeNextGrid
-            data={searchResults}
-            gridData={gridData}
-            isLoading={isSearching}
-            showData={showData}
-            hasResults={hasResults}
-            totalEndingBalance={totalEndingBalance}
-            profitYear={formData.profitYear}
-            pagination={pagination}
-            onSortChange={pagination.handleSortChange}
-          />
-        </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

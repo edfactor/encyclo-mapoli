@@ -79,29 +79,31 @@ export const RecursiveNavItem: FC<RecursiveNavItemProps> = ({ item, level, maxAu
 
   const hasActiveChild = containsActivePath(item);
 
-  // Auto-expand logic: expand if level is within auto-expand depth OR if this item contains the active path
-  // This only runs on mount or when the active path changes, not on every render
+  // Auto-expand logic: runs on mount and when location changes
+  // Consolidated into a single effect to prevent double render cycles
   useEffect(() => {
-    const storedExpanded = getStoredExpanded();
-
-    // Don't override user's manual collapse/expand choices unless necessary
-    if (level <= maxAutoExpandDepth && !storedExpanded) {
-      setExpanded(false);
-    } else if (hasActiveChild && !isActive && !storedExpanded) {
-      // Auto-expand parent items that contain the active child
-      setExpanded(false);
+    // Read stored preference directly to avoid dependency on getStoredExpanded callback
+    let storedExpanded: boolean | null = null;
+    try {
+      const stored = localStorage.getItem(`nav-expanded-${item.id}`);
+      storedExpanded = stored ? JSON.parse(stored) : null;
+    } catch {
+      storedExpanded = null;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]); // Only re-run when location changes
 
-  // Re-check localStorage when location changes (for page search navigation)
-  useEffect(() => {
-    const storedExpanded = getStoredExpanded();
-    // Only restore expanded state from localStorage, don't force it
-    if (storedExpanded) {
+    // If user has a stored preference, respect it
+    if (storedExpanded !== null) {
       setExpanded(storedExpanded);
+      return;
     }
-  }, [location.pathname, getStoredExpanded]);
+
+    // No stored preference - apply auto-expand rules:
+    // 1. Expand if level is within auto-expand depth
+    // 2. Expand if this item contains the active child path (but isn't the active item itself)
+    if (level <= maxAutoExpandDepth || (hasActiveChild && !isActive)) {
+      setExpanded(true);
+    }
+  }, [location.pathname, item.id, level, maxAutoExpandDepth, hasActiveChild, isActive]);
 
   // Persist expanded state
   useEffect(() => {

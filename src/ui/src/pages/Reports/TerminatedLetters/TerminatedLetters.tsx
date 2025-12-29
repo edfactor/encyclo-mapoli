@@ -3,6 +3,7 @@ import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
 import useTerminatedLetters from "./hooks/useTerminatedLetters";
 import TerminatedLettersGrid from "./TerminatedLettersGrid";
@@ -72,13 +73,15 @@ const TerminatedLetters = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.TERMINATED_LETTERS}
-      actionNode={renderActionNode()}>
-      <MissiveAlertProvider>
-        <TerminatedLettersContent />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Terminated Letters">
+      <Page
+        label={CAPTIONS.TERMINATED_LETTERS}
+        actionNode={renderActionNode()}>
+        <MissiveAlertProvider>
+          <TerminatedLettersContent />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

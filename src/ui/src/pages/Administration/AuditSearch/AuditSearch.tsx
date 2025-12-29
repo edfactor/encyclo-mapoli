@@ -1,6 +1,7 @@
 import { Divider, Grid } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { Page } from "smart-ui-library";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { SortParams } from "../../../hooks/useGridPagination";
 import { useLazySearchAuditQuery } from "../../../reduxstore/api/ItOperationsApi";
 import { useLazyGetNavigationStatusQuery } from "../../../reduxstore/api/NavigationStatusApi";
@@ -90,33 +91,35 @@ const AuditSearch = () => {
   );
 
   return (
-    <Page label="Audit Search">
-      <Grid
-        container
-        rowSpacing={3}>
-        <Grid width={"100%"}>
-          <Divider />
+    <PageErrorBoundary pageName="Audit Search">
+      <Page label="Audit Search">
+        <Grid
+          container
+          rowSpacing={3}>
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
+          <Grid width={"100%"}>
+            <AuditSearchManager
+              onSearch={handleSearch}
+              isLoading={isFetching}
+            />
+          </Grid>
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
+          <Grid width={"100%"}>
+            <AuditSearchGrid
+              data={data?.results || []}
+              total={data?.total || 0}
+              isLoading={isFetching}
+              onPaginationChange={handlePaginationChange}
+              navigationStatusList={navigationStatusData?.navigationStatusList || []}
+            />
+          </Grid>
         </Grid>
-        <Grid width={"100%"}>
-          <AuditSearchManager
-            onSearch={handleSearch}
-            isLoading={isFetching}
-          />
-        </Grid>
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
-          <AuditSearchGrid
-            data={data?.results || []}
-            total={data?.total || 0}
-            isLoading={isFetching}
-            onPaginationChange={handlePaginationChange}
-            navigationStatusList={navigationStatusData?.navigationStatusList || []}
-          />
-        </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

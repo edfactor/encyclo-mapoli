@@ -3,6 +3,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
 import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../reduxstore/store";
@@ -55,42 +56,44 @@ const AdhocProfLetter73: React.FC = () => {
   };
 
   return (
-    <Page
-      label={isGridExpanded ? "" : CAPTIONS.ADHOC_PROF_LETTER73}
-      actionNode={isGridExpanded ? undefined : renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        {!isGridExpanded && (
-          <Grid width={"100%"}>
-            <Divider />
-          </Grid>
-        )}
-        {!isGridExpanded && (
-          <Grid width={"100%"}>
-            <DSMAccordion title="Filter">
-              <AdhocProfLetter73FilterSection
-                onSearch={handleFilterChange}
-                onReset={handleReset}
-                isLoading={isLoading}
-              />
-            </DSMAccordion>
-          </Grid>
-        )}
+    <PageErrorBoundary pageName="Adhoc Prof Letter 73">
+      <Page
+        label={isGridExpanded ? "" : CAPTIONS.ADHOC_PROF_LETTER73}
+        actionNode={isGridExpanded ? undefined : renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          {!isGridExpanded && (
+            <Grid width={"100%"}>
+              <Divider />
+            </Grid>
+          )}
+          {!isGridExpanded && (
+            <Grid width={"100%"}>
+              <DSMAccordion title="Filter">
+                <AdhocProfLetter73FilterSection
+                  onSearch={handleFilterChange}
+                  onReset={handleReset}
+                  isLoading={isLoading}
+                />
+              </DSMAccordion>
+            </Grid>
+          )}
 
-        {filterParams && (
-          <Grid width="100%">
-            <AdhocProfLetter73Grid
-              key={searchTrigger}
-              filterParams={filterParams}
-              onLoadingChange={handleLoadingChange}
-              isGridExpanded={isGridExpanded}
-              onToggleExpand={handleToggleGridExpand}
-            />
-          </Grid>
-        )}
-      </Grid>
-    </Page>
+          {filterParams && (
+            <Grid width="100%">
+              <AdhocProfLetter73Grid
+                key={searchTrigger}
+                filterParams={filterParams}
+                onLoadingChange={handleLoadingChange}
+                isGridExpanded={isGridExpanded}
+                onToggleExpand={handleToggleGridExpand}
+              />
+            </Grid>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 
