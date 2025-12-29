@@ -11,6 +11,7 @@ import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
+import { useTooltipState } from "../../../hooks/useTooltipState";
 import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionsAndForfeituresGridColumns";
@@ -42,12 +43,9 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   isGridExpanded = false,
   onToggleExpand
 }) => {
-  const [showStateTaxTooltip, setShowStateTaxTooltip] = useState(false);
-  const [showForfeitureTooltip, setShowForfeitureTooltip] = useState(false);
-  const [showUnattributedTooltip, setShowUnattributedTooltip] = useState(false);
-  const [stateTaxTimeout, setStateTaxTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [forfeitureTimeout, setForfeitureTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [unattributedTimeout, setUnattributedTimeout] = useState<NodeJS.Timeout | null>(null);
+  const stateTaxTooltip = useTooltipState();
+  const forfeitureTooltip = useTooltipState();
+  const unattributedTooltip = useTooltipState();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -120,51 +118,6 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0,
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
-
-  const handleStateTaxPopoverOpen = () => {
-    if (stateTaxTimeout) {
-      clearTimeout(stateTaxTimeout);
-      setStateTaxTimeout(null);
-    }
-    setShowStateTaxTooltip(true);
-  };
-
-  const handleStateTaxPopoverClose = () => {
-    const timeout = setTimeout(() => {
-      setShowStateTaxTooltip(false);
-    }, 100);
-    setStateTaxTimeout(timeout);
-  };
-
-  const handleForfeiturePopoverOpen = () => {
-    if (forfeitureTimeout) {
-      clearTimeout(forfeitureTimeout);
-      setForfeitureTimeout(null);
-    }
-    setShowForfeitureTooltip(true);
-  };
-
-  const handleForfeiturePopoverClose = () => {
-    const timeout = setTimeout(() => {
-      setShowForfeitureTooltip(false);
-    }, 100);
-    setForfeitureTimeout(timeout);
-  };
-
-  const handleUnattributedPopoverOpen = () => {
-    if (unattributedTimeout) {
-      clearTimeout(unattributedTimeout);
-      setUnattributedTimeout(null);
-    }
-    setShowUnattributedTooltip(true);
-  };
-
-  const handleUnattributedPopoverClose = () => {
-    const timeout = setTimeout(() => {
-      setShowUnattributedTooltip(false);
-    }, 100);
-    setUnattributedTimeout(timeout);
-  };
 
   const onSearch = useCallback(async () => {
     const request = {
@@ -255,18 +208,6 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     onLoadingChange?.(isFetching);
   }, [isFetching, onLoadingChange]);
 
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (stateTaxTimeout) {
-        clearTimeout(stateTaxTimeout);
-      }
-      if (forfeitureTimeout) {
-        clearTimeout(forfeitureTimeout);
-      }
-    };
-  }, [stateTaxTimeout, forfeitureTimeout]);
-
   const sortEventHandler = (update: ISortParams) => handleSortChange(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
 
@@ -311,14 +252,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
                   <div
                     className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
-                    onMouseEnter={handleStateTaxPopoverOpen}
-                    onMouseLeave={handleStateTaxPopoverClose}>
+                    onMouseEnter={stateTaxTooltip.handleOpen}
+                    onMouseLeave={stateTaxTooltip.handleClose}>
                     <InfoOutlinedIcon
                       className="cursor-pointer text-green-500"
                       fontSize="small"
                     />
                     <div
-                      className={`absolute left-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-gray-300 bg-white shadow-lg ${!showStateTaxTooltip ? "hidden" : ""}`}>
+                      className={`absolute left-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-gray-300 bg-white shadow-lg ${!stateTaxTooltip.isOpen ? "hidden" : ""}`}>
                       <div className="p-3 px-4 pb-4">
                         <Typography
                           variant="subtitle2"
@@ -374,14 +315,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 (distributionsAndForfeitures.forfeitureClassActionTotal || 0) > 0) && (
                 <div
                   className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
-                  onMouseEnter={handleForfeiturePopoverOpen}
-                  onMouseLeave={handleForfeiturePopoverClose}>
+                  onMouseEnter={forfeitureTooltip.handleOpen}
+                  onMouseLeave={forfeitureTooltip.handleClose}>
                   <InfoOutlinedIcon
                     className="cursor-pointer text-blue-500"
                     fontSize="small"
                   />
                   <div
-                    className={`absolute right-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-gray-300 bg-white shadow-lg ${!showForfeitureTooltip ? "hidden" : ""}`}>
+                    className={`absolute right-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-gray-300 bg-white shadow-lg ${!forfeitureTooltip.isOpen ? "hidden" : ""}`}>
                     <div className="p-3 px-4 pb-4">
                       <Typography
                         variant="subtitle2"
@@ -447,14 +388,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 </div>
                 <div
                   className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
-                  onMouseEnter={handleUnattributedPopoverOpen}
-                  onMouseLeave={handleUnattributedPopoverClose}>
+                  onMouseEnter={unattributedTooltip.handleOpen}
+                  onMouseLeave={unattributedTooltip.handleClose}>
                   <InfoOutlinedIcon
                     className="cursor-pointer text-yellow-600"
                     fontSize="small"
                   />
                   <div
-                    className={`absolute right-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-yellow-300 bg-yellow-50 shadow-lg ${!showUnattributedTooltip ? "hidden" : ""}`}>
+                    className={`absolute right-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-yellow-300 bg-yellow-50 shadow-lg ${!unattributedTooltip.isOpen ? "hidden" : ""}`}>
                     <div className="p-3 px-4 pb-4">
                       <Typography
                         variant="subtitle2"
