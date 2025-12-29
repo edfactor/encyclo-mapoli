@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, ROUTES } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
@@ -364,13 +365,15 @@ const EditDistribution = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.EDIT_DISTRIBUTION}
-      actionNode={renderActionNode()}>
-      <MissiveAlertProvider>
-        <EditDistributionContent />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Edit Distribution">
+      <Page
+        label={CAPTIONS.EDIT_DISTRIBUTION}
+        actionNode={renderActionNode()}>
+        <MissiveAlertProvider>
+          <EditDistributionContent />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

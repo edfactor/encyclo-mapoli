@@ -1,4 +1,4 @@
-import { FormLabel, Grid, TextField } from "@mui/material";
+import { FormControlLabel, FormLabel, Grid, TextField } from "@mui/material";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import Checkbox from "@mui/material/Checkbox";
@@ -27,15 +27,31 @@ import * as yup from "yup";
 
 const schema = yup.object().shape({
   beneficiarySsn: ssnValidator.required("SSN is required"),
-  relationship: yup.string().required(),
+  relationship: yup.string().required("Relationship is required"),
   //percentage: yup.number().required(),
-  dateOfBirth: yup.date().required(),
-  street: yup.string().optional(),
-  city: yup.string().optional(),
-  state: yup.string().optional(),
-  postalCode: yup.string().optional(),
-  firstName: yup.string().required(),
-  lastName: yup.string().required(),
+  dateOfBirth: yup.date().required("Date of Birth is required"),
+  street: yup.string().when("addressSameAsBeneficiary", {
+    is: false,
+    then: (schema) => schema.required("Address is required"),
+    otherwise: (schema) => schema.optional()
+  }),
+  city: yup.string().when("addressSameAsBeneficiary", {
+    is: false,
+    then: (schema) => schema.required("City is required"),
+    otherwise: (schema) => schema.optional()
+  }),
+  state: yup.string().when("addressSameAsBeneficiary", {
+    is: false,
+    then: (schema) => schema.required("State is required"),
+    otherwise: (schema) => schema.optional()
+  }),
+  postalCode: yup.string().when("addressSameAsBeneficiary", {
+    is: false,
+    then: (schema) => schema.required("Zipcode is required"),
+    otherwise: (schema) => schema.optional()
+  }),
+  firstName: yup.string().required("First Name is required"),
+  lastName: yup.string().required("Last Name is required"),
   addressSameAsBeneficiary: yup.boolean().notRequired()
 });
 
@@ -78,7 +94,8 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
     control,
     formState: { errors, isValid },
     handleSubmit,
-    reset
+    reset,
+    watch
   } = useForm<cb>({
     resolver: yupResolver(schema) as Resolver<cb>,
     mode: "onBlur",
@@ -109,6 +126,8 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
           addressSameAsBeneficiary: false
         }
   });
+
+  const addressSameAsBeneficiary = watch("addressSameAsBeneficiary");
 
   useEffect(() => {
     if (!isLoading) {
@@ -190,14 +209,19 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   };
 
   const saveBeneficiary = (beneficiaryContactId: number, data: cb) => {
+    // Calculate beneficiary hierarchy numbers
+    const firstLevel = Math.floor(psnSuffix / 1000) % 10;
+    const secondLevel = Math.floor(psnSuffix / 100) % 10;
+    const thirdLevel = Math.floor(psnSuffix / 10) % 10;
+
     const request: CreateBeneficiaryRequest = {
       beneficiaryContactId: beneficiaryContactId,
       employeeBadgeNumber: badgeNumber,
-      firstLevelBeneficiaryNumber: Math.floor(psnSuffix / 1000) % 10,
+      firstLevelBeneficiaryNumber: firstLevel === 0 ? null : firstLevel,
       //percentage: data.percentage,
       relationship: data.relationship,
-      secondLevelBeneficiaryNumber: Math.floor(psnSuffix / 100) % 10,
-      thirdLevelBeneficiaryNumber: Math.floor(psnSuffix / 10) % 10
+      secondLevelBeneficiaryNumber: secondLevel === 0 ? null : secondLevel,
+      thirdLevelBeneficiaryNumber: thirdLevel === 0 ? null : thirdLevel
     };
     triggerAdd(request)
       .unwrap()
@@ -218,7 +242,9 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
           size={12}
           rowSpacing={3}>
           <Grid size={{ md: 5, xs: 12 }}>
-            <FormLabel>First Name</FormLabel>
+            <FormLabel>
+              First Name <span style={{ color: "red" }}>*</span>
+            </FormLabel>
             <Controller
               name="firstName"
               control={control}
@@ -230,6 +256,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.firstName}
+                  autoComplete="off"
                   onChange={(e) => {
                     field.onChange(e.target.value);
                   }}
@@ -240,7 +267,9 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
           <Grid
             offset={1}
             size={{ md: 5, xs: 12 }}>
-            <FormLabel>Last Name</FormLabel>
+            <FormLabel>
+              Last Name <span style={{ color: "red" }}>*</span>
+            </FormLabel>
             <Controller
               name="lastName"
               control={control}
@@ -252,6 +281,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.lastName}
+                  autoComplete="off"
                   onChange={(e) => {
                     field.onChange(e.target.value);
                   }}
@@ -260,7 +290,9 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             />
           </Grid>
           <Grid size={{ md: 5, xs: 12 }}>
-            <FormLabel>SSN</FormLabel>
+            <FormLabel>
+              SSN <span style={{ color: "red" }}>*</span>
+            </FormLabel>
             <Controller
               name="beneficiarySsn"
               control={control}
@@ -274,6 +306,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                   value={field.value ?? ""}
                   error={!!errors.beneficiarySsn}
                   helperText={errors.beneficiarySsn?.message}
+                  autoComplete="off"
                   onChange={(e) => {
                     const value = e.target.value;
                     // Only allow numeric input
@@ -293,7 +326,9 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
           <Grid
             offset={1}
             size={{ md: 5, xs: 12 }}>
-            <FormLabel>Date of Birth</FormLabel>
+            <FormLabel>
+              Date of Birth <span style={{ color: "red" }}>*</span>
+            </FormLabel>
             <Controller
               name="dateOfBirth"
               control={control}
@@ -314,25 +349,27 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             />
           </Grid>
           <Grid size={{ md: 12, xs: 12 }}>
-            <FormLabel>
-              <Controller
-                name="addressSameAsBeneficiary"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    {...field}
-                    checked={!!field.value} // Ensure it's a boolean
-                    onChange={(e) => {
-                      field.onChange(e.target.checked); // Use checked, not value
-                    }}
-                  />
-                )}
-              />
-              Address the same as employee ?
-            </FormLabel>
+            <Controller
+              name="addressSameAsBeneficiary"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      {...field}
+                      checked={!!field.value}
+                      onChange={(e) => {
+                        field.onChange(e.target.checked);
+                      }}
+                    />
+                  }
+                  label="Is Beneficiary Address the same as Employee Address?"
+                />
+              )}
+            />
           </Grid>
           <Grid size={{ md: 5, xs: 12 }}>
-            <FormLabel>Address</FormLabel>
+            <FormLabel>Address {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}</FormLabel>
             <Controller
               name="street"
               control={control}
@@ -344,6 +381,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.street}
+                  autoComplete="off"
                   onChange={(e) => {
                     field.onChange(e.target.value);
                   }}
@@ -356,7 +394,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             columnSpacing={4}
             size={{ xs: 12, md: 12 }}>
             <Grid size={{ md: 5, xs: 12 }}>
-              <FormLabel>City</FormLabel>
+              <FormLabel>City {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}</FormLabel>
               <Controller
                 name="city"
                 control={control}
@@ -368,6 +406,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     variant="outlined"
                     value={field.value ?? ""}
                     error={!!errors.city}
+                    autoComplete="off"
                     onChange={(e) => {
                       field.onChange(e.target.value);
                     }}
@@ -376,7 +415,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               />
             </Grid>
             <Grid size={{ md: 2, xs: 12 }}>
-              <FormLabel>State</FormLabel>
+              <FormLabel>State {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}</FormLabel>
               <Controller
                 name="state"
                 control={control}
@@ -388,6 +427,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     variant="outlined"
                     value={field.value ?? ""}
                     error={!!errors.state}
+                    autoComplete="off"
                     onChange={(e) => {
                       field.onChange(e.target.value);
                     }}
@@ -396,7 +436,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               />
             </Grid>
             <Grid size={{ md: 3, xs: 12 }}>
-              <FormLabel>Zipcode</FormLabel>
+              <FormLabel>Zipcode {!addressSameAsBeneficiary && <span style={{ color: "red" }}>*</span>}</FormLabel>
               <Controller
                 name="postalCode"
                 control={control}
@@ -408,6 +448,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     variant="outlined"
                     value={field.value ?? ""}
                     error={!!errors.postalCode}
+                    autoComplete="off"
                     onChange={(e) => {
                       field.onChange(e.target.value);
                     }}
@@ -422,7 +463,9 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             columnSpacing={4}
             size={{ xs: 12, md: 12 }}>
             <Grid size={{ md: 5, xs: 12 }}>
-              <FormLabel>Relationship</FormLabel>
+              <FormLabel>
+                Relationship <span style={{ color: "red" }}>*</span>
+              </FormLabel>
               <Controller
                 name="relationship"
                 control={control}
@@ -434,6 +477,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     variant="outlined"
                     value={field.value ?? ""}
                     error={!!errors.relationship}
+                    autoComplete="off"
                     onChange={(e) => {
                       field.onChange(e.target.value);
                     }}

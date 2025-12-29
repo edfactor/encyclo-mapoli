@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Divider, Grid } from "@mui/material";
 import { DSMAccordion, Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
@@ -15,36 +16,38 @@ const Forfeit = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.FORFEIT}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
-          <DSMAccordion title="Filter">
-            <ForfeitSearchFilter
-              onSearch={executeSearch}
-              onReset={handleReset}
-              isSearching={isSearching}
-            />
-          </DSMAccordion>
-        </Grid>
-
-        {showData && (
-          <Grid width="100%">
-            <ForfeitGrid
-              searchResults={searchResults}
-              pagination={pagination}
-              isSearching={isSearching}
-            />
+    <PageErrorBoundary pageName="Forfeit">
+      <Page
+        label={CAPTIONS.FORFEIT}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
           </Grid>
-        )}
-      </Grid>
-    </Page>
+          <Grid width={"100%"}>
+            <DSMAccordion title="Filter">
+              <ForfeitSearchFilter
+                onSearch={executeSearch}
+                onReset={handleReset}
+                isSearching={isSearching}
+              />
+            </DSMAccordion>
+          </Grid>
+
+          {showData && (
+            <Grid width="100%">
+              <ForfeitGrid
+                searchResults={searchResults}
+                pagination={pagination}
+                isSearching={isSearching}
+              />
+            </Grid>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

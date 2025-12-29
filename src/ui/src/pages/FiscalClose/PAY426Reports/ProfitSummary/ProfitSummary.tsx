@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { Button, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
@@ -6,15 +7,16 @@ import { useDynamicGridHeight } from "hooks/useDynamicGridHeight";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { closeDrawer, openDrawer, setFullscreen } from "../../../../reduxstore/slices/generalSlice";
 import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import {
   useFinalizeReportMutation,
+  useLazyGetYearEndProfitSharingReportTotalsQuery,
   useLazyGetYearEndProfitSharingSummaryReportQuery
 } from "reduxstore/api/YearsEndApi";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, numberToCurrency, Page } from "smart-ui-library";
-import { CAPTIONS, GRID_KEYS } from "../../../../constants";
-import { closeDrawer, openDrawer, setFullscreen } from "../../../../reduxstore/slices/generalSlice";
+import { GRID_KEYS } from "../../../../constants";
 import { RootState } from "../../../../reduxstore/store";
 import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
@@ -108,6 +110,8 @@ interface ProfitSummaryProps {
   triggerArchive?: boolean;
   /** Callback when archive request completes. Parent should reset triggerArchive to false. */
   onArchiveComplete?: () => void;
+  /** Page title. Defaults to "PROFIT SUMMARY". Pass empty string to hide when embedded in parent with its own title. */
+  pageTitle?: string;
 }
 
 const ProfitSummary: React.FC<ProfitSummaryProps> = ({
@@ -115,10 +119,11 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
   externalIsGridExpanded,
   externalOnToggleExpand,
   triggerArchive,
-  onArchiveComplete
+  onArchiveComplete,
+  pageTitle = "PROFIT SUMMARY"
 }) => {
   const dispatch = useDispatch();
-  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
+  const [trigger, { isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
   const [shouldArchive, setShouldArchive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [internalIsGridExpanded, setInternalIsGridExpanded] = useState(false);
@@ -129,7 +134,19 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
+
+  // Use the appropriate Redux slice based on frozenData - live and frozen are cached separately
+  const summaryData = useSelector((state: RootState) =>
+    frozenData ? state.yearsEnd.profitShareSummaryReportFrozen : state.yearsEnd.profitShareSummaryReportLive
+  );
+  const totalsData = useSelector((state: RootState) =>
+    frozenData
+      ? state.yearsEnd.yearEndProfitSharingReportTotalsFrozen
+      : state.yearsEnd.yearEndProfitSharingReportTotalsLive
+  );
   const profitYear = useFiscalCloseProfitYear();
+
+  const [triggerTotals] = useLazyGetYearEndProfitSharingReportTotalsQuery();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
   // Use dynamic grid height utility hook
@@ -159,8 +176,33 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
     }
   };
 
+  const handleToggleGridExpand = () => {
+    // Use external handler if provided
+    if (externalOnToggleExpand) {
+      externalOnToggleExpand();
+      return;
+    }
+
+    // Otherwise use internal logic
+    if (!internalIsGridExpanded) {
+      // Expanding: remember current drawer state and close it
+      setWasDrawerOpenBeforeExpand(isDrawerOpen || false);
+      dispatch(closeDrawer());
+      dispatch(setFullscreen(true));
+      setInternalIsGridExpanded(true);
+    } else {
+      // Collapsing: restore previous state
+      dispatch(setFullscreen(false));
+      setInternalIsGridExpanded(false);
+      if (wasDrawerOpenBeforeExpand) {
+        dispatch(openDrawer());
+      }
+    }
+  };
+
+  // Fetch summary report if not already in Redux (live and frozen are cached separately)
   useEffect(() => {
-    if (hasToken) {
+    if (hasToken && !summaryData) {
       trigger({
         useFrozenData: frozenData,
         profitYear: profitYear,
@@ -168,7 +210,19 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
         archive: false
       });
     }
-  }, [trigger, profitYear, hasToken, frozenData]);
+  }, [trigger, profitYear, hasToken, frozenData, summaryData]);
+
+  // Fetch totals if not already in Redux (live and frozen are cached separately)
+  useEffect(() => {
+    if (hasToken && !totalsData) {
+      triggerTotals({
+        useFrozenData: frozenData,
+        profitYear: profitYear,
+        badgeNumber: null,
+        archive: false
+      });
+    }
+  }, [triggerTotals, profitYear, hasToken, frozenData, totalsData]);
 
   // Reload with archive=true when status changes to Complete (internal trigger)
   useEffect(() => {
@@ -196,30 +250,6 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
     }
   }, [triggerArchive, hasToken, frozenData, profitYear, trigger, onArchiveComplete]);
 
-  const handleToggleGridExpand = () => {
-    // Use external handler if provided
-    if (externalOnToggleExpand) {
-      externalOnToggleExpand();
-      return;
-    }
-
-    // Otherwise use internal logic
-    if (!internalIsGridExpanded) {
-      // Expanding: remember current drawer state and close it
-      setWasDrawerOpenBeforeExpand(isDrawerOpen || false);
-      dispatch(closeDrawer());
-      dispatch(setFullscreen(true));
-      setInternalIsGridExpanded(true);
-    } else {
-      // Collapsing: restore previous state
-      dispatch(setFullscreen(false));
-      setInternalIsGridExpanded(false);
-      if (wasDrawerOpenBeforeExpand) {
-        dispatch(openDrawer());
-      }
-    }
-  };
-
   const renderActionNode = () => {
     if (!frozenData) return null;
 
@@ -242,27 +272,27 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
   // Here we combine the API data with placeholders for "Active and Inactive" and "terminated" section
   // If data exists for a row, it replaces the placeholder; otherwise the placeholder is used - ensuring all rows are displayed regardless of whether data exists for them
   const activeAndInactiveRowData = useMemo(() => {
-    if (!data?.lineItems) return activeInactivePlaceholders;
+    if (!summaryData?.lineItems) return activeInactivePlaceholders;
 
     const dataMap = new Map(
-      data.lineItems
+      summaryData.lineItems
         .filter((item) => item.subgroup.toUpperCase() === "ACTIVE AND INACTIVE")
         .map((item) => [item.lineItemPrefix, item])
     );
 
     return activeInactivePlaceholders.map((placeholder) => dataMap.get(placeholder.lineItemPrefix) || placeholder);
-  }, [data]);
+  }, [summaryData]);
 
   const terminatedRowData = useMemo(() => {
-    if (!data?.lineItems) return [];
+    if (!summaryData?.lineItems) return [];
 
-    return data.lineItems.filter((item) => item.subgroup.toUpperCase() === "TERMINATED");
-  }, [data]);
+    return summaryData.lineItems.filter((item) => item.subgroup.toUpperCase() === "TERMINATED");
+  }, [summaryData]);
 
   const employeesRowData = useMemo(() => {
-    if (!data?.lineItems) return [];
+    if (!summaryData?.lineItems) return [];
 
-    return data.lineItems.filter((item) => {
+    return summaryData.lineItems.filter((item) => {
       const subgroupUpper = item.subgroup.toUpperCase();
       return (
         subgroupUpper.includes("EMPLOYEE") &&
@@ -272,7 +302,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
         subgroupUpper !== "TERMINATED"
       );
     });
-  }, [data]);
+  }, [summaryData]);
 
   const getActiveAndInactiveTotals = useMemo(() => {
     if (!activeAndInactiveRowData) return [];
@@ -337,133 +367,179 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
   }, [activeAndInactiveRowData, terminatedRowData, employeesRowData]);
 
   return (
-    // Do not remove the label, as that also removes the buttons
-    <Page
-      label={isGridExpanded ? "" : CAPTIONS.PAY426_SUMMARY}
-      actionNode={isGridExpanded ? undefined : renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Grid
-            container
-            justifyContent="space-between"
-            alignItems="center"
-            marginBottom={2}>
-            <Grid />
-            <Grid>
-              <IconButton
-                onClick={handleToggleGridExpand}
-                sx={{ zIndex: 1 }}
-                aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
-                {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
-              </IconButton>
+    <PageErrorBoundary pageName="Profit Summary">
+      <Page
+        label={pageTitle}
+        actionNode={isGridExpanded ? undefined : renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Grid
+              container
+              justifyContent="space-between"
+              alignItems="center"
+              marginBottom={2}>
+              <Grid />
+              <Grid>
+                <IconButton
+                  onClick={handleToggleGridExpand}
+                  sx={{ zIndex: 1 }}
+                  aria-label={isGridExpanded ? "Exit fullscreen" : "Enter fullscreen"}>
+                  {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              </Grid>
             </Grid>
+            <div className="mb-4 flex items-center gap-6 px-3">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Total Employees:</span>
+                <span>{getGrandTotals[0]?.numberOfMembers?.toLocaleString() ?? 0}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Total Wages:</span>
+                <span>
+                  {typeof getGrandTotals[0]?.totalWages === "string"
+                    ? getGrandTotals[0]?.totalWages
+                    : numberToCurrency(getGrandTotals[0]?.totalWages ?? 0)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Total Balance:</span>
+                <span>
+                  {typeof getGrandTotals[0]?.totalBalance === "string"
+                    ? getGrandTotals[0]?.totalBalance
+                    : numberToCurrency(getGrandTotals[0]?.totalBalance ?? 0)}
+                </span>
+              </div>
+            </div>
           </Grid>
-          <div className="mb-[21px] mt-[37px] flex items-center gap-6 px-6">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Employees:</span>
-              <span>{getGrandTotals[0]?.numberOfMembers?.toLocaleString() ?? 0}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Wages:</span>
-              <span>
-                {typeof getGrandTotals[0]?.totalWages === "string"
-                  ? getGrandTotals[0]?.totalWages
-                  : numberToCurrency(getGrandTotals[0]?.totalWages ?? 0)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Balance:</span>
-              <span>
-                {typeof getGrandTotals[0]?.totalBalance === "string"
-                  ? getGrandTotals[0]?.totalBalance
-                  : numberToCurrency(getGrandTotals[0]?.totalBalance ?? 0)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Hours:</span>
-              <span>
-                {typeof getGrandTotals[0]?.totalHours === "string"
-                  ? getGrandTotals[0]?.totalHours
-                  : (getGrandTotals[0]?.totalHours?.toLocaleString() ?? "0")}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">Total Points:</span>
-              <span>
-                {typeof getGrandTotals[0]?.totalPoints === "string"
-                  ? getGrandTotals[0]?.totalPoints
-                  : (getGrandTotals[0]?.totalPoints?.toLocaleString() ?? "0")}
-              </span>
-            </div>
-          </div>
-        </Grid>
 
-        <Grid width={"100%"}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, px: 3 }}>
-            Active and Inactive
-          </Typography>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.ACTIVE_INACTIVE_SUMMARY}
-            isLoading={isFetching}
-            handleSortChanged={() => {}}
-            providedOptions={{
-              rowData: activeAndInactiveRowData,
-              pinnedTopRowData: getActiveAndInactiveTotals,
-              columnDefs: columnDefs
-            }}
-          />
-        </Grid>
-
-        <Grid width={"100%"}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, px: 3 }}>
-            Terminated
-          </Typography>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.TERMINATED_SUMMARY}
-            isLoading={isFetching}
-            handleSortChanged={() => {}}
-            providedOptions={{
-              rowData: terminatedRowData,
-              pinnedTopRowData: getTerminatedTotals,
-              columnDefs: columnDefs
-            }}
-          />
-        </Grid>
-
-        {employeesRowData && employeesRowData.length > 0 && (
           <Grid width={"100%"}>
             <Typography
               variant="h6"
               sx={{ mb: 2, px: 3 }}>
-              Employees
+              Plan Eligibility (18+, 1000+ Hours)
             </Typography>
-            <DSMGrid
-              preferenceKey={GRID_KEYS.EMPLOYEES_SUMMARY}
-              isLoading={isFetching}
-              handleSortChanged={() => {}}
-              providedOptions={{
-                rowData: employeesRowData,
-                pinnedTopRowData: getEmployeesTotals,
-                columnDefs: columnDefs
-              }}
-            />
+            <div className="px-3">
+              {/* One-off inline styles for this simple table. If we reuse this pattern, move to a shared CSS module. */}
+              <style>{`
+              .eligibility-table {
+                width: 100%;
+                border-collapse: collapse;
+              }
+              .eligibility-table thead tr {
+                background-color: #E8E8E8;
+              }
+              .eligibility-table th,
+              .eligibility-table td {
+                padding: 0.5rem 1rem;
+                text-align: right;
+                font-size: 0.875rem;
+              }
+              .eligibility-table th {
+                font-weight: 500;
+              }
+            `}</style>
+              <div className="rounded border border-gray-300">
+                <table className="eligibility-table">
+                  <thead>
+                    <tr>
+                      <th>Total Eligible</th>
+                      <th>New to Plan</th>
+                      <th>Under 21</th>
+                      <th>Already in Plan</th>
+                      <th>Wages</th>
+                      <th>Hours</th>
+                      <th>Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{totalsData?.numberOfEmployees?.toLocaleString() ?? "0"}</td>
+                      <td>{totalsData?.numberOfNewEmployees?.toLocaleString() ?? "0"}</td>
+                      <td>{totalsData?.numberOfEmployeesUnder21?.toLocaleString() ?? "0"}</td>
+                      <td>{totalsData?.numberOfEmployeesInPlan?.toLocaleString() ?? "0"}</td>
+                      <td>{numberToCurrency(totalsData?.wagesTotal ?? 0)}</td>
+                      <td>{totalsData?.hoursTotal?.toLocaleString() ?? "0"}</td>
+                      <td>{totalsData?.pointsTotal?.toLocaleString() ?? "0"}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </Grid>
-        )}
-      </Grid>
 
-      <CommitModal
-        open={isModalOpen}
-        onClose={handleCancel}
-        onCommit={handleCommit}
-        isFinalizing={isFinalizing}
-      />
-    </Page>
+          <Grid width={"100%"}>
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, px: 3 }}>
+              Active and Inactive
+            </Typography>
+            <div className="px-3">
+              <DSMGrid
+                preferenceKey={GRID_KEYS.ACTIVE_INACTIVE_SUMMARY}
+                isLoading={isFetching}
+                handleSortChanged={() => {}}
+                providedOptions={{
+                  rowData: activeAndInactiveRowData,
+                  pinnedTopRowData: getActiveAndInactiveTotals,
+                  columnDefs: columnDefs
+                }}
+              />
+            </div>
+          </Grid>
+
+          <Grid width={"100%"}>
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, px: 3 }}>
+              Terminated
+            </Typography>
+            <div className="px-3">
+              <DSMGrid
+                preferenceKey={GRID_KEYS.TERMINATED_SUMMARY}
+                isLoading={isFetching}
+                handleSortChanged={() => {}}
+                providedOptions={{
+                  rowData: terminatedRowData,
+                  pinnedTopRowData: getTerminatedTotals,
+                  columnDefs: columnDefs
+                }}
+              />
+            </div>
+          </Grid>
+
+          {employeesRowData && employeesRowData.length > 0 && (
+            <Grid width={"100%"}>
+              <Typography
+                variant="h6"
+                sx={{ mb: 2, px: 3 }}>
+                Employees
+              </Typography>
+              <div className="px-3">
+                <DSMGrid
+                  preferenceKey={GRID_KEYS.EMPLOYEES_SUMMARY}
+                  isLoading={isFetching}
+                  handleSortChanged={() => {}}
+                  providedOptions={{
+                    rowData: employeesRowData,
+                    pinnedTopRowData: getEmployeesTotals,
+                    columnDefs: columnDefs
+                  }}
+                />
+              </div>
+            </Grid>
+          )}
+        </Grid>
+
+        <CommitModal
+          open={isModalOpen}
+          onClose={handleCancel}
+          onCommit={handleCommit}
+          isFinalizing={isFinalizing}
+        />
+      </Page>
+    </PageErrorBoundary>
   );
 };
 
@@ -477,15 +553,19 @@ interface FrozenProfitSummaryWrapperProps {
 
 export const FrozenProfitSummaryWrapper: React.FC<FrozenProfitSummaryWrapperProps> = ({ frozenData }) => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
-  const [fetchFrozenState, { data: frozenState, isLoading }] = useLazyGetFrozenStateResponseQuery();
+  // Use Redux-cached frozen state for persistence across navigation
+  const cachedFrozenState = useSelector((state: RootState) => state.frozen.frozenStateResponseData);
+  const [fetchFrozenState, { isLoading }] = useLazyGetFrozenStateResponseQuery();
 
+  // Only fetch if not already in Redux cache
   useEffect(() => {
-    if (hasToken) {
+    if (hasToken && !cachedFrozenState) {
       fetchFrozenState(undefined, false);
     }
-  }, [fetchFrozenState, hasToken]);
+  }, [fetchFrozenState, hasToken, cachedFrozenState]);
 
-  if (isLoading || !frozenState?.profitYear) {
+  // Use Redux-cached data (persists across navigation)
+  if (isLoading || !cachedFrozenState?.profitYear) {
     return (
       <Grid
         container

@@ -1,5 +1,5 @@
 import { RefObject, useMemo } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { DuplicateSSNDetail, PagedReportResponse } from "../../../types";
@@ -12,7 +12,6 @@ interface DuplicateSSNsOnDemographicsGridProps {
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
 
@@ -23,40 +22,26 @@ const DuplicateSSNsOnDemographicsGrid = ({
   showData,
   hasResults,
   pagination,
-  onPaginationChange,
   onSortChange
 }: DuplicateSSNsOnDemographicsGridProps) => {
   const columnDefs = useMemo(() => GetDuplicateSSNsOnDemographicsColumns(), []);
 
+  if (!showData || !data?.response) {
+    return null;
+  }
+
   return (
-    <>
-      {showData && data?.response && (
-        <div ref={innerRef}>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.DUPLICATE_SSNS}
-            isLoading={isLoading}
-            handleSortChanged={onSortChange}
-            providedOptions={{
-              rowData: data.response.results,
-              columnDefs: columnDefs
-            }}
-          />
-        </div>
-      )}
-      {hasResults && data?.response && (
-        <Pagination
-          pageNumber={pagination.pageNumber}
-          setPageNumber={(value: number) => {
-            onPaginationChange(value - 1, pagination.pageSize);
-          }}
-          pageSize={pagination.pageSize}
-          setPageSize={(value: number) => {
-            onPaginationChange(0, value);
-          }}
-          recordCount={data.response.total || 0}
-        />
-      )}
-    </>
+    <DSMPaginatedGrid<DuplicateSSNDetail>
+      innerRef={innerRef}
+      preferenceKey={GRID_KEYS.DUPLICATE_SSNS}
+      data={data.response.results}
+      columnDefs={columnDefs}
+      totalRecords={data.response.total || 0}
+      isLoading={isLoading}
+      pagination={pagination}
+      onSortChange={onSortChange}
+      showPagination={hasResults}
+    />
   );
 };
 

@@ -108,9 +108,7 @@ describe("DuplicateSSNsOnDemographics", () => {
       expect(calls.length).toBeGreaterThan(0);
       const firstCallProps = calls[0][0];
       expect(firstCallProps).toHaveProperty("pagination");
-      expect(firstCallProps).toHaveProperty("onPaginationChange");
       expect(firstCallProps).toHaveProperty("onSortChange");
-      expect(typeof firstCallProps.onPaginationChange).toBe("function");
       expect(typeof firstCallProps.onSortChange).toBe("function");
     });
   });

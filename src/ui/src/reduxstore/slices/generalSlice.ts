@@ -12,6 +12,10 @@ export interface GeneralState {
   isDrawerOpen?: boolean;
   activeSubmenu?: string;
   isFullscreen?: boolean;
+  /** ID of the currently expanded grid (if any) */
+  expandedGridId?: string | null;
+  /** Drawer state before grid expansion (for restoration) */
+  wasDrawerOpenBeforeExpand?: boolean;
 }
 
 const getStoredDrawerState = (): { isDrawerOpen: boolean; activeSubmenu: string } => {
@@ -36,7 +40,9 @@ const initialState: GeneralState = {
   loading: false,
   isDrawerOpen,
   activeSubmenu,
-  isFullscreen: false
+  isFullscreen: false,
+  expandedGridId: null,
+  wasDrawerOpenBeforeExpand: false
 };
 
 export const generalSlice = createSlice({
@@ -146,6 +152,50 @@ export const generalSlice = createSlice({
     },
     setFullscreen: (state, action: PayloadAction<boolean>) => {
       state.isFullscreen = action.payload;
+    },
+    /**
+     * Expand a grid by ID, closing the drawer and entering fullscreen mode.
+     * Remembers the previous drawer state for restoration.
+     */
+    expandGrid: (state, action: PayloadAction<string>) => {
+      state.wasDrawerOpenBeforeExpand = state.isDrawerOpen ?? false;
+      state.expandedGridId = action.payload;
+      state.isDrawerOpen = false;
+      state.isFullscreen = true;
+      try {
+        localStorage.setItem(
+          "drawerState",
+          JSON.stringify({
+            isDrawerOpen: false,
+            activeSubmenu: state.activeSubmenu
+          })
+        );
+      } catch (error) {
+        console.error("Error saving drawer state to localStorage:", error);
+      }
+    },
+    /**
+     * Collapse the currently expanded grid, restoring the drawer to its previous state.
+     */
+    collapseGrid: (state) => {
+      const shouldRestoreDrawer = state.wasDrawerOpenBeforeExpand;
+      state.expandedGridId = null;
+      state.isFullscreen = false;
+      if (shouldRestoreDrawer) {
+        state.isDrawerOpen = true;
+        try {
+          localStorage.setItem(
+            "drawerState",
+            JSON.stringify({
+              isDrawerOpen: true,
+              activeSubmenu: state.activeSubmenu
+            })
+          );
+        } catch (error) {
+          console.error("Error saving drawer state to localStorage:", error);
+        }
+      }
+      state.wasDrawerOpenBeforeExpand = false;
     }
   }
 });
@@ -160,6 +210,8 @@ export const {
   closeDrawer,
   setActiveSubMenu,
   clearActiveSubMenu,
-  setFullscreen
+  setFullscreen,
+  expandGrid,
+  collapseGrid
 } = generalSlice.actions;
 export default generalSlice.reducer;

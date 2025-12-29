@@ -1,8 +1,8 @@
 import { Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
-import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
+import { numberToCurrency } from "smart-ui-library";
+import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { DistributionSearchResponse } from "../../../types";
 import { GetDistributionInquiryColumns } from "./DistributionInquiryGridColumns";
@@ -20,7 +20,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
   isLoading,
   onPaginationChange
 }) => {
-  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
+  const pagination = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
@@ -33,9 +33,8 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
     )
   });
 
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: postReturnData?.length ?? 0
-  });
+  const { pageNumber } = pagination;
+
   const columnDefs = useMemo(() => GetDistributionInquiryColumns(), []);
 
   // Calculate totals
@@ -66,29 +65,24 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
   }, [postReturnData]);
 
   return (
-    <>
-      <div style={{ padding: "24px 24px 0px 24px" }}>
+    <DSMPaginatedGrid<DistributionSearchResponse>
+      preferenceKey={GRID_KEYS.DISTRIBUTION_INQUIRY}
+      data={postReturnData ?? []}
+      columnDefs={columnDefs}
+      totalRecords={totalRecords}
+      isLoading={isLoading}
+      pagination={pagination}
+      onSortChange={pagination.handleSortChange}
+      showPagination={postReturnData !== null && postReturnData.length > 0}
+      header={
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
           {`Distribution Records (${totalRecords} ${totalRecords === 1 ? "Record" : "Records"})`}
         </Typography>
-      </div>
-
-      <DSMGrid
-        preferenceKey={GRID_KEYS.DISTRIBUTION_INQUIRY}
-        isLoading={isLoading}
-        handleSortChanged={handleSortChange}
-        maxHeight={gridMaxHeight}
-        providedOptions={{
-          rowData: postReturnData,
-          columnDefs: columnDefs,
-          suppressMultiSort: true
-        }}
-      />
-
-      {postReturnData && postReturnData.length > 0 && (
-        <>
+      }
+      afterGrid={
+        postReturnData && postReturnData.length > 0 ? (
           <div
             style={{
               padding: "16px 24px",
@@ -131,17 +125,9 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
               <Typography variant="body1">{numberToCurrency(totals.checkAmount)}</Typography>
             </div>
           </div>
-
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-            pageSize={pageSize}
-            setPageSize={handlePageSizeChange}
-            recordCount={totalRecords}
-          />
-        </>
-      )}
-    </>
+        ) : undefined
+      }
+    />
   );
 };
 

@@ -11,9 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CsvHelper" />
     <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Riok.Mapperly" />
-  <PackageReference Include="Serilog.Enrichers.Sensitive" />
+    <PackageReference Include="Serilog.Enrichers.Sensitive" />
+    <PackageReference Include="SSH.NET" />
   </ItemGroup>
 
   <ItemGroup>

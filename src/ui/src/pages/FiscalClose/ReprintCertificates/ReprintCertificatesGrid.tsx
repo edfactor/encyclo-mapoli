@@ -2,9 +2,10 @@ import { Typography } from "@mui/material";
 import { SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { ISortParams } from "smart-ui-library";
+import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetCertificatesReportQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import { CertificatePrintRequest } from "../../../reduxstore/types";
@@ -17,63 +18,74 @@ interface ReprintCertificatesGridProps {
 }
 
 const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filterParams, onSelectionChange }) => {
-  const [pageNumber, setPageNumber] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
   const [_selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
   const { certificates } = useSelector((state: RootState) => state.yearsEnd);
   const [getCertificatesReport, { isFetching }] = useLazyGetCertificatesReportQuery();
 
-  const buildApiRequest = useCallback((): CertificatePrintRequest => {
-    const request: CertificatePrintRequest = {
-      profitYear: filterParams.profitYear,
-      skip: pageNumber * pageSize,
-      take: pageSize,
-      sortBy: sortParams.sortBy,
-      isSortDescending: sortParams.isSortDescending
-    };
+  const buildApiRequest = useCallback(
+    (pn: number, ps: number, sp: ISortParams): CertificatePrintRequest => {
+      const request: CertificatePrintRequest = {
+        profitYear: filterParams.profitYear,
+        skip: pn * ps,
+        take: ps,
+        sortBy: sp.sortBy,
+        isSortDescending: sp.isSortDescending
+      };
 
-    if (filterParams.badgeNumber) {
-      const badgeNumbers = filterParams.badgeNumber
-        .split(",")
-        .map((num) => parseInt(num.trim()))
-        .filter((num) => !isNaN(num));
-      if (badgeNumbers.length > 0) {
-        request.badgeNumbers = badgeNumbers;
+      if (filterParams.badgeNumber) {
+        const badgeNumbers = filterParams.badgeNumber
+          .split(",")
+          .map((num) => parseInt(num.trim()))
+          .filter((num) => !isNaN(num));
+        if (badgeNumbers.length > 0) {
+          request.badgeNumbers = badgeNumbers;
+        }
       }
-    }
 
-    if (filterParams.socialSecurityNumber) {
-      const ssns = filterParams.socialSecurityNumber
-        .split(",")
-        .map((ssn) => parseInt(ssn.replace(/\D/g, "")))
-        .filter((ssn) => !isNaN(ssn) && ssn > 0);
-      if (ssns.length > 0) {
-        request.ssns = ssns;
+      if (filterParams.socialSecurityNumber) {
+        const ssns = filterParams.socialSecurityNumber
+          .split(",")
+          .map((ssn) => parseInt(ssn.replace(/\D/g, "")))
+          .filter((ssn) => !isNaN(ssn) && ssn > 0);
+        if (ssns.length > 0) {
+          request.ssns = ssns;
+        }
       }
-    }
 
-    return request;
-  }, [filterParams, pageNumber, pageSize, sortParams]);
+      return request;
+    },
+    [filterParams]
+  );
+
+  const pagination = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    persistenceKey: GRID_KEYS.REPRINT_CERTIFICATES,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: ISortParams) => {
+        if (certificates && (pageNum > 0 || sortPrms.sortBy !== "badgeNumber" || sortPrms.isSortDescending !== false)) {
+          const request = buildApiRequest(pageNum, pageSz, sortPrms);
+          getCertificatesReport(request);
+        }
+      },
+      [certificates, buildApiRequest, getCertificatesReport]
+    )
+  });
+
+  const { pageNumber, pageSize, sortParams } = pagination;
 
   useEffect(() => {
     if (
       certificates &&
       (pageNumber > 0 || sortParams.sortBy !== "badgeNumber" || sortParams.isSortDescending !== false)
     ) {
-      const request = buildApiRequest();
+      const request = buildApiRequest(pageNumber, pageSize, sortParams);
       getCertificatesReport(request);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber, pageSize, sortParams]);
-
-  const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update);
-  };
 
   const gridData = useMemo(() => {
     if (!certificates?.response?.results) return [];
@@ -93,18 +105,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     );
   }, [certificates]);
 
-  // Use content-aware grid height utility hook
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: gridData?.length ?? 0
-  });
-
-  const columnDefs = useMemo(
-    () => GetReprintCertificatesGridColumns(),
-    //selectedRowIds,
-    //() => {},
-    //() => {}
-    []
-  );
+  const columnDefs = useMemo(() => GetReprintCertificatesGridColumns(), []);
 
   const onSelectionChanged = useCallback(
     (event: SelectionChangedEvent<ReprintCertificateEmployee>) => {
@@ -121,45 +122,32 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
   const totalCount = certificates?.response?.total || 0;
 
   return (
-    <>
-      <div style={{ padding: "0 24px" }}>
+    <DSMPaginatedGrid<ReprintCertificateEmployee>
+      preferenceKey={GRID_KEYS.REPRINT_CERTIFICATES}
+      data={gridData}
+      columnDefs={columnDefs}
+      totalRecords={totalCount}
+      isLoading={isFetching}
+      pagination={pagination}
+      onSortChange={pagination.handleSortChange}
+      showPagination={gridData.length > 0 || totalCount > 0}
+      header={
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
           Print Profit Certificates ({totalCount})
         </Typography>
-      </div>
-
-      <DSMGrid
-        preferenceKey={GRID_KEYS.REPRINT_CERTIFICATES}
-        isLoading={isFetching}
-        handleSortChanged={sortEventHandler}
-        maxHeight={gridMaxHeight}
-        providedOptions={{
-          rowData: gridData,
-          columnDefs: columnDefs,
-          rowSelection: {
-            mode: "multiRow",
-            checkboxes: true,
-            headerCheckbox: true,
-            enableClickSelection: false
-          },
-          onSelectionChanged: onSelectionChanged as (event: unknown) => void
-        }}
-      />
-      {(gridData.length > 0 || totalCount > 0) && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => setPageNumber(value - 1)}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
-          }}
-          recordCount={totalCount}
-        />
-      )}
-    </>
+      }
+      gridOptions={{
+        rowSelection: {
+          mode: "multiRow",
+          checkboxes: true,
+          headerCheckbox: true,
+          enableClickSelection: false
+        },
+        onSelectionChanged: onSelectionChanged as (event: unknown) => void
+      }}
+    />
   );
 };
 

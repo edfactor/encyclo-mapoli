@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Divider, Grid, Tab, Tabs } from "@mui/material";
 import { useCallback, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -87,47 +88,49 @@ const QPAY066TA = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.BREAKDOWN_REPORT}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width="100%">
-          <Divider />
-        </Grid>
+    <PageErrorBoundary pageName="QPAY066TA Breakdown Report">
+      <Page
+        label={CAPTIONS.BREAKDOWN_REPORT}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width="100%">
+            <Divider />
+          </Grid>
 
-        <Grid width="100%">
-          <DSMAccordion title="Filter">
-            <QPAY066TABreakdownParameters
-              activeTab={getActiveTab()}
-              onStoreChange={(newStore) => setStore(newStore)}
-              onReset={handleReset}
-              isLoading={isLoading}
-            />
-          </DSMAccordion>
-        </Grid>
-
-        <Grid width="100%">
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            aria-label="pay share by store tabs"
-            sx={{ marginLeft: "24px" }}>
-            {tabs.map((tab, index) => (
-              <Tab
-                key={index}
-                label={tab}
-                id={`tab-${index}`}
-                aria-controls={`tabpanel-${index}`}
+          <Grid width="100%">
+            <DSMAccordion title="Filter">
+              <QPAY066TABreakdownParameters
+                activeTab={getActiveTab()}
+                onStoreChange={(newStore) => setStore(newStore)}
+                onReset={handleReset}
+                isLoading={isLoading}
               />
-            ))}
-          </Tabs>
-        </Grid>
+            </DSMAccordion>
+          </Grid>
 
-        {store && <Grid width="100%">{renderContent()}</Grid>}
-      </Grid>
-    </Page>
+          <Grid width="100%">
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              aria-label="pay share by store tabs"
+              sx={{ marginLeft: "24px" }}>
+              {tabs.map((tab, index) => (
+                <Tab
+                  key={index}
+                  label={tab}
+                  id={`tab-${index}`}
+                  aria-controls={`tabpanel-${index}`}
+                />
+              ))}
+            </Tabs>
+          </Grid>
+
+          {store && <Grid width="100%">{renderContent()}</Grid>}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

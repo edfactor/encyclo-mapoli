@@ -1,4 +1,5 @@
 import { Divider, Grid } from "@mui/material";
+import PageErrorBoundary from "components/PageErrorBoundary";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
 import { memo } from "react";
@@ -75,7 +76,6 @@ const ForfeituresAdjustmentContent = memo(() => {
             transactionData={transactionData}
             isLoading={isFetchingTransactions}
             pagination={transactionPagination}
-            onPaginationChange={transactionPagination.handlePaginationChange}
             onSortChange={transactionPagination.handleSortChange}
           />
         </Grid>
@@ -93,13 +93,15 @@ const ForfeituresAdjustmentContent = memo(() => {
 
 const ForfeituresAdjustment = () => {
   return (
-    <Page
-      label={CAPTIONS.FORFEITURES_ADJUSTMENT}
-      actionNode={<StatusDropdownActionNode />}>
-      <MissiveAlertProvider>
-        <ForfeituresAdjustmentContent />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Forfeitures Adjustment">
+      <Page
+        label={CAPTIONS.FORFEITURES_ADJUSTMENT}
+        actionNode={<StatusDropdownActionNode />}>
+        <MissiveAlertProvider>
+          <ForfeituresAdjustmentContent />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

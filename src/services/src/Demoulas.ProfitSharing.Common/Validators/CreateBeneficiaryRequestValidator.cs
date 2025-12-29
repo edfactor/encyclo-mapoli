@@ -1,7 +1,7 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using FluentValidation;
 
-namespace Demoulas.ProfitSharing.Services.Beneficiaries.Validators;
+namespace Demoulas.ProfitSharing.Common.Validators;
 
 public class CreateBeneficiaryRequestValidator : AbstractValidator<CreateBeneficiaryRequest>
 {

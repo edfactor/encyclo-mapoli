@@ -1,6 +1,7 @@
 import { Box, Divider } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Page } from "smart-ui-library";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { SortParams } from "../../../hooks/useGridPagination";
 import {
   useClearDemographicSyncAudit,
@@ -62,31 +63,34 @@ const OracleHcmDiagnostics = () => {
   };
 
   return (
-    <Page label="OracleHcm Diagnostics">
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        <Divider />
+    <PageErrorBoundary pageName="Oracle HCM Diagnostics">
+      <Page label="OracleHcm Diagnostics">
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <Divider />
 
-        {/* Metadata Section */}
-        <OracleHcmMetadata
-          metadata={metadataData}
-          isLoading={metadataLoading}
-          onRefresh={refetchMetadata}
-        />
+          {/* Metadata Section */}
+          <OracleHcmMetadata
+            metadata={metadataData}
+            isLoading={metadataLoading}
+            onRefresh={refetchMetadata}
+          />
 
-        <Divider />
+          <Divider />
 
-        {/* Audit Grid Section */}
-        <AuditGrid
-          data={auditData}
-          isLoading={auditLoading || clearLoading}
-          onClearSuccess={handleClearSuccess}
-          pageNumber={pageNumber}
-          pageSize={pageSize}
-          onPageChange={handlePageChange}
-          onSortChange={handleSortChange}
-        />
-      </Box>
-    </Page>
+          {/* Audit Grid Section */}
+          <AuditGrid
+            data={auditData}
+            isLoading={auditLoading || clearLoading}
+            onClearSuccess={handleClearSuccess}
+            pageNumber={pageNumber}
+            pageSize={pageSize}
+            sortParams={{ sortBy, isSortDescending }}
+            onPageChange={handlePageChange}
+            onSortChange={handleSortChange}
+          />
+        </Box>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

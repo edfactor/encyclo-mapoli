@@ -1,8 +1,8 @@
 import ReplayIcon from "@mui/icons-material/Replay";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { GridApi, IRowNode } from "ag-grid-community";
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { GetReversalsGridColumns, isRowReversible } from "./ReversalsGridColumns";
 
@@ -98,7 +98,7 @@ const ReversalsGrid: React.FC<ReversalsGridProps> = memo(
 
     const handlePageChange = useCallback(
       (newPageNumber: number) => {
-        onPaginationChange(newPageNumber - 1, pageSize);
+        onPaginationChange(newPageNumber, pageSize);
       },
       [onPaginationChange, pageSize]
     );
@@ -119,6 +119,19 @@ const ReversalsGrid: React.FC<ReversalsGridProps> = memo(
       [toggleSelection]
     );
 
+    // Create a pagination-like object to pass to DSMPaginatedGrid
+    const paginationProps = useMemo(
+      () => ({
+        pageNumber,
+        pageSize,
+        sortParams: { sortBy: "", isSortDescending: false },
+        handlePageNumberChange: handlePageChange,
+        handlePageSizeChange,
+        handleSortChange: () => {}
+      }),
+      [pageNumber, pageSize, handlePageChange, handlePageSizeChange]
+    );
+
     if (!profitData) {
       return null;
     }
@@ -136,12 +149,21 @@ const ReversalsGrid: React.FC<ReversalsGridProps> = memo(
             }
           `}
         </style>
-        <Grid
-          container
-          width="100%"
-          spacing={2}>
-          {/* Reverse Button - always visible, disabled when no selection */}
-          <Grid size={{ xs: 12 }}>
+        <DSMPaginatedGrid<ProfitDetailRow>
+          preferenceKey={GRID_KEYS.REVERSALS}
+          data={profitData.results}
+          columnDefs={columnDefs}
+          totalRecords={profitData.total}
+          isLoading={isLoading}
+          pagination={paginationProps}
+          header={
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5", marginY: "8px" }}>
+              Transactions
+            </Typography>
+          }
+          headerActions={
             <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
               <Button
                 variant="outlined"
@@ -156,60 +178,30 @@ const ReversalsGrid: React.FC<ReversalsGridProps> = memo(
                 REVERSE{selectedRows.length > 0 ? ` (${selectedRows.length})` : ""}
               </Button>
             </Box>
-          </Grid>
-
-          {/* Grid Title */}
-          <Grid size={{ xs: 12 }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5", marginY: "8px" }}>
-              Transactions
-            </Typography>
-          </Grid>
-
-          {/* Grid */}
-          <Grid size={{ xs: 12 }}>
-            <DSMGrid
-              preferenceKey={GRID_KEYS.REVERSALS}
-              isLoading={isLoading}
-              providedOptions={{
-                rowData: profitData.results,
-                columnDefs: columnDefs,
-                context: gridContext,
-                rowSelection: {
-                  mode: "multiRow",
-                  checkboxes: false,
-                  headerCheckbox: false,
-                  enableClickSelection: false,
-                  isRowSelectable: isRowSelectable
-                },
-                suppressRowClickSelection: true,
-                onGridReady: (params) => {
-                  gridApiRef.current = params.api;
-                },
-                getRowClass: (params) => {
-                  // Apply gray styling to already-reversed rows
-                  const data = params.data as ProfitDetailRow | undefined;
-                  if (data?.isAlreadyReversed) {
-                    return "row-already-reversed";
-                  }
-                  return undefined;
-                }
-              }}
-            />
-          </Grid>
-
-          {/* Pagination */}
-          <Grid size={{ xs: 12 }}>
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={handlePageChange}
-              pageSize={pageSize}
-              setPageSize={handlePageSizeChange}
-              recordCount={profitData.total}
-            />
-          </Grid>
-        </Grid>
+          }
+          gridOptions={{
+            context: gridContext,
+            rowSelection: {
+              mode: "multiRow",
+              checkboxes: false,
+              headerCheckbox: false,
+              enableClickSelection: false,
+              isRowSelectable: isRowSelectable
+            },
+            suppressRowClickSelection: true,
+            onGridReady: (params) => {
+              gridApiRef.current = params.api;
+            },
+            getRowClass: (params) => {
+              // Apply gray styling to already-reversed rows
+              const data = params.data as ProfitDetailRow | undefined;
+              if (data?.isAlreadyReversed) {
+                return "row-already-reversed";
+              }
+              return undefined;
+            }
+          }}
+        />
       </>
     );
   }

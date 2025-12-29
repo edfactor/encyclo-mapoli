@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import ProfitShareTotalsDisplay from "@/components/ProfitShareTotalsDisplay";
 import { Box, Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
@@ -10,16 +11,19 @@ import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/year
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { CAPTIONS, MENU_LABELS } from "../../../constants";
+import { useInitialLoad } from "../../../hooks/useInitialLoad";
 
 const ProfitShareTotals426 = () => {
-  const [_initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const { setLoaded: setInitialSearchLoaded } = useInitialLoad();
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
   const navigate = useNavigate();
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const [triggerSearch, { isLoading }] = useLazyGetYearEndProfitSharingReportLiveQuery();
-  const { yearEndProfitSharingReportTotals } = useSelector((state: RootState) => state.yearsEnd);
+  const { yearEndProfitSharingReportTotalsFrozen: yearEndProfitSharingReportTotals } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
@@ -54,7 +58,7 @@ const ProfitShareTotals426 = () => {
           console.error("Initial search failed:", error);
         });
     }
-  }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
+  }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch, setInitialSearchLoaded]);
 
   const renderActionNode = () => {
     return (
@@ -71,43 +75,45 @@ const ProfitShareTotals426 = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.PROFIT_SHARE_TOTALS}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
+    <PageErrorBoundary pageName="Profit Share Totals">
+      <Page
+        label={CAPTIONS.PROFIT_SHARE_TOTALS}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
 
-        <Grid width="100%">
-          <Box sx={{ mb: 3 }}>
-            <div style={{ padding: "0 24px 0 24px" }}>
-              <Typography
-                variant="h2"
-                sx={{ color: "#0258A5" }}>
-                {`${CAPTIONS.PROFIT_SHARE_TOTALS}`}
-              </Typography>
-            </div>
+          <Grid width="100%">
+            <Box sx={{ mb: 3 }}>
+              <div style={{ padding: "0 24px 0 24px" }}>
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5" }}>
+                  {`${CAPTIONS.PROFIT_SHARE_TOTALS}`}
+                </Typography>
+              </div>
 
-            {isLoading ? (
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                minHeight="200px">
-                <CircularProgress />
-              </Box>
-            ) : (
-              <Box sx={{ px: 3, mt: 2 }}>
-                <ProfitShareTotalsDisplay totalsData={yearEndProfitSharingReportTotals} />
-              </Box>
-            )}
-          </Box>
+              {isLoading ? (
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  minHeight="200px">
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <Box sx={{ px: 3, mt: 2 }}>
+                  <ProfitShareTotalsDisplay totalsData={yearEndProfitSharingReportTotals} />
+                </Box>
+              )}
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

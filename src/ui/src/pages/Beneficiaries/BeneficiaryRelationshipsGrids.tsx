@@ -4,7 +4,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useDeleteBeneficiaryMutation } from "reduxstore/api/BeneficiariesApi";
 import { setDistributionHome } from "reduxstore/slices/distributionSlice";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS, ROUTES } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
@@ -245,34 +246,33 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
               {`Beneficiaries (${relationships.beneficiaryList?.total || 0} ${relationships.beneficiaryList?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
-          <DSMGrid
+          <DSMPaginatedGrid<BeneficiaryDto>
             preferenceKey={GRID_KEYS.BENEFICIARIES_LIST}
+            data={relationships.beneficiaryList?.results ?? []}
+            columnDefs={columnDefs}
+            totalRecords={relationships.beneficiaryList?.total ?? 0}
             isLoading={relationships.isLoading}
-            handleSortChanged={sortEventHandler}
-            providedOptions={{
-              rowData: relationships.beneficiaryList?.results,
-              columnDefs: columnDefs,
+            onSortChange={sortEventHandler}
+            pagination={{
+              pageNumber,
+              pageSize,
+              sortParams,
+              handlePageNumberChange,
+              handlePageSizeChange,
+              handleSortChange
+            }}
+            gridOptions={{
               suppressMultiSort: true
             }}
+            showPagination={relationships.beneficiaryList?.results && relationships.beneficiaryList.results.length > 0}
           />
         </>
       )}
-      {!!relationships.beneficiaryList &&
-        relationships.beneficiaryList.results &&
-        relationships.beneficiaryList?.results.length > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-            pageSize={pageSize}
-            setPageSize={handlePageSizeChange}
-            recordCount={relationships.beneficiaryList?.total}
-          />
-        )}
 
       {/* Snackbar for percentage update feedback */}
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={4000}
+        autoHideDuration={100000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
         <Alert

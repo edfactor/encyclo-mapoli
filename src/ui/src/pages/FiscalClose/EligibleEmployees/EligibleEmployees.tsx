@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useRef } from "react";
@@ -15,30 +16,31 @@ const EligibleEmployees = () => {
   };
 
   return (
-    <Page
-      label={`${CAPTIONS.ELIGIBLE_EMPLOYEES}`}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
+    <PageErrorBoundary pageName="Eligible Employees">
+      <Page
+        label={`${CAPTIONS.ELIGIBLE_EMPLOYEES}`}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
 
-        <Grid width="100%">
-          <EligibleEmployeesGrid
-            innerRef={componentRef}
-            data={searchResults}
-            isLoading={isSearching}
-            showData={showData}
-            hasResults={hasResults ?? false}
-            pagination={pagination}
-            onPaginationChange={pagination.handlePaginationChange}
-            onSortChange={pagination.handleSortChange}
-          />
+          <Grid width="100%">
+            <EligibleEmployeesGrid
+              innerRef={componentRef}
+              data={searchResults}
+              isLoading={isSearching}
+              showData={showData}
+              hasResults={hasResults ?? false}
+              pagination={pagination}
+              onSortChange={pagination.handleSortChange}
+            />
+          </Grid>
         </Grid>
-      </Grid>
-    </Page>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 
