@@ -416,6 +416,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(YTD_WAGES_EXTRACT_UNFROZEN, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(YTD_WAGES_EXTRACT_UNFROZEN, FINANCE_MANAGER);
     assign_navigation_role(YTD_WAGES_EXTRACT_UNFROZEN, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(YTD_WAGES_EXTRACT_UNFROZEN, IT_DEVOPS);
 
  -- LABELS NEW REPORT
     assign_navigation_role(LABELS_NEW, SYSTEM_ADMINISTRATOR);
