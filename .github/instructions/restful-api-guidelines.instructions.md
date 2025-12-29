@@ -1,15 +1,10 @@
----
-applyTo: "src/services/src/Demoulas.ProfitSharing.Endpoints/**/*.*"
-paths: "src/services/src/Demoulas.ProfitSharing.Endpoints/**/*.*"
----
-
 # RESTful API Guidelines Instructions
 
 **Reference:** [RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/)  
-**Project:** Smart Profit Sharing - Demoulas.ProfitSharing.Endpoints  
-**Last Updated:** November 8, 2025
+**Project:** Smart - Demoulas.{projectName}.Endpoints  
+**Last Updated:** December 23, 2025
 
-This document provides team guidelines for building RESTful API endpoints that conform to Zalando's RESTful API guidelines. These rules apply to all new endpoints and services under `src/services/src/Demoulas.ProfitSharing.Endpoints/`.
+This document provides team guidelines for building RESTful API endpoints that conform to Zalando's RESTful API guidelines. These rules apply to all new endpoints and services under `src/services/src/Demoulas.{projectName}.Endpoints/`.
 
 ---
 
@@ -34,29 +29,29 @@ This document provides team guidelines for building RESTful API endpoints that c
 
 ### DO ✅
 
-- Use **resource-oriented design** (nouns, not verbs)
-- Use **kebab-case** for path segments: `/profit-sharing-distributions`
-- Use **plural** resource names: `/distributions`, `/beneficiaries`
-- Use HTTP methods correctly: GET (read), POST (create), PUT (update), DELETE (remove)
-- Use **domain-specific** names: `/profit-year-distributions` not just `/distributions`
-- Return **JSON objects** as top-level (not arrays)
-- Use **snake_case** for JSON properties and query parameters
-- Return proper **error responses** with Problem JSON format
-- Implement **pagination** on all collection endpoints
-- Add **comprehensive telemetry** with business metrics
+-   Use **resource-oriented design** (nouns, not verbs)
+-   Use **kebab-case** for path segments: `/profit-sharing-distributions`
+-   Use **plural** resource names: `/distributions`, `/beneficiaries`
+-   Use HTTP methods correctly: GET (read), POST (create), PUT (update), DELETE (remove)
+-   Use **domain-specific** names: `/profit-year-distributions` not just `/distributions`
+-   Return **JSON objects** as top-level (not arrays)
+-   Use **snake_case** for JSON properties and query parameters
+-   Return proper **error responses** with Problem JSON format
+-   Implement **pagination** on all collection endpoints
+-   Add **comprehensive telemetry** with business metrics
 
 ### DON'T ❌
 
-- Use **verbs in URLs**: ~~`POST /update-enrollment`~~ → `PUT /profit-years/{id}`
-- Use **trailing slashes**: ~~`/distributions/`~~ → `/distributions`
-- Use **empty path segments**: ~~`GET /`~~ → `GET /resource-name`
-- Return **arrays as top-level**: ~~`[ {...}, {...} ]`~~ → `{ "results": [{...}] }`
-- Use **mixed case** in paths: ~~`/ProfitYearDistributions`~~ → `/profit-year-distributions`
-- Expose **stack traces** in error responses
-- Trust **client-provided roles** (always validate server-side)
-- Use **URL versioning**: ~~`/v1/distributions`~~ → Use media-type versioning instead
-- Skip **input validation** (validate all user input)
-- Implement **API-specific authentication** (use Okta OAuth 2.0)
+-   Use **verbs in URLs**: ~~`POST /update-enrollment`~~ → `PUT /profit-years/{id}`
+-   Use **trailing slashes**: ~~`/distributions/`~~ → `/distributions`
+-   Use **empty path segments**: ~~`GET /`~~ → `GET /resource-name`
+-   Return **arrays as top-level**: ~~`[ {...}, {...} ]`~~ → `{ "results": [{...}] }`
+-   Use **mixed case** in paths: ~~`/ProfitYearDistributions`~~ → `/profit-year-distributions`
+-   Expose **stack traces** in error responses
+-   Trust **client-provided roles** (always validate server-side)
+-   Use **URL versioning**: ~~`/v1/distributions`~~ → Use media-type versioning instead
+-   Skip **input validation** (validate all user input)
+-   Implement **API-specific authentication** (use Okta OAuth 2.0)
 
 ---
 
@@ -165,7 +160,7 @@ Collections use plural; items use singular identifiers.
 
 ```csharp
 // BEFORE: Singular (wrong)
-public class CreateDistributionEndpoint : ProfitSharingEndpoint<...>
+public class CreateDistributionEndpoint : {projectName}Endpoint<...>
 {
     public override void Configure()
     {
@@ -176,7 +171,7 @@ public class CreateDistributionEndpoint : ProfitSharingEndpoint<...>
 // URL: POST /distribution
 
 // AFTER: Plural (correct)
-public class CreateDistributionEndpoint : ProfitSharingEndpoint<...>
+public class CreateDistributionEndpoint : {projectName}Endpoint<...>
 {
     public override void Configure()
     {
@@ -289,11 +284,11 @@ public override void Configure()
 
 **Characteristics:**
 
-- ✅ Does not modify server state
-- ✅ Can be called multiple times safely
-- ✅ Results can be cached
-- ✅ Can include query parameters
-- ❌ Cannot include request body (or body must be ignored)
+-   ✅ Does not modify server state
+-   ✅ Can be called multiple times safely
+-   ✅ Results can be cached
+-   ✅ Can include query parameters
+-   ❌ Cannot include request body (or body must be ignored)
 
 #### POST - Creates Resource (NOT idempotent by default)
 
@@ -308,16 +303,16 @@ public override void Configure()
 
 **Characteristics:**
 
-- ✅ Creates new resource (server generates ID)
-- ✅ Typically returns 201 (Created)
-- ❌ NOT idempotent (same call = multiple resources)
-- ✅ Can include request body
+-   ✅ Creates new resource (server generates ID)
+-   ✅ Typically returns 201 (Created)
+-   ❌ NOT idempotent (same call = multiple resources)
+-   ✅ Can include request body
 
 **Response Codes:**
 
-- `201 Created` - Resource created (include Location header with new resource URI)
-- `200 OK` - Idempotent POST (if designed that way)
-- `202 Accepted` - Asynchronous processing started
+-   `201 Created` - Resource created (include Location header with new resource URI)
+-   `200 OK` - Idempotent POST (if designed that way)
+-   `202 Accepted` - Asynchronous processing started
 
 #### PUT - Updates Resource (Idempotent)
 
@@ -332,17 +327,17 @@ public override void Configure()
 
 **Characteristics:**
 
-- ✅ Updates existing resource
-- ✅ Client provides all required fields
-- ✅ Idempotent (same call = same result)
-- ✅ Returns 200 (OK) or 204 (No Content)
-- ✅ Can include request body
+-   ✅ Updates existing resource
+-   ✅ Client provides all required fields
+-   ✅ Idempotent (same call = same result)
+-   ✅ Returns 200 (OK) or 204 (No Content)
+-   ✅ Can include request body
 
 **Response Codes:**
 
-- `200 OK` - Resource updated; return updated resource
-- `204 No Content` - Resource updated; no response body
-- `404 Not Found` - Resource doesn't exist
+-   `200 OK` - Resource updated; return updated resource
+-   `204 No Content` - Resource updated; no response body
+-   `404 Not Found` - Resource doesn't exist
 
 #### DELETE - Removes Resource (Idempotent)
 
@@ -357,17 +352,17 @@ public override void Configure()
 
 **Characteristics:**
 
-- ✅ Removes resource
-- ✅ Idempotent (DELETE twice = same result)
-- ✅ Returns 200 (OK), 204 (No Content), or 202 (Accepted)
-- ❌ Typically no request body
+-   ✅ Removes resource
+-   ✅ Idempotent (DELETE twice = same result)
+-   ✅ Returns 200 (OK), 204 (No Content), or 202 (Accepted)
+-   ❌ Typically no request body
 
 **Response Codes:**
 
-- `200 OK` - Resource deleted; return deleted resource
-- `204 No Content` - Resource deleted; no response body
-- `202 Accepted` - Deletion queued (asynchronous)
-- `404 Not Found` - Resource doesn't exist
+-   `200 OK` - Resource deleted; return deleted resource
+-   `204 No Content` - Resource deleted; no response body
+-   `202 Accepted` - Deletion queued (asynchronous)
+-   `404 Not Found` - Resource doesn't exist
 
 #### PATCH - Partial Update (with JSON Merge Patch)
 
@@ -380,14 +375,14 @@ public override void Configure()
 
 **Use PATCH when:**
 
-- Only updating specific fields
-- Using JSON Merge Patch (`application/merge-patch+json`)
+-   Only updating specific fields
+-   Using JSON Merge Patch (`application/merge-patch+json`)
 
 **Prefer PUT** when:
 
-- Updating entire resource
-- Client provides complete object
-- Simple semantics needed
+-   Updating entire resource
+-   Client provides complete object
+-   Simple semantics needed
 
 ### Rule: Fulfill Common Method Properties (MUST)
 
@@ -410,7 +405,7 @@ If same POST request may be called multiple times, design it as idempotent:
 
 ```csharp
 // ✅ Idempotent POST using secondary key
-public class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDistributionRequest, DistributionResponse>
+public class CreateDistributionEndpoint : {projectName}Endpoint<CreateDistributionRequest, DistributionResponse>
 {
     public override void Configure()
     {
@@ -501,8 +496,8 @@ Return objects (with `{ }` braces), NOT arrays.
 
 ```json
 [
-  { "id": 1, "name": "Distribution 1" },
-  { "id": 2, "name": "Distribution 2" }
+    { "id": 1, "name": "Distribution 1" },
+    { "id": 2, "name": "Distribution 2" }
 ]
 ```
 
@@ -510,10 +505,10 @@ Return objects (with `{ }` braces), NOT arrays.
 
 ```json
 {
-  "results": [
-    { "id": 1, "name": "Distribution 1" },
-    { "id": 2, "name": "Distribution 2" }
-  ]
+    "results": [
+        { "id": 1, "name": "Distribution 1" },
+        { "id": 2, "name": "Distribution 2" }
+    ]
 }
 ```
 
@@ -672,11 +667,11 @@ All error responses MUST follow Problem JSON schema (RFC 7807).
 
 ```json
 {
-  "type": "https://api.example.com/errors/validation-error",
-  "title": "Validation Failed",
-  "status": 400,
-  "detail": "The 'profit_year' field must be between 2000 and 2099",
-  "instance": "/distributions/123"
+    "type": "https://api.example.com/errors/validation-error",
+    "title": "Validation Failed",
+    "status": 400,
+    "detail": "The 'profit_year' field must be between 2000 and 2099",
+    "instance": "/distributions/123"
 }
 ```
 
@@ -715,9 +710,9 @@ public override async Task<Results<Ok<T>, BadRequest, ProblemHttpResult>> Execut
 
 ```json
 {
-  "error": "NullReferenceException at line 42",
-  "stack_trace": "at MasterInquiryService.GetMembers() in MasterInquiryService.cs:line 42",
-  "sql": "SELECT * FROM MEMBERS WHERE ID = NULL"
+    "error": "NullReferenceException at line 42",
+    "stack_trace": "at MasterInquiryService.GetMembers() in MasterInquiryService.cs:line 42",
+    "sql": "SELECT * FROM MEMBERS WHERE ID = NULL"
 }
 ```
 
@@ -725,10 +720,10 @@ public override async Task<Results<Ok<T>, BadRequest, ProblemHttpResult>> Execut
 
 ```json
 {
-  "type": "https://api.example.com/errors/member-not-found",
-  "title": "Member Not Found",
-  "status": 404,
-  "detail": "Member with ID 99999 does not exist"
+    "type": "https://api.example.com/errors/member-not-found",
+    "title": "Member Not Found",
+    "status": 404,
+    "detail": "Member with ID 99999 does not exist"
 }
 ```
 
@@ -761,8 +756,8 @@ Every collection endpoint MUST support pagination.
 GET /distributions?limit=20&cursor=abc123
 ```
 
-- `limit` - Number of results to return (default: 20, max: 1000)
-- `cursor` - Pagination cursor (opaque string for next/previous page)
+-   `limit` - Number of results to return (default: 20, max: 1000)
+-   `cursor` - Pagination cursor (opaque string for next/previous page)
 
 #### Response Structure
 
@@ -838,9 +833,9 @@ public class ListDistributionsEndpoint :
 
 **Why cursors over offset:**
 
-- ✅ Handles data changes between requests (inserts/deletes)
-- ✅ Efficient for large datasets
-- ✅ No N+1 query issues
+-   ✅ Handles data changes between requests (inserts/deletes)
+-   ✅ Efficient for large datasets
+-   ✅ No N+1 query issues
 
 **Don't use offset-based:**
 
@@ -1000,17 +995,17 @@ When changing APIs:
 
 **DO:**
 
-- ✅ Add optional fields
-- ✅ Add new endpoints
-- ✅ Deprecate old endpoints (with warning)
-- ✅ Support both old and new for 6+ months
+-   ✅ Add optional fields
+-   ✅ Add new endpoints
+-   ✅ Deprecate old endpoints (with warning)
+-   ✅ Support both old and new for 6+ months
 
 **DON'T:**
 
-- ❌ Remove fields
-- ❌ Change field types
-- ❌ Change HTTP methods for existing endpoints
-- ❌ Change URL structure without migration path
+-   ❌ Remove fields
+-   ❌ Change field types
+-   ❌ Change HTTP methods for existing endpoints
+-   ❌ Change URL structure without migration path
 
 **Example: Adding a Field**
 
@@ -1039,9 +1034,9 @@ public class MemberDto
 
 Version format: `MAJOR.MINOR.PATCH`
 
-- `MAJOR` - Breaking changes
-- `MINOR` - Backwards-compatible additions
-- `PATCH` - Bug fixes
+-   `MAJOR` - Breaking changes
+-   `MINOR` - Backwards-compatible additions
+-   `PATCH` - Bug fixes
 
 Example: `1.2.3`
 
@@ -1049,8 +1044,8 @@ Example: `1.2.3`
 
 ```yaml
 info:
-  title: Profit Sharing API
-  version: 1.2.3 # ✅ Semantic versioning
+    title: Profit Sharing API
+    version: 1.2.3 # ✅ Semantic versioning
 ```
 
 ---
@@ -1063,104 +1058,104 @@ info:
 
 OpenAPI 3.1 specification MUST be published for all APIs.
 
-**File location:** `/src/services/Demoulas.ProfitSharing.openapi.yaml`
+**File location:** `/src/services/Demoulas.{projectName}.openapi.yaml`
 
 **Minimal Example:**
 
 ```yaml
 openapi: 3.1.0
 info:
-  title: Profit Sharing API
-  version: 1.0.0
-  x-api-id: profit-sharing-api-uuid
-  x-audience: component-internal
-  description: |
-    Core API for profit sharing calculations and member management.
+    title: Profit Sharing API
+    version: 1.0.0
+    x-api-id: profit-sharing-api-uuid
+    x-audience: component-internal
+    description: |
+        Core API for profit sharing calculations and member management.
 
-    Authentication: OAuth 2.0 Bearer (Okta)
-    Roles: ADMINISTRATOR, FINANCEMANAGER, READONLY
+        Authentication: OAuth 2.0 Bearer (Okta)
+        Roles: ADMINISTRATOR, FINANCEMANAGER, READONLY
 
 servers:
-  - url: https://api.example.com
-    description: Production
+    - url: https://api.example.com
+      description: Production
 
 paths:
-  /distributions:
-    get:
-      summary: List distributions
-      operationId: listDistributions
-      parameters:
-        - name: profit_year
-          in: query
-          schema:
-            type: integer
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Distribution"
-                  pagination:
-                    $ref: "#/components/schemas/Pagination"
+    /distributions:
+        get:
+            summary: List distributions
+            operationId: listDistributions
+            parameters:
+                - name: profit_year
+                  in: query
+                  schema:
+                      type: integer
+                - name: limit
+                  in: query
+                  schema:
+                      type: integer
+                      default: 20
+            responses:
+                "200":
+                    description: Success
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    results:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/Distribution"
+                                    pagination:
+                                        $ref: "#/components/schemas/Pagination"
 
-    post:
-      summary: Create distribution
-      operationId: createDistribution
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateDistributionRequest"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Distribution"
-        "400":
-          description: Bad Request
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
+        post:
+            summary: Create distribution
+            operationId: createDistribution
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreateDistributionRequest"
+            responses:
+                "201":
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Distribution"
+                "400":
+                    description: Bad Request
+                    content:
+                        application/problem+json:
+                            schema:
+                                $ref: "#/components/schemas/Problem"
 
 components:
-  schemas:
-    Distribution:
-      type: object
-      properties:
-        id:
-          type: integer
-        profit_year:
-          type: integer
-        gross_amount:
-          type: number
-          format: decimal
+    schemas:
+        Distribution:
+            type: object
+            properties:
+                id:
+                    type: integer
+                profit_year:
+                    type: integer
+                gross_amount:
+                    type: number
+                    format: decimal
 
-    Problem:
-      type: object
-      properties:
-        type:
-          type: string
-        title:
-          type: string
-        status:
-          type: integer
-        detail:
-          type: string
+        Problem:
+            type: object
+            properties:
+                type:
+                    type: string
+                title:
+                    type: string
+                status:
+                    type: integer
+                detail:
+                    type: string
 ```
 
 ---
@@ -1171,66 +1166,66 @@ Use this checklist when creating any new endpoint to ensure compliance:
 
 ### Design Phase
 
-- [ ] **Resource-based URL** - Uses nouns (not verbs)
-  - Example: `POST /beneficiary-disbursements` not `POST /create-disbursement`
-- [ ] **Correct HTTP method** - GET/POST/PUT/DELETE match semantics
-- [ ] **Kebab-case path** - All path segments lowercase with hyphens
-  - Example: `/profit-year-distributions/{id}` not `/ProfitYearDistributions/{id}`
-- [ ] **Plural resource names** - Collections use plural
-  - Example: `/distributions/{id}` not `/distribution/{id}`
-- [ ] **Domain-specific names** - Use business terminology
-  - Example: `/beneficiary-disbursements` not `/payments`
-- [ ] **≤3 nesting levels** - Don't over-nest resources
+-   [ ] **Resource-based URL** - Uses nouns (not verbs)
+    -   Example: `POST /beneficiary-disbursements` not `POST /create-disbursement`
+-   [ ] **Correct HTTP method** - GET/POST/PUT/DELETE match semantics
+-   [ ] **Kebab-case path** - All path segments lowercase with hyphens
+    -   Example: `/profit-year-distributions/{id}` not `/ProfitYearDistributions/{id}`
+-   [ ] **Plural resource names** - Collections use plural
+    -   Example: `/distributions/{id}` not `/distribution/{id}`
+-   [ ] **Domain-specific names** - Use business terminology
+    -   Example: `/beneficiary-disbursements` not `/payments`
+-   [ ] **≤3 nesting levels** - Don't over-nest resources
 
 ### API Design
 
-- [ ] **Status codes defined** - 200, 201, 204, 400, 404, 500 documented
-- [ ] **Request/response DTOs** - Clear, documented structure
-- [ ] **Pagination implemented** - Collection endpoints support `limit` and `cursor`
-- [ ] **Error handling** - Problem JSON format for errors
-- [ ] **Security policy** - Endpoint has appropriate authorization
+-   [ ] **Status codes defined** - 200, 201, 204, 400, 404, 500 documented
+-   [ ] **Request/response DTOs** - Clear, documented structure
+-   [ ] **Pagination implemented** - Collection endpoints support `limit` and `cursor`
+-   [ ] **Error handling** - Problem JSON format for errors
+-   [ ] **Security policy** - Endpoint has appropriate authorization
 
 ### Implementation
 
-- [ ] **Snake_case JSON** - JSON serializer configured for snake_case
-- [ ] **Snake_case query params** - Query parameters use snake_case
-- [ ] **Top-level JSON objects** - Never return arrays at root
-- [ ] **Telemetry added** - Business metrics and sensitive fields declared
-- [ ] **Logger injected** - `ILogger<T>` in constructor for correlation
-- [ ] **Input validation** - FluentValidation rules defined
+-   [ ] **Snake_case JSON** - JSON serializer configured for snake_case
+-   [ ] **Snake_case query params** - Query parameters use snake_case
+-   [ ] **Top-level JSON objects** - Never return arrays at root
+-   [ ] **Telemetry added** - Business metrics and sensitive fields declared
+-   [ ] **Logger injected** - `ILogger<T>` in constructor for correlation
+-   [ ] **Input validation** - FluentValidation rules defined
 
 ### Documentation
 
-- [ ] **Summary provided** - Endpoint `Summary()` property populated
-- [ ] **Description detailed** - Explain purpose and usage
-- [ ] **Example request** - `ExampleRequest` property shown
-- [ ] **Example responses** - Response examples for each status code
-- [ ] **OpenAPI updated** - Specification includes new endpoint
+-   [ ] **Summary provided** - Endpoint `Summary()` property populated
+-   [ ] **Description detailed** - Explain purpose and usage
+-   [ ] **Example request** - `ExampleRequest` property shown
+-   [ ] **Example responses** - Response examples for each status code
+-   [ ] **OpenAPI updated** - Specification includes new endpoint
 
 ### Security Review
 
-- [ ] **Endpoint secured** - Policy applied via `Policies()`
-- [ ] **Authentication required** - Not marked `AllowAnonymous`
-- [ ] **Server-side validation** - Roles validated server-side
-- [ ] **No PII in logs** - Sensitive fields masked in telemetry
-- [ ] **No stack traces exposed** - Error responses generic
-- [ ] **CRITICAL: Age never calculated in frontend** - Age MUST be calculated backend-only. Frontend must never compute age from DOB (causes inconsistency and breaks sensitive data masking)
+-   [ ] **Endpoint secured** - Policy applied via `Policies()`
+-   [ ] **Authentication required** - Not marked `AllowAnonymous`
+-   [ ] **Server-side validation** - Roles validated server-side
+-   [ ] **No PII in logs** - Sensitive fields masked in telemetry
+-   [ ] **No stack traces exposed** - Error responses generic
+-   [ ] **CRITICAL: Age never calculated in frontend** - Age MUST be calculated backend-only. Frontend must never compute age from DOB (causes inconsistency and breaks sensitive data masking)
 
 ### Testing
 
-- [ ] **Unit tests** - Happy path and error cases
-- [ ] **Integration tests** - HTTP method semantics verified
-- [ ] **Authorization tests** - Policy enforcement tested
-- [ ] **Security tests** - Unauthenticated/unauthorized access blocked
+-   [ ] **Unit tests** - Happy path and error cases
+-   [ ] **Integration tests** - HTTP method semantics verified
+-   [ ] **Authorization tests** - Policy enforcement tested
+-   [ ] **Security tests** - Unauthenticated/unauthorized access blocked
 
 ---
 
 ## References
 
-- [Zalando RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/)
-- Project: [COPILOT_INSTRUCTIONS.md](../copilot-instructions.md)
-- Architecture: [Architecture Overview](../../README.md)
-- Related: [endpoints.instructions.md](endpoints.instructions.md)
+-   [Zalando RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/)
+-   Project: [COPILOT_INSTRUCTIONS.md](../copilot-instructions.md)
+-   Architecture: [Architecture Overview](../../README.md)
+-   Related: [endpoints.instructions.md](endpoints.instructions.md)
 
 ---
 

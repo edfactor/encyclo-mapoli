@@ -5,7 +5,7 @@ describe("fileDownload", () => {
   describe("downloadFileFromResponse", () => {
     let createObjectURLSpy: ReturnType<typeof vi.fn>;
     let revokeObjectURLSpy: ReturnType<typeof vi.fn>;
-    let consoleErrorSpy: ReturnType<typeof vi.fn>;
+    let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
       // Mock window.URL methods

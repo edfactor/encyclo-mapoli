@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -13,14 +13,14 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
 {
     public Mock<ProfitSharingDbContext> ProfitSharingDbContext { get; }
     public Mock<ProfitSharingReadOnlyDbContext> ProfitSharingReadOnlyDbContext { get; }
-    public Mock<DemoulasCommonWarehouseContext> StoreInfoDbContext { get; }
+    public Mock<IDemoulasCommonWarehouseContext> StoreInfoDbContext { get; }
 
 
     public ScenarioDataContextFactory()
     {
         ProfitSharingDbContext = new Mock<ProfitSharingDbContext>();
         ProfitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
-        StoreInfoDbContext = new Mock<DemoulasCommonWarehouseContext>();
+        StoreInfoDbContext = new Mock<IDemoulasCommonWarehouseContext>();
     }
 
     /// <summary>
@@ -189,7 +189,7 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
-    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
+    public async Task<T> UseWarehouseContext<T>(Func<IDemoulasCommonWarehouseContext, Task<T>> func)
     {
         try
         {

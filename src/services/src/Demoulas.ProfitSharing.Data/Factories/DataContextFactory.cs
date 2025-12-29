@@ -1,6 +1,6 @@
 ﻿using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Contexts.Factory;
-using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,12 +29,12 @@ public sealed class DataContextFactory : DataContextFactoryBase<ProfitSharingDbC
     /// <typeparam name="T"></typeparam>
     /// <param name="func"></param>
     /// <returns></returns>
-    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
+    public async Task<T> UseWarehouseContext<T>(Func<IDemoulasCommonWarehouseContext, Task<T>> func)
     {
         using (Logger.BeginScope("Warehouse DB Operation"))
         {
             await using AsyncServiceScope scope = ServiceProvider.CreateAsyncScope();
-            DemoulasCommonWarehouseContext dbContext = scope.ServiceProvider.GetRequiredService<DemoulasCommonWarehouseContext>();
+            IDemoulasCommonWarehouseContext dbContext = scope.ServiceProvider.GetRequiredService<IDemoulasCommonWarehouseContext>();
             return await func(dbContext);
         }
     }
