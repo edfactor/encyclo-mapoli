@@ -347,7 +347,7 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
 };
 
 export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => {
-  const defaultValueFormatter = (params:ValueFormatterParams<any,any>) => {
+  const defaultValueFormatter = (params: ValueFormatterParams) => {
       const value = params.value;
       // Need to log value and type of value
 
@@ -361,7 +361,7 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
       // Fallback: attempt not to break – convert other types to string
       return String(value);
   };
-  
+
   const {
     headerName,
     field,
