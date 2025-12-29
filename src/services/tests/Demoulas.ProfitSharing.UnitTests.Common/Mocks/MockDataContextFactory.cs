@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
@@ -25,7 +25,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 {
     private readonly Mock<ProfitSharingDbContext> _profitSharingDbContext;
     private readonly Mock<ProfitSharingReadOnlyDbContext> _profitSharingReadOnlyDbContext;
-    private readonly Mock<DemoulasCommonWarehouseContext> _storeInfoDbContext;
+    private readonly Mock<IDemoulasCommonWarehouseContext> _storeInfoDbContext;
 
     // Lazy loading: Store references for on-demand Beneficiary expansion (never reassigned, content is mutated)
     private readonly List<Demographic>? _lazyDemographics;
@@ -149,7 +149,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(ctx => ctx.SaveChangesAsync(true, It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
-        _storeInfoDbContext = new Mock<DemoulasCommonWarehouseContext>();
+        _storeInfoDbContext = new Mock<IDemoulasCommonWarehouseContext>();
 
         // Setup Database facade for the read-only context
         var mockDatabaseFacade = new Mock<DatabaseFacade>(_profitSharingReadOnlyDbContext.Object);
@@ -754,7 +754,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     }
 
 
-    public async Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
+    public async Task<T> UseWarehouseContext<T>(Func<IDemoulasCommonWarehouseContext, Task<T>> func)
     {
         try
         {

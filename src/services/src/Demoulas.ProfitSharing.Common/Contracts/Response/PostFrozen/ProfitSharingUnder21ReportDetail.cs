@@ -24,7 +24,7 @@ public record ProfitSharingUnder21ReportDetail : IIsExecutive, IFirstName, ILast
     [MaskSensitive]
     public DateOnly DateOfBirth { get; init; }
     [MaskSensitive] public required short Age { get; init; }
-    public required string EmploymentStatusId { get; init; }
+    public required char EmploymentStatusId { get; init; }
     public decimal CurrentBalance { get; init; }
     public required string EnrollmentId { get; init; }
 
@@ -47,7 +47,7 @@ public record ProfitSharingUnder21ReportDetail : IIsExecutive, IFirstName, ILast
             TerminationDate = null,
             DateOfBirth = new DateOnly(2005, 8, 20),
             Age = 19,
-            EmploymentStatusId = "A",
+            EmploymentStatusId = 'A',
             CurrentBalance = 15000.50m,
             EnrollmentId = "1"
         };
