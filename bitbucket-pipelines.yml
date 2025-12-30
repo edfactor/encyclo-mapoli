@@ -17,7 +17,6 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt195
       script:
         # Set environment variables
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
