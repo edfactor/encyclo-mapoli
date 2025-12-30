@@ -33,7 +33,6 @@ public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<Update
     private static bool HasAtMostFourDecimals(decimal value)
     {
         // Convert to string using invariant culture to ensure consistent decimal separator
-        // This avoids floating-point precision issues and culture-dependent formatting
         var valueString = value.ToString(System.Globalization.CultureInfo.InvariantCulture);
         var decimalIndex = valueString.IndexOf('.');
 
@@ -43,7 +42,16 @@ public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<Update
             return true;
         }
 
-        var decimalPlaces = valueString.Length - decimalIndex - 1;
+        // Count digit characters after the decimal point
+        int decimalPlaces = 0;
+        for (int i = decimalIndex + 1; i < valueString.Length; i++)
+        {
+            if (char.IsDigit(valueString[i]))
+            {
+                decimalPlaces++;
+            }
+        }
+
         return decimalPlaces <= 4;
     }
 }
