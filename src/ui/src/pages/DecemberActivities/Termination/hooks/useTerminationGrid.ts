@@ -69,6 +69,8 @@ const ACTIVITY_CONFIG = {
   rowKeyConfig: { type: "termination" as const }
 };
 
+const INITIAL_PAGE_SIZE = 25;
+
 export const useTerminationGrid = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
@@ -101,6 +103,10 @@ export const useTerminationGrid = ({
   const gridRef = useRef<{ api: GridApi } | null>(null);
   const prevTermination = useRef<typeof termination | null>(null);
   const lastRequestKeyRef = useRef<string | null>(null);
+
+  // Refs to prevent duplicate API calls during pagination changes
+  const isPaginationChangeRef = useRef<boolean>(false);
+  const currentPageSizeRef = useRef<number>(INITIAL_PAGE_SIZE);
 
   // Notify parent component of loading state changes
   useEffect(() => {
@@ -145,28 +151,18 @@ export const useTerminationGrid = ({
 
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
     useGridPagination({
-      initialPageSize: 25,
+      initialPageSize: INITIAL_PAGE_SIZE,
       initialSortBy: "name",
       initialSortDescending: false,
-      persistenceKey: GRID_KEYS.TERMINATION,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (initialSearchLoaded && searchParams) {
-            const params = createRequest(
-              pageNum * pageSz,
-              sortPrms.sortBy,
-              sortPrms.isSortDescending,
-              selectedProfitYear,
-              pageSz
-            );
-            if (params) {
-              await triggerSearch(params, false);
-            }
-          }
-        },
-        [initialSearchLoaded, searchParams, createRequest, selectedProfitYear, triggerSearch]
-      )
+      persistenceKey: GRID_KEYS.TERMINATION
+      // Note: No onPaginationChange callback - paginationHandlers directly trigger search
+      // to avoid duplicate API calls when page size changes
     });
+
+  // Keep currentPageSizeRef in sync with pageSize from useGridPagination
+  useEffect(() => {
+    currentPageSizeRef.current = pageSize;
+  }, [pageSize]);
 
   const onGridReady = useCallback((_params: { api: GridApi }) => {
     // Grid is now ready - gridRef will be set by the component
@@ -246,7 +242,8 @@ export const useTerminationGrid = ({
 
   // Unified effect to handle all data fetching scenarios
   useEffect(() => {
-    if (!initialSearchLoaded || !searchParams) return;
+    // Skip if pagination change is being handled by paginationHandlers directly
+    if (!initialSearchLoaded || !searchParams || isPaginationChangeRef.current) return;
 
     const executeSearch = async () => {
       const params = createRequest(
@@ -558,25 +555,84 @@ export const useTerminationGrid = ({
       .filter((row) => row !== null); // Remove null entries
   }, [termination]);
 
-  const paginationHandlers = {
-    setPageNumber: (value: number) => {
-      if (hasUnsavedChanges) {
-        onShowUnsavedChangesDialog?.();
-        return;
+  // Memoized pagination handlers that directly trigger search to avoid duplicate API calls
+  const paginationHandlers = useMemo(
+    () => ({
+      setPageNumber: async (value: number) => {
+        if (hasUnsavedChanges) {
+          onShowUnsavedChangesDialog?.();
+          return;
+        }
+
+        // If we're in the middle of a pagination change (like page size change),
+        // just update the state without triggering a search
+        if (isPaginationChangeRef.current) {
+          const currentPageSizeValue = currentPageSizeRef.current;
+          handlePaginationChange(value, currentPageSizeValue);
+          return;
+        }
+
+        // Normal page number change - trigger search directly
+        const currentPageSizeValue = currentPageSizeRef.current;
+        handlePaginationChange(value, currentPageSizeValue);
+
+        const params = createRequest(
+          value * currentPageSizeValue,
+          sortParams.sortBy,
+          sortParams.isSortDescending,
+          selectedProfitYear,
+          currentPageSizeValue
+        );
+        if (params) {
+          try {
+            await triggerSearch(params, false);
+          } catch (error) {
+            console.error("Error fetching termination report:", error);
+          }
+        }
+        setInitialSearchLoaded(true);
+      },
+      setPageSize: async (value: number) => {
+        if (hasUnsavedChanges) {
+          onShowUnsavedChangesDialog?.();
+          return;
+        }
+
+        // Set flag to prevent useEffect from also triggering a search
+        isPaginationChangeRef.current = true;
+        currentPageSizeRef.current = value;
+        handlePaginationChange(0, value);
+
+        const params = createRequest(0, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear, value);
+        if (params) {
+          try {
+            await triggerSearch(params, false);
+          } catch (error) {
+            console.error("Error fetching termination report:", error);
+          }
+        }
+
+        // Clear flag after search completes using RAF + timeout to ensure state updates are processed
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            isPaginationChangeRef.current = false;
+          }, 10);
+        });
+        setInitialSearchLoaded(true);
       }
-      // DSMPaginatedGrid already passes 0-based page number (no need to subtract 1)
-      handlePaginationChange(value, pageSize);
-      setInitialSearchLoaded(true);
-    },
-    setPageSize: (value: number) => {
-      if (hasUnsavedChanges) {
-        onShowUnsavedChangesDialog?.();
-        return;
-      }
-      handlePaginationChange(0, value);
-      setInitialSearchLoaded(true);
-    }
-  };
+    }),
+    [
+      hasUnsavedChanges,
+      onShowUnsavedChangesDialog,
+      handlePaginationChange,
+      createRequest,
+      sortParams.sortBy,
+      sortParams.isSortDescending,
+      selectedProfitYear,
+      triggerSearch,
+      setInitialSearchLoaded
+    ]
+  );
 
   return {
     // State

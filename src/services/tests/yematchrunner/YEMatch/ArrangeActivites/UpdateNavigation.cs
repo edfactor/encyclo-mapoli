@@ -1,7 +1,7 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Shouldly;
+﻿using Shouldly;
+using YEMatch.AssertActivities;
 
-namespace YEMatch.AssertActivities;
+namespace YEMatch.ArrangeActivites;
 
 public class UpdateNavigation : BaseActivity
 {

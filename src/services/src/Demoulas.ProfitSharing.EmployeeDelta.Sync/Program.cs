@@ -58,7 +58,7 @@ builder.Configuration.Bind("SmartLogging", logConfig);
 
 logConfig.MaskingOperators = [
     new UnformattedSocialSecurityNumberMaskingOperator(),
-    new SensitiveValueMaskingOperator()
+    new SensitiveValueMaskingOperator(builder.Environment)
 ];
 
 builder.SetDefaultLoggerConfiguration(logConfig);

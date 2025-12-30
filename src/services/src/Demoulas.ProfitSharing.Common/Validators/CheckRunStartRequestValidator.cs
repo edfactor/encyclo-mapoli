@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request.CheckRun;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.CheckRun;
 using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Common.Validators;

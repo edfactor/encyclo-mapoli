@@ -52,23 +52,18 @@ else
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 }
 
+Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 // Configure logging - configuration read from SmartLogging section in appsettings
 LoggingConfig logConfig = new();
 builder.Configuration.Bind("SmartLogging", logConfig);
 
 logConfig.MaskingOperators = [
     new UnformattedSocialSecurityNumberMaskingOperator(),
-    new SensitiveValueMaskingOperator()
+    new SensitiveValueMaskingOperator(builder.Environment)
 ];
 
 _ = builder.SetDefaultLoggerConfiguration(logConfig);
-
-// Configure QuestPDF license for development and production environments
-// For development and non-commercial use: Community license (free)
-// For commercial use with revenue > $1M USD: requires Commercial license
-// See: https://www.questpdf.com/license/
-Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
-
 _ = builder.AddSecurityServices();
 
 

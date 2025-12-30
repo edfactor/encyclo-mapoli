@@ -145,7 +145,7 @@ Demoulas.ProfitSharing.Endpoints/
 
 - One endpoint per file, named `{Operation}{Entity}Endpoint.cs` (e.g., `CreateBeneficiaryEndpoint.cs`)
 - Group endpoints by business domain, not HTTP verb
-- Validators colocated in `/Validation` folder (shared) or inline as nested classes
+- **Validators MUST be in `Common.Validators` namespace** (see [copilot-instructions.md](../../copilot-instructions.md) line 313) - NOT in Endpoints.Validation. This ensures validators are accessible across all layers (endpoints, services, tests)
 
 ---
 
@@ -900,7 +900,12 @@ FastEndpoints integrates with **FluentValidation** for request DTO validation. V
 #### Validator Example
 
 ```csharp
+// File location: Demoulas.ProfitSharing.Common/Validators/IdsRequestValidator.cs
+// CRITICAL: Validators MUST be in Common.Validators namespace, NOT Endpoints.Validation
+
 using FluentValidation;
+
+namespace Demoulas.ProfitSharing.Common.Validators;
 
 public class IdsRequestValidator : AbstractValidator<IdsRequest>
 {
@@ -928,6 +933,8 @@ public class IdsRequestValidator : AbstractValidator<IdsRequest>
     }
 }
 ```
+
+**Location Requirement:** All validators MUST be placed in the `Demoulas.ProfitSharing.Common.Validators` namespace, NOT in `Endpoints.Validation`. This ensures validators are accessible across all layers (endpoints, services, tests) and maintains clean architectural separation.
 
 **Registration:** FluentValidation validators are auto-discovered via `AddValidatorsFromAssemblyContaining<T>()` in DI setup.
 
@@ -961,6 +968,13 @@ When validation fails, FastEndpoints returns:
 #### Example: Pagination Validator
 
 ```csharp
+// File location: Demoulas.ProfitSharing.Common/Validators/PaginationRequestValidator.cs
+// CRITICAL: Validators MUST be in Common.Validators namespace
+
+using FluentValidation;
+
+namespace Demoulas.ProfitSharing.Common.Validators;
+
 public class PaginationRequestValidator : AbstractValidator<PaginationRequest>
 {
     public PaginationRequestValidator()
@@ -1412,8 +1426,11 @@ public sealed record MyFeatureResponse
 
 #### 2. Create Validator (if needed)
 
+**File location: Demoulas.ProfitSharing.Common/Validators/MyFeatureRequestValidator.cs**
+**CRITICAL: Validators MUST be in `Common.Validators` namespace, NOT in `Endpoints.Validation`**
+
 ```csharp
-namespace Demoulas.ProfitSharing.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Common.Validators;
 
 public sealed class MyFeatureRequestValidator : AbstractValidator<MyFeatureRequest>
 {

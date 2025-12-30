@@ -28,7 +28,6 @@ internal sealed record MemberSlice
     internal decimal Etva { get; init; }
     public bool IsBeneficiaryAndEmployee { get; set; }
     public bool IsOnlyBeneficiary { get; set; }
-    public short ProfitYear { get; set; }
     public bool IsExecutive { get; set; }
 
     public byte[] CheckSum
@@ -36,7 +35,7 @@ internal sealed record MemberSlice
         get
         {
             byte[] bytes = Encoding.UTF8.GetBytes(
-                $"{PsnSuffix}{BadgeNumber}{Ssn}{HoursCurrentYear}{EmploymentStatusCode}{FullName}{FirstName}{LastName}{YearsInPs}{BirthDate}{TerminationDate}{IncomeRegAndExecCurrentYear}{TerminationCode}{ZeroCont}{EnrollmentId}{Etva}{IsBeneficiaryAndEmployee}{IsOnlyBeneficiary}{ProfitYear}");
+                $"{PsnSuffix}{BadgeNumber}{Ssn}{HoursCurrentYear}{EmploymentStatusCode}{FullName}{FirstName}{LastName}{YearsInPs}{BirthDate}{TerminationDate}{IncomeRegAndExecCurrentYear}{TerminationCode}{ZeroCont}{EnrollmentId}{Etva}{IsBeneficiaryAndEmployee}{IsOnlyBeneficiary}");
             return SHA256.HashData(bytes);
         }
     }

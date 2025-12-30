@@ -47,9 +47,8 @@ describe("useAdhocProfLetter73Print", () => {
     const selectedRows: Record<string, unknown>[] = [{ badgeNumber: "123456" }];
 
     const mockTriggerDownload = vi.fn();
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
     vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
       mockTriggerDownload,
       {
@@ -80,9 +79,8 @@ describe("useAdhocProfLetter73Print", () => {
     const selectedRows: Record<string, unknown>[] = [];
 
     const mockTriggerDownload = vi.fn();
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
     vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
       mockTriggerDownload,
       {
@@ -122,9 +120,8 @@ describe("useAdhocProfLetter73Print", () => {
       data: mockBlob
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
     vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
       mockTriggerDownload,
       {
@@ -171,9 +168,8 @@ describe("useAdhocProfLetter73Print", () => {
       data: mockBlob
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
     vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
       mockTriggerDownload,
       {
@@ -218,9 +214,8 @@ describe("useAdhocProfLetter73Print", () => {
       data: mockBlob
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
     vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
       mockTriggerDownload,
       {
@@ -258,9 +253,8 @@ describe("useAdhocProfLetter73Print", () => {
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const mockTriggerDownload = vi.fn().mockRejectedValue(new Error("API Error"));
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
     vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
       mockTriggerDownload,
       {
@@ -377,9 +371,8 @@ describe("useAdhocProfLetter73Print", () => {
     ];
 
     const mockTriggerDownload = vi.fn();
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
     vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
       mockTriggerDownload,
       {
@@ -418,9 +411,8 @@ describe("useAdhocProfLetter73Print", () => {
       error: { status: 500, data: "Server error" }
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
     vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
       mockTriggerDownload,
       {
@@ -488,9 +480,8 @@ describe("useAdhocProfLetter73Print", () => {
       data: mockBlob
     });
 
-    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } = await import(
-      "../../../../../reduxstore/api/AdhocProfLetter73Api"
-    );
+    const { useLazyDownloadAdhocProfLetter73FormLetterQuery } =
+      await import("../../../../../reduxstore/api/AdhocProfLetter73Api");
     vi.mocked(useLazyDownloadAdhocProfLetter73FormLetterQuery).mockReturnValue([
       mockTriggerDownload,
       {

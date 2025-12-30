@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
@@ -15,14 +16,13 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     {
     }
 
-    public async Task<string> CreateTextReport()
+    public async Task<string> CreateTextReport(DateOnly effectiveDateOfTestData)
     {
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
         short profitSharingYear = 2025;
-        DateOnly startDate = new(2018, 12, 31);
-        DateOnly endDate = new(2025, 12, 27);
-        DateOnly effectiveDateOfTestData = new(2025, 11, 11);
+        DateOnly startDate = new(2024, 01, 01);
+        DateOnly endDate = new(2024, 12, 31);
 
         ILoggerFactory _loggerFactory = LoggerFactory.Create(builder =>
         {
@@ -50,24 +50,30 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     [Fact]
     public async Task EnsureSmartReportMatchesReadyReport()
     {
+        string expectedText = ReadEmbeddedResource(".golden.R03-QPAY066");
+        DateOnly reportPrintedDate = QPay066ReportParser.ParseReportDate(expectedText);
+
         Stopwatch stopwatch = Stopwatch.StartNew();
-        string actualText = await CreateTextReport();
+        string actualText = await CreateTextReport(reportPrintedDate);
         TestOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds} To create SMART QPAY066 report");
         actualText.ShouldNotBeNullOrEmpty();
         QPay066Report a = new(actualText);
 
-        string expectedText = ReadEmbeddedResource(".golden.R3-QPAY066");
         QPay066Report e = new(expectedText);
 
         // Lets check the totals.
         a.ShouldBeEquivalentTo(e);
 
-        // Uncomment to for the Visual diff
-        // ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText)
+        // Toggle > to enable display of site by side diff
+        if (DateTime.Now.Year < 2024)
+        {
+            ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText);
+        }
 
         Dictionary<long, QPay066Record> expectedMap = AsDict(QPay066ReportParser.ParseRecords(expectedText));
         Dictionary<long, QPay066Record> actualMap = AsDict(QPay066ReportParser.ParseRecords(actualText));
-        actualMap.Count.ShouldBeEquivalentTo(expectedMap.Count, $"We dont have the same number of employees in the two reports. SMART {actualMap.Count}, READY {expectedMap.Count}");
+        actualMap.Count.ShouldBeEquivalentTo(expectedMap.Count,
+            $"We dont have the same number of employees in the two reports. SMART {actualMap.Count}, READY {expectedMap.Count}");
         actualMap.Keys.ShouldBe(expectedMap.Keys, true, "The reports dont have the same set of PSN/Badges.");
 
         // Get employee badges (not beneficiaries) to query READY authoritative data
