@@ -362,22 +362,22 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                         control={
                           <Radio
                             size="small"
-                            disabled={isMemberTypeDisabled}
+                            // disabled={isMemberTypeDisabled}
                           />
                         }
                         label={option.label}
-                        disabled={isMemberTypeDisabled}
+                        // disabled={isMemberTypeDisabled}
                       />
                     ))}
                   </RadioGroup>
                 )}
               />
             </FormControl>
-            {isMemberTypeDisabled && (
+            {/* {isMemberTypeDisabled && (
               <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
                 Member Type set based on Badge/PSN length. Clear Badge/PSN to manually select.
               </FormHelperText>
-            )}
+            )} */}
           </Grid>
         </Grid>
 

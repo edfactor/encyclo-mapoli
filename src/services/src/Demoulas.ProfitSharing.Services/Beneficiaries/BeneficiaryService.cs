@@ -52,7 +52,7 @@ public class BeneficiaryService : IBeneficiaryService
             throw new ValidationException("Badge number must be greater than 0.");
         }
         
-        if (req.Percentage <= 0 || req.Percentage > 100m)
+        if (req.Percentage < 0 || req.Percentage > 100m)
         {
             throw new ValidationException("Percentage must be between 0 and 100%.");
         }

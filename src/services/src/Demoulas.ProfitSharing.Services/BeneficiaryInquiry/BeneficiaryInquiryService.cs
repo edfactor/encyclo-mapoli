@@ -140,7 +140,53 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     {
         PaginatedResponseDto<BeneficiarySearchFilterResponse> result;
 
-        if (request.MemberType == EmployeeMemberType)
+        if (request.MemberType == 0) // All - search both employees and beneficiaries
+        {
+            // Create a request without pagination to get all results first
+            var unpaginatedRequest = request with { Skip = 0, Take = int.MaxValue };
+            
+            // Get all employee results
+            var employeeResults = await GetEmployeeQueryPaginated(unpaginatedRequest, cancellationToken);
+            
+            // Get all beneficiary results
+            var beneficiaryRows = await _dataContextFactory.UseReadOnlyContext(async context =>
+            {
+                var query = GetBeneficiaryQuery(request, context);
+                return await query.ToPaginationResultsAsync(unpaginatedRequest, cancellationToken);
+            }, cancellationToken);
+            
+            var beneficiaryResults = beneficiaryRows.Results?.Select(r => new BeneficiarySearchFilterResponse
+            {
+                BadgeNumber = r.BadgeNumber,
+                PsnSuffix = r.PsnSuffix,
+                FullName = r.FullName,
+                Ssn = r.Ssn != 0 ? r.Ssn.ToString().MaskSsn() : string.Empty.MaskSsn(),
+                Street = r.Street,
+                City = r.City,
+                State = r.State,
+                Zip = r.Zip,
+                Age = r.Age,
+            }).ToList() ?? [];
+            
+            // Combine results from both sources
+            var combinedResults = (employeeResults.Results ?? []).Concat(beneficiaryResults).ToList();
+            
+            // Apply pagination manually to the combined results
+            var pagedResults = combinedResults
+                .Skip(request.Skip ?? 0)
+                .Take(request.Take ?? 50)
+                .ToList();
+            
+            result = new PaginatedResponseDto<BeneficiarySearchFilterResponse>
+            {
+                IsPartialResult = employeeResults.IsPartialResult || beneficiaryRows.IsPartialResult,
+                ResultHash = string.Empty,
+                TimeoutOccurred = employeeResults.TimeoutOccurred || beneficiaryRows.TimeoutOccurred,
+                Total = combinedResults.Count,
+                Results = pagedResults
+            };
+        }
+        else if (request.MemberType == EmployeeMemberType)
         {
             // Employee query is already in-memory, handle pagination separately
             result = await GetEmployeeQueryPaginated(request, cancellationToken);
