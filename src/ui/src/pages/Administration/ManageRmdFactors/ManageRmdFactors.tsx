@@ -31,12 +31,21 @@ const ManageRmdFactors = () => {
   const hasUnsavedChanges = Object.keys(stagedFactorsByAge).length > 0;
   useUnsavedChangesGuard(hasUnsavedChanges);
 
-  // Log any API errors
+  // Handle API load errors
   useEffect(() => {
     if (isError && error) {
       console.error("RMD Factors API Error:", error);
+      dispatch(
+        setMessage({
+          ...Messages.RmdFactorsLoadError,
+          message: {
+            ...Messages.RmdFactorsLoadError.message,
+            message: "Unable to load RMD factors. Please try again."
+          }
+        })
+      );
     }
-  }, [isError, error]);
+  }, [isError, error, dispatch]);
 
   useEffect(() => {
     if (!data) return;
@@ -164,6 +173,17 @@ const ManageRmdFactors = () => {
     } catch (e) {
       console.error("Failed to update RMD factors", e);
       setErrorMessage("Failed to save changes. Please try again.");
+      
+      // Dispatch error message
+      dispatch(
+        setMessage({
+          ...Messages.RmdFactorsSaveError,
+          message: {
+            ...Messages.RmdFactorsSaveError.message,
+            message: "An error occurred while saving. Please try again."
+          }
+        })
+      );
     }
   };
 
