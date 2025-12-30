@@ -32,9 +32,9 @@ public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<Update
 
     private static bool HasAtMostFourDecimals(decimal value)
     {
-        // Convert to string and count decimal places
-        // This avoids floating-point precision issues
-        var valueString = value.ToString();
+        // Convert to string using invariant culture to ensure consistent decimal separator
+        // This avoids floating-point precision issues and culture-dependent formatting
+        var valueString = value.ToString(System.Globalization.CultureInfo.InvariantCulture);
         var decimalIndex = valueString.IndexOf('.');
 
         if (decimalIndex == -1)
