@@ -15,6 +15,23 @@ public sealed class UpdateAnnuityRateRequestValidatorTests
 {
     private readonly UpdateAnnuityRateRequestValidator _validator = new();
 
+    #region Diagnostic Tests
+
+    [Fact(DisplayName = "Validator - Constructor is called and rules are defined")]
+    [Description("PS-2382 : Diagnostic test to verify validator initialization")]
+    public void Validate_ConstructorCalled_ShouldHaveRules()
+    {
+        // Arrange & Act
+        Console.WriteLine($"ConstructorCalled: {UpdateAnnuityRateRequestValidator.ConstructorCalled}");
+        Console.WriteLine($"RuleCount: {UpdateAnnuityRateRequestValidator.RuleCount}");
+        
+        // Assert
+        UpdateAnnuityRateRequestValidator.ConstructorCalled.ShouldBeTrue();
+        UpdateAnnuityRateRequestValidator.RuleCount.ShouldBe(4);
+    }
+
+    #endregion
+
     #region SingleRate Decimal Place Tests
 
     [Fact(DisplayName = "Validator - SingleRate with 0 decimal places should be valid")]
