@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Box, CircularProgress, Divider, Grid } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -5,6 +6,7 @@ import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../../constants";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
+import { useInitialLoad } from "../../../../hooks/useInitialLoad";
 import {
   useLazyGetUnder21BreakdownByStoreQuery,
   useLazyGetUnder21TotalsQuery
@@ -19,7 +21,7 @@ const Under21TA = () => {
   const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
   const under21BreakdownByStore = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const { isLoaded: initialSearchLoaded, setLoaded: setInitialSearchLoaded } = useInitialLoad();
   const [pageNumber, setPageNumber] = useState<number>(0);
   const [pageSize] = useState<number>(25);
   const [sortParams] = useState({
@@ -100,53 +102,55 @@ const Under21TA = () => {
   };
 */
   return (
-    <Page
-      label={CAPTIONS.QPAY066TA_UNDER21}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-
-        {initialLoad ? (
-          <Grid width="100%">
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight="200px">
-              <CircularProgress />
-            </Box>
+    <PageErrorBoundary pageName="Under 21 TA">
+      <Page
+        label={CAPTIONS.QPAY066TA_UNDER21}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
           </Grid>
-        ) : (
-          <>
-            {hasData && !isLoading && (
-              <Grid
-                width="100%"
-                paddingX="24px">
-                <Under21Summary
-                  totals={under21Totals}
-                  isLoading={isTotalsLoading}
-                  title="UNDER 21 (QPAY066TA-UNDR21)"
+
+          {initialLoad ? (
+            <Grid width="100%">
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="200px">
+                <CircularProgress />
+              </Box>
+            </Grid>
+          ) : (
+            <>
+              {hasData && !isLoading && (
+                <Grid
+                  width="100%"
+                  paddingX="24px">
+                  <Under21Summary
+                    totals={under21Totals}
+                    isLoading={isTotalsLoading}
+                    title="UNDER 21 (QPAY066TA-UNDR21)"
+                  />
+                </Grid>
+              )}
+
+              <Grid width="100%">
+                <Under21BreakdownGrid
+                  isLoading={isInactiveLoading}
+                  setInitialSearchLoaded={setInitialSearchLoaded}
+                  pageNumber={pageNumber}
+                  pageSize={pageSize}
+                  onPageChange={setPageNumber}
                 />
               </Grid>
-            )}
-
-            <Grid width="100%">
-              <Under21BreakdownGrid
-                isLoading={isInactiveLoading}
-                setInitialSearchLoaded={setInitialSearchLoaded}
-                pageNumber={pageNumber}
-                pageSize={pageSize}
-                onPageChange={setPageNumber}
-              />
-            </Grid>
-          </>
-        )}
-      </Grid>
-    </Page>
+            </>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

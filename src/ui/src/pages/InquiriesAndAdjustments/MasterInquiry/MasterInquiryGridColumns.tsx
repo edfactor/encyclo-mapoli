@@ -1,10 +1,9 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
 import Link from "@mui/material/Link";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import {
   createCurrencyColumn,
   createHoursColumn,
   createStateColumn,
-  createStatusColumn,
   createTaxCodeColumn,
   createYearColumn,
   createYesOrNoColumn
@@ -135,7 +134,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120
     }),
     createTaxCodeColumn({}),
-    createTaxCodeColumn({}),
     {
       headerName: "Comment Type",
       headerTooltip: "Comment Type",
@@ -179,9 +177,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "commentIsPartialTransaction",
       minWidth: 120,
       useWords: true
-    }),
-    createStatusColumn({
-      field: "employmentStatus"
     })
   ];
 };

@@ -167,7 +167,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
         ssn: ssn || undefined,
         skip: 0,
         take: 5,
-        sortBy: "FullName",
+        sortBy: "fullName",
         isSortDescending: true
       };
       onSearch(beneficiarySearchFilterRequest);

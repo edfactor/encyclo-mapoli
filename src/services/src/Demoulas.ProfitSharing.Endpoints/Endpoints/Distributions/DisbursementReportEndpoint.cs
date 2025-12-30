@@ -30,6 +30,7 @@ public sealed class DisbursementReportEndpoint : ProfitSharingEndpoint<ProfitYea
         {
             s.Description = "Gets the disbursement report with distribution details by profit year.";
             s.Summary = "Disbursement report - QPAY078";
+            s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object> {
             {
                 200, new List<DisbursementReportDetailResponse>()

@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Box, CircularProgress, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -65,89 +66,91 @@ const VestedAmountsByAge = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.VESTED_AMOUNTS_BY_AGE}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-
-        {initialLoad ? (
-          <Grid width="100%">
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight="200px">
-              <CircularProgress />
-            </Box>
+    <PageErrorBoundary pageName="Vested Amounts By Age">
+      <Page
+        label={CAPTIONS.VESTED_AMOUNTS_BY_AGE}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
           </Grid>
-        ) : (
-          <Grid
-            width={"100%"}
-            sx={{ overflowX: "inherit" }}>
-            {vestedAmountsByAge?.response && (
-              <div style={{ overflowX: "inherit" }}>
-                <div className="px-[24px]">
-                  <h2 className="text-dsm-secondary">Summary</h2>
-                  <h3 className="text-dsm-secondary">
-                    {toCapitalCase(vestedAmountsByAge.reportName)}
-                    {"  -   "}
-                    {new Date(vestedAmountsByAge.reportDate).toLocaleDateString("en-US", options)}
-                  </h3>
+
+          {initialLoad ? (
+            <Grid width="100%">
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="200px">
+                <CircularProgress />
+              </Box>
+            </Grid>
+          ) : (
+            <Grid
+              width={"100%"}
+              sx={{ overflowX: "inherit" }}>
+              {vestedAmountsByAge?.response && (
+                <div style={{ overflowX: "inherit" }}>
+                  <div className="px-[24px]">
+                    <h2 className="text-dsm-secondary">Summary</h2>
+                    <h3 className="text-dsm-secondary">
+                      {toCapitalCase(vestedAmountsByAge.reportName)}
+                      {"  -   "}
+                      {new Date(vestedAmountsByAge.reportDate).toLocaleDateString("en-US", options)}
+                    </h3>
+                  </div>
+
+                  <TotalsGrid
+                    breakpoints={{
+                      xs: 12,
+                      sm: 12,
+                      md: 12,
+                      lg: 12,
+                      xl: 12
+                    }}
+                    displayData={[
+                      [
+                        numberToCurrency(vestedAmountsByAge?.totalFullTime100PercentAmount ?? 0),
+                        numberToCurrency(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
+                        numberToCurrency(vestedAmountsByAge?.totalFullTimeNotVestedAmount ?? 0),
+                        numberToCurrency(vestedAmountsByAge?.totalPartTime100PercentAmount ?? 0),
+                        numberToCurrency(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
+                        numberToCurrency(vestedAmountsByAge?.totalPartTimeNotVestedAmount ?? 0),
+                        vestedAmountsByAge?.totalBeneficiaryCount ?? 0,
+                        numberToCurrency(vestedAmountsByAge?.totalBeneficiaryAmount ?? 0),
+                        vestedAmountsByAge?.totalFullTimeCount ?? 0,
+                        vestedAmountsByAge?.totalNotVestedCount ?? 0,
+                        vestedAmountsByAge?.totalPartialVestedCount ?? 0
+                      ]
+                    ]}
+                    leftColumnHeaders={[""]}
+                    topRowHeaders={[
+                      "FT 100%",
+                      "FT Partial Vested",
+                      "FT Not Vested",
+                      "PT 100% Vested",
+                      "PT Partial Vested",
+                      "PT Not Vested",
+                      "Beneficiaries",
+                      "Beneficiary Amount",
+                      "FT Total Count",
+                      "Not Vested",
+                      "Partial Vested"
+                    ]}
+                  />
+
+                  <Grid width={"100%"}>
+                    <VestedAmountsByAgeTabs />
+                  </Grid>
                 </div>
-
-                <TotalsGrid
-                  breakpoints={{
-                    xs: 12,
-                    sm: 12,
-                    md: 12,
-                    lg: 12,
-                    xl: 12
-                  }}
-                  displayData={[
-                    [
-                      numberToCurrency(vestedAmountsByAge?.totalFullTime100PercentAmount ?? 0),
-                      numberToCurrency(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
-                      numberToCurrency(vestedAmountsByAge?.totalFullTimeNotVestedAmount ?? 0),
-                      numberToCurrency(vestedAmountsByAge?.totalPartTime100PercentAmount ?? 0),
-                      numberToCurrency(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
-                      numberToCurrency(vestedAmountsByAge?.totalPartTimeNotVestedAmount ?? 0),
-                      vestedAmountsByAge?.totalBeneficiaryCount ?? 0,
-                      numberToCurrency(vestedAmountsByAge?.totalBeneficiaryAmount ?? 0),
-                      vestedAmountsByAge?.totalFullTimeCount ?? 0,
-                      vestedAmountsByAge?.totalNotVestedCount ?? 0,
-                      vestedAmountsByAge?.totalPartialVestedCount ?? 0
-                    ]
-                  ]}
-                  leftColumnHeaders={[""]}
-                  topRowHeaders={[
-                    "FT 100%",
-                    "FT Partial Vested",
-                    "FT Not Vested",
-                    "PT 100% Vested",
-                    "PT Partial Vested",
-                    "PT Not Vested",
-                    "Beneficiaries",
-                    "Beneficiary Amount",
-                    "FT Total Count",
-                    "Not Vested",
-                    "Partial Vested"
-                  ]}
-                />
-
-                <Grid width={"100%"}>
-                  <VestedAmountsByAgeTabs />
-                </Grid>
-              </div>
-            )}
-          </Grid>
-        )}
-      </Grid>
-    </Page>
+              )}
+            </Grid>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

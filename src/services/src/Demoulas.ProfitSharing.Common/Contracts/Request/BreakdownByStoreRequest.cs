@@ -10,4 +10,16 @@ public record BreakdownByStoreRequest : ProfitYearRequest
 
     [MaskSensitive]
     public string? EmployeeName { get; set; }
+
+    public static new BreakdownByStoreRequest RequestExample()
+    {
+        return new BreakdownByStoreRequest
+        {
+            ProfitYear = 2024,
+            StoreManagement = true,
+            StoreNumber = 22,
+            BadgeNumber = 123456,
+            EmployeeName = "Smith"
+        };
+    }
 }

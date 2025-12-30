@@ -1,12 +1,13 @@
 import { Typography } from "@mui/material";
-import { useMemo, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
+import { FrozenStateResponse } from "../../../types";
+import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
 
 interface DemoFreezeSearchProps {
   initialSearchLoaded: boolean;
@@ -25,28 +26,30 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
   const freezeResults = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
   const [triggerSearch, { isFetching }] = useLazyGetHistoricalFrozenStateResponseQuery();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "createdDateTime",
-      initialSortDescending: true,
-      persistenceKey: GRID_KEYS.DEMOGRAPHIC_FREEZE,
-      onPaginationChange: useCallback(
-        (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (initialSearchLoaded) {
-            // Trigger search when pagination or sorting changes
-            const request = {
-              skip: pageNum * pageSz,
-              take: pageSz,
-              sortBy: sortPrms.sortBy,
-              isSortDescending: sortPrms.isSortDescending
-            };
-            triggerSearch(request, false);
-          }
-        },
-        [initialSearchLoaded, triggerSearch]
-      )
-    });
+  const pagination = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "createdDateTime",
+    initialSortDescending: true,
+    persistenceKey: GRID_KEYS.DEMOGRAPHIC_FREEZE,
+    onPaginationChange: useCallback(
+      (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (initialSearchLoaded) {
+          // Trigger search when pagination or sorting changes
+          const request = {
+            skip: pageNum * pageSz,
+            take: pageSz,
+            sortBy: sortPrms.sortBy,
+            isSortDescending: sortPrms.isSortDescending
+          };
+          triggerSearch(request, false);
+        }
+      },
+      [initialSearchLoaded, triggerSearch]
+    )
+  });
+
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, resetPagination } =
+    pagination;
 
   const onSearch = useCallback(async () => {
     const request = {
@@ -74,44 +77,50 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
     }
   }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
+  // Wrap handlers to include side effects
+  const handlePageNumberChangeWithCallback = useCallback(
+    (value: number) => {
+      handlePageNumberChange(value);
+      setInitialSearchLoaded(true);
+    },
+    [handlePageNumberChange, setInitialSearchLoaded]
+  );
+
+  const handlePageSizeChangeWithCallback = useCallback(
+    (value: number) => {
+      handlePageSizeChange(value);
+      setInitialSearchLoaded(true);
+    },
+    [handlePageSizeChange, setInitialSearchLoaded]
+  );
+
+  if (!freezeResults) {
+    return null;
+  }
+
   return (
-    <>
-      {freezeResults && (
-        <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`Previous Freezes`}
-            </Typography>
-          </div>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.DEMOGRAPHIC_FREEZE}
-            isLoading={isFetching}
-            handleSortChanged={handleSortChange}
-            providedOptions={{
-              rowData: freezeResults?.results,
-              columnDefs: columnDefs
-            }}
-          />
-        </>
-      )}
-      {!!freezeResults && freezeResults.results.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-            setInitialSearchLoaded(true);
-          }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-            setInitialSearchLoaded(true);
-          }}
-          recordCount={freezeResults.total}
-        />
-      )}
-    </>
+    <DSMPaginatedGrid<FrozenStateResponse>
+      preferenceKey={GRID_KEYS.DEMOGRAPHIC_FREEZE}
+      data={freezeResults.results}
+      columnDefs={columnDefs}
+      totalRecords={freezeResults.total}
+      isLoading={isFetching}
+      pagination={{
+        ...pagination,
+        handlePageNumberChange: handlePageNumberChangeWithCallback,
+        handlePageSizeChange: handlePageSizeChangeWithCallback
+      }}
+      onSortChange={pagination.handleSortChange}
+      showPagination={freezeResults.results.length > 0}
+      header={
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
+          Previous Freezes
+        </Typography>
+      }
+      slotClassNames={{ headerClassName: "px-6" }}
+    />
   );
 };
 

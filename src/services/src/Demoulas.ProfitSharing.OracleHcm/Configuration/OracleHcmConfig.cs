@@ -73,7 +73,7 @@ public sealed record OracleHcmConfig
     /// The example "fusion" is a common default, but your environment may use a different user.
     /// Default: "fusion" (VERIFY THIS WITH YOUR ORACLE HCM ADMIN BEFORE USING IN PRODUCTION)
     /// </summary>
-    public string JwtPrincipal { get; set; } = "fusion";
+    public string JwtPrincipal { get; set; } = "API_PS";
 
     /// <summary>
     /// Gets or sets the JWT token expiration time in minutes.
@@ -86,7 +86,7 @@ public sealed record OracleHcmConfig
     /// This identifies the principal about which the JWT makes a statement.
     /// Example: "API_PS_PROD"
     /// </summary>
-    public string JwtSubject { get; set; } = "API_PS_PROD";
+    public string JwtSubject { get; set; } = "API_PS";
 
     /// <summary>
     /// Gets or sets the audience (aud) claim for JWT tokens.

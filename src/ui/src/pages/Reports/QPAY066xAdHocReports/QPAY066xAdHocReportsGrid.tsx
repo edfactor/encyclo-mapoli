@@ -13,7 +13,8 @@ import { ColDef } from "ag-grid-community";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
+import { numberToCurrency } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
@@ -46,7 +47,7 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
   storeNumber,
   gridPagination
 }) => {
-  const { pageNumber, pageSize, handlePaginationChange } = gridPagination;
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange } = gridPagination;
 
   const breakdownByStoreManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreManagement);
   const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
@@ -277,34 +278,27 @@ const QPAY066xAdHocReportsGrid: React.FC<QPAY066xAdHocReportsGridProps> = ({
 
       {/* Grid Section */}
       <Grid size={{ xs: 12 }}>
-        <DSMGrid
+        <DSMPaginatedGrid
           preferenceKey={GRID_KEYS.QPAY066_ADHOC_REPORT}
+          data={rowData ?? []}
+          columnDefs={columnDefs(reportId)}
+          totalRecords={totalRecords}
           isLoading={isLoading}
-          maxHeight={gridMaxHeight}
-          providedOptions={{
-            rowData: rowData,
-            columnDefs: columnDefs(reportId),
+          heightConfig={{ maxHeight: gridMaxHeight }}
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams: { sortBy: "", isSortDescending: false },
+            handlePageNumberChange,
+            handlePageSizeChange,
+            handleSortChange: () => {}
+          }}
+          gridOptions={{
             maintainColumnOrder: true
           }}
+          showPagination={rowData && rowData.length > 0}
         />
       </Grid>
-
-      {/* Pagination */}
-      {rowData && rowData.length > 0 && (
-        <Grid size={{ xs: 12 }}>
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
-            }}
-            pageSize={pageSize}
-            setPageSize={(value: number) => {
-              handlePaginationChange(0, value);
-            }}
-            recordCount={totalRecords}
-          />
-        </Grid>
-      )}
     </Grid>
   );
 };

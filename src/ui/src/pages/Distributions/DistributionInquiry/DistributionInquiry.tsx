@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DSMAccordion, Page, formatNumberWithComma } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
@@ -349,13 +350,15 @@ const DistributionInquiry = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.DISTRIBUTIONS_INQUIRY}
-      actionNode={renderActionNode()}>
-      <MissiveAlertProvider>
-        <DistributionInquiryContent />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Distribution Inquiry">
+      <Page
+        label={CAPTIONS.DISTRIBUTIONS_INQUIRY}
+        actionNode={renderActionNode()}>
+        <MissiveAlertProvider>
+          <DistributionInquiryContent />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

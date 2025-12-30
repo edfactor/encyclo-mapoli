@@ -1,5 +1,6 @@
 ---
 applyTo: "src/services/src/Demoulas.ProfitSharing.Endpoints/**/*.*"
+paths: "src/services/src/Demoulas.ProfitSharing.Endpoints/**/*.*"
 ---
 
 # ENDPOINTS.md

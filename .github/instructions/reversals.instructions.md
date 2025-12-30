@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/pages/InquiriesAndAdjustments/Reversals/**/*.*"
+paths: "src/ui/src/pages/InquiriesAndAdjustments/Reversals/**/*.*"
 ---
 
 # Reversals Page Technical Documentation

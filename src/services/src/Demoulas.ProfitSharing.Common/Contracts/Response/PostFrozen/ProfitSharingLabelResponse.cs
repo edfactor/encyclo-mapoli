@@ -19,7 +19,7 @@ public record ProfitSharingLabelResponse : IIsExecutive
     public string? PostalCode { get; set; }
     public required bool IsExecutive { get; set; }
 
-    public static ProfitSharingLabelResponse SampleResponse()
+    public static ProfitSharingLabelResponse ResponseExample()
     {
         return new ProfitSharingLabelResponse()
         {

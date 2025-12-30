@@ -12,7 +12,8 @@ import {
 import { SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useMemo } from "react";
 import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
-import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
+import { formatNumberWithComma, ISortParams } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetTerminatedLettersColumns } from "./TerminatedLettersGridColumns";
@@ -44,7 +45,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   printContent,
   printTerminatedLetters
 }) => {
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = gridPagination;
+  const { sortParams, handleSortChange } = gridPagination;
 
   const handleSelectionChanged = useCallback(
     (event: SelectionChangedEvent) => {
@@ -58,6 +59,15 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   const columnDefs = useMemo(() => GetTerminatedLettersColumns(), []);
 
   const isPrintDisabled = selectedRows.length === 0;
+
+  const paginationProps = {
+    pageNumber: gridPagination.pageNumber,
+    pageSize: gridPagination.pageSize,
+    sortParams,
+    handlePageNumberChange: gridPagination.handlePageNumberChange,
+    handlePageSizeChange: gridPagination.handlePageSizeChange,
+    handleSortChange
+  };
 
   const renderPrintButton = () => {
     const button = (
@@ -89,42 +99,32 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   return (
     <div style={{ marginRight: "24px" }}>
       {reportData && reportData.response && (
-        <>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <Typography
-              variant="h6"
-              component="h2"
-              sx={{ marginLeft: "20px", marginRight: "10px" }}>
-              EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS (
-              {formatNumberWithComma(reportData.response.total)} Records)
-            </Typography>
-            {renderPrintButton()}
-          </div>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.TERMINATED_LETTERS}
-            isLoading={isLoading}
-            handleSortChanged={sortEventHandler}
-            providedOptions={{
-              rowData: reportData.response.results,
-              columnDefs: columnDefs,
-              suppressMultiSort: true,
-              rowSelection: "multiple",
-              onSelectionChanged: handleSelectionChanged
-            }}
-          />
-        </>
-      )}
-      {reportData && reportData.response && reportData.response.results && reportData.response.results.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
+        <DSMPaginatedGrid
+          preferenceKey={GRID_KEYS.TERMINATED_LETTERS}
+          data={reportData.response.results}
+          columnDefs={columnDefs}
+          totalRecords={reportData.response.total}
+          isLoading={isLoading}
+          pagination={paginationProps}
+          onSortChange={sortEventHandler}
+          gridOptions={{
+            suppressMultiSort: true,
+            rowSelection: "multiple",
+            onSelectionChanged: handleSelectionChanged
           }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
-          recordCount={reportData.response.total}
+          showPagination={reportData.response.results && reportData.response.results.length > 0}
+          header={
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <Typography
+                variant="h6"
+                component="h2"
+                sx={{ marginLeft: "20px", marginRight: "10px" }}>
+                EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS (
+                {formatNumberWithComma(reportData.response.total)} Records)
+              </Typography>
+              {renderPrintButton()}
+            </div>
+          }
         />
       )}
 

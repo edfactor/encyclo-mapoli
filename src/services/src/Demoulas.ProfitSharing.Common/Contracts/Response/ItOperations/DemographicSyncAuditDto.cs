@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 
 /// <summary>
 /// Internal DTO for a demographic sync audit record.
@@ -14,4 +14,19 @@ public class DemographicSyncAuditDto
     public string? InvalidValue { get; set; }
     public string? UserName { get; set; }
     public DateTimeOffset Created { get; set; }
+
+    public static DemographicSyncAuditDto ResponseExample()
+    {
+        return new DemographicSyncAuditDto
+        {
+            Id = 1001,
+            BadgeNumber = 12345,
+            OracleHcmId = 567890,
+            Message = "SSN mismatch detected during sync",
+            PropertyName = "SocialSecurityNumber",
+            InvalidValue = "XXX-XX-6789",
+            UserName = "system_sync",
+            Created = DateTimeOffset.UtcNow
+        };
+    }
 }

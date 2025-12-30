@@ -32,7 +32,13 @@ const CreateBeneficiaryDialog: React.FC<CreateBeneficiaryDialogProps> = ({
   return (
     <Dialog
       open={open}
-      onClose={onClose}>
+      onClose={(_event, reason) => {
+        if (reason === "backdropClick" || reason === "escapeKeyDown") {
+          return;
+        }
+        onClose();
+      }}
+      disableEscapeKeyDown>
       <DialogTitle>{title}</DialogTitle>
       <IconButton
         aria-label="close"

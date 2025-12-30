@@ -30,6 +30,7 @@ public sealed class DistributionRunReportEndpoint : ProfitSharingEndpoint<Distri
         {
             s.Description = "Gets the distribution run report.";
             s.Summary = "Distribution run report";
+            s.ExampleRequest = DistributionRunReportRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object> {
             {
                 200, new List<DistributionRunReportDetail>()

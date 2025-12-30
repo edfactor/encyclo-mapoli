@@ -27,6 +27,7 @@ public class CreateBeneficiaryAndContactEndpoint : ProfitSharingEndpoint<CreateB
         Summary(s =>
         {
             s.Summary = "Adds a new beneficiary";
+            s.ExampleRequest = CreateBeneficiaryRequest.SampleRequest();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 { 200, CreateBeneficiaryResponse.SampleResponse()}

@@ -8,4 +8,19 @@ public sealed record DistributionsAndForfeituresRequest : SortedPaginationReques
     public DateOnly? EndDate { get; set; }
     public string[]? States { get; set; }
     public char[]? TaxCodes { get; set; }
+
+    public static DistributionsAndForfeituresRequest RequestExample()
+    {
+        return new DistributionsAndForfeituresRequest
+        {
+            StartDate = new DateOnly(2024, 1, 1),
+            EndDate = new DateOnly(2024, 12, 31),
+            States = ["MA", "NH", "CT"],
+            TaxCodes = ['F', 'S'],
+            Skip = 0,
+            Take = 50,
+            SortBy = "Date",
+            IsSortDescending = true
+        };
+    }
 }

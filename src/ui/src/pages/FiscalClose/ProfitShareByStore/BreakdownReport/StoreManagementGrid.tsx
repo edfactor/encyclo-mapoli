@@ -1,14 +1,13 @@
-import { Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { DSMPaginatedGrid } from "../../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../../constants";
-import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetStoreManagementGridColumns } from "./StoreManagementGridColumns";
 
 interface StoreManagementGridProps {
@@ -31,42 +30,49 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useDecemberFlowProfitYear();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 10,
-      initialSortBy: "badgeNumber",
-      initialSortDescending: false,
-      persistenceKey: `${GRID_KEYS.STORE_MANAGEMENT_PREFIX}${store}`,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (hasToken) {
-            const params = {
-              profitYear: queryParams?.profitYear || profitYear,
-              storeNumber: store,
-              storeManagement: true,
-              badgeNumber: queryParams?.badgeNumber,
-              employeeName: queryParams?.employeeName,
-              pagination: {
-                skip: pageNum * pageSz,
-                take: pageSz,
-                sortBy: sortPrms.sortBy,
-                isSortDescending: sortPrms.isSortDescending
-              }
-            };
-            await fetchStoreManagement(params);
-          }
-        },
-        [
-          hasToken,
-          queryParams?.profitYear,
-          profitYear,
-          store,
-          queryParams?.badgeNumber,
-          queryParams?.employeeName,
-          fetchStoreManagement
-        ]
-      )
-    });
+  const {
+    pageNumber,
+    pageSize,
+    sortParams,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange,
+    resetPagination
+  } = useGridPagination({
+    initialPageSize: 10,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    persistenceKey: `${GRID_KEYS.STORE_MANAGEMENT_PREFIX}${store}`,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (hasToken) {
+          const params = {
+            profitYear: queryParams?.profitYear || profitYear,
+            storeNumber: store,
+            storeManagement: true,
+            badgeNumber: queryParams?.badgeNumber,
+            employeeName: queryParams?.employeeName,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            }
+          };
+          await fetchStoreManagement(params);
+        }
+      },
+      [
+        hasToken,
+        queryParams?.profitYear,
+        profitYear,
+        store,
+        queryParams?.badgeNumber,
+        queryParams?.employeeName,
+        fetchStoreManagement
+      ]
+    )
+  });
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -137,24 +143,22 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
         </Typography>
       </Grid>
       <Grid width="100%">
-        <DSMGrid
+        <DSMPaginatedGrid
           preferenceKey={`${GRID_KEYS.STORE_MANAGEMENT_PREFIX}${store}`}
+          data={storeManagement?.response?.results || []}
+          columnDefs={columnDefs}
+          totalRecords={storeManagement?.response?.total || 0}
           isLoading={isFetching}
-          handleSortChanged={handleSortChange}
-          providedOptions={{
-            rowData: storeManagement?.response?.results || [],
-            columnDefs: columnDefs
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams,
+            handlePageNumberChange,
+            handlePageSizeChange,
+            handleSortChange
           }}
+          showPagination={storeManagement?.response?.results && storeManagement.response.results.length > 0}
         />
-        {storeManagement?.response?.results && storeManagement.response.results.length > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
-            pageSize={pageSize}
-            setPageSize={(value: number) => handlePaginationChange(0, value)}
-            recordCount={storeManagement.response.total || 0}
-          />
-        )}
       </Grid>
     </Grid>
   );

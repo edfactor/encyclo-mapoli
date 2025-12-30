@@ -15,7 +15,8 @@ import {
   clearUnder21Totals,
   clearYearEndProfitSharingReportFrozen,
   clearYearEndProfitSharingReportLive,
-  clearYearEndProfitSharingReportTotals,
+  clearYearEndProfitSharingReportTotalsLive,
+  clearYearEndProfitSharingReportTotalsFrozen,
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
@@ -37,7 +38,8 @@ import {
   setProfitMasterApply,
   setProfitMasterRevert,
   setProfitMasterStatus,
-  setProfitShareSummaryReport,
+  setProfitShareSummaryReportLive,
+  setProfitShareSummaryReportFrozen,
   setProfitSharingEdit,
   setProfitSharingLabels,
   setProfitSharingUnder21Report,
@@ -52,7 +54,8 @@ import {
   setVestedAmountsByAge,
   setYearEndProfitSharingReportFrozen,
   setYearEndProfitSharingReportLive,
-  setYearEndProfitSharingReportTotals
+  setYearEndProfitSharingReportTotalsLive,
+  setYearEndProfitSharingReportTotalsFrozen
 } from "reduxstore/slices/yearsEndSlice";
 import {
   BadgeNumberRequest,
@@ -394,10 +397,10 @@ export const YearsEndApi = createApi({
         totalHoursCurrentYearWages?: number;
         totalIncomeCurrentYearWages?: number;
       },
-      EmployeeWagesForYearRequestDto & { acceptHeader: string }
+      EmployeeWagesForYearRequestDto & { acceptHeader: string } & { archive?: boolean }
     >({
       query: (params) => ({
-        url: "yearend/wages-current-year",
+        url: `yearend/wages-current-year${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -563,9 +566,12 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getEligibleEmployees: builder.query<EligibleEmployeeResponseDto, EligibleEmployeesRequestDto>({
+    getEligibleEmployees: builder.query<
+      EligibleEmployeeResponseDto,
+      EligibleEmployeesRequestDto & { archive?: boolean }
+    >({
       query: (params) => ({
-        url: "yearend/eligible-employees",
+        url: `yearend/eligible-employees${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -1113,14 +1119,26 @@ export const YearsEndApi = createApi({
           ...params
         }
       }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          dispatch(clearYearEndProfitSharingReportTotals());
+          if (arg.useFrozenData) {
+            dispatch(clearYearEndProfitSharingReportTotalsFrozen());
+          } else {
+            dispatch(clearYearEndProfitSharingReportTotalsLive());
+          }
           const { data } = await queryFulfilled;
-          dispatch(setYearEndProfitSharingReportTotals(data));
+          if (arg.useFrozenData) {
+            dispatch(setYearEndProfitSharingReportTotalsFrozen(data));
+          } else {
+            dispatch(setYearEndProfitSharingReportTotalsLive(data));
+          }
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearYearEndProfitSharingReportTotals());
+          if (arg.useFrozenData) {
+            dispatch(clearYearEndProfitSharingReportTotalsFrozen());
+          } else {
+            dispatch(clearYearEndProfitSharingReportTotalsLive());
+          }
         }
       }
     }),
@@ -1139,10 +1157,14 @@ export const YearsEndApi = createApi({
           take: 255
         }
       }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setProfitShareSummaryReport(data));
+          if (arg.useFrozenData) {
+            dispatch(setProfitShareSummaryReportFrozen(data));
+          } else {
+            dispatch(setProfitShareSummaryReportLive(data));
+          }
         } catch (err) {
           console.error(
             "Error fetching year-end profit sharing summary report:",

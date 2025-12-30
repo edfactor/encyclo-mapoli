@@ -2,6 +2,8 @@
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
+using Demoulas.ProfitSharing.Data.Entities.CheckRun;
+using Demoulas.ProfitSharing.Data.Entities.FileTransfer;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
@@ -26,6 +28,8 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
 
     public virtual DbSet<AnnuityRate> AnnuityRates { get; set; }
     public virtual DbSet<AuditEvent> AuditEvents { get; set; }
+    public virtual DbSet<FileTransferAudit> FileTransferAudits { get; set; }
+    public virtual DbSet<FtpOperationLog> FtpOperationLogs { get; set; }
     public virtual DbSet<ReportChecksum> ReportChecksums { get; set; }
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }
@@ -43,6 +47,8 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<BeneficiaryContact> BeneficiaryContacts { get; set; }
     public virtual DbSet<BeneficiaryContactArchive> BeneficiaryContactArchives { get; set; }
     public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
+    public virtual DbSet<CheckRunWorkflow> CheckRunWorkflows { get; set; }
+    public virtual DbSet<CommentType> CommentTypes { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
     public virtual DbSet<Distribution> Distributions { get; set; }
     public virtual DbSet<DistributionFrequency> DistributionFrequencies { get; set; }
@@ -67,6 +73,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<NavigationStatus> NavigationStatuses { get; set; }
     public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }
 
+    public virtual DbSet<ProfitShareCheck> ProfitShareChecks { get; set; }
     public virtual DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
     public virtual DbSet<StateTax> StateTaxes { get; set; }
     public virtual DbSet<State> States { get; set; }

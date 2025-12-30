@@ -1,5 +1,5 @@
 
-DJDE JDE=LANIQS,JDL=DFLT4,END,;PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              11/13/25    PAGE 1
+DJDE JDE=LANIQS,JDL=DFLT4,END,;PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              12/22/25    PAGE 1
 
      FT 100% VESTED    FT PARTIAL VEST      FT NOT VESTED     PT 100% VESTED  PT PARTIAL VESTED      PT NOT VESTED
 AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE
@@ -47,7 +47,7 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
        6,515,903.31         337,993.27           8,173.93         342,129.71         126,128.04          36,559.94
 
  33              87                 39                  4                 27                 29                  3
-       8,234,988.50         378,203.46          22,028.32         354,421.78         119,182.09          11,424.65
+       8,240,608.84         378,203.46          22,028.32         354,421.78         119,182.09          11,424.65
 
  34              70                 32                  3                 31                 30                 12
        8,406,148.46         365,191.44          21,140.91         529,927.65         143,453.36          41,873.79
@@ -59,13 +59,13 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
       10,949,641.35         287,705.38          25,949.88         443,045.57         113,574.30          21,681.56
 
  37              80                 36                  1                 22                 29                 10
-      11,580,248.17         378,409.80           7,092.58         601,968.31         157,544.11          41,711.72PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              11/13/25    PAGE 2
+      11,580,248.17         378,409.80           7,092.58         601,968.31         157,544.11          41,711.72PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              12/22/25    PAGE 2
 
      FT 100% VESTED    FT PARTIAL VEST      FT NOT VESTED     PT 100% VESTED  PT PARTIAL VESTED      PT NOT VESTED
 AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE
 
  38              90                 40                  2                 15                 25                  7
-      13,249,132.32         433,368.46          19,172.14         302,898.56          96,243.74          30,863.81
+      13,271,915.35         433,368.46          19,172.14         302,898.56          96,243.74          30,863.81
 
  39              84                 43                  4                 15                 23                  8
       11,681,179.19         604,465.58          23,698.16         313,851.99          72,172.06          36,503.08
@@ -104,7 +104,7 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
       16,166,399.91         230,147.83           3,082.00         283,004.88          67,071.85          32,168.36
 
  51              41                 16                  1                  8                 30                  6
-      10,078,000.01         197,021.44          10,384.47         364,027.33         219,463.41          20,431.49
+      10,092,098.50         197,021.44          10,384.47         364,027.33         219,463.41          20,431.49
 
  52              61                 20                  1                 13                 24                  8
       16,038,434.85         324,283.94           6,027.17         336,289.31         132,392.14          32,588.11
@@ -113,13 +113,13 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
       11,534,452.30         192,691.33           7,665.14         663,886.55         118,109.42          21,366.73
 
  54              56                 16                  1                 13                 18                  6
-      17,850,523.89         122,215.87           5,365.60         269,656.09          92,387.70          18,937.00
+      17,856,969.82         122,215.87           5,365.60         269,656.09          92,387.70          18,937.00
 
  55              60                 14                  1                 25                 18                  9
       19,340,995.98         174,744.54           3,743.56         973,050.97          97,950.40          30,532.98
 
  56              40                 14                  0                 11                 33                  9
-      11,598,094.49         145,877.20               0.00         505,741.64         146,993.27          33,347.98PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              11/13/25    PAGE 3
+      11,598,094.49         145,877.20               0.00         505,741.64         146,993.27          33,347.98PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              12/22/25    PAGE 3
 
      FT 100% VESTED    FT PARTIAL VEST      FT NOT VESTED     PT 100% VESTED  PT PARTIAL VESTED      PT NOT VESTED
 AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE
@@ -149,10 +149,10 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
       20,972,526.87         150,199.03               0.00         861,350.81         167,669.32          53,916.63
 
  65              28                  6                  1                 42                 21                 13
-      11,599,723.72          58,664.51           9,303.12       1,262,671.95          78,376.34          39,956.98
+      11,627,904.82          58,664.51           9,303.12       1,262,671.95          78,376.34          39,956.98
 
  66              33                  9                  0                 53                 27                  9
-       9,905,692.11         111,590.37               0.00       2,689,170.33         119,315.81          31,183.52
+       9,926,871.60         111,590.37               0.00       2,689,170.33         119,315.81          31,183.52
 
  67              27                  6                  0                 56                 22                 11
        9,612,477.70          62,208.38               0.00       2,877,760.81          53,271.47          33,247.06
@@ -161,7 +161,7 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
        4,813,623.95          23,718.76               0.00         571,330.04          57,953.43           5,374.88
 
  69              26                  3                  0                 23                 12                 10
-       5,973,530.16          39,383.47               0.00       2,249,029.09          35,582.77          32,754.02
+       5,978,959.98          39,383.47               0.00       2,249,029.09          35,582.77          32,754.02
 
  70              13                  1                  0                 22                  5                  3
        4,590,693.91          13,107.70               0.00         974,328.56          10,421.98          10,982.25
@@ -170,7 +170,7 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
        2,534,676.27          21,520.77               0.00         716,167.94          40,636.65          26,335.15
 
  72               7                  1                  0                 24                 13                  3
-       1,828,132.50           9,040.17               0.00         780,585.03          45,789.72           7,875.02
+       1,833,530.57           9,040.17               0.00         780,585.03          45,789.72           7,875.02
 
  73              10                  0                  0                 21                 12                  5
        2,443,539.92               0.00               0.00         557,406.23          33,164.77          14,677.98
@@ -178,8 +178,8 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
  74               3                  0                  1                 18                  5                  2
          756,975.78               0.00           8,019.21       1,451,145.23          18,616.04           5,912.44
 
- 75               6                  1                  0                 15                 13                  1
-       1,340,075.98          19,696.63               0.00         560,396.21          61,256.76           3,364.95PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              11/13/25    PAGE 4
+ 75               6                  1                  0                 16                 13                  1
+       1,340,075.98          19,696.63               0.00         564,936.94          61,256.76           3,364.95PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              12/22/25    PAGE 4
 
      FT 100% VESTED    FT PARTIAL VEST      FT NOT VESTED     PT 100% VESTED  PT PARTIAL VESTED      PT NOT VESTED
 AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE
@@ -239,7 +239,7 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
                0.00               0.00               0.00          11,513.93               0.00               0.00
 
  95               1                  0                  0                  0                  0                  0
-         107,070.12               0.00               0.00               0.00               0.00               0.00PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              11/13/25    PAGE 5
+         107,070.12               0.00               0.00               0.00               0.00               0.00PROF130V            PROFIT SHARING VESTED AMOUNTS BY AGE FOR 2024                              12/22/25    PAGE 5
 
      FT 100% VESTED    FT PARTIAL VEST      FT NOT VESTED     PT 100% VESTED  PT PARTIAL VESTED      PT NOT VESTED
 AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE
@@ -247,5 +247,5 @@ AGE    EMPLOY/$AMNT     EMPLOY/$VESTED    EMPLOY/$BALANCE       EMPLOY/$AMNT    
 BEN              22                  0                  0                  0                  0                  0
        3,868,894.95               0.00               0.00               0.00               0.00               0.00
 
-TOTALS        2,767              1,481                 52              1,255              1,553                473
-     578,016,498.93      17,078,729.20         355,374.92      38,346,543.99       6,596,469.43       1,702,069.12
+TOTALS        2,767              1,481                 52              1,256              1,553                473
+     578,125,635.20      17,078,729.20         355,374.92      38,351,084.72       6,596,469.43       1,702,069.12

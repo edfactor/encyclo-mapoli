@@ -34,6 +34,7 @@
 
 ### Backend Architecture
 
+- **[Security Guidelines](./.github/instructions/security.instructions.md)** - Comprehensive security patterns (OWASP Top 10, STRIDE, Defense in Depth)
 - **[RESTful API Guidelines](./src/services/src/Demoulas.ProfitSharing.Endpoints/.github/instructions/restful-api-guidelines.instructions.md)** - Zalando RESTful API design, HTTP semantics, endpoint patterns
 - **[EF Core 10 Patterns](./copilot-instructions.md#ef-core-10-patterns--best-practices-mandatory)** - Database access patterns, query optimization, bulk operations
 - **[Distributed Caching Patterns](./DISTRIBUTED_CACHING_PATTERNS.md)** - IDistributedCache patterns, version-based invalidation

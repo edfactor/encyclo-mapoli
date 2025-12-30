@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Metrics;
@@ -11,7 +12,6 @@ using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.Util.Extensions;
-using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -43,7 +43,7 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
         ]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
-    factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonWarehouseContext>("ProfitSharing"));
+    factoryRequests.Add(ContextFactoryRequest.Initialize<IDemoulasCommonWarehouseContext, DemoulasCommonWarehouseContext>("Warehouse"));
 });
 
 builder.AddServiceDefaults(null, null);

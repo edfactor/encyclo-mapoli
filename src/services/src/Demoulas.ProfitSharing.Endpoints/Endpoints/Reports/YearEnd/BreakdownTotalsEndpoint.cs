@@ -31,6 +31,7 @@ public class BreakdownTotalsEndpoint : ProfitSharingEndpoint<BreakdownByStoreReq
         Summary(s =>
         {
             s.Summary = "Breakdown managers and associates totals for requested store";
+            s.ExampleRequest = BreakdownByStoreRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<AdhocReportsGroup>();

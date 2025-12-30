@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/pages/**/*.*"
+paths: "src/ui/src/pages/**/*.*"
 ---
 
 # Page Component Architecture
@@ -499,29 +500,81 @@ Used for collapsible filter sections.
 
 ---
 
-### 3. DSMGrid (AG Grid Wrapper)
+### 3. DSMGrid vs DSMPaginatedGrid
 
-Standardized grid component wrapping AG Grid.
+**Use `DSMPaginatedGrid` for server-side paginated data** (recommended for most use cases).
+**Use `DSMGrid` only for small, non-paginated datasets** (e.g., static lookups, small inline tables).
+
+#### DSMPaginatedGrid (Recommended for Paginated Data)
+
+Combines grid and pagination into a single component with built-in:
+
+- Integrated pagination controls
+- Content-aware or fixed height modes
+- Loading state handling
+- Sort event handling
 
 ```typescript
-<DSMGrid
-  rowData={data?.results ?? []}
-  columnDefs={columnDefs}
-  pagination={true}
-  paginationPageSize={25}
-  onPaginationChanged={handlePaginationChange}
-  onSortChanged={handleSortChange}
-  loading={isLoading}
-/>
+import { DSMPaginatedGrid, ISortParams } from "smart-ui-library";
+import { useGridPagination } from "../../../hooks/useGridPagination";
+
+const MyGrid: React.FC = () => {
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: false,
+      persistenceKey: GRID_KEYS.MY_GRID,
+      onPaginationChange: (pageNum, pageSz, sortParams) => {
+        // Trigger API call with pagination params
+        getData({ skip: pageNum * pageSz, take: pageSz, ...sortParams });
+      }
+    });
+
+  return (
+    <DSMPaginatedGrid
+      preferenceKey={GRID_KEYS.MY_GRID}
+      isLoading={isFetching}
+      onSortChange={(update: ISortParams) => handleSortChange(update)}
+      providedOptions={{
+        rowData: data?.results || [],
+        columnDefs: columnDefs
+      }}
+      pagination={{
+        pageNumber,
+        pageSize,
+        sortParams: { sortBy: "badgeNumber", isSortDescending: false },
+        handlePageNumberChange,  // Pass directly - NO value - 1
+        handlePageSizeChange,
+        handleSortChange
+      }}
+      heightConfig={{
+        mode: "content-aware",
+        maxHeight: 600
+      }}
+      totalRecords={data?.total ?? 0}
+      showPagination={!!data?.results?.length}
+    />
+  );
+};
 ```
 
-**Features**:
+**CRITICAL**: When using `DSMPaginatedGrid`, pass handlers directly (e.g., `handlePageNumberChange,`). Do NOT subtract 1 from the page number - `DSMPaginatedGrid` handles the 1-based to 0-based conversion internally.
 
-- Automatic pagination
-- Sorting
-- Loading states
-- Responsive design
-- Consistent styling
+#### DSMGrid (For Non-Paginated Data Only)
+
+Use for small datasets that don't require pagination:
+
+````typescript
+<DSMGrid
+  preferenceKey="SMALL_LOOKUP_GRID"
+  isLoading={isLoading}
+  maxHeight={300}
+  providedOptions={{
+    rowData: lookupData ?? [],
+    columnDefs: columnDefs
+  }}
+/>
 
 ---
 
@@ -562,7 +615,7 @@ const DistributionInquirySearchFilter: React.FC<SearchFilterProps> = ({
     </Grid>
   );
 };
-```
+````
 
 **Common Pattern**:
 
@@ -1019,30 +1072,36 @@ const Grid: React.FC<GridProps> = ({
   isLoading,
   pageNumber,
   pageSize,
-  onPageChange,
-  onSortChange,
+  handlePageNumberChange,
+  handlePageSizeChange,
+  handleSortChange,
 }) => {
   const columnDefs = useMemo(() => GetGridColumns(), []);
 
   return (
-    <>
-      <DSMGrid
-        preferenceKey="MY_GRID"
-        isLoading={isLoading}
-        handleSortChanged={onSortChange} // CRITICAL: enables server-side sorting
-        providedOptions={{
-          rowData: data?.results || [],
-          columnDefs: columnDefs,
-        }}
-      />
-      <Pagination
-        pageNumber={pageNumber}
-        setPageNumber={(value: number) => onPageChange(value - 1, pageSize)} // Convert 1-based to 0-based
-        pageSize={pageSize}
-        setPageSize={(value: number) => onPageChange(0, value)} // Reset to page 0 on size change
-        recordCount={data?.total || 0}
-      />
-    </>
+    <DSMPaginatedGrid
+      preferenceKey="MY_GRID"
+      isLoading={isLoading}
+      onSortChange={handleSortChange}
+      providedOptions={{
+        rowData: data?.results || [],
+        columnDefs: columnDefs,
+      }}
+      pagination={{
+        pageNumber,
+        pageSize,
+        sortParams: { sortBy: "Created", isSortDescending: true },
+        handlePageNumberChange,  // Pass directly - NO value - 1
+        handlePageSizeChange,
+        handleSortChange
+      }}
+      heightConfig={{
+        mode: "content-aware",
+        maxHeight: 600
+      }}
+      totalRecords={data?.total ?? 0}
+      showPagination={!!data?.results?.length}
+    />
   );
 };
 ```
@@ -1250,12 +1309,13 @@ const columnDefs = useMemo(() => GetMyGridColumns(), []);
 
 1. **Page** - Top-level page wrapper
 2. **DSMAccordion** - Collapsible sections
-3. **DSMGrid** - AG Grid wrapper with pagination
-4. **SearchAndReset** - Standard search/reset button pair
-5. **TotalsGrid** - Grid for displaying summary/totals
-6. **SmartModal** - Modal dialog component
-7. **Pagination** - Standalone pagination component
-8. **ApiMessageAlert** - API error/success message display
+3. **DSMPaginatedGrid** - AG Grid wrapper with integrated pagination (use for paginated data)
+4. **DSMGrid** - AG Grid wrapper without pagination (use for small, non-paginated datasets)
+5. **SearchAndReset** - Standard search/reset button pair
+6. **TotalsGrid** - Grid for displaying summary/totals
+7. **SmartModal** - Modal dialog component
+8. **Pagination** - Standalone pagination component (rarely needed - prefer DSMPaginatedGrid)
+9. **ApiMessageAlert** - API error/success message display
 
 ### From `components/`
 

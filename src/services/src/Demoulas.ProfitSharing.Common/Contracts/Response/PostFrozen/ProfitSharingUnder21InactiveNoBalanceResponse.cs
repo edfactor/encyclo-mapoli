@@ -23,7 +23,7 @@ public sealed record ProfitSharingUnder21InactiveNoBalanceResponse : IIsExecutiv
     [MaskSensitive] public required string FullName { get; set; }
 
     public const string REPORT_NAME = "Inactive/Terminated Under 21";
-    public static ProfitSharingUnder21InactiveNoBalanceResponse SampleResponse()
+    public static ProfitSharingUnder21InactiveNoBalanceResponse ResponseExample()
     {
         return new ProfitSharingUnder21InactiveNoBalanceResponse()
         {

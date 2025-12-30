@@ -2,16 +2,21 @@
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Common.Validators;
+using Demoulas.ProfitSharing.Services.Administration;
 using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Demoulas.ProfitSharing.Services.Certificates;
+using Demoulas.ProfitSharing.Services.CheckRun;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Lookup;
@@ -40,6 +45,8 @@ public static class ServicesExtension
     {
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
+        _ = builder.Services.AddScoped<ICheckRunWorkflowService, CheckRunWorkflowService>();
+        _ = builder.Services.AddScoped<ICheckRunOrchestrator, CheckRunOrchestrator>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
         _ = builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
         _ = builder.Services.AddScoped<IDistributionService, DistributionService>();
@@ -103,6 +110,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IOracleHcmDiagnosticsService, OracleHcmDiagnosticsService>();
         _ = builder.Services.AddScoped<IStateTaxRatesService, StateTaxRatesService>();
         _ = builder.Services.AddScoped<IAnnuityRatesService, AnnuityRatesService>();
+        _ = builder.Services.AddScoped<ICommentTypeService, CommentTypeService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         _ = builder.Services.AddScoped<IUnmaskingService, UnmaskingService>();

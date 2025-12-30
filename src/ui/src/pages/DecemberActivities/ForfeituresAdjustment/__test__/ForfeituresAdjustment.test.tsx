@@ -116,6 +116,8 @@ vi.mock("../hooks/useForfeituresAdjustment", () => ({
       pageSize: 25,
       sortParams: { sortBy: "date", isSortDescending: true },
       handlePaginationChange: vi.fn(),
+      handlePageNumberChange: vi.fn(),
+      handlePageSizeChange: vi.fn(),
       handleSortChange: vi.fn(),
       resetPagination: vi.fn(),
       clearPersistedState: vi.fn()
@@ -238,6 +240,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -290,6 +294,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -342,6 +348,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -388,6 +396,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -431,6 +441,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -475,6 +487,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -528,6 +542,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -580,6 +596,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -634,6 +652,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()
@@ -689,6 +709,8 @@ describe("ForfeituresAdjustment", () => {
           pageSize: 25,
           sortParams: { sortBy: "date", isSortDescending: true },
           handlePaginationChange: vi.fn(),
+          handlePageNumberChange: vi.fn(),
+          handlePageSizeChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn(),
           clearPersistedState: vi.fn()

@@ -31,7 +31,7 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
     where RespType : class
     where MapType : ClassMap<RespType>
 {
-    private readonly bool _addHeaderWithDateAndReportName; 
+    private readonly bool _addHeaderWithDateAndReportName;
     // Activity source is held in non-generic static to avoid per-closed-generic duplication
     protected EndpointWithCsvBase(short navigationId, bool addHeaderWithDateAndReportName = true)
     {
@@ -137,7 +137,7 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
         MemoryStream memoryStream = new MemoryStream();
         await using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
         await using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
-        { 
+        {
             if (_addHeaderWithDateAndReportName)
             {
                 await streamWriter.WriteLineAsync($"{report.ReportDate:MMM dd yyyy HH:mm}".AsMemory(), cancellationToken);

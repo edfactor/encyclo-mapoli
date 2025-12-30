@@ -1,15 +1,17 @@
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { CircularProgress, Grid, IconButton, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { ISortParams, numberToCurrency, TotalsGrid } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
+import { useTooltipState } from "../../../hooks/useTooltipState";
 import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionsAndForfeituresGridColumns";
@@ -41,12 +43,9 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   isGridExpanded = false,
   onToggleExpand
 }) => {
-  const [showStateTaxTooltip, setShowStateTaxTooltip] = useState(false);
-  const [showForfeitureTooltip, setShowForfeitureTooltip] = useState(false);
-  const [showUnattributedTooltip, setShowUnattributedTooltip] = useState(false);
-  const [stateTaxTimeout, setStateTaxTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [forfeitureTimeout, setForfeitureTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [unattributedTimeout, setUnattributedTimeout] = useState<NodeJS.Timeout | null>(null);
+  const stateTaxTooltip = useTooltipState();
+  const forfeitureTooltip = useTooltipState();
+  const unattributedTooltip = useTooltipState();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -57,106 +56,68 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   // Make the initial page size configurable via state so it can be updated if needed
   const [initialPageSize, setInitialPageSize] = useState<number>(25);
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize,
-      initialSortBy: "employeeName, date",
-      initialSortDescending: false,
-      persistenceKey: GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (hasToken && initialSearchLoaded) {
-            const request = {
-              profitYear: profitYear || 0,
-              ...(distributionsAndForfeituresQueryParams?.startDate && {
-                startDate: distributionsAndForfeituresQueryParams?.startDate
+  const {
+    pageNumber,
+    pageSize,
+    sortParams,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange,
+    resetPagination
+  } = useGridPagination({
+    initialPageSize,
+    initialSortBy: "employeeName, date",
+    initialSortDescending: false,
+    persistenceKey: GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (hasToken && initialSearchLoaded) {
+          const request = {
+            profitYear: profitYear || 0,
+            ...(distributionsAndForfeituresQueryParams?.startDate && {
+              startDate: distributionsAndForfeituresQueryParams?.startDate
+            }),
+            ...(distributionsAndForfeituresQueryParams?.endDate && {
+              endDate: distributionsAndForfeituresQueryParams?.endDate
+            }),
+            ...(distributionsAndForfeituresQueryParams?.states &&
+              distributionsAndForfeituresQueryParams.states.length > 0 && {
+                states: distributionsAndForfeituresQueryParams?.states
               }),
-              ...(distributionsAndForfeituresQueryParams?.endDate && {
-                endDate: distributionsAndForfeituresQueryParams?.endDate
+            ...(distributionsAndForfeituresQueryParams?.taxCodes &&
+              distributionsAndForfeituresQueryParams.taxCodes.length > 0 && {
+                taxCodes: distributionsAndForfeituresQueryParams?.taxCodes
               }),
-              ...(distributionsAndForfeituresQueryParams?.states &&
-                distributionsAndForfeituresQueryParams.states.length > 0 && {
-                  states: distributionsAndForfeituresQueryParams?.states
-                }),
-              ...(distributionsAndForfeituresQueryParams?.taxCodes &&
-                distributionsAndForfeituresQueryParams.taxCodes.length > 0 && {
-                  taxCodes: distributionsAndForfeituresQueryParams?.taxCodes
-                }),
-              ...(shouldArchive && { archive: true }),
-              pagination: {
-                skip: pageNum * pageSz,
-                take: pageSz,
-                sortBy: sortPrms.sortBy,
-                isSortDescending: sortPrms.isSortDescending
-              }
-            };
-            await triggerSearch(request, false);
-          }
-        },
-        [
-          hasToken,
-          initialSearchLoaded,
-          profitYear,
-          distributionsAndForfeituresQueryParams?.startDate,
-          distributionsAndForfeituresQueryParams?.endDate,
-          distributionsAndForfeituresQueryParams?.states,
-          distributionsAndForfeituresQueryParams?.taxCodes,
-          shouldArchive,
-          triggerSearch
-        ]
-      )
-    });
+            ...(shouldArchive && { archive: true }),
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            }
+          };
+          await triggerSearch(request, false);
+        }
+      },
+      [
+        hasToken,
+        initialSearchLoaded,
+        profitYear,
+        distributionsAndForfeituresQueryParams?.startDate,
+        distributionsAndForfeituresQueryParams?.endDate,
+        distributionsAndForfeituresQueryParams?.states,
+        distributionsAndForfeituresQueryParams?.taxCodes,
+        shouldArchive,
+        triggerSearch
+      ]
+    )
+  });
 
   // Use content-aware grid height utility hook - updated to use heightPercentage based on expand state
   const gridMaxHeight = useContentAwareGridHeight({
     rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0,
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
-
-  const handleStateTaxPopoverOpen = () => {
-    if (stateTaxTimeout) {
-      clearTimeout(stateTaxTimeout);
-      setStateTaxTimeout(null);
-    }
-    setShowStateTaxTooltip(true);
-  };
-
-  const handleStateTaxPopoverClose = () => {
-    const timeout = setTimeout(() => {
-      setShowStateTaxTooltip(false);
-    }, 100);
-    setStateTaxTimeout(timeout);
-  };
-
-  const handleForfeiturePopoverOpen = () => {
-    if (forfeitureTimeout) {
-      clearTimeout(forfeitureTimeout);
-      setForfeitureTimeout(null);
-    }
-    setShowForfeitureTooltip(true);
-  };
-
-  const handleForfeiturePopoverClose = () => {
-    const timeout = setTimeout(() => {
-      setShowForfeitureTooltip(false);
-    }, 100);
-    setForfeitureTimeout(timeout);
-  };
-
-  const handleUnattributedPopoverOpen = () => {
-    if (unattributedTimeout) {
-      clearTimeout(unattributedTimeout);
-      setUnattributedTimeout(null);
-    }
-    setShowUnattributedTooltip(true);
-  };
-
-  const handleUnattributedPopoverClose = () => {
-    const timeout = setTimeout(() => {
-      setShowUnattributedTooltip(false);
-    }, 100);
-    setUnattributedTimeout(timeout);
-  };
 
   const onSearch = useCallback(async () => {
     const request = {
@@ -247,18 +208,6 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     onLoadingChange?.(isFetching);
   }, [isFetching, onLoadingChange]);
 
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (stateTaxTimeout) {
-        clearTimeout(stateTaxTimeout);
-      }
-      if (forfeitureTimeout) {
-        clearTimeout(forfeitureTimeout);
-      }
-    };
-  }, [stateTaxTimeout, forfeitureTimeout]);
-
   const sortEventHandler = (update: ISortParams) => handleSortChange(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
 
@@ -303,14 +252,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
                   <div
                     className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
-                    onMouseEnter={handleStateTaxPopoverOpen}
-                    onMouseLeave={handleStateTaxPopoverClose}>
+                    onMouseEnter={stateTaxTooltip.handleOpen}
+                    onMouseLeave={stateTaxTooltip.handleClose}>
                     <InfoOutlinedIcon
                       className="cursor-pointer text-green-500"
                       fontSize="small"
                     />
                     <div
-                      className={`absolute left-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-gray-300 bg-white shadow-lg ${!showStateTaxTooltip ? "hidden" : ""}`}>
+                      className={`absolute left-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-gray-300 bg-white shadow-lg ${!stateTaxTooltip.isOpen ? "hidden" : ""}`}>
                       <div className="p-3 px-4 pb-4">
                         <Typography
                           variant="subtitle2"
@@ -366,14 +315,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 (distributionsAndForfeitures.forfeitureClassActionTotal || 0) > 0) && (
                 <div
                   className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
-                  onMouseEnter={handleForfeiturePopoverOpen}
-                  onMouseLeave={handleForfeiturePopoverClose}>
+                  onMouseEnter={forfeitureTooltip.handleOpen}
+                  onMouseLeave={forfeitureTooltip.handleClose}>
                   <InfoOutlinedIcon
                     className="cursor-pointer text-blue-500"
                     fontSize="small"
                   />
                   <div
-                    className={`absolute right-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-gray-300 bg-white shadow-lg ${!showForfeitureTooltip ? "hidden" : ""}`}>
+                    className={`absolute right-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-gray-300 bg-white shadow-lg ${!forfeitureTooltip.isOpen ? "hidden" : ""}`}>
                     <div className="p-3 px-4 pb-4">
                       <Typography
                         variant="subtitle2"
@@ -439,14 +388,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 </div>
                 <div
                   className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
-                  onMouseEnter={handleUnattributedPopoverOpen}
-                  onMouseLeave={handleUnattributedPopoverClose}>
+                  onMouseEnter={unattributedTooltip.handleOpen}
+                  onMouseLeave={unattributedTooltip.handleClose}>
                   <InfoOutlinedIcon
                     className="cursor-pointer text-yellow-600"
                     fontSize="small"
                   />
                   <div
-                    className={`absolute right-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-yellow-300 bg-yellow-50 shadow-lg ${!showUnattributedTooltip ? "hidden" : ""}`}>
+                    className={`absolute right-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-yellow-300 bg-yellow-50 shadow-lg ${!unattributedTooltip.isOpen ? "hidden" : ""}`}>
                     <div className="p-3 px-4 pb-4">
                       <Typography
                         variant="subtitle2"
@@ -522,35 +471,39 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
               </Typography>
             </div>
           ) : (
-            <DSMGrid
+            <DSMPaginatedGrid
               preferenceKey={GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES}
+              data={distributionsAndForfeitures?.response.results ?? []}
+              columnDefs={columnDefs}
+              totalRecords={distributionsAndForfeitures?.response?.total ?? 0}
               isLoading={false}
-              handleSortChanged={sortEventHandler}
-              maxHeight={gridMaxHeight}
-              providedOptions={{
-                rowData: distributionsAndForfeitures?.response.results,
-                columnDefs: columnDefs,
+              pagination={{
+                pageNumber,
+                pageSize,
+                sortParams,
+                handlePageNumberChange: (value: number) => {
+                  handlePageNumberChange(value);
+                  setInitialSearchLoaded(true);
+                },
+                handlePageSizeChange: (value: number) => {
+                  setInitialPageSize(value);
+                  handlePageSizeChange(value);
+                  setInitialSearchLoaded(true);
+                },
+                handleSortChange
+              }}
+              onSortChange={sortEventHandler}
+              heightConfig={{
+                mode: "content-aware",
+                maxHeight: gridMaxHeight
+              }}
+              gridOptions={{
                 suppressMultiSort: true
               }}
+              showPagination={!!distributionsAndForfeitures && distributionsAndForfeitures.response?.total > 0}
             />
           )}
         </>
-      )}
-      {!isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response?.total > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-            setInitialSearchLoaded(true);
-          }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            setInitialPageSize(value);
-            handlePaginationChange(0, value);
-            setInitialSearchLoaded(true);
-          }}
-          recordCount={distributionsAndForfeitures.response.total}
-        />
       )}
     </>
   );

@@ -1,6 +1,6 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Typography } from "@mui/material";
-import { numberToCurrency } from "smart-ui-library";
+import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { ProfitShareUpdateTotals } from "../../../reduxstore/types";
 
 interface ValidationResult {
@@ -13,7 +13,6 @@ interface ValidationResult {
 
 interface MasterUpdateSummaryTableProps {
   totals: ProfitShareUpdateTotals;
-  validationResponse: ValidationResult | null | undefined;
   getFieldValidation: (fieldKey: string) => ValidationResult | null;
   openValidationField: string | null;
   onValidationToggle: (fieldName: string) => void;
@@ -26,7 +25,6 @@ interface MasterUpdateSummaryTableProps {
  */
 export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> = ({
   totals,
-  validationResponse,
   getFieldValidation,
   openValidationField,
   onValidationToggle
@@ -34,18 +32,26 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
   /**
    * Renders a validation icon in a column header with proper styling
    */
-  const renderHeaderValidationIcon = (fieldKey: string) => {
-    const validation = getFieldValidation(fieldKey);
-    if (!validationResponse || !validation) {
+  const renderHeaderValidationIcon = (keysToValidate: string | string[]) => {
+    var keys = Array.isArray(keysToValidate) ? keysToValidate : [keysToValidate];
+
+    const validations = [];
+    for (const key of keys) {
+      const validation = getFieldValidation(key);
+      validations.push(validation);
+    }
+    if (validations.every((v) => v === null)) {
       return null;
     }
+
+    const isValid = validations.every((v) => v !== null && v.isValid);
 
     return (
       <div
         className="inline-block cursor-pointer"
-        onClick={() => onValidationToggle(fieldKey)}>
+        onClick={() => onValidationToggle(keys[0])}>
         <InfoOutlinedIcon
-          className={`${validation.isValid ? "text-green-500" : "text-orange-500"}`}
+          className={`${isValid ? "text-green-500" : "text-orange-500"}`}
           fontSize="small"
         />
       </div>
@@ -97,7 +103,7 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               <th className="px-3 py-2 text-right text-sm font-semibold">
                 <div className="flex items-center justify-end gap-1">
                   <span>Distributions</span>
-                  {renderHeaderValidationIcon("DistributionTotals")}
+                  {renderHeaderValidationIcon(["DistributionTotals", "QPAY129_DistributionTotals"])}
                 </div>
               </th>
 
@@ -146,8 +152,14 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
             <tr className="border-b border-gray-200">
               <td className="px-3 py-2 text-left font-medium">Point</td>
               <td className="px-3 py-2 text-right"></td>
-              <td className="px-3 py-2 text-right">{numberToCurrency(totals.contributionPoints || 0)}</td>
-              <td className="px-3 py-2 text-right">{numberToCurrency(totals.earningPoints || 0)}</td>
+              <td className="px-3 py-2 text-right">
+                {renderHeaderValidationIcon("TotalForfeitPoints")}&nbsp;
+                {formatNumberWithComma(totals.contributionPoints || 0)}
+              </td>
+              <td className="px-3 py-2 text-right">
+                {renderHeaderValidationIcon("TotalEarningPoints")}&nbsp;
+                {formatNumberWithComma(totals.earningPoints || 0)}
+              </td>
               <td className="px-3 py-2 text-right"></td>
               <td className="px-3 py-2 text-right"></td>
               <td className="px-3 py-2 text-right"></td>
@@ -388,6 +400,76 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                 <strong>Note:</strong> {getFieldValidation("NetAllocTransfer")?.message}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Forfeiture points Validation Popup */}
+      {openValidationField === "TotalForfeitPoints" && getFieldValidation("TotalForfeitPoints") && (
+        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+          <div className="p-2 px-4 pb-4">
+            <Typography
+              variant="subtitle2"
+              sx={{ p: 1 }}>
+              Contribution Points
+            </Typography>
+            <table className="w-full border-collapse text-[0.95rem]">
+              <thead>
+                <tr>
+                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
+                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
+                  <td className="border-b border-gray-100 px-2 py-1 text-right">
+                    {formatNumberWithComma(totals.contributionPoints || 0)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                  <td className="px-2 py-1 text-right">
+                    {formatNumberWithComma(getFieldValidation("TotalForfeitPoints")?.expectedValue || 0)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Forfeiture points Validation Popup */}
+      {openValidationField === "TotalEarningPoints" && getFieldValidation("TotalEarningPoints") && (
+        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+          <div className="p-2 px-4 pb-4">
+            <Typography
+              variant="subtitle2"
+              sx={{ p: 1 }}>
+              Earning Points
+            </Typography>
+            <table className="w-full border-collapse text-[0.95rem]">
+              <thead>
+                <tr>
+                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
+                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
+                  <td className="border-b border-gray-100 px-2 py-1 text-right">
+                    {formatNumberWithComma(totals.earningPoints || 0)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                  <td className="px-2 py-1 text-right">
+                    {formatNumberWithComma(getFieldValidation("TotalEarningPoints")?.expectedValue || 0)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       )}

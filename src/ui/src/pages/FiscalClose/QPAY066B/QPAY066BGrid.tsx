@@ -1,9 +1,10 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { ISortParams, numberToCurrency, TotalsGrid } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../../reduxstore/api/AdhocApi";
 import { RootState } from "../../../reduxstore/store";
@@ -25,7 +26,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
     rowCount: qpay066bData?.response?.response?.results?.length ?? 0
   });
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
@@ -114,37 +115,27 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
         </Typography>
       </div>
 
-      {isFetching ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          py={4}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.QPAY066B}
-            isLoading={isFetching}
-            maxHeight={gridMaxHeight}
-            handleSortChanged={sortEventHandler}
-            providedOptions={{
-              rowData: qpay066bData?.response?.response?.results || [],
-              columnDefs: columnDefs
-            }}
-          />
-          {!!qpay066bData?.response?.response?.results?.length && (
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
-              pageSize={pageSize}
-              setPageSize={(value: number) => handlePaginationChange(0, value)}
-              recordCount={qpay066bData.response.response.total}
-            />
-          )}
-        </>
-      )}
+      <DSMPaginatedGrid
+        preferenceKey={GRID_KEYS.QPAY066B}
+        isLoading={isFetching}
+        onSortChange={sortEventHandler}
+        data={qpay066bData?.response?.response?.results || []}
+        columnDefs={columnDefs}
+        pagination={{
+          pageNumber,
+          pageSize,
+          sortParams: { sortBy: "badgeNumber", isSortDescending: false },
+          handlePageNumberChange,
+          handlePageSizeChange,
+          handleSortChange
+        }}
+        heightConfig={{
+          mode: "content-aware",
+          maxHeight: gridMaxHeight
+        }}
+        totalRecords={qpay066bData?.response?.response?.total ?? 0}
+        showPagination={!!qpay066bData?.response?.response?.results?.length}
+      />
     </div>
   );
 };

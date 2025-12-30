@@ -14,6 +14,10 @@ export interface GridPaginationState {
 
 export interface GridPaginationActions {
   handlePaginationChange: (pageNumber: number, pageSize: number) => void;
+  /** Use this for setPageNumber prop - avoids stale closure issues with pageSize */
+  handlePageNumberChange: (pageNumber: number) => void;
+  /** Use this for setPageSize prop - automatically resets to page 0 */
+  handlePageSizeChange: (pageSize: number) => void;
   handleSortChange: (sortParams: SortParams) => void;
   resetPagination: () => void;
   clearPersistedState: () => void;
@@ -47,6 +51,11 @@ export const useGridPagination = ({
   // Load persisted state if persistenceKey is provided
   const persistedState = persistenceKey ? loadPaginationState(persistenceKey) : null;
 
+  // Debug: Log what we're loading from localStorage
+  if (persistenceKey && process.env.NODE_ENV === "development") {
+    console.log(`[useGridPagination] ${persistenceKey}: loaded`, persistedState);
+  }
+
   const [pageNumber, setPageNumber] = useState(persistedState?.pageNumber ?? 0);
   const [pageSize, setPageSize] = useState(persistedState?.pageSize ?? initialPageSize);
   const [sortBy, setSortBy] = useState(persistedState?.sortBy ?? initialSortBy);
@@ -58,8 +67,9 @@ export const useGridPagination = ({
     callbackRef.current = onPaginationChange;
   }, [onPaginationChange]);
 
-  // Prevent duplicate calls
-  const isUpdatingRef = useRef(false);
+  // Track current pageSize in a ref to avoid stale closure issues
+  const pageSizeRef = useRef(pageSize);
+  pageSizeRef.current = pageSize;
 
   const sortParams = useMemo(
     () => ({
@@ -92,23 +102,40 @@ export const useGridPagination = ({
 
   const handlePaginationChange = useCallback(
     (newPageNumber: number, newPageSize: number) => {
-      // Prevent re-entrant calls
-      if (isUpdatingRef.current) {
-        return;
-      }
-
-      isUpdatingRef.current = true;
       setPageNumber(newPageNumber);
       setPageSize(newPageSize);
+      pageSizeRef.current = newPageSize;
 
       if (typeof callbackRef.current === "function") {
-        // Use setTimeout to defer callback and prevent immediate re-entry
-        setTimeout(() => {
-          callbackRef.current!(newPageNumber, newPageSize, { sortBy, isSortDescending });
-          isUpdatingRef.current = false;
-        }, 0);
-      } else {
-        isUpdatingRef.current = false;
+        callbackRef.current(newPageNumber, newPageSize, { sortBy, isSortDescending });
+      }
+    },
+    [sortBy, isSortDescending]
+  );
+
+  // Separate handler for page number changes - uses ref to get current pageSize
+  // This avoids stale closure issues when Pagination component calls both
+  // setPageSize and setPageNumber synchronously
+  const handlePageNumberChange = useCallback(
+    (newPageNumber: number) => {
+      setPageNumber(newPageNumber);
+
+      if (typeof callbackRef.current === "function") {
+        callbackRef.current(newPageNumber, pageSizeRef.current, { sortBy, isSortDescending });
+      }
+    },
+    [sortBy, isSortDescending]
+  );
+
+  // Separate handler for page size changes - always resets to page 0
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => {
+      setPageNumber(0);
+      setPageSize(newPageSize);
+      pageSizeRef.current = newPageSize;
+
+      if (typeof callbackRef.current === "function") {
+        callbackRef.current(0, newPageSize, { sortBy, isSortDescending });
       }
     },
     [sortBy, isSortDescending]
@@ -147,6 +174,8 @@ export const useGridPagination = ({
   return {
     ...pagination,
     handlePaginationChange,
+    handlePageNumberChange,
+    handlePageSizeChange,
     handleSortChange,
     resetPagination,
     clearPersistedState

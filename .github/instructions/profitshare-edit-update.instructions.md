@@ -1,5 +1,6 @@
 ---
 applyTo: "src/ui/src/pages/FiscalClose/ProfitShareEditUpdate/**/*.*"
+paths: "src/ui/src/pages/FiscalClose/ProfitShareEditUpdate/**/*.*"
 ---
 
 # ProfitShareEditUpdate Component Architecture

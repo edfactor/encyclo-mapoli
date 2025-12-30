@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -27,9 +28,9 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         var configuration = new ConfigurationBuilder()
             .AddUserSecrets<Api.Program>()
             .Build();
-        ConnectionString = OrSkip(configuration,"ConnectionStrings:ProfitSharing");
-        var warehouseConnectionString = OrSkip(configuration,"ConnectionStrings:Warehouse");
-        
+        ConnectionString = OrSkip(configuration, "ConnectionStrings:ProfitSharing");
+        var warehouseConnectionString = OrSkip(configuration, "ConnectionStrings:Warehouse");
+
         _readOnlyCtx = setUpReadOnlyCtx(ConnectionString, debug);
         _ctx = setUpWriteCtx(ConnectionString, debug);
         _warehouseCtx = setUpWarehouseCtx(warehouseConnectionString, debug);
@@ -97,7 +98,7 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         return func(_readOnlyCtx);
     }
 
-    public Task<T> UseWarehouseContext<T>(Func<DemoulasCommonWarehouseContext, Task<T>> func)
+    public Task<T> UseWarehouseContext<T>(Func<IDemoulasCommonWarehouseContext, Task<T>> func)
     {
         return func(_warehouseCtx);
     }

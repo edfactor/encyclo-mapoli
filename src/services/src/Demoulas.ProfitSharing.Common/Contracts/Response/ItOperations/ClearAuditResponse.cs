@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Attributes;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 
@@ -10,4 +10,12 @@ public class ClearAuditResponse
 {
     /// <summary>Number of records deleted.</summary>
     public int DeletedCount { get; set; }
+
+    public static ClearAuditResponse ResponseExample()
+    {
+        return new ClearAuditResponse
+        {
+            DeletedCount = 42
+        };
+    }
 }

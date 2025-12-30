@@ -1,13 +1,12 @@
-import { Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { DSMPaginatedGrid } from "../../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../../constants";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetAssociatesColumns } from "./AssociatesGridColumns";
 
@@ -31,42 +30,49 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
   const profitYear = useDecemberFlowProfitYear();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 10,
-      initialSortBy: "badgeNumber",
-      initialSortDescending: false,
-      persistenceKey: `${GRID_KEYS.BREAKDOWN_REPORT_ASSOCIATES_PREFIX}${store}`,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (hasToken) {
-            const params = {
-              profitYear: queryParams?.profitYear || profitYear,
-              storeNumber: store,
-              storeManagement: false,
-              badgeNumber: queryParams?.badgeNumber,
-              employeeName: queryParams?.employeeName,
-              pagination: {
-                skip: pageNum * pageSz,
-                take: pageSz,
-                sortBy: sortPrms.sortBy,
-                isSortDescending: sortPrms.isSortDescending
-              }
-            };
-            await fetchBreakdownByStore(params);
-          }
-        },
-        [
-          hasToken,
-          queryParams?.profitYear,
-          profitYear,
-          store,
-          queryParams?.badgeNumber,
-          queryParams?.employeeName,
-          fetchBreakdownByStore
-        ]
-      )
-    });
+  const {
+    pageNumber,
+    pageSize,
+    sortParams,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange,
+    resetPagination
+  } = useGridPagination({
+    initialPageSize: 10,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    persistenceKey: `${GRID_KEYS.BREAKDOWN_REPORT_ASSOCIATES_PREFIX}${store}`,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (hasToken) {
+          const params = {
+            profitYear: queryParams?.profitYear || profitYear,
+            storeNumber: store,
+            storeManagement: false,
+            badgeNumber: queryParams?.badgeNumber,
+            employeeName: queryParams?.employeeName,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            }
+          };
+          await fetchBreakdownByStore(params);
+        }
+      },
+      [
+        hasToken,
+        queryParams?.profitYear,
+        profitYear,
+        store,
+        queryParams?.badgeNumber,
+        queryParams?.employeeName,
+        fetchBreakdownByStore
+      ]
+    )
+  });
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -137,24 +143,22 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
         </Typography>
       </Grid>
       <Grid width="100%">
-        <DSMGrid
+        <DSMPaginatedGrid
           preferenceKey={`${GRID_KEYS.BREAKDOWN_REPORT_ASSOCIATES_PREFIX}${store}`}
+          data={breakdownByStore?.response?.results || []}
+          columnDefs={columnDefs}
+          totalRecords={breakdownByStore?.response?.total || 0}
           isLoading={isFetching}
-          handleSortChanged={handleSortChange}
-          providedOptions={{
-            rowData: breakdownByStore?.response?.results || [],
-            columnDefs: columnDefs
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams,
+            handlePageNumberChange,
+            handlePageSizeChange,
+            handleSortChange
           }}
+          showPagination={breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0}
         />
-        {breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
-            pageSize={pageSize}
-            setPageSize={(value: number) => handlePaginationChange(0, value)}
-            recordCount={breakdownByStore.response.total || 0}
-          />
-        )}
       </Grid>
     </Grid>
   );

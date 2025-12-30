@@ -13,4 +13,18 @@ public sealed record MilitaryContributionResponse : YearRequest, IIsExecutive
     public bool IsSupplementalContribution { get; init; }
     public DateOnly ContributionDate { get; set; }
     public bool IsExecutive { get; set; }
+
+    public static MilitaryContributionResponse ResponseExample()
+    {
+        return new MilitaryContributionResponse
+        {
+            ProfitYear = 2024,
+            BadgeNumber = 12345,
+            Amount = 5000.00m,
+            CommentTypeId = 1,
+            IsSupplementalContribution = false,
+            ContributionDate = DateOnly.FromDateTime(DateTime.Today),
+            IsExecutive = false
+        };
+    }
 }

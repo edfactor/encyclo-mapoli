@@ -1,8 +1,7 @@
 import { RefObject, useMemo } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { EligibleEmployeeResponseDto } from "../../../reduxstore/types";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumns";
@@ -14,7 +13,6 @@ interface EligibleEmployeesGridProps {
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
 
@@ -25,11 +23,9 @@ const EligibleEmployeesGrid = ({
   showData,
   hasResults,
   pagination,
-  onPaginationChange,
   onSortChange
 }: EligibleEmployeesGridProps) => {
-  // I need to clone the data object, but alter the reportName. I need to keep the year from the end
-  // of the existing report name, but add "Eligible Employees " to the front.
+  // Clone the data object and modify the reportName to add "Eligible Employees " prefix
   const clonedData = data ? ({ ...data } as EligibleEmployeeResponseDto) : null;
   const year = clonedData?.reportName?.match(/\d{4}$/)?.[0];
   if (clonedData && year) {
@@ -37,42 +33,29 @@ const EligibleEmployeesGrid = ({
   }
 
   const columnDefs = useMemo(() => GetEligibleEmployeesColumns(), []);
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: clonedData?.response?.results?.length ?? 0
-  });
+
+  // Don't render if we shouldn't show data
+  if (!showData || !clonedData?.response) {
+    return null;
+  }
 
   return (
-    <>
-      {showData && clonedData?.response && (
-        <div ref={innerRef}>
-          <ReportSummary report={clonedData} />
-          <DSMGrid
-            preferenceKey={GRID_KEYS.ELIGIBLE_EMPLOYEES}
-            isLoading={isLoading}
-            handleSortChanged={onSortChange}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: clonedData.response.results,
-              columnDefs: columnDefs,
-              suppressMultiSort: true
-            }}
-          />
-        </div>
-      )}
-      {hasResults && data?.response && (
-        <Pagination
-          pageNumber={pagination.pageNumber}
-          setPageNumber={(value: number) => {
-            onPaginationChange(value - 1, pagination.pageSize);
-          }}
-          pageSize={pagination.pageSize}
-          setPageSize={(value: number) => {
-            onPaginationChange(0, value);
-          }}
-          recordCount={data.response.total || 0}
-        />
-      )}
-    </>
+    <DSMPaginatedGrid
+      innerRef={innerRef}
+      preferenceKey={GRID_KEYS.ELIGIBLE_EMPLOYEES}
+      data={clonedData.response.results}
+      columnDefs={columnDefs}
+      totalRecords={clonedData.response.total || 0}
+      isLoading={isLoading}
+      pagination={pagination}
+      onSortChange={onSortChange}
+      showPagination={hasResults}
+      beforeGrid={<ReportSummary report={clonedData} />}
+      heightConfig={{
+        mode: "content-aware",
+        heightPercentage: 0.6
+      }}
+    />
   );
 };
 

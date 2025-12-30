@@ -74,6 +74,7 @@ export const ROUTES = {
   DEMO_FREEZE: "demographic-freeze",
   MANAGE_STATE_TAXES: "manage-state-taxes",
   MANAGE_ANNUITY_RATES: "manage-annuity-rates",
+  MANAGE_COMMENT_TYPES: "manage-comment-types",
   PROFIT_SHARING_ADJUSTMENTS: "profit-sharing-adjustments",
   AUDIT_SEARCH: "audit-search",
   ORACLE_HCM_DIAGNOSTICS: "oracle-hcm-diagnostics",
@@ -189,6 +190,9 @@ export const CAPTIONS = {
 
   MANAGE_ANNUITY_RATES: "Manage Annuity Rates",
   MANAGE_ANNUITY_RATES_SHORT: "Manage Annuity Rates",
+
+  MANAGE_COMMENT_TYPES: "Manage Comment Types",
+  MANAGE_COMMENT_TYPES_SHORT: "Manage Comment Types",
 
   PROFIT_SHARING_ADJUSTMENTS: "Profit Sharing Adjustments (008-22)",
   PROFIT_SHARING_ADJUSTMENTS_SHORT: "Profit Sharing Adjustments",
@@ -458,6 +462,7 @@ export const GRID_KEYS = {
   BALANCE_AGE_PARTTIME: "BALANCE-AGE-PARTTIME",
 
   // Profit Summary
+  PLAN_ELIGIBILITY_SUMMARY: "PLAN-ELIGIBILITY-SUMMARY",
   ACTIVE_INACTIVE_SUMMARY: "ACTIVE-INACTIVE-SUMMARY",
   TERMINATED_SUMMARY: "TERMINATED-SUMMARY",
   EMPLOYEES_SUMMARY: "EMPLOYEES-SUMMARY",
@@ -473,6 +478,7 @@ export const GRID_KEYS = {
   DEMOGRAPHIC_SYNC_AUDIT: "DEMOGRAPHIC-SYNC-AUDIT",
   MANAGE_STATE_TAX_RATES: "MANAGE-STATE-TAX-RATES",
   MANAGE_ANNUITY_RATES: "MANAGE-ANNUITY-RATES",
+  MANAGE_COMMENT_TYPES: "MANAGE-COMMENT-TYPES",
   PROFIT_SHARING_ADJUSTMENTS: "PROFIT-SHARING-ADJUSTMENTS",
 
   // Distributions
@@ -485,5 +491,24 @@ export const GRID_KEYS = {
   TERMINATED_LETTERS: "TERMINATED-LETTERS",
   RECENTLY_TERMINATED: "RECENTLY-TERMINATED",
   PAY_BEN_REPORT: "PAY-BEN-REPORT",
+  PAY_BE_NEXT: "PAY-BE-NEXT",
   BENEFICIARY_INQUIRY: "BENEFICIARY-INQUIRY"
+} as const;
+
+/**
+ * Common pagination defaults used across grids
+ */
+export const PAGINATION = {
+  /** Default page size for most grids */
+  DEFAULT_PAGE_SIZE: 25,
+  /** Smaller page size for selection grids (e.g., member selection) */
+  SMALL_PAGE_SIZE: 10,
+  /** Larger page size for detailed data grids */
+  LARGE_PAGE_SIZE: 50,
+  /** Minimal page size for compact views */
+  MINIMAL_PAGE_SIZE: 5,
+  /** Standard page size options for pagination controls */
+  PAGE_SIZE_OPTIONS: [10, 25, 50] as const,
+  /** Compact page size options for selection grids */
+  COMPACT_PAGE_SIZE_OPTIONS: [5, 10, 25] as const
 } as const;

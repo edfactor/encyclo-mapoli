@@ -3,6 +3,7 @@ import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
 import useRecentlyTerminated from "./hooks/useRecentlyTerminated";
 import RecentlyTerminatedGrid from "./RecentlyTerminatedGrid";
@@ -50,13 +51,15 @@ const RecentlyTerminated = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.RECENTLY_TERMINATED}
-      actionNode={renderActionNode()}>
-      <MissiveAlertProvider>
-        <RecentlyTerminatedContent />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Recently Terminated">
+      <Page
+        label={CAPTIONS.RECENTLY_TERMINATED}
+        actionNode={renderActionNode()}>
+        <MissiveAlertProvider>
+          <RecentlyTerminatedContent />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

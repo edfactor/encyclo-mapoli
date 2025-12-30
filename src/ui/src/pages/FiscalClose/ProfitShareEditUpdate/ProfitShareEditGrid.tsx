@@ -4,10 +4,10 @@ import { useSelector } from "react-redux";
 import { useLazyGetProfitShareEditQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
 
 interface ProfitShareEditGridProps {
@@ -34,41 +34,48 @@ const ProfitShareEditGrid = ({
     rowCount: profitSharingEdit?.response?.results?.length ?? 0
   });
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "name",
-      initialSortDescending: false,
-      persistenceKey: GRID_KEYS.PROFIT_SHARE_EDIT,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (initialSearchLoaded && hasToken) {
-            const request: ProfitShareUpdateRequest = {
-              pagination: {
-                sortBy: sortPrms.sortBy,
-                isSortDescending: sortPrms.isSortDescending,
-                skip: pageNum * pageSz,
-                take: pageSz
-              },
-              profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0,
-              contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
-              earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
-              incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
-              secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
-              maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
-              badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
-              adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
-              adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
-              adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
-              badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
-              adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
-            };
-            await triggerSearchUpdate(request, false);
-          }
-        },
-        [initialSearchLoaded, hasToken, profitSharingEditQueryParams, triggerSearchUpdate]
-      )
-    });
+  const {
+    pageNumber,
+    pageSize,
+    sortParams,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange,
+    resetPagination
+  } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "name",
+    initialSortDescending: false,
+    persistenceKey: GRID_KEYS.PROFIT_SHARE_EDIT,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (initialSearchLoaded && hasToken) {
+          const request: ProfitShareUpdateRequest = {
+            pagination: {
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending,
+              skip: pageNum * pageSz,
+              take: pageSz
+            },
+            profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0,
+            contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
+            earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
+            incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
+            secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
+            maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
+            badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
+            adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
+            adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
+            adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
+            badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
+            adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
+          };
+          await triggerSearchUpdate(request, false);
+        }
+      },
+      [initialSearchLoaded, hasToken, profitSharingEditQueryParams, triggerSearchUpdate]
+    )
+  });
 
   const onSearch = useCallback(async () => {
     const request: ProfitShareUpdateRequest = {
@@ -118,31 +125,29 @@ const ProfitShareEditGrid = ({
         </Typography>
       </div>
       {!!profitSharingEdit && (
-        <>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.PROFIT_SHARE_EDIT}
-            isLoading={isFetching}
-            handleSortChanged={handleSortChange}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: "response" in profitSharingEdit ? profitSharingEdit.response?.results : [],
-              columnDefs: editColumnDefs
-            }}
-          />
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
+        <DSMPaginatedGrid
+          preferenceKey={GRID_KEYS.PROFIT_SHARE_EDIT}
+          data={"response" in profitSharingEdit ? (profitSharingEdit.response?.results ?? []) : []}
+          columnDefs={editColumnDefs}
+          totalRecords={profitSharingEdit?.response.total ?? 0}
+          isLoading={isFetching}
+          heightConfig={{ maxHeight: gridMaxHeight }}
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams,
+            handlePageNumberChange: (value: number) => {
+              handlePageNumberChange(value);
               setInitialSearchLoaded(true);
-            }}
-            pageSize={pageSize}
-            setPageSize={(value: number) => {
-              handlePaginationChange(0, value);
+            },
+            handlePageSizeChange: (value: number) => {
+              handlePageSizeChange(value);
               setInitialSearchLoaded(true);
-            }}
-            recordCount={profitSharingEdit?.response.total ?? 0}
-          />
-        </>
+            },
+            handleSortChange
+          }}
+          showPagination
+        />
       )}
     </>
   );

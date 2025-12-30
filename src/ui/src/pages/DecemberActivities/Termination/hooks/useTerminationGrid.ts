@@ -1,11 +1,11 @@
 import { GridApi } from "ag-grid-community";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import {
   useUpdateForfeitureAdjustmentBulkMutation,
   useUpdateForfeitureAdjustmentMutation
 } from "reduxstore/api/AdhocApi";
+import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import {
   CalendarResponseDto,
@@ -13,9 +13,9 @@ import {
   ForfeitureAdjustmentUpdateRequest
 } from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
+import { GRID_KEYS } from "../../../../constants";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { useEditState } from "../../../../hooks/useEditState";
-import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useRowSelection } from "../../../../hooks/useRowSelection";
 import { generateRowKey } from "../../../../utils/forfeitActivities/gridDataHelpers";
@@ -564,7 +564,8 @@ export const useTerminationGrid = ({
         onShowUnsavedChangesDialog?.();
         return;
       }
-      handlePaginationChange(value - 1, pageSize);
+      // DSMPaginatedGrid already passes 0-based page number (no need to subtract 1)
+      handlePaginationChange(value, pageSize);
       setInitialSearchLoaded(true);
     },
     setPageSize: (value: number) => {

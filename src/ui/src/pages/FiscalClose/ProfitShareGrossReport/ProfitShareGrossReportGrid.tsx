@@ -5,7 +5,8 @@ import { Path, useNavigate } from "react-router";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
-import { DSMGrid, Pagination, TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
@@ -29,35 +30,36 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     rowCount: grossWagesReport?.response?.results?.length ?? 0
   });
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "BadgeNumber",
-    initialSortDescending: false,
-    persistenceKey: GRID_KEYS.PROFIT_SHARE_GROSS_REPORT,
-    onPaginationChange: useCallback(
-      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-        // Match the behavior of Duplicate Names & Birthdays: once search params exist,
-        // page/sort changes trigger a server call.
-        if (!grossWagesReportQueryParams?.profitYear) {
-          return;
-        }
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "BadgeNumber",
+      initialSortDescending: false,
+      persistenceKey: GRID_KEYS.PROFIT_SHARE_GROSS_REPORT,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+          // Match the behavior of Duplicate Names & Birthdays: once search params exist,
+          // page/sort changes trigger a server call.
+          if (!grossWagesReportQueryParams?.profitYear) {
+            return;
+          }
 
-        const request: GrossWagesReportDto = {
-          profitYear: grossWagesReportQueryParams.profitYear,
-          pagination: {
-            skip: pageNum * pageSz,
-            take: pageSz,
-            sortBy: sortPrms.sortBy,
-            isSortDescending: sortPrms.isSortDescending
-          },
-          minGrossAmount: grossWagesReportQueryParams.minGrossAmount ?? 0
-        };
+          const request: GrossWagesReportDto = {
+            profitYear: grossWagesReportQueryParams.profitYear,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            },
+            minGrossAmount: grossWagesReportQueryParams.minGrossAmount ?? 0
+          };
 
-        await triggerSearch(request, false);
-      },
-      [grossWagesReportQueryParams?.profitYear, grossWagesReportQueryParams?.minGrossAmount, triggerSearch]
-    )
-  });
+          await triggerSearch(request, false);
+        },
+        [grossWagesReportQueryParams?.profitYear, grossWagesReportQueryParams?.minGrossAmount, triggerSearch]
+      )
+    });
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -103,32 +105,29 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
               topRowHeaders={["Totals"]}
             />
           )}
-          <DSMGrid
+          <DSMPaginatedGrid
             preferenceKey={GRID_KEYS.PROFIT_SHARE_GROSS_REPORT}
+            data={grossWagesReport?.response.results ?? []}
+            columnDefs={columnDefs}
+            totalRecords={grossWagesReport?.response.total ?? 0}
             isLoading={isFetching}
-            maxHeight={gridMaxHeight}
-            handleSortChanged={handleSortChange}
-            providedOptions={{
-              rowData: grossWagesReport?.response.results,
-              columnDefs: columnDefs,
+            onSortChange={handleSortChange}
+            heightConfig={{ maxHeight: gridMaxHeight }}
+            pagination={{
+              pageNumber,
+              pageSize,
+              sortParams: { sortBy: "", isSortDescending: false },
+              handlePageNumberChange,
+              handlePageSizeChange,
+              handleSortChange: () => {}
+            }}
+            showPagination={!!grossWagesReport && grossWagesReport.response.results.length > 0}
+            gridOptions={{
               suppressHorizontalScroll: true,
               suppressColumnVirtualisation: true
             }}
           />
         </>
-      )}
-      {!!grossWagesReport && grossWagesReport.response.results.length && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-          }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
-          recordCount={grossWagesReport.response.total}
-        />
       )}
     </div>
   );

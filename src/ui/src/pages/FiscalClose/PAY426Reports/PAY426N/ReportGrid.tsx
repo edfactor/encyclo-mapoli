@@ -10,9 +10,10 @@ import {
   useLazyGetYearEndProfitSharingReportLiveQuery
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
+import { ISortParams } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../../constants";
+import { useContentAwareGridHeight } from "../../../../hooks/useContentAwareGridHeight";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { RootState } from "../../../../reduxstore/store";
 import { ValidationResponse } from "../../../../types/validation/cross-reference-validation";
@@ -50,7 +51,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
   const frozenData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportFrozen);
   const data = isFrozen ? frozenData : liveData;
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "fullName",
     initialSortDescending: false,
@@ -122,7 +123,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
       const presetNumber = matchingPreset ? Number(matchingPreset.id) : 0;
 
       if (presetNumber >= 1 && presetNumber <= 8) {
-        triggerValidation({ profitYear, reportSuffix: presetNumber })
+        triggerValidation({ profitYear, reportSuffix: presetNumber, useFrozenData: isFrozen })
           .unwrap()
           .then((response) => {
             setValidationData(response);
@@ -134,7 +135,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
         setValidationData(null);
       }
     }
-  }, [hasToken, params, profitYear, triggerValidation]);
+  }, [hasToken, isFrozen, params, profitYear, triggerValidation]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -217,32 +218,30 @@ const ReportGrid: React.FC<ReportGridProps> = ({
           <CircularProgress />
         </Box>
       ) : (
-        <>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.PAY426N_REPORT}
-            isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: data?.response?.results || [],
-              columnDefs: columnDefs,
-              pinnedTopRowData: pinnedTopRowData
-            }}
-          />
-          {!!data && data.response.results.length > 0 && (
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={(value: number) => {
-                handlePaginationChange(value - 1, pageSize);
-              }}
-              pageSize={pageSize}
-              setPageSize={(value: number) => {
-                handlePaginationChange(0, value);
-              }}
-              recordCount={data.response.total}
-            />
-          )}
-        </>
+        <DSMPaginatedGrid
+          preferenceKey={GRID_KEYS.PAY426N_REPORT}
+          data={data?.response?.results || []}
+          columnDefs={columnDefs}
+          totalRecords={data?.response?.total || 0}
+          isLoading={isFetching}
+          pagination={{
+            pageNumber,
+            pageSize,
+            sortParams: { sortBy: "fullName", isSortDescending: false },
+            handlePageNumberChange,
+            handlePageSizeChange,
+            handleSortChange
+          }}
+          onSortChange={sortEventHandler}
+          heightConfig={{
+            mode: "content-aware",
+            maxHeight: gridMaxHeight
+          }}
+          gridOptions={{
+            pinnedTopRowData: pinnedTopRowData
+          }}
+          showPagination={!!data && data.response.results.length > 0}
+        />
       )}
     </>
   );

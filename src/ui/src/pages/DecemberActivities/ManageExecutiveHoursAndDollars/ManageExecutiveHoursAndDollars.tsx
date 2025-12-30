@@ -1,6 +1,7 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
+import PageErrorBoundary from "components/PageErrorBoundary";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import { memo, useCallback } from "react";
@@ -207,9 +208,11 @@ const ManageExecutiveHoursAndDollarsInner = () => {
 
 const ManageExecutiveHoursAndDollars = () => {
   return (
-    <MissiveAlertProvider>
-      <ManageExecutiveHoursAndDollarsInner />
-    </MissiveAlertProvider>
+    <PageErrorBoundary pageName="Manage Executive Hours and Dollars">
+      <MissiveAlertProvider>
+        <ManageExecutiveHoursAndDollarsInner />
+      </MissiveAlertProvider>
+    </PageErrorBoundary>
   );
 };
 

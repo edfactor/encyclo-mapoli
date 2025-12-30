@@ -15,9 +15,8 @@ if (PortHelper.IsTcpPortInUse(uiPort))
 {
     ProcessHelper.KillProcessesByName("node", logger);
 }
-
-var database = builder.AddConnectionString("ProfitSharing", "ConnectionStrings:ProfitSharing");
-var warehouse = builder.AddConnectionString("Warehouse", "ConnectionStrings:Warehouse").WithParentRelationship(database);
+var database = builder.AddConnectionString("ProfitSharing", "ConnectionStrings:ProfitSharing").ExcludeFromManifest();
+var warehouse = builder.AddConnectionString("Warehouse", "ConnectionStrings:Warehouse").WithParentRelationship(database).ExcludeFromManifest();
 
 Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;

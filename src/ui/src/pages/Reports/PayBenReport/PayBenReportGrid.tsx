@@ -1,5 +1,5 @@
-import { RefObject, useCallback, useMemo } from "react";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { RefObject, useMemo } from "react";
+import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
@@ -13,7 +13,6 @@ interface PayBenReportGridProps {
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
-  onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
 
@@ -24,7 +23,6 @@ const PayBenReportGrid = ({
   showData,
   hasResults,
   pagination,
-  onPaginationChange,
   onSortChange
 }: PayBenReportGridProps) => {
   const columnDefs = useMemo(() => PayBenReportGridColumn(), []);
@@ -34,51 +32,31 @@ const PayBenReportGrid = ({
     rowCount: data?.results?.length ?? 0
   });
 
-  const handleSortChanged = useCallback(
-    (update: ISortParams) => {
-      // Handle empty sortBy case - set default (preserving original logic)
-      if (update.sortBy === "") {
-        update.sortBy = "ssn";
-        update.isSortDescending = true;
-      }
-
-      // Reset to page 0 when sorting changes (preserving original logic)
-      onPaginationChange(0, pagination.pageSize);
-      onSortChange(update);
-    },
-    [onPaginationChange, onSortChange, pagination.pageSize]
-  );
+  if (!showData || !data?.results) {
+    return null;
+  }
 
   return (
-    <div className="relative">
-      {showData && data?.results && (
-        <div ref={innerRef}>
-          <DSMGrid
-            preferenceKey={GRID_KEYS.PAY_BEN_REPORT}
-            isLoading={isLoading}
-            maxHeight={gridMaxHeight}
-            handleSortChanged={handleSortChanged}
-            providedOptions={{
-              rowData: data.results,
-              columnDefs: columnDefs,
-              suppressMultiSort: true
-            }}
-          />
-        </div>
-      )}
-      {hasResults && data && (
-        <Pagination
-          pageNumber={pagination.pageNumber}
-          setPageNumber={(value: number) => {
-            onPaginationChange(value - 1, pagination.pageSize);
-          }}
-          pageSize={pagination.pageSize}
-          setPageSize={(value: number) => {
-            onPaginationChange(0, value);
-          }}
-          recordCount={data.total || 0}
-        />
-      )}
+    <div
+      className="relative"
+      ref={innerRef}>
+      <DSMPaginatedGrid
+        preferenceKey={GRID_KEYS.PAY_BEN_REPORT}
+        data={data.results}
+        columnDefs={columnDefs}
+        totalRecords={data.total || 0}
+        isLoading={isLoading}
+        pagination={pagination}
+        onSortChange={onSortChange}
+        heightConfig={{
+          mode: "content-aware",
+          maxHeight: gridMaxHeight
+        }}
+        gridOptions={{
+          suppressMultiSort: true
+        }}
+        showPagination={hasResults}
+      />
     </div>
   );
 };

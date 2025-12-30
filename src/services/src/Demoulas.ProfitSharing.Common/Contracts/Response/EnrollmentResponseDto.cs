@@ -4,4 +4,13 @@ public sealed record EnrollmentResponseDto
 {
     public required byte Id { get; set; }
     public required string Name { get; set; }
+
+    public static EnrollmentResponseDto ResponseExample()
+    {
+        return new EnrollmentResponseDto
+        {
+            Id = 1,
+            Name = "Enrolled"
+        };
+    }
 }

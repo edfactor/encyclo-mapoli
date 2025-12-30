@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using ArchUnitNET.Domain;
 using ArchUnitNET.Fluent;
 using Microsoft.Extensions.Caching.Memory;
@@ -102,5 +102,67 @@ public sealed class AdditionalArchitectureRulesTests
             .Because("Application caching must use IDistributedCache, not IMemoryCache (per distributed caching requirements).");
 
         ArchRuleAssertions.AssertNoArchitectureViolations(rule, s_architecture);
+    }
+
+    [Fact]
+    [Description("PS-XXXX : EmploymentStatusId must be typed as char or char? everywhere")]
+    public void EmploymentStatusId_ShouldBeTypedAsChar_Everywhere()
+    {
+        // Get all assemblies to check
+        var assembliesToCheck = new[]
+        {
+            s_endpointsAssembly,
+            s_servicesAssembly,
+            s_dataAssembly,
+            ProfitSharingArchitectureFixture.CommonAssembly
+        };
+
+        var violations = new System.Collections.Generic.List<string>();
+
+        foreach (var assembly in assembliesToCheck)
+        {
+            // Get all types in the assembly
+            var types = assembly.GetTypes();
+
+            foreach (var type in types)
+            {
+                // Skip compiler-generated anonymous types
+                if (type.Name.StartsWith("<>f__AnonymousType", System.StringComparison.Ordinal) ||
+                    type.Name.Contains("<>"))
+                {
+                    continue;
+                }
+
+                // Get all properties named EmploymentStatusId
+                var properties = type.GetProperties(
+                    System.Reflection.BindingFlags.Public |
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance)
+                    .Where(p => p.Name == "EmploymentStatusId");
+
+                foreach (var property in properties)
+                {
+                    // Check if the property type is char or Nullable<char>
+                    var propertyType = property.PropertyType;
+                    var isChar = propertyType == typeof(char);
+                    var isNullableChar = propertyType == typeof(char?);
+
+                    if (!isChar && !isNullableChar)
+                    {
+                        violations.Add(
+                            $"{type.FullName}.{property.Name} has type '{propertyType.FullName}' " +
+                            $"but should be 'char' or 'char?' (nullable char)");
+                    }
+                }
+            }
+        }
+
+        // Assert no violations found - output each violation separately for clarity
+        if (violations.Any())
+        {
+            var message = "EmploymentStatusId type violations found:\n" +
+                          string.Join("\n", violations);
+            Assert.Fail(message);
+        }
     }
 }

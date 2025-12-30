@@ -3,6 +3,7 @@ import { memo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
 import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../reduxstore/store";
@@ -91,7 +92,6 @@ const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: Master
           searchResults={searchResults}
           onMemberSelect={selectMember}
           memberGridPagination={memberGridPagination}
-          onPaginationChange={memberGridPagination.handlePaginationChange}
           onSortChange={memberGridPagination.handleSortChange}
           isLoading={isFetchingMembers}
           isGridExpanded={isGridExpanded}
@@ -155,7 +155,6 @@ const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: Master
               profitData={memberProfitData}
               isLoading={isFetchingProfitData}
               profitGridPagination={profitGridPagination}
-              onPaginationChange={profitGridPagination.handlePaginationChange}
               onSortChange={profitGridPagination.handleSortChange}
               isGridExpanded={isGridExpanded}
               onToggleExpand={handleToggleGridExpand}
@@ -179,14 +178,16 @@ const MasterInquiry = () => {
   const [isGridExpanded, setIsGridExpanded] = useState(false);
 
   return (
-    <Page label={isGridExpanded ? "" : CAPTIONS.MASTER_INQUIRY}>
-      <MissiveAlertProvider>
-        <MasterInquiryContent
-          isGridExpanded={isGridExpanded}
-          setIsGridExpanded={setIsGridExpanded}
-        />
-      </MissiveAlertProvider>
-    </Page>
+    <PageErrorBoundary pageName="Master Inquiry">
+      <Page label={isGridExpanded ? "" : CAPTIONS.MASTER_INQUIRY}>
+        <MissiveAlertProvider>
+          <MasterInquiryContent
+            isGridExpanded={isGridExpanded}
+            setIsGridExpanded={setIsGridExpanded}
+          />
+        </MissiveAlertProvider>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Demoulas Common Services - Extension Methods Guide
 
 This document provides a comprehensive guide to all extension methods available in the `demoulas.common` solution. These extensions enhance functionality across various .NET types and services.
@@ -12,12 +17,13 @@ This document provides a comprehensive guide to all extension methods available 
 6. [HttpRequestMessage Extensions](#httprequestmessage-extensions)
 7. [Environment Extensions](#environment-extensions)
 8. [DbContext Extensions](#dbcontext-extensions)
-9. [Pagination Extensions](#pagination-extensions)
-10. [API Endpoint Extensions](#api-endpoint-extensions)
-11. [Exception Extensions](#exception-extensions)
-12. [Middleware Extensions](#middleware-extensions)
-13. [Swagger Extensions](#swagger-extensions)
-14. [PDF Extensions](#pdf-extensions)
+9. [Database Context Configuration](#database-context-configuration)
+10. [Pagination Extensions](#pagination-extensions)
+11. [API Endpoint Extensions](#api-endpoint-extensions)
+12. [Exception Extensions](#exception-extensions)
+13. [Middleware Extensions](#middleware-extensions)
+14. [Swagger Extensions](#swagger-extensions)
+15. [PDF Extensions](#pdf-extensions)
 
 ---
 
@@ -638,6 +644,183 @@ await dbContext.BulkInsertAsync(
 
 ---
 
+## Database Context Configuration
+
+**Namespace:** `Demoulas.Common.Data.Contexts.DTOs.Context`  
+**Class:** `ContextFactoryRequest`
+
+### Overview
+
+The `ContextFactoryRequest` class is used to configure and initialize DbContext instances in the Demoulas Common library. It provides a fluent API for setting up database contexts with support for connection strings, custom EF Core options, interceptors, and role-based commit guards.
+
+### ContextFactoryRequest.Initialize()
+
+Creates a new context factory request with customizable configuration options.
+
+**Syntax:**
+
+```csharp
+public static ContextFactoryRequest Initialize<TContext>(
+    string connectionName,
+    Action<OracleEntityFrameworkCoreSettings>? configureSettings = null,
+    Action<DbContextOptionsBuilder>? configureDbContextOptions = null,
+    Func<IServiceProvider, IEnumerable<IInterceptor>>? interceptorFactory = null,
+    IEnumerable<string>? denyCommitRoles = null)
+    where TContext : DbContext
+```
+
+**Type Parameters:**
+
+- `TContext`: The type of DbContext to configure (must inherit from DbContext)
+
+**Parameters:**
+
+- `connectionName` (string, required): The name of the connection string in configuration
+- `configureSettings` (Action, optional): Delegate to configure Aspire Oracle settings (health checks, retries, etc.)
+- `configureDbContextOptions` (Action, optional): **Delegate to customize EF Core DbContextOptions**
+- `interceptorFactory` (Func, optional): Factory function to create custom EF Core interceptors
+- `denyCommitRoles` (IEnumerable<string>, optional): Roles that are denied write access to this context
+
+**Returns:** A configured `ContextFactoryRequest` instance
+
+**Key Feature - configureDbContextOptions:**
+
+The `configureDbContextOptions` parameter allows you to customize EF Core behavior for your DbContext. This is essential when you need to:
+
+- Enable sensitive data logging or detailed errors for debugging
+- Configure query behavior (tracking, split queries, command timeouts)
+- Override default Oracle settings
+- Add additional EF Core features or optimizations
+
+**Common Use Cases:**
+
+1. **Development/Debugging Configuration:**
+
+```csharp
+ContextFactoryRequest.Initialize<AppDbContext>(
+    connectionName: "AppDb",
+    configureDbContextOptions: options =>
+    {
+        options.EnableSensitiveDataLogging();  // Show parameter values in logs
+        options.EnableDetailedErrors();         // Show detailed error information
+    })
+```
+
+2. **Query Behavior Customization:**
+
+```csharp
+ContextFactoryRequest.Initialize<AppReadOnlyDbContext>(
+    connectionName: "AppDb",
+    configureDbContextOptions: options =>
+    {
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        options.UseOracle(oracle => oracle.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+    })
+```
+
+3. **Command Timeout Configuration:**
+
+```csharp
+ContextFactoryRequest.Initialize<AppDbContext>(
+    connectionName: "AppDb",
+    configureDbContextOptions: options =>
+    {
+        options.UseOracle(oracle => oracle.CommandTimeout(120)); // 2 minutes
+    })
+```
+
+4. **Comprehensive Configuration (All Parameters):**
+
+```csharp
+ContextFactoryRequest.Initialize<AppDbContext>(
+    connectionName: "AppDb",
+    configureSettings: settings =>
+    {
+        settings.DisableHealthChecks = false;   // Enable health checks
+        settings.DisableRetry = false;          // Enable retries
+    },
+    configureDbContextOptions: options =>
+    {
+        options.EnableSensitiveDataLogging();
+        options.UseOracle(oracle =>
+        {
+            oracle.CommandTimeout(120);
+            oracle.EnableRetryOnFailure(maxRetryCount: 3);
+        });
+    },
+    interceptorFactory: serviceProvider =>
+    {
+        // Add custom interceptors
+        return new[] { new AuditInterceptor(), new PerformanceInterceptor() };
+    },
+    denyCommitRoles: new[] { "ReadOnlyUser", "Auditor" })
+```
+
+5. **API/Web Application Example:**
+
+```csharp
+// In Program.cs or service configuration
+List<ContextFactoryRequest> contextRequests = new()
+{
+    // Production context with minimal logging
+    ContextFactoryRequest.Initialize<ProductionDbContext>("Production"),
+
+    // Development context with enhanced debugging
+    ContextFactoryRequest.Initialize<DevDbContext>(
+        connectionName: "Development",
+        configureDbContextOptions: options =>
+        {
+            if (builder.Environment.IsDevelopment())
+            {
+                options.EnableSensitiveDataLogging();
+                options.EnableDetailedErrors();
+            }
+        })
+};
+
+await builder.AddDatabaseServices(contextRequests);
+```
+
+**Important Notes:**
+
+- The library automatically applies default Oracle configurations (compatibility, naming conventions, interceptors)
+- The `configureDbContextOptions` parameter adds customizations **on top of** these defaults
+- Do not use `EnableSensitiveDataLogging()` in production environments as it may log sensitive information
+- For read-only contexts, the library automatically sets `QueryTrackingBehavior.NoTracking` unless overridden
+
+**Integration with Database Services:**
+
+```csharp
+// Basic registration
+builder.AddDatabaseServices<AppContextFactory, AppDbContext, AppReadOnlyDbContext>(
+    (services, requests) =>
+    {
+        requests.Add(ContextFactoryRequest.Initialize<AppDbContext>("MyConnection"));
+    },
+    init: (builder, requests) => new AppContextFactory(builder, requests));
+
+// With custom configuration
+builder.AddDatabaseServices<AppContextFactory, AppDbContext, AppReadOnlyDbContext>(
+    (services, requests) =>
+    {
+        requests.Add(ContextFactoryRequest.Initialize<AppDbContext>(
+            connectionName: "MyConnection",
+            configureDbContextOptions: options =>
+            {
+                options.LogTo(Console.WriteLine, LogLevel.Information);
+            }));
+    },
+    init: (builder, requests) => new AppContextFactory(builder, requests));
+```
+
+**See Also:**
+
+- [Microsoft.EntityFrameworkCore.DbContextOptionsBuilder Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontextoptionsbuilder)
+- [Aspire Oracle EntityFrameworkCore Settings](https://learn.microsoft.com/en-us/dotnet/api/aspire.oracle.entityframeworkcore.oracleentityframeworkcoresettings)
+- Demoulas.Common.Data.Contexts readme.md
+
+---
+
 ## Pagination Extensions
 
 **Namespace:** `Demoulas.Common.Data.Contexts.Extensions`  
@@ -851,14 +1034,14 @@ public static ValidationProblemDetails ToProblemDetails(
 
 **Default Status Code Mapping:**
 
-- ValidationException → 400 (Bad Request)
-- ArgumentException → 400 (Bad Request)
-- KeyNotFoundException → 404 (Not Found)
-- UnauthorizedAccessException → 401 (Unauthorized)
-- NotImplementedException → 501 (Not Implemented)
-- UniqueConstraintException → 409 (Conflict)
-- ReferenceConstraintException → 409 (Conflict)
-- All others → 500 (Internal Server Error)
+- ValidationException â†’ 400 (Bad Request)
+- ArgumentException â†’ 400 (Bad Request)
+- KeyNotFoundException â†’ 404 (Not Found)
+- UnauthorizedAccessException â†’ 401 (Unauthorized)
+- NotImplementedException â†’ 501 (Not Implemented)
+- UniqueConstraintException â†’ 409 (Conflict)
+- ReferenceConstraintException â†’ 409 (Conflict)
+- All others â†’ 500 (Internal Server Error)
 
 **Example:**
 
@@ -1143,11 +1326,14 @@ page.AddPageDefaults();
 
 1. **String Extensions**: Use `FirstCharToUpper()` instead of manual string manipulation for consistent capitalization
 2. **DateTime Extensions**: Use specialized methods like `ToEndOfDay()` and `ZeroTime()` to ensure consistent date/time handling
-3. **Pagination**: Always use `ToPaginationResultsAsync()` for database queries to support sorting and filtering
-4. **Exception Handling**: Leverage `ToProblemDetails()` for consistent error responses in APIs
-5. **PDF Generation**: Use the Demoulas-specific extensions for consistent styling and formatting
-6. **Environment Detection**: Use `IsTestEnvironment()` to safely detect test contexts without manual checks
-7. **Dynamic Queries**: Use `OrderByProperty()` for dynamic sorting instead of manual LINQ-to-SQL construction
+3. **Database Context Configuration**: Always use `ContextFactoryRequest.Initialize()` with the `configureDbContextOptions` parameter when you need to customize EF Core behavior. Avoid creating workarounds or custom initialization code.
+4. **DbContext Options**: Use `configureDbContextOptions` for development-specific settings like `EnableSensitiveDataLogging()`, but ensure these are never enabled in production environments
+5. **Pagination**: Always use `ToPaginationResultsAsync()` for database queries to support sorting and filtering
+6. **Exception Handling**: Leverage `ToProblemDetails()` for consistent error responses in APIs
+7. **PDF Generation**: Use the Demoulas-specific extensions for consistent styling and formatting
+8. **Environment Detection**: Use `IsTestEnvironment()` to safely detect test contexts without manual checks
+9. **Dynamic Queries**: Use `OrderByProperty()` for dynamic sorting instead of manual LINQ-to-SQL construction
+10. **Context Configuration**: Leverage all available parameters in `ContextFactoryRequest.Initialize()` (configureSettings, configureDbContextOptions, interceptorFactory, denyCommitRoles) instead of creating custom solutions
 
 ## Import Statements
 
@@ -1156,6 +1342,7 @@ Add these namespaces to use the extensions:
 ```csharp
 using Demoulas.Util.Extensions;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Pdf.Extensions;
 ```

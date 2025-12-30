@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 /// PROF-LETTER73 - Adhoc report for employees with profits over age 73.
 /// Returns JSON only (CSV export removed for simplification).
 /// </summary>
-public sealed class EmployeesWithProfitsOver73Endpoint 
+public sealed class EmployeesWithProfitsOver73Endpoint
     : ProfitSharingEndpoint<EmployeesWithProfitsOver73Request, Results<Ok<PaginatedResponseDto<EmployeesWithProfitsOver73DetailDto>>, ProblemHttpResult>>
 {
     private readonly IEmployeesWithProfitsOver73Service _reportService;
@@ -36,10 +36,10 @@ public sealed class EmployeesWithProfitsOver73Endpoint
     public override void Configure()
     {
         Get("prof-letter73");
-        
+
         // Add role-based authorization
         Roles(Role.ADMINISTRATOR, Role.FINANCEMANAGER);
-        
+
         Summary(s =>
         {
             s.Summary = "PROF-LETTER73: Employees with Profits Over Age 73";

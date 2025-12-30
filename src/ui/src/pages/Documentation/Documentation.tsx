@@ -3,6 +3,7 @@ import { Box, Divider, List, ListItem, ListItemButton, ListItemText, Paper, Typo
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Page } from "smart-ui-library";
+import { PageErrorBoundary } from "../../components/PageErrorBoundary";
 
 // Documentation files metadata
 const documentationFiles = [
@@ -137,6 +138,13 @@ const documentationFiles = [
     filename: "REPORT_CROSSREFERENCE_QUICK.md",
     description:
       "Visual quick reference guide showing report value matching patterns, validation priority order, and field names for API validation - ideal for developers implementing cross-report validation"
+  },
+  {
+    key: "front-end-patterns",
+    title: "Frontend Code Patterns - Code Review Guide",
+    filename: "FRONT_END_PATTERNS.md",
+    description:
+      "Established patterns and conventions used throughout the frontend codebase for components, state management, hooks, APIs, testing, forms, grids, styling, and types - use for code reviews"
   }
 ];
 
@@ -460,105 +468,107 @@ const Documentation: React.FC = () => {
   };
 
   return (
-    <Page label="Documentation">
-      <Box sx={{ display: "flex", height: "100%", p: 2 }}>
-        {/* Document List Sidebar */}
-        <Paper
-          elevation={2}
-          sx={{
-            width: 350,
-            mr: 2,
-            p: 2,
-            maxHeight: "calc(100vh - 200px)",
-            overflow: "auto"
-          }}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, display: "flex", alignItems: "center" }}>
-            <DescriptionIcon sx={{ mr: 1 }} />
-            Documentation
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
+    <PageErrorBoundary pageName="Documentation">
+      <Page label="Documentation">
+        <Box sx={{ display: "flex", height: "100%", p: 2 }}>
+          {/* Document List Sidebar */}
+          <Paper
+            elevation={2}
+            sx={{
+              width: 350,
+              mr: 2,
+              p: 2,
+              maxHeight: "calc(100vh - 200px)",
+              overflow: "auto"
+            }}>
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, display: "flex", alignItems: "center" }}>
+              <DescriptionIcon sx={{ mr: 1 }} />
+              Documentation
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
 
-          <List disablePadding>
-            {documentationFiles.map((doc) => (
-              <ListItem
-                key={doc.key}
-                disablePadding
-                sx={{ mb: 1 }}>
-                <ListItemButton
-                  selected={selectedDoc === doc.key}
-                  onClick={() => setSelectedDoc(doc.key)}
-                  sx={{
-                    borderRadius: 1,
-                    "&.Mui-selected": {
-                      backgroundColor: "primary.light",
-                      color: "primary.contrastText",
-                      "&:hover": {
-                        backgroundColor: "primary.main"
+            <List disablePadding>
+              {documentationFiles.map((doc) => (
+                <ListItem
+                  key={doc.key}
+                  disablePadding
+                  sx={{ mb: 1 }}>
+                  <ListItemButton
+                    selected={selectedDoc === doc.key}
+                    onClick={() => setSelectedDoc(doc.key)}
+                    sx={{
+                      borderRadius: 1,
+                      "&.Mui-selected": {
+                        backgroundColor: "primary.light",
+                        color: "primary.contrastText",
+                        "&:hover": {
+                          backgroundColor: "primary.main"
+                        }
                       }
-                    }
-                  }}>
-                  <ListItemText
-                    primary={
-                      <Typography
-                        variant="body2"
-                        fontWeight="medium">
-                        {doc.title}
-                      </Typography>
-                    }
-                    secondary={
-                      <Typography
-                        variant="caption"
-                        color="text.secondary">
-                        {doc.description}
-                      </Typography>
-                    }
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
+                    }}>
+                    <ListItemText
+                      primary={
+                        <Typography
+                          variant="body2"
+                          fontWeight="medium">
+                          {doc.title}
+                        </Typography>
+                      }
+                      secondary={
+                        <Typography
+                          variant="caption"
+                          color="text.secondary">
+                          {doc.description}
+                        </Typography>
+                      }
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Paper>
 
-        {/* Document Content Area */}
-        <Paper
-          elevation={2}
-          sx={{
-            flex: 1,
-            p: 3,
-            maxHeight: "calc(100vh - 200px)",
-            overflow: "auto"
-          }}>
-          {!selectedDoc ? (
-            <Box sx={{ textAlign: "center", mt: 8 }}>
-              <DescriptionIcon sx={{ fontSize: 64, color: "text.secondary", mb: 2 }} />
-              <Typography
-                variant="h5"
-                color="text.secondary"
-                gutterBottom>
-                Select a Document
-              </Typography>
-              <Typography
-                variant="body1"
-                color="text.secondary">
-                Choose a documentation file from the sidebar to view its contents.
-              </Typography>
-            </Box>
-          ) : loading ? (
-            <Box sx={{ textAlign: "center", mt: 8 }}>
-              <Typography
-                variant="h6"
-                color="text.secondary">
-                Loading document...
-              </Typography>
-            </Box>
-          ) : (
-            <Box>{renderMarkdown(documentContent)}</Box>
-          )}
-        </Paper>
-      </Box>
-    </Page>
+          {/* Document Content Area */}
+          <Paper
+            elevation={2}
+            sx={{
+              flex: 1,
+              p: 3,
+              maxHeight: "calc(100vh - 200px)",
+              overflow: "auto"
+            }}>
+            {!selectedDoc ? (
+              <Box sx={{ textAlign: "center", mt: 8 }}>
+                <DescriptionIcon sx={{ fontSize: 64, color: "text.secondary", mb: 2 }} />
+                <Typography
+                  variant="h5"
+                  color="text.secondary"
+                  gutterBottom>
+                  Select a Document
+                </Typography>
+                <Typography
+                  variant="body1"
+                  color="text.secondary">
+                  Choose a documentation file from the sidebar to view its contents.
+                </Typography>
+              </Box>
+            ) : loading ? (
+              <Box sx={{ textAlign: "center", mt: 8 }}>
+                <Typography
+                  variant="h6"
+                  color="text.secondary">
+                  Loading document...
+                </Typography>
+              </Box>
+            ) : (
+              <Box>{renderMarkdown(documentContent)}</Box>
+            )}
+          </Paper>
+        </Box>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

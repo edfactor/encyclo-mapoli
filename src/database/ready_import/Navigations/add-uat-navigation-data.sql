@@ -54,7 +54,7 @@ DECLARE
     DECEMBER_ACTIVITIES CONSTANT NUMBER := 10;
     
     -- Third-level under December Activities
-    CLEANUP_REPORTS CONSTANT NUMBER := 10;
+    CLEANUP_REPORTS CONSTANT NUMBER := 11;
     -- Third-level under Fiscal Close
     -- PROF_SHARE_REPORT_BY_AGE CONSTANT NUMBER := 11; -- REMOVED (was under FISCAL_CLOSE)
     -- PROF_SHARE_BY_STORE CONSTANT NUMBER := 12; -- REMOVED (was under FISCAL_CLOSE)
@@ -109,6 +109,9 @@ DECLARE
     -- PAY426_2 CONSTANT NUMBER := 140;
     -- PAY426_3 CONSTANT NUMBER := 141;
     DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT CONSTANT NUMBER := 142;
+    PROFIT_DETAILS_REVERSAL CONSTANT NUMBER := 154;
+    AUDIT_SEARCH_PAGE CONSTANT NUMBER := 166;
+    MANAGE_COMMENT_TYPES_PAGE CONSTANT NUMBER := 177;
     DUPLICATE_SSNS_DEMOGRAPHICS CONSTANT NUMBER := 143;
     NEGATIVE_ETVA CONSTANT NUMBER := 144;
     TERMINATIONS CONSTANT NUMBER := 145;
@@ -263,24 +266,27 @@ BEGIN
 
 
 --distribution items - REMOVED
-    -- insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14l)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_ELEVENTH, '', DISABLED, IS_NAVIGABLE);
+    -- insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14L)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_ELEVENTH, '', DISABLED, IS_NAVIGABLE);
 
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT, IT_DEVOPS_MENU, 'Demographic Badges Not In PayProfit', '','demographic-badges-not-in-payprofit', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
 
 --Administrative Operations
     insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, ADMINISTRATIVE_MENU, 'Demographic Sync Errors', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_ANNUITY_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage Annuity Rates', '', 'manage-annuity-rates', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADMINISTRATIVE_MENU, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(AUDIT_SEARCH_PAGE, ADMINISTRATIVE_MENU, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_COMMENT_TYPES_PAGE, ADMINISTRATIVE_MENU, 'Manage Comment Types', '', 'manage-comment-types', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_DETAILS_REVERSAL, ADMINISTRATIVE_MENU, 'Reversals', '008-23', 'reversals', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(CLEANUP_REPORTS, DECEMBER_ACTIVITIES, 'Clean up Reports', '','', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
 --sub values for Clean up Reports
-    insert_navigation_item(DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT, CLEANUP_REPORTS, 'Demographic Badges Not In PayProfit', '','demographic-badges-not-in-payprofit', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DUPLICATE_SSNS_DEMOGRAPHICS, CLEANUP_REPORTS, 'Duplicate SSNs in Demographics', '','duplicate-ssns-demographics', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(NEGATIVE_ETVA, CLEANUP_REPORTS, 'Negative ETVA', '','negative-etva-for-ssns-on-payprofit', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DUPLICATE_NAMES_BIRTHDAYS, CLEANUP_REPORTS, 'Duplicate Names and Birthdays', '','duplicate-names-and-birthdays', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
@@ -377,6 +383,13 @@ BEGIN
     assign_navigation_role(MASTER_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
     assign_navigation_role(MASTER_INQUIRY_PAGE, HR_READONLY);
 
+-- Assign roles for Profit Details Reversal
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, FINANCE_MANAGER);
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, AUDITOR);
+    assign_navigation_role(PROFIT_DETAILS_REVERSAL, IT_DEVOPS);
+
 -- Assign roles for ADJUSTMENTS_GROUP - REMOVED
     -- assign_navigation_role(ADJUSTMENTS_GROUP, SYSTEM_ADMINISTRATOR); 
     -- assign_navigation_role(ADJUSTMENTS_GROUP, FINANCE_MANAGER);
@@ -393,8 +406,6 @@ BEGIN
     assign_navigation_role(CLEANUP_REPORTS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(CLEANUP_REPORTS, FINANCE_MANAGER);
     assign_navigation_role(CLEANUP_REPORTS, HR_READONLY);  -- Parent must have this role for children to be visible
-    assign_navigation_role(DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT, FINANCE_MANAGER);
     assign_navigation_role(DUPLICATE_SSNS_DEMOGRAPHICS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DUPLICATE_SSNS_DEMOGRAPHICS, FINANCE_MANAGER);
     assign_navigation_role(NEGATIVE_ETVA, SYSTEM_ADMINISTRATOR);
@@ -534,6 +545,11 @@ BEGIN
     assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, IT_DEVOPS);
     assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(AUDIT_SEARCH_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(AUDIT_SEARCH_PAGE, FINANCE_MANAGER);
+    assign_navigation_role(AUDIT_SEARCH_PAGE, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     -- assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS); -- REMOVED

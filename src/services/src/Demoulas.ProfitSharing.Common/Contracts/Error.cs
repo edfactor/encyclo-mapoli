@@ -67,6 +67,9 @@ public sealed record Error
     //Validation errors
     public static Error ReportNotFound => new(131, "Report not found for the specified year");
 
+    // File transfer errors
+    public static Error FileTransferFailed => new(133, "File transfer operation failed");
+
     // Unexpected error wrapper (message captured). Prefer logging full exception separately.
     public static Error Unexpected(string message) => new(900, message);
 

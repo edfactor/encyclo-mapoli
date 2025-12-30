@@ -1,3 +1,4 @@
+import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import React, { useState } from "react";
@@ -44,35 +45,37 @@ const QPAY066B: React.FC = () => {
   };
 
   return (
-    <Page
-      label={CAPTIONS.QPAY066B}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
-          <DSMAccordion title="Filter">
-            <QPAY066BFilterSection
-              onFilterChange={handleFilterChange}
-              onReset={handleReset}
-              isLoading={isLoading}
-            />
-          </DSMAccordion>
-        </Grid>
-
-        {hasSearched && (
-          <Grid width="100%">
-            <QPAY066BGrid
-              filterParams={filterParams}
-              onLoadingChange={handleLoadingChange}
-            />
+    <PageErrorBoundary pageName="QPAY066B">
+      <Page
+        label={CAPTIONS.QPAY066B}
+        actionNode={renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
           </Grid>
-        )}
-      </Grid>
-    </Page>
+          <Grid width={"100%"}>
+            <DSMAccordion title="Filter">
+              <QPAY066BFilterSection
+                onFilterChange={handleFilterChange}
+                onReset={handleReset}
+                isLoading={isLoading}
+              />
+            </DSMAccordion>
+          </Grid>
+
+          {hasSearched && (
+            <Grid width="100%">
+              <QPAY066BGrid
+                filterParams={filterParams}
+                onLoadingChange={handleLoadingChange}
+              />
+            </Grid>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

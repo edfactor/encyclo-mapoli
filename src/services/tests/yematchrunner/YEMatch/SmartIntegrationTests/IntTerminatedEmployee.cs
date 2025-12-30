@@ -6,7 +6,7 @@
 public class IntTerminatedEmployee : BaseIntegrationTestActivity
 {
     public IntTerminatedEmployee(string integrationTestPath)
-        : base(integrationTestPath, "TerminatedEmployee", "TerminatedEmployeeAndBeneficiaryReportIntegrationTests")
+        : base(integrationTestPath, "TerminatedEmployee", "Demoulas.ProfitSharing.IntegrationTests.Reports.Termination.TerminatedEmployeeAndBeneficiaryReportIntegrationTests.EnsureSmartReportMatchesReadyReport")
     {
     }
 }

@@ -1,5 +1,6 @@
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Alert, Box, Button, Chip, CircularProgress, Divider, FormControlLabel, Grid, Switch } from "@mui/material";
+import PageErrorBoundary from "components/PageErrorBoundary";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -89,99 +90,100 @@ const DuplicateNamesAndBirthdays = () => {
   const reportDate = searchResults?.reportDate ? new Date(searchResults.reportDate).toLocaleString() : "N/A";
 
   return (
-    <Page
-      label={isGridExpanded ? "" : `${CAPTIONS.DUPLICATE_NAMES} (${recordCount} records)`}
-      actionNode={isGridExpanded ? undefined : renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        {!isGridExpanded && (
-          <Grid width={"100%"}>
-            <Divider />
-          </Grid>
-        )}
+    <PageErrorBoundary pageName="Duplicate Names and Birthdays">
+      <Page
+        label={isGridExpanded ? "" : `${CAPTIONS.DUPLICATE_NAMES} (${recordCount} records)`}
+        actionNode={isGridExpanded ? undefined : renderActionNode()}>
+        <Grid
+          container
+          rowSpacing="24px">
+          {!isGridExpanded && (
+            <Grid width={"100%"}>
+              <Divider />
+            </Grid>
+          )}
 
-        {/* Report As Of Date and Refresh Button */}
-        {!isGridExpanded && (
-          <Grid
-            width={"100%"}
-            container
-            alignItems="center"
-            justifyContent="space-between"
-            paddingX={2}>
-            <Box
-              display="flex"
+          {/* Report As Of Date and Refresh Button */}
+          {!isGridExpanded && (
+            <Grid
+              width={"100%"}
+              container
               alignItems="center"
-              gap={1}>
-              <Chip
-                label={`Report as of: ${reportDate}`}
-                className="bg-dsm-grey-hover"
-              />
-            </Box>
-            <Box
-              display="flex"
-              alignItems="center"
-              gap={2}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={includeFictionalSsnPairs}
-                    onChange={handleToggleFictionalSsn}
-                  />
-                }
-                label="Include Fictional SSN Pairs"
-              />
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<RefreshIcon />}
-                onClick={handleRefreshCache}
-                disabled={isRefreshing}>
-                {isRefreshing ? "Refreshing..." : "Refresh Cache"}
-              </Button>
-            </Box>
-          </Grid>
-        )}
+              justifyContent="space-between"
+              paddingX={2}>
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1}>
+                <Chip
+                  label={`Report as of: ${reportDate}`}
+                  className="bg-dsm-grey-hover"
+                />
+              </Box>
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={2}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={includeFictionalSsnPairs}
+                      onChange={handleToggleFictionalSsn}
+                    />
+                  }
+                  label="Include Fictional SSN Pairs"
+                />
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<RefreshIcon />}
+                  onClick={handleRefreshCache}
+                  disabled={isRefreshing}>
+                  {isRefreshing ? "Refreshing..." : "Refresh Cache"}
+                </Button>
+              </Box>
+            </Grid>
+          )}
 
-        {/* Refresh Message */}
-        {!isGridExpanded && refreshMessage && (
-          <Grid
-            width={"100%"}
-            paddingX={2}>
-            <Alert
-              severity={refreshMessage.type}
-              onClose={() => setRefreshMessage(null)}>
-              {refreshMessage.text}
-            </Alert>
-          </Grid>
-        )}
+          {/* Refresh Message */}
+          {!isGridExpanded && refreshMessage && (
+            <Grid
+              width={"100%"}
+              paddingX={2}>
+              <Alert
+                severity={refreshMessage.type}
+                onClose={() => setRefreshMessage(null)}>
+                {refreshMessage.text}
+              </Alert>
+            </Grid>
+          )}
 
-        {isSearching && !searchResults ? (
-          <Grid
-            width={"100%"}
-            container
-            justifyContent="center"
-            padding={4}>
-            <CircularProgress />
-          </Grid>
-        ) : (
-          <Grid width="100%">
-            <DuplicateNamesAndBirthdaysGrid
-              innerRef={componentRef}
-              data={searchResults}
-              isLoading={isSearching}
-              showData={showData}
-              hasResults={hasResults ?? false}
-              pagination={pagination}
-              onPaginationChange={pagination.handlePaginationChange}
-              onSortChange={pagination.handleSortChange}
-              isGridExpanded={isGridExpanded}
-              onToggleExpand={handleToggleGridExpand}
-            />
-          </Grid>
-        )}
-      </Grid>
-    </Page>
+          {isSearching && !searchResults ? (
+            <Grid
+              width={"100%"}
+              container
+              justifyContent="center"
+              padding={4}>
+              <CircularProgress />
+            </Grid>
+          ) : (
+            <Grid width="100%">
+              <DuplicateNamesAndBirthdaysGrid
+                innerRef={componentRef}
+                data={searchResults}
+                isLoading={isSearching}
+                showData={showData}
+                hasResults={hasResults ?? false}
+                pagination={pagination}
+                onSortChange={pagination.handleSortChange}
+                isGridExpanded={isGridExpanded}
+                onToggleExpand={handleToggleGridExpand}
+              />
+            </Grid>
+          )}
+        </Grid>
+      </Page>
+    </PageErrorBoundary>
   );
 };
 

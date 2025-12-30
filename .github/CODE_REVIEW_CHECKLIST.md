@@ -85,6 +85,8 @@ Note: This document is a review aid, not a formal control implementation stateme
 
 **All security items are CRITICAL. Deviations require security review.**
 
+**📖 For comprehensive security guidance, see [security.instructions.md](instructions/security.instructions.md)**
+
 ### Authentication & Authorization (A01/A07)
 
 - [ ] **Server-side role validation**: Always re-validate roles server-side, never trust client headers

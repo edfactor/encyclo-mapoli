@@ -1,17 +1,17 @@
 import { GridApi } from "ag-grid-community";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetUnForfeitsQuery } from "reduxstore/api/YearsEndApi";
 import {
   useUpdateForfeitureAdjustmentBulkMutation,
   useUpdateForfeitureAdjustmentMutation
 } from "reduxstore/api/AdhocApi";
+import { useLazyGetUnForfeitsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
+import { GRID_KEYS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useEditState } from "../../../hooks/useEditState";
-import { GRID_KEYS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useRowSelection } from "../../../hooks/useRowSelection";
 import { flattenMasterDetailData, generateRowKey } from "../../../utils/forfeitActivities/gridDataHelpers";
@@ -482,19 +482,19 @@ export const useUnForfeitGrid = ({
         // If we're in the middle of a pagination change (like page size change),
         // just update the state without triggering a search
         if (isPaginationChangeRef.current) {
-          const newPageNumber = value - 1;
+          // DSMPaginatedGrid already passes 0-based page number
           const currentPageSizeValue = currentPageSizeRef.current;
-          handlePaginationChange(newPageNumber, currentPageSizeValue);
+          handlePaginationChange(value, currentPageSizeValue);
           return;
         }
 
         // Normal page number change - trigger search
-        const newPageNumber = value - 1;
+        // DSMPaginatedGrid already passes 0-based page number (no need to subtract 1)
         const currentPageSizeValue = currentPageSizeRef.current;
-        handlePaginationChange(newPageNumber, currentPageSizeValue);
+        handlePaginationChange(value, currentPageSizeValue);
         try {
           await performSearch(
-            newPageNumber * currentPageSizeValue,
+            value * currentPageSizeValue,
             sortParams.sortBy,
             sortParams.isSortDescending,
             currentPageSizeValue

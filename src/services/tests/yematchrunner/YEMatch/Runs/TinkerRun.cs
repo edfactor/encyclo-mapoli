@@ -26,8 +26,14 @@ public class TinkerRun : Runnable
     public override async Task Exec()
     {
         await Run(Specify(
-            UpdateNavigation
-        /*            
+            P00_BuildDatabase, // init both dbs
+            DropBadBenesReady, // in READY, get rid of the two Bene/Employees w/o Demographics rows
+            ActivityName.SanityCheckEmployeeAndBenes,
+            R08_ProfitShareReport,
+            IntPay426,
+            IntPay426N,
+            IntPay426N9
+        /*
                     IntProfitMasterUpdateTest, // Runs Contributions on Smart
 
                     // Ensure that YE update went to plan

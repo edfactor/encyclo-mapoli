@@ -1,7 +1,8 @@
 import { BeneficiaryDetail } from "@/types";
 import { RowClickedEvent } from "ag-grid-community";
 import { useMemo } from "react";
-import { DSMGrid, Paged, Pagination } from "smart-ui-library";
+import { Paged } from "smart-ui-library";
+import { DSMPaginatedGrid } from "../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../constants";
 import { GetMemberResultsGridColumns } from "./MemberResultsGridColumns";
 
@@ -29,37 +30,36 @@ const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({
   }, []);
 
   return (
-    <>
-      <p>Please click on a row below to see details</p>
-      <DSMGrid
-        preferenceKey={GRID_KEYS.MEMBER_RESULTS}
-        isLoading={isLoading}
-        providedOptions={{
-          rowData: searchResults.results,
-          columnDefs: columnDefs,
-          suppressMultiSort: true,
-
-          onRowClicked: ((event: RowClickedEvent<BeneficiaryDetail>) => {
-            if (event.data) {
-              onRowClick(event.data);
-            }
-          }) as (event: unknown) => void
-        }}
-      />
-
-      <Pagination
-        pageNumber={pageNumber}
-        setPageNumber={(value: number) => {
-          onPageNumberChange(value - 1);
-        }}
-        pageSize={pageSize}
-        setPageSize={(value: number) => {
+    <DSMPaginatedGrid<BeneficiaryDetail>
+      preferenceKey={GRID_KEYS.MEMBER_RESULTS}
+      data={searchResults.results ?? []}
+      columnDefs={columnDefs}
+      totalRecords={searchResults?.total ?? 0}
+      isLoading={isLoading}
+      pagination={{
+        pageNumber,
+        pageSize,
+        sortParams: { sortBy: "", isSortDescending: false },
+        handlePageNumberChange: (value: number) => {
+          onPageNumberChange(value);
+        },
+        handlePageSizeChange: (value: number) => {
           onPageSizeChange(value);
-          onPageNumberChange(1);
-        }}
-        recordCount={searchResults?.total}
-      />
-    </>
+          onPageNumberChange(0);
+        },
+        handleSortChange: () => {}
+      }}
+      gridOptions={{
+        suppressMultiSort: true,
+        onRowClicked: ((event: RowClickedEvent<BeneficiaryDetail>) => {
+          if (event.data) {
+            onRowClick(event.data);
+          }
+        }) as (event: unknown) => void
+      }}
+      showPagination={searchResults?.total > 0}
+      header={<p>Please click on a row below to see details</p>}
+    />
   );
 };
 

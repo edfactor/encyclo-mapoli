@@ -17,4 +17,13 @@ public sealed record StateListResponse
     /// Full state name (e.g., "Massachusetts", "New Hampshire")
     /// </summary>
     public required string Name { get; set; }
+
+    public static StateListResponse ResponseExample()
+    {
+        return new StateListResponse
+        {
+            Abbreviation = "MA",
+            Name = "Massachusetts"
+        };
+    }
 }
