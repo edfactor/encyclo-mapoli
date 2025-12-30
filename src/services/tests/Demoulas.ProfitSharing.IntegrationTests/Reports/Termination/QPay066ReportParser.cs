@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
+﻿using System.Globalization;
+
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 
 /// <summary>
 ///     Parser for QPAY066 Termination - Profit Sharing report.
@@ -186,6 +188,51 @@ public static class QPay066ReportParser
         }
 
         throw new InvalidDataException($"Unable to parse monetary amount: '{amountStr}'");
+    }
+
+    /// <summary>
+    ///     Parses the report generation date from the QPAY066 header.
+    ///     Expects format: "DATE DEC 22, 2025" in the header line.
+    /// </summary>
+    public static DateOnly ParseReportDate(string reportText)
+    {
+        string[] lines = reportText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (string line in lines)
+        {
+            // Look for the header line containing "QPAY066" and "DATE"
+            int dateIndex = line.IndexOf("DATE ", StringComparison.OrdinalIgnoreCase);
+            if (dateIndex < 0)
+            {
+                continue;
+            }
+
+            // Extract the date portion (e.g., "DEC 22, 2025")
+            // Find where "YEAR:" starts to know where the date ends
+            int yearIndex = line.IndexOf("YEAR:", dateIndex, StringComparison.OrdinalIgnoreCase);
+            if (yearIndex < 0)
+            {
+                continue;
+            }
+
+            string dateStr = line.Substring(dateIndex + 5, yearIndex - dateIndex - 5).Trim();
+
+            // Parse "DEC 22, 2025" format
+            if (DateTime.TryParseExact(dateStr, "MMM dd, yyyy",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
+            {
+                return DateOnly.FromDateTime(parsedDate);
+            }
+
+            // Try alternate format "MMM d, yyyy" for single-digit days
+            if (DateTime.TryParseExact(dateStr, "MMM d, yyyy",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return DateOnly.FromDateTime(parsedDate);
+            }
+        }
+
+        throw new InvalidDataException("Unable to find or parse report date from QPAY066 header.");
     }
 
     /// <summary>

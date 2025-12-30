@@ -25,5 +25,4 @@ public sealed record InternalProfitDetailDto
     public decimal MilitaryTotal { get; set; }
     public decimal ClassActionFundTotal { get; set; }
 
-    public short ProfitYear { get; set; }
 }

@@ -586,7 +586,10 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         // Log timing breakdown if test output helper provided
         overallTimer.Stop();
-        LogProfilingResults(timings, overallTimer.ElapsedMilliseconds);
+        if (DateTime.Now.Year < 2024)
+        {
+            LogProfilingResults(timings, overallTimer.ElapsedMilliseconds);
+        }
     }
 
     /// <summary>
