@@ -461,7 +461,16 @@ public class BeneficiaryService : IBeneficiaryService
     {
         _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            var beneficiaryToDelete = await ctx.Beneficiaries.Include(x => x.Contact).Include(x => x.Contact!.ContactInfo).Include(x => x.Contact!.Address).SingleAsync(x => x.Id == id);
+            // Include BeneficiarySsnChangeHistories collection for proper loading
+            var beneficiaryToDelete = await ctx.Beneficiaries
+                .Include(x => x.Contact)
+                    .ThenInclude(c => c!.ContactInfo)
+                .Include(x => x.Contact)
+                    .ThenInclude(c => c!.Address)
+                .Include(x => x.Contact)
+                    .ThenInclude(c => c!.BeneficiarySsnChangeHistories)
+                .SingleAsync(x => x.Id == id, cancellationToken);
+            
             if (await CanIDeleteThisBeneficiary(beneficiaryToDelete, ctx, cancellationToken))
             {
                 var deleteContact = false;
@@ -480,6 +489,12 @@ public class BeneficiaryService : IBeneficiaryService
                     if (beneficiaryToDelete!.Contact.ContactInfo != null)
                     {
                         ctx.Remove(beneficiaryToDelete!.Contact.ContactInfo);
+                    }
+                    // Use RemoveRange for collections, not Remove
+                    if (beneficiaryToDelete!.Contact.BeneficiarySsnChangeHistories != null && 
+                        beneficiaryToDelete!.Contact.BeneficiarySsnChangeHistories.Any())
+                    {
+                        ctx.RemoveRange(beneficiaryToDelete!.Contact.BeneficiarySsnChangeHistories);
                     }
                     ctx.BeneficiaryContacts.Remove(beneficiaryToDelete.Contact);
                 }
