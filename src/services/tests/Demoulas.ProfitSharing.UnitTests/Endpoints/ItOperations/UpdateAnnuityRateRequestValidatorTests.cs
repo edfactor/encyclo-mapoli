@@ -13,12 +13,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
 [Collection("Validation Tests")]
 public sealed class UpdateAnnuityRateRequestValidatorTests
 {
-    private readonly UpdateAnnuityRateRequestValidator _validator;
-
-    public UpdateAnnuityRateRequestValidatorTests()
-    {
-        _validator = new UpdateAnnuityRateRequestValidator();
-    }
+    private readonly UpdateAnnuityRateRequestValidator _validator = new();
 
     #region SingleRate Decimal Place Tests
 
