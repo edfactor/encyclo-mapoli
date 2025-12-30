@@ -557,11 +557,21 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// <summary>
     /// Logs the profiling breakdown of mock data factory generation to test output.
     /// Shows timing for each entity/category and total time.
+    /// Only logs when PS_VERBOSE_TESTS environment variable is set to "true" or "1".
     /// </summary>
     private static void LogProfilingResults(Dictionary<string, long> timings, long totalMs)
     {
         try
         {
+            // Only log if verbose mode is enabled via environment variable
+            var verboseMode = Environment.GetEnvironmentVariable("PS_VERBOSE_TESTS");
+            if (string.IsNullOrEmpty(verboseMode) ||
+                (!verboseMode.Equals("true", StringComparison.OrdinalIgnoreCase) &&
+                 verboseMode != "1"))
+            {
+                return;
+            }
+
             Console.WriteLine("");
             Console.WriteLine("=== MOCK DATA FACTORY GENERATION TIMING (milliseconds) ===");
 

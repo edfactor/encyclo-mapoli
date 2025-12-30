@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useGetStateTaxRatesQuery, useUpdateStateTaxRateMutation } from "../../../../reduxstore/api/ItOperationsApi";
 import { StateTaxRateDto } from "../../../../reduxstore/types";
+import { createMockStoreAndWrapper } from "../../../../test/mocks/createMockStore";
 import ManageStateTaxes from "../ManageStateTaxes";
 
 // Mock the RTK Query hooks
@@ -33,6 +34,9 @@ describe("ManageStateTaxes", () => {
     { abbreviation: "NH", rate: 0.0 }
   ];
 
+  // Create Redux store wrapper for all tests
+  const { wrapper } = createMockStoreAndWrapper();
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -54,7 +58,7 @@ describe("ManageStateTaxes", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any);
 
-    render(<ManageStateTaxes />);
+    render(<ManageStateTaxes />, { wrapper });
 
     expect(screen.getByTestId("page")).toBeInTheDocument();
     expect(screen.getByTestId("dsm-grid")).toBeInTheDocument();
@@ -77,7 +81,7 @@ describe("ManageStateTaxes", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any);
 
-    render(<ManageStateTaxes />);
+    render(<ManageStateTaxes />, { wrapper });
 
     // Verify the grid is rendered with data
     const grid = screen.getByTestId("dsm-grid");
@@ -104,7 +108,7 @@ describe("ManageStateTaxes", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any);
 
-    render(<ManageStateTaxes />);
+    render(<ManageStateTaxes />, { wrapper });
 
     // Verify error handling is in place
     expect(screen.getByTestId("page")).toBeInTheDocument();
@@ -128,7 +132,7 @@ describe("ManageStateTaxes", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any);
 
-    render(<ManageStateTaxes />);
+    render(<ManageStateTaxes />, { wrapper });
 
     // Note: Testing the timeout behavior would require more complex setup
     // with simulated cell changes. The implementation includes a 5-second
