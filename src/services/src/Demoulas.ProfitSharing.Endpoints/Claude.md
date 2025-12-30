@@ -1408,7 +1408,7 @@ public sealed record MyFeatureResponse
 #### 2. Create Validator (if needed)
 
 ```csharp
-namespace Demoulas.ProfitSharing.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Common.Validators;
 
 public sealed class MyFeatureRequestValidator : AbstractValidator<MyFeatureRequest>
 {

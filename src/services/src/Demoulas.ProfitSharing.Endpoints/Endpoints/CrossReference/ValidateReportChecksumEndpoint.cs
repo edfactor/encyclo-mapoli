@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.CrossReference;
 
 /// <summary>
 /// Endpoint for validating specific fields of an archived report against caller-provided values.

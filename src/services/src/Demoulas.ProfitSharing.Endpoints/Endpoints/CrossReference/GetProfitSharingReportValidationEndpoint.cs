@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Validation;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -9,21 +9,21 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.CrossReference;
 
 /// <summary>
-/// Endpoint for retrieving comprehensive cross-reference validation data for the Master Update page.
-/// Returns validation results for all checksum groups: Contributions, Earnings, Forfeitures, Distributions, and ALLOC transfers.
+/// Endpoint for retrieving validation data for Profit Sharing Summary Reports.
+/// Returns validation results for Members, Balance, and Wages checksum groups.
 /// </summary>
-public sealed class GetMasterUpdateValidationEndpoint
-    : ProfitSharingEndpoint<YearRequest, Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>>
+public sealed class GetProfitSharingReportValidationEndpoint
+    : ProfitSharingEndpoint<ProfitSharingReportValidationRequest, Results<Ok<ValidationResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly ICrossReferenceValidationService _crossReferenceValidationService;
-    private readonly ILogger<GetMasterUpdateValidationEndpoint> _logger;
+    private readonly ILogger<GetProfitSharingReportValidationEndpoint> _logger;
 
-    public GetMasterUpdateValidationEndpoint(
+    public GetProfitSharingReportValidationEndpoint(
         ICrossReferenceValidationService crossReferenceValidationService,
-        ILogger<GetMasterUpdateValidationEndpoint> logger)
+        ILogger<GetProfitSharingReportValidationEndpoint> logger)
         : base(Navigation.Constants.Unknown)
     {
         _crossReferenceValidationService = crossReferenceValidationService ?? throw new ArgumentNullException(nameof(crossReferenceValidationService));
@@ -32,54 +32,57 @@ public sealed class GetMasterUpdateValidationEndpoint
 
     public override void Configure()
     {
-        Get("checksum/master-update/{profitYear}");
+        Get("checksum/profit-sharing-report/{profitYear}/{reportSuffix}/{useFrozenData}");
         Summary(s =>
         {
-            s.Summary = "Get Master Update cross-reference validation data for a specific profit year";
-            s.Description = "Retrieves comprehensive validation data for the Master Update page, including validation " +
-                            "results for Contributions (PAY443/PAY444), Earnings, Forfeitures, Distributions, and ALLOC transfers. " +
-                            "Returns detailed per-field validation with current values, expected values, and variance information.";
+            s.Summary = "Get Profit Sharing Report validation data for a specific profit year and report suffix";
+            s.Description = "Retrieves validation data for Profit Sharing Summary Reports, including validation " +
+                            "results for Members, Balance, and Wages against archived checksums. " +
+                            "Returns detailed validation status and variance information.";
             s.RequestParam(r => r.ProfitYear, $"The profit year to validate (must be between 2020 and {DateTime.UtcNow.Year + 1})");
-            s.ExampleRequest = new YearRequest { ProfitYear = 2024 };
-            s.Response<MasterUpdateCrossReferenceValidationResponse>(200, "Validation data retrieved successfully");
-            s.Response(404, "No archived reports found for the specified year");
-            s.Response(400, $"Invalid profit year (must be between 2020 and {DateTime.UtcNow.Year + 1})");
+            s.RequestParam(r => r.ReportSuffix, "The report suffix (1-8) identifying the specific Profit Sharing Report");
+            s.ExampleRequest = new ProfitSharingReportValidationRequest { ProfitYear = 2024, ReportSuffix = "1" };
+            s.Response<ValidationResponse>(200, "Validation data retrieved successfully");
+            s.Response(404, "No archived checksums found for the specified year and report");
+            s.Response(400, $"Invalid profit year (must be between 2020 and {DateTime.UtcNow.Year + 1}) or invalid report suffix");
             s.Response(403, "Forbidden - Requires year-end report viewing permissions");
         });
         Group<ValidationGroup>();
         Description(x => x
-            .Produces<MasterUpdateCrossReferenceValidationResponse>(200)
+            .Produces<ValidationResponse>(200)
             .Produces(404)
             .Produces(400)
             .Produces(403)
             .WithTags("Validation"));
     }
 
-    public override Task<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
-        YearRequest req,
+    public override Task<Results<Ok<ValidationResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
+        ProfitSharingReportValidationRequest req,
         CancellationToken ct)
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var profitYear = req.ProfitYear;
+            var reportSuffix = req.ReportSuffix;
 
             // Note: Year validation is handled by ProfitYearRequestValidator (2020 to current year + 1)
-            // This ensures requests are validated before reaching this point
+            // Report suffix validation (1-8) should be handled by request validator
 
-            // Get archived values without comparison - UI will do the comparison
-            // PS-1721: Now using ICrossReferenceValidationService with empty dictionary to get ExpectedValues
-            var result = await _crossReferenceValidationService.ValidateMasterUpdateCrossReferencesAsync(
+            // Get validation data for the specified Profit Sharing Report
+            var result = await _crossReferenceValidationService.ValidateProfitSharingReport(
                 profitYear,
-                new Dictionary<string, decimal>(), // Empty dictionary - we only want archived ExpectedValues
+                reportSuffix,
+                req.UseFrozenData,
                 ct);
 
             if (result.IsSuccess && result.Value != null)
             {
                 // Record business metrics for successful validation retrieval
                 Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                    new KeyValuePair<string, object?>("operation", "master-update-validation-retrieval"),
-                    new KeyValuePair<string, object?>("endpoint", nameof(GetMasterUpdateValidationEndpoint)),
-                    new KeyValuePair<string, object?>("profit_year", profitYear));
+                    new KeyValuePair<string, object?>("operation", "profit-sharing-report-validation-retrieval"),
+                    new KeyValuePair<string, object?>("endpoint", nameof(GetProfitSharingReportValidationEndpoint)),
+                    new KeyValuePair<string, object?>("profit_year", profitYear),
+                    new KeyValuePair<string, object?>("report_suffix", reportSuffix));
 
                 // Record validation metrics
                 var validationGroupCount = result.Value.ValidationGroups.Count;
@@ -88,10 +91,10 @@ public sealed class GetMasterUpdateValidationEndpoint
                 Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(
                     validationGroupCount,
                     new KeyValuePair<string, object?>("record_type", "validation-groups"),
-                    new KeyValuePair<string, object?>("endpoint", nameof(GetMasterUpdateValidationEndpoint)));
+                    new KeyValuePair<string, object?>("endpoint", nameof(GetProfitSharingReportValidationEndpoint)));
             }
 
-            return result.Match<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>>(
+            return result.Match<Results<Ok<ValidationResponse>, NotFound, ProblemHttpResult>>(
                 success => TypedResults.Ok(success),
                 problemDetails =>
                 {
@@ -99,8 +102,9 @@ public sealed class GetMasterUpdateValidationEndpoint
                     if (result.Error?.Code == 104)
                     {
                         _logger.LogWarning(
-                            "No archived reports found for profit year {ProfitYear}",
-                            profitYear);
+                            "No archived checksums found for profit year {ProfitYear} and report suffix {ReportSuffix}",
+                            profitYear,
+                            reportSuffix);
                         return TypedResults.NotFound();
                     }
 

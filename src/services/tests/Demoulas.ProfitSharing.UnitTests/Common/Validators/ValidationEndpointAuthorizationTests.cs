@@ -2,14 +2,14 @@
 using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Validation;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.CrossReference;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Shouldly;
 
-namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Validators;
 
 /// <summary>
 /// Unit tests for validation endpoint authorization.
