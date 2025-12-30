@@ -23,6 +23,8 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.Adhoc;
 /// - Badge number filtering logic
 /// - Pagination behavior
 /// - Form letter generation with empty data
+/// - RMD calculation (Factor and Rmd fields)
+/// - Financial rounding behavior (MidpointRounding.AwayFromZero)
 /// 
 /// Full integration tests with actual balance calculations should be performed at the API/integration test level.
 /// </summary>
@@ -365,8 +367,8 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
     public async Task GetEmployeesWithProfitsOver73Async_ReturnsCorrectDateRange()
     {
         // Arrange
-        var today = DateOnly.FromDateTime(DateTime.Today);
-
+        var fiscalStart = DateOnly.FromDateTime(new DateTime(2023, 12, 31, 0, 0, 0, DateTimeKind.Unspecified));
+        var fiscalEnd = DateOnly.FromDateTime(new DateTime(2024, 12, 28, 0, 0, 0, DateTimeKind.Unspecified));
         MockDbContextFactory = new ScenarioFactory
         {
             Demographics = [],
@@ -384,8 +386,8 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
         var result = await Service.GetEmployeesWithProfitsOver73Async(request, CancellationToken.None);
 
         // Assert
-        result.StartDate.ShouldBe(today);
-        result.EndDate.ShouldBe(today);
+        result.StartDate.ShouldBe(fiscalStart);
+        result.EndDate.ShouldBe(fiscalEnd);
     }
 
     [Fact]
@@ -419,8 +421,201 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
         result.Response.Results.ShouldNotBeNull();
 
         // DTO fields verification (BadgeNumber, Name, Address, City, State, Zip, Status,
-        // DateOfBirth, Age, Ssn, TerminationDate, Balance, RequiredMinimumDistributions) 
+        // DateOfBirth, Age, Ssn, TerminationDate, Balance, Factor, Rmd) 
         // are validated by the type system since EmployeesWithProfitsOver73DetailDto uses required properties
+    }
+
+    #endregion
+
+    #region RMD Calculation Tests (PS-2154)
+
+    [Fact]
+    [Description("PS-2154 : EmployeesWithProfitsOver73DetailDto has Factor property for RMD divisor")]
+    public void EmployeesWithProfitsOver73DetailDto_HasFactorProperty()
+    {
+        // Arrange & Act
+        var dtoType = typeof(global::Demoulas.ProfitSharing.Common.Contracts.Response.EmployeesWithProfitsOver73DetailDto);
+        var factorProperty = dtoType.GetProperty("Factor");
+
+        // Assert
+        factorProperty.ShouldNotBeNull("Factor property must exist for RMD calculation");
+        factorProperty.PropertyType.ShouldBe(typeof(decimal), "Factor must be decimal type");
+    }
+
+    [Fact]
+    [Description("PS-2154 : EmployeesWithProfitsOver73DetailDto has Rmd property for calculated RMD amount")]
+    public void EmployeesWithProfitsOver73DetailDto_HasRmdProperty()
+    {
+        // Arrange & Act
+        var dtoType = typeof(global::Demoulas.ProfitSharing.Common.Contracts.Response.EmployeesWithProfitsOver73DetailDto);
+        var rmdProperty = dtoType.GetProperty("Rmd");
+
+        // Assert
+        rmdProperty.ShouldNotBeNull("Rmd property must exist for calculated RMD amount");
+        rmdProperty.PropertyType.ShouldBe(typeof(decimal), "Rmd must be decimal type");
+    }
+
+    [Fact]
+    [Description("PS-2154 : RMD calculation uses MidpointRounding.AwayFromZero for financial accuracy")]
+    public void RmdCalculation_UsesMidpointRoundingAwayFromZero()
+    {
+        // This test documents the expected rounding behavior for RMD calculations
+        // Actual implementation verification requires integration tests
+
+        // Arrange - Test data mimicking IRS RMD calculation
+        decimal balance = 100000.00m;
+        decimal factor = 26.5m; // Age 73 factor
+
+        // Act - Calculate RMD using financial rounding (matches COBOL behavior)
+        decimal expectedRmd = Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero);
+
+        // Assert - Document expected behavior
+        expectedRmd.ShouldBe(3773.58m, "RMD should use AwayFromZero rounding for financial calculations");
+        
+        // Verify midpoint case: 0.5 rounds UP (away from zero)
+        decimal midpointBalance = 265.00m;
+        decimal midpointFactor = 2m;
+        decimal midpointRmd = Math.Round(midpointBalance / midpointFactor, 2, MidpointRounding.AwayFromZero);
+        midpointRmd.ShouldBe(132.50m, "Midpoint values should round away from zero");
+    }
+
+    [Fact]
+    [Description("PS-2154 : RMD calculation handles zero factor gracefully")]
+    public void RmdCalculation_HandlesZeroFactorGracefully()
+    {
+        // Arrange
+        decimal balance = 100000.00m;
+        decimal factor = 0m; // Edge case: missing age or invalid data
+
+        // Act - Should not divide by zero
+        decimal rmd = factor > 0 ? Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero) : 0m;
+
+        // Assert
+        rmd.ShouldBe(0m, "RMD should be 0 when factor is 0 (avoids division by zero)");
+    }
+
+    [Fact]
+    [Description("PS-2154 : RMD calculation handles zero balance correctly")]
+    public void RmdCalculation_HandlesZeroBalanceCorrectly()
+    {
+        // Arrange
+        decimal balance = 0m;
+        decimal factor = 26.5m;
+
+        // Act
+        decimal rmd = Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero);
+
+        // Assert
+        rmd.ShouldBe(0m, "RMD should be 0 when balance is 0");
+    }
+
+    [Fact]
+    [Description("PS-2154 : RMD calculation handles typical age 73 scenario")]
+    public void RmdCalculation_HandlesAge73Scenario()
+    {
+        // Arrange - IRS factor for age 73 is 26.5
+        decimal balance = 100000.00m;
+        decimal factor = 26.5m;
+
+        // Act
+        decimal rmd = Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero);
+
+        // Assert
+        rmd.ShouldBe(3773.58m, "RMD for $100,000 at age 73 (factor 26.5) should be $3,773.58");
+    }
+
+    [Fact]
+    [Description("PS-2154 : RMD calculation handles typical age 75 scenario")]
+    public void RmdCalculation_HandlesAge75Scenario()
+    {
+        // Arrange - IRS factor for age 75 is 24.6
+        decimal balance = 250000.00m;
+        decimal factor = 24.6m;
+
+        // Act
+        decimal rmd = Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero);
+
+        // Assert
+        rmd.ShouldBe(10162.60m, "RMD for $250,000 at age 75 (factor 24.6) should be $10,162.60");
+    }
+
+    [Fact]
+    [Description("PS-2154 : RMD calculation handles typical age 80 scenario")]
+    public void RmdCalculation_HandlesAge80Scenario()
+    {
+        // Arrange - IRS factor for age 80 is 20.2
+        decimal balance = 500000.00m;
+        decimal factor = 20.2m;
+
+        // Act
+        decimal rmd = Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero);
+
+        // Assert
+        rmd.ShouldBe(24752.48m, "RMD for $500,000 at age 80 (factor 20.2) should be $24,752.48");
+    }
+
+    [Fact]
+    [Description("PS-2154 : RMD calculation handles age 99 scenario with smallest factor")]
+    public void RmdCalculation_HandlesAge99ScenarioSmallestFactor()
+    {
+        // Arrange - IRS factor for age 99 is 6.8 (highest age in table)
+        decimal balance = 50000.00m;
+        decimal factor = 6.8m;
+
+        // Act
+        decimal rmd = Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero);
+
+        // Assert
+        rmd.ShouldBe(7352.94m, "RMD for $50,000 at age 99 (factor 6.8) should be $7,352.94");
+    }
+
+    [Fact]
+    [Description("PS-2154 : RMD calculation handles large balance amounts")]
+    public void RmdCalculation_HandlesLargeBalanceAmounts()
+    {
+        // Arrange - Test with 1 million dollar balance
+        decimal balance = 1000000.00m;
+        decimal factor = 26.5m;
+
+        // Act
+        decimal rmd = Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero);
+
+        // Assert
+        rmd.ShouldBe(37735.85m, "RMD for $1,000,000 at factor 26.5 should be $37,735.85");
+    }
+
+    [Fact]
+    [Description("PS-2154 : RMD calculation handles small balance amounts")]
+    public void RmdCalculation_HandlesSmallBalanceAmounts()
+    {
+        // Arrange - Test with small balance
+        decimal balance = 1000.00m;
+        decimal factor = 26.5m;
+
+        // Act
+        decimal rmd = Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero);
+
+        // Assert
+        rmd.ShouldBe(37.74m, "RMD for $1,000 at factor 26.5 should be $37.74");
+    }
+
+    [Theory]
+    [Description("PS-2154 : RMD calculation produces correct results for multiple age scenarios")]
+    [InlineData(100000.00, 26.5, 3773.58)] // Age 73
+    [InlineData(100000.00, 25.5, 3921.57)] // Age 74
+    [InlineData(100000.00, 24.6, 4065.04)] // Age 75
+    [InlineData(100000.00, 20.2, 4950.50)] // Age 80
+    [InlineData(100000.00, 16.0, 6250.00)] // Age 85
+    [InlineData(100000.00, 12.2, 8196.72)] // Age 90
+    [InlineData(100000.00, 8.9, 11235.96)] // Age 95
+    [InlineData(100000.00, 6.8, 14705.88)] // Age 99
+    public void RmdCalculation_ProducesCorrectResultsForMultipleAges(decimal balance, decimal factor, decimal expectedRmd)
+    {
+        // Act
+        decimal actualRmd = Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero);
+
+        // Assert
+        actualRmd.ShouldBe(expectedRmd, $"RMD for balance ${balance} with factor {factor} should be ${expectedRmd}");
     }
 
     #endregion

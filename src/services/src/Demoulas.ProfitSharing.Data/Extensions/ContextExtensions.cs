@@ -66,6 +66,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ProfitDetailMap());
         modelBuilder.ApplyConfiguration(new ProfitShareCheckMap());
         modelBuilder.ApplyConfiguration(new ReportChecksumMap());
+        modelBuilder.ApplyConfiguration(new RmdsFactorByAgeMap());
         modelBuilder.ApplyConfiguration(new StartMethodMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
         modelBuilder.ApplyConfiguration(new TaxCodeMap());

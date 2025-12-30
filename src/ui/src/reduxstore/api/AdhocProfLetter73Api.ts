@@ -6,6 +6,7 @@ const baseQuery = createDataSourceAwareBaseQuery();
 
 export interface AdhocProfLetter73Request {
   profitYear: number;
+  DeMinimusValue?: number | null;
   skip?: number;
   take?: number;
   sortBy?: string;
@@ -34,7 +35,10 @@ export const AdhocProfLetter73Api = createApi({
         const queryParams = new URLSearchParams({
           profitYear: params.profitYear.toString()
         });
-
+        
+        if (params.DeMinimusValue !== undefined && params.DeMinimusValue !== null) {
+          queryParams.append('DeMinimusValue', params.DeMinimusValue.toString());
+        }
         if (params.skip !== undefined) {
           queryParams.append("skip", params.skip.toString());
         }
