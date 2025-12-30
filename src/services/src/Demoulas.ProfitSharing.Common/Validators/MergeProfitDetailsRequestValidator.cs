@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Demographics;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Adjustments;
 using FastEndpoints;
 using FluentValidation;
 

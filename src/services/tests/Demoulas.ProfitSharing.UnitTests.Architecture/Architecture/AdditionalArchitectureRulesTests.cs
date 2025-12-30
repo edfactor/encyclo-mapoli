@@ -211,18 +211,6 @@ public sealed class AdditionalArchitectureRulesTests
 
             Assert.Fail(message);
         }
-        else
-        {
-            // Debug output to understand why no violations found
-            var msg = $"DEBUG: allTypesWithEndpointsValidation={allTypesWithEndpointsValidation.Count}\n" +
-                     $"DEBUG: allValidators={allValidators.Count}\n" +
-                     $"DEBUG: validatorsInWrongNamespace={validatorsInWrongNamespace.Count}";
-
-            msg += $"\n\nAll Types in Endpoints.Validation:\n" +
-                   string.Join("\n", allTypesWithEndpointsValidation.Select(t =>
-                       $"  {t.FullName} (Name={t.Name}, Ends with 'Validator'={t.Name.EndsWith("Validator")}), Interfaces={string.Join(",", t.ImplementedInterfaces.Select(i => i.FullName))}"));
-
-            Assert.Fail(msg);
-        }
+        // Test passes if no validators found in wrong namespace
     }
 }

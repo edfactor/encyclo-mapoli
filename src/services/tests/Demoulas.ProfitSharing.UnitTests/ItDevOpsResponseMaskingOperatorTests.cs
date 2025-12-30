@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
 
-namespace Demoulas.ProfitSharing.UnitTests.Contracts.Response;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 public class ItDevOpsResponseMaskingOperatorTests
 {
