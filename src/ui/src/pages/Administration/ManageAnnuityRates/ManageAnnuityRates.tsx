@@ -17,13 +17,13 @@ const hasMoreThanFourDecimals = (value: number): boolean => {
   // Convert to string and count decimal places
   // This avoids floating-point precision issues
   const valueString = value.toString();
-  const decimalIndex = valueString.indexOf('.');
-  
+  const decimalIndex = valueString.indexOf(".");
+
   if (decimalIndex === -1) {
     // No decimal point, so 0 decimal places
     return false;
   }
-  
+
   const decimalPlaces = valueString.length - decimalIndex - 1;
   return decimalPlaces > 4;
 };
