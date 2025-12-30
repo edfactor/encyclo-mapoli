@@ -165,4 +165,64 @@ public sealed class AdditionalArchitectureRulesTests
             Assert.Fail(message);
         }
     }
+
+    [Fact]
+    [Description("PS-XXXX : FluentValidation validators must reside in Common.Validators namespace")]
+    public void Validators_ShouldBe_InCommonValidatorsNamespace()
+    {
+        // Strategy: Find types in Endpoints.Validation that inherit from AbstractValidator<T>
+        // Approach: Use FullName which contains the full namespace.ClassName
+
+        // Debug: Check what types match partially
+        var allTypesWithEndpointsValidation = s_architecture.Types.Where(t =>
+            t.FullName != null &&
+            t.FullName.Contains("Endpoints.Validation", System.StringComparison.Ordinal))
+            .ToList();
+
+        // Debug: Check all validators
+        var allValidators = s_architecture.Types.Where(t =>
+            t.Name.EndsWith("Validator", System.StringComparison.Ordinal) &&
+            t.ImplementedInterfaces.Any(i =>
+                i.FullName != null &&
+                i.FullName.StartsWith("FluentValidation.IValidator`1", System.StringComparison.Ordinal)))
+            .ToList();
+
+        // Apply full filter
+        var validatorsInWrongNamespace = s_architecture.Types.Where(t =>
+            t.FullName != null &&
+            t.FullName.Contains("Endpoints.Validation", System.StringComparison.Ordinal) &&
+            t.Name.EndsWith("Validator", System.StringComparison.Ordinal) &&
+            t.ImplementedInterfaces.Any(i =>
+                i.FullName != null &&
+                i.FullName.StartsWith("FluentValidation.IValidator`1", System.StringComparison.Ordinal)))
+            .ToList();
+
+        if (validatorsInWrongNamespace.Any())
+        {
+            var violationsList = string.Join("\n", validatorsInWrongNamespace.Select(v =>
+                $"  • {v.FullName}"));
+
+            var message = "❌ ARCHITECTURE VIOLATION: FluentValidation validators found in WRONG namespace\n\n" +
+                          "ALL validators MUST reside in:\n" +
+                          "  ✅ Demoulas.ProfitSharing.Common.Validators\n\n" +
+                          "These validators are in the WRONG location and must be moved:\n" +
+                          violationsList + "\n\n" +
+                          "Reference: copilot-instructions.md (line 313) - Validators MUST be in Common.Validators namespace";
+
+            Assert.Fail(message);
+        }
+        else
+        {
+            // Debug output to understand why no violations found
+            var msg = $"DEBUG: allTypesWithEndpointsValidation={allTypesWithEndpointsValidation.Count}\n" +
+                     $"DEBUG: allValidators={allValidators.Count}\n" +
+                     $"DEBUG: validatorsInWrongNamespace={validatorsInWrongNamespace.Count}";
+
+            msg += $"\n\nAll Types in Endpoints.Validation:\n" +
+                   string.Join("\n", allTypesWithEndpointsValidation.Select(t =>
+                       $"  {t.FullName} (Name={t.Name}, Ends with 'Validator'={t.Name.EndsWith("Validator")}), Interfaces={string.Join(",", t.ImplementedInterfaces.Select(i => i.FullName))}"));
+
+            Assert.Fail(msg);
+        }
+    }
 }

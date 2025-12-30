@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -10,7 +11,6 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Common.Validators;
 
 namespace Demoulas.ProfitSharing.Services.Beneficiaries;
 
@@ -51,7 +51,7 @@ public class BeneficiaryService : IBeneficiaryService
         {
             throw new ValidationException("Badge number must be greater than 0.");
         }
-        
+
         if (req.Percentage <= 0 || req.Percentage > 100m)
         {
             throw new ValidationException("Percentage must be between 0 and 100%.");
