@@ -39,9 +39,21 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             return false;
         }
         string? ns = typeToConvert.Namespace;
-        if (ns is null || (
-            !ns.Contains(".Contracts.Response.", StringComparison.Ordinal) &&
-            !ns.EndsWith(".Contracts.Response", StringComparison.Ordinal)))
+        if (ns is null)
+        {
+            return false;
+        }
+
+        // Check for Response DTOs (production code)
+        bool isResponseDto = ns.Contains(".Contracts.Response.", StringComparison.Ordinal) ||
+                             ns.EndsWith(".Contracts.Response", StringComparison.Ordinal);
+
+        // In test environment, also allow UnitTests namespace (for test DTOs)
+        bool isTestDto = (_hostEnvironment?.IsTestEnvironment() ?? false) &&
+                         (ns.EndsWith(".UnitTests", StringComparison.Ordinal) ||
+                          ns.Contains(".UnitTests.", StringComparison.Ordinal));
+
+        if (!isResponseDto && !isTestDto)
         {
             return false;
         }
