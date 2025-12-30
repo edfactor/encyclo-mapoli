@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
-using Demoulas.ProfitSharing.Endpoints.Validation;
+using Demoulas.ProfitSharing.Common.Validators;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;

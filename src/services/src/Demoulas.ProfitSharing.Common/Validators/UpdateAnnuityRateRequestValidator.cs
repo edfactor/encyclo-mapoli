@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using FluentValidation;
 
-namespace Demoulas.ProfitSharing.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Common.Validators;
 
 public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<UpdateAnnuityRateRequest>
 {
