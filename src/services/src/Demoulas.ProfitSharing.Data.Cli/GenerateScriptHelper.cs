@@ -78,7 +78,7 @@ internal static class GenerateScriptHelper
         {
             config.MaskingOperators = [
                 new UnformattedSocialSecurityNumberMaskingOperator(),
-                new SensitiveValueMaskingOperator()
+                new SensitiveValueMaskingOperator(builder.Environment)
             ];
         });
 

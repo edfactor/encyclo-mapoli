@@ -2,6 +2,8 @@
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.ProfitSharing.Services.Serialization;
+using Microsoft.Extensions.Hosting;
+using Moq;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests;
@@ -19,8 +21,12 @@ public class SerilogItDevOpsMaskingOperatorObjectMaskTests
 
     private static string SerializeAsIt(SampleDto dto)
     {
+        var mockEnvironment = new Mock<IHostEnvironment>();
+        mockEnvironment.Setup(e => e.EnvironmentName).Returns("Testing");
+        mockEnvironment.Setup(e => e.ApplicationName).Returns("Demoulas.ProfitSharing.UnitTests");
+
         var opts = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        opts.Converters.Insert(0, new MaskingJsonConverterFactory());
+        opts.Converters.Insert(0, new MaskingJsonConverterFactory(mockEnvironment.Object));
         MaskingAmbientRoleContext.Current = new RoleContextSnapshot(new[] { Role.ITDEVOPS }, true, false);
         try { return JsonSerializer.Serialize(dto, opts); }
         finally { MaskingAmbientRoleContext.Clear(); }
@@ -31,7 +37,12 @@ public class SerilogItDevOpsMaskingOperatorObjectMaskTests
     {
         var dto = new SampleDto();
         string viaConverter = SerializeAsIt(dto);
-        var serilogOp = new SensitiveValueMaskingOperator();
+
+        var mockEnvironment = new Mock<IHostEnvironment>();
+        mockEnvironment.Setup(e => e.EnvironmentName).Returns("Testing");
+        mockEnvironment.Setup(e => e.ApplicationName).Returns("Demoulas.ProfitSharing.UnitTests");
+
+        var serilogOp = new SensitiveValueMaskingOperator(mockEnvironment.Object);
         string viaOperator = serilogOp.MaskObject(dto);
         viaOperator.ShouldBe(viaConverter);
         // Spot check essential expectations

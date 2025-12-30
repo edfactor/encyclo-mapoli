@@ -3,6 +3,8 @@ using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
+using Microsoft.Extensions.Hosting;
+using Moq;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests;
@@ -23,8 +25,13 @@ public class MaskingJsonConverterTests
     public MaskingJsonConverterTests(ITestOutputHelper output) => _output = output;
     private static JsonSerializerOptions CreateOptions()
     {
+        // Create a mock IHostEnvironment for test environment detection
+        var mockEnvironment = new Mock<IHostEnvironment>();
+        mockEnvironment.Setup(e => e.EnvironmentName).Returns("Testing");
+        mockEnvironment.Setup(e => e.ApplicationName).Returns("Demoulas.ProfitSharing.UnitTests");
+
         JsonSerializerOptions opts = new(JsonSerializerDefaults.Web);
-        opts.Converters.Insert(0, new MaskingJsonConverterFactory());
+        opts.Converters.Insert(0, new MaskingJsonConverterFactory(mockEnvironment.Object));
         return opts;
     }
 
@@ -135,8 +142,12 @@ public class MaskingJsonConverterTests
         MaskingAmbientRoleContext.Current = new RoleContextSnapshot(new[] { Role.ITDEVOPS }, isItDevOps, false);
         try
         {
+            var mockEnvironment = new Mock<IHostEnvironment>();
+            mockEnvironment.Setup(e => e.EnvironmentName).Returns("Testing");
+            mockEnvironment.Setup(e => e.ApplicationName).Returns("Demoulas.ProfitSharing.UnitTests");
+
             var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-            options.Converters.Insert(0, new MaskingJsonConverterFactory());
+            options.Converters.Insert(0, new MaskingJsonConverterFactory(mockEnvironment.Object));
             string json = JsonSerializer.Serialize(detail, options);
             _output.WriteLine("YearEndProfitSharingReportDetail_Points_Masked_For_ItDevOps => " + json);
 

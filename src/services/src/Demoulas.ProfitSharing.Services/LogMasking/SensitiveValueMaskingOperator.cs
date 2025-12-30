@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
+using Microsoft.Extensions.Hosting;
 using Serilog.Enrichers.Sensitive;
 
 namespace Demoulas.ProfitSharing.Services.LogMasking;
@@ -16,11 +17,11 @@ public sealed class SensitiveValueMaskingOperator : RegexMaskingOperator
 {
     private readonly JsonSerializerOptions _options;
 
-    public SensitiveValueMaskingOperator()
+    public SensitiveValueMaskingOperator(IHostEnvironment hostEnvironment)
         : base("(?!)") // regex that never matches (no-op for simple strings)
     {
         _options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        _options.Converters.Insert(0, new MaskingJsonConverterFactory());
+        _options.Converters.Insert(0, new MaskingJsonConverterFactory(hostEnvironment));
     }
 
     // Extended helper for structured objects applying IT DevOps masking semantics.

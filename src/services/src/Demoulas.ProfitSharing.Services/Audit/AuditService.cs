@@ -16,6 +16,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Services.Audit;
 
@@ -30,7 +31,8 @@ public sealed class AuditService : IAuditService
     public AuditService(IProfitSharingDataContextFactory dataContextFactory,
         ICommitGuardOverride guardOverride,
         IAppUser? appUser,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IHostEnvironment hostEnvironment)
     {
         _dataContextFactory = dataContextFactory;
         _guardOverride = guardOverride;
@@ -39,7 +41,7 @@ public sealed class AuditService : IAuditService
 
         // Initialize masking serializer options
         _maskingOptions = new JsonSerializerOptions(JsonSerializerOptions.Web);
-        _maskingOptions.Converters.Add(new MaskingJsonConverterFactory());
+        _maskingOptions.Converters.Add(new MaskingJsonConverterFactory(hostEnvironment));
     }
 
     // Move all ArchiveCompletedReportAsync overloads so they are adjacent, per S4136
