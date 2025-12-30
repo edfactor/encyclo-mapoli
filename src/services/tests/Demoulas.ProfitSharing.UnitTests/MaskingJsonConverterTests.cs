@@ -142,8 +142,12 @@ public class MaskingJsonConverterTests
         MaskingAmbientRoleContext.Current = new RoleContextSnapshot(new[] { Role.ITDEVOPS }, isItDevOps, false);
         try
         {
+            var mockEnvironment = new Mock<IHostEnvironment>();
+            mockEnvironment.Setup(e => e.EnvironmentName).Returns("Testing");
+            mockEnvironment.Setup(e => e.ApplicationName).Returns("Demoulas.ProfitSharing.UnitTests");
+            
             var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-            options.Converters.Insert(0, new MaskingJsonConverterFactory());
+            options.Converters.Insert(0, new MaskingJsonConverterFactory(mockEnvironment.Object));
             string json = JsonSerializer.Serialize(detail, options);
             _output.WriteLine("YearEndProfitSharingReportDetail_Points_Masked_For_ItDevOps => " + json);
 

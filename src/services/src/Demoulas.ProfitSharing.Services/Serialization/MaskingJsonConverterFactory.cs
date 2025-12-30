@@ -17,9 +17,9 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
 {
     private static readonly Type _stringType = typeof(string);
     private static readonly ConcurrentDictionary<Type, TypeMetadata> _typeMetadataCache = new();
-    private readonly IHostEnvironment? _hostEnvironment;
+    private readonly IHostEnvironment _hostEnvironment;
 
-    public MaskingJsonConverterFactory(IHostEnvironment? hostEnvironment = null)
+    public MaskingJsonConverterFactory(IHostEnvironment hostEnvironment)
     {
         _hostEnvironment = hostEnvironment;
     }
@@ -49,7 +49,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                              ns.EndsWith(".Contracts.Response", StringComparison.Ordinal);
 
         // In test environment, also allow UnitTests namespace (for test DTOs)
-        bool isTestDto = (_hostEnvironment?.IsTestEnvironment() ?? false) &&
+        bool isTestDto = (_hostEnvironment.IsTestEnvironment()) &&
                          (ns.EndsWith(".UnitTests", StringComparison.Ordinal) ||
                           ns.Contains(".UnitTests.", StringComparison.Ordinal));
 
@@ -185,8 +185,8 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             try
             {
                 // Use JsonNode to safely read the current token, then deserialize without our factory
-                using var doc = System.Text.Json.JsonDocument.ParseValue(ref reader);
-                var json = doc.RootElement.GetRawText();
+                using var doc = JsonDocument.ParseValue(ref reader);
+                string json = doc.RootElement.GetRawText();
 
                 // DEBUG: Log the JSON for inspection
                 System.Diagnostics.Debug.WriteLine($"[MaskingConverter.Read] Full JSON for {typeToConvert.Name}:\n{json}");
