@@ -1,12 +1,15 @@
-import { Box, Button, Divider, Grid, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid } from "@mui/material";
 import { CellValueChangedEvent, ColDef, ValueFormatterParams, ValueParserParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
-import { DSMGrid, Page } from "smart-ui-library";
+import { useDispatch } from "react-redux";
+import { ApiMessageAlert, DSMGrid, Page } from "smart-ui-library";
 import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { useGetAnnuityRatesQuery, useUpdateAnnuityRateMutation } from "../../../reduxstore/api/ItOperationsApi";
+import { setMessage } from "../../../reduxstore/slices/messageSlice";
 import { AnnuityRateDto } from "../../../reduxstore/types";
+import { Messages } from "../../../utils/messageDictonary";
 
 type StagedAnnuityRateChange = {
   singleRate: number;
@@ -37,13 +40,13 @@ const getRowKey = (row: Pick<AnnuityRateDto, "year" | "age">): string => {
 };
 
 const ManageAnnuityRates = () => {
+  const dispatch = useDispatch();
   const { data, isFetching, refetch } = useGetAnnuityRatesQuery({ sortBy: "Year", isSortDescending: true });
   const [updateAnnuityRate, { isLoading: isSaving }] = useUpdateAnnuityRateMutation();
 
   const [rowData, setRowData] = useState<AnnuityRateDto[]>([]);
   const [originalRatesByKey, setOriginalRatesByKey] = useState<Record<string, StagedAnnuityRateChange>>({});
   const [stagedRatesByKey, setStagedRatesByKey] = useState<Record<string, StagedAnnuityRateChange>>({});
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const hasUnsavedChanges = Object.keys(stagedRatesByKey).length > 0;
   useUnsavedChangesGuard(hasUnsavedChanges);
@@ -62,7 +65,7 @@ const ManageAnnuityRates = () => {
     );
 
     setStagedRatesByKey({});
-    setErrorMessage(null);
+
   }, [data]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
@@ -122,8 +125,6 @@ const ManageAnnuityRates = () => {
     const row = event.data as AnnuityRateDto | undefined;
     if (!row) return;
 
-    setErrorMessage(null);
-
     const key = getRowKey(row);
     const original = originalRatesByKey[key];
     if (!original) return;
@@ -151,12 +152,9 @@ const ManageAnnuityRates = () => {
     if (!data) return;
     setRowData(data.map((r) => ({ ...r })));
     setStagedRatesByKey({});
-    setErrorMessage(null);
   };
 
   const saveChanges = async () => {
-    setErrorMessage(null);
-
     const entries = Object.entries(stagedRatesByKey);
     if (entries.length === 0) return;
 
@@ -166,32 +164,80 @@ const ManageAnnuityRates = () => {
       const age = Number.parseInt(ageStr ?? "", 10);
 
       if (!Number.isFinite(year) || year < 1900 || year > 2100) {
-        setErrorMessage("Year must be between 1900 and 2100.");
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesSaveError,
+            message: {
+              ...Messages.AnnuityRatesSaveError.message,
+              message: "Year must be between 1900 and 2100."
+            }
+          })
+        );
         return;
       }
 
       if (!Number.isFinite(age) || age < 0 || age > 120) {
-        setErrorMessage("Age must be between 0 and 120.");
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesSaveError,
+            message: {
+              ...Messages.AnnuityRatesSaveError.message,
+              message: "Age must be between 0 and 120."
+            }
+          })
+        );
         return;
       }
 
       if (rates.singleRate < 0 || rates.singleRate > 99.9999) {
-        setErrorMessage("Single Rate must be between 0 and 99.9999.");
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesSaveError,
+            message: {
+              ...Messages.AnnuityRatesSaveError.message,
+              message: "Single Rate must be between 0 and 99.9999."
+            }
+          })
+        );
         return;
       }
 
       if (hasMoreThanFourDecimals(rates.singleRate)) {
-        setErrorMessage("Single Rate can have at most 4 decimal places.");
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesSaveError,
+            message: {
+              ...Messages.AnnuityRatesSaveError.message,
+              message: "Single Rate can have at most 4 decimal places."
+            }
+          })
+        );
         return;
       }
 
       if (rates.jointRate < 0 || rates.jointRate > 99.9999) {
-        setErrorMessage("Joint Rate must be between 0 and 99.9999.");
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesSaveError,
+            message: {
+              ...Messages.AnnuityRatesSaveError.message,
+              message: "Joint Rate must be between 0 and 99.9999."
+            }
+          })
+        );
         return;
       }
 
       if (hasMoreThanFourDecimals(rates.jointRate)) {
-        setErrorMessage("Joint Rate can have at most 4 decimal places.");
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesSaveError,
+            message: {
+              ...Messages.AnnuityRatesSaveError.message,
+              message: "Joint Rate can have at most 4 decimal places."
+            }
+          })
+        );
         return;
       }
     }
@@ -207,9 +253,11 @@ const ManageAnnuityRates = () => {
 
       setStagedRatesByKey({});
       await refetch();
+
+      dispatch(setMessage(Messages.AnnuityRatesSaveSuccess));
     } catch (e) {
       console.error("Failed to update annuity rates", e);
-      setErrorMessage("Failed to save changes. Please try again.");
+      dispatch(setMessage(Messages.AnnuityRatesSaveError));
     }
   };
 
@@ -224,6 +272,10 @@ const ManageAnnuityRates = () => {
           </Grid>
 
           <Grid width="100%">
+            <ApiMessageAlert commonKey="AnnuityRatesSave" />
+          </Grid>
+
+          <Grid width="100%">
             <Box
               sx={{
                 display: "flex",
@@ -232,15 +284,7 @@ const ManageAnnuityRates = () => {
                 width: "100%",
                 px: 1
               }}>
-              <Box sx={{ flex: 1 }}>
-                {errorMessage && (
-                  <Typography
-                    variant="body2"
-                    color="error">
-                    {errorMessage}
-                  </Typography>
-                )}
-              </Box>
+              <Box sx={{ flex: 1 }} />
 
               <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
                 <Button
