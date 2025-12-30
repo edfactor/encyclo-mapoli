@@ -13,7 +13,9 @@ vi.mock("../../../../reduxstore/api/ItOperationsApi", () => ({
 
 // Mock the components
 vi.mock("smart-ui-library", () => ({
-  DSMGrid: ({ rowData }: { rowData?: unknown[] }) => <div data-testid="dsm-grid">{Array.isArray(rowData) ? rowData.length : 0} rows</div>,
+  DSMGrid: ({ rowData }: { rowData?: unknown[] }) => (
+    <div data-testid="dsm-grid">{Array.isArray(rowData) ? rowData.length : 0} rows</div>
+  ),
   Page: ({ children, label }: { children?: React.ReactNode; label?: string }) => (
     <div data-testid="page">
       {label}
@@ -46,7 +48,10 @@ describe("ManageStateTaxes", () => {
       refetch: mockRefetch
     });
 
-    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
+    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([
+      mockUpdateStateTaxRate,
+      { isLoading: false }
+    ]);
 
     render(<ManageStateTaxes />);
 
@@ -65,7 +70,10 @@ describe("ManageStateTaxes", () => {
       refetch: mockRefetch
     });
 
-    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
+    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([
+      mockUpdateStateTaxRate,
+      { isLoading: false }
+    ]);
 
     render(<ManageStateTaxes />);
 
@@ -95,7 +103,10 @@ describe("ManageStateTaxes", () => {
       refetch: mockRefetch
     });
 
-    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
+    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([
+      mockUpdateStateTaxRate,
+      { isLoading: false }
+    ]);
 
     render(<ManageStateTaxes />);
 
@@ -114,7 +125,10 @@ describe("ManageStateTaxes", () => {
       refetch: mockRefetch
     });
 
-    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
+    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([
+      mockUpdateStateTaxRate,
+      { isLoading: false }
+    ]);
 
     render(<ManageStateTaxes />);
 
