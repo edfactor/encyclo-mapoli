@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Demographics;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Adjustments;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Adjustments;
 
 public sealed class MergeProfitDetailsEndpoint : ProfitSharingRequestEndpoint<MergeProfitDetailsRequest>
 {

@@ -348,18 +348,18 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
 
 export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => {
   const defaultValueFormatter = (params: ValueFormatterParams) => {
-      const value = params.value;
-      // Need to log value and type of value
+    const value = params.value;
+    // Need to log value and type of value
 
-      if (value == null || value === "") return ""; // keep empty display consistent
-      // If it's already a string (even if numeric-like), return as-is per requirement
-      if (typeof value === "string") return value;
-      // Only format when it's an actual number
-      if (typeof value === "number" && !isNaN(value)) {
-        return numberToCurrency(value);
-      }
-      // Fallback: attempt not to break – convert other types to string
-      return String(value);
+    if (value == null || value === "") return ""; // keep empty display consistent
+    // If it's already a string (even if numeric-like), return as-is per requirement
+    if (typeof value === "string") return value;
+    // Only format when it's an actual number
+    if (typeof value === "number" && !isNaN(value)) {
+      return numberToCurrency(value);
+    }
+    // Fallback: attempt not to break – convert other types to string
+    return String(value);
   };
 
   const {

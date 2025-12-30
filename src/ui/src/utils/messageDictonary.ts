@@ -6,7 +6,8 @@ export enum MessageKeys {
   TerminationSave = "TerminationSave",
   TerminationBulkSave = "TerminationBulkSave",
   UnforfeitSave = "UnforfeitSave",
-  MilitaryContribution = "MilitaryContribution"
+  MilitaryContribution = "MilitaryContribution",
+  StateTaxRatesSave = "StateTaxRatesSave"
 }
 
 export class Messages {
@@ -50,6 +51,21 @@ export class Messages {
     message: {
       type: "success",
       title: "Military contribution saved successfully"
+    }
+  };
+  static readonly StateTaxRatesSaveSuccess: MessageUpdate = {
+    key: MessageKeys.StateTaxRatesSave,
+    message: {
+      type: "success",
+      title: "State tax rates saved successfully"
+    }
+  };
+  static readonly StateTaxRatesSaveError: MessageUpdate = {
+    key: MessageKeys.StateTaxRatesSave,
+    message: {
+      type: "error",
+      title: "Failed to save state tax rates",
+      message: "Please try again"
     }
   };
   static readonly ProfitShareApplySuccess: MessageUpdate = {

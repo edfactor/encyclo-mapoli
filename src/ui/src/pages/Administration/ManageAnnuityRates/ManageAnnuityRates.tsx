@@ -14,7 +14,18 @@ type StagedAnnuityRateChange = {
 };
 
 const hasMoreThanFourDecimals = (value: number): boolean => {
-  return Math.abs(value * 10000 - Math.round(value * 10000)) > Number.EPSILON;
+  // Convert to string and count decimal places
+  // This avoids floating-point precision issues
+  const valueString = value.toString();
+  const decimalIndex = valueString.indexOf(".");
+
+  if (decimalIndex === -1) {
+    // No decimal point, so 0 decimal places
+    return false;
+  }
+
+  const decimalPlaces = valueString.length - decimalIndex - 1;
+  return decimalPlaces > 4;
 };
 
 const normalizeRateToFourDecimals = (value: number): number => {

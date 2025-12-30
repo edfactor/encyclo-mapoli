@@ -657,10 +657,10 @@ public sealed class BreakdownReportService : IBreakdownService
            Monthly payroll (900) is simply anyone with FREQ = 2.
        */
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-        
+
         var pensionerSsns = from ei in ctx.ExcludedIds
-                           where ei.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions
-                           select ei.ExcludedIdValue;
+                            where ei.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions
+                            select ei.ExcludedIdValue;
 
         var query =
             from d in demographics.Include(x => x.Address)

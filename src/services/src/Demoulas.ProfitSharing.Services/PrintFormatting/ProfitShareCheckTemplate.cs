@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Demoulas.ProfitSharing.Common.Extensions;
 
 namespace Demoulas.ProfitSharing.Services.PrintFormatting;

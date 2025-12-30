@@ -2,14 +2,12 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <ItemGroup>
     <!-- ========================================== -->
     <!-- .NET Aspire                                -->
     <!-- ========================================== -->
     <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.1.0" />
     <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="13.1.0" />
-
     <!-- ========================================== -->
     <!-- Demoulas Common Libraries                  -->
     <!-- ========================================== -->
@@ -21,7 +19,6 @@
     <PackageVersion Include="Demoulas.Common.Logging" Version="2.3.2-beta" />
     <PackageVersion Include="Demoulas.Security" Version="3.11.1-beta" />
     <PackageVersion Include="Demoulas.Util" Version="2.9.1-beta2" />
-
     <!-- ========================================== -->
     <!-- FastEndpoints & API                        -->
     <!-- ========================================== -->
@@ -31,7 +28,6 @@
     <PackageVersion Include="FastEndpoints.Swagger" Version="7.1.1" />
     <PackageVersion Include="NSwag.Core" Version="14.1.0" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.11.10" />
-
     <!-- ========================================== -->
     <!-- Entity Framework Core & Oracle             -->
     <!-- ========================================== -->
@@ -45,7 +41,6 @@
     <PackageVersion Include="Oracle.EntityFrameworkCore" Version="10.23.26000" />
     <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.26.0" />
     <PackageVersion Include="Oracle.ManagedDataAccess.OpenTelemetry" Version="23.5.0" />
-
     <!-- ========================================== -->
     <!-- Microsoft Extensions                       -->
     <!-- ========================================== -->
@@ -67,7 +62,6 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
-
     <!-- ========================================== -->
     <!-- OpenTelemetry & Observability              -->
     <!-- ========================================== -->
@@ -79,7 +73,6 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.11.0-beta.2" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
-
     <!-- ========================================== -->
     <!-- Serilog & Logging                          -->
     <!-- ========================================== -->
@@ -98,20 +91,17 @@
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
-
     <!-- ========================================== -->
     <!-- Authentication & Security                  -->
     <!-- ========================================== -->
     <PackageVersion Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.3.1" />
     <PackageVersion Include="Okta.AspNetCore" Version="5.0.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
-
     <!-- ========================================== -->
     <!-- Health Checks                              -->
     <!-- ========================================== -->
     <PackageVersion Include="AspNetCore.HealthChecks.System" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
-
     <!-- ========================================== -->
     <!-- Utilities & Helpers                        -->
     <!-- ========================================== -->
@@ -121,7 +111,7 @@
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" />
     <PackageVersion Include="JsonSchema.Net" Version="6.0.2" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="QuestPDF" Version="2025.12.0" />
+    <PackageVersion Include="QuestPDF" Version="2025.12.1" />
     <PackageVersion Include="Quartz" Version="3.15.1" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.1" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
@@ -130,7 +120,6 @@
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.1" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
-
     <!-- ========================================== -->
     <!-- Testing - xUnit v3 & Microsoft Testing     -->
     <!-- ========================================== -->
@@ -138,7 +127,6 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.1.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2" />
-
     <!-- ========================================== -->
     <!-- Testing - Additional Tools                 -->
     <!-- ========================================== -->
@@ -152,7 +140,6 @@
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="TngTech.ArchUnitNET" Version="0.13.1" />
     <PackageVersion Include="TngTech.ArchUnitNET.xUnitV3" Version="0.13.1" />
-
     <!-- ========================================== -->
     <!-- Code Analysis & Roslyn                     -->
     <!-- ========================================== -->
@@ -164,17 +151,15 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="5.0.0" />
-
     <!-- ========================================== -->
     <!-- Static Analysis & Linters                  -->
     <!-- ========================================== -->
-    <PackageVersion Include="AsyncFixer" Version="1.6.0" />
+    <PackageVersion Include="AsyncFixer" Version="2.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.MiddlewareAnalysis" Version="9.0.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
     <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.15.0" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.17.0.131074" />
-
     <!-- ========================================== -->
     <!-- Build & Tooling                            -->
     <!-- ========================================== -->
