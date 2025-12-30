@@ -15,12 +15,11 @@ public class SwaggerImpersonationHeader : IOperationProcessor
             Name = Role.IMPERSONATION,
             Kind = OpenApiParameterKind.Header,
             IsRequired = false,
-            Type = JsonObjectType.String,
-            Default = "",
             Description = "A list of roles to impersonate",
             Schema = new JsonSchema
             {
                 Type = JsonObjectType.String,
+                Default = "",
                 Enumeration = { Role.BENEFICIARY_ADMINISTRATOR, Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.HARDSHIPADMINISTRATOR, Role.ADMINISTRATOR, Role.ITDEVOPS, Role.EXECUTIVEADMIN, Role.ITOPERATIONS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING }
             },
         };
