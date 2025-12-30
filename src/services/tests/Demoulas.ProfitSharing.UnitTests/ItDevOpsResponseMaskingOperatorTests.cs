@@ -36,11 +36,11 @@ public class ItDevOpsResponseMaskingOperatorTests
     public void Operator_Output_Equals_IT_Context_Output()
     {
         var dto = new SampleDto();
-        
+
         var mockEnvironment = new Mock<IHostEnvironment>();
         mockEnvironment.Setup(e => e.EnvironmentName).Returns("Testing");
         mockEnvironment.Setup(e => e.ApplicationName).Returns("Demoulas.ProfitSharing.UnitTests");
-        
+
         var op = new SensitiveValueMaskingOperator(mockEnvironment.Object);
         string expected = SerializeAsIt(dto);
         string actual = op.MaskObject(dto);

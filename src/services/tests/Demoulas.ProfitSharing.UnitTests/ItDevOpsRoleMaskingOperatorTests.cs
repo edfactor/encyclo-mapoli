@@ -37,11 +37,11 @@ public class SerilogItDevOpsMaskingOperatorObjectMaskTests
     {
         var dto = new SampleDto();
         string viaConverter = SerializeAsIt(dto);
-        
+
         var mockEnvironment = new Mock<IHostEnvironment>();
         mockEnvironment.Setup(e => e.EnvironmentName).Returns("Testing");
         mockEnvironment.Setup(e => e.ApplicationName).Returns("Demoulas.ProfitSharing.UnitTests");
-        
+
         var serilogOp = new SensitiveValueMaskingOperator(mockEnvironment.Object);
         string viaOperator = serilogOp.MaskObject(dto);
         viaOperator.ShouldBe(viaConverter);
