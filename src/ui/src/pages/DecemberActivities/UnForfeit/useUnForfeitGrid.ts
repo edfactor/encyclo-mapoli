@@ -92,6 +92,7 @@ export const useUnForfeitGrid = ({
       const baseRequest: StartAndEndDateRequest = {
         beginningDate: unForfeitsQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
         endingDate: unForfeitsQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
+        excludeZeroBalance: unForfeitsQueryParams?.excludeZeroBalance || false,
         profitYear: selectedProfitYear,
         pagination: { skip, take, sortBy, isSortDescending }
       };
