@@ -114,12 +114,12 @@ public sealed class TerminatedEmployeeReportService
                                  && ssns.Contains(pd.Ssn));
 
                 // This grabs all transactions for the current year
+                // Group by SSN only since profit year is already filtered above
                 return await profitDetailsRaw
-                    .GroupBy(pd => new { pd.Ssn, pd.ProfitYear })
+                    .GroupBy(pd => pd.Ssn)
                     .Select(g => new InternalProfitDetailDto
                     {
-                        Ssn = g.Key.Ssn,
-                        ProfitYear = g.Key.ProfitYear,
+                        Ssn = g.Key,
                         TotalContributions = g.Sum(x => x.Contribution),
                         TotalEarnings = g.Sum(x => x.Earnings),
                         TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
@@ -142,7 +142,7 @@ public sealed class TerminatedEmployeeReportService
                                                    (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
                                                    (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
                     })
-                    .ToDictionaryAsync(x => new { x.Ssn, x.ProfitYear }, cancellationToken);
+                    .ToDictionaryAsync(x => x.Ssn, cancellationToken);
             },
             dict => dict.Count);
 
@@ -198,8 +198,7 @@ public sealed class TerminatedEmployeeReportService
                 }
 
                 // Get transactions for this member
-                var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
-                if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
+                if (!profitDetailsDict.TryGetValue(memberSlice.Ssn, out InternalProfitDetailDto? transactionsThisYear))
                 {
                     transactionsThisYear = new InternalProfitDetailDto();
                 }
@@ -256,7 +255,6 @@ public sealed class TerminatedEmployeeReportService
                 {
                     Id = memberSlice.Id,
                     BadgeNumber = memberSlice.BadgeNumber,
-                    ProfitYear = memberSlice.ProfitYear,
                     PsnSuffix = memberSlice.PsnSuffix,
                     FullName = memberSlice.FullName,
                     FirstName = memberSlice.FirstName,
@@ -527,7 +525,6 @@ public sealed class TerminatedEmployeeReportService
                                                     : 0,
                                             EnrollmentId = payProfit != null ? payProfit.EnrollmentId : (byte)0,
                                             Etva = payProfit != null ? payProfit.Etva : 0,
-                                            ProfitYear = currentYear,
                                             IsOnlyBeneficiary = false,
                                             IsBeneficiaryAndEmployee = false,
                                             IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
@@ -583,8 +580,6 @@ public sealed class TerminatedEmployeeReportService
                         ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
                         EnrollmentId = 0,
                         Etva = 0,
-                        // CRITICAL: Beneficiaries must use the requested profit year to match transaction lookups
-                        ProfitYear = (short)request.EndingDate.Year,
                         IsOnlyBeneficiary = d == null,
                         IsBeneficiaryAndEmployee = d != null,
                         IsExecutive = false
