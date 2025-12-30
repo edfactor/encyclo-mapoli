@@ -79,7 +79,7 @@ definitions:
 
         # Restore packages explicitly
         - echo "Restoring NuGet packages..."
-        - dotnet restore src/services/Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+        - dotnet restore src/services/Demoulas.ProfitSharing.slnx
 
         # Build without incremental compilation to avoid stale artifacts
         - echo "Building solution..."
@@ -181,7 +181,7 @@ definitions:
 
         # Restore packages explicitly
         - echo "Restoring NuGet packages..."
-        - dotnet restore src/services/Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+        - dotnet restore src/services/Demoulas.ProfitSharing.slnx
 
         # Build without incremental compilation to avoid stale artifacts
         - echo "Building solution..."
@@ -586,13 +586,13 @@ definitions:
         # Only update if not already present
         - if (-not (Get-Command Demoulas.Common.Build.Cli -ErrorAction SilentlyContinue)) { dotnet tool update --global Demoulas.Common.Build.Cli --no-cache }
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeFull.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeFull.Sync -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeFull.Sync.zip -Force
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeDelta.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeDelta.Sync -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeDelta.Sync.zip -Force
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeePayroll.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeePayroll.Sync -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeePayroll.Sync.zip -Force
 
     create-frontend-artifact-qa: &create-frontend-artifact-qa
@@ -914,7 +914,7 @@ definitions:
 
         - dotnet --info
         - dotnet nuget list source
-        - dotnet restore Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+        - dotnet restore Demoulas.ProfitSharing.slnx
 
         - |
           $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
