@@ -195,7 +195,7 @@ export interface UpdateSummaryEmployee {
   badgeNumber: number;
   storeNumber: number;
   psnSuffix: number;
-  name: string;
+  fullName: string;
   isEmployee: boolean;
   before: {
     profitSharingAmount: number;
