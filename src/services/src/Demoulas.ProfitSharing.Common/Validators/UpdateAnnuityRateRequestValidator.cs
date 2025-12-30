@@ -9,6 +9,7 @@ public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<Update
 
     public UpdateAnnuityRateRequestValidator()
     {
+        
         RuleFor(x => x.Year)
             .InclusiveBetween((short)1900, (short)2100)
             .WithMessage("Year must be between 1900 and 2100.");
@@ -32,9 +33,8 @@ public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<Update
 
     private static bool HasAtMostFourDecimals(decimal value)
     {
-        // Convert to string and count decimal places
-        // This avoids floating-point precision issues
-        var valueString = value.ToString();
+        // Convert to string using invariant culture to ensure consistent decimal separator
+        var valueString = value.ToString(System.Globalization.CultureInfo.InvariantCulture);
         var decimalIndex = valueString.IndexOf('.');
 
         if (decimalIndex == -1)
@@ -43,7 +43,16 @@ public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<Update
             return true;
         }
 
-        var decimalPlaces = valueString.Length - decimalIndex - 1;
+        // Count digit characters after the decimal point
+        int decimalPlaces = 0;
+        for (int i = decimalIndex + 1; i < valueString.Length; i++)
+        {
+            if (char.IsDigit(valueString[i]))
+            {
+                decimalPlaces++;
+            }
+        }
+
         return decimalPlaces <= 4;
     }
 }
