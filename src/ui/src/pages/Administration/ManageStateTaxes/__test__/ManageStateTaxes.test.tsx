@@ -13,8 +13,8 @@ vi.mock("../../../../reduxstore/api/ItOperationsApi", () => ({
 
 // Mock the components
 vi.mock("smart-ui-library", () => ({
-  DSMGrid: ({ rowData }: any) => <div data-testid="dsm-grid">{rowData?.length || 0} rows</div>,
-  Page: ({ children, label }: any) => (
+  DSMGrid: ({ rowData }: { rowData?: unknown[] }) => <div data-testid="dsm-grid">{Array.isArray(rowData) ? rowData.length : 0} rows</div>,
+  Page: ({ children, label }: { children?: React.ReactNode; label?: string }) => (
     <div data-testid="page">
       {label}
       {children}
@@ -23,13 +23,13 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 vi.mock("../../../components/PageErrorBoundary/PageErrorBoundary", () => ({
-  default: ({ children }: any) => <>{children}</>
+  default: ({ children }: { children?: React.ReactNode }) => <>{children}</>
 }));
 
 describe("ManageStateTaxes", () => {
   const mockStateTaxData: StateTaxRateDto[] = [
-    { abbreviation: "MA", rate: 0.05, dateModified: new Date("2025-01-01") as any, userModified: "admin" },
-    { abbreviation: "NH", rate: 0.0, dateModified: new Date("2025-01-01") as any, userModified: "admin" }
+    { abbreviation: "MA", rate: 0.05, dateModified: new Date("2025-01-01") as unknown as Date, userModified: "admin" },
+    { abbreviation: "NH", rate: 0.0, dateModified: new Date("2025-01-01") as unknown as Date, userModified: "admin" }
   ];
 
   beforeEach(() => {
@@ -40,13 +40,13 @@ describe("ManageStateTaxes", () => {
     const mockRefetch = vi.fn();
     const mockUpdateStateTaxRate = vi.fn();
 
-    (useGetStateTaxRatesQuery as any).mockReturnValue({
+    (useGetStateTaxRatesQuery as unknown as typeof useGetStateTaxRatesQuery).mockReturnValue({
       data: mockStateTaxData,
       isFetching: false,
       refetch: mockRefetch
     });
 
-    (useUpdateStateTaxRateMutation as any).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
+    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
 
     render(<ManageStateTaxes />);
 
@@ -55,26 +55,26 @@ describe("ManageStateTaxes", () => {
   });
 
   it("should display success message after saving state tax", async () => {
-    const user = userEvent.setup();
+    const _user = userEvent.setup();
     const mockRefetch = vi.fn();
     const mockUpdateStateTaxRate = vi.fn().mockResolvedValue({ abbreviation: "MA", rate: 0.06 });
 
-    (useGetStateTaxRatesQuery as any).mockReturnValue({
+    (useGetStateTaxRatesQuery as unknown as typeof useGetStateTaxRatesQuery).mockReturnValue({
       data: mockStateTaxData,
       isFetching: false,
       refetch: mockRefetch
     });
 
-    (useUpdateStateTaxRateMutation as any).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
+    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
 
     render(<ManageStateTaxes />);
 
     // Simulate cell edit
-    const grid = screen.getByTestId("dsm-grid");
+    const _grid = screen.getByTestId("dsm-grid");
     const saveButton = screen.getByRole("button", { name: /save/i });
 
     // Mock a state change for testing
-    const stateChanges = { MA: 0.06 };
+    const _stateChanges = { MA: 0.06 };
 
     // Since we can't directly trigger cell edits in the mocked grid,
     // we'll verify the success message would appear by checking the button is enabled
@@ -89,13 +89,13 @@ describe("ManageStateTaxes", () => {
     const mockRefetch = vi.fn();
     const mockUpdateStateTaxRate = vi.fn().mockRejectedValue(new Error("API Error"));
 
-    (useGetStateTaxRatesQuery as any).mockReturnValue({
+    (useGetStateTaxRatesQuery as unknown as typeof useGetStateTaxRatesQuery).mockReturnValue({
       data: mockStateTaxData,
       isFetching: false,
       refetch: mockRefetch
     });
 
-    (useUpdateStateTaxRateMutation as any).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
+    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
 
     render(<ManageStateTaxes />);
 
@@ -108,13 +108,13 @@ describe("ManageStateTaxes", () => {
     const mockRefetch = vi.fn();
     const mockUpdateStateTaxRate = vi.fn().mockResolvedValue({ abbreviation: "MA", rate: 0.06 });
 
-    (useGetStateTaxRatesQuery as any).mockReturnValue({
+    (useGetStateTaxRatesQuery as unknown as typeof useGetStateTaxRatesQuery).mockReturnValue({
       data: mockStateTaxData,
       isFetching: false,
       refetch: mockRefetch
     });
 
-    (useUpdateStateTaxRateMutation as any).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
+    (useUpdateStateTaxRateMutation as unknown as typeof useUpdateStateTaxRateMutation).mockReturnValue([mockUpdateStateTaxRate, { isLoading: false }]);
 
     render(<ManageStateTaxes />);
 
