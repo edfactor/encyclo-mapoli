@@ -75,8 +75,6 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                 IsExecutive = false,
             };
             Assert.True(AreEquivalent(dto, expected));
-
-            return Task.CompletedTask;
         });
     }
 
@@ -133,8 +131,6 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             lines[5].ShouldBe($"Number written,{expectedNumberWritten}");
             lines[6].ShouldBe("ASSIGNMENT_ID,BADGE_PSN,NAME");
             lines.Skip(7).ShouldContain($"{_dh.DepartmentId},{_dh.BadgeNumber},\"{_d.ContactInfo!.FullName!}\"");
-
-            return Task.CompletedTask;
         });
     }
 
@@ -156,8 +152,6 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
 
             // Assert
             Assert.DoesNotContain(response.Result.Response.Results, e => e.BadgeNumber == _dh.BadgeNumber);
-
-            return Task.CompletedTask;
         });
     }
 
@@ -179,8 +173,6 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
 
             // Assert
             Assert.DoesNotContain(response.Result.Response.Results, e => e.BadgeNumber == _dh.BadgeNumber);
-
-            return Task.CompletedTask;
         });
     }
 
@@ -200,8 +192,6 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
 
             // Assert
             Assert.DoesNotContain(response.Result.Response.Results, e => e.BadgeNumber == _dh.BadgeNumber);
-
-            return Task.CompletedTask;
         });
     }
 

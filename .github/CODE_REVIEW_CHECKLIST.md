@@ -182,7 +182,7 @@ Note: This document is a review aid, not a formal control implementation stateme
   // ❌ WRONG - AUTO-REJECT: Frontend age calculation
   const age = Math.floor(
     (Date.now() - new Date(dateOfBirth).getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25),
+      (1000 * 60 * 60 * 24 * 365.25)
   );
   const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 
@@ -663,9 +663,13 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 
 ### Server-Side Validation (MANDATORY)
 
-- [ ] **FluentValidation used**: All request DTOs have validators
+- [ ] **FluentValidation used**: All request DTOs have validators in `Demoulas.ProfitSharing.Common.Validators` namespace (NOT in `Endpoints.Validation`)
+
   ```csharp
-  public class SearchRequestValidator : AbstractValidator<SearchRequest>
+  // File: Demoulas.ProfitSharing.Common/Validators/SearchRequestValidator.cs
+  namespace Demoulas.ProfitSharing.Common.Validators;
+
+  public sealed class SearchRequestValidator : AbstractValidator<SearchRequest>
   {
       public SearchRequestValidator()
       {
@@ -675,6 +679,9 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
       }
   }
   ```
+
+  **CRITICAL**: Validators MUST be in `Common.Validators` namespace (see copilot-instructions.md line 313) to ensure accessibility across all layers (endpoints, services, tests).
+
 - [ ] **Numeric ranges**: Min/max bounds validated
 - [ ] **String lengths**: Max length constraints
 - [ ] **Collection sizes**: Prevent unbounded collections

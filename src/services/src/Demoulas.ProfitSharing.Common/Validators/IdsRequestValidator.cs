@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using FluentValidation;
 
-namespace Demoulas.ProfitSharing.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Common.Validators;
 
 /// <summary>
 /// Validator for IdsRequest to enforce batch size limits and ensure valid IDs.

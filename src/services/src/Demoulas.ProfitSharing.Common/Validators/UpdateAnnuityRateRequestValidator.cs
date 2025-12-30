@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using FluentValidation;
 
-namespace Demoulas.ProfitSharing.Endpoints.Validation;
+namespace Demoulas.ProfitSharing.Common.Validators;
 
 public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<UpdateAnnuityRateRequest>
 {
@@ -20,13 +20,30 @@ public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<Update
         RuleFor(x => x.SingleRate)
             .InclusiveBetween(0m, MaxRate)
             .WithMessage("SingleRate must be between 0 and 99.9999.")
-            .Must(rate => Math.Round(rate, 4, MidpointRounding.AwayFromZero) == rate)
-            .WithMessage("SingleRate must have up to 4 decimal places.");
+            .Must(rate => HasAtMostFourDecimals(rate))
+            .WithMessage("SingleRate can have at most 4 decimal places.");
 
         RuleFor(x => x.JointRate)
             .InclusiveBetween(0m, MaxRate)
             .WithMessage("JointRate must be between 0 and 99.9999.")
-            .Must(rate => Math.Round(rate, 4, MidpointRounding.AwayFromZero) == rate)
-            .WithMessage("JointRate must have up to 4 decimal places.");
+            .Must(rate => HasAtMostFourDecimals(rate))
+            .WithMessage("JointRate can have at most 4 decimal places.");
+    }
+
+    private static bool HasAtMostFourDecimals(decimal value)
+    {
+        // Convert to string and count decimal places
+        // This avoids floating-point precision issues
+        var valueString = value.ToString();
+        var decimalIndex = valueString.IndexOf('.');
+
+        if (decimalIndex == -1)
+        {
+            // No decimal point, so 0 decimal places
+            return true;
+        }
+
+        var decimalPlaces = valueString.Length - decimalIndex - 1;
+        return decimalPlaces <= 4;
     }
 }

@@ -39,6 +39,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Update="AsyncFixer">
+      <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Update="Roslynator.Analyzers">
       <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

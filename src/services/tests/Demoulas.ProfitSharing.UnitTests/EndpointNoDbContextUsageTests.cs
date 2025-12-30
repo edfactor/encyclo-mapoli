@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
-namespace Demoulas.ProfitSharing.UnitTests.Infrastructure;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 public class EndpointNoDbContextUsageTests
 {
