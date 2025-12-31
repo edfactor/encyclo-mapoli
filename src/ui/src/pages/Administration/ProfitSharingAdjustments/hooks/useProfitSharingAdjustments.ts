@@ -3,14 +3,14 @@ import { useDispatch } from "react-redux";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import {
-    useLazyGetProfitSharingAdjustmentsQuery,
-    useSaveProfitSharingAdjustmentsMutation
+  useLazyGetProfitSharingAdjustmentsQuery,
+  useSaveProfitSharingAdjustmentsMutation
 } from "../../../../reduxstore/api/ProfitDetailsApi";
 import { removeMessage } from "../../../../reduxstore/slices/messageSlice";
 import {
-    ProfitSharingAdjustmentRowDto,
-    ProfitSharingAdjustmentsKey,
-    SaveProfitSharingAdjustmentRowRequest
+  ProfitSharingAdjustmentRowDto,
+  ProfitSharingAdjustmentsKey,
+  SaveProfitSharingAdjustmentRowRequest
 } from "../../../../reduxstore/types";
 import { ProfitSharingAdjustmentsSearchParams } from "../ProfitSharingAdjustmentsSearchFilter";
 
