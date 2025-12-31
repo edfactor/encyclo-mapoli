@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Demoulas Common Libraries - Complete Guide
 
 This is the main index for all Demoulas Common library documentation. The libraries provide a comprehensive suite of extensions, utilities, and base classes for building enterprise .NET applications.
