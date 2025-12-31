@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 /// <summary>
 /// Response DTO for RMD factor by age data.
@@ -8,6 +10,7 @@ public sealed record RmdsFactorDto
     /// <summary>
     /// Age in years (73-120).
     /// </summary>
+    [MaskSensitive]
     public required byte Age { get; init; }
 
     /// <summary>
