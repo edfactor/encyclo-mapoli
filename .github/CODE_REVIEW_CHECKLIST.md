@@ -85,7 +85,7 @@ Note: This document is a review aid, not a formal control implementation stateme
 
 **All security items are CRITICAL. Deviations require security review.**
 
-**📖 For comprehensive security guidance, see [security.instructions.md](instructions/security.instructions.md)**
+**📖 For comprehensive security guidance, see security.instructions.md)**
 
 ### Authentication & Authorization (A01/A07)
 
@@ -182,7 +182,7 @@ Note: This document is a review aid, not a formal control implementation stateme
   // ❌ WRONG - AUTO-REJECT: Frontend age calculation
   const age = Math.floor(
     (Date.now() - new Date(dateOfBirth).getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25)
+      (1000 * 60 * 60 * 24 * 365.25),
   );
   const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 
@@ -303,8 +303,6 @@ Note: This document is a review aid, not a formal control implementation stateme
 - [ ] **Request/response examples**: Sample payloads documented
 - [ ] **Error responses documented**: 404, 400, 401, etc. with examples
 
-**Reference:** `.github/instructions/restful-api-guidelines.instructions.md`
-
 ---
 
 ## 4. Backend - Services
@@ -334,8 +332,6 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
         : Result<MemberDto>.Success(member.ToDto());
 }
 ```
-
-**Reference:** `.github/instructions/services.instructions.md`
 
 ---
 
@@ -569,8 +565,6 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 - [ ] **No stack traces in error messages**: Never expose technical details to users
 
 **Reference:** Security section for age calculation details
-
-**Reference:** `.github/instructions/pages.instructions.md`
 
 ---
 
@@ -926,14 +920,6 @@ aspire run
 - **VALIDATION_PATTERNS.md** - Validation guidelines
 - **DISTRIBUTED_CACHING_PATTERNS.md** - Caching patterns
 - **BRANCHING_AND_WORKFLOW.md** - Git workflow
-
-### Instruction Files
-
-- `.github/instructions/restful-api-guidelines.instructions.md`
-- `.github/instructions/endpoints.instructions.md`
-- `.github/instructions/services.instructions.md`
-- `.github/instructions/pages.instructions.md`
-- `.github/instructions/redux.instructions.md`
 
 ### Security Tickets
 

@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Service Layer Architecture
 
 **Project**: Demoulas Profit Sharing Application
@@ -7,6 +12,10 @@
 **Last Updated**: 2025-10-23
 
 ---
+
+## Background
+
+@./ai-templates/main-includes/back-end.md
 
 ## Table of Contents
 
@@ -2311,36 +2320,36 @@ public class ChecksumValidationServiceTests
 
 1. **Always use `[Description]` attribute** with Jira ticket number:
 
-    ```csharp
-    [Description("PS-1234 : Brief description of test scenario")]
-    ```
+   ```csharp
+   [Description("PS-1234 : Brief description of test scenario")]
+   ```
 
 2. **Use Shouldly assertions** (not xUnit Assert):
 
-    ```csharp
-    result.ShouldNotBeNull();
-    result.Value.ShouldBe(expected);
-    collection.ShouldBeEmpty();
-    exception.Message.ShouldContain("error text");
-    ```
+   ```csharp
+   result.ShouldNotBeNull();
+   result.Value.ShouldBe(expected);
+   collection.ShouldBeEmpty();
+   exception.Message.ShouldContain("error text");
+   ```
 
 3. **Test boundary cases**:
 
-    - Minimum/maximum values
-    - Empty collections
-    - Null values (where applicable)
-    - Edge dates (leap years, fiscal year boundaries)
+   - Minimum/maximum values
+   - Empty collections
+   - Null values (where applicable)
+   - Edge dates (leap years, fiscal year boundaries)
 
 4. **Isolate tests** - each test should:
 
-    - Set up its own data
-    - Not depend on other tests
-    - Clean up after itself (or use fresh in-memory DB)
+   - Set up its own data
+   - Not depend on other tests
+   - Clean up after itself (or use fresh in-memory DB)
 
 5. **Test negative cases**:
-    - Invalid inputs
-    - Missing entities
-    - Business rule violations
+   - Invalid inputs
+   - Missing entities
+   - Business rule violations
 
 ---
 
