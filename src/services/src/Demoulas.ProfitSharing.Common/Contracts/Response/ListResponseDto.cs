@@ -14,4 +14,9 @@ public sealed class ListResponseDto<T>
     {
         Items = items as IReadOnlyList<T> ?? items.ToList()
     };
+
+    public static ListResponseDto<T> ResponseExample() => new()
+    {
+        Items = new List<T>()
+    };
 }

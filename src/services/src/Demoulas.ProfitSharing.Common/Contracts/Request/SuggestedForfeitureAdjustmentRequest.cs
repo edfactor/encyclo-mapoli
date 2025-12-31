@@ -6,4 +6,10 @@ public sealed record SuggestedForfeitureAdjustmentRequest
 {
     public int? Ssn { get; set; }
     public int? Badge { get; set; }
+
+    public static SuggestedForfeitureAdjustmentRequest RequestExample() => new()
+    {
+        Ssn = 123456789,
+        Badge = 123456
+    };
 }

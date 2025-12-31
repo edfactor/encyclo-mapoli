@@ -30,4 +30,31 @@ public record ProfitShareUpdateTotals
 
     public long TotalEmployees { get; set; }
     public long TotalBeneficaries { get; set; }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static ProfitShareUpdateTotals ResponseExample()
+    {
+        return new ProfitShareUpdateTotals
+        {
+            BeginningBalance = 5000000.00m,
+            TotalContribution = 450000.00m,
+            Earnings = 300000.00m,
+            Earnings2 = 150000.00m,
+            Forfeiture = 75000.00m,
+            Distributions = 200000.00m,
+            Military = 50000.00m,
+            EndingBalance = 5375000.00m,
+            Allocations = 125000.00m,
+            PaidAllocations = 100000.00m,
+            ClassActionFund = 25000.00m,
+            ContributionPoints = 10000,
+            EarningPoints = 5000,
+            MaxOverTotal = 0m,
+            MaxPointsTotal = 15000,
+            TotalEmployees = 2500,
+            TotalBeneficaries = 850
+        };
+    }
 }

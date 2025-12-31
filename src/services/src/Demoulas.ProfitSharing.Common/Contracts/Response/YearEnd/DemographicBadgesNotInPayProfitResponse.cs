@@ -12,4 +12,21 @@ public sealed record DemographicBadgesNotInPayProfitResponse : IIsExecutive
     public char Status { get; set; }
     public string StatusName { get; set; } = string.Empty;
     public bool IsExecutive { get; set; }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static DemographicBadgesNotInPayProfitResponse ResponseExample()
+    {
+        return new DemographicBadgesNotInPayProfitResponse
+        {
+            BadgeNumber = 456789,
+            Ssn = "***-**-5678",
+            FullName = "Smith, Jennifer M",
+            Store = 42,
+            Status = 'A',
+            StatusName = "Active",
+            IsExecutive = false
+        };
+    }
 }

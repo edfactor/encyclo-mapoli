@@ -16,4 +16,16 @@ public record BeneficiarySearchFilterResponse
     public string? Zip { get; set; }
     [MaskSensitive] public short? Age { get; set; }
 
+    public static BeneficiarySearchFilterResponse ResponseExample() => new()
+    {
+        BadgeNumber = 12345,
+        PsnSuffix = 1,
+        FullName = "John Smith",
+        Ssn = "***-**-6789",
+        Street = "123 Main St",
+        City = "Springfield",
+        State = "MA",
+        Zip = "01101",
+        Age = 44
+    };
 }

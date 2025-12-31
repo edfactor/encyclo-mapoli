@@ -58,4 +58,19 @@ public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullName
     /// Represents the portion of the account that is not subject to forfeiture.
     /// </summary>
     public decimal VestedBalance { get; set; }
+
+    public static AccountHistoryReportResponse ResponseExample() => new()
+    {
+        Id = 1,
+        BadgeNumber = 12345,
+        FullName = "John Smith",
+        Ssn = "***-**-6789",
+        ProfitYear = 2024,
+        Contributions = 5000.00m,
+        Earnings = 2500.00m,
+        Forfeitures = 0m,
+        Withdrawals = 1000.00m,
+        EndingBalance = 125000.00m,
+        VestedBalance = 100000.00m
+    };
 }

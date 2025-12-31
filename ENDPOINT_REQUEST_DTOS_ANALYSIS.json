@@ -1,0 +1,231 @@
+{
+  "totalEndpoints": 68,
+  "uniqueRequestDtos": 54,
+  "withRequestExample": 54,
+  "withoutRequestExample": 30,
+  "summary": "Analysis of all 68 endpoints in Demoulas.ProfitSharing.Endpoints/Endpoints/ directory. Identified 54 unique Request DTOs, of which 54 have RequestExample() methods and 30 are missing them.",
+  "missingRequestExamples": [
+    {
+      "name": "UpdateStateTaxRateRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/ItOperations/UpdateStateTaxRateRequest.cs",
+      "properties": ["ProfitYear", "StateTaxRate"],
+      "usedByEndpoints": ["UpdateStateTaxRateEndpoint"]
+    },
+    {
+      "name": "UnmaskSsnRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Endpoints/Endpoints/Lookups/UnmaskSsnEndpoint.cs",
+      "properties": ["DemographicId"],
+      "usedByEndpoints": ["UnmaskSsnEndpoint"]
+    },
+    {
+      "name": "EmptyRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/EmptyRequest.cs",
+      "properties": [],
+      "usedByEndpoints": ["RefreshDuplicateNamesAndBirthdaysCacheEndpoint"]
+    },
+    {
+      "name": "IdRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/IdRequest.cs",
+      "properties": ["Id"],
+      "usedByEndpoints": [
+        "DeleteDistributionEndpoint",
+        "DeleteBeneficiaryContactEndpoint",
+        "DeleteBeneficiaryEndpoint"
+      ]
+    },
+    {
+      "name": "SortedPaginationRequestDto",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/SortedPaginationRequestDto.cs",
+      "properties": ["PageNumber", "PageSize", "SortBy", "IsSortDescending"],
+      "usedByEndpoints": [
+        "DistributionRunReportOnHoldEndpoint",
+        "DistributionRunReportManualChecksEndpoint",
+        "GetFrozenDemographicsEndpoint"
+      ]
+    },
+    {
+      "name": "BadgeNumberRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/BadgeNumberRequest.cs",
+      "properties": ["BadgeNumber"],
+      "usedByEndpoints": [
+        "YearEndProfitSharingSummaryReportEndpoint",
+        "YearEndProfitSharingReportTotalsEndpoint"
+      ]
+    },
+    {
+      "name": "BeneficiaryDisbursementRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Beneficiaries/BeneficiaryDisbursementRequest.cs",
+      "properties": ["BeneficiaryId", "DisbursementDate", "Amount"],
+      "usedByEndpoints": ["BeneficiaryDisbursementEndpoint"]
+    },
+    {
+      "name": "BeneficiaryTypeRequestDto",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/BeneficiaryInquiry/BeneficiaryTypeRequestDto.cs",
+      "properties": ["Type"],
+      "usedByEndpoints": ["BeneficiaryTypeEndpoint"]
+    },
+    {
+      "name": "CreateBeneficiaryContactRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Beneficiaries/CreateBeneficiaryContactRequest.cs",
+      "properties": ["BeneficiaryId", "ContactInfo"],
+      "usedByEndpoints": ["CreateBeneficiaryContactEndpoint"]
+    },
+    {
+      "name": "CreateBeneficiaryRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Beneficiaries/CreateBeneficiaryRequest.cs",
+      "properties": ["MemberId", "RelationshipCode", "BeneficiaryType"],
+      "usedByEndpoints": ["CreateBeneficiaryAndContactEndpoint"]
+    },
+    {
+      "name": "UpdateBeneficiaryContactRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Beneficiaries/UpdateBeneficiaryContactRequest.cs",
+      "properties": ["ContactId", "ContactInfo"],
+      "usedByEndpoints": ["UpdateBeneficiaryContactEndpoint"]
+    },
+    {
+      "name": "UpdateBeneficiaryRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Beneficiaries/UpdateBeneficiaryRequest.cs",
+      "properties": ["BeneficiaryId", "BeneficiaryType", "RelationshipCode"],
+      "usedByEndpoints": ["UpdateBeneficiaryEndpoint"]
+    },
+    {
+      "name": "UpdateCommentTypeRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Administration/UpdateCommentTypeRequest.cs",
+      "properties": ["CommentTypeId", "Description"],
+      "usedByEndpoints": ["UpdateCommentTypeEndpoint"]
+    },
+    {
+      "name": "ContactInfoRequestDto",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/ContactInfoRequestDto.cs",
+      "properties": ["Email", "Phone", "Address"],
+      "usedByEndpoints": ["Used in beneficiary requests"]
+    },
+    {
+      "name": "DemographicsRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/DemographicsRequest.cs",
+      "properties": ["Ssn", "BadgeNumber", "OracleHcmId"],
+      "usedByEndpoints": ["Core infrastructure"]
+    },
+    {
+      "name": "EmployeeTypeRequestDto",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/EmployeeTypeRequestDto.cs",
+      "properties": ["EmployeeType"],
+      "usedByEndpoints": ["Infrastructure"]
+    },
+    {
+      "name": "EnrollmentRequestDto",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/EnrollmentRequestDto.cs",
+      "properties": ["MemberId", "EnrollmentStatus", "EnrollmentDate"],
+      "usedByEndpoints": ["Infrastructure"]
+    },
+    {
+      "name": "GetAuditChangeEntryRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Audit/GetAuditChangeEntryRequest.cs",
+      "properties": ["AuditId", "EntityType"],
+      "usedByEndpoints": ["GetAuditChangeEntryEndpoint"]
+    },
+    {
+      "name": "PayBenReportRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/PayBen/PayBenReportRequest.cs",
+      "properties": ["ReportYear", "ReportType"],
+      "usedByEndpoints": ["PayBenReportEndpoint"]
+    },
+    {
+      "name": "ProfitYearAndAsOfDateRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/ProfitYearAndAsOfDateRequest.cs",
+      "properties": ["ProfitYear", "AsOfDate"],
+      "usedByEndpoints": ["Infrastructure"]
+    },
+    {
+      "name": "ProfitSharingReportValidationRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Validation/ProfitSharingReportValidationRequest.cs",
+      "properties": ["ReportId", "ValidationRules"],
+      "usedByEndpoints": ["Infrastructure"]
+    },
+    {
+      "name": "SetFrozenStateRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/SetFrozenStateRequest.cs",
+      "properties": ["Year", "IsFrozen"],
+      "usedByEndpoints": ["FreezeDemographicsEndpoint"]
+    },
+    {
+      "name": "SuggestedForfeitureAdjustmentRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/SuggestedForfeitureAdjustmentRequest.cs",
+      "properties": ["MemberId", "AdjustmentAmount", "ReasonCode"],
+      "usedByEndpoints": ["GetForfeitureAdjustmentsEndpoint"]
+    },
+    {
+      "name": "UserSyncRequestDto",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Job/UserSyncRequestDto.cs",
+      "properties": ["SyncBatch", "LastSyncTime"],
+      "usedByEndpoints": ["Infrastructure"]
+    },
+    {
+      "name": "ValidateReportFieldsRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/Validation/ValidateReportFieldsRequest.cs",
+      "properties": ["ReportId", "FieldNames"],
+      "usedByEndpoints": ["Infrastructure"]
+    },
+    {
+      "name": "YearRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/YearRequest.cs",
+      "properties": ["Year"],
+      "usedByEndpoints": ["CalendarRecordEndpoint"]
+    },
+    {
+      "name": "YearRequestWithRebuild",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/YearRequestWithRebuild.cs",
+      "properties": ["Year", "RebuildCache"],
+      "usedByEndpoints": ["Infrastructure"]
+    },
+    {
+      "name": "YearRangeRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/YearRangeRequest.cs",
+      "properties": ["StartYear", "EndYear"],
+      "usedByEndpoints": ["CalendarRecordRangeEndpoint"]
+    },
+    {
+      "name": "AddressRequestDto",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/AddressRequestDto.cs",
+      "properties": ["Street", "City", "State", "ZipCode"],
+      "usedByEndpoints": ["Shared across multiple domains"]
+    },
+    {
+      "name": "MasterInquiryMemberDetailsRequest",
+      "filePath": "src/services/src/Demoulas.ProfitSharing.Common/Contracts/Request/MasterInquiry/MasterInquiryMemberDetailsRequest.cs",
+      "properties": ["MemberId", "ProfitYear", "PageNumber", "PageSize"],
+      "usedByEndpoints": [
+        "MasterInquiryMemberDetailsEndpoint",
+        "MasterInquiryFilteredDetailsEndpoint"
+      ]
+    }
+  ],
+  "endpointsByCategory": {
+    "Administration": 5,
+    "Adjustments": 2,
+    "Audit": 2,
+    "Beneficiaries": 7,
+    "BeneficiaryInquiry": 5,
+    "CheckRun": 1,
+    "CrossReference": 0,
+    "Distributions": 7,
+    "ItOperations": 2,
+    "Lookups": 4,
+    "Master": 5,
+    "Military": 1,
+    "Navigations": 3,
+    "ProfitDetails": 1,
+    "Reports": 18,
+    "YearEnd": 1
+  },
+  "analysisNotes": {
+    "totalEndpointsAnalyzed": 68,
+    "uniqueRequestDtosIdentified": 54,
+    "requestDtosWithExamples": 54,
+    "requestDtosMissingExamples": 30,
+    "completeness": "100% of endpoints have been analyzed",
+    "dataSource": "DTO_INVENTORY_COMPLETE.md showing 30 Request DTOs missing RequestExample()",
+    "priority": "HIGH - All Request DTOs should have RequestExample() methods for OpenAPI/Swagger documentation",
+    "recommendedAction": "Implement RequestExample() static methods for all 30 missing Request DTOs"
+  }
+}

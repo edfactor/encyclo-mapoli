@@ -42,4 +42,32 @@ public partial record BeneficiaryDto : IdRequest, INameParts, IFullNameProperty,
     public required decimal Percent { get; set; }
     public decimal? CurrentBalance { get; set; }
     public required bool IsExecutive { get; set; }
+
+    public static BeneficiaryDto ResponseExample() => new()
+    {
+        Id = 1,
+        PsnSuffix = 1,
+        BadgeNumber = 12345,
+        DemographicId = 1,
+        Ssn = "***-**-6789",
+        DateOfBirth = new DateOnly(1980, 5, 15),
+        Street = "123 Main St",
+        Street2 = "Apt 4B",
+        City = "Springfield",
+        State = "MA",
+        PostalCode = "01101",
+        CountryIso = "US",
+        FullName = "John Smith",
+        LastName = "Smith",
+        FirstName = "John",
+        MiddleName = "Michael",
+        PhoneNumber = "(555) 123-4567",
+        MobileNumber = "(555) 987-6543",
+        EmailAddress = "john.smith@example.com",
+        CreatedDate = new DateOnly(2020, 1, 1),
+        Relationship = "Spouse",
+        Percent = 50.00m,
+        CurrentBalance = 150000.00m,
+        IsExecutive = false
+    };
 }

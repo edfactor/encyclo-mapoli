@@ -22,4 +22,23 @@ public sealed record AdhocTerminatedEmployeeResponse : IFullNameProperty, IIsExe
     [MaskSensitive] public string State { get; set; } = string.Empty;
     [MaskSensitive] public string PostalCode { get; set; } = string.Empty;
     public bool IsExecutive { get; set; }
+
+    public static AdhocTerminatedEmployeeResponse ResponseExample() => new()
+    {
+        BadgeNumber = 12345,
+        FullName = "John Michael Doe",
+        FirstName = "John",
+        LastName = "Doe",
+        MiddleInitial = "M",
+        Ssn = "***-**-6789",
+        TerminationDate = new DateOnly(2024, 6, 30),
+        TerminationCodeId = 'V',
+        TerminationCode = "Voluntary",
+        Address = "123 Main Street",
+        Address2 = "Suite 200",
+        City = "Boston",
+        State = "MA",
+        PostalCode = "02101",
+        IsExecutive = false
+    };
 }
