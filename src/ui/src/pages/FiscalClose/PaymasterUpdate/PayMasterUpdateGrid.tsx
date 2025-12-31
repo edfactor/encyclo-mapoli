@@ -61,7 +61,7 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
 
     return summaryData.response.results.map((employee) => ({
       badgeNumber: employee.badgeNumber,
-      employeeName: employee.name,
+      fullName: employee.fullName,
       storeNumber: employee.storeNumber === 0 ? "-" : employee.storeNumber,
       psAmountOriginal: employee.before.profitSharingAmount,
       psVestedOriginal: employee.before.vestedProfitSharingAmount,

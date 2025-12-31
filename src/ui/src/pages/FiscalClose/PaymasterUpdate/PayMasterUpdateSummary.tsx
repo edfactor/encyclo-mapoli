@@ -21,6 +21,7 @@ const PayMasterUpdateSummary = () => {
   const {
     summaryData,
     searchCompleted,
+    isSearching,
     executeSearch,
     handleStatusChange,
     handleUpdate,
@@ -90,6 +91,7 @@ const PayMasterUpdateSummary = () => {
               onSearch={onSearch}
               onReset={onReset}
               setPageReset={setPageNumberReset}
+              isFetching={isSearching}
             />
           </DSMAccordion>
         </Grid>

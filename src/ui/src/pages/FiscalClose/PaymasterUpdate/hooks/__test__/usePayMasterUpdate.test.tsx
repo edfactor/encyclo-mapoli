@@ -303,7 +303,7 @@ describe("usePayMasterUpdate", () => {
         badgeNumber: 12345,
         storeNumber: 1,
         psnSuffix: 0,
-        name: "Employee 1",
+        fullName: "Employee 1",
         isEmployee: true,
         before: {
           profitSharingAmount: 1000,
@@ -678,7 +678,7 @@ describe("usePayMasterUpdate", () => {
           badgeNumber: 12345,
           storeNumber: 1,
           psnSuffix: 0,
-          name: "John Doe",
+          fullName: "John Doe",
           isEmployee: true,
           before: {
             profitSharingAmount: 1000,
@@ -736,7 +736,7 @@ describe("usePayMasterUpdate", () => {
           badgeNumber: 12345,
           storeNumber: 1,
           psnSuffix: 0,
-          name: "John Doe",
+          fullName: "John Doe",
           isEmployee: true,
           before: {
             profitSharingAmount: 1000,

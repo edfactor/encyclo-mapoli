@@ -102,7 +102,7 @@ public sealed class UpdateSummaryReportEndpoint : EndpointWithCsvTotalsBase<Froz
         public UpdateSummaryReportMapper()
         {
             Map(m => m.BadgeNumber).Index(0).Name("BADGE#");
-            Map(m => m.Name).Index(2).Name("NAME");
+            Map(m => m.FullName).Index(2).Name("FULL_NAME");
             Map(m => m.StoreNumber).Index(3).Name("STR");
 
             Map(m => m.Before.ProfitSharingAmount).Index(4).Name("BEFORE_P/S_AMOUNT");

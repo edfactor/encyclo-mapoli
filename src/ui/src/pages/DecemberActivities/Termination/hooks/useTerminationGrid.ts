@@ -603,13 +603,7 @@ export const useTerminationGrid = ({
         currentPageSizeRef.current = value;
         handlePaginationChange(0, value);
 
-        const params = createRequest(
-          0,
-          sortParams.sortBy,
-          sortParams.isSortDescending,
-          selectedProfitYear,
-          value
-        );
+        const params = createRequest(0, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear, value);
         if (params) {
           try {
             await triggerSearch(params, false);

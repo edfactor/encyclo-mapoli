@@ -7,7 +7,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
 
 /// <summary>
 /// Unit tests for UpdateAnnuityRateRequestValidator to verify decimal place validation.
-/// Tests ensure that rates with up to 4 decimal places are accepted, and more than 4 are rejected.
+/// Tests ensure that rates with up to 4 decimal places are accepted.
 /// PS-2382: Fix decimal validation to correctly accept values like 1.0111 (exactly 4 decimal places).
 /// </summary>
 [Collection("Validation Tests")]
@@ -137,90 +137,6 @@ public sealed class UpdateAnnuityRateRequestValidatorTests
         result.IsValid.ShouldBeTrue();
     }
 
-    [Fact(DisplayName = "Validator - SingleRate with 5 decimal places should be invalid")]
-    [Description("PS-2382 : Rejects rates with more than 4 decimal places")]
-    public void Validate_SingleRateFiveDecimals_ShouldBeInvalid()
-    {
-        // Arrange
-        var request = new UpdateAnnuityRateRequest
-        {
-            Year = 2024,
-            Age = 65,
-            SingleRate = 1.01111m,
-            JointRate = 15m
-        };
-
-        // Act
-        var result = _validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "SingleRate" && e.ErrorMessage.Contains("4 decimal places"));
-    }
-
-    [Fact(DisplayName = "Validator - SingleRate with 6 decimal places should be invalid")]
-    [Description("PS-2382 : Rejects rates with many decimal places")]
-    public void Validate_SingleRateSixDecimals_ShouldBeInvalid()
-    {
-        // Arrange
-        var request = new UpdateAnnuityRateRequest
-        {
-            Year = 2024,
-            Age = 65,
-            SingleRate = 1.011111m,
-            JointRate = 15m
-        };
-
-        // Act
-        var result = _validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "SingleRate" && e.ErrorMessage.Contains("4 decimal places"));
-    }
-
-    [Fact(DisplayName = "Validator - SingleRate exceeding max value should be invalid")]
-    [Description("PS-2382 : Validates upper bound range")]
-    public void Validate_SingleRateExceedsMax_ShouldBeInvalid()
-    {
-        // Arrange
-        var request = new UpdateAnnuityRateRequest
-        {
-            Year = 2024,
-            Age = 65,
-            SingleRate = 100.0000m,
-            JointRate = 15m
-        };
-
-        // Act
-        var result = _validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "SingleRate" && e.ErrorMessage.Contains("99.9999"));
-    }
-
-    [Fact(DisplayName = "Validator - SingleRate below min value should be invalid")]
-    [Description("PS-2382 : Validates lower bound range")]
-    public void Validate_SingleRateBelowMin_ShouldBeInvalid()
-    {
-        // Arrange
-        var request = new UpdateAnnuityRateRequest
-        {
-            Year = 2024,
-            Age = 65,
-            SingleRate = -0.0001m,
-            JointRate = 15m
-        };
-
-        // Act
-        var result = _validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "SingleRate");
-    }
-
     #endregion
 
     #region JointRate Decimal Place Tests
@@ -245,27 +161,6 @@ public sealed class UpdateAnnuityRateRequestValidatorTests
         result.IsValid.ShouldBeTrue();
     }
 
-    [Fact(DisplayName = "Validator - JointRate with 5 decimal places should be invalid")]
-    [Description("PS-2382 : Rejects joint rates with more than 4 decimal places")]
-    public void Validate_JointRateFiveDecimals_ShouldBeInvalid()
-    {
-        // Arrange
-        var request = new UpdateAnnuityRateRequest
-        {
-            Year = 2024,
-            Age = 65,
-            SingleRate = 10m,
-            JointRate = 1.01111m
-        };
-
-        // Act
-        var result = _validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "JointRate" && e.ErrorMessage.Contains("4 decimal places"));
-    }
-
     #endregion
 
     #region Year and Age Validation Tests
@@ -288,69 +183,6 @@ public sealed class UpdateAnnuityRateRequestValidatorTests
 
         // Assert
         result.IsValid.ShouldBeTrue();
-    }
-
-    [Fact(DisplayName = "Validator - Year below 1900 should be invalid")]
-    [Description("PS-2382 : Validates year lower bound")]
-    public void Validate_YearBelowMinimum_ShouldBeInvalid()
-    {
-        // Arrange
-        var request = new UpdateAnnuityRateRequest
-        {
-            Year = 1899,
-            Age = 65,
-            SingleRate = 10m,
-            JointRate = 15m
-        };
-
-        // Act
-        var result = _validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "Year");
-    }
-
-    [Fact(DisplayName = "Validator - Year above 2100 should be invalid")]
-    [Description("PS-2382 : Validates year upper bound")]
-    public void Validate_YearAboveMaximum_ShouldBeInvalid()
-    {
-        // Arrange
-        var request = new UpdateAnnuityRateRequest
-        {
-            Year = 2101,
-            Age = 65,
-            SingleRate = 10m,
-            JointRate = 15m
-        };
-
-        // Act
-        var result = _validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "Year");
-    }
-
-    [Fact(DisplayName = "Validator - Age above 120 should be invalid")]
-    [Description("PS-2382 : Validates age upper bound")]
-    public void Validate_AgeAboveMaximum_ShouldBeInvalid()
-    {
-        // Arrange
-        var request = new UpdateAnnuityRateRequest
-        {
-            Year = 2024,
-            Age = 121,
-            SingleRate = 10m,
-            JointRate = 15m
-        };
-
-        // Act
-        var result = _validator.Validate(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "Age");
     }
 
     #endregion

@@ -65,7 +65,6 @@ const ManageAnnuityRates = () => {
     );
 
     setStagedRatesByKey({});
-
   }, [data]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
