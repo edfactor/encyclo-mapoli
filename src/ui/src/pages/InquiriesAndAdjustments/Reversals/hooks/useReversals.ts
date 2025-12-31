@@ -3,17 +3,17 @@ import { useDispatch } from "react-redux";
 import { numberToCurrency } from "smart-ui-library";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
-import { useReverseProfitDetailsMutation } from "../../../../reduxstore/api/AdjustmentsApi";
 import {
-    useLazyGetProfitMasterInquiryFilteredDetailsQuery,
-    useLazySearchProfitMasterInquiryQuery
+  useLazyGetProfitMasterInquiryFilteredDetailsQuery,
+  useLazySearchProfitMasterInquiryQuery
 } from "../../../../reduxstore/api/InquiryApi";
+import { useReverseProfitDetailsMutation } from "../../../../reduxstore/api/AdjustmentsApi";
 import { removeMessage, setMessage } from "../../../../reduxstore/slices/messageSlice";
 import { EmployeeDetails, MasterInquiryResponseDto } from "../../../../reduxstore/types";
 import { ServiceErrorResponse } from "../../../../types/errors/errors";
-import { ReversalItem } from "../ReversalConfirmationModal";
-import { ProfitDetailRow } from "../ReversalsGrid";
 import { ReversalsSearchParams } from "../ReversalsSearchFilter";
+import { ProfitDetailRow } from "../ReversalsGrid";
+import { ReversalItem } from "../ReversalConfirmationModal";
 
 // Constants
 const REVERSALS_MESSAGE_KEY = "ReversalOperation";
@@ -290,7 +290,7 @@ export function useReversals() {
             commentTypeName: item.commentTypeName ?? "",
             commentRelatedCheckNumber: item.commentRelatedCheckNumber ?? "",
             employmentStatus: item.employmentStatus ?? "",
-            isAlreadyReversed: Boolean(item.isAlreadyReversed) ?? false
+            isAlreadyReversed: Boolean(item.isAlreadyReversed)
           }));
 
           dispatch({
