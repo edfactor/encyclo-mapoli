@@ -54,12 +54,6 @@
 
 ### Instruction Files (for Developers)
 
-- `.github/instructions/endpoints.instructions.md` - FastEndpoints implementation patterns
-- `.github/instructions/services.instructions.md` - Service layer patterns
-- `.github/instructions/pages.instructions.md` - Frontend page development
-- `.github/instructions/redux.instructions.md` - Redux store organization
-- `.github/instructions/beneficiary.instructions.md` - Beneficiary feature development
-- `.github/instructions/master-inquiry.instructions.md` - Master Inquiry implementation
 - `.github/instructions/fullname-pattern.instructions.md` - Standard naming conventions for names
 
 ## Definition of Ready (DoR)
