@@ -225,7 +225,7 @@ public class UpdateSummaryTests : PristineBaseTest
                 BadgeAndStore = rr.IsEmployee
                     ? $"0{rr.BadgeNumber} {rr.StoreNumber:000}"
                     : $"0{+rr.BadgeNumber}",
-                Name = rr.Name,
+                Name = rr.FullName,
                 BeforeAmount = rr.Before.ProfitSharingAmount,
                 BeforeVested = rr.Before.VestedProfitSharingAmount,
                 BeforeYears = rr.Before.YearsInPlan,
