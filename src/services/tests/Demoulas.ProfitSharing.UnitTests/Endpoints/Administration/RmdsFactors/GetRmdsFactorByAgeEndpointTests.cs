@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Administration.RmdFactors;
 public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "GetRmdFactorByAge - Should return RMD for valid age")]
-    [Description("PS-XXXX : Retrieves RMD factor for age 73")]
+    [Description("PS-2320 : Retrieves RMD factor for age 73")]
     public async Task Get_ReturnsRmdForValidAge()
     {
         // Arrange
@@ -37,7 +37,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should return 404 for non-existent age")]
-    [Description("PS-XXXX : Returns NotFound when age not in database")]
+    [Description("PS-2320 : Returns NotFound when age not in database")]
     public async Task Get_Returns404ForNonExistentAge()
     {
         // Arrange
@@ -53,7 +53,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should return correct factor for age 80")]
-    [Description("PS-XXXX : Validates mid-range IRS factor")]
+    [Description("PS-2320 : Validates mid-range IRS factor")]
     public async Task Get_ReturnsCorrectFactorForAge80()
     {
         // Arrange
@@ -71,7 +71,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should return correct factor for age 99")]
-    [Description("PS-XXXX : Validates maximum seeded age factor")]
+    [Description("PS-2320 : Validates maximum seeded age factor")]
     public async Task Get_ReturnsCorrectFactorForAge99()
     {
         // Arrange
@@ -89,7 +89,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should be accessible to ADMINISTRATOR role")]
-    [Description("PS-XXXX : Verifies administrators can access RMD by age")]
+    [Description("PS-2320 : Verifies administrators can access RMD by age")]
     public async Task Get_AllowsAccessForAdministrator()
     {
         // Arrange
@@ -105,7 +105,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should handle boundary ages")]
-    [Description("PS-XXXX : Tests minimum and maximum age boundaries")]
+    [Description("PS-2320 : Tests minimum and maximum age boundaries")]
     public async Task Get_HandlesBoundaryAges()
     {
         // Arrange

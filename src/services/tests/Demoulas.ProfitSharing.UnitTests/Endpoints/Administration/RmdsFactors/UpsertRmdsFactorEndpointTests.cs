@@ -19,7 +19,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Administration.RmdFactors;
 public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "UpsertRmdFactor - Should add new RMD percentage")]
-    [Description("PS-XXXX : Creates new RMD record for age not in database")]
+    [Description("PS-2320 : Creates new RMD record for age not in database")]
     public async Task Post_AddsNewRmdFactor()
     {
         // Arrange
@@ -41,7 +41,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdFactor - Should update existing RMD percentage")]
-    [Description("PS-XXXX : Updates factor for existing age")]
+    [Description("PS-2320 : Updates factor for existing age")]
     public async Task Post_UpdatesExistingRmdFactor()
     {
         // Arrange
@@ -63,7 +63,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdFactor - Should validate age minimum boundary")]
-    [Description("PS-XXXX : Rejects age below 73 (minimum RMD age)")]
+    [Description("PS-2320 : Rejects age below 73 (minimum RMD age)")]
     public async Task Post_RejectsAgeBelowMinimum()
     {
         // Arrange
@@ -82,7 +82,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdFactor - Should validate age maximum boundary")]
-    [Description("PS-XXXX : Rejects age above 120")]
+    [Description("PS-2320 : Rejects age above 120")]
     public async Task Post_RejectsAgeAboveMaximum()
     {
         // Arrange
@@ -101,7 +101,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdFactor - Should validate factor greater than zero")]
-    [Description("PS-XXXX : Rejects factor value of 0")]
+    [Description("PS-2320 : Rejects factor value of 0")]
     public async Task Post_RejectsZeroFactor()
     {
         // Arrange
@@ -120,7 +120,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdFactor - Should validate factor less than or equal to 100")]
-    [Description("PS-XXXX : Rejects unreasonably large factor values")]
+    [Description("PS-2320 : Rejects unreasonably large factor values")]
     public async Task Post_RejectsFactorAbove100()
     {
         // Arrange
@@ -139,7 +139,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdsFactor - Should accept valid factor with decimal precision")]
-    [Description("PS-XXXX : Accepts factor with one decimal place (e.g., 26.5)")]
+    [Description("PS-2320 : Accepts factor with one decimal place (e.g., 26.5)")]
     public async Task Post_AcceptsValidDecimalFactor()
     {
         // Arrange
@@ -159,7 +159,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdsFactor - Should be accessible to ADMINISTRATOR role only")]
-    [Description("PS-XXXX : Verifies only administrators can modify Rmds data")]
+    [Description("PS-2320 : Verifies only administrators can modify Rmds data")]
     public async Task Post_AllowsAccessForAdministratorOnly()
     {
         // Arrange
@@ -178,7 +178,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdsFactor - Should reject access for non-admin roles")]
-    [Description("PS-XXXX : Ensures AUDITOR role cannot modify Rmds data")]
+    [Description("PS-2320 : Ensures AUDITOR role cannot modify Rmds data")]
     public async Task Post_RejectsAccessForNonAdminRoles()
     {
         // Arrange
@@ -197,7 +197,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdsFactor - Should support multiple sequential operations")]
-    [Description("PS-XXXX : Validates repeated add/update operations")]
+    [Description("PS-2320 : Validates repeated add/update operations")]
     public async Task Post_SupportsMultipleOperations()
     {
         // Arrange
@@ -230,7 +230,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdFactor - Should handle all valid age ranges")]
-    [Description("PS-XXXX : Tests upsert for minimum, mid, and maximum ages")]
+    [Description("PS-2320 : Tests upsert for minimum, mid, and maximum ages")]
     public async Task Post_HandlesAllValidAgeRanges()
     {
         // Arrange
@@ -253,7 +253,7 @@ public sealed class UpsertRmdFactorEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "UpsertRmdFactor - Should preserve data integrity after update")]
-    [Description("PS-XXXX : Verifies updated values are persisted correctly")]
+    [Description("PS-2320 : Verifies updated values are persisted correctly")]
     public async Task Post_PreservesDataIntegrityAfterUpdate()
     {
         // Arrange
