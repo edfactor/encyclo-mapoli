@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Demoulas.Common.Logging - Structured Logging and Observability
 
 **Package:** `Demoulas.Common.Logging`  

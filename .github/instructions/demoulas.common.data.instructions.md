@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Demoulas.Common.Data - Database and Data Access Utilities
 
 **Packages:** `Demoulas.Common.Data.Contexts`, `Demoulas.Common.Data.Services`  

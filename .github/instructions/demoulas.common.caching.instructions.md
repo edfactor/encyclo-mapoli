@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Demoulas.Common.Caching - Distributed Caching with Hosted Services
 
 **Package:** `Demoulas.Common.Caching`  

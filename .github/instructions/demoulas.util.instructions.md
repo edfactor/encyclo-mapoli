@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Demoulas.Util - Core Utility Extensions
 
 **Package:** `Demoulas.Util`  

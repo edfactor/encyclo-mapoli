@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Application Security Instructions
 
 **Purpose:** Generic security guidelines for application development aligned with industry standards (OWASP, FISMA, STRIDE)  
