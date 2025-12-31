@@ -6,6 +6,8 @@ export interface AnnuityRateDto {
   age: number;
   singleRate: number;
   jointRate: number;
+  dateModified?: string;
+  userModified?: string;
 }
 
 /// <summary>
