@@ -36,7 +36,7 @@ public class ProfitShareUpdateEndpoint
 
     public override void Configure()
     {
-        Get("profit-sharing-update");
+        Get("/profit-sharing-update");
         Summary(s =>
         {
             s.Summary = "profit sharing update";

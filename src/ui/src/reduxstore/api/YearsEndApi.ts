@@ -15,8 +15,8 @@ import {
   clearUnder21Totals,
   clearYearEndProfitSharingReportFrozen,
   clearYearEndProfitSharingReportLive,
-  clearYearEndProfitSharingReportTotalsLive,
   clearYearEndProfitSharingReportTotalsFrozen,
+  clearYearEndProfitSharingReportTotalsLive,
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
@@ -38,8 +38,8 @@ import {
   setProfitMasterApply,
   setProfitMasterRevert,
   setProfitMasterStatus,
-  setProfitShareSummaryReportLive,
   setProfitShareSummaryReportFrozen,
+  setProfitShareSummaryReportLive,
   setProfitSharingEdit,
   setProfitSharingLabels,
   setProfitSharingUnder21Report,
@@ -54,8 +54,8 @@ import {
   setVestedAmountsByAge,
   setYearEndProfitSharingReportFrozen,
   setYearEndProfitSharingReportLive,
-  setYearEndProfitSharingReportTotalsLive,
-  setYearEndProfitSharingReportTotalsFrozen
+  setYearEndProfitSharingReportTotalsFrozen,
+  setYearEndProfitSharingReportTotalsLive
 } from "reduxstore/slices/yearsEndSlice";
 import {
   BadgeNumberRequest,
