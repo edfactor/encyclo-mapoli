@@ -16,7 +16,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.RmdsFactors;
 /// GET endpoint to retrieve all RMD factors by age.
 /// </summary>
 public sealed class GetAllRmdsFactorsEndpoint
-    : ProfitSharingEndpoint<EmptyRequest, Results<Ok<List<RmdsFactorDto>>, ProblemHttpResult>>
+    : ProfitSharingResponseEndpoint<Results<Ok<List<RmdsFactorDto>>, ProblemHttpResult>>
 {
     private readonly IRmdsFactorService _rmdsService;
     private readonly ILogger<GetAllRmdsFactorsEndpoint> _logger;
@@ -47,15 +47,12 @@ public sealed class GetAllRmdsFactorsEndpoint
     }
 
     public override async Task<Results<Ok<List<RmdsFactorDto>>, ProblemHttpResult>> ExecuteAsync(
-        EmptyRequest req,
         CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
         try
         {
-            this.RecordRequestMetrics(HttpContext, _logger, req);
-
             var result = await _rmdsService.GetAllAsync(ct);
 
             // Record business metrics

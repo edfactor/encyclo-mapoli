@@ -10,12 +10,12 @@ import { useGetRmdFactorsQuery, useUpdateRmdFactorMutation } from "../../../redu
 import { RmdFactorDto } from "../../../reduxstore/types";
 import { Messages } from "../../../utils/messageDictonary";
 
-const hasMoreThanFourDecimals = (value: number): boolean => {
-  return Math.abs(value * 10000 - Math.round(value * 10000)) > Number.EPSILON;
+const hasMoreThanOneDecimal = (value: number): boolean => {
+  return Math.abs(value * 10 - Math.round(value * 10)) > Number.EPSILON;
 };
 
-const normalizePercentageToFourDecimals = (value: number): number => {
-  return Math.round(value * 10000) / 10000;
+const normalizeToOneDecimal = (value: number): number => {
+  return Math.round(value * 10) / 10;
 };
 
 const ManageRmdFactors = () => {
@@ -86,7 +86,7 @@ const ManageRmdFactors = () => {
         },
         valueFormatter: (params: ValueFormatterParams) => {
           const value = params.value;
-          return typeof value === "number" && Number.isFinite(value) ? value.toFixed(4) : "N/A";
+          return typeof value === "number" && Number.isFinite(value) ? value.toFixed(1) : "N/A";
         }
       }
     ];
@@ -105,8 +105,8 @@ const ManageRmdFactors = () => {
     const originalFactor = originalFactorsByAge[age];
     if (typeof originalFactor !== "number") return;
 
-    const normalizedNewFactor = normalizePercentageToFourDecimals(parsedNewFactor);
-    const normalizedOriginalFactor = normalizePercentageToFourDecimals(originalFactor);
+    const normalizedNewFactor = normalizeToOneDecimal(parsedNewFactor);
+    const normalizedOriginalFactor = normalizeToOneDecimal(originalFactor);
 
     setStagedFactorsByAge((prev) => {
       const next = { ...prev };
@@ -145,8 +145,8 @@ const ManageRmdFactors = () => {
         return;
       }
 
-      if (hasMoreThanFourDecimals(factor)) {
-        setErrorMessage("Factor can have at most 4 decimal places.");
+      if (hasMoreThanOneDecimal(factor)) {
+        setErrorMessage("Factor can have at most 1 decimal place.");
         return;
       }
     }
