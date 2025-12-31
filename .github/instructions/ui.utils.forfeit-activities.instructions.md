@@ -1,3 +1,8 @@
+---
+applyTo: "src/ui/src/utils/forfeitActivities/**/*.*"
+paths: "src/ui/src/utils/forfeitActivities/**/*.*"
+---
+
 # Forfeit Activities Shared Utilities
 
 This directory contains shared utility functions for Forfeit-related Activities master-detail grid screens (Termination and UnForfeit).

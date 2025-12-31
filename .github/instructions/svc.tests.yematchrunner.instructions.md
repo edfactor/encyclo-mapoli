@@ -1,6 +1,7 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+---
+applyTo: "src/services/tests/yematchrunner/**/*.*"
+paths: "src/services/tests/yematchrunner/**/*.*"
+---
 
 ## Project Overview
 
@@ -18,10 +19,10 @@ results.
 - **Runs**: End-to-end test scenarios (e.g., `GoldenYearEndRun`, `BaselineRun`, `TerminationsRun`) that orchestrate
   sequences of activities
 - **Activities**: Individual test steps implementing the `IActivity` interface, categorized as:
-    - `ReadyActivity`: SSH commands executed against READY system (via Renci.SshNet)
-    - `SmartActivity`: API calls to SMART system (via NSwag-generated `ApiClient`)
-    - Assert Activities: SQL-based validation queries comparing READY and SMART databases
-    - Arrange Activities: Setup and teardown operations
+  - `ReadyActivity`: SSH commands executed against READY system (via Renci.SshNet)
+  - `SmartActivity`: API calls to SMART system (via NSwag-generated `ApiClient`)
+  - Assert Activities: SQL-based validation queries comparing READY and SMART databases
+  - Arrange Activities: Setup and teardown operations
 - **Outcomes**: Activity execution results with status (`Ok`, `Error`, `NoOperation`, `ToBeDone`), timing, and output
   capture
 - **Parallel Execution**: Activities can run in parallel using `ParallelActivity` wrapper; outcomes are merged
@@ -32,18 +33,18 @@ YEMatch uses **.NET Dependency Injection** with the following lifetime scopes:
 
 - **Singleton Factories**: `IReadySshClientFactory`, `ISmartApiClientFactory`, `IActivityFactory`
 
-    - Maintain single SSH/HTTP connections throughout application lifetime
-    - Create and register all available activities
-    - Implement `IDisposable` for proper cleanup
+  - Maintain single SSH/HTTP connections throughout application lifetime
+  - Create and register all available activities
+  - Implement `IDisposable` for proper cleanup
 
 - **Transient Runs**: All Run classes (BaselineRun, TinkerRun, etc.)
 
-    - New instance created per execution
-    - Dependencies injected via constructor
+  - New instance created per execution
+  - Dependencies injected via constructor
 
 - **Configuration**: `IOptions<YeMatchOptions>` pattern
-    - Strongly-typed configuration from `appsettings.json` and user secrets
-    - Hierarchical structure: `YeMatch:ReadyHost:*`, `YeMatch:SmartApi:*`, etc.
+  - Strongly-typed configuration from `appsettings.json` and user secrets
+  - Hierarchical structure: `YeMatch:ReadyHost:*`, `YeMatch:SmartApi:*`, etc.
 
 **DI Container Setup** (Program.cs):
 
@@ -129,30 +130,30 @@ Create `appsettings.json` to override defaults:
 
 ```json
 {
-    "YeMatch": {
-        "BaseDataDirectory": "/custom/path/for/logs",
-        "ReadyHost": {
-            "Host": "appt07d",
-            "ConnectionTimeoutSeconds": 30,
-            "Chatty": true
-        },
-        "SmartApi": {
-            "BaseUrl": "https://localhost:7141",
-            "TimeoutHours": 2
-        },
-        "Jwt": {
-            "Issuer": "dotnet-user-jwts",
-            "Audience": "https://localhost:7141",
-            "ExpirationSeconds": 3600
-        },
-        "YearEndDates": {
-            "ProfitYear": 2025,
-            "FirstSaturday": "250104",
-            "LastSaturday": "251227",
-            "CutOffSaturday": "260103",
-            "MoreThanFiveYears": "181231"
-        }
+  "YeMatch": {
+    "BaseDataDirectory": "/custom/path/for/logs",
+    "ReadyHost": {
+      "Host": "appt07d",
+      "ConnectionTimeoutSeconds": 30,
+      "Chatty": true
+    },
+    "SmartApi": {
+      "BaseUrl": "https://localhost:7141",
+      "TimeoutHours": 2
+    },
+    "Jwt": {
+      "Issuer": "dotnet-user-jwts",
+      "Audience": "https://localhost:7141",
+      "ExpirationSeconds": 3600
+    },
+    "YearEndDates": {
+      "ProfitYear": 2025,
+      "FirstSaturday": "250104",
+      "LastSaturday": "251227",
+      "CutOffSaturday": "260103",
+      "MoreThanFiveYears": "181231"
     }
+  }
 }
 ```
 
@@ -165,8 +166,8 @@ Default data directory: `/tmp/ye/<dd-MMM-HH-mm>`
 ### Prerequisites
 
 1. **Configure JWT signing key** in user secrets (see Configuration section above)
-    - The key must match the SMART API server's signing key
-    - If the server uses `dotnet user-jwts`, copy the signing key from the server's user secrets
+   - The key must match the SMART API server's signing key
+   - If the server uses `dotnet user-jwts`, copy the signing key from the server's user secrets
 2. Start the local SMART API with the JWT authentication enabled
 3. Ensure READY environment is accessible via SSH with `setyematch` script configured
 
