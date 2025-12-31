@@ -290,7 +290,7 @@ export function useReversals() {
             commentTypeName: item.commentTypeName ?? "",
             commentRelatedCheckNumber: item.commentRelatedCheckNumber ?? "",
             employmentStatus: item.employmentStatus ?? "",
-            isAlreadyReversed: item.isAlreadyReversed ?? false
+            isAlreadyReversed: Boolean(item.isAlreadyReversed) ?? false
           }));
 
           dispatch({
