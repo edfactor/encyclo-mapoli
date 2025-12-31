@@ -66,6 +66,8 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
                     Age = x.Age,
                     SingleRate = x.SingleRate,
                     JointRate = x.JointRate,
+                    DateModified = x.ModifiedAtUtc != null ? DateOnly.FromDateTime(x.ModifiedAtUtc.Value.DateTime) : null,
+                    UserModified = x.UserName,
                 })
                 .ToListAsync(cancellationToken);
 
@@ -87,6 +89,8 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
                     Age = x.Age,
                     SingleRate = x.SingleRate,
                     JointRate = x.JointRate,
+                    DateModified = x.ModifiedAtUtc != null ? DateOnly.FromDateTime(x.ModifiedAtUtc.Value.DateTime) : null,
+                    UserModified = x.UserName,
                 })
                 .ToListAsync(cancellationToken);
 
@@ -154,6 +158,8 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
                         Age = annuityRate.Age,
                         SingleRate = annuityRate.SingleRate,
                         JointRate = annuityRate.JointRate,
+                        DateModified = annuityRate.ModifiedAtUtc != null ? DateOnly.FromDateTime(annuityRate.ModifiedAtUtc.Value.DateTime) : null,
+                        UserModified = annuityRate.UserName,
                     });
                 }
 
@@ -207,6 +213,8 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
                     Age = annuityRate.Age,
                     SingleRate = annuityRate.SingleRate,
                     JointRate = annuityRate.JointRate,
+                    DateModified = annuityRate.ModifiedAtUtc != null ? DateOnly.FromDateTime(annuityRate.ModifiedAtUtc.Value.DateTime) : null,
+                    UserModified = annuityRate.UserName,
                 });
             }, cancellationToken);
         }

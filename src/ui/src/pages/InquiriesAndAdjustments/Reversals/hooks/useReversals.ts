@@ -289,7 +289,8 @@ export function useReversals() {
             taxCode: (item.taxCode as string) ?? "",
             commentTypeName: item.commentTypeName ?? "",
             commentRelatedCheckNumber: item.commentRelatedCheckNumber ?? "",
-            employmentStatus: item.employmentStatus ?? ""
+            employmentStatus: item.employmentStatus ?? "",
+            isAlreadyReversed: Boolean(item.isAlreadyReversed)
           }));
 
           dispatch({
