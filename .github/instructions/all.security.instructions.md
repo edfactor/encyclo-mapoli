@@ -16,7 +16,7 @@ Every security decision should consider these pillars:
 4. **Data Security** – Encryption at rest/transit, PII protection, data classification
 5. **Detection & Response** – Logging, monitoring, incident response readiness
 
-💡 **Ask yourself:** *"How could an attacker exploit this across each pillar?"*
+💡 **Ask yourself:** _"How could an attacker exploit this across each pillar?"_
 
 ---
 
@@ -44,12 +44,14 @@ Every security decision should consider these pillars:
 **What It Is:** Users can access resources or perform actions they shouldn't be authorized for.
 
 **Common Mistakes:**
+
 - Trusting client-provided roles/permissions without server-side validation
 - Missing authorization checks on endpoints
 - Exposing internal IDs that allow enumeration
 - Using localStorage for auth state that determines access
 
 **Prevention Checklist:**
+
 - [ ] **Server-side validation ALWAYS:** Re-check permissions on every request
 - [ ] **Principle of least privilege:** Users get minimum required permissions
 - [ ] **Centralized authorization:** Use a policy/role map (single source of truth)
@@ -77,12 +79,14 @@ if (!requestedRoles.All(r => allowedRoles.Contains(r)))
 **What It Is:** Failure to protect sensitive data at rest or in transit.
 
 **Common Mistakes:**
+
 - Transmitting sensitive data over HTTP (not HTTPS)
 - Storing passwords in plain text
 - Using weak encryption algorithms (MD5, SHA1)
 - Hardcoding secrets in code
 
 **Prevention Checklist:**
+
 - [ ] **HTTPS everywhere:** All production traffic uses TLS 1.2+
 - [ ] **HSTS enabled:** `Strict-Transport-Security` header prevents HTTP fallback
 - [ ] **Secrets management:** Use Key Vault, environment variables, or secure vaults
@@ -96,11 +100,13 @@ if (!requestedRoles.All(r => allowedRoles.Contains(r)))
 **What It Is:** Untrusted data sent to an interpreter as part of a command or query.
 
 **Common Mistakes:**
+
 - Building SQL queries by string concatenation
 - Passing user input directly to shell commands
 - Dynamic query construction without parameterization
 
 **Prevention Checklist:**
+
 - [ ] **Parameterized queries ONLY:** Use ORM/prepared statements (EF Core, Dapper)
 - [ ] **No raw SQL strings:** If unavoidable, fully parameterize
 - [ ] **Validate input types:** Reject non-alphanumeric where not needed
@@ -127,12 +133,14 @@ var user = await db.Users
 **What It Is:** Missing or ineffective security controls due to poor design decisions.
 
 **Common Mistakes:**
+
 - No threat modeling during design phase
 - Ignoring security requirements early
 - Overcomplicating architecture (more attack surface)
 - Not designing for failure scenarios
 
 **Prevention Checklist:**
+
 - [ ] **Threat model early:** Use STRIDE before writing code (see section below)
 - [ ] **Fail closed:** Default to denying access on errors
 - [ ] **Defense in depth:** Multiple layers of security (network, app, data)
@@ -145,12 +153,14 @@ var user = await db.Users
 **What It Is:** Missing security hardening, improper permissions, default credentials.
 
 **Common Mistakes:**
+
 - Leaving default admin passwords
 - Enabling unnecessary features/endpoints
 - Missing security headers (CSP, X-Frame-Options)
 - Verbose error messages in production
 
 **Prevention Checklist:**
+
 - [ ] **Remove defaults:** Change all default credentials
 - [ ] **Disable unused features:** Remove sample endpoints, debug mode
 - [ ] **Security headers present:** CSP, HSTS, X-Frame-Options, X-Content-Type-Options
@@ -174,11 +184,13 @@ Referrer-Policy: no-referrer
 **What It Is:** Using libraries/frameworks with known vulnerabilities.
 
 **Common Mistakes:**
+
 - Not updating dependencies regularly
 - Using unmaintained packages
 - No vulnerability scanning in CI/CD
 
 **Prevention Checklist:**
+
 - [ ] **Monthly audits:** Check for outdated packages (`dotnet list package --outdated`)
 - [ ] **Critical CVEs within 48 hours:** Patch high-severity vulnerabilities immediately
 - [ ] **Dependency scanning:** Integrate tools (Snyk, Dependabot, WhiteSource)
@@ -191,12 +203,14 @@ Referrer-Policy: no-referrer
 **What It Is:** Broken authentication allowing attackers to compromise accounts.
 
 **Common Mistakes:**
+
 - Weak password policies
 - No multi-factor authentication (MFA)
 - Session tokens don't expire
 - Storing passwords in plain text
 
 **Prevention Checklist:**
+
 - [ ] **Use OAuth 2.0 / OIDC:** Delegate authentication to Okta, Auth0, Azure AD
 - [ ] **Minimal claims extraction:** Only extract necessary user info (e.g., 'sub')
 - [ ] **Token expiration:** Enforce short-lived tokens with refresh mechanism
@@ -210,11 +224,13 @@ Referrer-Policy: no-referrer
 **What It Is:** Code/infrastructure that assumes untrusted sources are safe.
 
 **Common Mistakes:**
+
 - Auto-accepting updates from unverified sources
 - No CI/CD pipeline integrity checks
 - Deserializing untrusted data without validation
 
 **Prevention Checklist:**
+
 - [ ] **Signed packages:** Verify NuGet package signatures
 - [ ] **CI/CD validation:** Ensure build artifacts aren't tampered with
 - [ ] **No unsafe deserialization:** Validate JSON/XML against schema
@@ -227,12 +243,14 @@ Referrer-Policy: no-referrer
 **What It Is:** Insufficient logging/monitoring prevents detecting breaches.
 
 **Common Mistakes:**
+
 - Not logging authentication failures
 - No correlation IDs across distributed requests
 - Logging sensitive data (PII, passwords)
 - No alerting on suspicious patterns
 
 **Prevention Checklist:**
+
 - [ ] **Log security events:** Authn/authz failures, privilege changes, data access
 - [ ] **Correlation IDs:** Trace requests across services
 - [ ] **Mask PII in logs:** Redact SSN, emails, passwords
@@ -246,11 +264,13 @@ Referrer-Policy: no-referrer
 **What It Is:** Application fetches remote resources without validating URLs.
 
 **Common Mistakes:**
+
 - Accepting user-provided URLs for fetching
 - No allowlist for external services
 - Fetching from internal network addresses
 
 **Prevention Checklist:**
+
 - [ ] **Allowlist URLs:** Only permit known, safe external domains
 - [ ] **Block internal IPs:** Reject localhost, 10.x, 192.168.x, 169.254.x
 - [ ] **Validate protocols:** Only HTTPS, reject file://, gopher://, etc.
@@ -267,11 +287,13 @@ Referrer-Policy: no-referrer
 **Threat:** Attacker pretends to be another user or system.
 
 **Questions to Ask:**
+
 - Can someone forge authentication tokens?
 - Are API requests verified against the authenticated user?
 - Could an attacker replay old session tokens?
 
 **Mitigations:**
+
 - Use strong authentication (OAuth 2.0, OIDC)
 - Sign tokens (JWT with RS256/ES256)
 - Implement token expiration and rotation
@@ -283,11 +305,13 @@ Referrer-Policy: no-referrer
 **Threat:** Attacker modifies data in transit or at rest.
 
 **Questions to Ask:**
+
 - Can HTTP requests be intercepted and modified (MITM)?
 - Is data in the database protected from unauthorized changes?
 - Are file uploads validated for malicious content?
 
 **Mitigations:**
+
 - HTTPS/TLS for all traffic
 - Digital signatures for critical data
 - Immutable audit logs
@@ -300,11 +324,13 @@ Referrer-Policy: no-referrer
 **Threat:** Attacker denies performing an action (no audit trail).
 
 **Questions to Ask:**
+
 - Are critical actions logged with user identity and timestamp?
 - Can logs be tampered with or deleted?
 - Do we have non-repudiation for financial transactions?
 
 **Mitigations:**
+
 - Comprehensive audit logging
 - Immutable log storage
 - Correlation IDs across distributed systems
@@ -317,11 +343,13 @@ Referrer-Policy: no-referrer
 **Threat:** Attacker gains access to sensitive information.
 
 **Questions to Ask:**
+
 - Are error messages revealing stack traces, SQL, or file paths?
 - Is PII properly masked in logs and responses?
 - Can an attacker enumerate valid usernames or IDs?
 
 **Mitigations:**
+
 - Generic error messages in production
 - Mask PII in logs (SSN: `***-**-1234`, Email: `u***@c***.com`)
 - Rate limiting on authentication endpoints
@@ -334,11 +362,13 @@ Referrer-Policy: no-referrer
 **Threat:** Attacker makes the system unavailable to legitimate users.
 
 **Questions to Ask:**
+
 - Can an attacker exhaust resources (CPU, memory, DB connections)?
 - Are there unbounded loops or recursive operations?
 - Is rate limiting implemented on expensive endpoints?
 
 **Mitigations:**
+
 - Rate limiting on APIs (per user, per IP)
 - Pagination with max page size (e.g., 1000)
 - Timeout on long-running operations
@@ -351,11 +381,13 @@ Referrer-Policy: no-referrer
 **Threat:** Attacker gains higher privileges than authorized.
 
 **Questions to Ask:**
+
 - Can a regular user access admin-only endpoints?
 - Are role checks performed server-side on every request?
 - Could an attacker manipulate tokens to gain admin rights?
 
 **Mitigations:**
+
 - Server-side authorization checks (never trust client)
 - Principle of least privilege
 - Centralized role/policy enforcement
@@ -370,6 +402,7 @@ Referrer-Policy: no-referrer
 **Principle:** Users/services get minimum permissions needed to perform their function.
 
 **Examples:**
+
 - Database connection uses read-only account for queries
 - API keys scoped to specific operations (not admin keys everywhere)
 - Users start with zero permissions; explicitly grant access
@@ -381,6 +414,7 @@ Referrer-Policy: no-referrer
 **Principle:** On error or uncertainty, deny access rather than allow.
 
 **Examples:**
+
 - Authorization check throws exception → default to 403 Forbidden
 - Cache miss during permission lookup → deny access, log error
 - Token validation fails → reject request (don't fall back to anonymous)
@@ -409,11 +443,13 @@ if (!isAuthorized)
 **Principle:** All input from the client is potentially malicious.
 
 **Examples:**
+
 - Validate all query parameters, request bodies, headers
 - Don't trust `x-user-role` headers (re-validate server-side)
 - Sanitize file uploads (check type, size, content)
 
 **Validation Checklist:**
+
 - [ ] **Numeric ranges:** Min/max for integers, floats
 - [ ] **String lengths:** Max length constraints
 - [ ] **Enum validation:** Reject unknown enum values
@@ -428,6 +464,7 @@ if (!isAuthorized)
 **Principle:** Use multiple layers of security so failure of one doesn't compromise the system.
 
 **Layers:**
+
 1. **Network:** Firewall, VPN, network segmentation
 2. **Application:** Input validation, authentication, authorization
 3. **Data:** Encryption at rest, column-level encryption for PII
@@ -442,6 +479,7 @@ if (!isAuthorized)
 **Principle:** Critical operations require multiple approvals/roles.
 
 **Examples:**
+
 - Code deployment requires developer + approver
 - Financial transactions require initiator + approver
 - Database schema changes require DBA + architect review
@@ -453,6 +491,7 @@ if (!isAuthorized)
 **Principle:** Out-of-the-box configuration should be secure.
 
 **Examples:**
+
 - HTTPS enabled by default (not HTTP)
 - Authentication required by default (not `AllowAnonymous`)
 - Restrictive CORS policy (not `AllowAnyOrigin()`)
@@ -530,6 +569,7 @@ _logger.LogInformation("User {MaskedEmail} accessed resource", maskedEmail);
 **All inputs MUST be validated server-side. Client-side validation is UX only, never security.**
 
 **Validation Rules:**
+
 1. **Type validation:** Ensure correct data type (int, string, enum, date)
 2. **Range validation:** Min/max for numbers, dates
 3. **Length validation:** Min/max string length
@@ -610,6 +650,7 @@ var demographics = await db.Demographics
 **All Personally Identifiable Information (PII) MUST be masked in logs, telemetry, and error messages.**
 
 **Common PII Fields:**
+
 - Social Security Numbers (SSN)
 - Email addresses
 - Phone numbers
@@ -650,16 +691,16 @@ public static string MaskPhone(string phone)
 
 ```csharp
 // ❌ WRONG: Unmasked PII in logs
-_logger.LogInformation("Processing employee: SSN {Ssn}, Email {Email}", 
+_logger.LogInformation("Processing employee: SSN {Ssn}, Email {Email}",
     employee.Ssn, employee.Email);
 
 // ✅ RIGHT: Masked PII
-_logger.LogInformation("Processing employee: SSN {MaskedSsn}, Email {MaskedEmail}", 
+_logger.LogInformation("Processing employee: SSN {MaskedSsn}, Email {MaskedEmail}",
     MaskSsn(employee.Ssn), MaskEmail(employee.Email));
 
 // ✅ BETTER: Use structured logging with automatic masking
 // (Configure masking operators in logging pipeline)
-_logger.LogInformation("Processing employee: SSN {Ssn}, Email {Email}", 
+_logger.LogInformation("Processing employee: SSN {Ssn}, Email {Email}",
     employee.Ssn, employee.Email); // Masking operators handle it
 ```
 
@@ -680,12 +721,12 @@ await this.ExecuteWithTelemetry(HttpContext, _logger, request, async () =>
 
 **Classify data sensitivity to apply appropriate controls:**
 
-| Classification | Examples                              | Controls                              |
-| -------------- | ------------------------------------- | ------------------------------------- |
-| **Public**     | Product catalog, public announcements | No special protection                 |
-| **Internal**   | Business reports, internal memos      | Require authentication                |
-| **Confidential** | Employee data, financial records    | Require authorization, mask in logs   |
-| **Restricted** | SSN, passwords, bank accounts         | Encrypt at rest/transit, audit access |
+| Classification   | Examples                              | Controls                              |
+| ---------------- | ------------------------------------- | ------------------------------------- |
+| **Public**       | Product catalog, public announcements | No special protection                 |
+| **Internal**     | Business reports, internal memos      | Require authentication                |
+| **Confidential** | Employee data, financial records      | Require authorization, mask in logs   |
+| **Restricted**   | SSN, passwords, bank accounts         | Encrypt at rest/transit, audit access |
 
 ---
 
@@ -696,6 +737,7 @@ await this.ExecuteWithTelemetry(HttpContext, _logger, request, async () =>
 **All production traffic MUST use HTTPS (TLS 1.2 or higher).**
 
 **Configuration:**
+
 - HTTPS termination at load balancer (recommended)
 - Or HTTPS in application with `UseHttpsRedirection()` and `UseHsts()`
 
@@ -854,6 +896,7 @@ npm outdated
 **Critical and high-severity vulnerabilities MUST be patched within 48 hours.**
 
 **Process:**
+
 1. Identify vulnerability via security advisory or scan
 2. Check if vulnerability affects your usage
 3. Update to patched version or apply workaround
@@ -879,6 +922,7 @@ npm outdated
 **All endpoints MUST implement telemetry for security monitoring.**
 
 **What to Log:**
+
 - Authentication attempts (success, failure)
 - Authorization failures (attempted privilege escalation)
 - Sensitive field access (SSN, email, etc.)
@@ -887,6 +931,7 @@ npm outdated
 - Errors and exceptions
 
 **What NOT to Log:**
+
 - Unmasked PII (SSN, email, phone, passwords)
 - Authentication tokens or session IDs
 - Full request/response bodies with sensitive data
@@ -962,28 +1007,33 @@ public override async Task<TResponse> ExecuteAsync(TRequest req, CancellationTok
 **Defense in Depth = Multiple layers of security so failure of one doesn't compromise the system.**
 
 ### Layer 1: Network Security
+
 - Firewall rules (allow only necessary ports)
 - VPN for internal services
 - Network segmentation (DMZ, internal, data tier)
 
 ### Layer 2: Application Security
+
 - Input validation
 - Authentication & authorization
 - Output encoding
 - Rate limiting
 
 ### Layer 3: Data Security
+
 - Encryption at rest (database, file storage)
 - Encryption in transit (TLS)
 - Column-level encryption for highly sensitive fields
 
 ### Layer 4: Monitoring & Detection
+
 - Centralized logging (SIEM)
 - Intrusion detection systems (IDS)
 - Anomaly detection (ML-based)
 - Security Information and Event Management (SIEM)
 
 ### Layer 5: Incident Response
+
 - Incident response plan documented
 - Regular security drills
 - Post-incident reviews
@@ -1011,15 +1061,18 @@ public override async Task<TResponse> ExecuteAsync(TRequest req, CancellationTok
 ## Additional Resources
 
 ### OWASP Resources
+
 - [OWASP Top 10 Web Application Security Risks](https://owasp.org/www-project-top-ten/)
 - [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/)
 - [OWASP API Security Top 10](https://owasp.org/www-project-api-security/)
 
 ### STRIDE Resources
+
 - [Microsoft Threat Modeling Tool](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool)
 - [STRIDE Threat Modeling Framework](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats)
 
 ### Security Training
+
 - [YouTube: "OWASP Top 10 Explained" (search for recent videos)](https://www.youtube.com/results?search_query=owasp+top+10+explained)
 - [YouTube: "Defense in Depth Security Strategy"](https://www.youtube.com/results?search_query=defense+in+depth+security)
 - [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework)
