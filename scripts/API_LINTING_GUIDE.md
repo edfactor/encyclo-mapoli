@@ -7,6 +7,7 @@ This document explains how to lint the Profit Sharing API OpenAPI specification 
 ### Local Development (Recommended)
 
 #### Option 1: PowerShell Script (All Platforms)
+
 From the project root:
 
 ```powershell
@@ -22,6 +23,7 @@ $env:QA_BASE_URL = "https://qa-api.example.com"
 ```
 
 #### Option 2: npm Script (from src/ui/)
+
 ```bash
 # Requires QA_BASE_URL environment variable
 npm run lint:api
@@ -52,6 +54,7 @@ The linting rules are defined in `.spectral.yaml` at the project root. This file
 - Defines severity levels for each rule (error, warning, info, off)
 
 **Key Rules**:
+
 - ✅ Operations must have `operationId`
 - ✅ Paths must use kebab-case
 - ✅ POST/PUT/PATCH must have request body
@@ -64,10 +67,10 @@ To customize rules, edit `.spectral.yaml` and re-run the linter.
 
 ### Environment Variables
 
-| Variable       | Required | Default | Description                                           |
-| -------------- | -------- | ------- | ----------------------------------------------------- |
-| `QA_BASE_URL`  | Yes*     | None    | Base URL for QA API (e.g., `https://qa-api.example.com`) |
-| *              | *        | *       | *Only needed when downloading from QA environment     |
+| Variable      | Required | Default | Description                                              |
+| ------------- | -------- | ------- | -------------------------------------------------------- |
+| `QA_BASE_URL` | Yes\*    | None    | Base URL for QA API (e.g., `https://qa-api.example.com`) |
+| \*            | \*       | \*      | \*Only needed when downloading from QA environment       |
 
 ## Script Usage
 
@@ -76,19 +79,23 @@ To customize rules, edit `.spectral.yaml` and re-run the linter.
 #### Parameters
 
 - **`-OpenApiPath`** (string): Path to local OpenAPI spec file or remote URL
+
   - If not provided, automatically downloads from QA
   - Example: `./openapi.json`, `https://api.example.com/openapi.json`
 
 - **`-QaBaseUrl`** (string): Base URL for QA environment
+
   - Default: `$env:QA_BASE_URL`
   - Used only if `OpenApiPath` not provided
   - Example: `https://qa-api.example.com:8443`
 
 - **`-OutputFormat`** (stylish|junit): Output format
+
   - `stylish`: Console-friendly output (default)
   - `junit`: JUnit XML for CI systems
 
 - **`-OutputFile`** (string): Path to save output file
+
   - Only used with JUnit format
   - Example: `./reports/api-lint.xml`
 
@@ -129,6 +136,7 @@ $env:QA_BASE_URL = "https://qa-api.example.com"
 ### For CI/CD Pipeline
 
 The pipeline automatically:
+
 1. ✅ Downloads OpenAPI from QA environment
 2. ✅ Runs Spectral linting with Zalando rules
 3. ✅ Saves JUnit report for BitBucket integration
@@ -141,6 +149,7 @@ The pipeline automatically:
 **Cause**: Missing environment variable or parameter
 
 **Fix**:
+
 ```powershell
 # Set environment variable
 $env:QA_BASE_URL = "https://qa-api.example.com"
@@ -155,6 +164,7 @@ $env:QA_BASE_URL = "https://qa-api.example.com"
 **Cause**: Can't reach QA environment or SSL certificate issues
 
 **Fix**:
+
 ```powershell
 # For local testing, save OpenAPI from Swagger UI:
 # 1. Run: aspire run
@@ -169,6 +179,7 @@ $env:QA_BASE_URL = "https://qa-api.example.com"
 **Cause**: Spectral not installed globally
 
 **Fix**:
+
 ```powershell
 npm install -g @stoplight/spectral-cli
 ```
