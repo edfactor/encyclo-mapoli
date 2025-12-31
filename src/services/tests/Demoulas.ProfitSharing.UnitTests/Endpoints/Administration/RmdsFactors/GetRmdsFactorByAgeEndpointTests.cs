@@ -130,7 +130,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should return proper response structure")]
-    [Description("PS-XXXX : Validates RmdFactorDto structure")]
+    [Description("PS-2320 : Validates RmdFactorDto structure")]
     public async Task Get_ReturnsProperResponseStructure()
     {
         // Arrange
@@ -147,7 +147,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should return consistent results")]
-    [Description("PS-XXXX : Validates endpoint returns same data across multiple calls")]
+    [Description("PS-2320 : Validates endpoint returns same data across multiple calls")]
     public async Task Get_ReturnsConsistentResults()
     {
         // Arrange
