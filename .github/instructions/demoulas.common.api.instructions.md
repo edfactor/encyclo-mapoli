@@ -258,8 +258,8 @@ using FastEndpoints;
 
 **See Also:**
 
--   [Main Documentation](./demoulas.common.instructions.md)
--   [RESTful API Guidelines](./restful-api-guidelines.instructions.md)
--   [Data Extensions](./demoulas.common.data.instructions.md)
--   [Util Extensions](./demoulas.util.instructions.md)
+-   [Main Documentation](demoulas.common.instructions.md)
+-   [RESTful API Guidelines](demoulas.common.restful-api-guidelines.instructions.md)
+-   [Data Extensions](demoulas.common.data.instructions.md)
+-   [Util Extensions](demoulas.util.instructions.md)
 -   [FastEndpoints Documentation](https://fast-endpoints.com/)
