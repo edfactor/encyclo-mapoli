@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Service Layer Architecture
 
 **Project**: Demoulas Profit Sharing Application
