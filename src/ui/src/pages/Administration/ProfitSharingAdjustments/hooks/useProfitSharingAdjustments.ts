@@ -306,7 +306,7 @@ export function useProfitSharingAdjustments() {
             rowData: copy
           }
         });
-      } catch (error) {
+      } catch (_error) {
         dispatch({ type: "SEARCH_FAILURE" });
         showError("Failed to load adjustments. Please try again.");
       }
@@ -539,7 +539,7 @@ export function useProfitSharingAdjustments() {
         message: "Success",
         description: "Changes saved successfully."
       });
-    } catch (error) {
+    } catch (_error) {
       dispatch({ type: "SET_SAVING", payload: false });
       showError("Failed to save changes. Please try again.");
     }

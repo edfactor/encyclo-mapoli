@@ -5,12 +5,12 @@ import { ICellRendererParams } from "ag-grid-community";
 import React from "react";
 import { ProfitSharingAdjustmentRowDto } from "../../../reduxstore/types";
 
-export type AdjustmentEligibilityStatus = "editable" | "reversed" | "locked";
+type AdjustmentEligibilityStatus = "editable" | "reversed" | "locked";
 
 /**
  * Determines the adjustment eligibility status of a row.
  */
-export const getAdjustmentEligibilityStatus = (data: ProfitSharingAdjustmentRowDto): AdjustmentEligibilityStatus => {
+const getAdjustmentEligibilityStatus = (data: ProfitSharingAdjustmentRowDto): AdjustmentEligibilityStatus => {
   if (data.hasBeenReversed) {
     return "reversed";
   }
@@ -27,7 +27,7 @@ export const getAdjustmentEligibilityStatus = (data: ProfitSharingAdjustmentRowD
 /**
  * Returns a human-readable description for the status.
  */
-export const getStatusDescription = (data: ProfitSharingAdjustmentRowDto): string => {
+const getStatusDescription = (data: ProfitSharingAdjustmentRowDto): string => {
   const status = getAdjustmentEligibilityStatus(data);
 
   switch (status) {

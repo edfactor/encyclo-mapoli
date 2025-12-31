@@ -18,7 +18,6 @@ const ProfitSharingAdjustmentsContent = memo(() => {
   const {
     // Search state
     isSearching,
-    searchParams,
 
     // Adjustments data state
     loadedKey,
