@@ -59,7 +59,7 @@ const reports: QPAY066xAdHocReportPreset[] = [
       reportId: 6
     },
     requiresDateRange: false,
-    apiEndpoint: "/api/yearend/breakdown-by-store"
+    apiEndpoint: "/api/yearend/stores/breakdown"
   },
   {
     id: "QPAY066M",

@@ -27,10 +27,11 @@ public class BreakdownTotalsEndpoint : ProfitSharingEndpoint<BreakdownByStoreReq
 
     public override void Configure()
     {
-        Get("/breakdown-by-store/{@storeNumber}/totals", request => new { request.StoreNumber });
+        Get("/stores/{@storeNumber}/breakdown/totals", request => new { request.StoreNumber });
         Summary(s =>
         {
             s.Summary = "Breakdown managers and associates totals for requested store";
+            s.Description = "Retrieves total breakdown data for managers and associates at a specific store. Requires QPAY066TA authorization.";
             s.ExampleRequest = BreakdownByStoreRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });

@@ -23,11 +23,11 @@ public sealed class YearEndSetEnrollmentEndpoint : ProfitSharingRequestEndpoint<
 
     public override void Configure()
     {
-        Post("update-enrollment");
+        Post("/enrollments");
         Summary(s =>
         {
             s.Summary = "Updates the enrollment id of all members for the year";
-            s.Description = "Accepts profit year as optional route parameter or in request body. Route parameter takes precedence if provided.";
+            s.Description = "Updates the enrollment ID of all members for a given profit year. Accepts profit year as optional route parameter or in request body. Route parameter takes precedence if provided.";
         });
         Group<YearEndGroup>();
 

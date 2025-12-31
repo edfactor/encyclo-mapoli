@@ -29,10 +29,11 @@ public class BreakdownEndpoint : EndpointWithCsvBase<BreakdownByStoreRequest, Me
 
     public override void Configure()
     {
-        Get("/breakdown-by-store");
+        Get("/stores/breakdown");
         Summary(s =>
         {
             s.Summary = "QPAY066TA: Breakdown managers and associates for all stores";
+            s.Description = "Retrieves a breakdown of managers and associates by store for all stores in the profit sharing program. Returns member summary data organized by store.";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<AdhocReportsGroup>();

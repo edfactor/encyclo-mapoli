@@ -158,7 +158,7 @@ export const YearsEndApi = createApi({
     }),
     updateEnrollment: builder.mutation<void, ProfitYearRequest>({
       query: (params) => ({
-        url: `yearend/update-enrollment`,
+        url: `yearend/enrollments`,
         method: "POST",
         body: params
       })
