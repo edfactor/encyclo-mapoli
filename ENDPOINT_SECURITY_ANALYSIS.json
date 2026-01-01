@@ -76,21 +76,32 @@
             "count": 9,
             "group": "BalanceGroup",
             "policy": "CAN_VIEW_BALANCES",
-            "examples": ["BalanceByAgeEndpoint", "DistributionsByAgeEndpoint", "VestingByAgeEndpoint"]
+            "examples": [
+              "BalanceByAgeEndpoint",
+              "DistributionsByAgeEndpoint",
+              "VestingByAgeEndpoint"
+            ]
           },
           {
             "name": "PostFrozen",
             "count": 10,
             "group": "BalanceGroup",
             "policy": "CAN_VIEW_BALANCES",
-            "examples": ["NewProfitSharingLabelsEndpoint", "CertificatesReportEndpoint", "ProfitControlSheetEndpoint"]
+            "examples": [
+              "NewProfitSharingLabelsEndpoint",
+              "CertificatesReportEndpoint",
+              "ProfitControlSheetEndpoint"
+            ]
           },
           {
             "name": "Cleanup",
             "count": 6,
             "group": "BalanceGroup",
             "policy": "CAN_VIEW_BALANCES",
-            "examples": ["DuplicateNamesAndBirthdaysEndpoint", "NegativeETVAForSSNsOnPayProfitEndPoint"]
+            "examples": [
+              "DuplicateNamesAndBirthdaysEndpoint",
+              "NegativeETVAForSSNsOnPayProfitEndPoint"
+            ]
           },
           {
             "name": "Eligibility",
@@ -219,7 +230,10 @@
         "group": "MilitaryGroup",
         "policy": "CAN_VIEW_YEAR_END_REPORTS",
         "authorization_level": "Finance/Audit year-end visibility",
-        "examples": ["CreateMilitaryContributionRecord", "GetMilitaryContributionRecords"],
+        "examples": [
+          "CreateMilitaryContributionRecord",
+          "GetMilitaryContributionRecords"
+        ],
         "security_level": "MEDIUM-HIGH - Military service tracking"
       },
       {
@@ -237,7 +251,11 @@
         "group": "NavigationGroup",
         "policy": "None (Authentication only)",
         "authorization_level": "Authenticated users",
-        "examples": ["GetNavigationEndpoint", "GetNavigationStatusEndPoint", "UpdateNavigationStatusEndpoint"],
+        "examples": [
+          "GetNavigationEndpoint",
+          "GetNavigationStatusEndPoint",
+          "UpdateNavigationStatusEndpoint"
+        ],
         "security_concern": "LOW - Menu/status data, user-specific permissions enforced by application logic",
         "security_level": "LOW - Navigation/UI data"
       },
@@ -380,7 +398,11 @@
           "Military (2)",
           "Validation (8)"
         ],
-        "typical_roles": ["Finance Manager", "Administrator", "Hardship Administrator"]
+        "typical_roles": [
+          "Finance Manager",
+          "Administrator",
+          "Hardship Administrator"
+        ]
       },
       {
         "policy_name": "CAN_MANAGE_ADMINISTRATION",
@@ -392,21 +414,34 @@
       {
         "policy_name": "CAN_RUN_MASTER_INQUIRY",
         "count": 27,
-        "groups": ["AdhocReportsGroup", "MasterInquiryGroup", "AdjustmentsGroup", "BeneficiaryTypeGroup"],
+        "groups": [
+          "AdhocReportsGroup",
+          "MasterInquiryGroup",
+          "AdjustmentsGroup",
+          "BeneficiaryTypeGroup"
+        ],
         "endpoint_categories": [
           "Reports - Adhoc (16)",
           "Master Inquiry (5)",
           "Adjustments (3)",
           "BeneficiaryInquiry (4)"
         ],
-        "typical_roles": ["Finance Manager", "Administrator", "Distributions Clerk"]
+        "typical_roles": [
+          "Finance Manager",
+          "Administrator",
+          "Distributions Clerk"
+        ]
       },
       {
         "policy_name": "CAN_VIEW_DISTRIBUTIONS",
         "count": 9,
         "groups": ["DistributionGroup"],
         "endpoint_categories": ["Distributions (9)"],
-        "typical_roles": ["Administrator", "Distributions Clerk", "Finance Manager"]
+        "typical_roles": [
+          "Administrator",
+          "Distributions Clerk",
+          "Finance Manager"
+        ]
       },
       {
         "policy_name": "CAN_MANAGE_BENEFICIARIES",
@@ -427,7 +462,11 @@
         "count": 1,
         "groups": ["CheckRunGroup"],
         "endpoint_categories": ["CheckRun (1)"],
-        "typical_roles": ["Administrator", "Distributions Clerk", "Finance Manager"]
+        "typical_roles": [
+          "Administrator",
+          "Distributions Clerk",
+          "Finance Manager"
+        ]
       },
       {
         "policy_name": "CAN_VIEW_AUDITS",

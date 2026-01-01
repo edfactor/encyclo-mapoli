@@ -281,7 +281,7 @@ export const YearsEndApi = createApi({
     }),
     getGrossWagesReport: builder.query<GrossWagesReportResponse, GrossWagesReportDto>({
       query: (params) => ({
-        url: "yearend/frozen/grosswages",
+        url: "yearend/frozen/gross-wages",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -1175,7 +1175,7 @@ export const YearsEndApi = createApi({
     }),
     getUpdateSummary: builder.query<UpdateSummaryResponse, UpdateSummaryRequestWithArchive>({
       query: (params) => ({
-        url: `yearend/frozen/updatesummary`,
+        url: `yearend/frozen/update-summary`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
