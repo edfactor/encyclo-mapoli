@@ -1,10 +1,10 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { Paged } from "smart-ui-library";
 import type {
-  ClearAuditResponse,
-  DemographicSyncAuditRecord,
-  OracleHcmSyncMetadata,
-  SortedPaginationRequestDto
+    ClearAuditResponse,
+    DemographicSyncAuditRecord,
+    OracleHcmSyncMetadata,
+    SortedPaginationRequestDto
 } from "../../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 

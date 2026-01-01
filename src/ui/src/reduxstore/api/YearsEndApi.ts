@@ -1223,25 +1223,12 @@ export const YearsEndApi = createApi({
         body: params
       })
     }),
-    payBenReport: builder.query<PayBenReportResponse, PayBenReportRequest>({
+    payBenReport: builder.mutation<PayBenReportResponse, PayBenReportRequest>({
       query: (params) => ({
         url: "yearend/payben-report",
-        method: "GET",
-        params: {
-          id: params.id,
-          skip: params.skip || 0,
-          take: params.take || 255,
-          sortBy: params.sortBy,
-          isSortDescending: params.isSortDescending
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch: _dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
+        method: "POST",
+        body: params
+      })
     }),
     getCertificatesReport: builder.query<CertificatesReportResponse, CertificatePrintRequest>({
       query: (params) => ({
@@ -1320,7 +1307,7 @@ export const {
   useLazyGetYearEndProfitSharingReportLiveQuery,
   useLazyGetYearEndProfitSharingReportTotalsQuery,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
-  useLazyPayBenReportQuery,
+  usePayBenReportMutation,
   useGetMasterApplyMutation,
   useRefreshDuplicateNamesAndBirthdaysCacheMutation,
   useUnmaskSsnMutation,
