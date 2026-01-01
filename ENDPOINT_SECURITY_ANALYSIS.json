@@ -1,0 +1,586 @@
+{
+  "analysis_summary": {
+    "title": "Smart Profit Sharing API - Security & Authorization Documentation Analysis",
+    "analyzed_date": "2025-12-31",
+    "total_endpoints": 133,
+    "analysis_scope": "All endpoint files in src/services/src/Demoulas.ProfitSharing.Endpoints/Endpoints/",
+    "key_findings": {
+      "authorization_pattern": "Group-based FastEndpoints policy enforcement",
+      "security_model": "Role-based Access Control (RBAC) via FastEndpoints.Policies()",
+      "implementation_status": "PARTIALLY IMPLEMENTED - Most endpoints use group-level policies, but need explicit endpoint-level documentation",
+      "missing_elements": [
+        "AllowAnonymous() decorators for truly public endpoints (none currently used)",
+        "Explicit endpoint-level WithOpenApi() visibility control (all documented via group)",
+        "Detailed 'Authorization:' sections in endpoint summaries explaining role requirements",
+        "Some lookups may be candidates for AllowAnonymous if they are truly public reference data"
+      ]
+    }
+  },
+  "endpoint_categories": {
+    "summary": "Endpoints are organized into 28 functional categories with group-level authorization",
+    "categories": [
+      {
+        "category": "Lookups",
+        "count": 12,
+        "group": "LookupGroup",
+        "policy": "None (Authentication only - no group-level policy)",
+        "individual_policies_override": "Yes - Some lookups like PayClassificationLookup have specific comment documentation mentioning roles",
+        "examples": [
+          "CalendarRecordEndpoint",
+          "StateListEndpoint",
+          "DistributionStatusEndpoint",
+          "DistributionFrequencyEndpoint",
+          "CommentTypeEndpoint",
+          "DuplicateSsnExistsEndpoint",
+          "PayClassificationLookupEndpoint",
+          "MissiveLookupEndpoint",
+          "CalendarRecordRangeEndpoint"
+        ],
+        "recommendation": "REQUIRES REVIEW: Determine which lookups are truly public vs. finance-only. Consider granular policy assignment.",
+        "security_concern": "MEDIUM - Some lookups contain reference data that might be public, while others (pay classifications, etc.) should be restricted"
+      },
+      {
+        "category": "YearEnd",
+        "count": 7,
+        "group": "YearEndGroup",
+        "policy": "CAN_VIEW_YEAR_END_REPORTS",
+        "authorization_level": "Admin/Finance operations",
+        "examples": [
+          "YearEndSetEnrollmentEndpoint",
+          "YearEndProcessFinalRunEndpoint",
+          "CertificatesFileEndpoint"
+        ],
+        "security_level": "HIGH - Year-end operations are heavily restricted"
+      },
+      {
+        "category": "Reports - Adhoc",
+        "count": 16,
+        "group": "AdhocReportsGroup",
+        "policy": "CAN_RUN_MASTER_INQUIRY",
+        "authorization_level": "Finance/Admin inquiry access",
+        "examples": [
+          "AdhocBeneficiariesReportEndpoint",
+          "AccountHistoryReportEndpoint",
+          "EmployeesWithProfitsOver73Endpoint",
+          "InactiveEmployeesBreakdownEndpoint",
+          "TerminatedEmployeesReportEndpoint"
+        ],
+        "security_level": "HIGH - Contains sensitive financial and personal data"
+      },
+      {
+        "category": "Reports - YearEnd",
+        "count": 26,
+        "subgroups": [
+          {
+            "name": "Frozen",
+            "count": 9,
+            "group": "BalanceGroup",
+            "policy": "CAN_VIEW_BALANCES",
+            "examples": ["BalanceByAgeEndpoint", "DistributionsByAgeEndpoint", "VestingByAgeEndpoint"]
+          },
+          {
+            "name": "PostFrozen",
+            "count": 10,
+            "group": "BalanceGroup",
+            "policy": "CAN_VIEW_BALANCES",
+            "examples": ["NewProfitSharingLabelsEndpoint", "CertificatesReportEndpoint", "ProfitControlSheetEndpoint"]
+          },
+          {
+            "name": "Cleanup",
+            "count": 6,
+            "group": "BalanceGroup",
+            "policy": "CAN_VIEW_BALANCES",
+            "examples": ["DuplicateNamesAndBirthdaysEndpoint", "NegativeETVAForSSNsOnPayProfitEndPoint"]
+          },
+          {
+            "name": "Eligibility",
+            "count": 1,
+            "group": "BalanceGroup",
+            "policy": "CAN_VIEW_BALANCES"
+          }
+        ],
+        "security_level": "HIGH - Sensitive financial reporting"
+      },
+      {
+        "category": "Administration",
+        "count": 10,
+        "group": "AdministrationGroup",
+        "policy": "CAN_MANAGE_ADMINISTRATION",
+        "authorization_level": "System administration only",
+        "examples": [
+          "GetCommentTypesEndpoint",
+          "CreateCommentTypeEndpoint",
+          "UpdateCommentTypeEndpoint",
+          "GetAnnuityRatesEndpoint",
+          "UpdateAnnuityRateEndpoint",
+          "UpdateStateTaxRateEndpoint",
+          "GetStateTaxRatesEndpoint",
+          "GetDemographicSyncAuditEndpoint",
+          "ClearDemographicSyncAuditEndpoint",
+          "GetOracleHcmSyncMetadataEndpoint"
+        ],
+        "security_level": "CRITICAL - System configuration and sensitive data management"
+      },
+      {
+        "category": "Master Inquiry",
+        "count": 5,
+        "group": "MasterInquiryGroup",
+        "policy": "CAN_RUN_MASTER_INQUIRY",
+        "authorization_level": "Finance/Admin inquiry",
+        "examples": [
+          "MasterInquiryMemberEndpoint",
+          "MasterInquiryMemberDetailsEndpoint",
+          "MasterInquiryFilteredDetailsEndpoint",
+          "MasterInquiryDetailGroupingEndpoint",
+          "MasterInquirySearchEndpoint"
+        ],
+        "security_level": "HIGH - Broad data inquiry access"
+      },
+      {
+        "category": "Distributions",
+        "count": 9,
+        "group": "DistributionGroup",
+        "policy": "CAN_VIEW_DISTRIBUTIONS",
+        "authorization_level": "Distribution management",
+        "examples": [
+          "CreateDistributionEndpoint",
+          "UpdateDistributionEndpoint",
+          "DeleteDistributionEndpoint",
+          "DistributionSearchEndpoint",
+          "DistributionRunReportEndpoint",
+          "DisbursementReportEndpoint"
+        ],
+        "security_level": "HIGH - Financial transactions"
+      },
+      {
+        "category": "Beneficiaries",
+        "count": 7,
+        "group": "BeneficiariesGroup",
+        "policy": "CAN_MANAGE_BENEFICIARIES",
+        "authorization_level": "Beneficiary management",
+        "examples": [
+          "CreateBeneficiaryEndpoint",
+          "UpdateBeneficiaryEndpoint",
+          "DeleteBeneficiaryEndpoint",
+          "CreateBeneficiaryContactEndpoint",
+          "DeleteBeneficiaryContactEndpoint",
+          "BeneficiaryDisbursementEndpoint"
+        ],
+        "security_level": "HIGH - Contains personal beneficiary data"
+      },
+      {
+        "category": "IT Operations",
+        "count": 4,
+        "group": "ItDevOpsGroup",
+        "policy": "CAN_FREEZE_DEMOGRAPHICS",
+        "authorization_level": "IT Operations/System administration",
+        "examples": [
+          "GetFrozenDemographicsEndpoint",
+          "GetActiveFrozenDemographicEndpoint",
+          "FreezeDemographicsEndpoint",
+          "GetTableMetadataEndpoint"
+        ],
+        "security_level": "CRITICAL - Data freeze/system operations"
+      },
+      {
+        "category": "Adjustments",
+        "count": 3,
+        "group": "AdjustmentsGroup",
+        "policy": "CAN_RUN_MASTER_INQUIRY",
+        "authorization_level": "Admin adjustments",
+        "examples": [
+          "GetProfitSharingAdjustmentsEndpoint",
+          "SaveProfitSharingAdjustmentsEndpoint",
+          "MergeProfitDetailsEndpoint"
+        ],
+        "security_level": "CRITICAL - Data modification"
+      },
+      {
+        "category": "Audit",
+        "count": 2,
+        "group": "AuditGroup",
+        "policy": "CAN_VIEW_AUDITS",
+        "authorization_level": "Audit viewing",
+        "examples": ["GetAuditChangeEntryEndpoint", "AuditSearchEndpoint"],
+        "security_level": "MEDIUM-HIGH - Historical data access"
+      },
+      {
+        "category": "CheckRun",
+        "count": 1,
+        "group": "CheckRunGroup",
+        "policy": "CAN_PROCESS_CHECKS",
+        "authorization_level": "Check processing",
+        "examples": ["CheckRunStartEndpoint"],
+        "security_level": "CRITICAL - Payment processing"
+      },
+      {
+        "category": "Military",
+        "count": 2,
+        "group": "MilitaryGroup",
+        "policy": "CAN_VIEW_YEAR_END_REPORTS",
+        "authorization_level": "Finance/Audit year-end visibility",
+        "examples": ["CreateMilitaryContributionRecord", "GetMilitaryContributionRecords"],
+        "security_level": "MEDIUM-HIGH - Military service tracking"
+      },
+      {
+        "category": "SSN Unmasking",
+        "count": 1,
+        "group": "SsnUnmaskingGroup",
+        "policy": "CAN_UNMASK_SSN",
+        "authorization_level": "SSN unmasking (highly restricted)",
+        "security_concern": "CRITICAL - SSN-unmasking role is extremely restricted",
+        "security_level": "CRITICAL - PII unmasking"
+      },
+      {
+        "category": "Navigation",
+        "count": 3,
+        "group": "NavigationGroup",
+        "policy": "None (Authentication only)",
+        "authorization_level": "Authenticated users",
+        "examples": ["GetNavigationEndpoint", "GetNavigationStatusEndPoint", "UpdateNavigationStatusEndpoint"],
+        "security_concern": "LOW - Menu/status data, user-specific permissions enforced by application logic",
+        "security_level": "LOW - Navigation/UI data"
+      },
+      {
+        "category": "CrossReference/Validation",
+        "count": 8,
+        "group": "ValidationGroup",
+        "policy": "CAN_VIEW_YEAR_END_REPORTS",
+        "authorization_level": "Finance/Admin validation",
+        "examples": [
+          "GetMasterUpdateValidationEndpoint",
+          "GetProfitSharingReportValidationEndpoint",
+          "ValidateReportChecksumEndpoint",
+          "ValidateAllocTransfersEndpoint"
+        ],
+        "security_level": "HIGH - Data integrity validation"
+      },
+      {
+        "category": "BeneficiaryInquiry",
+        "count": 4,
+        "group": "BeneficiaryTypeGroup",
+        "policy": "CAN_RUN_MASTER_INQUIRY",
+        "authorization_level": "Master inquiry access",
+        "examples": [
+          "BeneficiarySearchFilterEndpoint",
+          "BeneficiaryTypeEndpoint",
+          "BeneficiaryEndpoint",
+          "BeneficiaryDetailEndpoint"
+        ],
+        "security_level": "MEDIUM-HIGH - Beneficiary inquiry data"
+      }
+    ]
+  },
+  "security_findings": {
+    "what_is_implemented": [
+      {
+        "item": "Group-level policy enforcement",
+        "status": "IMPLEMENTED",
+        "details": "All endpoints inherit FastEndpoints group-level policies through ep.Policies() in group Configure()",
+        "example": "YearEndGroup uses ep.Policies(Policy.CanViewYearEndReports)"
+      },
+      {
+        "item": "Role-based access control",
+        "status": "IMPLEMENTED",
+        "details": "Centralized policy definitions in src/services/src/Demoulas.ProfitSharing.Security/Policy.cs",
+        "example": "12 distinct policies defined (CAN_VIEW_YEAR_END_REPORTS, CAN_MANAGE_ADMINISTRATION, etc.)"
+      },
+      {
+        "item": "Problem response documentation",
+        "status": "IMPLEMENTED",
+        "details": "ProducesProblemFE() in groups documents 400, 401, 403, 500 responses",
+        "example": "All groups include problem response documentation"
+      },
+      {
+        "item": "FastEndpoints integration",
+        "status": "IMPLEMENTED",
+        "details": "Group base class (GroupBase) provides Configure(route, action) pattern",
+        "example": "All 23 endpoint groups inherit from GroupBase"
+      }
+    ],
+    "what_needs_improvement": [
+      {
+        "item": "AllowAnonymous() usage",
+        "status": "MISSING",
+        "severity": "MEDIUM",
+        "description": "No endpoints currently explicitly marked with AllowAnonymous()",
+        "details": "Even truly public lookups don't have explicit AllowAnonymous decorators. They inherit group-level policy (or lack thereof).",
+        "recommendation": "Add AllowAnonymous() to endpoints that should be accessible without authentication (e.g., reference lookups used in public forms)",
+        "candidates": [
+          {
+            "endpoint": "StateListEndpoint",
+            "category": "Lookups",
+            "reason": "List of US states - pure reference data, no sensitive context"
+          },
+          {
+            "endpoint": "DistributionFrequencyEndpoint",
+            "category": "Lookups",
+            "reason": "Frequency codes - reference data for dropdowns"
+          },
+          {
+            "endpoint": "DistributionStatusEndpoint",
+            "category": "Lookups",
+            "reason": "Status codes - reference data"
+          }
+        ]
+      },
+      {
+        "item": "WithOpenApi() visibility control",
+        "status": "IMPLICIT (not explicit per endpoint)",
+        "severity": "LOW",
+        "description": "No per-endpoint WithOpenApi() declarations observed",
+        "details": "OpenAPI visibility is managed at group level via NSwag configuration and SwaggerAuthorizationDetails processor",
+        "recommendation": "Optional: Add explicit WithOpenApi() per endpoint if some endpoints should be hidden from Swagger (rare)",
+        "note": "Current approach (group-level) is acceptable for this API"
+      },
+      {
+        "item": "Security documentation in endpoint summaries",
+        "status": "PARTIAL",
+        "severity": "MEDIUM",
+        "description": "Endpoint Summary sections lack explicit 'Authorization:' sections documenting required roles/policies",
+        "details": "Some endpoints mention roles in 403 response text (e.g., PayClassificationLookupEndpoint), but no consistent pattern",
+        "examples": [
+          {
+            "endpoint": "PayClassificationLookupEndpoint",
+            "current_doc": "s.Responses[403] = $\"Forbidden. Requires roles of {Role.ADMINISTRATOR}, {Role.FINANCEMANAGER}, ...\"",
+            "recommended": "Add s.Description with explicit 'Authorization: Policy.CanRunMasterInquiry' section"
+          }
+        ],
+        "recommendation": "Add explicit Authorization sections to endpoint Summary() for clarity in Swagger and documentation"
+      },
+      {
+        "item": "Lookup endpoint authorization granularity",
+        "status": "UNCLEAR",
+        "severity": "MEDIUM",
+        "description": "LookupGroup has NO group-level policy enforcement, leaving individual lookups potentially under-protected",
+        "details": "Lookups inherit 'Authentication only' from LookupGroup (no specific policy). Some should probably be public reference data, while others (pay classifications, etc.) should be restricted.",
+        "affected_count": 12,
+        "recommendation": "AUDIT each lookup endpoint to determine:\n  1. Is this truly public reference data (candidates for AllowAnonymous)?\n  2. Should it inherit a specific policy (e.g., CAN_RUN_MASTER_INQUIRY)?\n  3. Should some lookups move to a different group?"
+      },
+      {
+        "item": "ItDevOpsAllUsersGroup lacks policy enforcement",
+        "status": "MISSING",
+        "severity": "MEDIUM",
+        "description": "ItDevOpsAllUsersGroup has no Configure() with policy enforcement",
+        "details": "The group exists but applies NO authorization beyond base authentication",
+        "recommendation": "Review endpoints in this group and either: (a) Add policy enforcement, (b) Explicitly document why no policy is needed, or (c) Merge with ItDevOpsGroup"
+      }
+    ]
+  },
+  "policy_matrix": {
+    "title": "Authorization Policy to Endpoint Category Mapping",
+    "policies": [
+      {
+        "policy_name": "CAN_VIEW_YEAR_END_REPORTS",
+        "count": 26,
+        "groups": ["YearEndGroup", "MilitaryGroup", "ValidationGroup"],
+        "endpoint_categories": [
+          "YearEnd (7)",
+          "Reports - YearEnd (19)",
+          "Military (2)",
+          "Validation (8)"
+        ],
+        "typical_roles": ["Finance Manager", "Administrator", "Hardship Administrator"]
+      },
+      {
+        "policy_name": "CAN_MANAGE_ADMINISTRATION",
+        "count": 10,
+        "groups": ["AdministrationGroup"],
+        "endpoint_categories": ["Administration (10)"],
+        "typical_roles": ["Administrator", "IT DevOps"]
+      },
+      {
+        "policy_name": "CAN_RUN_MASTER_INQUIRY",
+        "count": 27,
+        "groups": ["AdhocReportsGroup", "MasterInquiryGroup", "AdjustmentsGroup", "BeneficiaryTypeGroup"],
+        "endpoint_categories": [
+          "Reports - Adhoc (16)",
+          "Master Inquiry (5)",
+          "Adjustments (3)",
+          "BeneficiaryInquiry (4)"
+        ],
+        "typical_roles": ["Finance Manager", "Administrator", "Distributions Clerk"]
+      },
+      {
+        "policy_name": "CAN_VIEW_DISTRIBUTIONS",
+        "count": 9,
+        "groups": ["DistributionGroup"],
+        "endpoint_categories": ["Distributions (9)"],
+        "typical_roles": ["Administrator", "Distributions Clerk", "Finance Manager"]
+      },
+      {
+        "policy_name": "CAN_MANAGE_BENEFICIARIES",
+        "count": 7,
+        "groups": ["BeneficiariesGroup"],
+        "endpoint_categories": ["Beneficiaries (7)"],
+        "typical_roles": ["Administrator", "Hardship Administrator"]
+      },
+      {
+        "policy_name": "CAN_FREEZE_DEMOGRAPHICS",
+        "count": 4,
+        "groups": ["ItDevOpsGroup"],
+        "endpoint_categories": ["IT Operations (4)"],
+        "typical_roles": ["IT DevOps", "Administrator"]
+      },
+      {
+        "policy_name": "CAN_PROCESS_CHECKS",
+        "count": 1,
+        "groups": ["CheckRunGroup"],
+        "endpoint_categories": ["CheckRun (1)"],
+        "typical_roles": ["Administrator", "Distributions Clerk", "Finance Manager"]
+      },
+      {
+        "policy_name": "CAN_VIEW_AUDITS",
+        "count": 2,
+        "groups": ["AuditGroup"],
+        "endpoint_categories": ["Audit (2)"],
+        "typical_roles": ["Administrator", "Compliance Officer"]
+      },
+      {
+        "policy_name": "CAN_UNMASK_SSN",
+        "count": 1,
+        "groups": ["SsnUnmaskingGroup"],
+        "endpoint_categories": ["SSN Unmasking (1)"],
+        "typical_roles": ["SSN-Unmasking role (extremely restricted)"],
+        "security_note": "CRITICAL - Highly restricted, separate role for SSN unmasking"
+      },
+      {
+        "policy_name": "Authentication only (no specific policy)",
+        "count": 10,
+        "groups": ["LookupGroup", "NavigationGroup"],
+        "endpoint_categories": ["Lookups (12)", "Navigation (3)"],
+        "note": "These groups allow any authenticated user. REVIEW needed for lookup endpoints.",
+        "security_concern": "MEDIUM - Lookups need granular authorization audit"
+      }
+    ]
+  },
+  "recommendations_by_priority": {
+    "critical": [
+      {
+        "recommendation": "Conduct security audit of LookupGroup endpoints",
+        "details": "12 endpoints with only 'Authentication required' protection. Determine which should be:\n  1. AllowAnonymous (truly public reference data)\n  2. Restricted to specific policies (e.g., PayClassificationLookup)",
+        "effort": "MEDIUM (1-2 hours)",
+        "impact": "HIGH - Prevents potential privilege escalation or information disclosure"
+      },
+      {
+        "recommendation": "Add explicit Authorization documentation to endpoint summaries",
+        "details": "Add 'Authorization: <Policy>' sections to Summary/Description of all secured endpoints",
+        "details_example": "s.Description = \"...[description]...\n\n**Authorization:** Requires CAN_RUN_MASTER_INQUIRY policy (Finance Manager, Administrator, etc.)\"",
+        "effort": "MEDIUM (2-3 hours)",
+        "impact": "HIGH - Improves API documentation and user understanding of security requirements"
+      },
+      {
+        "recommendation": "Review ItDevOpsAllUsersGroup for policy enforcement",
+        "details": "Determine if this group should have policy enforcement or if it's intentionally unrestricted",
+        "effort": "LOW (30 minutes)",
+        "impact": "MEDIUM - Ensures IT operation endpoints are properly protected"
+      }
+    ],
+    "high": [
+      {
+        "recommendation": "Add AllowAnonymous() to confirmed public reference endpoints",
+        "details": "After audit, explicitly mark truly public lookups with AllowAnonymous() for clarity",
+        "candidates": [
+          "StateListEndpoint (US states list - pure reference)",
+          "DistributionFrequencyEndpoint (frequency codes - reference)",
+          "DistributionStatusEndpoint (status codes - reference)"
+        ],
+        "effort": "LOW (30 minutes)",
+        "impact": "MEDIUM - Improves API clarity and security posture"
+      },
+      {
+        "recommendation": "Document authorization pattern in API guidelines",
+        "details": "Create internal documentation explaining:\n  1. How group-level policies work in this codebase\n  2. When to use group policies vs. endpoint-level policies\n  3. Lookup endpoint authorization rules",
+        "effort": "MEDIUM (1 hour)",
+        "impact": "HIGH - Guides future API development and maintenance"
+      }
+    ],
+    "medium": [
+      {
+        "recommendation": "Add WithOpenApi() for hidden endpoints (if any exist)",
+        "details": "Identify endpoints that should not appear in Swagger and add WithOpenApi(false) if needed",
+        "effort": "LOW (less critical, optional)",
+        "impact": "LOW - Documentation clarity improvement"
+      },
+      {
+        "recommendation": "Standardize role documentation in 403 responses",
+        "details": "Some endpoints document required roles in 403 response text (e.g., PayClassificationLookupEndpoint)",
+        "recommendation_detail": "Move this to a consistent Authorization: section in Summary/Description",
+        "effort": "LOW (1 hour)",
+        "impact": "LOW - Consistency improvement"
+      }
+    ]
+  },
+  "security_checklist": {
+    "current_implementation": [
+      {
+        "item": "Group-level policy enforcement via FastEndpoints",
+        "status": "✓ IMPLEMENTED",
+        "evidence": "All 23 endpoint groups use ep.Policies() in Configure()"
+      },
+      {
+        "item": "Centralized policy definitions",
+        "status": "✓ IMPLEMENTED",
+        "evidence": "Policy.cs contains 12 distinct authorization policies"
+      },
+      {
+        "item": "Role-based access control (RBAC)",
+        "status": "✓ IMPLEMENTED",
+        "evidence": "PolicyRoleMap.cs maps policies to specific roles"
+      },
+      {
+        "item": "HTTP problem response documentation",
+        "status": "✓ IMPLEMENTED",
+        "evidence": "ProducesProblemFE() in all group Configure methods"
+      },
+      {
+        "item": "Authentication required by default",
+        "status": "✓ IMPLEMENTED",
+        "evidence": "No AllowAnonymous() decorators; groups require authentication"
+      },
+      {
+        "item": "Endpoint-level OpenAPI visibility control",
+        "status": "⚠ PARTIAL",
+        "evidence": "No explicit WithOpenApi() per endpoint; NSwag handles globally"
+      },
+      {
+        "item": "Explicit security documentation in endpoint summaries",
+        "status": "✗ MISSING",
+        "evidence": "No consistent 'Authorization:' sections in endpoint documentation"
+      },
+      {
+        "item": "AllowAnonymous for public endpoints",
+        "status": "✗ MISSING",
+        "evidence": "No AllowAnonymous() decorators found; unclear which lookups are public"
+      }
+    ]
+  },
+  "endpoint_count_summary": {
+    "by_authorization_level": {
+      "CRITICAL (payment/system ops)": 8,
+      "HIGH (financial/sensitive data)": 65,
+      "MEDIUM (audit/military)": 4,
+      "LOW (reference/navigation)": 15,
+      "UNREVIEWED (lookups)": 12,
+      "UNCLEAR (no specific policy)": 10,
+      "total": 133
+    }
+  },
+  "next_steps": {
+    "immediate": [
+      "1. Run LookupEndpoint authorization audit",
+      "2. Add Authorization: sections to endpoint documentation",
+      "3. Review ItDevOpsAllUsersGroup for policy enforcement"
+    ],
+    "short_term": [
+      "4. Add AllowAnonymous() to confirmed public lookups",
+      "5. Document authorization pattern in API guidelines",
+      "6. Create lookup authorization matrix"
+    ],
+    "ongoing": [
+      "7. Enforce authorization documentation in PR reviews",
+      "8. Conduct quarterly security audits of endpoint groups",
+      "9. Monitor lint warnings for missing operation-security-defined attributes"
+    ]
+  }
+}
