@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Text.Json;
-using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
+using Demoulas.Common.Data.Services.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
