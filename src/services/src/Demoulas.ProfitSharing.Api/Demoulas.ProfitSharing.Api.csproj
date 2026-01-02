@@ -59,7 +59,7 @@
     <Exec
       WorkingDirectory="$(MSBuildProjectDirectory)"
       EnvironmentVariables="NSWAG_APIEXPLORER_WARMUP=1;ASPNETCORE_ENVIRONMENT=Development;DOTNET_ENVIRONMENT=Development;Okta__RolePrefix=DEV"
-      Command="$(NSwagExe_Net100) run &quot;$(MSBuildProjectDirectory)\nswag.json&quot; /variables:Configuration=$(Configuration)" />
+      Command="$(NSwagExe_Net100) run &quot;$(MSBuildProjectDirectory)/nswag.json&quot; /variables:Configuration=$(Configuration)" />
   </Target>
 
 </Project>

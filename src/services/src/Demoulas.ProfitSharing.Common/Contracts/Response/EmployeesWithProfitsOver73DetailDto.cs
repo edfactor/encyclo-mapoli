@@ -114,6 +114,9 @@ public sealed record EmployeesWithProfitsOver73DetailDto
         Ssn = "***-**-9876",
         TerminationDate = null,
         Balance = 275000.00m,
-        RequiredMinimumDistributions = 13750.00m
+        Factor = 25.5m,
+        Rmd = 10784.31m,
+        PaymentsInProfitYear = 0.00m,
+        SuggestRmdCheckAmount = 10784.31m
     };
 }
