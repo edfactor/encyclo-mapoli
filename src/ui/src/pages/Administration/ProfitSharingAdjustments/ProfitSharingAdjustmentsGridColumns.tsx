@@ -1,6 +1,7 @@
 import { ColDef, ITooltipParams } from "ag-grid-community";
 import type { ProfitSharingAdjustmentRowDto } from "../../../reduxstore/types";
 import { createCurrencyColumn, createTaxCodeColumn, createYearColumn } from "../../../utils/gridColumnFactory";
+import { AdjustmentStatusCellRenderer } from "./AdjustmentStatusCellRenderer";
 
 /**
  * Helper to parse string to number or keep old value
@@ -37,6 +38,19 @@ const reversedRowTooltip = (params: ITooltipParams): string | undefined => {
  */
 export const GetProfitSharingAdjustmentsGridColumns = (): ColDef[] => {
   return [
+    {
+      headerName: "",
+      field: "status",
+      colId: "status",
+      width: 50,
+      minWidth: 50,
+      maxWidth: 50,
+      pinned: "left",
+      cellRenderer: AdjustmentStatusCellRenderer,
+      suppressHeaderMenuButton: true,
+      sortable: false,
+      resizable: false
+    },
     {
       headerName: "Row",
       valueGetter: "node.rowIndex + 1",

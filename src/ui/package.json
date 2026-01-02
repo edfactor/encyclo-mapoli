@@ -12,6 +12,7 @@
     "build:qa": "tsc -b && vite build --mode qa",
     "build:uat": "tsc -b && vite build --mode uat",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:api": "powershell -ExecutionPolicy Bypass -File ../../scripts/Lint-Api.ps1",
     "prettier": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
     "test": "vitest --coverage",
     "test:windows": "vitest --coverage --run --pool=threads --poolOptions.threads.singleThread",
