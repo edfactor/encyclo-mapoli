@@ -1,8 +1,3 @@
----
-applyTo: "src/services/src/**/*.*"
-paths: "src/services/src/**/*.*"
----
-
 # Demoulas.Common.Api - REST API Development Package
 
 **Package:** `Demoulas.Common.Api`  

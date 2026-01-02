@@ -1,9 +1,10 @@
 ﻿
 using System.ComponentModel;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public record DemographicsRequest : IMemberRequest
+public record DemographicsRequest : IMemberRequest, IBadgeNumberRequest
 {
 #pragma warning disable DSM001
     public required int Ssn { get; set; }
