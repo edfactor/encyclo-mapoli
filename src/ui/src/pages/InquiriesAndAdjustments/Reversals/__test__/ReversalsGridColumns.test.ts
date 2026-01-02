@@ -248,6 +248,7 @@ describe("ReversalsGridColumns", () => {
     const currentYear = 2025;
     const currentMonth = 6; // June
 
+    it("should return true for reversible rows", () => {
       const data = {
         profitCodeId: 1,
         monthToDate: currentMonth,
