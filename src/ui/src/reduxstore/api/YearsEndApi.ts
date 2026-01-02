@@ -1054,7 +1054,6 @@ export const YearsEndApi = createApi({
     >({
       query: (params) => {
         const { pagination, archive, ...rest } = params;
-        rest.profitYear = 2025;
         return {
           url: `yearend/yearend-profit-sharing-report${archive === true ? "/?archive=true" : ""}`,
           method: "POST",

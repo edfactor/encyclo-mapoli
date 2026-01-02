@@ -253,6 +253,15 @@ const ReportGrid: React.FC<ReportGridProps> = ({
                 return { background: "#f3f4f6" };  // Light grey background for pinned rows
               }
               return undefined;
+            },
+            onGridReady: (params) => {
+              setTimeout(() => params.api.sizeColumnsToFit(), 100);
+            },
+            onFirstDataRendered: (params) => {
+              params.api.sizeColumnsToFit();
+            },
+            onGridSizeChanged: (params) => {
+              params.api.sizeColumnsToFit();
             }
           }}
           showPagination={!!data && data.response.results.length > 0}
