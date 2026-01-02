@@ -18,9 +18,18 @@ describe("ReversalsGridColumns", () => {
   });
 
   describe("getReversalEligibilityStatus", () => {
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1; // 1-based
+    // Mock to June to avoid January rule complications
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const currentYear = 2025;
+    const currentMonth = 6; // June
 
     describe("null/undefined data", () => {
       it("should return ineligible for null data", () => {
@@ -207,9 +216,18 @@ describe("ReversalsGridColumns", () => {
   });
 
   describe("isRowReversible", () => {
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1;
+    // Mock to June to avoid January rule complications
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const currentYear = 2025;
+    const currentMonth = 6; // June
 
     it("should return true for reversible rows", () => {
       const data = {
@@ -250,9 +268,18 @@ describe("ReversalsGridColumns", () => {
   });
 
   describe("getIneligibilityReason", () => {
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1;
+    // Mock to June to avoid January rule complications
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const currentYear = 2025;
+    const currentMonth = 6; // June
 
     it("should return default message for null data", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

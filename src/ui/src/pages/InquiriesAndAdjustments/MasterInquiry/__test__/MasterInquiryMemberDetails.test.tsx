@@ -424,8 +424,8 @@ describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
     // Beginning balances should appear before current balances
     expect(screen.getByText("Begin Balance")).toBeInTheDocument();
     expect(screen.getByText("Begin Vested Balance")).toBeInTheDocument();
-    expect(screen.getByText("Current Balance")).toBeInTheDocument();
-    expect(screen.getByText("Current Vested Balance")).toBeInTheDocument();
+    expect(screen.getByText("End 2025 Balance")).toBeInTheDocument();
+    expect(screen.getByText("End 2025 Vested Balance")).toBeInTheDocument();
   });
 
   // PS-1899: Verify payClassification property is correctly cased
