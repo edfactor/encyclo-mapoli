@@ -1,8 +1,3 @@
----
-applyTo: "src/services/src/**/*.*"
-paths: "src/services/src/**/*.*"
----
-
 # RESTful API Guidelines Instructions
 
 **Reference:** [RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/)  
