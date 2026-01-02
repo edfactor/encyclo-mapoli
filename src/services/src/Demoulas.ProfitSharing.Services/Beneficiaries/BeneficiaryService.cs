@@ -46,17 +46,6 @@ public class BeneficiaryService : IBeneficiaryService
             throw new ValidationException(validationResult.Errors);
         }
 
-        // Validate percentage constraints before creating beneficiary
-        if (req.EmployeeBadgeNumber <= 0)
-        {
-            throw new ValidationException("Badge number must be greater than 0.");
-        }
-        
-        if (req.Percentage < 0 || req.Percentage > 100m)
-        {
-            throw new ValidationException("Percentage must be between 0 and 100%.");
-        }
-
         // Check that sum of percentages doesn't exceed 100%
         var existingPercentageSum = await GetBeneficiaryPercentageSumAsync(req.EmployeeBadgeNumber, null, cancellationToken);
         if (existingPercentageSum >= 0 && (existingPercentageSum + req.Percentage) > 100m)
