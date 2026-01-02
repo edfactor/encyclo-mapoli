@@ -1261,3 +1261,7 @@ export const createBadgeOrPSNColumn = (
 
   return column;
 };
+
+export const createColumnFrom = (initialSet: ColDef, additionalOptions: ColDef): ColDef => {
+  return { ...initialSet, ...additionalOptions };
+};

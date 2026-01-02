@@ -210,19 +210,18 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
     {
         var currentValues = new Dictionary<string, decimal>
         {
-            { "QPAY129.QPAY129_DistributionTotals", forfeitTotal },
-            { "QPAY129.ForfeitureTotal", distributionTotal }
+            { "QPAY129.QPAY129_DistributionTotals", distributionTotal},
+            { "QPAY129.ForfeitureTotal", forfeitTotal }
         };
-        var lastYear = (short)(profitYear - 1); //QPAY129 seems to archive for the prior year
 
         var distributionTotalValidation = await ValidateSingleFieldAsync(
-            lastYear,
+            profitYear,
             "QPAY129",
             "QPAY129_DistributionTotals",
             currentValues,
             cancellationToken);
         var forfeitTotalValidation = await ValidateSingleFieldAsync(
-            lastYear,
+            profitYear,
             "QPAY129",
             "ForfeitureTotal",
             currentValues,

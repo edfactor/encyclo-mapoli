@@ -1,13 +1,22 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import React from "react";
+import { ValidationIcon } from "../../../components/ValidationIcon";
 import {
   createBadgeOrPSNColumn,
+  createColumnFrom,
   createCountColumn,
   createCurrencyColumn,
   createNameColumn,
   createSSNColumn
 } from "../../../utils/gridColumnFactory";
 
-export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export interface ForfeitColumnsOptions {
+  navFunction: (badgeNumber: string) => void;
+  onValidationClick?: (fieldName: string) => void;
+}
+
+export const GetProfitShareForfeitColumns = (options: ForfeitColumnsOptions): ColDef[] => {
+  const { navFunction, onValidationClick } = options;
   return [
     createBadgeOrPSNColumn({
       headerName: "Badge/PSN",
@@ -21,10 +30,24 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
       field: "employeeName"
     }),
     createSSNColumn({}),
-    createCurrencyColumn({
-      headerName: "Forfeitures",
-      field: "forfeitures"
-    }),
+    createColumnFrom(
+      createCurrencyColumn({
+        headerName: "Forfeitures",
+        field: "forfeitures"
+      }),
+      {
+        cellRenderer: (params: ICellRendererParams) => {
+          return React.createElement('div', {}, 
+            React.createElement(ValidationIcon, {
+              validationGroup: params.data?.validation || null,
+              fieldName: "ForfeitureTotal",
+              onClick: onValidationClick ? () => onValidationClick("ForfeitureTotal") : undefined
+            }),
+            params.valueFormatted,
+          );
+        },
+      }
+    ),
 
     createCountColumn({
       headerName: "Cont/Forfeit Points",

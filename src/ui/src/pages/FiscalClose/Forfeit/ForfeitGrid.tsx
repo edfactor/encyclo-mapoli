@@ -1,6 +1,8 @@
-import { useCallback, useMemo } from "react";
+import { ValidationIcon, ValidationResultsDialog } from "@/components/ValidationIcon";
+import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import { useCallback, useMemo, useState } from "react";
 import { Path, useNavigate } from "react-router";
-import { numberToCurrency, TotalsGrid } from "smart-ui-library";
+import { numberToCurrency } from "smart-ui-library";
 import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
@@ -24,9 +26,20 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
     [navigate]
   );
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [validationDialogField, setValidationDialogField] = useState<string | null>(null);  
+
+  const handleValidationClick = useCallback((fieldName: string) => {
+    setValidationDialogField(fieldName);
+    setIsDialogOpen(true);
+  }, []);
+
   const columnDefs = useMemo(
-    () => GetProfitShareForfeitColumns(handleNavigationForButton),
-    [handleNavigationForButton]
+    () => GetProfitShareForfeitColumns({
+      navFunction: handleNavigationForButton,
+      onValidationClick: handleValidationClick
+    }),
+    [handleNavigationForButton, handleValidationClick]
   );
 
   // Custom sort handler for compound sort on badgeOrPsn column
@@ -58,9 +71,10 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
 
   const totalsRow = useMemo(
     () => ({
-      forfeitures: totalForfeituresRaw.toFixed(2),
+      forfeitures: (totalForfeituresRaw.toFixed(2)),
       contForfeitPoints: totalForfeitPoints,
-      earningPoints: totalEarningPoints
+      earningPoints: totalEarningPoints,
+      validation: searchResults?.crossReferenceValidation?.validationGroups[0] || null
     }),
     [totalForfeituresRaw, totalForfeitPoints, totalEarningPoints]
   );
@@ -78,27 +92,41 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
       onSortChange={handleSortChange}
       beforeGrid={
         <>
+          <ValidationResultsDialog open={isDialogOpen} 
+                                   onClose={()=> setIsDialogOpen(false)} 
+                                   validationGroup={searchResults?.crossReferenceValidation?.validationGroups[0]}
+                                   fieldName = {validationDialogField} />
           <div className="sticky top-0 z-10 flex bg-white">
-            <TotalsGrid
-              displayData={[[numberToCurrency(searchResults.totalProfitSharingBalance || 0)]]}
-              leftColumnHeaders={["Profit Sharing Amount"]}
-              topRowHeaders={[]}
-            />
-            <TotalsGrid
-              displayData={[[numberToCurrency(searchResults.distributionTotals || 0)]]}
-              leftColumnHeaders={["Distribution Amount"]}
-              topRowHeaders={[]}
-            />
-            <TotalsGrid
-              displayData={[[numberToCurrency(searchResults.allocationToTotals || 0)]]}
-              leftColumnHeaders={["Allocations To"]}
-              topRowHeaders={[]}
-            />
-            <TotalsGrid
-              displayData={[[numberToCurrency(searchResults.allocationsFromTotals || 0)]]}
-              leftColumnHeaders={["Allocations From"]}
-              topRowHeaders={[]}
-            />
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell className="align-middle text-center">Profit Sharing Amount</TableCell>
+                  <TableCell className="align-middle text-center">Distribution Amount</TableCell>
+                  <TableCell className="align-middle text-center">Allocation To</TableCell>
+                  <TableCell className="align-middle text-center">Allocation From</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="align-middle text-center">{numberToCurrency(searchResults.totalProfitSharingBalance || 0)}</TableCell>
+                  <TableCell className="align-middle text-center">
+                    <ValidationIcon 
+                      validationGroup={searchResults.crossReferenceValidation?.validationGroups[0]}
+                      fieldName="QPAY129_DistributionTotals"
+                      onClick={()=>
+                        {
+                          setValidationDialogField("QPAY129_DistributionTotals")
+                          setIsDialogOpen(!isDialogOpen);
+                        }
+                      }
+                    />
+                    {numberToCurrency(searchResults.distributionTotals || 0)}
+                  </TableCell>
+                  <TableCell className="align-middle text-center">{numberToCurrency(searchResults.allocationToTotals || 0)}</TableCell>
+                  <TableCell className="align-middle text-center">{numberToCurrency(searchResults.allocationsFromTotals || 0)}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
           <ReportSummary report={searchResults} />
         </>
