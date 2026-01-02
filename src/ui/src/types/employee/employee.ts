@@ -107,7 +107,7 @@ export interface YearEndProfitSharingReportRequest extends FilterParams {
 
 export interface YearEndProfitSharingEmployee {
   badgeNumber: number;
-  employeeName: string;
+  fullName: string;
   storeNumber: number;
   employeeTypeCode: string;
   employmentTypeName: string;
