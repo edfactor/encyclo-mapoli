@@ -74,9 +74,32 @@ public sealed record EmployeesWithProfitsOver73DetailDto
     public required decimal Balance { get; init; }
 
     /// <summary>
-    /// minimum required distribution based on age from the 
+    /// IRS life expectancy divisor for this age from RmdsFactorByAge table.
+    /// Used to calculate required minimum distribution (e.g., 26.5 years for age 73).
     /// </summary>
-    public required decimal RequiredMinimumDistributions { get; init; }
+    public required decimal Factor { get; init; }
+
+    /// <summary>
+    /// Required minimum distribution amount calculated as Balance ÷ Factor.
+    /// Based on IRS Publication 590-B Uniform Lifetime Table.
+    /// </summary>
+    public required decimal Rmd { get; init; }
+
+    /// <summary>
+    /// Total payments (distributions) made to this employee during the fiscal year.
+    /// Calculated by summing Forfeiture amounts from PROFIT_DETAIL where ProfitCodeId 
+    /// is a payment/distribution code and the payment date falls within the fiscal year.
+    /// </summary>
+    public required decimal PaymentsInProfitYear { get; init; }
+
+    /// <summary>
+    /// Suggested RMD check amount based on de minimis threshold and payments received.
+    /// Logic:
+    /// - If Balance &lt;= DeMinimusValue: Returns entire remaining balance (liquidate account)
+    /// - If Balance &gt; DeMinimusValue: Returns (RMD - PaymentsInProfitYear), minimum of 0
+    /// This represents the recommended distribution amount to satisfy IRS RMD requirements.
+    /// </summary>
+    public required decimal SuggestRmdCheckAmount { get; init; }
     public static EmployeesWithProfitsOver73DetailDto ResponseExample() => new()
     {
         BadgeNumber = 45678,
@@ -91,6 +114,9 @@ public sealed record EmployeesWithProfitsOver73DetailDto
         Ssn = "***-**-9876",
         TerminationDate = null,
         Balance = 275000.00m,
-        RequiredMinimumDistributions = 13750.00m
+        Factor = 25.5m,
+        Rmd = 10784.31m,
+        PaymentsInProfitYear = 0.00m,
+        SuggestRmdCheckAmount = 10784.31m
     };
 }

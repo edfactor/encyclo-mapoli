@@ -110,6 +110,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IOracleHcmDiagnosticsService, OracleHcmDiagnosticsService>();
         _ = builder.Services.AddScoped<IStateTaxRatesService, StateTaxRatesService>();
         _ = builder.Services.AddScoped<IAnnuityRatesService, AnnuityRatesService>();
+        _ = builder.Services.AddScoped<IRmdsFactorService, RmdsFactorService>();
         _ = builder.Services.AddScoped<ICommentTypeService, CommentTypeService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
