@@ -215,12 +215,19 @@ definitions:
           Write-Host "Analyzing changes since last successful develop build" -ForegroundColor Cyan
           Write-Host "========================================" -ForegroundColor Cyan
 
-          # Check if the tag exists (local or remote)
+          # Check if the tag exists locally
+          Write-Host "Checking for tag locally..." -ForegroundColor Gray
           $tagExists = git tag -l $tagName
+
           if (-not $tagExists) {
-            # Try to fetch from remote
-            git fetch origin "refs/tags/${tagName}:refs/tags/${tagName}" 2>$null
-            $tagExists = git tag -l $tagName
+            Write-Host "Tag not found locally, checking remote..." -ForegroundColor Gray
+            # Use git ls-remote to check if tag exists on remote (fast, won't hang)
+            $remoteTagCheck = git ls-remote --tags origin "refs/tags/$tagName" 2>&1
+            if ($LASTEXITCODE -eq 0 -and $remoteTagCheck -match $tagName) {
+              Write-Host "Tag found on remote, fetching..." -ForegroundColor Gray
+              git fetch origin "refs/tags/${tagName}:refs/tags/${tagName}"
+              $tagExists = git tag -l $tagName
+            }
           }
 
           if (-not $tagExists) {
