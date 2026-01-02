@@ -1,5 +1,7 @@
 ﻿
 
+using Demoulas.ProfitSharing.Common.Interfaces;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 
 public record BeneficiaryDetailRequest : IBadgeNumberRequest

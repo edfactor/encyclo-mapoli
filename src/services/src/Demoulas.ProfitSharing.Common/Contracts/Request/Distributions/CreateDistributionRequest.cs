@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 
 public record CreateDistributionRequest : IBadgeNumberRequest
 {

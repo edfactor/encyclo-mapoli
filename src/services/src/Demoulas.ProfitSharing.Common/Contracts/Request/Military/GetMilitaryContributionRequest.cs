@@ -1,8 +1,9 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 
-public sealed record GetMilitaryContributionRequest : SortedPaginationRequestDto
+public sealed record GetMilitaryContributionRequest : SortedPaginationRequestDto, IBadgeNumberRequest
 {
     public int BadgeNumber { get; init; }
 
