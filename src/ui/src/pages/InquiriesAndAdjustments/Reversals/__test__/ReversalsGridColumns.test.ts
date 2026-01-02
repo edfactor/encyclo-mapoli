@@ -37,9 +37,6 @@ describe("ReversalsGridColumns", () => {
       vi.useRealTimers();
     });
 
-    const currentYear = 2025;
-    const currentMonth = 6; // June
-
     describe("null/undefined data", () => {
       it("should return ineligible for null data", () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -307,9 +304,6 @@ describe("ReversalsGridColumns", () => {
     afterEach(() => {
       vi.useRealTimers();
     });
-
-    const currentYear = 2025;
-    const currentMonth = 6; // June
 
     it("should return default message for null data", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
