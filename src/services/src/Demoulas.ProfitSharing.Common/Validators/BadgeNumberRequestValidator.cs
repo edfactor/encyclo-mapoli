@@ -4,7 +4,7 @@ using FluentValidation;
 namespace Demoulas.ProfitSharing.Common.Validators;
 
 /// <summary>
-/// Validator for badge numbers. Badge numbers must be between 2 and 11 digits (10 to 99,999,999,999).
+/// Validator for badge numbers. Badge numbers must be between 2 and 11 digits (10 to 2,147,483,647).
 /// </summary>
 /// <typeparam name="T">The request type that implements IBadgeNumberRequest</typeparam>
 public sealed class BadgeNumberRequestValidator<T> : AbstractValidator<T> where T : IBadgeNumberRequest
