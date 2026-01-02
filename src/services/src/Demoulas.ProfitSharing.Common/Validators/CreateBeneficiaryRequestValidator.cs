@@ -7,17 +7,13 @@ public class CreateBeneficiaryRequestValidator : AbstractValidator<CreateBenefic
 {
     public CreateBeneficiaryRequestValidator()
     {
-        // Include employee badge number validation
-        Include(new EmployeeBadgeNumberRequestValidator<CreateBeneficiaryRequest>());
-
         RuleFor(x => x.BeneficiaryContactId)
             .GreaterThan(0)
             .WithMessage("Beneficiary Contact ID must be greater than 0.");
 
-        // Removed EmployeeBadgeNumber validation (now in EmployeeBadgeNumberRequestValidator)
-        // RuleFor(x => x.EmployeeBadgeNumber) 
-        //     .GreaterThan(0)
-        //     .WithMessage("Employee Badge Number must be greater than 0.");
+        RuleFor(x => x.EmployeeBadgeNumber)
+            .GreaterThan(0)
+            .WithMessage("Employee Badge Number must be greater than 0.");
 
         RuleFor(x => x.FirstLevelBeneficiaryNumber)
             .InclusiveBetween((byte)1, (byte)9)
