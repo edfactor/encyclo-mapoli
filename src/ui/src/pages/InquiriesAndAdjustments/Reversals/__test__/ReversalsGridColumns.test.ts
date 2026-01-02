@@ -27,14 +27,18 @@ describe("ReversalsGridColumns", () => {
   });
 
   describe("getReversalEligibilityStatus", () => {
+    // Mock to June to avoid January rule complications
     beforeEach(() => {
-      // Default all tests to a non-January month to avoid time-dependent failures.
-      setSystemDate(new Date(2025, 5, 15)); // June 15, 2025
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
     });
 
     afterEach(() => {
-      resetSystemDate();
+      vi.useRealTimers();
     });
+
+    const currentYear = 2025;
+    const currentMonth = 6; // June
 
     describe("null/undefined data", () => {
       it("should return ineligible for null data", () => {
@@ -231,18 +235,18 @@ describe("ReversalsGridColumns", () => {
   });
 
   describe("isRowReversible", () => {
+    // Mock to June to avoid January rule complications
     beforeEach(() => {
-      setSystemDate(new Date(2025, 5, 15)); // June 15, 2025
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
     });
 
     afterEach(() => {
-      resetSystemDate();
+      vi.useRealTimers();
     });
 
-    it("should return true for reversible rows", () => {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = 2025;
+    const currentMonth = 6; // June
 
       const data = {
         profitCodeId: 1,
@@ -293,13 +297,18 @@ describe("ReversalsGridColumns", () => {
   });
 
   describe("getIneligibilityReason", () => {
+    // Mock to June to avoid January rule complications
     beforeEach(() => {
-      setSystemDate(new Date(2025, 5, 15)); // June 15, 2025
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
     });
 
     afterEach(() => {
-      resetSystemDate();
+      vi.useRealTimers();
     });
+
+    const currentYear = 2025;
+    const currentMonth = 6; // June
 
     it("should return default message for null data", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
