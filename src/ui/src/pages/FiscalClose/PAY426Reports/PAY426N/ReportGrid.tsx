@@ -153,11 +153,6 @@ const ReportGrid: React.FC<ReportGridProps> = ({
     [handleNavigationForButton, validationData]
   );
 
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: data?.response?.results?.length ?? 0,
-    heightPercentage: isGridExpanded ? 0.85 : 0.65
-  });
-
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
 
@@ -173,11 +168,23 @@ const ReportGrid: React.FC<ReportGridProps> = ({
         _isPinnedTotal: true
       },
       {
+        badgeNumber: 0,
         fullName: "No Wages",
+        storeNumber: 0,
+        employeeTypeCode: "",
+        employmentTypeName: "",
+        dateOfBirth: null,
+        age: "",
+        ssn: "",
         wages: 0,
         hours: 0,
         points: 0,
-        balance: 0
+        isUnder21: false,
+        isNew: false,
+        employeeStatus: "",
+        balance: 0,
+        yearsInPlan: 0,
+        terminationDate: null
       }
     ];
   }, [data]);
@@ -235,10 +242,18 @@ const ReportGrid: React.FC<ReportGridProps> = ({
           onSortChange={sortEventHandler}
           heightConfig={{
             mode: "content-aware",
-            maxHeight: gridMaxHeight
+            heightPercentage: isGridExpanded ? 0.85 : 0.65,
+            minHeight: 200,
+            pinnedRowCount: 2  // Account for 2 pinned top rows (totals + "No Wages")
           }}
           gridOptions={{
-            pinnedTopRowData: pinnedTopRowData
+            pinnedTopRowData: pinnedTopRowData,
+            getRowStyle: (params) => {
+              if (params.node.rowPinned) {
+                return { background: "#f3f4f6" };  // Light grey background for pinned rows
+              }
+              return undefined;
+            }
           }}
           showPagination={!!data && data.response.results.length > 0}
         />
