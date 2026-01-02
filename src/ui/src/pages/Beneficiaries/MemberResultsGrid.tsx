@@ -1,3 +1,4 @@
+import { SortParams } from "@/hooks/useGridPagination";
 import { BeneficiaryDetail } from "@/types";
 import { RowClickedEvent } from "ag-grid-community";
 import { useMemo } from "react";
@@ -14,6 +15,8 @@ interface MemberResultsGridProps {
   onRowClick: (data: BeneficiaryDetail) => void;
   onPageNumberChange: (pageNumber: number) => void;
   onPageSizeChange: (pageSize: number) => void;
+  handleSortChange: (sortParams: SortParams) => void;
+  
 }
 
 const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({
@@ -23,7 +26,8 @@ const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({
   pageSize,
   onRowClick,
   onPageNumberChange,
-  onPageSizeChange
+  onPageSizeChange,
+  handleSortChange
 }) => {
   const columnDefs = useMemo(() => {
     return GetMemberResultsGridColumns();
@@ -47,7 +51,7 @@ const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({
           onPageSizeChange(value);
           onPageNumberChange(0);
         },
-        handleSortChange: () => {}
+        handleSortChange: handleSortChange
       }}
       gridOptions={{
         suppressMultiSort: true,
