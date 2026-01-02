@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public sealed record SetExecutiveHoursAndDollarsDto
+public sealed record SetExecutiveHoursAndDollarsDto : IBadgeNumberRequest
 {
     public int BadgeNumber { get; set; }
     public decimal ExecutiveHours { get; set; }

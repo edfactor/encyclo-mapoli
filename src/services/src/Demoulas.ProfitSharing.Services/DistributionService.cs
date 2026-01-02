@@ -765,9 +765,9 @@ public sealed class DistributionService : IDistributionService
     {
         var validationErrors = new Dictionary<string, string[]>();
 
-        if (request.BadgeNumber < 9_999 || request.BadgeNumber > 99_999_999_999)
+        if (request.BadgeNumber < 10 || request.BadgeNumber > 99_999_999_999)
         {
-            validationErrors[nameof(request.BadgeNumber)] = ["BadgeNumber must be between 5 and 11 digits."];
+            validationErrors[nameof(request.BadgeNumber)] = ["BadgeNumber must be between 2 and 11 digits."];
         }
         if (request.GrossAmount <= 0)
         {
