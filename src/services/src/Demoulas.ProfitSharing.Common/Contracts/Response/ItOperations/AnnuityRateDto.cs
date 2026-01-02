@@ -12,6 +12,10 @@ public sealed record AnnuityRateDto
 
     [UnmaskSensitive] public required decimal JointRate { get; init; }
 
+    public DateOnly? DateModified { get; init; }
+
+    public string? UserModified { get; init; }
+
     public static AnnuityRateDto ResponseExample()
     {
         return new AnnuityRateDto
@@ -19,7 +23,9 @@ public sealed record AnnuityRateDto
             Year = 2024,
             Age = 65,
             SingleRate = 0.0525m,
-            JointRate = 0.0475m
+            JointRate = 0.0475m,
+            DateModified = DateOnly.FromDateTime(DateTime.Today),
+            UserModified = "admin_user"
         };
     }
 }

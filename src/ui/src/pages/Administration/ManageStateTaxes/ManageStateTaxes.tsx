@@ -9,6 +9,7 @@ import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { useGetStateTaxRatesQuery, useUpdateStateTaxRateMutation } from "../../../reduxstore/api/ItOperationsApi";
 import { setMessage } from "../../../reduxstore/slices/messageSlice";
 import { StateTaxRateDto } from "../../../reduxstore/types";
+import { mmDDYYFormat } from "../../../utils/dateUtils";
 import { Messages } from "../../../utils/messageDictonary";
 
 const hasMoreThanTwoDecimals = (value: number): boolean => {
@@ -74,6 +75,25 @@ const ManageStateTaxes = () => {
         valueFormatter: (params: ValueFormatterParams) => {
           const value = params.value;
           return typeof value === "number" && Number.isFinite(value) ? value.toFixed(2) : "";
+        }
+      },
+      {
+        headerName: "User Modified",
+        field: "userModified",
+        sortable: true,
+        filter: false,
+        editable: false,
+        width: 150
+      },
+      {
+        headerName: "Date Modified",
+        field: "dateModified",
+        sortable: true,
+        filter: false,
+        editable: false,
+        width: 150,
+        valueFormatter: (params: ValueFormatterParams) => {
+          return params.value ? mmDDYYFormat(params.value) : "";
         }
       },
       {
