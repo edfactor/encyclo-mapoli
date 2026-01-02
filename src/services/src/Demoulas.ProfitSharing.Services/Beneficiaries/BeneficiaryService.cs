@@ -32,25 +32,18 @@ public class BeneficiaryService : IBeneficiaryService
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
-        _createBeneficiaryValidator = new CreateBeneficiaryRequestValidator();
+        _createBeneficiaryValidator = new CreateBeneficiaryRequestValidator(this);
         _createBeneficiaryContactValidator = new CreateBeneficiaryContactRequestValidator();
         _updateBeneficiaryContactValidator = new UpdateBeneficiaryContactRequestValidator();
         _databaseValidator = new BeneficiaryDatabaseValidator(demographicReaderService);
     }
     public async Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
-        // Validate request using FluentValidation
+        // Validate request using FluentValidation (including percentage sum validation)
         var validationResult = await _createBeneficiaryValidator.ValidateAsync(req, cancellationToken);
         if (!validationResult.IsValid)
         {
             throw new ValidationException(validationResult.Errors);
-        }
-
-        // Check that sum of percentages doesn't exceed 100%
-        var existingPercentageSum = await GetBeneficiaryPercentageSumAsync(req.EmployeeBadgeNumber, null, cancellationToken);
-        if (existingPercentageSum >= 0 && (existingPercentageSum + req.Percentage) > 100m)
-        {
-            throw new ValidationException("The sum of all beneficiary percentages would exceed 100%.");
         }
 
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>

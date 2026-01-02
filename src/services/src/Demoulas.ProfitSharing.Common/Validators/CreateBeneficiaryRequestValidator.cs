@@ -1,11 +1,12 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
 public class CreateBeneficiaryRequestValidator : AbstractValidator<CreateBeneficiaryRequest>
 {
-    public CreateBeneficiaryRequestValidator()
+    public CreateBeneficiaryRequestValidator(IBeneficiaryService? beneficiaryService = null)
     {
         RuleFor(x => x.BeneficiaryContactId)
             .GreaterThan(0)
@@ -37,5 +38,27 @@ public class CreateBeneficiaryRequestValidator : AbstractValidator<CreateBenefic
         RuleFor(x => x.Relationship)
             .NotEmpty()
             .WithMessage("Relationship is required.");
+
+        // Validate that the sum of all beneficiary percentages doesn't exceed 100%
+        if (beneficiaryService != null)
+        {
+            RuleFor(x => x)
+                .MustAsync(async (request, cancellationToken) =>
+                {
+                    var existingPercentageSum = await beneficiaryService.GetBeneficiaryPercentageSumAsync(
+                        request.EmployeeBadgeNumber,
+                        null,
+                        cancellationToken);
+
+                    // If we got an error (-1), allow validation to pass (the error will be caught elsewhere)
+                    if (existingPercentageSum < 0)
+                    {
+                        return true;
+                    }
+
+                    return (existingPercentageSum + request.Percentage) <= 100m;
+                })
+                .WithMessage("The sum of all beneficiary percentages would exceed 100%.");
+        }
     }
 }
