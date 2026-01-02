@@ -198,6 +198,159 @@ definitions:
       artifacts:
         - test-reports/**
 
+    # Develop branch analysis - determines whether to run frontend/backend steps
+    # Uses git tag comparison to find all changes since last successful build
+    selective-develop-analysis: &selective-develop-analysis
+      name: Analyze Develop Changes (Since Last Build)
+      runs-on:
+        - windows
+        - self.hosted
+      artifacts:
+        - develop-test-decision.json
+      script:
+        - |
+          $tagName = "last-successful-develop-build"
+
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "Analyzing changes since last successful develop build" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+
+          # Check if the tag exists (local or remote)
+          $tagExists = git tag -l $tagName
+          if (-not $tagExists) {
+            # Try to fetch from remote
+            git fetch origin "refs/tags/${tagName}:refs/tags/${tagName}" 2>$null
+            $tagExists = git tag -l $tagName
+          }
+
+          if (-not $tagExists) {
+            Write-Host "Tag '$tagName' not found - this is the first run" -ForegroundColor Yellow
+            Write-Host "Will run ALL steps to establish baseline" -ForegroundColor Yellow
+            @{
+              runFrontend = $true
+              runBackend = $true
+              reason = "First run - no baseline tag exists"
+              isFirstRun = $true
+            } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+            exit 0
+          }
+
+          # Get commit info
+          $lastBuildCommit = git rev-parse $tagName
+          $currentCommit = git rev-parse HEAD
+
+          Write-Host "Last successful build: $lastBuildCommit" -ForegroundColor Cyan
+          Write-Host "Current HEAD: $currentCommit" -ForegroundColor Cyan
+
+          if ($lastBuildCommit -eq $currentCommit) {
+            Write-Host "No new commits since last successful build" -ForegroundColor Green
+            @{
+              runFrontend = $false
+              runBackend = $false
+              reason = "No changes since last successful build"
+              isFirstRun = $false
+            } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+            exit 0
+          }
+
+          # Get changed files since last successful build
+          $changedFiles = git diff --name-only "$tagName..HEAD" 2>&1
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "git diff failed: $changedFiles" -ForegroundColor Yellow
+            Write-Host "Falling back to running ALL steps" -ForegroundColor Yellow
+            @{
+              runFrontend = $true
+              runBackend = $true
+              reason = "git diff failed - running all steps for safety"
+              isFirstRun = $false
+            } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+            exit 0
+          }
+
+          $changedFiles = $changedFiles -split "`n" | Where-Object { $_ }
+          Write-Host "`nFound $($changedFiles.Count) changed files since last build" -ForegroundColor Cyan
+
+          # Categorize changes
+          $frontendChanges = $changedFiles | Where-Object { $_ -match "^src/ui/" }
+          $backendChanges = $changedFiles | Where-Object { $_ -match "^src/services/" }
+
+          $runFrontend = $frontendChanges.Count -gt 0
+          $runBackend = $backendChanges.Count -gt 0
+
+          # Build reason string
+          $reasons = @()
+          if ($runFrontend) { $reasons += "Frontend: $($frontendChanges.Count) files changed" }
+          if ($runBackend) { $reasons += "Backend: $($backendChanges.Count) files changed" }
+          if (-not $runFrontend -and -not $runBackend) { $reasons += "No frontend or backend source changes" }
+
+          Write-Host "`n----------------------------------------" -ForegroundColor Cyan
+          Write-Host "Decision Summary:" -ForegroundColor Cyan
+          Write-Host "----------------------------------------" -ForegroundColor Cyan
+          Write-Host "  Run Frontend Steps: $(if ($runFrontend) { 'YES' } else { 'SKIP' })" -ForegroundColor $(if ($runFrontend) { 'Green' } else { 'Yellow' })
+          Write-Host "  Run Backend Steps:  $(if ($runBackend) { 'YES' } else { 'SKIP' })" -ForegroundColor $(if ($runBackend) { 'Green' } else { 'Yellow' })
+          Write-Host "----------------------------------------" -ForegroundColor Cyan
+
+          if ($frontendChanges.Count -gt 0 -and $frontendChanges.Count -le 20) {
+            Write-Host "`nFrontend files changed:" -ForegroundColor Yellow
+            $frontendChanges | ForEach-Object { Write-Host "  - $_" }
+          }
+
+          if ($backendChanges.Count -gt 0 -and $backendChanges.Count -le 20) {
+            Write-Host "`nBackend files changed:" -ForegroundColor Yellow
+            $backendChanges | ForEach-Object { Write-Host "  - $_" }
+          }
+
+          @{
+            runFrontend = $runFrontend
+            runBackend = $runBackend
+            reason = ($reasons -join "; ")
+            isFirstRun = $false
+            frontendFileCount = $frontendChanges.Count
+            backendFileCount = $backendChanges.Count
+          } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+
+    # Update the develop build tag after successful pipeline completion
+    update-develop-tag: &update-develop-tag
+      name: Update Develop Build Tag
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - |
+          $tagName = "last-successful-develop-build"
+          $currentCommit = git rev-parse HEAD
+
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "Updating develop build tag" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "Tag: $tagName" -ForegroundColor Cyan
+          Write-Host "Commit: $currentCommit" -ForegroundColor Cyan
+
+          # Configure git for tagging
+          git config user.email "bitbucket-pipeline@demoulas.com"
+          git config user.name "Bitbucket Pipeline"
+
+          # Delete existing tag locally (ignore errors if doesn't exist)
+          git tag -d $tagName 2>$null
+
+          # Delete existing tag on remote (ignore errors if doesn't exist)
+          git push origin --delete $tagName 2>$null
+
+          # Create new tag at HEAD
+          git tag $tagName HEAD
+
+          # Push the new tag
+          git push origin $tagName
+
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "`n[OK] Tag '$tagName' updated successfully" -ForegroundColor Green
+          } else {
+            Write-Host "`n[WARNING] Failed to push tag - next build will run all steps" -ForegroundColor Yellow
+            # Don't fail the build for tag issues
+            exit 0
+          }
+
     # Selective backend test analysis - determines which tests to run based on changed files
     # Uses dotnet-affected tool to build dependency graph and identify impacted projects
     selective-backend-analysis: &selective-backend-analysis
@@ -1003,7 +1156,7 @@ definitions:
           # API linting using centralized PowerShell script
           # Script location: scripts/Lint-Api.ps1
           # For local development: .\scripts\Lint-Api.ps1 or npm run lint:api (from src/ui/)
-          
+
           $output = New-Item -ItemType Directory -Path "reports/api-lint" -Force
           & ./scripts/Lint-Api.ps1 -QaBaseUrl "${env:QA_BASE_URL}:8443" -OutputFormat junit -OutputFile "./reports/api-lint/junit.xml"
           exit $LASTEXITCODE
@@ -1371,17 +1524,212 @@ pipelines:
       - step: *uat-validate-import
 
     develop:
-      # Stage 1: Code quality checks (fail fast)
-      - step: *frontend-lint
-      # Stage 2: Run audits and security scans only if build succeeds
+      # Stage 0: Analyze what changed since last successful build
+      - step: *selective-develop-analysis
+
+      # Stage 1: Code quality checks (fail fast) - only if frontend changed
+      - step:
+          name: Frontend TSC + Lint (Develop)
+          image: node:22-alpine
+          max-time: 10
+          script:
+            - |
+              echo "Checking develop-test-decision.json..."
+              if [ -f "develop-test-decision.json" ]; then
+                runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                if [ "$runFrontend" = "false" ]; then
+                  echo "SKIP: No frontend changes detected"
+                  exit 0
+                fi
+              fi
+              echo "Running frontend lint..."
+
+            - cd src/ui
+            - apk add --no-cache git
+            - npm install -g npm@latest
+            - |
+              cat > .npmrc << EOF
+              registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+              //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+              EOF
+            - npm ci
+            - npm run lint
+            - npx tsc -b --noEmit
+
+      # Stage 2: Run audits - conditional based on changes
       - parallel:
-          - step: *audit-frontend
-          - step: *audit-backend
-      # Stage 3: Build and test
+          - step:
+              name: Check frontend for vulnerabilities (Develop)
+              image: node:22-alpine
+              max-time: 10
+              script:
+                - |
+                  echo "Checking develop-test-decision.json..."
+                  if [ -f "develop-test-decision.json" ]; then
+                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                    if [ "$runFrontend" = "false" ]; then
+                      echo "SKIP: No frontend changes detected"
+                      exit 0
+                    fi
+                  fi
+                  echo "Running frontend audit..."
+
+                - cd src/ui
+                - |
+                  cat > .npmrc << EOF
+                  registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+                  //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+                  EOF
+                - npm audit --audit-level=high --production
+
+          - step:
+              name: Check Backend API for vulnerabilities (Develop)
+              runs-on:
+                - windows
+                - self.hosted
+              script:
+                - |
+                  Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
+                  if (Test-Path "develop-test-decision.json") {
+                    $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
+                    if ($decision.runBackend -eq $false) {
+                      Write-Host "SKIP: No backend changes detected" -ForegroundColor Yellow
+                      exit 0
+                    }
+                  }
+                  Write-Host "Running backend audit..." -ForegroundColor Cyan
+
+                - $env:SolutionDir = ".\src\services"
+                - echo "Checking dotnet vulnerabilities"
+                - cd $env:SolutionDir
+                - dotnet --info
+                - dotnet nuget list source
+                - dotnet restore Demoulas.ProfitSharing.slnx
+                - |
+                  $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+                  if ($output -match "has the following vulnerable packages") {
+                    Write-Host "Vulnerabilities found!"
+                    Write-Host $output
+                    exit 1
+                  } else {
+                    Write-Host "No vulnerabilities found."
+                    exit 0
+                  }
+
+      # Stage 3: Build and test - conditional based on changes
       - parallel:
-          - step: *build-and-test-backend-unit
-          - step: *build-and-test-backend-architecture
-          - step: *test-frontend
+          - step:
+              name: Build and Test Backend API - UnitTests (Develop)
+              runs-on:
+                - windows
+                - self.hosted
+              artifacts:
+                - test-reports/**
+              script:
+                - |
+                  Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
+                  if (Test-Path "develop-test-decision.json") {
+                    $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
+                    if ($decision.runBackend -eq $false) {
+                      Write-Host "SKIP: No backend changes detected" -ForegroundColor Yellow
+                      exit 0
+                    }
+                  }
+                  Write-Host "Running backend unit tests..." -ForegroundColor Cyan
+
+                - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+                - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
+                - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
+                - mkdir -Force -Path $env:REPORTS_PATH
+                - |
+                  $dotnetSdkList = dotnet --list-sdks;
+                  Write-Output "Installed .NET SDKs:";
+                  Write-Output $dotnetSdkList;
+                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+                  if (-not $dotnetSdkRequired) {
+                      Write-Error "FAILED: .NET 10 SDK is required but not available.";
+                      exit 1;
+                  }
+                - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+                - dotnet restore src/services/Demoulas.ProfitSharing.slnx
+                - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
+                - |
+                  $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
+                  Write-Host "Running ALL unit tests" -ForegroundColor Cyan
+                  & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+
+          - step:
+              name: Build and Test Backend API - Architecture (Develop)
+              runs-on:
+                - windows
+                - self.hosted
+              artifacts:
+                - test-reports/**
+              script:
+                - |
+                  Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
+                  if (Test-Path "develop-test-decision.json") {
+                    $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
+                    if ($decision.runBackend -eq $false) {
+                      Write-Host "SKIP: No backend changes detected" -ForegroundColor Yellow
+                      exit 0
+                    }
+                  }
+                  Write-Host "Running backend architecture tests..." -ForegroundColor Cyan
+
+                - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+                - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
+                - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/architecture-tests"
+                - mkdir -Force -Path $env:REPORTS_PATH
+                - |
+                  $dotnetSdkList = dotnet --list-sdks;
+                  Write-Output "Installed .NET SDKs:";
+                  Write-Output $dotnetSdkList;
+                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+                  if (-not $dotnetSdkRequired) {
+                      Write-Error "FAILED: .NET 10 SDK is required but not available.";
+                      exit 1;
+                  }
+                - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+                - dotnet restore src/services/Demoulas.ProfitSharing.slnx
+                - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
+                - |
+                  $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
+                  Write-Host "Executing test runner: $testExe"
+                  & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+
+          - step:
+              name: Build and Test Frontend UI (Develop)
+              image: node:22-alpine
+              max-time: 10
+              artifacts:
+                - src/ui/coverage/**
+                - src/ui/FE_Tests/**
+              script:
+                - |
+                  echo "Checking develop-test-decision.json..."
+                  if [ -f "develop-test-decision.json" ]; then
+                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                    if [ "$runFrontend" = "false" ]; then
+                      echo "SKIP: No frontend changes detected"
+                      exit 0
+                    fi
+                  fi
+                  echo "Running frontend tests..."
+
+                - cd src/ui
+                - apk add --no-cache git
+                - npm install -g npm@latest
+                - |
+                  cat > .npmrc << EOF
+                  registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+                  //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+                  EOF
+                - npm ci
+                - npm run test
+
+      # Stage 4: Update the build tag on success
+      - step: *update-develop-tag
 
   pull-requests:
     "**":
