@@ -17,4 +17,18 @@ public record UnattributedTotals
 
     /// <summary>Sum of net proceeds for unattributed records</summary>
     public decimal NetProceeds { get; set; }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static UnattributedTotals ResponseExample()
+    {
+        return new UnattributedTotals
+        {
+            Count = 5,
+            FederalTax = 250.00m,
+            StateTax = 125.00m,
+            NetProceeds = 1500.00m
+        };
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 
-public sealed record MissiveResponse : IdRequest
+public sealed record MissiveResponse : IdRequest<int>
 {
     public required string Message { get; set; }
     public required string Description { get; set; }

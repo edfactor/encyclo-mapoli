@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
+using Demoulas.Common.Data.Services.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;

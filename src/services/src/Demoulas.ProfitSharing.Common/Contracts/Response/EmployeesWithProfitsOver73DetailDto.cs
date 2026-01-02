@@ -100,4 +100,20 @@ public sealed record EmployeesWithProfitsOver73DetailDto
     /// This represents the recommended distribution amount to satisfy IRS RMD requirements.
     /// </summary>
     public required decimal SuggestRmdCheckAmount { get; init; }
+    public static EmployeesWithProfitsOver73DetailDto ResponseExample() => new()
+    {
+        BadgeNumber = 45678,
+        FullName = "Robert James Wilson",
+        Address = "456 Oak Avenue",
+        City = "Worcester",
+        State = "MA",
+        Zip = "01608",
+        Status = "Active",
+        DateOfBirth = new DateOnly(1950, 3, 15),
+        Age = 74,
+        Ssn = "***-**-9876",
+        TerminationDate = null,
+        Balance = 275000.00m,
+        RequiredMinimumDistributions = 13750.00m
+    };
 }

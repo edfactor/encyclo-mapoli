@@ -26,4 +26,22 @@ public sealed record DisbursementReportDetailResponse
         OriginalAmount = 5000.00M,
         RemainingBalance = 10000.00M
     };
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static DisbursementReportDetailResponse ResponseExample()
+    {
+        return new DisbursementReportDetailResponse
+        {
+            DistributionFrequencyId = 'M',
+            DistributionFrequencyName = "Monthly",
+            Ssn = "***-**-4567",
+            BadgeNumber = 123456,
+            EmployeeName = "Jane Smith",
+            VestedBalance = 25000.00m,
+            OriginalAmount = 8000.00m,
+            RemainingBalance = 17000.00m
+        };
+    }
 }

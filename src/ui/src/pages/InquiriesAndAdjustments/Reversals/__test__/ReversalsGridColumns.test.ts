@@ -1,12 +1,21 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  REVERSIBLE_PROFIT_CODES,
-  getReversalEligibilityStatus,
-  isRowReversible,
-  getIneligibilityReason
+    REVERSIBLE_PROFIT_CODES,
+    getIneligibilityReason,
+    getReversalEligibilityStatus,
+    isRowReversible
 } from "../ReversalsGridColumns";
 
 describe("ReversalsGridColumns", () => {
+  const setSystemDate = (date: Date) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(date);
+  };
+
+  const resetSystemDate = () => {
+    vi.useRealTimers();
+  };
+
   describe("REVERSIBLE_PROFIT_CODES", () => {
     it("should contain the expected profit codes", () => {
       expect(REVERSIBLE_PROFIT_CODES).toEqual([1, 3, 5, 6, 9]);
@@ -18,9 +27,15 @@ describe("ReversalsGridColumns", () => {
   });
 
   describe("getReversalEligibilityStatus", () => {
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1; // 1-based
+    // Mock to June to avoid January rule complications
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
 
     describe("null/undefined data", () => {
       it("should return ineligible for null data", () => {
@@ -36,6 +51,10 @@ describe("ReversalsGridColumns", () => {
 
     describe("already reversed transactions", () => {
       it("should return already-reversed when isAlreadyReversed is true", () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+
         const data = {
           profitCodeId: 1,
           monthToDate: currentMonth,
@@ -46,6 +65,10 @@ describe("ReversalsGridColumns", () => {
       });
 
       it("should check other conditions when isAlreadyReversed is false", () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+
         const data = {
           profitCodeId: 1,
           monthToDate: currentMonth,
@@ -58,6 +81,10 @@ describe("ReversalsGridColumns", () => {
 
     describe("profit code validation", () => {
       it.each(REVERSIBLE_PROFIT_CODES)("should return reversible for profit code %i", (profitCodeId) => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+
         const data = {
           profitCodeId,
           monthToDate: currentMonth,
@@ -67,6 +94,10 @@ describe("ReversalsGridColumns", () => {
       });
 
       it.each([0, 2, 4, 7, 8, 10, 99])("should return ineligible for non-reversible profit code %i", (profitCodeId) => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+
         const data = {
           profitCodeId,
           monthToDate: currentMonth,
@@ -78,6 +109,10 @@ describe("ReversalsGridColumns", () => {
 
     describe("date validation - 2 month rule", () => {
       it("should return reversible for transaction from current month", () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+
         const data = {
           profitCodeId: 1,
           monthToDate: currentMonth,
@@ -111,6 +146,9 @@ describe("ReversalsGridColumns", () => {
       });
 
       it("should return ineligible for transaction from previous year (old)", () => {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+
         const data = {
           profitCodeId: 1,
           monthToDate: 6,
@@ -123,12 +161,11 @@ describe("ReversalsGridColumns", () => {
     describe("January rule", () => {
       beforeEach(() => {
         // Mock Date to return January
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date(2025, 0, 15)); // January 15, 2025
+        setSystemDate(new Date(2025, 0, 15)); // January 15, 2025
       });
 
       afterEach(() => {
-        vi.useRealTimers();
+        resetSystemDate();
       });
 
       it("should block January transactions in January", () => {
@@ -184,32 +221,29 @@ describe("ReversalsGridColumns", () => {
       });
     });
 
-    describe("January rule does not apply in other months", () => {
-      beforeEach(() => {
-        // Mock Date to return June
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
-      });
-
-      afterEach(() => {
-        vi.useRealTimers();
-      });
-
-      it("should allow recent transactions in non-January months", () => {
-        const data = {
-          profitCodeId: 1,
-          monthToDate: 5, // May (within 2 months of June)
-          yearToDate: 2025
-        };
-        expect(getReversalEligibilityStatus(data)).toBe("reversible");
-      });
+    it("should allow recent transactions in non-January months", () => {
+      const data = {
+        profitCodeId: 1,
+        monthToDate: 5, // May (within 2 months of June)
+        yearToDate: 2025
+      };
+      expect(getReversalEligibilityStatus(data)).toBe("reversible");
     });
   });
 
   describe("isRowReversible", () => {
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1;
+    // Mock to June to avoid January rule complications
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const currentYear = 2025;
+    const currentMonth = 6; // June
 
     it("should return true for reversible rows", () => {
       const data = {
@@ -221,6 +255,10 @@ describe("ReversalsGridColumns", () => {
     });
 
     it("should return false for already-reversed rows", () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth() + 1;
+
       const data = {
         profitCodeId: 1,
         monthToDate: currentMonth,
@@ -231,6 +269,10 @@ describe("ReversalsGridColumns", () => {
     });
 
     it("should return false for ineligible profit codes", () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth() + 1;
+
       const data = {
         profitCodeId: 2,
         monthToDate: currentMonth,
@@ -240,6 +282,9 @@ describe("ReversalsGridColumns", () => {
     });
 
     it("should return false for old transactions", () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+
       const data = {
         profitCodeId: 1,
         monthToDate: 1,
@@ -250,9 +295,15 @@ describe("ReversalsGridColumns", () => {
   });
 
   describe("getIneligibilityReason", () => {
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1;
+    // Mock to June to avoid January rule complications
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
 
     it("should return default message for null data", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -260,6 +311,10 @@ describe("ReversalsGridColumns", () => {
     });
 
     it("should return already reversed message", () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth() + 1;
+
       const data = {
         profitCodeId: 1,
         monthToDate: currentMonth,
@@ -270,6 +325,10 @@ describe("ReversalsGridColumns", () => {
     });
 
     it("should return ineligible code message for non-reversible profit codes", () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth() + 1;
+
       const data = {
         profitCodeId: 2,
         monthToDate: currentMonth,
@@ -292,12 +351,11 @@ describe("ReversalsGridColumns", () => {
 
     describe("January rule messages", () => {
       beforeEach(() => {
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date(2025, 0, 15)); // January 15, 2025
+        setSystemDate(new Date(2025, 0, 15)); // January 15, 2025
       });
 
       afterEach(() => {
-        vi.useRealTimers();
+        resetSystemDate();
       });
 
       it("should return January-specific message for blocked transactions", () => {
@@ -311,6 +369,10 @@ describe("ReversalsGridColumns", () => {
     });
 
     it("should return default message for other ineligible cases", () => {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth() + 1;
+
       // This tests the fallback case - a row that passes all checks but somehow still ineligible
       // In practice, this shouldn't happen, but the function handles it gracefully
       const data = {

@@ -37,6 +37,8 @@ export interface ContentAwareHeightConfig {
   minHeight?: number;
   /** Maximum height in pixels. Default: 900 */
   maxHeight?: number;
+  /** Number of pinned rows (top and bottom combined) to add to row count calculation. Default: 0 */
+  pinnedRowCount?: number;
 }
 
 /**
@@ -372,7 +374,7 @@ export function DSMPaginatedGrid<T = unknown>({
 
   // Calculate content-aware grid height
   const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: data?.length ?? 0,
+    rowCount: (data?.length ?? 0) + (heightConfig?.pinnedRowCount ?? 0),
     ...heightConfig
   });
 

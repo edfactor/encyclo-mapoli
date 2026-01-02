@@ -67,5 +67,40 @@ public record MemberYearSummaryDto : IIsExecutive
     public string? PostalCode { get; set; }
     public int CertificateSort { get; set; }
     public bool IsExecutive { get; set; }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static MemberYearSummaryDto ResponseExample()
+    {
+        return new MemberYearSummaryDto
+        {
+            StoreNumber = 51,
+            BadgeNumber = 111222,
+            FullName = "Williams, Patricia A",
+            PayClassificationId = "FT",
+            PayClassificationName = "Full Time",
+            BeginningBalance = 25000.00m,
+            Earnings = 3500.00m,
+            Contributions = 4000.00m,
+            Forfeitures = 0.00m,
+            Distributions = 1000.00m,
+            EndingBalance = 31500.00m,
+            BeneficiaryAllocation = 0.00m,
+            VestedAmount = 28350.00m,
+            VestedPercent = 90,
+            DateOfBirth = new DateOnly(1978, 7, 22),
+            HireDate = new DateOnly(2012, 1, 15),
+            TerminationDate = null,
+            EnrollmentId = 4,
+            ProfitShareHours = 2000.00m,
+            Street1 = "456 Oak Avenue",
+            City = "Boston",
+            State = "MA",
+            PostalCode = "02101",
+            CertificateSort = 1,
+            IsExecutive = false
+        };
+    }
 }
 

@@ -20,7 +20,7 @@ export const hcmSyncApi = createApi({
      */
     getOracleHcmSyncMetadata: builder.query<OracleHcmSyncMetadata, void>({
       query: () => ({
-        url: "administration/oracleHcm/metadata",
+        url: "administration/oracle-hcm/metadata",
         method: "GET"
       }),
       providesTags: ["hcm-sync-metadata"]
@@ -32,7 +32,7 @@ export const hcmSyncApi = createApi({
     getDemographicSyncAudit: builder.query<Paged<DemographicSyncAuditRecord>, SortedPaginationRequestDto>({
       query: ({ skip, take, sortBy, isSortDescending }) => {
         return {
-          url: "administration/oracleHcm/audit",
+          url: "administration/oracle-hcm/audit",
           method: "GET",
           params: {
             skip,
@@ -50,7 +50,7 @@ export const hcmSyncApi = createApi({
      */
     clearDemographicSyncAudit: builder.mutation<ClearAuditResponse, void>({
       query: () => ({
-        url: "administration/oracleHcm/audit/clear",
+        url: "administration/oracle-hcm/audit/clear",
         method: "POST"
       }),
       invalidatesTags: ["hcm-sync-metadata", "demographic-sync-audit"]

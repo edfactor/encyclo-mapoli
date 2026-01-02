@@ -32,7 +32,7 @@ public sealed class ValidateAllocTransfersEndpoint
 
     public override void Configure()
     {
-        Get("balance-validation/alloc-transfers/{profitYear}");
+        Get("balance-validation/alloc-transfers/{profit-year}");
         Summary(s =>
         {
             s.Summary = "Validate ALLOC/PAID ALLOC transfer balance";

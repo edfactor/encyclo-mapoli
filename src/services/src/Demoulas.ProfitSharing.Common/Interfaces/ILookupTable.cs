@@ -4,6 +4,6 @@
 /// </summary>
 public interface ILookupTable<TType>
 {
-    public TType Id { get; set; }
-    public string Name { get; set; }
+    TType Id { get; set; }
+    string Name { get; set; }
 }

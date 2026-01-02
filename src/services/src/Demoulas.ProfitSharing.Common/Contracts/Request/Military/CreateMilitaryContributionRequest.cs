@@ -1,13 +1,15 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
-public sealed record CreateMilitaryContributionRequest : YearRequest
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+
+public sealed record CreateMilitaryContributionRequest : YearRequest, IBadgeNumberRequest
 {
     public int BadgeNumber { get; init; }
     public decimal ContributionAmount { get; init; }
     public bool IsSupplementalContribution { get; init; }
     public DateTime ContributionDate { get; init; } = DateTime.Now;
 
-    public static CreateMilitaryContributionRequest RequestExample()
+    public static new CreateMilitaryContributionRequest RequestExample()
     {
         return new CreateMilitaryContributionRequest
         {

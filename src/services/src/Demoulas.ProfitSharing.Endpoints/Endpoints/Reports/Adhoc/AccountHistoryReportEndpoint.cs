@@ -31,7 +31,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
 
     public override void Configure()
     {
-        Post("divorce-report");
+        Post("/divorce-report");
         Group<AdhocReportsGroup>();
         Summary(s =>
         {
