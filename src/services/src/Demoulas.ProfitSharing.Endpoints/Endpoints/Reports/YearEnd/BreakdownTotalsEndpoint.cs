@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class BreakdownTotalsEndpoint : ProfitSharingEndpoint<BreakdownByStoreRequest, Results<Ok<BreakdownByStoreTotals>, NotFound, ProblemHttpResult>>
+public class BreakdownTotalsEndpoint : ProfitSharingEndpoint<BreakdownTotalsByStoreRequest, Results<Ok<BreakdownByStoreTotals>, NotFound, ProblemHttpResult>>
 {
     private readonly IBreakdownService _breakdownService;
     private readonly ILogger<BreakdownTotalsEndpoint> _logger;
@@ -27,29 +27,38 @@ public class BreakdownTotalsEndpoint : ProfitSharingEndpoint<BreakdownByStoreReq
 
     public override void Configure()
     {
-        Get("/stores/{@storeNumber}/breakdown/totals", request => new { request.StoreNumber });
+        Get("/stores/{StoreNumber:int}/breakdown/totals");
         Summary(s =>
         {
             s.Summary = "Breakdown managers and associates totals for requested store";
             s.Description = "Retrieves total breakdown data for managers and associates at a specific store. Requires QPAY066TA authorization.";
-            s.ExampleRequest = BreakdownByStoreRequest.RequestExample();
+            s.ExampleRequest = BreakdownTotalsByStoreRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<AdhocReportsGroup>();
     }
 
-    public override async Task<Results<Ok<BreakdownByStoreTotals>, NotFound, ProblemHttpResult>> ExecuteAsync(BreakdownByStoreRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<BreakdownByStoreTotals>, NotFound, ProblemHttpResult>> ExecuteAsync(BreakdownTotalsByStoreRequest req, CancellationToken ct)
     {
         return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            var data = await _breakdownService.GetTotalsByStore(req, ct);
+            var serviceRequest = new BreakdownByStoreRequest
+            {
+                ProfitYear = req.ProfitYear,
+                StoreManagement = req.StoreManagement,
+                StoreNumber = req.StoreNumber,
+                BadgeNumber = req.BadgeNumber,
+                EmployeeName = req.EmployeeName
+            };
+
+            var data = await _breakdownService.GetTotalsByStore(serviceRequest, ct);
 
             // Record year-end breakdown store totals metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "year-end-breakdown-store-totals"),
                 new("endpoint", "BreakdownTotalsEndpoint"),
                 new("report_type", "store-totals"),
-                new("store_number", req.StoreNumber?.ToString() ?? "all"));
+                new("store_number", req.StoreNumber.ToString()));
 
             _logger.LogInformation("Year-end breakdown store totals retrieved for store {StoreNumber} (correlation: {CorrelationId})",
                 req.StoreNumber, HttpContext.TraceIdentifier);

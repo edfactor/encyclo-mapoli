@@ -28,7 +28,11 @@
     <PackageVersion Include="FastEndpoints.AspVersioning" Version="7.1.1" />
     <PackageVersion Include="FastEndpoints.Security" Version="5.31.0" />
     <PackageVersion Include="FastEndpoints.Swagger" Version="7.1.1" />
-    <PackageVersion Include="NSwag.Core" Version="14.6.2" />
+    <PackageVersion Include="NSwag.Core" Version="14.6.3" />
+    <PackageVersion Include="NSwag.Core.Yaml" Version="14.6.3" />
+    <PackageVersion Include="NSwag.AspNetCore" Version="14.6.3" />
+    <PackageVersion Include="NSwag.Generation.AspNetCore" Version="14.6.3" />
+    <PackageVersion Include="NSwag.MSBuild" Version="14.6.3" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.11.10" />
     <!-- ========================================== -->
     <!-- Entity Framework Core & Oracle             -->
