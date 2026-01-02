@@ -15,8 +15,8 @@ import {
   clearUnder21Totals,
   clearYearEndProfitSharingReportFrozen,
   clearYearEndProfitSharingReportLive,
-  clearYearEndProfitSharingReportTotalsLive,
   clearYearEndProfitSharingReportTotalsFrozen,
+  clearYearEndProfitSharingReportTotalsLive,
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
@@ -38,8 +38,8 @@ import {
   setProfitMasterApply,
   setProfitMasterRevert,
   setProfitMasterStatus,
-  setProfitShareSummaryReportLive,
   setProfitShareSummaryReportFrozen,
+  setProfitShareSummaryReportLive,
   setProfitSharingEdit,
   setProfitSharingLabels,
   setProfitSharingUnder21Report,
@@ -54,8 +54,8 @@ import {
   setVestedAmountsByAge,
   setYearEndProfitSharingReportFrozen,
   setYearEndProfitSharingReportLive,
-  setYearEndProfitSharingReportTotalsLive,
-  setYearEndProfitSharingReportTotalsFrozen
+  setYearEndProfitSharingReportTotalsFrozen,
+  setYearEndProfitSharingReportTotalsLive
 } from "reduxstore/slices/yearsEndSlice";
 import {
   BadgeNumberRequest,
@@ -158,7 +158,7 @@ export const YearsEndApi = createApi({
     }),
     updateEnrollment: builder.mutation<void, ProfitYearRequest>({
       query: (params) => ({
-        url: `yearend/update-enrollment`,
+        url: `yearend/enrollments`,
         method: "POST",
         body: params
       })
@@ -281,7 +281,7 @@ export const YearsEndApi = createApi({
     }),
     getGrossWagesReport: builder.query<GrossWagesReportResponse, GrossWagesReportDto>({
       query: (params) => ({
-        url: "yearend/frozen/grosswages",
+        url: "yearend/frozen/gross-wages",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -1175,7 +1175,7 @@ export const YearsEndApi = createApi({
     }),
     getUpdateSummary: builder.query<UpdateSummaryResponse, UpdateSummaryRequestWithArchive>({
       query: (params) => ({
-        url: `yearend/frozen/updatesummary`,
+        url: `yearend/frozen/update-summary`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -1226,22 +1226,8 @@ export const YearsEndApi = createApi({
     payBenReport: builder.query<PayBenReportResponse, PayBenReportRequest>({
       query: (params) => ({
         url: "yearend/payben-report",
-        method: "GET",
-        params: {
-          id: params.id,
-          skip: params.skip || 0,
-          take: params.take || 255,
-          sortBy: params.sortBy,
-          isSortDescending: params.isSortDescending
-        }
-      }),
-      async onQueryStarted(_arg, { dispatch: _dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
+        params
+      })
     }),
     getCertificatesReport: builder.query<CertificatesReportResponse, CertificatePrintRequest>({
       query: (params) => ({

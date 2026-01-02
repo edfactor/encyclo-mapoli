@@ -23,7 +23,7 @@ public class MasterInquiryMemberDetailsEndpoint : ProfitSharingEndpoint<MasterIn
 
     public override void Configure()
     {
-        Get("master-inquiry/member/{MemberType}/{Id}/details");
+        Get("master-inquiry/member/{member-type}/{id}/details");
         Summary(s =>
         {
             s.Summary = "Get paginated profit details for a specific member (employee or beneficiary).";

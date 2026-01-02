@@ -24,10 +24,11 @@ public sealed class UpdateBeneficiaryEndpoint : ProfitSharingEndpoint<UpdateBene
 
     public override void Configure()
     {
-        Put("/");
+        Put("");
         Summary(s =>
         {
             s.Summary = "Updates beneficiary information";
+            s.Description = "Updates an existing beneficiary's information. Requires beneficiary ID in request body.";
             s.ExampleRequest = UpdateBeneficiaryRequest.SampleRequest();
         });
         Group<BeneficiariesGroup>();

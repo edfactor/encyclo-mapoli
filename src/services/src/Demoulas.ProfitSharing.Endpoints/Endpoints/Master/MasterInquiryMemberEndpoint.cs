@@ -100,7 +100,7 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
     {
         try
         {
-            var entity = await _masterInquiryService.GetMemberVestingAsync(req, ct);
+            var entity = await _masterInquiryService.GetMemberAsync(req, ct);
             var result = entity.ToResultOrNotFound(Error.EntityNotFound("Member"));
             return result.ToHttpResult(Error.EntityNotFound("Member"));
         }

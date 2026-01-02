@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 
-public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNumber, IIsExecutive
+public record MemberDetails : IdRequest<int>, INameParts, IFullNameProperty, IPhoneNumber, IIsExecutive
 {
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; init; }

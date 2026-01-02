@@ -28,4 +28,16 @@ public record class ValidateReportFieldsRequest : ProfitYearRequest
     /// </code>
     /// </example>
     public required Dictionary<string, decimal> Fields { get; set; }
+
+    public static new ValidateReportFieldsRequest RequestExample() => new()
+    {
+        ProfitYear = 2024,
+        ReportType = "YearEndBreakdown",
+        Fields = new Dictionary<string, decimal>
+        {
+            { "TotalAmount", 12345.67m },
+            { "ParticipantCount", 100m },
+            { "AverageDistribution", 123.45m }
+        }
+    };
 }

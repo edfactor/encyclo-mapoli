@@ -1,12 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  REVERSIBLE_PROFIT_CODES,
-  getIneligibilityReason,
-  getReversalEligibilityStatus,
-  isRowReversible
+    REVERSIBLE_PROFIT_CODES,
+    getIneligibilityReason,
+    getReversalEligibilityStatus,
+    isRowReversible
 } from "../ReversalsGridColumns";
 
 describe("ReversalsGridColumns", () => {
+  const setSystemDate = (date: Date) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(date);
+  };
+
+  const resetSystemDate = () => {
+    vi.useRealTimers();
+  };
+
   describe("REVERSIBLE_PROFIT_CODES", () => {
     it("should contain the expected profit codes", () => {
       expect(REVERSIBLE_PROFIT_CODES).toEqual([1, 3, 5, 6, 9]);
@@ -152,12 +161,11 @@ describe("ReversalsGridColumns", () => {
     describe("January rule", () => {
       beforeEach(() => {
         // Mock Date to return January
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date(2025, 0, 15)); // January 15, 2025
+        setSystemDate(new Date(2025, 0, 15)); // January 15, 2025
       });
 
       afterEach(() => {
-        vi.useRealTimers();
+        resetSystemDate();
       });
 
       it("should block January transactions in January", () => {
@@ -213,25 +221,13 @@ describe("ReversalsGridColumns", () => {
       });
     });
 
-    describe("January rule does not apply in other months", () => {
-      beforeEach(() => {
-        // Mock Date to return June
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
-      });
-
-      afterEach(() => {
-        vi.useRealTimers();
-      });
-
-      it("should allow recent transactions in non-January months", () => {
-        const data = {
-          profitCodeId: 1,
-          monthToDate: 5, // May (within 2 months of June)
-          yearToDate: 2025
-        };
-        expect(getReversalEligibilityStatus(data)).toBe("reversible");
-      });
+    it("should allow recent transactions in non-January months", () => {
+      const data = {
+        profitCodeId: 1,
+        monthToDate: 5, // May (within 2 months of June)
+        yearToDate: 2025
+      };
+      expect(getReversalEligibilityStatus(data)).toBe("reversible");
     });
   });
 
@@ -246,11 +242,10 @@ describe("ReversalsGridColumns", () => {
       vi.useRealTimers();
     });
 
-    it("should return true for reversible rows", () => {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = 2025;
+    const currentMonth = 6; // June
 
+    it("should return true for reversible rows", () => {
       const data = {
         profitCodeId: 1,
         monthToDate: currentMonth,
@@ -356,12 +351,11 @@ describe("ReversalsGridColumns", () => {
 
     describe("January rule messages", () => {
       beforeEach(() => {
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date(2025, 0, 15)); // January 15, 2025
+        setSystemDate(new Date(2025, 0, 15)); // January 15, 2025
       });
 
       afterEach(() => {
-        vi.useRealTimers();
+        resetSystemDate();
       });
 
       it("should return January-specific message for blocked transactions", () => {

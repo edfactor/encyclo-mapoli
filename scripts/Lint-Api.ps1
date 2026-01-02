@@ -77,7 +77,8 @@ if (-not $OpenApiPath) {
         if ($PSVersionTable.PSVersion.Major -ge 6) {
             # PowerShell Core 6+ has built-in -SkipCertificateCheck
             Invoke-WebRequest -Uri $uri -OutFile $OpenApiPath -SkipCertificateCheck -ErrorAction Stop
-        } else {
+        }
+        else {
             # Windows PowerShell 5.x - use .NET certificate policy
             Add-Type -TypeDefinition @"
 using System.Net;
@@ -99,7 +100,8 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
         Write-Error "Failed to download OpenAPI spec: $_"
         exit 1
     }
-} else {
+}
+else {
     Write-Host "[1] Using provided OpenAPI spec" -ForegroundColor Cyan
     Write-Host "Path: $OpenApiPath" -ForegroundColor Yellow
     
@@ -162,7 +164,8 @@ Write-Host "======================" -ForegroundColor Cyan
 if ($lintExitCode -eq 0) {
     Write-Host "[PASS] API linting PASSED - No errors found" -ForegroundColor Green
     exit 0
-} else {
+}
+else {
     Write-Host "[FAIL] API linting FAILED - Review errors above" -ForegroundColor Red
     if ($OutputFile) {
         Write-Host "JUnit report saved to: $OutputFile" -ForegroundColor Yellow
