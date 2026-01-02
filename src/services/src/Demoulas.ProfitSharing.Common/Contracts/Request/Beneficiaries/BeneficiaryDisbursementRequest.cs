@@ -1,6 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
-public sealed record BeneficiaryDisbursementRequest
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+
+public sealed record BeneficiaryDisbursementRequest : IBadgeNumberRequest
 {
     public required int BadgeNumber { get; init; }
     public short? PsnSuffix { get; init; }
