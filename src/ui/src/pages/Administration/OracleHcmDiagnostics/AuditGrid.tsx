@@ -26,7 +26,8 @@ interface AuditGridProps {
   pageNumber: number;
   pageSize: number;
   sortParams: SortParams;
-  onPageChange: (page: number, pageSize: number) => void;
+  onPageNumberChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
   onSortChange: (sortParams: SortParams) => void;
 }
 
@@ -37,7 +38,8 @@ const AuditGrid: React.FC<AuditGridProps> = ({
   pageNumber,
   pageSize,
   sortParams,
-  onPageChange,
+  onPageNumberChange,
+  onPageSizeChange,
   onSortChange
 }) => {
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
@@ -98,13 +100,13 @@ const AuditGrid: React.FC<AuditGridProps> = ({
           data={data.results ?? []}
           columnDefs={columnDefs}
           totalRecords={data.total}
-          isLoading={isLoading}
+          isLoading={isLoading || isClearing}
           pagination={{
             pageNumber,
             pageSize,
             sortParams,
-            handlePageNumberChange: (value: number) => onPageChange(value, pageSize),
-            handlePageSizeChange: (value: number) => onPageChange(0, value),
+            handlePageNumberChange: onPageNumberChange,
+            handlePageSizeChange: onPageSizeChange,
             handleSortChange: onSortChange
           }}
           showPagination={(data.results?.length ?? 0) > 0}

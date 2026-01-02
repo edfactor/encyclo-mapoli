@@ -2,7 +2,6 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Data.Contexts.Interfaces;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -42,23 +41,33 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
         {
             var metadata = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                // Get latest timestamps from PayProfit table for both table syncs
+#pragma warning disable DSMPS001
+                var demographicTimestamps = await ctx.Demographics
+#pragma warning restore DSMPS001
+                    .TagWith("GetOracleHcmSyncMetadata-Demographic")
+                    .GroupBy(_ => 1)
+                    .Select(g => new
+                    {
+                        LatestCreated = g.Min(d => d.CreatedAtUtc),
+                        LatestModified = g.Max(d => d.ModifiedAtUtc != null ? d.ModifiedAtUtc : d.CreatedAtUtc)
+                    })
+                    .FirstOrDefaultAsync(ct);
+
+                // Get earliest created and latest modified timestamps from PayProfit table
                 var payProfitTimestamps = await ctx.PayProfits
                     .TagWith("GetOracleHcmSyncMetadata-PayProfit")
                     .GroupBy(_ => 1)
                     .Select(g => new
                     {
-                        LatestCreated = g.Max(p => p.CreatedAtUtc),
-                        LatestModified = g.Max(p => p.ModifiedAtUtc)
+                        LatestCreated = g.Min(p => p.CreatedAtUtc),
+                        LatestModified = g.Max(p => p.ModifiedAtUtc != null ? p.ModifiedAtUtc : p.CreatedAtUtc)
                     })
                     .FirstOrDefaultAsync(ct);
 
-                // For Demographic timestamps, we use PayProfit as proxy since direct Demographics access is restricted
-                // Both tables are synced together from OracleHcm
                 return new OracleHcmSyncMetadata
                 {
-                    DemographicCreatedAtUtc = payProfitTimestamps?.LatestCreated,
-                    DemographicModifiedAtUtc = payProfitTimestamps?.LatestModified,
+                    DemographicCreatedAtUtc = demographicTimestamps?.LatestCreated,
+                    DemographicModifiedAtUtc = demographicTimestamps?.LatestModified,
                     PayProfitCreatedAtUtc = payProfitTimestamps?.LatestCreated,
                     PayProfitModifiedAtUtc = payProfitTimestamps?.LatestModified
                 };
@@ -168,7 +177,7 @@ public class OracleHcmDiagnosticsService : IOracleHcmDiagnosticsService
     {
         try
         {
-            using (_guardOverride.AllowFor(roles: Role.ITDEVOPS))
+            using (_guardOverride.AllowFor(Role.ITDEVOPS, Role.ADMINISTRATOR))
             {
                 // Get count and delete in same writable context
                 var count = await _dataContextFactory.UseWritableContext(async ctx =>

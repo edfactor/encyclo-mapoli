@@ -1,6 +1,5 @@
 ﻿using System.CommandLine;
 using System.Text;
-using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +7,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
