@@ -2,7 +2,7 @@ import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
 import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
-import { usePayBenReportMutation } from "../../../../reduxstore/api/YearsEndApi";
+import { useLazyPayBenReportQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import { PayBenReportRequest } from "../../../../types";
 import { initialState, payBenReportReducer, selectHasResults, selectShowData } from "./usePayBenReportReducer";
@@ -10,7 +10,7 @@ import { initialState, payBenReportReducer, selectHasResults, selectShowData } f
 const usePayBenReport = () => {
   const [state, dispatch] = useReducer(payBenReportReducer, initialState);
 
-  const [triggerReport, { isLoading: isSearching }] = usePayBenReportMutation();
+  const [triggerReport, { isLoading: isSearching }] = useLazyPayBenReportQuery();
   const hasToken = !!useSelector((state: RootState) => state.security.token);
 
   const handlePaginationChange = useCallback(

@@ -25,7 +25,7 @@ public class PayBenReportEndpoint : ProfitSharingEndpoint<PayBenReportRequest,
 
     public override void Configure()
     {
-        Post("payben-report");
+        Get("payben-report");
         Summary(s =>
         {
             s.Summary = "PayBen Report";
