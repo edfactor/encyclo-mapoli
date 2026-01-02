@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  REVERSIBLE_PROFIT_CODES,
-  getIneligibilityReason,
-  getReversalEligibilityStatus,
-  isRowReversible
+    REVERSIBLE_PROFIT_CODES,
+    getIneligibilityReason,
+    getReversalEligibilityStatus,
+    isRowReversible
 } from "../ReversalsGridColumns";
 
 describe("ReversalsGridColumns", () => {
