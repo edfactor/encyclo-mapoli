@@ -110,25 +110,13 @@ builder.Services.AddCors(options =>
 // Configure JSON serialization with source generation for better performance
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
-    // In test scenarios with multiple WebApplicationFactory instances, JsonSerializerOptions
-    // may become read-only after first use. Skip modifications if already locked.
-    if (o.SerializerOptions.IsReadOnly)
-    {
-        return;
-    }
-
     // Insert masking converter at index 0 to ensure highest precedence
     // Pass the host environment to the converter so it can check IsTestEnvironment()
     o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory(builder.Environment));
 
     // Add source-generated JSON serializer context for compile-time serialization
     // This reduces reflection overhead and improves startup time
-    // Skip in test environment to avoid the singleton context's options becoming read-only
-    // across multiple test WebApplicationFactory instances
-    if (!builder.Environment.IsTestEnvironment())
-    {
-        o.SerializerOptions.TypeInfoResolverChain.Insert(0, Demoulas.ProfitSharing.Api.Serialization.ProfitSharingJsonSerializerContext.Default);
-    }
+    o.SerializerOptions.TypeInfoResolverChain.Insert(0, Demoulas.ProfitSharing.Api.Serialization.ProfitSharingJsonSerializerContext.Default);
 });
 
 builder.AddDatabaseServices((services, factoryRequests) =>
