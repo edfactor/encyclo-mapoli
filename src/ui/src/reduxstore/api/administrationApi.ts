@@ -14,7 +14,6 @@ export const AdministrationApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "administrationApi",
   tagTypes: ["CommentTypes", "RmdFactors"],
-  tagTypes: ["CommentTypes", "RmdFactors"],
   // Disable caching to prevent sensitive data from persisting in browser
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,

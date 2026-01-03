@@ -55,7 +55,7 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
         DeMinimusValue: data.DeMinimusValue
       };
 
-      console.log('Filter params being sent:', dataCopy);
+      console.log("Filter params being sent:", dataCopy);
       onSearch(dataCopy);
     }
   });
@@ -108,7 +108,9 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
               control={control}
               render={({ field }) => (
                 <>
-                  <label htmlFor="DeMinimusValue" style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>
+                  <label
+                    htmlFor="DeMinimusValue"
+                    style={{ display: "block", marginBottom: "8px", fontSize: "14px" }}>
                     De Minimus Value
                   </label>
                   <input
@@ -116,23 +118,21 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
                     type="number"
                     step="0.01"
                     min="0"
-                    value={field.value ?? ''}
+                    value={field.value ?? ""}
                     onChange={(e) => {
-                      const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                      const value = e.target.value === "" ? null : parseFloat(e.target.value);
                       field.onChange(value);
                       trigger("DeMinimusValue");
                     }}
                     style={{
-                      width: '100%',
-                      padding: '8px',
-                      fontSize: '14px',
-                      border: errors.DeMinimusValue ? '1px solid #d32f2f' : '1px solid #ccc',
-                      borderRadius: '4px'
+                      width: "100%",
+                      padding: "8px",
+                      fontSize: "14px",
+                      border: errors.DeMinimusValue ? "1px solid #d32f2f" : "1px solid #ccc",
+                      borderRadius: "4px"
                     }}
                   />
-                  {errors.DeMinimusValue && (
-                    <FormHelperText error>{errors.DeMinimusValue.message}</FormHelperText>
-                  )}
+                  {errors.DeMinimusValue && <FormHelperText error>{errors.DeMinimusValue.message}</FormHelperText>}
                 </>
               )}
             />

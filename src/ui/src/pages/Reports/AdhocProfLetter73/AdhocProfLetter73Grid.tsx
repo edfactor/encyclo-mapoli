@@ -63,32 +63,26 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
   };
 
   // Pagination hook with server-side sorting support
-  const { 
-    pageNumber, 
-    pageSize, 
-    sortParams, 
-    handlePageNumberChange,
-    handlePageSizeChange,
-    handleSortChange 
-  } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "BadgeNumber",
-    initialSortDescending: false,
-    persistenceKey: "ADHOC_PROF_LETTER73",
-    onPaginationChange: (newPageNumber, newPageSize, newSortParams) => {
-      // Server-side pagination and sorting - trigger API call
-      if (profitYear > 0) {
-        trigger({
-          profitYear,
-          DeMinimusValue: filterParams.DeMinimusValue,
-          skip: newPageNumber * newPageSize,
-          take: newPageSize,
-          sortBy: newSortParams.sortBy,
-          isSortDescending: newSortParams.isSortDescending
-        });
+  const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "BadgeNumber",
+      initialSortDescending: false,
+      persistenceKey: "ADHOC_PROF_LETTER73",
+      onPaginationChange: (newPageNumber, newPageSize, newSortParams) => {
+        // Server-side pagination and sorting - trigger API call
+        if (profitYear > 0) {
+          trigger({
+            profitYear,
+            DeMinimusValue: filterParams.DeMinimusValue,
+            skip: newPageNumber * newPageSize,
+            take: newPageSize,
+            sortBy: newSortParams.sortBy,
+            isSortDescending: newSortParams.isSortDescending
+          });
+        }
       }
-    }
-  });
+    });
 
   // Trigger API call when profitYear or DeMinimusValue changes (initial load)
   useEffect(() => {
@@ -101,7 +95,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
         sortBy: sortParams.sortBy,
         isSortDescending: sortParams.isSortDescending
       };
-      console.log('API params being sent to backend:', apiParams);
+      console.log("API params being sent to backend:", apiParams);
       trigger(apiParams);
     }
   }, [profitYear, filterParams.DeMinimusValue, trigger, pageNumber, pageSize, sortParams]);
@@ -130,15 +124,18 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
         if (sampleData) {
           const cols: ColDef[] = Object.keys(sampleData).map((key) => {
             const baseCol: ColDef = {
-              headerName: key.replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase()),
+              headerName: key
+                .replace(/([A-Z])/g, " $1")
+                .trim()
+                .replace(/^./, (str) => str.toUpperCase()),
               field: key,
               sortable: true,
               filter: false,
               resizable: true
             };
-            
+
             // Add special formatting for Factor column
-            if (key.toLowerCase() === 'factor') {
+            if (key.toLowerCase() === "factor") {
               baseCol.headerName = "Factor";
               baseCol.type = "rightAligned";
               baseCol.valueFormatter = (params) => {
@@ -148,9 +145,9 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
                 return Number.isFinite(numValue) ? numValue.toFixed(4) : "N/A";
               };
             }
-            
+
             // Add special formatting for RMD column
-            if (key.toLowerCase() === 'rmd') {
+            if (key.toLowerCase() === "rmd") {
               baseCol.headerName = "RMD";
               baseCol.type = "rightAligned";
               baseCol.valueFormatter = (params) => {
@@ -158,17 +155,17 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
                 if (value == null) return "N/A";
                 const numValue = Number(value);
                 if (!Number.isFinite(numValue)) return "N/A";
-                return new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
+                return new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 }).format(numValue);
               };
             }
-            
+
             // Add special formatting for Balance column
-            if (key.toLowerCase() === 'balance') {
+            if (key.toLowerCase() === "balance") {
               baseCol.headerName = "Balance";
               baseCol.type = "rightAligned";
               baseCol.valueFormatter = (params) => {
@@ -176,17 +173,17 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
                 if (value == null) return "N/A";
                 const numValue = Number(value);
                 if (!Number.isFinite(numValue)) return "N/A";
-                return new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
+                return new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 }).format(numValue);
               };
             }
-            
+
             // Add special formatting for PaymentsInProfitYear column
-            if (key.toLowerCase() === 'paymentsinprofityear') {
+            if (key.toLowerCase() === "paymentsinprofityear") {
               baseCol.headerName = "Payments In Profit Year";
               baseCol.type = "rightAligned";
               baseCol.valueFormatter = (params) => {
@@ -194,17 +191,17 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
                 if (value == null) return "N/A";
                 const numValue = Number(value);
                 if (!Number.isFinite(numValue)) return "N/A";
-                return new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
+                return new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 }).format(numValue);
               };
             }
-            
+
             // Add special formatting for SuggestRmdCheckAmount column
-            if (key.toLowerCase() === 'suggestrmdcheckamount') {
+            if (key.toLowerCase() === "suggestrmdcheckamount") {
               baseCol.headerName = "Suggest RMD Check Amount";
               baseCol.type = "rightAligned";
               baseCol.valueFormatter = (params) => {
@@ -212,18 +209,18 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
                 if (value == null) return "N/A";
                 const numValue = Number(value);
                 if (!Number.isFinite(numValue)) return "N/A";
-                return new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
+                return new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 }).format(numValue);
               };
             }
-            
+
             return baseCol;
           });
-          
+
           // Add Print checkbox column
           cols.push({
             headerName: "Print",

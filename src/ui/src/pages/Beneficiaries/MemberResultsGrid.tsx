@@ -16,7 +16,6 @@ interface MemberResultsGridProps {
   onPageNumberChange: (pageNumber: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   handleSortChange: (sortParams: SortParams) => void;
-  
 }
 
 const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({

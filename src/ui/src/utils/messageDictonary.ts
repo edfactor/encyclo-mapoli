@@ -6,8 +6,6 @@ export enum MessageKeys {
   TerminationSave = "TerminationSave",
   TerminationBulkSave = "TerminationBulkSave",
   UnforfeitSave = "UnforfeitSave",
-  RmdFactorsSave = "RmdFactorsSave",
-  RmdFactorsUpdate = "RmdFactorsEditUpdate",
   MilitaryContribution = "MilitaryContribution",
   StateTaxRatesSave = "StateTaxRatesSave",
   AnnuityRatesSave = "AnnuityRatesSave",
@@ -87,6 +85,14 @@ export class Messages {
       message: "Please try again"
     }
   };
+  static readonly RmdFactorsLoadError: MessageUpdate = {
+    key: MessageKeys.RmdFactorsSave,
+    message: {
+      type: "error",
+      title: "Failed to load RMD factors",
+      message: "Please try again"
+    }
+  };
   static readonly RmdFactorsSaveSuccess: MessageUpdate = {
     key: MessageKeys.RmdFactorsSave,
     message: {
@@ -95,17 +101,11 @@ export class Messages {
     }
   };
   static readonly RmdFactorsSaveError: MessageUpdate = {
-    key: MessageKeys.RmdFactorsUpdate,
+    key: MessageKeys.RmdFactorsSave,
     message: {
       type: "error",
-      title: "Failed to save RMD factors"
-    }
-  };
-  static readonly RmdFactorsLoadError: MessageUpdate = {
-    key: MessageKeys.RmdFactorsUpdate,
-    message: {
-      type: "error",
-      title: "Failed to load RMD factors"
+      title: "Failed to save RMD factors",
+      message: "Please try again"
     }
   };
   static readonly ProfitShareApplySuccess: MessageUpdate = {
@@ -154,29 +154,6 @@ export class Messages {
       type: "error",
       title: "Prerequisite Not Complete",
       message: "" // dynamic message added at dispatch time
-    }
-  };
-  static readonly RmdFactorsLoadError: MessageUpdate = {
-    key: MessageKeys.RmdFactorsSave,
-    message: {
-      type: "error",
-      title: "Failed to load RMD factors",
-      message: "Please try again"
-    }
-  };
-  static readonly RmdFactorsSaveSuccess: MessageUpdate = {
-    key: MessageKeys.RmdFactorsSave,
-    message: {
-      type: "success",
-      title: "RMD factors saved successfully"
-    }
-  };
-  static readonly RmdFactorsSaveError: MessageUpdate = {
-    key: MessageKeys.RmdFactorsSave,
-    message: {
-      type: "error",
-      title: "Failed to save RMD factors",
-      message: "Please try again"
     }
   };
 }
