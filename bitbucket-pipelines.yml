@@ -200,11 +200,15 @@ definitions:
 
     # Develop branch analysis - determines whether to run frontend/backend steps
     # Uses git tag comparison to find all changes since last successful build
+    # Note: Git network operations hang on Windows self-hosted runners, so we only check locally
+    # The clone configuration below uses depth: full to ensure tags are included
     selective-develop-analysis: &selective-develop-analysis
       name: Analyze Develop Changes (Since Last Build)
       runs-on:
         - windows
         - self.hosted
+      clone:
+        depth: full
       artifacts:
         - develop-test-decision.json
       script:
@@ -215,20 +219,10 @@ definitions:
           Write-Host "Analyzing changes since last successful develop build" -ForegroundColor Cyan
           Write-Host "========================================" -ForegroundColor Cyan
 
-          # Check if the tag exists locally
-          Write-Host "Checking for tag locally..." -ForegroundColor Gray
+          # Check if the tag exists locally (included via depth: full clone)
+          # Note: We don't check remote because git network ops hang on Windows runners
+          Write-Host "Checking for baseline tag..." -ForegroundColor Gray
           $tagExists = git tag -l $tagName
-
-          if (-not $tagExists) {
-            Write-Host "Tag not found locally, checking remote..." -ForegroundColor Gray
-            # Use git ls-remote to check if tag exists on remote (fast, won't hang)
-            $remoteTagCheck = git ls-remote --tags origin "refs/tags/$tagName" 2>&1
-            if ($LASTEXITCODE -eq 0 -and $remoteTagCheck -match $tagName) {
-              Write-Host "Tag found on remote, fetching..." -ForegroundColor Gray
-              git fetch origin "refs/tags/${tagName}:refs/tags/${tagName}"
-              $tagExists = git tag -l $tagName
-            }
-          }
 
           if (-not $tagExists) {
             Write-Host "Tag '$tagName' not found - this is the first run" -ForegroundColor Yellow
@@ -318,11 +312,13 @@ definitions:
           } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
 
     # Update the develop build tag after successful pipeline completion
+    # Note: Git push operations may hang on Windows runners, so we use timeouts
     update-develop-tag: &update-develop-tag
       name: Update Develop Build Tag
       runs-on:
         - windows
         - self.hosted
+      max-time: 5
       script:
         - |
           $tagName = "last-successful-develop-build"
@@ -341,19 +337,29 @@ definitions:
           # Delete existing tag locally (ignore errors if doesn't exist)
           git tag -d $tagName 2>$null
 
-          # Delete existing tag on remote (ignore errors if doesn't exist)
-          git push origin --delete $tagName 2>$null
-
           # Create new tag at HEAD
           git tag $tagName HEAD
 
-          # Push the new tag
-          git push origin $tagName
+          # Try to push tag with timeout (git network ops may hang on Windows runners)
+          Write-Host "Pushing tag to remote (30s timeout)..." -ForegroundColor Gray
+          $job = Start-Job -ScriptBlock {
+            param($tag)
+            # Delete old tag on remote first
+            git push origin --delete $tag 2>$null
+            # Push new tag
+            git push origin $tag
+          } -ArgumentList $tagName
 
-          if ($LASTEXITCODE -eq 0) {
+          $completed = Wait-Job $job -Timeout 30
+          if ($completed) {
+            $result = Receive-Job $job
+            Remove-Job $job -Force
             Write-Host "`n[OK] Tag '$tagName' updated successfully" -ForegroundColor Green
           } else {
-            Write-Host "`n[WARNING] Failed to push tag - next build will run all steps" -ForegroundColor Yellow
+            Stop-Job $job
+            Remove-Job $job -Force
+            Write-Host "`n[WARNING] Git push timed out - tag not updated on remote" -ForegroundColor Yellow
+            Write-Host "Next build will run all steps. This is a known limitation with Windows runners." -ForegroundColor Yellow
             # Don't fail the build for tag issues
             exit 0
           }
