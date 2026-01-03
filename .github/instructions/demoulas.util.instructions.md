@@ -38,14 +38,14 @@ public static string FirstCharToUpper(this string input)
 
 **Parameters:**
 
--   `input` (string): The input string to process
+- `input` (string): The input string to process
 
 **Returns:** A string with its first character converted to uppercase
 
 **Exceptions:**
 
--   `ArgumentNullException`: Thrown when input is null
--   `ArgumentException`: Thrown when input is empty
+- `ArgumentNullException`: Thrown when input is null
+- `ArgumentException`: Thrown when input is empty
 
 **Example:**
 
@@ -70,9 +70,9 @@ public static bool Contains(this string input, string searched, StringComparison
 
 **Parameters:**
 
--   `input` (string): The source string to search in
--   `searched` (string): The substring to search for
--   `comparison` (StringComparison): The comparison type (e.g., `OrdinalIgnoreCase`)
+- `input` (string): The source string to search in
+- `searched` (string): The substring to search for
+- `comparison` (StringComparison): The comparison type (e.g., `OrdinalIgnoreCase`)
 
 **Returns:** True if the substring is found; otherwise, false
 
@@ -97,7 +97,7 @@ public static string Base64Encode(this string plainText)
 
 **Parameters:**
 
--   `plainText` (string): The plain text string to encode
+- `plainText` (string): The plain text string to encode
 
 **Returns:** A Base64-encoded string
 
@@ -121,7 +121,7 @@ public static string Base64Decode(this string base64EncodedData)
 
 **Parameters:**
 
--   `base64EncodedData` (string): The Base64-encoded string to decode
+- `base64EncodedData` (string): The Base64-encoded string to decode
 
 **Returns:** The decoded plain text string
 
@@ -149,7 +149,7 @@ public static DateTime ToEndOfDay(this DateTime dateTime)
 
 **Parameters:**
 
--   `dateTime` (DateTime): The date to process
+- `dateTime` (DateTime): The date to process
 
 **Returns:** A DateTime representing 11:59:59 PM on the given date
 
@@ -174,7 +174,7 @@ public static DateTime ZeroTime(this DateTime dateTime)
 
 **Parameters:**
 
--   `dateTime` (DateTime): The date to process
+- `dateTime` (DateTime): The date to process
 
 **Returns:** A DateTime with time set to 00:00:00
 
@@ -199,7 +199,7 @@ public static DateTime? NullOnUnixStart(this DateTime? date)
 
 **Parameters:**
 
--   `date` (DateTime?): The nullable date to check
+- `date` (DateTime?): The nullable date to check
 
 **Returns:** The original date if after Unix epoch, otherwise null
 
@@ -227,7 +227,7 @@ public static DateTime LastYearDay(this DateTime todayDate)
 
 **Parameters:**
 
--   `todayDate` (DateTime): The current date
+- `todayDate` (DateTime): The current date
 
 **Returns:** The date of the same day and week number in the previous year
 
@@ -262,8 +262,8 @@ public static short Age(this DateTimeOffset birthDate, DateTimeOffset fromDateTi
 
 **Parameters:**
 
--   `birthDate` (DateTime/DateTimeOffset): The date of birth
--   `fromDateTime` (DateTime/DateTimeOffset, optional): Reference date for calculation (defaults to today/now)
+- `birthDate` (DateTime/DateTimeOffset): The date of birth
+- `fromDateTime` (DateTime/DateTimeOffset, optional): Reference date for calculation (defaults to today/now)
 
 **Returns:** The calculated age as a short integer
 
@@ -324,9 +324,9 @@ public static DateOnly ToDateOnly(this DateTimeOffset dateTimeOffset, DateTimeKi
 
 **Parameters:**
 
--   `dateTime` (DateTime): The DateTime to convert
--   `dateTimeOffset` (DateTimeOffset): The DateTimeOffset to convert
--   `kind` (DateTimeKind, optional): The DateTimeKind to use for conversion
+- `dateTime` (DateTime): The DateTime to convert
+- `dateTimeOffset` (DateTimeOffset): The DateTimeOffset to convert
+- `kind` (DateTimeKind, optional): The DateTimeKind to use for conversion
 
 **Returns:** A DateOnly representation of the provided date/time
 
@@ -358,8 +358,8 @@ public static object? GetPropertyValue(this object source, string propertyName)
 
 **Parameters:**
 
--   `source` (object): The object to retrieve the property from
--   `propertyName` (string): The name of the property
+- `source` (object): The object to retrieve the property from
+- `propertyName` (string): The name of the property
 
 **Returns:** The property value, or null if the property doesn't exist
 
@@ -384,8 +384,8 @@ public static string? GetPropertyValueAsString(this object source, string proper
 
 **Parameters:**
 
--   `source` (object): The object to retrieve the property from
--   `propertyName` (string): The name of the property
+- `source` (object): The object to retrieve the property from
+- `propertyName` (string): The name of the property
 
 **Returns:** A string representation of the property value, or null
 
@@ -410,9 +410,9 @@ public static decimal? GetPropertyValueAsDecimal(this object source, string prop
 
 **Parameters:**
 
--   `source` (object): The object to retrieve the property from
--   `propertyName` (string): The name of the property
--   `defaultValue` (decimal, optional): Default value if conversion fails
+- `source` (object): The object to retrieve the property from
+- `propertyName` (string): The name of the property
+- `defaultValue` (decimal, optional): Default value if conversion fails
 
 **Returns:** A decimal representation of the property value, or the default value
 
@@ -447,26 +447,26 @@ public static IQueryable<TEntity> OrderByProperty<TEntity>(
 
 **Type Parameters:**
 
--   `TEntity`: The type of elements in the sequence
+- `TEntity`: The type of elements in the sequence
 
 **Parameters:**
 
--   `source` (IQueryable<TEntity>): The source queryable
--   `orderByProperty` (string): The property name to order by (case-insensitive for strings)
--   `descending` (bool, optional): Whether to sort in descending order
--   `ignoreNullValues` (bool, optional): Whether to move null values to the bottom of the sort
+- `source` (IQueryable<TEntity>): The source queryable
+- `orderByProperty` (string): The property name to order by (case-insensitive for strings)
+- `descending` (bool, optional): Whether to sort in descending order
+- `ignoreNullValues` (bool, optional): Whether to move null values to the bottom of the sort
 
 **Returns:** An ordered IQueryable<TEntity>
 
 **Exceptions:**
 
--   `ArgumentException`: Thrown if the property doesn't exist on the entity type
+- `ArgumentException`: Thrown if the property doesn't exist on the entity type
 
 **Features:**
 
--   Case-insensitive sorting for string properties
--   Null value handling to push them to bottom of results
--   Supports multi-column sorting with comma-separated property names
+- Case-insensitive sorting for string properties
+- Null value handling to push them to bottom of results
+- Supports multi-column sorting with comma-separated property names
 
 **Example:**
 
@@ -504,17 +504,17 @@ public static string GenerateCurlCommand(this HttpRequestMessage request, string
 
 **Parameters:**
 
--   `request` (HttpRequestMessage): The HTTP request message
--   `url` (string): The complete URL being requested
+- `request` (HttpRequestMessage): The HTTP request message
+- `url` (string): The complete URL being requested
 
 **Returns:** A formatted cURL command string that can be copied to Postman or terminal
 
 **Features:**
 
--   Includes all headers
--   Properly escapes quotes in header values
--   Adds compression and insecure flags for testing
--   Ready to paste into terminal or Postman
+- Includes all headers
+- Properly escapes quotes in header values
+- Adds compression and insecure flags for testing
+- Ready to paste into terminal or Postman
 
 **Example:**
 
@@ -548,18 +548,18 @@ public static bool IsTestEnvironment(this IWebHostEnvironment environment)
 
 **Parameters:**
 
--   `environment` (IHostEnvironment/IWebHostEnvironment): The host environment
+- `environment` (IHostEnvironment/IWebHostEnvironment): The host environment
 
 **Returns:** True if the environment is a test environment, otherwise false
 
 **Recognized Test Environments:**
 
--   Environment name: "Testing" or "Test"
--   Application names: "ReSharperTestRunner" or "testHost"
+- Environment name: "Testing" or "Test"
+- Application names: "ReSharperTestRunner" or "testHost"
 
 **Side Effect:**
 
--   Sets the environment name to "Testing" if a test environment is detected
+- Sets the environment name to "Testing" if a test environment is detected
 
 **Example:**
 
@@ -595,6 +595,6 @@ using Demoulas.Util.Extensions;
 
 **See Also:**
 
--   [Main Documentation](./demoulas.common.instructions.md)
--   [Data Extensions](./demoulas.common.data.instructions.md)
--   [API Extensions](./demoulas.common.api.instructions.md)
+- [Main Documentation](./demoulas.common.instructions.md)
+- [Data Extensions](./demoulas.common.data.instructions.md)
+- [API Extensions](./demoulas.common.api.instructions.md)

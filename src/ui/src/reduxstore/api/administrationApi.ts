@@ -1,6 +1,12 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { CommentTypeDto, CreateCommentTypeRequest, UpdateCommentTypeRequest, RmdFactorDto, UpdateRmdFactorRequest } from "../types";
+import {
+  CommentTypeDto,
+  CreateCommentTypeRequest,
+  RmdFactorDto,
+  UpdateCommentTypeRequest,
+  UpdateRmdFactorRequest
+} from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -42,23 +48,37 @@ export const AdministrationApi = createApi({
       }),
       invalidatesTags: ["CommentTypes"]
     }),
+
+    // RMD Factors endpoints
     getRmdFactors: builder.query<RmdFactorDto[], void>({
       query: () => ({
-        url: "administration/rmds-factors",
+        url: "/administration/rmd-factors",
         method: "GET"
       }),
+      transformResponse: (response: RmdFactorDto[] | { items: RmdFactorDto[]; count: number }) => {
+        // Handle both direct array and paginated response formats
+        if (Array.isArray(response)) {
+          return response;
+        }
+        return response.items || [];
+      },
       providesTags: ["RmdFactors"]
     }),
     updateRmdFactor: builder.mutation<RmdFactorDto, UpdateRmdFactorRequest>({
-      query: (request) => ({
-        url: "administration/rmds-factors",
-        method: "POST",
-        body: request
+      query: (body) => ({
+        url: "/administration/rmd-factors",
+        method: "PUT",
+        body
       }),
       invalidatesTags: ["RmdFactors"]
     })
   })
 });
 
-export const { useGetCommentTypesQuery, useCreateCommentTypeMutation, useUpdateCommentTypeMutation, useGetRmdFactorsQuery, useUpdateRmdFactorMutation } =
-  AdministrationApi;
+export const {
+  useGetCommentTypesQuery,
+  useCreateCommentTypeMutation,
+  useUpdateCommentTypeMutation,
+  useGetRmdFactorsQuery,
+  useUpdateRmdFactorMutation
+} = AdministrationApi;

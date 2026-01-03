@@ -35,9 +35,9 @@ export const AdhocProfLetter73Api = createApi({
         const queryParams = new URLSearchParams({
           profitYear: params.profitYear.toString()
         });
-        
+
         if (params.DeMinimusValue !== undefined && params.DeMinimusValue !== null) {
-          queryParams.append('DeMinimusValue', params.DeMinimusValue.toString());
+          queryParams.append("DeMinimusValue", params.DeMinimusValue.toString());
         }
         if (params.skip !== undefined) {
           queryParams.append("skip", params.skip.toString());

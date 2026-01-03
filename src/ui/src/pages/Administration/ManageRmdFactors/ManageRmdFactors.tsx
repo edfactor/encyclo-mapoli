@@ -134,7 +134,7 @@ const ManageRmdFactors = () => {
 
     for (const [ageStr, factor] of entries) {
       const age = Number.parseInt(ageStr, 10);
-      
+
       if (!Number.isInteger(age) || age < 0 || age > 150) {
         setErrorMessage("Age must be a valid integer between 0 and 150.");
         return;
@@ -159,21 +159,21 @@ const ManageRmdFactors = () => {
 
       setStagedFactorsByAge({});
       await refetch();
-      
+
       // Dispatch success message
       dispatch(
         setMessage({
           ...Messages.RmdFactorsSaveSuccess,
           message: {
             ...Messages.RmdFactorsSaveSuccess.message,
-            message: `Successfully updated ${entries.length} RMD factor${entries.length > 1 ? 's' : ''}.`
+            message: `Successfully updated ${entries.length} RMD factor${entries.length > 1 ? "s" : ""}.`
           }
         })
       );
     } catch (e) {
       console.error("Failed to update RMD factors", e);
       setErrorMessage("Failed to save changes. Please try again.");
-      
+
       // Dispatch error message
       dispatch(
         setMessage({
@@ -196,62 +196,62 @@ const ManageRmdFactors = () => {
         <Grid
           container
           rowSpacing={3}>
-        <Grid width="100%">
-          <Divider />
-        </Grid>
+          <Grid width="100%">
+            <Divider />
+          </Grid>
 
-        <Grid width="100%">
-          <Box
-            sx={{
-              display: "flex",
-              gap: 3,
-              alignItems: "center",
-              width: "100%",
-              px: 1
-            }}>
-            <Box sx={{ flex: 1 }}>
-              {errorMessage && (
-                <Typography
-                  variant="body2"
-                  color="error">
-                  {errorMessage}
-                </Typography>
-              )}
+          <Grid width="100%">
+            <Box
+              sx={{
+                display: "flex",
+                gap: 3,
+                alignItems: "center",
+                width: "100%",
+                px: 1
+              }}>
+              <Box sx={{ flex: 1 }}>
+                {errorMessage && (
+                  <Typography
+                    variant="body2"
+                    color="error">
+                    {errorMessage}
+                  </Typography>
+                )}
+              </Box>
+
+              <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
+                <Button
+                  variant="contained"
+                  disabled={!hasUnsavedChanges || isSaving}
+                  onClick={saveChanges}>
+                  Save
+                </Button>
+                <Button
+                  variant="outlined"
+                  disabled={!hasUnsavedChanges || isSaving}
+                  onClick={discardChanges}>
+                  Discard
+                </Button>
+              </Box>
             </Box>
+          </Grid>
 
-            <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
-              <Button
-                variant="contained"
-                disabled={!hasUnsavedChanges || isSaving}
-                onClick={saveChanges}>
-                Save
-              </Button>
-              <Button
-                variant="outlined"
-                disabled={!hasUnsavedChanges || isSaving}
-                onClick={discardChanges}>
-                Discard
-              </Button>
-            </Box>
-          </Box>
+          <Grid width="100%">
+            <DSMGrid
+              preferenceKey={GRID_KEYS.MANAGE_RMD_FACTORS}
+              isLoading={isFetching || isSaving}
+              providedOptions={{
+                rowData,
+                columnDefs,
+                suppressMultiSort: true,
+                stopEditingWhenCellsLoseFocus: true,
+                enterNavigatesVertically: true,
+                enterNavigatesVerticallyAfterEdit: true,
+                onCellValueChanged
+              }}
+            />
+          </Grid>
         </Grid>
-
-        <Grid width="100%">
-          <DSMGrid
-            preferenceKey={GRID_KEYS.MANAGE_RMD_FACTORS}
-            isLoading={isFetching || isSaving}
-            providedOptions={{
-              rowData,
-              columnDefs,
-              suppressMultiSort: true,
-              stopEditingWhenCellsLoseFocus: true,
-              enterNavigatesVertically: true,
-              enterNavigatesVerticallyAfterEdit: true,
-              onCellValueChanged
-            }}
-          />
-        </Grid>
-      </Grid>
       </Page>
     </PageErrorBoundary>
   );
