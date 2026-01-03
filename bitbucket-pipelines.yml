@@ -334,8 +334,8 @@ definitions:
           git config user.email "bitbucket-pipeline@demoulas.com"
           git config user.name "Bitbucket Pipeline"
 
-          # Delete existing tag locally (ignore errors if doesn't exist)
-          git tag -d $tagName 2>&1 | Out-Null
+          # Delete existing tag locally if it exists
+          if (git tag -l $tagName) { git tag -d $tagName }
 
           # Create new tag at HEAD
           git tag $tagName HEAD
@@ -344,8 +344,8 @@ definitions:
           Write-Host "Pushing tag to remote (30s timeout)..." -ForegroundColor Gray
           $job = Start-Job -ScriptBlock {
             param($tag)
-            # Delete old tag on remote first
-            git push origin --delete $tag 2>&1 | Out-Null
+            # Delete old tag on remote first (if it exists)
+            if (git ls-remote --tags origin $tag) { git push origin --delete $tag }
             # Push new tag
             git push origin $tag
           } -ArgumentList $tagName
