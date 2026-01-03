@@ -341,14 +341,17 @@ definitions:
           git tag $tagName HEAD
 
           # Try to push tag with timeout (git network ops may hang on Windows runners)
+          # Note: Start-Job runs in a separate process without the current directory context
           Write-Host "Pushing tag to remote (30s timeout)..." -ForegroundColor Gray
+          $repoPath = (Get-Location).Path
           $job = Start-Job -ScriptBlock {
-            param($tag)
+            param($tag, $workDir)
+            Set-Location $workDir
             # Delete old tag on remote first (if it exists)
             if (git ls-remote --tags origin $tag) { git push origin --delete $tag }
             # Push new tag
             git push origin $tag
-          } -ArgumentList $tagName
+          } -ArgumentList $tagName, $repoPath
 
           $completed = Wait-Job $job -Timeout 30
           if ($completed) {
