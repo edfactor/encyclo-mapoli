@@ -65,7 +65,12 @@ Pure utility functions for percentage allocation validation (100% constraint).
 ## Usage
 
 ```typescript
-import { parseBadgeAndPSN, decomposePSNSuffix, calculatePercentageSum, validatePercentageAllocation } from "./utils";
+import {
+  parseBadgeAndPSN,
+  decomposePSNSuffix,
+  calculatePercentageSum,
+  validatePercentageAllocation,
+} from "./utils";
 
 // Parse badge/PSN
 const { badge, psn } = parseBadgeAndPSN("12345678"); // { badge: 1234567, psn: 8 }
