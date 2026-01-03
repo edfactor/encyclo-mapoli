@@ -335,7 +335,7 @@ definitions:
           git config user.name "Bitbucket Pipeline"
 
           # Delete existing tag locally (ignore errors if doesn't exist)
-          git tag -d $tagName 2>$null
+          git tag -d $tagName 2>&1 | Out-Null
 
           # Create new tag at HEAD
           git tag $tagName HEAD
@@ -345,7 +345,7 @@ definitions:
           $job = Start-Job -ScriptBlock {
             param($tag)
             # Delete old tag on remote first
-            git push origin --delete $tag 2>$null
+            git push origin --delete $tag 2>&1 | Out-Null
             # Push new tag
             git push origin $tag
           } -ArgumentList $tagName
