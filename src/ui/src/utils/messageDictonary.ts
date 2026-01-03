@@ -6,6 +6,8 @@ export enum MessageKeys {
   TerminationSave = "TerminationSave",
   TerminationBulkSave = "TerminationBulkSave",
   UnforfeitSave = "UnforfeitSave",
+  RmdFactorsSave = "RmdFactorsSave",
+  RmdFactorsUpdate = "RmdFactorsEditUpdate",
   MilitaryContribution = "MilitaryContribution",
   StateTaxRatesSave = "StateTaxRatesSave",
   AnnuityRatesSave = "AnnuityRatesSave",
@@ -83,6 +85,27 @@ export class Messages {
       type: "error",
       title: "Failed to save annuity rates",
       message: "Please try again"
+    }
+  };
+  static readonly RmdFactorsSaveSuccess: MessageUpdate = {
+    key: MessageKeys.RmdFactorsSave,
+    message: {
+      type: "success",
+      title: "RMD factors saved successfully"
+    }
+  };
+  static readonly RmdFactorsSaveError: MessageUpdate = {
+    key: MessageKeys.RmdFactorsUpdate,
+    message: {
+      type: "error",
+      title: "Failed to save RMD factors"
+    }
+  };
+  static readonly RmdFactorsLoadError: MessageUpdate = {
+    key: MessageKeys.RmdFactorsUpdate,
+    message: {
+      type: "error",
+      title: "Failed to load RMD factors"
     }
   };
   static readonly ProfitShareApplySuccess: MessageUpdate = {

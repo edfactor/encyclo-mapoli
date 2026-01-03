@@ -74,6 +74,7 @@ const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDW
 const DemographicFreeze = lazy(() => import("../../pages/ITOperations/DemographicFreeze/DemographicFreeze"));
 const ManageStateTaxes = lazy(() => import("../../pages/Administration/ManageStateTaxes/ManageStateTaxes"));
 const ManageAnnuityRates = lazy(() => import("../../pages/Administration/ManageAnnuityRates/ManageAnnuityRates"));
+const ManageRmdFactors = lazy(() => import("../../pages/Administration/ManageRmdFactors/ManageRmdFactors"));
 const ManageCommentTypes = lazy(() => import("../../pages/Administration/ManageCommentTypes/ManageCommentTypes"));
 const ProfitSharingAdjustments = lazy(
   () => import("../../pages/Administration/ProfitSharingAdjustments/ProfitSharingAdjustments")
@@ -636,6 +637,17 @@ const RouterSubAssembly: React.FC = () => {
                       requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageAnnuityRates />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.MANAGE_RMD_FACTORS}
+                  element={
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <ManageRmdFactors />
                       </Suspense>
                     </ProtectedRoute>
                   }

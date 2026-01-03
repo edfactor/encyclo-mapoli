@@ -5385,6 +5385,161 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("PROFIT_SHARE_CHECK", (string)null);
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.RmdsFactorByAge", b =>
+                {
+                    b.Property<byte>("Age")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("AGE");
+
+                    b.Property<decimal>("Factor")
+                        .HasPrecision(4, 1)
+                        .HasColumnType("DECIMAL(4,1)")
+                        .HasColumnName("FACTOR");
+
+                    b.HasKey("Age")
+                        .HasName("PK_RMDS_FACTOR_BY_AGE");
+
+                    b.ToTable("RMDS_FACTOR_BY_AGE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Age = (byte)73,
+                            Factor = 26.5m
+                        },
+                        new
+                        {
+                            Age = (byte)74,
+                            Factor = 25.5m
+                        },
+                        new
+                        {
+                            Age = (byte)75,
+                            Factor = 24.6m
+                        },
+                        new
+                        {
+                            Age = (byte)76,
+                            Factor = 23.7m
+                        },
+                        new
+                        {
+                            Age = (byte)77,
+                            Factor = 22.9m
+                        },
+                        new
+                        {
+                            Age = (byte)78,
+                            Factor = 22.0m
+                        },
+                        new
+                        {
+                            Age = (byte)79,
+                            Factor = 21.1m
+                        },
+                        new
+                        {
+                            Age = (byte)80,
+                            Factor = 20.2m
+                        },
+                        new
+                        {
+                            Age = (byte)81,
+                            Factor = 19.4m
+                        },
+                        new
+                        {
+                            Age = (byte)82,
+                            Factor = 18.5m
+                        },
+                        new
+                        {
+                            Age = (byte)83,
+                            Factor = 17.7m
+                        },
+                        new
+                        {
+                            Age = (byte)84,
+                            Factor = 16.8m
+                        },
+                        new
+                        {
+                            Age = (byte)85,
+                            Factor = 16.0m
+                        },
+                        new
+                        {
+                            Age = (byte)86,
+                            Factor = 15.2m
+                        },
+                        new
+                        {
+                            Age = (byte)87,
+                            Factor = 14.4m
+                        },
+                        new
+                        {
+                            Age = (byte)88,
+                            Factor = 13.7m
+                        },
+                        new
+                        {
+                            Age = (byte)89,
+                            Factor = 12.9m
+                        },
+                        new
+                        {
+                            Age = (byte)90,
+                            Factor = 12.2m
+                        },
+                        new
+                        {
+                            Age = (byte)91,
+                            Factor = 11.5m
+                        },
+                        new
+                        {
+                            Age = (byte)92,
+                            Factor = 10.8m
+                        },
+                        new
+                        {
+                            Age = (byte)93,
+                            Factor = 10.1m
+                        },
+                        new
+                        {
+                            Age = (byte)94,
+                            Factor = 9.5m
+                        },
+                        new
+                        {
+                            Age = (byte)95,
+                            Factor = 8.9m
+                        },
+                        new
+                        {
+                            Age = (byte)96,
+                            Factor = 8.4m
+                        },
+                        new
+                        {
+                            Age = (byte)97,
+                            Factor = 7.8m
+                        },
+                        new
+                        {
+                            Age = (byte)98,
+                            Factor = 7.3m
+                        },
+                        new
+                        {
+                            Age = (byte)99,
+                            Factor = 6.8m
+                        });
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.Job", b =>
                 {
                     b.Property<int>("Id")

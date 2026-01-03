@@ -32,7 +32,7 @@ public sealed class GetProfitSharingReportValidationEndpoint
 
     public override void Configure()
     {
-        Get("checksum/profit-sharing-report/{profitYear}/{reportSuffix}/{useFrozenData}");
+        Get("checksum/profit-sharing-report/{profit-year}/{report-suffix}/{use-frozen-data}");
         Summary(s =>
         {
             s.Summary = "Get Profit Sharing Report validation data for a specific profit year and report suffix";

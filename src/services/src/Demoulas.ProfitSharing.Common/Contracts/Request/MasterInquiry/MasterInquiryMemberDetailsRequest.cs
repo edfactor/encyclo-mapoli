@@ -20,4 +20,27 @@ public record MasterInquiryMemberDetailsRequest : SortedPaginationRequestDto
     public string? Name { get; set; }
     public byte? PaymentType { get; set; }
     public bool? Voids { get; set; }
+
+    public static MasterInquiryMemberDetailsRequest RequestExample() => new()
+    {
+        MemberType = 1,
+        Id = 500,
+        ProfitYear = 2024,
+        MonthToDate = 12,
+        BadgeNumber = 123456,
+        PsnSuffix = 1,
+        Ssn = "123-45-6789",
+        ProfitCode = 1,
+        ContributionAmount = 1500.00m,
+        EarningsAmount = 250.75m,
+        ForfeitureAmount = 0m,
+        PaymentAmount = 800.00m,
+        Name = "Smith, John",
+        PaymentType = 1,
+        Voids = false,
+        Skip = 0,
+        Take = 50,
+        SortBy = "BadgeNumber",
+        IsSortDescending = false
+    };
 }

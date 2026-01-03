@@ -1,4 +1,4 @@
-﻿
+
 using System.Reflection;
 using Demoulas.Common.Data.Services.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
@@ -54,6 +54,38 @@ public sealed class ScenarioFactory
         .Where(f => f.FieldType == typeof(char))
         .Select(f => new TerminationCode { Id = (char)f.GetValue(null)!, Name = f.Name })
         .ToList();
+
+    // RMD factors (IRS Publication 590-B Uniform Lifetime Table) - seed all ages 73-99
+    public List<RmdsFactorByAge> RmdsFactorsByAge { get; set; } =
+    [
+        new RmdsFactorByAge { Age = 73, Factor = 26.5m },
+        new RmdsFactorByAge { Age = 74, Factor = 25.5m },
+        new RmdsFactorByAge { Age = 75, Factor = 24.6m },
+        new RmdsFactorByAge { Age = 76, Factor = 23.7m },
+        new RmdsFactorByAge { Age = 77, Factor = 22.9m },
+        new RmdsFactorByAge { Age = 78, Factor = 22.0m },
+        new RmdsFactorByAge { Age = 79, Factor = 21.1m },
+        new RmdsFactorByAge { Age = 80, Factor = 20.2m },
+        new RmdsFactorByAge { Age = 81, Factor = 19.4m },
+        new RmdsFactorByAge { Age = 82, Factor = 18.5m },
+        new RmdsFactorByAge { Age = 83, Factor = 17.7m },
+        new RmdsFactorByAge { Age = 84, Factor = 16.8m },
+        new RmdsFactorByAge { Age = 85, Factor = 16.0m },
+        new RmdsFactorByAge { Age = 86, Factor = 15.2m },
+        new RmdsFactorByAge { Age = 87, Factor = 14.4m },
+        new RmdsFactorByAge { Age = 88, Factor = 13.7m },
+        new RmdsFactorByAge { Age = 89, Factor = 12.9m },
+        new RmdsFactorByAge { Age = 90, Factor = 12.2m },
+        new RmdsFactorByAge { Age = 91, Factor = 11.5m },
+        new RmdsFactorByAge { Age = 92, Factor = 10.8m },
+        new RmdsFactorByAge { Age = 93, Factor = 10.1m },
+        new RmdsFactorByAge { Age = 94, Factor = 9.5m },
+        new RmdsFactorByAge { Age = 95, Factor = 8.9m },
+        new RmdsFactorByAge { Age = 96, Factor = 8.4m },
+        new RmdsFactorByAge { Age = 97, Factor = 7.8m },
+        new RmdsFactorByAge { Age = 98, Factor = 7.3m },
+        new RmdsFactorByAge { Age = 99, Factor = 6.8m }
+    ];
 
     // collects ctx.ProfitDetail.AddRange() rows for inspection by test
     public List<ProfitDetail> addedProfitDetails = [];
@@ -283,6 +315,10 @@ public sealed class ScenarioFactory
         _sdb.ProfitSharingDbContext.Setup(m => m.AuditEvents).Returns(mockAuditEvents.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.AuditEvents).Returns(mockAuditEvents.Object);
 
+        // RmdsFactorsByAge - IRS RMD factors for ages 73-99
+        Mock<DbSet<RmdsFactorByAge>> mockRmdsFactorsByAge = RmdsFactorsByAge.BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.RmdsFactorsByAge).Returns(mockRmdsFactorsByAge.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.RmdsFactorsByAge).Returns(mockRmdsFactorsByAge.Object);
 
         return _sdb;
     }

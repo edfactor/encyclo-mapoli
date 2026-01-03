@@ -2,7 +2,6 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Data.Services.Entities.Entities;
-using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
@@ -456,61 +455,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         }
     }
 
-    public Task<PaginatedResponseDto<GroupedProfitSummaryDto>> GetGroupedProfitDetails(MasterInquiryRequest req, CancellationToken cancellationToken = default)
-    {
-        byte[] balanceProfitCodes = GetPaymentProfitCodes();
-
-        return _dataContextFactory.UseReadOnlyContext(async ctx =>
-        {
-            // Use context-based overloads to avoid nested context disposal
-            IQueryable<MasterInquiryItem> query;
-
-            if (req.MemberType == 1)
-            {
-                query = await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken);
-            }
-            else if (req.MemberType == 2)
-            {
-                query = await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken);
-            }
-            else
-            {
-                var empQuery = await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken);
-                var benQuery = await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken);
-                query = empQuery.Union(benQuery);
-            }
-
-            query = FilterMemberQuery(req, query);
-
-            // Only group by non-null ProfitDetail
-            query = query.Where(x => x.ProfitDetail != null);
-
-            return await query
-                .GroupBy(x => new
-                {
-                    ProfitYear = x.ProfitDetail != null ? x.ProfitDetail.ProfitYear : (short)0,
-                    MonthToDate = x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0
-                })
-                .Select(g => new GroupedProfitSummaryDto
-                {
-                    ProfitYear = g.Key.ProfitYear,
-                    MonthToDate = g.Key.MonthToDate,
-                    TotalContribution = g.Sum(x => x.ProfitDetail != null ? x.ProfitDetail.Contribution : 0),
-                    TotalEarnings = g.Sum(x => x.ProfitDetail != null ? x.ProfitDetail.Earnings : 0),
-                    TotalForfeiture = g.Sum(x =>
-                        x.ProfitDetail != null && !balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
-                    TotalPayment = g.Sum(x =>
-                        x.ProfitDetail != null && balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
-                    TransactionCount = g.Count()
-                })
-                .OrderBy(x => x.ProfitYear)
-                .ThenBy(x => x.MonthToDate)
-                .ToPaginationResultsAsync(req, cancellationToken);
-        }, cancellationToken);
-    }
-
-
-    public async Task<MemberProfitPlanDetails?> GetMemberVestingAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
+    public async Task<MemberProfitPlanDetails?> GetMemberAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
     {
         short currentYear = req.ProfitYear;
         short previousYear = (short)(currentYear - 1);

@@ -10,7 +10,7 @@ import { initialState, payBenReportReducer, selectHasResults, selectShowData } f
 const usePayBenReport = () => {
   const [state, dispatch] = useReducer(payBenReportReducer, initialState);
 
-  const [triggerReport, { isFetching: isSearching }] = useLazyPayBenReportQuery();
+  const [triggerReport, { isLoading: isSearching }] = useLazyPayBenReportQuery();
   const hasToken = !!useSelector((state: RootState) => state.security.token);
 
   const handlePaginationChange = useCallback(

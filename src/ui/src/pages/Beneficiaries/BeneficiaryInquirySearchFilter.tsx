@@ -27,14 +27,12 @@ const schema = yup.object().shape({
 // Define the type of props
 type BeneficiaryInquirySearchFilterProps = {
   onSearch: (params: BeneficiarySearchAPIRequest | undefined) => void;
-  onMemberTypeChange: (type: number | undefined) => void;
   onReset: () => void;
   isSearching?: boolean;
 };
 
 const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({
   onSearch,
-  onMemberTypeChange,
   onReset,
   isSearching = false
 }) => {
@@ -75,9 +73,8 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
       }
 
       setValue("memberType", memberType as 0 | 1 | 2);
-      onMemberTypeChange(memberType);
     },
-    [setValue, onMemberTypeChange]
+    [setValue]
   );
 
   // Member type options
@@ -114,7 +111,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
     (fieldName: string, isDisabled: boolean) => {
       if (!isDisabled) return undefined;
 
-      if (fieldName === "socialSecurity") {
+      if (fieldName === "ssn") {
         if (hasName) return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
         if (hasBadgeNumber) return "Disabled: Badge/PSN field is in use. Press Reset to clear and re-enable.";
       }
@@ -352,7 +349,6 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                     {...field}
                     onChange={(event) => {
                       field.onChange(event);
-                      onMemberTypeChange(Number(event.target.value));
                     }}
                     row>
                     {memberTypeOptions.map((option) => (

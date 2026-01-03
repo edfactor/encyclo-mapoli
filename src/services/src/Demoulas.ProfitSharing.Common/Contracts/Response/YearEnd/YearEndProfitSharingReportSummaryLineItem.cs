@@ -13,4 +13,23 @@ public sealed record YearEndProfitSharingReportSummaryLineItem
     [MaskSensitive] public int? TotalPoints { get; set; }
     public decimal TotalBalance { get; set; }
     public decimal TotalPriorBalance { get; set; }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static YearEndProfitSharingReportSummaryLineItem ResponseExample()
+    {
+        return new YearEndProfitSharingReportSummaryLineItem
+        {
+            Subgroup = "ACTIVE AND INACTIVE",
+            LineItemPrefix = "2",
+            LineItemTitle = "AGE 21-30 WITH >= 1000 PS HOURS",
+            NumberOfMembers = 45,
+            TotalWages = 1850000.00m,
+            TotalHours = 850,
+            TotalPoints = 4200,
+            TotalBalance = 185000.00m,
+            TotalPriorBalance = 155000.00m
+        };
+    }
 }

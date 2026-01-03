@@ -27,7 +27,7 @@ public sealed class GrossWagesReportEndpoint : EndpointWithCsvTotalsBase<GrossWa
 
     public override void Configure()
     {
-        Get("frozen/grosswages");
+        Get("frozen/gross-wages");
         Summary(s =>
         {
             s.Summary = ReportFileName;

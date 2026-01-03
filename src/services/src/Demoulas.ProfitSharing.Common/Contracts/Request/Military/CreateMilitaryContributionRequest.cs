@@ -9,7 +9,7 @@ public sealed record CreateMilitaryContributionRequest : YearRequest, IBadgeNumb
     public bool IsSupplementalContribution { get; init; }
     public DateTime ContributionDate { get; init; } = DateTime.Now;
 
-    public static CreateMilitaryContributionRequest RequestExample()
+    public static new CreateMilitaryContributionRequest RequestExample()
     {
         return new CreateMilitaryContributionRequest
         {

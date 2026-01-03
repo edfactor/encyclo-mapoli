@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-using System.Security.Principal;
-using System.Text;
+﻿using System.Text;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -8,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,15 +20,18 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
+    private readonly ICalendarService _calendarService;
 
     public EmployeesWithProfitsOver73Service(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
-        TotalService totalService)
+        TotalService totalService,
+        ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
+        _calendarService = calendarService;
     }
 
     public Task<ReportResponseBase<EmployeesWithProfitsOver73DetailDto>> GetEmployeesWithProfitsOver73Async(
@@ -38,6 +40,11 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            // Get fiscal year dates for payment calculation
+            var calendarInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var fiscalStartDate = calendarInfo.FiscalBeginDate;
+            var fiscalEndDate = calendarInfo.FiscalEndDate;
+
             // Get all current demographics with contact info
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
 
@@ -80,6 +87,32 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                 .Where(tb => tb.TotalAmount > 0) // Only include employees with positive balances
                 .ToDictionaryAsync(tb => tb.Ssn, cancellationToken);
 
+            // Load all RMD factors from database (ages 73-99)
+            var rmdFactors = await ctx.RmdsFactorsByAge
+                .TagWith("GetRmdFactors-Over73Report")
+                .ToDictionaryAsync(r => (int)r.Age, r => r.Factor, cancellationToken);
+
+            // Get payment profit codes (codes that represent distributions/payments)
+            var paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
+
+            // Calculate payments within fiscal year for these employees
+            // Payment records are in PROFIT_DETAIL where:
+            // - ProfitCodeId is a payment/distribution code
+            // - ProfitYear <= request.ProfitYear (payments can span multiple years)
+            // - We'll use YearToDate to approximate fiscal year boundary
+            var paymentsInFiscalYear = await ctx.ProfitDetails
+                .TagWith($"GetPaymentsInFiscalYear-{request.ProfitYear}")
+                .Where(pd => employeeSsns.Contains(pd.Ssn))
+                .Where(pd => paymentProfitCodes.Contains(pd.ProfitCodeId))
+                .Where(pd => pd.ProfitYear == request.ProfitYear)
+                .GroupBy(pd => pd.Ssn)
+                .Select(g => new
+                {
+                    Ssn = g.Key,
+                    TotalPayments = g.Sum(pd => Math.Abs(pd.Forfeiture)) // Forfeiture is negative for payments
+                })
+                .ToDictionaryAsync(x => x.Ssn, x => x.TotalPayments, cancellationToken);
+
             // Build detail records with pagination support
             var detailRecords = employeesOver73
                 .Where(e => totalBalances.ContainsKey(e.Ssn))
@@ -87,6 +120,22 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                 {
                     totalBalances.TryGetValue(employee.Ssn, out var balance);
                     var age = today.Year - employee.DateOfBirth.Year;
+
+                    // Get RMD factor for this age (default to 0 if age not found)
+                    var factor = rmdFactors.TryGetValue(age, out var f) ? f : 0m;
+
+                    // Calculate RMD: Balance ÷ Factor (protect against divide by zero)
+                    // IMPORTANT: Parentheses around (balance?.TotalAmount ?? 0) ensure correct order of operations
+                    var rmd = factor > 0 ? Math.Round((balance?.TotalAmount ?? 0) / factor, 2, MidpointRounding.AwayFromZero) : 0m;
+
+                    // Get payments made in the fiscal year
+                    var paymentsInYear = paymentsInFiscalYear.TryGetValue(employee.Ssn, out var payments) ? payments : 0m;
+
+                    // Calculate suggested RMD check amount based on de minimis threshold
+                    var currentBalance = balance?.TotalAmount ?? 0;
+                    var suggestRmdCheckAmount = currentBalance <= request.DeMinimusValue
+                        ? currentBalance  // De minimis: liquidate entire account
+                        : Math.Max(0, rmd - paymentsInYear);  // Above threshold: RMD minus payments already received
 
                     return new EmployeesWithProfitsOver73DetailDto
                     {
@@ -101,8 +150,11 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                         DateOfBirth = employee.DateOfBirth,
                         TerminationDate = employee.TerminationDate,
                         Age = age,
-                        Balance = balance?.TotalAmount ?? 0,
-                        RequiredMinimumDistributions = 0.0M
+                        Balance = currentBalance,
+                        Factor = factor,
+                        Rmd = rmd,
+                        PaymentsInProfitYear = paymentsInYear,
+                        SuggestRmdCheckAmount = suggestRmdCheckAmount
                     };
                 })
                 .AsQueryable();
@@ -114,8 +166,8 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             {
                 ReportName = "PROF-LETTER73: Employees with Profits Over Age 73",
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = today,
-                EndDate = today,
+                StartDate = fiscalStartDate,
+                EndDate = fiscalEndDate,
                 Response = paginatedResults
             };
         }, cancellationToken);

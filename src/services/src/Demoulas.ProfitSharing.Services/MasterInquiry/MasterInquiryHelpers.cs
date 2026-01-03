@@ -22,7 +22,7 @@ public static class MasterInquiryHelpers
     /// Payment profit codes - these are the codes where the Forfeiture column contains payment amounts.
     /// Using a private static readonly to satisfy Sonar analyzer (S3887, S2386).
     /// </summary>
-    private static readonly byte[] s_paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
+    private static readonly byte[] _paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
     /// <summary>
     /// Applies comprehensive filtering to a master inquiry query based on request parameters.
@@ -66,7 +66,7 @@ public static class MasterInquiryHelpers
         }
 
         // BadgeNumber is very selective
-        if (req.BadgeNumber.HasValue && req.BadgeNumber > 0)
+        if (req.BadgeNumber is > 0)
         {
             query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
         }
@@ -112,7 +112,7 @@ public static class MasterInquiryHelpers
         {
             query = query.Where(x =>
                 x.ProfitDetail != null &&
-                s_paymentProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) &&
+                _paymentProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) &&
                 x.ProfitDetail.Forfeiture == req.PaymentAmount);
         }
 

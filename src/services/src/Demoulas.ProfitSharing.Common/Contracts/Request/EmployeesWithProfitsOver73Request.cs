@@ -12,6 +12,15 @@ public record EmployeesWithProfitsOver73Request : ProfitYearRequest
     /// </summary>
     public List<int>? BadgeNumbers { get; init; }
 
+    /// <summary>
+    /// De minimis threshold value for determining RMD payment logic.
+    /// If an employee's balance is at or below this amount, the suggested RMD check amount
+    /// will be the entire remaining balance (liquidate account).
+    /// If above this amount, the suggested check will be RMD minus payments already received.
+    /// Defaults to $5,000 if not specified.
+    /// </summary>
+    public decimal DeMinimusValue { get; init; } = 5000m;
+
     public static new EmployeesWithProfitsOver73Request RequestExample()
     {
         return new EmployeesWithProfitsOver73Request
@@ -19,7 +28,8 @@ public record EmployeesWithProfitsOver73Request : ProfitYearRequest
             ProfitYear = 2023,
             Skip = 0,
             Take = 100,
-            BadgeNumbers = null // Optional: Can include [12345, 67890] for specific employees
+            BadgeNumbers = null, // Optional: Can include [12345, 67890] for specific employees
+            DeMinimusValue = 5000m
         };
     }
 }

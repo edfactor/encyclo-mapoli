@@ -27,4 +27,35 @@ public record ProfitShareUpdateMemberResponse : IIsExecutive
     public decimal SecondaryEtvaEarnings { get; set; } // PY_PROF_ETVA2 (portion of Secondary Earnings which applies to ETVA)
     public bool TreatAsBeneficiary { get; set; }
     public bool IsExecutive { get; set; }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static ProfitShareUpdateMemberResponse ResponseExample()
+    {
+        return new ProfitShareUpdateMemberResponse
+        {
+            IsEmployee = true,
+            Badge = 334455,
+            Psn = "334455",
+            Name = "Davis, Michael J",
+            BeginningAmount = 45000.00m,
+            Distributions = 2000.00m,
+            Military = 0.00m,
+            Xfer = 0.00m,
+            Pxfer = 0.00m,
+            EmployeeTypeId = 1,
+            Contributions = 5500.00m,
+            IncomingForfeitures = 500.00m,
+            AllEarnings = 3200.00m,
+            AllSecondaryEarnings = 1500.00m,
+            EndingBalance = 52700.00m,
+            ZeroContributionReasonId = null,
+            Etva = 12000.00m,
+            EtvaEarnings = 800.00m,
+            SecondaryEtvaEarnings = 400.00m,
+            TreatAsBeneficiary = false,
+            IsExecutive = false
+        };
+    }
 }

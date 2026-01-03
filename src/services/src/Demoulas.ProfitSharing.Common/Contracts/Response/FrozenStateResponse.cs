@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 [NoMemberDataExposed]
-public sealed record FrozenStateResponse : IdRequest, IProfitYearRequest
+public sealed record FrozenStateResponse : IdRequest<int>, IProfitYearRequest
 {
     public short ProfitYear { get; set; }
     public string? FrozenBy { get; set; }

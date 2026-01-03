@@ -2,7 +2,7 @@
 
 using Demoulas.ProfitSharing.Common.Attributes;
 using Shared;
-public record UpdateBeneficiaryContactRequest : IdRequest, INameParts, IPhoneNumber, IEmailAddress, ICity
+public record UpdateBeneficiaryContactRequest : IdRequest<int>, INameParts, IPhoneNumber, IEmailAddress, ICity
 {
     public int? ContactSsn { get; set; }
     public DateOnly? DateOfBirth { get; set; }

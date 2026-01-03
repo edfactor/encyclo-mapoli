@@ -12,6 +12,7 @@ export * from "./audit/audit";
 // IT Operations types
 export * from "./it-operations/annuity-rates";
 export * from "./it-operations/oracle-hcm-diagnostics";
+export * from "./it-operations/rmd-factors";
 export * from "./it-operations/state-taxes";
 
 // Administration types

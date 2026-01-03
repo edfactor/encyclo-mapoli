@@ -23,12 +23,11 @@ public class SetExecutiveHoursAndDollarsEndpoint : ProfitSharingRequestEndpoint<
 
     public override void Configure()
     {
-        Put("executive-hours-and-dollars");
+        Put("/executive-hours");
         Summary(s =>
         {
-            s.Summary = "Executive Hours and Dollars Endpoint";
-            s.Description =
-                "This endpoint allows the executive hours and dollars to be set.";
+            s.Summary = "Update executive hours and dollars";
+            s.Description = "Updates executive hours and dollars allocations for a profit year. Requires FINANCEMANAGER role.";
 
             s.ExampleRequest = SetExecutiveHoursAndDollarsRequest.RequestExample();
 

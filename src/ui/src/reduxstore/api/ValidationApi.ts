@@ -35,12 +35,12 @@ export const validationApi = createApi({
      * ```
      */
     getMasterUpdateValidation: builder.query<MasterUpdateCrossReferenceValidationResponse, number>({
-      query: (profitYear) => `checksum/master-update/${profitYear}`,
+      query: (profitYear) => `checksum/master-update/${profitYear}`, // Note: profitYear is a parameter value, not a path segment
       providesTags: (_result, _error, profitYear) => [{ type: "MasterUpdateValidation", id: profitYear }]
     }),
     getProfitSharingReportValidation: builder.query<ValidationResponse, ProfitSharingReportValidationRequest>({
       query: (request) =>
-        `checksum/profit-sharing-report/${request.profitYear}/${request.reportSuffix}/${request.useFrozenData ? "true" : "false"}`,
+        `checksum/profit-sharing-report/${request.profitYear}/${request.reportSuffix}/${request.useFrozenData ? "true" : "false"}`, // Note: parameter values, not path segments
       providesTags: (_result, _error, request) => [
         { type: "MasterUpdateValidation", id: `${request.profitYear}-${request.reportSuffix}` }
       ]
@@ -65,7 +65,7 @@ export const validationApi = createApi({
      * ```
      */
     getBalanceValidation: builder.query<CrossReferenceValidationGroup | null, number>({
-      query: (profitYear) => `../balance-validation/alloc-transfers/${profitYear}`,
+      query: (profitYear) => `../balance-validation/alloc-transfers/${profitYear}`, // Note: profitYear is a parameter value, not a path segment
       // Handle 404 gracefully - no validation data available for this year
       transformErrorResponse: (response) => {
         if (response.status === 404) {

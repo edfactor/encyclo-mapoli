@@ -53,4 +53,33 @@ public sealed record DistributionSearchResponse : IIsExecutive
 
         return response;
     }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static DistributionSearchResponse ResponseExample()
+    {
+        return new DistributionSearchResponse
+        {
+            Id = 2001,
+            PaymentSequence = 2,
+            Ssn = "***-**-5678",
+            BadgeNumber = 701002,
+            FullName = "Jane Smith",
+            IsExecutive = true,
+            IsEmployee = false,
+            FrequencyId = 'B',
+            FrequencyName = "Bi-weekly",
+            StatusId = 'P',
+            StatusName = "Processed",
+            TaxCodeId = 'B',
+            TaxCodeName = "Special",
+            GrossAmount = 2500.00m,
+            FederalTax = 350.00m,
+            StateTax = 125.00m,
+            CheckAmount = 2025.00m,
+            DemographicId = 5002,
+            BeneficiaryId = 101
+        };
+    }
 }

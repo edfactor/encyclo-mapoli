@@ -14,13 +14,14 @@ export const AdministrationApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "administrationApi",
   tagTypes: ["CommentTypes", "RmdFactors"],
+  tagTypes: ["CommentTypes", "RmdFactors"],
   // Disable caching to prevent sensitive data from persisting in browser
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getCommentTypes: builder.query<CommentTypeDto[], void>({
       query: () => ({
-        url: "/administration/comment-types",
+        url: "administration/comment-types",
         method: "GET"
       }),
       transformResponse: (response: CommentTypeDto[] | { items: CommentTypeDto[]; count: number }) => {
@@ -34,7 +35,7 @@ export const AdministrationApi = createApi({
     }),
     createCommentType: builder.mutation<CommentTypeDto, CreateCommentTypeRequest>({
       query: (body) => ({
-        url: "/administration/comment-types",
+        url: "administration/comment-types",
         method: "POST",
         body
       }),
@@ -42,7 +43,7 @@ export const AdministrationApi = createApi({
     }),
     updateCommentType: builder.mutation<CommentTypeDto, UpdateCommentTypeRequest>({
       query: (body) => ({
-        url: "/administration/comment-types",
+        url: "administration/comment-types",
         method: "PUT",
         body
       }),
