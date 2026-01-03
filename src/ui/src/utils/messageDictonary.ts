@@ -8,7 +8,8 @@ export enum MessageKeys {
   UnforfeitSave = "UnforfeitSave",
   MilitaryContribution = "MilitaryContribution",
   StateTaxRatesSave = "StateTaxRatesSave",
-  AnnuityRatesSave = "AnnuityRatesSave"
+  AnnuityRatesSave = "AnnuityRatesSave",
+  RmdFactorsSave = "RmdFactorsSave"
 }
 
 export class Messages {
@@ -130,6 +131,29 @@ export class Messages {
       type: "error",
       title: "Prerequisite Not Complete",
       message: "" // dynamic message added at dispatch time
+    }
+  };
+  static readonly RmdFactorsLoadError: MessageUpdate = {
+    key: MessageKeys.RmdFactorsSave,
+    message: {
+      type: "error",
+      title: "Failed to load RMD factors",
+      message: "Please try again"
+    }
+  };
+  static readonly RmdFactorsSaveSuccess: MessageUpdate = {
+    key: MessageKeys.RmdFactorsSave,
+    message: {
+      type: "success",
+      title: "RMD factors saved successfully"
+    }
+  };
+  static readonly RmdFactorsSaveError: MessageUpdate = {
+    key: MessageKeys.RmdFactorsSave,
+    message: {
+      type: "error",
+      title: "Failed to save RMD factors",
+      message: "Please try again"
     }
   };
 }
