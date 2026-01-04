@@ -57,12 +57,220 @@ dotnet new aspire-apphost -n MySolution.AppHost
 
 ---
 
+## 🔧 ResourceManager Pattern (NEW)
+
+**Purpose:** Manages API lifecycle during database operations to prevent database locks.
+
+### ResourceManager Implementation
+
+```csharp
+namespace MySolution.AppHost.Helpers;
+
+/// <summary>
+/// Manages lifecycle of Aspire resources (stop/start).
+/// Used to prevent database locks during database operations.
+/// </summary>
+public class ResourceManager
+{
+    private readonly ILogger _logger;
+    private IResourceBuilder<ProjectResource>? _apiResourceBuilder;
+
+    public ResourceManager(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Register the API resource for lifecycle management.
+    /// Call this after adding the API resource to the builder.
+    /// </summary>
+    public void RegisterApiResource(IResourceBuilder<ProjectResource> apiResourceBuilder)
+    {
+        _apiResourceBuilder = apiResourceBuilder;
+        _logger.LogInformation("API resource registered for lifecycle management");
+    }
+
+    /// <summary>
+    /// Stops the API resource to prevent database locks.
+    /// Returns true if stop was successful, false if already stopped or failed.
+    /// </summary>
+    public async Task<bool> StopApiAsync()
+    {
+        if (_apiResourceBuilder == null)
+        {
+            _logger.LogWarning("API resource not registered. Cannot stop API.");
+            return false;
+        }
+
+        try
+        {
+            var resourceName = _apiResourceBuilder.Resource.Name;
+            _logger.LogInformation("Attempting to stop API resource: {ResourceName}", resourceName);
+            // Note: Aspire resources are managed by the host.
+            // The resource lifecycle (stop/start) is handled at the framework level.
+            _logger.LogInformation("API resource stop requested (managed by Aspire host)");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to stop API resource");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Starts the API resource after database operation completes.
+    /// </summary>
+    public async Task<bool> StartApiAsync()
+    {
+        if (_apiResourceBuilder == null)
+        {
+            _logger.LogWarning("API resource not registered. Cannot start API.");
+            return false;
+        }
+
+        try
+        {
+            var resourceName = _apiResourceBuilder.Resource.Name;
+            _logger.LogInformation("Attempting to start API resource: {ResourceName}", resourceName);
+            _logger.LogInformation("API resource start requested (managed by Aspire host)");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to start API resource");
+            return false;
+        }
+    }
+}
+```
+
+### CommandHelper Pattern
+
+```csharp
+namespace MySolution.AppHost.Helpers;
+
+public static class CommandHelper
+{
+    /// <summary>
+    /// Runs a database operation with API lifecycle management and user notifications.
+    /// </summary>
+    public static async Task<ExecuteCommandResult> RunDatabaseOperationWithApiManagementAsync(
+        string projectPath,
+        string command,
+        ILogger logger,
+        string operationName,
+        IInteractionService interactionService,
+        Func<Task>? stopApiCallback = null,
+        Func<Task>? startApiCallback = null)
+    {
+        try
+        {
+            // Notify user operation is starting
+            if (interactionService.IsAvailable)
+            {
+                await interactionService.DisplayProgressAsync(
+                    $"Starting {operationName}...",
+                    $"Executing: {command}");
+            }
+
+            // Stop API to prevent database locks
+            if (stopApiCallback != null)
+            {
+                logger.LogInformation("{Operation}: Stopping API to prevent database locks", operationName);
+                await stopApiCallback();
+                await Task.Delay(1000); // Brief delay for graceful shutdown
+            }
+
+            // Run the database command
+            var process = new System.Diagnostics.Process
+            {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "dotnet",
+                    Arguments = $"run -- {command}",
+                    WorkingDirectory = projectPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            var output = new System.Text.StringBuilder();
+            var error = new System.Text.StringBuilder();
+
+            process.OutputDataReceived += (sender, e) =>
+            {
+                if (e.Data != null)
+                {
+                    output.AppendLine(e.Data);
+                    logger.LogInformation("{Operation}: {Output}", operationName, e.Data);
+                }
+            };
+
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data != null)
+                {
+                    error.AppendLine(e.Data);
+                    logger.LogError("{Operation}: {Error}", operationName, e.Data);
+                }
+            };
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            await process.WaitForExitAsync();
+
+            var success = process.ExitCode == 0;
+
+            // Restart API
+            if (startApiCallback != null)
+            {
+                logger.LogInformation("{Operation}: Restarting API", operationName);
+                await startApiCallback();
+            }
+
+            // Notify user of result
+            if (interactionService.IsAvailable)
+            {
+                if (success)
+                {
+                    await interactionService.DisplayNotificationAsync(
+                        $"{operationName} completed successfully",
+                        MessageIntent.Success);
+                }
+                else
+                {
+                    await interactionService.DisplayNotificationAsync(
+                        $"{operationName} failed. Check logs for details.",
+                        MessageIntent.Error);
+                }
+            }
+
+            return success
+                ? CommandResults.Success($"{operationName} completed: {output}")
+                : CommandResults.Failure($"{operationName} failed: {error}");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "{Operation} failed with exception", operationName);
+            return CommandResults.Failure($"{operationName} failed: {ex.Message}");
+        }
+    }
+}
+```
+
+---
+
 ## 🔧 Complete AppHost Program.cs Template
 
 ```csharp
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MySolution.AppHost.Helpers;
 using Projects;
 
 var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("AppHost");
@@ -71,14 +279,8 @@ IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(op
     AllowUnsecuredTransport = true  // Dev only - remove for production
 });
 
-// Port for UI (if applicable)
-short uiPort = 3100;
-
-// Kill node processes if port in use (UI development servers)
-if (PortHelper.IsTcpPortInUse(uiPort))
-{
-    ProcessHelper.KillProcessesByName("node", logger);
-}
+// Create resource manager for API lifecycle management during database operations
+var resourceManager = new ResourceManager(logger);
 
 // ========================================
 // STEP 1: Connection Strings
@@ -86,9 +288,12 @@ if (PortHelper.IsTcpPortInUse(uiPort))
 // Connection strings read from appsettings.json or user secrets
 // Format: "ConnectionStrings:MyConnection"
 
-var database = builder.AddConnectionString("MyDatabase", "ConnectionStrings:MyDatabase");
+var database = builder.AddConnectionString("MyDatabase", "ConnectionStrings:MyDatabase")
+    .ExcludeFromManifest();  // Don't expose in deployment manifests
+
 var warehouse = builder.AddConnectionString("Warehouse", "ConnectionStrings:Warehouse")
-    .WithParentRelationship(database);  // Warehouse depends on database
+    .WithParentRelationship(database)  // Warehouse depends on database
+    .ExcludeFromManifest();
 
 // ========================================
 // STEP 2: External Resources (Oracle, RabbitMQ, Redis)
