@@ -8,13 +8,12 @@ using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 
-file static class EndpointActivity
+static file class EndpointActivity
 {
     public static readonly ActivitySource Source = new("Demoulas.ProfitSharing.Endpoints");
 }
@@ -75,18 +74,6 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
     public abstract Task<ReportResponseBase<RespType>> GetResponse(ReqType req, CancellationToken ct);
 
     /// <summary>
-    /// Override to return a ProblemDetails response without throwing exceptions.
-    /// Default implementation calls <see cref="GetResponse"/> and returns success.
-    /// </summary>
-    protected virtual async Task<(ReportResponseBase<RespType>? Response, ProblemDetails? Problem)> TryGetResponseAsync(
-        ReqType req,
-        CancellationToken ct)
-    {
-        ReportResponseBase<RespType> response = await GetResponse(req, ct);
-        return (response, null);
-    }
-
-    /// <summary>
     /// Returns the base portion of the filename downloaded to the browser.
     /// </summary>
     public abstract string ReportFileName { get; }
@@ -133,25 +120,16 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
             req = req with { Skip = 0, Take = int.MaxValue };
         }
 
-        (ReportResponseBase<RespType>? response, ProblemDetails? problem) = await TryGetResponseAsync(req, ct);
-        if (problem is not null)
-        {
-            int statusCode = problem.Status ?? StatusCodes.Status400BadRequest;
-            await SendAsync(problem, statusCode: statusCode, cancellation: ct);
-            return;
-        }
-
-        // response is guaranteed when problem is null
-        Debug.Assert(response is not null, "Response must be non-null when no problem is returned.");
+        ReportResponseBase<RespType> response = await GetResponse(req, ct);
 
         if (acceptHeader.Contains("text/csv"))
         {
-            await using MemoryStream csvData = await GenerateCsvStreamAsync(response!, ct);
+            await using MemoryStream csvData = await GenerateCsvStreamAsync(response, ct);
             await Send.StreamAsync(csvData, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
             return;
         }
 
-        await Send.OkAsync(response!, ct);
+        await Send.OkAsync(response, ct);
     }
 
     private async Task<MemoryStream> GenerateCsvStreamAsync(ReportResponseBase<RespType> report, CancellationToken cancellationToken)

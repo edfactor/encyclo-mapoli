@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -8,16 +9,19 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
-public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePrintRequest, CertificateReprintResponse, CertificatesReportEndpoint.CertificateReprintResponseMap>
+public sealed class CertificatesReportEndpoint
+    : ProfitSharingEndpoint<CerficatePrintRequest, Results<Ok<ReportResponseBase<CertificateReprintResponse>>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly ICertificateService _certificateService;
     private readonly ILogger<CertificatesReportEndpoint> _logger;
 
-    public CertificatesReportEndpoint(ICertificateService certificateService, ILogger<CertificatesReportEndpoint> logger) : base(Navigation.Constants.PrintProfitCerts)
+    public CertificatesReportEndpoint(ICertificateService certificateService, ILogger<CertificatesReportEndpoint> logger)
+        : base(Navigation.Constants.PrintProfitCerts)
     {
         _certificateService = certificateService;
         _logger = logger;
@@ -41,7 +45,7 @@ public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePr
                     200,
                     new ReportResponseBase<CertificateReprintResponse>
                     {
-                        ReportName = ReportFileName,
+                        ReportName = "Certificate Reprint",
                         ReportDate = DateTimeOffset.Now,
                         StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
                         EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
@@ -54,117 +58,38 @@ public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePr
             };
         });
         Group<YearEndGroup>();
-        base.Configure();
     }
 
-    public override string ReportFileName => "Certificate Reprint";
-
-    public override async Task<ReportResponseBase<CertificateReprintResponse>> GetResponse(CerficatePrintRequest req, CancellationToken ct)
+    public override Task<Results<Ok<ReportResponseBase<CertificateReprintResponse>>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(
+        CerficatePrintRequest req,
+        CancellationToken ct)
     {
-        using var activity = this.StartEndpointActivity(HttpContext);
-        this.RecordRequestMetrics(HttpContext, _logger, req);
-
-        try
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            var serviceResult = await _certificateService.GetMembersWithBalanceActivityByStore(req, ct);
+            var result = await _certificateService.GetMembersWithBalanceActivityByStore(req, ct);
 
-            if (!serviceResult.IsSuccess)
-            {
-                // Validation error (e.g., missing annuity rates) - throw BadHttpRequestException for 400
-                if (serviceResult.Error?.ValidationErrors?.Count > 0)
-                {
-                    var errorMessages = string.Join("; ",
-                        serviceResult.Error.ValidationErrors.SelectMany(kvp => kvp.Value));
-
-                    _logger.LogWarning("Certificate report generation failed validation for profit year {ProfitYear}: {ErrorMessage} (correlation: {CorrelationId})",
-                        req.ProfitYear, errorMessages, HttpContext.TraceIdentifier);
-
-                    throw new BadHttpRequestException(errorMessages, statusCode: 400);
-                }
-
-                // Service error - log and throw for 500
-                _logger.LogError("Certificate report generation failed for profit year {ProfitYear}: {ErrorMessage} (correlation: {CorrelationId})",
-                    req.ProfitYear, serviceResult.Error?.Description ?? "Unknown error", HttpContext.TraceIdentifier);
-
-                throw new InvalidOperationException(serviceResult.Error?.Description ?? "Failed to generate certificate report.");
-            }
-
-            var result = serviceResult.Value!;
-
-            // Record business operation metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "certificates_report"),
                 new("profit_year", req.ProfitYear.ToString()));
 
-            var resultCount = result?.Response?.Results?.Count() ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
-                new("record_type", "post-frozen-certificates"),
-                new("endpoint", "CertificatesReportEndpoint"));
-
-            var badgeCount = req.BadgeNumbers?.Length ?? 0;
-            if (badgeCount > 0)
+            if (result.IsSuccess)
             {
-                EndpointTelemetry.RecordCountsProcessed.Record(badgeCount,
-                    new("operation", "certificates_report"),
-                    new("metric_type", "badge_numbers_requested"));
+                var response = result.Value;
+                var resultCount = response?.Response?.Results?.Count() ?? 0;
+                EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                    new("record_type", "post-frozen-certificates"),
+                    new("endpoint", nameof(CertificatesReportEndpoint)));
+
+                var badgeCount = req.BadgeNumbers?.Length ?? 0;
+                if (badgeCount > 0)
+                {
+                    EndpointTelemetry.RecordCountsProcessed.Record(badgeCount,
+                        new("operation", "certificates_report"),
+                        new("metric_type", "badge_numbers_requested"));
+                }
             }
 
-            _logger.LogInformation("Year-end post-frozen certificates report generated, returned {Count} certificate records for {BadgeCount} badge numbers (correlation: {CorrelationId})",
-                resultCount, badgeCount, HttpContext.TraceIdentifier);
-
-            if (result != null)
-            {
-                this.RecordResponseMetrics(HttpContext, _logger, result);
-                return result;
-            }
-
-            var emptyResult = new ReportResponseBase<CertificateReprintResponse>
-            {
-                ReportName = ReportFileName,
-                StartDate = DateOnly.FromDateTime(DateTime.Today),
-                EndDate = DateOnly.FromDateTime(DateTime.Today),
-                Response = new() { Results = [] }
-            };
-
-            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
-            return emptyResult;
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
-    }
-
-    public sealed class CertificateReprintResponseMap : CsvHelper.Configuration.ClassMap<CertificateReprintResponse>
-    {
-        public CertificateReprintResponseMap()
-        {
-            Map(m => m.BadgeNumber).Index(0).Name("Badge Number");
-            Map(m => m.FullName).Index(1).Name("Full Name");
-            Map(m => m.Street1).Index(2).Name("Address");
-            Map(m => m.City).Index(3).Name("City");
-            Map(m => m.State).Index(4).Name("State");
-            Map(m => m.PostalCode).Index(5).Name("Zip");
-            Map(m => m.PayClassificationName).Index(6).Name("Pay Classification");
-            Map(m => m.BeginningBalance).Index(7).Name("Beginning Balance").TypeConverterOption.Format("C2");
-            Map(m => m.Earnings).Index(8).Name("Earnings").TypeConverterOption.Format("C2");
-            Map(m => m.Contributions).Index(9).Name("Contributions").TypeConverterOption.Format("C2");
-            Map(m => m.Forfeitures).Index(10).Name("Forfeitures").TypeConverterOption.Format("C2");
-            Map(m => m.Distributions).Index(11).Name("Distributions").TypeConverterOption.Format("C2");
-            Map(m => m.EndingBalance).Index(12).Name("Ending Balance").TypeConverterOption.Format("C2");
-            Map(m => m.VestedAmount).Index(13).Name("Vested Amount").TypeConverterOption.Format("C2");
-            Map(m => m.VestedPercent).Index(14).Name("Vested %").TypeConverterOption.Format("P0");
-            Map(m => m.DateOfBirth).Index(15).Name("Date of Birth").TypeConverterOption.Format("MM/dd/yyyy");
-            Map(m => m.HireDate).Index(16).Name("Hire Date").TypeConverterOption.Format("MM/dd/yyyy");
-            Map(m => m.TerminationDate).Index(17).Name("Termination Date").TypeConverterOption.Format("MM/dd/yyyy");
-            Map(m => m.EnrollmentId).Index(18).Name("Enrollment ID");
-            Map(m => m.ProfitShareHours).Index(19).Name("Profit Share Hours").TypeConverterOption.Format("N2");
-            Map(m => m.CertificateSort).Index(20).Name("Certificate Sort");
-            Map(m => m.AnnuitySingleRate).Index(21).Name("Annuity Single Rate").TypeConverterOption.Format("C2");
-            Map(m => m.AnnuityJointRate).Index(22).Name("Annuity Joint Rate").TypeConverterOption.Format("C2");
-            Map(m => m.MonthlyPaymentSingle).Index(23).Name("Monthly Payment Single").TypeConverterOption.Format("C2");
-            Map(m => m.MonthlyPaymentJoint).Index(24).Name("Monthly Payment Joint").TypeConverterOption.Format("C2");
-        }
+            return result.ToHttpResultWithValidation();
+        });
     }
 }
