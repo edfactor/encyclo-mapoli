@@ -19,6 +19,8 @@ export interface AccountHistoryReportResponse {
   withdrawals: number;
   endingBalance: number;
   vestedBalance: number;
+  vestingPercent?: number;
+  yearsInPlan?: number;
   comment?: string;
 }
 
