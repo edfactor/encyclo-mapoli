@@ -129,8 +129,8 @@ const ReprintCertificates: React.FC = () => {
             <Grid width="100%">
               <Alert severity="warning">
                 Annuity rates are incomplete for profit year {filterParams.profitYear}
-                {missingAges.length > 0 ? ` (missing ages: ${missingAges.join(", ")}).` : "."} Certificate generation may fail
-                until annuity rates are updated.
+                {missingAges.length > 0 ? ` (missing ages: ${missingAges.join(", ")}).` : "."} Certificate generation
+                may fail until annuity rates are updated.
               </Alert>
             </Grid>
           )}
