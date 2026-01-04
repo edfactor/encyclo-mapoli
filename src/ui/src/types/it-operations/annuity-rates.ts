@@ -26,6 +26,8 @@ export interface UpdateAnnuityRateRequest {
 export interface GetMissingAnnuityYearsRequest {
   startYear?: number;
   endYear?: number;
+  suppressAllToastErrors?: boolean;
+  onlyNetworkToastErrors?: boolean;
 }
 
 /// <summary>

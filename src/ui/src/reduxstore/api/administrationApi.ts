@@ -24,6 +24,8 @@ export const AdministrationApi = createApi({
       query: (request) => {
         const startYear = request?.startYear;
         const endYear = request?.endYear;
+        const suppressAllToastErrors = request?.suppressAllToastErrors;
+        const onlyNetworkToastErrors = request?.onlyNetworkToastErrors;
 
         const searchParams = new URLSearchParams();
         if (startYear !== undefined) searchParams.set("StartYear", String(startYear));
@@ -36,7 +38,8 @@ export const AdministrationApi = createApi({
 
         return {
           url,
-          method: "GET"
+          method: "GET",
+          meta: { suppressAllToastErrors, onlyNetworkToastErrors }
         };
       }
     }),

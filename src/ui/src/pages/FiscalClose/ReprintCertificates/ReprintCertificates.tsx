@@ -20,10 +20,17 @@ const ReprintCertificates: React.FC = () => {
     socialSecurityNumber: ""
   });
 
-  const { data: missingYearsData } = useGetMissingAnnuityYearsQuery({
-    startYear: filterParams.profitYear,
-    endYear: filterParams.profitYear
-  });
+  const shouldCheckAnnuityRates = typeof filterParams.profitYear === "number" && filterParams.profitYear > 0;
+  const { data: missingYearsData } = useGetMissingAnnuityYearsQuery(
+    shouldCheckAnnuityRates
+      ? {
+          startYear: filterParams.profitYear,
+          endYear: filterParams.profitYear,
+          suppressAllToastErrors: true
+        }
+      : undefined,
+    { skip: !shouldCheckAnnuityRates }
+  );
 
   const selectedYearStatus = missingYearsData?.years?.find((y) => y.year === filterParams.profitYear);
   const missingAges = selectedYearStatus?.missingAges ?? [];
