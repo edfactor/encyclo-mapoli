@@ -17,7 +17,7 @@ namespace Demoulas.ProfitSharing.Services.ItDevOps;
 public sealed class AnnuityRatesService : IAnnuityRatesService
 {
     private const decimal MaxRate = 99.9999m;
-    private static readonly Error s_annuityRateNotFound = Error.EntityNotFound("Annuity rate");
+    private static readonly Error _annuityRateNotFound = Error.EntityNotFound("Annuity rate");
 
     private readonly IProfitSharingDataContextFactory _contextFactory;
     private readonly IAuditService _auditService;
@@ -144,7 +144,7 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
 
                 if (annuityRate is null)
                 {
-                    return Result<AnnuityRateDto>.Failure(s_annuityRateNotFound);
+                    return Result<AnnuityRateDto>.Failure(_annuityRateNotFound);
                 }
 
                 var originalSingle = annuityRate.SingleRate;

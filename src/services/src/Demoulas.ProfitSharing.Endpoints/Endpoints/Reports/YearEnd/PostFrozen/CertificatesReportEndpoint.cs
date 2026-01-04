@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
@@ -65,7 +66,30 @@ public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePr
 
         try
         {
-            var result = await _certificateService.GetMembersWithBalanceActivityByStore(req, ct);
+            var serviceResult = await _certificateService.GetMembersWithBalanceActivityByStore(req, ct);
+
+            if (!serviceResult.IsSuccess)
+            {
+                // Validation error (e.g., missing annuity rates) - throw BadHttpRequestException for 400
+                if (serviceResult.Error?.ValidationErrors?.Count > 0)
+                {
+                    var errorMessages = string.Join("; ",
+                        serviceResult.Error.ValidationErrors.SelectMany(kvp => kvp.Value));
+
+                    _logger.LogWarning("Certificate report generation failed validation for profit year {ProfitYear}: {ErrorMessage} (correlation: {CorrelationId})",
+                        req.ProfitYear, errorMessages, HttpContext.TraceIdentifier);
+
+                    throw new BadHttpRequestException(errorMessages, statusCode: 400);
+                }
+
+                // Service error - log and throw for 500
+                _logger.LogError("Certificate report generation failed for profit year {ProfitYear}: {ErrorMessage} (correlation: {CorrelationId})",
+                    req.ProfitYear, serviceResult.Error?.Description ?? "Unknown error", HttpContext.TraceIdentifier);
+
+                throw new InvalidOperationException(serviceResult.Error?.Description ?? "Failed to generate certificate report.");
+            }
+
+            var result = serviceResult.Value!;
 
             // Record business operation metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

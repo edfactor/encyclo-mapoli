@@ -29,11 +29,11 @@ This package provides a base implementation for distributed caching using `IDist
 
 Abstract base class for implementing background caching services that automatically refresh cached data at configurable intervals. Provides built-in:
 
-- **Automatic refresh** on a timer (configurable seconds)
-- **Delta detection** - only updates changed items
-- **Event notifications** - raises events when cache items are added, updated, or removed
-- **OpenTelemetry metrics** - tracks refresh counts, failures, and durations
-- **Thread-safe operations** with proper cancellation support
+-   **Automatic refresh** on a timer (configurable seconds)
+-   **Delta detection** - only updates changed items
+-   **Event notifications** - raises events when cache items are added, updated, or removed
+-   **OpenTelemetry metrics** - tracks refresh counts, failures, and durations
+-   **Thread-safe operations** with proper cancellation support
 
 ### Required Abstract Members
 
@@ -61,10 +61,10 @@ How often the cache refreshes in seconds. Default implementations use 3600 (hour
 
 **Common values:**
 
-- `300` - 5 minutes (frequently changing data)
-- `1800` - 30 minutes (moderate updates)
-- `3600` - 1 hour (stable data)
-- `86400` - 24 hours (rarely changing)
+-   `300` - 5 minutes (frequently changing data)
+-   `1800` - 30 minutes (moderate updates)
+-   `3600` - 1 hour (stable data)
+-   `86400` - 24 hours (rarely changing)
 
 #### CacheVersion
 
@@ -84,8 +84,8 @@ Called on each refresh cycle. Receives current `CacheDataDictionary` to support 
 
 **Parameters:**
 
-- `cdd` - Current cached data dictionary for comparison
-- `cancellation` - Cancellation token
+-   `cdd` - Current cached data dictionary for comparison
+-   `cancellation` - Cancellation token
 
 **Returns:** Updated dataset. Framework automatically detects adds, updates, and removals.
 
@@ -177,9 +177,9 @@ The package emits OpenTelemetry metrics for cache operations:
 
 Traces cache refresh operations with spans for:
 
-- Initial cache population
-- Scheduled refreshes
-- Delta detection operations
+-   Initial cache population
+-   Scheduled refreshes
+-   Delta detection operations
 
 ---
 
@@ -317,10 +317,10 @@ public class PayrollService
 
 ### Refresh Interval Selection
 
-- **Frequent changes:** 5-15 minutes
-- **Moderate stability:** 30-60 minutes
-- **Rarely changes:** 1-24 hours
-- **Consider data volume** - larger datasets may need longer intervals
+-   **Frequent changes:** 5-15 minutes
+-   **Moderate stability:** 30-60 minutes
+-   **Rarely changes:** 1-24 hours
+-   **Consider data volume** - larger datasets may need longer intervals
 
 ### Delta Detection Strategy
 
@@ -351,10 +351,10 @@ public override async Task<IEnumerable<T>> GetDataToUpdateCacheAsync(
 
 ### Performance Considerations
 
-- Use **`IAsyncEnumerable<T>`** for large datasets
-- Implement **projection** in queries (don't materialize full entities)
-- Consider **compression** for large cached objects
-- Monitor **cache hit rates** via telemetry
+-   Use **`IAsyncEnumerable<T>`** for large datasets
+-   Implement **projection** in queries (don't materialize full entities)
+-   Consider **compression** for large cached objects
+-   Monitor **cache hit rates** via telemetry
 
 ---
 
@@ -366,6 +366,6 @@ This package supports **net8.0, net9.0, and net10.0**. No framework-specific con
 
 ## Related Documentation
 
-- [Demoulas.Common.Contracts Instructions](./demoulas.common.contracts.instructions.md) - Shared interfaces and DTOs
-- [Demoulas.Common.Data Instructions](./demoulas.common.data.instructions.md) - Database context patterns
-- [Code Review Instructions](./code-review.instructions.md) - Review standards
+-   [Demoulas.Common.Contracts Instructions](./demoulas.common.contracts.instructions.md) - Shared interfaces and DTOs
+-   [Demoulas.Common.Data Instructions](./demoulas.common.data.instructions.md) - Database context patterns
+-   [Code Review Instructions](./code-review.instructions.md) - Review standards

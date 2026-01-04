@@ -1,8 +1,3 @@
----
-applyTo: "src/services/src/**/*.*"
-paths: "src/services/src/**/*.*"
----
-
 # Demoulas.Common.Logging - Structured Logging and Observability
 
 **Package:** `Demoulas.Common.Logging`  
@@ -201,10 +196,10 @@ Dynatrace = new DynatraceConfig
 
 Specify `EntityId` manually when:
 
-- Running in **serverless functions** (Lambda, Azure Functions)
-- Using **containerized** deployments without OneAgent
-- **Legacy systems** without OneAgent auto-injection
-- Need **custom entity** grouping in Dynatrace UI
+-   Running in **serverless functions** (Lambda, Azure Functions)
+-   Using **containerized** deployments without OneAgent
+-   **Legacy systems** without OneAgent auto-injection
+-   Need **custom entity** grouping in Dynatrace UI
 
 If OneAgent is installed, `EntityId` is auto-discovered.
 
@@ -218,9 +213,9 @@ UseFileIngestion = true  // Logs written to OneAgent monitored path
 
 Prerequisites:
 
-- OneAgent installed and active
-- File monitoring configured in Dynatrace
-- Proper file permissions
+-   OneAgent installed and active
+-   File monitoring configured in Dynatrace
+-   Proper file permissions
 
 ---
 
@@ -232,15 +227,15 @@ Prerequisites:
 
 #### Masked Data Types
 
-- **SSN:** `XXX-XX-1234` → `***MASKED***`
-- **Credit Cards:** `4111-1111-1111-1111` → `***MASKED***`
-- **Email Addresses:** `user@example.com` → `***MASKED***`
-- **IBAN:** `DE89370400440532013000` → `***MASKED***`
-- **Database Connections:**
-  - Hostnames: `dbserver.company.com` → `***MASKED***`
-  - Ports: `:1521` → `***MASKED***`
-  - Service Names: `SERVICE_NAME=PROD` → `***MASKED***`
-  - Oracle descriptors: `(DESCRIPTION=...)` → `***MASKED***`
+-   **SSN:** `XXX-XX-1234` → `***MASKED***`
+-   **Credit Cards:** `4111-1111-1111-1111` → `***MASKED***`
+-   **Email Addresses:** `user@example.com` → `***MASKED***`
+-   **IBAN:** `DE89370400440532013000` → `***MASKED***`
+-   **Database Connections:**
+    -   Hostnames: `dbserver.company.com` → `***MASKED***`
+    -   Ports: `:1521` → `***MASKED***`
+    -   Service Names: `SERVICE_NAME=PROD` → `***MASKED***`
+    -   Oracle descriptors: `(DESCRIPTION=...)` → `***MASKED***`
 
 #### Configuration
 
@@ -316,10 +311,10 @@ Resolved in this order:
 
 Automatically instruments:
 
-- **ASP.NET Core** - HTTP request/response
-- **HttpClient** - Outbound HTTP calls
-- **Runtime** - GC, CPU, memory metrics
-- **Oracle Database** - SQL queries and commands (via OpenTelemetry.Instrumentation.EntityFrameworkCore)
+-   **ASP.NET Core** - HTTP request/response
+-   **HttpClient** - Outbound HTTP calls
+-   **Runtime** - GC, CPU, memory metrics
+-   **Oracle Database** - SQL queries and commands (via OpenTelemetry.Instrumentation.EntityFrameworkCore)
 
 ### Custom Spans
 
@@ -347,9 +342,9 @@ public async Task ProcessOrderAsync(int orderId)
 
 Adds standard health check endpoints:
 
-- `/health` - Basic health check
-- `/health/ready` - Readiness probe (Kubernetes)
-- `/health/live` - Liveness probe (Kubernetes)
+-   `/health` - Basic health check
+-   `/health/ready` - Readiness probe (Kubernetes)
+-   `/health/live` - Liveness probe (Kubernetes)
 
 ```csharp
 var app = builder.Build();
@@ -392,16 +387,16 @@ app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 
 1. **Configuration Object:**
 
-   - `ElasticSearchConfig` → `LoggingConfig`
-   - ElasticSearch removed (use SumoLogic or OpenTelemetry)
+    - `ElasticSearchConfig` → `LoggingConfig`
+    - ElasticSearch removed (use SumoLogic or OpenTelemetry)
 
 2. **OpenTelemetry Setup:**
 
-   - Now configured via `AddServiceDefaults()` instead of `ConfigureLogging()`
+    - Now configured via `AddServiceDefaults()` instead of `ConfigureLogging()`
 
 3. **Method Signatures:**
-   - `ConfigureLogging()` removed
-   - Use `SetDefaultLoggerConfiguration(LoggingConfig)` instead
+    - `ConfigureLogging()` removed
+    - Use `SetDefaultLoggerConfiguration(LoggingConfig)` instead
 
 ### v1.x Code
 
@@ -452,12 +447,12 @@ _logger.LogInformation($"User {userId} placed order {orderId} for ${amount}");
 
 ### Log Levels
 
-- **Trace:** Detailed diagnostic (e.g., method entry/exit)
-- **Debug:** Development-time debugging
-- **Information:** General application flow
-- **Warning:** Unexpected but handled situations
-- **Error:** Errors and exceptions
-- **Critical:** Application/system failures
+-   **Trace:** Detailed diagnostic (e.g., method entry/exit)
+-   **Debug:** Development-time debugging
+-   **Information:** General application flow
+-   **Warning:** Unexpected but handled situations
+-   **Error:** Errors and exceptions
+-   **Critical:** Application/system failures
 
 ### Exception Logging
 
@@ -475,10 +470,10 @@ catch (Exception ex)
 
 ### Performance Considerations
 
-- Use **structured logging** for efficient querying
-- Enable **JSON logs** for file-based sinks used by aggregators
-- Configure **retention policies** to manage disk usage
-- Use **buffered mode** for SumoLogic in high-throughput scenarios
+-   Use **structured logging** for efficient querying
+-   Enable **JSON logs** for file-based sinks used by aggregators
+-   Configure **retention policies** to manage disk usage
+-   Use **buffered mode** for SumoLogic in high-throughput scenarios
 
 ---
 
@@ -490,7 +485,7 @@ This package supports **net8.0, net9.0, and net10.0**. No framework-specific con
 
 ## Related Documentation
 
-- [Demoulas.Common.Contracts Instructions](demoulas.common.contracts.instructions.md) - Configuration DTOs
-- [Demoulas.Common.Api Instructions](demoulas.common.api.instructions.md) - API logging integration
-- [Security Instructions](demoulas.common.security.instructions.md) - Security best practices
-- [Code Review Instructions](code-review.instructions.md) - Review standards
+-   [Demoulas.Common.Contracts Instructions](./demoulas.common.contracts.instructions.md) - Configuration DTOs
+-   [Demoulas.Common.Api Instructions](./demoulas.common.api.instructions.md) - API logging integration
+-   [Security Instructions](./security.instructions.md) - Security best practices
+-   [Code Review Instructions](./code-review.instructions.md) - Review standards
