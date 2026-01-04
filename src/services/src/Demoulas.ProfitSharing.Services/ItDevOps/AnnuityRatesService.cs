@@ -220,6 +220,104 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
         }
     }
 
+    /// <inheritdoc />
+    public async Task<Result<MissingAnnuityYearsResponse>> GetMissingAnnuityYearsAsync(GetMissingAnnuityYearsRequest request, CancellationToken cancellationToken)
+    {
+        // Default to current year and previous 5 years if not specified
+        var currentYear = (short)DateTime.Today.Year;
+        var startYear = request.StartYear ?? (short)(currentYear - 5);
+        var endYear = request.EndYear ?? currentYear;
+
+        // Validate year range
+        if (startYear > endYear)
+        {
+            return Result<MissingAnnuityYearsResponse>.Failure(Error.Validation(new Dictionary<string, string[]>
+            {
+                [nameof(request.StartYear)] = ["StartYear must be less than or equal to EndYear."]
+            }));
+        }
+
+        var yearStatuses = new List<AnnuityYearStatus>();
+
+        for (short year = startYear; year <= endYear; year++)
+        {
+            var status = await GetYearStatusAsync(year, cancellationToken);
+            yearStatuses.Add(status);
+        }
+
+        return Result<MissingAnnuityYearsResponse>.Success(new MissingAnnuityYearsResponse
+        {
+            Years = yearStatuses
+        });
+    }
+
+    private Task<AnnuityYearStatus> GetYearStatusAsync(short year, CancellationToken cancellationToken)
+    {
+        return _contextFactory.UseReadOnlyContext(async ctx =>
+        {
+            // Check if year has any annuity rates at all
+            var hasAnyRates = await ctx.AnnuityRates
+                .TagWith($"ItDevOps-GetMissingAnnuityYears-HasRates-{year}")
+                .AnyAsync(r => r.Year == year, cancellationToken);
+
+            if (!hasAnyRates)
+            {
+                // Year has no rates - mark as incomplete with all ages missing
+                var config = await ctx.AnnuityRateConfigs
+                    .TagWith($"ItDevOps-GetMissingAnnuityYears-Config-{year}")
+                    .FirstOrDefaultAsync(c => c.Year == year, cancellationToken);
+
+                var allAges = config != null
+                    ? Enumerable.Range(config.MinimumAge, config.MaximumAge - config.MinimumAge + 1)
+                        .Select(age => (byte)age)
+                        .ToArray()
+                    : Enumerable.Range(67, 54).Select(age => (byte)age).ToArray(); // Default 67-120
+
+                return new AnnuityYearStatus
+                {
+                    Year = year,
+                    IsComplete = false,
+                    MissingAges = allAges
+                };
+            }
+
+            // Get config to determine expected age range
+            var yearConfig = await ctx.AnnuityRateConfigs
+                .TagWith($"ItDevOps-GetMissingAnnuityYears-ExpectedAges-{year}")
+                .FirstOrDefaultAsync(c => c.Year == year, cancellationToken);
+
+            if (yearConfig == null)
+            {
+                // No config - cannot determine expected ages, treat as incomplete
+                return new AnnuityYearStatus
+                {
+                    Year = year,
+                    IsComplete = false,
+                    MissingAges = Array.Empty<byte>()
+                };
+            }
+
+            var existingAges = await ctx.AnnuityRates
+                .TagWith($"ItDevOps-GetMissingAnnuityYears-ExistingAges-{year}")
+                .Where(r => r.Year == year)
+                .Select(r => r.Age)
+                .ToListAsync(cancellationToken);
+
+            var expectedAges = Enumerable.Range(yearConfig.MinimumAge, yearConfig.MaximumAge - yearConfig.MinimumAge + 1)
+                .Select(age => (byte)age)
+                .ToHashSet();
+
+            var missingAges = expectedAges.Except(existingAges).OrderBy(age => age).ToArray();
+
+            return new AnnuityYearStatus
+            {
+                Year = year,
+                IsComplete = missingAges.Length == 0,
+                MissingAges = missingAges
+            };
+        }, cancellationToken);
+    }
+
     private static bool IsValidYear(short year)
     {
         return year is >= 1900 and <= 2100;
