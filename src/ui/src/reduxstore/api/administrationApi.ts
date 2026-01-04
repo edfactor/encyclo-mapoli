@@ -3,6 +3,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   CommentTypeDto,
   CreateCommentTypeRequest,
+  GetMissingAnnuityYearsRequest,
+  MissingAnnuityYearsResponse,
   RmdFactorDto,
   UpdateCommentTypeRequest,
   UpdateRmdFactorRequest
@@ -18,6 +20,26 @@ export const AdministrationApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
+    getMissingAnnuityYears: builder.query<MissingAnnuityYearsResponse, GetMissingAnnuityYearsRequest | void>({
+      query: (request) => {
+        const startYear = request?.startYear;
+        const endYear = request?.endYear;
+
+        const searchParams = new URLSearchParams();
+        if (startYear !== undefined) searchParams.set("StartYear", String(startYear));
+        if (endYear !== undefined) searchParams.set("EndYear", String(endYear));
+
+        const queryString = searchParams.toString();
+        const url = queryString
+          ? `administration/annuity-rates/missing-years?${queryString}`
+          : "administration/annuity-rates/missing-years";
+
+        return {
+          url,
+          method: "GET"
+        };
+      }
+    }),
     getCommentTypes: builder.query<CommentTypeDto[], void>({
       query: () => ({
         url: "administration/comment-types",
@@ -76,6 +98,7 @@ export const AdministrationApi = createApi({
 });
 
 export const {
+  useGetMissingAnnuityYearsQuery,
   useGetCommentTypesQuery,
   useCreateCommentTypeMutation,
   useUpdateCommentTypeMutation,

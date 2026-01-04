@@ -19,3 +19,27 @@ export interface UpdateAnnuityRateRequest {
   singleRate: number;
   jointRate: number;
 }
+
+/// <summary>
+/// Request to check which years have complete annuity rate data.
+/// </summary>
+export interface GetMissingAnnuityYearsRequest {
+  startYear?: number;
+  endYear?: number;
+}
+
+/// <summary>
+/// Represents the completeness status of annuity rates for a single year.
+/// </summary>
+export interface AnnuityYearStatusDto {
+  year: number;
+  isComplete: boolean;
+  missingAges: number[];
+}
+
+/// <summary>
+/// Response indicating which years have complete/incomplete annuity rates.
+/// </summary>
+export interface MissingAnnuityYearsResponse {
+  years: AnnuityYearStatusDto[];
+}
