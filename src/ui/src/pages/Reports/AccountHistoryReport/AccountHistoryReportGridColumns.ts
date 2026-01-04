@@ -37,16 +37,6 @@ export const GetAccountHistoryReportColumns = (): ColDef[] => {
       field: "forfeitures",
       minWidth: 120
     }),
-    createCurrencyColumn({
-      headerName: "Withdrawals",
-      field: "withdrawals",
-      minWidth: 120
-    }),
-    createCurrencyColumn({
-      headerName: "Vested Balance",
-      field: "vestedBalance",
-      minWidth: 130
-    }),
     {
       headerName: "Vesting %",
       field: "vestingPercent",
@@ -74,6 +64,16 @@ export const GetAccountHistoryReportColumns = (): ColDef[] => {
       },
       cellStyle: { textAlign: "right" }
     },
+    createCurrencyColumn({
+      headerName: "Withdrawals",
+      field: "withdrawals",
+      minWidth: 120
+    }),
+    createCurrencyColumn({
+      headerName: "Vested Balance",
+      field: "vestedBalance",
+      minWidth: 130
+    }),
     createCurrencyColumn({
       headerName: "Ending Balance",
       field: "endingBalance",
