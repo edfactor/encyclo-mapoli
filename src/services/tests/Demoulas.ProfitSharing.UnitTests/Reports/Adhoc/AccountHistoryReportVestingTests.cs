@@ -614,13 +614,13 @@ public class AccountHistoryReportVestingTests : ApiTestBase<Api.Program>
         {
             var yearResult = result.Response.Results.FirstOrDefault(r => r.ProfitYear == TestProfitYear);
             yearResult.ShouldNotBeNull("Expected profit year result not found");
-            
+
             // Validate individual row has vesting fields populated
-            yearResult.VestedBalance.ShouldBe(expectedVestedBalance, 
+            yearResult.VestedBalance.ShouldBe(expectedVestedBalance,
                 $"Member with 5 years should have 60% vested balance = {expectedVestedBalance}");
-            yearResult.VestingPercent.ShouldBe(expectedVestingPercent, 
+            yearResult.VestingPercent.ShouldBe(expectedVestingPercent,
                 "VestingPercent should be populated in the response");
-            yearResult.YearsInPlan.ShouldBe((short)yearsInPlan, 
+            yearResult.YearsInPlan.ShouldBe((short)yearsInPlan,
                 "YearsInPlan should be populated in the response");
 
             // CRITICAL: Validate cumulative totals includes TotalVestedBalance
