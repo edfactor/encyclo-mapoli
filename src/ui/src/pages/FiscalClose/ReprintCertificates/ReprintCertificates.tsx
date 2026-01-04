@@ -33,14 +33,14 @@ const ReprintCertificates: React.FC = () => {
   );
 
   const selectedYearStatus = missingYearsData?.years?.find((y) => y.year === filterParams.profitYear);
-  const rawMissingAges = selectedYearStatus?.missingAges;
+  const rawMissingAges = selectedYearStatus?.missingAges as unknown;
   const missingAges = Array.isArray(rawMissingAges)
     ? rawMissingAges
     : typeof rawMissingAges === "string"
       ? rawMissingAges
           .split(",")
-          .map((x) => Number(x.trim()))
-          .filter((x) => Number.isFinite(x))
+          .map((x: string) => Number(x.trim()))
+          .filter((x: number) => Number.isFinite(x))
       : [];
   const showMissingAgesWarning = selectedYearStatus ? !selectedYearStatus.isComplete : false;
 

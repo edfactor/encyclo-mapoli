@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
@@ -61,6 +62,26 @@ public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePr
 
     public override async Task<ReportResponseBase<CertificateReprintResponse>> GetResponse(CerficatePrintRequest req, CancellationToken ct)
     {
+        (ReportResponseBase<CertificateReprintResponse>? response, ProblemDetails? problem) = await TryGetResponseAsync(req, ct);
+        if (problem is null)
+        {
+            return response!;
+        }
+
+        // Fallback for direct calls (HandleAsync will send ProblemDetails when TryGetResponseAsync returns one)
+        return new ReportResponseBase<CertificateReprintResponse>
+        {
+            ReportName = ReportFileName,
+            StartDate = DateOnly.FromDateTime(DateTime.Today),
+            EndDate = DateOnly.FromDateTime(DateTime.Today),
+            Response = new() { Results = [] }
+        };
+    }
+
+    protected override async Task<(ReportResponseBase<CertificateReprintResponse>? Response, ProblemDetails? Problem)> TryGetResponseAsync(
+        CerficatePrintRequest req,
+        CancellationToken ct)
+    {
         using var activity = this.StartEndpointActivity(HttpContext);
         this.RecordRequestMetrics(HttpContext, _logger, req);
 
@@ -70,23 +91,37 @@ public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePr
 
             if (!serviceResult.IsSuccess)
             {
-                // Validation error (e.g., missing annuity rates) - throw BadHttpRequestException for 400
                 if (serviceResult.Error?.ValidationErrors?.Count > 0)
                 {
-                    var errorMessages = string.Join("; ",
+                    string errorMessages = string.Join("; ",
                         serviceResult.Error.ValidationErrors.SelectMany(kvp => kvp.Value));
 
                     _logger.LogWarning("Certificate report generation failed validation for profit year {ProfitYear}: {ErrorMessage} (correlation: {CorrelationId})",
                         req.ProfitYear, errorMessages, HttpContext.TraceIdentifier);
 
-                    throw new BadHttpRequestException(errorMessages, statusCode: 400);
+                    var pd = new ValidationProblemDetails(serviceResult.Error.ValidationErrors)
+                    {
+                        Title = "Certificate report validation failed",
+                        Detail = errorMessages,
+                        Status = StatusCodes.Status400BadRequest,
+                        Instance = HttpContext.Request?.Path.Value,
+                    };
+                    pd.Extensions["correlationId"] = HttpContext.TraceIdentifier;
+                    return (null, pd);
                 }
 
-                // Service error - log and throw for 500
                 _logger.LogError("Certificate report generation failed for profit year {ProfitYear}: {ErrorMessage} (correlation: {CorrelationId})",
                     req.ProfitYear, serviceResult.Error?.Description ?? "Unknown error", HttpContext.TraceIdentifier);
 
-                throw new InvalidOperationException(serviceResult.Error?.Description ?? "Failed to generate certificate report.");
+                var problem = new ProblemDetails
+                {
+                    Title = "Certificate report generation failed",
+                    Detail = "Failed to generate certificate report.",
+                    Status = StatusCodes.Status500InternalServerError,
+                    Instance = HttpContext.Request?.Path.Value,
+                };
+                problem.Extensions["correlationId"] = HttpContext.TraceIdentifier;
+                return (null, problem);
             }
 
             var result = serviceResult.Value!;
@@ -115,7 +150,7 @@ public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePr
             if (result != null)
             {
                 this.RecordResponseMetrics(HttpContext, _logger, result);
-                return result;
+                return (result, null);
             }
 
             var emptyResult = new ReportResponseBase<CertificateReprintResponse>
@@ -127,12 +162,21 @@ public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePr
             };
 
             this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
-            return emptyResult;
+            return (emptyResult, null);
         }
         catch (Exception ex)
         {
             this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
+
+            var problem = new ProblemDetails
+            {
+                Title = "Unexpected error generating certificate report",
+                Detail = "An unexpected error occurred.",
+                Status = StatusCodes.Status500InternalServerError,
+                Instance = HttpContext.Request?.Path.Value,
+            };
+            problem.Extensions["correlationId"] = HttpContext.TraceIdentifier;
+            return (null, problem);
         }
     }
 
