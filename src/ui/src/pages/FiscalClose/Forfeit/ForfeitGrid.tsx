@@ -26,12 +26,13 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
     [navigate]
   );
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [validationDialogField, setValidationDialogField] = useState<string | null>(null);  
+  const [dialogState, setDialogState] = useState<{
+    isOpen: boolean;
+    fieldName: string | null;
+  }>({ isOpen: false, fieldName: null });
 
   const handleValidationClick = useCallback((fieldName: string) => {
-    setValidationDialogField(fieldName);
-    setIsDialogOpen(true);
+    setDialogState({ isOpen: true, fieldName });
   }, []);
 
   const columnDefs = useMemo(
@@ -71,7 +72,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
 
   const totalsRow = useMemo(
     () => ({
-      forfeitures: (totalForfeituresRaw.toFixed(2)),
+      forfeitures: totalForfeituresRaw.toFixed(2),
       contForfeitPoints: totalForfeitPoints,
       earningPoints: totalEarningPoints,
       validation: searchResults?.crossReferenceValidation?.validationGroups[0] || null
@@ -92,10 +93,12 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
       onSortChange={handleSortChange}
       beforeGrid={
         <>
-          <ValidationResultsDialog open={isDialogOpen} 
-                                   onClose={()=> setIsDialogOpen(false)} 
-                                   validationGroup={searchResults?.crossReferenceValidation?.validationGroups[0]}
-                                   fieldName = {validationDialogField} />
+          <ValidationResultsDialog
+            open={dialogState.isOpen}
+            onClose={() => setDialogState({ isOpen: false, fieldName: null })}
+            validationGroup={searchResults?.crossReferenceValidation?.validationGroups[0]}
+            fieldName={dialogState.fieldName}
+          />
           <div className="sticky top-0 z-10 flex bg-white">
             <Table>
               <TableHead>
@@ -110,15 +113,15 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
                 <TableRow>
                   <TableCell className="align-middle text-center">{numberToCurrency(searchResults.totalProfitSharingBalance || 0)}</TableCell>
                   <TableCell className="align-middle text-center">
-                    <ValidationIcon 
+                    <ValidationIcon
                       validationGroup={searchResults.crossReferenceValidation?.validationGroups[0]}
                       fieldName="QPAY129_DistributionTotals"
-                      onClick={()=>
-                        {
-                          setValidationDialogField("QPAY129_DistributionTotals")
-                          setIsDialogOpen(!isDialogOpen);
-                        }
-                      }
+                      onClick={() => {
+                        setDialogState({
+                          isOpen: !dialogState.isOpen,
+                          fieldName: "QPAY129_DistributionTotals"
+                        });
+                      }}
                     />
                     {numberToCurrency(searchResults.distributionTotals || 0)}
                   </TableCell>

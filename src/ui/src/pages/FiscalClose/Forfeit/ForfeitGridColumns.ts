@@ -1,6 +1,4 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import React from "react";
-import { ValidationIcon } from "../../../components/ValidationIcon";
+import { ColDef } from "ag-grid-community";
 import {
   createBadgeOrPSNColumn,
   createColumnFrom,
@@ -9,6 +7,7 @@ import {
   createNameColumn,
   createSSNColumn
 } from "../../../utils/gridColumnFactory";
+import { ForfeituresCellRenderer } from "./ForfeituresCellRenderer";
 
 export interface ForfeitColumnsOptions {
   navFunction: (badgeNumber: string) => void;
@@ -36,16 +35,10 @@ export const GetProfitShareForfeitColumns = (options: ForfeitColumnsOptions): Co
         field: "forfeitures"
       }),
       {
-        cellRenderer: (params: ICellRendererParams) => {
-          return React.createElement('div', {}, 
-            React.createElement(ValidationIcon, {
-              validationGroup: params.data?.validation || null,
-              fieldName: "ForfeitureTotal",
-              onClick: onValidationClick ? () => onValidationClick("ForfeitureTotal") : undefined
-            }),
-            params.valueFormatted,
-          );
-        },
+        cellRenderer: ForfeituresCellRenderer,
+        cellRendererParams: {
+          onValidationClick
+        }
       }
     ),
 
