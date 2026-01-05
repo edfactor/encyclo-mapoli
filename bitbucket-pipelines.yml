@@ -1502,7 +1502,7 @@ pipelines:
 
       # Stage 1: Code quality checks (fail fast) - only if frontend changed
       - step:
-          name: Frontend TSC + Lint (Develop)
+          name: Front TSC + Lint (Develop)
           image: node:22-alpine
           max-time: 10
           script:
@@ -1537,7 +1537,7 @@ pipelines:
       # Stage 2: Run audits - conditional based on changes
       - parallel:
           - step:
-              name: Check frontend for vulnerabilities (Develop)
+              name: Front check vulnerabilities (Develop)
               image: node:22-alpine
               max-time: 10
               script:
@@ -1566,7 +1566,7 @@ pipelines:
                   npm audit --audit-level=high --production
 
           - step:
-              name: Check Backend API for vulnerabilities (Develop)
+              name: Back check vulnerabilities (Develop)
               runs-on:
                 - windows
                 - self.hosted
@@ -1604,7 +1604,7 @@ pipelines:
       # Stage 3: Build and test - conditional based on changes
       - parallel:
           - step:
-              name: Build and Test Backend API Unit and Arch (Develop)
+              name: Back Unit + Arch Test (Develop)
               runs-on:
                 - windows
                 - self.hosted
@@ -1678,7 +1678,7 @@ pipelines:
                   }
 
           - step:
-              name: Build and Test Frontend UI (Develop)
+              name: Front Unit Test (Develop)
               image: node:22-alpine
               max-time: 10
               artifacts:
