@@ -1573,17 +1573,16 @@ pipelines:
               fi
               echo "Running frontend lint..."
 
-            - cd src/ui
-            - apk add --no-cache git
-            - npm install -g npm@latest
-            - |
+              cd src/ui
+              apk add --no-cache git
+              npm install -g npm@latest
               cat > .npmrc << EOF
               registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
               //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
               EOF
-            - npm ci
-            - npm run lint
-            - npx tsc -b --noEmit
+              npm ci
+              npm run lint
+              npx tsc -b --noEmit
 
       # Stage 2: Run audits - conditional based on changes
       - parallel:
@@ -1603,13 +1602,12 @@ pipelines:
                   fi
                   echo "Running frontend audit..."
 
-                - cd src/ui
-                - |
+                  cd src/ui
                   cat > .npmrc << EOF
                   registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
                   //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
                   EOF
-                - npm audit --audit-level=high --production
+                  npm audit --audit-level=high --production
 
           - step:
               name: Check Backend API for vulnerabilities (Develop)
@@ -1618,6 +1616,7 @@ pipelines:
                 - self.hosted
               script:
                 - |
+                  # Check if backend audit should run
                   Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
                   if (Test-Path "develop-test-decision.json") {
                     $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
@@ -1628,13 +1627,14 @@ pipelines:
                   }
                   Write-Host "Running backend audit..." -ForegroundColor Cyan
 
-                - $env:SolutionDir = ".\src\services"
-                - echo "Checking dotnet vulnerabilities"
-                - cd $env:SolutionDir
-                - dotnet --info
-                - dotnet nuget list source
-                - dotnet restore Demoulas.ProfitSharing.slnx
-                - |
+                  # Run vulnerability check
+                  $env:SolutionDir = ".\src\services"
+                  Write-Host "Checking dotnet vulnerabilities"
+                  cd $env:SolutionDir
+                  dotnet --info
+                  dotnet nuget list source
+                  dotnet restore Demoulas.ProfitSharing.slnx
+
                   $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
                   if ($output -match "has the following vulnerable packages") {
                     Write-Host "Vulnerabilities found!"
@@ -1656,6 +1656,7 @@ pipelines:
                 - test-reports/**
               script:
                 - |
+                  # Check if backend tests should run
                   Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
                   if (Test-Path "develop-test-decision.json") {
                     $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
@@ -1666,23 +1667,28 @@ pipelines:
                   }
                   Write-Host "Running backend unit tests..." -ForegroundColor Cyan
 
-                - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-                - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-                - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
-                - mkdir -Force -Path $env:REPORTS_PATH
-                - |
-                  $dotnetSdkList = dotnet --list-sdks;
-                  Write-Output "Installed .NET SDKs:";
-                  Write-Output $dotnetSdkList;
-                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+                  # Set environment variables
+                  $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+                  $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
+                  $env:REPORTS_PATH = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/unit-tests"
+                  mkdir -Force -Path $env:REPORTS_PATH
+
+                  # Verify .NET SDK
+                  $dotnetSdkList = dotnet --list-sdks
+                  Write-Output "Installed .NET SDKs:"
+                  Write-Output $dotnetSdkList
+                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\."
                   if (-not $dotnetSdkRequired) {
-                      Write-Error "FAILED: .NET 10 SDK is required but not available.";
-                      exit 1;
+                    Write-Error "FAILED: .NET 10 SDK is required but not available."
+                    exit 1
                   }
-                - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
-                - dotnet restore src/services/Demoulas.ProfitSharing.slnx
-                - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
-                - |
+
+                  # Build and test
+                  dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+                  dotnet restore src/services/Demoulas.ProfitSharing.slnx
+                  dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
+
+                  # Run tests
                   $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
                   Write-Host "Running ALL unit tests" -ForegroundColor Cyan
                   & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
@@ -1696,6 +1702,7 @@ pipelines:
                 - test-reports/**
               script:
                 - |
+                  # Check if backend tests should run
                   Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
                   if (Test-Path "develop-test-decision.json") {
                     $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
@@ -1706,23 +1713,28 @@ pipelines:
                   }
                   Write-Host "Running backend architecture tests..." -ForegroundColor Cyan
 
-                - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-                - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
-                - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/architecture-tests"
-                - mkdir -Force -Path $env:REPORTS_PATH
-                - |
-                  $dotnetSdkList = dotnet --list-sdks;
-                  Write-Output "Installed .NET SDKs:";
-                  Write-Output $dotnetSdkList;
-                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+                  # Set environment variables
+                  $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+                  $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
+                  $env:REPORTS_PATH = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/architecture-tests"
+                  mkdir -Force -Path $env:REPORTS_PATH
+
+                  # Verify .NET SDK
+                  $dotnetSdkList = dotnet --list-sdks
+                  Write-Output "Installed .NET SDKs:"
+                  Write-Output $dotnetSdkList
+                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\."
                   if (-not $dotnetSdkRequired) {
-                      Write-Error "FAILED: .NET 10 SDK is required but not available.";
-                      exit 1;
+                    Write-Error "FAILED: .NET 10 SDK is required but not available."
+                    exit 1
                   }
-                - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
-                - dotnet restore src/services/Demoulas.ProfitSharing.slnx
-                - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
-                - |
+
+                  # Build and test
+                  dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+                  dotnet restore src/services/Demoulas.ProfitSharing.slnx
+                  dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
+
+                  # Run tests
                   $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
                   Write-Host "Executing test runner: $testExe"
                   & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
@@ -1746,16 +1758,15 @@ pipelines:
                   fi
                   echo "Running frontend tests..."
 
-                - cd src/ui
-                - apk add --no-cache git
-                - npm install -g npm@latest
-                - |
+                  cd src/ui
+                  apk add --no-cache git
+                  npm install -g npm@latest
                   cat > .npmrc << EOF
                   registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
                   //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
                   EOF
-                - npm ci
-                - npm run test
+                  npm ci
+                  npm run test
 
       # Stage 4: Update the build tag on success
       - step: *update-develop-tag
