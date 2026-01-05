@@ -1,13 +1,18 @@
 import { ColDef } from "ag-grid-community";
 import {
-  createBadgeColumn,
-  createDateColumn,
-  createNameColumn,
-  createSSNColumn,
-  createStatusColumn
+    createBadgeColumn,
+    createDateColumn,
+    createNameColumn,
+    createSSNColumn,
+    createStatusColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetRecentlyTerminatedColumns = (): ColDef[] => {
+  const terminationCodeColumn = createStatusColumn({
+    headerName: "Termination Code",
+    field: "terminationCode"
+  });
+
   return [
     createBadgeColumn({}),
     createSSNColumn({}),
@@ -19,9 +24,6 @@ export const GetRecentlyTerminatedColumns = (): ColDef[] => {
       headerName: "Termination Date",
       field: "terminationDate"
     }),
-    createStatusColumn({
-      headerName: "Termination Code",
-      field: "terminationCode"
-    })
+    { ...terminationCodeColumn, flex: 1 }
   ];
 };
