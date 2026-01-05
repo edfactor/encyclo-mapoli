@@ -1665,7 +1665,7 @@ pipelines:
       # Stage 3: Build and test - conditional based on changes
       - parallel:
           - step:
-              name: Build and Test Backend API - UnitTests (Develop)
+              name: Build and Test Backend API (Develop)
               runs-on:
                 - windows
                 - self.hosted
@@ -1682,13 +1682,10 @@ pipelines:
                       exit 0
                     }
                   }
-                  Write-Host "Running backend unit tests..." -ForegroundColor Cyan
+                  Write-Host "Running backend tests..." -ForegroundColor Cyan
 
                   # Set environment variables
                   $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-                  $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-                  $env:REPORTS_PATH = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/unit-tests"
-                  mkdir -Force -Path $env:REPORTS_PATH
 
                   # Verify .NET SDK
                   $dotnetSdkList = dotnet --list-sdks
@@ -1700,61 +1697,46 @@ pipelines:
                     exit 1
                   }
 
-                  # Build and test
+                  # Build once for all tests
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Building solution..." -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
                   dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
                   dotnet restore src/services/Demoulas.ProfitSharing.slnx
                   dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
-                  # Run tests
-                  $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-                  Write-Host "Running ALL unit tests" -ForegroundColor Cyan
-                  & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+                  # Run Unit Tests
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Running Unit Tests..." -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  $unitTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/unit-tests"
+                  mkdir -Force -Path $unitTestsPath
+                  $unitTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.exe"
+                  & $unitTestExe -jUnit "$unitTestsPath/junit.xml"
+                  $unitTestExit = $LASTEXITCODE
 
-          - step:
-              name: Build and Test Backend API - Architecture (Develop)
-              runs-on:
-                - windows
-                - self.hosted
-              artifacts:
-                - test-reports/**
-              script:
-                - |
-                  # Check if backend tests should run
-                  Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
-                  if (Test-Path "develop-test-decision.json") {
-                    $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
-                    if ($decision.runBackend -eq $false) {
-                      Write-Host "SKIP: No backend changes detected" -ForegroundColor Yellow
-                      exit 0
-                    }
-                  }
-                  Write-Host "Running backend architecture tests..." -ForegroundColor Cyan
+                  # Run Architecture Tests
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Running Architecture Tests..." -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  $archTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/architecture-tests"
+                  mkdir -Force -Path $archTestsPath
+                  $archTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests.Architecture/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.Architecture.exe"
+                  & $archTestExe -jUnit "$archTestsPath/junit.xml"
+                  $archTestExit = $LASTEXITCODE
 
-                  # Set environment variables
-                  $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-                  $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
-                  $env:REPORTS_PATH = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/architecture-tests"
-                  mkdir -Force -Path $env:REPORTS_PATH
+                  # Report results
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Test Results Summary" -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  Write-Host "Unit Tests: $(if ($unitTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($unitTestExit -eq 0) { 'Green' } else { 'Red' })
+                  Write-Host "Architecture Tests: $(if ($archTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($archTestExit -eq 0) { 'Green' } else { 'Red' })
 
-                  # Verify .NET SDK
-                  $dotnetSdkList = dotnet --list-sdks
-                  Write-Output "Installed .NET SDKs:"
-                  Write-Output $dotnetSdkList
-                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\."
-                  if (-not $dotnetSdkRequired) {
-                    Write-Error "FAILED: .NET 10 SDK is required but not available."
+                  # Exit with failure if either test suite failed
+                  if ($unitTestExit -ne 0 -or $archTestExit -ne 0) {
+                    Write-Error "One or more test suites failed"
                     exit 1
                   }
-
-                  # Build and test
-                  dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
-                  dotnet restore src/services/Demoulas.ProfitSharing.slnx
-                  dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
-
-                  # Run tests
-                  $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-                  Write-Host "Executing test runner: $testExe"
-                  & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
 
           - step:
               name: Build and Test Frontend UI (Develop)
