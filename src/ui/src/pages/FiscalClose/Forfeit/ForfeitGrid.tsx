@@ -76,7 +76,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
       earningPoints: totalEarningPoints,
       validation: searchResults?.crossReferenceValidation?.validationGroups[0] || null
     }),
-    [totalForfeituresRaw, totalForfeitPoints, totalEarningPoints]
+    [totalForfeituresRaw, totalForfeitPoints, totalEarningPoints, searchResults]
   );
 
   if (!searchResults?.response) return null;
