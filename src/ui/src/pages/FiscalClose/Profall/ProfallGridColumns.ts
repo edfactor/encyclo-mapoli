@@ -16,6 +16,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
     }),
     createBadgeColumn({
       headerName: "Badge",
+      alignment: "right",
       navigateFunction: navFunction
     }),
     createNameColumn({
