@@ -138,6 +138,10 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     /// <returns>Paginated beneficiary results.</returns>
     public async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilter(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken)
     {
+
+        /*
+         Note: Just call Master Inquiry Service and transform according to your response.
+         */
         PaginatedResponseDto<BeneficiarySearchFilterResponse> result;
 
         if (request.MemberType == 0) // All - search both employees and beneficiaries
