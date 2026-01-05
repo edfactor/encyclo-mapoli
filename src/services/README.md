@@ -56,27 +56,27 @@ Install 3rd Party Libraries:
 
 ### Suggested Visual Studio Extensions
 
-- [Productivity Power Tools 2022](https://marketplace.visualstudio.com/items?itemName=VisualStudioPlatformTeam.ProductivityPowerPack2022)
-- [Visual Studio Spell Checker (VS2022 and Later)](https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellCheckerVS2022andLater)
+-   [Productivity Power Tools 2022](https://marketplace.visualstudio.com/items?itemName=VisualStudioPlatformTeam.ProductivityPowerPack2022)
+-   [Visual Studio Spell Checker (VS2022 and Later)](https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellCheckerVS2022andLater)
 
 <hr/>
 
 ### Good reads
 
-- [Minimal APIs overview](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/overview?view=aspnetcore-8.0)
-- [RESTful web API design](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)
-- [Web API implementation](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-implementation)
-- [Caching guidance](https://learn.microsoft.com/en-us/azure/architecture/best-practices/caching)
-- [Performance testing and antipatterns for cloud applications](https://learn.microsoft.com/en-us/azure/architecture/antipatterns/#catalog-of-antipatterns)
-- [Use feature flags in an ASP.NET Core app](https://learn.microsoft.com/en-us/azure/azure-app-configuration/use-feature-flags-dotnet-core)
-- [EF.Core Bulk updates](https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-7.0/whatsnew#executeupdate-and-executedelete-bulk-updates)
-- [Async return types (C#)](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types)
+-   [Minimal APIs overview](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/overview?view=aspnetcore-8.0)
+-   [RESTful web API design](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)
+-   [Web API implementation](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-implementation)
+-   [Caching guidance](https://learn.microsoft.com/en-us/azure/architecture/best-practices/caching)
+-   [Performance testing and antipatterns for cloud applications](https://learn.microsoft.com/en-us/azure/architecture/antipatterns/#catalog-of-antipatterns)
+-   [Use feature flags in an ASP.NET Core app](https://learn.microsoft.com/en-us/azure/azure-app-configuration/use-feature-flags-dotnet-core)
+-   [EF.Core Bulk updates](https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-7.0/whatsnew#executeupdate-and-executedelete-bulk-updates)
+-   [Async return types (C#)](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types)
 
 <hr/>
 
 ### Databases
 
-- Oracle
+-   Oracle
 
 ### EntityFramework Tools
 
@@ -93,7 +93,7 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 **Drop and rebuild schema**: Demoulas.ProfitSharing.Data.Cli drop-recreate-db --connection-name ProfitSharing
 **Import from Ready**: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema "PROFITSHARE"
 
-- Second Example: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file "..\..\..\..\..\..\..\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema "PROFITSHARE"
+-   Second Example: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file "..\..\..\..\..\..\..\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema "PROFITSHARE"
 
 **Generate dgml**: Demoulas.ProfitSharing.Data.Cli generate-dgml --connection-name ProfitSharing --output-file ProfitSharing.dgml
 **Generate markdown**: Demoulas.ProfitSharing.Data.Cli generate-markdown --connection-name ProfitSharing --output-file ProfitSharing.dgml
@@ -104,7 +104,7 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 
 ## Reference [dotnet publish](https://learn.microsoft.com/en-us/dotnet/core/docker/publish-as-container?pivots=dotnet-8-0)
 
-dotnet publish -c Release -p:PublishProfile=FolderProfile -o ./publishOutput
+dotnet publish -c Release -p:PublishProfile=FolderProfile -p:SkipOpenApiSpecGeneration=true -o ./publishOutput
 PowerShell -ExecutionPolicy Bypass -File .\utilities\generateBuildInfo.ps1
 
 Compress-Archive -Path ./publishOutput/\* -DestinationPath ./Demoulas.ProfitSharing.Api.zip -Force
