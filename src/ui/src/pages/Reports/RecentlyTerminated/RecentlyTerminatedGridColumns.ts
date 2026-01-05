@@ -1,10 +1,10 @@
 import { ColDef } from "ag-grid-community";
 import {
-    createBadgeColumn,
-    createDateColumn,
-    createNameColumn,
-    createSSNColumn,
-    createStatusColumn
+  createBadgeColumn,
+  createDateColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStatusColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetRecentlyTerminatedColumns = (): ColDef[] => {
