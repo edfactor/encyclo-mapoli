@@ -32,7 +32,7 @@ public class ProfitShareEditEndpoint
 
     public override void Configure()
     {
-        Get("profit-share-edit");
+        Get("/profit-share-edit");
         Summary(s =>
         {
             s.Summary = "profit share edit";

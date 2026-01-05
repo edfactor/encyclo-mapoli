@@ -14,4 +14,22 @@ public sealed record RehireTransactionDetailResponse : IProfitYearRequest
 
     // Need a property for the profit detail id from the PROFIT_DETAIL database table
     public int ProfitDetailId { get; set; }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static RehireTransactionDetailResponse ResponseExample()
+    {
+        return new RehireTransactionDetailResponse
+        {
+            ProfitYear = 2022,
+            Forfeiture = 3254.14m,
+            Remark = "Rehire forfeiture recovery",
+            ProfitCodeId = 2,
+            WagesTransactionYear = 15000.00m,
+            HoursTransactionYear = 800.00m,
+            SuggestedUnforfeiture = 3254.14m,
+            ProfitDetailId = 1001
+        };
+    }
 }

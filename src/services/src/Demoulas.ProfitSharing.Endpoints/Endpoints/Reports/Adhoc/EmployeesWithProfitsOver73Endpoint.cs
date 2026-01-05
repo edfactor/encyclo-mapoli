@@ -37,9 +37,6 @@ public sealed class EmployeesWithProfitsOver73Endpoint
     {
         Get("prof-letter73");
 
-        // Add role-based authorization
-        Roles(Role.ADMINISTRATOR, Role.FINANCEMANAGER);
-
         Summary(s =>
         {
             s.Summary = "PROF-LETTER73: Employees with Profits Over Age 73";

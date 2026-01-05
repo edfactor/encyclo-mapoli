@@ -30,7 +30,7 @@ public sealed class UpdateSummaryReportEndpoint : EndpointWithCsvTotalsBase<Froz
 
     public override void Configure()
     {
-        Get("frozen/updatesummary");
+        Get("frozen/update-summary");
         Summary(s =>
         {
             s.Summary = ReportFileName;

@@ -5,9 +5,9 @@ import { useLazyBeneficiarySearchFilterQuery, useLazyGetBeneficiaryDetailQuery }
 
 import { DSMAccordion, Page, Paged } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
-import { PageErrorBoundary } from "../../components/PageErrorBoundary";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { BENEFICIARY_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
+import { PageErrorBoundary } from "../../components/PageErrorBoundary";
 import { CAPTIONS, ROUTES } from "../../constants";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { setDistributionHome } from "../../reduxstore/slices/distributionSlice";
@@ -144,9 +144,6 @@ const BeneficiaryInquiryContent = () => {
               setSelectedMember(null);
               search.reset();
             }}
-            onMemberTypeChange={(type) => {
-              setMemberType(type);
-            }}
             onReset={handleReset}
             isSearching={isFetching}
           />
@@ -165,6 +162,7 @@ const BeneficiaryInquiryContent = () => {
             onRowClick={onBadgeClick}
             onPageNumberChange={(page) => search.handlePaginationChange(page, search.pageSize)}
             onPageSizeChange={(size) => search.handlePaginationChange(0, size)}
+            handleSortChange={search.handleSortChange}
           />
         )}
 

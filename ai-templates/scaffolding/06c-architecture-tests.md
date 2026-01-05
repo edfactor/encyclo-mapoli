@@ -1,6 +1,6 @@
 # Part 6c: Architecture Tests
 
-**Estimated Time:** 15 minutes  
+**Estimated Time:** 30 minutes  
 **Prerequisites:** [Part 6b Complete](./06b-testing-patterns.md)  
 **Next:** [Part 7: Alignment Checklist](./07-alignment-checklist.md)
 
@@ -8,12 +8,16 @@
 
 ## 🎯 Overview
 
-Architecture tests enforce:
+Architecture tests enforce structural rules and organizational patterns across your codebase:
 
-- **Layer Dependencies** - Services don't reference Endpoints
-- **Immutability Rules** - DTOs are immutable records
-- **Naming Conventions** - Interfaces start with I
-- **Project Structure** - Proper namespace organization
+- **Contracts Organization** - Request/Response separation in Contracts folder
+- **Validation Organization** - Validators centralized in Validation namespace
+- **Layer Dependencies** - Services don't reference Endpoints/Api
+- **Naming Conventions** - Consistent suffixes (Service, Endpoint, Validator, Dto)
+- **Project Structure** - Domain-based organization, no Controllers
+- **Immutability Rules** - DTOs are immutable with readonly properties
+
+**Reference Implementation:** See `Demoulas.Handheld.UnitTests.Architecture` for complete examples (31 tests across 6 categories)
 
 ---
 
@@ -29,24 +33,34 @@ Architecture tests enforce:
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
+    <EnableMicrosoftTestingPlatform>true</EnableMicrosoftTestingPlatform>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="ArchUnitNET" />
-    <PackageReference Include="ArchUnitNET.xUnit" />
+    <PackageReference Include="TngTech.ArchUnitNET" />
+    <PackageReference Include="TngTech.ArchUnitNET.xUnit" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Reference assemblies with actual types to analyze -->
     <ProjectReference Include="..\..\src\MySolution.Api\MySolution.Api.csproj" />
+    <ProjectReference Include="..\..\src\MySolution.Endpoints\MySolution.Endpoints.csproj" />
     <ProjectReference Include="..\..\src\MySolution.Services\MySolution.Services.csproj" />
     <ProjectReference Include="..\..\src\MySolution.Data\MySolution.Data.csproj" />
     <ProjectReference Include="..\..\src\MySolution.Common\MySolution.Common.csproj" />
   </ItemGroup>
 </Project>
 ```
+
+**Key Configuration Notes:**
+
+- Use `TngTech.ArchUnitNET` packages (not just `ArchUnitNET`)
+- Enable Microsoft Testing Platform for xUnit v3 compatibility
+- Reference all assemblies you need to analyze (not just interfaces)
 
 ---
 
@@ -57,272 +71,649 @@ Architecture tests enforce:
 ```csharp
 using ArchUnitNET.Domain;
 using ArchUnitNET.Loader;
-using ArchUnitNET.Fluent;
+using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace MySolution.UnitTests.Architecture;
 
 public abstract class ArchitectureTestBase
 {
+    // Build architecture from actual type references (not interface assemblies)
     protected static readonly Architecture Architecture =
         new ArchLoader()
             .LoadAssemblies(
                 typeof(MySolution.Api.Program).Assembly,
-                typeof(MySolution.Services.MemberService).Assembly,
-                typeof(MySolution.Data.Contexts.MyDbContext).Assembly,
-                typeof(MySolution.Common.Interfaces.IMemberService).Assembly)
+                typeof(MySolution.Endpoints.Endpoints.GetItemsEndpoint).Assembly,
+                typeof(MySolution.Services.Orders.OrderService).Assembly,
+                typeof(MySolution.Common.Contracts.Request.GetOrderRequest).Assembly
+            )
             .Build();
-
-    protected static IObjectProvider<IType> ApiLayer =>
-        ArchRuleDefinition.Types()
-            .That().ResideInNamespace("MySolution.Api.*", useRegularExpressions: true)
-            .As("API Layer");
-
-    protected static IObjectProvider<IType> ServiceLayer =>
-        ArchRuleDefinition.Types()
-            .That().ResideInNamespace("MySolution.Services.*", useRegularExpressions: true)
-            .As("Service Layer");
-
-    protected static IObjectProvider<IType> DataLayer =>
-        ArchRuleDefinition.Types()
-            .That().ResideInNamespace("MySolution.Data.*", useRegularExpressions: true)
-            .As("Data Layer");
-
-    protected static IObjectProvider<IType> CommonLayer =>
-        ArchRuleDefinition.Types()
-            .That().ResideInNamespace("MySolution.Common.*", useRegularExpressions: true)
-            .As("Common Layer");
 }
 ```
 
+**Critical ArchUnitNET API Patterns:**
+
+1. **ResideInNamespace()** - Takes single string parameter (NO boolean parameters)
+
+   ```csharp
+   // ✅ CORRECT
+   .ResideInNamespace("MySolution.Common")
+
+   // ❌ WRONG - no useRegularExpressions parameter
+   .ResideInNamespace("MySolution.Common", useRegularExpressions: true)
+   ```
+
+2. **WithoutRequiringPositiveResults()** - Required for rules that may match zero types
+
+   ```csharp
+   // ✅ CORRECT - use when rule may have no matches
+   .Should().NotDependOnAny(...)
+   .Because("reason")
+   .WithoutRequiringPositiveResults()
+   .Check(Architecture);
+   ```
+
+3. **Method Chain Order** - Strict ordering required
+
+   ```csharp
+   // ✅ CORRECT ORDER
+   Classes().That()...
+       .Should()...
+       .Because("reason")
+       .WithoutRequiringPositiveResults()  // After Because()
+       .Check(Architecture);
+
+   // ❌ WRONG - WithoutRequiringPositiveResults before Because
+   .Should()...
+   .WithoutRequiringPositiveResults()
+   .Because("reason")
+   .Check(Architecture);
+   ```
+
+4. **Interfaces()** - Call .Should() directly, no .That() needed
+
+   ```csharp
+   // ✅ CORRECT
+   Interfaces().Should().HaveNameStartingWith("I")
+
+   // ❌ WRONG - unnecessary .That()
+   Interfaces().That().AreInterfaces().Should()...
+   ```
+
 ---
 
-## 🔒 Layer Dependency Tests
+## � Test Category 1: Contracts Organization
+
+### ContractsArchitectureTests.cs
+
+Validates proper organization of Request/Response DTOs in the Contracts folder.
+
+```csharp
+using static ArchUnitNET.Fluent.ArchRuleDefinition;
+
+namespace MySolution.UnitTests.Architecture;
+
+public class ContractsArchitectureTests : ArchitectureTestBase
+{
+    [Fact]
+    public void RequestClasses_Should_Be_In_Contracts_Request_Namespace()
+    {
+        Classes().That().HaveNameEndingWith("Request")
+            .And().ResideInNamespace("MySolution.Common")
+            .Should().ResideInNamespace("MySolution.Common.Contracts.Request")
+            .Because("request classes should be centralized in Contracts.Request folder")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void ResponseClasses_Should_Be_In_Contracts_Response_Namespace()
+    {
+        Classes().That().HaveNameEndingWith("Response")
+            .And().ResideInNamespace("MySolution.Common")
+            .Should().ResideInNamespace("MySolution.Common.Contracts.Response")
+            .Because("response DTOs should be centralized in Contracts.Response folder")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Contracts_Request_Should_Not_Depend_On_Response()
+    {
+        Types().That().ResideInNamespace("MySolution.Common.Contracts.Request")
+            .Should().NotDependOnAny(Types().That().ResideInNamespace("MySolution.Common.Contracts.Response"))
+            .Because("request contracts should not depend on response contracts")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Contracts_Should_Not_Depend_On_Services()
+    {
+        Types().That().ResideInNamespace("MySolution.Common.Contracts")
+            .Should().NotDependOnAny(Types().That().ResideInNamespace("MySolution.Services"))
+            .Because("contracts should be independent of service implementations")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Contracts_Should_Be_Immutable_Data_Objects()
+    {
+        // Verify all contracts have readonly properties (init-only setters)
+        Classes().That().ResideInNamespace("MySolution.Common.Contracts")
+            .And().AreNotAbstract()
+            .Should().HavePropertyMemberWithSetter(false) // No setters, only init
+            .Because("contract DTOs should be immutable")
+            .Check(Architecture);
+    }
+}
+```
+
+**Key Tests:**
+
+- Request/Response folder separation
+- No circular dependencies between Request and Response
+- Contracts independent of Services/Endpoints
+- Immutability enforcement
+
+---
+
+## ✅ Test Category 2: Validation Organization
+
+### ValidationArchitectureTests.cs
+
+Validates FluentValidation validator organization and dependencies.
+
+```csharp
+using static ArchUnitNET.Fluent.ArchRuleDefinition;
+
+namespace MySolution.UnitTests.Architecture;
+
+public class ValidationArchitectureTests : ArchitectureTestBase
+{
+    [Fact]
+    public void Validators_Should_Be_In_Validation_Namespace()
+    {
+        Classes().That().HaveNameEndingWith("Validator")
+            .And().ResideInNamespace("MySolution.Common")
+            .Should().ResideInNamespace("MySolution.Common.Validation")
+            .Because("validators should be centralized in Validation namespace")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Validators_Should_End_With_Validator_Suffix()
+    {
+        Classes().That().ResideInNamespace("MySolution.Common.Validation")
+            .And().AreNotAbstract()
+            .Should().HaveNameEndingWith("Validator")
+            .Because("validation classes should follow naming convention")
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Request_Validators_Should_End_With_RequestValidator()
+    {
+        // Validators for request objects should have RequestValidator suffix
+        Classes().That().ResideInNamespace("MySolution.Common.Validation")
+            .And().HaveNameEndingWith("RequestValidator")
+            .Should().Exist()
+            .Because("request validators should be clearly identified")
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Validators_Should_Not_Depend_On_Services()
+    {
+        Types().That().ResideInNamespace("MySolution.Common.Validation")
+            .Should().NotDependOnAny(Types().That().ResideInNamespace("MySolution.Services"))
+            .Because("validation layer should not depend on service implementations")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+}
+```
+
+**Key Tests:**
+
+- Validators centralized in Validation namespace
+- Naming conventions enforced (*Validator, *RequestValidator)
+- Validators independent of Services/Endpoints
+
+---
+
+## 🏗️ Test Category 3: Layer Dependencies
 
 ### LayerDependencyTests.cs
 
+Enforces proper dependency flow between architectural layers.
+
 ```csharp
-using ArchUnitNET.Fluent;
-using ArchUnitNET.xUnit;
-using Xunit;
+using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace MySolution.UnitTests.Architecture;
 
 public class LayerDependencyTests : ArchitectureTestBase
 {
     [Fact]
-    [Description("Services should not depend on API endpoints")]
-    public void Services_ShouldNot_DependOn_Endpoints()
+    public void Services_Should_Not_Depend_On_Endpoints()
     {
-        var rule = ArchRuleDefinition.Types()
-            .That().Are(ServiceLayer)
-            .Should().NotDependOnAny(ApiLayer)
-            .Because("Service layer should be independent of API layer");
-
-        rule.Check(Architecture);
+        Types().That().ResideInNamespace("MySolution.Services")
+            .Should().NotDependOnAny(Types().That().ResideInNamespace("MySolution.Endpoints"))
+            .Because("service layer should be independent of API/endpoint layer")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
     }
 
     [Fact]
-    [Description("Data layer should not depend on services")]
-    public void Data_ShouldNot_DependOn_Services()
+    public void Services_Should_Not_Depend_On_Api()
     {
-        var rule = ArchRuleDefinition.Types()
-            .That().Are(DataLayer)
-            .Should().NotDependOnAny(ServiceLayer)
-            .Because("Data layer should not know about business logic");
-
-        rule.Check(Architecture);
+        Types().That().ResideInNamespace("MySolution.Services")
+            .Should().NotDependOnAny(Types().That().ResideInNamespace("MySolution.Api"))
+            .Because("service layer should not depend on API hosting layer")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
     }
 
     [Fact]
-    [Description("Common should not depend on any other layer")]
-    public void Common_ShouldNot_DependOn_AnyLayer()
+    public void Common_Should_Not_Depend_On_Services()
     {
-        var rule = ArchRuleDefinition.Types()
-            .That().Are(CommonLayer)
-            .Should().NotDependOnAny(ApiLayer)
-            .AndShould().NotDependOnAny(ServiceLayer)
-            .AndShould().NotDependOnAny(DataLayer)
-            .Because("Common layer should be self-contained");
+        Types().That().ResideInNamespace("MySolution.Common")
+            .Should().NotDependOnAny(Types().That().ResideInNamespace("MySolution.Services"))
+            .Because("common layer (contracts, DTOs) should not depend on service implementations")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
 
-        rule.Check(Architecture);
+    [Fact]
+    public void Common_Should_Not_Depend_On_Endpoints()
+    {
+        Types().That().ResideInNamespace("MySolution.Common")
+            .Should().NotDependOnAny(Types().That().ResideInNamespace("MySolution.Endpoints"))
+            .Because("common layer should not depend on API layer")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Common_Should_Not_Depend_On_Api()
+    {
+        Types().That().ResideInNamespace("MySolution.Common")
+            .Should().NotDependOnAny(Types().That().ResideInNamespace("MySolution.Api"))
+            .Because("common layer should be self-contained")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
     }
 }
 ```
 
+**Enforced Dependency Flow:**
+
+```
+Api → Endpoints → Services → Data
+         ↓           ↓
+       Common ← ← ← ← ←
+```
+
 ---
 
-## 📐 Naming Convention Tests
+## 📐 Test Category 4: Naming Conventions
 
 ### NamingConventionTests.cs
 
+Enforces consistent naming patterns across the codebase.
+
 ```csharp
-using ArchUnitNET.Fluent;
-using ArchUnitNET.xUnit;
-using Xunit;
+using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace MySolution.UnitTests.Architecture;
 
 public class NamingConventionTests : ArchitectureTestBase
 {
     [Fact]
-    [Description("Interfaces should start with I")]
-    public void Interfaces_ShouldStartWith_I()
+    public void Interfaces_Should_Start_With_I()
     {
-        var rule = ArchRuleDefinition.Interfaces()
-            .That().AreInterfaces()
-            .Should().HaveNameStartingWith("I")
-            .Because("Interface naming convention");
-
-        rule.Check(Architecture);
+        // Note: Interfaces() returns a type that can call .Should() directly
+        Interfaces().Should().HaveNameStartingWith("I")
+            .Because("interface naming convention requires I prefix")
+            .Check(Architecture);
     }
 
     [Fact]
-    [Description("Services should end with Service")]
-    public void Services_ShouldEndWith_Service()
+    public void Services_Should_End_With_Service()
     {
-        var rule = ArchRuleDefinition.Classes()
-            .That().ResideInNamespace("MySolution.Services", useRegularExpressions: false)
+        Classes().That().ResideInNamespace("MySolution.Services")
             .And().AreNotAbstract()
             .Should().HaveNameEndingWith("Service")
-            .Because("Service naming convention");
-
-        rule.Check(Architecture);
+            .Because("service classes should follow naming convention")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
     }
 
     [Fact]
-    [Description("Endpoints should end with Endpoint")]
-    public void Endpoints_ShouldEndWith_Endpoint()
+    public void Endpoints_Should_End_With_Endpoint()
     {
-        var rule = ArchRuleDefinition.Classes()
-            .That().ResideInNamespace("MySolution.Api.Endpoints.*", useRegularExpressions: true)
+        Classes().That().ResideInNamespace("MySolution.Endpoints")
             .And().AreNotAbstract()
+            .And().DoNotHaveName("EndpointBase") // Exclude base classes
             .Should().HaveNameEndingWith("Endpoint")
-            .Because("Endpoint naming convention");
+            .Because("endpoint classes should follow FastEndpoints naming convention")
+            .Check(Architecture);
+    }
 
-        rule.Check(Architecture);
+    [Fact]
+    public void Dtos_Should_End_With_Dto()
+    {
+        Classes().That().HaveNameEndingWith("Dto")
+            .Should().ResideInNamespace("MySolution.Common")
+            .Because("DTOs should be in Common layer")
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Response_Classes_Should_Have_Consistent_Naming()
+    {
+        Classes().That().ResideInNamespace("MySolution.Common.Contracts.Response")
+            .Should().HaveNameEndingWith("Response")
+            .Or().HaveNameEndingWith("ResponseDto")
+            .Because("response classes should have consistent naming")
+            .Check(Architecture);
     }
 }
 ```
 
----
+**Naming Patterns:**
 
-## 🔐 Immutability Tests
-
-### ImmutabilityTests.cs
-
-```csharp
-using ArchUnitNET.Fluent;
-using ArchUnitNET.xUnit;
-using Xunit;
-
-namespace MySolution.UnitTests.Architecture;
-
-public class ImmutabilityTests : ArchitectureTestBase
-{
-    [Fact]
-    [Description("DTOs should be immutable records")]
-    public void DTOs_ShouldBe_Records()
-    {
-        var rule = ArchRuleDefinition.Types()
-            .That().ResideInNamespace("MySolution.Common.Contracts.*", useRegularExpressions: true)
-            .And().HaveNameEndingWith("Dto")
-            .Should().BeRecords()
-            .Because("DTOs should be immutable");
-
-        rule.Check(Architecture);
-    }
-
-    [Fact]
-    [Description("Request DTOs should be immutable")]
-    public void RequestDTOs_ShouldBe_Immutable()
-    {
-        var rule = ArchRuleDefinition.Types()
-            .That().ResideInNamespace("MySolution.Common.Contracts.Request.*", useRegularExpressions: true)
-            .Should().BeRecords()
-            .Because("Request objects should not be modified after creation");
-
-        rule.Check(Architecture);
-    }
-}
-```
+- `I*` - Interfaces
+- `*Service` - Service implementations
+- `*Endpoint` - FastEndpoints endpoints
+- `*Dto` - Data transfer objects
+- `*Request` - Request objects
+- `*Response` / `*ResponseDto` - Response objects
+- `*Validator` - FluentValidation validators
 
 ---
 
-## 🎯 Custom Architecture Rules
+## 🏛️ Test Category 5: Project Structure
 
-### CustomArchitectureRules.cs
+### ProjectStructureTests.cs
+
+Validates overall project organization and domain patterns.
 
 ```csharp
-using ArchUnitNET.Fluent;
-using ArchUnitNET.xUnit;
-using Xunit;
+using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace MySolution.UnitTests.Architecture;
 
-public class CustomArchitectureRules : ArchitectureTestBase
+public class ProjectStructureTests : ArchitectureTestBase
 {
     [Fact]
-    [Description("Controllers should not exist (use FastEndpoints)")]
-    public void Controllers_ShouldNot_Exist()
+    public void Endpoints_Should_Be_Organized_In_Endpoints_Namespace()
     {
-        var rule = ArchRuleDefinition.Classes()
-            .That().HaveNameEndingWith("Controller")
+        Classes().That().HaveNameEndingWith("Endpoint")
+            .And().AreNotAbstract()
+            .Should().ResideInNamespace("MySolution.Endpoints")
+            .Because("endpoints should be organized in Endpoints project")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Services_Should_Be_Organized_By_Domain()
+    {
+        // Services should be in domain-specific namespaces (e.g., MySolution.Services.Orders)
+        Classes().That().ResideInNamespace("MySolution.Services")
+            .And().HaveNameEndingWith("Service")
+            .Should().NotResideInNamespace("MySolution.Services") // Not in root
+            .Because("services should be organized by domain (e.g., Services.Orders, Services.Items)")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Service_Interfaces_Should_Be_In_Interfaces_Namespace()
+    {
+        Interfaces().That().HaveNameEndingWith("Service")
+            .Should().ResideInNamespace("MySolution.Common.Interfaces")
+            .Because("service interfaces should be in Common.Interfaces")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void No_Controllers_Should_Exist()
+    {
+        Classes().That().HaveNameEndingWith("Controller")
             .Should().NotExist()
-            .Because("Use FastEndpoints instead of controllers");
-
-        rule.Check(Architecture);
+            .Because("FastEndpoints should be used instead of controllers")
+            .Check(Architecture);
     }
 
     [Fact]
-    [Description("DbContext should only be used in Data layer")]
-    public void DbContext_ShouldOnlyBeUsed_InDataLayer()
+    public void All_Validation_Should_Be_In_Validation_Namespace()
     {
-        var rule = ArchRuleDefinition.Classes()
-            .That().AreAssignableTo("Microsoft.EntityFrameworkCore.DbContext")
-            .Should().ResideInNamespace("MySolution.Data.*", useRegularExpressions: true)
-            .Because("DbContext should only be in Data layer");
-
-        rule.Check(Architecture);
-    }
-
-    [Fact]
-    [Description("Services should return Result<T>")]
-    public void Services_ShouldReturn_ResultT()
-    {
-        var rule = ArchRuleDefinition.Methods()
-            .That().AreDeclaredIn(ServiceLayer)
-            .And().ArePublic()
-            .And().DoNotHaveReturnType(typeof(void))
-            .Should().HaveReturnType("MySolution.Common.Contracts.Result`1")
-            .Or().HaveReturnType("System.Threading.Tasks.Task`1")
-            .Because("Services should use Result<T> pattern");
-
-        // Note: This rule requires more sophisticated pattern matching
-        // May need custom ArchUnit extension
+        Classes().That().ImplementInterface("FluentValidation.IValidator")
+            .Should().ResideInNamespace("MySolution.Common.Validation")
+            .Because("all validators should be centralized in Validation namespace")
+            .WithoutRequiringPositiveResults()
+            .Check(Architecture);
     }
 }
 ```
+
+**Structure Patterns:**
+
+- Endpoints in `*.Endpoints.Endpoints.*`
+- Services in `*.Services.{Domain}.*` (e.g., `Services.Orders`)
+- Interfaces in `*.Common.Interfaces`
+- Contracts in `*.Common.Contracts.{Request|Response}`
+- Validation in `*.Common.Validation`
+- No MVC Controllers (FastEndpoints only)
+
+---
+
+## 🎯 Test Category 6: Endpoint-Specific Tests
+
+### EndpointArchitectureTests.cs
+
+Validates FastEndpoints-specific patterns.
+
+```csharp
+using static ArchUnitNET.Fluent.ArchRuleDefinition;
+
+namespace MySolution.UnitTests.Architecture;
+
+public class EndpointArchitectureTests : ArchitectureTestBase
+{
+    [Fact]
+    public void Endpoints_Should_Be_In_Endpoints_Namespace()
+    {
+        Classes().That().HaveNameEndingWith("Endpoint")
+            .And().AreNotAbstract()
+            .And().DoNotHaveFullName("MySolution.Endpoints.Base.EndpointBase")
+            .Should().ResideInNamespace("MySolution.Endpoints.Endpoints")
+            .Because("concrete endpoints should be in Endpoints.Endpoints namespace")
+            .Check(Architecture);
+    }
+
+    [Fact]
+    public void Endpoints_Should_Not_Reference_DbContext()
+    {
+        Types().That().ResideInNamespace("MySolution.Endpoints")
+            .Should().NotDependOnAny(Types().That().HaveNameEndingWith("DbContext"))
+            .Because("endpoints should not directly access database (use services)")
+            .Check(Architecture);
+    }
+}
+```
+
+---
+
+## 🧪 Running Architecture Tests
+
+### Command Line
+
+```bash
+# Run all architecture tests
+cd tests/MySolution.UnitTests.Architecture
+dotnet test
+
+# Run specific test category
+dotnet test --filter "FullyQualifiedName~ContractsArchitectureTests"
+dotnet test --filter "FullyQualifiedName~LayerDependencyTests"
+
+# Verbose output
+dotnet test --logger "console;verbosity=detailed"
+```
+
+### Visual Studio / Rider
+
+- Open Test Explorer
+- Filter by project: `MySolution.UnitTests.Architecture`
+- Run all or specific test categories
+
+### CI/CD Integration
+
+```yaml
+# Example: Azure Pipelines
+- task: DotNetCoreCLI@2
+  displayName: "Run Architecture Tests"
+  inputs:
+    command: "test"
+    projects: "**/MySolution.UnitTests.Architecture.csproj"
+    arguments: "--configuration $(buildConfiguration) --logger trx"
+```
+
+---
+
+## 🚨 Common Test Failures & Fixes
+
+### 1. "Requires positive evaluation, not just absence of violations"
+
+**Problem:** Rule expects to find matching types but finds none.
+
+**Fix:** Add `.WithoutRequiringPositiveResults()` after `.Because()`
+
+```csharp
+// ❌ FAILS when no matching types
+.Should().ResideInNamespace("...")
+.Because("reason")
+.Check(Architecture);
+
+// ✅ CORRECT - allows zero matches
+.Should().ResideInNamespace("...")
+.Because("reason")
+.WithoutRequiringPositiveResults()
+.Check(Architecture);
+```
+
+### 2. "does not contain a definition for 'Because'"
+
+**Problem:** `.WithoutRequiringPositiveResults()` called before `.Because()`
+
+**Fix:** Correct method chain order
+
+```csharp
+// ❌ WRONG ORDER
+.Should()...
+.WithoutRequiringPositiveResults()  // Too early
+.Because("reason")
+.Check(Architecture);
+
+// ✅ CORRECT ORDER
+.Should()...
+.Because("reason")
+.WithoutRequiringPositiveResults()  // After Because
+.Check(Architecture);
+```
+
+### 3. "ResideInNamespace does not contain a definition for 'useRegularExpressions'"
+
+**Problem:** Using boolean parameters that don't exist in ArchUnitNET API
+
+**Fix:** Remove all boolean parameters
+
+```csharp
+// ❌ WRONG - no boolean parameters exist
+.ResideInNamespace("MySolution.Services", useRegularExpressions: true)
+.DoNotResideInNamespace("MySolution.Api", false)
+
+// ✅ CORRECT - single string parameter only
+.ResideInNamespace("MySolution.Services")
+.DoNotResideInNamespace("MySolution.Api")
+```
+
+### 4. Assembly Not Loaded
+
+**Problem:** Architecture test can't find types from a project
+
+**Fix:** Reference actual implementation assembly (not interface-only assembly)
+
+```csharp
+// ❌ WRONG - interface assembly has no implementations
+typeof(MySolution.Common.Interfaces.IOrderService).Assembly
+
+// ✅ CORRECT - implementation assembly with actual types
+typeof(MySolution.Services.Orders.OrderService).Assembly
+```
+
+---
+
+## 📊 Test Organization Summary
+
+| Test Class                  | Tests  | Purpose                                   |
+| --------------------------- | ------ | ----------------------------------------- |
+| ContractsArchitectureTests  | 9      | Request/Response organization             |
+| ValidationArchitectureTests | 5      | Validator organization & patterns         |
+| LayerDependencyTests        | 5      | Layer boundary enforcement                |
+| NamingConventionTests       | 5      | Consistent naming across codebase         |
+| ProjectStructureTests       | 7      | Domain organization, no Controllers       |
+| EndpointArchitectureTests   | 2      | FastEndpoints patterns                    |
+| **Total**                   | **33** | **Comprehensive architecture validation** |
 
 ---
 
 ## ✅ Validation Checklist - Part 6c
 
-- [ ] **Architecture test project** created
-- [ ] **ArchUnitNET** package installed
-- [ ] **Layer dependency tests** implemented
-- [ ] **Naming convention tests** implemented
-- [ ] **Immutability tests** for DTOs
-- [ ] **Custom rules** for project-specific patterns
-- [ ] **Tests run** in CI/CD pipeline
+- [ ] **Architecture test project** created with correct packages
+  - `TngTech.ArchUnitNET` and `TngTech.ArchUnitNET.xUnit`
+  - `EnableMicrosoftTestingPlatform=true` for xUnit v3
+- [ ] **All assemblies referenced** in ArchLoader (implementation assemblies)
+- [ ] **Contracts organization tests** (9 tests)
+  - Request/Response separation
+  - No circular dependencies
+  - Immutability checks
+- [ ] **Validation organization tests** (5 tests)
+  - Validators centralized
+  - Naming conventions
+  - No service dependencies
+- [ ] **Layer dependency tests** (5 tests)
+  - Services independent of Endpoints/Api
+  - Common self-contained
+- [ ] **Naming convention tests** (5 tests)
+  - Interfaces, Services, Endpoints, DTOs
+- [ ] **Project structure tests** (7 tests)
+  - Domain organization
+  - No Controllers
+- [ ] **Endpoint-specific tests** (2+ tests)
+  - FastEndpoints patterns
+  - No direct DbContext access
+- [ ] **All tests pass** with `dotnet test`
+- [ ] **Tests integrated** into CI/CD pipeline
+- [ ] **Documentation created** (README.md in test project)
 
 ---
 
 ## 🎓 Key Takeaways - Part 6c
 
-1. **Automated Enforcement** - Architecture rules enforced by tests
-2. **Layer Independence** - Prevent circular dependencies
-3. **Naming Conventions** - Consistent naming across codebase
-4. **Immutability** - DTOs are immutable records
+1. **Automated Enforcement** - Architecture rules automatically enforced by tests
+2. **Organization Patterns** - Contracts/Validation folders properly structured
+3. **Layer Independence** - Prevent circular dependencies, enforce uni-directional flow
+4. **Naming Consistency** - Consistent suffixes (Service, Endpoint, Validator, Dto)
+5. **FastEndpoints Pattern** - No Controllers, endpoints don't access DbContext directly
+6. **ArchUnitNET Quirks** - API differs from documentation; use trial/error or working examples
+7. **WithoutRequiringPositiveResults** - Essential for organizational rules that may have zero matches
 
 ---
 

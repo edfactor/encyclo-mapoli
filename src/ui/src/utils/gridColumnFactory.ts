@@ -38,7 +38,7 @@ export const createAddressColumn = (options: StreetAddressColumnOptions = {}): C
     valueGetter
   } = options;
 
-  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
 
   const column: ColDef = {
     headerName,
@@ -1260,4 +1260,8 @@ export const createBadgeOrPSNColumn = (
   }
 
   return column;
+};
+
+export const createColumnFrom = (initialSet: ColDef, additionalOptions: ColDef): ColDef => {
+  return { ...initialSet, ...additionalOptions };
 };

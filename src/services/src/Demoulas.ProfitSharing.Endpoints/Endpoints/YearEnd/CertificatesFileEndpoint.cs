@@ -43,7 +43,37 @@ public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePr
             // Record request metrics
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var response = await _certificateService.GetCertificateFile(req, ct);
+            var result = await _certificateService.GetCertificateFile(req, ct);
+
+            if (!result.IsSuccess)
+            {
+                // Validation error (e.g., missing annuity rates) - return 400 BadRequest
+                if (result.Error?.ValidationErrors?.Count > 0)
+                {
+                    _logger.LogWarning("Certificate file generation failed validation for profit year {ProfitYear}: {ErrorMessage} (correlation: {CorrelationId})",
+                        req.ProfitYear, result.Error.Description, HttpContext.TraceIdentifier);
+
+                    foreach (var error in result.Error.ValidationErrors)
+                    {
+                        foreach (var message in error.Value)
+                        {
+                            AddError(error.Key, message);
+                        }
+                    }
+                    ThrowError(result.Error.Description, 400);
+                    return;
+                }
+
+                // Service error - return 500
+                _logger.LogError("Certificate file generation failed for profit year {ProfitYear}: {ErrorMessage} (correlation: {CorrelationId})",
+                    req.ProfitYear, result.Error?.Description ?? "Unknown error", HttpContext.TraceIdentifier);
+
+                AddError("CertificateGeneration", result.Error?.Description ?? "Failed to generate certificate file.");
+                ThrowError(result.Error?.Description ?? "Failed to generate certificate file.", 500);
+                return;
+            }
+
+            var response = result.Value!;
             var memoryStream = new MemoryStream();
             await using var writer = new StreamWriter(memoryStream);
             await writer.WriteAsync(response);

@@ -31,7 +31,7 @@ public class GetDemographicSyncAuditEndpoint
 
     public override void Configure()
     {
-        Get("oracleHcm/audit");
+        Get("oracle-hcm/audit");
         Summary(s =>
         {
             s.Summary = "Gets demographic sync audit records with pagination";

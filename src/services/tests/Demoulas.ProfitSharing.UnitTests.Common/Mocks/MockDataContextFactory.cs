@@ -272,6 +272,41 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.States).Returns(mockStates.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.States).Returns(mockStates.Object);
 
+        // RMD Factors (IRS Publication 590-B Uniform Lifetime Table)
+        var rmdsFactors = new List<RmdsFactorByAge>()
+        {
+            new RmdsFactorByAge { Age = 73, Factor = 26.5m },
+            new RmdsFactorByAge { Age = 74, Factor = 25.5m },
+            new RmdsFactorByAge { Age = 75, Factor = 24.6m },
+            new RmdsFactorByAge { Age = 76, Factor = 23.7m },
+            new RmdsFactorByAge { Age = 77, Factor = 22.9m },
+            new RmdsFactorByAge { Age = 78, Factor = 22.0m },
+            new RmdsFactorByAge { Age = 79, Factor = 21.1m },
+            new RmdsFactorByAge { Age = 80, Factor = 20.2m },
+            new RmdsFactorByAge { Age = 81, Factor = 19.4m },
+            new RmdsFactorByAge { Age = 82, Factor = 18.5m },
+            new RmdsFactorByAge { Age = 83, Factor = 17.7m },
+            new RmdsFactorByAge { Age = 84, Factor = 16.8m },
+            new RmdsFactorByAge { Age = 85, Factor = 16.0m },
+            new RmdsFactorByAge { Age = 86, Factor = 15.2m },
+            new RmdsFactorByAge { Age = 87, Factor = 14.4m },
+            new RmdsFactorByAge { Age = 88, Factor = 13.7m },
+            new RmdsFactorByAge { Age = 89, Factor = 12.9m },
+            new RmdsFactorByAge { Age = 90, Factor = 12.2m },
+            new RmdsFactorByAge { Age = 91, Factor = 11.5m },
+            new RmdsFactorByAge { Age = 92, Factor = 10.8m },
+            new RmdsFactorByAge { Age = 93, Factor = 10.1m },
+            new RmdsFactorByAge { Age = 94, Factor = 9.5m },
+            new RmdsFactorByAge { Age = 95, Factor = 8.9m },
+            new RmdsFactorByAge { Age = 96, Factor = 8.4m },
+            new RmdsFactorByAge { Age = 97, Factor = 7.8m },
+            new RmdsFactorByAge { Age = 98, Factor = 7.3m },
+            new RmdsFactorByAge { Age = 99, Factor = 6.8m }
+        };
+        var mockRmdsFactors = BuildMockDbSetWithBackingList(rmdsFactors);
+        _profitSharingDbContext.Setup(m => m.RmdsFactorsByAge).Returns(mockRmdsFactors.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.RmdsFactorsByAge).Returns(mockRmdsFactors.Object);
+
         var employmentTypes = new List<EmploymentType>()
         {
             new EmploymentType() {Id=EmploymentType.Constants.FullTimeAccruedPaidHolidays,Name=EmploymentType.Constants.FullTimeAccruedPaidHolidays.ToString() },

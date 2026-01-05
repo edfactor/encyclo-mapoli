@@ -101,7 +101,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     formState: { errors, isValid },
     reset,
     watch,
-    trigger: _trigger // need this unused param to prevent console errors. No idea why - EL
+    trigger: _trigger // need this unused param to prevent console errors. No idea why. - EL
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(validationSchema) as Resolver<ExecutiveHoursAndDollarsSearch>,
     mode: "onBlur",

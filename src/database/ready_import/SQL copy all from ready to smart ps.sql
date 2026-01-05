@@ -1477,5 +1477,67 @@ delete from profit_detail where ssn IN ( 700010556, 700010521, 700010561 );
 delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561));
 delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561 );
 
+-- ============================================================================
+-- ANNUITY RATE SEED DATA (PS-1890)
+-- ============================================================================
+-- Seed ANNUITY_RATE_CONFIG table with age ranges for years 2020-2026
+-- This defines the expected age range (67-120) for annuity rate validation
+-- ============================================================================
+
+DECLARE
+    v_count NUMBER;
+BEGIN
+    -- Seed config for years 2020-2026 (only if not already present)
+    FOR yr IN 2020..2026 LOOP
+        SELECT COUNT(*) INTO v_count FROM ANNUITY_RATE_CONFIG WHERE YEAR = yr;
+        IF v_count = 0 THEN
+            INSERT INTO ANNUITY_RATE_CONFIG (YEAR, MINIMUM_AGE, MAXIMUM_AGE, USER_NAME, CREATED_AT_UTC, MODIFIED_AT_UTC)
+            VALUES (yr, 67, 120, USER, SYSTIMESTAMP, SYSTIMESTAMP);
+            DBMS_OUTPUT.PUT_LINE('Seeded ANNUITY_RATE_CONFIG for year ' || yr);
+        END IF;
+    END LOOP;
+    
+    COMMIT;
+END;
+/
+
+-- ============================================================================
+-- Copy annuity rates from 2024 to any missing years (2020-2026)
+-- Uses 2024 as the source year since it has complete data
+-- Only copies if the target year has no rates defined yet (idempotent)
+-- ============================================================================
+
+DECLARE
+    v_source_year NUMBER := 2024;
+    v_count NUMBER;
+    v_rates_copied NUMBER := 0;
+BEGIN
+    -- For each target year, copy rates from 2024 if not already present
+    FOR yr IN 2020..2026 LOOP
+        -- Skip the source year itself
+        IF yr != v_source_year THEN
+            -- Check if target year already has annuity rates
+            SELECT COUNT(*) INTO v_count FROM ANNUITY_RATE WHERE YEAR = yr;
+            
+            IF v_count = 0 THEN
+                -- Copy all rates from source year to target year
+                INSERT INTO ANNUITY_RATE (YEAR, AGE, SINGLE_RATE, JOINT_RATE, CREATED_AT_UTC, USER_NAME, MODIFIED_AT_UTC)
+                SELECT yr, AGE, SINGLE_RATE, JOINT_RATE, SYSTIMESTAMP, USER, SYSTIMESTAMP
+                FROM ANNUITY_RATE
+                WHERE YEAR = v_source_year
+                ORDER BY AGE;
+                
+                v_rates_copied := SQL%ROWCOUNT;
+                DBMS_OUTPUT.PUT_LINE('Copied ' || v_rates_copied || ' annuity rates from year ' || v_source_year || ' to year ' || yr);
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('Year ' || yr || ' already has ' || v_count || ' annuity rates - skipping');
+            END IF;
+        END IF;
+    END LOOP;
+    
+    COMMIT;
+END;
+/
+
 END;
 COMMIT ;

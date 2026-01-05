@@ -1,4 +1,4 @@
-import { ColDef, IRowNode } from "ag-grid-community";
+import { ColDef, IRowNode, ValueFormatterParams } from "ag-grid-community";
 import { createCountColumn, createCurrencyColumn } from "../../../utils/gridColumnFactory";
 
 export function GetAdhocProfLetter73GridColumns(): ColDef[] {
@@ -26,6 +26,22 @@ export function GetAdhocProfLetter73GridColumns(): ColDef[] {
     createCurrencyColumn({
       headerName: "Last Year's Wages",
       field: "yearsWages"
+    }),
+    {
+      headerName: "Factor",
+      field: "factor",
+      sortable: true,
+      filter: "agNumberColumnFilter",
+      type: "rightAligned",
+      minWidth: 100,
+      valueFormatter: (params: ValueFormatterParams) => {
+        const value = params.value;
+        return value != null ? Number(value).toFixed(4) : "";
+      }
+    },
+    createCurrencyColumn({
+      headerName: "RMD",
+      field: "rmd"
     })
   ];
 }

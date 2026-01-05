@@ -243,13 +243,13 @@ const ReportGrid: React.FC<ReportGridProps> = ({
             mode: "content-aware",
             heightPercentage: isGridExpanded ? 0.85 : 0.65,
             minHeight: 200,
-            pinnedRowCount: 2  // Account for 2 pinned top rows (totals + "No Wages")
+            pinnedRowCount: 2 // Account for 2 pinned top rows (totals + "No Wages")
           }}
           gridOptions={{
             pinnedTopRowData: pinnedTopRowData,
             getRowStyle: (params) => {
               if (params.node.rowPinned) {
-                return { background: "#f3f4f6" };  // Light grey background for pinned rows
+                return { background: "#f3f4f6" }; // Light grey background for pinned rows
               }
               return undefined;
             },

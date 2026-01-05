@@ -2,6 +2,6 @@
 
 public interface IStartEndDateRequest
 {
-    public DateOnly? StartDate { get; set; }
-    public DateOnly? EndDate { get; set; }
+    DateOnly? StartDate { get; set; }
+    DateOnly? EndDate { get; set; }
 }

@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 /// Request to update forfeiture adjustments for a given badge number and profit year.
 /// Use a positive forfeiture amount to forfeit money back to the plan, use an negative amount to unforforeit money back to the employee.
 /// </summary>
-public record ForfeitureAdjustmentUpdateRequest : IProfitYearRequest
+public record ForfeitureAdjustmentUpdateRequest : IProfitYearRequest, IBadgeNumberRequest
 {
     public required int BadgeNumber { get; init; }
     public required decimal ForfeitureAmount { get; init; }

@@ -28,7 +28,6 @@ namespace Demoulas.ProfitSharing.Api.Serialization;
 // Common response types (generics)
 [JsonSerializable(typeof(PaginatedResponseDto<MemberDetails>))]
 [JsonSerializable(typeof(PaginatedResponseDto<MasterInquiryResponseDto>))]
-[JsonSerializable(typeof(PaginatedResponseDto<GroupedProfitSummaryDto>))]
 [JsonSerializable(typeof(PaginatedResponseDto<BeneficiarySearchFilterResponse>))]
 [JsonSerializable(typeof(PaginatedResponseDto<DistributionSearchResponse>))]
 [JsonSerializable(typeof(PaginatedResponseDto<MilitaryContributionResponse>))]
@@ -80,7 +79,6 @@ namespace Demoulas.ProfitSharing.Api.Serialization;
 [JsonSerializable(typeof(MemberDetails))]
 [JsonSerializable(typeof(MemberProfitPlanDetails))]
 [JsonSerializable(typeof(MasterInquiryResponseDto))]
-[JsonSerializable(typeof(GroupedProfitSummaryDto))]
 // Beneficiaries
 [JsonSerializable(typeof(BeneficiaryResponse))]
 [JsonSerializable(typeof(BeneficiaryDetailResponse))]

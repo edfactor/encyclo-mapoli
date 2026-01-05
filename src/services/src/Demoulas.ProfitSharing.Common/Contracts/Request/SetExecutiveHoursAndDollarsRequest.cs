@@ -4,7 +4,7 @@ public sealed record SetExecutiveHoursAndDollarsRequest : YearRequest
 {
     public required List<SetExecutiveHoursAndDollarsDto> ExecutiveHoursAndDollars { get; set; } = [];
 
-    public static SetExecutiveHoursAndDollarsRequest RequestExample()
+    public static new SetExecutiveHoursAndDollarsRequest RequestExample()
     {
         return new()
         {

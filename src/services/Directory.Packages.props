@@ -13,12 +13,12 @@
     <!-- ========================================== -->
     <!-- Demoulas Common Libraries                  -->
     <!-- ========================================== -->
-    <PackageVersion Include="Demoulas.Common.Api" Version="3.5.0-beta4" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="3.5.0-beta6" />
     <PackageVersion Include="Demoulas.Common.Caching" Version="3.3.1-beta4" />
     <PackageVersion Include="Demoulas.Common.Contracts" Version="2.13.0-beta6" />
     <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.14.0-beta7" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="4.0.1-beta11" />
-    <PackageVersion Include="Demoulas.Common.Logging" Version="2.3.2-beta3" />
+    <PackageVersion Include="Demoulas.Common.Logging" Version="2.3.2-beta4" />
     <PackageVersion Include="Demoulas.Security" Version="3.11.1-beta3" />
     <PackageVersion Include="Demoulas.Util" Version="2.9.1-beta6" />
     <!-- ========================================== -->
@@ -28,7 +28,11 @@
     <PackageVersion Include="FastEndpoints.AspVersioning" Version="7.1.1" />
     <PackageVersion Include="FastEndpoints.Security" Version="5.31.0" />
     <PackageVersion Include="FastEndpoints.Swagger" Version="7.1.1" />
-    <PackageVersion Include="NSwag.Core" Version="14.6.2" />
+    <PackageVersion Include="NSwag.Core" Version="14.6.3" />
+    <PackageVersion Include="NSwag.Core.Yaml" Version="14.6.3" />
+    <PackageVersion Include="NSwag.AspNetCore" Version="14.6.3" />
+    <PackageVersion Include="NSwag.Generation.AspNetCore" Version="14.6.3" />
+    <PackageVersion Include="NSwag.MSBuild" Version="14.6.3" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.11.10" />
     <!-- ========================================== -->
     <!-- Entity Framework Core & Oracle             -->

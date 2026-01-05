@@ -28,6 +28,7 @@ using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
+using Demoulas.ProfitSharing.Services.Validators;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.Util.Extensions;
@@ -110,6 +111,8 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IOracleHcmDiagnosticsService, OracleHcmDiagnosticsService>();
         _ = builder.Services.AddScoped<IStateTaxRatesService, StateTaxRatesService>();
         _ = builder.Services.AddScoped<IAnnuityRatesService, AnnuityRatesService>();
+        _ = builder.Services.AddScoped<IAnnuityRateValidator, AnnuityRateValidator>();
+        _ = builder.Services.AddScoped<IRmdsFactorService, RmdsFactorService>();
         _ = builder.Services.AddScoped<ICommentTypeService, CommentTypeService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
