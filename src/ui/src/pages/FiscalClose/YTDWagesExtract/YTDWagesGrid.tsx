@@ -71,7 +71,7 @@ const YTDWagesGrid = ({
     rowCount: clonedData?.response?.results?.length ?? 0,
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
-  
+
   if (!showData || !clonedData?.response) {
     return null;
   }

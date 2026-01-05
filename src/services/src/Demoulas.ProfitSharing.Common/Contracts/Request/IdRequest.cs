@@ -1,6 +1,10 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using System.Numerics;
 
-public record IdRequest
+namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+
+public record IdRequest<T> where T : INumber<T>
 {
-    public required int Id { get; set; }
+    public required T Id { get; set; }
+
+    public static IdRequest<T> RequestExample() => new() { Id = T.One };
 }

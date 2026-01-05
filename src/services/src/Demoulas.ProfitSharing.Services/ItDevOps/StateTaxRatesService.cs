@@ -53,6 +53,8 @@ public sealed class StateTaxRatesService : IStateTaxRatesService
                 {
                     Abbreviation = x.Abbreviation,
                     Rate = x.Rate,
+                    DateModified = x.ModifiedAtUtc != null ? DateOnly.FromDateTime(x.ModifiedAtUtc.Value.DateTime) : null,
+                    UserModified = x.UserName,
                 })
                 .ToListAsync(cancellationToken);
 
@@ -100,6 +102,8 @@ public sealed class StateTaxRatesService : IStateTaxRatesService
                     {
                         Abbreviation = stateTax.Abbreviation,
                         Rate = stateTax.Rate,
+                        DateModified = stateTax.ModifiedAtUtc != null ? DateOnly.FromDateTime(stateTax.ModifiedAtUtc.Value.DateTime) : null,
+                        UserModified = stateTax.UserName,
                     });
                 }
 
@@ -138,6 +142,8 @@ public sealed class StateTaxRatesService : IStateTaxRatesService
                 {
                     Abbreviation = stateTax.Abbreviation,
                     Rate = stateTax.Rate,
+                    DateModified = stateTax.ModifiedAtUtc != null ? DateOnly.FromDateTime(stateTax.ModifiedAtUtc.Value.DateTime) : null,
+                    UserModified = stateTax.UserName,
                 });
             }, cancellationToken);
         }

@@ -1,7 +1,7 @@
 ﻿using System.CommandLine;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
-using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.Common.Data.Services.Contexts;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -78,7 +78,7 @@ internal static class GenerateScriptHelper
         {
             config.MaskingOperators = [
                 new UnformattedSocialSecurityNumberMaskingOperator(),
-                new SensitiveValueMaskingOperator()
+                new SensitiveValueMaskingOperator(builder.Environment)
             ];
         });
 

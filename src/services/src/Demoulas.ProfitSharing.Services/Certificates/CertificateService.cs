@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
@@ -16,18 +17,29 @@ public sealed class CertificateService : ICertificateService
     private readonly IBreakdownService _breakdownService;
     private readonly ICalendarService _calendarService;
     private readonly IAnnuityRatesService _annuityRatesService;
+    private readonly IAnnuityRateValidator _annuityRateValidator;
 
-    public CertificateService(IBreakdownService breakdownService, ICalendarService calendarService, IAnnuityRatesService annuityRatesService)
+    public CertificateService(
+        IBreakdownService breakdownService,
+        ICalendarService calendarService,
+        IAnnuityRatesService annuityRatesService,
+        IAnnuityRateValidator annuityRateValidator)
     {
         _breakdownService = breakdownService;
         _calendarService = calendarService;
         _annuityRatesService = annuityRatesService;
+        _annuityRateValidator = annuityRateValidator;
     }
 
-    public async Task<string> GetCertificateFile(CerficatePrintRequest request, CancellationToken token)
+    public async Task<Result<string>> GetCertificateFile(CerficatePrintRequest request, CancellationToken token)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, token);
-        Dictionary<byte, AnnuityRateDto> annuityRates = await GetAnnuityRatesByAge(request, token);
+        var annuityRatesResult = await GetAnnuityRatesByAge(request, token);
+        if (!annuityRatesResult.IsSuccess)
+        {
+            return Result<string>.Failure(annuityRatesResult.Error!);
+        }
+        var annuityRates = annuityRatesResult.Value!;
 
         var members = await GetCertificateData(request, token);
 
@@ -56,7 +68,13 @@ public sealed class CertificateService : ICertificateService
             {
                 estimatedPaymentAtAge = 67;
             }
-            var annuityRate = annuityRates[(byte)estimatedPaymentAtAge];
+            if (!annuityRates.TryGetValue((byte)estimatedPaymentAtAge, out var annuityRate))
+            {
+                return Result<string>.Failure(Error.Validation(new Dictionary<string, string[]>
+                {
+                    ["AnnuityRate"] = [$"Annuity rate for age {estimatedPaymentAtAge} not found in year {request.ProfitYear}. This indicates incomplete rate data."]
+                }));
+            }
             var pmtSingle = (member.BeginningBalance + member.Contributions + member.Forfeitures) / annuityRate.SingleRate / 12;
             var pmtJoint = (member.BeginningBalance + member.Contributions + member.Forfeitures) / annuityRate.JointRate / 12;
 
@@ -134,7 +152,7 @@ public sealed class CertificateService : ICertificateService
 
         }
 
-        return sb.ToString();
+        return Result<string>.Success(sb.ToString());
 
         void WriteMemberInfo(StringBuilder sb, MemberYearSummaryDto member, bool addLf)
         {
@@ -174,11 +192,16 @@ public sealed class CertificateService : ICertificateService
         }
     }
 
-    public async Task<ReportResponseBase<CertificateReprintResponse>> GetMembersWithBalanceActivityByStore(CerficatePrintRequest request, CancellationToken token)
+    public async Task<Result<ReportResponseBase<CertificateReprintResponse>>> GetMembersWithBalanceActivityByStore(CerficatePrintRequest request, CancellationToken token)
     {
         var rawData = await GetCertificateData(request, token);
         var rslt = new List<CertificateReprintResponse>();
-        var annuityRates = await GetAnnuityRatesByAge(request, token);
+        var annuityRatesResult = await GetAnnuityRatesByAge(request, token);
+        if (!annuityRatesResult.IsSuccess)
+        {
+            return Result<ReportResponseBase<CertificateReprintResponse>>.Failure(annuityRatesResult.Error!);
+        }
+        var annuityRates = annuityRatesResult.Value!;
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, token);
 
         foreach (var cert in rawData.Response.Results)
@@ -235,7 +258,7 @@ public sealed class CertificateService : ICertificateService
             });
         }
 
-        return new ReportResponseBase<CertificateReprintResponse>()
+        return Result<ReportResponseBase<CertificateReprintResponse>>.Success(new ReportResponseBase<CertificateReprintResponse>()
         {
             ReportDate = rawData.ReportDate,
             ReportName = rawData.ReportName,
@@ -247,7 +270,7 @@ public sealed class CertificateService : ICertificateService
             StartDate = rawData.StartDate,
             EndDate = rawData.EndDate,
 
-        };
+        });
     }
 
     private Task<ReportResponseBase<MemberYearSummaryDto>> GetCertificateData(CerficatePrintRequest request, CancellationToken token)
@@ -263,15 +286,24 @@ public sealed class CertificateService : ICertificateService
         return _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, request.BadgeNumbers ?? Array.Empty<int>(), token);
     }
 
-    private async Task<Dictionary<byte, AnnuityRateDto>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)
+    private async Task<Result<Dictionary<byte, AnnuityRateDto>>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)
     {
+        // Validate year completeness first
+        var validationResult = await _annuityRateValidator.ValidateYearCompletenessAsync(request.ProfitYear, token);
+        if (!validationResult.IsSuccess)
+        {
+            return Result<Dictionary<byte, AnnuityRateDto>>.Failure(validationResult.Error!);
+        }
+
+        // Get annuity rates for the year
         var result = await _annuityRatesService.GetAnnuityRatesByYearAsync(request.ProfitYear, token);
         if (!result.IsSuccess)
         {
-            throw new InvalidOperationException(result.Error?.Description ?? "Failed to retrieve annuity rates.");
+            return Result<Dictionary<byte, AnnuityRateDto>>.Failure(
+                result.Error ?? Error.Unexpected("Failed to retrieve annuity rates."));
         }
 
-        return result.Value!
-            .ToDictionary(x => x.Age, x => x);
+        var dictionary = result.Value!.ToDictionary(x => x.Age, x => x);
+        return Result<Dictionary<byte, AnnuityRateDto>>.Success(dictionary);
     }
 }

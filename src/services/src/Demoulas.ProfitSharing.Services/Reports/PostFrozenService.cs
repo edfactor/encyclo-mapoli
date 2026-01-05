@@ -754,7 +754,7 @@ public class PostFrozenService : IPostFrozenService
                         d.ContactInfo.MiddleName,
                         Address1 = d.Address.Street,
                         d.Address.City,
-                        State = d.Address.Street,
+                        State = d.Address.State,
                         d.Address.PostalCode,
                         d.PayFrequencyId,
                     }

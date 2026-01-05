@@ -10,6 +10,16 @@ import {
 import { ColDef } from "ag-grid-community";
 
 export const PayBeNextGridColumns = (): ColDef[] => {
+  const relationshipColumn: ColDef = {
+    headerName: "Relationship",
+    field: "relationship",
+    colId: "relationship",
+    minWidth: 120,
+    headerClass: "center-align",
+    cellClass: "center-align",
+    resizable: true
+  };
+
   return [
     createPSNColumn({
       headerName: "PSN",
@@ -22,15 +32,7 @@ export const PayBeNextGridColumns = (): ColDef[] => {
       field: "fullName"
     }),
     createSSNColumn({}),
-    {
-      headerName: "Relationship",
-      field: "relationship",
-      colId: "relationship",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    }
+    { ...relationshipColumn, flex: 1 }
   ];
 };
 

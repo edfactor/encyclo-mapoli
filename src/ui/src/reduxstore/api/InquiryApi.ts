@@ -107,7 +107,7 @@ export const InquiryApi = createApi({
       { memberType: number; id: number; skip?: number; take?: number; sortBy?: string; isSortDescending?: boolean }
     >({
       query: ({ memberType, id, ...pagination }) => ({
-        url: `master/master-inquiry/member/${memberType}/${id}/details`,
+        url: `master/master-inquiry/member/${memberType}/${id}/details`, // Note: memberType and id are parameter values, kept as-is from API call
         method: "GET",
         params: pagination
       }),

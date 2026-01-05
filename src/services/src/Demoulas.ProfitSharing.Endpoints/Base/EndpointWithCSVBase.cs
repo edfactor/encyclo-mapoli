@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 
-file static class EndpointActivity
+static file class EndpointActivity
 {
     public static readonly ActivitySource Source = new("Demoulas.ProfitSharing.Endpoints");
 }

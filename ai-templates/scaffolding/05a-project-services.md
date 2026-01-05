@@ -20,39 +20,48 @@
 
 ### Extensions/ServicesExtension.cs
 
+**CRITICAL:** Use `IHostApplicationBuilder` (not `IServiceCollection`) for modern .NET 10 pattern.
+
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using MySolution.Common.Interfaces;
 using MySolution.Services;
+using MySolution.Services.Caching.Extensions;
+using Demoulas.Common.Data.Services.Interfaces;
+using Demoulas.Common.Data.Services.Service;
 
-namespace MySolution.Api.Extensions;
+namespace MySolution.Services.Extensions;
 
+/// <summary>
+/// Provides helper methods for configuring project services.
+/// </summary>
 public static class ServicesExtension
 {
-    public static IServiceCollection AddProjectServices(this IServiceCollection services)
+    public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
         // ========================================
         // Business Services (Scoped - per request)
         // ========================================
-        services.AddScoped<IMemberService, MemberService>();
-        services.AddScoped<IBeneficiaryService, BeneficiaryService>();
-        services.AddScoped<IDistributionService, DistributionService>();
-        services.AddScoped<IReportService, ReportService>();
+        builder.Services.AddScoped<IMemberService, MemberService>();
+        builder.Services.AddScoped<IBeneficiaryService, BeneficiaryService>();
+        builder.Services.AddScoped<IDistributionService, DistributionService>();
+        builder.Services.AddScoped<IReportService, ReportService>();
         // ... add all business services
 
         // ========================================
-        // Cache Services (Singleton - shared)
+        // Common Data Services
         // ========================================
-        services.AddSingleton<IStateTaxCache, StateTaxCache>();
-        services.AddSingleton<INavigationCache, NavigationCache>();
+        builder.Services.AddSingleton<IStoreService, StoreService>();
+        builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+        builder.Services.AddScoped<IAccountingPeriodsService, AccountingPeriodsService>();
 
         // ========================================
-        // Hosted Services (background tasks)
+        // Cache Services (via extension)
         // ========================================
-        services.AddHostedService<CacheWarmerHostedService>();
-        services.AddHostedService<DataCleanupHostedService>();
+        builder.AddProjectCachingServices();
 
-        return services;
+        return builder;
     }
 }
 ```
@@ -64,7 +73,7 @@ public static class ServicesExtension
 ### Scoped (Default for Business Logic)
 
 ```csharp
-services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<IMemberService, MemberService>();
 ```
 
 **When to use:**
@@ -77,7 +86,7 @@ services.AddScoped<IMemberService, MemberService>();
 ### Singleton (Shared State)
 
 ```csharp
-services.AddSingleton<IStateTaxCache, StateTaxCache>();
+builder.Services.AddSingleton<IStateTaxCache, StateTaxCache>();
 ```
 
 **When to use:**
@@ -92,7 +101,7 @@ services.AddSingleton<IStateTaxCache, StateTaxCache>();
 ### Transient (Rarely Used)
 
 ```csharp
-services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 ```
 
 **When to use:**

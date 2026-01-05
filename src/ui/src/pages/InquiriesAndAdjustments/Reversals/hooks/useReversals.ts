@@ -3,17 +3,17 @@ import { useDispatch } from "react-redux";
 import { numberToCurrency } from "smart-ui-library";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
+import { useReverseProfitDetailsMutation } from "../../../../reduxstore/api/AdjustmentsApi";
 import {
   useLazyGetProfitMasterInquiryFilteredDetailsQuery,
   useLazySearchProfitMasterInquiryQuery
 } from "../../../../reduxstore/api/InquiryApi";
-import { useReverseProfitDetailsMutation } from "../../../../reduxstore/api/AdjustmentsApi";
 import { removeMessage, setMessage } from "../../../../reduxstore/slices/messageSlice";
 import { EmployeeDetails, MasterInquiryResponseDto } from "../../../../reduxstore/types";
 import { ServiceErrorResponse } from "../../../../types/errors/errors";
-import { ReversalsSearchParams } from "../ReversalsSearchFilter";
-import { ProfitDetailRow } from "../ReversalsGrid";
 import { ReversalItem } from "../ReversalConfirmationModal";
+import { ProfitDetailRow } from "../ReversalsGrid";
+import { ReversalsSearchParams } from "../ReversalsSearchFilter";
 
 // Constants
 const REVERSALS_MESSAGE_KEY = "ReversalOperation";
@@ -289,7 +289,8 @@ export function useReversals() {
             taxCode: (item.taxCode as string) ?? "",
             commentTypeName: item.commentTypeName ?? "",
             commentRelatedCheckNumber: item.commentRelatedCheckNumber ?? "",
-            employmentStatus: item.employmentStatus ?? ""
+            employmentStatus: item.employmentStatus ?? "",
+            isAlreadyReversed: Boolean(item.isAlreadyReversed)
           }));
 
           dispatch({

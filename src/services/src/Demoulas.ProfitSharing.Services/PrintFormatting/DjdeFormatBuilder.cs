@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Services.PrintFormatting;
+﻿namespace Demoulas.ProfitSharing.Services.PrintFormatting;
 
 /// <summary>
 /// Factory for building DJDE templates based on check type.

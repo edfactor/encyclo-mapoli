@@ -38,7 +38,7 @@ export const createAddressColumn = (options: StreetAddressColumnOptions = {}): C
     valueGetter
   } = options;
 
-  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
 
   const column: ColDef = {
     headerName,
@@ -348,18 +348,18 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
 
 export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => {
   const defaultValueFormatter = (params: ValueFormatterParams) => {
-      const value = params.value;
-      // Need to log value and type of value
+    const value = params.value;
+    // Need to log value and type of value
 
-      if (value == null || value === "") return ""; // keep empty display consistent
-      // If it's already a string (even if numeric-like), return as-is per requirement
-      if (typeof value === "string") return value;
-      // Only format when it's an actual number
-      if (typeof value === "number" && !isNaN(value)) {
-        return numberToCurrency(value);
-      }
-      // Fallback: attempt not to break – convert other types to string
-      return String(value);
+    if (value == null || value === "") return ""; // keep empty display consistent
+    // If it's already a string (even if numeric-like), return as-is per requirement
+    if (typeof value === "string") return value;
+    // Only format when it's an actual number
+    if (typeof value === "number" && !isNaN(value)) {
+      return numberToCurrency(value);
+    }
+    // Fallback: attempt not to break – convert other types to string
+    return String(value);
   };
 
   const {
@@ -1260,4 +1260,8 @@ export const createBadgeOrPSNColumn = (
   }
 
   return column;
+};
+
+export const createColumnFrom = (initialSet: ColDef, additionalOptions: ColDef): ColDef => {
+  return { ...initialSet, ...additionalOptions };
 };

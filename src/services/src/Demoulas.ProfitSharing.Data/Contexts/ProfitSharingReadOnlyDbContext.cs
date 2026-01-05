@@ -31,6 +31,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<ReportChecksum> ReportChecksums { get; set; }
     public virtual DbSet<DemographicSyncAudit> DemographicSyncAudit { get; set; }
     public virtual DbSet<AnnuityRate> AnnuityRates { get; set; }
+    public virtual DbSet<AnnuityRateConfig> AnnuityRateConfigs { get; set; }
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }
     public virtual DbSet<EmploymentType> EmploymentTypes { get; set; }
@@ -75,6 +76,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
     public virtual DbSet<StateTax> StateTaxes { get; set; }
     public virtual DbSet<State> States { get; set; }
+    public virtual DbSet<RmdsFactorByAge> RmdsFactorsByAge { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

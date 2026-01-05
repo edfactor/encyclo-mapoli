@@ -85,7 +85,7 @@ Note: This document is a review aid, not a formal control implementation stateme
 
 **All security items are CRITICAL. Deviations require security review.**
 
-**📖 For comprehensive security guidance, see [security.instructions.md](instructions/security.instructions.md)**
+**📖 For comprehensive security guidance, see security.instructions.md)**
 
 ### Authentication & Authorization (A01/A07)
 
@@ -303,8 +303,6 @@ Note: This document is a review aid, not a formal control implementation stateme
 - [ ] **Request/response examples**: Sample payloads documented
 - [ ] **Error responses documented**: 404, 400, 401, etc. with examples
 
-**Reference:** `.github/instructions/restful-api-guidelines.instructions.md`
-
 ---
 
 ## 4. Backend - Services
@@ -334,8 +332,6 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
         : Result<MemberDto>.Success(member.ToDto());
 }
 ```
-
-**Reference:** `.github/instructions/services.instructions.md`
 
 ---
 
@@ -570,8 +566,6 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 
 **Reference:** Security section for age calculation details
 
-**Reference:** `.github/instructions/pages.instructions.md`
-
 ---
 
 ## 8. Telemetry & Observability
@@ -663,9 +657,13 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
 
 ### Server-Side Validation (MANDATORY)
 
-- [ ] **FluentValidation used**: All request DTOs have validators
+- [ ] **FluentValidation used**: All request DTOs have validators in `Demoulas.ProfitSharing.Common.Validators` namespace (NOT in `Endpoints.Validation`)
+
   ```csharp
-  public class SearchRequestValidator : AbstractValidator<SearchRequest>
+  // File: Demoulas.ProfitSharing.Common/Validators/SearchRequestValidator.cs
+  namespace Demoulas.ProfitSharing.Common.Validators;
+
+  public sealed class SearchRequestValidator : AbstractValidator<SearchRequest>
   {
       public SearchRequestValidator()
       {
@@ -675,6 +673,9 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
       }
   }
   ```
+
+  **CRITICAL**: Validators MUST be in `Common.Validators` namespace (see copilot-instructions.md line 313) to ensure accessibility across all layers (endpoints, services, tests).
+
 - [ ] **Numeric ranges**: Min/max bounds validated
 - [ ] **String lengths**: Max length constraints
 - [ ] **Collection sizes**: Prevent unbounded collections
@@ -919,14 +920,6 @@ aspire run
 - **VALIDATION_PATTERNS.md** - Validation guidelines
 - **DISTRIBUTED_CACHING_PATTERNS.md** - Caching patterns
 - **BRANCHING_AND_WORKFLOW.md** - Git workflow
-
-### Instruction Files
-
-- `.github/instructions/restful-api-guidelines.instructions.md`
-- `.github/instructions/endpoints.instructions.md`
-- `.github/instructions/services.instructions.md`
-- `.github/instructions/pages.instructions.md`
-- `.github/instructions/redux.instructions.md`
 
 ### Security Tickets
 

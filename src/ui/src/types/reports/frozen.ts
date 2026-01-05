@@ -1,6 +1,7 @@
 import { PaginationParams } from "smart-ui-library";
 import type { PagedReportResponse, ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
 import type { FrozenReportsByAgeRequestType } from "../common/enums";
+import { ValidationResponse } from "../validation";
 
 export interface ReportsByAgeParams extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
@@ -81,6 +82,7 @@ export interface ForfeituresAndPointsResponse extends PagedReportResponse<Forfei
   distributionTotals: number;
   allocationToTotals: number;
   allocationsFromTotals: number;
+  crossReferenceValidation: ValidationResponse;
 }
 
 export interface ForfeituresByAgeDetail {

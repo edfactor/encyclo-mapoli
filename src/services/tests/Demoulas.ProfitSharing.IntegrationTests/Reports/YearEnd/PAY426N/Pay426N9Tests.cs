@@ -78,7 +78,7 @@ public class Pay426N9Tests : PristineBaseTest
             actualItem.Subgroup.ToUpper().ShouldBe(expectedItem.Subgroup,
                 $"Line {prefix}: Subgroup mismatch");
         }
-        
+
         actual.LineItems.First(li => li.LineItemTitle == ">= AGE 21 WITH >= 1000 PS HOURS").TotalHours.ShouldBe(7732647);
 
         // Calculate and compare grand totals (exclude E and X as they don't count toward totals)

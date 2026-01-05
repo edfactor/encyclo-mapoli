@@ -23,4 +23,21 @@ public sealed record DistributionRunReportSummaryResponse
             TotalCheckAmount = 200000.00M
         };
     }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static DistributionRunReportSummaryResponse ResponseExample()
+    {
+        return new DistributionRunReportSummaryResponse
+        {
+            DistributionFrequencyId = 'Q',
+            DistributionTypeName = "Quarterly",
+            TotalDistributions = 350,
+            TotalGrossAmount = 750000.00m,
+            TotalFederalTaxAmount = 112500.00m,
+            TotalStateTaxAmount = 37500.00m,
+            TotalCheckAmount = 600000.00m
+        };
+    }
 }

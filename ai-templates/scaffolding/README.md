@@ -4,7 +4,7 @@
 
 **Target Audience:** Development teams, AI coding assistants, technical leads
 
-**Last Updated:** December 23, 2025
+**Last Updated:** December 24, 2025
 
 ---
 
@@ -25,10 +25,11 @@ This guide is organized into 11 focused sections:
 #### [Part 2: Aspire Orchestration](./02-aspire-orchestration.md) ⏱️ 15-20 min
 
 - Complete AppHost Program.cs template (388 lines)
-- ResourceManager pattern
+- **ResourceManager pattern** (NEW: API lifecycle management during DB operations)
+- **CommandHelper pattern** (NEW: Database operations with user interaction)
 - Service integration (Oracle, RabbitMQ, Redis)
 - Playwright browser automation
-- Aspire CLI commands
+- Aspire CLI commands with confirmation dialogs
 
 #### [Part 3: API Bootstrap & Middleware](./03-api-bootstrap-middleware.md) ⏱️ 20-25 min
 
@@ -45,6 +46,7 @@ This guide is organized into 11 focused sections:
 - ContextFactoryRequest configuration
 - Interceptor ordering (CRITICAL: HttpContextAccessor before Audit)
 - Read-only contexts
+- **NoOpServicePattern** (NEW: Graceful degradation for optional dependencies)
 - Health checks
 - Connection string management
 
@@ -61,6 +63,7 @@ This guide is organized into 11 focused sections:
 
 - AddSecurityServices extension method
 - Okta JWT authentication configuration
+- **OktaEnable configuration toggle** (NEW: Runtime on/off switch)
 - PolicyRoleMap pattern for authorization
 - Read-only role service implementation
 - UserContextService for claims extraction

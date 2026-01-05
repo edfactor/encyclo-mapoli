@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
-public sealed record BalanceEndpointResponse : IdRequest
+public sealed record BalanceEndpointResponse : IdRequest<int>
 {
     public required string Ssn { get; set; }
     public decimal VestedBalance { get; set; }
