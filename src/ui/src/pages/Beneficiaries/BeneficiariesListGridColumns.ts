@@ -1,6 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import {
-  createBadgeColumn,
   createCityColumn,
   createDateColumn,
   createNameColumn,
@@ -9,13 +8,30 @@ import {
   createZipColumn
 } from "../../utils/gridColumnFactory";
 import { BeneficiaryActionHandlers, BeneficiaryActionsCellRenderer } from "./BeneficiaryActions";
+import { BadgeCellRenderer } from "./BadgeCellRenderer";
+import { BeneficiaryDto } from "../../types";
 
 export const GetBeneficiariesListGridColumns = (
   percentageFieldRenderer: (percentage: number, id: number) => React.JSX.Element,
-  actionHandlers?: BeneficiaryActionHandlers
+  actionHandlers?: BeneficiaryActionHandlers,
+  onBadgeClick?: (beneficiary: BeneficiaryDto) => void
 ): ColDef[] => {
   const columns: ColDef[] = [
-    createBadgeColumn({ headerName: "Badge/Psn", psnSuffix: true }),
+    {
+      headerName: "Badge/Psn",
+      field: "badgeNumber",
+      colId: "badgeNumber",
+      minWidth: 120,
+      maxWidth: 125,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true,
+      cellRenderer: BadgeCellRenderer,
+      cellRendererParams: {
+        onBadgeClick: onBadgeClick
+      }
+    },
     createNameColumn({
       field: "fullName"
     }),

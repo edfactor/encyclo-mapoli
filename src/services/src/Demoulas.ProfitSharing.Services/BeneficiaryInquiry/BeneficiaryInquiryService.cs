@@ -26,18 +26,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     private readonly ITotalService _totalService;
     private readonly IMasterInquiryService _masterInquiryService;
 
-    private sealed record BeneficiarySearchFilterRow
-    {
-        public int BadgeNumber { get; init; }
-        public short PsnSuffix { get; init; }
-        public string? FullName { get; init; }
-        public int Ssn { get; init; }
-        public string? Street { get; init; }
-        public string? City { get; init; }
-        public string? State { get; init; }
-        public string? Zip { get; init; }
-        public short? Age { get; init; }
-    }
 
     private sealed record BeneficiaryRow
     {
@@ -74,62 +62,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         _masterInquiryService = masterInquiryService;
     }
 
-    private async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> GetEmployeeQueryPaginated(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken)
-    {
-        var member = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest()
-        {
-            BadgeNumber = request.BadgeNumber,
-            PsnSuffix = request.PsnSuffix,
-            Name = request.Name,
-            Ssn = request.Ssn != null ? Convert.ToInt32(request.Ssn) : 0,
-            MemberType = request.MemberType,
-            EndProfitYear = (short)DateTime.Now.Year,
-            ProfitYear = (short)DateTime.Now.Year
-
-        }, cancellationToken);
-
-        var mapped = member.Results.Select(x => new BeneficiarySearchFilterResponse()
-        {
-            Ssn = x.Ssn.ToString().MaskSsn(),
-            Age = x.DateOfBirth.Age(),
-            BadgeNumber = x.BadgeNumber,
-            City = x.AddressCity,
-            FullName = x.FullName,
-            State = x.AddressState,
-            Street = x.Address,
-            Zip = x.AddressZipCode
-        });
-
-        // Use AsQueryable to work with ToPaginationResultsAsync extension
-        // Note: Data is already in memory from _masterInquiryService call
-        return await mapped.AsQueryable().ToPaginationResultsAsync(request, cancellationToken);
-    }
-
-    private IQueryable<BeneficiarySearchFilterRow> GetBeneficiaryQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
-    {
-        var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.Address).Include(x => x.Contact!.ContactInfo)
-            .Where(x =>
-            (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
-            (request.PsnSuffix == null || x.PsnSuffix == request.PsnSuffix) &&
-            (string.IsNullOrEmpty(request.Name) || EF.Functions.Like(x.Contact!.ContactInfo!.FullName!.ToUpper(), $"%{request.Name.ToUpper()}%")) &&
-            (request.Ssn == null || x.Contact!.Ssn == request.Ssn)
-            ).Select(x => new BeneficiarySearchFilterRow
-            {
-                Ssn = x.Contact!.Ssn,
-                Age = x.Contact!.DateOfBirth.Age(),
-                BadgeNumber = x.BadgeNumber,
-                PsnSuffix = x.PsnSuffix,
-                City = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.City : null,
-                FullName = x.Contact!.ContactInfo!.FullName,
-                State = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.State : null,
-                Street = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.Street : null,
-                Zip = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.PostalCode : null
-            });
-
-        return query;
-
-    }
-
     /// <summary>
     /// Retrieves beneficiary information filtered by request criteria.
     /// </summary>
@@ -138,45 +70,44 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     /// <returns>Paginated beneficiary results.</returns>
     public async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilter(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken)
     {
-        PaginatedResponseDto<BeneficiarySearchFilterResponse> result;
-
-        if (request.MemberType == EmployeeMemberType)
+        // Call MasterInquiryService.GetMembersAsync to handle all member searches
+        var masterInquiryRequest = new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest
         {
-            // Employee query is already in-memory, handle pagination separately
-            result = await GetEmployeeQueryPaginated(request, cancellationToken);
-        }
-        else
-        {
-            // Beneficiary query uses database, use proper async pagination
-            var rows = await _dataContextFactory.UseReadOnlyContext(async context =>
-            {
-                var query = GetBeneficiaryQuery(request, context);
-                // IMPORTANT: await the pagination while the DbContext (and its connection) is still alive.
-                return await query.ToPaginationResultsAsync(request, cancellationToken);
-            }, cancellationToken);
+            BadgeNumber = request.BadgeNumber,
+            PsnSuffix = request.PsnSuffix,
+            Name = request.Name,
+            Ssn = request.Ssn != null ? Convert.ToInt32(request.Ssn) : 0,
+            MemberType = request.MemberType,
+            EndProfitYear = (short)DateTime.Now.Year,
+            ProfitYear = (short)DateTime.Now.Year,
+            Skip = request.Skip,
+            Take = request.Take,
+            SortBy = request.SortBy,
+            IsSortDescending = request.IsSortDescending
+        };
 
-            result = new PaginatedResponseDto<BeneficiarySearchFilterResponse>
+        var memberResults = await _masterInquiryService.GetMembersAsync(masterInquiryRequest, cancellationToken);
+
+        // Map MemberDetails to BeneficiarySearchFilterResponse
+        var result = new PaginatedResponseDto<BeneficiarySearchFilterResponse>
+        {
+            IsPartialResult = memberResults.IsPartialResult,
+            ResultHash = memberResults.ResultHash,
+            TimeoutOccurred = memberResults.TimeoutOccurred,
+            Total = memberResults.Total,
+            Results = memberResults.Results?.Select(m => new BeneficiarySearchFilterResponse
             {
-                IsPartialResult = rows.IsPartialResult,
-                ResultHash = rows.ResultHash,
-                TimeoutOccurred = rows.TimeoutOccurred,
-                Total = rows.Total,
-                Results = rows.Results is null
-                    ? []
-                    : rows.Results.Select(r => new BeneficiarySearchFilterResponse
-                    {
-                        BadgeNumber = r.BadgeNumber,
-                        PsnSuffix = r.PsnSuffix,
-                        FullName = r.FullName,
-                        Ssn = r.Ssn != 0 ? r.Ssn.ToString().MaskSsn() : string.Empty.MaskSsn(),
-                        Street = r.Street,
-                        City = r.City,
-                        State = r.State,
-                        Zip = r.Zip,
-                        Age = r.Age,
-                    }).ToList(),
-            };
-        }
+                BadgeNumber = m.BadgeNumber,
+                PsnSuffix = m.PsnSuffix,
+                FullName = m.FullName,
+                Ssn = m.Ssn.ToString().MaskSsn(),
+                Street = m.Address,
+                City = m.AddressCity,
+                State = m.AddressState,
+                Zip = m.AddressZipCode,
+                Age = m.DateOfBirth.Age()
+            }).ToList() ?? []
+        };
 
         return result;
     }

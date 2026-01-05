@@ -21,13 +21,15 @@ interface BeneficiaryRelationshipsProps {
   count: number;
   onEditBeneficiary: (selectedMember: BeneficiaryDto | undefined) => void;
   onBeneficiariesChange?: (beneficiaries: BeneficiaryDto[]) => void;
+  onBadgeClick?: (beneficiary: BeneficiaryDto) => void;
 }
 
 const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = ({
   selectedMember,
   count,
   onEditBeneficiary,
-  onBeneficiariesChange
+  onBeneficiariesChange,
+  onBadgeClick
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -205,9 +207,9 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   );
 
   const columnDefs = useMemo(() => {
-    const columns = GetBeneficiariesListGridColumns(percentageFieldRenderer, actionHandlers);
+    const columns = GetBeneficiariesListGridColumns(percentageFieldRenderer, actionHandlers, onBadgeClick);
     return [...columns];
-  }, [percentageFieldRenderer, actionHandlers]);
+  }, [percentageFieldRenderer, actionHandlers, onBadgeClick]);
 
   return (
     <>
