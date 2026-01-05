@@ -5,7 +5,7 @@ paths: "src/ui/src/pages/Beneficiaries/utils/**/*.*"
 
 # Beneficiaries Utility Functions
 
-This directory contains pure utility functions for the Beneficiaries page, extracted for reusability, testability, and maintainability.
+This directory contains pure utility functions for the Beneficiaries page It is extracted for reusability, testability, and maintainability.
 
 ## Files
 
@@ -65,7 +65,12 @@ Pure utility functions for percentage allocation validation (100% constraint).
 ## Usage
 
 ```typescript
-import { parseBadgeAndPSN, decomposePSNSuffix, calculatePercentageSum, validatePercentageAllocation } from "./utils";
+import {
+  parseBadgeAndPSN,
+  decomposePSNSuffix,
+  calculatePercentageSum,
+  validatePercentageAllocation,
+} from "./utils";
 
 // Parse badge/PSN
 const { badge, psn } = parseBadgeAndPSN("12345678"); // { badge: 1234567, psn: 8 }

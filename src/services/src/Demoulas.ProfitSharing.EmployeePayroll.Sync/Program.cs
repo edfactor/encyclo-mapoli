@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
-using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.Common.Data.Services.Contexts;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Common.Extensions;

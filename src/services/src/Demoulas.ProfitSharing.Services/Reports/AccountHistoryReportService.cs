@@ -410,7 +410,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 throw new InvalidOperationException($"No account history data found for member {memberId}");
             }
 
-            var employee = await _employeeLookupService.GetMemberVestingAsync(new MasterInquiryMemberRequest()
+            var employee = await _employeeLookupService.GetMemberAsync(new MasterInquiryMemberRequest()
             {
                 Id = firstResponse.Id,
                 MemberType = 1,

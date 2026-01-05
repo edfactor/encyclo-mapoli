@@ -38,7 +38,7 @@ export const createAddressColumn = (options: StreetAddressColumnOptions = {}): C
     valueGetter
   } = options;
 
-  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
 
   const column: ColDef = {
     headerName,

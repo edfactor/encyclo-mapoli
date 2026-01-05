@@ -50,7 +50,7 @@ export interface SSNColumnOptions extends LimitedAlignmentColumnOptions {
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
-export interface BadgeColumnOptions extends LimitedAlignmentColumnOptions {
+export interface BadgeColumnOptions extends AlignableColumnOptions {
   renderAsLink?: boolean;
   psnSuffix?: boolean;
   navigateFunction?: (path: string) => void;

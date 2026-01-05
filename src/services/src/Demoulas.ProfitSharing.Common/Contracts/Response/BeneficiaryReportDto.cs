@@ -14,4 +14,18 @@ public record BeneficiaryReportDto(
 ) : IIsExecutive
 {
     public required bool IsExecutive { get; set; }
+
+    public static BeneficiaryReportDto ResponseExample() => new(
+        BeneficiaryId: 1,
+        FullName: "Jane Smith",
+        Ssn: "***-**-6789",
+        Relationship: "Spouse",
+        Balance: 150000.00m,
+        BadgeNumber: 12345,
+        PsnSuffix: 1,
+        ProfitDetails: new List<ProfitDetailDto> { ProfitDetailDto.ResponseExample() }
+    )
+    {
+        IsExecutive = false
+    };
 };

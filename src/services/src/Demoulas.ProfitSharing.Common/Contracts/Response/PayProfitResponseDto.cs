@@ -46,4 +46,15 @@ public sealed record PayProfitResponseDto : IProfitYearRequest
     /// </summary>
     public byte YearsInPlan { get; set; }
 
+    public static PayProfitResponseDto ResponseExample() => new()
+    {
+        DemographicId = 1,
+        ProfitYear = 2024,
+        CurrentHoursYear = 1000.00m,
+        CurrentIncomeYear = 75000.00m,
+        WeeksWorkedYear = 52,
+        LastUpdate = DateTimeOffset.UtcNow,
+        PointsEarned = 1000.00m,
+        YearsInPlan = 10
+    };
 }

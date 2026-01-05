@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 
-public class BeneficiaryTypesRequestDto
+public record BeneficiaryTypesRequestDto
 {
     public byte? Id { get; set; }
 

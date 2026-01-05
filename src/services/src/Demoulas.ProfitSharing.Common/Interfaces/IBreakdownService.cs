@@ -42,5 +42,5 @@ public interface IBreakdownService
 
     Task<BreakdownByStoreTotals> GetTotalsByStore(BreakdownByStoreRequest request, CancellationToken cancellationToken);
 
-    public Task<GrandTotalsByStoreResponseDto> GetGrandTotals(YearRequest request, CancellationToken cancellationToken);
+    Task<GrandTotalsByStoreResponseDto> GetGrandTotals(YearRequest request, CancellationToken cancellationToken);
 }

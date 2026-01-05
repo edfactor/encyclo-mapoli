@@ -411,11 +411,14 @@ describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
 
   // PS-1897: Verify balance grouping order
   it("should group beginning and current balances together (PS-1897)", () => {
+    const profitYear = 2025;
+    const yearLabel = profitYear === new Date().getFullYear() ? "Current" : `End ${profitYear}`;
+
     renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
-        profitYear={2025}
+        profitYear={profitYear}
         memberDetails={mockEmployeeDetails}
         isLoading={false}
       />
@@ -424,8 +427,8 @@ describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
     // Beginning balances should appear before current balances
     expect(screen.getByText("Begin Balance")).toBeInTheDocument();
     expect(screen.getByText("Begin Vested Balance")).toBeInTheDocument();
-    expect(screen.getByText("Current Balance")).toBeInTheDocument();
-    expect(screen.getByText("Current Vested Balance")).toBeInTheDocument();
+    expect(screen.getByText(`${yearLabel} Balance`)).toBeInTheDocument();
+    expect(screen.getByText(`${yearLabel} Vested Balance`)).toBeInTheDocument();
   });
 
   // PS-1899: Verify payClassification property is correctly cased

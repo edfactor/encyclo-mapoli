@@ -197,6 +197,8 @@ MySolution/
 4. **Shared Contracts** - Common project prevents circular dependencies
 5. **Security Isolation** - Separate project for auth/authz concerns
 
+**Note on Project Naming:** Some projects may have directory names that differ from their `.csproj` file names due to refactoring. For example, `MySolution.Endpoints.Contracts/` directory might contain `MySolution.Common.csproj`. This is acceptable - the .csproj name takes precedence for project references.
+
 ---
 
 ## 📦 Central Package Management Setup
@@ -257,7 +259,8 @@ Create at solution root to enable central package version management:
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 
     <!-- Architecture Testing -->
-    <PackageVersion Include="TngTech.ArchUnitNET.xUnit" Version="0.11.0" />
+    <PackageVersion Include="TngTech.ArchUnitNET" Version="0.13.1" />
+    <PackageVersion Include="TngTech.ArchUnitNET.xUnit" Version="0.13.1" />
 
     <!-- Security -->
     <PackageVersion Include="SecurityCodeScan.VS2019" Version="5.6.7" />

@@ -52,16 +52,6 @@ const reports: QPAY066xAdHocReportPreset[] = [
     apiEndpoint: "yearend/breakdown-by-store/retired/withbalanceactivity"
   },
   {
-    id: "QPAY066TA",
-    name: "QPAY066TA",
-    description: "Managers and associates for all stores",
-    params: {
-      reportId: 6
-    },
-    requiresDateRange: false,
-    apiEndpoint: "/api/yearend/breakdown-by-store"
-  },
-  {
     id: "QPAY066M",
     name: "QPAY066M",
     description: "Monthly employees with distribution, forfeit, or contribution",

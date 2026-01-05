@@ -32,7 +32,7 @@ public class ClearDemographicSyncAuditEndpoint
 
     public override void Configure()
     {
-        Post("oracleHcm/audit/clear");
+        Post("oracle-hcm/audit/clear");
         Summary(s =>
         {
             s.Summary = "Clears all demographic sync audit records";

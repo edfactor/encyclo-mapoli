@@ -1,9 +1,10 @@
 ﻿
 using System.ComponentModel;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public record DemographicsRequest : IMemberRequest
+public record DemographicsRequest : IMemberRequest, IBadgeNumberRequest
 {
 #pragma warning disable DSM001
     public required int Ssn { get; set; }
@@ -38,4 +39,22 @@ public record DemographicsRequest : IMemberRequest
     public required char GenderCode { get; set; }
     public required char EmploymentStatusId { get; set; }
 
+    public static DemographicsRequest RequestExample() => new()
+    {
+        Ssn = 123456789,
+        BadgeNumber = 123456,
+        OracleHcmId = 999887766L,
+        StoreNumber = 22,
+        DepartmentId = 10,
+        PayClassificationId = "FT",
+        ContactInfo = ContactInfoRequestDto.RequestExample(),
+        Address = AddressRequestDto.RequestExample(),
+        DateOfBirth = new DateOnly(1985, 6, 15),
+        FullTimeDate = new DateOnly(2010, 1, 1),
+        HireDate = new DateOnly(2010, 1, 1),
+        EmploymentTypeCode = 'F',
+        PayFrequencyId = 2,
+        GenderCode = 'M',
+        EmploymentStatusId = 'A'
+    };
 }

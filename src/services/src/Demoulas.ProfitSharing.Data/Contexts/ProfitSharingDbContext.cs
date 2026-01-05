@@ -79,6 +79,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<State> States { get; set; }
 
     public virtual DbSet<HealthCheckStatusHistory> HealthCheckStatusHistories { get; set; }
+    public virtual DbSet<RmdsFactorByAge> RmdsFactorsByAge { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
