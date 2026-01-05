@@ -42,6 +42,13 @@ const CommentTypeLinkRenderer = (params: ICellRendererParams) => {
 };
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
+  const partialTransactionColumn = createYesOrNoColumn({
+    headerName: "Partial Transaction",
+    field: "commentIsPartialTransaction",
+    minWidth: 120,
+    useWords: true
+  });
+
   return [
     createYearColumn({
       headerName: "Profit Year",
@@ -172,11 +179,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 60,
       alignment: "left"
     }),
-    createYesOrNoColumn({
-      headerName: "Partial Transaction",
-      field: "commentIsPartialTransaction",
-      minWidth: 120,
-      useWords: true
-    })
+    { ...partialTransactionColumn, flex: 1 }
   ];
 };

@@ -37,6 +37,33 @@ export const GetAccountHistoryReportColumns = (): ColDef[] => {
       field: "forfeitures",
       minWidth: 120
     }),
+    {
+      headerName: "Vesting %",
+      field: "vestingPercent",
+      minWidth: 110,
+      maxWidth: 110,
+      sortable: true,
+      filter: false,
+      valueFormatter: (params) => {
+        const value = params.value;
+        if (value == null) return "N/A";
+        return `${(value * 100).toFixed(0)}%`;
+      },
+      cellStyle: { textAlign: "right" }
+    },
+    {
+      headerName: "Years",
+      field: "yearsInPlan",
+      minWidth: 80,
+      maxWidth: 80,
+      sortable: true,
+      filter: false,
+      valueFormatter: (params) => {
+        const value = params.value;
+        return value != null ? value.toString() : "N/A";
+      },
+      cellStyle: { textAlign: "right" }
+    },
     createCurrencyColumn({
       headerName: "Withdrawals",
       field: "withdrawals",
