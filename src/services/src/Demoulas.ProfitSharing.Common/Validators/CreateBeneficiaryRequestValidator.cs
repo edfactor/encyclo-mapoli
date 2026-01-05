@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Validators;
 
 public class CreateBeneficiaryRequestValidator : AbstractValidator<CreateBeneficiaryRequest>
 {
-    public CreateBeneficiaryRequestValidator(IBeneficiaryService? beneficiaryService = null)
+    public CreateBeneficiaryRequestValidator(IBeneficiaryService beneficiaryService)
     {
         RuleFor(x => x.BeneficiaryContactId)
             .GreaterThan(0)
@@ -40,25 +40,22 @@ public class CreateBeneficiaryRequestValidator : AbstractValidator<CreateBenefic
             .WithMessage("Relationship is required.");
 
         // Validate that the sum of all beneficiary percentages doesn't exceed 100%
-        if (beneficiaryService != null)
-        {
-            RuleFor(x => x)
-                .MustAsync(async (request, cancellationToken) =>
+        RuleFor(x => x)
+            .MustAsync(async (request, cancellationToken) =>
+            {
+                var existingPercentageSum = await beneficiaryService.GetBeneficiaryPercentageSumAsync(
+                    request.EmployeeBadgeNumber,
+                    null,
+                    cancellationToken);
+
+                // If we got an error (-1), allow validation to pass (the error will be caught elsewhere)
+                if (existingPercentageSum < 0)
                 {
-                    var existingPercentageSum = await beneficiaryService.GetBeneficiaryPercentageSumAsync(
-                        request.EmployeeBadgeNumber,
-                        null,
-                        cancellationToken);
+                    return true;
+                }
 
-                    // If we got an error (-1), allow validation to pass (the error will be caught elsewhere)
-                    if (existingPercentageSum < 0)
-                    {
-                        return true;
-                    }
-
-                    return (existingPercentageSum + request.Percentage) <= 100m;
-                })
-                .WithMessage("The sum of all beneficiary percentages would exceed 100%.");
-        }
+                return (existingPercentageSum + request.Percentage) <= 100m;
+            })
+            .WithMessage("The sum of all beneficiary percentages would exceed 100%.");
     }
 }
