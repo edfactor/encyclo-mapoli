@@ -53,7 +53,7 @@ const EligibleEmployeesGrid = ({
       beforeGrid={<ReportSummary report={clonedData} />}
       heightConfig={{
         mode: "content-aware",
-        heightPercentage: 0.6
+        heightPercentage: 0.7
       }}
     />
   );
