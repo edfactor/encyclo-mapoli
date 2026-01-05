@@ -213,7 +213,9 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 Forfeitures = yearForfeitures,
                 Withdrawals = memberDistributions?.TotalAmount ?? 0,
                 EndingBalance = memberBalance?.TotalAmount ?? 0,
-                VestedBalance = vestingBalance?.VestedBalance ?? 0
+                VestedBalance = vestingBalance?.VestedBalance ?? 0,
+                VestingPercent = vestingBalance?.VestingPercent,
+                YearsInPlan = vestingBalance?.YearsInPlan
             };
         }, cancellationToken);
     }
@@ -258,8 +260,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         var totalEarnings = sortedResult.Sum(r => r.Earnings);
         var totalForfeitures = sortedResult.Sum(r => r.Forfeitures);
         var totalWithdrawals = sortedResult.Sum(r => r.Withdrawals);
-        // TotalVestedBalance is from the highest profit year (last in the unsorted chronological list)
-        var totalVestedBalance = reportData.LastOrDefault()?.VestedBalance ?? 0;
+        // TotalVestedBalance is from the most recent profit year (highest year number)
+        var totalVestedBalance = reportData.OrderByDescending(r => r.ProfitYear).FirstOrDefault()?.VestedBalance ?? 0;
 
         // Calculate total count before pagination
         var totalCount = sortedResult.Count;
