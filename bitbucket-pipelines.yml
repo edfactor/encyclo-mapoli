@@ -312,7 +312,7 @@ definitions:
           } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
 
     # Update the develop build tag after successful pipeline completion
-    # Note: Git push operations may hang on Windows runners, so we use timeouts
+    # Uses Bitbucket REST API instead of git push (git network ops hang on Windows runners)
     update-develop-tag: &update-develop-tag
       name: Update Develop Build Tag
       runs-on:
@@ -330,39 +330,47 @@ definitions:
           Write-Host "Tag: $tagName" -ForegroundColor Cyan
           Write-Host "Commit: $currentCommit" -ForegroundColor Cyan
 
-          # Configure git for tagging
-          git config user.email "bitbucket-pipeline@demoulas.com"
-          git config user.name "Bitbucket Pipeline"
+          # Use Bitbucket REST API to update tag (avoids git network hanging issues)
+          $baseUrl = "https://api.bitbucket.org/2.0/repositories/$env:BITBUCKET_REPO_FULL_NAME/refs/tags"
+          $headers = @{
+            "Authorization" = "Bearer $env:BITBUCKET_PACKAGES_TOKEN"
+            "Content-Type" = "application/json"
+          }
 
-          # Delete existing tag locally if it exists
-          if (git tag -l $tagName) { git tag -d $tagName }
+          # Check if BITBUCKET_PACKAGES_TOKEN is available
+          if (-not $env:BITBUCKET_PACKAGES_TOKEN) {
+            Write-Host "[WARNING] BITBUCKET_PACKAGES_TOKEN not set - cannot update tag via API" -ForegroundColor Yellow
+            Write-Host "This is a default pipeline variable and should be available automatically." -ForegroundColor Yellow
+            exit 0
+          }
 
-          # Create new tag at HEAD
-          git tag $tagName HEAD
+          try {
+            # Delete existing tag if it exists (ignore 404 errors)
+            Write-Host "Deleting existing tag (if any)..." -ForegroundColor Gray
+            try {
+              Invoke-RestMethod -Uri "$baseUrl/$tagName" -Method Delete -Headers $headers -ErrorAction Stop
+              Write-Host "  Existing tag deleted" -ForegroundColor Gray
+            } catch {
+              if ($_.Exception.Response.StatusCode -ne 404) {
+                Write-Host "  Note: $($_.Exception.Message)" -ForegroundColor Gray
+              }
+            }
 
-          # Try to push tag with timeout (git network ops may hang on Windows runners)
-          # Note: Start-Job runs in a separate process without the current directory context
-          Write-Host "Pushing tag to remote (30s timeout)..." -ForegroundColor Gray
-          $repoPath = (Get-Location).Path
-          $job = Start-Job -ScriptBlock {
-            param($tag, $workDir)
-            Set-Location $workDir
-            # Delete old tag on remote first (if it exists)
-            if (git ls-remote --tags origin $tag) { git push origin --delete $tag }
-            # Push new tag
-            git push origin $tag
-          } -ArgumentList $tagName, $repoPath
+            # Create new tag at current commit
+            Write-Host "Creating tag at commit $currentCommit..." -ForegroundColor Gray
+            $body = @{
+              name = $tagName
+              target = @{
+                hash = $currentCommit
+              }
+            } | ConvertTo-Json
 
-          $completed = Wait-Job $job -Timeout 30
-          if ($completed) {
-            $result = Receive-Job $job
-            Remove-Job $job -Force
-            Write-Host "`n[OK] Tag '$tagName' updated successfully" -ForegroundColor Green
-          } else {
-            Stop-Job $job
-            Remove-Job $job -Force
-            Write-Host "`n[WARNING] Git push timed out - tag not updated on remote" -ForegroundColor Yellow
-            Write-Host "Next build will run all steps. This is a known limitation with Windows runners." -ForegroundColor Yellow
+            $response = Invoke-RestMethod -Uri $baseUrl -Method Post -Headers $headers -Body $body -ErrorAction Stop
+            Write-Host "`n[OK] Tag '$tagName' updated successfully via API" -ForegroundColor Green
+
+          } catch {
+            Write-Host "`n[WARNING] Failed to update tag via API: $($_.Exception.Message)" -ForegroundColor Yellow
+            Write-Host "Next build will run all steps." -ForegroundColor Yellow
             # Don't fail the build for tag issues
             exit 0
           }
