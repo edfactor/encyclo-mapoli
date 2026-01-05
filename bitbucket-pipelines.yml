@@ -227,12 +227,13 @@ definitions:
           if (-not $tagExists) {
             Write-Host "Tag '$tagName' not found - this is the first run" -ForegroundColor Yellow
             Write-Host "Will run ALL steps to establish baseline" -ForegroundColor Yellow
-            @{
+            $decision = @{
               runFrontend = $true
               runBackend = $true
               reason = "First run - no baseline tag exists"
               isFirstRun = $true
-            } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+            } | ConvertTo-Json -Compress
+            [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
             exit 0
           }
 
@@ -245,12 +246,13 @@ definitions:
 
           if ($lastBuildCommit -eq $currentCommit) {
             Write-Host "No new commits since last successful build" -ForegroundColor Green
-            @{
+            $decision = @{
               runFrontend = $false
               runBackend = $false
               reason = "No changes since last successful build"
               isFirstRun = $false
-            } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+            } | ConvertTo-Json -Compress
+            [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
             exit 0
           }
 
@@ -260,12 +262,13 @@ definitions:
           if ($LASTEXITCODE -ne 0) {
             Write-Host "git diff failed: $changedFiles" -ForegroundColor Yellow
             Write-Host "Falling back to running ALL steps" -ForegroundColor Yellow
-            @{
+            $decision = @{
               runFrontend = $true
               runBackend = $true
               reason = "git diff failed - running all steps for safety"
               isFirstRun = $false
-            } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+            } | ConvertTo-Json -Compress
+            [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
             exit 0
           }
 
@@ -302,14 +305,16 @@ definitions:
             $backendChanges | ForEach-Object { Write-Host "  - $_" }
           }
 
-          @{
+          $decision = @{
             runFrontend = $runFrontend
             runBackend = $runBackend
             reason = ($reasons -join "; ")
             isFirstRun = $false
             frontendFileCount = $frontendChanges.Count
             backendFileCount = $backendChanges.Count
-          } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+          } | ConvertTo-Json -Compress
+          # Use WriteAllText to avoid BOM that Out-File adds
+          [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
 
     # Update the develop build tag after successful pipeline completion
     # Uses Bitbucket REST API instead of git push (git network ops hang on Windows runners)
@@ -1565,9 +1570,10 @@ pipelines:
             - |
               echo "Checking develop-test-decision.json..."
               if [ -f "develop-test-decision.json" ]; then
-                echo "DEBUG - File exists, contents:"
+                echo "DEBUG - File contents:"
                 cat develop-test-decision.json
-                runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                echo ""
+                runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
                 echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                 if [ "$runFrontend" = "false" ]; then
                   echo "SKIP: No frontend changes detected"
@@ -1599,9 +1605,10 @@ pipelines:
                 - |
                   echo "Checking develop-test-decision.json..."
                   if [ -f "develop-test-decision.json" ]; then
-                    echo "DEBUG - File exists, contents:"
+                    echo "DEBUG - File contents:"
                     cat develop-test-decision.json
-                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                    echo ""
+                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
                     echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                     if [ "$runFrontend" = "false" ]; then
                       echo "SKIP: No frontend changes detected"
@@ -1760,9 +1767,10 @@ pipelines:
                 - |
                   echo "Checking develop-test-decision.json..."
                   if [ -f "develop-test-decision.json" ]; then
-                    echo "DEBUG - File exists, contents:"
+                    echo "DEBUG - File contents:"
                     cat develop-test-decision.json
-                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                    echo ""
+                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
                     echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                     if [ "$runFrontend" = "false" ]; then
                       echo "SKIP: No frontend changes detected"
