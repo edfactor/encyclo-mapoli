@@ -4,7 +4,6 @@ using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Contexts;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Logging.Extensions;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -23,7 +22,6 @@ using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.AspNetCore;
-using NSwag.Generation.AspNetCore;
 using QuestPDF;
 using Scalar.AspNetCore;
 
@@ -138,16 +136,38 @@ void OktaSettingsAction(OktaSwaggerConfiguration settings)
     builder.Configuration.Bind("Okta", settings);
 }
 
-void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
-{
-    settings.OperationProcessors.Add(new SwaggerImpersonationHeader());
-    settings.OperationProcessors.Add(new SwaggerAuthorizationDetails());
-}
-
 builder.ConfigureDefaultEndpoints(meterNames: [],
-    activitySourceNames: [OracleHcmActivitySource.Instance.Name, "Demoulas.ProfitSharing.Endpoints"])
-    .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
-    .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
+        activitySourceNames: [OracleHcmActivitySource.Instance.Name, "Demoulas.ProfitSharing.Endpoints"])
+    .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, impersonationRole: Role.IMPERSONATION,
+        swaggerAvailableRoles: new List<string>
+        {
+            Role.ADMINISTRATOR,
+            Role.AUDITOR,
+            Role.BENEFICIARY_ADMINISTRATOR,
+            Role.DISTRIBUTIONSCLERK,
+            Role.EXECUTIVEADMIN,
+            Role.FINANCEMANAGER,
+            Role.HARDSHIPADMINISTRATOR,
+            Role.HR_READONLY,
+            Role.ITDEVOPS,
+            Role.ITOPERATIONS,
+            Role.SSN_UNMASKING
+        })
+    .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, impersonationRole: Role.IMPERSONATION,
+        swaggerAvailableRoles: new List<string>
+        {
+            Role.ADMINISTRATOR,
+            Role.AUDITOR,
+            Role.BENEFICIARY_ADMINISTRATOR,
+            Role.DISTRIBUTIONSCLERK,
+            Role.EXECUTIVEADMIN,
+            Role.FINANCEMANAGER,
+            Role.HARDSHIPADMINISTRATOR,
+            Role.HR_READONLY,
+            Role.ITDEVOPS,
+            Role.ITOPERATIONS,
+            Role.SSN_UNMASKING
+        });
 
 // Add Profit Sharing specific telemetry (extends base Aspire setup)
 builder.Services.AddProfitSharingTelemetry(builder.Configuration);

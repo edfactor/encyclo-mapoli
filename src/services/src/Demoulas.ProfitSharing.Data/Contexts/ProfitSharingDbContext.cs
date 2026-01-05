@@ -27,6 +27,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     }
 
     public virtual DbSet<AnnuityRate> AnnuityRates { get; set; }
+    public virtual DbSet<AnnuityRateConfig> AnnuityRateConfigs { get; set; }
     public virtual DbSet<AuditEvent> AuditEvents { get; set; }
     public virtual DbSet<FileTransferAudit> FileTransferAudits { get; set; }
     public virtual DbSet<FtpOperationLog> FtpOperationLogs { get; set; }

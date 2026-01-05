@@ -367,7 +367,7 @@ BEGIN
     --insert_navigation_item(PROFIT_SHARE_REPORT_FINAL_RUN, FISCAL_CLOSE, 'Profit Share Report Final Run', '', 'profit-share-report-final-run', STATUS_NORMAL, ORDER_SEVENTEENTH, '', ENABLED, IS_NAVIGABLE);
     --insert_navigation_item(PROFIT_SHARE_REPORT_EDIT_RUN, FISCAL_CLOSE, 'Profit Share Report Edit Run', '', 'profit-share-report-edit-run', STATUS_NORMAL, ORDER_EIGHTEENTH, '', ENABLED, IS_NAVIGABLE);
     
-    --insert_navigation_item(PRINT_PROFIT_CERTS, FISCAL_CLOSE, 'Reprint Certificates / Print Profit Certs', 'PAYCERT', 'reprint-certificates', STATUS_NORMAL, ORDER_TWENTIETH, '', ENABLED, IS_NAVIGABLE);
+    --insert_navigation_item(PRINT_PROFIT_CERTS, FISCAL_CLOSE, 'Reprint Certificates / Print Profit Certs', 'PAYCERT', 'print-profit-certs', STATUS_NORMAL, ORDER_TWENTIETH, '', ENABLED, IS_NAVIGABLE);
 
 
 
@@ -396,7 +396,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
  insert_navigation_item(QNEWPROFLBL, PRINT_PS_JOBS, 'QNEWPROFLBL', '', 'new-ps-labels', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
  insert_navigation_item(PROFNEW, PRINT_PS_JOBS, 'PROFNEW', '', 'profnew', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
  insert_navigation_item(PROFALL, PRINT_PS_JOBS, 'PROFALL', '', 'profall', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
- insert_navigation_item(REPRINT_CERTIFICATES, PRINT_PS_JOBS, 'Reprint Certificates / Print Profit Certs', 'PAYCERT', 'reprint-certificates', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+ insert_navigation_item(REPRINT_CERTIFICATES, PRINT_PS_JOBS, 'Reprint Certificates / Print Profit Certs', 'PAYCERT', 'print-profit-certs', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
 -- Inserting value for IT Operation for role management
 --  NOTE: IT-DevOps navigation should be accessible only to members of the IT-DevOps role (role id 6).

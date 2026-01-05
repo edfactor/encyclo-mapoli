@@ -1,13 +1,14 @@
 import PageErrorBoundary from "@/components/PageErrorBoundary";
-import { Button, Divider, Grid } from "@mui/material";
+import { Alert, Button, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import React, { useState } from "react";
+import { useGetMissingAnnuityYearsQuery } from "reduxstore/api/administrationApi";
 import { useLazyDownloadCertificatesFileQuery } from "reduxstore/api/YearsEndApi";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { downloadFileFromResponse } from "utils/fileDownload";
-import { CAPTIONS } from "../../../constants";
 import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
+import { CAPTIONS } from "../../../constants";
 import ReprintCertificatesFilterSection, { ReprintCertificatesFilterParams } from "./ReprintCertificatesFilterSection";
 import ReprintCertificatesGrid from "./ReprintCertificatesGrid";
 
@@ -18,6 +19,30 @@ const ReprintCertificates: React.FC = () => {
     badgeNumber: "",
     socialSecurityNumber: ""
   });
+
+  const shouldCheckAnnuityRates = typeof filterParams.profitYear === "number" && filterParams.profitYear > 0;
+  const { data: missingYearsData } = useGetMissingAnnuityYearsQuery(
+    shouldCheckAnnuityRates
+      ? {
+          startYear: filterParams.profitYear,
+          endYear: filterParams.profitYear,
+          suppressAllToastErrors: true
+        }
+      : undefined,
+    { skip: !shouldCheckAnnuityRates }
+  );
+
+  const selectedYearStatus = missingYearsData?.years?.find((y) => y.year === filterParams.profitYear);
+  const rawMissingAges = selectedYearStatus?.missingAges as unknown;
+  const missingAges = Array.isArray(rawMissingAges)
+    ? rawMissingAges
+    : typeof rawMissingAges === "string"
+      ? rawMissingAges
+          .split(",")
+          .map((x: string) => Number(x.trim()))
+          .filter((x: number) => Number.isFinite(x))
+      : [];
+  const showMissingAgesWarning = selectedYearStatus ? !selectedYearStatus.isComplete : false;
 
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedBadgeNumbers, setSelectedBadgeNumbers] = useState<number[]>([]);
@@ -114,6 +139,16 @@ const ReprintCertificates: React.FC = () => {
           <Grid width="100%">
             <Divider />
           </Grid>
+
+          {showMissingAgesWarning && (
+            <Grid width="100%">
+              <Alert severity="warning">
+                Annuity rates are incomplete for profit year {filterParams.profitYear}
+                {missingAges.length > 0 ? ` (missing ages: ${missingAges.join(", ")}).` : "."} Certificate generation
+                may fail until annuity rates are updated.
+              </Alert>
+            </Grid>
+          )}
           <Grid width="100%">
             <DSMAccordion title="Search">
               <ReprintCertificatesFilterSection
