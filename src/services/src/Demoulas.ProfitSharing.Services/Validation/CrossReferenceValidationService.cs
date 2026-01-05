@@ -214,18 +214,24 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
             { "QPAY129.ForfeitureTotal", forfeitTotal }
         };
 
-        var distributionTotalValidation = await ValidateSingleFieldAsync(
+        // Execute validations in parallel for better performance
+        var distributionTask = ValidateSingleFieldAsync(
             profitYear,
             "QPAY129",
             "QPAY129_DistributionTotals",
             currentValues,
             cancellationToken);
-        var forfeitTotalValidation = await ValidateSingleFieldAsync(
+        var forfeitTask = ValidateSingleFieldAsync(
             profitYear,
             "QPAY129",
             "ForfeitureTotal",
             currentValues,
             cancellationToken);
+
+        await Task.WhenAll(distributionTask, forfeitTask);
+
+        var distributionTotalValidation = await distributionTask;
+        var forfeitTotalValidation = await forfeitTask;
 
         var validationGroup = new CrossReferenceValidationGroup
         {
