@@ -333,19 +333,19 @@ definitions:
           # Use Bitbucket REST API to update tag (avoids git network hanging issues)
           $baseUrl = "https://api.bitbucket.org/2.0/repositories/$env:BITBUCKET_REPO_FULL_NAME/refs/tags"
           $headers = @{
-            "Authorization" = "Bearer $env:BITBUCKET_PACKAGES_TOKEN"
+            "Authorization" = "Bearer $env:BITBUCKET_ACCESS_TOKEN"
             "Content-Type" = "application/json"
           }
 
           # Debug: Show URL being used
           Write-Host "DEBUG - BITBUCKET_REPO_FULL_NAME: $env:BITBUCKET_REPO_FULL_NAME" -ForegroundColor Magenta
           Write-Host "DEBUG - API URL: $baseUrl" -ForegroundColor Magenta
-          Write-Host "DEBUG - Token present: $(-not [string]::IsNullOrEmpty($env:BITBUCKET_PACKAGES_TOKEN))" -ForegroundColor Magenta
+          Write-Host "DEBUG - Token present: $(-not [string]::IsNullOrEmpty($env:BITBUCKET_ACCESS_TOKEN))" -ForegroundColor Magenta
 
-          # Check if BITBUCKET_PACKAGES_TOKEN is available
-          if (-not $env:BITBUCKET_PACKAGES_TOKEN) {
-            Write-Host "[WARNING] BITBUCKET_PACKAGES_TOKEN not set - cannot update tag via API" -ForegroundColor Yellow
-            Write-Host "This is a default pipeline variable and should be available automatically." -ForegroundColor Yellow
+          # Check if BITBUCKET_ACCESS_TOKEN is available
+          if (-not $env:BITBUCKET_ACCESS_TOKEN) {
+            Write-Host "[WARNING] BITBUCKET_ACCESS_TOKEN not set - cannot update tag via API" -ForegroundColor Yellow
+            Write-Host "Please create a Repository Access Token with repository:write scope." -ForegroundColor Yellow
             exit 0
           }
 
