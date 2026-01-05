@@ -252,6 +252,7 @@ definitions:
             isFirstRun = $false
             frontendFileCount = $frontendChanges.Count
             backendFileCount = $backendChanges.Count
+            frontendFiles = @($frontendChanges)
           } | ConvertTo-Json -Compress
           # Use WriteAllText to avoid BOM that Out-File adds
           [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
@@ -1678,7 +1679,7 @@ pipelines:
                   }
 
           - step:
-              name: Front Unit Test (Develop)
+              name: Frontend Unit Tests (Develop)
               image: node:22-alpine
               max-time: 10
               artifacts:
@@ -1687,30 +1688,99 @@ pipelines:
               script:
                 - |
                   echo "Checking develop-test-decision.json..."
-                  if [ -f "develop-test-decision.json" ]; then
-                    echo "DEBUG - File contents:"
+                  if [ ! -f "develop-test-decision.json" ]; then
+                    echo "No decision file - running all tests"
+                    RUN_ALL=true
+                  else
+                    echo "Decision file contents:"
                     cat develop-test-decision.json
                     echo ""
+
                     runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
-                    echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                     if [ "$runFrontend" = "false" ]; then
                       echo "SKIP: No frontend changes detected"
                       exit 0
                     fi
-                  else
-                    echo "DEBUG - File does not exist, running all tests"
+
+                    isFirstRun=$(grep -o '"isFirstRun":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
+                    if [ "$isFirstRun" = "true" ]; then
+                      echo "First run - will run all tests"
+                      RUN_ALL=true
+                    else
+                      RUN_ALL=false
+                      # Extract frontendFiles array from JSON
+                      changed_files=$(grep -o '"frontendFiles":\[[^]]*\]' develop-test-decision.json | sed 's/"frontendFiles":\[//;s/\]//;s/"//g;s/,/\n/g' | tr -d ' ')
+                      echo "Changed frontend files from decision:"
+                      echo "$changed_files"
+                    fi
                   fi
-                  echo "Running frontend tests..."
 
                   cd src/ui
-                  apk add --no-cache git
                   npm install -g npm@latest
                   cat > .npmrc << EOF
                   registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
                   //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
                   EOF
                   npm ci
-                  npm run test
+
+                  if [ "$RUN_ALL" = "true" ]; then
+                    echo "Running ALL tests"
+                    npm run test
+                    exit 0
+                  fi
+
+                  # Build test patterns based on changed areas
+                  test_patterns=""
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/utils/'; then
+                    test_patterns="$test_patterns src/utils"
+                  fi
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/hooks/'; then
+                    test_patterns="$test_patterns src/hooks"
+                  fi
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/components/'; then
+                    test_patterns="$test_patterns src/components"
+                  fi
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/reduxstore/'; then
+                    test_patterns="$test_patterns src/reduxstore"
+                  fi
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/pages/DecemberActivities/'; then
+                    test_patterns="$test_patterns src/pages/DecemberActivities"
+                  fi
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/pages/FiscalClose/'; then
+                    test_patterns="$test_patterns src/pages/FiscalClose"
+                  fi
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/pages/Beneficiaries/'; then
+                    test_patterns="$test_patterns src/pages/Beneficiaries"
+                  fi
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/pages/InquiriesAndAdjustments/'; then
+                    test_patterns="$test_patterns src/pages/InquiriesAndAdjustments"
+                  fi
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/pages/Reports/'; then
+                    test_patterns="$test_patterns src/pages/Reports"
+                  fi
+
+                  if echo "$changed_files" | grep -q '^src/ui/src/pages/Distributions/'; then
+                    test_patterns="$test_patterns src/pages/Distributions"
+                  fi
+
+                  # Trim leading whitespace
+                  test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
+
+                  if [ -n "$test_patterns" ]; then
+                    echo "Running tests for changed areas: $test_patterns"
+                    npm run test -- --run $test_patterns
+                  else
+                    echo "No test areas matched changed files - skipping tests"
+                  fi
 
       # Stage 4: Update the build tag on success
       - step: *update-develop-tag
