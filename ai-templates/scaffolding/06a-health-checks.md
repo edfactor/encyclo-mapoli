@@ -22,27 +22,36 @@ Health checks provide diagnostics for:
 ### HealthCheck/EnvironmentHealthCheck.cs
 
 ```csharp
+using System.Runtime.InteropServices;
+using Demoulas.Common.Api.Utilities;
+using Demoulas.Common.Contracts.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System.Runtime.InteropServices;
 
-namespace MySolution.Api.HealthCheck;
+namespace MySolution.Endpoints.HealthCheck;
 
 public class EnvironmentHealthCheck : IHealthCheck
 {
     private static readonly DateTime _startupTime = DateTime.UtcNow;
+    private readonly AppVersionInfo _appVersion;
+    private readonly OktaConfiguration _config;
     private readonly IWebHostEnvironment _env;
 
-    public EnvironmentHealthCheck(IWebHostEnvironment env)
+    public EnvironmentHealthCheck(
+        IWebHostEnvironment env,
+        AppVersionInfo appVersion,
+        OktaConfiguration config)
     {
         _env = env;
+        _appVersion = appVersion;
+        _config = config;
     }
 
     public Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)
     {
-        var data = new Dictionary<string, object>
+        Dictionary<string, object> data = new()
         {
             { "Environment", _env.EnvironmentName },
             { "ApplicationName", _env.ApplicationName },
@@ -50,12 +59,12 @@ public class EnvironmentHealthCheck : IHealthCheck
             { "WorkingSet", Environment.WorkingSet },
             { "OSVersion", Environment.OSVersion.ToString() },
             { "Framework", RuntimeInformation.FrameworkDescription },
+            { "AppVersion", _appVersion.BuildNumber },
             { "CurrentDirectory", Environment.CurrentDirectory },
             { "Uptime", (DateTime.UtcNow - _startupTime).ToString(@"dd\.hh\:mm\:ss") },
             { "UtcNow", DateTimeOffset.UtcNow.ToString("o") },
-            { "ProcessorCount", Environment.ProcessorCount },
-            { "Is64BitProcess", Environment.Is64BitProcess },
-            { "CLRVersion", Environment.Version.ToString() }
+            { "OktaEnvironmentName", _config.EnvironmentName ?? string.Empty },
+            { "OktaRolePrefix", _config.RolePrefix }
         };
 
         return Task.FromResult(HealthCheckResult.Healthy("Environment check", data));
@@ -63,13 +72,27 @@ public class EnvironmentHealthCheck : IHealthCheck
 }
 ```
 
+**Key Points:**
+
+- ✅ Injects `AppVersionInfo` for build version tracking
+- ✅ Injects `OktaConfiguration` for environment validation
+- ✅ Tracks startup time for uptime calculation
+- ✅ Includes 12 diagnostic fields for troubleshooting
+- ✅ Uses dictionary initializer for cleaner syntax
+
 ---
 
 ## 🔧 Health Check Registration
 
 ### In Program.cs
 
+**CRITICAL:** Ensure required dependencies are registered before health checks.
+
 ```csharp
+// Register dependencies for EnvironmentHealthCheck
+// AppVersionInfo is typically registered earlier in Program.cs
+// OktaConfiguration is registered in AddSecurityServices
+
 // Register health checks
 builder.Services.AddHealthChecks()
     .AddCheck<EnvironmentHealthCheck>("environment")

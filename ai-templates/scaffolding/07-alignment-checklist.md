@@ -73,22 +73,18 @@ public class ResourceManager
 
 ### Middleware Ordering (CRITICAL)
 
-- [ ] **PII Masking** registered FIRST
-- [ ] **Health Checks** before authentication
+- [ ] **UseCors()** called FIRST (before all other middleware)
+- [ ] **UseCommonMiddleware()** included (via UseDefaultEndpoints - adds server timing, versioning headers)
 - [ ] **Authentication** before authorization
-- [ ] **Custom instrumentation** LAST
+- [ ] **No custom endpoint instrumentation middleware** (telemetry automatic via DemoulasEndpoint)
 
 **Validation:**
 
 ```csharp
-// CORRECT ORDER:
-app.UseSmartPiiMasking();           // 1. PII masking FIRST
-app.MapHealthChecks("/health");     // 2. Health checks
-app.UseHttpsRedirection();          // 3. HTTPS
-app.UseAuthentication();            // 4. Authentication BEFORE authorization
-app.UseAuthorization();             // 5. Authorization AFTER authentication
-app.MapFastEndpoints();             // 6. FastEndpoints
-app.UseEndpointInstrumentation();   // 7. Custom middleware LAST
+// CORRECT ORDER (post-Common.Api adoption):
+app.UseCors();                      // 1. CORS FIRST (CRITICAL)
+// ... custom middleware (no-cache, PII masking)
+app.UseDefaultEndpoints();          // Includes UseCommonMiddleware, authentication, authorization
 ```
 
 ### CORS Configuration
@@ -251,25 +247,147 @@ public static readonly Dictionary<string, string[]> Map = new()
 
 ## ✅ Telemetry & Observability Audit
 
-### OpenTelemetry Configuration
+### ConfigureDefaultEndpoints (Demoulas.Common.Api)
 
-- [ ] **Custom ActivitySource** configured
-- [ ] **Resource attributes** set (service name, environment)
-- [ ] **Instrumentation** enabled (AspNetCore, HttpClient, EF Core)
-
-### EndpointInstrumentationMiddleware
-
-- [ ] **Session tracking** implemented (X-Session-ID)
-- [ ] **Activity tags** include endpoint name, HTTP method, user ID
-- [ ] **Logger scope** includes SessionId, TraceId, SpanId
-- [ ] **Exception recording** with `activity.RecordException()`
-- [ ] **Middleware registered LAST**
+- [ ] **ConfigureDefaultEndpoints()** called with custom meter names
+- [ ] **Meter names** follow naming pattern: `"{Company}.{Project}.{Layer}"`
+- [ ] **EF Core instrumentation** enabled with `SetDbStatementForText` and `SetDbStatementForStoredProcedure`
+- [ ] **UseCommonMiddleware()** included (via UseDefaultEndpoints)
 
 **Validation:**
 
 ```csharp
-// Check middleware registration order
-app.UseEndpointInstrumentation();  // MUST be LAST
+// In Program.cs - Check builder configuration
+builder.ConfigureDefaultEndpoints(
+    meterNames: [
+        "Demoulas.Smart.StoreOrdering.Endpoints",
+        "Demoulas.Smart.StoreOrdering.Services",
+        "Demoulas.Smart.StoreOrdering.Data"
+    ]);
+
+// Check EF Core instrumentation registration
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        // ... existing meters
+        metrics.AddMeter("Microsoft.EntityFrameworkCore");
+    })
+    .WithTracing(tracing =>
+    {
+        // ... existing tracing
+        tracing.AddEntityFrameworkCoreInstrumentation(options =>
+        {
+            options.SetDbStatementForText = true;
+            options.SetDbStatementForStoredProcedure = true;
+            options.EnrichWithIDbCommand = (activity, command) =>
+            {
+                activity.DisplayName = command.CommandText;
+            };
+        });
+    });
+```
+
+### DemoulasEndpoint Base Classes
+
+- [ ] **All endpoints** inherit from `DemoulasEndpoint<TRequest, TResponse>` (or variant)
+- [ ] **ExecuteAsync renamed** to `HandleRequestAsync` (protected abstract)
+- [ ] **GetSensitiveFields()** overridden for PII tracking (SSN, DOB, email)
+- [ ] **AddCustomTelemetryTags()** overridden for domain metadata (store_id, user_id, order_id)
+- [ ] **BusinessOperationsTotal** metrics added for operational insights
+
+**Validation:**
+
+```csharp
+// Check endpoint inheritance
+public sealed class GetStoresEndpoint : DemoulasEndpoint<GetStoresRequest, StoreListResponse>
+{
+    // Constructor MUST inject ILogger<T>
+    public GetStoresEndpoint(
+        IStoreService service,
+        ILogger<GetStoresEndpoint> logger)  // Required for telemetry
+        : base(navigationId)
+    {
+        _service = service;
+        _logger = logger;
+    }
+
+    // MUST implement HandleRequestAsync (not ExecuteAsync)
+    protected override async Task<StoreListResponse> HandleRequestAsync(
+        GetStoresRequest req, CancellationToken ct)
+    {
+        // Business logic
+        var result = await _service.GetStoresAsync(req, ct);
+
+        // Business metrics (required)
+        EndpointTelemetry.BusinessOperationsTotal.Add(1,
+            new("operation", "store-list"),
+            new("endpoint", nameof(GetStoresEndpoint)));
+
+        return result;
+    }
+
+    // Override for PII tracking (compliance)
+    protected override string[] GetSensitiveFields(GetStoresRequest request) =>
+        new[] { "Ssn", "DateOfBirth", "Email" };  // If applicable
+
+    // Override for domain-specific telemetry
+    protected override void AddCustomTelemetryTags(Activity activity, GetStoresRequest request)
+    {
+        activity.SetTag("store.region_id", request.RegionId);
+        activity.SetTag("store.include_inactive", request.IncludeInactive);
+    }
+}
+```
+
+**Migration Strategy:**
+
+```csharp
+// BEFORE: Standard FastEndpoints pattern (no telemetry)
+public class GetStoresEndpoint : Endpoint<GetStoresRequest, StoreListResponse>
+{
+    public override async Task<StoreListResponse> ExecuteAsync(
+        GetStoresRequest req, CancellationToken ct)
+    {
+        var stores = await _service.GetStoresAsync(req, ct);
+        return new StoreListResponse { Stores = stores };
+    }
+}
+
+// AFTER: DemoulasEndpoint with automatic telemetry
+public class GetStoresEndpoint : DemoulasEndpoint<GetStoresRequest, StoreListResponse>
+{
+    private readonly ILogger<GetStoresEndpoint> _logger;  // REQUIRED
+
+    public GetStoresEndpoint(
+        IStoreService service,
+        ILogger<GetStoresEndpoint> logger)  // Inject logger
+        : base(navigationId)
+    {
+        _service = service;
+        _logger = logger;
+    }
+
+    // Renamed ExecuteAsync → HandleRequestAsync
+    protected override async Task<StoreListResponse> HandleRequestAsync(
+        GetStoresRequest req, CancellationToken ct)
+    {
+        var stores = await _service.GetStoresAsync(req, ct);
+
+        // Add business metrics
+        EndpointTelemetry.BusinessOperationsTotal.Add(1,
+            new("operation", "store-list"),
+            new("endpoint", nameof(GetStoresEndpoint)));
+
+        return new StoreListResponse { Stores = stores };
+    }
+
+    // Add domain tags
+    protected override void AddCustomTelemetryTags(Activity activity, GetStoresRequest request)
+    {
+        if (request.RegionId.HasValue)
+            activity.SetTag("store.region_id", request.RegionId.Value);
+    }
+}
 ```
 
 ---
@@ -306,15 +424,15 @@ app.UseEndpointInstrumentation();  // MUST be LAST
 
 ### Issue 1: Middleware Ordering
 
-**Symptom:** Authentication not working, PII leaking in logs
+**Symptom:** CORS headers missing, authentication not working
 
 **Fix:**
 
 ```csharp
-// Move PII masking to FIRST
-app.UseSmartPiiMasking();  // Must be first
+// Move UseCors() to FIRST position (CRITICAL - security vulnerability)
+app.UseCors();  // Must be first for preflight requests
 // ... other middleware
-app.UseEndpointInstrumentation();  // Must be last
+app.UseDefaultEndpoints();  // Includes UseCommonMiddleware
 ```
 
 ### Issue 2: DbContext in Endpoints
@@ -356,17 +474,40 @@ options.AddInterceptors(
     new AuditInterceptor());       // AFTER
 ```
 
-### Issue 5: No Session Tracking
+### Issue 5: Endpoints Not Using DemoulasEndpoint
 
-**Symptom:** Can't correlate logs across requests
+**Symptom:** No telemetry, missing PII tracking, no correlation IDs
 
 **Fix:**
 
 ```csharp
-// Add EndpointInstrumentationMiddleware with X-Session-ID
-public class EndpointInstrumentationMiddleware
+// Migrate from Endpoint<T> to DemoulasEndpoint<T>
+// See "DemoulasEndpoint Base Classes" section above for full pattern
+public class MyEndpoint : DemoulasEndpoint<MyRequest, MyResponse>
 {
-    // ... implementation from Part 5c
+    private readonly ILogger<MyEndpoint> _logger;  // REQUIRED
+
+    public MyEndpoint(IMyService service, ILogger<MyEndpoint> logger)
+        : base(navigationId)
+    {
+        _service = service;
+        _logger = logger;  // Must inject for telemetry
+    }
+
+    // Rename ExecuteAsync → HandleRequestAsync
+    protected override async Task<MyResponse> HandleRequestAsync(
+        MyRequest req, CancellationToken ct)
+    {
+        // Business logic
+        var result = await _service.ProcessAsync(req, ct);
+
+        // Add business metrics
+        EndpointTelemetry.BusinessOperationsTotal.Add(1,
+            new("operation", "my-operation"),
+            new("endpoint", nameof(MyEndpoint)));
+
+        return result;
+    }
 }
 ```
 
@@ -392,10 +533,13 @@ Use this checklist when reviewing PRs:
 
 **Telemetry:**
 
-- [ ] Activity created with endpoint name
-- [ ] Session tracking implemented
-- [ ] Exception recording with `activity.RecordException()`
-- [ ] Logger scope includes correlation IDs
+- [ ] Endpoints inherit from `DemoulasEndpoint<TRequest, TResponse>`
+- [ ] `ILogger<TEndpoint>` injected in constructor
+- [ ] `ExecuteAsync` renamed to `HandleRequestAsync`
+- [ ] `GetSensitiveFields()` overridden for PII access
+- [ ] `AddCustomTelemetryTags()` overridden for domain metadata
+- [ ] `BusinessOperationsTotal` metrics added
+- [ ] ConfigureDefaultEndpoints called with custom meters
 
 **Testing:**
 
@@ -424,10 +568,12 @@ Use this checklist when reviewing PRs:
 
 **Priority 3 (Observability - Plan for Q2):**
 
-1. OpenTelemetry instrumentation
-2. Session tracking implementation
-3. Health check enhancements
-4. Architecture tests implementation
+1. DemoulasEndpoint migration for all endpoints
+2. GetSensitiveFields() overrides for PII tracking
+3. AddCustomTelemetryTags() for domain metadata
+4. BusinessOperationsTotal metrics implementation
+5. Health check enhancements
+6. Architecture tests implementation
 
 ---
 
@@ -456,11 +602,12 @@ aspire run
 
 ## 🎓 Key Takeaways - Part 7
 
-1. **Security First** - CORS, PII, JWT validation are critical
-2. **Layer Separation** - Endpoints → Services → Data
-3. **Middleware Ordering** - PII first, instrumentation last
+1. **Security First** - CORS (FIRST in pipeline), PII, JWT validation are critical
+2. **Layer Separation** - Endpoints → Services → Data (no DbContext in endpoints)
+3. **Middleware Ordering** - CORS first, UseCommonMiddleware via UseDefaultEndpoints
 4. **Interceptor Ordering** - SoftDelete before Audit
-5. **Testing** - Architecture tests prevent regression
+5. **Telemetry via Base Classes** - DemoulasEndpoint provides automatic instrumentation
+6. **Testing** - Architecture tests prevent regression
 
 ---
 
