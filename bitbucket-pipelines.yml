@@ -227,12 +227,13 @@ definitions:
           if (-not $tagExists) {
             Write-Host "Tag '$tagName' not found - this is the first run" -ForegroundColor Yellow
             Write-Host "Will run ALL steps to establish baseline" -ForegroundColor Yellow
-            @{
+            $decision = @{
               runFrontend = $true
               runBackend = $true
               reason = "First run - no baseline tag exists"
               isFirstRun = $true
-            } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+            } | ConvertTo-Json -Compress
+            [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
             exit 0
           }
 
@@ -245,12 +246,13 @@ definitions:
 
           if ($lastBuildCommit -eq $currentCommit) {
             Write-Host "No new commits since last successful build" -ForegroundColor Green
-            @{
+            $decision = @{
               runFrontend = $false
               runBackend = $false
               reason = "No changes since last successful build"
               isFirstRun = $false
-            } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+            } | ConvertTo-Json -Compress
+            [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
             exit 0
           }
 
@@ -260,12 +262,13 @@ definitions:
           if ($LASTEXITCODE -ne 0) {
             Write-Host "git diff failed: $changedFiles" -ForegroundColor Yellow
             Write-Host "Falling back to running ALL steps" -ForegroundColor Yellow
-            @{
+            $decision = @{
               runFrontend = $true
               runBackend = $true
               reason = "git diff failed - running all steps for safety"
               isFirstRun = $false
-            } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+            } | ConvertTo-Json -Compress
+            [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
             exit 0
           }
 
@@ -302,17 +305,19 @@ definitions:
             $backendChanges | ForEach-Object { Write-Host "  - $_" }
           }
 
-          @{
+          $decision = @{
             runFrontend = $runFrontend
             runBackend = $runBackend
             reason = ($reasons -join "; ")
             isFirstRun = $false
             frontendFileCount = $frontendChanges.Count
             backendFileCount = $backendChanges.Count
-          } | ConvertTo-Json | Out-File -FilePath "develop-test-decision.json" -Encoding UTF8
+          } | ConvertTo-Json -Compress
+          # Use WriteAllText to avoid BOM that Out-File adds
+          [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
 
     # Update the develop build tag after successful pipeline completion
-    # Note: Git push operations may hang on Windows runners, so we use timeouts
+    # Uses Bitbucket REST API instead of git push (git network ops hang on Windows runners)
     update-develop-tag: &update-develop-tag
       name: Update Develop Build Tag
       runs-on:
@@ -330,39 +335,52 @@ definitions:
           Write-Host "Tag: $tagName" -ForegroundColor Cyan
           Write-Host "Commit: $currentCommit" -ForegroundColor Cyan
 
-          # Configure git for tagging
-          git config user.email "bitbucket-pipeline@demoulas.com"
-          git config user.name "Bitbucket Pipeline"
+          # Use Bitbucket REST API to update tag (avoids git network hanging issues)
+          $baseUrl = "https://api.bitbucket.org/2.0/repositories/$env:BITBUCKET_REPO_FULL_NAME/refs/tags"
+          $headers = @{
+            "Authorization" = "Bearer $env:BITBUCKET_ACCESS_TOKEN"
+            "Content-Type" = "application/json"
+          }
 
-          # Delete existing tag locally if it exists
-          if (git tag -l $tagName) { git tag -d $tagName }
+          # Debug: Show URL being used
+          Write-Host "DEBUG - BITBUCKET_REPO_FULL_NAME: $env:BITBUCKET_REPO_FULL_NAME" -ForegroundColor Magenta
+          Write-Host "DEBUG - API URL: $baseUrl" -ForegroundColor Magenta
+          Write-Host "DEBUG - Token present: $(-not [string]::IsNullOrEmpty($env:BITBUCKET_ACCESS_TOKEN))" -ForegroundColor Magenta
 
-          # Create new tag at HEAD
-          git tag $tagName HEAD
+          # Check if BITBUCKET_ACCESS_TOKEN is available
+          if (-not $env:BITBUCKET_ACCESS_TOKEN) {
+            Write-Host "[WARNING] BITBUCKET_ACCESS_TOKEN not set - cannot update tag via API" -ForegroundColor Yellow
+            Write-Host "Please create a Repository Access Token with repository:write scope." -ForegroundColor Yellow
+            exit 0
+          }
 
-          # Try to push tag with timeout (git network ops may hang on Windows runners)
-          # Note: Start-Job runs in a separate process without the current directory context
-          Write-Host "Pushing tag to remote (30s timeout)..." -ForegroundColor Gray
-          $repoPath = (Get-Location).Path
-          $job = Start-Job -ScriptBlock {
-            param($tag, $workDir)
-            Set-Location $workDir
-            # Delete old tag on remote first (if it exists)
-            if (git ls-remote --tags origin $tag) { git push origin --delete $tag }
-            # Push new tag
-            git push origin $tag
-          } -ArgumentList $tagName, $repoPath
+          try {
+            # Delete existing tag if it exists (ignore 404 errors)
+            Write-Host "Deleting existing tag (if any)..." -ForegroundColor Gray
+            try {
+              Invoke-RestMethod -Uri "$baseUrl/$tagName" -Method Delete -Headers $headers -ErrorAction Stop
+              Write-Host "  Existing tag deleted" -ForegroundColor Gray
+            } catch {
+              if ($_.Exception.Response.StatusCode -ne 404) {
+                Write-Host "  Note: $($_.Exception.Message)" -ForegroundColor Gray
+              }
+            }
 
-          $completed = Wait-Job $job -Timeout 30
-          if ($completed) {
-            $result = Receive-Job $job
-            Remove-Job $job -Force
-            Write-Host "`n[OK] Tag '$tagName' updated successfully" -ForegroundColor Green
-          } else {
-            Stop-Job $job
-            Remove-Job $job -Force
-            Write-Host "`n[WARNING] Git push timed out - tag not updated on remote" -ForegroundColor Yellow
-            Write-Host "Next build will run all steps. This is a known limitation with Windows runners." -ForegroundColor Yellow
+            # Create new tag at current commit
+            Write-Host "Creating tag at commit $currentCommit..." -ForegroundColor Gray
+            $body = @{
+              name = $tagName
+              target = @{
+                hash = $currentCommit
+              }
+            } | ConvertTo-Json
+
+            $response = Invoke-RestMethod -Uri $baseUrl -Method Post -Headers $headers -Body $body -ErrorAction Stop
+            Write-Host "`n[OK] Tag '$tagName' updated successfully via API" -ForegroundColor Green
+
+          } catch {
+            Write-Host "`n[WARNING] Failed to update tag via API: $($_.Exception.Message)" -ForegroundColor Yellow
+            Write-Host "Next build will run all steps." -ForegroundColor Yellow
             # Don't fail the build for tag issues
             exit 0
           }
@@ -731,7 +749,7 @@ definitions:
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -p:SkipOpenApiSpecGeneration=true -o .\publishOutput
 
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\publishOutput\"
@@ -1552,25 +1570,30 @@ pipelines:
             - |
               echo "Checking develop-test-decision.json..."
               if [ -f "develop-test-decision.json" ]; then
-                runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                echo "DEBUG - File contents:"
+                cat develop-test-decision.json
+                echo ""
+                runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
+                echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                 if [ "$runFrontend" = "false" ]; then
                   echo "SKIP: No frontend changes detected"
                   exit 0
                 fi
+              else
+                echo "DEBUG - File does not exist, running all checks"
               fi
               echo "Running frontend lint..."
 
-            - cd src/ui
-            - apk add --no-cache git
-            - npm install -g npm@latest
-            - |
+              cd src/ui
+              apk add --no-cache git
+              npm install -g npm@latest
               cat > .npmrc << EOF
               registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
               //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
               EOF
-            - npm ci
-            - npm run lint
-            - npx tsc -b --noEmit
+              npm ci
+              npm run lint
+              npx tsc -b --noEmit
 
       # Stage 2: Run audits - conditional based on changes
       - parallel:
@@ -1582,21 +1605,26 @@ pipelines:
                 - |
                   echo "Checking develop-test-decision.json..."
                   if [ -f "develop-test-decision.json" ]; then
-                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                    echo "DEBUG - File contents:"
+                    cat develop-test-decision.json
+                    echo ""
+                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
+                    echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                     if [ "$runFrontend" = "false" ]; then
                       echo "SKIP: No frontend changes detected"
                       exit 0
                     fi
+                  else
+                    echo "DEBUG - File does not exist, running audit"
                   fi
                   echo "Running frontend audit..."
 
-                - cd src/ui
-                - |
+                  cd src/ui
                   cat > .npmrc << EOF
                   registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
                   //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
                   EOF
-                - npm audit --audit-level=high --production
+                  npm audit --audit-level=high --production
 
           - step:
               name: Check Backend API for vulnerabilities (Develop)
@@ -1605,6 +1633,7 @@ pipelines:
                 - self.hosted
               script:
                 - |
+                  # Check if backend audit should run
                   Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
                   if (Test-Path "develop-test-decision.json") {
                     $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
@@ -1615,13 +1644,14 @@ pipelines:
                   }
                   Write-Host "Running backend audit..." -ForegroundColor Cyan
 
-                - $env:SolutionDir = ".\src\services"
-                - echo "Checking dotnet vulnerabilities"
-                - cd $env:SolutionDir
-                - dotnet --info
-                - dotnet nuget list source
-                - dotnet restore Demoulas.ProfitSharing.slnx
-                - |
+                  # Run vulnerability check
+                  $env:SolutionDir = ".\src\services"
+                  Write-Host "Checking dotnet vulnerabilities"
+                  cd $env:SolutionDir
+                  dotnet --info
+                  dotnet nuget list source
+                  dotnet restore Demoulas.ProfitSharing.slnx
+
                   $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
                   if ($output -match "has the following vulnerable packages") {
                     Write-Host "Vulnerabilities found!"
@@ -1635,7 +1665,7 @@ pipelines:
       # Stage 3: Build and test - conditional based on changes
       - parallel:
           - step:
-              name: Build and Test Backend API - UnitTests (Develop)
+              name: Build and Test Backend API Unit and Arch (Develop)
               runs-on:
                 - windows
                 - self.hosted
@@ -1643,6 +1673,7 @@ pipelines:
                 - test-reports/**
               script:
                 - |
+                  # Check if backend tests should run
                   Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
                   if (Test-Path "develop-test-decision.json") {
                     $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
@@ -1651,68 +1682,61 @@ pipelines:
                       exit 0
                     }
                   }
-                  Write-Host "Running backend unit tests..." -ForegroundColor Cyan
+                  Write-Host "Running backend tests..." -ForegroundColor Cyan
 
-                - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-                - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-                - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
-                - mkdir -Force -Path $env:REPORTS_PATH
-                - |
-                  $dotnetSdkList = dotnet --list-sdks;
-                  Write-Output "Installed .NET SDKs:";
-                  Write-Output $dotnetSdkList;
-                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+                  # Set environment variables
+                  $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+
+                  # Verify .NET SDK
+                  $dotnetSdkList = dotnet --list-sdks
+                  Write-Output "Installed .NET SDKs:"
+                  Write-Output $dotnetSdkList
+                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\."
                   if (-not $dotnetSdkRequired) {
-                      Write-Error "FAILED: .NET 10 SDK is required but not available.";
-                      exit 1;
+                    Write-Error "FAILED: .NET 10 SDK is required but not available."
+                    exit 1
                   }
-                - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
-                - dotnet restore src/services/Demoulas.ProfitSharing.slnx
-                - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
-                - |
-                  $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-                  Write-Host "Running ALL unit tests" -ForegroundColor Cyan
-                  & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
 
-          - step:
-              name: Build and Test Backend API - Architecture (Develop)
-              runs-on:
-                - windows
-                - self.hosted
-              artifacts:
-                - test-reports/**
-              script:
-                - |
-                  Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
-                  if (Test-Path "develop-test-decision.json") {
-                    $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
-                    if ($decision.runBackend -eq $false) {
-                      Write-Host "SKIP: No backend changes detected" -ForegroundColor Yellow
-                      exit 0
-                    }
-                  }
-                  Write-Host "Running backend architecture tests..." -ForegroundColor Cyan
+                  # Build once for all tests
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Building solution..." -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+                  dotnet restore src/services/Demoulas.ProfitSharing.slnx
+                  dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
-                - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-                - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
-                - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/architecture-tests"
-                - mkdir -Force -Path $env:REPORTS_PATH
-                - |
-                  $dotnetSdkList = dotnet --list-sdks;
-                  Write-Output "Installed .NET SDKs:";
-                  Write-Output $dotnetSdkList;
-                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
-                  if (-not $dotnetSdkRequired) {
-                      Write-Error "FAILED: .NET 10 SDK is required but not available.";
-                      exit 1;
+                  # Run Unit Tests
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Running Unit Tests..." -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  $unitTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/unit-tests"
+                  mkdir -Force -Path $unitTestsPath
+                  $unitTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.exe"
+                  & $unitTestExe -jUnit "$unitTestsPath/junit.xml"
+                  $unitTestExit = $LASTEXITCODE
+
+                  # Run Architecture Tests
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Running Architecture Tests..." -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  $archTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/architecture-tests"
+                  mkdir -Force -Path $archTestsPath
+                  $archTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests.Architecture/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.Architecture.exe"
+                  & $archTestExe -jUnit "$archTestsPath/junit.xml"
+                  $archTestExit = $LASTEXITCODE
+
+                  # Report results
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Test Results Summary" -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  Write-Host "Unit Tests: $(if ($unitTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($unitTestExit -eq 0) { 'Green' } else { 'Red' })
+                  Write-Host "Architecture Tests: $(if ($archTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($archTestExit -eq 0) { 'Green' } else { 'Red' })
+
+                  # Exit with failure if either test suite failed
+                  if ($unitTestExit -ne 0 -or $archTestExit -ne 0) {
+                    Write-Error "One or more test suites failed"
+                    exit 1
                   }
-                - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
-                - dotnet restore src/services/Demoulas.ProfitSharing.slnx
-                - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
-                - |
-                  $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-                  Write-Host "Executing test runner: $testExe"
-                  & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
 
           - step:
               name: Build and Test Frontend UI (Develop)
@@ -1725,24 +1749,29 @@ pipelines:
                 - |
                   echo "Checking develop-test-decision.json..."
                   if [ -f "develop-test-decision.json" ]; then
-                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                    echo "DEBUG - File contents:"
+                    cat develop-test-decision.json
+                    echo ""
+                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
+                    echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                     if [ "$runFrontend" = "false" ]; then
                       echo "SKIP: No frontend changes detected"
                       exit 0
                     fi
+                  else
+                    echo "DEBUG - File does not exist, running all tests"
                   fi
                   echo "Running frontend tests..."
 
-                - cd src/ui
-                - apk add --no-cache git
-                - npm install -g npm@latest
-                - |
+                  cd src/ui
+                  apk add --no-cache git
+                  npm install -g npm@latest
                   cat > .npmrc << EOF
                   registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
                   //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
                   EOF
-                - npm ci
-                - npm run test
+                  npm ci
+                  npm run test
 
       # Stage 4: Update the build tag on success
       - step: *update-develop-tag
