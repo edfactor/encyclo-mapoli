@@ -1665,7 +1665,7 @@ pipelines:
       # Stage 3: Build and test - conditional based on changes
       - parallel:
           - step:
-              name: Build and Test Backend API (Develop)
+              name: Build and Test Backend API Unit and Arch (Develop)
               runs-on:
                 - windows
                 - self.hosted
