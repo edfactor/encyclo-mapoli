@@ -1565,11 +1565,16 @@ pipelines:
             - |
               echo "Checking develop-test-decision.json..."
               if [ -f "develop-test-decision.json" ]; then
+                echo "DEBUG - File exists, contents:"
+                cat develop-test-decision.json
                 runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                 if [ "$runFrontend" = "false" ]; then
                   echo "SKIP: No frontend changes detected"
                   exit 0
                 fi
+              else
+                echo "DEBUG - File does not exist, running all checks"
               fi
               echo "Running frontend lint..."
 
@@ -1594,11 +1599,16 @@ pipelines:
                 - |
                   echo "Checking develop-test-decision.json..."
                   if [ -f "develop-test-decision.json" ]; then
+                    echo "DEBUG - File exists, contents:"
+                    cat develop-test-decision.json
                     runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                    echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                     if [ "$runFrontend" = "false" ]; then
                       echo "SKIP: No frontend changes detected"
                       exit 0
                     fi
+                  else
+                    echo "DEBUG - File does not exist, running audit"
                   fi
                   echo "Running frontend audit..."
 
@@ -1750,11 +1760,16 @@ pipelines:
                 - |
                   echo "Checking develop-test-decision.json..."
                   if [ -f "develop-test-decision.json" ]; then
+                    echo "DEBUG - File exists, contents:"
+                    cat develop-test-decision.json
                     runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' ')
+                    echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                     if [ "$runFrontend" = "false" ]; then
                       echo "SKIP: No frontend changes detected"
                       exit 0
                     fi
+                  else
+                    echo "DEBUG - File does not exist, running all tests"
                   fi
                   echo "Running frontend tests..."
 
