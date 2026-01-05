@@ -337,6 +337,11 @@ definitions:
             "Content-Type" = "application/json"
           }
 
+          # Debug: Show URL being used
+          Write-Host "DEBUG - BITBUCKET_REPO_FULL_NAME: $env:BITBUCKET_REPO_FULL_NAME" -ForegroundColor Magenta
+          Write-Host "DEBUG - API URL: $baseUrl" -ForegroundColor Magenta
+          Write-Host "DEBUG - Token present: $(-not [string]::IsNullOrEmpty($env:BITBUCKET_PACKAGES_TOKEN))" -ForegroundColor Magenta
+
           # Check if BITBUCKET_PACKAGES_TOKEN is available
           if (-not $env:BITBUCKET_PACKAGES_TOKEN) {
             Write-Host "[WARNING] BITBUCKET_PACKAGES_TOKEN not set - cannot update tag via API" -ForegroundColor Yellow
