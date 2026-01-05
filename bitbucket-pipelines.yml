@@ -12,22 +12,21 @@ definitions:
     uat_app_server: &uat_app_server "appt24d"
 
   steps:
-    build-and-test-backend-unit: &build-and-test-backend-unit
-      name: Build and Test Backend API (UnitTests)
+    build-and-test-backend: &build-and-test-backend
+      name: Build and Test Backend API
       runs-on:
         - windows
         - self.hosted
       script:
-        # Set environment variables
-        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
-
-        # Check selective test decision and set filters
         - |
-          $script:testFilters = @()
-          $script:runAllTests = $true
-          $script:skipTests = $false
+          # Set environment variables
+          $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+
+          # Check selective test decision and set filters
+          $testFilters = @()
+          $runAllTests = $true
+          $skipTests = $false
+          $runArchitectureTests = $true
 
           if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
             Write-Host "Checking selective test decision..." -ForegroundColor Cyan
@@ -35,165 +34,106 @@ definitions:
 
             if ($decision.decision -eq "SKIP_ALL") {
               Write-Host "SKIP: No backend files changed" -ForegroundColor Yellow
-              $script:skipTests = $true
+              $skipTests = $true
             }
             elseif ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -eq 0) {
               Write-Host "SKIP: No test filters (only test files changed)" -ForegroundColor Yellow
-              $script:skipTests = $true
+              $skipTests = $true
             }
             elseif ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -gt 0) {
-              $script:runAllTests = $false
-              $script:testFilters = $decision.testFilters
-              Write-Host "SELECTIVE: Running tests for: $($script:testFilters -join ', ')" -ForegroundColor Green
+              $runAllTests = $false
+              $testFilters = $decision.testFilters
+              Write-Host "SELECTIVE: Running tests for: $($testFilters -join ', ')" -ForegroundColor Green
             }
             else {
               Write-Host "RUN ALL: $($decision.reason)" -ForegroundColor Yellow
             }
+
+            # Check if architecture tests should run
+            if ($decision.runArchitectureTests -eq $false) {
+              $runArchitectureTests = $false
+              Write-Host "Architecture tests: SKIP (no structural changes)" -ForegroundColor Yellow
+            }
           }
 
-          if ($script:skipTests) {
+          if ($skipTests) {
             Write-Host "Exiting - no tests to run" -ForegroundColor Yellow
             exit 0
           }
 
-        # Ensure the REPORTS_PATH directory exists
-        - mkdir -Force -Path $env:REPORTS_PATH
-
-        # Verify required .NET SDK is available (do not attempt installation)
-        - echo "Checking for required .NET SDK version..."
-        - |
-          $dotnetSdkList = dotnet --list-sdks;
-          Write-Output "Installed .NET SDKs:";
-          Write-Output $dotnetSdkList;
-
-          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+          # Verify .NET SDK
+          $dotnetSdkList = dotnet --list-sdks
+          Write-Output "Installed .NET SDKs:"
+          Write-Output $dotnetSdkList
+          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\."
           if (-not $dotnetSdkRequired) {
-              Write-Error "FAILED: .NET 10 SDK is required but not available.";
-              Write-Error "Please ensure .NET 10 SDK is installed on the build agent.";
-              exit 1;
+            Write-Error "FAILED: .NET 10 SDK is required but not available."
+            exit 1
           }
 
-        # Clean any previous build artifacts to ensure deterministic builds
-        - echo "Cleaning previous build artifacts..."
-        - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+          # Build once for all tests
+          Write-Host "`n========================================" -ForegroundColor Cyan
+          Write-Host "Building solution..." -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+          dotnet restore src/services/Demoulas.ProfitSharing.slnx
+          dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
-        # Restore packages explicitly
-        - echo "Restoring NuGet packages..."
-        - dotnet restore src/services/Demoulas.ProfitSharing.slnx
-
-        # Build without incremental compilation to avoid stale artifacts
-        - echo "Building solution..."
-        - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
-
-        # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
-        - echo "Running unit tests..."
-        - |
-          $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-
-          # Check if we have selective filters from the decision file
-          $testFilters = @()
-          $runAllTests = $true
-
-          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
-            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
-            if ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -gt 0) {
-              $runAllTests = $false
-              $testFilters = $decision.testFilters
-            }
-          }
+          # Run Unit Tests
+          Write-Host "`n========================================" -ForegroundColor Cyan
+          Write-Host "Running Unit Tests..." -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          $unitTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/unit-tests"
+          mkdir -Force -Path $unitTestsPath
+          $unitTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.exe"
 
           if ($runAllTests) {
-            Write-Host "========================================" -ForegroundColor Cyan
             Write-Host "Running ALL unit tests" -ForegroundColor Cyan
-            Write-Host "========================================" -ForegroundColor Cyan
-            & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+            & $unitTestExe -jUnit "$unitTestsPath/junit.xml"
           } else {
-            Write-Host "========================================" -ForegroundColor Green
             Write-Host "Running SELECTIVE tests" -ForegroundColor Green
             Write-Host "Filters: $($testFilters -join ', ')" -ForegroundColor Yellow
-            Write-Host "========================================" -ForegroundColor Green
-
-            # Build namespace filter args for xUnit v3: -namespace *Pattern* -namespace *Pattern2*
-            $namespaceArgs = @("-jUnit", "$env:REPORTS_PATH/junit.xml")
+            $namespaceArgs = @("-jUnit", "$unitTestsPath/junit.xml")
             foreach ($filter in $testFilters) {
               $namespaceArgs += "-namespace"
               $namespaceArgs += "*$filter*"
             }
+            Write-Host "Running: $unitTestExe $($namespaceArgs -join ' ')"
+            & $unitTestExe @namespaceArgs
+          }
+          $unitTestExit = $LASTEXITCODE
 
-            Write-Host "Running: $testExe $($namespaceArgs -join ' ')"
-            & $testExe @namespaceArgs
+          # Run Architecture Tests (if enabled)
+          $archTestExit = 0
+          if ($runArchitectureTests) {
+            Write-Host "`n========================================" -ForegroundColor Cyan
+            Write-Host "Running Architecture Tests..." -ForegroundColor Cyan
+            Write-Host "========================================" -ForegroundColor Cyan
+            $archTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/architecture-tests"
+            mkdir -Force -Path $archTestsPath
+            $archTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests.Architecture/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.Architecture.exe"
+            & $archTestExe -jUnit "$archTestsPath/junit.xml"
+            $archTestExit = $LASTEXITCODE
+          } else {
+            Write-Host "`nArchitecture Tests: SKIPPED" -ForegroundColor Yellow
           }
 
-      artifacts:
-        - test-reports/**
-
-    build-and-test-backend-architecture: &build-and-test-backend-architecture
-      name: Build and Test Backend API (Architecture)
-      runs-on:
-        - windows
-        - self.hosted
-      script:
-        # Set environment variables
-        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
-
-        # Check selective test decision (PR builds only)
-        - |
-          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
-            Write-Host "Checking selective test decision..." -ForegroundColor Cyan
-            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
-
-            if ($decision.decision -eq "SKIP_ALL") {
-              Write-Host "SKIP: No backend files changed" -ForegroundColor Yellow
-              exit 0
-            }
-
-            if ($decision.runArchitectureTests -eq $false) {
-              Write-Host "SKIP: Architecture tests not needed (no structural changes)" -ForegroundColor Yellow
-              exit 0
-            }
-
-            Write-Host "RUN: Architecture tests will execute" -ForegroundColor Green
+          # Report results
+          Write-Host "`n========================================" -ForegroundColor Cyan
+          Write-Host "Test Results Summary" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "Unit Tests: $(if ($unitTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($unitTestExit -eq 0) { 'Green' } else { 'Red' })
+          if ($runArchitectureTests) {
+            Write-Host "Architecture Tests: $(if ($archTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($archTestExit -eq 0) { 'Green' } else { 'Red' })
+          } else {
+            Write-Host "Architecture Tests: SKIPPED" -ForegroundColor Yellow
           }
 
-        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/architecture-tests"
-
-        # Ensure the REPORTS_PATH directory exists
-        - mkdir -Force -Path $env:REPORTS_PATH
-
-        # Verify required .NET SDK is available (do not attempt installation)
-        - echo "Checking for required .NET SDK version..."
-        - |
-          $dotnetSdkList = dotnet --list-sdks;
-          Write-Output "Installed .NET SDKs:";
-          Write-Output $dotnetSdkList;
-
-          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
-          if (-not $dotnetSdkRequired) {
-              Write-Error "FAILED: .NET 10 SDK is required but not available.";
-              Write-Error "Please ensure .NET 10 SDK is installed on the build agent.";
-              exit 1;
+          # Exit with failure if any test suite failed
+          if ($unitTestExit -ne 0 -or $archTestExit -ne 0) {
+            Write-Error "One or more test suites failed"
+            exit 1
           }
-
-        # Clean any previous build artifacts to ensure deterministic builds
-        - echo "Cleaning previous build artifacts..."
-        - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
-
-        # Restore packages explicitly
-        - echo "Restoring NuGet packages..."
-        - dotnet restore src/services/Demoulas.ProfitSharing.slnx
-
-        # Build without incremental compilation to avoid stale artifacts
-        - echo "Building solution..."
-        - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
-
-        # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
-        # VSTest is no longer supported - must run the executable directly
-        - echo "Running architecture tests..."
-        - |
-          $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-          Write-Host "Executing test runner: $testExe"
-          & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
 
       artifacts:
         - test-reports/**
@@ -1422,8 +1362,7 @@ pipelines:
           - step: *audit-backend
       # Stage 3: Build and test
       - parallel:
-          - step: *build-and-test-backend-unit
-          - step: *build-and-test-backend-architecture
+          - step: *build-and-test-backend
           - step: *test-frontend
       # Stage 2: Generate build information (Windows, ~30 seconds)
       - step: *generate-buildinfo
@@ -1563,7 +1502,7 @@ pipelines:
 
       # Stage 1: Code quality checks (fail fast) - only if frontend changed
       - step:
-          name: Frontend TSC + Lint (Develop)
+          name: Front TSC + Lint (Develop)
           image: node:22-alpine
           max-time: 10
           script:
@@ -1598,7 +1537,7 @@ pipelines:
       # Stage 2: Run audits - conditional based on changes
       - parallel:
           - step:
-              name: Check frontend for vulnerabilities (Develop)
+              name: Front check vulnerabilities (Develop)
               image: node:22-alpine
               max-time: 10
               script:
@@ -1627,7 +1566,7 @@ pipelines:
                   npm audit --audit-level=high --production
 
           - step:
-              name: Check Backend API for vulnerabilities (Develop)
+              name: Back check vulnerabilities (Develop)
               runs-on:
                 - windows
                 - self.hosted
@@ -1665,7 +1604,7 @@ pipelines:
       # Stage 3: Build and test - conditional based on changes
       - parallel:
           - step:
-              name: Build and Test Backend API Unit and Arch (Develop)
+              name: Back Unit + Arch Test (Develop)
               runs-on:
                 - windows
                 - self.hosted
@@ -1739,7 +1678,7 @@ pipelines:
                   }
 
           - step:
-              name: Build and Test Frontend UI (Develop)
+              name: Front Unit Test (Develop)
               image: node:22-alpine
               max-time: 10
               artifacts:
@@ -1823,18 +1762,7 @@ pipelines:
       # Stage 3: Build and test
       - parallel:
           - step:
-              <<: *build-and-test-backend-unit
-              condition:
-                changesets:
-                  includePaths:
-                    - "src/services/**/*.cs"
-                    - "src/services/**/*.csproj"
-                    - "src/services/**/*.sln"
-                    - "src/services/**/*.slnx"
-                    - "src/services/**/*.json"
-                    - "src/services/**/*.config"
-          - step:
-              <<: *build-and-test-backend-architecture
+              <<: *build-and-test-backend
               condition:
                 changesets:
                   includePaths:
