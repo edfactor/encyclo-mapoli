@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { RootState } from "reduxstore/store";
 
 /**
@@ -7,9 +9,17 @@ import { RootState } from "reduxstore/store";
  * Fiscal Close
  */
 const useFiscalCloseProfitYear = (): number => {
-  const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const frozenStateResponse = useSelector((state: RootState) => state.frozen.frozenStateResponseData);
+  const [fetchActiveFrozenState] = useLazyGetFrozenStateResponseQuery();
 
-  return selectedProfitYearForFiscalClose;
+  useEffect(() => {
+    if (hasToken && !frozenStateResponse) {
+      fetchActiveFrozenState();
+    }
+  }, [fetchActiveFrozenState, frozenStateResponse, hasToken]);
+
+  return frozenStateResponse?.profitYear ?? new Date().getFullYear();
 };
 
 export default useFiscalCloseProfitYear;

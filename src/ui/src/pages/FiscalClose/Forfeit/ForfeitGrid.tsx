@@ -36,10 +36,11 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
   }, []);
 
   const columnDefs = useMemo(
-    () => GetProfitShareForfeitColumns({
-      navFunction: handleNavigationForButton,
-      onValidationClick: handleValidationClick
-    }),
+    () =>
+      GetProfitShareForfeitColumns({
+        navFunction: handleNavigationForButton,
+        onValidationClick: handleValidationClick
+      }),
     [handleNavigationForButton, handleValidationClick]
   );
 
@@ -103,16 +104,18 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell className="align-middle text-center">Profit Sharing Amount</TableCell>
-                  <TableCell className="align-middle text-center">Distribution Amount</TableCell>
-                  <TableCell className="align-middle text-center">Allocation To</TableCell>
-                  <TableCell className="align-middle text-center">Allocation From</TableCell>
+                  <TableCell className="text-center align-middle">Profit Sharing Amount</TableCell>
+                  <TableCell className="text-center align-middle">Distribution Amount</TableCell>
+                  <TableCell className="text-center align-middle">Allocation To</TableCell>
+                  <TableCell className="text-center align-middle">Allocation From</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 <TableRow>
-                  <TableCell className="align-middle text-center">{numberToCurrency(searchResults.totalProfitSharingBalance || 0)}</TableCell>
-                  <TableCell className="align-middle text-center">
+                  <TableCell className="text-center align-middle">
+                    {numberToCurrency(searchResults.totalProfitSharingBalance || 0)}
+                  </TableCell>
+                  <TableCell className="text-center align-middle">
                     <ValidationIcon
                       validationGroup={searchResults.crossReferenceValidation?.validationGroups[0]}
                       fieldName="QPAY129_DistributionTotals"
@@ -125,8 +128,12 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
                     />
                     {numberToCurrency(searchResults.distributionTotals || 0)}
                   </TableCell>
-                  <TableCell className="align-middle text-center">{numberToCurrency(searchResults.allocationToTotals || 0)}</TableCell>
-                  <TableCell className="align-middle text-center">{numberToCurrency(searchResults.allocationsFromTotals || 0)}</TableCell>
+                  <TableCell className="text-center align-middle">
+                    {numberToCurrency(searchResults.allocationToTotals || 0)}
+                  </TableCell>
+                  <TableCell className="text-center align-middle">
+                    {numberToCurrency(searchResults.allocationsFromTotals || 0)}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>

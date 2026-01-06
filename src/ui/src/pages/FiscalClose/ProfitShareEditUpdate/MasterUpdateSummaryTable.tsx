@@ -1,4 +1,4 @@
- import { CrossReferenceValidation } from "@/types/validation";
+import { CrossReferenceValidation } from "@/types/validation";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { ProfitShareUpdateTotals } from "../../../reduxstore/types";
@@ -52,8 +52,8 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
   };
 
   const ValidationPopupFields: ValidationField[] = [
-    { 
-      fieldKey: "TotalProfitSharingBalance", 
+    {
+      fieldKey: "TotalProfitSharingBalance",
       title: "Beginning Balance",
       headers: ["Report", "Amount"],
       rows: [
@@ -151,7 +151,7 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
           getRowClass: () => "font-semibold",
           label: "Net Transfer (Should be $0.00)",
           valueGetter: () => numberToCurrency(getFieldValidation("NetAllocTransfer")?.currentValue || 0),
-          getValueClass: () => getFieldValidation("NetAllocTransfer")?.isValid ? "text-green-600" : "text-orange-600",
+          getValueClass: () => (getFieldValidation("NetAllocTransfer")?.isValid ? "text-green-600" : "text-orange-600")
         }
       ],
       messageGetter: () => getFieldValidation("NetAllocTransfer")?.message

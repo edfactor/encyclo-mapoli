@@ -162,12 +162,8 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
-  selectedProfitYearForDecemberActivities: localStorage.getItem("selectedProfitYearForDecemberActivities")
-    ? Number(localStorage.getItem("selectedProfitYearForDecemberActivities"))
-    : new Date().getFullYear(),
-  selectedProfitYearForFiscalClose: localStorage.getItem("selectedProfitYearForFiscalClose")
-    ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
-    : new Date().getFullYear(),
+  selectedProfitYearForDecemberActivities: new Date().getFullYear(),
+  selectedProfitYearForFiscalClose: new Date().getFullYear(),
   invalidProfitShareEditYear: false,
   totalForfeituresGreaterThanZero: false,
   profitShareEditUpdateShowSearch: true,
@@ -350,11 +346,9 @@ export const yearsEndSlice = createSlice({
 
     setSelectedProfitYearForDecemberActivities: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForDecemberActivities = action.payload;
-      localStorage.setItem("selectedProfitYearForDecemberActivities", action.payload.toString());
     },
     setSelectedProfitYearForFiscalClose: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForFiscalClose = action.payload;
-      localStorage.setItem("selectedProfitYearForFiscalClose", action.payload.toString());
     },
     checkDecemberParamsAndGridsProfitYears: (state, action: PayloadAction<number>) => {
       // So now we need to update cached december actives data if it was based

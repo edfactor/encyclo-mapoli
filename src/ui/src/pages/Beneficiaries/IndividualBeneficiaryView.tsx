@@ -12,10 +12,10 @@ interface IndividualBeneficiaryViewProps {
   onBeneficiarySelect?: (beneficiary: BeneficiaryDetail) => void;
 }
 
-const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({ 
-  selectedMember, 
+const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
+  selectedMember,
   memberType,
-  onBeneficiarySelect 
+  onBeneficiarySelect
 }) => {
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
@@ -53,7 +53,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
         sortBy: "psnSuffix",
         take: 25
       };
-      
+
       triggerBeneficiaryDetail(request)
         .unwrap()
         .then((res) => {

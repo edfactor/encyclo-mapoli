@@ -352,11 +352,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                       <FormControlLabel
                         key={option.value}
                         value={option.value}
-                        control={
-                          <Radio
-                            size="small"
-                          />
-                        }
+                        control={<Radio size="small" />}
                         label={option.label}
                       />
                     ))}
