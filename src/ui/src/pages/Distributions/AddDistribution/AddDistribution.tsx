@@ -307,7 +307,7 @@ const AddDistributionContent = () => {
                   ref={formRef}
                   stateTaxRate={stateTaxRate}
                   sequenceNumber={sequenceNumber}
-                  badgeNumber={parseInt(memberId || "0", 10)}
+                  badgeNumber={memberData.badgeNumber}
                   onSubmit={handleFormSubmit}
                   onReset={handleFormReset}
                   isSubmitting={isSubmitting}
@@ -323,7 +323,7 @@ const AddDistributionContent = () => {
 
               {/* Pending Disbursements List Section */}
               <PendingDisbursementsList
-                badgeNumber={parseInt(memberId || "0", 10)}
+                badgeNumber={memberData.badgeNumber}
                 memberType={parseInt(memberType || "0", 10)}
               />
             </>
