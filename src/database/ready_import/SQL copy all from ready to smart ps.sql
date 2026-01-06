@@ -1,8 +1,27 @@
 DECLARE
-    this_year NUMBER := EXTRACT(YEAR FROM SYSDATE); -- <-------- ORACLE HCM loads data in this year.
-    last_year NUMBER := EXTRACT(YEAR FROM SYSDATE) - 1; -- <-------- active year end year for the scramble.   Scramble is frozen in 2024. 
+    /*
+      IMPORTANT:
+      Do NOT tie import years to SYSDATE.
+
+      This script is routinely used with "scramble" source data that can be frozen in a prior year.
+      If we label PAY_PROFIT rows with SYSDATE-derived years, then downstream vesting/year
+      calculations that depend on PAY_PROFIT hours/income will be shifted into the wrong profit year.
+
+      Instead, derive the active profit year from the source PROFIT_DETAIL max year.
+      (Example: if source max PROFIT_YEAR is 2024, then PAY_PROFIT "this_year" should be 2024 and
+      "last_year" should be 2023.)
+    */
+    this_year NUMBER;
+    last_year NUMBER;
+    wall_clock_year NUMBER := EXTRACT(YEAR FROM SYSDATE);
     demographic_cutoff TIMESTAMP; -- <-- Timestamp to use if we import DEMO_PROFSHARE
 BEGIN
+
+    SELECT MAX(TRUNC(PROFIT_YEAR))
+    INTO this_year
+    FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DETAIL;
+
+    last_year := this_year - 1;
 
  -- First disable all foreign key constraints
     FOR fk IN (SELECT constraint_name, table_name 
@@ -1126,6 +1145,7 @@ MERGE INTO profit_detail pd
                     profit_detail
                 WHERE
                     profit_year_iteration = 5
+                                    AND profit_year = 1989
                   AND profit_code_id = 0
                   AND contribution != 0
                 AND ( comment_type_id = 5 OR comment_type_id IS NULL )
@@ -1137,7 +1157,7 @@ MERGE INTO profit_detail pd
     WHEN MATCHED THEN UPDATE
         SET pd.years_of_service_credit = 1;
 
--- Handle 1998.5 V-ONLY rows
+-- Handle 1989.5 V-ONLY rows
 MERGE INTO profit_detail tgt
     USING (
         SELECT MIN(id) AS id
@@ -1452,6 +1472,59 @@ INSERT ALL
         INSERT INTO STATE_TAX(ABBREVIATION, RATE, USER_NAME, CREATED_AT_UTC) VALUES('WI',0,USER,(SYSTIMESTAMP));
         INSERT INTO STATE_TAX(ABBREVIATION, RATE, USER_NAME, CREATED_AT_UTC) VALUES('WV',0,USER,(SYSTIMESTAMP));
         INSERT INTO STATE_TAX(ABBREVIATION, RATE, USER_NAME, CREATED_AT_UTC) VALUES('WY',0,USER,(SYSTIMESTAMP));
+
+                /*
+                     PAY_PROFIT "current year" rows are expected by the application.
+
+                     This import intentionally derives this_year/last_year from source PROFIT_DETAIL (scramble may be frozen).
+                     When the wall-clock year advances beyond the newest imported profit year, ensure we still have a
+                     PAY_PROFIT row for the wall-clock year for each employee we have in the most recent year.
+
+                     We copy the employee set and plan/status fields from the most recent PAY_PROFIT (this_year), but
+                     zero out the quantitative fields (hours/income/weeks/points) so the row is effectively "empty".
+                */
+                IF wall_clock_year > this_year THEN
+                        INSERT INTO PAY_PROFIT
+                        (DEMOGRAPHIC_ID,
+                         PROFIT_YEAR,
+                         CURRENT_HOURS_YEAR,
+                         CURRENT_INCOME_YEAR,
+                         WEEKS_WORKED_YEAR,
+                         PS_CERTIFICATE_ISSUED_DATE,
+                         ENROLLMENT_ID,
+                         BENEFICIARY_TYPE_ID,
+                         EMPLOYEE_TYPE_ID,
+                         ZERO_CONTRIBUTION_REASON_ID,
+                         HOURS_EXECUTIVE,
+                         INCOME_EXECUTIVE,
+                         POINTS_EARNED,
+                         ETVA)
+                        SELECT
+                                pp.DEMOGRAPHIC_ID,
+                                wall_clock_year AS PROFIT_YEAR,
+                                0 AS CURRENT_HOURS_YEAR,
+                                0 AS CURRENT_INCOME_YEAR,
+                                0 AS WEEKS_WORKED_YEAR,
+                                NULL AS PS_CERTIFICATE_ISSUED_DATE,
+                                pp.ENROLLMENT_ID,
+                                pp.BENEFICIARY_TYPE_ID,
+                                pp.EMPLOYEE_TYPE_ID,
+                                pp.ZERO_CONTRIBUTION_REASON_ID,
+                                0 AS HOURS_EXECUTIVE,
+                                0 AS INCOME_EXECUTIVE,
+                                0 AS POINTS_EARNED,
+                                pp.ETVA
+                        FROM PAY_PROFIT pp
+                        WHERE pp.PROFIT_YEAR = this_year
+                            AND NOT EXISTS (
+                                SELECT 1
+                                FROM PAY_PROFIT existing
+                                WHERE existing.DEMOGRAPHIC_ID = pp.DEMOGRAPHIC_ID
+                                    AND existing.PROFIT_YEAR = wall_clock_year
+                            );
+
+                        DBMS_OUTPUT.PUT_LINE('Seeded PAY_PROFIT for wall-clock year ' || wall_clock_year || ' from year ' || this_year || ': ' || SQL%ROWCOUNT || ' rows.');
+                END IF;
 
         -- Seed an active freeze point (READY import)
         INSERT INTO FROZEN_STATE (PROFIT_YEAR, FROZEN_BY, AS_OF_DATETIME, IS_ACTIVE)
