@@ -57,24 +57,24 @@
 # ============================================================================
 #
 # DEFINITIONS (line ~60)
-# ├── servers:                    Environment server hostnames
-# └── steps:                      Reusable step definitions
-#     ├── build-and-test-backend  Combined backend build + tests (PR/QA)
+# ├── servers:                        Environment server hostnames
+# └── steps:                          Reusable step definitions
+#     ├── build-and-test-backend      Combined backend build + tests (PR/QA)
 #     ├── selective-develop-analysis  Analyze changes for develop branch
-#     ├── update-develop-tag      Update rolling success tag
+#     ├── update-develop-tag          Update rolling success tag
 #     ├── selective-backend-analysis  Determine which backend tests to run
-#     ├── audit-frontend          NPM vulnerability scan
-#     ├── audit-backend           NuGet vulnerability scan
-#     ├── secret-scan             Detect leaked secrets
-#     ├── frontend-lint           ESLint + TypeScript check
-#     ├── test-frontend           Frontend unit tests (selective for PRs)
-#     ├── generate-buildinfo      Create build metadata
-#     ├── create-api-artifacts    Package API for deployment
-#     ├── create-service-artifacts Package background services
-#     ├── create-frontend-artifact-* Frontend builds per environment
-#     ├── *-drop-recreate-db      Database reset steps
-#     ├── *-import-*              Data import steps
-#     └── run-playwright-tests    E2E test execution
+#     ├── audit-frontend              NPM vulnerability scan
+#     ├── audit-backend               NuGet vulnerability scan
+#     ├── secret-scan                 Detect leaked secrets
+#     ├── frontend-lint               ESLint + TypeScript check
+#     ├── test-frontend               Frontend unit tests (selective for PRs)
+#     ├── generate-buildinfo          Create build metadata
+#     ├── create-api-artifacts        Package API for deployment
+#     ├── create-service-artifacts    Package background services
+#     ├── create-frontend-artifact-*  Frontend builds per environment
+#     ├── *-drop-recreate-db          Database reset steps
+#     ├── *-import-*                  Data import steps
+#     └── run-playwright-tests        E2E test execution
 #
 # PIPELINES (line ~1350)
 # ├── branches:
