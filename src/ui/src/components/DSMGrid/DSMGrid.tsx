@@ -98,6 +98,11 @@ export const DSMGrid: FC<DSMGridOptions> = (props) => {
    * Memoized column preferences from localStorage
    */
   const preferenceArray = useMemo(() => {
+    // Defensive: if a caller accidentally passes an undefined preference key at runtime,
+    // localStorage would coerce it to the string "undefined".
+    if (typeof preferenceKey !== "string" || !preferenceKey || preferenceKey === "undefined" || preferenceKey === "null") {
+      return [];
+    }
     try {
       const stored = localStorage.getItem(preferenceKey);
       if (stored) {

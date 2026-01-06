@@ -19,7 +19,7 @@ import { GetDistributionsAndForfeituresColumns } from "./DistributionsAndForfeit
 interface DistributionsAndForfeituresQueryParams {
   startDate?: string;
   endDate?: string;
-  states?: string; // Stringified for comparison 
+  states?: string; // Stringified for comparison
   taxCodes?: string; // Stringified for comparison
   profitYear?: number;
 }

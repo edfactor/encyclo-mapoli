@@ -3,6 +3,7 @@ import { renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { describe, expect, it } from "vitest";
 import useFiscalCloseProfitYear from "./useFiscalCloseProfitYear";
+import type { FrozenStateResponse } from "reduxstore/types";
 
 import { vi } from "vitest";
 
@@ -16,7 +17,10 @@ describe("useFiscalCloseProfitYear", () => {
       reducer: {
         security: () => ({ token: "" }),
         frozen: () => ({
-          frozenStateResponseData: profitYear === null ? null : ({ profitYear } as any),
+          frozenStateResponseData:
+            profitYear === null
+              ? null
+              : ({ profitYear } as Pick<FrozenStateResponse, "profitYear"> as FrozenStateResponse),
           frozenStateCollectionData: null,
           error: null
         })

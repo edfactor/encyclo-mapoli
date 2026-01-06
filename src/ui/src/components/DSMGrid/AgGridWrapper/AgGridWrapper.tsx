@@ -150,6 +150,9 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
   const ref = useRef<AgGridReact>(null);
   const [gridReady, setGridReady] = useState(false);
 
+  const isValidPreferenceKey =
+    typeof preferenceKey === "string" && Boolean(preferenceKey) && preferenceKey !== "undefined" && preferenceKey !== "null";
+
   // Clear saved state for grids with column groups on mount to prevent corruption
   useEffect(() => {
     const hasColumnGroups = providedOptions.columnDefs?.some(
@@ -157,7 +160,9 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
     );
 
     if (hasColumnGroups) {
-      localStorage.removeItem(preferenceKey);
+      if (isValidPreferenceKey) {
+        localStorage.removeItem(preferenceKey);
+      }
       setColumnStates([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -191,6 +196,10 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
       return;
     }
 
+    if (!isValidPreferenceKey) {
+      return;
+    }
+
     // Check if column definitions contain column groups
     const hasColumnGroups = providedOptions.columnDefs?.some(
       (col: ColDef | ColGroupDef) => "children" in col && Array.isArray(col.children)
@@ -220,7 +229,9 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
    */
   useEffect(() => {
     if (resetPreferences && gridReady && ref?.current?.api) {
-      localStorage.removeItem(preferenceKey);
+      if (isValidPreferenceKey) {
+        localStorage.removeItem(preferenceKey);
+      }
       ref.current.api.resetColumnState();
 
       // Check if grid is not destroyed before sizing columns

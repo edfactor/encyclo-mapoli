@@ -24,7 +24,9 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
   const isFullscreen = useSelector((state: RootState) => state.general.isFullscreen);
 
   return (
-    <div onClick={onClick} className="flex flex-col">
+    <div
+      onClick={onClick}
+      className="flex flex-col">
       {/* THIS IS THE LIGHT BLUE BANNER AT VERY TOP */}
       {!isFullscreen && (
         <div

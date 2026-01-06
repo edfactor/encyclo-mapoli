@@ -34,11 +34,18 @@ const ValidationPopup: React.FC<ValidationPopupProps> = ({ field, openField, get
   const popupWidth = field.popupClassName ?? "w-[350px]";
 
   return (
-    <div className={`fixed left-1/2 top-1/2 z-[1000] max-h-[300px] ${popupWidth} -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg`}>
+    <div
+      className={`fixed left-1/2 top-1/2 z-[1000] max-h-[300px] ${popupWidth} -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg`}>
       <div className="p-2 px-4 pb-4">
         <div className="flex items-center justify-between">
-          <Typography variant="subtitle2" sx={{ p: 1 }}>{field.title}</Typography>
-          <div className="inline-block cursor-pointer" onClick={onClose}>
+          <Typography
+            variant="subtitle2"
+            sx={{ p: 1 }}>
+            {field.title}
+          </Typography>
+          <div
+            className="inline-block cursor-pointer"
+            onClick={onClose}>
             <Close fontSize="small" />
           </div>
         </div>
@@ -47,7 +54,11 @@ const ValidationPopup: React.FC<ValidationPopupProps> = ({ field, openField, get
           <thead>
             <tr>
               {field.headers.map((header) => (
-                <th key={header} className="border-b border-gray-300 px-2 py-1 text-left font-semibold">{header}</th>
+                <th
+                  key={header}
+                  className="border-b border-gray-300 px-2 py-1 text-left font-semibold">
+                  {header}
+                </th>
               ))}
             </tr>
           </thead>
@@ -58,13 +69,13 @@ const ValidationPopup: React.FC<ValidationPopupProps> = ({ field, openField, get
               const valueClass = row.getValueClass ? row.getValueClass() : "";
 
               return (
-                <tr key={index} className={rowClass}>
-                  <td className={`px-2 py-1 text-left${index < field.rows.length ? " border-b border-gray-100" : ""}`}>
+                <tr
+                  key={index}
+                  className={rowClass}>
+                  <td className={`px-2 py-1 text-left${index < field.rows.length ? "border-b border-gray-100" : ""}`}>
                     {row.label}
                   </td>
-                  <td className={`px-2 py-1 text-right ${valueClass}`}>
-                    {row.valueGetter()}
-                  </td>
+                  <td className={`px-2 py-1 text-right ${valueClass}`}>{row.valueGetter()}</td>
                 </tr>
               );
             })}

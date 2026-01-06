@@ -41,12 +41,7 @@ interface ValidationIconProps {
  *   fieldName="DistributionTotals"
  * />
  */
-export const ValidationIcon: React.FC<ValidationIconProps> = ({
-  validationGroup,
-  fieldName,
-  className,
-  onClick
-}) => {
+export const ValidationIcon: React.FC<ValidationIconProps> = ({ validationGroup, fieldName, className, onClick }) => {
   // Return nothing if no validation group provided
   if (!validationGroup) {
     return null;

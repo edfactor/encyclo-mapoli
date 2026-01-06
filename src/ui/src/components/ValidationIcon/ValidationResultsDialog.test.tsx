@@ -6,15 +6,7 @@ vi.mock("@mui/material", () => ({
   Button: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
     <button onClick={onClick}>{children}</button>
   ),
-  Dialog: ({
-    open,
-    onClose,
-    children
-  }: {
-    open: boolean;
-    onClose: () => void;
-    children: React.ReactNode;
-  }) =>
+  Dialog: ({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) =>
     open ? (
       <div
         role="dialog"
@@ -25,15 +17,13 @@ vi.mock("@mui/material", () => ({
   DialogTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DialogActions: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Typography: ({
-    children,
-    variant,
-    color
-  }: {
-    children: React.ReactNode;
-    variant?: string;
-    color?: string;
-  }) => <span data-variant={variant} data-color={color}>{children}</span>
+  Typography: ({ children, variant, color }: { children: React.ReactNode; variant?: string; color?: string }) => (
+    <span
+      data-variant={variant}
+      data-color={color}>
+      {children}
+    </span>
+  )
 }));
 
 // Mock smart-ui-library to avoid any potential issues
@@ -128,9 +118,7 @@ describe("ValidationResultsDialog", () => {
         />
       );
 
-      expect(
-        screen.getByText('No validation found for field "NonExistentField".')
-      ).toBeInTheDocument();
+      expect(screen.getByText('No validation found for field "NonExistentField".')).toBeInTheDocument();
     });
 
     it("should display fieldName as title when fieldDisplayName is not provided", () => {

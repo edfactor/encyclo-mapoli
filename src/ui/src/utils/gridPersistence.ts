@@ -18,12 +18,18 @@ export interface PaginationState {
 
 const PAGINATION_SUFFIX = "_pagination";
 
+const isValidGridPersistenceKey = (key: unknown): key is string =>
+  typeof key === "string" && Boolean(key) && key !== "undefined" && key !== "null";
+
 /**
  * Load pagination state from localStorage
  * @param key - Unique key for the grid (from GRID_KEYS)
  * @returns The pagination state or null if not found
  */
 export const loadPaginationState = (key: string): PaginationState | null => {
+  if (!isValidGridPersistenceKey(key)) {
+    return null;
+  }
   try {
     const stored = localStorage.getItem(`${key}${PAGINATION_SUFFIX}`);
     if (stored) {
@@ -42,6 +48,9 @@ export const loadPaginationState = (key: string): PaginationState | null => {
  * @param pagination - The pagination state to persist
  */
 export const savePaginationState = (key: string, pagination: PaginationState): void => {
+  if (!isValidGridPersistenceKey(key)) {
+    return;
+  }
   try {
     localStorage.setItem(`${key}${PAGINATION_SUFFIX}`, JSON.stringify(pagination));
   } catch (error) {
@@ -54,6 +63,9 @@ export const savePaginationState = (key: string, pagination: PaginationState): v
  * @param key - Unique key for the grid
  */
 export const clearPaginationState = (key: string): void => {
+  if (!isValidGridPersistenceKey(key)) {
+    return;
+  }
   try {
     localStorage.removeItem(`${key}${PAGINATION_SUFFIX}`);
   } catch (error) {
