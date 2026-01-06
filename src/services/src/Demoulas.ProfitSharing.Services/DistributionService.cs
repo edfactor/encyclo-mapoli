@@ -52,9 +52,7 @@ public sealed class DistributionService : IDistributionService
                             PaymentSequence = dist.PaymentSequence,
                             Ssn = dist.Ssn,
                             BadgeNumber = dem != null ? (long?)dem.BadgeNumber : null,
-                            DemFullName = dem != null ? dem.ContactInfo.FullName : null,
-                            BeneFullName = ben != null ? ben.Contact!.ContactInfo.FullName : null,
-                            // Computed FullName for sorting - matches DTO property name
+                            // FullName picks employee name if available, otherwise beneficiary name
                             FullName = dem != null && dem.ContactInfo.FullName != null
                                 ? dem.ContactInfo.FullName
                                 : (ben != null && ben.Contact!.ContactInfo.FullName != null
@@ -834,8 +832,6 @@ internal sealed class DistributionSearchQueryItem
     public byte PaymentSequence { get; init; }
     public int Ssn { get; init; }
     public long? BadgeNumber { get; init; }
-    public string? DemFullName { get; init; }
-    public string? BeneFullName { get; init; }
     public string FullName { get; init; } = string.Empty;
     public char FrequencyId { get; init; }
     public string FrequencyName { get; init; } = string.Empty;
