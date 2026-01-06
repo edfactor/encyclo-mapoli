@@ -46,30 +46,30 @@ public sealed class DistributionService : IDistributionService
                         from dem in demGroup.DefaultIfEmpty()
                         join benLj in ctx.Beneficiaries on dist.Ssn equals benLj.Contact!.Ssn into benGroup
                         from ben in benGroup.DefaultIfEmpty()
-                        select new
+                        select new DistributionSearchQueryItem
                         {
-                            dist.Id,
-                            dist.PaymentSequence,
-                            dist.Ssn,
+                            Id = dist.Id,
+                            PaymentSequence = dist.PaymentSequence,
+                            Ssn = dist.Ssn,
                             BadgeNumber = dem != null ? (long?)dem.BadgeNumber : null,
-                            DemLastName = dem != null ? dem.ContactInfo.LastName : null,
-                            DemFirstName = dem != null ? dem.ContactInfo.FirstName : null,
-                            DemMiddleName = dem != null ? dem.ContactInfo.MiddleName : null,
                             DemFullName = dem != null ? dem.ContactInfo.FullName : null,
-                            BeneLastName = ben != null ? ben.Contact!.ContactInfo.LastName : null,
-                            BeneFirstName = ben != null ? ben.Contact!.ContactInfo.FirstName : null,
-                            BeneMiddleName = ben != null ? ben.Contact!.ContactInfo.MiddleName : null,
                             BeneFullName = ben != null ? ben.Contact!.ContactInfo.FullName : null,
-                            dist.FrequencyId,
-                            Frequency = freq,
-                            dist.StatusId,
-                            Status = status,
-                            dist.TaxCodeId,
-                            TaxCode = tax,
-                            dist.GrossAmount,
-                            dist.FederalTaxAmount,
-                            dist.StateTaxAmount,
-                            dist.CheckAmount,
+                            // Computed FullName for sorting - matches DTO property name
+                            FullName = dem != null && dem.ContactInfo.FullName != null
+                                ? dem.ContactInfo.FullName
+                                : (ben != null && ben.Contact!.ContactInfo.FullName != null
+                                    ? ben.Contact!.ContactInfo.FullName
+                                    : string.Empty),
+                            FrequencyId = dist.FrequencyId,
+                            FrequencyName = freq.Name,
+                            StatusId = dist.StatusId,
+                            StatusName = status.Name,
+                            TaxCodeId = dist.TaxCodeId,
+                            TaxCodeName = tax.Name,
+                            GrossAmount = dist.GrossAmount,
+                            FederalTax = dist.FederalTaxAmount,
+                            StateTax = dist.StateTaxAmount,
+                            CheckAmount = dist.CheckAmount,
                             IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly,
                             DemographicId = dem != null ? (int?)dem.Id : null,
                             BeneficiaryId = ben != null ? (int?)ben.Id : null
@@ -181,7 +181,19 @@ public sealed class DistributionService : IDistributionService
             var searchContext = $"DistributionSearch-Badge{request.BadgeNumber}-SSN{(string.IsNullOrWhiteSpace(request.Ssn?.MaskSsn()) ? "None" : "Provided")}-{DateTime.UtcNow:yyyyMMddHHmm}";
             query = query.TagWith(searchContext);
 
-            return await query.ToPaginationResultsAsync(request, cancellationToken);
+            // Normalize SortBy to PascalCase for OrderByProperty compatibility
+            // Frontend sends camelCase (e.g., "fullName") but OrderByProperty uses case-sensitive reflection
+            var paginationRequest = new SortedPaginationRequestDto
+            {
+                Skip = request.Skip,
+                Take = request.Take,
+                SortBy = !string.IsNullOrWhiteSpace(request.SortBy)
+                    ? request.SortBy.FirstCharToUpper()
+                    : null,
+                IsSortDescending = request.IsSortDescending
+            };
+
+            return await query.ToPaginationResultsAsync(paginationRequest, cancellationToken);
         }, cancellationToken);
 
         var result = new PaginatedResponseDto<DistributionSearchResponse>(request)
@@ -193,20 +205,16 @@ public sealed class DistributionService : IDistributionService
                 PaymentSequence = d.PaymentSequence,
                 Ssn = d.Ssn.MaskSsn(),
                 BadgeNumber = d.BadgeNumber,
-                FullName = !string.IsNullOrWhiteSpace(d.DemFullName)
-                    ? d.DemFullName
-                    : (!string.IsNullOrWhiteSpace(d.BeneFullName)
-                        ? d.BeneFullName
-                        : string.Empty),
+                FullName = d.FullName,
                 FrequencyId = d.FrequencyId,
-                FrequencyName = d.Frequency!.Name,
+                FrequencyName = d.FrequencyName,
                 StatusId = d.StatusId,
-                StatusName = d.Status!.Name,
+                StatusName = d.StatusName,
                 TaxCodeId = d.TaxCodeId,
-                TaxCodeName = d.TaxCode!.Name,
+                TaxCodeName = d.TaxCodeName,
                 GrossAmount = d.GrossAmount,
-                FederalTax = d.FederalTaxAmount,
-                StateTax = d.StateTaxAmount,
+                FederalTax = d.FederalTax,
+                StateTax = d.StateTax,
                 CheckAmount = d.CheckAmount,
                 IsExecutive = d.IsExecutive,
                 IsEmployee = d.BadgeNumber.HasValue,
@@ -814,4 +822,32 @@ public sealed class DistributionService : IDistributionService
 
         return distributionQuery;
     }
+}
+
+/// <summary>
+/// Internal DTO for distribution search query results.
+/// Property names match the response DTO (PascalCase) for consistent sorting via ToPaginationResultsAsync.
+/// </summary>
+internal sealed class DistributionSearchQueryItem
+{
+    public long Id { get; init; }
+    public byte PaymentSequence { get; init; }
+    public int Ssn { get; init; }
+    public long? BadgeNumber { get; init; }
+    public string? DemFullName { get; init; }
+    public string? BeneFullName { get; init; }
+    public string FullName { get; init; } = string.Empty;
+    public char FrequencyId { get; init; }
+    public string FrequencyName { get; init; } = string.Empty;
+    public char StatusId { get; init; }
+    public string StatusName { get; init; } = string.Empty;
+    public char TaxCodeId { get; init; }
+    public string TaxCodeName { get; init; } = string.Empty;
+    public decimal GrossAmount { get; init; }
+    public decimal FederalTax { get; init; }
+    public decimal StateTax { get; init; }
+    public decimal CheckAmount { get; init; }
+    public bool IsExecutive { get; init; }
+    public int? DemographicId { get; init; }
+    public int? BeneficiaryId { get; init; }
 }
