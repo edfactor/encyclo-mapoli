@@ -757,48 +757,46 @@ definitions:
               changed_files=$(git diff --name-only --diff-filter=ACMR "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' || true)
               cd src/ui
 
+              # ================================================================
+              # DYNAMIC DIRECTORY DISCOVERY FOR SELECTIVE TESTING
+              # ================================================================
+              # Instead of hardcoding directories, we dynamically discover them.
+              # This ensures new directories are automatically included in testing.
+              #
+              # Excluded top-level directories (no testable code):
+              #   assets, middleware, Okta, styles, types, test, pages
+              #   (pages is handled separately to match subdirectories)
+              #
+              # Excluded page directories:
+              #   Dev (developer utilities)
+              # ================================================================
+
+              # Define excluded directories
+              excluded_top_level="assets|middleware|Okta|styles|types|test|pages"
+              excluded_pages="Dev"
+
+              # Discover top-level directories (e.g., utils, hooks, components, redux, reduxstore)
+              top_level_dirs=$(ls -d src/ui/src/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_top_level)$" || true)
+
+              # Discover page directories (e.g., Beneficiaries, Reports, FiscalClose)
+              page_dirs=$(ls -d src/ui/src/pages/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_pages)$" || true)
+
               # Build test patterns based on changed areas
               test_patterns=""
 
-              if echo "$changed_files" | grep -q '^src/ui/src/utils/'; then
-                  test_patterns="$test_patterns src/utils"
-              fi
+              # Check top-level directories for changes
+              for dir in $top_level_dirs; do
+                  if echo "$changed_files" | grep -q "^src/ui/src/$dir/"; then
+                      test_patterns="$test_patterns src/$dir"
+                  fi
+              done
 
-              if echo "$changed_files" | grep -q '^src/ui/src/hooks/'; then
-                  test_patterns="$test_patterns src/hooks"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/components/'; then
-                  test_patterns="$test_patterns src/components"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/reduxstore/'; then
-                  test_patterns="$test_patterns src/reduxstore"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/DecemberActivities/'; then
-                  test_patterns="$test_patterns src/pages/DecemberActivities"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/FiscalClose/'; then
-                  test_patterns="$test_patterns src/pages/FiscalClose"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/Beneficiaries/'; then
-                  test_patterns="$test_patterns src/pages/Beneficiaries"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/InquiriesAndAdjustments/'; then
-                  test_patterns="$test_patterns src/pages/InquiriesAndAdjustments"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/Reports/'; then
-                  test_patterns="$test_patterns src/pages/Reports"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/Distributions/'; then
-                  test_patterns="$test_patterns src/pages/Distributions"
-              fi
+              # Check page directories for changes
+              for page_dir in $page_dirs; do
+                  if echo "$changed_files" | grep -q "^src/ui/src/pages/$page_dir/"; then
+                      test_patterns="$test_patterns src/pages/$page_dir"
+                  fi
+              done
 
               # Trim leading whitespace
               test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
@@ -1931,48 +1929,46 @@ pipelines:
                     exit 0
                   fi
 
+                  # ================================================================
+                  # DYNAMIC DIRECTORY DISCOVERY FOR SELECTIVE TESTING
+                  # ================================================================
+                  # Instead of hardcoding directories, we dynamically discover them.
+                  # This ensures new directories are automatically included in testing.
+                  #
+                  # Excluded top-level directories (no testable code):
+                  #   assets, middleware, Okta, styles, types, test, pages
+                  #   (pages is handled separately to match subdirectories)
+                  #
+                  # Excluded page directories:
+                  #   Dev (developer utilities)
+                  # ================================================================
+
+                  # Define excluded directories
+                  excluded_top_level="assets|middleware|Okta|styles|types|test|pages"
+                  excluded_pages="Dev"
+
+                  # Discover top-level directories (e.g., utils, hooks, components, redux, reduxstore)
+                  top_level_dirs=$(ls -d src/ui/src/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_top_level)$" || true)
+
+                  # Discover page directories (e.g., Beneficiaries, Reports, FiscalClose)
+                  page_dirs=$(ls -d src/ui/src/pages/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_pages)$" || true)
+
                   # Build test patterns based on changed areas
                   test_patterns=""
 
-                  if echo "$changed_files" | grep -q '^src/ui/src/utils/'; then
-                    test_patterns="$test_patterns src/utils"
-                  fi
+                  # Check top-level directories for changes
+                  for dir in $top_level_dirs; do
+                    if echo "$changed_files" | grep -q "^src/ui/src/$dir/"; then
+                      test_patterns="$test_patterns src/$dir"
+                    fi
+                  done
 
-                  if echo "$changed_files" | grep -q '^src/ui/src/hooks/'; then
-                    test_patterns="$test_patterns src/hooks"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/components/'; then
-                    test_patterns="$test_patterns src/components"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/reduxstore/'; then
-                    test_patterns="$test_patterns src/reduxstore"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/DecemberActivities/'; then
-                    test_patterns="$test_patterns src/pages/DecemberActivities"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/FiscalClose/'; then
-                    test_patterns="$test_patterns src/pages/FiscalClose"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/Beneficiaries/'; then
-                    test_patterns="$test_patterns src/pages/Beneficiaries"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/InquiriesAndAdjustments/'; then
-                    test_patterns="$test_patterns src/pages/InquiriesAndAdjustments"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/Reports/'; then
-                    test_patterns="$test_patterns src/pages/Reports"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/Distributions/'; then
-                    test_patterns="$test_patterns src/pages/Distributions"
-                  fi
+                  # Check page directories for changes
+                  for page_dir in $page_dirs; do
+                    if echo "$changed_files" | grep -q "^src/ui/src/pages/$page_dir/"; then
+                      test_patterns="$test_patterns src/pages/$page_dir"
+                    fi
+                  done
 
                   # Trim leading whitespace
                   test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
