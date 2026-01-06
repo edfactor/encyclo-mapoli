@@ -1,10 +1,25 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.ComponentModel;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 
 public sealed record DistributionSearchRequest : SortedPaginationRequestDto
 {
+    /// <summary>
+    /// Property name to sort by (e.g., "BadgeNumber", "FullName", "GrossAmount").
+    /// Use prefix '-' for descending (e.g., "-BadgeNumber"). Supports comma-separated multi-sort.
+    /// </summary>
+    /// <example>BadgeNumber</example>
+    [DefaultValue(null)]
+    public new string? SortBy { get; set; }
+
+    /// <summary>
+    /// When true, sorts in descending order. Ignored if SortBy uses '-' prefix notation.
+    /// </summary>
+    [DefaultValue(false)]
+    public new bool? IsSortDescending { get; set; }
+
     public string? Ssn { get; set; }
     public long? BadgeNumber { get; set; }
     public short? PsnSuffix { get; set; }
