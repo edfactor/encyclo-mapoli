@@ -121,6 +121,7 @@ public sealed class Navigation
     public List<Navigation>? Items { get; set; }
     public Navigation? Parent { get; set; }
     public List<NavigationTracking>? NavigationTrackings { get; set; }
+    public List<NavigationCustomSetting>? CustomSettings { get; set; }
 
     // Self-referencing many-to-many to represent prerequisite navigation elements.
     // PrerequisiteNavigations: the items this navigation depends on.

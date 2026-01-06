@@ -5,7 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
+import useNavigationYear from "../../../hooks/useNavigationYear";
 import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../reduxstore/store";
 import useYTDWages from "./hooks/useYTDWages";
@@ -19,9 +19,11 @@ interface YTDWagesProps {
 const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   const componentRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
-  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+  const profitYear = useNavigationYear();
+  
   const { searchResults, isSearching, pagination, showData, hasResults, executeSearch } = useYTDWages({
-    defaultUseFrozenData: useFrozenData
+    defaultUseFrozenData: useFrozenData,
+    profitYear: profitYear
   });
   const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
@@ -32,12 +34,12 @@ const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   // Handle status change - refresh grid with archive=true when status changes to Complete
   const handleStatusChange = useCallback(
     (_newStatus: string, statusName?: string) => {
-      if (statusName === "Complete" && fiscalCloseProfitYear) {
+      if (statusName === "Complete" && profitYear) {
         // Refresh the grid with archive=true to archive the results
-        executeSearch({ profitYear: fiscalCloseProfitYear, useFrozenData, archive: true }, "status-complete");
+        executeSearch({ profitYear, useFrozenData, archive: true }, "status-complete");
       }
     },
-    [fiscalCloseProfitYear, useFrozenData, executeSearch]
+    [profitYear, useFrozenData, executeSearch]
   );
 
   const renderActionNode = () => {

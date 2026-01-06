@@ -4,9 +4,9 @@ import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsA
 import { RootState } from "reduxstore/store";
 
 /**
- * Hook to provide the selected profit year from the Fiscal Close flow
- * This centralized hook allows us to control the profit year consistently across all
- * Fiscal Close
+ * Hook to provide the frozen profit year from Fiscal Close flow
+ * 
+ * Returns the frozen profit year if available, otherwise falls back to current calendar year
  */
 const useFiscalCloseProfitYear = (): number => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);

@@ -73,6 +73,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<NavigationRole> NavigationRoles { get; set; }
     public virtual DbSet<NavigationStatus> NavigationStatuses { get; set; }
     public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }
+    public virtual DbSet<NavigationCustomSetting> NavigationCustomSettings { get; set; }
 
     public virtual DbSet<ProfitShareCheck> ProfitShareChecks { get; set; }
     public virtual DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }

@@ -2,7 +2,7 @@ import PageErrorBoundary from "@/components/PageErrorBoundary";
 import ProfitShareTotalsDisplay from "@/components/ProfitShareTotalsDisplay";
 import { Box, Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import useNavigationYear from "hooks/useNavigationYear";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -18,7 +18,7 @@ const ProfitShareTotals426 = () => {
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
   const navigate = useNavigate();
   const hasToken = !!useSelector((state: RootState) => state.security.token);
-  const profitYear = useFiscalCloseProfitYear();
+  const profitYear = useNavigationYear();
   const dispatch = useDispatch();
   const [triggerSearch, { isLoading }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const { yearEndProfitSharingReportTotalsFrozen: yearEndProfitSharingReportTotals } = useSelector(
