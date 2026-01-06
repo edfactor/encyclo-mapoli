@@ -77,7 +77,7 @@ export const AdministrationApi = createApi({
     // RMD Factors endpoints
     getRmdFactors: builder.query<RmdFactorDto[], void>({
       query: () => ({
-        url: "/administration/rmd-factors",
+        url: "/administration/rmds-factors",
         method: "GET"
       }),
       transformResponse: (response: RmdFactorDto[] | { items: RmdFactorDto[]; count: number }) => {
@@ -91,7 +91,7 @@ export const AdministrationApi = createApi({
     }),
     updateRmdFactor: builder.mutation<RmdFactorDto, UpdateRmdFactorRequest>({
       query: (body) => ({
-        url: "/administration/rmd-factors",
+        url: "/administration/rmds-factors",
         method: "PUT",
         body
       }),
