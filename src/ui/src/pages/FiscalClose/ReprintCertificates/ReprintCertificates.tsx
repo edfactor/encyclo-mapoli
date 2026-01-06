@@ -15,7 +15,7 @@ import ReprintCertificatesGrid from "./ReprintCertificatesGrid";
 const ReprintCertificates: React.FC = () => {
   const selectedProfitYear = useNavigationYear();
   const [filterParams, setFilterParams] = useState<ReprintCertificatesFilterParams>({
-    profitYear: selectedProfitYear,
+    profitYear: selectedProfitYear ?? new Date().getFullYear(),
     badgeNumber: "",
     socialSecurityNumber: ""
   });
@@ -57,7 +57,7 @@ const ReprintCertificates: React.FC = () => {
 
   const handleReset = () => {
     setFilterParams({
-      profitYear: selectedProfitYear,
+      profitYear: selectedProfitYear ?? new Date().getFullYear(),
       badgeNumber: "",
       socialSecurityNumber: ""
     });

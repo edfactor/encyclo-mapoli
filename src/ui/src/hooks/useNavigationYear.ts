@@ -73,7 +73,7 @@ const useNavigationYear = (): number | undefined => {
       return currentYear;
     }
 
-    console.log('[useNavigationYear] Current navigation:', currentNavigation.label, 'useFrozenYear:', useFrozenYear);
+    console.log('[useNavigationYear] Current navigation:', currentNavigation.title, 'useFrozenYear:', useFrozenYear);
 
     // If this page requires frozen year, wait for frozen state to load
     if (useFrozenYear) {

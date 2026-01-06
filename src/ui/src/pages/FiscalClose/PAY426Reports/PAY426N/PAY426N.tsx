@@ -136,7 +136,7 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
                 searchTrigger={searchTrigger}
                 isGridExpanded={isGridExpanded}
                 onToggleExpand={handleToggleGridExpand}
-                profitYear={profitYear}
+                profitYear={profitYear ?? new Date().getFullYear()}
               />
             )}
 

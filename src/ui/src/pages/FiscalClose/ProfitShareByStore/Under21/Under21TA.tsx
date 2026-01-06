@@ -40,7 +40,7 @@ const Under21TA = () => {
   useEffect(() => {
     const fetchData = async () => {
       const queryParams = {
-        profitYear,
+        profitYear: profitYear ?? new Date().getFullYear(),
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
@@ -61,7 +61,7 @@ const Under21TA = () => {
   useEffect(() => {
     if (initialSearchLoaded) {
       const queryParams = {
-        profitYear,
+        profitYear: profitYear ?? new Date().getFullYear(),
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,

@@ -145,7 +145,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
   const executeSearch = useCallback(
     async (searchForm: ExecutiveSearchForm) => {
       const searchParams: ExecutiveHoursAndDollarsRequestDto = {
-        profitYear: profitYear || 0,
+        profitYear: profitYear || new Date().getFullYear(),
         ...(searchForm.badgeNumber && { badgeNumber: searchForm.badgeNumber }),
         ...(searchForm.socialSecurity && { socialSecurity: Number(searchForm.socialSecurity) }),
         ...(searchForm.fullNameContains && { fullNameContains: searchForm.fullNameContains }),
@@ -184,7 +184,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
           }
         }
 
-        reduxDispatch(setExecutiveHoursAndDollarsGridYear(profitYear));
+        reduxDispatch(setExecutiveHoursAndDollarsGridYear(profitYear || new Date().getFullYear()));
         dispatch({ type: "CLEAR_ADDITIONAL_EXECUTIVES" });
       } catch (error) {
         dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Search failed" } });
