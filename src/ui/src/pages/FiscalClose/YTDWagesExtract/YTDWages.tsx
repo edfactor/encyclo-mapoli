@@ -74,7 +74,7 @@ const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
         actionNode={isGridExpanded ? undefined : renderActionNode()}>
         <Grid
           container
-          rowSpacing="24px">
+          rowSpacing="6px">
           {!isGridExpanded && (
             <Grid width={"100%"}>
               <Divider />
