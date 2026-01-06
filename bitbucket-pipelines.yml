@@ -1,17 +1,125 @@
-# ------------------------------------------------------------------------
-# BitBucket Pipeline
-# ------------------------------------------------------------------------
-# Application Name:
-#   - SMART Profit Sharing
-# ------------------------------------------------------------------------
+# ============================================================================
+#                        BITBUCKET PIPELINES CONFIGURATION
+#                           SMART Profit Sharing Application
+# ============================================================================
+#
+# OVERVIEW
+# --------
+# This pipeline automates CI/CD for the SMART Profit Sharing application,
+# which consists of:
+#   - Backend: .NET 10 API with FastEndpoints (src/services/)
+#   - Frontend: React/TypeScript UI with Vite (src/ui/)
+#
+# PIPELINE TYPES
+# --------------
+# 1. BRANCH PIPELINES (pipelines.branches)
+#    - main:    Full build, test, and deploy to QA, then UAT
+#    - develop: Selective build/test based on changes since last successful build
+#
+# 2. PULL REQUEST PIPELINE (pipelines.pull-requests)
+#    - Runs on all PRs targeting any branch
+#    - Selective testing based on changed files
+#    - Uses Bitbucket's changeset conditions for efficiency
+#
+# 3. CUSTOM PIPELINES (pipelines.custom)
+#    - infrastructure_as_code: Install .NET hosting bundle, configure IIS
+#    - api_lint: Run API linting
+#    - profitsharing_database: Database operations (upgrade, reset, import)
+#    - playwright_e2e_qa: End-to-end tests
+#
+# OPTIMIZATION FEATURES
+# ---------------------
+# - Selective Testing: Only runs tests for changed areas (frontend/backend)
+# - Rolling Tag: Tracks last successful develop build to minimize redundant work
+# - Combined Steps: Backend unit + architecture tests share a single build
+# - Artifact Reuse: Build artifacts passed between stages
+#
+# RUNNER CONFIGURATION
+# --------------------
+# - Windows Self-Hosted: Backend builds, database operations, deployments
+# - Cloud (Alpine): Frontend builds, linting (frees on-prem resources)
+#
+# ENVIRONMENT SERVERS
+# -------------------
+# - QA:  appt23d
+# - UAT: appt24d
+#
+# REQUIRED REPOSITORY VARIABLES
+# -----------------------------
+# - BITBUCKET_ACCESS_TOKEN: For tag updates via REST API
+# - JFROG_WORKSPACE_VARIABLE: NPM registry authentication
+# - ConnectionStrings_ProfitSharing_QA/UAT: Database connections
+# - TEAMS_WEBHOOK_URL: Microsoft Teams notifications
+# - See repository settings for full list
+#
+# ============================================================================
+#                              TABLE OF CONTENTS
+# ============================================================================
+#
+# DEFINITIONS (line ~60)
+# ├── servers:                        Environment server hostnames
+# └── steps:                          Reusable step definitions
+#     ├── build-and-test-backend      Combined backend build + tests (PR/QA)
+#     ├── selective-develop-analysis  Analyze changes for develop branch
+#     ├── update-develop-tag          Update rolling success tag
+#     ├── selective-backend-analysis  Determine which backend tests to run
+#     ├── audit-frontend              NPM vulnerability scan
+#     ├── audit-backend               NuGet vulnerability scan
+#     ├── secret-scan                 Detect leaked secrets
+#     ├── frontend-lint               ESLint + TypeScript check
+#     ├── test-frontend               Frontend unit tests (selective for PRs)
+#     ├── generate-buildinfo          Create build metadata
+#     ├── create-api-artifacts        Package API for deployment
+#     ├── create-service-artifacts    Package background services
+#     ├── create-frontend-artifact-*  Frontend builds per environment
+#     ├── *-drop-recreate-db          Database reset steps
+#     ├── *-import-*                  Data import steps
+#     └── run-playwright-tests        E2E test execution
+#
+# PIPELINES (line ~1350)
+# ├── branches:
+# │   ├── main:                   Full QA + UAT deployment
+# │   └── develop:                Selective build/test with tag tracking
+# ├── pull-requests:              PR validation with changeset conditions
+# └── custom:                     Manual trigger pipelines
+#
+# ============================================================================
+
+# ============================================================================
+#                                 DEFINITIONS
+# ============================================================================
+# Reusable components referenced throughout the pipeline using YAML anchors.
+# Anchors are defined with & and referenced with *.
+# ============================================================================
 
 definitions:
-  # Centralized server variables
+  # --------------------------------------------------------------------------
+  # SERVER CONFIGURATION
+  # --------------------------------------------------------------------------
+  # Centralized server hostnames for each environment.
+  # Update these when server names change.
+  # --------------------------------------------------------------------------
   servers:
     qa_app_server: &qa_app_server "appt23d"
     uat_app_server: &uat_app_server "appt24d"
 
+  # --------------------------------------------------------------------------
+  # REUSABLE STEP DEFINITIONS
+  # --------------------------------------------------------------------------
+  # These steps are referenced by pipelines using YAML anchors (*step-name).
+  # Each step is documented with its purpose, runner type, and key behaviors.
+  # --------------------------------------------------------------------------
   steps:
+    # ========================================================================
+    # BACKEND BUILD AND TEST (Combined)
+    # ========================================================================
+    # Purpose: Build .NET solution and run both unit + architecture tests
+    # Runner:  Windows self-hosted (requires .NET 10 SDK)
+    # Used by: PR pipeline, QA pipeline
+    #
+    # Optimization: Single build shared by both test suites
+    # Selective:    Reads selective-test-decision.json for PR builds
+    # ========================================================================
     build-and-test-backend: &build-and-test-backend
       name: Build and Test Backend API
       runs-on:
@@ -138,10 +246,22 @@ definitions:
       artifacts:
         - test-reports/**
 
-    # Develop branch analysis - determines whether to run frontend/backend steps
-    # Uses git tag comparison to find all changes since last successful build
-    # Note: Git network operations hang on Windows self-hosted runners, so we only check locally
-    # The clone configuration below uses depth: full to ensure tags are included
+    # ========================================================================
+    # DEVELOP BRANCH ANALYSIS
+    # ========================================================================
+    # Purpose: Determine which steps to run based on changes since last success
+    # Runner:  Windows self-hosted (needs full git history for tag comparison)
+    # Used by: develop branch pipeline only
+    #
+    # How it works:
+    # 1. Compares HEAD against 'last-successful-develop-build' tag
+    # 2. Categorizes changed files as frontend (src/ui/) or backend (src/services/)
+    # 3. Outputs develop-test-decision.json with runFrontend/runBackend flags
+    # 4. Includes list of changed frontend files for selective test targeting
+    #
+    # Note: Uses depth:full clone because git network operations hang on
+    #       Windows runners, so we need all tags available locally.
+    # ========================================================================
     selective-develop-analysis: &selective-develop-analysis
       name: Analyze Develop Changes (Since Last Build)
       runs-on:
@@ -257,8 +377,20 @@ definitions:
           # Use WriteAllText to avoid BOM that Out-File adds
           [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
 
-    # Update the develop build tag after successful pipeline completion
-    # Uses Bitbucket REST API instead of git push (git network ops hang on Windows runners)
+    # ========================================================================
+    # UPDATE DEVELOP BUILD TAG
+    # ========================================================================
+    # Purpose: Move the rolling success tag to current commit after all tests pass
+    # Runner:  Windows self-hosted
+    # Used by: develop branch pipeline (final step)
+    #
+    # This enables the selective-develop-analysis step to compare against
+    # the last successful build on subsequent pipeline runs.
+    #
+    # Note: Uses Bitbucket REST API instead of git push because git network
+    #       operations hang on Windows self-hosted runners.
+    # Requires: BITBUCKET_ACCESS_TOKEN with repository:write scope
+    # ========================================================================
     update-develop-tag: &update-develop-tag
       name: Update Develop Build Tag
       runs-on:
@@ -282,11 +414,6 @@ definitions:
             "Authorization" = "Bearer $env:BITBUCKET_ACCESS_TOKEN"
             "Content-Type" = "application/json"
           }
-
-          # Debug: Show URL being used
-          Write-Host "DEBUG - BITBUCKET_REPO_FULL_NAME: $env:BITBUCKET_REPO_FULL_NAME" -ForegroundColor Magenta
-          Write-Host "DEBUG - API URL: $baseUrl" -ForegroundColor Magenta
-          Write-Host "DEBUG - Token present: $(-not [string]::IsNullOrEmpty($env:BITBUCKET_ACCESS_TOKEN))" -ForegroundColor Magenta
 
           # Check if BITBUCKET_ACCESS_TOKEN is available
           if (-not $env:BITBUCKET_ACCESS_TOKEN) {
@@ -326,8 +453,22 @@ definitions:
             exit 0
           }
 
-    # Selective backend test analysis - determines which tests to run based on changed files
-    # Uses dotnet-affected tool to build dependency graph and identify impacted projects
+    # ========================================================================
+    # SELECTIVE BACKEND ANALYSIS (PR Builds)
+    # ========================================================================
+    # Purpose: Determine which backend tests to run based on changed files
+    # Runner:  Windows self-hosted
+    # Used by: PR pipeline only
+    #
+    # How it works:
+    # 1. Compares HEAD against PR destination branch
+    # 2. Detects global config changes (Directory.Build.props, etc.) → run all
+    # 3. Maps changed .cs/.csproj files to test namespace filters
+    # 4. Outputs selective-test-decision.json with:
+    #    - decision: RUN_ALL | SELECTIVE | SKIP_ALL
+    #    - testFilters: namespace patterns for selective test runs
+    #    - runArchitectureTests: whether architecture tests are needed
+    # ========================================================================
     selective-backend-analysis: &selective-backend-analysis
       name: Analyze Backend Changes (Selective Testing)
       runs-on:
@@ -565,6 +706,18 @@ definitions:
             } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
           }
 
+    # ========================================================================
+    # FRONTEND TESTS (PR Builds)
+    # ========================================================================
+    # Purpose: Run frontend unit tests with selective targeting for PRs
+    # Runner:  Cloud (node:22-alpine) - frees on-prem resources
+    # Used by: PR pipeline, main branch pipeline
+    #
+    # For PR builds: Runs only tests for changed directories
+    # For branch builds: Runs all tests
+    #
+    # Test patterns: utils, hooks, components, reduxstore, pages/*
+    # ========================================================================
     test-frontend: &test-frontend
       name: Build and Test Frontend UI
       # Run on Bitbucket Cloud to free on-premises resources
@@ -604,48 +757,46 @@ definitions:
               changed_files=$(git diff --name-only --diff-filter=ACMR "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' || true)
               cd src/ui
 
+              # ================================================================
+              # DYNAMIC DIRECTORY DISCOVERY FOR SELECTIVE TESTING
+              # ================================================================
+              # Instead of hardcoding directories, we dynamically discover them.
+              # This ensures new directories are automatically included in testing.
+              #
+              # Excluded top-level directories (no testable code):
+              #   assets, middleware, Okta, styles, types, test, pages
+              #   (pages is handled separately to match subdirectories)
+              #
+              # Excluded page directories:
+              #   Dev (developer utilities)
+              # ================================================================
+
+              # Define excluded directories
+              excluded_top_level="assets|middleware|Okta|styles|types|test|pages"
+              excluded_pages="Dev"
+
+              # Discover top-level directories (e.g., utils, hooks, components, redux, reduxstore)
+              top_level_dirs=$(ls -d src/ui/src/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_top_level)$" || true)
+
+              # Discover page directories (e.g., Beneficiaries, Reports, FiscalClose)
+              page_dirs=$(ls -d src/ui/src/pages/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_pages)$" || true)
+
               # Build test patterns based on changed areas
               test_patterns=""
 
-              if echo "$changed_files" | grep -q '^src/ui/src/utils/'; then
-                  test_patterns="$test_patterns src/utils"
-              fi
+              # Check top-level directories for changes
+              for dir in $top_level_dirs; do
+                  if echo "$changed_files" | grep -q "^src/ui/src/$dir/"; then
+                      test_patterns="$test_patterns src/$dir"
+                  fi
+              done
 
-              if echo "$changed_files" | grep -q '^src/ui/src/hooks/'; then
-                  test_patterns="$test_patterns src/hooks"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/components/'; then
-                  test_patterns="$test_patterns src/components"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/reduxstore/'; then
-                  test_patterns="$test_patterns src/reduxstore"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/DecemberActivities/'; then
-                  test_patterns="$test_patterns src/pages/DecemberActivities"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/FiscalClose/'; then
-                  test_patterns="$test_patterns src/pages/FiscalClose"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/Beneficiaries/'; then
-                  test_patterns="$test_patterns src/pages/Beneficiaries"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/InquiriesAndAdjustments/'; then
-                  test_patterns="$test_patterns src/pages/InquiriesAndAdjustments"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/Reports/'; then
-                  test_patterns="$test_patterns src/pages/Reports"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/Distributions/'; then
-                  test_patterns="$test_patterns src/pages/Distributions"
-              fi
+              # Check page directories for changes
+              for page_dir in $page_dirs; do
+                  if echo "$changed_files" | grep -q "^src/ui/src/pages/$page_dir/"; then
+                      test_patterns="$test_patterns src/pages/$page_dir"
+                  fi
+              done
 
               # Trim leading whitespace
               test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
@@ -1017,6 +1168,12 @@ definitions:
           if ($LASTEXITCODE -ne 0) { Write-Error "Import validation failed."; exit 1 }
           Write-Host "Import validation completed."
 
+    # ========================================================================
+    # DATABASE CLI BUILD
+    # ========================================================================
+    # Purpose: Build the database CLI tool for migrations and data operations
+    # Runner:  Windows self-hosted
+    # ========================================================================
     db-cli-build-artifact: &db-cli-build-artifact
       name: Build DB CLI (artifact)
       runs-on:
@@ -1030,6 +1187,14 @@ definitions:
           if ($LASTEXITCODE -ne 0) { Write-Error "Database CLI build failed. Exiting."; exit 1 }
           Write-Host "DB CLI built to .\\dbcli"
 
+    # ========================================================================
+    # SECURITY AUDITS
+    # ========================================================================
+    # These steps check for known vulnerabilities in dependencies.
+    # Run early in the pipeline to fail fast on security issues.
+    # ========================================================================
+
+    # Backend: NuGet vulnerability scan
     audit-backend: &audit-backend
       name: "Check Backend API for vulnerabilities"
       runs-on:
@@ -1055,6 +1220,7 @@ definitions:
             exit 0
           }
 
+    # Frontend: NPM vulnerability scan
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
       # Run on Bitbucket Cloud to free on-premises resources
@@ -1071,6 +1237,13 @@ definitions:
           EOF
         - npm audit --audit-level=high --production
 
+    # ========================================================================
+    # CODE QUALITY CHECKS
+    # ========================================================================
+    # Linting and type checking. Run early for fast feedback on code issues.
+    # ========================================================================
+
+    # Frontend: ESLint + TypeScript (selective for PRs)
     frontend-lint: &frontend-lint
       name: Frontend TSC + Lint
       # Run on Bitbucket Cloud to free on-premises resources
@@ -1119,6 +1292,7 @@ definitions:
 
         - npx tsc -b --noEmit
 
+    # Backend API: Zalando API Guidelines linting
     api-lint: &api-lint
       name: "API Linting (Zalando Guidelines)"
       # Runs on self-hosted Windows runner
@@ -1138,6 +1312,12 @@ definitions:
       artifacts:
         - reports/api-lint/**
 
+    # ========================================================================
+    # SECRET SCANNING
+    # ========================================================================
+    # Detect accidentally committed secrets (API keys, passwords, etc.)
+    # Uses Gitleaks for comprehensive secret detection.
+    # ========================================================================
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
       # Runs on Bitbucket Cloud by default (Docker image)
@@ -1351,8 +1531,25 @@ definitions:
 
           echo "✓ Release tag '$TAG_NAME' created and pushed successfully"
 
+# ============================================================================
+#                                  PIPELINES
+# ============================================================================
+# Pipeline definitions for different triggers (branches, PRs, manual).
+# ============================================================================
+
 pipelines:
+  # ==========================================================================
+  # BRANCH PIPELINES
+  # ==========================================================================
+  # Triggered automatically when code is pushed to specific branches.
+  # ==========================================================================
   branches:
+    # ------------------------------------------------------------------------
+    # RELEASE BRANCH PIPELINE (main)
+    # ------------------------------------------------------------------------
+    # Full CI/CD: Build → Test → Deploy to QA → Deploy to UAT
+    # All steps run regardless of what changed (no selective testing)
+    # ------------------------------------------------------------------------
     release:
       # Stage 1: Build and test
       # Stage 1: Code quality checks (fail fast)
@@ -1497,6 +1694,21 @@ pipelines:
       - step: *uat-import-uat-navigation
       - step: *uat-validate-import
 
+    # ------------------------------------------------------------------------
+    # DEVELOP BRANCH PIPELINE
+    # ------------------------------------------------------------------------
+    # Optimized CI: Only builds/tests what changed since last successful build
+    #
+    # Uses rolling tag 'last-successful-develop-build' to track baseline.
+    # Steps check develop-test-decision.json and skip if their area unchanged.
+    #
+    # Flow:
+    # 1. Analyze changes since last success → outputs decision JSON
+    # 2. Frontend lint (if frontend changed)
+    # 3. Audits (frontend/backend, if respective area changed)
+    # 4. Tests (frontend/backend, if respective area changed)
+    # 5. Update success tag (only if all steps pass)
+    # ------------------------------------------------------------------------
     develop:
       # Stage 0: Analyze what changed since last successful build
       - step: *selective-develop-analysis
@@ -1510,17 +1722,11 @@ pipelines:
             - |
               echo "Checking develop-test-decision.json..."
               if [ -f "develop-test-decision.json" ]; then
-                echo "DEBUG - File contents:"
-                cat develop-test-decision.json
-                echo ""
                 runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
-                echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                 if [ "$runFrontend" = "false" ]; then
                   echo "SKIP: No frontend changes detected"
                   exit 0
                 fi
-              else
-                echo "DEBUG - File does not exist, running all checks"
               fi
               echo "Running frontend lint..."
 
@@ -1545,17 +1751,11 @@ pipelines:
                 - |
                   echo "Checking develop-test-decision.json..."
                   if [ -f "develop-test-decision.json" ]; then
-                    echo "DEBUG - File contents:"
-                    cat develop-test-decision.json
-                    echo ""
                     runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
-                    echo "DEBUG - Extracted runFrontend value: '$runFrontend'"
                     if [ "$runFrontend" = "false" ]; then
                       echo "SKIP: No frontend changes detected"
                       exit 0
                     fi
-                  else
-                    echo "DEBUG - File does not exist, running audit"
                   fi
                   echo "Running frontend audit..."
 
@@ -1729,48 +1929,46 @@ pipelines:
                     exit 0
                   fi
 
+                  # ================================================================
+                  # DYNAMIC DIRECTORY DISCOVERY FOR SELECTIVE TESTING
+                  # ================================================================
+                  # Instead of hardcoding directories, we dynamically discover them.
+                  # This ensures new directories are automatically included in testing.
+                  #
+                  # Excluded top-level directories (no testable code):
+                  #   assets, middleware, Okta, styles, types, test, pages
+                  #   (pages is handled separately to match subdirectories)
+                  #
+                  # Excluded page directories:
+                  #   Dev (developer utilities)
+                  # ================================================================
+
+                  # Define excluded directories
+                  excluded_top_level="assets|middleware|Okta|styles|types|test|pages"
+                  excluded_pages="Dev"
+
+                  # Discover top-level directories (e.g., utils, hooks, components, redux, reduxstore)
+                  top_level_dirs=$(ls -d src/ui/src/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_top_level)$" || true)
+
+                  # Discover page directories (e.g., Beneficiaries, Reports, FiscalClose)
+                  page_dirs=$(ls -d src/ui/src/pages/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_pages)$" || true)
+
                   # Build test patterns based on changed areas
                   test_patterns=""
 
-                  if echo "$changed_files" | grep -q '^src/ui/src/utils/'; then
-                    test_patterns="$test_patterns src/utils"
-                  fi
+                  # Check top-level directories for changes
+                  for dir in $top_level_dirs; do
+                    if echo "$changed_files" | grep -q "^src/ui/src/$dir/"; then
+                      test_patterns="$test_patterns src/$dir"
+                    fi
+                  done
 
-                  if echo "$changed_files" | grep -q '^src/ui/src/hooks/'; then
-                    test_patterns="$test_patterns src/hooks"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/components/'; then
-                    test_patterns="$test_patterns src/components"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/reduxstore/'; then
-                    test_patterns="$test_patterns src/reduxstore"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/DecemberActivities/'; then
-                    test_patterns="$test_patterns src/pages/DecemberActivities"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/FiscalClose/'; then
-                    test_patterns="$test_patterns src/pages/FiscalClose"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/Beneficiaries/'; then
-                    test_patterns="$test_patterns src/pages/Beneficiaries"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/InquiriesAndAdjustments/'; then
-                    test_patterns="$test_patterns src/pages/InquiriesAndAdjustments"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/Reports/'; then
-                    test_patterns="$test_patterns src/pages/Reports"
-                  fi
-
-                  if echo "$changed_files" | grep -q '^src/ui/src/pages/Distributions/'; then
-                    test_patterns="$test_patterns src/pages/Distributions"
-                  fi
+                  # Check page directories for changes
+                  for page_dir in $page_dirs; do
+                    if echo "$changed_files" | grep -q "^src/ui/src/pages/$page_dir/"; then
+                      test_patterns="$test_patterns src/pages/$page_dir"
+                    fi
+                  done
 
                   # Trim leading whitespace
                   test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
@@ -1785,6 +1983,18 @@ pipelines:
       # Stage 4: Update the build tag on success
       - step: *update-develop-tag
 
+  # ==========================================================================
+  # PULL REQUEST PIPELINE
+  # ==========================================================================
+  # Runs on all PRs regardless of target branch.
+  # Uses Bitbucket's changeset conditions for efficient step skipping.
+  #
+  # Steps only run if relevant files changed:
+  # - Frontend steps: src/ui/**
+  # - Backend steps: src/services/**
+  #
+  # Also includes selective backend analysis for intelligent test targeting.
+  # ==========================================================================
   pull-requests:
     "**":
       # Stage 1: Code quality checks (fail fast)
@@ -1852,7 +2062,19 @@ pipelines:
                     - "src/ui/**/*.js"
                     - "src/ui/**/*.jsx"
 
+  # ==========================================================================
+  # CUSTOM PIPELINES (Manual Trigger)
+  # ==========================================================================
+  # These pipelines run on-demand from the Bitbucket UI.
+  # Select "Run Pipeline" → choose branch → select custom pipeline.
+  # ==========================================================================
   custom:
+    # ------------------------------------------------------------------------
+    # INFRASTRUCTURE AS CODE
+    # ------------------------------------------------------------------------
+    # Server provisioning: Install .NET hosting bundle, configure IIS settings
+    # Variables: ServerEnvironment (QA/UAT), Operation, ForceReinstall
+    # ------------------------------------------------------------------------
     infrastructure_as_code:
       - variables:
           - name: ServerEnvironment
@@ -2074,9 +2296,23 @@ pipelines:
               Write-Host "[OK] IaC operation completed successfully" -ForegroundColor Green
               Write-Host "================================================================" -ForegroundColor Cyan
 
+    # ------------------------------------------------------------------------
+    # API LINT
+    # ------------------------------------------------------------------------
+    # Validate API design against Zalando API Guidelines
+    # ------------------------------------------------------------------------
     api_lint:
       - step: *api-lint
 
+    # ------------------------------------------------------------------------
+    # DATABASE OPERATIONS
+    # ------------------------------------------------------------------------
+    # Database management: migrations, reset, data import
+    # Variables:
+    #   - Environment: QA or UAT
+    #   - Action: upgrade-db, drop-recreate-db, import-from-ready, etc.
+    #   - SourceSchema: PROFITSHARE or MTPR
+    # ------------------------------------------------------------------------
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
@@ -2141,5 +2377,12 @@ pipelines:
                 echo "Validated: Environment=$Environment, SourceSchema=$SourceSchema"
               fi
       - step: *upgrade-database
+
+    # ------------------------------------------------------------------------
+    # END-TO-END TESTS (Playwright)
+    # ------------------------------------------------------------------------
+    # Run Playwright E2E tests against QA environment
+    # Uses QA_Playwright variable for credentials
+    # ------------------------------------------------------------------------
     playwright_e2e_qa:
       - step: *run-playwright-tests
