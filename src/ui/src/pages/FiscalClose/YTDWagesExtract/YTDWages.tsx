@@ -1,14 +1,13 @@
 import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
+import useNavigationYear from "../../../hooks/useNavigationYear";
 import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../reduxstore/store";
-import { NavigationCustomSettingsKeys, NavigationDto } from "../../../types/navigation/navigation";
 import useYTDWages from "./hooks/useYTDWages";
 import YTDWagesGrid from "./YTDWagesGrid";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
@@ -20,71 +19,11 @@ interface YTDWagesProps {
 const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   const componentRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
-  const frozenProfitYear = useFiscalCloseProfitYear();
-  
-  // Get current navigation to check if we should use frozen year
-  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
-  const frozenStateResponse = useSelector((state: RootState) => state.frozen.frozenStateResponseData);
-  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
-  
-  const currentNavigation = useMemo(() => {
-    const getNavigationObjectBasedOnId = (navigationArray?: NavigationDto[], id?: number): NavigationDto | undefined => {
-      if (navigationArray) {
-        for (const item of navigationArray) {
-          if (item.id === id) {
-            return item;
-          }
-          if (item.items && item.items.length > 0) {
-            const found = getNavigationObjectBasedOnId(item.items, id);
-            if (found) {
-              return found;
-            }
-          }
-        }
-      }
-      return undefined;
-    };
-    return getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId);
-  }, [navigationList, currentNavigationId]);
-
-  // Check if this navigation requires frozen year
-  const useFrozenYear = currentNavigation?.customSettings?.[NavigationCustomSettingsKeys.useFrozenYear] === true;
-  
-  // Use frozen year if required by navigation, otherwise use current calendar year
-  // Wait for both navigation data AND frozen state to be loaded if needed
-  const profitYear = useMemo(() => {
-    // If we don't have navigation data yet, return undefined to prevent premature API calls
-    if (!navigationList?.navigation) {
-      console.log('[YTDWages] Navigation data not loaded yet');
-      return undefined;
-    }
-    
-    console.log('[YTDWages] Navigation ID:', currentNavigationId);
-    console.log('[YTDWages] Current navigation:', currentNavigation);
-    console.log('[YTDWages] useFrozenYear setting:', useFrozenYear);
-    console.log('[YTDWages] Frozen state response:', frozenStateResponse);
-    console.log('[YTDWages] Frozen profit year:', frozenProfitYear);
-    
-    // If this page requires frozen year, wait for frozen state to load
-    if (useFrozenYear) {
-      // Don't return a year until frozen state is loaded
-      if (!frozenStateResponse) {
-        console.log('[YTDWages] Waiting for frozen state to load...');
-        return undefined;
-      }
-      console.log('[YTDWages] Using frozen year:', frozenStateResponse.profitYear);
-      return frozenStateResponse.profitYear;
-    }
-    
-    // Otherwise use current calendar year immediately
-    const currentYear = new Date().getFullYear();
-    console.log('[YTDWages] Using calendar year:', currentYear);
-    return currentYear;
-  }, [navigationList, currentNavigationId, currentNavigation, useFrozenYear, frozenStateResponse, frozenProfitYear]);
+  const profitYear = useNavigationYear();
   
   const { searchResults, isSearching, pagination, showData, hasResults, executeSearch } = useYTDWages({
     defaultUseFrozenData: useFrozenData,
-    profitYear: profitYear // Will be undefined until frozen state loads if needed
+    profitYear: profitYear
   });
   const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);

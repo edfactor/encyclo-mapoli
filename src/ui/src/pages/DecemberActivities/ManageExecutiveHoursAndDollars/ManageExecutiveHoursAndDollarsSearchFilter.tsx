@@ -1,16 +1,16 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, Grid, TextField, Typography } from "@mui/material";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import useNavigationYear from "hooks/useNavigationYear";
 import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import {
-  badgeNumberStringValidator,
-  handleBadgeNumberStringInput,
-  handleSsnInput,
-  profitYearValidator,
-  ssnValidator
+    badgeNumberStringValidator,
+    handleBadgeNumberStringInput,
+    handleSsnInput,
+    profitYearValidator,
+    ssnValidator
 } from "../../../utils/FormValidators";
 
 interface ExecutiveHoursAndDollarsSearch {
@@ -93,7 +93,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     }));
   };
 
-  const profitYear = useFiscalCloseProfitYear();
+  const profitYear = useNavigationYear();
 
   const {
     control,
