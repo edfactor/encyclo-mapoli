@@ -1,12 +1,11 @@
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { IconButton } from "@mui/material";
-import { RowClassParams } from "ag-grid-community";
+import { IconButton, Typography } from "@mui/material";
 import { RefObject, useMemo } from "react";
+import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
-import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { EmployeeWagesForYearResponse } from "../../../reduxstore/types";
 import { GetYTDWagesColumns } from "./YTDWagesGridColumns";
@@ -44,33 +43,22 @@ const YTDWagesGrid = ({
 
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
 
-  // Calculate totals for pinned top row - use API totals if available, otherwise calculate
-  const totalsRow = useMemo(() => {
-    if (!clonedData?.response?.results) return null;
-
-    // Check if API provided totals
-    const totalHours =
+  // Calculate totals - use API totals if available, otherwise calculate from results
+  const totalHours = useMemo(() => {
+    if (!clonedData?.response?.results) return 0;
+    return (
       clonedData.totalHoursCurrentYearWages ??
-      clonedData.response.results.reduce((sum, row) => sum + (row.hoursCurrentYear || 0), 0);
+      clonedData.response.results.reduce((sum, row) => sum + (row.hoursCurrentYear || 0), 0)
+    );
+  }, [clonedData?.response?.results, clonedData?.totalHoursCurrentYearWages]);
 
-    const totalIncome =
+  const totalIncome = useMemo(() => {
+    if (!clonedData?.response?.results) return 0;
+    return (
       clonedData.totalIncomeCurrentYearWages ??
-      clonedData.response.results.reduce((sum, row) => sum + (row.incomeCurrentYear || 0), 0);
-
-    return {
-      badgeNumber: "TOTALS",
-      hoursCurrentYear: totalHours,
-      incomeCurrentYear: totalIncome,
-      isExecutive: false,
-      storeNumber: 0
-    };
-  }, [clonedData?.response?.results, clonedData?.totalHoursCurrentYearWages, clonedData?.totalIncomeCurrentYearWages]);
-
-  // Use content-aware grid height utility hook
-  const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: clonedData?.response?.results?.length ?? 0,
-    heightPercentage: isGridExpanded ? 0.85 : 0.5
-  });
+      clonedData.response.results.reduce((sum, row) => sum + (row.incomeCurrentYear || 0), 0)
+    );
+  }, [clonedData?.response?.results, clonedData?.totalIncomeCurrentYearWages]);
 
   if (!showData || !clonedData?.response) {
     return null;
@@ -85,9 +73,12 @@ const YTDWagesGrid = ({
         isLoading={isLoading}
         pagination={pagination}
         totalRecords={hasResults ? (data?.response?.total ?? 0) : 0}
-        showPagination={!isGridExpanded && hasResults}
+        showPagination={hasResults}
         onSortChange={onSortChange}
-        heightConfig={{ maxHeight: gridMaxHeight }}
+        heightConfig={{
+          mode: "content-aware",
+          heightPercentage: isGridExpanded ? 0.85 : 0.5
+        }}
         headerActions={
           onToggleExpand ? (
             <IconButton
@@ -98,16 +89,23 @@ const YTDWagesGrid = ({
             </IconButton>
           ) : null
         }
-        beforeGrid={!isGridExpanded ? <ReportSummary report={clonedData} /> : undefined}
-        gridOptions={{
-          pinnedTopRowData: totalsRow ? [totalsRow] : [],
-          getRowStyle: (params: RowClassParams) => {
-            if (params.node.rowPinned) {
-              return { background: "#f0f0f0", fontWeight: "bold" };
-            }
-            return undefined;
-          }
-        }}
+        beforeGrid={
+          !isGridExpanded ? (
+            <>
+              <div style={{ marginTop: "-18px" }}>
+                <ReportSummary report={clonedData} />
+              </div>
+              <div style={{ marginTop: "4px", marginBottom: "8px", paddingLeft: "24px" }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: "bold" }}>
+                  Total Hours {formatNumberWithComma(totalHours.toFixed(2))} &nbsp;&nbsp;&nbsp; Total Income{" "}
+                  {numberToCurrency(totalIncome)}
+                </Typography>
+              </div>
+            </>
+          ) : undefined
+        }
       />
     </div>
   );

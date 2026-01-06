@@ -8,16 +8,18 @@ import {
 
 export const GetYTDWagesColumns = (): ColDef[] => {
   const columns: ColDef[] = [
-    createBadgeColumn({}),
+    createBadgeColumn({ flex: 1 }),
     createHoursColumn({
       headerName: "Hours Current Year",
-      field: "hoursCurrentYear"
+      field: "hoursCurrentYear",
+      flex: 1
     }),
     createCurrencyColumn({
       headerName: "Dollars Current Year",
-      field: "incomeCurrentYear"
+      field: "incomeCurrentYear",
+      flex: 1
     }),
-    createStoreColumn({})
+    createStoreColumn({ flex: 1 })
   ];
   return columns;
 };
