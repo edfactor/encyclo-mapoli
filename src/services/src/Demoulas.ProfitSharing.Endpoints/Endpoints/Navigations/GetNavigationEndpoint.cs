@@ -39,8 +39,7 @@ public class GetNavigationEndpoint : ProfitSharingEndpoint<NavigationRequestDto,
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            var navigationList = await _navigationService.GetNavigation(cancellationToken: ct);
-            var response = new NavigationResponseDto { Navigation = navigationList };
+            var response = await _navigationService.GetNavigation(cancellationToken: ct);
 
             // Record business metrics
             Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
@@ -48,7 +47,7 @@ public class GetNavigationEndpoint : ProfitSharingEndpoint<NavigationRequestDto,
                 new KeyValuePair<string, object?>("endpoint.category", "navigation"));
 
             // Record navigation count for monitoring
-            var navigationCount = navigationList?.Count() ?? 0;
+            var navigationCount = response.Navigation?.Count ?? 0;
             Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(navigationCount,
                 new KeyValuePair<string, object?>("endpoint.name", nameof(GetNavigationEndpoint)),
                 new KeyValuePair<string, object?>("operation", "get"));

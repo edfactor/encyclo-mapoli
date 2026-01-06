@@ -27,8 +27,20 @@ public class NavigationService : INavigationService
         _logger = logger;
     }
 
+    public async Task<NavigationResponseDto> GetNavigation(CancellationToken cancellationToken)
+    {
+        var navigationList = await GetNavigationTreeAsync(cancellationToken);
 
-    public async Task<List<NavigationDto>> GetNavigation(CancellationToken cancellationToken)
+        // Custom settings are now per-navigation (loaded via Include), 
+        // so response-level customSettings can remain empty or null
+        return new NavigationResponseDto
+        {
+            Navigation = navigationList,
+            CustomSettings = null
+        };
+    }
+
+    private async Task<List<NavigationDto>> GetNavigationTreeAsync(CancellationToken cancellationToken)
     {
         List<string> roleNamesUpper = _appUser.GetUserAllRoles()
             .Where(r => !string.IsNullOrWhiteSpace(r))
@@ -76,6 +88,7 @@ public class NavigationService : INavigationService
                 .OrderBy(n => n.OrderNumber)
                 .Include(n => n.RequiredRoles)
                 .Include(n => n.NavigationStatus)
+                .Include(n => n.CustomSettings)
                 .Include(n => n.PrerequisiteNavigations!) // prerequisites
                     .ThenInclude(p => p.NavigationStatus)
                 .Include(n => n.PrerequisiteNavigations!)
@@ -194,7 +207,8 @@ public class NavigationService : INavigationService
                             PrerequisiteNavigations = new List<NavigationDto>(),
                             // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
                             IsNavigable = p.IsNavigable ?? !string.IsNullOrWhiteSpace(p.Url),
-                            IsReadOnly = userHasReadOnlyRole
+                            IsReadOnly = userHasReadOnlyRole,
+                            CustomSettings = ParseCustomSettings(p.CustomSettings)
                         })
                         .ToList() ?? new List<NavigationDto>();
 
@@ -217,7 +231,8 @@ public class NavigationService : INavigationService
                         // Prefer the DB-backed IsNavigable when present; otherwise fall back to Url-derived logic
                         // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
                         IsNavigable = x.IsNavigable ?? !string.IsNullOrWhiteSpace(x.Url),
-                        IsReadOnly = userHasReadOnlyRole
+                        IsReadOnly = userHasReadOnlyRole,
+                        CustomSettings = ParseCustomSettings(x.CustomSettings)
                     };
                 })
                 .ToList();
@@ -382,6 +397,76 @@ public class NavigationService : INavigationService
         await BustAllNavigationTreeCaches(cancellationToken);
 
         _logger?.LogInformation("All navigation statuses reset to 'Not Started' and caches invalidated");
+    }
+
+    /// <summary>
+    /// Parses custom settings from NavigationCustomSetting entities into a dictionary.
+    /// JSON values are parsed to their appropriate types (bool, string, or raw JSON).
+    /// </summary>
+    private static Dictionary<string, object?>? ParseCustomSettings(List<NavigationCustomSetting>? customSettings)
+    {
+        if (customSettings == null || customSettings.Count == 0)
+        {
+            return null;
+        }
+
+        var result = new Dictionary<string, object?>();
+
+        foreach (var setting in customSettings)
+        {
+            if (string.IsNullOrWhiteSpace(setting.Key))
+            {
+                continue;
+            }
+
+            if (!TryParseCustomSettingValue(setting.ValueJson, out object? parsedValue))
+            {
+                continue;
+            }
+
+            result[setting.Key] = parsedValue;
+        }
+
+        return result.Count > 0 ? result : null;
+    }
+
+    private static bool TryParseCustomSettingValue(string? valueJson, out object? parsedValue)
+    {
+        parsedValue = null;
+
+        if (string.IsNullOrWhiteSpace(valueJson))
+        {
+            return false;
+        }
+
+        try
+        {
+            using JsonDocument document = JsonDocument.Parse(valueJson);
+            JsonElement root = document.RootElement;
+
+            switch (root.ValueKind)
+            {
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                    parsedValue = root.GetBoolean();
+                    return true;
+                case JsonValueKind.String:
+                    parsedValue = root.GetString();
+                    return true;
+                case JsonValueKind.Null:
+                case JsonValueKind.Undefined:
+                    parsedValue = null;
+                    return true;
+                default:
+                    // Keep other types as a string so the API stays compatible with the UI's string/boolean expectations.
+                    parsedValue = root.GetRawText();
+                    return true;
+            }
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
 

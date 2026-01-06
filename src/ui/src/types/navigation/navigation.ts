@@ -2,8 +2,20 @@ export interface NavigationRequestDto {
   navigationId?: number;
 }
 
+export const NavigationCustomSettingsKeys = {
+  trackPageStatus: "trackPageStatus",
+  useFrozenYear: "useFrozenYear"
+} as const;
+
+export interface NavigationCustomSettings {
+  trackPageStatus?: boolean;
+  useFrozenYear?: boolean;
+  [key: string]: string | boolean | undefined;
+}
+
 export interface NavigationResponseDto {
   navigation: NavigationDto[];
+  customSettings?: NavigationCustomSettings;
 }
 
 export interface NavigationDto {
@@ -23,6 +35,8 @@ export interface NavigationDto {
   // Prerequisite navigation elements that are currently completed.
   prerequisiteNavigations?: NavigationDto[];
   items: NavigationDto[];
+  // Custom settings specific to this navigation item (e.g., trackPageStatus, useFrozenYear)
+  customSettings?: NavigationCustomSettings;
 }
 
 export interface NavigationStatusDto {
