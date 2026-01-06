@@ -330,9 +330,12 @@ export const useAddDistribution = () => {
         // Step 1: Try to search for member using identifier (could be badge number or SSN)
         try {
           searchResponse = await triggerSearchMember({
-            badgeNumber: identifierNum,
-            // Only use the psnSuffix parameter if it is not 0
-            psnSuffix: psnSuffix !== 0 ? psnSuffix : undefined,
+            // Pass badgeNumber only if not an SSN search
+            badgeNumber: isSSN ? undefined : identifierNum,
+            // Pass SSN if identifier is a 9-digit SSN (convert to number)
+            ssn: isSSN ? parseInt(identifier, 10) : undefined,
+            // Only use the psnSuffix parameter if it is not 0 and not an SSN search
+            psnSuffix: !isSSN && psnSuffix !== 0 ? psnSuffix : undefined,
             memberType,
             endProfitYear: profitYear,
             pagination: {
@@ -347,12 +350,8 @@ export const useAddDistribution = () => {
           if (results && results.length > 0) {
             memberId = results[0].id;
             badgeNum = results[0].badgeNumber; // Get actual badge number from results
-          } else if (isSSN) {
-            // If badge number search failed and we have an SSN, try searching by SSN
-            // For now, this will fail as the API may not support SSN search yet
-            throw new Error("Member not found with SSN");
           } else {
-            throw new Error("Member not found");
+            throw new Error(isSSN ? "Member not found with SSN" : "Member not found");
           }
         } catch (searchError) {
           if (isSSN) {
