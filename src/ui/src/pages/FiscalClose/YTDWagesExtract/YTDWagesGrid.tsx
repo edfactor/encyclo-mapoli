@@ -2,7 +2,7 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { IconButton, Typography } from "@mui/material";
 import { RefObject, useMemo } from "react";
-import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
+import { numberToCurrency } from "smart-ui-library";
 import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
@@ -99,8 +99,7 @@ const YTDWagesGrid = ({
                 <Typography
                   variant="body2"
                   sx={{ fontWeight: "bold" }}>
-                  Total Hours {formatNumberWithComma(totalHours.toFixed(2))} &nbsp;&nbsp;&nbsp; Total Income{" "}
-                  {numberToCurrency(totalIncome)}
+                  Total Hours {totalHours.toFixed(2)} &nbsp;&nbsp;&nbsp; Total Income {numberToCurrency(totalIncome)}
                 </Typography>
               </div>
             </>
