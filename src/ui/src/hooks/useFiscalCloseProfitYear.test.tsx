@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
+import type { FrozenStateResponse } from "reduxstore/types";
 import { describe, expect, it } from "vitest";
 import useFiscalCloseProfitYear from "./useFiscalCloseProfitYear";
-import type { FrozenStateResponse } from "reduxstore/types";
 
 import { vi } from "vitest";
 
