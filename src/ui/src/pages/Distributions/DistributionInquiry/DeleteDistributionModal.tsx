@@ -76,18 +76,18 @@ const DeleteDistributionModal = ({
 
       <DialogActions sx={{ gap: 1, p: 2 }}>
         <Button
-          variant="outlined"
-          onClick={onCancel}
-          disabled={isLoading}>
-          CANCEL
-        </Button>
-        <Button
           variant="contained"
           color="error"
           onClick={handleConfirm}
           disabled={isLoading}
           startIcon={isLoading ? <CircularProgress size={20} /> : <DeleteIcon />}>
           {isLoading ? "DELETING..." : "DELETE"}
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={onCancel}
+          disabled={isLoading}>
+          CANCEL
         </Button>
       </DialogActions>
     </Dialog>
