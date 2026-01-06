@@ -42,6 +42,8 @@ console.error = (...args: any[]) => {
   originalConsoleError.apply(console, args);
 };
 
+const warnedInvalidPreferenceKeys = new Set<string>();
+
 /**
  * Error boundary specifically for ag-grid column group rendering issues
  */
@@ -152,6 +154,23 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
 
   const isValidPreferenceKey =
     typeof preferenceKey === "string" && Boolean(preferenceKey) && preferenceKey !== "undefined" && preferenceKey !== "null";
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development" || isValidPreferenceKey) {
+      return;
+    }
+
+    const keyLabel = String(preferenceKey);
+    if (warnedInvalidPreferenceKeys.has(keyLabel)) {
+      return;
+    }
+
+    warnedInvalidPreferenceKeys.add(keyLabel);
+    console.warn(
+      `[DSMGrid] Invalid preferenceKey detected (will skip persistence): "${keyLabel}". Investigate the call site passing preferenceKey.`,
+      new Error("Invalid preferenceKey stack trace")
+    );
+  }, [isValidPreferenceKey, preferenceKey]);
 
   // Clear saved state for grids with column groups on mount to prevent corruption
   useEffect(() => {
