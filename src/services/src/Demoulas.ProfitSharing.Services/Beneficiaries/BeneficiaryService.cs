@@ -32,36 +32,18 @@ public class BeneficiaryService : IBeneficiaryService
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
-        _createBeneficiaryValidator = new CreateBeneficiaryRequestValidator();
+        _createBeneficiaryValidator = new CreateBeneficiaryRequestValidator(this);
         _createBeneficiaryContactValidator = new CreateBeneficiaryContactRequestValidator();
         _updateBeneficiaryContactValidator = new UpdateBeneficiaryContactRequestValidator();
         _databaseValidator = new BeneficiaryDatabaseValidator(demographicReaderService);
     }
     public async Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
-        // Validate request using FluentValidation
+        // Validate request using FluentValidation (including percentage sum validation)
         var validationResult = await _createBeneficiaryValidator.ValidateAsync(req, cancellationToken);
         if (!validationResult.IsValid)
         {
             throw new ValidationException(validationResult.Errors);
-        }
-
-        // Validate percentage constraints before creating beneficiary
-        if (req.EmployeeBadgeNumber <= 0)
-        {
-            throw new ValidationException("Badge number must be greater than 0.");
-        }
-
-        if (req.Percentage <= 0 || req.Percentage > 100m)
-        {
-            throw new ValidationException("Percentage must be between 0 and 100%.");
-        }
-
-        // Check that sum of percentages doesn't exceed 100%
-        var existingPercentageSum = await GetBeneficiaryPercentageSumAsync(req.EmployeeBadgeNumber, null, cancellationToken);
-        if (existingPercentageSum >= 0 && (existingPercentageSum + req.Percentage) > 100m)
-        {
-            throw new ValidationException("The sum of all beneficiary percentages would exceed 100%.");
         }
 
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
@@ -205,11 +187,19 @@ public class BeneficiaryService : IBeneficiaryService
         return response;
     }
 
-    public Task<UpdateBeneficiaryResponse> UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
+    public async Task<UpdateBeneficiaryResponse> UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
-        var resp = _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
+        var resp = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
             var beneficiary = await ctx.Beneficiaries.SingleAsync(x => x.Id == req.Id, cancellationToken);
+
+            // Validate request using FluentValidation (including percentage sum validation)
+            var updateBeneficiaryValidator = new UpdateBeneficiaryRequestValidator(this, beneficiary.BadgeNumber, beneficiary.Id);
+            var validationResult = await updateBeneficiaryValidator.ValidateAsync(req, cancellationToken);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
 
             if (!string.IsNullOrEmpty(req.Relationship))
             {
@@ -218,19 +208,6 @@ public class BeneficiaryService : IBeneficiaryService
 
             if (req.Percentage.HasValue)
             {
-                // Validate percentage constraints if percentage was updated
-                if (req.Percentage.Value <= 0 || req.Percentage.Value > 100m)
-                {
-                    throw new ValidationException("Percentage must be between 0 and 100%.");
-                }
-
-                // Check that sum of percentages doesn't exceed 100%
-                var existingPercentageSum = await GetBeneficiaryPercentageSumAsync(beneficiary.BadgeNumber, beneficiary.Id, cancellationToken);
-                if (existingPercentageSum >= 0 && (existingPercentageSum + req.Percentage.Value) > 100m)
-                {
-                    throw new ValidationException("The sum of all beneficiary percentages would exceed 100%.");
-                }
-
                 beneficiary.Percent = req.Percentage.Value;
             }
 

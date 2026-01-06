@@ -145,48 +145,56 @@ const SummariesContent: React.FC = () => {
       headerName: "STE 1-140",
       field: "ste1",
       flex: 1,
+      type: "rightAligned",
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "700",
       field: "700",
       flex: 1,
+      type: "rightAligned",
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "701",
       field: "701",
       flex: 1,
+      type: "rightAligned",
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "800",
       field: "800",
       flex: 1,
+      type: "rightAligned",
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "801",
       field: "801",
       flex: 1,
+      type: "rightAligned",
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "802",
       field: "802",
       flex: 1,
+      type: "rightAligned",
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "900",
       field: "900",
       flex: 1,
+      type: "rightAligned",
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "Total",
       field: "total",
       flex: 1,
+      type: "rightAligned",
       valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     }
   ];

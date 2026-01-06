@@ -1,19 +1,12 @@
+import { CrossReferenceValidation } from "@/types/validation";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { Typography } from "@mui/material";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { ProfitShareUpdateTotals } from "../../../reduxstore/types";
-
-interface ValidationResult {
-  isValid: boolean;
-  currentValue: number;
-  expectedValue: number;
-  variance?: number;
-  message?: string;
-}
+import ValidationPopup, { ValidationField } from "./ValidationPopup";
 
 interface MasterUpdateSummaryTableProps {
   totals: ProfitShareUpdateTotals;
-  getFieldValidation: (fieldKey: string) => ValidationResult | null;
+  getFieldValidation: (fieldKey: string) => Partial<CrossReferenceValidation> | null;
   openValidationField: string | null;
   onValidationToggle: (fieldName: string) => void;
 }
@@ -57,6 +50,143 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
       </div>
     );
   };
+
+  const ValidationPopupFields: ValidationField[] = [
+    {
+      fieldKey: "TotalProfitSharingBalance",
+      title: "Beginning Balance",
+      headers: ["Report", "Amount"],
+      rows: [
+        {
+          label: "PAY444 (Current)",
+          valueGetter: () => numberToCurrency(getFieldValidation("TotalProfitSharingBalance")?.currentValue || 0)
+        },
+        {
+          label: "PAY443 (Expected)",
+          valueGetter: () => numberToCurrency(getFieldValidation("TotalProfitSharingBalance")?.expectedValue || 0)
+        }
+      ]
+    },
+    {
+      fieldKey: "TotalContributions",
+      title: "Contributions",
+      headers: ["Report", "Amount"],
+      rows: [
+        {
+          label: "PAY444 (Current)",
+          valueGetter: () => numberToCurrency(getFieldValidation("PAY443.TotalContributions")?.currentValue || 0)
+        },
+        {
+          label: "PAY443 (Expected)",
+          valueGetter: () => numberToCurrency(getFieldValidation("PAY443.TotalContributions")?.expectedValue || 0)
+        }
+      ]
+    },
+    {
+      fieldKey: "TotalEarnings",
+      title: "Earnings",
+      headers: ["Report", "Amount"],
+      rows: [
+        {
+          label: "PAY444 (Current)",
+          valueGetter: () => numberToCurrency(getFieldValidation("PAY443.TotalEarnings")?.currentValue || 0)
+        },
+        {
+          label: "PAY443 (Expected)",
+          valueGetter: () => numberToCurrency(getFieldValidation("PAY443.TotalEarnings")?.expectedValue || 0)
+        }
+      ]
+    },
+    {
+      fieldKey: "TotalForfeitures",
+      title: "Forfeitures",
+      headers: ["Report", "Amount"],
+      rows: [
+        {
+          label: "PAY444 (Current)",
+          valueGetter: () => numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")?.currentValue || 0)
+        },
+        {
+          label: "PAY443 (Expected)",
+          valueGetter: () => numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")?.expectedValue || 0)
+        }
+      ]
+    },
+    {
+      fieldKey: "DistributionTotals",
+      title: "Distributions",
+      headers: ["Report", "Amount"],
+      rows: [
+        {
+          label: "PAY444 (Current)",
+          valueGetter: () => numberToCurrency(getFieldValidation("DistributionTotals")?.currentValue || 0)
+        },
+        {
+          label: "PAY443 (Expected)",
+          valueGetter: () => numberToCurrency(getFieldValidation("DistributionTotals")?.expectedValue || 0)
+        },
+        {
+          label: "QPAY129 (Expected)",
+          valueGetter: () => numberToCurrency(getFieldValidation("QPAY129_DistributionTotals")?.expectedValue || 0)
+        }
+      ]
+    },
+    {
+      popupClassName: "w-[400px]",
+      fieldKey: "NetAllocTransfer",
+      title: "ALLOC/PAID ALLOC Transfer Balance",
+      headers: ["Field", "Amount"],
+      rows: [
+        {
+          condition: () => getFieldValidation("IncomingAllocations") !== null,
+          label: "Incoming (ALLOC - code 6)",
+          valueGetter: () => numberToCurrency(getFieldValidation("IncomingAllocations")?.currentValue || 0)
+        },
+        {
+          condition: () => getFieldValidation("OutgoingAllocations") !== null,
+          label: "Outgoing (PAID ALLOC - code 5)",
+          valueGetter: () => numberToCurrency(getFieldValidation("OutgoingAllocations")?.currentValue || 0)
+        },
+        {
+          getRowClass: () => "font-semibold",
+          label: "Net Transfer (Should be $0.00)",
+          valueGetter: () => numberToCurrency(getFieldValidation("NetAllocTransfer")?.currentValue || 0),
+          getValueClass: () => (getFieldValidation("NetAllocTransfer")?.isValid ? "text-green-600" : "text-orange-600")
+        }
+      ],
+      messageGetter: () => getFieldValidation("NetAllocTransfer")?.message
+    },
+    {
+      fieldKey: "TotalForfeitPoints",
+      title: "Contribution Points",
+      headers: ["Report", "Amount"],
+      rows: [
+        {
+          label: "PAY444 (Current)",
+          valueGetter: () => formatNumberWithComma(totals.contributionPoints || 0)
+        },
+        {
+          label: "PAY443 (Expected)",
+          valueGetter: () => formatNumberWithComma(getFieldValidation("TotalForfeitPoints")?.expectedValue || 0)
+        }
+      ]
+    },
+    {
+      fieldKey: "TotalEarningPoints",
+      title: "Earning Points",
+      headers: ["Report", "Amount"],
+      rows: [
+        {
+          label: "PAY444 (Current)",
+          valueGetter: () => formatNumberWithComma(totals.earningPoints || 0)
+        },
+        {
+          label: "PAY443 (Expected)",
+          valueGetter: () => formatNumberWithComma(getFieldValidation("TotalEarningPoints")?.expectedValue || 0)
+        }
+      ]
+    }
+  ];
 
   return (
     <>
@@ -172,307 +302,21 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
 
       {/* Validation Popups - positioned fixed and centered on screen */}
 
-      {/* Beginning Balance Validation Popup */}
-      {openValidationField === "TotalProfitSharingBalance" && getFieldValidation("TotalProfitSharingBalance") && (
-        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-          <div className="p-2 px-4 pb-4">
-            <Typography
-              variant="subtitle2"
-              sx={{ p: 1 }}>
-              Beginning Balance
-            </Typography>
-            <table className="w-full border-collapse text-[0.95rem]">
-              <thead>
-                <tr>
-                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
-                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
-                  <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("TotalProfitSharingBalance")?.currentValue || 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
-                  <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("TotalProfitSharingBalance")?.expectedValue || 0)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {ValidationPopupFields.map((field) => {
+        if (openValidationField === field.fieldKey && getFieldValidation(field.fieldKey)) {
+          return (
+            <ValidationPopup
+              key={field.fieldKey}
+              field={field}
+              openField={openValidationField}
+              getFieldValidation={getFieldValidation}
+              onClose={() => onValidationToggle(field.fieldKey)}
+            />
+          );
+        }
 
-      {/* Contributions Validation Popup */}
-      {openValidationField === "TotalContributions" && getFieldValidation("TotalContributions") && (
-        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-          <div className="p-2 px-4 pb-4">
-            <Typography
-              variant="subtitle2"
-              sx={{ p: 1 }}>
-              Contributions
-            </Typography>
-            <table className="w-full border-collapse text-[0.95rem]">
-              <thead>
-                <tr>
-                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
-                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
-                  <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalContributions")?.currentValue || 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
-                  <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalContributions")?.expectedValue || 0)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Earnings Validation Popup */}
-      {openValidationField === "TotalEarnings" && getFieldValidation("TotalEarnings") && (
-        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-          <div className="p-2 px-4 pb-4">
-            <Typography
-              variant="subtitle2"
-              sx={{ p: 1 }}>
-              Earnings
-            </Typography>
-            <table className="w-full border-collapse text-[0.95rem]">
-              <thead>
-                <tr>
-                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
-                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
-                  <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")?.currentValue || 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
-                  <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")?.expectedValue || 0)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Forfeitures Validation Popup */}
-      {openValidationField === "TotalForfeitures" && getFieldValidation("TotalForfeitures") && (
-        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-          <div className="p-2 px-4 pb-4">
-            <Typography
-              variant="subtitle2"
-              sx={{ p: 1 }}>
-              Forfeitures
-            </Typography>
-            <table className="w-full border-collapse text-[0.95rem]">
-              <thead>
-                <tr>
-                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
-                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
-                  <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")?.currentValue || 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
-                  <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")?.expectedValue || 0)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Distributions Validation Popup */}
-      {openValidationField === "DistributionTotals" && getFieldValidation("DistributionTotals") && (
-        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-          <div className="p-2 px-4 pb-4">
-            <Typography
-              variant="subtitle2"
-              sx={{ p: 1 }}>
-              Distributions
-            </Typography>
-            <table className="w-full border-collapse text-[0.95rem]">
-              <thead>
-                <tr>
-                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
-                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
-                  <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("DistributionTotals")?.currentValue || 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
-                  <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("DistributionTotals")?.expectedValue || 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-1 text-left">QPAY129 (Expected)</td>
-                  <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("QPAY129_DistributionTotals")?.expectedValue || 0)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* ALLOC/PAID ALLOC Transfer Balance Validation Popup */}
-      {openValidationField === "NetAllocTransfer" && getFieldValidation("NetAllocTransfer") && (
-        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[400px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-          <div className="p-2 px-4 pb-4">
-            <Typography
-              variant="subtitle2"
-              sx={{ p: 1 }}>
-              ALLOC/PAID ALLOC Transfer Balance
-            </Typography>
-            <table className="w-full border-collapse text-[0.95rem]">
-              <thead>
-                <tr>
-                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Field</th>
-                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getFieldValidation("IncomingAllocations") && (
-                  <tr>
-                    <td className="border-b border-gray-100 px-2 py-1 text-left">Incoming (ALLOC - code 6)</td>
-                    <td className="border-b border-gray-100 px-2 py-1 text-right">
-                      {numberToCurrency(getFieldValidation("IncomingAllocations")?.currentValue || 0)}
-                    </td>
-                  </tr>
-                )}
-                {getFieldValidation("OutgoingAllocations") && (
-                  <tr>
-                    <td className="border-b border-gray-100 px-2 py-1 text-left">Outgoing (PAID ALLOC - code 5)</td>
-                    <td className="border-b border-gray-100 px-2 py-1 text-right">
-                      {numberToCurrency(getFieldValidation("OutgoingAllocations")?.currentValue || 0)}
-                    </td>
-                  </tr>
-                )}
-                <tr className="font-semibold">
-                  <td className="px-2 py-1 text-left">Net Transfer (Should be $0.00)</td>
-                  <td
-                    className={`px-2 py-1 text-right ${getFieldValidation("NetAllocTransfer")?.isValid ? "text-green-600" : "text-orange-600"}`}>
-                    {numberToCurrency(getFieldValidation("NetAllocTransfer")?.currentValue || 0)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            {getFieldValidation("NetAllocTransfer")?.message && (
-              <div className="mt-2 rounded bg-gray-50 p-2 text-sm">
-                <strong>Note:</strong> {getFieldValidation("NetAllocTransfer")?.message}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Forfeiture points Validation Popup */}
-      {openValidationField === "TotalForfeitPoints" && getFieldValidation("TotalForfeitPoints") && (
-        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-          <div className="p-2 px-4 pb-4">
-            <Typography
-              variant="subtitle2"
-              sx={{ p: 1 }}>
-              Contribution Points
-            </Typography>
-            <table className="w-full border-collapse text-[0.95rem]">
-              <thead>
-                <tr>
-                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
-                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
-                  <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {formatNumberWithComma(totals.contributionPoints || 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
-                  <td className="px-2 py-1 text-right">
-                    {formatNumberWithComma(getFieldValidation("TotalForfeitPoints")?.expectedValue || 0)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Forfeiture points Validation Popup */}
-      {openValidationField === "TotalEarningPoints" && getFieldValidation("TotalEarningPoints") && (
-        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-          <div className="p-2 px-4 pb-4">
-            <Typography
-              variant="subtitle2"
-              sx={{ p: 1 }}>
-              Earning Points
-            </Typography>
-            <table className="w-full border-collapse text-[0.95rem]">
-              <thead>
-                <tr>
-                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
-                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
-                  <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {formatNumberWithComma(totals.earningPoints || 0)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
-                  <td className="px-2 py-1 text-right">
-                    {formatNumberWithComma(getFieldValidation("TotalEarningPoints")?.expectedValue || 0)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+        return null;
+      })}
     </>
   );
 };

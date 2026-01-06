@@ -4,10 +4,7 @@ import { CrossReferenceValidationGroup } from "../../types/validation/cross-refe
 import { ValidationIcon } from "./ValidationIcon";
 
 // Helper function to create a mock validation group
-const createMockValidationGroup = (
-  fieldName: string,
-  isValid: boolean
-): CrossReferenceValidationGroup => ({
+const createMockValidationGroup = (fieldName: string, isValid: boolean): CrossReferenceValidationGroup => ({
   groupName: "Test Group",
   description: "Test validation group",
   isValid,

@@ -14,9 +14,7 @@ interface ForfeituresCellRendererProps extends ICellRendererParams {
 export const ForfeituresCellRenderer: React.FC<ForfeituresCellRendererProps> = (params) => {
   const { data, value, onValidationClick } = params;
 
-  const handleClick = onValidationClick
-    ? () => onValidationClick("ForfeitureTotal")
-    : undefined;
+  const handleClick = onValidationClick ? () => onValidationClick("ForfeitureTotal") : undefined;
 
   return (
     <div className="flex items-center gap-1">

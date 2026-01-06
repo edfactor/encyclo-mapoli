@@ -18,7 +18,8 @@ public class NavigationPrerequisiteValidator : INavigationPrerequisiteValidator
     public async Task ValidateAllCompleteAsync(short navigationId, CancellationToken cancellationToken)
     {
         // Fetch full navigation (by roles) and locate the requested node.
-        var tree = await _navigationService.GetNavigation(cancellationToken);
+        var response = await _navigationService.GetNavigation(cancellationToken);
+        var tree = response.Navigation ?? [];
         var node = FindNode(tree, navigationId);
         if (node == null)
         {

@@ -87,9 +87,6 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
     []
   );
 
-  // Disable member type radio when badge number has a value
-  const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
-
   // Helper function to check if a value is non-empty
   const hasValue = useCallback(
     (value: string | number | null | undefined) => value !== null && value !== undefined && value !== "",
@@ -355,25 +352,14 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                       <FormControlLabel
                         key={option.value}
                         value={option.value}
-                        control={
-                          <Radio
-                            size="small"
-                            disabled={isMemberTypeDisabled}
-                          />
-                        }
+                        control={<Radio size="small" />}
                         label={option.label}
-                        disabled={isMemberTypeDisabled}
                       />
                     ))}
                   </RadioGroup>
                 )}
               />
             </FormControl>
-            {isMemberTypeDisabled && (
-              <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
-                Member Type set based on Badge/PSN length. Clear Badge/PSN to manually select.
-              </FormHelperText>
-            )}
           </Grid>
         </Grid>
 

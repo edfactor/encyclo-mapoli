@@ -45,7 +45,8 @@ public class NavigationServiceTests : ApiTestBase<Program>
         // Use MemoryDistributedCache which implements IDistributedCache for testing
         var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
         var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
-        var navigation = await svc.GetNavigation(CancellationToken.None);
+        var response = await svc.GetNavigation(CancellationToken.None);
+        var navigation = response.Navigation ?? [];
 
         Assert.NotNull(navigation);
         // Structural sanity checks instead of brittle full equivalence to a hand-crafted list
@@ -101,14 +102,15 @@ public class NavigationServiceTests : ApiTestBase<Program>
         var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
 
         // Act: Get navigation items
-        var navigation = await svc.GetNavigation(CancellationToken.None);
+        var response = await svc.GetNavigation(CancellationToken.None);
+        var navigation = response.Navigation ?? [];
 
         // Assert: All navigation items should have IsReadOnly = true
         Assert.NotNull(navigation);
         Assert.All(navigation, n => Assert.True(n.IsReadOnly, $"Navigation item '{n.Title}' should have IsReadOnly = true for ITDEVOPS role"));
 
         // Also check child items
-        var itemsWithChildren = navigation.Where(n => n.Items?.Any() == true);
+        var itemsWithChildren = navigation.Where(n => n.Items is { Count: > 0 });
         foreach (var parent in itemsWithChildren)
         {
             Assert.All(parent.Items!, child => Assert.True(child.IsReadOnly, $"Child navigation item '{child.Title}' should have IsReadOnly = true for ITDEVOPS role"));
@@ -127,14 +129,15 @@ public class NavigationServiceTests : ApiTestBase<Program>
         var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
 
         // Act: Get navigation items
-        var navigation = await svc.GetNavigation(CancellationToken.None);
+        var response = await svc.GetNavigation(CancellationToken.None);
+        var navigation = response.Navigation ?? [];
 
         // Assert: All navigation items should have IsReadOnly = false
         Assert.NotNull(navigation);
         Assert.All(navigation, n => Assert.False(n.IsReadOnly, $"Navigation item '{n.Title}' should have IsReadOnly = false for FINANCEMANAGER role"));
 
         // Also check child items
-        var itemsWithChildren = navigation.Where(n => n.Items?.Any() == true);
+        var itemsWithChildren = navigation.Where(n => n.Items is { Count: > 0 });
         foreach (var parent in itemsWithChildren)
         {
             Assert.All(parent.Items!, child => Assert.False(child.IsReadOnly, $"Child navigation item '{child.Title}' should have IsReadOnly = false for FINANCEMANAGER role"));
@@ -153,14 +156,15 @@ public class NavigationServiceTests : ApiTestBase<Program>
         var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
 
         // Act: Get navigation items
-        var navigation = await svc.GetNavigation(CancellationToken.None);
+        var response = await svc.GetNavigation(CancellationToken.None);
+        var navigation = response.Navigation ?? [];
 
         // Assert: All navigation items should have IsReadOnly = true
         Assert.NotNull(navigation);
         Assert.All(navigation, n => Assert.True(n.IsReadOnly, $"Navigation item '{n.Title}' should have IsReadOnly = true for AUDITOR role"));
 
         // Also check child items
-        var itemsWithChildren = navigation.Where(n => n.Items?.Any() == true);
+        var itemsWithChildren = navigation.Where(n => n.Items is { Count: > 0 });
         foreach (var parent in itemsWithChildren)
         {
             Assert.All(parent.Items!, child => Assert.True(child.IsReadOnly, $"Child navigation item '{child.Title}' should have IsReadOnly = true for AUDITOR role"));

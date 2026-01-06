@@ -4043,6 +4043,28 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("NAVIGATION", (string)null);
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationCustomSetting", b =>
+                {
+                    b.Property<short>("NavigationId")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("NAVIGATION_ID");
+
+                    b.Property<string>("Key")
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("KEY");
+
+                    b.Property<string>("ValueJson")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("VALUE_JSON");
+
+                    b.HasKey("NavigationId", "Key")
+                        .HasName("PK_NAVIGATION_CUSTOM_SETTING");
+
+                    b.ToTable("NAVIGATION_CUSTOM_SETTING", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationRole", b =>
                 {
                     b.Property<byte>("Id")
@@ -7625,6 +7647,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationCustomSetting", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", "Navigation")
+                        .WithMany("CustomSettings")
+                        .HasForeignKey("NavigationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NAVIGATION_CUSTOM_SETTING_NAVIGATION_NAVIGATIONID");
+
+                    b.Navigation("Navigation");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationTracking", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", "Navigation")
@@ -7871,6 +7905,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
                 {
+                    b.Navigation("CustomSettings");
+
                     b.Navigation("Items");
 
                     b.Navigation("NavigationTrackings");

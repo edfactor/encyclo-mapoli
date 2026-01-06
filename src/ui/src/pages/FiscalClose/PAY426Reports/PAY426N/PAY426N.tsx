@@ -7,16 +7,16 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  clearYearEndProfitSharingReportFrozen,
-  clearYearEndProfitSharingReportLive
+    clearYearEndProfitSharingReportFrozen,
+    clearYearEndProfitSharingReportLive
 } from "reduxstore/slices/yearsEndSlice";
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS, ROUTES } from "../../../../constants";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { useGridExpansion } from "../../../../hooks/useGridExpansion";
 import { useIsProfitYearFrozen } from "../../../../hooks/useIsProfitYearFrozen";
 import { useIsReadOnlyByStatus } from "../../../../hooks/useIsReadOnlyByStatus";
+import useNavigationYear from "../../../../hooks/useNavigationYear";
 import ProfitSummary from "../ProfitSummary/ProfitSummary";
 import FilterSection from "./FilterSection";
 import presets from "./presets";
@@ -30,7 +30,7 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
   const { isGridExpanded, handleToggleGridExpand } = useGridExpansion();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useNavigationYear();
   const isFrozen = useIsProfitYearFrozen(profitYear);
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
 
@@ -136,7 +136,7 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
                 searchTrigger={searchTrigger}
                 isGridExpanded={isGridExpanded}
                 onToggleExpand={handleToggleGridExpand}
-                profitYear={profitYear}
+                profitYear={profitYear ?? new Date().getFullYear()}
               />
             )}
 

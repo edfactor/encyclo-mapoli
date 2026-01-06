@@ -9,9 +9,17 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// </summary>
 internal sealed class NullNavigationService : INavigationService
 {
-    public Task<List<NavigationDto>> GetNavigation(CancellationToken cancellationToken)
+    public Task<NavigationResponseDto> GetNavigation(CancellationToken cancellationToken)
     {
-        return Task.FromResult(new List<NavigationDto>());
+        return Task.FromResult(new NavigationResponseDto
+        {
+            Navigation = new List<NavigationDto>(),
+            CustomSettings = new Dictionary<string, object?>
+            {
+                [NavigationCustomSettingsKeys.TrackPageStatus] = true,
+                [NavigationCustomSettingsKeys.UseFrozenYear] = true
+            }
+        });
     }
 
     public NavigationDto GetNavigation(short navigationId)

@@ -18,12 +18,42 @@ export interface PaginationState {
 
 const PAGINATION_SUFFIX = "_pagination";
 
+const warnedInvalidPaginationKeys = new Set<string>();
+
+const isValidGridPersistenceKey = (key: unknown): key is string =>
+  typeof key === "string" && Boolean(key) && key !== "undefined" && key !== "null";
+
+const warnIfInvalidKey = (key: unknown) => {
+  if (process.env.NODE_ENV !== "development") {
+    return;
+  }
+
+  if (isValidGridPersistenceKey(key)) {
+    return;
+  }
+
+  const keyLabel = String(key);
+  if (warnedInvalidPaginationKeys.has(keyLabel)) {
+    return;
+  }
+
+  warnedInvalidPaginationKeys.add(keyLabel);
+  console.warn(
+    `[useGridPagination] Invalid persistenceKey detected (will skip localStorage pagination): "${keyLabel}". Investigate the call site passing persistenceKey.`,
+    new Error("Invalid persistenceKey stack trace")
+  );
+};
+
 /**
  * Load pagination state from localStorage
  * @param key - Unique key for the grid (from GRID_KEYS)
  * @returns The pagination state or null if not found
  */
 export const loadPaginationState = (key: string): PaginationState | null => {
+  if (!isValidGridPersistenceKey(key)) {
+    warnIfInvalidKey(key);
+    return null;
+  }
   try {
     const stored = localStorage.getItem(`${key}${PAGINATION_SUFFIX}`);
     if (stored) {
@@ -42,6 +72,10 @@ export const loadPaginationState = (key: string): PaginationState | null => {
  * @param pagination - The pagination state to persist
  */
 export const savePaginationState = (key: string, pagination: PaginationState): void => {
+  if (!isValidGridPersistenceKey(key)) {
+    warnIfInvalidKey(key);
+    return;
+  }
   try {
     localStorage.setItem(`${key}${PAGINATION_SUFFIX}`, JSON.stringify(pagination));
   } catch (error) {
@@ -54,6 +88,10 @@ export const savePaginationState = (key: string, pagination: PaginationState): v
  * @param key - Unique key for the grid
  */
 export const clearPaginationState = (key: string): void => {
+  if (!isValidGridPersistenceKey(key)) {
+    warnIfInvalidKey(key);
+    return;
+  }
   try {
     localStorage.removeItem(`${key}${PAGINATION_SUFFIX}`);
   } catch (error) {

@@ -1,7 +1,7 @@
 import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Alert, Button, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import useNavigationYear from "hooks/useNavigationYear";
 import React, { useState } from "react";
 import { useGetMissingAnnuityYearsQuery } from "reduxstore/api/administrationApi";
 import { useLazyDownloadCertificatesFileQuery } from "reduxstore/api/YearsEndApi";
@@ -13,9 +13,9 @@ import ReprintCertificatesFilterSection, { ReprintCertificatesFilterParams } fro
 import ReprintCertificatesGrid from "./ReprintCertificatesGrid";
 
 const ReprintCertificates: React.FC = () => {
-  const selectedProfitYear = useFiscalCloseProfitYear();
+  const selectedProfitYear = useNavigationYear();
   const [filterParams, setFilterParams] = useState<ReprintCertificatesFilterParams>({
-    profitYear: selectedProfitYear,
+    profitYear: selectedProfitYear ?? new Date().getFullYear(),
     badgeNumber: "",
     socialSecurityNumber: ""
   });
@@ -57,7 +57,7 @@ const ReprintCertificates: React.FC = () => {
 
   const handleReset = () => {
     setFilterParams({
-      profitYear: selectedProfitYear,
+      profitYear: selectedProfitYear ?? new Date().getFullYear(),
       badgeNumber: "",
       socialSecurityNumber: ""
     });

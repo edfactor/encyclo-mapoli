@@ -1,34 +1,34 @@
-import { GRID_KEYS } from "../../../../constants";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import useNavigationYear from "hooks/useNavigationYear";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  useLazyGetAdditionalExecutivesQuery,
-  useLazyGetExecutiveHoursAndDollarsQuery,
-  useUpdateExecutiveHoursAndDollarsMutation
+    useLazyGetAdditionalExecutivesQuery,
+    useLazyGetExecutiveHoursAndDollarsQuery,
+    useUpdateExecutiveHoursAndDollarsMutation
 } from "reduxstore/api/YearsEndApi";
 import {
-  addExecutiveHoursAndDollarsGridRow,
-  clearExecutiveHoursAndDollarsGridRows,
-  removeExecutiveHoursAndDollarsGridRow,
-  setExecutiveHoursAndDollarsGridYear,
-  updateExecutiveHoursAndDollarsGridRow
+    addExecutiveHoursAndDollarsGridRow,
+    clearExecutiveHoursAndDollarsGridRows,
+    removeExecutiveHoursAndDollarsGridRow,
+    setExecutiveHoursAndDollarsGridYear,
+    updateExecutiveHoursAndDollarsGridRow
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid, MissiveResponse } from "reduxstore/types";
 import { ISortParams } from "smart-ui-library";
 import { EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
+import { GRID_KEYS } from "../../../../constants";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
 import { ExecutiveHoursAndDollarsRequestDto } from "../../../../types/fiscal/executive";
 import { isSimpleSearch } from "../utils/ManageExecutiveHoursAndDollarsUtils";
 import {
-  initialState,
-  manageExecutiveHoursAndDollarsReducer,
-  selectCombinedGridData,
-  selectHasPendingChanges,
-  selectIsRowStagedToSave,
-  selectShowGrid,
-  selectShowModal
+    initialState,
+    manageExecutiveHoursAndDollarsReducer,
+    selectCombinedGridData,
+    selectHasPendingChanges,
+    selectIsRowStagedToSave,
+    selectShowGrid,
+    selectShowModal
 } from "./useManageExecutiveHoursAndDollarsReducer";
 
 interface ExecutiveSearchForm {
@@ -47,7 +47,7 @@ interface UseManageExecutiveHoursAndDollarsProps {
 const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageExecutiveHoursAndDollarsProps) => {
   const [state, dispatch] = useReducer(manageExecutiveHoursAndDollarsReducer, initialState);
   const reduxDispatch = useDispatch();
-  const profitYear = useFiscalCloseProfitYear();
+  const profitYear = useNavigationYear();
 
   const [triggerSearch, { isLoading: isSearching }] = useLazyGetExecutiveHoursAndDollarsQuery();
   const [triggerModalSearch, { isLoading: isModalSearching }] = useLazyGetAdditionalExecutivesQuery();
@@ -145,7 +145,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
   const executeSearch = useCallback(
     async (searchForm: ExecutiveSearchForm) => {
       const searchParams: ExecutiveHoursAndDollarsRequestDto = {
-        profitYear: profitYear || 0,
+        profitYear: profitYear || new Date().getFullYear(),
         ...(searchForm.badgeNumber && { badgeNumber: searchForm.badgeNumber }),
         ...(searchForm.socialSecurity && { socialSecurity: Number(searchForm.socialSecurity) }),
         ...(searchForm.fullNameContains && { fullNameContains: searchForm.fullNameContains }),
@@ -184,7 +184,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
           }
         }
 
-        reduxDispatch(setExecutiveHoursAndDollarsGridYear(profitYear));
+        reduxDispatch(setExecutiveHoursAndDollarsGridYear(profitYear || new Date().getFullYear()));
         dispatch({ type: "CLEAR_ADDITIONAL_EXECUTIVES" });
       } catch (error) {
         dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Search failed" } });

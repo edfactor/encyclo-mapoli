@@ -1,5 +1,5 @@
 import { Button, Checkbox, CircularProgress, FormControlLabel, FormLabel, Grid, MenuItem, Select } from "@mui/material";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import useNavigationYear from "hooks/useNavigationYear";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { YTDWagesSearchParams } from "./hooks/useYTDWages";
@@ -15,23 +15,23 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({
   isSearching = false,
   defaultUseFrozenData = true
 }) => {
-  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+  const profitYear = useNavigationYear();
   const [useFrozenData, setUseFrozenData] = useState(defaultUseFrozenData);
 
   const { handleSubmit } = useForm({
     defaultValues: {
-      profitYear: fiscalCloseProfitYear
+      profitYear: profitYear
     }
   });
 
   const doSearch = useCallback(() => {
     // call the form submit handler returned by handleSubmit
     handleSubmit(() => {
-      if (fiscalCloseProfitYear) {
-        onSearch({ profitYear: fiscalCloseProfitYear, useFrozenData });
+      if (profitYear) {
+        onSearch({ profitYear: profitYear, useFrozenData });
       }
     })();
-  }, [handleSubmit, fiscalCloseProfitYear, useFrozenData, onSearch]);
+  }, [handleSubmit, profitYear, useFrozenData, onSearch]);
 
   return (
     <form onSubmit={doSearch}>
@@ -43,10 +43,10 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({
           <FormLabel>Profit Year</FormLabel>
           <Select
             size="small"
-            value={fiscalCloseProfitYear || ""}
+            value={profitYear || ""}
             disabled={true}
             fullWidth>
-            <MenuItem value={fiscalCloseProfitYear || ""}>{fiscalCloseProfitYear}</MenuItem>
+            <MenuItem value={profitYear || ""}>{profitYear}</MenuItem>
           </Select>
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -67,7 +67,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({
         <div className="search-buttons mt-5 flex justify-start">
           <Button
             variant="contained"
-            disabled={isSearching || !fiscalCloseProfitYear}
+            disabled={isSearching || !profitYear}
             data-testid="searchButton"
             type="submit"
             onClick={doSearch}

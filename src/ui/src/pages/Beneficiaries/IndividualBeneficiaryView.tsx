@@ -1,6 +1,7 @@
-import { BeneficiaryDetail, BeneficiaryDto } from "@/types";
+import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiaryDto } from "@/types";
 import { Button } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
 import BeneficiaryRelationshipsGrids from "./BeneficiaryRelationshipsGrids";
 import CreateBeneficiaryDialog from "./CreateBeneficiaryDialog";
 import MemberDetailsPanel from "./MemberDetailsPanel";
@@ -8,14 +9,20 @@ import MemberDetailsPanel from "./MemberDetailsPanel";
 interface IndividualBeneficiaryViewProps {
   selectedMember: BeneficiaryDetail;
   memberType: number | undefined;
+  onBeneficiarySelect?: (beneficiary: BeneficiaryDetail) => void;
 }
 
-const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({ selectedMember, memberType }) => {
+const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
+  selectedMember,
+  memberType,
+  onBeneficiarySelect
+}) => {
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
   const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
   const [change, setChange] = useState<number>(0);
   const [existingBeneficiaries, setExistingBeneficiaries] = useState<BeneficiaryDto[]>([]);
+  const [triggerBeneficiaryDetail] = useLazyGetBeneficiaryDetailQuery();
 
   const handleClose = () => {
     setOpenCreateDialog(false);
@@ -35,6 +42,31 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({ s
   const handleBeneficiariesChange = (beneficiaries: BeneficiaryDto[]) => {
     setExistingBeneficiaries(beneficiaries);
   };
+
+  const handleBadgeClick = useCallback(
+    (beneficiary: BeneficiaryDto) => {
+      const request: BeneficiaryDetailAPIRequest = {
+        badgeNumber: beneficiary.badgeNumber,
+        psnSuffix: beneficiary.psnSuffix,
+        isSortDescending: true,
+        skip: 0,
+        sortBy: "psnSuffix",
+        take: 25
+      };
+
+      triggerBeneficiaryDetail(request)
+        .unwrap()
+        .then((res) => {
+          if (onBeneficiarySelect) {
+            onBeneficiarySelect(res);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to fetch beneficiary details:", error);
+        });
+    },
+    [triggerBeneficiaryDetail, onBeneficiarySelect]
+  );
 
   return (
     <>
@@ -73,6 +105,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({ s
         selectedMember={selectedMember}
         onEditBeneficiary={createOrUpdateBeneficiary}
         onBeneficiariesChange={handleBeneficiariesChange}
+        onBadgeClick={handleBadgeClick}
       />
     </>
   );

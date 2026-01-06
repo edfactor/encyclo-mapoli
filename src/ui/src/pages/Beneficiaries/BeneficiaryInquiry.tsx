@@ -170,6 +170,10 @@ const BeneficiaryInquiryContent = () => {
           <IndividualBeneficiaryView
             selectedMember={selectedMember}
             memberType={memberType}
+            onBeneficiarySelect={(beneficiary) => {
+              setSelectedMember(beneficiary);
+              setHasSelectedMember(true);
+            }}
           />
         )}
       </Grid>
