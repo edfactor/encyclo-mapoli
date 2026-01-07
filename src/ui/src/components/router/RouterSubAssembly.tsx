@@ -72,6 +72,7 @@ const ForfeituresByAge = lazy(() => import("../../pages/FiscalClose/AgeReports/F
 const ProfitShareEditUpdate = lazy(() => import("../../pages/FiscalClose/ProfitShareEditUpdate/ProfitShareEditUpdate"));
 const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDWages"));
 const DemographicFreeze = lazy(() => import("../../pages/ITOperations/DemographicFreeze/DemographicFreeze"));
+const FakeTimeManagement = lazy(() => import("../../pages/ITOperations/FakeTimeManagement/FakeTimeManagement"));
 const ManageStateTaxes = lazy(() => import("../../pages/Administration/ManageStateTaxes/ManageStateTaxes"));
 const ManageAnnuityRates = lazy(() => import("../../pages/Administration/ManageAnnuityRates/ManageAnnuityRates"));
 const ManageRmdFactors = lazy(() => import("../../pages/Administration/ManageRmdFactors/ManageRmdFactors"));
@@ -615,6 +616,16 @@ const RouterSubAssembly: React.FC = () => {
                     <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <DemographicFreeze />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.FAKE_TIME_MANAGEMENT}
+                  element={
+                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <FakeTimeManagement />
                       </Suspense>
                     </ProtectedRoute>
                   }

@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -16,16 +17,19 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private readonly TotalService _totalService;
     private readonly IFrozenService _frozenService;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly TimeProvider _timeProvider;
 
     public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory,
         TotalService totalService,
         IFrozenService frozenService,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        TimeProvider timeProvider)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _frozenService = frozenService;
         _demographicReaderService = demographicReaderService;
+        _timeProvider = timeProvider;
     }
 
     public Task<Result<SuggestedForfeitureAdjustmentResponse>> GetSuggestedForfeitureAmount(SuggestedForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
@@ -66,7 +70,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // PATH 2: No forfeiture history OR last transaction was UNFORFEIT (negative amount)
             // → Calculate how much SHOULD be forfeited based on vesting
-            var totalVestingBalance = await _totalService.TotalVestingBalance(context, profitYear, DateTime.Now.ToDateOnly())
+            var totalVestingBalance = await _totalService.TotalVestingBalance(context, profitYear, _timeProvider.GetLocalDateOnly())
                 .Where(vb => vb.Ssn == demographic.Ssn).SingleAsync(cancellationToken);
 
             // If fully vested, nothing to forfeit
@@ -188,8 +192,8 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id, // Code 2 for forfeitures
                 Remark = remarkText,
                 Forfeiture = req.ForfeitureAmount,
-                MonthToDate = (byte)DateTime.Now.Month,
-                YearToDate = (short)DateTime.Now.Year,
+                MonthToDate = _timeProvider.GetLocalMonthAsByte(),
+                YearToDate = _timeProvider.GetLocalYearAsShort(),
                 CreatedAtUtc = DateTimeOffset.UtcNow,
                 ModifiedAtUtc = DateTimeOffset.UtcNow,
                 CommentTypeId = commentType.Id,
@@ -222,7 +226,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 // The PY_PS_ETVA gets calculated then written and PY_PS_ENROLLED gets subtracted by two. So 3 becomes 1 and 4 becomes 2."
                 if (isForfeit)
                 {
-                    int wallClockYear = DateTime.Now.Year;
+                    int wallClockYear = _timeProvider.GetLocalYear();
                     if (req.ProfitYear <= wallClockYear - 2)
                     {
                         return Result<bool>.Failure(Error.Unexpected(

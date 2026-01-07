@@ -73,9 +73,12 @@ export const getMonthDateRange = (date: Date | null): { startDate: Date | null; 
  * // Called on December 15, 2025
  * getLastYearDateRange()
  * // Returns { beginDate: 2024-01-01, endDate: 2024-12-31 }
+ *
+ * @param currentDate - Optional date to use as "today". If not provided, uses system date.
+ *                      Pass fake time date for time-travel scenarios.
  */
-export const getLastYearDateRange = (): { beginDate: Date; endDate: Date } => {
-  const today = new Date();
+export const getLastYearDateRange = (currentDate?: Date): { beginDate: Date; endDate: Date } => {
+  const today = currentDate || new Date();
   const currentYear = today.getFullYear();
 
   // First day of last year (e.g., Jan 1, 2024 if current is 2025)

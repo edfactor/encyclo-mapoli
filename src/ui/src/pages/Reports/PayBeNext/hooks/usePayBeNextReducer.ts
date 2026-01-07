@@ -75,6 +75,7 @@ export const initialState: PayBeNextState = {
     hasSearched: false
   },
   formData: {
+    // Note: Initial state uses system time. Component should update with fake-time-aware year.
     profitYear: new Date().getFullYear(),
     isAlsoEmployee: true
   },

@@ -44,7 +44,7 @@ public abstract class PristineBaseTest
         TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);
         TestOutputHelper = testOutputHelper;
         PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService);
-        YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService);
+        YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService, TimeProvider.System);
     }
 
     public static string ReadEmbeddedResource(string resourceName)

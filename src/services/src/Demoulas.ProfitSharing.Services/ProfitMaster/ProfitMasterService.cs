@@ -3,6 +3,7 @@ using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -33,13 +34,15 @@ public class ProfitMasterService : IProfitMasterService
     private readonly IProfitSharingDataContextFactory _dbFactory;
     private readonly IInternalProfitShareEditService _profitShareEditService;
     private readonly IFrozenService _frozenService;
+    private readonly TimeProvider _timeProvider;
 
-    public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory, IAppUser appUser, IFrozenService frozenService)
+    public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory, IAppUser appUser, IFrozenService frozenService, TimeProvider timeProvider)
     {
         _profitShareEditService = profitShareEditService;
         _dbFactory = dbFactory;
         _appUser = appUser;
         _frozenService = frozenService;
+        _timeProvider = timeProvider;
     }
 
     public async Task<ProfitMasterUpdateResponse?> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken)
@@ -80,7 +83,7 @@ public class ProfitMasterService : IProfitMasterService
         return await _dbFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
             // The ETVA value is always hot in the wall clock year.
-            short etvaHotProfitYear = (short)DateTime.Now.Year;
+            short etvaHotProfitYear = _timeProvider.GetLocalYearAsShort();
 
             var latestYearEndUpdateStatus = await ctx.YearEndUpdateStatuses
                 .OrderByDescending(st => st.ProfitYear)
@@ -207,7 +210,7 @@ public class ProfitMasterService : IProfitMasterService
                 EmployeesEffected = employeesEffected,
                 EtvasEffected = etvasEffected,
                 TransactionsCreated = profitDetailRecords.Count,
-                UpdatedTime = DateTime.Now,
+                UpdatedTime = _timeProvider.GetLocalNow().DateTime,
                 UpdatedBy = _appUser.UserName ?? "Unknown",
                 ContributionPercent = profitShareUpdateRequest.ContributionPercent,
                 IncomingForfeitPercent = profitShareUpdateRequest.IncomingForfeitPercent,
@@ -248,7 +251,7 @@ public class ProfitMasterService : IProfitMasterService
     {
         var frozenDemographicYear = (await _frozenService.GetActiveFrozenDemographic(cancellationToken)).ProfitYear;
         // The ETVA value is always hot in the wall clock year.
-        short etvaHotProfitYear = (short)DateTime.Now.Year;
+        short etvaHotProfitYear = _timeProvider.GetLocalYearAsShort();
 
         return await _dbFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
@@ -318,7 +321,7 @@ public class ProfitMasterService : IProfitMasterService
                 EmployeesEffected = latestYearEndUpdateStatus?.EmployeesEffected ?? 0,
                 TransactionsRemoved = transactionsDeleted,
                 EtvasEffected = etvasEffected,
-                UpdatedTime = DateTime.Now,
+                UpdatedTime = _timeProvider.GetLocalNow().DateTime,
                 UpdatedBy = _appUser.UserName ?? "Unknown",
             };
         }, cancellationToken);
