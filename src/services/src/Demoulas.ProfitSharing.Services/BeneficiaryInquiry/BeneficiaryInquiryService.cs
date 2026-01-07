@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -25,6 +26,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     private readonly IFrozenService _frozenService;
     private readonly ITotalService _totalService;
     private readonly IMasterInquiryService _masterInquiryService;
+    private readonly TimeProvider _timeProvider;
 
 
     private sealed record BeneficiaryRow
@@ -54,12 +56,13 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         public string? Relationship { get; init; }
     }
 
-    public BeneficiaryInquiryService(IProfitSharingDataContextFactory dataContextFactory, IFrozenService frozenService, ITotalService totalService, IMasterInquiryService masterInquiryService)
+    public BeneficiaryInquiryService(IProfitSharingDataContextFactory dataContextFactory, IFrozenService frozenService, ITotalService totalService, IMasterInquiryService masterInquiryService, TimeProvider timeProvider)
     {
         _dataContextFactory = dataContextFactory;
         _frozenService = frozenService;
         _totalService = totalService;
         _masterInquiryService = masterInquiryService;
+        _timeProvider = timeProvider;
     }
 
     /// <summary>
@@ -78,8 +81,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             Name = request.Name,
             Ssn = request.Ssn != null ? Convert.ToInt32(request.Ssn) : 0,
             MemberType = request.MemberType,
-            EndProfitYear = (short)DateTime.Now.Year,
-            ProfitYear = (short)DateTime.Now.Year,
+            EndProfitYear = _timeProvider.GetLocalYearAsShort(),
+            ProfitYear = _timeProvider.GetLocalYearAsShort(),
             Skip = request.Skip,
             Take = request.Take,
             SortBy = request.SortBy,
@@ -488,8 +491,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             var memberDetail = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest
             {
                 BadgeNumber = request.BadgeNumber,
-                EndProfitYear = (short)DateTime.Now.Year,
-                ProfitYear = (short)DateTime.Now.Year,
+                EndProfitYear = _timeProvider.GetLocalYearAsShort(),
+                ProfitYear = _timeProvider.GetLocalYearAsShort(),
                 MemberType = EmployeeMemberType
             }, cancellationToken);
 

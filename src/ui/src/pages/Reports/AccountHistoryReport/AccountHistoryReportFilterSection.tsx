@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { useFakeTimeAwareYear } from "../../../hooks/useFakeTimeAwareDate";
 
 export interface AccountHistoryReportFilterParams {
   badgeNumber: string;
@@ -38,7 +39,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
   isLoading = false
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const currentYear = new Date().getFullYear();
+  const currentYear = useFakeTimeAwareYear();
   // Default start date goes back 5 years from current year
   const defaultStartDate = new Date(currentYear - 5, 0, 1);
   // Minimum allowed date goes back 75 years from current year

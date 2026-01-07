@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -35,6 +36,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IEmployeeMasterInquiryService _employeeInquiryService;
     private readonly IBeneficiaryMasterInquiryService _beneficiaryInquiryService;
+    private readonly TimeProvider _timeProvider;
 
     public MasterInquiryService(
         IProfitSharingDataContextFactory dataContextFactory,
@@ -42,7 +44,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
         ILoggerFactory loggerFactory,
         IDemographicReaderService demographicReaderService,
         IEmployeeMasterInquiryService employeeInquiryService,
-        IBeneficiaryMasterInquiryService beneficiaryInquiryService)
+        IBeneficiaryMasterInquiryService beneficiaryInquiryService,
+        TimeProvider timeProvider)
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
@@ -50,6 +53,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         _employeeInquiryService = employeeInquiryService;
         _beneficiaryInquiryService = beneficiaryInquiryService;
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
+        _timeProvider = timeProvider;
     }
 
 
@@ -753,7 +757,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         bool isProfitYearYearEndComplete = (currentYear < ReferenceData.SmartTransitionYear) || await _dataContextFactory.UseReadOnlyContext(async ctx =>
             await ctx.YearEndUpdateStatuses
                 .AnyAsync(x => x.ProfitYear == currentYear && x.IsYearEndCompleted, cancellationToken), cancellationToken);
-        bool isWallClockYear = currentYear == DateTime.Now.Year;
+        bool isWallClockYear = currentYear == _timeProvider.GetLocalYear();
 
         var ssnCollection = memberDetailsMap.Keys.ToHashSet();
         List<BalanceEndpointResponse> currentBalance = [];

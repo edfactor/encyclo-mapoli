@@ -15,6 +15,7 @@ import { RootState } from "reduxstore/store";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear.ts";
+import { useFakeTimeAwareDate } from "../../../hooks/useFakeTimeAwareDate";
 import { getLastYearDateRange } from "../../../utils/dateRangeUtils.ts";
 import { endDateAfterStartDateValidator } from "../../../utils/FormValidators.ts";
 
@@ -54,9 +55,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const dispatch = useDispatch();
   //  const fiscalData = useFiscalCalendarYear();
   const profitYear = useDecemberFlowProfitYear();
+  const currentDate = useFakeTimeAwareDate();
 
-  // Get last year date range for default values
-  const { beginDate, endDate: lastYearEndDate } = getLastYearDateRange();
+  // Get last year date range for default values (respects fake time)
+  const { beginDate, endDate: lastYearEndDate } = getLastYearDateRange(currentDate);
 
   const {
     control,
@@ -155,7 +157,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 required={false}
                 label="Start Date"
                 shouldDisableMonth={(month: Date) => {
-                  const today = new Date();
+                  const today = currentDate;
                   const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
                   const endOfNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0);
                   return month > endOfNextMonth;
@@ -181,7 +183,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 required={false}
                 label="End Date"
                 shouldDisableMonth={(month: Date) => {
-                  const today = new Date();
+                  const today = currentDate;
                   const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
                   const endOfNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0);
                   return month > endOfNextMonth;

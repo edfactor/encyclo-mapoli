@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { useFakeTimeAwareDate } from "../../../hooks/useFakeTimeAwareDate";
 
 export interface AdhocProfLetter73FilterParams {
   profitYear?: Date | null;
@@ -27,6 +28,10 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
   isLoading = false
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const currentDate = useFakeTimeAwareDate();
+
+  const defaultProfitYear = new Date(currentDate.getFullYear() - 1, 0, 1);
+
   const {
     control,
     handleSubmit,
@@ -36,7 +41,7 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
   } = useForm<AdhocProfLetter73FilterParams>({
     resolver: yupResolver(schema) as Resolver<AdhocProfLetter73FilterParams>,
     defaultValues: {
-      profitYear: new Date(new Date().getFullYear() - 1, 0, 1),
+      profitYear: defaultProfitYear,
       DeMinimusValue: 1000
     }
   });
@@ -65,7 +70,7 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
 
   const handleReset = () => {
     reset({
-      profitYear: new Date(new Date().getFullYear() - 1, 0, 1),
+      profitYear: new Date(currentDate.getFullYear() - 1, 0, 1),
       DeMinimusValue: 1000
     });
     onReset();

@@ -145,6 +145,7 @@ DECLARE
     ADHOC_PROF_LETTER73 CONSTANT NUMBER := 176;
     MANAGE_COMMENT_TYPES_PAGE CONSTANT NUMBER := 177;
     MANAGE_RMD_FACTORS CONSTANT NUMBER := 178;
+    FAKE_TIME_MANAGEMENT CONSTANT NUMBER := 179;
 
     --- These are the role IDs from the ROLES table
     SYSTEM_ADMINISTRATOR CONSTANT NUMBER := 1;
@@ -296,6 +297,7 @@ BEGIN
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT, IT_DEVOPS_MENU, 'Demographic Badges Not In PayProfit', '','demographic-badges-not-in-payprofit', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(FAKE_TIME_MANAGEMENT, IT_DEVOPS_MENU, 'Fake Time Management', '', 'fake-time-management', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
 
 --Administrative Operations
     insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -715,6 +717,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(AUDIT_SEARCH_PAGE, IT_DEVOPS);
     assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS);
     assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(FAKE_TIME_MANAGEMENT, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, IT_DEVOPS);

@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -23,14 +24,16 @@ public sealed class DistributionService : IDistributionService
     private readonly IAppUser? _appUser;
     private readonly TotalService _totalService;
     private readonly ICalendarService _calendarService;
+    private readonly TimeProvider _timeProvider;
 
-    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, IAppUser? appUser, TotalService totalService, ICalendarService calendarService)
+    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, IAppUser? appUser, TotalService totalService, ICalendarService calendarService, TimeProvider timeProvider)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _appUser = appUser;
         _totalService = totalService;
         _calendarService = calendarService;
+        _timeProvider = timeProvider;
     }
 
     public async Task<PaginatedResponseDto<DistributionSearchResponse>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken)
@@ -176,7 +179,7 @@ public sealed class DistributionService : IDistributionService
             }
 
             // Add query tagging for production traceability
-            var searchContext = $"DistributionSearch-Badge{request.BadgeNumber}-SSN{(string.IsNullOrWhiteSpace(request.Ssn?.MaskSsn()) ? "None" : "Provided")}-{DateTime.UtcNow:yyyyMMddHHmm}";
+            var searchContext = $"DistributionSearch-Badge{request.BadgeNumber}-SSN{(string.IsNullOrWhiteSpace(request.Ssn?.MaskSsn()) ? "None" : "Provided")}-{_timeProvider.GetUtcNow():yyyyMMddHHmm}";
             query = query.TagWith(searchContext);
 
             // Normalize SortBy to PascalCase for OrderByProperty compatibility
@@ -283,7 +286,7 @@ public sealed class DistributionService : IDistributionService
                 QualifiedDomesticRelationsOrder = request.IsQdro,
                 Memo = request.Memo,
                 RothIra = request.IsRothIra,
-                CreatedAtUtc = DateTime.UtcNow,
+                CreatedAtUtc = _timeProvider.GetUtcNow().DateTime,
                 UserName = _appUser != null ? _appUser.UserName : "unknown",
                 ThirdPartyPayeeAccount = request.ThirdPartyPayee?.Account
             };
@@ -445,7 +448,7 @@ public sealed class DistributionService : IDistributionService
             distribution.QualifiedDomesticRelationsOrder = request.IsQdro;
             distribution.Memo = request.Memo;
             distribution.RothIra = request.IsRothIra;
-            distribution.ModifiedAtUtc = DateTime.UtcNow;
+            distribution.ModifiedAtUtc = _timeProvider.GetUtcNow().DateTime;
 
             await ctx.SaveChangesAsync(cancellationToken);
             var response = new CreateOrUpdateDistributionResponse
@@ -531,7 +534,7 @@ public sealed class DistributionService : IDistributionService
             var distributionQuery = GetDistributionExtract(ctx, Array.Empty<char>());
 
             var groupedResults = await distributionQuery
-                .TagWith($"DistributionSummaryReport-{DateTime.UtcNow:yyyyMMddHHmm}")
+                .TagWith($"DistributionSummaryReport-{_timeProvider.GetUtcNow():yyyyMMddHHmm}")
                 .GroupBy(d => d.FrequencyId)
                 .Select(g => new DistributionRunReportSummaryResponse
                 {
@@ -574,7 +577,7 @@ public sealed class DistributionService : IDistributionService
                     TotalStateTaxAmount = g.Sum(d => d.StateTaxAmount),
                     TotalCheckAmount = g.Sum(d => d.GrossAmount) - g.Sum(d => d.FederalTaxAmount) - g.Sum(d => d.StateTaxAmount)
                 })
-                .TagWith($"DistributionSummaryManualOnHold-{DateTime.UtcNow:yyyyMMddHHmm}")
+                .TagWith($"DistributionSummaryManualOnHold-{_timeProvider.GetUtcNow():yyyyMMddHHmm}")
                 .ToListAsync(cancellationToken);
 
             var foundStatusNames = manualAndOnHoldDistributions.Select(gr => gr.DistributionTypeName).ToHashSet();
@@ -616,7 +619,7 @@ public sealed class DistributionService : IDistributionService
                         };
 
             // Add query tagging for on-hold distributions
-            query = query.TagWith($"DistributionsOnHold-{DateTime.UtcNow:yyyyMMddHHmm}");
+            query = query.TagWith($"DistributionsOnHold-{_timeProvider.GetUtcNow():yyyyMMddHHmm}");
 
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
 
@@ -653,7 +656,7 @@ public sealed class DistributionService : IDistributionService
                         };
 
             // Add query tagging for manual check distributions
-            query = query.TagWith($"ManualCheckDistributions-{DateTime.UtcNow:yyyyMMddHHmm}");
+            query = query.TagWith($"ManualCheckDistributions-{_timeProvider.GetUtcNow():yyyyMMddHHmm}");
 
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
 
@@ -728,7 +731,7 @@ public sealed class DistributionService : IDistributionService
 
             // Add query tagging for distribution run report
             var frequencies = request.DistributionFrequencies?.Length > 0 ? string.Join(",", request.DistributionFrequencies) : "All";
-            query = query.TagWith($"DistributionRunReport-Freq{frequencies}-{DateTime.UtcNow:yyyyMMddHHmm}");
+            query = query.TagWith($"DistributionRunReport-Freq{frequencies}-{_timeProvider.GetUtcNow():yyyyMMddHHmm}");
 
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
             return Result<PaginatedResponseDto<DistributionRunReportDetail>>.Success(paginatedResults);
@@ -761,7 +764,7 @@ public sealed class DistributionService : IDistributionService
                             RemainingBalance = (vest != null ? vest.VestedBalance ?? 0 : 0) - dist.GrossAmount
                         };
             // Add query tagging for disbursement report
-            query = query.TagWith($"DisbursementReport-{DateTime.UtcNow:yyyyMMddHHmm}");
+            query = query.TagWith($"DisbursementReport-{_timeProvider.GetUtcNow():yyyyMMddHHmm}");
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
             return Result<PaginatedResponseDto<DisbursementReportDetailResponse>>.Success(paginatedResults);
         }, cancellationToken);
@@ -797,7 +800,7 @@ public sealed class DistributionService : IDistributionService
             : Result<bool>.Success(true);
     }
 
-    private static IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, char[] distributionFrequencies)
+    private IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, char[] distributionFrequencies)
     {
         var distributionQuery = ctx.Distributions
             .Include(d => d.Frequency)
@@ -816,7 +819,7 @@ public sealed class DistributionService : IDistributionService
 
         // Add query tagging for distribution extract operations
         var frequencies = distributionFrequencies.Any() ? string.Join(",", distributionFrequencies) : "All";
-        distributionQuery = distributionQuery.TagWith($"DistributionExtract-Freq{frequencies}-{DateTime.UtcNow:yyyyMMddHHmm}");
+        distributionQuery = distributionQuery.TagWith($"DistributionExtract-Freq{frequencies}-{_timeProvider.GetUtcNow():yyyyMMddHHmm}");
 
         return distributionQuery;
     }
