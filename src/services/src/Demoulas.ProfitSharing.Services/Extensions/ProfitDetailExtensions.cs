@@ -38,7 +38,8 @@ public static class ProfitDetailExtensions
     public static decimal AggregateEarnings(IEnumerable<ProfitDetail> profitDetails)
     {
         return profitDetails
-            .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id)
+            .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                       || pd.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id)
             .Sum(pd => pd.Earnings);
     }
 
