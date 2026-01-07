@@ -56,12 +56,33 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
                     return Result<bool>.Failure(Error.DestinationDemographicNotFound);
                 }
 
+                // Get distinct years from source profit details that have years of service credit > 0
+                var sourceYearsWithCredit = await ctx.ProfitDetails
+                    .Where(p => p.Ssn == sourceSsn && p.YearsOfServiceCredit > 0)
+                    .Select(p => p.ProfitYear)
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+
+                // Find which years the destination already has service credit for
+                var destinationYearsWithCredit = await ctx.ProfitDetails
+                    .Where(p => p.Ssn == destinationSsn && p.YearsOfServiceCredit > 0)
+                    .Select(p => p.ProfitYear)
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+
+                // Find overlapping years where both source and destination have service credit
+                var overlappingYears = sourceYearsWithCredit.Intersect(destinationYearsWithCredit).ToHashSet();
+
                 // Perform the merge operation for ProfitDetails
+                // If the year overlaps (destination already has credit), set YearsOfServiceCredit to 0
+                // Otherwise, keep the source's YearsOfServiceCredit value
                 var profitDetailsRowsAffected = await ctx.ProfitDetails
                     .Where(p => p.Ssn == sourceSsn)
                     .ExecuteUpdateAsync(
                         s => s
                             .SetProperty(p => p.Ssn, destinationSsn)
+                            .SetProperty(p => p.YearsOfServiceCredit, 
+                                p => overlappingYears.Contains(p.ProfitYear) ? (sbyte)0 : p.YearsOfServiceCredit)
                             .SetProperty(p => p.ModifiedAtUtc, DateTimeOffset.UtcNow),
                         cancellationToken);
 
