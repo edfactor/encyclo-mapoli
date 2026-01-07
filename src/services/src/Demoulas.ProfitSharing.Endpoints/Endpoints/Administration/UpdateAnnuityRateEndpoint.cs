@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Endpoints.Validation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
@@ -31,7 +30,6 @@ public sealed class UpdateAnnuityRateEndpoint : ProfitSharingEndpoint<UpdateAnnu
     public override void Configure()
     {
         Put("annuity-rates");
-        Validator<UpdateAnnuityRateRequestValidator>();
         Summary(s =>
         {
             s.Summary = "Updates a single annuity rate.";

@@ -4,13 +4,16 @@ import React, { useEffect, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { useFakeTimeAwareDate } from "../../../hooks/useFakeTimeAwareDate";
 
 export interface AdhocProfLetter73FilterParams {
   profitYear?: Date | null;
+  DeMinimusValue?: number | null;
 }
 
 const schema = yup.object().shape({
-  profitYear: yup.date().nullable().required("Profit Year is required")
+  profitYear: yup.date().nullable().required("Profit Year is required"),
+  DeMinimusValue: yup.number().nullable().min(0, "Must be a positive number")
 });
 
 interface AdhocProfLetter73FilterSectionProps {
@@ -25,6 +28,10 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
   isLoading = false
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const currentDate = useFakeTimeAwareDate();
+
+  const defaultProfitYear = new Date(currentDate.getFullYear() - 1, 0, 1);
+
   const {
     control,
     handleSubmit,
@@ -34,7 +41,8 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
   } = useForm<AdhocProfLetter73FilterParams>({
     resolver: yupResolver(schema) as Resolver<AdhocProfLetter73FilterParams>,
     defaultValues: {
-      profitYear: new Date(new Date().getFullYear() - 1, 0, 1)
+      profitYear: defaultProfitYear,
+      DeMinimusValue: 1000
     }
   });
 
@@ -48,9 +56,11 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
     if (!isSubmitting) {
       setIsSubmitting(true);
       const dataCopy: AdhocProfLetter73FilterParams = {
-        profitYear: data.profitYear ? new Date(data.profitYear.getTime()) : null
+        profitYear: data.profitYear ? new Date(data.profitYear.getTime()) : null,
+        DeMinimusValue: data.DeMinimusValue
       };
 
+      console.log("Filter params being sent:", dataCopy);
       onSearch(dataCopy);
     }
   });
@@ -60,7 +70,8 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
 
   const handleReset = () => {
     reset({
-      profitYear: new Date(new Date().getFullYear() - 1, 0, 1)
+      profitYear: new Date(currentDate.getFullYear() - 1, 0, 1),
+      DeMinimusValue: 1000
     });
     onReset();
   };
@@ -95,6 +106,41 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
               )}
             />
             {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Controller
+              name="DeMinimusValue"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <label
+                    htmlFor="DeMinimusValue"
+                    style={{ display: "block", marginBottom: "8px", fontSize: "14px" }}>
+                    De Minimus Value
+                  </label>
+                  <input
+                    id="DeMinimusValue"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value === "" ? null : parseFloat(e.target.value);
+                      field.onChange(value);
+                      trigger("DeMinimusValue");
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      fontSize: "14px",
+                      border: errors.DeMinimusValue ? "1px solid #d32f2f" : "1px solid #ccc",
+                      borderRadius: "4px"
+                    }}
+                  />
+                  {errors.DeMinimusValue && <FormHelperText error>{errors.DeMinimusValue.message}</FormHelperText>}
+                </>
+              )}
+            />
           </Grid>
         </Grid>
       </Grid>

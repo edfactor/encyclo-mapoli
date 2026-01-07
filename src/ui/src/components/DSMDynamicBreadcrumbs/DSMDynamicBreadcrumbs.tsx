@@ -2,6 +2,7 @@ import { Breadcrumbs, Link, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Location, useLocation, useNavigate } from "react-router-dom";
+import { CAPTIONS, ROUTES } from "../../constants";
 import { RootState } from "../../reduxstore/store";
 import { getReadablePathName } from "../../utils/getReadablePathName";
 import { sanitizePath } from "../../utils/pathValidation";
@@ -91,6 +92,12 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
   const getCurrentPageLabel = (): string => {
     if (navigationHistory.length === 0) return "";
     const currentLocation = navigationHistory[navigationHistory.length - 1];
+
+    const basePath = currentLocation.pathname.replace(/^\/+|\/+$/g, "").split("/")[0];
+    if (basePath === ROUTES.MASTER_INQUIRY) {
+      return CAPTIONS.MASTER_INQUIRY_SHORT;
+    }
+
     const matched = findNavigationItemByUrl(currentLocation.pathname);
     return matched
       ? `${matched.title}${matched.subTitle ? ` (${matched.subTitle})` : ""}`
@@ -101,6 +108,14 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
 
   const currentPageLabel = getCurrentPageLabel();
 
+  const visibleItems =
+    !customItems &&
+    currentPageLabel &&
+    items.length > 0 &&
+    items[items.length - 1].label.trim().toLocaleLowerCase() === currentPageLabel.trim().toLocaleLowerCase()
+      ? items.slice(0, -1)
+      : items;
+
   if (navigationHistory.length <= 1) {
     return null;
   }
@@ -110,7 +125,7 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
       <Breadcrumbs
         separator={separator}
         maxItems={3}>
-        {items.map((item, index) => (
+        {visibleItems.map((item, index) => (
           <Link
             key={index}
             color="inherit"

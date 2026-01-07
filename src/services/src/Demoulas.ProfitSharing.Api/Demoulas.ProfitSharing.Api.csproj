@@ -10,6 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="OpenTelemetry.Api" />
+    <PackageReference Include="NSwag.AspNetCore" />
+    <PackageReference Include="NSwag.MSBuild" PrivateAssets="All" />
     <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
 
@@ -23,6 +25,9 @@
     <PackageReference Update="AsyncAwaitBestPractices">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="AsyncFixer">
+      <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Update="Microsoft.CodeAnalysis">
       <PrivateAssets>all</PrivateAssets>
@@ -49,5 +54,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
+  <Target Name="GenerateOpenApiSpec" AfterTargets="Build" Condition="'$(SkipOpenApiSpecGeneration)' != 'true'">
+    <Exec
+      WorkingDirectory="$(MSBuildProjectDirectory)"
+      EnvironmentVariables="NSWAG_APIEXPLORER_WARMUP=1;ASPNETCORE_ENVIRONMENT=Development;DOTNET_ENVIRONMENT=Development;Okta__RolePrefix=DEV"
+      Command="$(NSwagExe_Net100) run &quot;$(MSBuildProjectDirectory)/nswag.json&quot; /variables:Configuration=$(Configuration)" />
+  </Target>
 
 </Project>

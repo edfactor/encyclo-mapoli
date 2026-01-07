@@ -97,8 +97,11 @@ public sealed class Navigation
         public const short ManageStateTaxRates = 173;
         public const short ManageAnnuityRates = 174;
         public const short ProfitSharingAdjustments = 175;
+
         public const short AdhocProfLetter73 = 176;
         public const short ManageCommentTypes = 177;
+        public const short ManageRmdFactors = 178;
+        public const short FakeTimeManagement = 179;
     }
 
     public short Id { get; set; }
@@ -119,6 +122,7 @@ public sealed class Navigation
     public List<Navigation>? Items { get; set; }
     public Navigation? Parent { get; set; }
     public List<NavigationTracking>? NavigationTrackings { get; set; }
+    public List<NavigationCustomSetting>? CustomSettings { get; set; }
 
     // Self-referencing many-to-many to represent prerequisite navigation elements.
     // PrerequisiteNavigations: the items this navigation depends on.

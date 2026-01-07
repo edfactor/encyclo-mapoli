@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -13,13 +14,21 @@ internal static class YearEndChangeCalculator
     /// Calculates the Year End Change for a single employee.
     /// Very closely follows PAY426.cbl, 405-calculate-points
     /// </summary>
+    /// <param name="profitYear">The profit year being processed.</param>
+    /// <param name="firstContributionYear">The employee's first contribution year.</param>
+    /// <param name="age">The employee's age.</param>
+    /// <param name="currentBalance">The employee's current balance.</param>
+    /// <param name="employee">The employee's pay profit data.</param>
+    /// <param name="fiscalEnd">The fiscal year end date.</param>
+    /// <param name="timeProvider">The time provider for getting current date (supports fake time for testing).</param>
     public static YearEndChange ComputeChange(
         short profitYear,
         short? firstContributionYear,
         short age,
         decimal currentBalance,
         PayProfitDto employee,
-        DateOnly fiscalEnd)
+        DateOnly fiscalEnd,
+        TimeProvider timeProvider)
     {
         // Early exit for under 21
         if (age < ReferenceData.MinimumAgeForContribution)
@@ -36,11 +45,11 @@ internal static class YearEndChangeCalculator
         // Handle age 64+ employees
         if (age >= (ReferenceData.RetirementAge - 1))
         {
-            return ComputeChangeForAge64Plus(employee, age, profitYear, firstContributionYear, currentBalance, fiscalEnd);
+            return ComputeChangeForAge64Plus(employee, age, profitYear, firstContributionYear, currentBalance, fiscalEnd, timeProvider);
         }
 
         // Handle active employees under age 64
-        return ComputeChangeForActiveEmployeeUnder64(employee, age, firstContributionYear);
+        return ComputeChangeForActiveEmployeeUnder64(employee, age, firstContributionYear, timeProvider);
     }
 
     private static YearEndChange ComputeChangeForUnder21(short? firstContributionYear, short age)
@@ -95,11 +104,12 @@ internal static class YearEndChangeCalculator
     private static YearEndChange ComputeChangeForActiveEmployeeUnder64(
         PayProfitDto employee,
         short age,
-        short? firstContributionYear)
+        short? firstContributionYear,
+        TimeProvider timeProvider)
     {
         int isNew = DetermineIsNewEmployee(firstContributionYear, age);
         decimal points = CalculateEarnPoints(employee);
-        DateOnly? certDate = points > 0 ? DateOnly.FromDateTime(DateTime.Now) : null;
+        DateOnly? certDate = points > 0 ? timeProvider.GetLocalDateOnly() : null;
 
         return new YearEndChange
         {
@@ -116,13 +126,14 @@ internal static class YearEndChangeCalculator
         short profitYear,
         short? firstContributionYear,
         decimal currentBalance,
-        DateOnly fiscalEnd)
+        DateOnly fiscalEnd,
+        TimeProvider timeProvider)
     {
         int isNew = DetermineIsNewEmployee(firstContributionYear, age);
 
         // COBOL PAY426.cbl lines 1219-1221: Set points to 0 for age 64+ with < 1000 hours
         decimal points = HasMinimumHours(employee) ? CalculateEarnPoints(employee) : 0;
-        DateOnly? certDate = points > 0 ? DateOnly.FromDateTime(DateTime.Now) : null;
+        DateOnly? certDate = points > 0 ? timeProvider.GetLocalDateOnly() : null;
 
         byte zeroCont = DetermineZeroContributionReasonForAge64Plus(employee, age, profitYear, firstContributionYear, currentBalance, ZeroContributionReason.Constants.Normal);
 

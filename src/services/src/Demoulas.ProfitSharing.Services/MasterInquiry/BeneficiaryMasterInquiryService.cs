@@ -227,26 +227,29 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                     DemographicId = b.Id
                 });
 
-            return await members.Select(memberData => new MemberDetails
-            {
-                Id = memberData.Id,
-                IsEmployee = false,
-                FirstName = memberData.FirstName,
-                MiddleName = memberData.MiddleName,
-                LastName = memberData.LastName,
-                PhoneNumber = memberData.PhoneNumber,
-                AddressCity = memberData.City!,
-                AddressState = memberData.State!,
-                Address = memberData.Address,
-                AddressZipCode = memberData.PostalCode!,
-                DateOfBirth = memberData.DateOfBirth,
-                Ssn = memberData.Ssn.MaskSsn(),
-                BadgeNumber = memberData.BadgeNumber,
-                PsnSuffix = memberData.PsnSuffix,
-                PayFrequencyId = 0,
-                IsExecutive = false,
-            })
-                .ToPaginationResultsAsync(req, cancellationToken);
+            // Use the mapper overload of ToPaginationResultsAsync to separate sorting from mapping
+            return await members.ToPaginationResultsAsync(
+                req,
+                query => query.Select(memberData => new MemberDetails
+                {
+                    Id = memberData.Id,
+                    IsEmployee = false,
+                    FirstName = memberData.FirstName,
+                    MiddleName = memberData.MiddleName,
+                    LastName = memberData.LastName,
+                    PhoneNumber = memberData.PhoneNumber,
+                    AddressCity = memberData.City!,
+                    AddressState = memberData.State!,
+                    Address = memberData.Address,
+                    AddressZipCode = memberData.PostalCode!,
+                    DateOfBirth = memberData.DateOfBirth,
+                    Ssn = memberData.Ssn.MaskSsn(),
+                    BadgeNumber = memberData.BadgeNumber,
+                    PsnSuffix = memberData.PsnSuffix,
+                    PayFrequencyId = 0,
+                    IsExecutive = false,
+                }),
+                cancellationToken);
         }, cancellationToken);
     }
 

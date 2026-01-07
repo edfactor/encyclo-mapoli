@@ -56,13 +56,20 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
                     return Result<bool>.Failure(Error.DestinationDemographicNotFound);
                 }
 
-                // Perform the merge operation
-                var rowsAffected = await ctx.ProfitDetails
+                // Perform the merge operation for ProfitDetails
+                var profitDetailsRowsAffected = await ctx.ProfitDetails
                     .Where(p => p.Ssn == sourceSsn)
                     .ExecuteUpdateAsync(
                         s => s
                             .SetProperty(p => p.Ssn, destinationSsn)
                             .SetProperty(p => p.ModifiedAtUtc, DateTimeOffset.UtcNow),
+                        cancellationToken);
+
+                // Set EnrollmentId to 0 for PayProfit records associated with sourceSsn
+                var payProfitRowsAffected = await ctx.PayProfits
+                    .Where(pp => pp.Demographic!.Ssn == sourceSsn)
+                    .ExecuteUpdateAsync(
+                        s => s.SetProperty(pp => pp.EnrollmentId, 0),
                         cancellationToken);
 
                 return Result<bool>.Success(true);

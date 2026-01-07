@@ -1,10 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Button, FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import { Controller, Resolver, useForm } from "react-hook-form";
+import { DSMDatePicker } from "smart-ui-library";
 import * as yup from "yup";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
-import { DSMDatePicker } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useFakeTimeAwareYear } from "../../../hooks/useFakeTimeAwareDate";
 import { useFreezeDemographicsMutation } from "../../../reduxstore/api/ItOperationsApi";
 import { profitYearValidator } from "../../../utils/FormValidators";
 
@@ -16,10 +17,12 @@ interface DemographicFreezeSearch {
 }
 
 // Update the schema to include validation for all fields
+// Note: Schema validation uses system time at definition. Component validates against fake time.
 const schema = yup.object().shape({
   profitYear: profitYearValidator()
     .test("valid-year", "Year must be current or previous year", (value) => {
       if (!value) return false;
+      // Schema uses system time; component will re-validate with fake time
       const currentYear = new Date().getFullYear();
       return value === currentYear || value === currentYear - 1;
     })
@@ -53,7 +56,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
   const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
 
-  const currentYear = new Date().getFullYear();
+  const currentYear = useFakeTimeAwareYear();
   const previousYear = currentYear - 1;
 
   const {

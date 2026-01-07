@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 
-public record NavigationDto : IdRequest
+public record NavigationDto : IdRequest<int>
 {
     public int? ParentId { get; set; }
     public required string Title { get; set; }
@@ -26,6 +26,11 @@ public record NavigationDto : IdRequest
     /// This is used by the UI to disable or hide action buttons for users in read-only roles.
     /// </summary>
     public bool IsReadOnly { get; set; }
+    /// <summary>
+    /// Custom settings for this specific navigation item (e.g., trackPageStatus, useFrozenYear).
+    /// These are configured per-navigation in the database and control page-specific behavior.
+    /// </summary>
+    public Dictionary<string, object?>? CustomSettings { get; set; }
 
     public static NavigationDto ResponseExample()
     {

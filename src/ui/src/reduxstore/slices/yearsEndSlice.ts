@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AdhocApi } from "reduxstore/api/AdhocApi";
+import { ItOperationsApi } from "reduxstore/api/ItOperationsApi";
 
 import {
   BalanceByAge,
@@ -162,12 +163,8 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
-  selectedProfitYearForDecemberActivities: localStorage.getItem("selectedProfitYearForDecemberActivities")
-    ? Number(localStorage.getItem("selectedProfitYearForDecemberActivities"))
-    : new Date().getFullYear(),
-  selectedProfitYearForFiscalClose: localStorage.getItem("selectedProfitYearForFiscalClose")
-    ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
-    : new Date().getFullYear(),
+  selectedProfitYearForDecemberActivities: new Date().getFullYear(),
+  selectedProfitYearForFiscalClose: new Date().getFullYear(),
   invalidProfitShareEditYear: false,
   totalForfeituresGreaterThanZero: false,
   profitShareEditUpdateShowSearch: true,
@@ -350,11 +347,9 @@ export const yearsEndSlice = createSlice({
 
     setSelectedProfitYearForDecemberActivities: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForDecemberActivities = action.payload;
-      localStorage.setItem("selectedProfitYearForDecemberActivities", action.payload.toString());
     },
     setSelectedProfitYearForFiscalClose: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForFiscalClose = action.payload;
-      localStorage.setItem("selectedProfitYearForFiscalClose", action.payload.toString());
     },
     checkDecemberParamsAndGridsProfitYears: (state, action: PayloadAction<number>) => {
       // So now we need to update cached december actives data if it was based
@@ -1076,7 +1071,16 @@ export const yearsEndSlice = createSlice({
   },
 
   extraReducers: (builder) => {
-    // Your existing matchers
+    // Listen for fake time status updates
+    builder.addMatcher(ItOperationsApi.endpoints.getFakeTimeStatus.matchFulfilled, (state, action) => {
+      // When fake time is active, set the profit years to the fake time's year
+      if (action.payload.isActive && action.payload.currentFakeDateTime) {
+        const fakeDate = new Date(action.payload.currentFakeDateTime);
+        const fakeYear = fakeDate.getFullYear();
+        state.selectedProfitYearForDecemberActivities = fakeYear;
+        state.selectedProfitYearForFiscalClose = fakeYear;
+      }
+    });
 
     // Add this new matcher for the getBreakdownByStore endpoint
     builder.addMatcher(AdhocApi.endpoints.getBreakdownByStore.matchFulfilled, (state, action) => {

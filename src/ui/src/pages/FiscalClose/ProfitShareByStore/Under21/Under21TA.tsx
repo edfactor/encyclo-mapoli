@@ -5,11 +5,11 @@ import { useSelector } from "react-redux";
 import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../../constants";
-import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import { useInitialLoad } from "../../../../hooks/useInitialLoad";
+import useNavigationYear from "../../../../hooks/useNavigationYear";
 import {
-  useLazyGetUnder21BreakdownByStoreQuery,
-  useLazyGetUnder21TotalsQuery
+    useLazyGetUnder21BreakdownByStoreQuery,
+    useLazyGetUnder21TotalsQuery
 } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import Under21BreakdownGrid from "./Under21BreakdownGrid";
@@ -28,7 +28,7 @@ const Under21TA = () => {
     sortBy: "badgeNumber",
     isSortDescending: false
   });
-  const profitYear = useFiscalCloseProfitYear();
+  const profitYear = useNavigationYear();
 
   const isLoading = isTotalsLoading || isInactiveLoading;
 
@@ -40,7 +40,7 @@ const Under21TA = () => {
   useEffect(() => {
     const fetchData = async () => {
       const queryParams = {
-        profitYear,
+        profitYear: profitYear ?? new Date().getFullYear(),
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
@@ -61,7 +61,7 @@ const Under21TA = () => {
   useEffect(() => {
     if (initialSearchLoaded) {
       const queryParams = {
-        profitYear,
+        profitYear: profitYear ?? new Date().getFullYear(),
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,

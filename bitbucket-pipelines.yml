@@ -1,33 +1,140 @@
-# ------------------------------------------------------------------------
-# BitBucket Pipeline
-# ------------------------------------------------------------------------
-# Application Name:
-#   - SMART Profit Sharing
-# ------------------------------------------------------------------------
+# ============================================================================
+#                        BITBUCKET PIPELINES CONFIGURATION
+#                           SMART Profit Sharing Application
+# ============================================================================
+#
+# OVERVIEW
+# --------
+# This pipeline automates CI/CD for the SMART Profit Sharing application,
+# which consists of:
+#   - Backend: .NET 10 API with FastEndpoints (src/services/)
+#   - Frontend: React/TypeScript UI with Vite (src/ui/)
+#
+# PIPELINE TYPES
+# --------------
+# 1. BRANCH PIPELINES (pipelines.branches)
+#    - main:    Full build, test, and deploy to QA, then UAT
+#    - develop: Selective build/test based on changes since last successful build
+#
+# 2. PULL REQUEST PIPELINE (pipelines.pull-requests)
+#    - Runs on all PRs targeting any branch
+#    - Selective testing based on changed files
+#    - Uses Bitbucket's changeset conditions for efficiency
+#
+# 3. CUSTOM PIPELINES (pipelines.custom)
+#    - infrastructure_as_code: Install .NET hosting bundle, configure IIS
+#    - api_lint: Run API linting
+#    - profitsharing_database: Database operations (upgrade, reset, import)
+#    - playwright_e2e_qa: End-to-end tests
+#
+# OPTIMIZATION FEATURES
+# ---------------------
+# - Selective Testing: Only runs tests for changed areas (frontend/backend)
+# - Rolling Tag: Tracks last successful develop build to minimize redundant work
+# - Combined Steps: Backend unit + architecture tests share a single build
+# - Artifact Reuse: Build artifacts passed between stages
+#
+# RUNNER CONFIGURATION
+# --------------------
+# - Windows Self-Hosted: Backend builds, database operations, deployments
+# - Cloud (Alpine): Frontend builds, linting (frees on-prem resources)
+#
+# ENVIRONMENT SERVERS
+# -------------------
+# - QA:  appt23d
+# - UAT: appt24d
+#
+# REQUIRED REPOSITORY VARIABLES
+# -----------------------------
+# - BITBUCKET_ACCESS_TOKEN: For tag updates via REST API
+# - JFROG_WORKSPACE_VARIABLE: NPM registry authentication
+# - ConnectionStrings_ProfitSharing_QA/UAT: Database connections
+# - TEAMS_WEBHOOK_URL: Microsoft Teams notifications
+# - See repository settings for full list
+#
+# ============================================================================
+#                              TABLE OF CONTENTS
+# ============================================================================
+#
+# DEFINITIONS (line ~60)
+# ├── servers:                        Environment server hostnames
+# └── steps:                          Reusable step definitions
+#     ├── build-and-test-backend      Combined backend build + tests (PR/QA)
+#     ├── selective-develop-analysis  Analyze changes for develop branch
+#     ├── update-develop-tag          Update rolling success tag
+#     ├── selective-backend-analysis  Determine which backend tests to run
+#     ├── audit-frontend              NPM vulnerability scan
+#     ├── audit-backend               NuGet vulnerability scan
+#     ├── secret-scan                 Detect leaked secrets
+#     ├── frontend-lint               ESLint + TypeScript check
+#     ├── test-frontend               Frontend unit tests (selective for PRs)
+#     ├── generate-buildinfo          Create build metadata
+#     ├── create-api-artifacts        Package API for deployment
+#     ├── create-service-artifacts    Package background services
+#     ├── create-frontend-artifact-*  Frontend builds per environment
+#     ├── *-drop-recreate-db          Database reset steps
+#     ├── *-import-*                  Data import steps
+#     └── run-playwright-tests        E2E test execution
+#
+# PIPELINES (line ~1350)
+# ├── branches:
+# │   ├── main:                   Full QA + UAT deployment
+# │   └── develop:                Selective build/test with tag tracking
+# ├── pull-requests:              PR validation with changeset conditions
+# └── custom:                     Manual trigger pipelines
+#
+# ============================================================================
+
+# ============================================================================
+#                                 DEFINITIONS
+# ============================================================================
+# Reusable components referenced throughout the pipeline using YAML anchors.
+# Anchors are defined with & and referenced with *.
+# ============================================================================
 
 definitions:
-  # Centralized server variables
+  # --------------------------------------------------------------------------
+  # SERVER CONFIGURATION
+  # --------------------------------------------------------------------------
+  # Centralized server hostnames for each environment.
+  # Update these when server names change.
+  # --------------------------------------------------------------------------
   servers:
     qa_app_server: &qa_app_server "appt23d"
     uat_app_server: &uat_app_server "appt24d"
 
+  # --------------------------------------------------------------------------
+  # REUSABLE STEP DEFINITIONS
+  # --------------------------------------------------------------------------
+  # These steps are referenced by pipelines using YAML anchors (*step-name).
+  # Each step is documented with its purpose, runner type, and key behaviors.
+  # --------------------------------------------------------------------------
   steps:
-    build-and-test-backend-unit: &build-and-test-backend-unit
-      name: Build and Test Backend API (UnitTests)
+    # ========================================================================
+    # BACKEND BUILD AND TEST (Combined)
+    # ========================================================================
+    # Purpose: Build .NET solution and run both unit + architecture tests
+    # Runner:  Windows self-hosted (requires .NET 10 SDK)
+    # Used by: PR pipeline, QA pipeline
+    #
+    # Optimization: Single build shared by both test suites
+    # Selective:    Reads selective-test-decision.json for PR builds
+    # ========================================================================
+    build-and-test-backend: &build-and-test-backend
+      name: Build and Test Backend API
       runs-on:
         - windows
         - self.hosted
       script:
-        # Set environment variables
-        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/unit-tests"
-
-        # Check selective test decision and set filters
         - |
-          $script:testFilters = @()
-          $script:runAllTests = $true
-          $script:skipTests = $false
+          # Set environment variables
+          $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+
+          # Check selective test decision and set filters
+          $testFilters = @()
+          $runAllTests = $true
+          $skipTests = $false
+          $runArchitectureTests = $true
 
           if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
             Write-Host "Checking selective test decision..." -ForegroundColor Cyan
@@ -35,171 +142,333 @@ definitions:
 
             if ($decision.decision -eq "SKIP_ALL") {
               Write-Host "SKIP: No backend files changed" -ForegroundColor Yellow
-              $script:skipTests = $true
+              $skipTests = $true
             }
             elseif ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -eq 0) {
               Write-Host "SKIP: No test filters (only test files changed)" -ForegroundColor Yellow
-              $script:skipTests = $true
+              $skipTests = $true
             }
             elseif ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -gt 0) {
-              $script:runAllTests = $false
-              $script:testFilters = $decision.testFilters
-              Write-Host "SELECTIVE: Running tests for: $($script:testFilters -join ', ')" -ForegroundColor Green
+              $runAllTests = $false
+              $testFilters = $decision.testFilters
+              Write-Host "SELECTIVE: Running tests for: $($testFilters -join ', ')" -ForegroundColor Green
             }
             else {
               Write-Host "RUN ALL: $($decision.reason)" -ForegroundColor Yellow
             }
+
+            # Check if architecture tests should run
+            if ($decision.runArchitectureTests -eq $false) {
+              $runArchitectureTests = $false
+              Write-Host "Architecture tests: SKIP (no structural changes)" -ForegroundColor Yellow
+            }
           }
 
-          if ($script:skipTests) {
+          if ($skipTests) {
             Write-Host "Exiting - no tests to run" -ForegroundColor Yellow
             exit 0
           }
 
-        # Ensure the REPORTS_PATH directory exists
-        - mkdir -Force -Path $env:REPORTS_PATH
-
-        # Verify required .NET SDK is available (do not attempt installation)
-        - echo "Checking for required .NET SDK version..."
-        - |
-          $dotnetSdkList = dotnet --list-sdks;
-          Write-Output "Installed .NET SDKs:";
-          Write-Output $dotnetSdkList;
-
-          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
+          # Verify .NET SDK
+          $dotnetSdkList = dotnet --list-sdks
+          Write-Output "Installed .NET SDKs:"
+          Write-Output $dotnetSdkList
+          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\."
           if (-not $dotnetSdkRequired) {
-              Write-Error "FAILED: .NET 10 SDK is required but not available.";
-              Write-Error "Please ensure .NET 10 SDK is installed on the build agent.";
-              exit 1;
+            Write-Error "FAILED: .NET 10 SDK is required but not available."
+            exit 1
           }
 
-        # Clean any previous build artifacts to ensure deterministic builds
-        - echo "Cleaning previous build artifacts..."
-        - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+          # Build once for all tests
+          Write-Host "`n========================================" -ForegroundColor Cyan
+          Write-Host "Building solution..." -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+          dotnet restore src/services/Demoulas.ProfitSharing.slnx
+          dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
 
-        # Restore packages explicitly
-        - echo "Restoring NuGet packages..."
-        - dotnet restore src/services/Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
-
-        # Build without incremental compilation to avoid stale artifacts
-        - echo "Building solution..."
-        - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
-
-        # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
-        - echo "Running unit tests..."
-        - |
-          $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-
-          # Check if we have selective filters from the decision file
-          $testFilters = @()
-          $runAllTests = $true
-
-          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
-            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
-            if ($decision.decision -eq "SELECTIVE" -and $decision.testFilters.Count -gt 0) {
-              $runAllTests = $false
-              $testFilters = $decision.testFilters
-            }
-          }
+          # Run Unit Tests
+          Write-Host "`n========================================" -ForegroundColor Cyan
+          Write-Host "Running Unit Tests..." -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          $unitTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/unit-tests"
+          mkdir -Force -Path $unitTestsPath
+          $unitTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.exe"
 
           if ($runAllTests) {
-            Write-Host "========================================" -ForegroundColor Cyan
             Write-Host "Running ALL unit tests" -ForegroundColor Cyan
-            Write-Host "========================================" -ForegroundColor Cyan
-            & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
+            & $unitTestExe -jUnit "$unitTestsPath/junit.xml"
           } else {
-            Write-Host "========================================" -ForegroundColor Green
             Write-Host "Running SELECTIVE tests" -ForegroundColor Green
             Write-Host "Filters: $($testFilters -join ', ')" -ForegroundColor Yellow
-            Write-Host "========================================" -ForegroundColor Green
-
-            # Build namespace filter args for xUnit v3: -namespace *Pattern* -namespace *Pattern2*
-            $namespaceArgs = @("-jUnit", "$env:REPORTS_PATH/junit.xml")
+            $namespaceArgs = @("-jUnit", "$unitTestsPath/junit.xml")
             foreach ($filter in $testFilters) {
               $namespaceArgs += "-namespace"
               $namespaceArgs += "*$filter*"
             }
+            Write-Host "Running: $unitTestExe $($namespaceArgs -join ' ')"
+            & $unitTestExe @namespaceArgs
+          }
+          $unitTestExit = $LASTEXITCODE
 
-            Write-Host "Running: $testExe $($namespaceArgs -join ' ')"
-            & $testExe @namespaceArgs
+          # Run Architecture Tests (if enabled)
+          $archTestExit = 0
+          if ($runArchitectureTests) {
+            Write-Host "`n========================================" -ForegroundColor Cyan
+            Write-Host "Running Architecture Tests..." -ForegroundColor Cyan
+            Write-Host "========================================" -ForegroundColor Cyan
+            $archTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/architecture-tests"
+            mkdir -Force -Path $archTestsPath
+            $archTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests.Architecture/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.Architecture.exe"
+            & $archTestExe -jUnit "$archTestsPath/junit.xml"
+            $archTestExit = $LASTEXITCODE
+          } else {
+            Write-Host "`nArchitecture Tests: SKIPPED" -ForegroundColor Yellow
+          }
+
+          # Report results
+          Write-Host "`n========================================" -ForegroundColor Cyan
+          Write-Host "Test Results Summary" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "Unit Tests: $(if ($unitTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($unitTestExit -eq 0) { 'Green' } else { 'Red' })
+          if ($runArchitectureTests) {
+            Write-Host "Architecture Tests: $(if ($archTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($archTestExit -eq 0) { 'Green' } else { 'Red' })
+          } else {
+            Write-Host "Architecture Tests: SKIPPED" -ForegroundColor Yellow
+          }
+
+          # Exit with failure if any test suite failed
+          if ($unitTestExit -ne 0 -or $archTestExit -ne 0) {
+            Write-Error "One or more test suites failed"
+            exit 1
           }
 
       artifacts:
         - test-reports/**
 
-    build-and-test-backend-architecture: &build-and-test-backend-architecture
-      name: Build and Test Backend API (Architecture)
+    # ========================================================================
+    # DEVELOP BRANCH ANALYSIS
+    # ========================================================================
+    # Purpose: Determine which steps to run based on changes since last success
+    # Runner:  Windows self-hosted (needs full git history for tag comparison)
+    # Used by: develop branch pipeline only
+    #
+    # How it works:
+    # 1. Compares HEAD against 'last-successful-develop-build' tag
+    # 2. Categorizes changed files as frontend (src/ui/) or backend (src/services/)
+    # 3. Outputs develop-test-decision.json with runFrontend/runBackend flags
+    # 4. Includes list of changed frontend files for selective test targeting
+    #
+    # Note: Uses depth:full clone because git network operations hang on
+    #       Windows runners, so we need all tags available locally.
+    # ========================================================================
+    selective-develop-analysis: &selective-develop-analysis
+      name: Analyze Develop Changes (Since Last Build)
       runs-on:
         - windows
         - self.hosted
-      script:
-        # Set environment variables
-        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests.Architecture"
-
-        # Check selective test decision (PR builds only)
-        - |
-          if ($env:BITBUCKET_PR_DESTINATION_BRANCH -and (Test-Path "selective-test-decision.json")) {
-            Write-Host "Checking selective test decision..." -ForegroundColor Cyan
-            $decision = Get-Content "selective-test-decision.json" -Raw | ConvertFrom-Json
-
-            if ($decision.decision -eq "SKIP_ALL") {
-              Write-Host "SKIP: No backend files changed" -ForegroundColor Yellow
-              exit 0
-            }
-
-            if ($decision.runArchitectureTests -eq $false) {
-              Write-Host "SKIP: Architecture tests not needed (no structural changes)" -ForegroundColor Yellow
-              exit 0
-            }
-
-            Write-Host "RUN: Architecture tests will execute" -ForegroundColor Green
-          }
-
-        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}/architecture-tests"
-
-        # Ensure the REPORTS_PATH directory exists
-        - mkdir -Force -Path $env:REPORTS_PATH
-
-        # Verify required .NET SDK is available (do not attempt installation)
-        - echo "Checking for required .NET SDK version..."
-        - |
-          $dotnetSdkList = dotnet --list-sdks;
-          Write-Output "Installed .NET SDKs:";
-          Write-Output $dotnetSdkList;
-
-          $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\.";
-          if (-not $dotnetSdkRequired) {
-              Write-Error "FAILED: .NET 10 SDK is required but not available.";
-              Write-Error "Please ensure .NET 10 SDK is installed on the build agent.";
-              exit 1;
-          }
-
-        # Clean any previous build artifacts to ensure deterministic builds
-        - echo "Cleaning previous build artifacts..."
-        - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
-
-        # Restore packages explicitly
-        - echo "Restoring NuGet packages..."
-        - dotnet restore src/services/Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
-
-        # Build without incremental compilation to avoid stale artifacts
-        - echo "Building solution..."
-        - dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
-
-        # Run tests by executing the test assembly directly (required for MTP on .NET 10+)
-        # VSTest is no longer supported - must run the executable directly
-        - echo "Running architecture tests..."
-        - |
-          $testExe = "src/services/tests/$env:TEST_PROJECT_NAME/bin/Release/net10.0/$env:TEST_PROJECT_NAME.exe"
-          Write-Host "Executing test runner: $testExe"
-          & $testExe -jUnit "$env:REPORTS_PATH/junit.xml"
-
+      clone:
+        depth: full
       artifacts:
-        - test-reports/**
+        - develop-test-decision.json
+      script:
+        - |
+          $tagName = "last-successful-develop-build"
 
-    # Selective backend test analysis - determines which tests to run based on changed files
-    # Uses dotnet-affected tool to build dependency graph and identify impacted projects
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "Analyzing changes since last successful develop build" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+
+          # Check if the tag exists locally (included via depth: full clone)
+          # Note: We don't check remote because git network ops hang on Windows runners
+          Write-Host "Checking for baseline tag..." -ForegroundColor Gray
+          $tagExists = git tag -l $tagName
+
+          if (-not $tagExists) {
+            Write-Host "Tag '$tagName' not found - this is the first run" -ForegroundColor Yellow
+            Write-Host "Will run ALL steps to establish baseline" -ForegroundColor Yellow
+            $decision = @{
+              runFrontend = $true
+              runBackend = $true
+              reason = "First run - no baseline tag exists"
+              isFirstRun = $true
+            } | ConvertTo-Json -Compress
+            [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
+            exit 0
+          }
+
+          # Get commit info
+          $lastBuildCommit = git rev-parse $tagName
+          $currentCommit = git rev-parse HEAD
+
+          Write-Host "Last successful build: $lastBuildCommit" -ForegroundColor Cyan
+          Write-Host "Current HEAD: $currentCommit" -ForegroundColor Cyan
+
+          if ($lastBuildCommit -eq $currentCommit) {
+            Write-Host "No new commits since last successful build" -ForegroundColor Green
+            $decision = @{
+              runFrontend = $false
+              runBackend = $false
+              reason = "No changes since last successful build"
+              isFirstRun = $false
+            } | ConvertTo-Json -Compress
+            [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
+            exit 0
+          }
+
+          # Get changed files since last successful build
+          $changedFiles = git diff --name-only "$tagName..HEAD" 2>&1
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "git diff failed: $changedFiles" -ForegroundColor Yellow
+            Write-Host "Falling back to running ALL steps" -ForegroundColor Yellow
+            $decision = @{
+              runFrontend = $true
+              runBackend = $true
+              reason = "git diff failed - running all steps for safety"
+              isFirstRun = $false
+            } | ConvertTo-Json -Compress
+            [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
+            exit 0
+          }
+
+          $changedFiles = $changedFiles -split "`n" | Where-Object { $_ }
+          Write-Host "`nFound $($changedFiles.Count) changed files since last build" -ForegroundColor Cyan
+
+          # Categorize changes
+          $frontendChanges = $changedFiles | Where-Object { $_ -match "^src/ui/" }
+          $backendChanges = $changedFiles | Where-Object { $_ -match "^src/services/" }
+
+          $runFrontend = $frontendChanges.Count -gt 0
+          $runBackend = $backendChanges.Count -gt 0
+
+          # Build reason string
+          $reasons = @()
+          if ($runFrontend) { $reasons += "Frontend: $($frontendChanges.Count) files changed" }
+          if ($runBackend) { $reasons += "Backend: $($backendChanges.Count) files changed" }
+          if (-not $runFrontend -and -not $runBackend) { $reasons += "No frontend or backend source changes" }
+
+          Write-Host "`n----------------------------------------" -ForegroundColor Cyan
+          Write-Host "Decision Summary:" -ForegroundColor Cyan
+          Write-Host "----------------------------------------" -ForegroundColor Cyan
+          Write-Host "  Run Frontend Steps: $(if ($runFrontend) { 'YES' } else { 'SKIP' })" -ForegroundColor $(if ($runFrontend) { 'Green' } else { 'Yellow' })
+          Write-Host "  Run Backend Steps:  $(if ($runBackend) { 'YES' } else { 'SKIP' })" -ForegroundColor $(if ($runBackend) { 'Green' } else { 'Yellow' })
+          Write-Host "----------------------------------------" -ForegroundColor Cyan
+
+          if ($frontendChanges.Count -gt 0 -and $frontendChanges.Count -le 20) {
+            Write-Host "`nFrontend files changed:" -ForegroundColor Yellow
+            $frontendChanges | ForEach-Object { Write-Host "  - $_" }
+          }
+
+          if ($backendChanges.Count -gt 0 -and $backendChanges.Count -le 20) {
+            Write-Host "`nBackend files changed:" -ForegroundColor Yellow
+            $backendChanges | ForEach-Object { Write-Host "  - $_" }
+          }
+
+          $decision = @{
+            runFrontend = $runFrontend
+            runBackend = $runBackend
+            reason = ($reasons -join "; ")
+            isFirstRun = $false
+            frontendFileCount = $frontendChanges.Count
+            backendFileCount = $backendChanges.Count
+            frontendFiles = @($frontendChanges)
+          } | ConvertTo-Json -Compress
+          # Use WriteAllText to avoid BOM that Out-File adds
+          [System.IO.File]::WriteAllText("develop-test-decision.json", $decision)
+
+    # ========================================================================
+    # UPDATE DEVELOP BUILD TAG
+    # ========================================================================
+    # Purpose: Move the rolling success tag to current commit after all tests pass
+    # Runner:  Windows self-hosted
+    # Used by: develop branch pipeline (final step)
+    #
+    # This enables the selective-develop-analysis step to compare against
+    # the last successful build on subsequent pipeline runs.
+    #
+    # Note: Uses Bitbucket REST API instead of git push because git network
+    #       operations hang on Windows self-hosted runners.
+    # Requires: BITBUCKET_ACCESS_TOKEN with repository:write scope
+    # ========================================================================
+    update-develop-tag: &update-develop-tag
+      name: Update Develop Build Tag
+      runs-on:
+        - windows
+        - self.hosted
+      max-time: 5
+      script:
+        - |
+          $tagName = "last-successful-develop-build"
+          $currentCommit = git rev-parse HEAD
+
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "Updating develop build tag" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "Tag: $tagName" -ForegroundColor Cyan
+          Write-Host "Commit: $currentCommit" -ForegroundColor Cyan
+
+          # Use Bitbucket REST API to update tag (avoids git network hanging issues)
+          $baseUrl = "https://api.bitbucket.org/2.0/repositories/$env:BITBUCKET_REPO_FULL_NAME/refs/tags"
+          $headers = @{
+            "Authorization" = "Bearer $env:BITBUCKET_ACCESS_TOKEN"
+            "Content-Type" = "application/json"
+          }
+
+          # Check if BITBUCKET_ACCESS_TOKEN is available
+          if (-not $env:BITBUCKET_ACCESS_TOKEN) {
+            Write-Host "[WARNING] BITBUCKET_ACCESS_TOKEN not set - cannot update tag via API" -ForegroundColor Yellow
+            Write-Host "Please create a Repository Access Token with repository:write scope." -ForegroundColor Yellow
+            exit 0
+          }
+
+          try {
+            # Delete existing tag if it exists (ignore 404 errors)
+            Write-Host "Deleting existing tag (if any)..." -ForegroundColor Gray
+            try {
+              Invoke-RestMethod -Uri "$baseUrl/$tagName" -Method Delete -Headers $headers -ErrorAction Stop
+              Write-Host "  Existing tag deleted" -ForegroundColor Gray
+            } catch {
+              if ($_.Exception.Response.StatusCode -ne 404) {
+                Write-Host "  Note: $($_.Exception.Message)" -ForegroundColor Gray
+              }
+            }
+
+            # Create new tag at current commit
+            Write-Host "Creating tag at commit $currentCommit..." -ForegroundColor Gray
+            $body = @{
+              name = $tagName
+              target = @{
+                hash = $currentCommit
+              }
+            } | ConvertTo-Json
+
+            $response = Invoke-RestMethod -Uri $baseUrl -Method Post -Headers $headers -Body $body -ErrorAction Stop
+            Write-Host "`n[OK] Tag '$tagName' updated successfully via API" -ForegroundColor Green
+
+          } catch {
+            Write-Host "`n[WARNING] Failed to update tag via API: $($_.Exception.Message)" -ForegroundColor Yellow
+            Write-Host "Next build will run all steps." -ForegroundColor Yellow
+            # Don't fail the build for tag issues
+            exit 0
+          }
+
+    # ========================================================================
+    # SELECTIVE BACKEND ANALYSIS (PR Builds)
+    # ========================================================================
+    # Purpose: Determine which backend tests to run based on changed files
+    # Runner:  Windows self-hosted
+    # Used by: PR pipeline only
+    #
+    # How it works:
+    # 1. Compares HEAD against PR destination branch
+    # 2. Detects global config changes (Directory.Build.props, etc.) → run all
+    # 3. Maps changed .cs/.csproj files to test namespace filters
+    # 4. Outputs selective-test-decision.json with:
+    #    - decision: RUN_ALL | SELECTIVE | SKIP_ALL
+    #    - testFilters: namespace patterns for selective test runs
+    #    - runArchitectureTests: whether architecture tests are needed
+    # ========================================================================
     selective-backend-analysis: &selective-backend-analysis
       name: Analyze Backend Changes (Selective Testing)
       runs-on:
@@ -437,6 +706,18 @@ definitions:
             } | ConvertTo-Json | Out-File -FilePath "selective-test-decision.json" -Encoding UTF8
           }
 
+    # ========================================================================
+    # FRONTEND TESTS (PR Builds)
+    # ========================================================================
+    # Purpose: Run frontend unit tests with selective targeting for PRs
+    # Runner:  Cloud (node:22-alpine) - frees on-prem resources
+    # Used by: PR pipeline, main branch pipeline
+    #
+    # For PR builds: Runs only tests for changed directories
+    # For branch builds: Runs all tests
+    #
+    # Test patterns: utils, hooks, components, reduxstore, pages/*
+    # ========================================================================
     test-frontend: &test-frontend
       name: Build and Test Frontend UI
       # Run on Bitbucket Cloud to free on-premises resources
@@ -476,48 +757,46 @@ definitions:
               changed_files=$(git diff --name-only --diff-filter=ACMR "origin/$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD | grep '^src/ui/src/' || true)
               cd src/ui
 
+              # ================================================================
+              # DYNAMIC DIRECTORY DISCOVERY FOR SELECTIVE TESTING
+              # ================================================================
+              # Instead of hardcoding directories, we dynamically discover them.
+              # This ensures new directories are automatically included in testing.
+              #
+              # Excluded top-level directories (no testable code):
+              #   assets, middleware, Okta, styles, types, test, pages
+              #   (pages is handled separately to match subdirectories)
+              #
+              # Excluded page directories:
+              #   Dev (developer utilities)
+              # ================================================================
+
+              # Define excluded directories
+              excluded_top_level="assets|middleware|Okta|styles|types|test|pages"
+              excluded_pages="Dev"
+
+              # Discover top-level directories (e.g., utils, hooks, components, redux, reduxstore)
+              top_level_dirs=$(ls -d src/ui/src/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_top_level)$" || true)
+
+              # Discover page directories (e.g., Beneficiaries, Reports, FiscalClose)
+              page_dirs=$(ls -d src/ui/src/pages/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_pages)$" || true)
+
               # Build test patterns based on changed areas
               test_patterns=""
 
-              if echo "$changed_files" | grep -q '^src/ui/src/utils/'; then
-                  test_patterns="$test_patterns src/utils"
-              fi
+              # Check top-level directories for changes
+              for dir in $top_level_dirs; do
+                  if echo "$changed_files" | grep -q "^src/ui/src/$dir/"; then
+                      test_patterns="$test_patterns src/$dir"
+                  fi
+              done
 
-              if echo "$changed_files" | grep -q '^src/ui/src/hooks/'; then
-                  test_patterns="$test_patterns src/hooks"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/components/'; then
-                  test_patterns="$test_patterns src/components"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/reduxstore/'; then
-                  test_patterns="$test_patterns src/reduxstore"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/DecemberActivities/'; then
-                  test_patterns="$test_patterns src/pages/DecemberActivities"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/FiscalClose/'; then
-                  test_patterns="$test_patterns src/pages/FiscalClose"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/Beneficiaries/'; then
-                  test_patterns="$test_patterns src/pages/Beneficiaries"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/InquiriesAndAdjustments/'; then
-                  test_patterns="$test_patterns src/pages/InquiriesAndAdjustments"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/Reports/'; then
-                  test_patterns="$test_patterns src/pages/Reports"
-              fi
-
-              if echo "$changed_files" | grep -q '^src/ui/src/pages/Distributions/'; then
-                  test_patterns="$test_patterns src/pages/Distributions"
-              fi
+              # Check page directories for changes
+              for page_dir in $page_dirs; do
+                  if echo "$changed_files" | grep -q "^src/ui/src/pages/$page_dir/"; then
+                      test_patterns="$test_patterns src/pages/$page_dir"
+                  fi
+              done
 
               # Trim leading whitespace
               test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
@@ -562,7 +841,7 @@ definitions:
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -p:SkipOpenApiSpecGeneration=true -o .\publishOutput
 
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\publishOutput\"
@@ -586,13 +865,13 @@ definitions:
         # Only update if not already present
         - if (-not (Get-Command Demoulas.Common.Build.Cli -ErrorAction SilentlyContinue)) { dotnet tool update --global Demoulas.Common.Build.Cli --no-cache }
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeFull.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeFull.Sync -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeFull.Sync.zip -Force
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeDelta.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeDelta.Sync -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeDelta.Sync.zip -Force
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeePayroll.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeePayroll.Sync -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeePayroll.Sync.zip -Force
 
     create-frontend-artifact-qa: &create-frontend-artifact-qa
@@ -889,6 +1168,12 @@ definitions:
           if ($LASTEXITCODE -ne 0) { Write-Error "Import validation failed."; exit 1 }
           Write-Host "Import validation completed."
 
+    # ========================================================================
+    # DATABASE CLI BUILD
+    # ========================================================================
+    # Purpose: Build the database CLI tool for migrations and data operations
+    # Runner:  Windows self-hosted
+    # ========================================================================
     db-cli-build-artifact: &db-cli-build-artifact
       name: Build DB CLI (artifact)
       runs-on:
@@ -902,6 +1187,14 @@ definitions:
           if ($LASTEXITCODE -ne 0) { Write-Error "Database CLI build failed. Exiting."; exit 1 }
           Write-Host "DB CLI built to .\\dbcli"
 
+    # ========================================================================
+    # SECURITY AUDITS
+    # ========================================================================
+    # These steps check for known vulnerabilities in dependencies.
+    # Run early in the pipeline to fail fast on security issues.
+    # ========================================================================
+
+    # Backend: NuGet vulnerability scan
     audit-backend: &audit-backend
       name: "Check Backend API for vulnerabilities"
       runs-on:
@@ -914,9 +1207,7 @@ definitions:
 
         - dotnet --info
         - dotnet nuget list source
-        - dotnet workload update --source https://api.nuget.org/v3/index.json
-        - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
-        - dotnet restore Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+        - dotnet restore Demoulas.ProfitSharing.slnx
 
         - |
           $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
@@ -929,6 +1220,7 @@ definitions:
             exit 0
           }
 
+    # Frontend: NPM vulnerability scan
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
       # Run on Bitbucket Cloud to free on-premises resources
@@ -945,6 +1237,13 @@ definitions:
           EOF
         - npm audit --audit-level=high --production
 
+    # ========================================================================
+    # CODE QUALITY CHECKS
+    # ========================================================================
+    # Linting and type checking. Run early for fast feedback on code issues.
+    # ========================================================================
+
+    # Frontend: ESLint + TypeScript (selective for PRs)
     frontend-lint: &frontend-lint
       name: Frontend TSC + Lint
       # Run on Bitbucket Cloud to free on-premises resources
@@ -993,6 +1292,7 @@ definitions:
 
         - npx tsc -b --noEmit
 
+    # Backend API: Zalando API Guidelines linting
     api-lint: &api-lint
       name: "API Linting (Zalando Guidelines)"
       # Runs on self-hosted Windows runner
@@ -1000,80 +1300,24 @@ definitions:
         - self.hosted
         - windows
       max-time: 10
-      caches:
-        - node
       script:
         - |
-          Write-Host "API LINTING - Zalando RESTful Guidelines" -ForegroundColor Cyan
-          Write-Host "=============================================" -ForegroundColor Cyan
-          Write-Host ""
+          # API linting using centralized PowerShell script
+          # Script location: scripts/Lint-Api.ps1
+          # For local development: .\scripts\Lint-Api.ps1 or npm run lint:api (from src/ui/)
 
-          # Enable TLS 1.2 for HTTPS connections
-          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-
-          $uri = "${env:QA_BASE_URL}:8443/swagger/Release%201.0/swagger.json"
-          Write-Host "Fetching OpenAPI spec from: $uri" -ForegroundColor Yellow
-
-          # Download OpenAPI spec with SSL certificate bypass
-          # Support both PowerShell Core (6+) and Windows PowerShell (5.x)
-          if ($PSVersionTable.PSVersion.Major -ge 6) {
-            # PowerShell Core 6+ has built-in -SkipCertificateCheck
-            Write-Host "Using PowerShell Core $($PSVersionTable.PSVersion)" -ForegroundColor Green
-            Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json -SkipCertificateCheck
-          } else {
-            # Fallback for Windows PowerShell 5.x - use .NET certificate policy
-            Write-Host "Using Windows PowerShell $($PSVersionTable.PSVersion)" -ForegroundColor Green
-            Add-Type -TypeDefinition @"
-          using System.Net;
-          using System.Security.Cryptography.X509Certificates;
-          public class TrustAllCertsPolicy : ICertificatePolicy {
-            public bool CheckValidationResult(
-              ServicePoint srvPoint, X509Certificate certificate,
-              WebRequest request, int certificateProblem) {
-              return true;
-            }
-          }
-          "@
-            [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-            Invoke-WebRequest -Uri $uri -OutFile openapi-qa.json
-          }
-
-          Write-Host "[OK] OpenAPI spec downloaded successfully" -ForegroundColor Green
-          Write-Host ""
-
-          # Install Spectral CLI for API linting
-          Write-Host "Installing Spectral CLI..." -ForegroundColor Yellow
-          npm install -g @stoplight/spectral-cli
-          Write-Host "[OK] Spectral CLI installed" -ForegroundColor Green
-          Write-Host ""
-
-          # Run Spectral linting with JUnit output (using npx to avoid PATH issues)
-          Write-Host "Running API linting with Spectral..." -ForegroundColor Yellow
-          npx @stoplight/spectral-cli lint openapi-qa.json --format junit --output spectral-results.xml
-          npx @stoplight/spectral-cli lint openapi-qa.json --format stylish > spectral-report.txt
-
-          # Check for errors in the stylish report
-          $ERROR_COUNT = (Select-String -Path spectral-report.txt -Pattern " error " -AllMatches).Matches.Count
-
-          Write-Host ""
-          Write-Host "API LINTING SUMMARY" -ForegroundColor Cyan
-          Write-Host "======================" -ForegroundColor Cyan
-          Write-Host "Errors: $ERROR_COUNT" -ForegroundColor $(if ($ERROR_COUNT -gt 0) { "Red" } else { "Green" })
-          Write-Host ""
-
-          if ($ERROR_COUNT -gt 0) {
-            Write-Host "[FAIL] API linting FAILED with $ERROR_COUNT error(s)" -ForegroundColor Red
-            Write-Host "Review spectral-report.txt artifact for details" -ForegroundColor Yellow
-            exit 1
-          } else {
-            Write-Host "[PASS] API linting PASSED - No errors found" -ForegroundColor Green
-            exit 0
-          }
+          $output = New-Item -ItemType Directory -Path "reports/api-lint" -Force
+          & ./scripts/Lint-Api.ps1 -QaBaseUrl "${env:QA_BASE_URL}:8443" -OutputFormat junit -OutputFile "./reports/api-lint/junit.xml"
+          exit $LASTEXITCODE
       artifacts:
-        - spectral-results.xml
-        - spectral-report.txt
-        - openapi-qa.json
+        - reports/api-lint/**
 
+    # ========================================================================
+    # SECRET SCANNING
+    # ========================================================================
+    # Detect accidentally committed secrets (API keys, passwords, etc.)
+    # Uses Gitleaks for comprehensive secret detection.
+    # ========================================================================
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
       # Runs on Bitbucket Cloud by default (Docker image)
@@ -1287,8 +1531,25 @@ definitions:
 
           echo "✓ Release tag '$TAG_NAME' created and pushed successfully"
 
+# ============================================================================
+#                                  PIPELINES
+# ============================================================================
+# Pipeline definitions for different triggers (branches, PRs, manual).
+# ============================================================================
+
 pipelines:
+  # ==========================================================================
+  # BRANCH PIPELINES
+  # ==========================================================================
+  # Triggered automatically when code is pushed to specific branches.
+  # ==========================================================================
   branches:
+    # ------------------------------------------------------------------------
+    # RELEASE BRANCH PIPELINE (main)
+    # ------------------------------------------------------------------------
+    # Full CI/CD: Build → Test → Deploy to QA → Deploy to UAT
+    # All steps run regardless of what changed (no selective testing)
+    # ------------------------------------------------------------------------
     release:
       # Stage 1: Build and test
       # Stage 1: Code quality checks (fail fast)
@@ -1299,8 +1560,7 @@ pipelines:
           - step: *audit-backend
       # Stage 3: Build and test
       - parallel:
-          - step: *build-and-test-backend-unit
-          - step: *build-and-test-backend-architecture
+          - step: *build-and-test-backend
           - step: *test-frontend
       # Stage 2: Generate build information (Windows, ~30 seconds)
       - step: *generate-buildinfo
@@ -1434,19 +1694,307 @@ pipelines:
       - step: *uat-import-uat-navigation
       - step: *uat-validate-import
 
+    # ------------------------------------------------------------------------
+    # DEVELOP BRANCH PIPELINE
+    # ------------------------------------------------------------------------
+    # Optimized CI: Only builds/tests what changed since last successful build
+    #
+    # Uses rolling tag 'last-successful-develop-build' to track baseline.
+    # Steps check develop-test-decision.json and skip if their area unchanged.
+    #
+    # Flow:
+    # 1. Analyze changes since last success → outputs decision JSON
+    # 2. Frontend lint (if frontend changed)
+    # 3. Audits (frontend/backend, if respective area changed)
+    # 4. Tests (frontend/backend, if respective area changed)
+    # 5. Update success tag (only if all steps pass)
+    # ------------------------------------------------------------------------
     develop:
-      # Stage 1: Code quality checks (fail fast)
-      - step: *frontend-lint
-      # Stage 2: Run audits and security scans only if build succeeds
-      - parallel:
-          - step: *audit-frontend
-          - step: *audit-backend
-      # Stage 3: Build and test
-      - parallel:
-          - step: *build-and-test-backend-unit
-          - step: *build-and-test-backend-architecture
-          - step: *test-frontend
+      # Stage 0: Analyze what changed since last successful build
+      - step: *selective-develop-analysis
 
+      # Stage 1: Code quality checks (fail fast) - only if frontend changed
+      - step:
+          name: Front TSC + Lint (Develop)
+          image: node:22-alpine
+          max-time: 10
+          script:
+            - |
+              echo "Checking develop-test-decision.json..."
+              if [ -f "develop-test-decision.json" ]; then
+                runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
+                if [ "$runFrontend" = "false" ]; then
+                  echo "SKIP: No frontend changes detected"
+                  exit 0
+                fi
+              fi
+              echo "Running frontend lint..."
+
+              cd src/ui
+              apk add --no-cache git
+              npm install -g npm@latest
+              cat > .npmrc << EOF
+              registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+              //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+              EOF
+              npm ci
+              npm run lint
+              npx tsc -b --noEmit
+
+      # Stage 2: Run audits - conditional based on changes
+      - parallel:
+          - step:
+              name: Front check vulnerabilities (Develop)
+              image: node:22-alpine
+              max-time: 10
+              script:
+                - |
+                  echo "Checking develop-test-decision.json..."
+                  if [ -f "develop-test-decision.json" ]; then
+                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
+                    if [ "$runFrontend" = "false" ]; then
+                      echo "SKIP: No frontend changes detected"
+                      exit 0
+                    fi
+                  fi
+                  echo "Running frontend audit..."
+
+                  cd src/ui
+                  cat > .npmrc << EOF
+                  registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+                  //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+                  EOF
+                  npm audit --audit-level=high --production
+
+          - step:
+              name: Back check vulnerabilities (Develop)
+              runs-on:
+                - windows
+                - self.hosted
+              script:
+                - |
+                  # Check if backend audit should run
+                  Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
+                  if (Test-Path "develop-test-decision.json") {
+                    $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
+                    if ($decision.runBackend -eq $false) {
+                      Write-Host "SKIP: No backend changes detected" -ForegroundColor Yellow
+                      exit 0
+                    }
+                  }
+                  Write-Host "Running backend audit..." -ForegroundColor Cyan
+
+                  # Run vulnerability check
+                  $env:SolutionDir = ".\src\services"
+                  Write-Host "Checking dotnet vulnerabilities"
+                  cd $env:SolutionDir
+                  dotnet --info
+                  dotnet nuget list source
+                  dotnet restore Demoulas.ProfitSharing.slnx
+
+                  $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+                  if ($output -match "has the following vulnerable packages") {
+                    Write-Host "Vulnerabilities found!"
+                    Write-Host $output
+                    exit 1
+                  } else {
+                    Write-Host "No vulnerabilities found."
+                    exit 0
+                  }
+
+      # Stage 3: Build and test - conditional based on changes
+      - parallel:
+          - step:
+              name: Back Unit + Arch Test (Develop)
+              runs-on:
+                - windows
+                - self.hosted
+              artifacts:
+                - test-reports/**
+              script:
+                - |
+                  # Check if backend tests should run
+                  Write-Host "Checking develop-test-decision.json..." -ForegroundColor Cyan
+                  if (Test-Path "develop-test-decision.json") {
+                    $decision = Get-Content "develop-test-decision.json" -Raw | ConvertFrom-Json
+                    if ($decision.runBackend -eq $false) {
+                      Write-Host "SKIP: No backend changes detected" -ForegroundColor Yellow
+                      exit 0
+                    }
+                  }
+                  Write-Host "Running backend tests..." -ForegroundColor Cyan
+
+                  # Set environment variables
+                  $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+
+                  # Verify .NET SDK
+                  $dotnetSdkList = dotnet --list-sdks
+                  Write-Output "Installed .NET SDKs:"
+                  Write-Output $dotnetSdkList
+                  $dotnetSdkRequired = $dotnetSdkList | Select-String "^10\."
+                  if (-not $dotnetSdkRequired) {
+                    Write-Error "FAILED: .NET 10 SDK is required but not available."
+                    exit 1
+                  }
+
+                  # Build once for all tests
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Building solution..." -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+                  dotnet restore src/services/Demoulas.ProfitSharing.slnx
+                  dotnet build src/services/Demoulas.ProfitSharing.slnx --configuration Release --no-incremental --no-restore
+
+                  # Run Unit Tests
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Running Unit Tests..." -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  $unitTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/unit-tests"
+                  mkdir -Force -Path $unitTestsPath
+                  $unitTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.exe"
+                  & $unitTestExe -jUnit "$unitTestsPath/junit.xml"
+                  $unitTestExit = $LASTEXITCODE
+
+                  # Run Architecture Tests
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Running Architecture Tests..." -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  $archTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/architecture-tests"
+                  mkdir -Force -Path $archTestsPath
+                  $archTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests.Architecture/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.Architecture.exe"
+                  & $archTestExe -jUnit "$archTestsPath/junit.xml"
+                  $archTestExit = $LASTEXITCODE
+
+                  # Report results
+                  Write-Host "`n========================================" -ForegroundColor Cyan
+                  Write-Host "Test Results Summary" -ForegroundColor Cyan
+                  Write-Host "========================================" -ForegroundColor Cyan
+                  Write-Host "Unit Tests: $(if ($unitTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($unitTestExit -eq 0) { 'Green' } else { 'Red' })
+                  Write-Host "Architecture Tests: $(if ($archTestExit -eq 0) { 'PASSED' } else { 'FAILED' })" -ForegroundColor $(if ($archTestExit -eq 0) { 'Green' } else { 'Red' })
+
+                  # Exit with failure if either test suite failed
+                  if ($unitTestExit -ne 0 -or $archTestExit -ne 0) {
+                    Write-Error "One or more test suites failed"
+                    exit 1
+                  }
+
+          - step:
+              name: Frontend Unit Tests (Develop)
+              image: node:22-alpine
+              max-time: 10
+              artifacts:
+                - src/ui/coverage/**
+                - src/ui/FE_Tests/**
+              script:
+                - |
+                  echo "Checking develop-test-decision.json..."
+                  if [ ! -f "develop-test-decision.json" ]; then
+                    echo "No decision file - running all tests"
+                    RUN_ALL=true
+                  else
+                    echo "Decision file contents:"
+                    cat develop-test-decision.json
+                    echo ""
+
+                    runFrontend=$(grep -o '"runFrontend":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
+                    if [ "$runFrontend" = "false" ]; then
+                      echo "SKIP: No frontend changes detected"
+                      exit 0
+                    fi
+
+                    isFirstRun=$(grep -o '"isFirstRun":[^,}]*' develop-test-decision.json | cut -d':' -f2 | tr -d ' \n\r')
+                    if [ "$isFirstRun" = "true" ]; then
+                      echo "First run - will run all tests"
+                      RUN_ALL=true
+                    else
+                      RUN_ALL=false
+                      # Extract frontendFiles array from JSON
+                      changed_files=$(grep -o '"frontendFiles":\[[^]]*\]' develop-test-decision.json | sed 's/"frontendFiles":\[//;s/\]//;s/"//g;s/,/\n/g' | tr -d ' ')
+                      echo "Changed frontend files from decision:"
+                      echo "$changed_files"
+                    fi
+                  fi
+
+                  cd src/ui
+                  npm install -g npm@latest
+                  cat > .npmrc << EOF
+                  registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+                  //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+                  EOF
+                  npm ci
+
+                  if [ "$RUN_ALL" = "true" ]; then
+                    echo "Running ALL tests"
+                    npm run test
+                    exit 0
+                  fi
+
+                  # ================================================================
+                  # DYNAMIC DIRECTORY DISCOVERY FOR SELECTIVE TESTING
+                  # ================================================================
+                  # Instead of hardcoding directories, we dynamically discover them.
+                  # This ensures new directories are automatically included in testing.
+                  #
+                  # Excluded top-level directories (no testable code):
+                  #   assets, middleware, Okta, styles, types, test, pages
+                  #   (pages is handled separately to match subdirectories)
+                  #
+                  # Excluded page directories:
+                  #   Dev (developer utilities)
+                  # ================================================================
+
+                  # Define excluded directories
+                  excluded_top_level="assets|middleware|Okta|styles|types|test|pages"
+                  excluded_pages="Dev"
+
+                  # Discover top-level directories (e.g., utils, hooks, components, redux, reduxstore)
+                  top_level_dirs=$(ls -d src/ui/src/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_top_level)$" || true)
+
+                  # Discover page directories (e.g., Beneficiaries, Reports, FiscalClose)
+                  page_dirs=$(ls -d src/ui/src/pages/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_pages)$" || true)
+
+                  # Build test patterns based on changed areas
+                  test_patterns=""
+
+                  # Check top-level directories for changes
+                  for dir in $top_level_dirs; do
+                    if echo "$changed_files" | grep -q "^src/ui/src/$dir/"; then
+                      test_patterns="$test_patterns src/$dir"
+                    fi
+                  done
+
+                  # Check page directories for changes
+                  for page_dir in $page_dirs; do
+                    if echo "$changed_files" | grep -q "^src/ui/src/pages/$page_dir/"; then
+                      test_patterns="$test_patterns src/pages/$page_dir"
+                    fi
+                  done
+
+                  # Trim leading whitespace
+                  test_patterns=$(echo "$test_patterns" | sed 's/^ *//')
+
+                  if [ -n "$test_patterns" ]; then
+                    echo "Running tests for changed areas: $test_patterns"
+                    npm run test -- --run $test_patterns
+                  else
+                    echo "No test areas matched changed files - skipping tests"
+                  fi
+
+      # Stage 4: Update the build tag on success
+      - step: *update-develop-tag
+
+  # ==========================================================================
+  # PULL REQUEST PIPELINE
+  # ==========================================================================
+  # Runs on all PRs regardless of target branch.
+  # Uses Bitbucket's changeset conditions for efficient step skipping.
+  #
+  # Steps only run if relevant files changed:
+  # - Frontend steps: src/ui/**
+  # - Backend steps: src/services/**
+  #
+  # Also includes selective backend analysis for intelligent test targeting.
+  # ==========================================================================
   pull-requests:
     "**":
       # Stage 1: Code quality checks (fail fast)
@@ -1494,18 +2042,7 @@ pipelines:
       # Stage 3: Build and test
       - parallel:
           - step:
-              <<: *build-and-test-backend-unit
-              condition:
-                changesets:
-                  includePaths:
-                    - "src/services/**/*.cs"
-                    - "src/services/**/*.csproj"
-                    - "src/services/**/*.sln"
-                    - "src/services/**/*.slnx"
-                    - "src/services/**/*.json"
-                    - "src/services/**/*.config"
-          - step:
-              <<: *build-and-test-backend-architecture
+              <<: *build-and-test-backend
               condition:
                 changesets:
                   includePaths:
@@ -1525,7 +2062,19 @@ pipelines:
                     - "src/ui/**/*.js"
                     - "src/ui/**/*.jsx"
 
+  # ==========================================================================
+  # CUSTOM PIPELINES (Manual Trigger)
+  # ==========================================================================
+  # These pipelines run on-demand from the Bitbucket UI.
+  # Select "Run Pipeline" → choose branch → select custom pipeline.
+  # ==========================================================================
   custom:
+    # ------------------------------------------------------------------------
+    # INFRASTRUCTURE AS CODE
+    # ------------------------------------------------------------------------
+    # Server provisioning: Install .NET hosting bundle, configure IIS settings
+    # Variables: ServerEnvironment (QA/UAT), Operation, ForceReinstall
+    # ------------------------------------------------------------------------
     infrastructure_as_code:
       - variables:
           - name: ServerEnvironment
@@ -1747,9 +2296,23 @@ pipelines:
               Write-Host "[OK] IaC operation completed successfully" -ForegroundColor Green
               Write-Host "================================================================" -ForegroundColor Cyan
 
+    # ------------------------------------------------------------------------
+    # API LINT
+    # ------------------------------------------------------------------------
+    # Validate API design against Zalando API Guidelines
+    # ------------------------------------------------------------------------
     api_lint:
       - step: *api-lint
 
+    # ------------------------------------------------------------------------
+    # DATABASE OPERATIONS
+    # ------------------------------------------------------------------------
+    # Database management: migrations, reset, data import
+    # Variables:
+    #   - Environment: QA or UAT
+    #   - Action: upgrade-db, drop-recreate-db, import-from-ready, etc.
+    #   - SourceSchema: PROFITSHARE or MTPR
+    # ------------------------------------------------------------------------
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
@@ -1814,5 +2377,12 @@ pipelines:
                 echo "Validated: Environment=$Environment, SourceSchema=$SourceSchema"
               fi
       - step: *upgrade-database
+
+    # ------------------------------------------------------------------------
+    # END-TO-END TESTS (Playwright)
+    # ------------------------------------------------------------------------
+    # Run Playwright E2E tests against QA environment
+    # Uses QA_Playwright variable for credentials
+    # ------------------------------------------------------------------------
     playwright_e2e_qa:
       - step: *run-playwright-tests

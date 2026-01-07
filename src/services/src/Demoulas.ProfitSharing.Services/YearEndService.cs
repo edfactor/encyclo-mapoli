@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -51,15 +52,17 @@ public sealed class YearEndService : IYearEndService
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly TimeProvider _timeProvider;
 
     public YearEndService(IProfitSharingDataContextFactory profitSharingDataContextFactory, ICalendarService calendar, IPayProfitUpdateService payProfitUpdateService,
-        TotalService totalService, IDemographicReaderService demographicReaderService)
+        TotalService totalService, IDemographicReaderService demographicReaderService, TimeProvider timeProvider)
     {
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _calendar = calendar;
         _payProfitUpdateService = payProfitUpdateService;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
+        _timeProvider = timeProvider;
     }
 
     /// <summary>
@@ -150,7 +153,7 @@ public sealed class YearEndService : IYearEndService
                 short? firstYearContribution = firstContributionYearBySsn.TryGetValue(ssn, out short value) ? value : null;
                 decimal lastYearBalance = lastYearBalanceBySsn.TryGetValue(ssn, out decimal? value1) ? value1 ?? 0m : 0m;
 
-                YearEndChange change = YearEndChangeCalculator.ComputeChange(profitYear, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate);
+                YearEndChange change = YearEndChangeCalculator.ComputeChange(profitYear, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate, _timeProvider);
                 if (change.IsChanged(employee))
                 {
                     changes.Add(employee.Demographic.Id, change);

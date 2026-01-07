@@ -27,6 +27,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     }
 
     public virtual DbSet<AnnuityRate> AnnuityRates { get; set; }
+    public virtual DbSet<AnnuityRateConfig> AnnuityRateConfigs { get; set; }
     public virtual DbSet<AuditEvent> AuditEvents { get; set; }
     public virtual DbSet<FileTransferAudit> FileTransferAudits { get; set; }
     public virtual DbSet<FtpOperationLog> FtpOperationLogs { get; set; }
@@ -72,6 +73,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<NavigationRole> NavigationRoles { get; set; }
     public virtual DbSet<NavigationStatus> NavigationStatuses { get; set; }
     public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }
+    public virtual DbSet<NavigationCustomSetting> NavigationCustomSettings { get; set; }
 
     public virtual DbSet<ProfitShareCheck> ProfitShareChecks { get; set; }
     public virtual DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
@@ -79,6 +81,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<State> States { get; set; }
 
     public virtual DbSet<HealthCheckStatusHistory> HealthCheckStatusHistories { get; set; }
+    public virtual DbSet<RmdsFactorByAge> RmdsFactorsByAge { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

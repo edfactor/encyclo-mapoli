@@ -21,6 +21,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
@@ -42,13 +43,14 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
     public ExecutiveHoursAndDollarsTests()
     {
-        var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
-        var appUser = ServiceProvider!.GetService<IAppUser>();
+        ICalendarService calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
+        IAppUser? appUser = ServiceProvider!.GetService<IAppUser>();
+        IHostEnvironment hostEnvironment = ServiceProvider!.GetRequiredService<IHostEnvironment>();
         Mock<IHttpContextAccessor> mockHttpContextAccessor = new();
         Mock<ILogger<ExecutiveHoursAndDollarsEndpoint>> mockLogger = new();
         Mock<ICommitGuardOverride> mockCommitGuardOverride = new();
         ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
-        IAuditService mockAuditService = new AuditService(MockDbContextFactory, mockCommitGuardOverride.Object, appUser, mockHttpContextAccessor.Object);
+        IAuditService mockAuditService = new AuditService(MockDbContextFactory, mockCommitGuardOverride.Object, appUser, mockHttpContextAccessor.Object, hostEnvironment);
         _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockAuditService, mockLogger.Object);
     }
 
@@ -291,7 +293,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
             // Assert - FullName should be formatted as "LastName, FirstName M" (with middle initial only)
             response.Result.Response.Results.Count().ShouldBeGreaterThan(0);
-            var result = response.Result.Response.Results.FirstOrDefault(r => r.BadgeNumber == 5001);
+            ExecutiveHoursAndDollarsResponse? result = response.Result.Response.Results.FirstOrDefault(r => r.BadgeNumber == 5001);
             result.ShouldNotBeNull();
             result!.FullName.ShouldBe("Smith, John M"); // Should have middle initial only, not full middle name
         });
@@ -339,7 +341,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
             // Assert - FullName should be formatted as "LastName, FirstName" (without middle initial)
             response.Result.Response.Results.Count().ShouldBeGreaterThan(0);
-            var result = response.Result.Response.Results.FirstOrDefault(r => r.BadgeNumber == 5002);
+            ExecutiveHoursAndDollarsResponse? result = response.Result.Response.Results.FirstOrDefault(r => r.BadgeNumber == 5002);
             result.ShouldNotBeNull();
             result!.FullName.ShouldBe("Johnson, Mary"); // Should not have middle initial when no middle name
         });

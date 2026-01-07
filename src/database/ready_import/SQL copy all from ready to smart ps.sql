@@ -1,8 +1,27 @@
 DECLARE
-    this_year NUMBER := 2025; -- <-------- ORACLE HCM loads data in this year.
-    last_year NUMBER := 2024; -- <-------- active year end year for the scramble.   Scramble is frozen in 2024. 
+    /*
+      IMPORTANT:
+      Do NOT tie import years to SYSDATE.
+
+      This script is routinely used with "scramble" source data that can be frozen in a prior year.
+      If we label PAY_PROFIT rows with SYSDATE-derived years, then downstream vesting/year
+      calculations that depend on PAY_PROFIT hours/income will be shifted into the wrong profit year.
+
+      Instead, derive the active profit year from the source PROFIT_DETAIL max year.
+      (Example: if source max PROFIT_YEAR is 2024, then PAY_PROFIT "this_year" should be 2024 and
+      "last_year" should be 2023.)
+    */
+    this_year NUMBER;
+    last_year NUMBER;
+    wall_clock_year NUMBER := EXTRACT(YEAR FROM SYSDATE);
     demographic_cutoff TIMESTAMP; -- <-- Timestamp to use if we import DEMO_PROFSHARE
 BEGIN
+
+    SELECT MAX(TRUNC(PROFIT_YEAR))
+    INTO this_year
+    FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DETAIL;
+
+    last_year := this_year - 1;
 
  -- First disable all foreign key constraints
     FOR fk IN (SELECT constraint_name, table_name 
@@ -1126,6 +1145,7 @@ MERGE INTO profit_detail pd
                     profit_detail
                 WHERE
                     profit_year_iteration = 5
+                                    AND profit_year = 1989
                   AND profit_code_id = 0
                   AND contribution != 0
                 AND ( comment_type_id = 5 OR comment_type_id IS NULL )
@@ -1137,7 +1157,7 @@ MERGE INTO profit_detail pd
     WHEN MATCHED THEN UPDATE
         SET pd.years_of_service_credit = 1;
 
--- Handle 1998.5 V-ONLY rows
+-- Handle 1989.5 V-ONLY rows
 MERGE INTO profit_detail tgt
     USING (
         SELECT MIN(id) AS id
@@ -1453,9 +1473,62 @@ INSERT ALL
         INSERT INTO STATE_TAX(ABBREVIATION, RATE, USER_NAME, CREATED_AT_UTC) VALUES('WV',0,USER,(SYSTIMESTAMP));
         INSERT INTO STATE_TAX(ABBREVIATION, RATE, USER_NAME, CREATED_AT_UTC) VALUES('WY',0,USER,(SYSTIMESTAMP));
 
+                /*
+                     PAY_PROFIT "current year" rows are expected by the application.
+
+                     This import intentionally derives this_year/last_year from source PROFIT_DETAIL (scramble may be frozen).
+                     When the wall-clock year advances beyond the newest imported profit year, ensure we still have a
+                     PAY_PROFIT row for the wall-clock year for each employee we have in the most recent year.
+
+                     We copy the employee set and plan/status fields from the most recent PAY_PROFIT (this_year), but
+                     zero out the quantitative fields (hours/income/weeks/points) so the row is effectively "empty".
+                */
+                IF wall_clock_year > this_year THEN
+                        INSERT INTO PAY_PROFIT
+                        (DEMOGRAPHIC_ID,
+                         PROFIT_YEAR,
+                         CURRENT_HOURS_YEAR,
+                         CURRENT_INCOME_YEAR,
+                         WEEKS_WORKED_YEAR,
+                         PS_CERTIFICATE_ISSUED_DATE,
+                         ENROLLMENT_ID,
+                         BENEFICIARY_TYPE_ID,
+                         EMPLOYEE_TYPE_ID,
+                         ZERO_CONTRIBUTION_REASON_ID,
+                         HOURS_EXECUTIVE,
+                         INCOME_EXECUTIVE,
+                         POINTS_EARNED,
+                         ETVA)
+                        SELECT
+                                pp.DEMOGRAPHIC_ID,
+                                wall_clock_year AS PROFIT_YEAR,
+                                0 AS CURRENT_HOURS_YEAR,
+                                0 AS CURRENT_INCOME_YEAR,
+                                0 AS WEEKS_WORKED_YEAR,
+                                NULL AS PS_CERTIFICATE_ISSUED_DATE,
+                                pp.ENROLLMENT_ID,
+                                pp.BENEFICIARY_TYPE_ID,
+                                pp.EMPLOYEE_TYPE_ID,
+                                pp.ZERO_CONTRIBUTION_REASON_ID,
+                                0 AS HOURS_EXECUTIVE,
+                                0 AS INCOME_EXECUTIVE,
+                                0 AS POINTS_EARNED,
+                                pp.ETVA
+                        FROM PAY_PROFIT pp
+                        WHERE pp.PROFIT_YEAR = this_year
+                            AND NOT EXISTS (
+                                SELECT 1
+                                FROM PAY_PROFIT existing
+                                WHERE existing.DEMOGRAPHIC_ID = pp.DEMOGRAPHIC_ID
+                                    AND existing.PROFIT_YEAR = wall_clock_year
+                            );
+
+                        DBMS_OUTPUT.PUT_LINE('Seeded PAY_PROFIT for wall-clock year ' || wall_clock_year || ' from year ' || this_year || ': ' || SQL%ROWCOUNT || ' rows.');
+                END IF;
+
         -- Seed an active freeze point (READY import)
         INSERT INTO FROZEN_STATE (PROFIT_YEAR, FROZEN_BY, AS_OF_DATETIME, IS_ACTIVE)
-        VALUES (2025, USER, TO_TIMESTAMP_TZ('2026-01-04 05:01:00 +00:00', 'YYYY-MM-DD HH24:MI:SS TZH:TZM'), 1);
+        VALUES (this_year, USER, TO_TIMESTAMP_TZ('2026-01-04 05:01:00 +00:00', 'YYYY-MM-DD HH24:MI:SS TZH:TZM'), 1);
 
 -- get rid of any history of YE Updates, as all the data is wiped
 delete from ye_update_status;
@@ -1476,6 +1549,68 @@ delete from ye_update_status;
 delete from profit_detail where ssn IN ( 700010556, 700010521, 700010561 );
 delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561));
 delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561 );
+
+-- ============================================================================
+-- ANNUITY RATE SEED DATA (PS-1890)
+-- ============================================================================
+-- Seed ANNUITY_RATE_CONFIG table with age ranges for years 2020-2026
+-- This defines the expected age range (67-120) for annuity rate validation
+-- ============================================================================
+
+DECLARE
+    v_count NUMBER;
+BEGIN
+    -- Seed config for years 2020-2026 (only if not already present)
+    FOR yr IN 2020..2026 LOOP
+        SELECT COUNT(*) INTO v_count FROM ANNUITY_RATE_CONFIG WHERE YEAR = yr;
+        IF v_count = 0 THEN
+            INSERT INTO ANNUITY_RATE_CONFIG (YEAR, MINIMUM_AGE, MAXIMUM_AGE, USER_NAME, CREATED_AT_UTC, MODIFIED_AT_UTC)
+            VALUES (yr, 67, 120, USER, SYSTIMESTAMP, SYSTIMESTAMP);
+            DBMS_OUTPUT.PUT_LINE('Seeded ANNUITY_RATE_CONFIG for year ' || yr);
+        END IF;
+    END LOOP;
+    
+    COMMIT;
+END;
+/
+
+-- ============================================================================
+-- Copy annuity rates from 2024 to any missing years (2020-2026)
+-- Uses 2024 as the source year since it has complete data
+-- Only copies if the target year has no rates defined yet (idempotent)
+-- ============================================================================
+
+DECLARE
+    v_source_year NUMBER := 2024;
+    v_count NUMBER;
+    v_rates_copied NUMBER := 0;
+BEGIN
+    -- For each target year, copy rates from 2024 if not already present
+    FOR yr IN 2020..2026 LOOP
+        -- Skip the source year itself
+        IF yr != v_source_year THEN
+            -- Check if target year already has annuity rates
+            SELECT COUNT(*) INTO v_count FROM ANNUITY_RATE WHERE YEAR = yr;
+            
+            IF v_count = 0 THEN
+                -- Copy all rates from source year to target year
+                INSERT INTO ANNUITY_RATE (YEAR, AGE, SINGLE_RATE, JOINT_RATE, CREATED_AT_UTC, USER_NAME, MODIFIED_AT_UTC)
+                SELECT yr, AGE, SINGLE_RATE, JOINT_RATE, SYSTIMESTAMP, USER, SYSTIMESTAMP
+                FROM ANNUITY_RATE
+                WHERE YEAR = v_source_year
+                ORDER BY AGE;
+                
+                v_rates_copied := SQL%ROWCOUNT;
+                DBMS_OUTPUT.PUT_LINE('Copied ' || v_rates_copied || ' annuity rates from year ' || v_source_year || ' to year ' || yr);
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('Year ' || yr || ' already has ' || v_count || ' annuity rates - skipping');
+            END IF;
+        END IF;
+    END LOOP;
+    
+    COMMIT;
+END;
+/
 
 END;
 COMMIT ;

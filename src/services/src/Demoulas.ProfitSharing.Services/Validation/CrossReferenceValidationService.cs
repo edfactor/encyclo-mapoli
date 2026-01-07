@@ -210,23 +210,28 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
     {
         var currentValues = new Dictionary<string, decimal>
         {
-            { "QPAY129.QPAY129_DistributionTotals", forfeitTotal },
-            { "QPAY129.ForfeitureTotal", distributionTotal }
+            { "QPAY129.QPAY129_DistributionTotals", distributionTotal},
+            { "QPAY129.ForfeitureTotal", forfeitTotal }
         };
-        var lastYear = (short)(profitYear - 1); //QPAY129 seems to archive for the prior year
 
-        var distributionTotalValidation = await ValidateSingleFieldAsync(
-            lastYear,
+        // Execute validations in parallel for better performance
+        var distributionTask = ValidateSingleFieldAsync(
+            profitYear,
             "QPAY129",
             "QPAY129_DistributionTotals",
             currentValues,
             cancellationToken);
-        var forfeitTotalValidation = await ValidateSingleFieldAsync(
-            lastYear,
+        var forfeitTask = ValidateSingleFieldAsync(
+            profitYear,
             "QPAY129",
             "ForfeitureTotal",
             currentValues,
             cancellationToken);
+
+        await Task.WhenAll(distributionTask, forfeitTask);
+
+        var distributionTotalValidation = await distributionTask;
+        var forfeitTotalValidation = await forfeitTask;
 
         var validationGroup = new CrossReferenceValidationGroup
         {

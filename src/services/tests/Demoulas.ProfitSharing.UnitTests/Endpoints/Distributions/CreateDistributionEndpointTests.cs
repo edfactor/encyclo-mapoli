@@ -446,9 +446,9 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        // The service validation throws ArgumentException which becomes HTTP 500
+        // The service validation throws ArgumentException which becomes HTTP 400
         // This indicates the validation error is being properly caught and handled
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "CreateDistribution - Should handle concurrent requests")]

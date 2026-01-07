@@ -34,7 +34,7 @@ public class ProfitMasterTests : PristineBaseTest
         IAppUser iAppUser = new Mock<IAppUser>().Object;
         ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
         ProfitShareEditService pses = new(psus, CalendarService);
-        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService);
+        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, TimeProvider.System);
 
         var frozenDemographicYear = (await FrozenService.GetActiveFrozenDemographic(CancellationToken.None)).ProfitYear;
         var maxYearEndStatusYear =
@@ -103,7 +103,7 @@ public class ProfitMasterTests : PristineBaseTest
         IAppUser iAppUser = new Mock<IAppUser>().Object;
         ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
         ProfitShareEditService pses = new(psus, CalendarService);
-        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService);
+        ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, TimeProvider.System);
 
         var frozenDemographicYear = (await FrozenService.GetActiveFrozenDemographic(CancellationToken.None)).ProfitYear;
         var maxYearEndStatusYear =

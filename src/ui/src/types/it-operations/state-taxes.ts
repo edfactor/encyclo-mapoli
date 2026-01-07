@@ -4,6 +4,8 @@
 export interface StateTaxRateDto {
   abbreviation: string;
   rate: number;
+  dateModified?: string;
+  userModified?: string;
 }
 
 /// <summary>

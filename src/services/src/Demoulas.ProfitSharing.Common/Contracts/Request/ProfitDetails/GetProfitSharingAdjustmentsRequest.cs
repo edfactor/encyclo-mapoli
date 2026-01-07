@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 
-public sealed record GetProfitSharingAdjustmentsRequest : IProfitYearRequest
+public sealed record GetProfitSharingAdjustmentsRequest : IProfitYearRequest, IBadgeNumberRequest
 {
     public short ProfitYear { get; set; }
 

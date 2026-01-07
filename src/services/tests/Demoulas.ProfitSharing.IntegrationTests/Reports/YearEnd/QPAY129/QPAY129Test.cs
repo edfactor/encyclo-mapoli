@@ -21,7 +21,8 @@ public class QPAY129Test : PristineBaseTest
             CalendarService,
             TotalService,
             new Mock<IHostEnvironment>().Object,
-            DemographicReaderService);
+            DemographicReaderService,
+            TimeProvider.System);
     }
 
     [Fact]

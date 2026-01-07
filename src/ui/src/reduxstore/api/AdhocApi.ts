@@ -238,7 +238,7 @@ export const AdhocApi = createApi({
 
     getBreakdownByStore: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store",
+        url: "adhoc/stores/breakdown",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -552,7 +552,7 @@ export const AdhocApi = createApi({
 
     getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
       query: (params) => ({
-        url: `adhoc/breakdown-by-store/${params.storeNumber}/totals`,
+        url: `adhoc/stores/${params.storeNumber}/breakdown/totals`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -575,7 +575,7 @@ export const AdhocApi = createApi({
     }),
     getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
       query: (params) => ({
-        url: `adhoc/breakdown-by-store/totals`,
+        url: `adhoc/stores/breakdown/totals`,
         method: "GET",
         params: {
           profitYear: params.profitYear

@@ -1,5 +1,5 @@
 import { FormControl, FormLabel, Grid, TextField } from "@mui/material";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import useNavigationYear from "hooks/useNavigationYear";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetCertificatesReportQuery } from "reduxstore/api/YearsEndApi";
@@ -21,7 +21,7 @@ const ReprintCertificatesFilterSection: React.FC<ReprintCertificatesFilterSectio
   onFilterChange,
   onReset
 }) => {
-  const selectedProfitYear = useFiscalCloseProfitYear();
+  const selectedProfitYear = useNavigationYear();
   const [getCertificatesReport, { isFetching }] = useLazyGetCertificatesReportQuery();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {

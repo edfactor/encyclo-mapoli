@@ -167,25 +167,24 @@ const ProfitShareEditUpdate = () => {
                   {/* Unified Summary Table (PAY444) */}
                   <MasterUpdateSummaryTable
                     totals={profitSharingUpdate.profitShareUpdateTotals}
-                    getFieldValidation={
-                      getFieldValidation as Parameters<typeof MasterUpdateSummaryTable>[0]["getFieldValidation"]
-                    }
+                    getFieldValidation={getFieldValidation}
                     openValidationField={openValidationField}
                     onValidationToggle={handleValidationToggle}
                   />
-
-                  <TotalsGrid
-                    tablePadding="12px"
-                    displayData={[
-                      [
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxOverTotal || 0),
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
-                        numberToCurrency(profitSharingEditQueryParams?.maxAllowedContributions || 0)
-                      ]
-                    ]}
-                    leftColumnHeaders={[]}
-                    topRowHeaders={["Total Forfeitures", "Total Points", "For Employees Exceeding Max Contribution"]}
-                  />
+                  <div className="[&>div]:w-3/5">
+                    <TotalsGrid
+                      tablePadding="12px"
+                      displayData={[
+                        [
+                          numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxOverTotal || 0),
+                          numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
+                          numberToCurrency(profitSharingEditQueryParams?.maxAllowedContributions || 0)
+                        ]
+                      ]}
+                      leftColumnHeaders={[]}
+                      topRowHeaders={["Total Forfeitures", "Total Points", "For Employees Exceeding Max Contribution"]}
+                    />
+                  </div>
                   {totalForfeituresGreaterThanZero && (
                     <div className="-mt-2 px-[24px] text-sm text-red-600">
                       <em>
@@ -198,7 +197,7 @@ const ProfitShareEditUpdate = () => {
                   <div className="px-[24px]">
                     <h2 className="text-dsm-secondary">Summary (PAY447)</h2>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 [&>div]:w-auto">
                     <TotalsGrid
                       breakpoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
                       tablePadding="4px"

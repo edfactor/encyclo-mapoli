@@ -7,7 +7,7 @@ public sealed class UpdateSummaryReportDetail : IIsExecutive
 {
     public long BadgeNumber { get; set; }
     public short StoreNumber { get; set; }
-    [MaskSensitive] public required string Name { get; set; }
+    [MaskSensitive] public required string FullName { get; set; }
     public bool IsEmployee { get; set; }
     public bool IsExecutive { get; set; }
     public required UpdateSummaryReportPointInTimeDetail Before { get; set; }
@@ -19,7 +19,7 @@ public sealed class UpdateSummaryReportDetail : IIsExecutive
         {
             BadgeNumber = 2002,
             StoreNumber = 10,
-            Name = "Oscar Taylor",
+            FullName = "Taylor, Oscar Z",
             Before = new UpdateSummaryReportPointInTimeDetail
             {
                 ProfitSharingAmount = 100,

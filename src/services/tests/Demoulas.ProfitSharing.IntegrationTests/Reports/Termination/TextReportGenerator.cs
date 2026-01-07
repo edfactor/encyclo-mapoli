@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
+﻿using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
+
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 
 /// <summary>
 ///     Produces a paper report identical to the QPAY066.pco program.
@@ -62,7 +64,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         string ageStr = age.HasValue ? $"{age:00}" : "";
         string wVestPertStr = wVestPert == 100 ? "100" : $"{wVestPert:00}";
 
-        string? name = r2EmployeeName?.PadRight(19).Substring(0, 19);
+        string? name = Pay443Tests.RemoveMiddleInitial(r2EmployeeName!)?.PadRight(19).Substring(0, 19);
 
         _reportWriter.WriteLine(r2BadgePsnNp.ToString().PadLeft(11) + " " + // fmt
                                 name + " " +

@@ -365,7 +365,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         // Act & Assert
         return Should.ThrowAsync<InvalidOperationException>(
-            () => _service.GeneratePdfAsync(badgeNumber, request, CancellationToken.None));
+            async () => await _service.GeneratePdfAsync(badgeNumber, request, CancellationToken.None));
     }
 
     [Description("PS-2284 : GeneratePdfAsync logs audit event for PDF download tracking")]

@@ -11,8 +11,6 @@ This concise guide explains the must-know patterns, commands, and files for AI c
 **Start here (authoritative references)**
 
 - [.github/CODE_REVIEW_CHECKLIST.md](.github/CODE_REVIEW_CHECKLIST.md) — master patterns, security, auto-reject rules (age calc, PII).
-- [.github/instructions/pages.instructions.md](.github/instructions/pages.instructions.md) — frontend page patterns and examples.
-- [src/ui/public/docs/TELEMETRY_GUIDE.md](src/ui/public/docs/TELEMETRY_GUIDE.md) — telemetry + masking examples.
 
 **Architecture & boundaries (big picture)**
 
@@ -114,7 +112,7 @@ If you want, I can also produce a suggested PR body and branch name for this cha
 
 ## Security Requirements (MANDATORY - OWASP Top 10 2021/2025 Aligned)
 
-**ALL NEW CODE must follow security patterns. See [security.instructions.md](.github/instructions/security.instructions.md) for complete guidance.**
+**ALL NEW CODE must follow security patterns. See [all.security.instructions.md](.github/instructions/all.security.instructions.md) for complete guidance.**
 
 **Critical security concepts covered:**
 
@@ -123,7 +121,7 @@ If you want, I can also produce a suggested PR body and branch name for this cha
 - **STRIDE Threat Modeling**: Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation of Privilege
 - **Secure-by-Default Principles**: Least privilege, fail closed, defense in depth
 
-**Quick security checklist** (see security.instructions.md for details):
+**Quick security checklist** (see all.security.instructions.md for details):
 
 - [ ] **Server-side validation ALWAYS**: Never trust client-provided roles/headers
 - [ ] **Parameterized queries ONLY**: No SQL string concatenation
@@ -134,7 +132,7 @@ If you want, I can also produce a suggested PR body and branch name for this cha
 - [ ] **Dependency security**: Monthly audits, critical CVEs within 48 hours
       See `VALIDATION_PATTERNS.md` (`.github/`) for complete patterns
 
-**For detailed security guidance, see [.github/instructions/security.instructions.md](.github/instructions/security.instructions.md)**
+**For detailed security guidance, see [.github/instructions/all.security.instructions.md](.github/instructions/all.security.instructions.md)**
 
 ## Endpoint Results Pattern (MANDATORY)
 
@@ -572,8 +570,8 @@ When creating new documentation:
 ## When Extending
 
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root.
-- **CODE REVIEW CHECKLIST**: Use the [Master Code Review Checklist](CODE_REVIEW_CHECKLIST.md) for all PRs - includes comprehensive security, architecture, frontend, backend, and telemetry guidance. **CRITICAL**: Frontend section includes auto-reject blockers like age calculation.
-- **NEW ENDPOINT CHECKLIST**: Use the [RESTful API Guidelines Instructions](instructions/restful-api-guidelines.instructions.md) (see “New endpoint checklist”) to verify design, implementation, documentation, and security before submitting PR
+- **CODE REVIEW CHECKLIST**: Use the Code review checklist for all PRs - includes comprehensive security, architecture, frontend, backend, and telemetry guidance. **CRITICAL**: Frontend section includes auto-reject blockers like age calculation.
+- **NEW ENDPOINT CHECKLIST**: Use the Endpoint instructions (see “New endpoint checklist”) to verify design, implementation, documentation, and security before submitting PR
 - ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section).
 - Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.).
 - Declare all sensitive fields accessed in telemetry calls for security auditing.

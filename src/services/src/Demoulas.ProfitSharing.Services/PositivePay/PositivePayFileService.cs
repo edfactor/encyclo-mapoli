@@ -1,11 +1,9 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
-using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
@@ -98,7 +96,7 @@ public sealed class PositivePayFileService : IPositivePayFileService
                     profitYear, checks.Count, memoryStream.Length);
 
                 return Result<Stream>.Success(memoryStream);
-            });
+            }, cancellationToken);
         }
         catch (Exception ex)
         {

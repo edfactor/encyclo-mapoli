@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Services.Administration;
 using Demoulas.ProfitSharing.Services.Audit;
@@ -28,11 +29,14 @@ using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
+using Demoulas.ProfitSharing.Services.Validators;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.Util.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -110,6 +114,8 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IOracleHcmDiagnosticsService, OracleHcmDiagnosticsService>();
         _ = builder.Services.AddScoped<IStateTaxRatesService, StateTaxRatesService>();
         _ = builder.Services.AddScoped<IAnnuityRatesService, AnnuityRatesService>();
+        _ = builder.Services.AddScoped<IAnnuityRateValidator, AnnuityRateValidator>();
+        _ = builder.Services.AddScoped<IRmdsFactorService, RmdsFactorService>();
         _ = builder.Services.AddScoped<ICommentTypeService, CommentTypeService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
@@ -140,10 +146,69 @@ public static class ServicesExtension
 
         builder.AddProjectCachingServices();
 
+        // Register TimeProvider (fake or real based on configuration and environment)
+        builder.AddTimeProvider();
+
         // Register cache warmer hosted service (not in test environment)
         if (!builder.Environment.IsTestEnvironment())
         {
             _ = builder.Services.AddHostedService<StateTaxCacheWarmerHostedService>();
+        }
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Registers the appropriate <see cref="TimeProvider"/> based on configuration and environment.
+    /// SECURITY: Fake time is only enabled in non-production environments when explicitly configured.
+    /// </summary>
+    /// <param name="builder">The host application builder.</param>
+    /// <returns>The builder for chaining.</returns>
+    public static IHostApplicationBuilder AddTimeProvider(this IHostApplicationBuilder builder)
+    {
+        var fakeTimeConfig = builder.Configuration
+            .GetSection(FakeTimeConfiguration.SectionName)
+            .Get<FakeTimeConfiguration>() ?? new FakeTimeConfiguration();
+
+        // SECURITY: Never allow fake time in Production
+        var isProduction = builder.Environment.IsProduction();
+        var useFakeTime = fakeTimeConfig.Enabled && !isProduction;
+
+        if (useFakeTime)
+        {
+            // Validate configuration
+            var validationErrors = fakeTimeConfig.Validate();
+            if (validationErrors.Count > 0)
+            {
+                throw new InvalidOperationException(
+                    $"FakeTime configuration is invalid: {string.Join("; ", validationErrors)}");
+            }
+
+            _ = builder.Services.AddSingleton<TimeProvider>(sp =>
+            {
+                var logger = sp.GetService<ILogger<FakeTimeProvider>>();
+                return new FakeTimeProvider(fakeTimeConfig, logger);
+            });
+
+            // Also register the configuration so endpoints can report status
+            _ = builder.Services.AddSingleton(fakeTimeConfig);
+        }
+        else
+        {
+            // Use the real system time provider
+            _ = builder.Services.AddSingleton(TimeProvider.System);
+
+            // Register a disabled configuration for status reporting
+            _ = builder.Services.AddSingleton(new FakeTimeConfiguration { Enabled = false });
+
+            if (fakeTimeConfig.Enabled && isProduction)
+            {
+                // Log a warning that fake time was requested but disabled in production
+                // This uses a temporary logger since DI isn't fully built yet
+                Console.WriteLine(
+                    "WARNING: FakeTime.Enabled is true but this is a Production environment. " +
+                    "Fake time has been disabled for security reasons.");
+            }
         }
 
         return builder;

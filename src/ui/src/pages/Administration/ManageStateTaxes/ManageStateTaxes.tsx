@@ -1,15 +1,23 @@
-import { Box, Button, Divider, Grid, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid } from "@mui/material";
 import { CellValueChangedEvent, ColDef, ValueFormatterParams, ValueParserParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
-import { DSMGrid, Page } from "smart-ui-library";
+import { useDispatch } from "react-redux";
+import { ApiMessageAlert, DSMGrid, Page } from "smart-ui-library";
 import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { useGetStateTaxRatesQuery, useUpdateStateTaxRateMutation } from "../../../reduxstore/api/ItOperationsApi";
+import { setMessage } from "../../../reduxstore/slices/messageSlice";
 import { StateTaxRateDto } from "../../../reduxstore/types";
+import { mmDDYYFormat } from "../../../utils/dateUtils";
+import { Messages } from "../../../utils/messageDictonary";
 
 const hasMoreThanTwoDecimals = (value: number): boolean => {
-  return Math.abs(value * 100 - Math.round(value * 100)) > Number.EPSILON;
+  // Convert to string and count decimal places to avoid floating-point precision issues
+  const strValue = String(value);
+  const decimalIndex = strValue.indexOf(".");
+  if (decimalIndex === -1) return false; // No decimal point, so 0 decimal places
+  return strValue.length - decimalIndex - 1 > 2; // Count digits after decimal point
 };
 
 const normalizeRateToTwoDecimals = (value: number): number => {
@@ -17,13 +25,13 @@ const normalizeRateToTwoDecimals = (value: number): number => {
 };
 
 const ManageStateTaxes = () => {
+  const dispatch = useDispatch();
   const { data, isFetching, refetch } = useGetStateTaxRatesQuery();
   const [updateStateTaxRate, { isLoading: isSaving }] = useUpdateStateTaxRateMutation();
 
   const [rowData, setRowData] = useState<StateTaxRateDto[]>([]);
   const [originalRatesByAbbr, setOriginalRatesByAbbr] = useState<Record<string, number>>({});
   const [stagedRatesByAbbr, setStagedRatesByAbbr] = useState<Record<string, number>>({});
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const hasUnsavedChanges = Object.keys(stagedRatesByAbbr).length > 0;
   useUnsavedChangesGuard(hasUnsavedChanges);
@@ -41,7 +49,6 @@ const ManageStateTaxes = () => {
     );
 
     setStagedRatesByAbbr({});
-    setErrorMessage(null);
   }, [data]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
@@ -69,6 +76,34 @@ const ManageStateTaxes = () => {
           const value = params.value;
           return typeof value === "number" && Number.isFinite(value) ? value.toFixed(2) : "";
         }
+      },
+      {
+        headerName: "User Modified",
+        field: "userModified",
+        sortable: true,
+        filter: false,
+        editable: false,
+        width: 150
+      },
+      {
+        headerName: "Date Modified",
+        field: "dateModified",
+        sortable: true,
+        filter: false,
+        editable: false,
+        width: 150,
+        valueFormatter: (params: ValueFormatterParams) => {
+          return params.value ? mmDDYYFormat(params.value) : "";
+        }
+      },
+      {
+        headerName: "",
+        field: "",
+        sortable: false,
+        filter: false,
+        editable: false,
+        flex: 1,
+        minWidth: 100
       }
     ];
   }, []);
@@ -77,8 +112,6 @@ const ManageStateTaxes = () => {
     const row = event.data as StateTaxRateDto | undefined;
     const abbr = row?.abbreviation;
     if (!abbr) return;
-
-    setErrorMessage(null);
 
     const parsedNewRate = Number.parseFloat(String(event.newValue ?? ""));
     if (!Number.isFinite(parsedNewRate)) return;
@@ -104,29 +137,50 @@ const ManageStateTaxes = () => {
     if (!data) return;
     setRowData(data.map((r) => ({ ...r })));
     setStagedRatesByAbbr({});
-    setErrorMessage(null);
   };
 
   const saveChanges = async () => {
-    setErrorMessage(null);
-
     const entries = Object.entries(stagedRatesByAbbr);
     if (entries.length === 0) return;
 
     for (const [abbreviation, rate] of entries) {
       const normalizedAbbr = abbreviation.trim().toUpperCase();
       if (!/^[A-Z]{2}$/.test(normalizedAbbr)) {
-        setErrorMessage("State abbreviation must be two letters (A-Z).");
+        dispatch(
+          setMessage({
+            ...Messages.StateTaxRatesSaveError,
+            message: {
+              ...Messages.StateTaxRatesSaveError.message,
+              message: "State abbreviation must be two letters (A-Z)."
+            }
+          })
+        );
         return;
       }
 
       if (rate < 0 || rate > 100) {
-        setErrorMessage("Rate must be between 0 and 100.");
+        dispatch(
+          setMessage({
+            ...Messages.StateTaxRatesSaveError,
+            message: {
+              ...Messages.StateTaxRatesSaveError.message,
+              message: "Rate must be between 0 and 100."
+            }
+          })
+        );
         return;
       }
 
       if (hasMoreThanTwoDecimals(rate)) {
-        setErrorMessage("Rate can have at most 2 decimal places.");
+        dispatch(
+          setMessage({
+            ...Messages.StateTaxRatesSaveError,
+            message: {
+              ...Messages.StateTaxRatesSaveError.message,
+              message: "Rate can have at most 2 decimal places."
+            }
+          })
+        );
         return;
       }
     }
@@ -138,9 +192,11 @@ const ManageStateTaxes = () => {
 
       setStagedRatesByAbbr({});
       await refetch();
+
+      dispatch(setMessage(Messages.StateTaxRatesSaveSuccess));
     } catch (e) {
       console.error("Failed to update state tax rates", e);
-      setErrorMessage("Failed to save changes. Please try again.");
+      dispatch(setMessage(Messages.StateTaxRatesSaveError));
     }
   };
 
@@ -155,38 +211,30 @@ const ManageStateTaxes = () => {
           </Grid>
 
           <Grid width="100%">
+            <ApiMessageAlert commonKey="StateTaxRatesSave" />
+          </Grid>
+
+          <Grid width="100%">
             <Box
               sx={{
                 display: "flex",
                 gap: 3,
-                alignItems: "center",
+                justifyContent: "flex-end",
                 width: "100%",
                 px: 1
               }}>
-              <Box sx={{ flex: 1 }}>
-                {errorMessage && (
-                  <Typography
-                    variant="body2"
-                    color="error">
-                    {errorMessage}
-                  </Typography>
-                )}
-              </Box>
-
-              <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
-                <Button
-                  variant="contained"
-                  disabled={!hasUnsavedChanges || isSaving}
-                  onClick={saveChanges}>
-                  Save
-                </Button>
-                <Button
-                  variant="outlined"
-                  disabled={!hasUnsavedChanges || isSaving}
-                  onClick={discardChanges}>
-                  Discard
-                </Button>
-              </Box>
+              <Button
+                variant="contained"
+                disabled={!hasUnsavedChanges || isSaving}
+                onClick={saveChanges}>
+                Save
+              </Button>
+              <Button
+                variant="outlined"
+                disabled={!hasUnsavedChanges || isSaving}
+                onClick={discardChanges}>
+                Discard
+              </Button>
             </Box>
           </Grid>
 

@@ -32,7 +32,7 @@ public class GetOracleHcmSyncMetadataEndpoint
 
     public override void Configure()
     {
-        Get("oracleHcm/metadata");
+        Get("oracle-hcm/metadata");
         Summary(s =>
         {
             s.Summary = "Gets OracleHcm sync metadata with timestamp information";

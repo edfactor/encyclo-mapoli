@@ -3,9 +3,11 @@ using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
+using Microsoft.Extensions.Hosting;
+using Moq;
 using Shouldly;
 
-namespace Demoulas.ProfitSharing.UnitTests.Contracts.Response;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 /// <summary>
 /// Tests for masking Dictionary&lt;string, decimal&gt; properties in response DTOs.
@@ -20,8 +22,13 @@ public class MaskingJsonConverterDictionaryTests
 
     private static JsonSerializerOptions CreateOptions()
     {
+        // Create a mock IHostEnvironment for test environment detection
+        var mockEnvironment = new Mock<IHostEnvironment>();
+        mockEnvironment.Setup(e => e.EnvironmentName).Returns("Testing");
+        mockEnvironment.Setup(e => e.ApplicationName).Returns("Demoulas.ProfitSharing.UnitTests");
+
         JsonSerializerOptions opts = new(JsonSerializerDefaults.Web);
-        opts.Converters.Insert(0, new MaskingJsonConverterFactory());
+        opts.Converters.Insert(0, new MaskingJsonConverterFactory(mockEnvironment.Object));
         return opts;
     }
 

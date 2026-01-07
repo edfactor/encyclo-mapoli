@@ -30,10 +30,11 @@ public class BreakdownGrandTotalEndpoint : ProfitSharingEndpoint<YearRequest, Re
 
     public override void Configure()
     {
-        Get("/breakdown-by-store/totals");
+        Get("/stores/breakdown/totals");
         Summary(s =>
         {
-            s.Summary = "Breakdown managers and associates totals for requested store";
+            s.Summary = "Breakdown managers and associates totals for all stores";
+            s.Description = "Retrieves grand total breakdown data for managers and associates across all stores. Results are cached for performance.";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<AdhocReportsGroup>();

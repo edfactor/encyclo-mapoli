@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
 
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import useNavigationYear from "hooks/useNavigationYear";
 import { RootState } from "reduxstore/store";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
@@ -22,7 +22,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
   const profitSharingLabels = useSelector((state: RootState) => state.yearsEnd.profitSharingLabels);
   const securityState = useSelector((state: RootState) => state.security);
   const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
-  const profitYear = useFiscalCloseProfitYear();
+  const profitYear = useNavigationYear();
 
   const pagination = useGridPagination({
     initialPageSize: 25,

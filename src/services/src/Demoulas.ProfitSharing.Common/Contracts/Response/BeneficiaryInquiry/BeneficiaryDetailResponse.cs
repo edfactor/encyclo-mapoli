@@ -18,4 +18,19 @@ public record BeneficiaryDetailResponse : IIsExecutive, IFullNameProperty
     [MaskSensitive] public DateOnly? DateOfBirth { get; set; }
     public decimal? CurrentBalance { get; set; }
     public bool IsExecutive { get; set; }
+
+    public static BeneficiaryDetailResponse ResponseExample() => new()
+    {
+        BadgeNumber = 12345,
+        PsnSuffix = 1,
+        FullName = "John Smith",
+        Ssn = "***-**-6789",
+        Street = "123 Main St",
+        City = "Springfield",
+        State = "MA",
+        Zip = "01101",
+        DateOfBirth = new DateOnly(1980, 5, 15),
+        CurrentBalance = 150000.00m,
+        IsExecutive = false
+    };
 }

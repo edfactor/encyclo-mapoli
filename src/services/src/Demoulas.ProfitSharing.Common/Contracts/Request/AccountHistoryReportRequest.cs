@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
@@ -6,7 +7,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 /// Request DTO for account history report queries.
 /// Accepts request body with badge number, date range, and pagination parameters.
 /// </summary>
-public record AccountHistoryReportRequest : SortedPaginationRequestDto
+public record AccountHistoryReportRequest : SortedPaginationRequestDto, IBadgeNumberRequest
 {
     /// <summary>
     /// The badge number of the employee/member to generate the report for.

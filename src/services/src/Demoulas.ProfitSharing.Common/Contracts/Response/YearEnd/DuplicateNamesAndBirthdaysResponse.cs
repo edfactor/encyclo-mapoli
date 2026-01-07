@@ -28,4 +28,37 @@ public sealed record DuplicateNamesAndBirthdaysResponse : IIsExecutive
     public required string EmploymentStatusName { get; set; }
     public required bool IsExecutive { get; set; }
     public bool IsFakeSsn { get; set; }
+
+    /// <summary>
+    /// Example data for testing and API documentation.
+    /// </summary>
+    public static DuplicateNamesAndBirthdaysResponse ResponseExample()
+    {
+        return new DuplicateNamesAndBirthdaysResponse
+        {
+            DemographicId = 12345,
+            BadgeNumber = 987654,
+            Ssn = "***-**-2468",
+            Name = "Johnson, Robert W",
+            DateOfBirth = new DateOnly(1980, 6, 15),
+            Address = "123 Main Street",
+            Street2 = "Apt 4B",
+            City = "Springfield",
+            State = "MA",
+            PostalCode = "01103",
+            CountryIso = "US",
+            Years = 15,
+            HireDate = new DateOnly(2009, 3, 10),
+            TerminationDate = null,
+            Status = 'A',
+            StoreNumber = 61,
+            Count = 2,
+            NetBalance = 125000.50m,
+            HoursCurrentYear = 2080.00m,
+            IncomeCurrentYear = 65000.00m,
+            EmploymentStatusName = "Active",
+            IsExecutive = false,
+            IsFakeSsn = false
+        };
+    }
 }

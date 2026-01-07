@@ -111,7 +111,8 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             mockDbContextFactory,
             _totalService,
             frozenServiceMock.Object,
-            demographicReaderMock.Object
+            demographicReaderMock.Object,
+            TimeProvider.System
         );
 
         var request = new SuggestedForfeitureAdjustmentRequest
@@ -158,7 +159,8 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             mockDbContextFactory,
             _totalService,
             frozenServiceMock.Object,
-            demographicReaderMock.Object
+            demographicReaderMock.Object,
+            TimeProvider.System
         );
 
         var request = new SuggestedForfeitureAdjustmentRequest
@@ -215,7 +217,8 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             mockDbContextFactory,
             _totalService,
             frozenServiceMock.Object,
-            demographicReaderMock.Object
+            demographicReaderMock.Object,
+            TimeProvider.System
         );
 
         var request = new SuggestedForfeitureAdjustmentRequest
@@ -256,7 +259,8 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             MockDbContextFactory,
             _totalService,
             frozenServiceMock.Object,
-            demographicReaderMock.Object
+            demographicReaderMock.Object,
+            TimeProvider.System
         );
 
         var request = new ForfeitureAdjustmentUpdateRequest
@@ -304,7 +308,8 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             mockDbContextFactory,
             _totalService,
             frozenServiceMock.Object,
-            demographicReaderMock.Object
+            demographicReaderMock.Object,
+            TimeProvider.System
         );
 
         var request = new ForfeitureAdjustmentUpdateRequest
@@ -352,7 +357,8 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             mockDbContextFactory,
             _totalService,
             frozenServiceMock.Object,
-            demographicReaderMock.Object
+            demographicReaderMock.Object,
+            TimeProvider.System
         );
 
         var request = new ForfeitureAdjustmentUpdateRequest
@@ -422,7 +428,8 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             mockDbContextFactory,
             _totalService,
             frozenServiceMock.Object,
-            demographicReaderMock.Object
+            demographicReaderMock.Object,
+            TimeProvider.System
         );
 
         var request = new ForfeitureAdjustmentUpdateRequest
@@ -485,7 +492,8 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             mockDbContextFactory,
             _totalService,
             frozenServiceMock.Object,
-            demographicReaderMock.Object
+            demographicReaderMock.Object,
+            TimeProvider.System
         );
 
         var request = new ForfeitureAdjustmentUpdateRequest
@@ -530,7 +538,8 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             MockDbContextFactory,
             _totalService,
             frozenServiceMock.Object,
-            demographicReaderMock.Object
+            demographicReaderMock.Object,
+            TimeProvider.System
         );
 
         var requests = new List<ForfeitureAdjustmentUpdateRequest>();

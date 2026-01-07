@@ -72,8 +72,10 @@ export const ROUTES = {
   NEW_PS_LABELS: "new-ps-labels",
   PROFALL: "profall",
   DEMO_FREEZE: "demographic-freeze",
+  FAKE_TIME_MANAGEMENT: "fake-time-management",
   MANAGE_STATE_TAXES: "manage-state-taxes",
   MANAGE_ANNUITY_RATES: "manage-annuity-rates",
+  MANAGE_RMD_FACTORS: "manage-rmd-factors",
   MANAGE_COMMENT_TYPES: "manage-comment-types",
   PROFIT_SHARING_ADJUSTMENTS: "profit-sharing-adjustments",
   AUDIT_SEARCH: "audit-search",
@@ -170,6 +172,9 @@ export const CAPTIONS = {
   FISCAL_CLOSE: MENU_LABELS.FISCAL_CLOSE,
   FISCAL_CLOSE_SHORT: "Fiscal Close",
 
+  FAKE_TIME_MANAGEMENT: "Fake Time Management",
+  FAKE_TIME_MANAGEMENT_SHORT: "Fake Time",
+
   FORFEIT: "Forfeit (PAY443)",
   FORFEIT_SHORT: "Forfeit",
 
@@ -190,6 +195,9 @@ export const CAPTIONS = {
 
   MANAGE_ANNUITY_RATES: "Manage Annuity Rates",
   MANAGE_ANNUITY_RATES_SHORT: "Manage Annuity Rates",
+
+  MANAGE_RMD_FACTORS: "Manage RMD Factors",
+  MANAGE_RMD_FACTORS_SHORT: "Manage RMD Factors",
 
   MANAGE_COMMENT_TYPES: "Manage Comment Types",
   MANAGE_COMMENT_TYPES_SHORT: "Manage Comment Types",
@@ -478,6 +486,7 @@ export const GRID_KEYS = {
   DEMOGRAPHIC_SYNC_AUDIT: "DEMOGRAPHIC-SYNC-AUDIT",
   MANAGE_STATE_TAX_RATES: "MANAGE-STATE-TAX-RATES",
   MANAGE_ANNUITY_RATES: "MANAGE-ANNUITY-RATES",
+  MANAGE_RMD_FACTORS: "MANAGE-RMD-FACTORS",
   MANAGE_COMMENT_TYPES: "MANAGE-COMMENT-TYPES",
   PROFIT_SHARING_ADJUSTMENTS: "PROFIT-SHARING-ADJUSTMENTS",
 

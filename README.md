@@ -54,129 +54,19 @@
 
 ### Instruction Files (for Developers)
 
-- `.github/instructions/endpoints.instructions.md` - FastEndpoints implementation patterns
-- `.github/instructions/services.instructions.md` - Service layer patterns
-- `.github/instructions/pages.instructions.md` - Frontend page development
-- `.github/instructions/redux.instructions.md` - Redux store organization
-- `.github/instructions/beneficiary.instructions.md` - Beneficiary feature development
-- `.github/instructions/master-inquiry.instructions.md` - Master Inquiry implementation
 - `.github/instructions/fullname-pattern.instructions.md` - Standard naming conventions for names
 
 ## Definition of Ready (DoR)
 
-The Definition of Ready outlines the prerequisites for any user story, task, or bug fix to be considered ready for development. It emphasizes clarity, testability, quality, security, and observability in our software engineering processes.
+The project Definition of Ready is maintained as a standalone guide:
 
-### Criteria
-
-#### 1. Clearly Defined Requirements
-
-- **Title and Description:** Clear title and detailed description of expected outcome
-- **Acceptance Criteria:** Comprehensive criteria outlining conditions for story completion
-- **Auditing Requirements:** Document any necessary auditing or compliance requirements
-- **Security Implications:** Identify any OWASP Top 10 2021 concerns (authentication, data exposure, validation, etc.)
-
-#### 2. UI/UX Designs & Requirements
-
-- **Design Mockups:** Complete UI/UX designs for frontend changes (React-compatible)
-- **Design Review:** Approval from product owner, UI/UX designer, and stakeholders
-- **Accessibility Requirements:** WCAG 2.1 Level AA compliance where applicable
-- **Responsive Design:** Mobile, tablet, and desktop considerations documented
-
-#### 3. Architecture & Technical Design
-
-- **Backend Changes:** Documented endpoint designs, database schema changes, or service layer updates
-- **Data Flow:** Clear description of how data flows through the application
-- **API Specification:** OpenAPI/Swagger specifications for any new endpoints
-- **Security Design Review:** Authentication, authorization, PII handling, and validation requirements specified
-
-#### 4. Dependencies Identified
-
-- **Internal Dependencies:** All internal service/component dependencies documented
-- **External Dependencies:** Third-party service dependencies (see [Confluence](https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/29853053/NGDS+Profit+Sharing+Documentation))
-- **Breaking Changes:** Any incompatibilities with existing APIs or data formats
-- **Deployment Order:** For dependent features, deployment sequence documented
-
-#### 5. Data Readiness
-
-- **Test Data:** Test data available or generation process documented
-- **Migration Strategy:** If schema changes required, migration plan documented
-- **Data Validation:** Edge cases and boundary conditions identified
-- **Sample Size:** For reports/bulk operations, representative data volumes documented
-
-#### 6. Observability Requirements
-
-- **Telemetry Plan:** Business metrics and sensitive field access identified
-- **Error Tracking:** Error scenarios and correlation ID requirements specified
-- **Performance Baseline:** Expected performance metrics documented (response time, data volume)
-- **Monitoring Alerts:** Specific monitoring/alerting needs identified
-
-#### 7. Testing Strategy
-
-- **Test Plan:** Unit, integration, and E2E test cases outlined
-- **Test Data:** Specific data scenarios for testing documented
-- **Boundary Cases:** Edge cases and negative scenarios identified
-- **Security Testing:** Any security-specific test scenarios (OWASP, PII handling, access control)
-
-#### 8. Estimation & Capacity
-
-- **Story Points:** Team consensus on effort estimation
-- **Capacity Planning:** Team capacity considered when allocating work
-- **Risk Assessment:** Technical risks and mitigation strategies identified
-- **Complexity Factors:** Factors affecting complexity clearly documented
-
-#### 9. Compliance & Security Checklist
-
-- **OWASP Top 10 Review:** Authentication, authorization, input validation, PII protection considered
-- **PII Handling:** Any PII fields identified and masking/security requirements specified
-- **Role-Based Access:** Access control requirements by user role documented
-- **Age Calculation Rule:** If applicable, confirmed backend-only calculation (CRITICAL)
-- **Data Retention:** Data retention and archival policies understood
-- **Audit Requirements:** Audit logging requirements specified
-
-#### 10. Documentation Requirements
-
-- **Backend Documentation:** API documentation, service patterns, and complex logic documented
-- **Frontend Documentation:** Component purposes and usage patterns documented
-- **Configuration:** Any configuration changes or feature flags required documented
-- **Release Notes:** Key points for release notes prepared
+- **[Definition of Ready (DoR)](./docs/DEFINITION_OF_READY.md)**
 
 ## Definition of Done (DoD)
 
-The Definition of Done outlines the criteria that must be met for any user story, task, or bug fix to be considered complete and ready for release or deployment.
+The project Definition of Done is maintained as a standalone guide:
 
-### Criteria
-
-1. **Acceptance Criteria Met**
-   - All acceptance criteria defined in the user story or task are fully implemented and verified.
-2. **Code Quality**
-   - Code is reviewed and approved according to the Code Review and Pull Request Guidelines.
-   - No critical or high-severity bugs remain unresolved.
-3. **Testing**
-   - All relevant unit, integration, and end-to-end tests are written and passing.
-   - Test coverage is adequate for new and changed code.
-   - Manual testing (if required) is completed and documented.
-4. **Documentation**
-   - Code is documented where necessary (methods, classes, complex logic).
-   - User-facing documentation is updated (if applicable).
-   - Release notes or change logs are updated (if required).
-5. **Deployment Readiness**
-   - Code is merged to the main branch and builds successfully.
-   - All automated checks (CI/CD) pass.
-   - Feature is deployed to the appropriate environment(s) for validation.
-6. **Compliance and Security**
-   - All security, compliance, and regulatory requirements are met.
-   - Sensitive data is handled according to project standards.
-7. **Stakeholder Review**
-   - Product owner or relevant stakeholders have reviewed and accepted the work.
-8. **Story Points Added**
-   - Each user story, task, or bug fix must have story points assigned and documented to support estimation and velocity tracking.
-
-<!--
-Solution Explanation:
-- Added a new criterion (8. Story Points Added) to the Definition of Done section.
-- This ensures that every completed work item is estimated, supporting agile best practices and team velocity tracking.
-- The comment block above explains the rationale for this addition for future maintainers and reviewers.
--->
+- **[Definition of Done (DoD)](./docs/DEFINITION_OF_DONE.md)**
 
 ## Code Review and Pull Request Guidelines
 
@@ -240,7 +130,7 @@ Solution Explanation:
   ```typescript
   // ❌ WRONG - BLOCKING: Frontend age calculation from DOB
   const age = Math.floor(
-    (Date.now() - new Date(dob).getTime()) / (1000 * 60 * 60 * 24 * 365.25),
+    (Date.now() - new Date(dob).getTime()) / (1000 * 60 * 60 * 24 * 365.25)
   );
 
   // ✅ RIGHT: Display DOB only, backend provides age if needed

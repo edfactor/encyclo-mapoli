@@ -81,8 +81,6 @@ using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Logging.Extensions;
 using MySolution.Api.Serialization;
-using MySolution.Common.ActivitySources;
-using MySolution.Common.Metrics;
 using MySolution.Data.Extensions;
 using MySolution.Endpoints.HealthCheck;
 using MySolution.Security;
@@ -238,18 +236,19 @@ void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
 }
 
 // ========================================
-// STEP 11: Default Endpoints (Demoulas.Common)
+// STEP 11: Default Endpoints with Telemetry (Demoulas.Common)
 // ========================================
+// ConfigureDefaultEndpoints includes OpenTelemetry instrumentation
+// meterNames: Add your custom meters for granular telemetry filtering
+// activitySourceNames: Not needed - Common.Api auto-instruments endpoints
 builder.ConfigureDefaultEndpoints(
-    meterNames: [],
-    activitySourceNames: [MyActivitySource.Instance.Name, "MySolution.Endpoints"])
+    meterNames: [
+        "MySolution.Endpoints",
+        "MySolution.Services",
+        "MySolution.Data"
+    ])
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
-
-// ========================================
-// STEP 12: Custom Telemetry (Part 5)
-// ========================================
-builder.Services.AddMyTelemetry(builder.Configuration);
 
 // ========================================
 // STEP 13: Health Checks
@@ -311,15 +310,14 @@ app.UseDemographicHeaders();
 app.UseSensitiveValueMasking();
 
 // 5. Default endpoints (auth, telemetry, compression, etc.)
-app.UseDefaultEndpoints(OktaSettingsAction)
+// Includes UseCommonMiddleware() - adds server timing, versioning headers
+// NEW: useOktaSecurity parameter allows runtime toggle via appsettings
+app.UseDefaultEndpoints(OktaSettingsAction, useOktaSecurity: true)
     .UseReDoc(settings =>
     {
         settings.Path = "/redoc";
         settings.DocumentPath = "/swagger/Release 1.0/swagger.json";
     });
-
-// 6. CRITICAL: Global endpoint instrumentation (MUST be last before MapEndpoints)
-app.UseEndpointInstrumentation();
 
 // 7. Scalar API documentation (alternative to Swagger UI)
 OktaSwaggerConfiguration oktaSwaggerConfiguration = OktaSwaggerConfiguration.Empty();
@@ -357,19 +355,18 @@ namespace MySolution.Api
    ↓
 4. UseSensitiveValueMasking() (custom middleware)
    ↓
-5. UseDefaultEndpoints() (Demoulas.Common - includes auth, telemetry, compression)
-   ↓
-6. UseEndpointInstrumentation() (custom telemetry middleware - MUST BE LAST)
+5. UseDefaultEndpoints() (Demoulas.Common - includes auth, telemetry, compression, common middleware)
 ```
 
 **Why This Order:**
 
-- **CORS first** - CORS headers must be set before any other processing
+- **CORS first** - CORS headers must be set before any other processing (CRITICAL - security vulnerability if not first)
 - **No-cache** - Prevents sensitive data caching before authentication
 - **Custom headers** - Track data sources before business logic
 - **PII masking** - Mask sensitive data before logging/telemetry
-- **Default endpoints** - Includes authentication (must be before instrumentation)
-- **Instrumentation last** - Wraps entire request lifecycle for telemetry
+- **Default endpoints** - Includes authentication, UseCommonMiddleware(), telemetry, compression
+
+**Note on Telemetry:** With Demoulas.Common.Api 3.3.2+, endpoint-level telemetry is automatic via `DemoulasEndpoint` base classes. See [Part 5c](./05c-telemetry-middleware.md) for endpoint patterns.
 
 ---
 
