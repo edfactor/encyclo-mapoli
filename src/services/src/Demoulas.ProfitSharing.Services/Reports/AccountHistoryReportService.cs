@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Reporting.Reports;
 using Demoulas.ProfitSharing.Services.Extensions;
@@ -125,25 +126,14 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     .ToListAsync(cancellationToken);
             }
 
-            // Batch load profit details for the years we're fetching
-            var allProfitDetails = await ctx.ProfitDetails
-                .TagWith($"AccountHistoryReport-AllProfitDetails-{badgeNumber}")
-                .Where(pd => pd.Ssn == ssn && yearsToFetch.Contains(pd.ProfitYear))
-                .ToListAsync(cancellationToken);
-
-            // Group profit details by year for efficient lookup
-            var profitDetailsByYear = allProfitDetails
-                .GroupBy(pd => pd.ProfitYear)
-                .ToDictionary(g => g.Key, g => g.ToList());
-
             // Execute per-year queries in parallel for better performance
+            // Each year's contributions/earnings/forfeitures are computed in the database
             var tasks = yearsToFetch.Select(year => FetchYearDataAsync(
                 year,
                 ssn,
                 badgeNumber,
                 demographicId,
                 fullName,
-                profitDetailsByYear.GetValueOrDefault(year, []),
                 cancellationToken)).ToList();
 
             var reportData = (await Task.WhenAll(tasks)).ToList();
@@ -172,6 +162,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
     /// <summary>
     /// Fetches year-specific data (balances, distributions, vesting) in a separate context for parallel execution.
     /// Each year runs in its own context, enabling parallel execution across years.
+    /// MUST use EmbeddedSqlService.GetTransactionsBySsnForProfitYearForOracle() for validated aggregations.
     /// </summary>
     private Task<AccountHistoryReportResponse> FetchYearDataAsync(
         short year,
@@ -179,18 +170,18 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         int badgeNumber,
         int demographicId,
         string fullName,
-        List<Data.Entities.ProfitDetail> yearProfitDetails,
         CancellationToken cancellationToken)
     {
-        // Use shared extension methods for consistent aggregation logic
-        (decimal yearContributions, decimal yearEarnings, decimal yearForfeitures) =
-            ProfitDetailExtensions.AggregateAllProfitValues(yearProfitDetails);
-
         // Execute balance/distribution queries sequentially within this context
         // (EF Core doesn't allow concurrent operations on the same context)
         // Parallelism is achieved at the year level - each year has its own context
         return _contextFactory.UseReadOnlyContext(async ctx =>
         {
+            // Use validated SQL formulas from EmbeddedSqlService for year aggregations
+            // This ensures we use the SME-approved formulas, not replicated C# logic
+            var yearRollup = await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, year)
+                .FirstOrDefaultAsync(r => r.Ssn == ssn, cancellationToken);
+
             var memberBalance = await _totalService.GetTotalBalanceSet(ctx, year)
                 .FirstOrDefaultAsync(b => b.Ssn == ssn, cancellationToken);
 
@@ -208,9 +199,9 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 FullName = fullName,
                 Ssn = ssn.MaskSsn(),
                 ProfitYear = year,
-                Contributions = yearContributions,
-                Earnings = yearEarnings,
-                Forfeitures = yearForfeitures,
+                Contributions = yearRollup?.TotalContributions ?? 0,
+                Earnings = yearRollup?.TotalEarnings ?? 0,
+                Forfeitures = yearRollup?.TotalForfeitures ?? 0,
                 Withdrawals = memberDistributions?.TotalAmount ?? 0,
                 EndingBalance = memberBalance?.TotalAmount ?? 0,
                 VestedBalance = vestingBalance?.VestedBalance ?? 0,
