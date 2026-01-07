@@ -515,6 +515,7 @@ public class BeneficiaryService : IBeneficiaryService
                 .Include(x => x.Beneficiaries)
                 .Include(beneficiaryContact => beneficiaryContact.Address)
                 .Include(beneficiaryContact => beneficiaryContact.ContactInfo)
+                .Include(beneficiaryContact => beneficiaryContact.BeneficiarySsnChangeHistories)
                 .SingleAsync(x => x.Id == id, cancellation);
 
             var deleteContact = true;
@@ -538,6 +539,11 @@ public class BeneficiaryService : IBeneficiaryService
                 if (contactToDelete.ContactInfo != null)
                 {
                     ctx.Remove(contactToDelete.ContactInfo);
+                }
+                if (contactToDelete.BeneficiarySsnChangeHistories != null &&
+                        contactToDelete.BeneficiarySsnChangeHistories.Any())
+                {
+                    ctx.RemoveRange(contactToDelete.BeneficiarySsnChangeHistories);
                 }
                 ctx.BeneficiaryContacts.Remove(contactToDelete);
                 await ctx.SaveChangesAsync(cancellation);
