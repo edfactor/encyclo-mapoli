@@ -1,18 +1,14 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "ui: build:qa",
-			"type": "shell",
-			"command": "pwsh",
-			"args": [
-				"-NoLogo",
-				"-Command",
-				"Set-Location -Path 'src/ui'; npm run build:qa"
-			],
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build"
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ui: build:qa",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoLogo", "-Command", "Set-Location -Path 'src/ui'; npm run build:qa"],
+      "isBackground": false,
+      "problemMatcher": [],
+      "group": "build"
+    }
+  ]
 }

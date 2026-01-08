@@ -85,7 +85,7 @@ export const store = configureStore({
 
     // RTK Query API reducers (dynamic reducer paths)
     [SecurityApi.reducerPath]: SecurityApi.reducer,
-    [YearsEndApi.reducerPath]: YearsEndApi.reducer,
+    [YearsEndApi.reducerPath]: YearsEndApi.reducer
     // ... other API reducers
   },
 
@@ -94,7 +94,7 @@ export const store = configureStore({
       .concat(rtkQueryErrorToastMiddleware(true))
       .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
       .concat(SecurityApi.middleware)
-      .concat(YearsEndApi.middleware),
+      .concat(YearsEndApi.middleware)
   // ... other API middleware
 });
 
@@ -136,7 +136,7 @@ All RTK Query APIs share a common base query configuration:
 export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const createDataSourceAwareBaseQuery = (
-  timeout?: number,
+  timeout?: number
 ): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
   const rawBaseQuery = fetchBaseQuery({
     baseUrl: `${url}/api/`,
@@ -156,7 +156,7 @@ export const createDataSourceAwareBaseQuery = (
       }
 
       return headers;
-    },
+    }
   });
 
   return async (args, api, extra) => {
@@ -164,9 +164,7 @@ export const createDataSourceAwareBaseQuery = (
 
     // Automatically copy x-demographic-data-source header to response
     if (result.data && typeof result.data === "object") {
-      const hdr =
-        result.meta?.response?.headers?.get("x-demographic-data-source") ??
-        "Live";
+      const hdr = result.meta?.response?.headers?.get("x-demographic-data-source") ?? "Live";
       (result.data as Record<string, string>).dataSource = hdr;
     }
 
@@ -206,8 +204,8 @@ export const YearsEndApi = createApi({
         params: {
           take: params.pagination.take,
           skip: params.pagination.skip,
-          profitYear: params.profitYear,
-        },
+          profitYear: params.profitYear
+        }
       }),
       // Optional: Update slice state when query succeeds
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -217,7 +215,7 @@ export const YearsEndApi = createApi({
         } catch (err) {
           console.log("Err: " + err);
         }
-      },
+      }
     }),
 
     // Mutation example
@@ -225,15 +223,14 @@ export const YearsEndApi = createApi({
       query: () => ({
         url: `yearend/update-enrollment`,
         method: "POST",
-        body: {},
-      }),
-    }),
-  }),
+        body: {}
+      })
+    })
+  })
 });
 
 // Export generated hooks
-export const { useLazyGetDuplicateSSNsQuery, useUpdateEnrollmentMutation } =
-  YearsEndApi;
+export const { useLazyGetDuplicateSSNsQuery, useUpdateEnrollmentMutation } = YearsEndApi;
 ```
 
 ### API Endpoint Patterns
@@ -245,7 +242,7 @@ getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
   query: (params) => ({
     url: "/lookup/calendar/accounting-year",
     method: "GET",
-    params: { profitYear: params.profitYear },
+    params: { profitYear: params.profitYear }
   }),
   async onQueryStarted(arg, { dispatch, queryFulfilled }) {
     try {
@@ -254,7 +251,7 @@ getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
     } catch (err) {
       console.log("Err: " + err);
     }
-  },
+  }
 });
 ```
 
@@ -263,36 +260,30 @@ getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
 ```typescript
 updateForfeitureAdjustment: builder.mutation<ResponseType, RequestType>({
   query: (params) => {
-    const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } =
-      params;
+    const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
     return {
       url: "yearend/forfeiture-adjustments/update",
       method: "PUT",
       body: requestData,
       // Pass metadata to middleware for error handling control
-      meta: { suppressAllToastErrors, onlyNetworkToastErrors },
+      meta: { suppressAllToastErrors, onlyNetworkToastErrors }
     };
-  },
+  }
 });
 ```
 
 #### 3. Query with Archive Support
 
 ```typescript
-getExecutiveHoursAndDollars: builder.query<
-  ResponseType,
-  RequestType & { archive?: boolean }
->({
+getExecutiveHoursAndDollars: builder.query<ResponseType, RequestType & { archive?: boolean }>({
   query: (params) => ({
-    url: `yearend/executive-hours-and-dollars${
-      params.archive ? "?archive=true" : ""
-    }`,
+    url: `yearend/executive-hours-and-dollars${params.archive ? "?archive=true" : ""}`,
     method: "GET",
     params: {
-      profitYear: params.profitYear,
+      profitYear: params.profitYear
       // ... other params
-    },
-  }),
+    }
+  })
 });
 ```
 
@@ -301,12 +292,9 @@ getExecutiveHoursAndDollars: builder.query<
 ```typescript
 getMissives: builder.query<MissiveResponse[], void>({
   query: () => ({ url: "/lookup/missives", method: "GET" }),
-  transformResponse: (response: {
-    items: MissiveResponse[];
-    count: number;
-  }) => {
+  transformResponse: (response: { items: MissiveResponse[]; count: number }) => {
     return response.items; // Extract just the items array
-  },
+  }
 });
 ```
 
@@ -319,20 +307,17 @@ downloadCertificatesFile: builder.query<Blob, CertificateDownloadRequest>({
     method: "GET",
     params: {
       profitYear: params.profitYear,
-      badgeNumbers: params.badgeNumbers,
+      badgeNumbers: params.badgeNumbers
     },
-    responseHandler: (response) => response.blob(), // Handle as blob
-  }),
+    responseHandler: (response) => response.blob() // Handle as blob
+  })
 });
 ```
 
 #### 6. Conditional CSV/JSON Response
 
 ```typescript
-getEmployeeWagesForYear: builder.query<
-  ResponseType,
-  RequestType & { acceptHeader: string }
->({
+getEmployeeWagesForYear: builder.query<ResponseType, RequestType & { acceptHeader: string }>({
   query: (params) => ({
     url: "yearend/wages-current-year",
     method: "GET",
@@ -343,8 +328,8 @@ getEmployeeWagesForYear: builder.query<
         return response.blob();
       }
       return response.json();
-    },
-  }),
+    }
+  })
 });
 ```
 
@@ -364,8 +349,7 @@ Example usage in components:
 
 ```typescript
 // Lazy query (manual trigger)
-const [getDuplicateSSNs, { data, isLoading, error }] =
-  useLazyGetDuplicateSSNsQuery();
+const [getDuplicateSSNs, { data, isLoading, error }] = useLazyGetDuplicateSSNsQuery();
 
 // Trigger the query
 useEffect(() => {
@@ -373,8 +357,7 @@ useEffect(() => {
 }, []);
 
 // Mutation
-const [updateEnrollment, { isLoading: isUpdating }] =
-  useUpdateEnrollmentMutation();
+const [updateEnrollment, { isLoading: isUpdating }] = useUpdateEnrollmentMutation();
 
 // Trigger mutation
 const handleUpdate = async () => {
@@ -405,19 +388,14 @@ export const myFeatureApi = createApi({
   tagTypes: ["my-feature-data"], // For cache invalidation
   endpoints: (builder) => ({
     getMyData: builder.query<MyResponse, MyRequest>({
-      query: ({
-        pageNumber = 1,
-        pageSize = 10,
-        sortBy = "Created",
-        isSortDescending = true,
-      }) => ({
+      query: ({ pageNumber = 1, pageSize = 10, sortBy = "Created", isSortDescending = true }) => ({
         url: "my-endpoint",
         method: "GET",
-        params: { pageNumber, pageSize, sortBy, isSortDescending },
+        params: { pageNumber, pageSize, sortBy, isSortDescending }
       }),
-      providesTags: ["my-feature-data"],
-    }),
-  }),
+      providesTags: ["my-feature-data"]
+    })
+  })
 });
 
 // CRITICAL: Export hooks
@@ -434,12 +412,12 @@ import { myFeatureApi } from "./api/myFeatureApi";
 export const store = configureStore({
   reducer: {
     // ... existing reducers
-    [myFeatureApi.reducerPath]: myFeatureApi.reducer, // Add reducer
+    [myFeatureApi.reducerPath]: myFeatureApi.reducer // Add reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
       .concat(rtkQueryErrorToastMiddleware(true))
-      .concat(myFeatureApi.middleware), // Add middleware
+      .concat(myFeatureApi.middleware) // Add middleware
 });
 ```
 
@@ -462,16 +440,11 @@ interface PaginatedSortedRequest {
 }
 
 getData: builder.query<ResponseType, PaginatedSortedRequest>({
-  query: ({
-    pageNumber = 1,
-    pageSize = 10,
-    sortBy = "Created",
-    isSortDescending = true,
-  }) => ({
+  query: ({ pageNumber = 1, pageSize = 10, sortBy = "Created", isSortDescending = true }) => ({
     url: "my-endpoint",
     method: "GET",
-    params: { pageNumber, pageSize, sortBy, isSortDescending }, // All four params
-  }),
+    params: { pageNumber, pageSize, sortBy, isSortDescending } // All four params
+  })
 });
 ```
 
@@ -514,7 +487,7 @@ const initialState: SecurityState = {
   username: "",
   performLogout: false,
   appUser: null,
-  impersonating: [],
+  impersonating: []
 };
 
 export const securitySlice = createSlice({
@@ -536,8 +509,8 @@ export const securitySlice = createSlice({
       state.userPermissions = [];
       state.performLogout = false;
       state.impersonating = [];
-    },
-  },
+    }
+  }
 });
 
 export const { setToken, setUserRoles, clearUserData } = securitySlice.actions;
@@ -564,8 +537,8 @@ openDrawer: (state) => {
       "drawerState",
       JSON.stringify({
         isDrawerOpen: true,
-        activeSubmenu: state.activeSubmenu,
-      }),
+        activeSubmenu: state.activeSubmenu
+      })
     );
   } catch (error) {
     console.error("Error saving drawer state to localStorage:", error);
@@ -605,8 +578,8 @@ const messagesSlice = createSlice({
     removeMessage: (state, action: PayloadAction<string>) => {
       delete state[action.payload];
     },
-    clearMessages: () => ({}),
-  },
+    clearMessages: () => ({})
+  }
 });
 ```
 
@@ -667,13 +640,12 @@ updateData({ data: payload, onlyNetworkToastErrors: true });
 
 ```typescript
 query: (params) => {
-  const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } =
-    params;
+  const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
   return {
     url: "endpoint",
     method: "POST",
     body: requestData,
-    meta: { suppressAllToastErrors, onlyNetworkToastErrors },
+    meta: { suppressAllToastErrors, onlyNetworkToastErrors }
   };
 };
 ```
@@ -713,8 +685,8 @@ query: (params) => ({
     take: params.pagination.take,
     skip: params.pagination.skip,
     sortBy: params.pagination.sortBy,
-    isSortDescending: params.pagination.isSortDescending,
-  },
+    isSortDescending: params.pagination.isSortDescending
+  }
 });
 ```
 
@@ -780,7 +752,7 @@ query: (arg) => {
 
   return {
     url: `yearend/frozen/contributions-by-age`,
-    params: { profitYear: arg.profitYear },
+    params: { profitYear: arg.profitYear }
   };
 };
 ```
@@ -939,8 +911,7 @@ export const LookupsApi = createApi({
   endpoints: (builder) => ({
     getStates: builder.query<StateListResponse[], void>({
       query: () => ({ url: "/lookup/states", method: "GET" }),
-      transformResponse: (response: { items: StateListResponse[] }) =>
-        response.items,
+      transformResponse: (response: { items: StateListResponse[] }) => response.items,
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -948,17 +919,17 @@ export const LookupsApi = createApi({
         } catch (err) {
           console.log("Err: " + err);
         }
-      },
+      }
     }),
 
     updateStateTax: builder.mutation<void, StateTaxUpdateRequest>({
       query: (params) => ({
         url: `/lookup/state-taxes/${params.state}`,
         method: "PUT",
-        body: params,
-      }),
-    }),
-  }),
+        body: params
+      })
+    })
+  })
 });
 
 export const { useGetStatesQuery, useUpdateStateTaxMutation } = LookupsApi;

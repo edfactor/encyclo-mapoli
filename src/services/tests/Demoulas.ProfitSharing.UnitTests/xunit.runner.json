@@ -1,12 +1,12 @@
 {
-    "$schema": "https://xunit.net/schema/current/xunit.runner.schema.json",
-    "diagnosticMessages": false,
-    "methodDisplay": "method",
-    "shadowCopy": false,
-    "appDomain": "denied",
-    "longRunningTestSeconds": 10,
-    "maxParallelThreads": 6,
-    "parallelizeAssembly": true,
-    "parallelizeTestCollections": true,
-    "preEnumerateTheories": true
+  "$schema": "https://xunit.net/schema/current/xunit.runner.schema.json",
+  "diagnosticMessages": false,
+  "methodDisplay": "method",
+  "shadowCopy": false,
+  "appDomain": "denied",
+  "longRunningTestSeconds": 10,
+  "maxParallelThreads": 6,
+  "parallelizeAssembly": true,
+  "parallelizeTestCollections": true,
+  "preEnumerateTheories": true
 }

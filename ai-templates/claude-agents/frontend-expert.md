@@ -146,9 +146,9 @@ export const employeeApi = createApi({
   endpoints: (builder) => ({
     getEmployees: builder.query<Employee[], { id: number }>({
       query: ({ id }) => `employees/${id}`,
-      providesTags: ["Employee"],
-    }),
-  }),
+      providesTags: ["Employee"]
+    })
+  })
 });
 
 export const { useGetEmployeesQuery } = employeeApi;

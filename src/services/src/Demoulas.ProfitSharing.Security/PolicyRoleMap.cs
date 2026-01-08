@@ -25,8 +25,11 @@ public static class PolicyRoleMap
         // Freeze is an operational integrity action; restrict to IT DevOps only.
         [Policy.CanFreezeDemographics] = [Role.ITDEVOPS],
 
-        // Distribution views are read-only; allow Finance, Clerks, Admin, and Auditor.
-        [Policy.CanViewDistributions] = [Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR],
+        // Distribution views are read-only; allow Finance, Clerks, Admin, Auditor, and IT DevOps.
+        [Policy.CanViewDistributions] = [Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS],
+
+        // Distribution management (create, update, delete) is more restrictive than view.
+        [Policy.CanManageDistributions] = [Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR],
 
         // Reversing profit details is a sensitive operation; restrict to Finance and Admin.
         [Policy.CanReverseProfitDetails] = [Role.FINANCEMANAGER, Role.ADMINISTRATOR],

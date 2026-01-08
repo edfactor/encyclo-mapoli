@@ -41,22 +41,22 @@ public static async Task BulkInsertAsync<T>(
 
 **Type Parameters:**
 
--   `T`: The entity type to bulk insert
+- `T`: The entity type to bulk insert
 
 **Parameters:**
 
--   `context` (DbContext): The database context
--   `itemsToInsert` (List<T>): The entities to insert
--   `cancellationToken` (CancellationToken): Cancellation token for the operation
--   `converterTypes` (Dictionary<string, Type>, optional): Column type conversions
--   `converters` (Dictionary<string, Func<dynamic, dynamic>>, optional): Custom value converters
+- `context` (DbContext): The database context
+- `itemsToInsert` (List<T>): The entities to insert
+- `cancellationToken` (CancellationToken): Cancellation token for the operation
+- `converterTypes` (Dictionary<string, Type>, optional): Column type conversions
+- `converters` (Dictionary<string, Func<dynamic, dynamic>>, optional): Custom value converters
 
 **Features:**
 
--   Manages database connection automatically
--   Supports column type conversions for schema compatibility
--   Supports custom value converters
--   Asynchronous operation with cancellation support
+- Manages database connection automatically
+- Supports column type conversions for schema compatibility
+- Supports custom value converters
+- Asynchronous operation with cancellation support
 
 **Example:**
 
@@ -99,15 +99,15 @@ public static ContextFactoryRequest Initialize<TContext>(
 
 **Type Parameters:**
 
--   `TContext`: The type of DbContext to configure (must inherit from DbContext)
+- `TContext`: The type of DbContext to configure (must inherit from DbContext)
 
 **Parameters:**
 
--   `connectionName` (string, required): The name of the connection string in configuration
--   `configureSettings` (Action, optional): Delegate to configure Aspire Oracle settings (health checks, retries, etc.)
--   `configureDbContextOptions` (Action, optional): **Delegate to customize EF Core DbContextOptions**
--   `interceptorFactory` (Func, optional): Factory function to create custom EF Core interceptors
--   `denyCommitRoles` (IEnumerable<string>, optional): Roles that are denied write access to this context
+- `connectionName` (string, required): The name of the connection string in configuration
+- `configureSettings` (Action, optional): Delegate to configure Aspire Oracle settings (health checks, retries, etc.)
+- `configureDbContextOptions` (Action, optional): **Delegate to customize EF Core DbContextOptions**
+- `interceptorFactory` (Func, optional): Factory function to create custom EF Core interceptors
+- `denyCommitRoles` (IEnumerable<string>, optional): Roles that are denied write access to this context
 
 **Returns:** A configured `ContextFactoryRequest` instance
 
@@ -115,10 +115,10 @@ public static ContextFactoryRequest Initialize<TContext>(
 
 The `configureDbContextOptions` parameter allows you to customize EF Core behavior for your DbContext. This is essential when you need to:
 
--   Enable sensitive data logging or detailed errors for debugging
--   Configure query behavior (tracking, split queries, command timeouts)
--   Override default Oracle settings
--   Add additional EF Core features or optimizations
+- Enable sensitive data logging or detailed errors for debugging
+- Configure query behavior (tracking, split queries, command timeouts)
+- Override default Oracle settings
+- Add additional EF Core features or optimizations
 
 **Common Use Cases:**
 
@@ -187,10 +187,10 @@ ContextFactoryRequest.Initialize<AppDbContext>(
 
 **Important Notes:**
 
--   The library automatically applies default Oracle configurations (compatibility, naming conventions, interceptors)
--   The `configureDbContextOptions` parameter adds customizations **on top of** these defaults
--   Do not use `EnableSensitiveDataLogging()` in production environments as it may log sensitive information
--   For read-only contexts, the library automatically sets `QueryTrackingBehavior.NoTracking` unless overridden
+- The library automatically applies default Oracle configurations (compatibility, naming conventions, interceptors)
+- The `configureDbContextOptions` parameter adds customizations **on top of** these defaults
+- Do not use `EnableSensitiveDataLogging()` in production environments as it may log sensitive information
+- For read-only contexts, the library automatically sets `QueryTrackingBehavior.NoTracking` unless overridden
 
 ---
 
@@ -225,26 +225,26 @@ public static async Task<PaginatedResponseDto<TResult>> ToPaginationResultsAsync
 
 **Type Parameters:**
 
--   `TEntity`: The database entity type
--   `TResult`: The result type (for mapping overload)
+- `TEntity`: The database entity type
+- `TResult`: The result type (for mapping overload)
 
 **Parameters:**
 
--   `source` (IQueryable<TEntity>): The source query
--   `request` (PaginationRequestDto): Pagination request with Skip, Take, and optional SortBy
--   `mapper` (Func, optional): A function to transform/project entities to results
--   `cancellationToken` (CancellationToken, optional): Cancellation token
+- `source` (IQueryable<TEntity>): The source query
+- `request` (PaginationRequestDto): Pagination request with Skip, Take, and optional SortBy
+- `mapper` (Func, optional): A function to transform/project entities to results
+- `cancellationToken` (CancellationToken, optional): Cancellation token
 
 **Returns:** A PaginatedResponseDto<T> containing results, total count, and metadata
 
 **Features:**
 
--   Automatic parallel execution (count and data queries run simultaneously)
--   Dynamic sorting with type-safe validation
--   Query timeout with graceful degradation
--   Result hashing for cache validation
--   OpenTelemetry integration
--   Support for both entity and mapped/projected results
+- Automatic parallel execution (count and data queries run simultaneously)
+- Dynamic sorting with type-safe validation
+- Query timeout with graceful degradation
+- Result hashing for cache validation
+- OpenTelemetry integration
+- Support for both entity and mapped/projected results
 
 **Example:**
 
@@ -310,7 +310,7 @@ using Microsoft.EntityFrameworkCore;
 
 **See Also:**
 
--   [Main Documentation](./demoulas.common.instructions.md)
--   [Util Extensions](./demoulas.util.instructions.md)
--   [API Extensions](./demoulas.common.api.instructions.md)
--   [Microsoft EF Core Documentation](https://learn.microsoft.com/en-us/ef/core/)
+- [Main Documentation](./demoulas.common.instructions.md)
+- [Util Extensions](./demoulas.util.instructions.md)
+- [API Extensions](./demoulas.common.api.instructions.md)
+- [Microsoft EF Core Documentation](https://learn.microsoft.com/en-us/ef/core/)

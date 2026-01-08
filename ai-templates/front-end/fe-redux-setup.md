@@ -48,7 +48,7 @@ export const store = configureStore({
     // RTK Query API reducers
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
-    [LookupsApi.reducerPath]: LookupsApi.reducer,
+    [LookupsApi.reducerPath]: LookupsApi.reducer
     // ... other APIs
   },
   middleware: (getDefaultMiddleware) =>
@@ -56,7 +56,7 @@ export const store = configureStore({
       .concat(rtkQueryErrorToastMiddleware(true))
       .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
       .concat(SecurityApi.middleware)
-      .concat(YearsEndApi.middleware),
+      .concat(YearsEndApi.middleware)
   // ... other API middleware
 });
 
@@ -90,7 +90,7 @@ const initialState: YearsEndState = {
 
   // Initialize new properties
   myNewData: null,
-  myNewQueryParams: null,
+  myNewQueryParams: null
 };
 ```
 
@@ -119,18 +119,15 @@ export const yearsEndSlice = createSlice({
     },
 
     // Complex update
-    updateMyNewDataField: (
-      state,
-      action: PayloadAction<Partial<MyNewDataType>>,
-    ) => {
+    updateMyNewDataField: (state, action: PayloadAction<Partial<MyNewDataType>>) => {
       if (state.myNewData) {
         state.myNewData = {
           ...state.myNewData,
-          ...action.payload,
+          ...action.payload
         };
       }
-    },
-  },
+    }
+  }
 });
 ```
 
@@ -142,7 +139,7 @@ export const {
   setMyNewData,
   clearMyNewData,
   setMyNewQueryParams,
-  updateMyNewDataField,
+  updateMyNewDataField
 } = yearsEndSlice.actions;
 ```
 
@@ -151,10 +148,7 @@ export const {
 **Conditional state updates:**
 
 ```typescript
-setExecutiveRowsSelected: (
-  state,
-  action: PayloadAction<ExecutiveHoursAndDollars[]>,
-) => {
+setExecutiveRowsSelected: (state, action: PayloadAction<ExecutiveHoursAndDollars[]>) => {
   if (action.payload.reportType === ReportType.Total) {
     state.executiveRowsTotal = action.payload;
   } else if (action.payload.reportType === ReportType.FullTime) {
@@ -228,16 +222,14 @@ export const createDataSourceAwareBaseQuery = () => {
       }
 
       return headers;
-    },
+    }
   });
 
   // Custom wrapper to extract x-demographic-data-source header
   return async (args, api, extra) => {
     const result = await rawBaseQuery(args, api, extra);
     if (result.data && typeof result.data === "object") {
-      const hdr =
-        result.meta?.response?.headers?.get("x-demographic-data-source") ??
-        "Live";
+      const hdr = result.meta?.response?.headers?.get("x-demographic-data-source") ?? "Live";
       (result.data as Record<string, unknown>).dataSource = hdr;
     }
     return result;
@@ -268,7 +260,7 @@ export const LookupsApi = createApi({
   reducerPath: "lookupsApi",
   endpoints: (builder) => ({
     // ... endpoints
-  }),
+  })
 });
 ```
 
@@ -285,12 +277,12 @@ export const SecurityApi = createApi({
     baseUrl: `${url}/api/security/`,
     mode: "cors",
     credentials: "include",
-    prepareHeaders,
+    prepareHeaders
   }),
   reducerPath: "securityApi",
   endpoints: (builder) => ({
     // ... endpoints
-  }),
+  })
 });
 ```
 
@@ -309,8 +301,8 @@ export const LookupsApi = createApi({
         url: "/lookup/calendar/accounting-year",
         method: "GET",
         params: {
-          profitYear: params.profitYear,
-        },
+          profitYear: params.profitYear
+        }
       }),
 
       // Optional: Dispatch to slice when data is fetched
@@ -321,14 +313,14 @@ export const LookupsApi = createApi({
         } catch (err) {
           console.error("Error:", err);
         }
-      },
+      }
     }),
 
     // Query without parameters
     getMissives: builder.query<MissiveResponse[], void>({
       query: () => ({
         url: "/lookup/missives",
-        method: "GET",
+        method: "GET"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
@@ -337,14 +329,13 @@ export const LookupsApi = createApi({
         } catch (err) {
           console.error("Error:", err);
         }
-      },
-    }),
-  }),
+      }
+    })
+  })
 });
 
 // Export hooks
-export const { useLazyGetAccountingYearQuery, useLazyGetMissivesQuery } =
-  LookupsApi;
+export const { useLazyGetAccountingYearQuery, useLazyGetMissivesQuery } = LookupsApi;
 ```
 
 ### Mutation Endpoints (POST, PUT, DELETE)
@@ -370,9 +361,9 @@ export const MilitaryApi = createApi({
           url: "military",
           method: "POST",
           body: request,
-          meta: { suppressAllToastErrors, onlyNetworkToastErrors },
+          meta: { suppressAllToastErrors, onlyNetworkToastErrors }
         };
-      },
+      }
     }),
 
     // PUT mutation
@@ -380,29 +371,23 @@ export const MilitaryApi = createApi({
       query: (request) => ({
         url: "/executive/hours",
         method: "PUT",
-        body: request,
-      }),
+        body: request
+      })
     }),
 
     // DELETE mutation
-    deleteBeneficiary: builder.mutation<
-      { success: boolean; message?: string },
-      DeleteBeneficiaryRequest
-    >({
+    deleteBeneficiary: builder.mutation<{ success: boolean; message?: string }, DeleteBeneficiaryRequest>({
       query: (request) => ({
         url: `/beneficiaries/${request.id}`,
-        method: "DELETE",
-      }),
-    }),
-  }),
+        method: "DELETE"
+      })
+    })
+  })
 });
 
 // Export mutation hooks
-export const {
-  useCreateMilitaryContributionMutation,
-  useUpdateExecutiveHoursMutation,
-  useDeleteBeneficiaryMutation,
-} = MilitaryApi;
+export const { useCreateMilitaryContributionMutation, useUpdateExecutiveHoursMutation, useDeleteBeneficiaryMutation } =
+  MilitaryApi;
 ```
 
 ### Creating a New API File
@@ -427,7 +412,7 @@ export const MyNewApi = createApi({
       query: (params) => ({
         url: "/my-endpoint",
         method: "GET",
-        params,
+        params
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
@@ -436,17 +421,17 @@ export const MyNewApi = createApi({
         } catch (err) {
           console.error("Failed to fetch data:", err);
         }
-      },
+      }
     }),
 
     createMyData: builder.mutation<MyResponse, MyRequest>({
       query: (request) => ({
         url: "/my-endpoint",
         method: "POST",
-        body: request,
-      }),
-    }),
-  }),
+        body: request
+      })
+    })
+  })
 });
 
 export const { useLazyGetMyDataQuery, useCreateMyDataMutation } = MyNewApi;
@@ -462,12 +447,12 @@ import { MyNewApi } from "./api/MyNewApi";
 export const store = configureStore({
   reducer: {
     // ... existing reducers
-    [MyNewApi.reducerPath]: MyNewApi.reducer,
+    [MyNewApi.reducerPath]: MyNewApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
       // ... existing middleware
-      .concat(MyNewApi.middleware),
+      .concat(MyNewApi.middleware)
 });
 ```
 
@@ -619,17 +604,14 @@ export const yearsEndSlice = createSlice({
   },
   extraReducers: (builder) => {
     // Respond to API endpoint completion
-    builder.addMatcher(
-      YearsEndApi.endpoints.getBreakdownByStore.matchFulfilled,
-      (state, action) => {
-        if (action.meta.arg.originalArgs.storeManagement) {
-          state.storeManagementBreakdown = action.payload;
-        } else {
-          state.breakdownByStore = action.payload;
-        }
-      },
-    );
-  },
+    builder.addMatcher(YearsEndApi.endpoints.getBreakdownByStore.matchFulfilled, (state, action) => {
+      if (action.meta.arg.originalArgs.storeManagement) {
+        state.storeManagementBreakdown = action.payload;
+      } else {
+        state.breakdownByStore = action.payload;
+      }
+    });
+  }
 });
 ```
 
@@ -651,9 +633,9 @@ createMilitaryContribution: builder.mutation<
       url: "military",
       method: "POST",
       body: request,
-      meta: { suppressAllToastErrors, onlyNetworkToastErrors },
+      meta: { suppressAllToastErrors, onlyNetworkToastErrors }
     };
-  },
+  }
 });
 ```
 
@@ -668,7 +650,7 @@ await create({
   profitYear: 2024,
   // Error handling flags
   suppressAllToastErrors: true,
-  onlyNetworkToastErrors: false,
+  onlyNetworkToastErrors: false
 });
 ```
 

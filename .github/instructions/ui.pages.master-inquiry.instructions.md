@@ -70,11 +70,7 @@ src/ui/src/pages/MasterInquiry/
 The page operates as a state machine with four distinct modes:
 
 ```typescript
-export type ViewMode =
-  | "idle"
-  | "searching"
-  | "multipleMembers"
-  | "memberDetails";
+export type ViewMode = "idle" | "searching" | "multipleMembers" | "memberDetails";
 ```
 
 #### State Transitions
@@ -94,16 +90,13 @@ searching
 // From useMasterInquiryReducer.ts
 
 export const selectShowMemberGrid = (state: MasterInquiryState): boolean =>
-  state.view.mode === "multipleMembers" &&
-  Boolean(state.search.results && state.search.results.results.length > 1);
+  state.view.mode === "multipleMembers" && Boolean(state.search.results && state.search.results.results.length > 1);
 
 export const selectShowMemberDetails = (state: MasterInquiryState): boolean =>
-  state.view.mode === "memberDetails" &&
-  Boolean(state.selection.selectedMember);
+  state.view.mode === "memberDetails" && Boolean(state.selection.selectedMember);
 
 export const selectShowProfitDetails = (state: MasterInquiryState): boolean =>
-  state.view.mode === "memberDetails" &&
-  Boolean(state.selection.selectedMember && state.selection.memberProfitData);
+  state.view.mode === "memberDetails" && Boolean(state.selection.selectedMember && state.selection.memberProfitData);
 ```
 
 ### Reducer State Shape
@@ -200,29 +193,20 @@ const schema = yup.object().shape({
     function (endYear) {
       const startYear = this.parent.startProfitYear;
       return !startYear || !endYear || endYear >= startYear;
-    },
+    }
   ),
   startProfitMonth: monthValidator,
-  endProfitMonth: monthValidator.min(
-    yup.ref("startProfitMonth"),
-    "End month must be after start month",
-  ),
+  endProfitMonth: monthValidator.min(yup.ref("startProfitMonth"), "End month must be after start month"),
   socialSecurity: ssnValidator,
   name: yup.string().nullable(),
   badgeNumber: badgeNumberOrPSNValidator,
-  paymentType: yup
-    .string()
-    .oneOf(["all", "hardship", "payoffs", "rollovers"])
-    .default("all"),
-  memberType: yup
-    .string()
-    .oneOf(["all", "employees", "beneficiaries", "none"])
-    .default("all"),
+  paymentType: yup.string().oneOf(["all", "hardship", "payoffs", "rollovers"]).default("all"),
+  memberType: yup.string().oneOf(["all", "employees", "beneficiaries", "none"]).default("all"),
   contribution: positiveNumberValidator("Contribution"),
   earnings: positiveNumberValidator("Earnings"),
   forfeiture: positiveNumberValidator("Forfeiture"),
   payment: positiveNumberValidator("Payment"),
-  voids: yup.boolean().default(false),
+  voids: yup.boolean().default(false)
 });
 ```
 
@@ -264,12 +248,9 @@ const handleBadgeNumberChange = useCallback(
       memberType = "employees"; // Regular badge numbers
     }
 
-    setValue(
-      "memberType",
-      memberType as "all" | "employees" | "beneficiaries" | "none",
-    );
+    setValue("memberType", memberType as "all" | "employees" | "beneficiaries" | "none");
   },
-  [setValue],
+  [setValue]
 );
 ```
 
@@ -292,8 +273,8 @@ useEffect(() => {
         skip: 0,
         take: 5,
         sortBy: "badgeNumber",
-        isSortDescending: true,
-      },
+        isSortDescending: true
+      }
     };
 
     reset(formData);
@@ -356,21 +337,16 @@ const hasSearchCriteria = useMemo(
 Transforms form data (UI shape) into API request shape.
 
 ```typescript
-export const transformSearchParams = (
-  data: MasterInquirySearch,
-  profitYear: number,
-): MasterInquiryRequest => {
+export const transformSearchParams = (data: MasterInquirySearch, profitYear: number): MasterInquiryRequest => {
   // Split PSN if needed (badge numbers >7 chars are PSN+suffix)
-  const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(
-    data.badgeNumber?.toString(),
-  );
+  const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(data.badgeNumber?.toString());
 
   return {
     pagination: {
       skip: data.pagination?.skip || 0,
       take: data.pagination?.take || 5,
       sortBy: data.pagination?.sortBy || "badgeNumber",
-      isSortDescending: data.pagination?.isSortDescending ?? true,
+      isSortDescending: data.pagination?.isSortDescending ?? true
     },
     endProfitYear: data.endProfitYear ?? profitYear,
     ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
@@ -378,20 +354,20 @@ export const transformSearchParams = (
     ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
     ...(!!data.name && { name: data.name }),
     ...(verifiedBadgeNumber !== undefined && {
-      badgeNumber: verifiedBadgeNumber,
+      badgeNumber: verifiedBadgeNumber
     }),
     ...(psnSuffix !== undefined && { psnSuffix }),
     ...(!!data.paymentType && {
-      paymentType: paymentTypeGetNumberMap[data.paymentType],
+      paymentType: paymentTypeGetNumberMap[data.paymentType]
     }),
     ...(!!data.memberType && {
-      memberType: memberTypeGetNumberMap[data.memberType],
+      memberType: memberTypeGetNumberMap[data.memberType]
     }),
     ...(!!data.contribution && { contributionAmount: data.contribution }),
     ...(!!data.earnings && { earningsAmount: data.earnings }),
     ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
     ...(!!data.payment && { paymentAmount: data.payment }),
-    _timestamp: Date.now(),
+    _timestamp: Date.now()
   };
 };
 ```
@@ -421,13 +397,10 @@ const executeSearch = useCallback(
         startProfitMonth: params.startProfitMonth,
         endProfitMonth: params.endProfitMonth,
         memberType: params.memberType,
-        paymentType: params.paymentType,
+        paymentType: params.paymentType
       });
 
-      if (
-        lastSearchParamsRef.current === currentParamsString &&
-        state.search.isSearching
-      ) {
+      if (lastSearchParamsRef.current === currentParamsString && state.search.isSearching) {
         console.log("[useMasterInquiry] Skipping duplicate executeSearch call");
         return;
       }
@@ -439,35 +412,27 @@ const executeSearch = useCallback(
       // Minimum 300ms loading state (UX improvement - prevents flash)
       const [response] = await Promise.all([
         triggerSearch(params).unwrap(),
-        new Promise((resolve) => setTimeout(resolve, 300)),
+        new Promise((resolve) => setTimeout(resolve, 300))
       ]);
 
-      if (
-        response &&
-        (Array.isArray(response)
-          ? response.length > 0
-          : response.results?.length > 0)
-      ) {
+      if (response && (Array.isArray(response) ? response.length > 0 : response.results?.length > 0)) {
         const results = Array.isArray(response) ? response : response.results;
-        const total = Array.isArray(response)
-          ? response.length
-          : response.total;
+        const total = Array.isArray(response) ? response.length : response.total;
 
         dispatch({
           type: "SEARCH_SUCCESS",
-          payload: { results: { results, total } },
+          payload: { results: { results, total } }
         });
       } else {
         // No results - dispatch success with empty array
         dispatch({
           type: "SEARCH_SUCCESS",
-          payload: { results: { results: [], total: 0 } },
+          payload: { results: { results: [], total: 0 } }
         });
 
         // Show appropriate "not found" message based on search type
         const isSimple = isSimpleSearch(searchFormData);
-        const isBeneficiarySearch =
-          masterInquiryRequestParams?.memberType === "beneficiaries";
+        const isBeneficiarySearch = masterInquiryRequestParams?.memberType === "beneficiaries";
 
         let alertMessage;
         if (isSimple && isBeneficiarySearch) {
@@ -484,17 +449,17 @@ const executeSearch = useCallback(
       console.error("Search failed:", error);
       dispatch({
         type: "SEARCH_FAILURE",
-        payload: { error: error?.toString() || "Unknown error" },
+        payload: { error: error?.toString() || "Unknown error" }
       });
       addAlert({
         id: 999,
         severity: "Error",
         message: "Search Failed",
-        description: "The search request failed. Please try again.",
+        description: "The search request failed. Please try again."
       } as MissiveResponse);
     }
   },
-  [triggerSearch, masterInquiryRequestParams, clearAlerts],
+  [triggerSearch, masterInquiryRequestParams, clearAlerts]
 );
 ```
 
@@ -568,7 +533,7 @@ const handleMemberClick = (member: EmployeeDetails) => {
     id: Number(member.id),
     ssn: Number(member.ssn),
     badgeNumber: Number(member.badgeNumber),
-    psnSuffix: Number(member.psnSuffix),
+    psnSuffix: Number(member.psnSuffix)
   });
 };
 ```
@@ -601,14 +566,14 @@ useEffect(() => {
 
   lastMemberDetailsCallRef.current = {
     memberType: currentMember.memberType,
-    id: currentMember.id,
+    id: currentMember.id
   };
 
   dispatch({ type: "MEMBER_DETAILS_FETCH_START" });
   triggerMemberDetails({
     memberType: currentMember.memberType,
     id: currentMember.id,
-    profitYear: state.search.params?.endProfitYear,
+    profitYear: state.search.params?.endProfitYear
   })
     .unwrap()
     .then((details) => {
@@ -618,9 +583,7 @@ useEffect(() => {
       if (details.missives && details.missives.length > 0) {
         if (Array.isArray(missives) && missives.length > 0) {
           const localMissives: MissiveResponse[] = details.missives
-            .map((id: number) =>
-              missives.find((m: MissiveResponse) => m.id === id),
-            )
+            .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
             .filter(Boolean) as MissiveResponse[];
 
           if (localMissives.length > 0) {
@@ -630,21 +593,14 @@ useEffect(() => {
       }
 
       // Special alert: If searching "all" but found beneficiary
-      if (
-        !details.isEmployee &&
-        masterInquiryRequestParams?.memberType === "all"
-      ) {
+      if (!details.isEmployee && masterInquiryRequestParams?.memberType === "all") {
         addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(details.ssn));
       }
     })
     .catch(() => {
       dispatch({ type: "MEMBER_DETAILS_FETCH_FAILURE" });
     });
-}, [
-  state.selection.selectedMember,
-  state.search.params?.endProfitYear,
-  triggerMemberDetails,
-]);
+}, [state.selection.selectedMember, state.search.params?.endProfitYear, triggerMemberDetails]);
 ```
 
 **Missive Processing**: API returns array of missive IDs (e.g., `[1, 5, 12]`). Hook cross-references with Redux store's missive definitions to get full alert objects, then displays them.
@@ -659,8 +615,7 @@ useEffect(() => {
 
   // Skip if we just called with same member (pagination changes handled separately)
   if (
-    lastProfitDetailsCallRef.current?.memberType ===
-      profitFetchDeps.memberType &&
+    lastProfitDetailsCallRef.current?.memberType === profitFetchDeps.memberType &&
     lastProfitDetailsCallRef.current?.id === profitFetchDeps.id
   ) {
     console.log("[useMasterInquiry] Skipping duplicate profit details fetch");
@@ -669,7 +624,7 @@ useEffect(() => {
 
   lastProfitDetailsCallRef.current = {
     memberType: profitFetchDeps.memberType,
-    id: profitFetchDeps.id,
+    id: profitFetchDeps.id
   };
 
   dispatch({ type: "PROFIT_DATA_FETCH_START" });
@@ -679,7 +634,7 @@ useEffect(() => {
     skip: profitFetchDeps.pageNumber * profitFetchDeps.pageSize,
     take: profitFetchDeps.pageSize,
     sortBy: profitFetchDeps.sortBy,
-    isSortDescending: profitFetchDeps.isSortDescending,
+    isSortDescending: profitFetchDeps.isSortDescending
   })
     .unwrap()
     .then((profitData) => {
@@ -701,11 +656,11 @@ const profitFetchDeps = useMemo(
     pageNumber: profitGridPagination.pageNumber,
     pageSize: profitGridPagination.pageSize,
     sortBy: profitGridPagination.sortParams.sortBy,
-    isSortDescending: profitGridPagination.sortParams.isSortDescending,
+    isSortDescending: profitGridPagination.sortParams.isSortDescending
   }),
   [
     /* dependencies */
-  ],
+  ]
 );
 ```
 
@@ -768,33 +723,28 @@ const summarySection = useMemo(() => {
     phoneNumber,
     isEmployee,
     workLocation,
-    storeNumber,
+    storeNumber
   } = memberDetails;
 
   const formattedZip = addressZipCode ? formatZipCode(addressZipCode) : "";
   const cityStateZip =
-    [formattedCity, formattedState].filter(Boolean).join(", ") +
-    (formattedZip ? ` ${formattedZip}` : "");
+    [formattedCity, formattedState].filter(Boolean).join(", ") + (formattedZip ? ` ${formattedZip}` : "");
 
   return [
     { label: "Name", value: `${lastName}, ${firstName}` },
     { label: "Address", value: `${address}` },
     { label: "", value: cityStateZip },
     { label: "Phone #", value: formatPhoneNumber(phoneNumber) },
-    ...(isEmployee
-      ? [{ label: "Work Location", value: workLocation || "N/A" }]
-      : []),
-    ...(isEmployee
-      ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }]
-      : []),
+    ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
+    ...(isEmployee ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }] : []),
     {
       label: "Enrolled",
-      value: enrollmentStatus.enrolled.replace(/\s*\(\d+\)/, ""),
+      value: enrollmentStatus.enrolled.replace(/\s*\(\d+\)/, "")
     },
     {
       label: "Forfeited",
-      value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, ""),
-    },
+      value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "")
+    }
   ];
 }, [memberDetails, enrollmentStatus]);
 ```
@@ -844,39 +794,37 @@ const milestoneSection = useMemo(() => {
       ? [
           {
             label: "Hire Date",
-            value: hireDate ? mmDDYYFormat(hireDate) : "N/A",
-          },
+            value: hireDate ? mmDDYYFormat(hireDate) : "N/A"
+          }
         ]
       : []),
     ...(isEmployee
       ? [
           {
             label: "Full Time Date",
-            value: fullTimeDate ? mmDDYYFormat(fullTimeDate) : "N/A",
-          },
+            value: fullTimeDate ? mmDDYYFormat(fullTimeDate) : "N/A"
+          }
         ]
       : []),
     ...(isEmployee
       ? [
           {
             label: "Termination Date",
-            value: terminationDate ? mmDDYYFormat(terminationDate) : "N/A",
-          },
+            value: terminationDate ? mmDDYYFormat(terminationDate) : "N/A"
+          }
         ]
       : []),
-    ...(isEmployee
-      ? [{ label: "Termination Reason", value: terminationReason || "N/A" }]
-      : []),
+    ...(isEmployee ? [{ label: "Termination Reason", value: terminationReason || "N/A" }] : []),
     ...(isEmployee
       ? [
           {
             label: "Re-Hire Date",
-            value: reHireDate ? mmDDYYFormat(reHireDate) : "N/A",
-          },
+            value: reHireDate ? mmDDYYFormat(reHireDate) : "N/A"
+          }
         ]
       : []),
     { label: "ETVA", value: numberToCurrency(currentEtva) },
-    { label: "Allocation From", value: numberToCurrency(allocationFromAmount) },
+    { label: "Allocation From", value: numberToCurrency(allocationFromAmount) }
   ];
 }, [memberDetails]);
 ```
@@ -993,14 +941,7 @@ const MasterInquiryContent = memo(() => {
 });
 
 const MasterInquiryMemberGrid = memo(
-  ({
-    searchResults,
-    onMemberSelect,
-    memberGridPagination,
-    onPaginationChange,
-    onSortChange,
-    isLoading,
-  }) => {
+  ({ searchResults, onMemberSelect, memberGridPagination, onPaginationChange, onSortChange, isLoading }) => {
     // Component logic
   },
   (prevProps, nextProps) => {
@@ -1008,18 +949,15 @@ const MasterInquiryMemberGrid = memo(
     return (
       prevProps.searchResults.results === nextProps.searchResults.results &&
       prevProps.searchResults.total === nextProps.searchResults.total &&
-      prevProps.memberGridPagination.pageNumber ===
-        nextProps.memberGridPagination.pageNumber &&
-      prevProps.memberGridPagination.pageSize ===
-        nextProps.memberGridPagination.pageSize &&
-      prevProps.memberGridPagination.sortParams ===
-        nextProps.memberGridPagination.sortParams &&
+      prevProps.memberGridPagination.pageNumber === nextProps.memberGridPagination.pageNumber &&
+      prevProps.memberGridPagination.pageSize === nextProps.memberGridPagination.pageSize &&
+      prevProps.memberGridPagination.sortParams === nextProps.memberGridPagination.sortParams &&
       prevProps.isLoading === nextProps.isLoading &&
       prevProps.onMemberSelect === nextProps.onMemberSelect &&
       prevProps.onPaginationChange === nextProps.onPaginationChange &&
       prevProps.onSortChange === nextProps.onSortChange
     );
-  },
+  }
 );
 ```
 
@@ -1044,10 +982,7 @@ const lastProfitDetailsCallRef = useRef<{
 const currentParamsString = JSON.stringify({
   /* search params */
 });
-if (
-  lastSearchParamsRef.current === currentParamsString &&
-  state.search.isSearching
-) {
+if (lastSearchParamsRef.current === currentParamsString && state.search.isSearching) {
   console.log("[useMasterInquiry] Skipping duplicate executeSearch call");
   return;
 }
@@ -1082,11 +1017,11 @@ const profitFetchDeps = useMemo(
     pageNumber: profitGridPagination.pageNumber,
     pageSize: profitGridPagination.pageSize,
     sortBy: profitGridPagination.sortParams.sortBy,
-    isSortDescending: profitGridPagination.sortParams.isSortDescending,
+    isSortDescending: profitGridPagination.sortParams.isSortDescending
   }),
   [
     /* dependencies */
-  ],
+  ]
 );
 ```
 
@@ -1108,14 +1043,14 @@ const memberGridPagination = useGridPagination({
   initialPageSize: 5,
   initialSortBy: "badgeNumber",
   initialSortDescending: true,
-  onPaginationChange: handleMemberGridPaginationChange,
+  onPaginationChange: handleMemberGridPaginationChange
 });
 
 const profitGridPagination = useGridPagination({
   initialPageSize: 25,
   initialSortBy: "profitYear",
   initialSortDescending: true,
-  onPaginationChange: handleProfitGridPaginationChange,
+  onPaginationChange: handleProfitGridPaginationChange
 });
 ```
 
@@ -1135,29 +1070,27 @@ const handleMemberGridPaginationChange = useCallback(
           skip: pageNumber * pageSize,
           take: pageSize,
           sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending,
-        },
+          isSortDescending: sortParams.isSortDescending
+        }
       })
         .unwrap()
         .then((response: SearchResponse | SearchResponse["results"]) => {
           const results = Array.isArray(response) ? response : response.results;
-          const total = Array.isArray(response)
-            ? response.length
-            : response.total;
+          const total = Array.isArray(response) ? response.length : response.total;
           dispatch({
             type: "MEMBERS_FETCH_SUCCESS",
-            payload: { results: { results, total } },
+            payload: { results: { results, total } }
           });
         })
         .catch((error: Error) => {
           dispatch({
             type: "MEMBERS_FETCH_FAILURE",
-            payload: { error: error?.toString() || "Unknown error" },
+            payload: { error: error?.toString() || "Unknown error" }
           });
         });
     }
   },
-  [triggerSearch],
+  [triggerSearch]
 );
 ```
 
@@ -1176,18 +1109,18 @@ const handleProfitGridPaginationChange = useCallback(
         skip: pageNumber * pageSize,
         take: pageSize,
         sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending,
+        isSortDescending: sortParams.isSortDescending
       })
         .unwrap()
         .then((profitData) => {
           dispatch({
             type: "PROFIT_DATA_FETCH_SUCCESS",
-            payload: { profitData },
+            payload: { profitData }
           });
         });
     }
   },
-  [triggerProfitDetails],
+  [triggerProfitDetails]
 );
 ```
 
@@ -1211,7 +1144,7 @@ addAlert({
   id: 911,
   severity: "Error",
   message: "Member Not Found",
-  description: "No member found with the provided badge number.",
+  description: "No member found with the provided badge number."
 });
 
 // Multiple alerts (from API response)
@@ -1237,8 +1170,7 @@ Three different messages based on search type:
 
 ```typescript
 const isSimple = isSimpleSearch(searchFormData);
-const isBeneficiarySearch =
-  masterInquiryRequestParams?.memberType === "beneficiaries";
+const isBeneficiarySearch = masterInquiryRequestParams?.memberType === "beneficiaries";
 
 let alertMessage;
 if (isSimple && isBeneficiarySearch) {
@@ -1315,7 +1247,7 @@ return [
   { label: "Name", value: fullName },
   ...(isEmployee ? [{ label: "Store", value: storeNumber }] : []),
   ...(isEmployee ? [{ label: "Department", value: department }] : []),
-  { label: "SSN", value: ssn },
+  { label: "SSN", value: ssn }
 ];
 ```
 
@@ -1346,7 +1278,7 @@ const currentSearchParams = searchParamsRef.current;
 ```typescript
 const [response] = await Promise.all([
   triggerSearch(params).unwrap(),
-  new Promise((resolve) => setTimeout(resolve, 300)),
+  new Promise((resolve) => setTimeout(resolve, 300))
 ]);
 ```
 
@@ -1546,10 +1478,7 @@ dispatch(clearMasterInquiryGroupingData());
 
 ```typescript
 // WRONG: DO NOT DO THIS
-const age = Math.floor(
-  (Date.now() - new Date(dateOfBirth).getTime()) /
-    (1000 * 60 * 60 * 24 * 365.25),
-);
+const age = Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25));
 const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 ```
 
@@ -1577,7 +1506,7 @@ const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 const dobDisplay = dateOfBirth ? mmDDYYFormat(dateOfBirth) : "N/A";
 
 return [
-  { label: "DOB", value: dobDisplay },
+  { label: "DOB", value: dobDisplay }
   // If age display is required by business logic, it MUST come from backend
   // in the MemberDetails response, never calculated in frontend
 ];
