@@ -37,7 +37,10 @@ export const FakeTimeBanner: React.FC = () => {
 
   const tooltipContent = (
     <Box sx={{ p: 1 }}>
-      <Typography variant="body2" fontWeight="bold" gutterBottom>
+      <Typography
+        variant="body2"
+        fontWeight="bold"
+        gutterBottom>
         Fake Time Configuration
       </Typography>
       <Typography variant="body2">
@@ -55,7 +58,10 @@ export const FakeTimeBanner: React.FC = () => {
       <Typography variant="body2">
         <strong>Real Time:</strong> {formatDateTime(fakeTimeStatus.realDateTime)}
       </Typography>
-      <Typography variant="caption" color="warning.main" sx={{ mt: 1, display: "block" }}>
+      <Typography
+        variant="caption"
+        color="warning.main"
+        sx={{ mt: 1, display: "block" }}>
         ⚠️ App restart required to change fake time
       </Typography>
     </Box>
