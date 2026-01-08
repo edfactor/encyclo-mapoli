@@ -169,9 +169,7 @@ interface State {
   // ...
 }
 
-type Action =
-  | { type: "SET_SEARCH_PARAMS"; payload: SearchParams }
-  | { type: "RESET" };
+type Action = { type: "SET_SEARCH_PARAMS"; payload: SearchParams } | { type: "RESET" };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -187,11 +185,10 @@ export const usePageState = () => {
 
   const actions = useMemo(
     () => ({
-      setSearchParams: (params: SearchParams) =>
-        dispatch({ type: "SET_SEARCH_PARAMS", payload: params }),
-      reset: () => dispatch({ type: "RESET" }),
+      setSearchParams: (params: SearchParams) => dispatch({ type: "SET_SEARCH_PARAMS", payload: params }),
+      reset: () => dispatch({ type: "RESET" })
     }),
-    [],
+    []
   );
 
   return { state, actions };
@@ -294,7 +291,7 @@ query: (params) => ({
 // Lazy query mock
 vi.mocked(useLazyGetData).mockReturnValue([
   vi.fn().mockResolvedValue({ data: mockData }),
-  { data: mockData, isLoading: false, isError: false },
+  { data: mockData, isLoading: false, isError: false }
 ]);
 
 // Eager query mock
@@ -302,23 +299,20 @@ vi.mocked(useGetData).mockReturnValue({
   data: mockData,
   isLoading: false,
   isError: false,
-  refetch: vi.fn(),
+  refetch: vi.fn()
 });
 
 // Mutation mock
 vi.mocked(useCreateData).mockReturnValue([
   vi.fn().mockResolvedValue({ data: mockResult }),
-  { isLoading: false, isSuccess: false },
+  { isLoading: false, isSuccess: false }
 ]);
 ```
 
 ### Mock Factory Functions
 
 ```typescript
-import {
-  createRTKQueryLazyMock,
-  createRTKQueryMutationMock,
-} from "@/test/utils";
+import { createRTKQueryLazyMock, createRTKQueryMutationMock } from "@/test/utils";
 
 const mockLazyQuery = createRTKQueryLazyMock(mockData, { isLoading: false });
 const mockMutation = createRTKQueryMutationMock(mockResult);
@@ -505,8 +499,8 @@ export const getGridColumns = (options: GridOptions): ColDef[] => [
     resizable: true,
     headerClass: "right-align",
     cellClass: "right-align",
-    valueFormatter: (params) => formatValue(params.value),
-  },
+    valueFormatter: (params) => formatValue(params.value)
+  }
 ];
 ```
 
@@ -632,11 +626,10 @@ export const NavigationStatus = {
   NotStarted: 1,
   InProgress: 2,
   OnHold: 3,
-  Complete: 4,
+  Complete: 4
 } as const;
 
-export type NavigationStatusType =
-  (typeof NavigationStatus)[keyof typeof NavigationStatus];
+export type NavigationStatusType = (typeof NavigationStatus)[keyof typeof NavigationStatus];
 ```
 
 ### Union Types for State
@@ -662,16 +655,10 @@ type ReportType = "distribution" | "contribution" | "forfeiture";
 **Location**: `utils/dateUtils.ts`
 
 ```typescript
-import {
-  isMaskedDate,
-  getMaskedDateDisplay,
-  mmDDYYFormat,
-} from "@/utils/dateUtils";
+import { isMaskedDate, getMaskedDateDisplay, mmDDYYFormat } from "@/utils/dateUtils";
 
 // Always check for masked dates
-const displayDate = isMaskedDate(date)
-  ? getMaskedDateDisplay()
-  : mmDDYYFormat(date);
+const displayDate = isMaskedDate(date) ? getMaskedDateDisplay() : mmDDYYFormat(date);
 ```
 
 ### Key Date Functions
@@ -701,7 +688,7 @@ const percent = formatPercentage(0.85); // "85%"
 ```typescript
 const taxCodes: Record<string, string> = {
   "0": "0: Unknown",
-  "1": "1: Early distribution",
+  "1": "1: Early distribution"
   // ...
 };
 

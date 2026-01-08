@@ -18,19 +18,19 @@
 
 1. **Async Query Provider Not Supported**
 
-    - Mock IQueryable does NOT implement `IAsyncQueryProvider`
-    - EF Core async methods (`.ToListAsync()`, `.FirstOrDefaultAsync()`, etc.) fail with:
-        ```
-        "The source IQueryable doesn't implement IAsyncEnumerable"
-        ```
-    - **Impact**: Tests using async LINQ methods will fail
-    - **Workaround**: Use synchronous methods in tests or switch to InMemory database
+   - Mock IQueryable does NOT implement `IAsyncQueryProvider`
+   - EF Core async methods (`.ToListAsync()`, `.FirstOrDefaultAsync()`, etc.) fail with:
+     ```
+     "The source IQueryable doesn't implement IAsyncEnumerable"
+     ```
+   - **Impact**: Tests using async LINQ methods will fail
+   - **Workaround**: Use synchronous methods in tests or switch to InMemory database
 
 2. **No CRUD Persistence**
-    - `.Add()`, `.Remove()`, `.Update()` operations don't persist across queries
-    - Each query sees a snapshot of the initial seed data
-    - **Impact**: Tests validating Add/Update/Delete need manual mock setup
-    - **Workaround**: Use backing lists with `BuildMockDbSetWithBackingList()`
+   - `.Add()`, `.Remove()`, `.Update()` operations don't persist across queries
+   - Each query sees a snapshot of the initial seed data
+   - **Impact**: Tests validating Add/Update/Delete need manual mock setup
+   - **Workaround**: Use backing lists with `BuildMockDbSetWithBackingList()`
 
 ### InMemory Database Testing (EXPERIMENTAL - NOT READY)
 
@@ -47,38 +47,38 @@
 
 1. **Navigation Property Validation Errors**
 
-    - Demographics entity has 7+ navigation properties (EmploymentStatus, EmploymentType, Gender, etc.)
-    - EF Core tries to validate/add related entities during seeding
-    - Error: `"The property 'EmploymentStatus.Id' does not have a value set and no value generator is available"`
-    - **Fix Required**: Seed all lookup tables before adding Demographics
+   - Demographics entity has 7+ navigation properties (EmploymentStatus, EmploymentType, Gender, etc.)
+   - EF Core tries to validate/add related entities during seeding
+   - Error: `"The property 'EmploymentStatus.Id' does not have a value set and no value generator is available"`
+   - **Fix Required**: Seed all lookup tables before adding Demographics
 
 2. **ExecuteUpdate/ExecuteDelete Not Supported**
 
-    - InMemory provider doesn't support `ExecuteUpdateAsync()` / `ExecuteDeleteAsync()`
-    - Error: `"The methods 'ExecuteUpdate' and 'ExecuteUpdateAsync' are not supported by the current database provider"`
-    - **Fix Required**: Rewrite repository methods to use `.ToList()` then modify in memory
+   - InMemory provider doesn't support `ExecuteUpdateAsync()` / `ExecuteDeleteAsync()`
+   - Error: `"The methods 'ExecuteUpdate' and 'ExecuteUpdateAsync' are not supported by the current database provider"`
+   - **Fix Required**: Rewrite repository methods to use `.ToList()` then modify in memory
 
 3. **FromSqlRaw Not Supported**
 
-    - InMemory provider doesn't support raw SQL queries
-    - **Fix Required**: Rewrite repository methods to use LINQ (affects 2 tests)
+   - InMemory provider doesn't support raw SQL queries
+   - **Fix Required**: Rewrite repository methods to use LINQ (affects 2 tests)
 
 4. **ReadOnly Context Casting Issues**
 
-    - Cannot cast `ProfitSharingDbContext` to `ProfitSharingReadOnlyDbContext`
-    - Current workaround causes validation issues
-    - **Fix Required**: Rethink readonly context strategy for InMemory
+   - Cannot cast `ProfitSharingDbContext` to `ProfitSharingReadOnlyDbContext`
+   - Current workaround causes validation issues
+   - **Fix Required**: Rethink readonly context strategy for InMemory
 
 5. **Lookup Data Seeding Required**
-    - Need to populate 7+ lookup tables:
-        - Department (byte ID)
-        - EmploymentStatus (char ID)
-        - EmploymentType (char ID)
-        - Gender (char ID)
-        - PayFrequency (byte ID)
-        - TerminationCode (char ID)
-        - PayClassification (string ID)
-    - **Fix Required**: Extend `ScenarioDataContextFactory.Create()` with lookup parameters
+   - Need to populate 7+ lookup tables:
+     - Department (byte ID)
+     - EmploymentStatus (char ID)
+     - EmploymentType (char ID)
+     - Gender (char ID)
+     - PayFrequency (byte ID)
+     - TerminationCode (char ID)
+     - PayClassification (string ID)
+   - **Fix Required**: Extend `ScenarioDataContextFactory.Create()` with lookup parameters
 
 ### Test Results Summary
 
@@ -87,9 +87,9 @@
 - Total: 17 tests
 - Passing: 1 test
 - Failing: 16 tests
-    - 11 InvalidCastException (readonly context casting)
-    - 3 NotSupportedException (navigation property validation)
-    - 2 InvalidOperationException (ExecuteUpdate not supported)
+  - 11 InvalidCastException (readonly context casting)
+  - 3 NotSupportedException (navigation property validation)
+  - 2 InvalidOperationException (ExecuteUpdate not supported)
 
 ## Effort Estimate to Fix InMemory Approach
 

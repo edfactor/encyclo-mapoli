@@ -74,7 +74,9 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
               position: "fixed",
               zIndex: 1000
             }}>
-            <div className="app-banner fixed bg-white w-full" style={{ top: `${appBannerTop}px` }}>
+            <div
+              className="app-banner fixed w-full bg-white"
+              style={{ top: `${appBannerTop}px` }}>
               <div className="text">{appTitle}</div>
               <WelcomeDisplay {...welcomeDisplayProps} />
             </div>

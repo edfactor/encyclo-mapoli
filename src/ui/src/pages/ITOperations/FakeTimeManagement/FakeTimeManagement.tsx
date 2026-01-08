@@ -2,29 +2,26 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
-    Alert,
-    AlertTitle,
-    Box,
-    Button,
-    Card,
-    CardContent,
-    Checkbox,
-    CircularProgress,
-    Divider,
-    FormControlLabel,
-    Grid,
-    TextField,
-    Typography
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  CircularProgress,
+  Divider,
+  FormControlLabel,
+  Grid,
+  TextField,
+  Typography
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Page } from "smart-ui-library";
 import { PageErrorBoundary } from "../../../components/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
-import {
-    useGetFakeTimeStatusQuery,
-    useValidateFakeTimeMutation
-} from "../../../reduxstore/api/ItOperationsApi";
+import { useGetFakeTimeStatusQuery, useValidateFakeTimeMutation } from "../../../reduxstore/api/ItOperationsApi";
 import { FakeTimeStatusResponse, SetFakeTimeRequest } from "../../../reduxstore/types";
 
 interface FakeTimeFormValues {
@@ -131,7 +128,9 @@ const FakeTimeManagement = () => {
   return (
     <PageErrorBoundary pageName="Fake Time Management">
       <Page label={CAPTIONS.FAKE_TIME_MANAGEMENT}>
-        <Grid container spacing={3}>
+        <Grid
+          container
+          spacing={3}>
           <Grid size={{ xs: 12 }}>
             <Divider />
           </Grid>
@@ -140,8 +139,14 @@ const FakeTimeManagement = () => {
           <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardContent>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                  <Typography variant="h6" component="h2">
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mb={2}>
+                  <Typography
+                    variant="h6"
+                    component="h2">
                     <AccessTimeIcon sx={{ mr: 1, verticalAlign: "middle" }} />
                     Current Time Status
                   </Typography>
@@ -156,7 +161,10 @@ const FakeTimeManagement = () => {
                 </Box>
 
                 {isLoading || isFetching ? (
-                  <Box display="flex" justifyContent="center" p={3}>
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    p={3}>
                     <CircularProgress />
                   </Box>
                 ) : status ? (
@@ -169,33 +177,48 @@ const FakeTimeManagement = () => {
                       {status.message}
                     </Alert>
 
-                    <Grid container spacing={2}>
+                    <Grid
+                      container
+                      spacing={2}>
                       <Grid size={{ xs: 6 }}>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography
+                          variant="body2"
+                          color="textSecondary">
                           Environment
                         </Typography>
                         <Typography variant="body1">{status.environment}</Typography>
                       </Grid>
                       <Grid size={{ xs: 6 }}>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography
+                          variant="body2"
+                          color="textSecondary">
                           Fake Time Allowed
                         </Typography>
                         <Typography variant="body1">{status.isAllowed ? "Yes" : "No"}</Typography>
                       </Grid>
                       <Grid size={{ xs: 12 }}>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography
+                          variant="body2"
+                          color="textSecondary">
                           Real System Time
                         </Typography>
-                        <Typography variant="body1" fontFamily="monospace">
+                        <Typography
+                          variant="body1"
+                          fontFamily="monospace">
                           {formatDateTime(status.realDateTime)}
                         </Typography>
                       </Grid>
                       {status.isActive && status.currentFakeDateTime && (
                         <Grid size={{ xs: 12 }}>
-                          <Typography variant="body2" color="textSecondary">
+                          <Typography
+                            variant="body2"
+                            color="textSecondary">
                             Current Fake Time
                           </Typography>
-                          <Typography variant="body1" fontFamily="monospace" color="warning.main">
+                          <Typography
+                            variant="body1"
+                            fontFamily="monospace"
+                            color="warning.main">
                             {formatDateTime(status.currentFakeDateTime)}
                           </Typography>
                         </Grid>
@@ -203,21 +226,29 @@ const FakeTimeManagement = () => {
                       {status.configuredDateTime && (
                         <>
                           <Grid size={{ xs: 6 }}>
-                            <Typography variant="body2" color="textSecondary">
+                            <Typography
+                              variant="body2"
+                              color="textSecondary">
                               Configured Date/Time
                             </Typography>
-                            <Typography variant="body1" fontFamily="monospace">
+                            <Typography
+                              variant="body1"
+                              fontFamily="monospace">
                               {status.configuredDateTime}
                             </Typography>
                           </Grid>
                           <Grid size={{ xs: 6 }}>
-                            <Typography variant="body2" color="textSecondary">
+                            <Typography
+                              variant="body2"
+                              color="textSecondary">
                               Time Zone
                             </Typography>
                             <Typography variant="body1">{status.timeZone}</Typography>
                           </Grid>
                           <Grid size={{ xs: 6 }}>
-                            <Typography variant="body2" color="textSecondary">
+                            <Typography
+                              variant="body2"
+                              color="textSecondary">
                               Advance Time
                             </Typography>
                             <Typography variant="body1">{status.advanceTime ? "Yes" : "No (Frozen)"}</Typography>
@@ -237,7 +268,10 @@ const FakeTimeManagement = () => {
           <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardContent>
-                <Typography variant="h6" component="h2" mb={2}>
+                <Typography
+                  variant="h6"
+                  component="h2"
+                  mb={2}>
                   Configuration Validator
                 </Typography>
 
@@ -248,14 +282,21 @@ const FakeTimeManagement = () => {
                   </Alert>
                 ) : (
                   <form onSubmit={handleSubmit(onValidate)}>
-                    <Grid container spacing={2}>
+                    <Grid
+                      container
+                      spacing={2}>
                       <Grid size={{ xs: 12 }}>
                         <Controller
                           name="enabled"
                           control={control}
                           render={({ field }) => (
                             <FormControlLabel
-                              control={<Checkbox {...field} checked={field.value} />}
+                              control={
+                                <Checkbox
+                                  {...field}
+                                  checked={field.value}
+                                />
+                              }
                               label="Enable Fake Time"
                             />
                           )}
@@ -302,7 +343,13 @@ const FakeTimeManagement = () => {
                           control={control}
                           render={({ field }) => (
                             <FormControlLabel
-                              control={<Checkbox {...field} checked={field.value} disabled={!enabled} />}
+                              control={
+                                <Checkbox
+                                  {...field}
+                                  checked={field.value}
+                                  disabled={!enabled}
+                                />
+                              }
                               label="Advance Time (uncheck to freeze at exact moment)"
                             />
                           )}
@@ -323,19 +370,22 @@ const FakeTimeManagement = () => {
                 )}
 
                 {validationError && (
-                  <Alert severity="error" sx={{ mt: 2 }}>
+                  <Alert
+                    severity="error"
+                    sx={{ mt: 2 }}>
                     {validationError}
                   </Alert>
                 )}
 
                 {validationResult && (
-                  <Alert severity="success" sx={{ mt: 2 }}>
+                  <Alert
+                    severity="success"
+                    sx={{ mt: 2 }}>
                     <AlertTitle>Configuration Valid</AlertTitle>
                     {validationResult.message}
                     <Box mt={1}>
                       <Typography variant="body2">
-                        To apply this configuration, update <code>appsettings.json</code> and restart the
-                        application:
+                        To apply this configuration, update <code>appsettings.json</code> and restart the application:
                       </Typography>
                       <Box
                         component="pre"
@@ -371,30 +421,41 @@ const FakeTimeManagement = () => {
           <Grid size={{ xs: 12 }}>
             <Card>
               <CardContent>
-                <Typography variant="h6" component="h2" mb={2}>
+                <Typography
+                  variant="h6"
+                  component="h2"
+                  mb={2}>
                   About Fake Time
                 </Typography>
-                <Typography variant="body2" paragraph>
+                <Typography
+                  variant="body2"
+                  paragraph>
                   The Fake Time feature allows testing time-sensitive operations (like year-end processing) by
-                  simulating a specific date and time. This feature is <strong>only available in non-production
-                  environments</strong>.
+                  simulating a specific date and time. This feature is{" "}
+                  <strong>only available in non-production environments</strong>.
                 </Typography>
-                <Typography variant="body2" paragraph>
-                  <strong>Important:</strong> Fake time configuration is loaded at application startup and cannot
-                  be changed at runtime. To change the fake time settings:
+                <Typography
+                  variant="body2"
+                  paragraph>
+                  <strong>Important:</strong> Fake time configuration is loaded at application startup and cannot be
+                  changed at runtime. To change the fake time settings:
                 </Typography>
                 <ol>
                   <li>
                     <Typography variant="body2">
                       Edit the <code>FakeTime</code> section in <code>appsettings.json</code> or
-                      <code>appsettings.{"{"}Environment{"}"}.json</code>
+                      <code>
+                        appsettings.{"{"}Environment{"}"}.json
+                      </code>
                     </Typography>
                   </li>
                   <li>
                     <Typography variant="body2">Restart the application</Typography>
                   </li>
                 </ol>
-                <Typography variant="body2" paragraph>
+                <Typography
+                  variant="body2"
+                  paragraph>
                   <strong>Configuration options:</strong>
                 </Typography>
                 <ul>
@@ -415,8 +476,8 @@ const FakeTimeManagement = () => {
                   </li>
                   <li>
                     <Typography variant="body2">
-                      <strong>AdvanceTime:</strong> If true, time advances from the starting point; if false, time
-                      stays frozen
+                      <strong>AdvanceTime:</strong> If true, time advances from the starting point; if false, time stays
+                      frozen
                     </Typography>
                   </li>
                 </ul>

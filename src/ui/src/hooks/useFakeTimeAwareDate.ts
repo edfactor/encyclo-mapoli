@@ -4,9 +4,9 @@ import { useGetFakeTimeStatusQuery } from "reduxstore/api/ItOperationsApi";
 /**
  * Hook that returns the current date, respecting fake time when active.
  * Falls back to real system time when fake time is not active.
- * 
+ *
  * @returns Date object representing current time (fake or real)
- * 
+ *
  * @example
  * ```tsx
  * const currentDate = useFakeTimeAwareDate();
@@ -32,9 +32,9 @@ export const useFakeTimeAwareDate = (): Date => {
 /**
  * Hook that returns the current year, respecting fake time when active.
  * Falls back to real system year when fake time is not active.
- * 
+ *
  * @returns Current year as a number
- * 
+ *
  * @example
  * ```tsx
  * const currentYear = useFakeTimeAwareYear();
@@ -50,9 +50,9 @@ export const useFakeTimeAwareYear = (): number => {
 /**
  * Hook that returns fake time status directly.
  * Useful when you need access to the full fake time status object.
- * 
+ *
  * @returns Fake time status object or undefined
- * 
+ *
  * @example
  * ```tsx
  * const fakeTimeStatus = useFakeTimeStatus();

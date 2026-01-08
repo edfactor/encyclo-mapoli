@@ -6,11 +6,11 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import {
-    badgeNumberStringValidator,
-    handleBadgeNumberStringInput,
-    handleSsnInput,
-    profitYearValidator,
-    ssnValidator
+  badgeNumberStringValidator,
+  handleBadgeNumberStringInput,
+  handleSsnInput,
+  profitYearValidator,
+  ssnValidator
 } from "../../../utils/FormValidators";
 
 interface ExecutiveHoursAndDollarsSearch {
@@ -38,11 +38,11 @@ const validationSchema = yup
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(
       values.profitYear ||
-      values.socialSecurity ||
-      values.badgeNumber ||
-      values.fullNameContains ||
-      values.hasExecutiveHoursAndDollars !== false ||
-      values.isMonthlyPayroll !== false
+        values.socialSecurity ||
+        values.badgeNumber ||
+        values.fullNameContains ||
+        values.hasExecutiveHoursAndDollars !== false ||
+        values.isMonthlyPayroll !== false
     )
   );
 

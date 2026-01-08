@@ -30,12 +30,12 @@ The Demoulas.Common.Api package provides a suite of base endpoint classes that a
 
 All Demoulas endpoint base classes:
 
--   **Automatically wrap your logic with telemetry** (distributed tracing, metrics, logging)
--   **Track sensitive field access** for audit and compliance
--   **Record request/response metrics** (size, timing, errors)
--   **Handle exceptions** with proper activity recording
--   **Support custom telemetry tags** via virtual methods
--   **Sealed HandleAsync** to enforce consistent telemetry wrapping
+- **Automatically wrap your logic with telemetry** (distributed tracing, metrics, logging)
+- **Track sensitive field access** for audit and compliance
+- **Record request/response metrics** (size, timing, errors)
+- **Handle exceptions** with proper activity recording
+- **Support custom telemetry tags** via virtual methods
+- **Sealed HandleAsync** to enforce consistent telemetry wrapping
 
 ### Available Base Classes
 
@@ -141,12 +141,12 @@ public static ValidationProblemDetails ToProblemDetails(
 
 **Status Code Mapping:**
 
--   ValidationException / ArgumentException → 400
--   KeyNotFoundException → 404
--   UnauthorizedAccessException → 401
--   NotImplementedException → 501
--   UniqueConstraintException / ReferenceConstraintException → 409
--   Others → 500
+- ValidationException / ArgumentException → 400
+- KeyNotFoundException → 404
+- UnauthorizedAccessException → 401
+- NotImplementedException → 501
+- UniqueConstraintException / ReferenceConstraintException → 409
+- Others → 500
 
 **Example:**
 
@@ -263,8 +263,8 @@ using FastEndpoints;
 
 **See Also:**
 
--   [Main Documentation](./demoulas.common.instructions.md)
--   [RESTful API Guidelines](./restful-api-guidelines.instructions.md)
--   [Data Extensions](./demoulas.common.data.instructions.md)
--   [Util Extensions](./demoulas.util.instructions.md)
--   [FastEndpoints Documentation](https://fast-endpoints.com/)
+- [Main Documentation](./demoulas.common.instructions.md)
+- [RESTful API Guidelines](./restful-api-guidelines.instructions.md)
+- [Data Extensions](./demoulas.common.data.instructions.md)
+- [Util Extensions](./demoulas.util.instructions.md)
+- [FastEndpoints Documentation](https://fast-endpoints.com/)

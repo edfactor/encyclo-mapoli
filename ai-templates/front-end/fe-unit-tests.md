@@ -127,7 +127,7 @@ it("should update search results when user enters badge number", async () => {
 const searchButton = screen.getByRole("button", { name: /search/i });
 const dateInput = screen.getByLabelText("Rehire Begin Date");
 const checkBox = screen.getByRole("checkbox", {
-  name: /exclude zero balance/i,
+  name: /exclude zero balance/i
 });
 
 // ❌ Brittle and inaccessible
@@ -192,7 +192,7 @@ describe("useDecemberFlowProfitYear", () => {
   it("should return the selected profit year from Redux store", () => {
     const mockStore = createMockStore(2024);
     const { result } = renderHook(() => useDecemberFlowProfitYear(), {
-      wrapper: wrapper(mockStore),
+      wrapper: wrapper(mockStore)
     });
 
     expect(result.current).toBe(2024);
@@ -232,17 +232,14 @@ vi.mock("../../../utils/FormValidators", async () => {
         .required(`${fieldName} is required`)
         .test("valid-date", `${fieldName} must be valid`, function (value) {
           if (!value) return false;
-          return (
-            /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value) ||
-            /^\d{4}-\d{2}-\d{2}$/.test(value)
-          );
+          return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value) || /^\d{4}-\d{2}-\d{2}$/.test(value);
         });
     },
     mmDDYYFormat: (date) => {
       if (!date) return "";
       // Implementation
       return formattedDate;
-    },
+    }
   };
 });
 ```
@@ -298,19 +295,16 @@ RTK Query hooks are async and need proper promise handling.
 // Step 1: Create mock functions at module scope using vi.hoisted()
 const { mockTriggerSearch, mockTriggerStatus } = vi.hoisted(() => ({
   mockTriggerSearch: vi.fn(),
-  mockTriggerStatus: vi.fn(),
+  mockTriggerStatus: vi.fn()
 }));
 
 // Step 2: Mock the entire module
 vi.mock("../../../reduxstore/api/YearsEndApi", () => ({
   useLazyGetUnForfeitsQuery: vi.fn(() => [
     mockTriggerSearch, // The trigger function
-    { isFetching: false }, // The hook state
+    { isFetching: false } // The hook state
   ]),
-  useLazyGetProfitMasterStatusQuery: vi.fn(() => [
-    mockTriggerStatus,
-    { isFetching: false },
-  ]),
+  useLazyGetProfitMasterStatusQuery: vi.fn(() => [mockTriggerStatus, { isFetching: false }])
 }));
 
 // Step 3: Set up return values in beforeEach
@@ -320,15 +314,15 @@ beforeEach(() => {
   mockTriggerSearch.mockReturnValue({
     unwrap: vi.fn().mockResolvedValue({
       results: mockData,
-      total: 1,
-    }),
+      total: 1
+    })
   });
 
   mockTriggerStatus.mockReturnValue({
     unwrap: vi.fn().mockResolvedValue({
       updatedBy: "John Doe",
-      updatedTime: "2024-01-15",
-    }),
+      updatedTime: "2024-01-15"
+    })
   });
 });
 ```
@@ -354,12 +348,12 @@ describe("useMasterInquiryReducer", () => {
           skip: 0,
           take: 25,
           sortBy: "name",
-          isSortDescending: false,
-        },
+          isSortDescending: false
+        }
       };
       const action = {
         type: "SEARCH_START" as const,
-        payload: { params, isManual: true },
+        payload: { params, isManual: true }
       };
       const newState = masterInquiryReducer(initialState, action);
 
@@ -387,9 +381,9 @@ describe("selectors", () => {
         ...initialState,
         search: {
           ...initialState.search,
-          results: { results: [{}, {}], total: 2 },
+          results: { results: [{}, {}], total: 2 }
         },
-        view: { mode: "multipleMembers" },
+        view: { mode: "multipleMembers" }
       };
 
       expect(selectShowMemberGrid(state)).toBe(true);
@@ -466,7 +460,7 @@ Use `renderHook` with proper Redux setup.
 ```typescript
 it("should return initial state", () => {
   const { wrapper } = createMockStoreAndWrapper({
-    yearsEnd: { selectedProfitYear: 2024 },
+    yearsEnd: { selectedProfitYear: 2024 }
   });
 
   const { result } = renderHook(() => useUnForfeitState(), { wrapper });
@@ -503,13 +497,13 @@ import { vi } from "vitest";
 
 // Mock custom hooks
 vi.mock("./useDecemberFlowProfitYear", () => ({
-  default: vi.fn(),
+  default: vi.fn()
 }));
 
 // Mock RTK Query hooks
 vi.mock("reduxstore/api/LookupsApi", () => ({
   useLazyGetAccountingYearQuery: vi.fn(),
-  useLazyGetAccountingRangeQuery: vi.fn(),
+  useLazyGetAccountingRangeQuery: vi.fn()
 }));
 ```
 
@@ -563,10 +557,7 @@ import { useLazyGetAccountingYearQuery } from "reduxstore/api/LookupsApi";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 
 vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([
-  mockFetchAccountingYear,
-  { isLoading: false } as any,
-]);
+vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false } as any]);
 ```
 
 ---
@@ -579,11 +570,11 @@ From `useProfitShareEditUpdate.test.tsx`:
 
 ```typescript
 const { mockApplyMaster } = vi.hoisted(() => ({
-  mockApplyMaster: vi.fn(),
+  mockApplyMaster: vi.fn()
 }));
 
 vi.mock("../../../reduxstore/api/YearsEndApi", () => ({
-  useGetMasterApplyMutation: vi.fn(() => [mockApplyMaster]),
+  useGetMasterApplyMutation: vi.fn(() => [mockApplyMaster])
 }));
 
 beforeEach(() => {
@@ -591,8 +582,8 @@ beforeEach(() => {
     unwrap: vi.fn().mockResolvedValue({
       employeesEffected: 100,
       beneficiariesEffected: 50,
-      etvasEffected: 150,
-    }),
+      etvasEffected: 150
+    })
   });
 });
 
@@ -620,12 +611,12 @@ it("should not fetch when token is missing", () => {
     security: { token: null, user: null },
     yearsEnd: {
       selectedProfitYearForDecemberActivities: 2024,
-      yearsEndData: null,
-    },
+      yearsEndData: null
+    }
   });
 
   const { result } = renderHook(() => useDuplicateNamesAndBirthdays(), {
-    wrapper,
+    wrapper
   });
 
   expect(result.current.isSearching).toBe(false);

@@ -1,16 +1,16 @@
 {
-    "ConnectionStrings": {
-        "ProfitSharing": "CONNECTIONSTRINGS_PROFITSHARING_SLUG",
-        "Warehouse": "CONNECTIONSTRINGS_WAREHOUSE_SLUG"
-    },
-    "OracleHcm": {
-        "BaseAddress": "ORACLEHCM_BASE_URL_SLUG",
-        "DemographicUrl": "/hcmRestApi/resources/11.13.18.05/workers",
-        "PayrollUrl": "/hcmRestApi/resources/11.13.18.05/personProcessResults",
-        "Username": "ORACLEHCM_USERNAME_SLUG",
-        "Password": "ORACLEHCM_PASSWORD_SLUG",
-        "UseBasicAuth": "true",
-        "RestFrameworkVersion": "9",
-        "OracleHcm:IntervalInHours": "350"
-    }
+  "ConnectionStrings": {
+    "ProfitSharing": "CONNECTIONSTRINGS_PROFITSHARING_SLUG",
+    "Warehouse": "CONNECTIONSTRINGS_WAREHOUSE_SLUG"
+  },
+  "OracleHcm": {
+    "BaseAddress": "ORACLEHCM_BASE_URL_SLUG",
+    "DemographicUrl": "/hcmRestApi/resources/11.13.18.05/workers",
+    "PayrollUrl": "/hcmRestApi/resources/11.13.18.05/personProcessResults",
+    "Username": "ORACLEHCM_USERNAME_SLUG",
+    "Password": "ORACLEHCM_PASSWORD_SLUG",
+    "UseBasicAuth": "true",
+    "RestFrameworkVersion": "9",
+    "OracleHcm:IntervalInHours": "350"
+  }
 }
