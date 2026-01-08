@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
@@ -25,6 +26,7 @@ public sealed class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDis
     {
         Post("/");
         Group<DistributionGroup>();
+        Policies(Security.Policy.CanManageDistributions); // Override group policy - create requires manage permission
         Summary(s =>
         {
             s.Summary = "Create a new profit sharing distribution in the current profit year.";
