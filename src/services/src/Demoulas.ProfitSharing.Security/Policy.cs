@@ -51,6 +51,11 @@ public static class Policy
     public static readonly string CanViewDistributions = "CAN_VIEW_DISTRIBUTIONS";
 
     /// <summary>
+    /// Manage distributions (create, update, delete). More restrictive than view.
+    /// </summary>
+    public static readonly string CanManageDistributions = "CAN_MANAGE_DISTRIBUTIONS";
+
+    /// <summary>
     /// Can reverse profit detail entries (corrections).
     /// </summary>
     public static readonly string CanReverseProfitDetails = "CAN_REVERSE_PROFIT_DETAILS";
