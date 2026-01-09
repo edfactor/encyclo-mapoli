@@ -185,7 +185,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             var memberBalance = await _totalService.GetTotalBalanceSet(ctx, year)
                 .FirstOrDefaultAsync(b => b.Ssn == ssn, cancellationToken);
 
-            var memberDistributions = await _totalService.GetTotalDistributions(ctx, year)
+            // PS-2424: Use GetYearlyDistributions for yearly amounts (not cumulative)
+            var memberDistributions = await _totalService.GetYearlyDistributions(ctx, year)
                 .FirstOrDefaultAsync(d => d.Ssn == ssn, cancellationToken);
 
             // GetVestingBalanceForSingleMemberAsync creates its own context internally

@@ -115,6 +115,48 @@ public sealed class TotalService : ITotalService
     }
 
     /// <summary>
+    /// Retrieves the yearly distributions for participants for a specific profit year only.
+    /// This is different from <see cref="GetTotalDistributions"/> which returns cumulative distributions.
+    /// </summary>
+    /// <param name="ctx">
+    /// The database context implementing <see cref="IProfitSharingDbContext"/> used to access profit-sharing data.
+    /// </param>
+    /// <param name="profitYear">
+    /// The specific profit year for which distributions are calculated (not cumulative).
+    /// </param>
+    /// <returns>
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalDto"/> representing the yearly distributions
+    /// for each participant, grouped by their SSN. Only includes distributions for the specified year.
+    /// </returns>
+    /// <remarks>
+    /// This method calculates withdrawals for a single profit year using profit codes:
+    /// - PC 1: Outgoing Payments (Partial Withdrawal)
+    /// - PC 3: Outgoing Direct Payments / Rollover Payments
+    /// - PC 9: Outgoing Payment from 100% Vesting Amount (ETVA funds)
+    /// 
+    /// Created to fix PS-2424: Account History Report was showing cumulative instead of yearly withdrawals.
+    /// </remarks>
+    internal IQueryable<ParticipantTotalDto> GetYearlyDistributions(IProfitSharingDbContext ctx, short profitYear)
+    {
+        return (
+            from pd in ctx.ProfitDetails
+            where pd.ProfitYear == profitYear  // Note: == not <= (yearly, not cumulative)
+            group pd by pd.Ssn
+            into pd_g
+            select new ParticipantTotalDto
+            {
+                Ssn = pd_g.Key,
+                TotalAmount = pd_g.Where(x => new[]
+                {
+                    /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+                    /*3*/ ProfitCode.Constants.OutgoingDirectPayments.Id,
+                    /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+                }.Contains(x.ProfitCodeId)).Sum(x => Math.Abs(x.Contribution + x.Earnings + x.Forfeiture))
+            }
+        );
+    }
+
+    /// <summary>
     /// Retrieves the total years of service for participants in the profit-sharing plan for a specified year.
     /// </summary>
     /// <param name="ctx">
