@@ -1,4 +1,4 @@
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import RouterSubAssembly from "./RouterSubAssembly";
 import RouteSecurity from "./RouteSecurity";
@@ -9,13 +9,12 @@ import RouteSecurity from "./RouteSecurity";
 const Router = () => {
   const oktaEnabled = EnvironmentUtils.isOktaEnabled;
 
+  console.log('[Router] Rendering - oktaEnabled:', oktaEnabled);
+
   return (
     <BrowserRouter>
       <RouteSecurity oktaEnabled={oktaEnabled}>
-        <Route
-          path="/*"
-          element={<RouterSubAssembly />}
-        />
+        <RouterSubAssembly />
       </RouteSecurity>
     </BrowserRouter>
   );

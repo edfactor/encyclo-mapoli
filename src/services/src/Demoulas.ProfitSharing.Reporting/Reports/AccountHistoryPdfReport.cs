@@ -171,10 +171,7 @@ public class AccountHistoryPdfReport : BasePdfReport
                     columns.RelativeColumn(1.3f);  // Contributions
                     columns.RelativeColumn(1.3f);  // Earnings
                     columns.RelativeColumn(1.3f);  // Forfeitures
-                    columns.RelativeColumn(0.8f);  // Vesting %
-                    columns.RelativeColumn(0.7f);  // Years
                     columns.RelativeColumn(1.3f);  // Withdrawals
-                    columns.RelativeColumn(1.3f);  // Vested Balance
                     columns.RelativeColumn(1.3f);  // Ending Balance
                 });
 
@@ -190,13 +187,7 @@ public class AccountHistoryPdfReport : BasePdfReport
                     header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
                         .Text("Forfeitures").FontSize(10).Bold();
                     header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
-                        .Text("Vesting %").FontSize(10).Bold();
-                    header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
-                        .Text("Years").FontSize(10).Bold();
-                    header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
                         .Text("Withdrawals").FontSize(10).Bold();
-                    header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
-                        .Text("Vested Balance").FontSize(10).Bold();
                     header.Cell().BorderBottom(1).BorderColor("#000000").Padding(3).AlignRight()
                         .Text("Ending Balance").FontSize(10).Bold();
                 });
@@ -209,18 +200,7 @@ public class AccountHistoryPdfReport : BasePdfReport
                     table.Cell().Padding(3).AlignRight().Text(row.Earnings.ToCurrencyString()).FontSize(10);
                     table.Cell().Padding(3).AlignRight().Text(row.Forfeitures.ToCurrencyString()).FontSize(10);
 
-                    var vestingPercentText = row.VestingPercent.HasValue
-                        ? $"{(row.VestingPercent.Value * 100):0}%"
-                        : "N/A";
-                    table.Cell().Padding(3).AlignRight().Text(vestingPercentText).FontSize(10);
-
-                    var yearsText = row.YearsInPlan.HasValue
-                        ? row.YearsInPlan.Value.ToString()
-                        : "N/A";
-                    table.Cell().Padding(3).AlignRight().Text(yearsText).FontSize(10);
-
                     table.Cell().Padding(3).AlignRight().Text(row.Withdrawals.ToCurrencyString()).FontSize(10);
-                    table.Cell().Padding(3).AlignRight().Text(row.VestedBalance.ToCurrencyString()).FontSize(10);
                     table.Cell().Padding(3).AlignRight().Text(row.EndingBalance.ToCurrencyString()).FontSize(10).Bold();
                 }
             });
