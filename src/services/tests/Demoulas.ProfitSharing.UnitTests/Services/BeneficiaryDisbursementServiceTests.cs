@@ -30,7 +30,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
 
     public BeneficiaryDisbursementServiceTests()
     {
-        var currentYear = TestCalendar.CurrentYear;
+        var currentYear = (short)DateTime.Now.Year;
 
         // Create test disburser (employee with balance)
         _disburser = StockFactory.CreateEmployee(currentYear);

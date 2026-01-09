@@ -34,7 +34,7 @@ public class ProfitDetailReversalsServiceTests : ApiTestBase<Api.Program>
         _demographic2.Ssn = 987654321;
 
         var currentMonth = (byte)DateTime.Now.Month;
-        var currentYear = TestCalendar.CurrentYear;
+        var currentYear = (short)DateTime.Now.Year;
 
         // Setup profit detail data - using reversible profit code and current month/year
         _profitDetail1 = new ProfitDetailFaker([_demographic1, _demographic2]).UseSeed(1).Generate();
@@ -137,7 +137,7 @@ public class ProfitDetailReversalsServiceTests : ApiTestBase<Api.Program>
     {
         // Arrange
         var currentMonth = (byte)DateTime.Now.Month;
-        var currentYear = TestCalendar.CurrentYear;
+        var currentYear = (short)DateTime.Now.Year;
 
         // Create a reversal record that is itself a reversal of another record
         var reversalRecord = new ProfitDetailFaker([_demographic1]).UseSeed(10).Generate();

@@ -39,7 +39,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         var mockCalendarService = new Mock<ICalendarService>();
         mockCalendarService
-            .Setup(c => c.GetYearStartAndEndAccountingDatesAsync(TestCalendar.CurrentYear, It.IsAny<CancellationToken>()))
+            .Setup(c => c.GetYearStartAndEndAccountingDatesAsync((short)DateTime.Now.Year, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CalendarResponseDto
             {
                 FiscalBeginDate = DateTime.Now.AddYears(-5).ToDateOnly(),
