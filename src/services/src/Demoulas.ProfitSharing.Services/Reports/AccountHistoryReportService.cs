@@ -3,13 +3,10 @@ using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Reporting.Reports;
-using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -74,7 +71,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             var ssn = demographic.Ssn;
             var badgeNumber = demographic.BadgeNumber;
             var demographicId = demographic.Id;
-            var fullName = demographic.ContactInfo.FullName ?? string.Empty;
 
             // Get all profit years for this member - apply sorting to determine which years we need
             var sortBy = request.SortBy ?? "ProfitYear";
@@ -133,7 +129,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 ssn,
                 badgeNumber,
                 demographicId,
-                fullName,
                 cancellationToken)).ToList();
 
             var reportData = (await Task.WhenAll(tasks)).ToList();
@@ -147,8 +142,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     TotalContributions = reportData.Sum(r => r.Contributions),
                     TotalEarnings = reportData.Sum(r => r.Earnings),
                     TotalForfeitures = reportData.Sum(r => r.Forfeitures),
-                    TotalWithdrawals = reportData.Sum(r => r.Withdrawals),
-                    TotalVestedBalance = reportData.OrderByDescending(r => r.ProfitYear).FirstOrDefault()?.VestedBalance ?? 0
+                    TotalWithdrawals = reportData.Sum(r => r.Withdrawals)
                 };
 
                 return BuildPaginatedResponsePreSorted(reportData, request, startYear, totalYearCount, cumulativeTotals);
@@ -169,7 +163,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         int ssn,
         int badgeNumber,
         int demographicId,
-        string fullName,
         CancellationToken cancellationToken)
     {
         // Execute balance/distribution queries sequentially within this context
@@ -197,17 +190,12 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             {
                 Id = demographicId,
                 BadgeNumber = badgeNumber,
-                FullName = fullName,
-                Ssn = ssn.MaskSsn(),
                 ProfitYear = year,
                 Contributions = yearRollup?.TotalContributions ?? 0,
                 Earnings = yearRollup?.TotalEarnings ?? 0,
                 Forfeitures = yearRollup?.TotalForfeitures ?? 0,
                 Withdrawals = memberDistributions?.TotalAmount ?? 0,
                 EndingBalance = memberBalance?.TotalAmount ?? 0,
-                VestedBalance = vestingBalance?.VestedBalance ?? 0,
-                VestingPercent = vestingBalance?.VestingPercent,
-                YearsInPlan = vestingBalance?.YearsInPlan
             };
         }, cancellationToken);
     }
@@ -252,8 +240,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         var totalEarnings = sortedResult.Sum(r => r.Earnings);
         var totalForfeitures = sortedResult.Sum(r => r.Forfeitures);
         var totalWithdrawals = sortedResult.Sum(r => r.Withdrawals);
-        // TotalVestedBalance is from the most recent profit year (highest year number)
-        var totalVestedBalance = reportData.OrderByDescending(r => r.ProfitYear).FirstOrDefault()?.VestedBalance ?? 0;
 
         // Calculate total count before pagination
         var totalCount = sortedResult.Count;
@@ -288,8 +274,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 TotalContributions = totalContributions,
                 TotalEarnings = totalEarnings,
                 TotalForfeitures = totalForfeitures,
-                TotalWithdrawals = totalWithdrawals,
-                TotalVestedBalance = totalVestedBalance
+                TotalWithdrawals = totalWithdrawals
             }
         };
     }
@@ -351,9 +336,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             "badgenumber" => descending
                 ? data.OrderByDescending(x => x.BadgeNumber)
                 : data.OrderBy(x => x.BadgeNumber),
-            "fullname" => descending
-                ? data.OrderByDescending(x => x.FullName)
-                : data.OrderBy(x => x.FullName),
             "contributions" => descending
                 ? data.OrderByDescending(x => x.Contributions)
                 : data.OrderBy(x => x.Contributions),
@@ -414,9 +396,9 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             // Create the PDF report document
             var memberProfile = new AccountHistoryPdfReport.MemberProfileInfo
             {
-                FullName = firstResponse.FullName,
-                BadgeNumber = firstResponse.BadgeNumber,
-                MaskedSsn = firstResponse.Ssn,
+                FullName = employee?.FullName ?? string.Empty,
+                BadgeNumber = employee?.BadgeNumber ?? 0,
+                MaskedSsn = employee?.Ssn ?? string.Empty,
                 Address = employee?.Address,
                 City = employee?.AddressCity,
                 State = employee?.AddressState,
