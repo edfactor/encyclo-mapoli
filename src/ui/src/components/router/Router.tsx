@@ -1,11 +1,7 @@
-import { lazy } from "react";
 import { BrowserRouter } from "react-router-dom";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import RouterSubAssembly from "./RouterSubAssembly";
 import RouteSecurity from "./RouteSecurity";
-
-const Login = lazy(() => import("components/Login/Login"));
-const OktaLoginCallback = lazy(() => import("components/MenuBar/OktaLoginCallback"));
 
 // We need a SubAssembly to let navigable items be put into
 // the drawer component. Otherwise, React thinks that the
