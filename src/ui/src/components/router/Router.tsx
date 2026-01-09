@@ -1,7 +1,11 @@
-import { BrowserRouter, Route } from "react-router-dom";
+import { lazy } from "react";
+import { BrowserRouter } from "react-router-dom";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import RouterSubAssembly from "./RouterSubAssembly";
 import RouteSecurity from "./RouteSecurity";
+
+const Login = lazy(() => import("components/Login/Login"));
+const OktaLoginCallback = lazy(() => import("components/MenuBar/OktaLoginCallback"));
 
 // We need a SubAssembly to let navigable items be put into
 // the drawer component. Otherwise, React thinks that the
@@ -9,13 +13,12 @@ import RouteSecurity from "./RouteSecurity";
 const Router = () => {
   const oktaEnabled = EnvironmentUtils.isOktaEnabled;
 
+  console.log('[Router] Rendering - oktaEnabled:', oktaEnabled);
+
   return (
     <BrowserRouter>
       <RouteSecurity oktaEnabled={oktaEnabled}>
-        <Route
-          path="/*"
-          element={<RouterSubAssembly />}
-        />
+        <RouterSubAssembly />
       </RouteSecurity>
     </BrowserRouter>
   );
