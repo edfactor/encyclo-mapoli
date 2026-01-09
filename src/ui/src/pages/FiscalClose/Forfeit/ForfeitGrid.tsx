@@ -77,19 +77,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
     const n = typeof val === "number" ? val : parseFloat(val as string);
     return Number.isFinite(n) ? n : 0;
   };
-  const totalForfeituresRaw = safeNumber(searchResults?.totalForfeitures);
-  const totalForfeitPoints = safeNumber(searchResults?.totalForfeitPoints);
   const totalEarningPoints = safeNumber(searchResults?.totalEarningPoints);
-
-  const totalsRow = useMemo(
-    () => ({
-      forfeitures: totalForfeituresRaw.toFixed(2),
-      contForfeitPoints: totalForfeitPoints,
-      earningPoints: totalEarningPoints,
-      validation: searchResults?.crossReferenceValidation?.validationGroups[0] || null
-    }),
-    [totalForfeituresRaw, totalForfeitPoints, totalEarningPoints, searchResults]
-  );
 
   if (!searchResults?.response) return null;
 
