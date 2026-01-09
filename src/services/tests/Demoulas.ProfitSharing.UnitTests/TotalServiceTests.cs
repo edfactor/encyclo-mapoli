@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -46,21 +47,21 @@ public class TotalServiceTests : ApiTestBase<Program>
             for (int i = 0; i < pdArray.Length; i++)
             {
                 var prof = pdArray[i];
-                prof.ProfitYear = (short)(DateTime.Now.Year - i);
+                prof.ProfitYear = (short)(TestCalendar.CurrentYear - i);
                 prof.ProfitCode = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal;
                 prof.ProfitCodeId = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id;
                 prof.Contribution = Convert.ToDecimal(Math.Pow(2, i * 3));
                 prof.Earnings = Convert.ToDecimal(Math.Pow(2, (i * 3) + 1));
                 prof.Forfeiture = Convert.ToDecimal(Math.Pow(2, (i * 3) + 2));
                 prof.MonthToDate = 0;
-                prof.YearToDate = (short)(DateTime.Now.Year - i);
+                prof.YearToDate = (short)(TestCalendar.CurrentYear - i);
                 prof.FederalTaxes = 0.5m;
                 prof.StateTaxes = 0.25m;
             }
 
             await ctx.SaveChangesAsync(CancellationToken.None);
 
-            var testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
+            var testRslt = await _totalService.GetTotalDistributions(ctx, TestCalendar.CurrentYear).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Outgoing Partial Withdrawal
             testRslt.Count.ShouldBe(1);
             testRslt[0].TotalAmount.ShouldBe(36);
@@ -74,7 +75,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync(CancellationToken.None);
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
+            testRslt = await _totalService.GetTotalDistributions(ctx, TestCalendar.CurrentYear).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Outgoing Forfeitures
             testRslt.Count.ShouldBe(1);
             testRslt[0].TotalAmount.ShouldBe(36);
@@ -88,7 +89,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync(CancellationToken.None);
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
+            testRslt = await _totalService.GetTotalDistributions(ctx, TestCalendar.CurrentYear).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Outgoing 100% Vested Earnings
             testRslt.Count.ShouldBe(1);
             testRslt[0].TotalAmount.ShouldBe(36);
@@ -102,7 +103,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync(CancellationToken.None);
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, (short)(DateTime.Now.Year - 1)).Where(x => x.Ssn == demoSsn)
+            testRslt = await _totalService.GetTotalDistributions(ctx, (short)(TestCalendar.CurrentYear - 1)).Where(x => x.Ssn == demoSsn)
                 .ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Test as of filter
             testRslt.Count.ShouldBe(1);
@@ -117,7 +118,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync(CancellationToken.None);
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
+            testRslt = await _totalService.GetTotalDistributions(ctx, TestCalendar.CurrentYear).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // All non-distributon records
             testRslt.Count.ShouldBe(1);
             testRslt[0].TotalAmount.ShouldBe(0);

@@ -81,11 +81,7 @@ public abstract class PristineBaseTest
                                 .FirstOrDefaultAsync(pp => pp.DemographicId == demographic.Id && pp.ProfitYear == year)
                             ?? throw new InvalidOperationException($"No PayProfit found for badge {badge} year {year}");
 
-            var details = await ctx.ProfitDetails
-                .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitYear == year)
-                .ToListAsync();
-
-            return new Employee { Demographic = demographic, PayProfit = payProfit, ProfitDetails = details };
+            return new Employee { Demographic = demographic, PayProfit = payProfit };
         });
     }
 }

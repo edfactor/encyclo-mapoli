@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.Extensions.Logging;
@@ -33,7 +34,7 @@ public class ProfitDetailReversalsServiceTests : ApiTestBase<Api.Program>
         _demographic2.Ssn = 987654321;
 
         var currentMonth = (byte)DateTime.Now.Month;
-        var currentYear = (short)DateTime.Now.Year;
+        var currentYear = TestCalendar.CurrentYear;
 
         // Setup profit detail data - using reversible profit code and current month/year
         _profitDetail1 = new ProfitDetailFaker([_demographic1, _demographic2]).UseSeed(1).Generate();
@@ -136,7 +137,7 @@ public class ProfitDetailReversalsServiceTests : ApiTestBase<Api.Program>
     {
         // Arrange
         var currentMonth = (byte)DateTime.Now.Month;
-        var currentYear = (short)DateTime.Now.Year;
+        var currentYear = TestCalendar.CurrentYear;
 
         // Create a reversal record that is itself a reversal of another record
         var reversalRecord = new ProfitDetailFaker([_demographic1]).UseSeed(10).Generate();

@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.Util.Extensions;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
@@ -38,7 +39,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 
         var mockCalendarService = new Mock<ICalendarService>();
         mockCalendarService
-            .Setup(c => c.GetYearStartAndEndAccountingDatesAsync((short)DateTime.Now.Year, It.IsAny<CancellationToken>()))
+            .Setup(c => c.GetYearStartAndEndAccountingDatesAsync(TestCalendar.CurrentYear, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CalendarResponseDto
             {
                 FiscalBeginDate = DateTime.Now.AddYears(-5).ToDateOnly(),

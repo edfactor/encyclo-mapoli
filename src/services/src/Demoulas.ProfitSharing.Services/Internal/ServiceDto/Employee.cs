@@ -6,6 +6,4 @@ public class Employee
 {
     public required Demographic Demographic { get; set; }
     public required PayProfit PayProfit { get; set; }
-
-    public required List<ProfitDetail> ProfitDetails { get; set; }
 }

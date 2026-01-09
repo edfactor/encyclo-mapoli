@@ -34,10 +34,15 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     {
         return _dbContextFactory.UseReadOnlyContext(async context =>
         {
-            Employee empl = await FetchEmployee(context, req.Badge, req.Ssn, cancellationToken);
+            Employee? empl = await FetchEmployee(context, req.Badge, req.Ssn, cancellationToken);
+
+            if (empl == null)
+            {
+                return Result<SuggestedForfeitureAdjustmentResponse>.Failure(Error.EmployeeNotFound);
+            }
 
             // Get the most recent PROFIT_CODE = 2 (forfeiture) transaction for this employee
-            var lastForfeitureTransaction = empl.ProfitDetails
+            var lastForfeitureTransaction = context.ProfitDetails
                 .Where(pd => pd.ProfitCodeId == 2 && pd.CommentTypeId != CommentType.Constants.ForfeitClassAction)
                 .OrderByDescending(pd => pd.ProfitYear)
                 .ThenByDescending(pd => pd.CreatedAtUtc)
@@ -93,23 +98,19 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     }
     
 
-    private async Task<Employee> FetchEmployee(IProfitSharingDbContext ctx, int? badgeMaybe, int? ssnMaybe, CancellationToken ct)
+    private async Task<Employee?> FetchEmployee(IProfitSharingDbContext ctx, int? badgeMaybe, int? ssnMaybe, CancellationToken ct)
     {
         var profitYear = _timeProvider.GetLocalYear();
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
 
-        var employee = await demographics
+        return await demographics
             .Where(d => ssnMaybe.HasValue && ssnMaybe.Value == d.Ssn || badgeMaybe.HasValue && badgeMaybe.Value == d.BadgeNumber)
             .Select(d => new Employee
             {
                 Demographic = d,
-                PayProfit = d.PayProfits.FirstOrDefault(pp => pp.ProfitYear == profitYear)!,
-                ProfitDetails = ctx.ProfitDetails
-                    .Where(pd => pd.Ssn == d.Ssn && pd.ProfitYear == profitYear)
-                    .ToList()
+                PayProfit = d.PayProfits.FirstOrDefault(pp => pp.ProfitYear == profitYear)!
             })
             .FirstOrDefaultAsync(ct);
-        return employee!;
     }
 
     public async Task<Result<bool>> UpdateForfeitureAdjustmentAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken cancellationToken = default)
