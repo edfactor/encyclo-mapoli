@@ -18,15 +18,18 @@ Following the root cause analysis and code fix implementation for PS-2424, this 
 ## Badges Under Investigation
 
 ### Badge 706355: Missing ProfitCode 8 in 2021 Earnings
+
 - **Issue:** Account History Report shows $608.56 for 2021, should be $651.16 (missing $42.60 from PC 8)
 - **Expected Findings:** PROFIT_DETAIL records with both ProfitCode 0 and ProfitCode 8 for profit year 2021
 
 ### Badge 700580: Withdrawal Duplication Across Years
+
 - **Issue:** 2014 withdrawals appear on all subsequent years in Account History Report
 - **Expected Findings:** PROFIT_DETAIL records showing improper distribution sequence or year assignment
 
 ### Badge 2109: Zero Vested Balance with 20% Vesting
-- **Issue:** Shows 20% vesting percentage but $0 vested balance  
+
+- **Issue:** Shows 20% vesting percentage but $0 vested balance
 - **Expected Findings:** Negative balance offsetting contributions, or data integrity issues in year-over-year aggregation
 
 ## SQL Investigation Queries
@@ -35,7 +38,7 @@ Following the root cause analysis and code fix implementation for PS-2424, this 
 
 ```sql
 -- Get all PROFIT_DETAIL records for badge 706355, profit year 2021
-SELECT 
+SELECT
     d.BADGE_NUMBER,
     d.SSN,
     d.ORACLE_HCM_ID,
@@ -61,7 +64,7 @@ ORDER BY pd.PROFIT_CODE_ID, pd.PROFIT_YEAR_ITERATION;
 
 ```sql
 -- Get year-over-year earnings to verify aggregation
-SELECT 
+SELECT
     d.BADGE_NUMBER,
     pd.PROFIT_YEAR,
     SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0, 8) THEN pd.EARNINGS ELSE 0 END) as TotalEarnings,
@@ -82,7 +85,7 @@ ORDER BY pd.PROFIT_YEAR;
 
 ```sql
 -- Get all PROFIT_DETAIL records for badge 700580 to identify withdrawal duplication
-SELECT 
+SELECT
     d.BADGE_NUMBER,
     d.SSN,
     pd.PROFIT_YEAR,
@@ -107,7 +110,7 @@ ORDER BY pd.PROFIT_YEAR, pd.DISTRIBUTION_SEQUENCE;
 ```sql
 -- Verify proper year-over-year balance calculation
 WITH YearlyTotals AS (
-    SELECT 
+    SELECT
         d.BADGE_NUMBER,
         pd.PROFIT_YEAR,
         SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0, 8) THEN pd.CONTRIBUTION + pd.EARNINGS ELSE 0 END) as Incoming,
@@ -117,7 +120,7 @@ WITH YearlyTotals AS (
     WHERE d.BADGE_NUMBER = 700580
     GROUP BY d.BADGE_NUMBER, pd.PROFIT_YEAR
 )
-SELECT 
+SELECT
     PROFIT_YEAR,
     Incoming,
     Outgoing,
@@ -133,7 +136,7 @@ ORDER BY PROFIT_YEAR;
 
 ```sql
 -- Get comprehensive view of badge 2109's profit sharing records
-SELECT 
+SELECT
     d.BADGE_NUMBER,
     d.SSN,
     pd.PROFIT_YEAR,
@@ -158,7 +161,7 @@ ORDER BY pd.PROFIT_YEAR, pd.PROFIT_CODE_ID;
 ```sql
 -- Calculate actual vested balance using same logic as Account History Report
 WITH YearlyTotals AS (
-    SELECT 
+    SELECT
         d.BADGE_NUMBER,
         pd.PROFIT_YEAR,
         SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0, 8) THEN pd.CONTRIBUTION + pd.EARNINGS ELSE 0 END) as TotalIncoming,
@@ -170,7 +173,7 @@ WITH YearlyTotals AS (
     GROUP BY d.BADGE_NUMBER, pd.PROFIT_YEAR
 ),
 RunningBalance AS (
-    SELECT 
+    SELECT
         PROFIT_YEAR,
         TotalIncoming,
         TotalOutgoing,
@@ -179,11 +182,11 @@ RunningBalance AS (
     FROM YearlyTotals
 ),
 VestingSchedule AS (
-    SELECT 
+    SELECT
         PROFIT_YEAR,
         CumulativeBalance,
         YearsOfService,
-        CASE 
+        CASE
             WHEN YearsOfService < 3 THEN 0.0
             WHEN YearsOfService = 3 THEN 0.20
             WHEN YearsOfService = 4 THEN 0.40
@@ -193,7 +196,7 @@ VestingSchedule AS (
         END as VestingPercentage
     FROM RunningBalance
 )
-SELECT 
+SELECT
     PROFIT_YEAR,
     CumulativeBalance,
     YearsOfService,
@@ -210,7 +213,7 @@ LIMIT 1;
 
 ```sql
 -- Verify data exists in PAY_PROFIT for these badges
-SELECT 
+SELECT
     d.BADGE_NUMBER,
     pp.SSN,
     pp.PROFIT_YEAR,
@@ -238,16 +241,19 @@ ORDER BY d.BADGE_NUMBER, pp.PROFIT_YEAR DESC;
 ## Expected Outcomes
 
 ### Badge 706355
+
 - **Data Verification:** Confirm PROFIT_DETAIL contains both PC 0 ($608.56) and PC 8 ($42.60) for 2021
 - **Code Fix Impact:** With the fix in ProfitDetailExtensions.AggregateEarnings(), the Account History Report will now correctly show $651.16
 - **Recommendation:** No data cleanup needed; code fix resolves the issue
 
 ### Badge 700580
+
 - **Data Analysis:** Identify the actual profit year(s) where the 2014 withdrawal is recorded
 - **Issue Type:** Likely a display/aggregation issue rather than data corruption
 - **Recommendation:** May require additional investigation into DISTRIBUTION_SEQUENCE handling or year assignment logic
 
 ### Badge 2109
+
 - **Balance Analysis:** Determine actual balance composition (contributions, earnings, forfeitures)
 - **Vesting Calculation:** Verify years of service calculation and vesting percentage logic
 - **Recommendation:** May indicate legitimate zero balance (all contributions forfeited) or data quality issue requiring correction
@@ -255,6 +261,7 @@ ORDER BY d.BADGE_NUMBER, pp.PROFIT_YEAR DESC;
 ## Next Steps
 
 Once database queries are executed:
+
 1. Document actual query results in this report
 2. Compare findings with expected outcomes
 3. Identify any additional code fixes needed beyond PS-2424
@@ -269,6 +276,7 @@ Once database queries are executed:
 ## Acceptance Criteria Validation
 
 After code fix deployment and database investigation:
+
 - [ ] Badge 706355 Account History Report shows $651.16 for 2021 (includes PC 8)
 - [ ] Badge 700580 withdrawal pattern analyzed and issue documented/fixed
 - [ ] Badge 2109 zero vested balance explained with data evidence

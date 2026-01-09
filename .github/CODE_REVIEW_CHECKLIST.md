@@ -180,10 +180,7 @@ Note: This document is a review aid, not a formal control implementation stateme
 
   ```typescript
   // ❌ WRONG - AUTO-REJECT: Frontend age calculation
-  const age = Math.floor(
-    (Date.now() - new Date(dateOfBirth).getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25),
-  );
+  const age = Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25));
   const dobDisplay = `${mmDDYYFormat(dateOfBirth)} (${age})`;
 
   // ✅ RIGHT: Display DOB only, let backend provide age if needed
@@ -527,7 +524,7 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
     field: key,
     sortable: true,
     filter: true, // WRONG - enables filtering on every column
-    resizable: true,
+    resizable: true
   }));
 
   // ✅ RIGHT: Filters disabled, only sortable
@@ -536,7 +533,7 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
     field: key,
     sortable: true,
     filter: false, // CORRECT - no filtering by default
-    resizable: true,
+    resizable: true
   }));
   ```
 

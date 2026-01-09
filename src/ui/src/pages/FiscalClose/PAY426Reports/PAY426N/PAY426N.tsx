@@ -7,8 +7,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-    clearYearEndProfitSharingReportFrozen,
-    clearYearEndProfitSharingReportLive
+  clearYearEndProfitSharingReportFrozen,
+  clearYearEndProfitSharingReportLive
 } from "reduxstore/slices/yearsEndSlice";
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";

@@ -1,3 +1,8 @@
+---
+applyTo: "src/services/src/**/*.*"
+paths: "src/services/src/**/*.*"
+---
+
 # Demoulas.Common.Contracts - Shared Contracts and Interfaces
 
 **Package:** `Demoulas.Common.Contracts`  
@@ -173,14 +178,14 @@ public class OktaConfiguration
 
 ```json
 {
-    "Okta": {
-        "OktaDomain": "dev-123456.okta.com",
-        "ClientId": "0oa1234567890abcdef",
-        "ClientSecret": "secret",
-        "Audience": "api://default",
-        "Issuer": "https://dev-123456.okta.com/oauth2/default",
-        "EnableTokenRenewal": true
-    }
+  "Okta": {
+    "OktaDomain": "dev-123456.okta.com",
+    "ClientId": "0oa1234567890abcdef",
+    "ClientSecret": "secret",
+    "Audience": "api://default",
+    "Issuer": "https://dev-123456.okta.com/oauth2/default",
+    "EnableTokenRenewal": true
+  }
 }
 ```
 
@@ -280,16 +285,16 @@ public class PaginatedResponseDto<T>
 
 ```json
 {
-    "data": [
-        { "id": 1, "name": "Product A" },
-        { "id": 2, "name": "Product B" }
-    ],
-    "totalCount": 150,
-    "skip": 0,
-    "take": 25,
-    "resultHash": "abc123def456",
-    "isPartialResult": false,
-    "timeoutOccurred": false
+  "data": [
+    { "id": 1, "name": "Product A" },
+    { "id": 2, "name": "Product B" }
+  ],
+  "totalCount": 150,
+  "skip": 0,
+  "take": 25,
+  "resultHash": "abc123def456",
+  "isPartialResult": false,
+  "timeoutOccurred": false
 }
 ```
 
@@ -535,8 +540,8 @@ This package supports **net8.0, net9.0, and net10.0**. No framework-specific con
 
 ## Related Documentation
 
--   [Demoulas.Common.Api Instructions](./demoulas.common.api.instructions.md) - API implementation
--   [Demoulas.Common.Data Instructions](./demoulas.common.data.instructions.md) - Data access patterns
--   [Demoulas.Common.Logging Instructions](./demoulas.common.logging.instructions.md) - Logging configuration
--   [Security Instructions](./security.instructions.md) - Security best practices
--   [Code Review Instructions](./code-review.instructions.md) - Review standards
+- [Demoulas.Common.Api Instructions](demoulas.common.api.instructions.md) - API implementation
+- [Demoulas.Common.Data Instructions](demoulas.common.data.instructions.md) - Data access patterns
+- [Demoulas.Common.Logging Instructions](demoulas.common.logging.instructions.md) - Logging configuration
+- [Security Instructions](demoulas.common.security.instructions.md) - Security best practices
+- [Code Review Instructions](code-review.instructions.md) - Review standards

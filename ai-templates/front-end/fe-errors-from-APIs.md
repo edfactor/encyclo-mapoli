@@ -15,7 +15,7 @@ const handleFormSubmit = async (data: FormData) => {
     const contribution: MilitaryContribution = {
       contributionDate: data.contributionDate,
       contributionAmount: data.contributionAmount,
-      isSupplementalContribution: data.isSupplementalContribution || false,
+      isSupplementalContribution: data.isSupplementalContribution || false
     };
 
     try {
@@ -27,13 +27,13 @@ const handleFormSubmit = async (data: FormData) => {
         contributionDate: data.contributionDate,
         contributionAmount: data.contributionAmount,
         isSupplementalContribution: data.isSupplementalContribution || false,
-        onlyNetworkToastErrors: true, // Suppress validation errors, only show network errors
+        onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
       };
 
       await createMilitaryContribution(request).unwrap();
       onSubmit({
         ...contribution,
-        contributionYear: data.contributionDate.getFullYear(),
+        contributionYear: data.contributionDate.getFullYear()
       });
     } catch (error) {
       const serviceError = error as ServiceErrorResponse;
@@ -46,16 +46,10 @@ const handleFormSubmit = async (data: FormData) => {
             // Map backend error messages to user-friendly messages
             if (error.reason.includes("already exists for this year")) {
               errorMessages.push(
-                "- There is already a contribution for that year. Please check supplemental box and resubmit if applicable.",
+                "- There is already a contribution for that year. Please check supplemental box and resubmit if applicable."
               );
-            } else if (
-              error.reason.includes(
-                "profit year differs from contribution year",
-              )
-            ) {
-              errorMessages.push(
-                "- When profit year differs from contribution year, it must be supplemental.",
-              );
+            } else if (error.reason.includes("profit year differs from contribution year")) {
+              errorMessages.push("- When profit year differs from contribution year, it must be supplemental.");
             } else if (error.reason.includes("not eligible")) {
               errorMessages.push(`- ${error.reason}`);
             } else if (error.reason.includes("not active")) {
@@ -70,8 +64,7 @@ const handleFormSubmit = async (data: FormData) => {
         // If we have an error message that includes "Employee employment status is not eligible" then
         // remove all other error messages to avoid confusion, except the first line "Errors:"
         let savedMessage = "";
-        const ineligibilityMessage =
-          "Employee employment status is not eligible";
+        const ineligibilityMessage = "Employee employment status is not eligible";
 
         errorMessages.forEach((msg) => {
           if (msg.includes(ineligibilityMessage)) {
@@ -98,7 +91,7 @@ const handleFormSubmit = async (data: FormData) => {
     console.warn("Form validation failed:", {
       date: data.contributionDate,
       amount: data.contributionAmount,
-      isSupplementalContribution: data.isSupplementalContribution,
+      isSupplementalContribution: data.isSupplementalContribution
     });
   }
 };
