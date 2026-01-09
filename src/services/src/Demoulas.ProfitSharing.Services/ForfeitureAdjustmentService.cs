@@ -43,7 +43,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // Get the most recent PROFIT_CODE = 2 (forfeiture) transaction for this employee
             var lastForfeitureTransaction = context.ProfitDetails
-                .Where(pd => pd.ProfitCodeId == 2 && pd.CommentTypeId != CommentType.Constants.ForfeitClassAction)
+                .Where(pd => pd.Ssn == empl.Demographic.Ssn && pd.ProfitCodeId == 2 && pd.CommentTypeId != CommentType.Constants.ForfeitClassAction)
                 .OrderByDescending(pd => pd.ProfitYear)
                 .ThenByDescending(pd => pd.CreatedAtUtc)
                 .FirstOrDefault();
@@ -62,10 +62,10 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // PATH 2: No forfeiture history OR last transaction was UNFORFEIT (negative amount)
             // → Calculate how much SHOULD be forfeited based on vesting
             var totalVestingBalance = await _totalService.TotalVestingBalance(context, profitYear, asOfDate)
-                .Where(vb => vb.Ssn == empl.Demographic.Ssn).SingleAsync(cancellationToken);
+                .Where(vb => vb.Ssn == empl.Demographic.Ssn).SingleOrDefaultAsync(cancellationToken);
 
-            // If fully vested, nothing to forfeit
-            if (totalVestingBalance.VestingPercent == 1m || totalVestingBalance.CurrentBalance <= 0m)
+            // If no vesting balance found or fully vested, nothing to forfeit
+            if (totalVestingBalance == null || totalVestingBalance.VestingPercent == 1m || totalVestingBalance.CurrentBalance <= 0m)
             {
                 return Suggested(empl, 0m);
             }
@@ -73,7 +73,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // Calculate unvested amount that should be forfeited
             var unvestedAmount = (totalVestingBalance.CurrentBalance ?? 0m) - (totalVestingBalance.VestedBalance ?? 0m);
 
-            if (empl.PayProfit.Etva > 0)
+            if (empl.PayProfit?.Etva > 0)
             {
                 decimal conditional = (totalVestingBalance?.CurrentBalance ?? 0) - empl.PayProfit.Etva;
                 unvestedAmount = conditional * (1 - totalVestingBalance?.VestingPercent ?? 1);

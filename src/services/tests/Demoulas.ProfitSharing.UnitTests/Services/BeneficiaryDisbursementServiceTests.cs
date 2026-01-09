@@ -4,11 +4,16 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Beneficiaries;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.Extensions.DependencyInjection;
 using MockQueryable.Moq;
+using Moq;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
@@ -57,7 +62,8 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
             PayProfits = [.. _disburser.payprofit, .. _beneficiaryEmployee.payprofit],
             Beneficiaries = [_beneficiary1, _beneficiary2]
         };
-        MockDbContextFactory = _scenarioFactory.BuildMocks();
+        var mockDbFactory = (ScenarioDataContextFactory)_scenarioFactory.BuildMocks();
+        MockDbContextFactory = mockDbFactory;
 
         // IMPORTANT: Set up mock balance data AFTER BuildMocks() to prevent it from being overwritten
         // BuildMocks() internally sets Constants.FakeParticipantTotals with random faker data
@@ -71,7 +77,20 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         var mockParticipantTotalsDbSet = mockParticipantTotals.BuildMockDbSet();
         Constants.FakeParticipantTotals = mockParticipantTotalsDbSet;
 
-        _service = ServiceProvider?.GetRequiredService<IBeneficiaryDisbursementService>()!;
+        // Create mock IDemographicReaderService that returns Demographics from mock context
+        var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
+        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+            .ReturnsAsync(mockDbFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
+
+        // Get TotalService from DI (sealed class, cannot be mocked)
+        var totalService = ServiceProvider?.GetRequiredService<TotalService>()!;
+
+        // Create service directly with mocked dependencies
+        _service = new BeneficiaryDisbursementService(
+            mockDbFactory,
+            demographicReaderMock.Object,
+            totalService,
+            TimeProvider.System);
     }
 
     [Fact]
