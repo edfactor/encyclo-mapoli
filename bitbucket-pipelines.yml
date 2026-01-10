@@ -197,15 +197,15 @@ definitions:
 
           # Print available options for diagnostics
           Write-Host "Available xUnit options:" -ForegroundColor Yellow
-          & $unitTestExe -? 2>&1 | Select-Object -First 50
+          & $unitTestExe -? 2>&1
 
           if ($runAllTests) {
             Write-Host "Running ALL unit tests" -ForegroundColor Cyan
-            & $unitTestExe -jUnit "$unitTestsPath/junit.xml"
+            & $unitTestExe -quiet -jUnit "$unitTestsPath/junit.xml"
           } else {
             Write-Host "Running SELECTIVE tests" -ForegroundColor Green
             Write-Host "Filters: $($testFilters -join ', ')" -ForegroundColor Yellow
-            $namespaceArgs = @("-jUnit", "$unitTestsPath/junit.xml")
+            $namespaceArgs = @("-quiet", "-jUnit", "$unitTestsPath/junit.xml")
             foreach ($filter in $testFilters) {
               $namespaceArgs += "-namespace"
               $namespaceArgs += "*$filter*"
@@ -224,7 +224,7 @@ definitions:
             $archTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/architecture-tests"
             mkdir -Force -Path $archTestsPath
             $archTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests.Architecture/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.Architecture.exe"
-            & $archTestExe -jUnit "$archTestsPath/junit.xml"
+            & $archTestExe -quiet -jUnit "$archTestsPath/junit.xml"
             $archTestExit = $LASTEXITCODE
           } else {
             Write-Host "`nArchitecture Tests: SKIPPED" -ForegroundColor Yellow
@@ -1856,7 +1856,7 @@ pipelines:
                   $unitTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/unit-tests"
                   mkdir -Force -Path $unitTestsPath
                   $unitTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.exe"
-                  & $unitTestExe -jUnit "$unitTestsPath/junit.xml"
+                  & $unitTestExe -quiet -jUnit "$unitTestsPath/junit.xml"
                   $unitTestExit = $LASTEXITCODE
 
                   # Run Architecture Tests
@@ -1866,7 +1866,7 @@ pipelines:
                   $archTestsPath = "../../../../test-reports/build_${env:BITBUCKET_BUILD_NUMBER}/architecture-tests"
                   mkdir -Force -Path $archTestsPath
                   $archTestExe = "src/services/tests/Demoulas.ProfitSharing.UnitTests.Architecture/bin/Release/net10.0/Demoulas.ProfitSharing.UnitTests.Architecture.exe"
-                  & $archTestExe -jUnit "$archTestsPath/junit.xml"
+                  & $archTestExe -quiet -jUnit "$archTestsPath/junit.xml"
                   $archTestExit = $LASTEXITCODE
 
                   # Report results
