@@ -27,7 +27,8 @@ public sealed class EmployeeMasterInquiryServiceTests
     public EmployeeMasterInquiryServiceTests()
     {
         // Use real LoggerFactory instead of mocking (extension methods can't be mocked)
-        _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        // Set minimum level to Warning to avoid noisy info logs during tests
+        _loggerFactory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning));
 
         _mockMissiveService = new Mock<IMissiveService>();
         _mockDemographicReader = new Mock<IDemographicReaderService>();
