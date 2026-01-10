@@ -149,9 +149,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
                     <TableCell className="text-center align-middle">
                       {numberToCurrency(searchResults.allocationsFromTotals || 0)}
                     </TableCell>
-                    <TableCell className="text-center align-middle">
-                      {totalEarningPoints.toLocaleString()}
-                    </TableCell>
+                    <TableCell className="text-center align-middle">{totalEarningPoints.toLocaleString()}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

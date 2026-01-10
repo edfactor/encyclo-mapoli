@@ -125,7 +125,7 @@ const RouterSubAssembly: React.FC = () => {
 
   const { impersonating, token } = useSelector((state: RootState) => state.security);
 
-  console.log('[RouterSubAssembly] Rendering - token:', token ? 'present' : 'null', 'impersonating:', impersonating);
+  console.log("[RouterSubAssembly] Rendering - token:", token ? "present" : "null", "impersonating:", impersonating);
 
   const dispatch = useDispatch();
 
@@ -186,17 +186,31 @@ const RouterSubAssembly: React.FC = () => {
 
   const { isDrawerOpen } = useSelector((state: RootState) => state.general);
   const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined }, { skip: !token });
-  
-  console.log('[RouterSubAssembly] Navigation query - skip:', !token, 'isSuccess:', isSuccess, 'data:', data ? 'present' : 'null');
-  
+
+  console.log(
+    "[RouterSubAssembly] Navigation query - skip:",
+    !token,
+    "isSuccess:",
+    isSuccess,
+    "data:",
+    data ? "present" : "null"
+  );
+
   const location = useLocation();
   const navigate = useNavigate();
 
   const isFullscreen = useSelector((state: RootState) => state.general.isFullscreen);
 
   const renderMenu = () => {
-    console.log('[RouterSubAssembly] renderMenu - isSuccess:', isSuccess, 'data:', data ? 'present' : 'null', 'isFullscreen:', isFullscreen);
-    
+    console.log(
+      "[RouterSubAssembly] renderMenu - isSuccess:",
+      isSuccess,
+      "data:",
+      data ? "present" : "null",
+      "isFullscreen:",
+      isFullscreen
+    );
+
     return isSuccess && data ? (
       <>
         {!isFullscreen && (
