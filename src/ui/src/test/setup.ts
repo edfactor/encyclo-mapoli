@@ -5,6 +5,16 @@ import { ModuleRegistry } from "ag-grid-community";
 import { ClientSideRowModelModule } from "ag-grid-community";
 import React from "react";
 
+// Intercept stderr to suppress jsdom "Not implemented" warnings
+const originalStderrWrite = process.stderr.write.bind(process.stderr);
+process.stderr.write = (chunk: string | Uint8Array, ...args: unknown[]): boolean => {
+  const message = typeof chunk === "string" ? chunk : chunk.toString();
+  if (message.includes("Not implemented:")) {
+    return true; // Suppress jsdom warnings
+  }
+  return originalStderrWrite(chunk, ...args);
+};
+
 // Register AG Grid modules globally for tests
 // AG Grid v33+ requires explicit module registration
 // See: https://www.ag-grid.com/react-data-grid/upgrading-to-ag-grid-33/#changes-to-modules/
@@ -18,6 +28,18 @@ beforeAll(() => {
 // Mock DOM methods not available in jsdom
 Element.prototype.scrollIntoView = vi.fn();
 HTMLElement.prototype.scrollIntoView = vi.fn();
+
+// Mock window.location to prevent "Not implemented: navigation" jsdom warnings
+// jsdom doesn't implement navigation, so we stub assign/replace to no-op
+Object.defineProperty(window, "location", {
+  value: {
+    ...window.location,
+    assign: vi.fn(),
+    replace: vi.fn(),
+    reload: vi.fn()
+  },
+  writable: true
+});
 
 // Polyfill for requestSubmit which is not implemented in jsdom
 // See: https://github.com/jsdom/jsdom/issues/3117
@@ -40,16 +62,15 @@ HTMLFormElement.prototype.requestSubmit = function (submitter?: HTMLElement) {
   }
 };
 
-// Suppress JSDOM "Not implemented" console.error warnings that can't be polyfilled
-// These warnings are logged by JSDOM before our polyfills can take effect
-const originalConsoleError = console.error;
-console.error = (...args: unknown[]) => {
-  const message = args[0];
-  if (typeof message === "string" && message.includes("Not implemented: HTMLFormElement")) {
-    return; // Suppress JSDOM "Not implemented" warnings
-  }
-  originalConsoleError.apply(console, args);
-};
+// Suppress all console output during tests to reduce noise
+// Tests should assert behavior, not rely on console output
+// To restore in a specific test: vi.restoreAllMocks()
+vi.spyOn(console, "log").mockImplementation(() => {});
+vi.spyOn(console, "info").mockImplementation(() => {});
+vi.spyOn(console, "warn").mockImplementation(() => {});
+vi.spyOn(console, "error").mockImplementation(() => {});
+vi.spyOn(console, "debug").mockImplementation(() => {});
+vi.spyOn(console, "trace").mockImplementation(() => {});
 
 // Mock components that make API calls to prevent real network requests during tests
 vi.mock("../components/DuplicateSsnGuard", () => ({
