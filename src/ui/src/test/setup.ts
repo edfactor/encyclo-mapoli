@@ -7,12 +7,17 @@ import React from "react";
 
 // Intercept stderr to suppress jsdom "Not implemented" warnings
 const originalStderrWrite = process.stderr.write.bind(process.stderr);
-process.stderr.write = (chunk: string | Uint8Array, ...args: unknown[]): boolean => {
+process.stderr.write = function (
+  chunk: string | Uint8Array,
+  encodingOrCallback?: string | ((err?: Error) => void),
+  callback?: (err?: Error) => void
+): boolean {
   const message = typeof chunk === "string" ? chunk : chunk.toString();
   if (message.includes("Not implemented:")) {
     return true; // Suppress jsdom warnings
   }
-  return originalStderrWrite(chunk, ...args);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return originalStderrWrite(chunk, encodingOrCallback as any, callback);
 };
 
 // Register AG Grid modules globally for tests
