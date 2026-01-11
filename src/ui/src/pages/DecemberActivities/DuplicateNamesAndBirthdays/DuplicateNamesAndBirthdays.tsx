@@ -25,7 +25,7 @@ const DuplicateNamesAndBirthdays = () => {
   const [isGridExpanded, setIsGridExpanded] = useState(false);
   const [wasDrawerOpenBeforeExpand, setWasDrawerOpenBeforeExpand] = useState(false);
 
-  // Get current drawer state from Redux
+  // Get current drawer state from Redux 
   const isDrawerOpen = useSelector((state: RootState) => state.general.isDrawerOpen);
 
   const handleRefreshCache = async () => {

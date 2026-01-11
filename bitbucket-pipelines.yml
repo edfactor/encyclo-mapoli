@@ -776,10 +776,14 @@ definitions:
               excluded_pages="Dev"
 
               # Discover top-level directories (e.g., utils, hooks, components, redux, reduxstore)
-              top_level_dirs=$(ls -d src/ui/src/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_top_level)$" || true)
+              # Use awk instead of basename for BusyBox compatibility
+              # Note: We're already in src/ui directory, so use src/*/ not src/ui/src/*/
+              top_level_dirs=$(ls -d src/*/ 2>/dev/null | awk -F/ '{print $(NF-1)}' | grep -Ev "^($excluded_top_level)$" || true)
 
               # Discover page directories (e.g., Beneficiaries, Reports, FiscalClose)
-              page_dirs=$(ls -d src/ui/src/pages/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_pages)$" || true)
+              # Use awk instead of basename for BusyBox compatibility
+              # Note: We're already in src/ui directory, so use src/pages/*/ not src/ui/src/pages/*/
+              page_dirs=$(ls -d src/pages/*/ 2>/dev/null | awk -F/ '{print $(NF-1)}' | grep -Ev "^($excluded_pages)$" || true)
 
               # Build test patterns based on changed areas
               test_patterns=""
@@ -1948,10 +1952,14 @@ pipelines:
                   excluded_pages="Dev"
 
                   # Discover top-level directories (e.g., utils, hooks, components, redux, reduxstore)
-                  top_level_dirs=$(ls -d src/ui/src/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_top_level)$" || true)
+                  # Use awk instead of basename for BusyBox compatibility
+                  # Note: We're already in src/ui directory, so use src/*/ not src/ui/src/*/
+                  top_level_dirs=$(ls -d src/*/ 2>/dev/null | awk -F/ '{print $(NF-1)}' | grep -Ev "^($excluded_top_level)$" || true)
 
                   # Discover page directories (e.g., Beneficiaries, Reports, FiscalClose)
-                  page_dirs=$(ls -d src/ui/src/pages/*/ 2>/dev/null | xargs -n1 basename | grep -Ev "^($excluded_pages)$" || true)
+                  # Use awk instead of basename for BusyBox compatibility
+                  # Note: We're already in src/ui directory, so use src/pages/*/ not src/ui/src/pages/*/
+                  page_dirs=$(ls -d src/pages/*/ 2>/dev/null | awk -F/ '{print $(NF-1)}' | grep -Ev "^($excluded_pages)$" || true)
 
                   # Build test patterns based on changed areas
                   test_patterns=""
