@@ -8,7 +8,8 @@ import useFiscalCloseProfitYear from "./useFiscalCloseProfitYear";
 import { vi } from "vitest";
 
 vi.mock("reduxstore/api/ItOperationsApi", () => ({
-  useLazyGetFrozenStateResponseQuery: vi.fn(() => [vi.fn(), {}])
+  useLazyGetFrozenStateResponseQuery: vi.fn(() => [vi.fn(), {}]),
+  useGetFakeTimeStatusQuery: vi.fn(() => ({ data: null }))
 }));
 
 describe("useFiscalCloseProfitYear", () => {

@@ -1,44 +1,41 @@
 import { useOktaAuth } from "@okta/okta-react";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-
-import { setToken } from "reduxstore/slices/securitySlice";
+import { useNavigate } from "react-router-dom";
 import EnvironmentUtils from "../../utils/environmentUtils";
-import RouterSubAssembly from "../router/RouterSubAssembly";
 
+/**
+ * Login page that triggers Okta authentication.
+ * 
+ * In the React Router v7 data router pattern, this component:
+ * - Triggers signInWithRedirect() for unauthenticated users
+ * - Redirects authenticated users to home page
+ * 
+ * Note: Token sync is handled by OktaTokenSync in RouteSecurity.tsx,
+ * not here. This keeps login logic simple and focused.
+ */
 const Login = () => {
   const oktaEnabled = EnvironmentUtils.isOktaEnabled;
   const { authState, oktaAuth } = useOktaAuth();
-  const dispatch = useDispatch();
-
-  // FIXME: Why are these here? They are unused
-  //const [skipRole, setSkipRole] = useState<boolean>(true);
-  //const [skipPermission, setSkipPermission] = useState<boolean>(true);
-  //const [skipUsername, setSkipUsername] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const login = async () => {
-      oktaAuth.signInWithRedirect();
-    };
-
-    if (oktaEnabled) {
-      if (authState && !authState.isAuthenticated) {
-        login();
-      }
-
-      if (authState && authState.isAuthenticated) {
-        const accessToken = oktaAuth.getAccessToken();
-        if (accessToken) {
-          dispatch(setToken(accessToken));
-          //(false);
-          //setSkipPermission(false);
-          //setSkipUsername(false);
-        }
-      }
+    if (!oktaEnabled) {
+      // Non-Okta environments redirect to home
+      navigate("/", { replace: true });
+      return;
     }
-  }, [authState, dispatch, oktaAuth, oktaEnabled]);
 
-  return <RouterSubAssembly />;
+    if (authState && !authState.isAuthenticated) {
+      // Not authenticated - trigger Okta login
+      oktaAuth.signInWithRedirect();
+    } else if (authState?.isAuthenticated) {
+      // Already authenticated - redirect to home
+      navigate("/", { replace: true });
+    }
+  }, [authState, oktaAuth, oktaEnabled, navigate]);
+
+  // Show loading message while auth state resolves or redirect happens
+  return <div>Redirecting to login...</div>;
 };
 
 export default Login;

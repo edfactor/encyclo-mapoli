@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Path, useNavigate } from "react-router";
+import { Path, useNavigate } from "react-router-dom";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";

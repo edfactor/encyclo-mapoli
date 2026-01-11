@@ -1,6 +1,5 @@
 import { Description, Settings } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { OktaAuth } from "@okta/okta-auth-js";
 import AppErrorBoundary from "components/ErrorBoundary";
 import PSLayout from "components/Layout/PSLayout";
 import { useCallback, useEffect, useState } from "react";
@@ -10,10 +9,10 @@ import { colors, themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import { initializeAgGrid } from "../agGridConfig";
 import Router from "./components/router/Router";
-import oktaConfig from "./Okta/config";
+import { OktaProvider, useOktaInstance } from "./Okta/OktaProvider";
 import { useLazyGetHealthQuery } from "./reduxstore/api/AppSupportApi";
 import { useGetAppVersionQuery } from "./reduxstore/api/CommonApi";
-import { clearUserData, setUserGroups, setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
+import { clearUserData, setUserGroups, setUsername } from "./reduxstore/slices/securitySlice";
 import { RootState } from "./reduxstore/store";
 import { getHealthStatusDescription } from "./utils/appSupportUtil";
 import EnvironmentUtils from "./utils/environmentUtils";
@@ -26,19 +25,23 @@ interface BuildInfo {
   commitHash?: string;
 }
 
-const App = () => {
+/**
+ * Inner App component that uses the shared OktaAuth instance from OktaProvider.
+ * This ensures a single OktaAuth instance is used throughout the application.
+ */
+const AppContent = () => {
   // State management
   const dispatch = useDispatch();
-  const clientId = import.meta.env.VITE_REACT_APP_OKTA_CLIENT_ID;
-  const issuer = import.meta.env.VITE_REACT_APP_OKTA_ISSUER;
 
   useGetAppVersionQuery();
   const [uiBuildInfo, setUiBuildInfo] = useState<BuildInfo | null>(null);
   const [buildInfoText, setBuildInfoText] = useState("");
   const { buildNumber } = useSelector((state: RootState) => state.common);
-  const [oktaAuth, setOktaAuth] = useState<OktaAuth | null>(null);
   const [loadMissives] = useLazyGetMissivesQuery();
   const [triggerHealth] = useLazyGetHealthQuery();
+
+  // Get shared OktaAuth instance from provider
+  const { oktaAuth } = useOktaInstance();
 
   const health = useSelector((state: RootState) => state.support.health);
 
@@ -47,29 +50,7 @@ const App = () => {
     initializeAgGrid();
   }, []);
 
-  useEffect(() => {
-    const config = oktaConfig(clientId, issuer);
-    const auth = new OktaAuth({
-      ...config.oidc,
-      services: {
-        autoRenew: true,
-        autoRemove: true,
-        syncStorage: true
-      }
-    });
-    setOktaAuth(auth);
-
-    // Start the OktaAuth service to enable token auto-renewal (temporary, longterm solution is to use refresh tokens)
-    // https://github.com/okta/okta-auth-js/blob/master/docs/autoRenew-notice.md
-    auth.start();
-
-    return () => {
-      auth.stop();
-    };
-  }, [clientId, issuer]);
-
   // Redux selectors
-  //const state = useSelector((state: RootState) => state);
   const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
 
   // Add effect to update username when token changes
@@ -228,6 +209,28 @@ const App = () => {
       </PSLayout>
     </ThemeProvider>
   );
+};
+
+/**
+ * Root App component that wraps with OktaProvider for shared OktaAuth instance.
+ * 
+ * CRITICAL: OktaProvider must be at the top level to ensure:
+ * 1. Single OktaAuth instance shared across App and Router/Security
+ * 2. OktaAuth is initialized before any components need it
+ * 3. Logout functionality in PSLayout works with the same instance
+ */
+const App = () => {
+  // Only wrap with OktaProvider when Okta is enabled
+  if (EnvironmentUtils.isOktaEnabled) {
+    return (
+      <OktaProvider>
+        <AppContent />
+      </OktaProvider>
+    );
+  }
+
+  // Non-Okta environments render directly
+  return <AppContent />;
 };
 
 export default App;

@@ -1,5 +1,5 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { UNSAFE_NavigationContext as NavigationContext, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useBlocker } from "react-router-dom";
 
 const UNSAVED_CHANGES_MESSAGE = "Please save your changes. Do you want to leave without saving?";
 
@@ -14,7 +14,7 @@ export interface UnsavedChangesGuardState {
 
 /**
  * Navigation guard that prevents accidental navigation when there are unsaved changes.
- * Works with legacy BrowserRouter (does not require data router).
+ * Uses React Router v7 useBlocker API for SPA navigation and beforeunload for browser actions.
  *
  * @param hasUnsavedChanges - Whether there are unsaved changes to protect
  * @param useStyledDialog - If true, returns state for rendering a styled dialog instead of using window.confirm()
@@ -24,91 +24,47 @@ export const useUnsavedChangesGuard = (
   hasUnsavedChanges: boolean,
   useStyledDialog: boolean = false
 ): UnsavedChangesGuardState => {
-  const { navigator } = useContext(NavigationContext);
-  const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
-  const pendingNavigationRef = useRef<{ to: string; replace: boolean } | null>(null);
+
+  // Block React Router v7 SPA navigation (navigate(), <Link>, etc.)
+  // useBlocker takes a predicate function that returns true when navigation should be blocked
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
+  );
 
   const onStay = useCallback(() => {
     setShowDialog(false);
-    pendingNavigationRef.current = null;
-  }, []);
+    if (blocker.state === "blocked") {
+      blocker.reset(); // Reset the blocker to unblock
+    }
+  }, [blocker]);
 
   const onLeave = useCallback(() => {
     setShowDialog(false);
-    const pending = pendingNavigationRef.current;
-    pendingNavigationRef.current = null;
-
-    if (pending) {
-      // Temporarily disable guard by navigating directly
-      navigate(pending.to, { replace: pending.replace });
+    if (blocker.state === "blocked") {
+      blocker.proceed(); // Proceed with the blocked navigation
     }
-  }, [navigate]);
+  }, [blocker]);
 
-  // Block React Router SPA navigation (navigate(), <Link>, etc.)
+  // Show styled dialog or native confirm when blocker is triggered
   useEffect(() => {
-    if (!hasUnsavedChanges) return;
-
-    // Override the navigator's push and replace methods
-    const originalPush = navigator.push;
-    const originalReplace = navigator.replace;
-
-    const blockNavigation = (originalFn: typeof navigator.push, isReplace: boolean) => {
-      return (...args: Parameters<typeof navigator.push>) => {
-        if (useStyledDialog) {
-          // Store pending navigation and show dialog
-          const to = typeof args[0] === "string" ? args[0] : ((args[0] as { pathname?: string })?.pathname ?? "/");
-          pendingNavigationRef.current = { to, replace: isReplace };
-          setShowDialog(true);
-        } else {
-          // Use native confirm
-          const userConfirmed = window.confirm(UNSAVED_CHANGES_MESSAGE);
-          if (userConfirmed) {
-            originalFn.apply(navigator, args);
-          }
-        }
-      };
-    };
-
-    navigator.push = blockNavigation(originalPush, false);
-    navigator.replace = blockNavigation(originalReplace, true);
-
-    return () => {
-      navigator.push = originalPush;
-      navigator.replace = originalReplace;
-    };
-  }, [hasUnsavedChanges, navigator, useStyledDialog]);
-
-  // Handle browser back/forward buttons
-  useEffect(() => {
-    if (!hasUnsavedChanges) return;
-
-    const handlePopState = () => {
+    if (blocker.state === "blocked") {
       if (useStyledDialog) {
-        // For styled dialog, we can't easily intercept back button with async modal
-        // Use native confirm for browser back/forward
-        const userConfirmed = window.confirm(UNSAVED_CHANGES_MESSAGE);
-        if (!userConfirmed) {
-          window.history.pushState(null, "", window.location.href);
-        }
+        setShowDialog(true);
       } else {
         const userConfirmed = window.confirm(UNSAVED_CHANGES_MESSAGE);
-        if (!userConfirmed) {
-          window.history.pushState(null, "", window.location.href);
+        if (userConfirmed) {
+          blocker.proceed();
+        } else {
+          blocker.reset();
         }
       }
-    };
+    }
+  }, [blocker, useStyledDialog]);
 
-    // Push initial state so we can detect back button
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [hasUnsavedChanges, useStyledDialog]);
-
-  // Handle browser navigation (refresh, close tab)
+  // Handle browser navigation (refresh, close tab, back/forward buttons)
+  // useBlocker only handles in-app React Router navigation, not browser chrome actions
   useEffect(() => {
     if (!hasUnsavedChanges) return;
 
