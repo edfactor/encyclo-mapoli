@@ -11,6 +11,7 @@ internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new BankMap());
         modelBuilder.ApplyConfiguration(new AnnuityRateMap());
         modelBuilder.ApplyConfiguration(new AnnuityRateConfigMap());
         modelBuilder.ApplyConfiguration(new AuditEventMap());
@@ -85,6 +86,11 @@ internal static class ContextExtensions
             .IncrementsBy(1)
             .HasMin(666000000)
             .HasMax(666999999)
+            .IsCyclic(false);
+
+        modelBuilder.HasSequence<int>("PROFIT_SHARE_CHECK_NUMBER_SEQ").StartsAt(1)
+            .IncrementsBy(1)
+            .HasMin(1)
             .IsCyclic(false);
 
         // Force table names to be upper case for consistency with all existing DSM projects

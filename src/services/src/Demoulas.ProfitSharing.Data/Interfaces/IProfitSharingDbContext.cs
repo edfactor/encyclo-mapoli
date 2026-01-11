@@ -8,6 +8,7 @@ namespace Demoulas.ProfitSharing.Data.Interfaces;
 
 public interface IProfitSharingDbContext
 {
+    DbSet<Bank> Banks { get; set; }
     DbSet<AnnuityRate> AnnuityRates { get; set; }
     DbSet<Demographic> Demographics { get; set; }
     DbSet<DemographicHistory> DemographicHistories { get; set; }
