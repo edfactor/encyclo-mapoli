@@ -107,7 +107,7 @@ const useYTDWages = (options: UseYTDWagesOptions) => {
 
   useEffect(() => {
     if (profitYear && !state.data && hasToken && !state.search.isLoading && !hasInitiallySearched.current) {
-      console.log('[useYTDWages] Running initial search with profitYear:', profitYear);
+      console.log("[useYTDWages] Running initial search with profitYear:", profitYear);
       hasInitiallySearched.current = true;
       executeSearch({ profitYear: profitYear, useFrozenData: defaultUseFrozenData }, "auto-initial");
     }

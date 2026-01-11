@@ -60,6 +60,13 @@
       WorkingDirectory="$(MSBuildProjectDirectory)"
       EnvironmentVariables="NSWAG_APIEXPLORER_WARMUP=1;ASPNETCORE_ENVIRONMENT=Development;DOTNET_ENVIRONMENT=Development;Okta__RolePrefix=DEV"
       Command="$(NSwagExe_Net100) run &quot;$(MSBuildProjectDirectory)/nswag.json&quot; /variables:Configuration=$(Configuration)" />
+    <!-- Ensure trailing newline in nswag.json (NSwag omits it, causing spurious git changes) -->
+    <Exec
+      Condition="$([MSBuild]::IsOSPlatform('Windows'))"
+      Command="powershell -NoProfile -Command '$$f=''$(MSBuildProjectDirectory)\nswag.json''; $$c=[IO.File]::ReadAllText($$f); if(-not $$c.EndsWith([char]10)){[IO.File]::WriteAllText($$f,$$c+[char]10)}'" />
+    <Exec
+      Condition="!$([MSBuild]::IsOSPlatform('Windows'))"
+      Command="test -n &quot;$$(tail -c1 '$(MSBuildProjectDirectory)/nswag.json')&quot; &amp;&amp; echo '' >> '$(MSBuildProjectDirectory)/nswag.json' || true" />
   </Target>
 
 </Project>

@@ -1,6 +1,6 @@
 import { Button, Divider, Grid } from "@mui/material";
 import React, { useCallback, useRef, useState } from "react";
-import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
+import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
@@ -178,57 +178,7 @@ const AccountHistoryReport: React.FC = () => {
                     Search criteria changed. Click Search to update results before exporting.
                   </span>
                 )}
-              </Grid>
-              <Grid width="100%">
-                <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2 [&_*]:!text-left">
-                  {data.cumulativeTotals && (
-                    <>
-                      <div className="flex-1">
-                        <TotalsGrid
-                          displayData={[[numberToCurrency(data.cumulativeTotals.totalContributions)]]}
-                          leftColumnHeaders={["Contributions"]}
-                          topRowHeaders={[]}
-                          breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <TotalsGrid
-                          displayData={[[numberToCurrency(data.cumulativeTotals.totalEarnings)]]}
-                          leftColumnHeaders={["Earnings"]}
-                          topRowHeaders={[]}
-                          breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <TotalsGrid
-                          displayData={[[numberToCurrency(data.cumulativeTotals.totalForfeitures)]]}
-                          leftColumnHeaders={["Forfeitures"]}
-                          topRowHeaders={[]}
-                          breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <TotalsGrid
-                          displayData={[[numberToCurrency(data.cumulativeTotals.totalWithdrawals)]]}
-                          leftColumnHeaders={["Withdrawals"]}
-                          topRowHeaders={[]}
-                          breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
-                        />
-                      </div>
-                      {data.cumulativeTotals.totalVestedBalance !== undefined && (
-                        <div className="flex-1">
-                          <TotalsGrid
-                            displayData={[[numberToCurrency(data.cumulativeTotals.totalVestedBalance)]]}
-                            leftColumnHeaders={["Vested Balance"]}
-                            topRowHeaders={[]}
-                            breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </Grid>
+              </Grid>             
               <Grid width="100%">
                 <AccountHistoryReportTable
                   data={data}

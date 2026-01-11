@@ -75,17 +75,14 @@ import {
   getErrorMessage,
   getRowKeysForRequests,
   prepareBulkSaveRequests,
-  prepareSaveRequest,
+  prepareSaveRequest
 } from "../utils/forfeitActivities/saveOperationHelpers";
-import {
-  flattenMasterDetailData,
-  generateRowKey,
-} from "../utils/forfeitActivities/gridDataHelpers";
+import { flattenMasterDetailData, generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
 
 // Configuration for shared utilities
 const ACTIVITY_CONFIG = {
   activityType: "unforfeit" as const,
-  rowKeyConfig: { type: "unforfeit" as const },
+  rowKeyConfig: { type: "unforfeit" as const }
 };
 
 // Individual save
@@ -98,31 +95,20 @@ const handleSave = async (request, name) => {
   const rowKey = generateRowKey(ACTIVITY_CONFIG.rowKeyConfig, {
     badgeNumber: request.badgeNumber,
     profitYear: request.profitYear,
-    profitDetailId: request.offsettingProfitDetailId,
+    profitDetailId: request.offsettingProfitDetailId
   });
 
   // Generate success message
-  const successMessage = generateSaveSuccessMessage(
-    ACTIVITY_CONFIG.activityType,
-    name,
-    request.forfeitureAmount,
-  );
+  const successMessage = generateSaveSuccessMessage(ACTIVITY_CONFIG.activityType, name, request.forfeitureAmount);
 };
 
 // Bulk save
 const handleBulkSave = async (requests, names) => {
-  const transformedRequests = prepareBulkSaveRequests(
-    ACTIVITY_CONFIG,
-    requests,
-  );
+  const transformedRequests = prepareBulkSaveRequests(ACTIVITY_CONFIG, requests);
   await updateForfeitureAdjustmentBulk(transformedRequests);
 
   const rowKeys = getRowKeysForRequests(ACTIVITY_CONFIG, requests);
-  const bulkSuccessMessage = generateBulkSaveSuccessMessage(
-    ACTIVITY_CONFIG.activityType,
-    requests.length,
-    names,
-  );
+  const bulkSuccessMessage = generateBulkSaveSuccessMessage(ACTIVITY_CONFIG.activityType, requests.length, names);
 };
 
 // Flatten grid data
@@ -130,7 +116,7 @@ const gridData = useMemo(() => {
   return flattenMasterDetailData(unForfeits.response.results, expandedRows, {
     getKey: (row) => row.badgeNumber.toString(),
     getDetails: (row) => row.details,
-    hasDetails: (row) => Boolean(row.details && row.details.length > 0),
+    hasDetails: (row) => Boolean(row.details && row.details.length > 0)
   });
 }, [unForfeits, expandedRows]);
 ```
@@ -143,7 +129,7 @@ const gridData = useMemo(() => {
 // Configuration for Termination
 const ACTIVITY_CONFIG = {
   activityType: "termination" as const,
-  rowKeyConfig: { type: "termination" as const },
+  rowKeyConfig: { type: "termination" as const }
 };
 
 // All the same utility functions work, but with termination-specific behavior

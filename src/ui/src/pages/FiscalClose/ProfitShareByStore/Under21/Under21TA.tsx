@@ -9,8 +9,8 @@ import { useFakeTimeAwareYear } from "../../../../hooks/useFakeTimeAwareDate";
 import { useInitialLoad } from "../../../../hooks/useInitialLoad";
 import useNavigationYear from "../../../../hooks/useNavigationYear";
 import {
-    useLazyGetUnder21BreakdownByStoreQuery,
-    useLazyGetUnder21TotalsQuery
+  useLazyGetUnder21BreakdownByStoreQuery,
+  useLazyGetUnder21TotalsQuery
 } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import Under21BreakdownGrid from "./Under21BreakdownGrid";

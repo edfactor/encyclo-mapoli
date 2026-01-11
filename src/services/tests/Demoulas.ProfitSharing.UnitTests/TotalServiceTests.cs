@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -46,14 +47,14 @@ public class TotalServiceTests : ApiTestBase<Program>
             for (int i = 0; i < pdArray.Length; i++)
             {
                 var prof = pdArray[i];
-                prof.ProfitYear = (short)(DateTime.Now.Year - i);
+                prof.ProfitYear = (short)((short)DateTime.Now.Year - i);
                 prof.ProfitCode = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal;
                 prof.ProfitCodeId = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id;
                 prof.Contribution = Convert.ToDecimal(Math.Pow(2, i * 3));
                 prof.Earnings = Convert.ToDecimal(Math.Pow(2, (i * 3) + 1));
                 prof.Forfeiture = Convert.ToDecimal(Math.Pow(2, (i * 3) + 2));
                 prof.MonthToDate = 0;
-                prof.YearToDate = (short)(DateTime.Now.Year - i);
+                prof.YearToDate = (short)((short)DateTime.Now.Year - i);
                 prof.FederalTaxes = 0.5m;
                 prof.StateTaxes = 0.25m;
             }
@@ -102,7 +103,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync(CancellationToken.None);
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, (short)(DateTime.Now.Year - 1)).Where(x => x.Ssn == demoSsn)
+            testRslt = await _totalService.GetTotalDistributions(ctx, (short)((short)DateTime.Now.Year - 1)).Where(x => x.Ssn == demoSsn)
                 .ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Test as of filter
             testRslt.Count.ShouldBe(1);

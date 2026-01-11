@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -13,6 +12,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.Util.Extensions;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
@@ -222,7 +222,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
             // Verify descending sort: first profit year >= last profit year
             var firstYear = result.Response.Results.First().ProfitYear;
             var lastYear = result.Response.Results.Last().ProfitYear;
-            ((int)firstYear).ShouldBeGreaterThanOrEqualTo((int)lastYear);
+            ((int)firstYear).ShouldBeGreaterThanOrEqualTo(lastYear);
         }
     }
 
@@ -337,8 +337,6 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
             var record = result.Response.Results.First();
             record.Id.ShouldBeGreaterThan(0);
             record.BadgeNumber.ShouldBe(badgeNumber);
-            record.FullName.ShouldNotBeNullOrEmpty();
-            record.Ssn.ShouldNotBeNullOrEmpty();
             ((int)record.ProfitYear).ShouldBeGreaterThan(0);
             record.Contributions.ShouldBeGreaterThanOrEqualTo(0);
             record.Earnings.ShouldBeGreaterThanOrEqualTo(0);

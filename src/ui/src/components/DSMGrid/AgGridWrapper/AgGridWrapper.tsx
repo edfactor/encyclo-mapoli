@@ -1,12 +1,12 @@
 import {
-    ColDef,
-    ColGroupDef,
-    ColumnState,
-    GridApi,
-    GridReadyEvent,
-    iconSetAlpine,
-    SortChangedEvent,
-    themeQuartz
+  ColDef,
+  ColGroupDef,
+  ColumnState,
+  GridApi,
+  GridReadyEvent,
+  iconSetAlpine,
+  SortChangedEvent,
+  themeQuartz
 } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { Component, ErrorInfo, FC, ReactNode, useEffect, useRef, useState } from "react";
@@ -153,7 +153,10 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
   const [gridReady, setGridReady] = useState(false);
 
   const isValidPreferenceKey =
-    typeof preferenceKey === "string" && Boolean(preferenceKey) && preferenceKey !== "undefined" && preferenceKey !== "null";
+    typeof preferenceKey === "string" &&
+    Boolean(preferenceKey) &&
+    preferenceKey !== "undefined" &&
+    preferenceKey !== "null";
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "development" || isValidPreferenceKey) {

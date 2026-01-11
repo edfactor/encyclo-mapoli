@@ -20,7 +20,7 @@ const YTDWages: React.FC<YTDWagesProps> = ({ useFrozenData = true }) => {
   const componentRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const profitYear = useNavigationYear();
-  
+
   const { searchResults, isSearching, pagination, showData, hasResults, executeSearch } = useYTDWages({
     defaultUseFrozenData: useFrozenData,
     profitYear: profitYear

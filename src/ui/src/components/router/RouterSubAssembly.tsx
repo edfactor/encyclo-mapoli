@@ -4,6 +4,8 @@ import SmartPSDrawer from "../../components/Drawer/SmartPSDrawer";
 import DSMDynamicBreadcrumbs from "../../components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
 import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 import { PageLoadingFallback } from "../../components/router/LazyPageLoader";
+const Login = lazy(() => import("../../components/Login/Login"));
+const OktaLoginCallback = lazy(() => import("../../components/MenuBar/OktaLoginCallback"));
 const FrozenSummary = lazy(() => import("../../pages/FrozenSummary/FrozenSummary"));
 const MasterInquiry = lazy(() => import("../../pages/InquiriesAndAdjustments/MasterInquiry/MasterInquiry"));
 const DemographicBadgesNotInPayprofit = lazy(
@@ -123,6 +125,8 @@ const RouterSubAssembly: React.FC = () => {
 
   const { impersonating, token } = useSelector((state: RootState) => state.security);
 
+  console.log('[RouterSubAssembly] Rendering - token:', token ? 'present' : 'null', 'impersonating:', impersonating);
+
   const dispatch = useDispatch();
 
   // CRITICAL DEV/QA FUNCTIONALITY:
@@ -182,12 +186,17 @@ const RouterSubAssembly: React.FC = () => {
 
   const { isDrawerOpen } = useSelector((state: RootState) => state.general);
   const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined }, { skip: !token });
+  
+  console.log('[RouterSubAssembly] Navigation query - skip:', !token, 'isSuccess:', isSuccess, 'data:', data ? 'present' : 'null');
+  
   const location = useLocation();
   const navigate = useNavigate();
 
   const isFullscreen = useSelector((state: RootState) => state.general.isFullscreen);
 
   const renderMenu = () => {
+    console.log('[RouterSubAssembly] renderMenu - isSuccess:', isSuccess, 'data:', data ? 'present' : 'null', 'isFullscreen:', isFullscreen);
+    
     return isSuccess && data ? (
       <>
         {!isFullscreen && (
@@ -288,6 +297,26 @@ const RouterSubAssembly: React.FC = () => {
               )}
               {!isFullscreen && <SmartPSDrawer navigationData={data} />}
               <Routes>
+                {EnvironmentUtils.isOktaEnabled && (
+                  <>
+                    <Route
+                      path="/login/callback"
+                      element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <OktaLoginCallback />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/login"
+                      element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <Login />
+                        </Suspense>
+                      }
+                    />
+                  </>
+                )}
                 <Route
                   path="/unauthorized"
                   element={<Unauthorized />}

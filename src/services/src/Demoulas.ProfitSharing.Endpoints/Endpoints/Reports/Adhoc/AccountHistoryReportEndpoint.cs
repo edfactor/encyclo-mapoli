@@ -61,8 +61,6 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                                 {
                                     Id = 123,
                                     BadgeNumber = 700518,
-                                    FullName = "John Doe",
-                                    Ssn = "***-**-6789",
                                     ProfitYear = 2017,
                                     Contributions = 50000,
                                     Earnings = 5000,
@@ -74,8 +72,6 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                                 {
                                     Id = 234,
                                     BadgeNumber = 700518,
-                                    FullName = "John Doe",
-                                    Ssn = "***-**-6789",
                                     ProfitYear = 2008,
                                     Contributions = 55000,
                                     Earnings = 6000,

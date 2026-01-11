@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.Util.Extensions;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -15,85 +15,102 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 {
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly TotalService _totalService;
-    private readonly IFrozenService _frozenService;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TimeProvider _timeProvider;
 
     public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory,
         TotalService totalService,
-        IFrozenService frozenService,
         IDemographicReaderService demographicReaderService,
         TimeProvider timeProvider)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
-        _frozenService = frozenService;
         _demographicReaderService = demographicReaderService;
         _timeProvider = timeProvider;
     }
 
+    // Invoked by the 008-12 Forfeit Adjustment screen - the user wants to make a change, we figure out which (forfeit or unforfeit or neither) is appropriate.
     public Task<Result<SuggestedForfeitureAdjustmentResponse>> GetSuggestedForfeitureAmount(SuggestedForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
     {
         return _dbContextFactory.UseReadOnlyContext(async context =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(context);
-            var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
-            short profitYear = frozenStateResponse.ProfitYear;
+            Employee? empl = await FetchEmployee(context, req.Badge, req.Ssn, cancellationToken);
 
-            var demographic = await demographics
-                .Where(d => req.Ssn.HasValue && req.Ssn.Value == d.Ssn || req.Badge.HasValue && req.Badge.Value == d.BadgeNumber)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (demographic == null)
+            if (empl == null)
             {
                 return Result<SuggestedForfeitureAdjustmentResponse>.Failure(Error.EmployeeNotFound);
             }
 
             // Get the most recent PROFIT_CODE = 2 (forfeiture) transaction for this employee
-            var lastForfeitureTransaction = await context.ProfitDetails
-                .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitCodeId == 2 && pd.CommentTypeId != CommentType.Constants.ForfeitClassAction)
+            var lastForfeitureTransaction = context.ProfitDetails
+                .Where(pd => pd.Ssn == empl.Demographic.Ssn && pd.ProfitCodeId == 2 && pd.CommentTypeId != CommentType.Constants.ForfeitClassAction)
                 .OrderByDescending(pd => pd.ProfitYear)
                 .ThenByDescending(pd => pd.CreatedAtUtc)
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefault();
 
             // PATH 1: Last transaction was a FORFEIT (positive amount)
             // → Suggest UNFORFEIT (negative amount to reverse it)
             if (lastForfeitureTransaction != null && lastForfeitureTransaction.Forfeiture > 0)
             {
-                return Result<SuggestedForfeitureAdjustmentResponse>.Success(new SuggestedForfeitureAdjustmentResponse
-                {
-                    SuggestedForfeitAmount = -lastForfeitureTransaction.Forfeiture, // Negative = unforfeit
-                    DemographicId = demographic.Id,
-                    BadgeNumber = demographic.BadgeNumber
-                });
+                return Suggested(empl, -lastForfeitureTransaction.Forfeiture); // Negative = unforfeit
             }
+
+            // This service is always live, so our reference time is today.
+            var asOfDate = _timeProvider.GetLocalDateOnly();
+            var profitYear = (short) asOfDate.Year;
 
             // PATH 2: No forfeiture history OR last transaction was UNFORFEIT (negative amount)
             // → Calculate how much SHOULD be forfeited based on vesting
-            var totalVestingBalance = await _totalService.TotalVestingBalance(context, profitYear, _timeProvider.GetLocalDateOnly())
-                .Where(vb => vb.Ssn == demographic.Ssn).SingleAsync(cancellationToken);
+            var totalVestingBalance = await _totalService.TotalVestingBalance(context, profitYear, asOfDate)
+                .Where(vb => vb.Ssn == empl.Demographic.Ssn).SingleOrDefaultAsync(cancellationToken);
 
-            // If fully vested, nothing to forfeit
-            if (totalVestingBalance.VestingPercent == 1m)
+            // If no vesting balance found or fully vested, nothing to forfeit
+            if (totalVestingBalance == null || totalVestingBalance.VestingPercent == 1m || totalVestingBalance.CurrentBalance <= 0m)
             {
-                return Result<SuggestedForfeitureAdjustmentResponse>.Success(new SuggestedForfeitureAdjustmentResponse
-                {
-                    SuggestedForfeitAmount = 0m,
-                    DemographicId = demographic.Id,
-                    BadgeNumber = demographic.BadgeNumber
-                });
+                return Suggested(empl, 0m);
             }
 
             // Calculate unvested amount that should be forfeited
             var unvestedAmount = (totalVestingBalance.CurrentBalance ?? 0m) - (totalVestingBalance.VestedBalance ?? 0m);
 
-            return Result<SuggestedForfeitureAdjustmentResponse>.Success(new SuggestedForfeitureAdjustmentResponse
+            if (empl.PayProfit?.Etva > 0)
             {
-                SuggestedForfeitAmount = Math.Round(unvestedAmount, 2, MidpointRounding.AwayFromZero), // Positive = forfeit
-                DemographicId = demographic.Id,
-                BadgeNumber = demographic.BadgeNumber
-            });
+                decimal conditional = (totalVestingBalance?.CurrentBalance ?? 0) - empl.PayProfit.Etva;
+                unvestedAmount = conditional * (1 - totalVestingBalance?.VestingPercent ?? 1);
+                if (unvestedAmount < 0m)
+                {
+                    return Suggested(empl, 0);
+                }
+            }
+
+            return Suggested(empl, unvestedAmount);
         }, cancellationToken);
+    }
+
+    private static Result<SuggestedForfeitureAdjustmentResponse> Suggested(Employee empl, decimal suggestedAmount)
+    {
+        return Result<SuggestedForfeitureAdjustmentResponse>.Success(new SuggestedForfeitureAdjustmentResponse
+        {
+            SuggestedForfeitAmount = Math.Round(suggestedAmount, 2, MidpointRounding.AwayFromZero),
+            DemographicId = empl.Demographic.Id,
+            BadgeNumber = empl.Demographic.BadgeNumber
+        });
+    }
+    
+
+    private async Task<Employee?> FetchEmployee(IProfitSharingDbContext ctx, int? badgeMaybe, int? ssnMaybe, CancellationToken ct)
+    {
+        var profitYear = _timeProvider.GetLocalYear();
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+
+        return await demographics
+            .Where(d => ssnMaybe.HasValue && ssnMaybe.Value == d.Ssn || badgeMaybe.HasValue && badgeMaybe.Value == d.BadgeNumber)
+            .Select(d => new Employee
+            {
+                Demographic = d,
+                PayProfit = d.PayProfits.FirstOrDefault(pp => pp.ProfitYear == profitYear)!
+            })
+            .FirstOrDefaultAsync(ct);
     }
 
     public async Task<Result<bool>> UpdateForfeitureAdjustmentAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken cancellationToken = default)

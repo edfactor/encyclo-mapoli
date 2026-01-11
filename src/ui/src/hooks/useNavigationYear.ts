@@ -27,13 +27,13 @@ const getNavigationObjectBasedOnId = (navigationArray?: NavigationDto[], id?: nu
 
 /**
  * Hook to provide the appropriate profit year based on current navigation's settings
- * 
+ *
  * - If the current navigation has `useFrozenYear: true` in customSettings,
  *   returns the frozen profit year from Fiscal Close flow (waits for it to load)
  * - Otherwise, returns the current calendar year immediately
- * 
+ *
  * Returns undefined while waiting for required data to load (navigation or frozen state)
- * 
+ *
  * @returns Profit year number or undefined if still loading
  */
 const useNavigationYear = (): number | undefined => {
@@ -54,7 +54,7 @@ const useNavigationYear = (): number | undefined => {
   // Fetch frozen state if this page requires it and we don't have it yet
   useEffect(() => {
     if (hasToken && useFrozenYear && !frozenStateResponse) {
-      console.log('[useNavigationYear] Fetching frozen state...');
+      console.log("[useNavigationYear] Fetching frozen state...");
       fetchActiveFrozenState();
     }
   }, [hasToken, useFrozenYear, frozenStateResponse, fetchActiveFrozenState]);
@@ -63,30 +63,34 @@ const useNavigationYear = (): number | undefined => {
   const profitYear = useMemo(() => {
     // If we don't have navigation data yet, we need to wait to know if useFrozenYear is true
     if (!navigationList?.navigation) {
-      console.log('[useNavigationYear] Navigation data not loaded yet, waiting...');
+      console.log("[useNavigationYear] Navigation data not loaded yet, waiting...");
       return undefined;
     }
 
     // If navigation not found, we can't determine useFrozenYear, so use current year as safe fallback
     if (!currentNavigation) {
-      console.log('[useNavigationYear] Navigation item not found for ID:', currentNavigationId, 'using current year as fallback');
+      console.log(
+        "[useNavigationYear] Navigation item not found for ID:",
+        currentNavigationId,
+        "using current year as fallback"
+      );
       return currentYear;
     }
 
-    console.log('[useNavigationYear] Current navigation:', currentNavigation.title, 'useFrozenYear:', useFrozenYear);
+    console.log("[useNavigationYear] Current navigation:", currentNavigation.title, "useFrozenYear:", useFrozenYear);
 
     // If this page requires frozen year, wait for frozen state to load
     if (useFrozenYear) {
       if (!frozenStateResponse) {
-        console.log('[useNavigationYear] Waiting for frozen state to load...');
+        console.log("[useNavigationYear] Waiting for frozen state to load...");
         return undefined;
       }
-      console.log('[useNavigationYear] Using frozen year:', frozenStateResponse.profitYear);
+      console.log("[useNavigationYear] Using frozen year:", frozenStateResponse.profitYear);
       return frozenStateResponse.profitYear;
     }
 
     // Otherwise use current calendar year immediately (respects fake time)
-    console.log('[useNavigationYear] Using current calendar year:', currentYear);
+    console.log("[useNavigationYear] Using current calendar year:", currentYear);
     return currentYear;
   }, [navigationList, currentNavigation, currentNavigationId, useFrozenYear, frozenStateResponse, currentYear]);
 

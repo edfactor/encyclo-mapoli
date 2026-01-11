@@ -6,7 +6,7 @@ import { useFakeTimeAwareYear } from "./useFakeTimeAwareDate";
 
 /**
  * Hook to provide the frozen profit year from Fiscal Close flow
- * 
+ *
  * Returns the frozen profit year if available, otherwise falls back to current calendar year
  */
 const useFiscalCloseProfitYear = (): number => {
