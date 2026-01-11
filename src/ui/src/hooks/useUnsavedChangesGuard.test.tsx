@@ -10,23 +10,7 @@ import { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";
  * not the legacy MemoryRouter.
  */
 const createDataRouterWrapper = () => {
-  const TestComponent = ({ children }: { children: ReactNode }) => <>{children}</>;
-
-  const router = createMemoryRouter(
-    [
-      {
-        path: "/",
-        element: <TestComponent children={null} />,
-        children: [{ path: "*", element: null }]
-      }
-    ],
-    { initialEntries: ["/"] }
-  );
-
-  // Return a wrapper that can render children within the router context
-  // For hook testing, we need to inject the hook's component into the router
   return ({ children }: { children: ReactNode }) => {
-    // Create a new router for each test with the hook's component as the element
     const testRouter = createMemoryRouter(
       [
         {
