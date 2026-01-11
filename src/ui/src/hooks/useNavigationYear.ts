@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useLazyGetFrozenStateResponseQuery } from "../reduxstore/api/ItOperationsApi";
 import { RootState } from "../reduxstore/store";
 import { NavigationCustomSettingsKeys, NavigationDto } from "../types/navigation/navigation";
+import { useFakeTimeAwareYear } from "./useFakeTimeAwareDate";
 
 /**
  * Helper function to find a navigation item by ID in the navigation tree
@@ -41,6 +42,7 @@ const useNavigationYear = (): number | undefined => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   const [fetchActiveFrozenState] = useLazyGetFrozenStateResponseQuery();
+  const currentYear = useFakeTimeAwareYear();
 
   const currentNavigation = useMemo(() => {
     return getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId);
@@ -59,8 +61,6 @@ const useNavigationYear = (): number | undefined => {
 
   // Calculate the appropriate year
   const profitYear = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    
     // If we don't have navigation data yet, we need to wait to know if useFrozenYear is true
     if (!navigationList?.navigation) {
       console.log('[useNavigationYear] Navigation data not loaded yet, waiting...');
@@ -85,10 +85,10 @@ const useNavigationYear = (): number | undefined => {
       return frozenStateResponse.profitYear;
     }
 
-    // Otherwise use current calendar year immediately
+    // Otherwise use current calendar year immediately (respects fake time)
     console.log('[useNavigationYear] Using current calendar year:', currentYear);
     return currentYear;
-  }, [navigationList, currentNavigation, currentNavigationId, useFrozenYear, frozenStateResponse]);
+  }, [navigationList, currentNavigation, currentNavigationId, useFrozenYear, frozenStateResponse, currentYear]);
 
   return profitYear;
 };

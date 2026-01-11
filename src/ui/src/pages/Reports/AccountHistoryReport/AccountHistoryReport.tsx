@@ -4,13 +4,14 @@ import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-libra
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
+import { useFakeTimeAwareYear } from "../../../hooks/useFakeTimeAwareDate";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { AdhocApi } from "../../../reduxstore/api/AdhocApi";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 import { AccountHistoryReportRequest } from "../../../types/reports/AccountHistoryReportTypes";
 import MasterInquiryMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/MasterInquiryMemberDetails";
 import AccountHistoryReportFilterSection, {
-  AccountHistoryReportFilterParams
+    AccountHistoryReportFilterParams
 } from "./AccountHistoryReportFilterSection";
 import AccountHistoryReportTable from "./AccountHistoryReportTable";
 
@@ -19,9 +20,10 @@ const AccountHistoryReport: React.FC = () => {
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [triggerSearch, { data, isFetching }] = AdhocApi.useLazyGetAccountHistoryReportQuery();
   const [downloadPdf, { isLoading: isDownloadingPdf }] = AdhocApi.useDownloadAccountHistoryReportPdfMutation();
+  const currentYear = useFakeTimeAwareYear();
 
   // Fetch member details when report data changes
-  const profitYear = filterParams?.endDate ? filterParams.endDate.getFullYear() : new Date().getFullYear();
+  const profitYear = filterParams?.endDate ? filterParams.endDate.getFullYear() : currentYear;
   const reportId = data?.response?.results?.[0]?.id ?? 0;
   const { data: memberDetails, isFetching: isFetchingMemberDetails } = InquiryApi.useGetProfitMasterInquiryMemberQuery(
     reportId > 0 ? { memberType: 1, id: reportId, profitYear } : { memberType: 1, id: 0, profitYear },

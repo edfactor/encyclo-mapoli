@@ -3,8 +3,9 @@ import { memo, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
-import PageErrorBoundary from "../../components/PageErrorBoundary/PageErrorBoundary";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
+import PageErrorBoundary from "../../components/PageErrorBoundary/PageErrorBoundary";
+import { useFakeTimeAwareYear } from "../../hooks/useFakeTimeAwareDate";
 import { RootState } from "../../reduxstore/store";
 import MasterInquiryDetailsGrid from "./MasterInquiry/MasterInquiryDetailsGrid";
 import StandaloneMemberDetails from "./MasterInquiry/StandaloneMemberDetails";
@@ -33,7 +34,7 @@ const Adjustments = memo(() => {
     profitDetailsResponseDestination
   } = useAdjustments();
 
-  const profitYear = new Date().getFullYear();
+  const profitYear = useFakeTimeAwareYear();
 
   // Fetch profit details when member details are available
   useEffect(() => {
