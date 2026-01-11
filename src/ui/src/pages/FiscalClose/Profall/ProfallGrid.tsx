@@ -70,7 +70,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
         isSortDescending: sortParams.isSortDescending
       }
     });
-  }, [profitYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
+  }, [profitYear, currentYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
 
   useEffect(() => {
     if (profitYear && securityState.token) {

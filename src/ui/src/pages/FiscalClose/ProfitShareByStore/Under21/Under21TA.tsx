@@ -83,7 +83,8 @@ const Under21TA = () => {
     sortParams,
     fetchUnder21Totals,
     fetchUnder21BreakdownByStore,
-    profitYear
+    profitYear,
+    currentYear
   ]);
 
   /*
