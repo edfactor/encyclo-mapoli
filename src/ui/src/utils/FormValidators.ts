@@ -13,13 +13,13 @@ export const ssnValidator = yup
   .transform((value) => value || undefined);
 
 /**
- * Validates that a Badge Number is between 1 and 7 digits (1 to 9999999)
+ * Validates that a Badge Number is between 3 and 7 digits (100 to 9999999)
  */
 export const badgeNumberValidator = yup
   .number()
   .typeError("Badge Number must be a number")
   .integer("Badge Number must be an integer")
-  .min(1, "Badge Number must be at least 1")
+  .min(100, "Badge Number must be at least 3 digits")
   .max(9999999, "Badge Number must be 7 digits or less")
   .nullable()
   .transform((value) => value || undefined);
@@ -28,7 +28,7 @@ export const badgeNumberOrPSNValidator = yup
   .number()
   .typeError("Badge Number or PSN must be a number")
   .integer("Badge Number or PSN must be an integer")
-  .min(1, "Badge Number or PSN must be at least 1 digits")
+  .min(100, "Badge Number or PSN must be at least 3 digits")
   .max(99999999999, "Badge Number or PSN must be 11 digits or less")
   .nullable()
   .transform((value) => value || undefined);
@@ -45,13 +45,13 @@ export const monthValidator = yup
   .nullable();
 
 /**
- * Validates that a PSN (Profit Sharing Number) is between 9 and 11 digits
+ * Validates that a PSN (Profit Sharing Number) is between 7 and 11 digits
  */
 export const psnValidator = yup
   .number()
   .typeError("PSN must be a number")
   .integer("PSN must be an integer")
-  .min(100000000, "PSN must be at least 9 digits")
+  .min(1000000, "PSN must be at least 7 digits")
   .max(99999999999, "PSN must be 11 digits or less")
   .nullable()
   .transform((value) => value || undefined);
@@ -236,7 +236,7 @@ export const handleBadgeNumberStringInput = (value: string): string | null => {
 };
 
 /**
- * Validates that a Badge Number string is 1 to 7 digits (preserves leading zeros)
+ * Validates that a Badge Number string is 3 to 7 digits (preserves leading zeros)
  */
 export const badgeNumberStringValidator = yup
   .string()
@@ -245,8 +245,8 @@ export const badgeNumberStringValidator = yup
     if (!value) return true;
     return /^\d+$/.test(value);
   })
-  .test("is-valid-length", "Badge Number must be 1 to 7 digits", function (value) {
+  .test("is-valid-length", "Badge Number must be 3 to 7 digits", function (value) {
     if (!value) return true;
-    return value.length >= 1 && value.length <= 7;
+    return value.length >= 3 && value.length <= 7;
   })
   .transform((value) => value || undefined);

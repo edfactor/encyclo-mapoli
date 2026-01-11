@@ -176,7 +176,7 @@ const AccountHistoryReport: React.FC = () => {
                     Search criteria changed. Click Search to update results before exporting.
                   </span>
                 )}
-              </Grid>             
+              </Grid>
               <Grid width="100%">
                 <AccountHistoryReportTable
                   data={data}

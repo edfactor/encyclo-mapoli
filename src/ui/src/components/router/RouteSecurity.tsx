@@ -21,8 +21,13 @@ const OktaTokenSync: React.FC = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log('[OktaTokenSync] Auth state changed:', authState?.isAuthenticated, 'token:', authState?.accessToken?.accessToken ? 'present' : 'null');
-    
+    console.log(
+      "[OktaTokenSync] Auth state changed:",
+      authState?.isAuthenticated,
+      "token:",
+      authState?.accessToken?.accessToken ? "present" : "null"
+    );
+
     if (authState?.isAuthenticated && authState.accessToken?.accessToken) {
       dispatch(setToken(authState.accessToken.accessToken));
     }
@@ -51,7 +56,12 @@ const RouteSecurity: React.FC<RouteSecurityProps> = ({ oktaEnabled, children }) 
   const [oktaAuth, setOktaAuth] = useState<OktaAuth | null>(null);
   const dispatch = useDispatch();
 
-  console.log("[RouteSecurity] Rendering - oktaEnabled:", oktaEnabled, "oktaAuth:", oktaAuth !== null ? "initialized" : "null");
+  console.log(
+    "[RouteSecurity] Rendering - oktaEnabled:",
+    oktaEnabled,
+    "oktaAuth:",
+    oktaAuth !== null ? "initialized" : "null"
+  );
 
   // Initialize token for non-Okta environments
   useEffect(() => {
@@ -80,19 +90,21 @@ const RouteSecurity: React.FC<RouteSecurityProps> = ({ oktaEnabled, children }) 
 
   // If Okta is not enabled, just render children without Security wrapper
   if (!oktaEnabled) {
-    console.log('[RouteSecurity] Okta disabled, rendering children directly');
+    console.log("[RouteSecurity] Okta disabled, rendering children directly");
     return <>{children}</>;
   }
 
   // If Okta is enabled but not initialized yet, show loading
   if (oktaAuth === null) {
-    console.log('[RouteSecurity] Okta enabled but not initialized yet');
+    console.log("[RouteSecurity] Okta enabled but not initialized yet");
     return <div>Loading authentication...</div>;
   }
 
-  console.log('[RouteSecurity] Okta enabled and initialized, wrapping with Security');
+  console.log("[RouteSecurity] Okta enabled and initialized, wrapping with Security");
   return (
-    <Security oktaAuth={oktaAuth} restoreOriginalUri={restoreOriginalUri}>
+    <Security
+      oktaAuth={oktaAuth}
+      restoreOriginalUri={restoreOriginalUri}>
       <OktaTokenSync />
       {children}
       <RestoreOriginalUriHandler />

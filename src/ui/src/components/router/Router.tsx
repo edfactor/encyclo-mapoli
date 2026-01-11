@@ -9,7 +9,7 @@ import RouteSecurity from "./RouteSecurity";
 const Router = () => {
   const oktaEnabled = EnvironmentUtils.isOktaEnabled;
 
-  console.log('[Router] Rendering - oktaEnabled:', oktaEnabled);
+  console.log("[Router] Rendering - oktaEnabled:", oktaEnabled);
 
   return (
     <BrowserRouter>

@@ -1,9 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import {
-  createBadgeColumn,
-  createCurrencyColumn,
-  createYearColumn
-} from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createYearColumn } from "../../../utils/gridColumnFactory";
 
 export const GetAccountHistoryReportColumns = (): ColDef[] => {
   return [
