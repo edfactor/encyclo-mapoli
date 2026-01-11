@@ -120,13 +120,13 @@ const AuditSearch = lazy(() => import("../../pages/Administration/AuditSearch/Au
 
 /**
  * Creates the React Router v7 data router configuration.
- * 
+ *
  * Features:
  * - Route-level Suspense boundaries for granular loading states
  * - Individual protected route wrapping for role-based access
  * - Authentication-gated navigation loader
  * - Conditional Okta routes based on environment
- * 
+ *
  * @param store - Redux store for loader access to authentication state
  * @returns Route configuration array for createBrowserRouter
  */

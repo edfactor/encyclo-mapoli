@@ -29,8 +29,7 @@ export const useUnsavedChangesGuard = (
   // Block React Router v7 SPA navigation (navigate(), <Link>, etc.)
   // useBlocker takes a predicate function that returns true when navigation should be blocked
   const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
+    ({ currentLocation, nextLocation }) => hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
   );
 
   const onStay = useCallback(() => {

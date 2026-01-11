@@ -14,25 +14,25 @@ const ImpersonatingRolesStorageKey = "impersonatingRoles";
 
 /**
  * Component that monitors Okta auth state and syncs token to Redux.
- * 
+ *
  * MUST be inside Security component to use useOktaAuth hook.
  * When auth state changes to authenticated, dispatches token to Redux store.
- * 
+ *
  * IMPORTANT: This component ONLY syncs tokens. It does NOT trigger login redirects.
  * Login redirects are handled by the LoaderErrorBoundary which shows the auth pending
  * UI and waits for the Security component to complete authentication.
  */
 /**
  * Component that monitors Okta auth state and syncs token AND impersonation roles to Redux.
- * 
+ *
  * MUST be inside Security component to use useOktaAuth hook.
  * When auth state changes to authenticated, dispatches token to Redux store.
  * Also loads impersonation roles from localStorage (dev/qa only).
- * 
+ *
  * CRITICAL FIX: Uses useLayoutEffect to dispatch token SYNCHRONOUSLY before
- * the browser paints. This ensures the token AND impersonation roles are in Redux 
+ * the browser paints. This ensures the token AND impersonation roles are in Redux
  * before AuthGate renders children (which creates the Router and runs loaders).
- * 
+ *
  * CRITICAL FIX: Uses a ref to track the last dispatched token to prevent
  * infinite re-render loops.
  */
@@ -80,18 +80,18 @@ const OktaTokenSync: React.FC = () => {
 
 /**
  * Component that gates access to the app by requiring authentication.
- * 
+ *
  * MUST be inside Security component to use useOktaAuth hook.
- * 
+ *
  * Flow:
  * 1. Wait for auth state to resolve (not null, not pending)
  * 2. If authenticated: render children (the Router)
  * 3. If NOT authenticated: trigger ONE redirect to Okta login
- * 
+ *
  * CRITICAL: This component BLOCKS rendering of children until auth is resolved.
  * This prevents the Router from being created (and running loaders) before
  * we know the auth state.
- * 
+ *
  * CRITICAL: Uses a ref to ensure we only redirect ONCE per mount.
  * This prevents infinite redirect loops during callback processing.
  */
@@ -142,7 +142,7 @@ const AuthGate: React.FC<{ children: ReactNode }> = ({ children }) => {
 
 /**
  * Inner component that wraps router with Okta Security component.
- * 
+ *
  * Uses the SHARED OktaAuth instance from OktaProvider instead of
  * creating a new instance. This prevents the dual-instance issue
  * where App.tsx and RouteSecurity.tsx had separate auth state.
@@ -152,7 +152,7 @@ const OktaSecurityWrapper: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   /**
    * Callback invoked by Okta LoginCallback after successful authentication.
-   * 
+   *
    * CRITICAL: This callback MUST navigate to the original URI.
    * We use window.location.replace() because:
    * 1. We're outside of Router context here (can't use useNavigate)
@@ -163,7 +163,7 @@ const OktaSecurityWrapper: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Navigate to the original URI (or home if none provided)
     const targetUri = originalUri || "/";
     const relativeUri = toRelativeUrl(targetUri, window.location.origin);
-    
+
     // Use replace to avoid the callback URL staying in browser history
     window.location.replace(relativeUri);
   };
@@ -174,7 +174,9 @@ const OktaSecurityWrapper: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   return (
-    <Security oktaAuth={oktaAuth} restoreOriginalUri={restoreOriginalUri}>
+    <Security
+      oktaAuth={oktaAuth}
+      restoreOriginalUri={restoreOriginalUri}>
       <OktaTokenSync />
       <AuthGate>{children}</AuthGate>
     </Security>
@@ -183,13 +185,13 @@ const OktaSecurityWrapper: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 /**
  * Higher-order component that wraps Router with Okta Security.
- * 
+ *
  * Refactored for React Router v7 data router pattern.
- * 
+ *
  * Behavior:
  * - If Okta enabled: wraps Router with Security component and token sync
  * - If Okta disabled: initializes dev token and renders Router directly
- * 
+ *
  * IMPORTANT: Uses shared OktaAuth instance from OktaProvider context.
  * The OktaProvider MUST wrap this component in the component tree.
  */
@@ -219,4 +221,3 @@ export function withOktaSecurity<P extends object>(RouterComponent: ComponentTyp
     );
   };
 }
-

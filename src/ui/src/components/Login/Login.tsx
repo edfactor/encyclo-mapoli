@@ -5,11 +5,11 @@ import EnvironmentUtils from "../../utils/environmentUtils";
 
 /**
  * Login page that triggers Okta authentication.
- * 
+ *
  * In the React Router v7 data router pattern, this component:
  * - Triggers signInWithRedirect() for unauthenticated users
  * - Redirects authenticated users to home page
- * 
+ *
  * Note: Token sync is handled by OktaTokenSync in RouteSecurity.tsx,
  * not here. This keeps login logic simple and focused.
  */

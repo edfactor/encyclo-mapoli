@@ -213,7 +213,7 @@ const AppContent = () => {
 
 /**
  * Root App component that wraps with OktaProvider for shared OktaAuth instance.
- * 
+ *
  * CRITICAL: OktaProvider must be at the top level to ensure:
  * 1. Single OktaAuth instance shared across App and Router/Security
  * 2. OktaAuth is initialized before any components need it

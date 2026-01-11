@@ -67,9 +67,7 @@ describe("useUnsavedChangesGuard", () => {
       renderHook(() => useUnsavedChangesGuard(false), { wrapper });
 
       // Check that beforeunload was NOT called (it's only added when hasUnsavedChanges is true)
-      const beforeunloadCalls = addEventListenerSpy.mock.calls.filter(
-        (call) => call[0] === "beforeunload"
-      );
+      const beforeunloadCalls = addEventListenerSpy.mock.calls.filter((call) => call[0] === "beforeunload");
       expect(beforeunloadCalls.length).toBe(0);
     });
   });

@@ -6,17 +6,17 @@ import type { RootState } from "../../reduxstore/store";
 
 /**
  * Error boundary component for React Router v7 loader failures.
- * 
+ *
  * Handles two types of errors:
  * 1. 401 Unauthorized - Missing authentication token
  *    - Displays "Authentication in progress..." message
  *    - Automatically retries ONCE when Redux token becomes available
  * 2. Generic loader errors - Network failures, server errors, etc.
  *    - Displays user-friendly error message with manual retry
- * 
+ *
  * The automatic retry on auth completion is critical for handling race conditions
  * where the router initializes before Okta authentication completes.
- * 
+ *
  * CRITICAL FIX: Uses hasRevalidatedRef to prevent infinite navigate(0) loops.
  * The error state from useRouteError() persists even after token arrives,
  * so we must track if we've already triggered revalidation.
@@ -53,8 +53,12 @@ const LoaderErrorBoundary: React.FC = () => {
           minHeight: "100vh",
           padding: 3
         }}>
-        <Alert severity="info" sx={{ maxWidth: 600, marginBottom: 2 }}>
-          <Typography variant="h6" gutterBottom>
+        <Alert
+          severity="info"
+          sx={{ maxWidth: 600, marginBottom: 2 }}>
+          <Typography
+            variant="h6"
+            gutterBottom>
             Authentication in Progress
           </Typography>
           <Typography variant="body2">
@@ -62,7 +66,9 @@ const LoaderErrorBoundary: React.FC = () => {
             is complete.
           </Typography>
         </Alert>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          color="text.secondary">
           If this message persists, please refresh the page manually.
         </Typography>
       </Box>
@@ -84,14 +90,22 @@ const LoaderErrorBoundary: React.FC = () => {
           minHeight: "100vh",
           padding: 3
         }}>
-        <Alert severity="error" sx={{ maxWidth: 600, marginBottom: 3 }}>
-          <Typography variant="h6" gutterBottom>
+        <Alert
+          severity="error"
+          sx={{ maxWidth: 600, marginBottom: 3 }}>
+          <Typography
+            variant="h6"
+            gutterBottom>
             Unable to Load Application
           </Typography>
-          <Typography variant="body2" gutterBottom>
+          <Typography
+            variant="body2"
+            gutterBottom>
             {errorMessage}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            color="text.secondary">
             This may be due to a network issue or the server being temporarily unavailable.
           </Typography>
         </Alert>
@@ -119,14 +133,22 @@ const LoaderErrorBoundary: React.FC = () => {
         minHeight: "100vh",
         padding: 3
       }}>
-      <Alert severity="error" sx={{ maxWidth: 600, marginBottom: 3 }}>
-        <Typography variant="h6" gutterBottom>
+      <Alert
+        severity="error"
+        sx={{ maxWidth: 600, marginBottom: 3 }}>
+        <Typography
+          variant="h6"
+          gutterBottom>
           Application Error
         </Typography>
-        <Typography variant="body2" gutterBottom>
+        <Typography
+          variant="body2"
+          gutterBottom>
           {errorMessage}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          color="text.secondary">
           Please try refreshing the page or contact support if the problem persists.
         </Typography>
       </Alert>

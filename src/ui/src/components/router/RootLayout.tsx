@@ -20,13 +20,13 @@ const ImpersonatingRolesStorageKey = "impersonatingRoles";
 
 /**
  * Root layout component for React Router v7 data router.
- * 
+ *
  * Replaces RouterSubAssembly.tsx with loader-based navigation data access.
  * Key differences from legacy pattern:
  * - Uses useLoaderData() instead of useGetNavigationQuery hook
  * - Navigation data is pre-loaded before rendering (no loading state needed)
  * - Renders Outlet for child route rendering instead of Routes/Route
- * 
+ *
  * Preserves all existing functionality:
  * - Impersonation role management with localStorage persistence (dev/qa only)
  * - MenuBar, Drawer, and breadcrumb rendering
@@ -226,7 +226,7 @@ const RootLayout: React.FC = () => {
               </Box>
             )}
             {!isFullscreen && <SmartPSDrawer navigationData={navigationData} />}
-            
+
             {/* Render child routes */}
             <Outlet />
           </Box>

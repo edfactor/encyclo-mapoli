@@ -4,11 +4,11 @@ import type { NavigationResponseDto } from "../../reduxstore/types";
 
 /**
  * Navigation loader for React Router v7 data router.
- * 
+ *
  * CRITICAL: This loader MUST have an authentication token before proceeding.
  * If no token exists, it throws a 401 response to prevent unauthorized API calls.
  * The LoaderErrorBoundary will handle this and automatically retry when token becomes available.
- * 
+ *
  * @param store - Redux store instance for accessing auth state and dispatching RTK Query
  * @returns Navigation data with menu structure
  * @throws Response with 401 status if authentication token is missing
@@ -36,10 +36,7 @@ export async function navigationLoader(store: AppStore, request?: Request): Prom
     // RTK Query dispatch returns a thunk result with unwrap()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const queryAction = (store.dispatch as any)(
-      NavigationApi.endpoints.getNavigation.initiate(
-        { navigationId: undefined },
-        { forceRefetch: false }
-      )
+      NavigationApi.endpoints.getNavigation.initiate({ navigationId: undefined }, { forceRefetch: false })
     );
 
     // unwrap() returns a promise with the actual data
@@ -55,7 +52,7 @@ export async function navigationLoader(store: AppStore, request?: Request): Prom
         statusText: "Unauthorized"
       });
     }
-    
+
     throw new Response("Failed to load navigation data", {
       status: err?.status || 500,
       statusText: err?.statusText || "Internal Server Error"

@@ -9,7 +9,7 @@ const issuer = import.meta.env.VITE_REACT_APP_OKTA_ISSUER;
 
 /**
  * Context value for shared OktaAuth instance.
- * 
+ *
  * This provides a single, stable OktaAuth instance across the entire application,
  * preventing the dual-instance issue where App.tsx and RouteSecurity.tsx had
  * separate OktaAuth objects with inconsistent auth state.
@@ -23,7 +23,7 @@ const OktaContext = createContext<OktaContextValue>({ oktaAuth: null, isInitiali
 
 /**
  * Hook to access the shared OktaAuth instance.
- * 
+ *
  * Use this instead of creating new OktaAuth instances directly.
  * The oktaAuth will be null until initialization completes.
  */
@@ -31,10 +31,10 @@ export const useOktaInstance = (): OktaContextValue => useContext(OktaContext);
 
 /**
  * Provider component for shared OktaAuth instance.
- * 
+ *
  * CRITICAL: This must be rendered at the app root level, ABOVE both
  * the Router and any components that need access to OktaAuth for logout.
- * 
+ *
  * Features:
  * - Creates single OktaAuth instance via useMemo (stable reference)
  * - Starts OktaAuth service for token auto-renewal

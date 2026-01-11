@@ -8,12 +8,12 @@ import { withOktaSecurity } from "./RouteSecurity";
 
 /**
  * Root router component for React Router v7 data router.
- * 
+ *
  * Replaces legacy BrowserRouter pattern with createBrowserRouter for:
  * - Loader-based data fetching before rendering
  * - Error boundaries at route level
  * - Better TypeScript integration with route definitions
- * 
+ *
  * IMPORTANT: Router is created with useMemo to maintain stable reference
  * across re-renders. Store is imported directly to avoid React hook type issues.
  */

@@ -11,7 +11,7 @@ import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 import { AccountHistoryReportRequest } from "../../../types/reports/AccountHistoryReportTypes";
 import MasterInquiryMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/MasterInquiryMemberDetails";
 import AccountHistoryReportFilterSection, {
-    AccountHistoryReportFilterParams
+  AccountHistoryReportFilterParams
 } from "./AccountHistoryReportFilterSection";
 import AccountHistoryReportTable from "./AccountHistoryReportTable";
 
