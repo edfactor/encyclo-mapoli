@@ -5,8 +5,8 @@
 ```pwsh
 # Build services
 cd src/services; dotnet build Demoulas.ProfitSharing.slnx
-# Run tests
-cd src/services; dotnet test
+# Run tests (quiet - no progress output, only failures and summary)
+cd src/services; dotnet test -- --no-progress
 # Start UI
 cd src/ui; npm run dev
 ```
@@ -41,8 +41,11 @@ npx playwright test # Run E2E tests
 # Build solution
 dotnet build Demoulas.ProfitSharing.slnx
 
-# Run tests
-dotnet test Demoulas.ProfitSharing.Tests.csproj --configuration debug
+# Run tests (quiet - no progress output, only failures and summary)
+dotnet test -- --no-progress
+
+# Run tests (verbose - all output with progress)
+dotnet test
 
 # Database management (using Data.Cli)
 Demoulas.ProfitSharing.Data.Cli upgrade-db --connection-name ProfitSharing
