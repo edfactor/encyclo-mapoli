@@ -148,7 +148,7 @@ export const YearsEndApi = createApi({
   endpoints: (builder) => ({
     updateExecutiveHoursAndDollars: builder.mutation({
       query: ({ ...rest }) => ({
-        url: `yearend/executive-hours-and-dollars/`,
+        url: `yearend/executive-hours`,
         method: "PUT",
         body: rest
       })
