@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { useFakeTimeAwareYear } from "../../../hooks/useFakeTimeAwareDate";
 import {
-  badgeNumberStringValidator,
-  handleBadgeNumberStringInput,
-  handleSsnInput,
-  ssnValidator
+    badgeNumberStringValidator,
+    handleBadgeNumberStringInput,
+    handleSsnInput,
+    ssnValidator
 } from "../../../utils/FormValidators";
 
 // Define the search parameters interface
@@ -47,6 +48,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
   isSearching
 }) => {
   const [activeField, setActiveField] = useState<"ssn" | "badge" | null>(null);
+  const currentYear = useFakeTimeAwareYear();
 
   const {
     control,
@@ -91,7 +93,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
       const searchParams: ForfeitureAdjustmentSearchParams = {
         ssn: data.ssn,
         badge: data.badge,
-        profitYear: new Date().getFullYear(), // Use current wall clock year
+        profitYear: currentYear,
         skip: 0,
         take: 255,
         sortBy: "badgeNumber",

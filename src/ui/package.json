@@ -19,6 +19,7 @@
     "e2e": "playwright test --workers=2",
     "e2e:watch": "playwright test --watch",
     "e2e:ui": "playwright test --ui",
+    "tsc": "npx tsc -b --noEmit",
     "preview": "vite preview"
   },
   "dependencies": {

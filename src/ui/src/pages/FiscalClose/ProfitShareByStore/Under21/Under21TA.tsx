@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../../constants";
+import { useFakeTimeAwareYear } from "../../../../hooks/useFakeTimeAwareDate";
 import { useInitialLoad } from "../../../../hooks/useInitialLoad";
 import useNavigationYear from "../../../../hooks/useNavigationYear";
 import {
@@ -29,6 +30,7 @@ const Under21TA = () => {
     isSortDescending: false
   });
   const profitYear = useNavigationYear();
+  const currentYear = useFakeTimeAwareYear();
 
   const isLoading = isTotalsLoading || isInactiveLoading;
 
@@ -40,7 +42,7 @@ const Under21TA = () => {
   useEffect(() => {
     const fetchData = async () => {
       const queryParams = {
-        profitYear: profitYear ?? new Date().getFullYear(),
+        profitYear: profitYear ?? currentYear,
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
@@ -56,12 +58,12 @@ const Under21TA = () => {
     };
 
     fetchData();
-  }, [fetchUnder21Totals, fetchUnder21BreakdownByStore, pageNumber, pageSize, sortParams, profitYear]);
+  }, [fetchUnder21Totals, fetchUnder21BreakdownByStore, pageNumber, pageSize, sortParams, profitYear, currentYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       const queryParams = {
-        profitYear: profitYear ?? new Date().getFullYear(),
+        profitYear: profitYear ?? currentYear,
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
@@ -81,7 +83,8 @@ const Under21TA = () => {
     sortParams,
     fetchUnder21Totals,
     fetchUnder21BreakdownByStore,
-    profitYear
+    profitYear,
+    currentYear
   ]);
 
   /*

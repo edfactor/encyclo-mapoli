@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
 
+import { useFakeTimeAwareYear } from "hooks/useFakeTimeAwareDate";
 import useNavigationYear from "hooks/useNavigationYear";
 import { RootState } from "reduxstore/store";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
@@ -23,6 +24,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
   const securityState = useSelector((state: RootState) => state.security);
   const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
   const profitYear = useNavigationYear();
+  const currentYear = useFakeTimeAwareYear();
 
   const pagination = useGridPagination({
     initialPageSize: 25,
@@ -32,7 +34,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
     onPaginationChange: useCallback(
       (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (profitYear && securityState.token) {
-          const yearToUse = profitYear || new Date().getFullYear();
+          const yearToUse = profitYear || currentYear;
           const skip = pageNum * pageSz;
           getProfitSharingLabels({
             profitYear: yearToUse,
@@ -46,7 +48,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
           });
         }
       },
-      [profitYear, securityState.token, getProfitSharingLabels]
+      [profitYear, currentYear, securityState.token, getProfitSharingLabels]
     )
   });
 
@@ -54,7 +56,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
   const { pageNumber, pageSize, sortParams, resetPagination } = pagination;
 
   const fetchData = useCallback(() => {
-    const yearToUse = profitYear || new Date().getFullYear();
+    const yearToUse = profitYear || currentYear;
     const skip = pageNumber * pageSize;
     getProfitSharingLabels({
       profitYear: yearToUse,
@@ -68,7 +70,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
         isSortDescending: sortParams.isSortDescending
       }
     });
-  }, [profitYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
+  }, [profitYear, currentYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
 
   useEffect(() => {
     if (profitYear && securityState.token) {

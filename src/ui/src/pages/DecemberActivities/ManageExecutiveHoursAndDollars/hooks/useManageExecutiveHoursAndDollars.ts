@@ -1,3 +1,4 @@
+import { useFakeTimeAwareYear } from "hooks/useFakeTimeAwareDate";
 import useNavigationYear from "hooks/useNavigationYear";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -48,6 +49,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
   const [state, dispatch] = useReducer(manageExecutiveHoursAndDollarsReducer, initialState);
   const reduxDispatch = useDispatch();
   const profitYear = useNavigationYear();
+  const currentYear = useFakeTimeAwareYear();
 
   const [triggerSearch, { isLoading: isSearching }] = useLazyGetExecutiveHoursAndDollarsQuery();
   const [triggerModalSearch, { isLoading: isModalSearching }] = useLazyGetAdditionalExecutivesQuery();
@@ -145,7 +147,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
   const executeSearch = useCallback(
     async (searchForm: ExecutiveSearchForm) => {
       const searchParams: ExecutiveHoursAndDollarsRequestDto = {
-        profitYear: profitYear || new Date().getFullYear(),
+        profitYear: profitYear || currentYear,
         ...(searchForm.badgeNumber && { badgeNumber: searchForm.badgeNumber }),
         ...(searchForm.socialSecurity && { socialSecurity: Number(searchForm.socialSecurity) }),
         ...(searchForm.fullNameContains && { fullNameContains: searchForm.fullNameContains }),
@@ -184,7 +186,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
           }
         }
 
-        reduxDispatch(setExecutiveHoursAndDollarsGridYear(profitYear || new Date().getFullYear()));
+        reduxDispatch(setExecutiveHoursAndDollarsGridYear(profitYear || currentYear));
         dispatch({ type: "CLEAR_ADDITIONAL_EXECUTIVES" });
       } catch (error) {
         dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Search failed" } });
@@ -196,7 +198,7 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
         } as MissiveResponse);
       }
     },
-    [triggerSearch, profitYear, reduxDispatch, mainGridPagination, addAlert, clearAlerts]
+    [triggerSearch, profitYear, currentYear, reduxDispatch, mainGridPagination, addAlert, clearAlerts]
   );
 
   const executeModalSearch = useCallback(
