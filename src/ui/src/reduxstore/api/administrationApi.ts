@@ -114,19 +114,7 @@ export const AdministrationApi = createApi({
     }),
     getBankById: builder.query<BankDto, number>({
       query: (id) => ({
-        url: `administration,
-              useGetAllBanksQuery,
-              useGetBankByIdQuery,
-              useCreateBankMutation,
-              useUpdateBankMutation,
-              useDisableBankMutation,
-              useGetBankAccountsQuery,
-              useLazyGetBankAccountsQuery,
-              useGetBankAccountByIdQuery,
-              useCreateBankAccountMutation,
-              useUpdateBankAccountMutation,
-              useSetPrimaryBankAccountMutation,
-              useDisableBankAccountMutation/banks/${id}`,
+        url: `administration/banks/${id}`,
         method: "GET"
       }),
       providesTags: (_result, _error, id) => [{ type: "Banks", id }]
