@@ -89,7 +89,7 @@ export const useBeneficiaryRelationshipData = ({
       sortBy: sortParams.sortBy,
       take: pageSize
     };
-  }, [selectedMember?.badgeNumber, selectedMember?.psnSuffix, pageNumber, pageSize, sortParams]);
+  }, [selectedMember?.id, selectedMember?.badgeNumber, selectedMember?.psnSuffix, pageNumber, pageSize, sortParams]);
 
   /**
    * Fetches the relationship data from the API
