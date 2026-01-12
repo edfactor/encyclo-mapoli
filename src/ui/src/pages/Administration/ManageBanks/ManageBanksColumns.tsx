@@ -41,28 +41,34 @@ export const GetManageBanksColumns = (
       editable: true,
       sortable: true
     },
-    createCityColumn({
-      field: "city",
-      headerName: "City",
+    {
+      ...createCityColumn({
+        field: "city",
+        headerName: "City",
+        minWidth: 150
+      }),
+      editable: true
+    },
+    {
+      ...createStateColumn({
+        field: "state",
+        headerName: "State",
+        minWidth: 100
+      }),
       editable: true,
-      width: 150
-    }),
-    createStateColumn({
-      field: "state",
-      headerName: "State",
-      editable: true,
-      width: 100,
       valueParser: (params: ValueParserParams) => {
         const value = params.newValue?.trim().toUpperCase();
         return value && value.length <= 2 ? value : params.oldValue;
       }
-    }),
-    createPhoneColumn({
-      field: "phone",
-      headerName: "Phone",
-      editable: true,
-      width: 150
-    }),
+    },
+    {
+      ...createPhoneColumn({
+        field: "phone",
+        headerName: "Phone",
+        minWidth: 150
+      }),
+      editable: true
+    },
     {
       field: "status",
       headerName: "Status",
@@ -77,12 +83,14 @@ export const GetManageBanksColumns = (
       editable: false,
       sortable: true
     },
-    createYesOrNoColumn({
-      field: "isDisabled",
-      headerName: "Disabled",
-      editable: false,
-      width: 100
-    }),
+    {
+      ...createYesOrNoColumn({
+        field: "isDisabled",
+        headerName: "Disabled",
+        minWidth: 100
+      }),
+      editable: false
+    },
     {
       headerName: "Actions",
       width: 120,

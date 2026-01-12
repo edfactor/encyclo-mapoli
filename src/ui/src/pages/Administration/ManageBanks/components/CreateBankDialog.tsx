@@ -20,11 +20,11 @@ interface CreateBankDialogProps {
 
 interface CreateBankFormData {
   name: string;
-  officeType?: string | null;
-  city?: string | null;
-  state?: string | null;
-  phone?: string | null;
-  status?: string | null;
+  officeType: string | null;
+  city: string | null;
+  state: string | null;
+  phone: string | null;
+  status: string | null;
 }
 
 const validationSchema = yup.object().shape({
@@ -102,7 +102,7 @@ const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) =>
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Create New Bank</DialogTitle>
       <DialogContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} id="create-bank-form">
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Controller
               name="name"
@@ -198,7 +198,8 @@ const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) =>
           Cancel
         </Button>
         <Button
-          onClick={handleSubmit(onSubmit)}
+          type="submit"
+          form="create-bank-form"
           variant="contained"
           color="primary"
           disabled={isSubmitting}

@@ -147,6 +147,7 @@ DECLARE
     RECENTLY_TERMINATED CONSTANT NUMBER := 133;
     -- QPAY066_AD_HOC_REPORTS CONSTANT NUMBER := 132; -- REMOVED
     QPAY066_UNDR21 CONSTANT NUMBER := 123;
+    ADHOC_PROF_LETTER73 CONSTANT NUMBER := 176;
     DIVORCE_REPORT CONSTANT NUMBER := 161;
 
     --- These are the role IDs from the ROLES table
@@ -324,7 +325,8 @@ BEGIN
     insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     -- insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE); -- REMOVED
     insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ADHOC_PROF_LETTER73, ADHOC_GROUP, 'Prof Letter73', '', 'adhoc-prof-letter73', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
 
 -- Fiscal Close
     insert_navigation_item(FISCAL_CLOSE, YEAR_END_MENU, 'Fiscal Close', '', 'fiscal-close', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
@@ -347,6 +349,36 @@ BEGIN
 --  NOTE: Administrative navigation should be accessible to members of the IT-DevOps and System-Administrator roles.
     assign_navigation_role(ADMINISTRATIVE_MENU, IT_DEVOPS);
     assign_navigation_role(ADMINISTRATIVE_MENU, SYSTEM_ADMINISTRATOR);
+
+-- Administrative groups (must have all roles that children have)
+    assign_navigation_role(ADMIN_CONFIGURATION_GROUP, IT_DEVOPS);
+    assign_navigation_role(ADMIN_CONFIGURATION_GROUP, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADMIN_DATA_QUALITY_GROUP, IT_DEVOPS);
+    assign_navigation_role(ADMIN_DATA_QUALITY_GROUP, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADMIN_DATA_QUALITY_GROUP, FINANCE_MANAGER);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, IT_DEVOPS);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, FINANCE_MANAGER);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, AUDITOR);
+
+    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_RMD_FACTORS, IT_DEVOPS);
+    assign_navigation_role(MANAGE_RMD_FACTORS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_BANKS, IT_DEVOPS);
+    assign_navigation_role(MANAGE_BANKS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, IT_DEVOPS);
+    assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, IT_DEVOPS);
+    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(AUDIT_SEARCH_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(AUDIT_SEARCH_PAGE, FINANCE_MANAGER);
+    assign_navigation_role(AUDIT_SEARCH_PAGE, IT_DEVOPS);
+    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS);
+    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, SYSTEM_ADMINISTRATOR);
 
 -- Print PS Jobs - REMOVED
     -- assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);
@@ -550,6 +582,9 @@ BEGIN
     assign_navigation_role(QPAY066_UNDR21, FINANCE_MANAGER);
     assign_navigation_role(QPAY066_UNDR21, DISTRIBUTIONS_CLERK);
     
+    assign_navigation_role(ADHOC_PROF_LETTER73, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADHOC_PROF_LETTER73, FINANCE_MANAGER);
+    
     assign_navigation_role(DIVORCE_REPORT, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DIVORCE_REPORT, FINANCE_MANAGER);
     assign_navigation_role(DIVORCE_REPORT, DISTRIBUTIONS_CLERK);
@@ -559,33 +594,6 @@ BEGIN
     assign_navigation_role(INQUIRIES_GROUP, IT_DEVOPS);
     -- assign_navigation_role(ADJUSTMENTS_GROUP, IT_DEVOPS); -- REMOVED
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
-    
-    -- Administrative groups (must have all roles that children have)
-    assign_navigation_role(ADMIN_CONFIGURATION_GROUP, IT_DEVOPS);
-    assign_navigation_role(ADMIN_CONFIGURATION_GROUP, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(ADMIN_DATA_QUALITY_GROUP, IT_DEVOPS);
-    assign_navigation_role(ADMIN_DATA_QUALITY_GROUP, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(ADMIN_DATA_QUALITY_GROUP, FINANCE_MANAGER);
-    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, IT_DEVOPS);
-    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, SYSTEM_ADMINISTRATOR);
-    
-    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, IT_DEVOPS);
-    assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, IT_DEVOPS);
-    assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(MANAGE_RMD_FACTORS, IT_DEVOPS);
-    assign_navigation_role(MANAGE_RMD_FACTORS, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(MANAGE_BANKS, IT_DEVOPS);
-    assign_navigation_role(MANAGE_BANKS, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, IT_DEVOPS);
-    assign_navigation_role(ORACLE_HCM_DIAGNOSTICS, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, IT_DEVOPS);
-    assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, IT_DEVOPS);
-    assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(AUDIT_SEARCH_PAGE, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(AUDIT_SEARCH_PAGE, FINANCE_MANAGER);
-    assign_navigation_role(AUDIT_SEARCH_PAGE, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     -- assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS); -- REMOVED
@@ -620,8 +628,8 @@ BEGIN
     assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
     assign_navigation_role(TERMINATED_LETTERS, IT_DEVOPS);
     assign_navigation_role(RECENTLY_TERMINATED, IT_DEVOPS);
-    -- assign_navigation_role(QPAY066_AD_HOC_REPORTS, IT_DEVOPS); -- REMOVED
     assign_navigation_role(QPAY066_UNDR21, IT_DEVOPS);
+    assign_navigation_role(ADHOC_PROF_LETTER73, IT_DEVOPS);
     assign_navigation_role(DIVORCE_REPORT, IT_DEVOPS);
 
     -- FISCAL_CLOSE IT_DEVOPS role assignments - REMOVED
