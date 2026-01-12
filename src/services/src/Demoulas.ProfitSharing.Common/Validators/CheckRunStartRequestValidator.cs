@@ -20,9 +20,14 @@ public sealed class CheckRunStartRequestValidator : AbstractValidator<CheckRunSt
             .Must(date => date >= new DateOnly(2000, 1, 1) && date <= new DateOnly(2100, 12, 31))
             .WithMessage("CheckRunDate must be between 2000-01-01 and 2100-12-31.");
 
-        RuleFor(x => x.CheckNumber)
-            .GreaterThan(0)
-            .WithMessage("CheckNumber must be a positive integer.");
+        RuleFor(x => x.DistributionIds)
+            .NotNull()
+            .Must(x => x.Count > 0)
+            .WithMessage("DistributionIds must contain at least one id.");
+
+        RuleFor(x => x.PrinterType)
+            .IsInEnum()
+            .WithMessage("PrinterType is invalid.");
 
         RuleFor(x => x.UserName)
             .NotEmpty()

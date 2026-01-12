@@ -9,7 +9,14 @@ export enum MessageKeys {
   MilitaryContribution = "MilitaryContribution",
   StateTaxRatesSave = "StateTaxRatesSave",
   AnnuityRatesSave = "AnnuityRatesSave",
-  RmdFactorsSave = "RmdFactorsSave"
+  RmdFactorsSave = "RmdFactorsSave",
+  BanksSave = "BanksSave",
+  BankCreate = "BankCreate",
+  BankDisable = "BankDisable",
+  BankAccountsSave = "BankAccountsSave",
+  BankAccountCreate = "BankAccountCreate",
+  BankAccountDisable = "BankAccountDisable",
+  BankAccountSetPrimary = "BankAccountSetPrimary"
 }
 
 export class Messages {
@@ -154,6 +161,115 @@ export class Messages {
       type: "error",
       title: "Prerequisite Not Complete",
       message: "" // dynamic message added at dispatch time
+    }
+  };
+  
+  // Bank management messages
+  static readonly BanksSaveSuccess: MessageUpdate = {
+    key: MessageKeys.BanksSave,
+    message: {
+      type: "success",
+      title: "Banks saved successfully"
+    }
+  };
+  static readonly BanksSaveError: MessageUpdate = {
+    key: MessageKeys.BanksSave,
+    message: {
+      type: "error",
+      title: "Failed to save banks",
+      message: "Please try again"
+    }
+  };
+  static readonly BankCreatedSuccess: MessageUpdate = {
+    key: MessageKeys.BankCreate,
+    message: {
+      type: "success",
+      title: "Bank created successfully"
+    }
+  };
+  static readonly BankCreateError: MessageUpdate = {
+    key: MessageKeys.BankCreate,
+    message: {
+      type: "error",
+      title: "Failed to create bank",
+      message: "Please try again"
+    }
+  };
+  static readonly BankDisabledSuccess: MessageUpdate = {
+    key: MessageKeys.BankDisable,
+    message: {
+      type: "success",
+      title: "Bank disabled successfully"
+    }
+  };
+  static readonly BankDisableError: MessageUpdate = {
+    key: MessageKeys.BankDisable,
+    message: {
+      type: "error",
+      title: "Failed to disable bank",
+      message: "Please try again"
+    }
+  };
+
+  // Bank account management messages
+  static readonly BankAccountsSaveSuccess: MessageUpdate = {
+    key: MessageKeys.BankAccountsSave,
+    message: {
+      type: "success",
+      title: "Bank accounts saved successfully"
+    }
+  };
+  static readonly BankAccountsSaveError: MessageUpdate = {
+    key: MessageKeys.BankAccountsSave,
+    message: {
+      type: "error",
+      title: "Failed to save bank accounts",
+      message: "Please try again"
+    }
+  };
+  static readonly BankAccountCreatedSuccess: MessageUpdate = {
+    key: MessageKeys.BankAccountCreate,
+    message: {
+      type: "success",
+      title: "Bank account created successfully"
+    }
+  };
+  static readonly BankAccountCreateError: MessageUpdate = {
+    key: MessageKeys.BankAccountCreate,
+    message: {
+      type: "error",
+      title: "Failed to create bank account",
+      message: "Please try again"
+    }
+  };
+  static readonly BankAccountDisabledSuccess: MessageUpdate = {
+    key: MessageKeys.BankAccountDisable,
+    message: {
+      type: "success",
+      title: "Bank account disabled successfully"
+    }
+  };
+  static readonly BankAccountDisableError: MessageUpdate = {
+    key: MessageKeys.BankAccountDisable,
+    message: {
+      type: "error",
+      title: "Failed to disable bank account",
+      message: "Please try again"
+    }
+  };
+  static readonly BankAccountSetPrimarySuccess: MessageUpdate = {
+    key: MessageKeys.BankAccountSetPrimary,
+    message: {
+      type: "success",
+      title: "Primary account updated successfully"
+    }
+  };
+  static readonly BankAccountSetPrimaryError: MessageUpdate = {
+    key: MessageKeys.BankAccountSetPrimary,
+    message: {
+      type: "error",
+      title: "Failed to set primary account",
+      message: "Please try again"
     }
   };
 }

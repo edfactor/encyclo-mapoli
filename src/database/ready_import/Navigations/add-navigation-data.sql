@@ -64,6 +64,11 @@ DECLARE
     ADJUSTMENTS_GROUP CONSTANT NUMBER := 15;
     ADHOC_GROUP CONSTANT NUMBER := 16;
     --DISTRIBUTIONS_GROUP CONSTANT NUMBER := 16;
+    
+    -- Groups under ADMINISTRATIVE
+    ADMIN_CONFIGURATION_GROUP CONSTANT NUMBER := 17;
+    ADMIN_DATA_QUALITY_GROUP CONSTANT NUMBER := 18;
+    ADMIN_CORRECTIONS_GROUP CONSTANT NUMBER := 19;
 
     -- AVAILABLE PAGES (ids starting at 100)
 
@@ -146,6 +151,7 @@ DECLARE
     MANAGE_COMMENT_TYPES_PAGE CONSTANT NUMBER := 177;
     MANAGE_RMD_FACTORS CONSTANT NUMBER := 178;
     FAKE_TIME_MANAGEMENT CONSTANT NUMBER := 179;
+    MANAGE_BANKS CONSTANT NUMBER := 180;
 
     --- These are the role IDs from the ROLES table
     SYSTEM_ADMINISTRATOR CONSTANT NUMBER := 1;
@@ -300,14 +306,23 @@ BEGIN
     insert_navigation_item(FAKE_TIME_MANAGEMENT, IT_DEVOPS_MENU, 'Fake Time Management', '', 'fake-time-management', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
 
 --Administrative Operations
-    insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, ADMINISTRATIVE_MENU, 'Demographic Sync Errors', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(MANAGE_ANNUITY_RATES_PAGE, ADMINISTRATIVE_MENU, 'Manage Annuity Rates', '', 'manage-annuity-rates', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-        insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADMINISTRATIVE_MENU, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(AUDIT_SEARCH_PAGE, ADMINISTRATIVE_MENU, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(MANAGE_COMMENT_TYPES_PAGE, ADMINISTRATIVE_MENU, 'Manage Comment Types', '', 'manage-comment-types', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_DETAILS_REVERSAL, ADMINISTRATIVE_MENU, 'Reversals', '008-23', 'reversals', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(MANAGE_RMD_FACTORS, ADMINISTRATIVE_MENU, 'Manage RMD Factors', '', 'manage-rmd-factors', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
+    -- Configuration Management Group
+    insert_navigation_item(ADMIN_CONFIGURATION_GROUP, ADMINISTRATIVE_MENU, 'Configuration Management', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_STATE_TAX_RATES_PAGE, ADMIN_CONFIGURATION_GROUP, 'Manage State Tax Rates', '', 'manage-state-taxes', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_ANNUITY_RATES_PAGE, ADMIN_CONFIGURATION_GROUP, 'Manage Annuity Rates', '', 'manage-annuity-rates', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_RMD_FACTORS, ADMIN_CONFIGURATION_GROUP, 'Manage RMD Factors', '', 'manage-rmd-factors', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_COMMENT_TYPES_PAGE, ADMIN_CONFIGURATION_GROUP, 'Manage Comment Types', '', 'manage-comment-types', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_BANKS, ADMIN_CONFIGURATION_GROUP, 'Manage Banks', '', 'manage-banks', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    
+    -- Data Quality & Diagnostics Group
+    insert_navigation_item(ADMIN_DATA_QUALITY_GROUP, ADMINISTRATIVE_MENU, 'Data Quality & Diagnostics', '', '', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ORACLE_HCM_DIAGNOSTICS, ADMIN_DATA_QUALITY_GROUP, 'Demographic Sync Errors', '', 'oracle-hcm-diagnostics', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(AUDIT_SEARCH_PAGE, ADMIN_DATA_QUALITY_GROUP, 'Audit Search', '', 'audit-search', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    
+    -- Corrections & Adjustments Group
+    insert_navigation_item(ADMIN_CORRECTIONS_GROUP, ADMINISTRATIVE_MENU, 'Corrections & Adjustments', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARING_ADJUSTMENTS_PAGE, ADMIN_CORRECTIONS_GROUP, 'Profit Sharing Adjustments', '008-22', 'profit-sharing-adjustments', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_DETAILS_REVERSAL, ADMIN_CORRECTIONS_GROUP, 'Reversals', '008-23', 'reversals', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
 
 --December Activities
     insert_navigation_item(DECEMBER_ACTIVITIES, YEAR_END_MENU, 'December Activities', '','december-process-accordion', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -702,12 +717,27 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
     assign_navigation_role(VESTING_REPORTS_GROUP, IT_DEVOPS);
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
+    
+    -- Administrative groups (must have all roles that children have)
+    assign_navigation_role(ADMIN_CONFIGURATION_GROUP, IT_DEVOPS);
+    assign_navigation_role(ADMIN_CONFIGURATION_GROUP, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADMIN_DATA_QUALITY_GROUP, IT_DEVOPS);
+    assign_navigation_role(ADMIN_DATA_QUALITY_GROUP, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADMIN_DATA_QUALITY_GROUP, FINANCE_MANAGER);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, IT_DEVOPS);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, FINANCE_MANAGER);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(ADMIN_CORRECTIONS_GROUP, AUDITOR);
+    
     assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, IT_DEVOPS);
     assign_navigation_role(MANAGE_STATE_TAX_RATES_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, IT_DEVOPS);
     assign_navigation_role(MANAGE_ANNUITY_RATES_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_RMD_FACTORS, IT_DEVOPS);
     assign_navigation_role(MANAGE_RMD_FACTORS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_BANKS, IT_DEVOPS);
+    assign_navigation_role(MANAGE_BANKS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, IT_DEVOPS);
     assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, IT_DEVOPS);
