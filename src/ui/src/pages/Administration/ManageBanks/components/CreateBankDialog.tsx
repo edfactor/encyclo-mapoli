@@ -8,7 +8,7 @@ import {
   Stack,
   TextField
 } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { CreateBankRequest } from "../../../../types/administration/banks";
 
@@ -20,11 +20,11 @@ interface CreateBankDialogProps {
 
 interface CreateBankFormData {
   name: string;
-  officeType: string | null;
-  city: string | null;
-  state: string | null;
-  phone: string | null;
-  status: string | null;
+  officeType: string;
+  city: string;
+  state: string;
+  phone: string;
+  status: string;
 }
 
 const validationSchema = yup.object().shape({
@@ -37,29 +37,29 @@ const validationSchema = yup.object().shape({
     .string()
     .trim()
     .max(50, "Office type must not exceed 50 characters")
-    .nullable(),
+    .default(""),
   city: yup
     .string()
     .trim()
     .max(50, "City must not exceed 50 characters")
-    .nullable(),
+    .default(""),
   state: yup
     .string()
     .trim()
     .uppercase()
     .matches(/^[A-Z]{0,2}$/, "State must be a 2-letter code")
     .max(2, "State must be a 2-letter code")
-    .nullable(),
+    .default(""),
   phone: yup
     .string()
     .trim()
     .max(20, "Phone must not exceed 20 characters")
-    .nullable(),
+    .default(""),
   status: yup
     .string()
     .trim()
     .max(50, "Status must not exceed 50 characters")
-    .nullable()
+    .default("")
 });
 
 const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) => {
@@ -80,14 +80,14 @@ const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) =>
     }
   });
 
-  const onSubmit = async (data: CreateBankFormData) => {
+  const onSubmit: SubmitHandler<CreateBankFormData> = async (data) => {
     await onCreate({
       name: data.name.trim(),
-      officeType: data.officeType?.trim() || null,
-      city: data.city?.trim() || null,
-      state: data.state?.trim().toUpperCase() || null,
-      phone: data.phone?.trim() || null,
-      status: data.status?.trim() || null
+      officeType: data.officeType.trim() || null,
+      city: data.city.trim() || null,
+      state: data.state.trim().toUpperCase() || null,
+      phone: data.phone.trim() || null,
+      status: data.status.trim() || null
     });
     
     reset();
