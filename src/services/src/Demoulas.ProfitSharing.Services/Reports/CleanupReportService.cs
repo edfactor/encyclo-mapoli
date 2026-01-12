@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -23,6 +24,7 @@ public class CleanupReportService : ICleanupReportService
     private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly TimeProvider _timeProvider;
 
     private readonly byte[] _distributionProfitCodes =
     [
@@ -44,12 +46,14 @@ public class CleanupReportService : ICleanupReportService
         ICalendarService calendarService,
         TotalService totalService,
         IHostEnvironment host,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        TimeProvider timeProvider)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
         _logger = factory.CreateLogger<CleanupReportService>();
+        _timeProvider = timeProvider;
     }
 
 
@@ -171,7 +175,7 @@ public class CleanupReportService : ICleanupReportService
                 // force to start of month, so returned reference range is correct - the day of the month is ignored.
                 startDate = new DateOnly(startDate.Year, startDate.Month, 1);
 
-                var endDate = req.EndDate ?? DateTime.Now.ToDateOnly();
+                var endDate = req.EndDate ?? _timeProvider.GetLocalDateOnly();
                 // force to end of month, so returned reference range is correct - day of the month is ignored.
                 endDate = new DateOnly(endDate.Year, endDate.Month, DateTime.DaysInMonth(endDate.Year, endDate.Month));
 

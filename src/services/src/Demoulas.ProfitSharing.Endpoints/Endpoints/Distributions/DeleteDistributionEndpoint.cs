@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,7 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
     {
         Delete("{Id}");
         Group<DistributionGroup>();
+        Policies(Security.Policy.CanManageDistributions); // Override group policy - delete requires manage permission
         Summary(s =>
         {
             s.Summary = "Delete a profit-sharing distribution";

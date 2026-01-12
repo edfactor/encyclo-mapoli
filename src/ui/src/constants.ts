@@ -72,6 +72,7 @@ export const ROUTES = {
   NEW_PS_LABELS: "new-ps-labels",
   PROFALL: "profall",
   DEMO_FREEZE: "demographic-freeze",
+  FAKE_TIME_MANAGEMENT: "fake-time-management",
   MANAGE_STATE_TAXES: "manage-state-taxes",
   MANAGE_ANNUITY_RATES: "manage-annuity-rates",
   MANAGE_RMD_FACTORS: "manage-rmd-factors",
@@ -170,6 +171,9 @@ export const CAPTIONS = {
 
   FISCAL_CLOSE: MENU_LABELS.FISCAL_CLOSE,
   FISCAL_CLOSE_SHORT: "Fiscal Close",
+
+  FAKE_TIME_MANAGEMENT: "Fake Time Management",
+  FAKE_TIME_MANAGEMENT_SHORT: "Fake Time",
 
   FORFEIT: "Forfeit (PAY443)",
   FORFEIT_SHORT: "Forfeit",

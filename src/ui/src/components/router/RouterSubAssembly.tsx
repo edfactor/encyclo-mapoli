@@ -4,6 +4,8 @@ import SmartPSDrawer from "../../components/Drawer/SmartPSDrawer";
 import DSMDynamicBreadcrumbs from "../../components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
 import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 import { PageLoadingFallback } from "../../components/router/LazyPageLoader";
+const Login = lazy(() => import("../../components/Login/Login"));
+const OktaLoginCallback = lazy(() => import("../../components/MenuBar/OktaLoginCallback"));
 const FrozenSummary = lazy(() => import("../../pages/FrozenSummary/FrozenSummary"));
 const MasterInquiry = lazy(() => import("../../pages/InquiriesAndAdjustments/MasterInquiry/MasterInquiry"));
 const DemographicBadgesNotInPayprofit = lazy(
@@ -72,6 +74,7 @@ const ForfeituresByAge = lazy(() => import("../../pages/FiscalClose/AgeReports/F
 const ProfitShareEditUpdate = lazy(() => import("../../pages/FiscalClose/ProfitShareEditUpdate/ProfitShareEditUpdate"));
 const YTDWages = lazy(() => import("../../pages/FiscalClose/YTDWagesExtract/YTDWages"));
 const DemographicFreeze = lazy(() => import("../../pages/ITOperations/DemographicFreeze/DemographicFreeze"));
+const FakeTimeManagement = lazy(() => import("../../pages/ITOperations/FakeTimeManagement/FakeTimeManagement"));
 const ManageStateTaxes = lazy(() => import("../../pages/Administration/ManageStateTaxes/ManageStateTaxes"));
 const ManageAnnuityRates = lazy(() => import("../../pages/Administration/ManageAnnuityRates/ManageAnnuityRates"));
 const ManageRmdFactors = lazy(() => import("../../pages/Administration/ManageRmdFactors/ManageRmdFactors"));
@@ -181,6 +184,7 @@ const RouterSubAssembly: React.FC = () => {
 
   const { isDrawerOpen } = useSelector((state: RootState) => state.general);
   const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined }, { skip: !token });
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -287,6 +291,26 @@ const RouterSubAssembly: React.FC = () => {
               )}
               {!isFullscreen && <SmartPSDrawer navigationData={data} />}
               <Routes>
+                {EnvironmentUtils.isOktaEnabled && (
+                  <>
+                    <Route
+                      path="/login/callback"
+                      element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <OktaLoginCallback />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/login"
+                      element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <Login />
+                        </Suspense>
+                      }
+                    />
+                  </>
+                )}
                 <Route
                   path="/unauthorized"
                   element={<Unauthorized />}
@@ -615,6 +639,16 @@ const RouterSubAssembly: React.FC = () => {
                     <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <DemographicFreeze />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.FAKE_TIME_MANAGEMENT}
+                  element={
+                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <FakeTimeManagement />
                       </Suspense>
                     </ProtectedRoute>
                   }

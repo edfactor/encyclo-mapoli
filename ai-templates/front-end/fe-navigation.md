@@ -17,10 +17,7 @@ Navigation structure is fetched from the backend API:
 
 ```typescript
 // API call in RouterSubAssembly.tsx
-const { data, isSuccess } = useGetNavigationQuery(
-  { navigationId: undefined },
-  { skip: !token },
-);
+const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined }, { skip: !token });
 
 // Returns NavigationResponseDto
 interface NavigationResponseDto {
@@ -68,9 +65,7 @@ The top navigation consists of:
 `MenuData()` in `src/MenuData.ts` transforms backend navigation into top menu structure:
 
 ```typescript
-export const MenuData = (
-  data: NavigationResponseDto | undefined,
-): RouteCategory[] => {
+export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory[] => {
   if (!data || !data.navigation) {
     return [];
   }
@@ -84,10 +79,7 @@ export const MenuData = (
   topLevelItems.forEach((values: NavigationDto) => {
     // Check role permissions
     const hasRequiredRole =
-      values.requiredRoles.length > 0 &&
-      values.requiredRoles.some((role) =>
-        localStorageImpersonating.includes(role),
-      );
+      values.requiredRoles.length > 0 && values.requiredRoles.some((role) => localStorageImpersonating.includes(role));
     const noRolesRequired = values.requiredRoles.length === 0;
 
     if ((hasRequiredRole || noRolesRequired) && (values.isNavigable ?? true)) {
@@ -177,9 +169,7 @@ Year End (Drawer Title)
 `menuLevels()` in `src/MenuData.ts` creates drawer structure:
 
 ```typescript
-export const menuLevels = (
-  data: NavigationResponseDto | undefined,
-): MenuLevel[] => {
+export const menuLevels = (data: NavigationResponseDto | undefined): MenuLevel[] => {
   if (!data || !data.navigation) {
     return [];
   }
@@ -200,10 +190,7 @@ export const menuLevels = (
       statusId: value.statusId,
       statusName: value.statusName,
       mainTitle: value.title + addSubTitle(value.subTitle),
-      topPage:
-        value.items && value.items.length > 0
-          ? populateTopPage(value.items)
-          : [],
+      topPage: value.items && value.items.length > 0 ? populateTopPage(value.items) : []
     }));
 };
 ```
@@ -267,7 +254,7 @@ export const ROUTES = {
   FISCAL_CLOSE: "fiscal-close",
   MASTER_INQUIRY: "master-inquiry",
   DISTRIBUTIONS_AND_FORFEITURES: "distributions-and-forfeitures",
-  MANAGE_EXECUTIVE_HOURS: "manage-executive-hours-and-dollars",
+  MANAGE_EXECUTIVE_HOURS: "manage-executive-hours-and-dollars"
   // ... more routes
 } as const;
 ```

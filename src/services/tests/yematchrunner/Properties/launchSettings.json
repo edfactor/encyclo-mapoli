@@ -1,48 +1,48 @@
 {
-    "profiles": {
-        "Baseline Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run baseline"
-        },
-        "Golden Year End Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run goldenyearend"
-        },
-        "Golden Express Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run goldenexpress"
-        },
-        "Golden December Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run goldendecemberexpress"
-        },
-        "Golden Republish Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run goldenrepublish"
-        },
-        "Master Inquiry Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run masterinquiry"
-        },
-        "Seven Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run seven"
-        },
-        "View Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run view"
-        },
-        "Tinker Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run tinker"
-        },
-        "Terminations Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run terminations"
-        },
-        "Auto Match Run": {
-            "commandName": "Project",
-            "commandLineArgs": "--run automatch"
-        }
+  "profiles": {
+    "Baseline Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run baseline"
+    },
+    "Golden Year End Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run goldenyearend"
+    },
+    "Golden Express Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run goldenexpress"
+    },
+    "Golden December Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run goldendecemberexpress"
+    },
+    "Golden Republish Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run goldenrepublish"
+    },
+    "Master Inquiry Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run masterinquiry"
+    },
+    "Seven Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run seven"
+    },
+    "View Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run view"
+    },
+    "Tinker Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run tinker"
+    },
+    "Terminations Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run terminations"
+    },
+    "Auto Match Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run automatch"
     }
+  }
 }

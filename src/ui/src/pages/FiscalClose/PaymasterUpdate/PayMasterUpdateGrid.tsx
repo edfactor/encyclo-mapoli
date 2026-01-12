@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
-import { Path } from "react-router";
+import { Path } from "react-router-dom";
 import { UpdateSummaryResponse } from "reduxstore/types";
 import { Pagination } from "smart-ui-library";
 import { DSMGrid } from "../../../components/DSMGrid/DSMGrid";

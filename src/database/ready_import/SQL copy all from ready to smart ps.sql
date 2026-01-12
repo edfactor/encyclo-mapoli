@@ -1572,7 +1572,7 @@ BEGIN
     
     COMMIT;
 END;
-/
+
 
 -- ============================================================================
 -- Copy annuity rates from 2024 to any missing years (2020-2026)
@@ -1610,7 +1610,7 @@ BEGIN
     
     COMMIT;
 END;
-/
+
 
 END;
 COMMIT ;

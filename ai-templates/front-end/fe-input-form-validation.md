@@ -19,26 +19,19 @@ All form validation begins with a Yup schema that defines the validation rules f
 
 ```typescript
 import * as yup from "yup";
-import {
-  ssnValidator,
-  badgeNumberValidator,
-  monthValidator,
-} from "../../utils/FormValidators";
+import { ssnValidator, badgeNumberValidator, monthValidator } from "../../utils/FormValidators";
 
 const schema = yup.object().shape({
   socialSecurity: ssnValidator,
   badgeNumber: badgeNumberValidator,
   name: yup.string().nullable(),
   startMonth: monthValidator,
-  endMonth: monthValidator.min(
-    yup.ref("startMonth"),
-    "End month must be after start month",
-  ),
+  endMonth: monthValidator.min(yup.ref("startMonth"), "End month must be after start month"),
   contribution: yup
     .number()
     .typeError("Contribution must be a number")
     .min(0, "Contribution must be a positive number")
-    .nullable(),
+    .nullable()
 });
 ```
 
@@ -64,16 +57,16 @@ const {
   formState: { errors, isValid },
   reset,
   setValue,
-  watch,
+  watch
 } = useForm<FormDataType>({
   resolver: yupResolver(schema) as Resolver<FormDataType>,
   mode: "onBlur", // Validate on blur events
   defaultValues: {
     socialSecurity: undefined,
     badgeNumber: undefined,
-    name: undefined,
+    name: undefined
     // ... other defaults
-  },
+  }
 });
 ```
 
@@ -223,7 +216,7 @@ const handleReset = () => {
   reset({
     socialSecurity: undefined,
     badgeNumber: undefined,
-    name: undefined,
+    name: undefined
     // ... other defaults
   });
 
@@ -301,22 +294,15 @@ export const profitYearNullableValidator = yup
 ### Cross-Field Date Validators
 
 ```typescript
-export const endDateAfterStartDateValidator = (
-  startFieldName: string,
-  errorMessage?: string,
-) =>
+export const endDateAfterStartDateValidator = (startFieldName: string, errorMessage?: string) =>
   yup
     .date()
     .nullable()
-    .test(
-      "is-after-start",
-      errorMessage || "End Date must be after Start Date",
-      function (value) {
-        const startDate = this.parent[startFieldName];
-        if (!startDate || !value) return true;
-        return value > startDate;
-      },
-    );
+    .test("is-after-start", errorMessage || "End Date must be after Start Date", function (value) {
+      const startDate = this.parent[startFieldName];
+      if (!startDate || !value) return true;
+      return value > startDate;
+    });
 ```
 
 ## Advanced Validation Patterns
@@ -333,9 +319,9 @@ const schema = yup.object().shape({
     function (endYear) {
       const startYear = this.parent.startProfitYear;
       return !startYear || !endYear || endYear >= startYear;
-    },
+    }
   ),
-  startProfitYear: profitYearNullableValidator,
+  startProfitYear: profitYearNullableValidator
 });
 ```
 
@@ -371,22 +357,12 @@ Determine if sufficient search criteria has been entered:
 
 ```typescript
 const hasSearchCriteria = useMemo(() => {
-  const hasFieldValues =
-    hasValue(watchedBadgeNumber) ||
-    hasValue(watchedSSN) ||
-    hasValue(watchedName);
+  const hasFieldValues = hasValue(watchedBadgeNumber) || hasValue(watchedSSN) || hasValue(watchedName);
 
-  const hasNonDefaultSelections =
-    watchedMemberType !== "all" || watchedPaymentType !== "all";
+  const hasNonDefaultSelections = watchedMemberType !== "all" || watchedPaymentType !== "all";
 
   return hasFieldValues || hasNonDefaultSelections;
-}, [
-  watchedBadgeNumber,
-  watchedSSN,
-  watchedName,
-  watchedMemberType,
-  watchedPaymentType,
-]);
+}, [watchedBadgeNumber, watchedSSN, watchedName, watchedMemberType, watchedPaymentType]);
 ```
 
 ### Auto-Update Related Fields
@@ -573,7 +549,7 @@ const schema = yup.object().shape({
 });
 
 useForm<SearchFormData>({
-  resolver: yupResolver(schema),
+  resolver: yupResolver(schema)
 });
 ```
 
@@ -587,8 +563,7 @@ const onSubmit = (data: SearchFormData) => {
     badge_number: data.badgeNumber ?? undefined,
     ssn: data.socialSecurity ? Number(data.socialSecurity) : undefined,
     full_name: data.name ?? undefined,
-    member_type_code:
-      data.memberType === "all" ? undefined : Number(data.memberType),
+    member_type_code: data.memberType === "all" ? undefined : Number(data.memberType)
   };
 
   apiCall(apiRequest);

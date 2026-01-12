@@ -19,12 +19,8 @@ public class YearEndServiceTests : PristineBaseTest
 
     public YearEndServiceTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _loggerFactory = LoggerFactory.Create(builder =>
-        {
-            _ = builder
-                .SetMinimumLevel(LogLevel.Debug)
-                .AddConsole();
-        });
+        // Set minimum level to Warning to avoid noisy logs during tests
+        _loggerFactory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning));
     }
 
     [Fact]
@@ -38,7 +34,7 @@ public class YearEndServiceTests : PristineBaseTest
         Dictionary<int, YearEndChange> smartRowsBySsn = await DbFactory.UseWritableContext(async ctx =>
         {
             PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService, CalendarService);
-            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService);
+            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService, TimeProvider.System);
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);
 

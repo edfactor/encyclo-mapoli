@@ -1,7 +1,9 @@
 import { ValidationIcon, ValidationResultsDialog } from "@/components/ValidationIcon";
-import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
-import { Path, useNavigate } from "react-router";
+import { Path, useNavigate } from "react-router-dom";
 import { numberToCurrency } from "smart-ui-library";
 import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
@@ -14,9 +16,17 @@ interface ForfeitGridProps {
   searchResults: ForfeituresAndPointsResponse | null;
   pagination: ReturnType<typeof useGridPagination>;
   isSearching: boolean;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
-const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, isSearching }) => {
+const ForfeitGrid: React.FC<ForfeitGridProps> = ({
+  searchResults,
+  pagination,
+  isSearching,
+  isGridExpanded = false,
+  onToggleExpand
+}) => {
   const navigate = useNavigate();
 
   const handleNavigationForButton = useCallback(
@@ -67,19 +77,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
     const n = typeof val === "number" ? val : parseFloat(val as string);
     return Number.isFinite(n) ? n : 0;
   };
-  const totalForfeituresRaw = safeNumber(searchResults?.totalForfeitures);
-  const totalForfeitPoints = safeNumber(searchResults?.totalForfeitPoints);
   const totalEarningPoints = safeNumber(searchResults?.totalEarningPoints);
-
-  const totalsRow = useMemo(
-    () => ({
-      forfeitures: totalForfeituresRaw.toFixed(2),
-      contForfeitPoints: totalForfeitPoints,
-      earningPoints: totalEarningPoints,
-      validation: searchResults?.crossReferenceValidation?.validationGroups[0] || null
-    }),
-    [totalForfeituresRaw, totalForfeitPoints, totalEarningPoints, searchResults]
-  );
 
   if (!searchResults?.response) return null;
 
@@ -92,58 +90,80 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
       isLoading={isSearching}
       pagination={pagination}
       onSortChange={handleSortChange}
+      header={<ReportSummary report={searchResults} />}
+      headerActions={
+        onToggleExpand && (
+          <IconButton
+            onClick={onToggleExpand}
+            sx={{ zIndex: 1 }}
+            title={isGridExpanded ? "Exit fullscreen" : "Expand fullscreen"}>
+            {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        )
+      }
+      heightConfig={{
+        mode: "content-aware",
+        heightPercentage: isGridExpanded ? 0.85 : 0.4
+      }}
       beforeGrid={
-        <>
+        !isGridExpanded ? (
+          <>
+            <ValidationResultsDialog
+              open={dialogState.isOpen}
+              onClose={() => setDialogState({ isOpen: false, fieldName: null })}
+              validationGroup={searchResults?.crossReferenceValidation?.validationGroups[0]}
+              fieldName={dialogState.fieldName}
+            />
+            <div className="sticky top-0 z-10 flex bg-white">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell className="text-center align-middle">Profit Sharing Amount</TableCell>
+                    <TableCell className="text-center align-middle">Distribution Amount</TableCell>
+                    <TableCell className="text-center align-middle">Allocation To</TableCell>
+                    <TableCell className="text-center align-middle">Allocation From</TableCell>
+                    <TableCell className="text-center align-middle">Earning Points</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="text-center align-middle">
+                      {numberToCurrency(searchResults.totalProfitSharingBalance || 0)}
+                    </TableCell>
+                    <TableCell className="text-center align-middle">
+                      <ValidationIcon
+                        validationGroup={searchResults.crossReferenceValidation?.validationGroups[0]}
+                        fieldName="QPAY129_DistributionTotals"
+                        onClick={() => {
+                          setDialogState({
+                            isOpen: !dialogState.isOpen,
+                            fieldName: "QPAY129_DistributionTotals"
+                          });
+                        }}
+                      />
+                      {numberToCurrency(searchResults.distributionTotals || 0)}
+                    </TableCell>
+                    <TableCell className="text-center align-middle">
+                      {numberToCurrency(searchResults.allocationToTotals || 0)}
+                    </TableCell>
+                    <TableCell className="text-center align-middle">
+                      {numberToCurrency(searchResults.allocationsFromTotals || 0)}
+                    </TableCell>
+                    <TableCell className="text-center align-middle">{totalEarningPoints.toLocaleString()}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        ) : (
           <ValidationResultsDialog
             open={dialogState.isOpen}
             onClose={() => setDialogState({ isOpen: false, fieldName: null })}
             validationGroup={searchResults?.crossReferenceValidation?.validationGroups[0]}
             fieldName={dialogState.fieldName}
           />
-          <div className="sticky top-0 z-10 flex bg-white">
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell className="text-center align-middle">Profit Sharing Amount</TableCell>
-                  <TableCell className="text-center align-middle">Distribution Amount</TableCell>
-                  <TableCell className="text-center align-middle">Allocation To</TableCell>
-                  <TableCell className="text-center align-middle">Allocation From</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="text-center align-middle">
-                    {numberToCurrency(searchResults.totalProfitSharingBalance || 0)}
-                  </TableCell>
-                  <TableCell className="text-center align-middle">
-                    <ValidationIcon
-                      validationGroup={searchResults.crossReferenceValidation?.validationGroups[0]}
-                      fieldName="QPAY129_DistributionTotals"
-                      onClick={() => {
-                        setDialogState({
-                          isOpen: !dialogState.isOpen,
-                          fieldName: "QPAY129_DistributionTotals"
-                        });
-                      }}
-                    />
-                    {numberToCurrency(searchResults.distributionTotals || 0)}
-                  </TableCell>
-                  <TableCell className="text-center align-middle">
-                    {numberToCurrency(searchResults.allocationToTotals || 0)}
-                  </TableCell>
-                  <TableCell className="text-center align-middle">
-                    {numberToCurrency(searchResults.allocationsFromTotals || 0)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-          <ReportSummary report={searchResults} />
-        </>
+        )
       }
-      gridOptions={{
-        pinnedTopRowData: [totalsRow]
-      }}
       className="relative"
     />
   );

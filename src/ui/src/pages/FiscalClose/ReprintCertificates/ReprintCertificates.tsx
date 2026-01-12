@@ -1,6 +1,7 @@
 import PageErrorBoundary from "@/components/PageErrorBoundary";
 import { Alert, Button, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useFakeTimeAwareYear } from "hooks/useFakeTimeAwareDate";
 import useNavigationYear from "hooks/useNavigationYear";
 import React, { useState } from "react";
 import { useGetMissingAnnuityYearsQuery } from "reduxstore/api/administrationApi";
@@ -14,8 +15,9 @@ import ReprintCertificatesGrid from "./ReprintCertificatesGrid";
 
 const ReprintCertificates: React.FC = () => {
   const selectedProfitYear = useNavigationYear();
+  const currentYear = useFakeTimeAwareYear();
   const [filterParams, setFilterParams] = useState<ReprintCertificatesFilterParams>({
-    profitYear: selectedProfitYear ?? new Date().getFullYear(),
+    profitYear: selectedProfitYear ?? currentYear,
     badgeNumber: "",
     socialSecurityNumber: ""
   });
@@ -57,7 +59,7 @@ const ReprintCertificates: React.FC = () => {
 
   const handleReset = () => {
     setFilterParams({
-      profitYear: selectedProfitYear ?? new Date().getFullYear(),
+      profitYear: selectedProfitYear ?? currentYear,
       badgeNumber: "",
       socialSecurityNumber: ""
     });

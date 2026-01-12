@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
@@ -31,6 +32,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IProcessWatchdog _watchdog;
     private readonly ILogger<EmployeeSyncService> _logger;
+    private readonly TimeProvider _timeProvider;
 
     public EmployeeSyncService(AtomFeedClient atomFeedClient,
         EmployeeFullSyncClient oracleEmployeeDataSyncClient,
@@ -38,7 +40,8 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         Channel<MessageRequest<OracleEmployee[]>> employeeChannel,
         IServiceScopeFactory serviceScopeFactory,
         IProcessWatchdog watchdog,
-        ILogger<EmployeeSyncService> logger)
+        ILogger<EmployeeSyncService> logger,
+        TimeProvider timeProvider)
     {
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
         _atomFeedClient = atomFeedClient;
@@ -47,6 +50,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         _serviceScopeFactory = serviceScopeFactory;
         _watchdog = watchdog;
         _logger = logger;
+        _timeProvider = timeProvider;
     }
 
     public async Task ExecuteFullSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
@@ -68,7 +72,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             StartMethodId = StartMethod.Constants.System,
             RequestedBy = requestedBy,
             JobStatusId = JobStatus.Constants.Running,
-            Started = DateTime.Now
+            Started = _timeProvider.GetLocalNow().DateTime
         };
 
         await _profitSharingDataContextFactory.UseWritableContext(db =>
@@ -140,7 +144,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             await _profitSharingDataContextFactory.UseWritableContext(db =>
             {
                 return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
-                        .SetProperty(b => b.Completed, b => DateTime.Now)
+                        .SetProperty(b => b.Completed, b => _timeProvider.GetLocalNow().DateTime)
                         .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
             }, cancellationToken).ConfigureAwait(false);
@@ -292,7 +296,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             await _profitSharingDataContextFactory.UseWritableContext(db =>
             {
                 return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
-                        .SetProperty(b => b.Completed, b => DateTime.Now)
+                        .SetProperty(b => b.Completed, b => _timeProvider.GetLocalNow().DateTime)
                         .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
             }, cancellationToken).ConfigureAwait(false);

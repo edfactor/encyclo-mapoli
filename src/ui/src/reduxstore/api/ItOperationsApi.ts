@@ -8,9 +8,11 @@ import {
   AuditEventDto,
   AuditSearchRequestDto,
   CurrentUserResponseDto,
+  FakeTimeStatusResponse,
   FreezeDemographicsRequest,
   FrozenStateResponse,
   RowCountResult,
+  SetFakeTimeRequest,
   SortedPaginationRequestDto,
   StateTaxRateDto,
   UpdateAnnuityRateRequest,
@@ -143,6 +145,19 @@ export const ItOperationsApi = createApi({
         url: `audit/changes/${auditEventId}`,
         method: "GET"
       })
+    }),
+    getFakeTimeStatus: builder.query<FakeTimeStatusResponse, void>({
+      query: () => ({
+        url: "itdevops/fake-time/status",
+        method: "GET"
+      })
+    }),
+    validateFakeTime: builder.mutation<FakeTimeStatusResponse, SetFakeTimeRequest>({
+      query: (request) => ({
+        url: "itdevops/fake-time/validate",
+        method: "POST",
+        body: request
+      })
     })
   })
 });
@@ -158,5 +173,8 @@ export const {
   useLazyGetMetadataQuery,
   useLazyGetCurrentUserQuery,
   useLazySearchAuditQuery,
-  useLazyGetAuditChangesQuery
+  useLazyGetAuditChangesQuery,
+  useGetFakeTimeStatusQuery,
+  useLazyGetFakeTimeStatusQuery,
+  useValidateFakeTimeMutation
 } = ItOperationsApi;

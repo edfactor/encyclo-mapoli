@@ -72,9 +72,7 @@ export interface SecurityState {
 }
 
 // yearsEndSlice.ts - reads selected profit year from localStorage
-selectedProfitYearForDecemberActivities: localStorage.getItem(
-  "selectedProfitYearForDecemberActivities",
-);
+selectedProfitYearForDecemberActivities: localStorage.getItem("selectedProfitYearForDecemberActivities");
 ```
 
 **Risk Explanation:**

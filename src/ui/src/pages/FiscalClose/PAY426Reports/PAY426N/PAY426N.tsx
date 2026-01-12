@@ -7,12 +7,13 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-    clearYearEndProfitSharingReportFrozen,
-    clearYearEndProfitSharingReportLive
+  clearYearEndProfitSharingReportFrozen,
+  clearYearEndProfitSharingReportLive
 } from "reduxstore/slices/yearsEndSlice";
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS, ROUTES } from "../../../../constants";
+import { useFakeTimeAwareYear } from "../../../../hooks/useFakeTimeAwareDate";
 import { useGridExpansion } from "../../../../hooks/useGridExpansion";
 import { useIsProfitYearFrozen } from "../../../../hooks/useIsProfitYearFrozen";
 import { useIsReadOnlyByStatus } from "../../../../hooks/useIsReadOnlyByStatus";
@@ -31,6 +32,7 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const profitYear = useNavigationYear();
+  const currentYear = useFakeTimeAwareYear();
   const isFrozen = useIsProfitYearFrozen(profitYear);
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
 
@@ -136,7 +138,7 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
                 searchTrigger={searchTrigger}
                 isGridExpanded={isGridExpanded}
                 onToggleExpand={handleToggleGridExpand}
-                profitYear={profitYear ?? new Date().getFullYear()}
+                profitYear={profitYear ?? currentYear}
               />
             )}
 

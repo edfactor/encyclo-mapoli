@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -23,6 +24,7 @@ public class PostFrozenService : IPostFrozenService
     private readonly ICalendarService _calendarService;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger _logger;
+    private readonly TimeProvider _timeProvider;
 
     // Static readonly arrays for profit code filtering - zero per-instance allocation
     // EF Core translates array.Contains() to SQL IN clause
@@ -55,7 +57,8 @@ public class PostFrozenService : IPostFrozenService
         TotalService totalService,
         ICalendarService calendarService,
         ILoggerFactory loggerFactory,
-        IDemographicReaderService demographicReaderService
+        IDemographicReaderService demographicReaderService,
+        TimeProvider timeProvider
     )
     {
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
@@ -63,6 +66,7 @@ public class PostFrozenService : IPostFrozenService
         _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
         _logger = loggerFactory.CreateLogger<PostFrozenService>();
+        _timeProvider = timeProvider;
     }
 
     public async Task<ProfitSharingUnder21ReportResponse> ProfitSharingUnder21Report(ProfitYearRequest request, CancellationToken cancellationToken)
@@ -73,7 +77,7 @@ public class PostFrozenService : IPostFrozenService
 
 
         //Report uses the current date as the offset to calculate the age.
-        var birthDate21 = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-21));
+        var birthDate21 = _timeProvider.GetUtcDateOnly().AddYears(-21);
 
         // Helper function to build the base query for counts - each task will use its own context
         Func<IProfitSharingDbContext, Task<IQueryable<Under21IntermediaryResult>>> buildBaseQuery = async (ctx) =>

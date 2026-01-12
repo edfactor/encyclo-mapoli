@@ -75,6 +75,7 @@ export const initialState: PayBeNextState = {
     hasSearched: false
   },
   formData: {
+    // Note: Initial state uses system time. Component will initialize with fake-time-aware year from hook.
     profitYear: new Date().getFullYear(),
     isAlsoEmployee: true
   },
@@ -159,6 +160,7 @@ export const payBeNextReducer = (state: PayBeNextState, action: PayBeNextAction)
       return {
         ...initialState,
         formData: {
+          // Note: Component should re-initialize with fake-time-aware year from hook after reset
           profitYear: new Date().getFullYear(),
           isAlsoEmployee: true
         }

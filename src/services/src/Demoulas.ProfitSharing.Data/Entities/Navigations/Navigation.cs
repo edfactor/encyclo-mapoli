@@ -101,6 +101,7 @@ public sealed class Navigation
         public const short AdhocProfLetter73 = 176;
         public const short ManageCommentTypes = 177;
         public const short ManageRmdFactors = 178;
+        public const short FakeTimeManagement = 179;
     }
 
     public short Id { get; set; }

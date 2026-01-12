@@ -227,6 +227,7 @@ BEGIN
     DELETE FROM NAVIGATION_PREREQUISITES;
     DELETE FROM NAVIGATION_ASSIGNED_ROLES;
     DELETE FROM NAVIGATION_TRACKING;
+    DELETE FROM NAVIGATION_CUSTOM_SETTING;
     DELETE FROM NAVIGATION;
     DELETE FROM NAVIGATION_ROLE;
     
@@ -351,6 +352,7 @@ BEGIN
     assign_navigation_role(INQUIRIES_MENU, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(INQUIRIES_MENU, FINANCE_MANAGER);
     assign_navigation_role(INQUIRIES_MENU, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(INQUIRIES_MENU, EXECUTIVE_ADMINISTRATOR);
     assign_navigation_role(INQUIRIES_MENU, HR_READONLY);
 
 -- Assign roles for YEAR END (YearEndGroup -> CanViewYearEndReports)
@@ -367,6 +369,7 @@ BEGIN
     assign_navigation_role(INQUIRIES_GROUP, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(INQUIRIES_GROUP, FINANCE_MANAGER); 
     assign_navigation_role(INQUIRIES_GROUP, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(INQUIRIES_GROUP, EXECUTIVE_ADMINISTRATOR);
     assign_navigation_role(INQUIRIES_GROUP, HR_READONLY);
 
 -- Assign roles for ADHOC_GROUP
@@ -433,6 +436,7 @@ BEGIN
     assign_navigation_role(FISCAL_CLOSE, FINANCE_MANAGER);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, FINANCE_MANAGER);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, DISTRIBUTIONS_CLERK);
     assign_navigation_role(YTD_WAGES_EXTRACT, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(YTD_WAGES_EXTRACT, FINANCE_MANAGER);
     assign_navigation_role(GET_ELIGIBLE_EMPLOYEES, SYSTEM_ADMINISTRATOR);
@@ -510,6 +514,7 @@ BEGIN
 
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, FINANCE_MANAGER);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, EXECUTIVE_ADMINISTRATOR);
 
     -- Adhoc Reports role assignments
     assign_navigation_role(TERMINATED_LETTERS, SYSTEM_ADMINISTRATOR);

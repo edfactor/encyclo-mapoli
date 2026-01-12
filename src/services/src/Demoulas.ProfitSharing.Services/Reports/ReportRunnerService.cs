@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Time;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -41,7 +42,8 @@ public class ReportRunnerService : IReportRunnerService
         IBreakdownService breakdownService,
         IFrozenReportService frozenReportService,
         IMasterInquiryService masterInquiryService,
-        IAdhocBeneficiariesReport adhocBeneficiariesReport)
+        IAdhocBeneficiariesReport adhocBeneficiariesReport,
+        TimeProvider timeProvider)
     {
         _terminatedEmployeeService = terminatedEmployeeService;
         _profitShareUpdateService = profitShareUpdateService;
@@ -55,7 +57,7 @@ public class ReportRunnerService : IReportRunnerService
         _frozenReportService = frozenReportService;
         _masterInquiryService = masterInquiryService;
         _adhocBeneficiariesReport = adhocBeneficiariesReport;
-        short wallClockYear = (short)DateTime.Now.Year;
+        short wallClockYear = timeProvider.GetLocalYearAsShort();
 
         _reports = new Dictionary<string, Func<CancellationToken, Task<Dictionary<string, object>>>>
         {

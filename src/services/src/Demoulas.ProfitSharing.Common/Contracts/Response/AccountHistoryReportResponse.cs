@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Attributes;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Shared;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
@@ -8,7 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 /// DTO for Account History Report response, displaying member account activity by profit year.
 /// Shows condensed yearly summaries of account balances and transactions.
 /// </summary>
-public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullNameProperty
+public sealed record AccountHistoryReportResponse : ProfitYearRequest
 {
     public required int Id { get; set; }
 
@@ -16,17 +14,6 @@ public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullName
     /// Employee badge number (identifier in payroll system).
     /// </summary>
     public int BadgeNumber { get; set; }
-
-    /// <summary>
-    /// Full name of the member.
-    /// </summary>
-    [MaskSensitive]
-    public string FullName { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Masked SSN for security (displays as XXX-XX-####).
-    /// </summary>
-    public string Ssn { get; set; } = string.Empty;
 
     /// <summary>
     /// Total contributions (employer) for the plan year.
@@ -53,38 +40,15 @@ public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullName
     /// </summary>
     public decimal EndingBalance { get; set; }
 
-    /// <summary>
-    /// Vested balance at the end of the plan year (12/31).
-    /// Represents the portion of the account that is not subject to forfeiture.
-    /// </summary>
-    public decimal VestedBalance { get; set; }
-
-    /// <summary>
-    /// Vesting percentage at the end of the plan year (0.0 to 1.0).
-    /// Represents the percentage of the account that is vested.
-    /// </summary>
-    public decimal? VestingPercent { get; set; }
-
-    /// <summary>
-    /// Years in plan at the end of the plan year.
-    /// Used to determine vesting percentage (0-2 years = 0%, 3 = 20%, 4 = 40%, 5 = 60%, 6 = 80%, 7+ = 100%).
-    /// </summary>
-    public short? YearsInPlan { get; set; }
-
     public static AccountHistoryReportResponse ResponseExample() => new()
     {
         Id = 1,
         BadgeNumber = 12345,
-        FullName = "John Smith",
-        Ssn = "***-**-6789",
         ProfitYear = 2024,
         Contributions = 5000.00m,
         Earnings = 2500.00m,
         Forfeitures = 0m,
         Withdrawals = 1000.00m,
-        EndingBalance = 125000.00m,
-        VestedBalance = 100000.00m,
-        VestingPercent = 0.60m,
-        YearsInPlan = 5
+        EndingBalance = 125000.00m
     };
 }

@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -13,12 +14,14 @@ public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementSer
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
+    private readonly TimeProvider _timeProvider;
 
-    public BeneficiaryDisbursementService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, TotalService totalService)
+    public BeneficiaryDisbursementService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, TotalService totalService, TimeProvider timeProvider)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
+        _timeProvider = timeProvider;
     }
 
     public async Task<Result<bool>> DisburseFundsToBeneficiaries(BeneficiaryDisbursementRequest request, CancellationToken cancellationToken)
@@ -27,7 +30,7 @@ public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementSer
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(context, false);
             int disburserSsn = 0;
-            var profitYear = (short)DateTime.Now.Year;
+            var profitYear = _timeProvider.GetLocalYearAsShort();
             int disburserDemographicId = 0;
             long disburserOracleHcmId = 0;
 
@@ -118,8 +121,8 @@ public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementSer
                     ProfitYear = profitYear,
                     ProfitCodeId = ProfitCode.Constants.OutgoingXferBeneficiary.Id,
                     Forfeiture = amount,
-                    MonthToDate = (byte)DateTime.Now.Month,
-                    YearToDate = (short)DateTime.Now.Year,
+                    MonthToDate = _timeProvider.GetLocalMonthAsByte(),
+                    YearToDate = _timeProvider.GetLocalYearAsShort(),
                     CommentTypeId = request.IsDeceased ? CommentType.Constants.TransferOut : CommentType.Constants.QdroOut,
                     Remark = $"{(request.IsDeceased ? "XREF>" : "QDRO>")}{request.BadgeNumber}{request.PsnSuffix?.ToString("0000") ?? "0000"}",
                     CommentRelatedOracleHcmId = disburserOracleHcmId,
@@ -132,8 +135,8 @@ public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementSer
                     ProfitYear = profitYear,
                     ProfitCodeId = ProfitCode.Constants.IncomingQdroBeneficiary.Id,
                     Contribution = amount,
-                    MonthToDate = (byte)DateTime.Now.Month,
-                    YearToDate = (short)DateTime.Now.Year,
+                    MonthToDate = _timeProvider.GetLocalMonthAsByte(),
+                    YearToDate = _timeProvider.GetLocalYearAsShort(),
                     CommentTypeId = request.IsDeceased ? CommentType.Constants.TransferIn : CommentType.Constants.QdroIn,
                     Remark = $"{(request.IsDeceased ? "XREF<" : "QDRO<")}{request.BadgeNumber}{request.PsnSuffix?.ToString("0000") ?? "0000"}",
                     CommentRelatedOracleHcmId = disburserOracleHcmId,

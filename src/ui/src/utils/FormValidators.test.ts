@@ -58,8 +58,8 @@ describe("FormValidators", () => {
       await expect(badgeNumberValidator.validate(12345)).resolves.toBe(12345);
     });
 
-    it("should validate badge number at minimum (1)", async () => {
-      await expect(badgeNumberValidator.validate(1)).resolves.toBe(1);
+    it("should validate badge number at minimum (100)", async () => {
+      await expect(badgeNumberValidator.validate(100)).resolves.toBe(100);
     });
 
     it("should validate badge number at maximum (9999999)", async () => {
@@ -76,8 +76,8 @@ describe("FormValidators", () => {
       await expect(badgeNumberValidator.validate(0)).resolves.toBeUndefined();
     });
 
-    it("should reject badge number less than 1", async () => {
-      await expect(badgeNumberValidator.validate(-5)).rejects.toThrow("Badge Number must be at least 1");
+    it("should reject badge number less than 100 (3 digits)", async () => {
+      await expect(badgeNumberValidator.validate(99)).rejects.toThrow("Badge Number must be at least 3 digits");
     });
 
     it("should reject badge number greater than 9999999", async () => {
@@ -99,16 +99,16 @@ describe("FormValidators", () => {
   });
 
   describe("badgeNumberOrPSNValidator", () => {
-    it("should validate badge numbers (1-7 digits)", async () => {
+    it("should validate badge numbers (3-7 digits)", async () => {
       await expect(badgeNumberOrPSNValidator.validate(1234567)).resolves.toBe(1234567);
     });
 
-    it("should validate PSN numbers (9-11 digits)", async () => {
+    it("should validate PSN numbers (7-11 digits)", async () => {
       await expect(badgeNumberOrPSNValidator.validate(12345678901)).resolves.toBe(12345678901);
     });
 
-    it("should validate minimum value (1)", async () => {
-      await expect(badgeNumberOrPSNValidator.validate(1)).resolves.toBe(1);
+    it("should validate minimum value (100)", async () => {
+      await expect(badgeNumberOrPSNValidator.validate(100)).resolves.toBe(100);
     });
 
     it("should validate maximum value (99999999999)", async () => {
@@ -125,9 +125,9 @@ describe("FormValidators", () => {
       await expect(badgeNumberOrPSNValidator.validate(0)).resolves.toBeUndefined();
     });
 
-    it("should reject values less than 1", async () => {
-      await expect(badgeNumberOrPSNValidator.validate(-1)).rejects.toThrow(
-        "Badge Number or PSN must be at least 1 digits"
+    it("should reject values less than 100 (3 digits)", async () => {
+      await expect(badgeNumberOrPSNValidator.validate(99)).rejects.toThrow(
+        "Badge Number or PSN must be at least 3 digits"
       );
     });
 
@@ -173,20 +173,20 @@ describe("FormValidators", () => {
   });
 
   describe("psnValidator", () => {
-    it("should validate 9-digit PSN", async () => {
-      await expect(psnValidator.validate(123456789)).resolves.toBe(123456789);
+    it("should validate 7-digit PSN", async () => {
+      await expect(psnValidator.validate(1234567)).resolves.toBe(1234567);
     });
 
-    it("should validate 10-digit PSN", async () => {
-      await expect(psnValidator.validate(1234567890)).resolves.toBe(1234567890);
+    it("should validate 9-digit PSN", async () => {
+      await expect(psnValidator.validate(123456789)).resolves.toBe(123456789);
     });
 
     it("should validate 11-digit PSN", async () => {
       await expect(psnValidator.validate(12345678901)).resolves.toBe(12345678901);
     });
 
-    it("should validate minimum PSN (100000000)", async () => {
-      await expect(psnValidator.validate(100000000)).resolves.toBe(100000000);
+    it("should validate minimum PSN (1000000)", async () => {
+      await expect(psnValidator.validate(1000000)).resolves.toBe(1000000);
     });
 
     it("should validate maximum PSN (99999999999)", async () => {
@@ -198,8 +198,8 @@ describe("FormValidators", () => {
       await expect(psnValidator.validate(undefined)).resolves.toBeUndefined();
     });
 
-    it("should reject PSN less than 9 digits", async () => {
-      await expect(psnValidator.validate(12345678)).rejects.toThrow("PSN must be at least 9 digits");
+    it("should reject PSN less than 7 digits", async () => {
+      await expect(psnValidator.validate(123456)).rejects.toThrow("PSN must be at least 7 digits");
     });
 
     it("should reject PSN greater than 11 digits", async () => {
@@ -773,7 +773,7 @@ describe("FormValidators", () => {
 
     it("should reject strings longer than 7 characters", async () => {
       await expect(badgeNumberStringValidator.validate("12345678")).rejects.toThrow(
-        "Badge Number must be 1 to 7 digits"
+        "Badge Number must be 3 to 7 digits"
       );
     });
 
@@ -781,8 +781,12 @@ describe("FormValidators", () => {
       await expect(badgeNumberStringValidator.validate("1234567")).resolves.toBe("1234567");
     });
 
-    it("should accept strings of 1 character", async () => {
-      await expect(badgeNumberStringValidator.validate("1")).resolves.toBe("1");
+    it("should accept strings of 3 characters", async () => {
+      await expect(badgeNumberStringValidator.validate("123")).resolves.toBe("123");
+    });
+
+    it("should reject strings shorter than 3 characters", async () => {
+      await expect(badgeNumberStringValidator.validate("12")).rejects.toThrow("Badge Number must be 3 to 7 digits");
     });
 
     it("should reject strings with special characters", async () => {

@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AdhocApi } from "reduxstore/api/AdhocApi";
+import { ItOperationsApi } from "reduxstore/api/ItOperationsApi";
 
 import {
   BalanceByAge,
@@ -1070,7 +1071,16 @@ export const yearsEndSlice = createSlice({
   },
 
   extraReducers: (builder) => {
-    // Your existing matchers
+    // Listen for fake time status updates
+    builder.addMatcher(ItOperationsApi.endpoints.getFakeTimeStatus.matchFulfilled, (state, action) => {
+      // When fake time is active, set the profit years to the fake time's year
+      if (action.payload.isActive && action.payload.currentFakeDateTime) {
+        const fakeDate = new Date(action.payload.currentFakeDateTime);
+        const fakeYear = fakeDate.getFullYear();
+        state.selectedProfitYearForDecemberActivities = fakeYear;
+        state.selectedProfitYearForFiscalClose = fakeYear;
+      }
+    });
 
     // Add this new matcher for the getBreakdownByStore endpoint
     builder.addMatcher(AdhocApi.endpoints.getBreakdownByStore.matchFulfilled, (state, action) => {
