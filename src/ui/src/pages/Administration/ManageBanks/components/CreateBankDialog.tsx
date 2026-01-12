@@ -20,11 +20,11 @@ interface CreateBankDialogProps {
 
 interface CreateBankFormData {
   name: string;
-  officeType: string;
-  city: string;
-  state: string;
-  phone: string;
-  status: string;
+  officeType?: string | null;
+  city?: string | null;
+  state?: string | null;
+  phone?: string | null;
+  status?: string | null;
 }
 
 const validationSchema = yup.object().shape({
@@ -83,11 +83,11 @@ const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) =>
   const onSubmit = async (data: CreateBankFormData) => {
     await onCreate({
       name: data.name.trim(),
-      officeType: data.officeType.trim() || null,
-      city: data.city.trim() || null,
-      state: data.state.trim().toUpperCase() || null,
-      phone: data.phone.trim() || null,
-      status: data.status.trim() || null
+      officeType: data.officeType?.trim() || null,
+      city: data.city?.trim() || null,
+      state: data.state?.trim().toUpperCase() || null,
+      phone: data.phone?.trim() || null,
+      status: data.status?.trim() || null
     });
     
     reset();
