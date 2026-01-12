@@ -34,6 +34,8 @@ public sealed class ScenarioFactory
     public List<DemographicHistory> DemographicHistories { get; set; } = [];
     public List<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; } = [];
     public List<AuditEvent> AuditEvents { get; set; } = [];
+    public List<Bank> Banks { get; set; } = [];
+    public List<BankAccount> BankAccounts { get; set; } = [];
 
     // populate ProfitCode dictionary object from the Constants
     public List<ProfitCode> ProfitCodes { get; set; } = typeof(ProfitCode.Constants)
@@ -319,6 +321,15 @@ public sealed class ScenarioFactory
         Mock<DbSet<RmdsFactorByAge>> mockRmdsFactorsByAge = RmdsFactorsByAge.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.RmdsFactorsByAge).Returns(mockRmdsFactorsByAge.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.RmdsFactorsByAge).Returns(mockRmdsFactorsByAge.Object);
+
+        // Banks and BankAccounts for administration
+        Mock<DbSet<Bank>> mockBanks = Banks.BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.Banks).Returns(mockBanks.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.Banks).Returns(mockBanks.Object);
+
+        Mock<DbSet<BankAccount>> mockBankAccounts = BankAccounts.BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.BankAccounts).Returns(mockBankAccounts.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.BankAccounts).Returns(mockBankAccounts.Object);
 
         return _sdb;
     }

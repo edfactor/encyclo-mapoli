@@ -217,25 +217,123 @@ To verify the implementation:
    dotnet build Demoulas.ProfitSharing.slnx
    ```
 
-2. **Database migration** (To be run):
+2. **Unit test verification** (✅ Completed):
 
    ```bash
+   cd src/services
+   dotnet test --project tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj
+   ```
+
+   **Tests Added:**
+
+   - `BankAccountServiceTests.cs` - 8 tests covering CRUD, masking, primary account logic
+   - `BankServiceTests.cs` - 6 tests covering CRUD and ordering
+   - `MicrFormatterFactoryTests.cs` - Existing MICR formatting tests
+
+3. **Frontend build verification** (✅ Completed):
+
+   ```bash
+   cd src/ui
+   npm run build:qa
+   ```
+
+   **Status:** Build succeeds with Vite warning about `define` option (security advisory only, not a build error)
+
+4. **Database migration verification** (⚠️ Required before deployment):
+
+   **CRITICAL**: These migrations contain breaking schema changes. Run in order on a TEST database first.
+
+   ```bash
+   # Step 1: Backup current database
+   # (Oracle backup commands or RMAN backup)
+
+   # Step 2: Run migrations
    cd src/services/src/Demoulas.ProfitSharing.Data.Cli
    dotnet run upgrade-db --connection-name ProfitSharing
    ```
 
-3. **Query verification** (After migration):
+   **Migration Verification Queries:**
 
    ```sql
-   -- Verify Bank table structure
-   SELECT * FROM BANK;
+   -- Verify Bank table structure (new ID primary key, nullable routing number)
+   SELECT * FROM BANK ORDER BY ID;
 
-   -- Verify BankAccount table
-   SELECT * FROM BANK_ACCOUNT;
+   -- Verify BankAccount table exists
+   SELECT * FROM BANK_ACCOUNT ORDER BY BANK_ID, IS_PRIMARY DESC;
 
-   -- Verify sequences
-   SELECT * FROM USER_SEQUENCES WHERE SEQUENCE_NAME IN ('BANK_SEQ', 'BANK_ACCOUNT_SEQ');
+   -- Verify sequences exist and have correct starting values
+   SELECT SEQUENCE_NAME, LAST_NUMBER, INCREMENT_BY
+   FROM USER_SEQUENCES
+   WHERE SEQUENCE_NAME IN ('BANK_SEQ', 'BANK_ACCOUNT_SEQ');
+
+   -- Verify primary key constraint on Bank.Id
+   SELECT CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME
+   FROM USER_CONSTRAINTS
+   WHERE TABLE_NAME = 'BANK' AND CONSTRAINT_TYPE = 'P';
+
+   -- Verify foreign key relationship
+   SELECT CONSTRAINT_NAME, CONSTRAINT_TYPE, R_CONSTRAINT_NAME
+   FROM USER_CONSTRAINTS
+   WHERE TABLE_NAME = 'BANK_ACCOUNT' AND CONSTRAINT_TYPE = 'R';
+
+   -- Verify indexes created
+   SELECT INDEX_NAME, TABLE_NAME, UNIQUENESS
+   FROM USER_INDEXES
+   WHERE TABLE_NAME IN ('BANK', 'BANK_ACCOUNT')
+   ORDER BY TABLE_NAME, INDEX_NAME;
+
+   -- Verify seed data migrated correctly
+   SELECT b.ID, b.NAME, COUNT(ba.ID) as ACCOUNT_COUNT
+   FROM BANK b
+   LEFT JOIN BANK_ACCOUNT ba ON b.ID = ba.BANK_ID
+   GROUP BY b.ID, b.NAME;
    ```
+
+   **Expected Results:**
+
+   - BANK table has ID as primary key (NUMBER(10))
+   - ROUTING_NUMBER is nullable VARCHAR2(9)
+   - BANK_ACCOUNT table exists with all columns
+   - BANK_SEQ starts at 2 (after seeded Newtek bank ID=1)
+   - BANK_ACCOUNT_SEQ starts at 2 (after seeded account ID=1)
+   - Foreign key FK_BANK_ACCOUNT_BANK exists with RESTRICT delete behavior
+   - Indexes created: IX_BANK_NAME, IX_BANK_ROUTING_NUMBER, IX_BANK_ACCOUNT_BANK_ID, etc.
+   - Seed data: 1 Bank (Newtek) with 1 BankAccount
+
+5. **Rollback Procedure** (if migration fails or needs reversal):
+
+   **WARNING**: Rollback will lose BankAccount data. Backup before proceeding.
+
+   ```bash
+   # Option 1: Restore from backup (RECOMMENDED)
+   # Use Oracle RMAN or backup tool to restore pre-migration state
+
+   # Option 2: Manual rollback (if no backup)
+   # Run this SQL to revert schema (DESTRUCTIVE - loses all BankAccount data)
+   ```
+
+   ```sql
+   -- Drop new tables and sequences
+   DROP TABLE BANK_ACCOUNT CASCADE CONSTRAINTS;
+   DROP SEQUENCE BANK_ACCOUNT_SEQ;
+   DROP SEQUENCE BANK_SEQ;
+
+   -- Revert Bank table to original structure
+   ALTER TABLE BANK DROP CONSTRAINT PK_BANK_NEW; -- New ID-based PK
+   ALTER TABLE BANK DROP COLUMN ID;
+   ALTER TABLE BANK DROP COLUMN IS_DISABLED;
+   ALTER TABLE BANK DROP COLUMN CREATED_AT_UTC;
+   ALTER TABLE BANK DROP COLUMN CREATED_BY;
+   ALTER TABLE BANK DROP COLUMN MODIFIED_AT_UTC;
+   ALTER TABLE BANK DROP COLUMN MODIFIED_BY;
+   ALTER TABLE BANK ADD ACCOUNT_NUMBER VARCHAR2(34) NOT NULL;
+   ALTER TABLE BANK MODIFY ROUTING_NUMBER VARCHAR2(9) NOT NULL;
+   ALTER TABLE BANK ADD CONSTRAINT PK_BANK PRIMARY KEY (ROUTING_NUMBER);
+
+   -- Note: Manual data migration required to restore ACCOUNT_NUMBER values
+   ```
+
+   **Post-Rollback:** Application code must be reverted to pre-Phase-1 commit to match schema.
 
 ## Code Patterns Followed
 
