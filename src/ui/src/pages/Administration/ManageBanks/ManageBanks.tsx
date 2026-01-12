@@ -1,6 +1,6 @@
 import { AccountBalance, Block } from "@mui/icons-material";
 import { Button, IconButton, Paper, Stack, Tab, Tabs, Tooltip } from "@mui/material";
-import { ColDef, ValueParserParams } from "ag-grid-community";
+import { CellValueChangedEvent, ColDef, ValueParserParams } from "ag-grid-community";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ApiMessageAlert, DSMGrid, Page } from "smart-ui-library";
@@ -82,9 +82,9 @@ const ManageBanks = () => {
   }, [banks, stagedBanksById]);
 
   const handleCellValueChanged = useCallback(
-    (params: any) => {
+    (params: CellValueChangedEvent) => {
       const bankId = params.data.id;
-      const field = params.colDef.field;
+      const field = params.colDef.field as string;
       const newValue = params.newValue;
 
       setStagedBanksById((prev) => ({
@@ -167,7 +167,7 @@ const ManageBanks = () => {
     }
   };
 
-  const handleDisableBank = async (bankId: number) => {
+  const handleDisableBank = useCallback(async (bankId: number) => {
     try {
       await disableBank(bankId).unwrap();
       await refetch();
@@ -176,7 +176,7 @@ const ManageBanks = () => {
       console.error("Error disabling bank:", error);
       dispatch(setMessage(Messages.BankDisableError));
     }
-  };
+  }, [disableBank, refetch, dispatch]);
 
   const columnDefs: ColDef[] = useMemo(
     () => [
@@ -252,8 +252,8 @@ const ManageBanks = () => {
         headerName: "Actions",
         width: 120,
         editable: false,
-        cellRenderer: (params: any) => {
-          const bank = params.data as BankDto;
+        cellRenderer: (params: { data: BankDto }) => {
+          const bank = params.data;
           return (
             <Stack direction="row" spacing={0.5}>
               <Tooltip title="Manage Accounts">

@@ -1,6 +1,6 @@
 import { Block, Star, StarBorder } from "@mui/icons-material";
 import { Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import { ColDef } from "ag-grid-community";
+import { CellValueChangedEvent, ColDef } from "ag-grid-community";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ApiMessageAlert, DSMGrid } from "smart-ui-library";
@@ -15,6 +15,7 @@ import {
 } from "../../../../reduxstore/api/administrationApi";
 import { setMessage } from "../../../../reduxstore/slices/messageSlice";
 import { BankAccountDto, CreateBankAccountRequest, UpdateBankAccountRequest } from "../../../../types/administration/banks";
+import { validateAccountNumber, validateRoutingNumber } from "../../../../utils/bankValidation";
 import { Messages } from "../../../../utils/messageDictonary";
 import CreateBankAccountDialog from "./CreateBankAccountDialog";
 
@@ -37,6 +38,7 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
 
     const [originalAccountsById, setOriginalAccountsById] = useState<Record<number, BankAccountDto>>({});
     const [stagedAccountsById, setStagedAccountsById] = useState<Record<number, BankAccountDto>>({});
+    const [validationErrors, setValidationErrors] = useState<Record<number, { routingNumber?: string; accountNumber?: string }>>({});
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const prevAccountsRef = useRef<BankAccountDto[]>([]);
@@ -77,6 +79,13 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
         });
     }, [stagedAccountsById, originalAccountsById]);
 
+    const hasValidationErrors = useMemo(() => {
+        return Object.keys(validationErrors).some((id) => {
+            const errors = validationErrors[Number(id)];
+            return errors && (errors.routingNumber || errors.accountNumber);
+        });
+    }, [validationErrors]);
+
     useUnsavedChangesGuard(hasUnsavedChanges);
 
     const rowData: EditableBankAccount[] = useMemo(() => {
@@ -87,11 +96,29 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
     }, [accounts, stagedAccountsById]);
 
     const handleCellValueChanged = useCallback(
-        (params: any) => {
+        (params: CellValueChangedEvent) => {
             const accountId = params.data.id;
-            const field = params.colDef.field;
+            const field = params.colDef.field as string;
             const newValue = params.newValue;
 
+            // Validate the changed field
+            let error = "";
+            if (field === "routingNumber") {
+                error = validateRoutingNumber(newValue);
+            } else if (field === "accountNumber") {
+                error = validateAccountNumber(newValue);
+            }
+
+            // Update validation errors
+            setValidationErrors((prev) => ({
+                ...prev,
+                [accountId]: {
+                    ...prev[accountId],
+                    [field]: error
+                }
+            }));
+
+            // Update staged data
             setStagedAccountsById((prev) => ({
                 ...prev,
                 [accountId]: {
@@ -104,6 +131,24 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
     );
 
     const handleSave = async () => {
+        // Check for validation errors
+        const hasValidationErrors = Object.keys(stagedAccountsById).some((id) => {
+            const errors = validationErrors[Number(id)];
+            return errors && (errors.routingNumber || errors.accountNumber);
+        });
+
+        if (hasValidationErrors) {
+            dispatch(setMessage({
+                key: "BankAccountsSave",
+                message: {
+                    type: "error",
+                    title: "Validation Error",
+                    message: "Please fix validation errors before saving."
+                }
+            }));
+            return;
+        }
+
         setIsSaving(true);
         try {
             const updates = Object.keys(stagedAccountsById)
@@ -131,13 +176,14 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
 
             await refetch();
 
-            // Reset staged state
+            // Reset staged state and validation errors
             const refreshedAccountsMap = accounts.reduce<Record<number, BankAccountDto>>((acc, account) => {
                 acc[account.id] = account;
                 return acc;
             }, {});
             setOriginalAccountsById(refreshedAccountsMap);
             setStagedAccountsById(refreshedAccountsMap);
+            setValidationErrors({});
 
             dispatch(setMessage(Messages.BankAccountsSaveSuccess));
         } catch (error) {
@@ -150,13 +196,12 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
 
     const handleDiscard = () => {
         setStagedAccountsById(originalAccountsById);
+        setValidationErrors({});
     };
 
     const handleCreateAccount = async (request: CreateBankAccountRequest) => {
-        if (bankId === null) return;
-
         try {
-            await createAccount({ ...request, bankId }).unwrap();
+            await createAccount(request).unwrap();
             await refetch();
             setIsCreateDialogOpen(false);
             dispatch(setMessage(Messages.BankAccountCreatedSuccess));
@@ -166,7 +211,7 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
         }
     };
 
-    const handleDisableAccount = async (accountId: number) => {
+    const handleDisableAccount = useCallback(async (accountId: number) => {
         try {
             await disableAccount(accountId).unwrap();
             await refetch();
@@ -175,9 +220,9 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
             console.error("Error disabling bank account:", error);
             dispatch(setMessage(Messages.BankAccountDisableError));
         }
-    };
+    }, [disableAccount, refetch, dispatch]);
 
-    const handleSetPrimary = async (accountId: number) => {
+    const handleSetPrimary = useCallback(async (accountId: number) => {
         try {
             await setPrimary(accountId).unwrap();
             await refetch();
@@ -186,7 +231,7 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
             console.error("Error setting primary account:", error);
             dispatch(setMessage(Messages.BankAccountSetPrimaryError));
         }
-    };
+    }, [setPrimary, refetch, dispatch]);
 
     const columnDefs: ColDef[] = useMemo(
         () => [
@@ -202,7 +247,16 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
                 headerName: "Routing Number",
                 width: 150,
                 editable: true,
-                sortable: true
+                sortable: true,
+                cellStyle: (params) => {
+                    const accountId = params.data?.id;
+                    const error = validationErrors[accountId]?.routingNumber;
+                    return error ? { backgroundColor: "#ffebee" } : undefined;
+                },
+                tooltipValueGetter: (params) => {
+                    const accountId = params.data?.id;
+                    return validationErrors[accountId]?.routingNumber || "";
+                }
             },
             {
                 field: "accountNumber",
@@ -210,6 +264,18 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
                 width: 200,
                 editable: true,
                 sortable: true,
+                cellStyle: (params) => {
+                    const accountId = params.data?.id;
+                    const error = validationErrors[accountId]?.accountNumber;
+                    return error ? { backgroundColor: "#ffebee" } : undefined;
+                },
+                tooltipValueGetter: (params) => {
+                    const accountId = params.data?.id;
+                    const error = validationErrors[accountId]?.accountNumber;
+                    if (error) return error;
+                    // Otherwise show masked value in tooltip
+                    return params.value || "";
+                },
                 valueFormatter: (params) => {
                     const value = params.value as string;
                     if (!value) return "";
@@ -255,8 +321,8 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
                 headerName: "Actions",
                 width: 120,
                 editable: false,
-                cellRenderer: (params: any) => {
-                    const account = params.data as BankAccountDto;
+                cellRenderer: (params: { data: BankAccountDto }) => {
+                    const account = params.data;
                     return (
                         <Stack direction="row" spacing={0.5}>
                             {!account.isPrimary && !account.isDisabled && (
@@ -294,7 +360,7 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
                 }
             }
         ],
-        [handleDisableAccount, handleSetPrimary]
+        [validationErrors, handleDisableAccount, handleSetPrimary]
     );
 
     if (bankId === null) {
@@ -325,7 +391,7 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
                     variant="contained"
                     color="primary"
                     onClick={handleSave}
-                    disabled={!hasUnsavedChanges || isSaving}
+                    disabled={!hasUnsavedChanges || hasValidationErrors || isSaving}
                 >
                     {isSaving ? "Saving..." : "Save Changes"}
                 </Button>
@@ -355,6 +421,7 @@ const ManageBankAccounts = ({ bankId, bankName }: ManageBankAccountsProps) => {
                 open={isCreateDialogOpen}
                 onClose={() => setIsCreateDialogOpen(false)}
                 onCreate={handleCreateAccount}
+                bankId={bankId!}
             />
         </Stack>
     );

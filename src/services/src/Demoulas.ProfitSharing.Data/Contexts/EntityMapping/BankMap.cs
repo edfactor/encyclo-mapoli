@@ -1,14 +1,17 @@
 ﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 
-public sealed class BankMap : IEntityTypeConfiguration<Bank>
+internal sealed class BankMap : ModifiedBaseMap<Bank>
 {
-    public void Configure(EntityTypeBuilder<Bank> builder)
+    public override void Configure(EntityTypeBuilder<Bank> builder)
     {
+        base.Configure(builder); // Configure ModifiedBase properties
+
         _ = builder.ToTable("BANK");
 
         _ = builder.HasKey(x => x.Id);
@@ -79,24 +82,6 @@ public sealed class BankMap : IEntityTypeConfiguration<Bank>
             .IsRequired()
             .HasDefaultValue(false)
             .HasColumnName("IS_DISABLED");
-
-        _ = builder.Property(x => x.CreatedAtUtc)
-            .IsRequired()
-            .HasColumnName("CREATED_AT_UTC")
-            .HasColumnType("TIMESTAMP WITH TIME ZONE")
-            .HasDefaultValueSql("SYSTIMESTAMP");
-
-        _ = builder.Property(x => x.CreatedBy)
-            .HasMaxLength(96)
-            .HasColumnName("CREATED_BY");
-
-        _ = builder.Property(x => x.ModifiedAtUtc)
-            .HasColumnName("MODIFIED_AT_UTC")
-            .HasColumnType("TIMESTAMP WITH TIME ZONE");
-
-        _ = builder.Property(x => x.ModifiedBy)
-            .HasMaxLength(96)
-            .HasColumnName("MODIFIED_BY");
 
         // Navigation property - one bank to many accounts
         _ = builder.HasMany(x => x.Accounts)

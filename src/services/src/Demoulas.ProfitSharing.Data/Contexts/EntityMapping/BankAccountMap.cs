@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -9,10 +10,12 @@ namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 /// Entity Framework Core configuration for BankAccount entity.
 /// Maps bank account details including routing numbers, account numbers, and account status.
 /// </summary>
-internal sealed class BankAccountMap : IEntityTypeConfiguration<BankAccount>
+internal sealed class BankAccountMap : ModifiedBaseMap<BankAccount>
 {
-    public void Configure(EntityTypeBuilder<BankAccount> builder)
+    public override void Configure(EntityTypeBuilder<BankAccount> builder)
     {
+        base.Configure(builder); // Configure ModifiedBase properties
+
         _ = builder.ToTable("BANK_ACCOUNT");
 
         _ = builder.HasKey(x => x.Id);
@@ -92,24 +95,6 @@ internal sealed class BankAccountMap : IEntityTypeConfiguration<BankAccount>
             .HasColumnName("DISCONTINUED_DATE")
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
-
-        _ = builder.Property(x => x.CreatedAtUtc)
-            .IsRequired()
-            .HasColumnName("CREATED_AT_UTC")
-            .HasColumnType("TIMESTAMP WITH TIME ZONE")
-            .HasDefaultValueSql("SYSTIMESTAMP");
-
-        _ = builder.Property(x => x.CreatedBy)
-            .HasMaxLength(96)
-            .HasColumnName("CREATED_BY");
-
-        _ = builder.Property(x => x.ModifiedAtUtc)
-            .HasColumnName("MODIFIED_AT_UTC")
-            .HasColumnType("TIMESTAMP WITH TIME ZONE");
-
-        _ = builder.Property(x => x.ModifiedBy)
-            .HasMaxLength(96)
-            .HasColumnName("MODIFIED_BY");
 
         // Foreign key relationship to Bank
         _ = builder.HasOne(x => x.Bank)

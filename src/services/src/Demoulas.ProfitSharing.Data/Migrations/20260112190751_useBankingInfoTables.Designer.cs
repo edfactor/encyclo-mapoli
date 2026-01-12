@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20260112024258_AddBankAccountTable")]
-    partial class AddBankAccountTable
+    [Migration("20260112190751_useBankingInfoTables")]
+    partial class useBankingInfoTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -436,9 +436,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(96)
-                        .HasColumnType("NVARCHAR2(96)")
-                        .HasColumnName("CREATED_BY");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("CREATEDBY");
 
                     b.Property<DateTime?>("FedAchChangeDate")
                         .HasColumnType("DATE")
@@ -469,9 +468,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<string>("ModifiedBy")
-                        .HasMaxLength(96)
-                        .HasColumnType("NVARCHAR2(96)")
-                        .HasColumnName("MODIFIED_BY");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("MODIFIEDBY");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -514,6 +512,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(24)")
                         .HasColumnName("STATUS");
 
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
                     b.HasKey("Id")
                         .HasName("PK_BANK");
 
@@ -533,7 +538,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = 1,
                             City = "Lake Success",
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 12, 2, 42, 57, 678, DateTimeKind.Unspecified).AddTicks(313), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 12, 19, 7, 50, 236, DateTimeKind.Unspecified).AddTicks(6625), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             FedAchChangeDate = new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FedwireLocation = "Miami, FL",
@@ -581,9 +586,34 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(96)
-                        .HasColumnType("NVARCHAR2(96)")
-                        .HasColumnName("CREATED_BY");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("CREATEDBY");
+
+                    b.Property<DateTime?>("DiscontinuedDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("DISCONTINUED_DATE");
+
+                    b.Property<DateTime?>("EffectiveDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("EFFECTIVE_DATE");
+
+                    b.Property<DateTime?>("FedAchChangeDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FED_ACH_CHANGE_DATE");
+
+                    b.Property<string>("FedwireLocation")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("FEDWIRE_LOCATION");
+
+                    b.Property<DateTime?>("FedwireRevisionDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FEDWIRE_REVISION_DATE");
+
+                    b.Property<string>("FedwireTelegraphicName")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("FEDWIRE_TELEGRAPHIC_NAME");
 
                     b.Property<bool>("IsDisabled")
                         .ValueGeneratedOnAdd()
@@ -602,15 +632,36 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("MODIFIED_AT_UTC");
 
                     b.Property<string>("ModifiedBy")
-                        .HasMaxLength(96)
-                        .HasColumnType("NVARCHAR2(96)")
-                        .HasColumnName("MODIFIED_BY");
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("MODIFIEDBY");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("NVARCHAR2(1000)")
+                        .HasColumnName("NOTES");
 
                     b.Property<string>("RoutingNumber")
                         .IsRequired()
                         .HasMaxLength(9)
                         .HasColumnType("NVARCHAR2(9)")
                         .HasColumnName("ROUTING_NUMBER");
+
+                    b.Property<string>("ServicingFedAddress")
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)")
+                        .HasColumnName("SERVICING_FED_ADDRESS");
+
+                    b.Property<string>("ServicingFedRoutingNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("SERVICING_FED_ROUTING_NUMBER");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_BANK_ACCOUNT");
@@ -636,7 +687,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccountName = "Profit Sharing Distribution Account",
                             AccountNumber = "PLACEHOLDER",
                             BankId = 1,
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 12, 2, 42, 57, 681, DateTimeKind.Unspecified).AddTicks(9552), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 12, 19, 7, 50, 242, DateTimeKind.Unspecified).AddTicks(6447), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             IsDisabled = false,
                             IsPrimary = true,

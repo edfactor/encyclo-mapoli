@@ -248,7 +248,10 @@ public sealed class BankAccountService : IBankAccountService
 
             var now = DateTimeOffset.UtcNow;
             var userName = appUser.UserName ?? "SYSTEM";
-            
+
+            // Always set effectiveDate to today if not provided - never trust client
+            var actualEffectiveDate = effectiveDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
             var bankAccount = new BankAccount
             {
                 BankId = bankId,
@@ -263,7 +266,7 @@ public sealed class BankAccountService : IBankAccountService
                 FedAchChangeDate = fedAchChangeDate,
                 FedwireRevisionDate = fedwireRevisionDate,
                 Notes = notes,
-                EffectiveDate = effectiveDate,
+                EffectiveDate = actualEffectiveDate,
                 CreatedAtUtc = now,
                 CreatedBy = userName,
                 ModifiedAtUtc = now,
@@ -365,7 +368,7 @@ public sealed class BankAccountService : IBankAccountService
         return _contextFactory.UseWritableContext(async ctx =>
         {
             var userName = appUser.UserName ?? "SYSTEM";
-            
+
             var bankAccount = await ctx.BankAccounts
                 .TagWith($"Administration-UpdateBankAccount-{id}")
                 .Include(ba => ba.Bank)
@@ -477,7 +480,7 @@ public sealed class BankAccountService : IBankAccountService
         return _contextFactory.UseWritableContext(async ctx =>
         {
             var userName = appUser.UserName ?? "SYSTEM";
-            
+
             var bankAccount = await ctx.BankAccounts
                 .TagWith($"Administration-SetPrimaryAccount-{id}")
                 .FirstOrDefaultAsync(ba => ba.Id == id, cancellationToken);
@@ -532,7 +535,7 @@ public sealed class BankAccountService : IBankAccountService
         return _contextFactory.UseWritableContext(async ctx =>
         {
             var userName = appUser.UserName ?? "SYSTEM";
-            
+
             var bankAccount = await ctx.BankAccounts
                 .TagWith($"Administration-DisableBankAccount-{id}")
                 .FirstOrDefaultAsync(ba => ba.Id == id, cancellationToken);
