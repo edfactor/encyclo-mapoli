@@ -12,6 +12,7 @@ internal static class ContextExtensions
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new BankMap());
+        modelBuilder.ApplyConfiguration(new BankAccountMap());
         modelBuilder.ApplyConfiguration(new AnnuityRateMap());
         modelBuilder.ApplyConfiguration(new AnnuityRateConfigMap());
         modelBuilder.ApplyConfiguration(new AuditEventMap());
@@ -81,6 +82,16 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new NavigationRoleMap());
         modelBuilder.ApplyConfiguration(new NavigationCustomSettingMap());
         modelBuilder.ApplyConfiguration(new StateMap());
+
+        modelBuilder.HasSequence<int>("BANK_SEQ").StartsAt(1)
+            .IncrementsBy(1)
+            .HasMin(1)
+            .IsCyclic(false);
+
+        modelBuilder.HasSequence<int>("BANK_ACCOUNT_SEQ").StartsAt(1)
+            .IncrementsBy(1)
+            .HasMin(1)
+            .IsCyclic(false);
 
         modelBuilder.HasSequence<int>("FAKE_SSN_SEQ").StartsAt(666000000)
             .IncrementsBy(1)

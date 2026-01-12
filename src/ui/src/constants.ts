@@ -77,6 +77,7 @@ export const ROUTES = {
   MANAGE_ANNUITY_RATES: "manage-annuity-rates",
   MANAGE_RMD_FACTORS: "manage-rmd-factors",
   MANAGE_COMMENT_TYPES: "manage-comment-types",
+  MANAGE_BANKS: "manage-banks",
   PROFIT_SHARING_ADJUSTMENTS: "profit-sharing-adjustments",
   AUDIT_SEARCH: "audit-search",
   ORACLE_HCM_DIAGNOSTICS: "oracle-hcm-diagnostics",
@@ -198,6 +199,9 @@ export const CAPTIONS = {
 
   MANAGE_RMD_FACTORS: "Manage RMD Factors",
   MANAGE_RMD_FACTORS_SHORT: "Manage RMD Factors",
+
+  MANAGE_BANKS: "Manage Banks",
+  MANAGE_BANKS_SHORT: "Manage Banks",
 
   MANAGE_COMMENT_TYPES: "Manage Comment Types",
   MANAGE_COMMENT_TYPES_SHORT: "Manage Comment Types",
@@ -488,6 +492,8 @@ export const GRID_KEYS = {
   MANAGE_ANNUITY_RATES: "MANAGE-ANNUITY-RATES",
   MANAGE_RMD_FACTORS: "MANAGE-RMD-FACTORS",
   MANAGE_COMMENT_TYPES: "MANAGE-COMMENT-TYPES",
+  MANAGE_BANKS: "MANAGE-BANKS",
+  MANAGE_BANK_ACCOUNTS: "MANAGE-BANK-ACCOUNTS",
   PROFIT_SHARING_ADJUSTMENTS: "PROFIT-SHARING-ADJUSTMENTS",
 
   // Distributions

@@ -1,14 +1,22 @@
+using Demoulas.ProfitSharing.Data.Entities.Base;
+
 namespace Demoulas.ProfitSharing.Data.Entities;
 
 /// <summary>
 /// Represents a bank record used for check printing, MICR configuration, and ACH/Fedwire reference.
 /// </summary>
-public sealed class Bank
+public sealed class Bank : ModifiedBase
 {
     /// <summary>
-    /// The 9-digit ABA routing number (leading zeros preserved).
+    /// Unique identifier for this bank record (primary key).
     /// </summary>
-    public required string RoutingNumber { get; set; }
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The 9-digit ABA routing number (leading zeros preserved).
+    /// Kept for backwards compatibility during Phase 1 transition.
+    /// </summary>
+    public string? RoutingNumber { get; set; }
 
     /// <summary>
     /// The bank's name as used in operational/financial references.
@@ -71,8 +79,23 @@ public sealed class Bank
     public DateOnly? FedwireRevisionDate { get; set; }
 
     /// <summary>
-    /// Optional bank account number used for MICR/printing.
-    /// NOTE: If populated in the future, this should be treated as sensitive and secured appropriately.
+    /// Indicates whether this bank is disabled and should not be used for new transactions.
     /// </summary>
-    public string? AccountNumber { get; set; }
+    public bool IsDisabled { get; set; }
+
+    /// <summary>
+    /// Username of the person who created this bank record.
+    /// </summary>
+    public string? CreatedBy { get; set; }
+
+    /// <summary>
+    /// Username of the person who last modified this bank record.
+    /// </summary>
+    public string? ModifiedBy { get; set; }
+
+    /// <summary>
+    /// Navigation property to bank accounts associated with this bank.
+    /// One bank can have multiple accounts.
+    /// </summary>
+    public ICollection<BankAccount> Accounts { get; set; } = new List<BankAccount>();
 }
