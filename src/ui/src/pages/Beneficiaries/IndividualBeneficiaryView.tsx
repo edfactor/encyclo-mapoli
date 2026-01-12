@@ -2,19 +2,25 @@ import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiaryDto } from "
 import { Button } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
+import type { EmployeeDetails } from "../../types/employee/employee";
+import MasterInquiryMemberDetails from "../InquiriesAndAdjustments/MasterInquiry/MasterInquiryMemberDetails";
 import BeneficiaryRelationshipsGrids from "./BeneficiaryRelationshipsGrids";
 import CreateBeneficiaryDialog from "./CreateBeneficiaryDialog";
-import MemberDetailsPanel from "./MemberDetailsPanel";
 
 interface IndividualBeneficiaryViewProps {
   selectedMember: BeneficiaryDetail;
   memberType: number | undefined;
+  memberDetails: EmployeeDetails | null;
+  isFetchingMemberDetails: boolean;
+  profitYear: number;
   onBeneficiarySelect?: (beneficiary: BeneficiaryDetail) => void;
 }
 
 const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
   selectedMember,
-  memberType,
+  memberDetails,
+  isFetchingMemberDetails,
+  profitYear,
   onBeneficiarySelect
 }) => {
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
@@ -23,6 +29,9 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
   const [change, setChange] = useState<number>(0);
   const [existingBeneficiaries, setExistingBeneficiaries] = useState<BeneficiaryDto[]>([]);
   const [triggerBeneficiaryDetail] = useLazyGetBeneficiaryDetailQuery();
+
+  // Calculate memberType based on psnSuffix: 0 = employee (type 1), else beneficiary (type 2)
+  const calculatedMemberType = selectedMember.psnSuffix === 0 ? 1 : 2;
 
   const handleClose = () => {
     setOpenCreateDialog(false);
@@ -46,6 +55,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
   const handleBadgeClick = useCallback(
     (beneficiary: BeneficiaryDto) => {
       const request: BeneficiaryDetailAPIRequest = {
+        id: beneficiary.id,
         badgeNumber: beneficiary.badgeNumber,
         psnSuffix: beneficiary.psnSuffix,
         isSortDescending: true,
@@ -81,9 +91,12 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
         onSaveSuccess={onBeneficiarySaveSuccess}
         existingBeneficiaries={existingBeneficiaries}
       />
-      <MemberDetailsPanel
-        selectedMember={selectedMember}
-        memberType={memberType || 0}
+      <MasterInquiryMemberDetails
+        memberType={calculatedMemberType}
+        id={selectedMember.id}
+        profitYear={profitYear}
+        memberDetails={memberDetails}
+        isLoading={isFetchingMemberDetails}
       />
       <div
         style={{
