@@ -3,7 +3,7 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
-import { Path, useNavigate } from "react-router";
+import { Path, useNavigate } from "react-router-dom";
 import { numberToCurrency } from "smart-ui-library";
 import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";

@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Path, useNavigate } from "react-router";
+import { Path, useNavigate } from "react-router-dom";
 import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
 
 import { useFakeTimeAwareYear } from "hooks/useFakeTimeAwareDate";

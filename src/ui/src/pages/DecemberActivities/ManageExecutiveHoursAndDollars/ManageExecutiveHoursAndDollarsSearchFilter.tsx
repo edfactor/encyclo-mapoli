@@ -38,11 +38,11 @@ const validationSchema = yup
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(
       values.profitYear ||
-        values.socialSecurity ||
-        values.badgeNumber ||
-        values.fullNameContains ||
-        values.hasExecutiveHoursAndDollars !== false ||
-        values.isMonthlyPayroll !== false
+      values.socialSecurity ||
+      values.badgeNumber ||
+      values.fullNameContains ||
+      values.hasExecutiveHoursAndDollars !== false ||
+      values.isMonthlyPayroll !== false
     )
   );
 

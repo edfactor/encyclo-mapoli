@@ -6,10 +6,10 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { useFakeTimeAwareYear } from "../../../hooks/useFakeTimeAwareDate";
 import {
-    badgeNumberStringValidator,
-    handleBadgeNumberStringInput,
-    handleSsnInput,
-    ssnValidator
+  badgeNumberStringValidator,
+  handleBadgeNumberStringInput,
+  handleSsnInput,
+  ssnValidator
 } from "../../../utils/FormValidators";
 
 // Define the search parameters interface
