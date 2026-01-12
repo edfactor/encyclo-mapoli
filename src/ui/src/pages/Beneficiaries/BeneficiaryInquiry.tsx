@@ -1,7 +1,9 @@
 import { Divider, Grid } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLazyBeneficiarySearchFilterQuery, useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
+import { useLazyBeneficiarySearchFilterQuery } from "reduxstore/api/BeneficiariesApi";
+import { useFakeTimeAwareYear } from "../../hooks/useFakeTimeAwareDate";
+import { InquiryApi } from "../../reduxstore/api/InquiryApi";
 
 import { DSMAccordion, Page, Paged } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
@@ -17,12 +19,15 @@ import IndividualBeneficiaryView from "./IndividualBeneficiaryView";
 import MemberResultsGrid from "./MemberResultsGrid";
 import { useBeneficiarySearch } from "./hooks/useBeneficiarySearch";
 
-import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiarySearchAPIRequest } from "@/types";
+import { BeneficiaryDetail, BeneficiarySearchAPIRequest } from "@/types";
+import type { EmployeeDetails } from "../../types/employee/employee";
 
 const BeneficiaryInquiryContent = () => {
   const dispatch = useDispatch();
-  const [triggerBeneficiaryDetail] = useLazyGetBeneficiaryDetailQuery();
+  const [triggerMemberDetails] = InquiryApi.useLazyGetProfitMasterInquiryMemberQuery();
   const [selectedMember, setSelectedMember] = useState<BeneficiaryDetail | null>();
+  const [memberDetails, setMemberDetails] = useState<EmployeeDetails | null>(null);
+  const [isFetchingMemberDetails, setIsFetchingMemberDetails] = useState(false);
   const [hasSelectedMember, setHasSelectedMember] = useState(false);
   const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiaryDetail>>();
   const [memberType, setMemberType] = useState<number | undefined>(undefined);
@@ -31,6 +36,7 @@ const BeneficiaryInquiryContent = () => {
   >();
   const [triggerSearch, { isFetching }] = useLazyBeneficiarySearchFilterQuery();
   const { addAlert, clearAlerts, missiveAlerts } = useMissiveAlerts();
+  const profitYear = useFakeTimeAwareYear();
 
   // Use custom hook for pagination and sort state
   const search = useBeneficiarySearch({ defaultPageSize: 10, defaultSortBy: "fullName" });
@@ -43,23 +49,30 @@ const BeneficiaryInquiryContent = () => {
   const onBadgeClick = useCallback(
     (data: BeneficiaryDetail) => {
       if (data) {
-        const request: BeneficiaryDetailAPIRequest = {
-          badgeNumber: data.badgeNumber,
-          psnSuffix: data.psnSuffix,
-          isSortDescending: search.sortParams.isSortDescending,
-          skip: 0,
-          sortBy: search.sortParams.sortBy,
-          take: search.pageSize
-        };
-        triggerBeneficiaryDetail(request)
+        // Calculate memberType: psnSuffix 0 = employee (type 1), else beneficiary (type 2)
+        const calculatedMemberType = data.psnSuffix === 0 ? 1 : 2;
+        
+        // Fetch member details for MasterInquiryMemberDetails component
+        setIsFetchingMemberDetails(true);
+        triggerMemberDetails({ memberType: calculatedMemberType, id: data.id, profitYear })
           .unwrap()
-          .then((res) => {
-            setSelectedMember(res);
+          .then((memberDetailsRes) => {
+            setSelectedMember(data);
+            setMemberDetails(memberDetailsRes);
             setHasSelectedMember(true);
+          })
+          .catch((error) => {
+            console.error("Failed to fetch member details:", error);
+            setSelectedMember(data);
+            setMemberDetails(null);
+            setHasSelectedMember(true);
+          })
+          .finally(() => {
+            setIsFetchingMemberDetails(false);
           });
       }
     },
-    [search.sortParams, search.pageSize, triggerBeneficiaryDetail]
+    [triggerMemberDetails, profitYear]
   );
 
   const onSearch = useCallback(
@@ -116,6 +129,7 @@ const BeneficiaryInquiryContent = () => {
     setBeneficiarySearchFilterRequest(undefined);
     setBeneficiarySearchFilterResponse(undefined);
     setSelectedMember(null);
+    setMemberDetails(null);
     setHasSelectedMember(false);
     setMemberType(undefined);
     clearAlerts();
@@ -170,6 +184,9 @@ const BeneficiaryInquiryContent = () => {
           <IndividualBeneficiaryView
             selectedMember={selectedMember}
             memberType={memberType}
+            memberDetails={memberDetails}
+            isFetchingMemberDetails={isFetchingMemberDetails}
+            profitYear={profitYear}
             onBeneficiarySelect={(beneficiary) => {
               setSelectedMember(beneficiary);
               setHasSelectedMember(true);
