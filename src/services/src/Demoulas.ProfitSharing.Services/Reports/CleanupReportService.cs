@@ -141,7 +141,7 @@ public class CleanupReportService : ICleanupReportService
                             .Where(p => p.ProfitYear == latestYear)
                             .Select(p => p.EnrollmentId)
                             .FirstOrDefault()
-                    }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
+                    }).Union(ctx.Beneficiaries.Where(b => !b.IsDeleted).Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
                         x.Contact.ContactInfo.FullName,

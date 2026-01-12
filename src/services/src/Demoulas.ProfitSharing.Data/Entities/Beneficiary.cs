@@ -17,5 +17,9 @@ public sealed class Beneficiary : Member
     public required decimal Percent { get; set; }
     public Demographic? Demographic { get; set; }
 
-
+    /// <summary>
+    /// Soft delete flag. When true, the beneficiary is considered deleted
+    /// but remains in the database for historical/audit purposes.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 }
