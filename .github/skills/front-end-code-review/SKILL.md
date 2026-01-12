@@ -72,6 +72,10 @@ Include positive observations about what was done well.
 - No commented-out code or console.log statements
 - Meaningful variable names
 - DRY principle followed
+- **Grid column definitions in separate `*Columns.tsx` files (not inline)**
+- **Grid columns use factory functions from `gridColumnFactory.ts` where applicable**
+- **MANDATORY: All forms use Yup validation with React Hook Form (NO manual validation like `if (!value)` checks)**
+- **FORBIDDEN: Using `useState` for form field management (use `useForm` from React Hook Form)**
 
 ### TypeScript
 

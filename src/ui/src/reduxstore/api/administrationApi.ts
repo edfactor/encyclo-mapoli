@@ -1,21 +1,21 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import {
-    BankAccountDto,
-    BankDto,
-    CreateBankAccountRequest,
-    CreateBankRequest,
-    UpdateBankAccountRequest,
-    UpdateBankRequest
+  BankAccountDto,
+  BankDto,
+  CreateBankAccountRequest,
+  CreateBankRequest,
+  UpdateBankAccountRequest,
+  UpdateBankRequest
 } from "../../types/administration/banks";
 import {
-    CommentTypeDto,
-    CreateCommentTypeRequest,
-    GetMissingAnnuityYearsRequest,
-    MissingAnnuityYearsResponse,
-    RmdFactorDto,
-    UpdateCommentTypeRequest,
-    UpdateRmdFactorRequest
+  CommentTypeDto,
+  CreateCommentTypeRequest,
+  GetMissingAnnuityYearsRequest,
+  MissingAnnuityYearsResponse,
+  RmdFactorDto,
+  UpdateCommentTypeRequest,
+  UpdateRmdFactorRequest
 } from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
@@ -115,18 +115,18 @@ export const AdministrationApi = createApi({
     getBankById: builder.query<BankDto, number>({
       query: (id) => ({
         url: `administration,
-  useGetAllBanksQuery,
-  useGetBankByIdQuery,
-  useCreateBankMutation,
-  useUpdateBankMutation,
-  useDisableBankMutation,
-  useGetBankAccountsQuery,
-  useLazyGetBankAccountsQuery,
-  useGetBankAccountByIdQuery,
-  useCreateBankAccountMutation,
-  useUpdateBankAccountMutation,
-  useSetPrimaryBankAccountMutation,
-  useDisableBankAccountMutation/banks/${id}`,
+              useGetAllBanksQuery,
+              useGetBankByIdQuery,
+              useCreateBankMutation,
+              useUpdateBankMutation,
+              useDisableBankMutation,
+              useGetBankAccountsQuery,
+              useLazyGetBankAccountsQuery,
+              useGetBankAccountByIdQuery,
+              useCreateBankAccountMutation,
+              useUpdateBankAccountMutation,
+              useSetPrimaryBankAccountMutation,
+              useDisableBankAccountMutation/banks/${id}`,
         method: "GET"
       }),
       providesTags: (_result, _error, id) => [{ type: "Banks", id }]

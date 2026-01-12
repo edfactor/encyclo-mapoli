@@ -169,7 +169,9 @@ interface State {
   // ...
 }
 
-type Action = { type: "SET_SEARCH_PARAMS"; payload: SearchParams } | { type: "RESET" };
+type Action =
+  | { type: "SET_SEARCH_PARAMS"; payload: SearchParams }
+  | { type: "RESET" };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -185,8 +187,9 @@ export const usePageState = () => {
 
   const actions = useMemo(
     () => ({
-      setSearchParams: (params: SearchParams) => dispatch({ type: "SET_SEARCH_PARAMS", payload: params }),
-      reset: () => dispatch({ type: "RESET" })
+      setSearchParams: (params: SearchParams) =>
+        dispatch({ type: "SET_SEARCH_PARAMS", payload: params }),
+      reset: () => dispatch({ type: "RESET" }),
     }),
     []
   );
@@ -291,7 +294,7 @@ query: (params) => ({
 // Lazy query mock
 vi.mocked(useLazyGetData).mockReturnValue([
   vi.fn().mockResolvedValue({ data: mockData }),
-  { data: mockData, isLoading: false, isError: false }
+  { data: mockData, isLoading: false, isError: false },
 ]);
 
 // Eager query mock
@@ -299,20 +302,23 @@ vi.mocked(useGetData).mockReturnValue({
   data: mockData,
   isLoading: false,
   isError: false,
-  refetch: vi.fn()
+  refetch: vi.fn(),
 });
 
 // Mutation mock
 vi.mocked(useCreateData).mockReturnValue([
   vi.fn().mockResolvedValue({ data: mockResult }),
-  { isLoading: false, isSuccess: false }
+  { isLoading: false, isSuccess: false },
 ]);
 ```
 
 ### Mock Factory Functions
 
 ```typescript
-import { createRTKQueryLazyMock, createRTKQueryMutationMock } from "@/test/utils";
+import {
+  createRTKQueryLazyMock,
+  createRTKQueryMutationMock,
+} from "@/test/utils";
 
 const mockLazyQuery = createRTKQueryLazyMock(mockData, { isLoading: false });
 const mockMutation = createRTKQueryMutationMock(mockResult);
@@ -331,7 +337,9 @@ describe("ComponentName", () => {
     render(<Component />, { wrapper: createMockStoreAndWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Submit" })
+      ).toBeInTheDocument();
     });
   });
 });
@@ -348,6 +356,15 @@ describe("ComponentName", () => {
 
 ## 6. Form Patterns
 
+### ⚠️ MANDATORY: All Forms Use Yup Validation
+
+**ALL FORMS MUST USE YUP FOR VALIDATION. NO EXCEPTIONS.**
+
+- Custom validation logic MUST be implemented in Yup schemas
+- Manual validation (e.g., checking `if (!value)`) is NOT allowed
+- All form inputs MUST be wrapped in `Controller` with Yup schema validation
+- Direct use of `useState` for form fields is NOT allowed - use React Hook Form
+
 ### React Hook Form + Yup Structure
 
 ```typescript
@@ -360,7 +377,11 @@ const schema = yup.object({
   startDate: dateStringValidator(minDate, maxDate, "Start Date"),
 });
 
-const { control, handleSubmit, formState: { errors } } = useForm({
+const {
+  control,
+  handleSubmit,
+  formState: { errors },
+} = useForm({
   resolver: yupResolver(schema),
   defaultValues: { badgeNumber: "", startDate: "" },
 });
@@ -373,7 +394,7 @@ const { control, handleSubmit, formState: { errors } } = useForm({
       <TextField {...field} error={!!errors.badgeNumber} />
     )}
   />
-</form>
+</form>;
 ```
 
 ### Pre-built Validators
@@ -407,10 +428,13 @@ const { control, handleSubmit, formState: { errors } } = useForm({
 
 ### Review Checklist
 
-- [ ] Uses React Hook Form with Yup resolver
+- [ ] **CRITICAL**: Uses React Hook Form with Yup resolver (NOT manual validation)
+- [ ] **CRITICAL**: NO `useState` for form field management (must use `useForm`)
+- [ ] **CRITICAL**: NO manual validation checks in submit handlers (e.g., `if (!value.trim())`)
 - [ ] Reuses pre-built validators from `FormValidators.ts`
 - [ ] Form wrapped in `DSMAccordion` for collapsible sections
 - [ ] Uses `SearchAndReset` component for action buttons
+- [ ] All fields wrapped in `Controller` component
 
 ---
 
@@ -428,19 +452,19 @@ const { control, handleSubmit, formState: { errors } } = useForm({
   providedOptions={{
     rowData: data?.results || [],
     columnDefs: columnDefs,
-    context: { isReadOnly }
+    context: { isReadOnly },
   }}
   pagination={{
     pageNumber,
     pageSize,
     sortParams: { sortBy: "fieldName", isSortDescending: false },
-    handlePageNumberChange,  // Pass directly - NO value - 1
+    handlePageNumberChange, // Pass directly - NO value - 1
     handlePageSizeChange,
-    handleSortChange
+    handleSortChange,
   }}
   heightConfig={{
     mode: "content-aware",
-    maxHeight: gridMaxHeight
+    maxHeight: gridMaxHeight,
   }}
   totalRecords={data?.total ?? 0}
   showPagination={!!data?.results?.length}
@@ -485,24 +509,138 @@ const { control, handleSubmit, formState: { errors } } = useForm({
 
 ### Column Definition Pattern
 
+**CRITICAL**: Column definitions MUST be in separate files, never inline in components.
+
+**File Location**: `pages/{PageName}/components/{GridName}Columns.tsx` or `components/grids/{GridName}Columns.tsx`
+
+**Pattern**:
+
 ```typescript
-export const getGridColumns = (options: GridOptions): ColDef[] => [
-  createBadgeColumn({ sortable: true }),
-  createNameColumn("employeeName"),
-  createCurrencyColumn("totalAmount", "Total Amount"),
-  {
-    headerName: "Custom Column",
-    field: "customField",
-    colId: "customField",
-    minWidth: 120,
-    sortable: true,
-    resizable: true,
-    headerClass: "right-align",
-    cellClass: "right-align",
-    valueFormatter: (params) => formatValue(params.value)
-  }
-];
+import { ColDef } from "ag-grid-community";
+import {
+  createDateColumn,
+  createCurrencyColumn,
+  createYesOrNoColumn,
+} from "@/utils/gridColumnFactory";
+
+interface GridColumnsOptions {
+  // Context functions/data needed by cell renderers
+  handleAction: (id: number) => void;
+  validationErrors?: Record<number, ValidationError>;
+}
+
+export const GetMyGridColumns = (options: GridColumnsOptions): ColDef[] => {
+  const { handleAction, validationErrors } = options;
+
+  return [
+    // Use factory functions for standard column types
+    createDateColumn({
+      headerName: "Start Date",
+      field: "startDate",
+      minWidth: 120,
+    }),
+    createCurrencyColumn({
+      headerName: "Amount",
+      field: "amount",
+      minWidth: 100,
+    }),
+    createYesOrNoColumn({
+      headerName: "Active",
+      field: "isActive",
+      minWidth: 80,
+    }),
+
+    // Custom columns when factories don't apply
+    {
+      headerName: "Custom Column",
+      field: "customField",
+      colId: "customField",
+      minWidth: 120,
+      sortable: true,
+      resizable: true,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      valueFormatter: (params) => formatValue(params.value),
+      cellRenderer: (params) => {
+        // Custom cell renderer logic
+        return (
+          <CustomCellComponent data={params.data} onAction={handleAction} />
+        );
+      },
+    },
+  ];
+};
 ```
+
+**In Component**:
+
+```typescript
+import { GetMyGridColumns } from "./MyGridColumns";
+
+const MyComponent = () => {
+  const handleAction = useCallback((id: number) => {
+    // handle action
+  }, []);
+
+  const columnDefs = useMemo(
+    () => GetMyGridColumns({ handleAction, validationErrors }),
+    [handleAction, validationErrors]
+  );
+
+  return <DSMGrid columnDefs={columnDefs} rowData={data} />;
+};
+```
+
+**Available Factory Functions**:
+
+- `createBadgeColumn()` - Badge numbers with optional Master Inquiry link
+- `createNameColumn()` - Employee names (left-aligned)
+- `createCurrencyColumn()` - Money values (right-aligned, formatted)
+- `createDateColumn()` - Dates (MM/DD/YYYY format)
+- `createPercentageColumn()` - Percentages with % suffix
+- `createYesOrNoColumn()` - Booleans (renders "Yes"/"No")
+- `createHoursColumn()` - Hours with comma separators
+- `createStoreColumn()` - Store numbers (right-aligned)
+- `createStateColumn()` - State codes (2-letter)
+- `createAddressColumn()` - Address fields
+- `createZipColumn()` - Zip codes with formatting
+- `createCityColumn()` - City names
+- `createSSNColumn()` - SSN (properly masked)
+- `createAgeColumn()` - Age fields (right-aligned)
+- `createPhoneColumn()` - Phone numbers with formatting
+- `createPSNColumn()` - PSN numbers
+- `createTaxCodeColumn()` - Tax codes with brackets
+
+### Old Pattern (DO NOT USE)
+
+### Old Pattern (DO NOT USE)
+
+**❌ WRONG - Inline column definitions**:
+
+```typescript
+const MyComponent = () => {
+  const columnDefs: ColDef[] = useMemo(
+    () => [
+      {
+        field: "startDate",
+        headerName: "Start Date",
+        valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
+      },
+      // ... more columns inline
+    ],
+    []
+  );
+
+  return <DSMGrid columnDefs={columnDefs} />;
+};
+```
+
+**Problems with inline definitions:**
+
+1. Makes components too long and hard to read
+2. Can't reuse column definitions across grids
+3. Doesn't enforce use of factory functions for consistency
+4. Harder to test column configurations
 
 ### Custom Cell Renderers
 
@@ -538,10 +676,10 @@ const gridContext = {
 ### Review Checklist
 
 - [ ] Uses `DSMPaginatedGrid` for paginated data, `DSMGrid` for non-paginated (not raw AG Grid)
-- [ ] Column definitions in separate `*GridColumns.ts` file
-- [ ] Uses factory functions for common column types
+- [ ] **MANDATORY: Column definitions in separate `*GridColumns.ts` file (NEVER inline in component)**
+- [ ] **MANDATORY: Uses factory functions from `gridColumnFactory.ts` for common column types (dates, currency, yes/no, etc.)**
 - [ ] Context passed for editable grids
-- [ ] Alignment classes consistent (right-align for numbers)
+- [ ] Alignment classes consistent (right-align for numbers, center-align for yes/no)
 - [ ] Pagination handlers passed directly to DSMPaginatedGrid (no `value - 1`)
 
 ---
@@ -552,12 +690,8 @@ const gridContext = {
 
 ```typescript
 <Grid container rowSpacing="24px" columnSpacing={2}>
-  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-    {/* Responsive content */}
-  </Grid>
-  <Grid width="100%">
-    {/* Full-width content */}
-  </Grid>
+  <Grid size={{ xs: 12, sm: 6, md: 4 }}>{/* Responsive content */}</Grid>
+  <Grid width="100%">{/* Full-width content */}</Grid>
 </Grid>
 ```
 
@@ -626,10 +760,11 @@ export const NavigationStatus = {
   NotStarted: 1,
   InProgress: 2,
   OnHold: 3,
-  Complete: 4
+  Complete: 4,
 } as const;
 
-export type NavigationStatusType = (typeof NavigationStatus)[keyof typeof NavigationStatus];
+export type NavigationStatusType =
+  (typeof NavigationStatus)[keyof typeof NavigationStatus];
 ```
 
 ### Union Types for State
@@ -655,10 +790,16 @@ type ReportType = "distribution" | "contribution" | "forfeiture";
 **Location**: `utils/dateUtils.ts`
 
 ```typescript
-import { isMaskedDate, getMaskedDateDisplay, mmDDYYFormat } from "@/utils/dateUtils";
+import {
+  isMaskedDate,
+  getMaskedDateDisplay,
+  mmDDYYFormat,
+} from "@/utils/dateUtils";
 
 // Always check for masked dates
-const displayDate = isMaskedDate(date) ? getMaskedDateDisplay() : mmDDYYFormat(date);
+const displayDate = isMaskedDate(date)
+  ? getMaskedDateDisplay()
+  : mmDDYYFormat(date);
 ```
 
 ### Key Date Functions
@@ -688,7 +829,7 @@ const percent = formatPercentage(0.85); // "85%"
 ```typescript
 const taxCodes: Record<string, string> = {
   "0": "0: Unknown",
-  "1": "1: Early distribution"
+  "1": "1: Early distribution",
   // ...
 };
 
@@ -790,7 +931,11 @@ export const SearchPage: React.FC = () => {
       </DSMAccordion>
 
       {hasSearched && (
-        <DSMGrid columnDefs={columns} rowData={data?.results} loading={isLoading} />
+        <DSMGrid
+          columnDefs={columns}
+          rowData={data?.results}
+          loading={isLoading}
+        />
       )}
     </Page>
   );
