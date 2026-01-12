@@ -142,7 +142,7 @@ const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: Master
         </Grid>
       )}
 
-      {/* Profit Details Section - Always render when we have selection, just control visibility */}
+      {/* Profit Details Section - Always render when we have selection just control visibility */}
       {selectedMember && (
         <Grid
           size={{ xs: 12 }}

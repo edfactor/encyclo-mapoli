@@ -4,6 +4,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 
 public sealed class PayFrequency : ILookupTable<byte>
 {
+    // Pay Frequency Id Constants
     public static class Constants
     {
         public const byte Weekly = 1;

@@ -11,6 +11,7 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using IdGen;
@@ -219,7 +220,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
 
             emp!.EmploymentStatusId = 'a';
-            emp.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+            emp.DateOfBirth = new DateOnly((short)DateTime.Now.Year - 28, 9, 21);
             empH.EmploymentStatusId = emp.EmploymentStatusId;
             empH.DateOfBirth = emp.DateOfBirth;
 
@@ -263,7 +264,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             var emp = payProfit.Demographic;
             var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
 
-            emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 15, 9, 21);
+            emp!.DateOfBirth = new DateOnly((short)DateTime.Now.Year - 15, 9, 21);
             empH.DateOfBirth = emp.DateOfBirth;
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
@@ -283,7 +284,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync(CancellationToken.None);
             var emp = payProfit.Demographic;
 
-            emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+            emp!.DateOfBirth = new DateOnly((short)DateTime.Now.Year - 28, 9, 21);
             payProfit.CurrentHoursYear = 50;
             payProfit.TotalHours = payProfit.CurrentHoursYear + payProfit.HoursExecutive;
             await ctx.SaveChangesAsync(CancellationToken.None);
@@ -302,7 +303,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     public async Task GetYearEndProfitSharingReportWithFilters()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
-        var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2024);
+        var profitYear = (short)Math.Min((short)DateTime.Now.Year - 1, 2024);
         var req = new YearEndProfitSharingReportRequest()
         {
             Skip = 0,
@@ -333,7 +334,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
 
             emp!.EmploymentStatusId = EmploymentStatus.Constants.Active;
-            emp.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+            emp.DateOfBirth = new DateOnly((short)DateTime.Now.Year - 28, 9, 21);
             empH.EmploymentStatusId = emp.EmploymentStatusId;
             empH.DateOfBirth = emp.DateOfBirth;
 
@@ -415,12 +416,12 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
                 var profitDetail = await ctx.ProfitDetails.FirstAsync(CancellationToken.None);
 
-                profitDetail.ProfitYear = (short)(DateTime.Now.Year - 1);
+                profitDetail.ProfitYear = (short)((short)DateTime.Now.Year - 1);
                 profitDetail.ProfitYearIteration = 0;
                 profitDetail.ProfitCodeId = (byte)profitCode;
                 profitDetail.Forfeiture = sampleforfeiture;
                 profitDetail.MonthToDate = 3;
-                profitDetail.YearToDate = (short)(DateTime.Now.Year - 1);
+                profitDetail.YearToDate = (short)((short)DateTime.Now.Year - 1);
                 profitDetail.FederalTaxes = 100;
                 profitDetail.StateTaxes = 50;
                 profitDetail.TaxCodeId = '7';
@@ -507,7 +508,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
         // Use last year to avoid any current year edge cases
-        var testYear = (short)(DateTime.Now.Year - 1);
+        var testYear = (short)((short)DateTime.Now.Year - 1);
         var req = new DistributionsAndForfeituresRequest
         {
             Skip = 0,
@@ -581,7 +582,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         decimal sampleDistribution = 7890.12m;
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
-        var testYear = (short)(DateTime.Now.Year - 1);
+        var testYear = (short)((short)DateTime.Now.Year - 1);
         var req = new DistributionsAndForfeituresRequest
         {
             Skip = 0,
@@ -711,7 +712,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
 
-        var testYear = (short)(DateTime.Now.Year - 1);
+        var testYear = (short)((short)DateTime.Now.Year - 1);
         var req = new DistributionsAndForfeituresRequest
         {
             Skip = 0,

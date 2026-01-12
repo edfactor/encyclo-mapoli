@@ -4,6 +4,8 @@ import SmartPSDrawer from "../../components/Drawer/SmartPSDrawer";
 import DSMDynamicBreadcrumbs from "../../components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
 import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 import { PageLoadingFallback } from "../../components/router/LazyPageLoader";
+const Login = lazy(() => import("../../components/Login/Login"));
+const OktaLoginCallback = lazy(() => import("../../components/MenuBar/OktaLoginCallback"));
 const FrozenSummary = lazy(() => import("../../pages/FrozenSummary/FrozenSummary"));
 const MasterInquiry = lazy(() => import("../../pages/InquiriesAndAdjustments/MasterInquiry/MasterInquiry"));
 const DemographicBadgesNotInPayprofit = lazy(
@@ -182,6 +184,7 @@ const RouterSubAssembly: React.FC = () => {
 
   const { isDrawerOpen } = useSelector((state: RootState) => state.general);
   const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined }, { skip: !token });
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -288,6 +291,26 @@ const RouterSubAssembly: React.FC = () => {
               )}
               {!isFullscreen && <SmartPSDrawer navigationData={data} />}
               <Routes>
+                {EnvironmentUtils.isOktaEnabled && (
+                  <>
+                    <Route
+                      path="/login/callback"
+                      element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <OktaLoginCallback />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/login"
+                      element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <Login />
+                        </Suspense>
+                      }
+                    />
+                  </>
+                )}
                 <Route
                   path="/unauthorized"
                   element={<Unauthorized />}

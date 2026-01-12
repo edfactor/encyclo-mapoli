@@ -3,12 +3,10 @@ using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Reporting.Reports;
-using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -73,7 +71,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             var ssn = demographic.Ssn;
             var badgeNumber = demographic.BadgeNumber;
             var demographicId = demographic.Id;
-            var fullName = demographic.ContactInfo.FullName ?? string.Empty;
 
             // Get all profit years for this member - apply sorting to determine which years we need
             var sortBy = request.SortBy ?? "ProfitYear";
@@ -125,25 +122,13 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     .ToListAsync(cancellationToken);
             }
 
-            // Batch load profit details for the years we're fetching
-            var allProfitDetails = await ctx.ProfitDetails
-                .TagWith($"AccountHistoryReport-AllProfitDetails-{badgeNumber}")
-                .Where(pd => pd.Ssn == ssn && yearsToFetch.Contains(pd.ProfitYear))
-                .ToListAsync(cancellationToken);
-
-            // Group profit details by year for efficient lookup
-            var profitDetailsByYear = allProfitDetails
-                .GroupBy(pd => pd.ProfitYear)
-                .ToDictionary(g => g.Key, g => g.ToList());
-
             // Execute per-year queries in parallel for better performance
+            // Each year's contributions/earnings/forfeitures are computed in the database
             var tasks = yearsToFetch.Select(year => FetchYearDataAsync(
                 year,
                 ssn,
                 badgeNumber,
                 demographicId,
-                fullName,
-                profitDetailsByYear.GetValueOrDefault(year, []),
                 cancellationToken)).ToList();
 
             var reportData = (await Task.WhenAll(tasks)).ToList();
@@ -157,8 +142,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     TotalContributions = reportData.Sum(r => r.Contributions),
                     TotalEarnings = reportData.Sum(r => r.Earnings),
                     TotalForfeitures = reportData.Sum(r => r.Forfeitures),
-                    TotalWithdrawals = reportData.Sum(r => r.Withdrawals),
-                    TotalVestedBalance = reportData.OrderByDescending(r => r.ProfitYear).FirstOrDefault()?.VestedBalance ?? 0
+                    TotalWithdrawals = reportData.Sum(r => r.Withdrawals)
                 };
 
                 return BuildPaginatedResponsePreSorted(reportData, request, startYear, totalYearCount, cumulativeTotals);
@@ -172,29 +156,30 @@ public class AccountHistoryReportService : IAccountHistoryReportService
     /// <summary>
     /// Fetches year-specific data (balances, distributions, vesting) in a separate context for parallel execution.
     /// Each year runs in its own context, enabling parallel execution across years.
+    /// MUST use EmbeddedSqlService.GetTransactionsBySsnForProfitYearForOracle() for validated aggregations.
     /// </summary>
     private Task<AccountHistoryReportResponse> FetchYearDataAsync(
         short year,
         int ssn,
         int badgeNumber,
         int demographicId,
-        string fullName,
-        List<Data.Entities.ProfitDetail> yearProfitDetails,
         CancellationToken cancellationToken)
     {
-        // Use shared extension methods for consistent aggregation logic
-        (decimal yearContributions, decimal yearEarnings, decimal yearForfeitures) =
-            ProfitDetailExtensions.AggregateAllProfitValues(yearProfitDetails);
-
         // Execute balance/distribution queries sequentially within this context
         // (EF Core doesn't allow concurrent operations on the same context)
         // Parallelism is achieved at the year level - each year has its own context
         return _contextFactory.UseReadOnlyContext(async ctx =>
         {
+            // Use validated SQL formulas from EmbeddedSqlService for year aggregations
+            // This ensures we use the SME-approved formulas, not replicated C# logic
+            var yearRollup = await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, year)
+                .FirstOrDefaultAsync(r => r.Ssn == ssn, cancellationToken);
+
             var memberBalance = await _totalService.GetTotalBalanceSet(ctx, year)
                 .FirstOrDefaultAsync(b => b.Ssn == ssn, cancellationToken);
 
-            var memberDistributions = await _totalService.GetTotalDistributions(ctx, year)
+            // PS-2424: Use GetYearlyDistributions for yearly amounts (not cumulative)
+            var memberDistributions = await _totalService.GetYearlyDistributions(ctx, year)
                 .FirstOrDefaultAsync(d => d.Ssn == ssn, cancellationToken);
 
             // GetVestingBalanceForSingleMemberAsync creates its own context internally
@@ -205,17 +190,12 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             {
                 Id = demographicId,
                 BadgeNumber = badgeNumber,
-                FullName = fullName,
-                Ssn = ssn.MaskSsn(),
                 ProfitYear = year,
-                Contributions = yearContributions,
-                Earnings = yearEarnings,
-                Forfeitures = yearForfeitures,
+                Contributions = yearRollup?.TotalContributions ?? 0,
+                Earnings = yearRollup?.TotalEarnings ?? 0,
+                Forfeitures = yearRollup?.TotalForfeitures ?? 0,
                 Withdrawals = memberDistributions?.TotalAmount ?? 0,
                 EndingBalance = memberBalance?.TotalAmount ?? 0,
-                VestedBalance = vestingBalance?.VestedBalance ?? 0,
-                VestingPercent = vestingBalance?.VestingPercent,
-                YearsInPlan = vestingBalance?.YearsInPlan
             };
         }, cancellationToken);
     }
@@ -260,8 +240,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         var totalEarnings = sortedResult.Sum(r => r.Earnings);
         var totalForfeitures = sortedResult.Sum(r => r.Forfeitures);
         var totalWithdrawals = sortedResult.Sum(r => r.Withdrawals);
-        // TotalVestedBalance is from the most recent profit year (highest year number)
-        var totalVestedBalance = reportData.OrderByDescending(r => r.ProfitYear).FirstOrDefault()?.VestedBalance ?? 0;
 
         // Calculate total count before pagination
         var totalCount = sortedResult.Count;
@@ -296,8 +274,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 TotalContributions = totalContributions,
                 TotalEarnings = totalEarnings,
                 TotalForfeitures = totalForfeitures,
-                TotalWithdrawals = totalWithdrawals,
-                TotalVestedBalance = totalVestedBalance
+                TotalWithdrawals = totalWithdrawals
             }
         };
     }
@@ -359,9 +336,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             "badgenumber" => descending
                 ? data.OrderByDescending(x => x.BadgeNumber)
                 : data.OrderBy(x => x.BadgeNumber),
-            "fullname" => descending
-                ? data.OrderByDescending(x => x.FullName)
-                : data.OrderBy(x => x.FullName),
             "contributions" => descending
                 ? data.OrderByDescending(x => x.Contributions)
                 : data.OrderBy(x => x.Contributions),
@@ -422,9 +396,9 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             // Create the PDF report document
             var memberProfile = new AccountHistoryPdfReport.MemberProfileInfo
             {
-                FullName = firstResponse.FullName,
-                BadgeNumber = firstResponse.BadgeNumber,
-                MaskedSsn = firstResponse.Ssn,
+                FullName = employee?.FullName ?? string.Empty,
+                BadgeNumber = employee?.BadgeNumber ?? 0,
+                MaskedSsn = employee?.Ssn ?? string.Empty,
                 Address = employee?.Address,
                 City = employee?.AddressCity,
                 State = employee?.AddressState,

@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, Grid, TextField, Typography } from "@mui/material";
 import useNavigationYear from "hooks/useNavigationYear";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -38,11 +38,11 @@ const validationSchema = yup
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(
       values.profitYear ||
-        values.socialSecurity ||
-        values.badgeNumber ||
-        values.fullNameContains ||
-        values.hasExecutiveHoursAndDollars !== false ||
-        values.isMonthlyPayroll !== false
+      values.socialSecurity ||
+      values.badgeNumber ||
+      values.fullNameContains ||
+      values.hasExecutiveHoursAndDollars !== false ||
+      values.isMonthlyPayroll !== false
     )
   );
 
@@ -195,6 +195,32 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     </Typography>
   );
 
+  // Helper text for mutual exclusion
+  const getExclusionHelperText = useCallback(
+    (fieldName: "socialSecurity" | "fullNameContains" | "badgeNumber") => {
+      if (fieldName === "socialSecurity" && (activeField === "badgeNumber" || activeField === "fullNameContains")) {
+        if (activeField === "fullNameContains")
+          return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
+        if (activeField === "badgeNumber")
+          return "Disabled: Badge field is in use. Press Reset to clear and re-enable.";
+      }
+      if (fieldName === "fullNameContains" && (activeField === "socialSecurity" || activeField === "badgeNumber")) {
+        if (activeField === "socialSecurity")
+          return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
+        if (activeField === "badgeNumber")
+          return "Disabled: Badge field is in use. Press Reset to clear and re-enable.";
+      }
+      if (fieldName === "badgeNumber" && (activeField === "socialSecurity" || activeField === "fullNameContains")) {
+        if (activeField === "socialSecurity")
+          return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
+        if (activeField === "fullNameContains")
+          return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
+      }
+      return undefined;
+    },
+    [activeField]
+  );
+
   return (
     <form onSubmit={validateAndSearch}>
       <Grid
@@ -205,7 +231,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           spacing={3}
           width="100%">
           {!isModal && (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
               <FormLabel>Profit Year</FormLabel>
               <Controller
                 name="profitYear"
@@ -227,32 +253,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
               {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
             </Grid>
           )}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Full Name {requiredLabel}</FormLabel>
-            <Controller
-              name="fullNameContains"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="outlined"
-                  disabled={activeField === "socialSecurity" || activeField === "badgeNumber"}
-                  error={!!errors.fullNameContains}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    if (e.target.value !== "") {
-                      toggleSearchFieldEntered(true, "fullNameContains");
-                    } else {
-                      toggleSearchFieldEntered(false, "fullNameContains");
-                    }
-                  }}
-                />
-              )}
-            />
-            {errors.fullNameContains && <FormHelperText error>{errors.fullNameContains.message}</FormHelperText>}
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, md: isModal ? 4 : 1.5 }}>
             <FormLabel>SSN {requiredLabel}</FormLabel>
             <Controller
               name="socialSecurity"
@@ -274,13 +275,58 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                       toggleSearchFieldEntered(validatedValue !== "", "socialSecurity");
                     }
                   }}
+                  sx={
+                    activeField === "badgeNumber" || activeField === "fullNameContains"
+                      ? { "& .MuiOutlinedInput-root": { backgroundColor: "#f5f5f5" } }
+                      : undefined
+                  }
                 />
               )}
             />
             {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
+            {!errors.socialSecurity && getExclusionHelperText("socialSecurity") && (
+              <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
+                {getExclusionHelperText("socialSecurity")}
+              </FormHelperText>
+            )}
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Badge Number {requiredLabel}</FormLabel>
+          <Grid size={{ xs: 12, sm: 6, md: isModal ? 4 : 1.5 }}>
+            <FormLabel>Name {requiredLabel}</FormLabel>
+            <Controller
+              name="fullNameContains"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  variant="outlined"
+                  disabled={activeField === "socialSecurity" || activeField === "badgeNumber"}
+                  error={!!errors.fullNameContains}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    if (e.target.value !== "") {
+                      toggleSearchFieldEntered(true, "fullNameContains");
+                    } else {
+                      toggleSearchFieldEntered(false, "fullNameContains");
+                    }
+                  }}
+                  sx={
+                    activeField === "socialSecurity" || activeField === "badgeNumber"
+                      ? { "& .MuiOutlinedInput-root": { backgroundColor: "#f5f5f5" } }
+                      : undefined
+                  }
+                />
+              )}
+            />
+            {errors.fullNameContains && <FormHelperText error>{errors.fullNameContains.message}</FormHelperText>}
+            {!errors.fullNameContains && getExclusionHelperText("fullNameContains") && (
+              <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
+                {getExclusionHelperText("fullNameContains")}
+              </FormHelperText>
+            )}
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: isModal ? 4 : 1.5 }}>
+            <FormLabel>Badge {requiredLabel}</FormLabel>
             <Controller
               name="badgeNumber"
               control={control}
@@ -299,18 +345,29 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                       toggleSearchFieldEntered(validatedValue !== "", "badgeNumber");
                     }
                   }}
+                  sx={
+                    activeField === "socialSecurity" || activeField === "fullNameContains"
+                      ? { "& .MuiOutlinedInput-root": { backgroundColor: "#f5f5f5" } }
+                      : undefined
+                  }
                 />
               )}
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
+            {!errors.badgeNumber && getExclusionHelperText("badgeNumber") && (
+              <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
+                {getExclusionHelperText("badgeNumber")}
+              </FormHelperText>
+            )}
           </Grid>
           {!isModal && (
             <>
               <Grid
                 container
                 paddingX="8px"
-                width={"100%"}>
-                <Grid size={{ xs: 3, sm: 3, md: 3 }}>
+                width={"100%"}
+                spacing={2}>
+                <Grid size="auto">
                   <FormLabel>Has Executive Hours and Dollars</FormLabel>
                   <Controller
                     name="hasExecutiveHoursAndDollars"
@@ -329,7 +386,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
                   )}
                 </Grid>
-                <Grid size={{ xs: 3, sm: 3, md: 3 }}>
+                <Grid size="auto">
                   <FormLabel>Monthly Payroll</FormLabel>
                   <Controller
                     name="isMonthlyPayroll"

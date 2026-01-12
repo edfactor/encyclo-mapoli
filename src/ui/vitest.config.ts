@@ -7,8 +7,19 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
+    environmentOptions: {
+      jsdom: {
+        // Suppress jsdom "Not implemented" warnings (navigation, etc.)
+        pretendToBeVisual: true,
+        resources: "usable"
+      }
+    },
     setupFiles: "./src/test/setup.ts",
     css: true,
+    // Use 'dot' reporter for minimal output: dots for passes, details for failures, summary at end
+    reporters: ["dot"],
+    // Suppress all console output during tests (return false to hide, true to show)
+    onConsoleLog: () => false,
     // Windows limitation: Reduce workers to avoid "too many open files" error
     // On Windows, limit to 1 worker; on Unix systems, use default (auto-detected based on CPU cores)
     threads: process.platform === "win32" ? 1 : true,

@@ -52,7 +52,7 @@ public class BeneficiaryService : IBeneficiaryService
 
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            // Validate database-dependent business rules
+            // Validate database-dependent business rules 
             var dbValidationModel = new BeneficiaryDatabaseValidationModel
             {
                 BeneficiaryContactId = req.BeneficiaryContactId,

@@ -1,6 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -37,6 +36,11 @@ public class ApiTestBase<TStartup> : IAsyncDisposable where TStartup : class
     /// <returns>The HTTP client timeout, or null to use the default 2-minute timeout.</returns>
     protected virtual TimeSpan? GetHttpClientTimeout() => null;
 
+    /// <summary>
+    ///   The WebApplicationFactory instance that manages the test server.
+    ///   Must be disposed to release server resources (ports, threads, etc.) after tests complete.
+    /// </summary>
+    private readonly WebApplicationFactory<TStartup> _factory;
 
     public ServiceProvider? ServiceProvider { get; private set; }
 
@@ -55,9 +59,9 @@ public class ApiTestBase<TStartup> : IAsyncDisposable where TStartup : class
         // it's configured before any WebApplicationFactory or ASP.NET host is created.
         // This is required for xUnit v3 / Microsoft Testing Platform compatibility.
 
-        WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
+        var webApplicationFactory = new WebApplicationFactory<TStartup>();
 
-        WebApplicationFactory<TStartup> builder = webApplicationFactory.WithWebHostBuilder(
+        _factory = webApplicationFactory.WithWebHostBuilder(
             hostBuilder =>
             {
                 hostBuilder.UseEnvironment("Testing");
@@ -67,7 +71,7 @@ public class ApiTestBase<TStartup> : IAsyncDisposable where TStartup : class
                     services.AddTransient((_) => MockDbContextFactory);
 
                     services.AddTransient((_) => MockEmbeddedSqlService.Initialize());
-                    services.AddTransient<ICalendarService, CalendarService>();
+                    services.AddTransient((_) => MockCalendarService.Initialize());
 
                     // Allow tests to provide additional service registrations before the provider is built.
                     TestServiceOverrides.Hook?.Invoke(services);
@@ -76,14 +80,14 @@ public class ApiTestBase<TStartup> : IAsyncDisposable where TStartup : class
                 });
             });
 
-        ApiClient = builder.CreateClient();
+        ApiClient = _factory.CreateClient();
 
         // Set timeout for integration tests - should complete quickly with mocked database
         // If this timeout is hit, it indicates a performance problem that needs investigation
         // Derived classes can override GetHttpClientTimeout() to customize this value
         ApiClient.Timeout = GetHttpClientTimeout() ?? TimeSpan.FromMinutes(2);
 
-        DownloadClient = builder.CreateClient();
+        DownloadClient = _factory.CreateClient();
         DownloadClient.Timeout = GetHttpClientTimeout() ?? TimeSpan.FromMinutes(2);
         DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }
@@ -105,16 +109,21 @@ public class ApiTestBase<TStartup> : IAsyncDisposable where TStartup : class
     /// Disposes test resources to reduce memory accumulation during test suite execution.
     /// Called by xUnit test runner after each test class completes.
     /// </summary>
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        // Dispose ServiceProvider to release all registered services and their resources
-        ServiceProvider?.Dispose();
+        // Dispose ServiceProvider asynchronously to release all registered services and their resources
+        if (ServiceProvider != null)
+        {
+            await ServiceProvider.DisposeAsync();
+        }
 
         // Dispose HTTP clients to close connections and free resources
         ApiClient?.Dispose();
         DownloadClient?.Dispose();
 
-        return ValueTask.CompletedTask;
+        // Dispose WebApplicationFactory to release test server resources (ports, threads, etc.)
+        // This is critical to prevent resource exhaustion when running many test classes
+        await _factory.DisposeAsync();
     }
 
 }

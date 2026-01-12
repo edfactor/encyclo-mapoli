@@ -23,9 +23,9 @@ vi.mock("../../../../utils/FormValidators", async () => {
         if (!value) return true;
         return /^\d+$/.test(value);
       })
-      .test("is-valid-length", "Badge Number must be 1 to 7 digits", function (value) {
+      .test("is-valid-length", "Badge Number must be 3 to 7 digits", function (value) {
         if (!value) return true;
-        return value.length >= 1 && value.length <= 7;
+        return value.length >= 3 && value.length <= 7;
       }),
     handleSsnInput: (value: string): string | null => {
       // Only allow numeric input

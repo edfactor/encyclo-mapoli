@@ -12,7 +12,7 @@ const MAX_BADGE_LENGTH = 8; // 8+ digits is a PSN (badge + suffix)
 /**
  * Parses a badge/PSN number string into separate badge and PSN components
  *
- * Badge numbers: 1-7 digits (employee badges)
+ * Badge numbers: 3-7 digits (employee badges)
  * PSN numbers: 8+ digits (badge + suffix)
  *
  * @example
@@ -41,7 +41,7 @@ export function parseBadgeAndPSN(badgeInput: string | number): BadgeParsing {
  *
  * Used for filtering search results:
  * - 0 = All (empty or too short to determine)
- * - 1 = Employees (1-7 digits)
+ * - 1 = Employees (3-7 digits)
  * - 2 = Beneficiaries (8+ digits, has PSN suffix)
  *
  * @example

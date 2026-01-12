@@ -24,15 +24,11 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         DateOnly startDate = new(2024, 01, 01);
         DateOnly endDate = new(2024, 12, 31);
 
-        ILoggerFactory _loggerFactory = LoggerFactory.Create(builder =>
-        {
-            _ = builder
-                .SetMinimumLevel(LogLevel.Debug)
-                .AddConsole();
-        });
+        // Set minimum level to Warning to avoid noisy logs during tests
+        ILoggerFactory _loggerFactory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning));
 
         TerminatedEmployeeService mockService =
-            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory, CalendarService, YearEndService);
+            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory, CalendarService, YearEndService, TimeProvider);
 
         TerminatedEmployeeAndBeneficiaryResponse data = await mockService.GetReportAsync(
             new FilterableStartAndEndDateRequest { SortBy = "Name", BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue },

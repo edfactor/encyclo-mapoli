@@ -29,8 +29,9 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const currentDate = useFakeTimeAwareDate();
+  const currentYear = currentDate.getFullYear();
 
-  const defaultProfitYear = new Date(currentDate.getFullYear() - 1, 0, 1);
+  const defaultProfitYear = new Date(currentYear - 1, 0, 1);
 
   const {
     control,
@@ -70,7 +71,7 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
 
   const handleReset = () => {
     reset({
-      profitYear: new Date(currentDate.getFullYear() - 1, 0, 1),
+      profitYear: new Date(currentYear - 1, 0, 1),
       DeMinimusValue: 1000
     });
     onReset();

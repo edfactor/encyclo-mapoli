@@ -1,5 +1,5 @@
 import { RefObject, useCallback, useMemo } from "react";
-import { Path, useNavigate } from "react-router";
+import { Path, useNavigate } from "react-router-dom";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
