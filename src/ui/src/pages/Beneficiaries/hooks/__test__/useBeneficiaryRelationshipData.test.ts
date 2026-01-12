@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { BeneficiaryDetail, BeneficiaryDto } from "@/types/beneficiary/beneficiary";
+import { configureStore } from "@reduxjs/toolkit";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
-import { useBeneficiaryRelationshipData } from "../useBeneficiaryRelationshipData";
-import { BeneficiaryDetail, BeneficiaryDto } from "@/types/beneficiary/beneficiary";
-import { Paged } from "smart-ui-library";
-import { configureStore } from "@reduxjs/toolkit";
 import securityReducer, { type SecurityState } from "reduxstore/slices/securitySlice";
+import { Paged } from "smart-ui-library";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useBeneficiaryRelationshipData } from "../useBeneficiaryRelationshipData";
 
 // Create mock functions for triggers/actions
 const mockTriggerGetBeneficiaries = vi.fn();
@@ -17,6 +17,7 @@ vi.mock("reduxstore/api/BeneficiariesApi", () => ({
 }));
 
 const mockBeneficiaryDetail: BeneficiaryDetail = {
+  id: 1,
   badgeNumber: 123,
   psnSuffix: 1,
   fullName: "John Doe",

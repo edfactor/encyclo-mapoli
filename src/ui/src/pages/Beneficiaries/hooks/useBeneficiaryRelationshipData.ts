@@ -81,6 +81,7 @@ export const useBeneficiaryRelationshipData = ({
     if (!selectedMember?.psnSuffix && selectedMember.psnSuffix !== 0) return null;
 
     return {
+      id: selectedMember.id,
       badgeNumber: selectedMember.badgeNumber,
       psnSuffix: selectedMember.psnSuffix,
       isSortDescending: sortParams.isSortDescending,
