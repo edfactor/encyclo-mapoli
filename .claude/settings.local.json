@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(front-end-code-review)"
+    ]
+  }
+}
