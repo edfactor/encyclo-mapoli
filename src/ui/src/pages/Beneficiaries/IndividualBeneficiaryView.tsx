@@ -78,7 +78,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
           addAlert(BENEFICIARY_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
         });
     },
-    [triggerBeneficiaryDetail, onBeneficiarySelect]
+    [triggerBeneficiaryDetail, onBeneficiarySelect, addAlert]
   );
 
   return (
