@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Caching.Interfaces;
+using Demoulas.Common.Caching.Interfaces;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;

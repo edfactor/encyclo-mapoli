@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.AppHost;
+using Demoulas.ProfitSharing.AppHost;
 using Demoulas.ProfitSharing.AppHost.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

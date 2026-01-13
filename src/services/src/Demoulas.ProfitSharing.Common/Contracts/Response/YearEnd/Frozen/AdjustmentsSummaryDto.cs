@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 /// <summary>
 ///     Used to collect data about adjustments made to employees.  This data is displayed to the user to show the effect of thier inputs.

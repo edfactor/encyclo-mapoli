@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.UnitTests.Common;
+namespace Demoulas.ProfitSharing.UnitTests.Common;
 
 /// <summary>
 /// Collection definition for tests that share global state via Constants.FakeParticipantTotals

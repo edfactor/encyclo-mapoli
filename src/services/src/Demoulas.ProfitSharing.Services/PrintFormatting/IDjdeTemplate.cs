@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.PrintFormatting;
+namespace Demoulas.ProfitSharing.Services.PrintFormatting;
 
 /// <summary>
 /// Template for generating Xerox DJDE (Dynamic Job Descriptor Entry) directives.

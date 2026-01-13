@@ -1,4 +1,4 @@
-﻿using CsvHelper;
+using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 // Result, Error

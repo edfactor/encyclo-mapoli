@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;

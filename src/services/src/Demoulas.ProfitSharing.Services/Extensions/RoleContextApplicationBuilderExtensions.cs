@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Services.Serialization;
+using Demoulas.ProfitSharing.Services.Serialization;
 using Microsoft.AspNetCore.Builder;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;

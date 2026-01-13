@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Configuration;
+namespace Demoulas.ProfitSharing.Data.Configuration;
 
 public sealed record DataConfig
 {

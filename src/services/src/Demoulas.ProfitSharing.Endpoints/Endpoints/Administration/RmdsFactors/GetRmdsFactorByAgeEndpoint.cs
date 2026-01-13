@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -44,7 +44,7 @@ public sealed class GetRmdsFactorByAgeEndpoint
     public override void Configure()
     {
         Get("rmds-factors/{Age}");
-        
+
         Summary(s =>
         {
             s.Summary = "Get RMD Factor by Age";

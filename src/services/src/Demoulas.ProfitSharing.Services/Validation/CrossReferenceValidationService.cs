@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Interfaces;

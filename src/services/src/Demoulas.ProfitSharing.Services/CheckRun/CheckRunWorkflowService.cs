@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
 using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Data.Entities.CheckRun;

@@ -2,27 +2,36 @@ CREATE OR REPLACE VIEW PSCALCVIEW AS
 WITH DEMO_OR_BENEFICIARY AS (
     SELECT
         p.SSN,
-        pp.ENROLLMENT_ID AS ENROLLMENT,
+        -- EnrollmentId computed from VestingScheduleId and HasForfeited (enrollment decomposition)
+        CASE 
+            WHEN p.VESTING_SCHEDULE_ID IS NULL THEN 0  -- NotEnrolled
+            WHEN p.HAS_FORFEITED = 1 THEN 
+                CASE WHEN p.VESTING_SCHEDULE_ID = 1 THEN 3 ELSE 5 END  -- Old/NewVestingPlanHasForfeitureRecords
+            ELSE 
+                CASE WHEN p.VESTING_SCHEDULE_ID = 1 THEN 1 ELSE 4 END  -- Old/NewVestingPlanHasContributions
+        END AS ENROLLMENT,
         CAST(p.TERMINATION_CODE_ID AS VARCHAR2(1)) AS TERMCD,
         p.TERMINATION_DATE AS TERMDT,
         pp.ZERO_CONTRIBUTION_REASON_ID AS ZEROCD,
         p.DATE_OF_BIRTH AS DOB,
         pp.HOURS_CURRENT_YEAR AS HOURS,
         pp.COMPANY_CONTRIBUTION_YEARS AS YEARS,
-        0 AS FROM_BENEFICIARY
+        0 AS FROM_BENEFICIARY,
+        p.VESTING_SCHEDULE_ID -- Keep for vesting calculations
     FROM DEMOGRAPHIC p
     JOIN PAY_PROFIT pp ON p.SSN = pp.SSN
     UNION ALL
     SELECT
         pb.SSN,
-        0 AS ENROLLMENT,   -- Adjust these fields based on the actual data in BENEFICIARY if needed
+        0 AS ENROLLMENT,   -- Beneficiaries not enrolled
         CAST(' ' AS VARCHAR2(1)) AS TERMCD,
         NULL AS TERMDT,
         0 AS ZEROCD,
         pb.DATE_OF_BIRTH AS DOB,
         0 AS HOURS,
         0 AS YEARS,
-        1 AS FROM_BENEFICIARY
+        1 AS FROM_BENEFICIARY,
+        NULL AS VESTING_SCHEDULE_ID
     FROM BENEFICIARY pb
     WHERE NOT EXISTS (SELECT 1 FROM DEMOGRAPHIC p WHERE p.SSN = pb.SSN)
 )
@@ -41,26 +50,26 @@ SELECT
             WHEN TRUNC(MONTHS_BETWEEN(CURRENT_DATE, d.DOB) / 12) >= 65 
              AND (d.TERMDT IS NULL OR EXTRACT(YEAR FROM d.TERMDT) >= EXTRACT(YEAR FROM CURRENT_DATE)) 
                THEN 1
-            WHEN d.ENROLLMENT IN (3,4) THEN 1
+            WHEN d.ENROLLMENT IN (3, 5) THEN 1  -- Has forfeiture records (values 3 and 5)
             WHEN d.TERMCD = 'Z' THEN 1
             WHEN d.ZEROCD = 6 THEN 1
             -- Remove the condition for PY_PROF_ZEROCONT = 7 affecting VESTPCT here
-            WHEN (CASE WHEN d.ENROLLMENT = 2 THEN 1 ELSE 0 END 
+            WHEN (CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN 1 ELSE 0 END  -- New plan vests 1 year faster
                   + CASE WHEN d.HOURS >= 1000 THEN 1 ELSE 0 END 
                   + d.YEARS) < 3 THEN 0
-            WHEN (CASE WHEN d.ENROLLMENT = 2 THEN 1 ELSE 0 END 
+            WHEN (CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN 1 ELSE 0 END 
                   + CASE WHEN d.HOURS >= 1000 THEN 1 ELSE 0 END 
                   + d.YEARS) = 3 THEN .2
-            WHEN (CASE WHEN d.ENROLLMENT = 2 THEN 1 ELSE 0 END 
+            WHEN (CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN 1 ELSE 0 END 
                   + CASE WHEN d.HOURS >= 1000 THEN 1 ELSE 0 END 
                   + d.YEARS) = 4 THEN .4
-            WHEN (CASE WHEN d.ENROLLMENT = 2 THEN 1 ELSE 0 END 
+            WHEN (CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN 1 ELSE 0 END 
                   + CASE WHEN d.HOURS >= 1000 THEN 1 ELSE 0 END 
                   + d.YEARS) = 5 THEN .6
-            WHEN (CASE WHEN d.ENROLLMENT = 2 THEN 1 ELSE 0 END 
+            WHEN (CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN 1 ELSE 0 END 
                   + CASE WHEN d.HOURS >= 1000 THEN 1 ELSE 0 END 
                   + d.YEARS) = 6 THEN .8
-            WHEN (CASE WHEN d.ENROLLMENT = 2 THEN 1 ELSE 0 END 
+            WHEN (CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN 1 ELSE 0 END 
                   + CASE WHEN d.HOURS >= 1000 THEN 1 ELSE 0 END 
                   + d.YEARS) >= 7 THEN 1
             ELSE 0

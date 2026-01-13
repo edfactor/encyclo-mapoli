@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Reporting.Core;
+namespace Demoulas.ProfitSharing.Reporting.Core;
 
 /// <summary>
 /// Centralized configuration for PDF report styling, fonts, colors, and branding.

@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;

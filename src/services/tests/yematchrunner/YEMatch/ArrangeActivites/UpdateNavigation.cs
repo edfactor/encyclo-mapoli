@@ -1,4 +1,4 @@
-﻿using Shouldly;
+using Shouldly;
 using YEMatch.AssertActivities;
 
 namespace YEMatch.ArrangeActivites;

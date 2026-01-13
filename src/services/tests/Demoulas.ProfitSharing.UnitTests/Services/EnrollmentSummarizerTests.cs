@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services.EnrollmentFlag;
+using Moq;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
@@ -13,17 +15,52 @@ public class EnrollmentSummarizerTests
     #region Test Helpers
 
     /// <summary>
+    /// Creates a mock IVestingScheduleService that returns vesting percentages based on standard schedules.
+    /// </summary>
+    private static Mock<IVestingScheduleService> CreateMockVestingScheduleService()
+    {
+        var mock = new Mock<IVestingScheduleService>();
+
+        // Setup mock to return vesting percentages based on schedule and years
+        mock.Setup(x => x.GetVestingPercentAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int scheduleId, int years, CancellationToken ct) =>
+            {
+                // Old Plan (ID=1): [0,0,0,20,40,60,80,100]
+                // New Plan (ID=2): [0,0,20,40,60,80,100]
+                if (scheduleId == VestingSchedule.Constants.OldPlan)
+                {
+                    byte[] oldTable = [0, 0, 0, 20, 40, 60, 80, 100];
+                    int index = Math.Clamp(years, 0, oldTable.Length - 1);
+                    return oldTable[index];
+                }
+                else // New Plan
+                {
+                    byte[] newTable = [0, 0, 20, 40, 60, 80, 100];
+                    int index = Math.Clamp(years, 0, newTable.Length - 1);
+                    return newTable[index];
+                }
+            });
+
+        // PS-2464: Mock GetNewPlanEffectiveYearAsync to return 2007 (standard new plan effective year)
+        mock.Setup(x => x.GetNewPlanEffectiveYearAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(2007);
+
+        return mock;
+    }
+
+    /// <summary>
     /// Computes enrollment with both implementations and verifies they match.
     /// </summary>
-    private static void VerifyBothImplementationsMatch(
+    private static async Task VerifyBothImplementationsMatchAsync(
         PayProfit payProfit,
         short yearsOfService,
         List<ProfitDetail> profitDetails,
         byte expectedEnrollment,
         string testContext)
     {
-        var es = new EnrollmentSummarizer();
-        var res = es.ComputeEnrollment(payProfit, yearsOfService, profitDetails);
+        var mockService = CreateMockVestingScheduleService();
+        var es = new EnrollmentSummarizer(mockService.Object);
+        var res = await es.ComputeEnrollmentAsync(payProfit, yearsOfService, profitDetails, CancellationToken.None);
 
         // Verify both match expected result
         res.ShouldBe(expectedEnrollment, $"failed for: {testContext}");
@@ -94,9 +131,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : No transactions returns not enrolled (0)")]
     [Fact]
-    public void ComputeEnrollment_NoTransactions_ReturnsNotEnrolled()
+    public Task ComputeEnrollment_NoTransactions_ReturnsNotEnrolled()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(),
             yearsOfService: 3,
             new List<ProfitDetail>(),
@@ -106,9 +143,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Single contribution before 2007 returns old vesting plan (1)")]
     [Fact]
-    public void ComputeEnrollment_SingleContributionBefore2007_ReturnsOldVestingPlan()
+    public Task ComputeEnrollment_SingleContributionBefore2007_ReturnsOldVestingPlan()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2006),
             yearsOfService: 3,
             new List<ProfitDetail> { CreateContribution(profitYear: 2006) },
@@ -118,9 +155,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Single contribution in 2007 or later returns new vesting plan (2)")]
     [Fact]
-    public void ComputeEnrollment_SingleContributionIn2007_ReturnsNewVestingPlan()
+    public Task ComputeEnrollment_SingleContributionIn2007_ReturnsNewVestingPlan()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2007),
             yearsOfService: 3,
             new List<ProfitDetail> { CreateContribution(profitYear: 2007) },
@@ -130,9 +167,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Contribution in 2024 returns new vesting plan (2)")]
     [Fact]
-    public void ComputeEnrollment_ContributionIn2024_ReturnsNewVestingPlan()
+    public Task ComputeEnrollment_ContributionIn2024_ReturnsNewVestingPlan()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 2,
             new List<ProfitDetail> { CreateContribution(profitYear: 2024, contributionAmount: 1500m) },
@@ -146,9 +183,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Old plan member with 2007+ contribution upgrades to new plan (2)")]
     [Fact]
-    public void ComputeEnrollment_OldPlanMemberGets2007Contribution_UpgradesToNewPlan()
+    public Task ComputeEnrollment_OldPlanMemberGets2007Contribution_UpgradesToNewPlan()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 4,
             new List<ProfitDetail>
@@ -167,9 +204,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Military contribution after 2007 sets new vesting plan")]
     [Fact]
-    public void ComputeEnrollment_MilitaryContributionAfter2007_SetsNewVestingPlan()
+    public Task ComputeEnrollment_MilitaryContributionAfter2007_SetsNewVestingPlan()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
             new List<ProfitDetail>
@@ -186,9 +223,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Military contribution before 2008 uses old vesting plan")]
     [Fact]
-    public void ComputeEnrollment_MilitaryContributionBefore2008_UsesOldVestingPlan()
+    public Task ComputeEnrollment_MilitaryContributionBefore2008_UsesOldVestingPlan()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
             new List<ProfitDetail>
@@ -209,9 +246,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Under 21 with V-only contribution qualifies for enrollment")]
     [Fact]
-    public void ComputeEnrollment_Under21WithVOnly_QualifiesForEnrollment()
+    public Task ComputeEnrollment_Under21WithVOnly_QualifiesForEnrollment()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
             new List<ProfitDetail>
@@ -228,9 +265,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Terminated employee with V-only qualifies for enrollment")]
     [Fact]
-    public void ComputeEnrollment_TerminatedWithVOnly_QualifiesForEnrollment()
+    public Task ComputeEnrollment_TerminatedWithVOnly_QualifiesForEnrollment()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
             new List<ProfitDetail>
@@ -247,9 +284,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : 65+ fully vested with contribution qualifies for enrollment")]
     [Fact]
-    public void ComputeEnrollment_65PlusFullyVestedWithContribution_QualifiesForEnrollment()
+    public Task ComputeEnrollment_65PlusFullyVestedWithContribution_QualifiesForEnrollment()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 6,
             new List<ProfitDetail>
@@ -269,9 +306,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Post-2006 forfeiture with vesting sets old forfeiture plan (3)")]
     [Fact]
-    public void ComputeEnrollment_Post2006ForfeitureWithVesting_SetsOldForfeiturePlan()
+    public Task ComputeEnrollment_Post2006ForfeitureWithVesting_SetsOldForfeiturePlan()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 3,
             new List<ProfitDetail>
@@ -285,9 +322,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Post-2006 forfeiture with new vesting sets new forfeiture plan (4)")]
     [Fact]
-    public void ComputeEnrollment_Post2006ForfeitureWithNewVesting_SetsNewForfeiturePlan()
+    public Task ComputeEnrollment_Post2006ForfeitureWithNewVesting_SetsNewForfeiturePlan()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 3,
             new List<ProfitDetail>
@@ -301,9 +338,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Class action forfeiture is ignored (not a real forfeiture)")]
     [Fact]
-    public void ComputeEnrollment_ClassActionForfeiture_IsIgnored()
+    public Task ComputeEnrollment_ClassActionForfeiture_IsIgnored()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 3,
             new List<ProfitDetail>
@@ -335,9 +372,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : 2003 void problem (ProfitCode 8) sets old forfeiture plan")]
     [Fact]
-    public void ComputeEnrollment_2003VoidProblem_SetsOldForfeiturePlan()
+    public Task ComputeEnrollment_2003VoidProblem_SetsOldForfeiturePlan()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 2,
             new List<ProfitDetail>
@@ -360,9 +397,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Multiple contributions in same year only counted once")]
     [Fact]
-    public void ComputeEnrollment_MultipleContributionsSameYear_CountedOnce()
+    public Task ComputeEnrollment_MultipleContributionsSameYear_CountedOnce()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
             new List<ProfitDetail>
@@ -377,9 +414,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Future transactions are ignored")]
     [Fact]
-    public void ComputeEnrollment_FutureTransactions_AreIgnored()
+    public Task ComputeEnrollment_FutureTransactions_AreIgnored()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
             new List<ProfitDetail>
@@ -394,9 +431,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Zero years of service with contribution still enrolls")]
     [Fact]
-    public void ComputeEnrollment_ZeroYearsWithContribution_StillEnrolls()
+    public Task ComputeEnrollment_ZeroYearsWithContribution_StillEnrolls()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 0,
             new List<ProfitDetail> { CreateContribution(profitYear: 2024) },
@@ -410,9 +447,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Long tenure employee with multiple plan transitions")]
     [Fact]
-    public void ComputeEnrollment_LongTenureWithTransitions_HandlesCorrectly()
+    public Task ComputeEnrollment_LongTenureWithTransitions_HandlesCorrectly()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 10,
             new List<ProfitDetail>
@@ -435,9 +472,9 @@ public class EnrollmentSummarizerTests
 
     [Description("PS-2196 : Employee with forfeiture then returns to plan")]
     [Fact]
-    public void ComputeEnrollment_ForfeitureeThenReturns_ShowsNewPlanWithForfeiture()
+    public Task ComputeEnrollment_ForfeitureeThenReturns_ShowsNewPlanWithForfeiture()
     {
-        VerifyBothImplementationsMatch(
+        return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 5,
             new List<ProfitDetail>

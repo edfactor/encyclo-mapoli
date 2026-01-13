@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Reporting.Core;
+namespace Demoulas.ProfitSharing.Reporting.Core;
 
 /// <summary>
 /// Service for generating PDF reports from report instances.

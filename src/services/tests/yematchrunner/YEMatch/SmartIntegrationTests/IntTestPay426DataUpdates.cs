@@ -1,4 +1,4 @@
-﻿namespace YEMatch.SmartIntegrationTests;
+namespace YEMatch.SmartIntegrationTests;
 
 /// <summary>
 ///     Runs the SMART integration test for PAY426 data updates validation.

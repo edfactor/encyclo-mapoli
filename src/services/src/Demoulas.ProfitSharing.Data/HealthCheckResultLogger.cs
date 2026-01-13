@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Audit;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;

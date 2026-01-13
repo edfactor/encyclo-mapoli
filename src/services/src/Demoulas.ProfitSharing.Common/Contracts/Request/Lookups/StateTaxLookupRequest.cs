@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 
 public sealed record StateTaxLookupRequest
 {

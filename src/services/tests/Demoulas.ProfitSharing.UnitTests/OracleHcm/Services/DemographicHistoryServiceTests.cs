@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Microsoft.Extensions.Logging;

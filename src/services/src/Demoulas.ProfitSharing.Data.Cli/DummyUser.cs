@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Demoulas.Common.Contracts.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Cli;

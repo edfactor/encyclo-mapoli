@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-[DebuggerDisplay($"Id={{DemographicId}} ProfitYear={{ProfitYear}} EnrollmentId={{EnrollmentId}} EmploymentStatus={{Demographic!.EmploymentStatusId}} TerminationCodeId={{Demographic!.TerminationCodeId}} Name:{{Demographic!.ContactInfo.FullName}}")]
+[DebuggerDisplay("Id={DemographicId} ProfitYear={ProfitYear} EmploymentStatus={Demographic.EmploymentStatusId} TerminationCodeId={Demographic.TerminationCodeId} Name:{Demographic.ContactInfo.FullName}")]
 public sealed class PayProfit : ModifiedBase
 {
     /// <summary>
@@ -48,13 +48,8 @@ public sealed class PayProfit : ModifiedBase
     /// </summary>
     public DateOnly? PsCertificateIssuedDate { get; set; }
 
-
-    /// <summary>
-    /// Employee enrollment status
-    /// </summary>
-    ///
-    public byte EnrollmentId { get; set; }
-    public Enrollment? Enrollment { get; set; }
+    // EnrollmentId and Enrollment properties removed - use Demographic.EnrollmentId instead
+    // Enrollment is now stored on DEMOGRAPHIC table (VestingScheduleId + HasForfeited)
 
     /// <summary>
     /// 0=Employee, 1=Beneficiary

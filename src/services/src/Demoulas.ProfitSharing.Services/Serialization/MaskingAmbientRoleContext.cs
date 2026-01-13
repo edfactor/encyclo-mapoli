@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.Serialization;
+namespace Demoulas.ProfitSharing.Services.Serialization;
 
 /// <summary>
 /// Ambient role context for masking decisions (AsyncLocal per-request scope).

@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Constants;

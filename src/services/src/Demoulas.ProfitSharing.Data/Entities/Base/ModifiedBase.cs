@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities.Base;
+namespace Demoulas.ProfitSharing.Data.Entities.Base;
 
 public abstract class ModifiedBase
 {

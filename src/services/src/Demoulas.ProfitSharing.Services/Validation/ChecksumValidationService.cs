@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;

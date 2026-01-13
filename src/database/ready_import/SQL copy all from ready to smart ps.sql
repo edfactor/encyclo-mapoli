@@ -13,20 +13,16 @@ DECLARE
     */
     this_year NUMBER;
     last_year NUMBER;
-    last_last_year NUMBER;
     wall_clock_year NUMBER := EXTRACT(YEAR FROM SYSDATE);
     demographic_cutoff TIMESTAMP; -- <-- Timestamp to use if we import DEMO_PROFSHARE
 BEGIN
 
-    -- FYI: we are in wallclock year 2026, and have 2026 transactions already 
-    -- so this_year = wallclock
     SELECT MAX(TRUNC(PROFIT_YEAR))
     INTO this_year
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DETAIL;
 
     last_year := this_year - 1;
-    last_last_year := last_year - 1;
-                   
+
  -- First disable all foreign key constraints
     FOR fk IN (SELECT constraint_name, table_name 
                FROM user_constraints 
@@ -101,7 +97,8 @@ BEGIN
      GENDER_ID,
      PAY_FREQUENCY_ID,
      TERMINATION_CODE_ID,
-     EMPLOYMENT_STATUS_ID)
+     EMPLOYMENT_STATUS_ID,
+     HAS_FORFEITED)
     SELECT
         ROWNUM AS ORACLEHCMID,
                 DEM_SSN,
@@ -227,7 +224,10 @@ BEGIN
                     SELECT ID
                     FROM EMPLOYMENT_STATUS
                     WHERE ID=LOWER(PY_SCOD)
-                ) AS EMPLOYMENT_STATUS_ID
+                ) AS EMPLOYMENT_STATUS_ID,
+                /* HAS_FORFEITED: Default to 0 (false). Will be updated after PROFIT_DETAIL is loaded
+                   to identify employees who have forfeiture records. */
+                0 AS HAS_FORFEITED
     FROM {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS;
 
     INSERT INTO DEMOGRAPHIC_HISTORY(DEMOGRAPHIC_ID, VALID_FROM, VALID_TO, ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME, CITY, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, MIDDLE_NAME, MOBILE_NUMBER, PHONE_NUMBER, POSTAL_CODE, STATE, STREET, STREET2)
@@ -249,7 +249,8 @@ BEGIN
      POSTAL_CODE,
      PHONE_NUMBER,
      MOBILE_NUMBER,
-     EMAIL_ADDRESS)
+     EMAIL_ADDRESS,
+     ISDELETED)
     SELECT
         PYBEN.PYBEN_PAYSSN AS SSN,
         TRIM(SUBSTR(PYBEN.PYBEN_NAME, INSTR(PYBEN.PYBEN_NAME, ', ') + 2)) AS FIRSTNAME,
@@ -277,7 +278,8 @@ BEGIN
         LPAD(TO_CHAR(PYBEN.PYBEN_ZIP),5,'0') AS POSTAL_CODE,
         NULL AS PHONE_NUMBER, -- phone number isn't available
         NULL AS MOBILE_NUMBER,  -- mobile number isn't available
-        NULL AS EMAIL_ADDRESS  -- email isn't available
+        NULL AS EMAIL_ADDRESS,  -- email isn't available
+        0 AS ISDELETED  -- Default to not deleted
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN PYBEN;
 
@@ -287,7 +289,8 @@ BEGIN
      DEMOGRAPHIC_ID,
      BENEFICIARY_CONTACT_ID,
      RELATIONSHIP,
-     PERCENT)
+     PERCENT,
+     ISDELETED)
     SELECT
         TO_NUMBER(SUBSTR(LPAD(PYBEN.PYBEN_PSN, 11, 0), 8)) AS PSN_SUFFIX,
         TO_NUMBER(SUBSTR(LPAD(PYBEN_PSN,11,0),1,7)) AS BADGE_NUMBER,
@@ -300,7 +303,8 @@ BEGIN
 
         CASE WHEN PAYREL.PYREL_PERCENT IS NULL THEN 0
              ELSE PAYREL.PYREL_PERCENT
-            END AS PERCENT
+            END AS PERCENT,
+        0 AS ISDELETED  -- Default to not deleted
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN PYBEN
              INNER JOIN BENEFICIARY_CONTACT BC ON PYBEN.PYBEN_PAYSSN = BC.SSN
              LEFT join DEMOGRAPHIC d on PYBEN.PYBEN_PAYSSN = d.SSN
@@ -316,20 +320,8 @@ BEGIN
 
 --------------------------------------------------------------------------------------------------
 
-    
--- We import into the scramble at the moment differently than UAT
--- This will diverge again as the year progresses ... we will like use a DEMO_PROFSHARE snapshot for dev/qa    
-    
-if lower('{SOURCE_PROFITSHARE_SCHEMA}') = 'profitshare' then
-   
--- Scramble mode.   As of today, the scramble is in 2025 with some 2026 transactions
--- so to import it.  We need three years;
-   -- 2026 - now year - some transactions are already here.  
-   -- 2025 - last year - open profit year
-   -- 2024 - reference year - used for Beginning Balance / Beginning Vested Amount
-   -- So, 0 -> hours/dollars in 2026, py_ph_hr -> hours/dollars into 2025, and PY_PH_LASTYR -> hours/dollars into 2024   
-
--- Insert THIS YEARS data into the PAY_PROFIT table
+    -------------------------------------------------------------------------------
+    -- Insert THIS YEARS data into the PAY_PROFIT table
     INSERT INTO PAY_PROFIT
     (DEMOGRAPHIC_ID,
      PROFIT_YEAR,
@@ -337,7 +329,6 @@ if lower('{SOURCE_PROFITSHARE_SCHEMA}') = 'profitshare' then
      CURRENT_INCOME_YEAR,
      WEEKS_WORKED_YEAR,
      PS_CERTIFICATE_ISSUED_DATE,
-     ENROLLMENT_ID,
      BENEFICIARY_TYPE_ID,
      EMPLOYEE_TYPE_ID,
      ZERO_CONTRIBUTION_REASON_ID,
@@ -345,117 +336,31 @@ if lower('{SOURCE_PROFITSHARE_SCHEMA}') = 'profitshare' then
      INCOME_EXECUTIVE,
      POINTS_EARNED,
      ETVA)
-SELECT -- 2026
-    (select ID from DEMOGRAPHIC where BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
-    this_year AS PROFIT_YEAR,
-    0 AS CURRENT_HOURS_YEAR, -- new year, no dollars yet
-    0 AS CURRENT_INCOME_YEAR,
-    0 AS WEEKS_WORKED_YEAR,
-    null as PS_CERTIFICATE_ISSUED_DATE, -- used at end of 2026 
-    PY_PS_ENROLLED AS ENROLLMENT_ID, -- this is cloned into both 2025 / 2026
-    PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-    PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
-    PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID, -- this is cloned into both 2025 / 2026
-    NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
-    NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-    0 AS POINTS_EARNED, -- Leaving the points here helps the PAY426 reports match identically.
-    PY_PS_ETVA as ETVA -- Considered the HOT ETVA
-FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
-where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
+    SELECT
+        (select ID from DEMOGRAPHIC where BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
+        this_year AS PROFIT_YEAR,
+        PY_PH AS CURRENT_HOURS_YEAR,
+        PY_PD AS CURRENT_INCOME_YEAR,
+        PY_WEEKS_WORK AS WEEKS_WORKED_YEAR,
+        null as PS_CERTIFICATE_ISSUED_DATE, -- Presuming an import is happening in year without a completed YE, so we use null 
+        PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
+        PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
+        PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
+        NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, 
+        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
+        PY_PROF_POINTS AS POINTS_EARNED, -- Leaving the points here helps the PAY426 reports match identically.
+        PY_PS_ETVA as ETVA
+    FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
+    where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
 
--- Insert LAST YEARS data into the PAY_PROFIT table
-INSERT INTO PAY_PROFIT
-(DEMOGRAPHIC_ID,
- PROFIT_YEAR,
- CURRENT_HOURS_YEAR,
- CURRENT_INCOME_YEAR,
- WEEKS_WORKED_YEAR,
- PS_CERTIFICATE_ISSUED_DATE,
- ENROLLMENT_ID,
- BENEFICIARY_TYPE_ID,
- EMPLOYEE_TYPE_ID,
- ZERO_CONTRIBUTION_REASON_ID,
- HOURS_EXECUTIVE,
- INCOME_EXECUTIVE,
- POINTS_EARNED,
- ETVA)
-SELECT -- 2025
-    (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
-    last_year AS PROFIT_YEAR,
-    PY_PH as CURRENT_HOURS_YEAR, -- end of 2025 hours
-    PY_PD AS CURRENT_INCOME_YEAR, -- end of 2025 dollars
-    PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
-     NULL as PS_CERTIFICATE_ISSUED_DATE, -- this gets set at the end of YE.  It indicates the paper is in the mail.
-    PY_PS_ENROLLED AS ENROLLMENT_ID,
-    PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-    PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
-    PY_PROF_ZEROCONT,
-    NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
-    NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-    0 as POINTS_EARNED, -- Use real value for 2025 - this will get set by PAY426 COMMIT button
-    PY_PRIOR_ETVA as ETVA -- Last years ETVA - This is used as PRIOR ETVA - used when an unforfeit happens in READY/SMART to restore ETVA
-FROM
-    {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
-            LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
-WHERE
-    PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
-
-INSERT INTO PAY_PROFIT
-(DEMOGRAPHIC_ID,
- PROFIT_YEAR,
- CURRENT_HOURS_YEAR,
- CURRENT_INCOME_YEAR,
- WEEKS_WORKED_YEAR,
- PS_CERTIFICATE_ISSUED_DATE,
- ENROLLMENT_ID,
- BENEFICIARY_TYPE_ID,
- EMPLOYEE_TYPE_ID,
- ZERO_CONTRIBUTION_REASON_ID,
- HOURS_EXECUTIVE,
- INCOME_EXECUTIVE,
- POINTS_EARNED,
- ETVA)
-SELECT -- 2024 - mostly a place holder 
-    (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
-    last_last_year AS PROFIT_YEAR,
-    PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- since the current scramble has not been shifted, we use these
-    PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- since the current scramble has not been shifted, we use these
-    PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR, -- since the current scramble has not been shifted, we use these
-    NULL, 
-    0 as ENROLLMENT_ID, -- having ZERO for all of 2024 triggers the RebuildEnrollmentAndZeroContService
-    PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-    PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
-    -- We will re-compute this in RebuildEnrollmentAndZeroContService for most employees when we first run. We intensionally leave the old value
-    -- because there is special logic for when someone gets to 6 (retired) that they never go back to an earlier value
-    -- so 6 is sticky.
-    PY_PROF_ZEROCONT,
-   0 AS HOURS_EXECUTIVE,
-   0 AS INCOME_EXECUTIVE,
-    PY_PROF_POINTS AS POINTS_EARNED,
-    0 as ETVA
-FROM
-    {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
-            LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
-WHERE
-    PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
-
-else    -------------------------------------------------------------------------------------
-
--- UAT mode
--- Presumably UAT is moving along in 2026 and this import script is happening on a weekly basis.
--- The goal is to pull in the data to SMART.   The main difference is we assume here that the
--- shift has happened in UAT.
-
-    -------------------------------------------------------------------------------
-    -- Insert THIS YEARS data into the PAY_PROFIT table
-INSERT INTO PAY_PROFIT
+    -- Insert LAST YEARS data into the PAY_PROFIT table
+    INSERT INTO PAY_PROFIT
     (DEMOGRAPHIC_ID,
      PROFIT_YEAR,
      CURRENT_HOURS_YEAR,
      CURRENT_INCOME_YEAR,
      WEEKS_WORKED_YEAR,
      PS_CERTIFICATE_ISSUED_DATE,
-     ENROLLMENT_ID,
      BENEFICIARY_TYPE_ID,
      EMPLOYEE_TYPE_ID,
      ZERO_CONTRIBUTION_REASON_ID,
@@ -463,103 +368,93 @@ INSERT INTO PAY_PROFIT
      INCOME_EXECUTIVE,
      POINTS_EARNED,
      ETVA)
-SELECT -- 2026
-    (select ID from DEMOGRAPHIC where BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
-    this_year AS PROFIT_YEAR,
-    PY_PH AS CURRENT_HOURS_YEAR,
-    PY_PD AS CURRENT_INCOME_YEAR,
-    PY_WEEKS_WORK AS WEEKS_WORKED_YEAR,
-    null as PS_CERTIFICATE_ISSUED_DATE, -- presumably this is the 2026 profit year cert.  Did we mail a cert to this person in 20255
-    PY_PS_ENROLLED AS ENROLLMENT_ID,
-    PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-    PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
-    PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
-    NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
-    NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-    PY_PROF_POINTS AS POINTS_EARNED, -- Leaving the points here helps the PAY426 reports match identically.
-    PY_PS_ETVA as ETVA
-FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
-where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
-
--- Insert LAST YEARS data into the PAY_PROFIT table
-INSERT INTO PAY_PROFIT
-(DEMOGRAPHIC_ID,
- PROFIT_YEAR,
- CURRENT_HOURS_YEAR,
- CURRENT_INCOME_YEAR,
- WEEKS_WORKED_YEAR,
- PS_CERTIFICATE_ISSUED_DATE,
- ENROLLMENT_ID,
- BENEFICIARY_TYPE_ID,
- EMPLOYEE_TYPE_ID,
- ZERO_CONTRIBUTION_REASON_ID,
- HOURS_EXECUTIVE,
- INCOME_EXECUTIVE,
- POINTS_EARNED,
- ETVA)
-SELECT -- 2025
-    (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
-    last_year AS PROFIT_YEAR,
-    PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- Pull the prior year hours as "last year"
-    PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- Pull the prior year income as "last year"
-    PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
-    null as PS_CERTIFICATE_ISSUED_DATE,
-    PY_PS_ENROLLED as ENROLLMENT_ID, -- we blindly assume 2025 is same as 2026.  Gets less so as time passes.
-    PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-    PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
-    PY_PROF_ZEROCONT as ZERO_CONTRIBUTION_REASON_ID, -- we blindly assume 2026 is same as 2026. 
-    NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
-    NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-    PY_PROF_POINTS AS POINTS_EARNED,
-    PY_PRIOR_ETVA as ETVA -- Holds ETVA Prior to Forfeit.
-FROM
-    {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
+    SELECT
+        (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
+        last_year AS PROFIT_YEAR,
+        PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- Pull the prior year hours as "last year"
+        PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- Pull the prior year income as "last year"
+        PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
+        CASE -- pull in the cert as the prior year's cert.  We use a DATE in SMART, but READY only has a boolean so we fudge it here.
+            WHEN PY_PROF_CERT = '1' THEN TO_DATE('12/31/' || last_year, 'MM/DD/YYYY')
+            ELSE NULL
+        END as PS_CERTIFICATE_ISSUED_DATE,
+        -- Enrollment is now computed dynamically from vesting schedule and forfeiture status
+        -- No longer stored in PayProfit table
+        PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
+        PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
+        -- We will re-compute this in RebuildEnrollmentAndZeroContService for most employees when we first run. We intensionally leave the old value
+        -- because there is special logic for when someone gets to 6 (retired) that they never go back to an earlier value
+        -- so 6 is sticky.
+        PY_PROF_ZEROCONT, 
+        NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
+        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
+        PY_PROF_POINTS AS POINTS_EARNED,
+        PY_PRIOR_ETVA as ETVA 
+    FROM
+        {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
             LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
-WHERE
-    PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
+    WHERE
+        PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
 
-INSERT INTO PAY_PROFIT
-(DEMOGRAPHIC_ID,
- PROFIT_YEAR,
- CURRENT_HOURS_YEAR,
- CURRENT_INCOME_YEAR,
- WEEKS_WORKED_YEAR,
- PS_CERTIFICATE_ISSUED_DATE,
- ENROLLMENT_ID,
- BENEFICIARY_TYPE_ID,
- EMPLOYEE_TYPE_ID,
- ZERO_CONTRIBUTION_REASON_ID,
- HOURS_EXECUTIVE,
- INCOME_EXECUTIVE,
- POINTS_EARNED,
- ETVA)
-SELECT -- 2024 - mostly a place holder for holding the zero contr and enrollment - which are both used to compute vested balances for end of 2024
-       (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
-       last_last_year AS PROFIT_YEAR,
-       0 as CURRENT_HOURS_YEAR,
-       0 AS CURRENT_INCOME_YEAR,
-       0 AS WEEKS_WORKED_YEAR,
-       NULL as PS_CERTIFICATE_ISSUED_DATE,
-       0 as ENROLLMENT_ID, -- having ZERO for all of 2024 triggers the RebuildEnrollmentAndZeroContService
-       PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-       PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
-       0 as ZERO_CONTRIBUTION_REASON_ID, -- gets rebuilt at startup when all enrollment_ids are zero 
-       0 AS HOURS_EXECUTIVE,
-       0 AS INCOME_EXECUTIVE,
-       0 AS POINTS_EARNED,
-       0 as ETVA
-FROM
-    {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
-            LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
-WHERE
-    PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
+    ---------------------------------------------------------------
+    -- Check if we have data for last_year-1 (e.g., 2024 if last_year is 2025)
+    -- If not, seed empty rows for every demographic for that year
+    ---------------------------------------------------------------
+    BEGIN
+        DECLARE
+            prior_year NUMBER := last_year - 1;
+            prior_year_count NUMBER;
+        BEGIN
+            -- Check if we have any PAY_PROFIT data for prior_year
+            SELECT COUNT(*)
+            INTO prior_year_count
+            FROM PAY_PROFIT
+            WHERE PROFIT_YEAR = prior_year;
 
-end if;
+            IF prior_year_count = 0 THEN
+                DBMS_OUTPUT.PUT_LINE('No PAY_PROFIT data found for year ' || prior_year || '. Seeding empty rows...');
+                
+                -- Insert empty rows for every demographic for prior_year
+                INSERT INTO PAY_PROFIT
+                (DEMOGRAPHIC_ID,
+                 PROFIT_YEAR,
+                 CURRENT_HOURS_YEAR,
+                 CURRENT_INCOME_YEAR,
+                 WEEKS_WORKED_YEAR,
+                 PS_CERTIFICATE_ISSUED_DATE,
+                 BENEFICIARY_TYPE_ID,
+                 EMPLOYEE_TYPE_ID,
+                 ZERO_CONTRIBUTION_REASON_ID,
+                 HOURS_EXECUTIVE,
+                 INCOME_EXECUTIVE,
+                 POINTS_EARNED,
+                 ETVA)
+                SELECT
+                    d.ID AS DEMOGRAPHIC_ID,
+                    prior_year AS PROFIT_YEAR,
+                    0 AS CURRENT_HOURS_YEAR,
+                    0 AS CURRENT_INCOME_YEAR,
+                    0 AS WEEKS_WORKED_YEAR,
+                    NULL AS PS_CERTIFICATE_ISSUED_DATE,
+                    1 AS BENEFICIARY_TYPE_ID,  -- Default value
+                    1 AS EMPLOYEE_TYPE_ID,     -- Default value
+                    NULL AS ZERO_CONTRIBUTION_REASON_ID,
+                    0 AS HOURS_EXECUTIVE,
+                    0 AS INCOME_EXECUTIVE,
+                    0 AS POINTS_EARNED,
+                    0 AS ETVA
+                FROM DEMOGRAPHIC d;
+                
+                DBMS_OUTPUT.PUT_LINE('Seeded ' || SQL%ROWCOUNT || ' empty PAY_PROFIT rows for year ' || prior_year);
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('PAY_PROFIT data already exists for year ' || prior_year || ' (' || prior_year_count || ' rows). Skipping seed.');
+            END IF;
+        END;
+    END;
 
-        
     ---------------------------------------------------------------
 
--- Migrate data into DISTRIBUTION_PAYEE table from {SOURCE_PROFITSHARE_SCHEMA}_PROFDIST
+-- Migrate data into DISTRIBUTION_PAYEE table from PROFITSHARE_PROFDIST
 -- Ensure that there are no duplicate entries based on unique PAYEE (SSN, NAME, and ADDRESS)
     INSERT INTO DISTRIBUTION_PAYEE (SSN, NAME, STREET, CITY, STATE, POSTAL_CODE, COUNTRY_ISO, MEMO)
     SELECT DISTINCT
@@ -575,7 +470,7 @@ end if;
     WHERE PROFDIST_PAYSSN IS NOT NULL;
 
 
-    -- Migrate data into DISTRIBUTION_THIRDPARTY_PAYEE table from {SOURCE_PROFITSHARE_SCHEMA}_PROFDIST
+    -- Migrate data into DISTRIBUTION_THIRDPARTY_PAYEE table from PROFITSHARE_PROFDIST
 -- Ensure that there are no duplicate entries based on unique third-party payee (SSN, NAME, and ADDRESS)
     INSERT INTO DISTRIBUTION_THIRDPARTY_PAYEE (PAYEE, NAME,  STREET, STREET2, CITY, STATE, POSTAL_CODE, COUNTRY_ISO, MEMO)
     SELECT DISTINCT
@@ -592,7 +487,7 @@ end if;
     WHERE (PROFDIST_3RDPAYTO IS NOT NULL AND TRIM(PROFDIST_3RDPAYTO) != '');
 
 
---LOAD DISTRIBUTION TABLE TO - "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
+--LOAD DISTRIBUTION TABLE TO - "YOUR CURRENT SCHEMA" FROM - PROFITSHARE
     INSERT INTO DISTRIBUTION
     (SSN,
      PAYMENT_SEQUENCE,
@@ -769,6 +664,17 @@ end if;
             END AS FOUR_DIGIT_YEAR
 
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_SS_DETAIL;
+
+    -- Update HAS_FORFEITED flag for employees with forfeiture records
+    -- This must run AFTER PROFIT_DETAIL is loaded
+    UPDATE DEMOGRAPHIC d
+    SET HAS_FORFEITED = 1
+    WHERE EXISTS (
+        SELECT 1
+        FROM PROFIT_DETAIL pd
+        WHERE pd.SSN = d.SSN
+          AND pd.REMARK LIKE 'FORFEIT%'
+    );
 
     ---------------------------------------------------------------------------------------------------------------------
 
@@ -1638,6 +1544,57 @@ INSERT ALL
         INSERT INTO STATE_TAX(ABBREVIATION, RATE, USER_NAME, CREATED_AT_UTC) VALUES('WV',0,USER,(SYSTIMESTAMP));
         INSERT INTO STATE_TAX(ABBREVIATION, RATE, USER_NAME, CREATED_AT_UTC) VALUES('WY',0,USER,(SYSTIMESTAMP));
 
+                /*
+                     PAY_PROFIT "current year" rows are expected by the application.
+
+                     This import intentionally derives this_year/last_year from source PROFIT_DETAIL (scramble may be frozen).
+                     When the wall-clock year advances beyond the newest imported profit year, ensure we still have a
+                     PAY_PROFIT row for the wall-clock year for each employee we have in the most recent year.
+
+                     We copy the employee set and plan/status fields from the most recent PAY_PROFIT (this_year), but
+                     zero out the quantitative fields (hours/income/weeks/points) so the row is effectively "empty".
+                */
+                IF wall_clock_year > this_year THEN
+                        INSERT INTO PAY_PROFIT
+                        (DEMOGRAPHIC_ID,
+                         PROFIT_YEAR,
+                         CURRENT_HOURS_YEAR,
+                         CURRENT_INCOME_YEAR,
+                         WEEKS_WORKED_YEAR,
+                         PS_CERTIFICATE_ISSUED_DATE,
+                         BENEFICIARY_TYPE_ID,
+                         EMPLOYEE_TYPE_ID,
+                         ZERO_CONTRIBUTION_REASON_ID,
+                         HOURS_EXECUTIVE,
+                         INCOME_EXECUTIVE,
+                         POINTS_EARNED,
+                         ETVA)
+                        SELECT
+                                pp.DEMOGRAPHIC_ID,
+                                wall_clock_year AS PROFIT_YEAR,
+                                0 AS CURRENT_HOURS_YEAR,
+                                0 AS CURRENT_INCOME_YEAR,
+                                0 AS WEEKS_WORKED_YEAR,
+                                NULL AS PS_CERTIFICATE_ISSUED_DATE,
+                                pp.BENEFICIARY_TYPE_ID,
+                                pp.EMPLOYEE_TYPE_ID,
+                                pp.ZERO_CONTRIBUTION_REASON_ID,
+                                0 AS HOURS_EXECUTIVE,
+                                0 AS INCOME_EXECUTIVE,
+                                0 AS POINTS_EARNED,
+                                pp.ETVA
+                        FROM PAY_PROFIT pp
+                        WHERE pp.PROFIT_YEAR = this_year
+                            AND NOT EXISTS (
+                                SELECT 1
+                                FROM PAY_PROFIT existing
+                                WHERE existing.DEMOGRAPHIC_ID = pp.DEMOGRAPHIC_ID
+                                    AND existing.PROFIT_YEAR = wall_clock_year
+                            );
+
+                        DBMS_OUTPUT.PUT_LINE('Seeded PAY_PROFIT for wall-clock year ' || wall_clock_year || ' from year ' || this_year || ': ' || SQL%ROWCOUNT || ' rows.');
+                END IF;
+
         -- Seed an active freeze point (READY import)
         INSERT INTO FROZEN_STATE (PROFIT_YEAR, FROZEN_BY, AS_OF_DATETIME, IS_ACTIVE)
         VALUES (2025, USER, TO_TIMESTAMP_TZ('2026-01-04 05:01:00 +00:00', 'YYYY-MM-DD HH24:MI:SS TZH:TZM'), 1);
@@ -1656,26 +1613,24 @@ delete from ye_update_status;
 --  | 700010556 | BEIL, AUTUMN   | BENEFICIARY ONLY | $96,719.52     | NO           | Legitimate QDRO (Code 6) beneficiary                       |
 --  | 700010521 | MILLS, KRYSTAL | BENEFICIARY ONLY | $0.00          | YES          | SCRAMBLED: 19 employee contributions (2004-2024, $29,655)  |
 --  | 700010561 | RHODES, CRUZ   | BENEFICIARY ONLY | $0.00          | YES          | SCRAMBLED: 28 employee contributions (1992-2024, $101,536) |
-    
--- The 2026 Jan 3 scramble has two bene's with employee contributions (bad);  700010510, 700010550
 
 --  Bad Beneficiaries, See https://demoulas.atlassian.net/browse/PS-1268
-delete from profit_detail where ssn IN ( 700010556, 700010521, 700010561, 700010510 , 700010550 );
-delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561, 700010510 , 700010550));
-delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561, 700010510 , 700010550 );
+delete from profit_detail where ssn IN ( 700010556, 700010521, 700010561 );
+delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561));
+delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561 );
 
 -- ============================================================================
 -- ANNUITY RATE SEED DATA (PS-1890)
 -- ============================================================================
--- Seed ANNUITY_RATE_CONFIG table with age ranges for years 2020-2026
+-- Seed ANNUITY_RATE_CONFIG table with age ranges for years 2020-2025
 -- This defines the expected age range (67-120) for annuity rate validation
 -- ============================================================================
 
 DECLARE
     v_count NUMBER;
 BEGIN
-    -- Seed config for years 2020-2026 (only if not already present)
-    FOR yr IN 2020..2026 LOOP
+    -- Seed config for years 2020-2025 (only if not already present)
+    FOR yr IN 2020..2025 LOOP
         SELECT COUNT(*) INTO v_count FROM ANNUITY_RATE_CONFIG WHERE YEAR = yr;
         IF v_count = 0 THEN
             INSERT INTO ANNUITY_RATE_CONFIG (YEAR, MINIMUM_AGE, MAXIMUM_AGE, USER_NAME, CREATED_AT_UTC, MODIFIED_AT_UTC)
@@ -1689,7 +1644,7 @@ END;
 
 
 -- ============================================================================
--- Copy annuity rates from 2024 to any missing years (2020-2026)
+-- Copy annuity rates from 2024 to any missing years (2020-2025)
 -- Uses 2024 as the source year since it has complete data
 -- Only copies if the target year has no rates defined yet (idempotent)
 -- ============================================================================
@@ -1700,7 +1655,7 @@ DECLARE
     v_rates_copied NUMBER := 0;
 BEGIN
     -- For each target year, copy rates from 2024 if not already present
-    FOR yr IN 2020..2026 LOOP
+    FOR yr IN 2020..2025 LOOP
         -- Skip the source year itself
         IF yr != v_source_year THEN
             -- Check if target year already has annuity rates

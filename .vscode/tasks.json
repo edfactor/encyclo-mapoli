@@ -1,14 +1,57 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "ui: build:qa",
-      "type": "shell",
-      "command": "pwsh",
-      "args": ["-NoLogo", "-Command", "Set-Location -Path 'src/ui'; npm run build:qa"],
-      "isBackground": false,
-      "problemMatcher": [],
-      "group": "build"
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "ui: build:qa",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoLogo",
+				"-Command",
+				"Set-Location -Path 'src/ui'; npm run build:qa"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "build-services",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoLogo",
+				"-Command",
+				"cd src/services; dotnet build Demoulas.ProfitSharing.slnx -v minimal"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "build-services",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoLogo",
+				"-Command",
+				"cd src/services; dotnet build Demoulas.ProfitSharing.slnx"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "build-services-log",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoLogo",
+				"-Command",
+				"cd src/services; dotnet build Demoulas.ProfitSharing.slnx -v normal *>&1 | Tee-Object -FilePath ../../artifacts/test-logs/services-build.log"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
 }

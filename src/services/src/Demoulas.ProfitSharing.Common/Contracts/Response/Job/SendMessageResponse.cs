@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Job;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.Job;
 
 public sealed record SendMessageResponse
 {

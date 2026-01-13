@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+namespace Demoulas.ProfitSharing.Data.Entities;
 
 /// <summary>
 /// Audit record for file transfer operations to external systems.

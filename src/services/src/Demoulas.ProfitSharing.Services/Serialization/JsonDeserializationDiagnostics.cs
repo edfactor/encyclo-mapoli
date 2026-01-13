@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace Demoulas.ProfitSharing.Services.Serialization;

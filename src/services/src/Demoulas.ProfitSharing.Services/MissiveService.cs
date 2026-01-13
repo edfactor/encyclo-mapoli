@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -91,8 +91,10 @@ internal sealed class MissiveService : IMissiveService
                 {
                     if (balanceMap.TryGetValue(empl.d.Ssn, out var memberBalance) && memberBalance is { YearsInPlan: >= 2 and <= 7 })
                     {
+                        // Check if using New Vesting Plan (VestingScheduleId == 2) and has contributions (no forfeiture)
                         var hasVesting = empl.pp.TotalHours > minHours &&
-                                          empl.pp.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
+                                          empl.d.VestingScheduleId == VestingSchedule.Constants.NewPlan &&
+                                          !empl.d.HasForfeited;
                         if (hasVesting)
                         {
                             vestingIncreased.Add(empl.d.Ssn);

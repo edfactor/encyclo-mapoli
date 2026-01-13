@@ -1,9 +1,17 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
@@ -17,16 +25,24 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TimeProvider _timeProvider;
+    private readonly IAppUser _appUser;
+    private readonly IAuditService _auditService;
 
-    public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory,
+
+    public ForfeitureAdjustmentService(
+        IProfitSharingDataContextFactory dbContextFactory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IAppUser appUser,
+        IAuditService auditService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
         _timeProvider = timeProvider;
+        _appUser = appUser;
+        _auditService = auditService;
     }
 
     // Invoked by the 008-12 Forfeit Adjustment screen - the user wants to make a change, we figure out which (forfeit or unforfeit or neither) is appropriate.
@@ -57,7 +73,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // This service is always live, so our reference time is today.
             var asOfDate = _timeProvider.GetLocalDateOnly();
-            var profitYear = (short) asOfDate.Year;
+            var profitYear = (short)asOfDate.Year;
 
             // PATH 2: No forfeiture history OR last transaction was UNFORFEIT (negative amount)
             // → Calculate how much SHOULD be forfeited based on vesting
@@ -96,7 +112,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             BadgeNumber = empl.Demographic.BadgeNumber
         });
     }
-    
+
 
     private async Task<Employee?> FetchEmployee(IProfitSharingDbContext ctx, int? badgeMaybe, int? ssnMaybe, CancellationToken ct)
     {
@@ -210,6 +226,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 YearToDate = _timeProvider.GetLocalYearAsShort(),
                 CreatedAtUtc = DateTimeOffset.UtcNow,
                 ModifiedAtUtc = DateTimeOffset.UtcNow,
+                UserName = _appUser.UserName ?? "System",
                 CommentTypeId = commentType.Id,
                 ReversedFromProfitDetailId = req.OffsettingProfitDetailId, // Track which record was reversed
             };
@@ -240,49 +257,42 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 // The PY_PS_ETVA gets calculated then written and PY_PS_ENROLLED gets subtracted by two. So 3 becomes 1 and 4 becomes 2."
                 if (isForfeit)
                 {
-                    // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
-                    byte newEnrollmentId = Enrollment.Constants.NotEnrolled;
-                    if (payProfit.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions)
-                    {
-                        newEnrollmentId = /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-                    }
-                    else if (payProfit.EnrollmentId == /*1*/ Enrollment.Constants.OldVestingPlanHasContributions)
-                    {
-                        newEnrollmentId = /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
-                    }
+                    // For forfeit: Set HAS_FORFEITED flag on DEMOGRAPHIC
+                    // Enrollment is now computed from Demographic.VestingScheduleId + HasForfeited
+#pragma warning disable DSMPS001 // ExecuteUpdateAsync is a bulk operation, not a query
+                    await context.Demographics
+                        .Where(d => d.Id == employeeData.Id)
+                        .ExecuteUpdateAsync(d => d
+                                .SetProperty(demo => demo.HasForfeited, true)
+                                .SetProperty(demo => demo.ModifiedAtUtc, DateTimeOffset.UtcNow),
+                            cancellationToken);
+#pragma warning restore DSMPS001
 
+                    // Update ETVA for all live years
                     await context.PayProfits
                         .Where(pp => pp.DemographicId == employeeData.Id && profitYear == pp.ProfitYear)
                         .ExecuteUpdateAsync(p => p
-                                .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
                                 .SetProperty(pp => pp.Etva, calculatedEtva) // Set recalculated ETVA
                                 .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
                 }
                 else
                 {
-                    // For un-forfeit: Recalculate PY_PS_ETVA and decrement enrollment by 2
-                    byte newEnrollmentId;
+                    // For un-forfeit: Clear HAS_FORFEITED flag on DEMOGRAPHIC
+                    // Enrollment will revert from 3/4 back to 1/2 via computed property
+#pragma warning disable DSMPS001 // ExecuteUpdateAsync is a bulk operation, not a query
+                    await context.Demographics
+                        .Where(d => d.Id == employeeData.Id)
+                        .ExecuteUpdateAsync(d => d
+                                .SetProperty(demo => demo.HasForfeited, false)
+                                .SetProperty(demo => demo.ModifiedAtUtc, DateTimeOffset.UtcNow),
+                            cancellationToken);
+#pragma warning restore DSMPS001
 
-                    // Enrollment ID math based on known constants to prevent magic numbers
-                    if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
-                    {
-                        newEnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions;
-                    }
-                    else if (payProfit.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
-                    {
-                        newEnrollmentId = Enrollment.Constants.OldVestingPlanHasContributions;
-                    }
-                    else
-                    {
-                        // Keep same if not a known constant with a -/+2 option.
-                        newEnrollmentId = payProfit.EnrollmentId;
-                    }
-
+                    // Update ETVA for requested year
                     await context.PayProfits
                         .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == profitYear)
                         .ExecuteUpdateAsync(p => p
-                                .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
                                 .SetProperty(pp => pp.Etva, calculatedEtva) // Set recalculated ETVA
                                 .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
@@ -290,6 +300,45 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             }
 
             await context.SaveChangesAsync(cancellationToken);
+
+            // Audit the forfeiture adjustment
+            var auditChanges = new List<AuditChangeEntryInput>
+            {
+                new AuditChangeEntryInput { ColumnName = "SSN", NewValue = employeeData.Ssn.ToString() },
+                new AuditChangeEntryInput { ColumnName = "BADGE_NUMBER", NewValue = employeeData.BadgeNumber.ToString() },
+                new AuditChangeEntryInput { ColumnName = "PROFIT_YEAR", NewValue = profitYear.ToString() },
+                new AuditChangeEntryInput { ColumnName = "FORFEITURE_AMOUNT", NewValue = req.ForfeitureAmount.ToString("F2") },
+                new AuditChangeEntryInput { ColumnName = "OPERATION_TYPE", NewValue = isForfeit ? "FORFEIT" : "UNFORFEIT" },
+                new AuditChangeEntryInput { ColumnName = "COMMENT_TYPE", NewValue = commentType.Name },
+                new AuditChangeEntryInput { ColumnName = "HAS_FORFEITED", NewValue = isForfeit.ToString() },
+            };
+
+            if (req.OffsettingProfitDetailId.HasValue)
+            {
+                auditChanges.Add(new AuditChangeEntryInput
+                {
+                    ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID",
+                    NewValue = req.OffsettingProfitDetailId.Value.ToString()
+                });
+            }
+
+            if (req.ClassAction)
+            {
+                auditChanges.Add(new AuditChangeEntryInput
+                {
+                    ColumnName = "CLASS_ACTION",
+                    NewValue = "true"
+                });
+            }
+
+            await _auditService.LogDataChangeAsync(
+                operationName: isForfeit ? "Create Forfeiture" : "Create Unforfeiture",
+                tableName: "PROFIT_DETAIL",
+                auditOperation: AuditEvent.AuditOperations.Create,
+                primaryKey: $"ProfitDetailId:{profitDetail.Id}|Badge:{employeeData.BadgeNumber}|SSN:{employeeData.Ssn}",
+                changes: auditChanges,
+                cancellationToken: cancellationToken);
+
             return Result<bool>.Success(true);
         }, cancellationToken);
     }

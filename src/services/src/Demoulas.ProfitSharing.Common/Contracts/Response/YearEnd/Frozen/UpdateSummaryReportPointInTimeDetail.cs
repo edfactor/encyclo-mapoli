@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 public sealed class UpdateSummaryReportPointInTimeDetail
 {

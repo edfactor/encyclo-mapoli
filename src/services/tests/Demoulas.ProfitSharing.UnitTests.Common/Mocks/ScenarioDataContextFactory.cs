@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;

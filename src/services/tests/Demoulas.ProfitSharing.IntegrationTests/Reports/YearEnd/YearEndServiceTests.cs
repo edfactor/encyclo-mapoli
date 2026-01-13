@@ -1,4 +1,4 @@
-﻿using System.Data.Common;
+using System.Data.Common;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +33,7 @@ public class YearEndServiceTests : PristineBaseTest
         // Get SMART results within transaction (will rollback to avoid modifying database)
         Dictionary<int, YearEndChange> smartRowsBySsn = await DbFactory.UseWritableContext(async ctx =>
         {
-            PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService, CalendarService);
+            PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService, CalendarService, VestingScheduleService);
             YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService, TimeProvider.System);
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);

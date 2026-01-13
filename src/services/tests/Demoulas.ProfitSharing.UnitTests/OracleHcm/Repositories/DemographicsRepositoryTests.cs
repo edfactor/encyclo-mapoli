@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Data.Repositories;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.Metrics;
+using System.Diagnostics.Metrics;
 using Demoulas.Common.Contracts.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 

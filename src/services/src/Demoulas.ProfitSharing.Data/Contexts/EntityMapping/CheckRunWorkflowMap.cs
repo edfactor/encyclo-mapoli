@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.CheckRun;
+using Demoulas.ProfitSharing.Data.Entities.CheckRun;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using ArchUnitNET.Domain;
 using ArchUnitNET.Fluent;
 using ArchUnitNET.Loader;

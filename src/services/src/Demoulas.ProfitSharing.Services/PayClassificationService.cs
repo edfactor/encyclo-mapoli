@@ -1,4 +1,4 @@
-﻿using System.Collections.Frozen;
+using System.Collections.Frozen;
 using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;

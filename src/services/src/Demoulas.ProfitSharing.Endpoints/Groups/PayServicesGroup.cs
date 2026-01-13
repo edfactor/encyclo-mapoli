@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Api.Groups;
+using Demoulas.Common.Api.Groups;
 using Demoulas.ProfitSharing.Security;  // Add this using
 using FastEndpoints;
 using Microsoft.AspNetCore.Builder;

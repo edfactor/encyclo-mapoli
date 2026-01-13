@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
+using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
@@ -9,7 +9,7 @@ public sealed class UpdateAnnuityRateRequestValidator : AbstractValidator<Update
 
     public UpdateAnnuityRateRequestValidator()
     {
-        
+
         RuleFor(x => x.Year)
             .InclusiveBetween((short)1900, (short)2100)
             .WithMessage("Year must be between 1900 and 2100.");

@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.Serialization;
+namespace Demoulas.ProfitSharing.Services.Serialization;
 
 /// <summary>
 /// Snapshot of caller roles used by masking converter.

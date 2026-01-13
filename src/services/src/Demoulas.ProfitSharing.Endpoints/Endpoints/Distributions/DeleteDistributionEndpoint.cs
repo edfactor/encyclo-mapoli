@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;

@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 
 using Demoulas.ProfitSharing.Common.Attributes;
 

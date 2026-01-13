@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Constants;
+namespace Demoulas.ProfitSharing.Common.Constants;
 
 /// <summary>
 /// Centralized telemetry constants used across the application for consistent tracking and correlation.

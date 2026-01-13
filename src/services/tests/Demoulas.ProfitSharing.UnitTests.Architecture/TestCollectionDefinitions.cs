@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.UnitTests.Architecture;
+namespace Demoulas.ProfitSharing.UnitTests.Architecture;
 
 /// <summary>
 /// Collection definitions for tests that must be run sequentially.

@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response; //  ListResponseDto
+using Demoulas.ProfitSharing.Common.Contracts.Response; //  ListResponseDto
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;

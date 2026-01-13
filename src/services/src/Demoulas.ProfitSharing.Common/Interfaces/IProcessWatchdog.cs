@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Interfaces;
+namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 /// <summary>
 /// Interface for a process watchdog service that monitors the health and continuity of a running process.

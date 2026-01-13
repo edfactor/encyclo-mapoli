@@ -1,4 +1,4 @@
-﻿using CsvHelper.Configuration;
+using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;

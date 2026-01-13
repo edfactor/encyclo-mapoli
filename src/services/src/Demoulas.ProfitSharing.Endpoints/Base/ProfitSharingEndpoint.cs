@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;

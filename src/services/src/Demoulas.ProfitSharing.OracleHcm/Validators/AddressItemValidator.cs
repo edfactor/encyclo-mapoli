@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using FastEndpoints;
 using FluentValidation;
 

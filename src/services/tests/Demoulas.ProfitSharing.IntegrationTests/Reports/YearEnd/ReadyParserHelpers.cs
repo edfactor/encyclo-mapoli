@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
 /// <summary>
 ///     Shared helper methods and types for parsing READY PAY426 reports.

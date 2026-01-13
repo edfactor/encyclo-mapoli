@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;

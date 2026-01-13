@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+namespace Demoulas.ProfitSharing.Data.Entities;
 
 /// <summary>
 /// Represents US states and territories used in profit sharing operations.
