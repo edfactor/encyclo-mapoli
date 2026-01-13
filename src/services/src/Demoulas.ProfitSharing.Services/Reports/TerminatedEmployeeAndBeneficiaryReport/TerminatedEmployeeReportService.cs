@@ -563,6 +563,7 @@ public sealed class TerminatedEmployeeReportService
 
         // Load beneficiaries and their related employee demographics
         IQueryable<MemberSlice> query = ctx.Beneficiaries
+            .Where(b => !b.IsDeleted)
             .Include(b => b.Contact)
             .ThenInclude(c => c!.ContactInfo)
             .GroupJoin(

@@ -19,7 +19,7 @@ internal static class BeneficiariesProcessingHelper
         var benes = await dbContextFactory.UseReadOnlyContext(ctx =>
         {
             // Get the Bene's
-            var benes = (from b in ctx.Beneficiaries.Include(b => b.Contact).ThenInclude(c => c!.ContactInfo)
+            var benes = (from b in ctx.Beneficiaries.Where(b => !b.IsDeleted).Include(b => b.Contact).ThenInclude(c => c!.ContactInfo)
                          join balTbl in totalsService.GetTotalBalanceSet(ctx, profitYearPrior) on b.Contact!.Ssn equals balTbl.Ssn into balTmp
                          from bal in balTmp.DefaultIfEmpty()
                          orderby b.Contact!.ContactInfo.FullName

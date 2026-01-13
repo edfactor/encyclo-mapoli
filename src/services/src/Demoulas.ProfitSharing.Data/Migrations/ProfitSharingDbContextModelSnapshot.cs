@@ -721,6 +721,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("ISDELETED");
+
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC");
@@ -789,6 +793,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("DATE")
                         .HasColumnName("DATE_OF_BIRTH");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("ISDELETED");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")

@@ -35,6 +35,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
             var employeeSsns = demographicQuery.Select(d => d.Ssn);
             var baseQuery = ctx.Beneficiaries
+                .Where(b => !b.IsDeleted)
                 .Select(b => new
                 {
                     b.Id,

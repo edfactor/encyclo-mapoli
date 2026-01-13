@@ -720,7 +720,7 @@ public class FrozenReportService : IFrozenReportService
 #pragma warning disable DSMPS001
                 .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Ssn))
 #pragma warning restore DSMPS001
-                .Join(ctx.Beneficiaries, bc => bc.Id, b => b.BeneficiaryContactId, (bc, b) => new { bc, b })
+                .Join(ctx.Beneficiaries.Where(b => !b.IsDeleted), bc => bc.Id, b => b.BeneficiaryContactId, (bc, b) => new { bc, b })
                 .Select(x => new
                 {
                     x.bc.Ssn,

@@ -34,6 +34,7 @@ public class PayBenReportService : IPayBenReportService
         var result = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var query = context.Beneficiaries
+                .Where(b => !b.IsDeleted)
                 .TagWith($"PayBenReport-GetReport-RequestId-{request.Id}")
                 .Include(x => x.Demographic)
                 .ThenInclude(x => x!.ContactInfo)
