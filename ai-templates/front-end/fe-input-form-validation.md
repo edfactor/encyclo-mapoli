@@ -4,11 +4,20 @@
 
 This application uses **React Hook Form** with **Yup** schema validation to provide comprehensive client-side form validation. The validation architecture combines declarative schema definitions with controlled Material-UI components for a robust user experience.
 
+## ⚠️ MANDATORY: Yup Validation Required
+
+**ALL FORM COMPONENTS MUST USE YUP FOR VALIDATION. NO EXCEPTIONS.**
+
+- Custom validation logic MUST be implemented in Yup schemas
+- Manual validation (e.g., checking `if (!value)`) is NOT allowed
+- All form inputs MUST be wrapped in `Controller` with Yup schema validation
+- Direct use of `useState` for form fields is NOT allowed - use React Hook Form
+
 ## Core Technology Stack
 
-- **React Hook Form**: Form state management and validation orchestration
-- **Yup**: Schema-based validation rules
-- **@hookform/resolvers/yup**: Integration bridge between React Hook Form and Yup
+- **React Hook Form**: Form state management and validation orchestration (REQUIRED)
+- **Yup**: Schema-based validation rules (REQUIRED)
+- **@hookform/resolvers/yup**: Integration bridge between React Hook Form and Yup (REQUIRED)
 - **Material-UI (MUI)**: UI components with built-in error display capabilities
 
 ## Validation Architecture
@@ -19,19 +28,26 @@ All form validation begins with a Yup schema that defines the validation rules f
 
 ```typescript
 import * as yup from "yup";
-import { ssnValidator, badgeNumberValidator, monthValidator } from "../../utils/FormValidators";
+import {
+  ssnValidator,
+  badgeNumberValidator,
+  monthValidator,
+} from "../../utils/FormValidators";
 
 const schema = yup.object().shape({
   socialSecurity: ssnValidator,
   badgeNumber: badgeNumberValidator,
   name: yup.string().nullable(),
   startMonth: monthValidator,
-  endMonth: monthValidator.min(yup.ref("startMonth"), "End month must be after start month"),
+  endMonth: monthValidator.min(
+    yup.ref("startMonth"),
+    "End month must be after start month"
+  ),
   contribution: yup
     .number()
     .typeError("Contribution must be a number")
     .min(0, "Contribution must be a positive number")
-    .nullable()
+    .nullable(),
 });
 ```
 
@@ -57,16 +73,16 @@ const {
   formState: { errors, isValid },
   reset,
   setValue,
-  watch
+  watch,
 } = useForm<FormDataType>({
   resolver: yupResolver(schema) as Resolver<FormDataType>,
   mode: "onBlur", // Validate on blur events
   defaultValues: {
     socialSecurity: undefined,
     badgeNumber: undefined,
-    name: undefined
+    name: undefined,
     // ... other defaults
-  }
+  },
 });
 ```
 
@@ -106,10 +122,12 @@ Each input field is wrapped in a `Controller` component to connect React Hook Fo
       }}
     />
   )}
-/>
-{errors.socialSecurity && (
-  <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>
-)}
+/>;
+{
+  errors.socialSecurity && (
+    <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>
+  );
+}
 ```
 
 **Key patterns:**
@@ -159,7 +177,9 @@ const onSubmit = (data: FormDataType) => {
   // Transform form data to API request format
   const searchParams: SearchRequest = {
     badgeNumber: data.badgeNumber ?? undefined,
-    socialSecurity: data.socialSecurity ? Number(data.socialSecurity) : undefined,
+    socialSecurity: data.socialSecurity
+      ? Number(data.socialSecurity)
+      : undefined,
     name: data.name ?? undefined,
     // ... other field transformations
   };
@@ -170,9 +190,7 @@ const onSubmit = (data: FormDataType) => {
 const validateAndSubmit = handleSubmit(onSubmit);
 
 // In the form
-<form onSubmit={validateAndSubmit}>
-  {/* form fields */}
-</form>
+<form onSubmit={validateAndSubmit}>{/* form fields */}</form>;
 ```
 
 **Flow:**
@@ -216,7 +234,7 @@ const handleReset = () => {
   reset({
     socialSecurity: undefined,
     badgeNumber: undefined,
-    name: undefined
+    name: undefined,
     // ... other defaults
   });
 
@@ -294,15 +312,22 @@ export const profitYearNullableValidator = yup
 ### Cross-Field Date Validators
 
 ```typescript
-export const endDateAfterStartDateValidator = (startFieldName: string, errorMessage?: string) =>
+export const endDateAfterStartDateValidator = (
+  startFieldName: string,
+  errorMessage?: string
+) =>
   yup
     .date()
     .nullable()
-    .test("is-after-start", errorMessage || "End Date must be after Start Date", function (value) {
-      const startDate = this.parent[startFieldName];
-      if (!startDate || !value) return true;
-      return value > startDate;
-    });
+    .test(
+      "is-after-start",
+      errorMessage || "End Date must be after Start Date",
+      function (value) {
+        const startDate = this.parent[startFieldName];
+        if (!startDate || !value) return true;
+        return value > startDate;
+      }
+    );
 ```
 
 ## Advanced Validation Patterns
@@ -321,7 +346,7 @@ const schema = yup.object().shape({
       return !startYear || !endYear || endYear >= startYear;
     }
   ),
-  startProfitYear: profitYearNullableValidator
+  startProfitYear: profitYearNullableValidator,
 });
 ```
 
@@ -345,10 +370,7 @@ const isSSNDisabled = hasBadge || hasName;
 const isNameDisabled = hasBadge || hasSSN;
 
 // Apply to TextField
-<TextField
-  {...field}
-  disabled={isBadgeDisabled}
-/>
+<TextField {...field} disabled={isBadgeDisabled} />;
 ```
 
 ### Dynamic Search Criteria Detection
@@ -357,12 +379,22 @@ Determine if sufficient search criteria has been entered:
 
 ```typescript
 const hasSearchCriteria = useMemo(() => {
-  const hasFieldValues = hasValue(watchedBadgeNumber) || hasValue(watchedSSN) || hasValue(watchedName);
+  const hasFieldValues =
+    hasValue(watchedBadgeNumber) ||
+    hasValue(watchedSSN) ||
+    hasValue(watchedName);
 
-  const hasNonDefaultSelections = watchedMemberType !== "all" || watchedPaymentType !== "all";
+  const hasNonDefaultSelections =
+    watchedMemberType !== "all" || watchedPaymentType !== "all";
 
   return hasFieldValues || hasNonDefaultSelections;
-}, [watchedBadgeNumber, watchedSSN, watchedName, watchedMemberType, watchedPaymentType]);
+}, [
+  watchedBadgeNumber,
+  watchedSSN,
+  watchedName,
+  watchedMemberType,
+  watchedPaymentType,
+]);
 ```
 
 ### Auto-Update Related Fields
@@ -452,9 +484,21 @@ Radio buttons for mutually exclusive options:
   control={control}
   render={({ field }) => (
     <RadioGroup {...field} row>
-      <FormControlLabel value="all" control={<Radio size="small" />} label="All" />
-      <FormControlLabel value="hardship" control={<Radio size="small" />} label="Hardship" />
-      <FormControlLabel value="payoffs" control={<Radio size="small" />} label="Payoffs" />
+      <FormControlLabel
+        value="all"
+        control={<Radio size="small" />}
+        label="All"
+      />
+      <FormControlLabel
+        value="hardship"
+        control={<Radio size="small" />}
+        label="Hardship"
+      />
+      <FormControlLabel
+        value="payoffs"
+        control={<Radio size="small" />}
+        label="Payoffs"
+      />
     </RadioGroup>
   )}
 />
@@ -471,7 +515,9 @@ Custom `DsmDatePicker` component integration:
   render={({ field }) => (
     <DsmDatePicker
       id="profit-year"
-      onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+      onChange={(value: Date | null) =>
+        field.onChange(value?.getFullYear() || undefined)
+      }
       value={field.value ? new Date(field.value, 0) : null}
       required={true}
       label="Profit Year"
@@ -481,8 +527,12 @@ Custom `DsmDatePicker` component integration:
       error={errors.profitYear?.message}
     />
   )}
-/>
-{errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
+/>;
+{
+  errors.profitYear && (
+    <FormHelperText error>{errors.profitYear.message}</FormHelperText>
+  );
+}
 ```
 
 ## Error Display Pattern
@@ -490,41 +540,51 @@ Custom `DsmDatePicker` component integration:
 Consistent error messaging below each field:
 
 ```typescript
-{errors?.fieldName && (
-  <FormHelperText error>{errors.fieldName.message}</FormHelperText>
-)}
+{
+  errors?.fieldName && (
+    <FormHelperText error>{errors.fieldName.message}</FormHelperText>
+  );
+}
 ```
 
 ## Best Practices
 
-### 1. **Always Use Controller for MUI Components**
+### 1. **MANDATORY: Always Use Yup for All Form Validation**
+
+- **REQUIRED**: Define a Yup schema for every form
+- **REQUIRED**: Use `yupResolver` to connect schema to `useForm`
+- **FORBIDDEN**: Manual validation checks (e.g., `if (!name.trim())` in submit handlers)
+- **FORBIDDEN**: Using `useState` for form field management
+- All validation rules MUST be declared in the Yup schema
+
+### 2. **Always Use Controller for MUI Components**
 
 Never use `register()` directly with Material-UI components always use `Controller` for proper integration.
 
-### 2. **Preventative + Declarative Validation**
+### 3. **Preventative + Declarative Validation**
 
 Combine real-time input restrictions (`onChange` blocking) with schema validation for best UX:
 
 - **Preventative**: Block invalid characters immediately
 - **Declarative**: Validate complete field on blur with detailed error messages
 
-### 3. **Null vs Undefined Handling**
+### 4. **Null vs Undefined Handling**
 
 - Use `value={field.value ?? ""}` to prevent uncontrolled input warnings
 - Transform empty strings to `null` or `undefined` in `onChange` for consistent API payloads
 - Use `.nullable()` in schemas for optional fields
 
-### 4. **Reuse Validators**
+### 5. **Reuse Validators**
 
 Always check `utils/FormValidators.ts` before creating new validation logic. Reuse existing validators for consistency.
 
-### 5. **Validation Mode Selection**
+### 6. **Validation Mode Selection**
 
 - **`"onBlur"`**: Recommended for most forms validates when user leaves field
 - **`"onChange"`**: Use sparingly can be intrusive but useful for real-time feedback
 - **`"onSubmit"`**: Validates only on submit use for simple forms
 
-### 6. **Error Message Clarity**
+### 7. **Error Message Clarity**
 
 Write user-friendly error messages that explain what's wrong and how to fix it:
 
@@ -532,7 +592,7 @@ Write user-friendly error messages that explain what's wrong and how to fix it:
 - "Badge Number must be 7 digits or less"
 - L "Invalid input"
 
-### 7. **Type Safety**
+### 8. **Type Safety**
 
 Define TypeScript interfaces for form data that match your schema shape:
 
@@ -549,11 +609,11 @@ const schema = yup.object().shape({
 });
 
 useForm<SearchFormData>({
-  resolver: yupResolver(schema)
+  resolver: yupResolver(schema),
 });
 ```
 
-### 8. **Transform Data for API**
+### 9. **Transform Data for API**
 
 Separate form state from API request format. Transform data in `onSubmit`:
 
@@ -563,7 +623,8 @@ const onSubmit = (data: SearchFormData) => {
     badge_number: data.badgeNumber ?? undefined,
     ssn: data.socialSecurity ? Number(data.socialSecurity) : undefined,
     full_name: data.name ?? undefined,
-    member_type_code: data.memberType === "all" ? undefined : Number(data.memberType)
+    member_type_code:
+      data.memberType === "all" ? undefined : Number(data.memberType),
   };
 
   apiCall(apiRequest);
@@ -584,7 +645,7 @@ import { ssnValidator, badgeNumberValidator } from "../../utils/FormValidators";
 const schema = yup.object().shape({
   badgeNumber: badgeNumberValidator,
   name: yup.string().nullable(),
-  socialSecurity: ssnValidator
+  socialSecurity: ssnValidator,
 });
 
 // 2. Define TypeScript interface
@@ -600,21 +661,24 @@ interface SearchFilterProps {
   isSearching?: boolean;
 }
 
-const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, isSearching = false }) => {
+const SearchFilter: React.FC<SearchFilterProps> = ({
+  onSearch,
+  isSearching = false,
+}) => {
   // 4. Initialize form
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset
+    reset,
   } = useForm<SearchFormData>({
     resolver: yupResolver(schema) as any,
     mode: "onBlur",
     defaultValues: {
       badgeNumber: undefined,
       name: undefined,
-      socialSecurity: undefined
-    }
+      socialSecurity: undefined,
+    },
   });
 
   // 5. Submit handler
@@ -622,7 +686,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, isSearching = fal
     const searchParams: SearchRequest = {
       badgeNumber: data.badgeNumber ?? undefined,
       name: data.name ?? undefined,
-      ssn: data.socialSecurity ? Number(data.socialSecurity) : undefined
+      ssn: data.socialSecurity ? Number(data.socialSecurity) : undefined,
     };
     onSearch(searchParams);
   };
@@ -634,7 +698,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, isSearching = fal
     reset({
       badgeNumber: undefined,
       name: undefined,
-      socialSecurity: undefined
+      socialSecurity: undefined,
     });
   };
 
@@ -686,7 +750,9 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, isSearching = fal
               />
             )}
           />
-          {errors.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
+          {errors.name && (
+            <FormHelperText error>{errors.name.message}</FormHelperText>
+          )}
         </Grid>
 
         {/* SSN Field */}
@@ -716,7 +782,9 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, isSearching = fal
             )}
           />
           {errors.socialSecurity && (
-            <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>
+            <FormHelperText error>
+              {errors.socialSecurity.message}
+            </FormHelperText>
           )}
         </Grid>
 

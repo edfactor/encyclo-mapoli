@@ -21,10 +21,19 @@ public sealed record CheckRunStartRequest : IProfitYearRequest
     public required DateOnly CheckRunDate { get; init; }
 
     /// <summary>
-    /// The check number prefix or starting number for this run (e.g., 7542).
-    /// Used in file naming and tracking. Must be a positive integer.
+    /// The set of distributions to print checks for.
     /// </summary>
-    public required int CheckNumber { get; init; }
+    public required IReadOnlyCollection<long> DistributionIds { get; init; }
+
+    /// <summary>
+    /// Which printer/output format to generate.
+    /// </summary>
+    public required CheckRunPrinterType PrinterType { get; init; }
+
+    /// <summary>
+    /// When true, voids prior checks for the run and generates new check numbers.
+    /// </summary>
+    public bool IsReprint { get; init; }
 
     /// <summary>
     /// The username of the user initiating the check run.
@@ -39,7 +48,9 @@ public sealed record CheckRunStartRequest : IProfitYearRequest
     {
         ProfitYear = 2024,
         CheckRunDate = new DateOnly(2024, 12, 25),
-        CheckNumber = 7542,
+        DistributionIds = new long[] { 10001, 10002, 10003 },
+        PrinterType = CheckRunPrinterType.XeroxDjde,
+        IsReprint = false,
         UserName = "jdoe"
     };
 }

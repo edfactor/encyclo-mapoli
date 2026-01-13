@@ -29,6 +29,7 @@ using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
+using Demoulas.ProfitSharing.Services.PrintFormatting;
 using Demoulas.ProfitSharing.Services.Validators;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.Services.Validation;
@@ -51,6 +52,10 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICheckRunWorkflowService, CheckRunWorkflowService>();
         _ = builder.Services.AddScoped<ICheckRunOrchestrator, CheckRunOrchestrator>();
+        _ = builder.Services.AddScoped<ICheckRunPrintFileService, CheckRunPrintFileService>();
+
+        _ = builder.Services.AddSingleton<IMicrFormatterFactory, MicrFormatterFactory>();
+        _ = builder.Services.AddSingleton<DjdeFormatBuilder>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
         _ = builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
         _ = builder.Services.AddScoped<IDistributionService, DistributionService>();
@@ -117,6 +122,8 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IAnnuityRateValidator, AnnuityRateValidator>();
         _ = builder.Services.AddScoped<IRmdsFactorService, RmdsFactorService>();
         _ = builder.Services.AddScoped<ICommentTypeService, CommentTypeService>();
+        _ = builder.Services.AddScoped<IBankService, BankService>();
+        _ = builder.Services.AddScoped<IBankAccountService, BankAccountService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         _ = builder.Services.AddScoped<IUnmaskingService, UnmaskingService>();

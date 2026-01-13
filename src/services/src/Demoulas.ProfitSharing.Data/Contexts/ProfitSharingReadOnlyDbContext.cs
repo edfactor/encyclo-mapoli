@@ -27,6 +27,8 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
         ChangeTracker.LazyLoadingEnabled = false;
     }
 
+    public virtual DbSet<Bank> Banks { get; set; }
+    public virtual DbSet<BankAccount> BankAccounts { get; set; }
     public virtual DbSet<AuditEvent> AuditEvents { get; set; }
     public virtual DbSet<ReportChecksum> ReportChecksums { get; set; }
     public virtual DbSet<DemographicSyncAudit> DemographicSyncAudit { get; set; }
