@@ -355,7 +355,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 {
                     // PsnSuffix provided - search for specific beneficiary
                     ssnFromBadge = ctx.Beneficiaries
-                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value && b.PsnSuffix == req.PsnSuffix.Value)
+                        .Where(b => !b.IsDeleted && b.BadgeNumber == req.BadgeNumber.Value && b.PsnSuffix == req.PsnSuffix.Value)
                         .Include(b => b.Contact)
                         .Select(b => b.Contact!.Ssn)
                         .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value} PsnSuffix {req.PsnSuffix}");
@@ -364,7 +364,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 {
                     // No PsnSuffix - search all beneficiaries for this badge number
                     ssnFromBadge = ctx.Beneficiaries
-                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
+                        .Where(b => !b.IsDeleted && b.BadgeNumber == req.BadgeNumber.Value)
                         .Include(b => b.Contact)
                         .Select(b => b.Contact!.Ssn)
                         .TagWith($"MasterInquiry: Get SSN for all Beneficiaries with BadgeNumber {req.BadgeNumber.Value}");
@@ -389,7 +389,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 {
                     // PsnSuffix provided - search for beneficiary with this specific PsnSuffix
                     beneficiarySSNs = ctx.Beneficiaries
-                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value && b.PsnSuffix == req.PsnSuffix.Value)
+                        .Where(b => !b.IsDeleted && b.BadgeNumber == req.BadgeNumber.Value && b.PsnSuffix == req.PsnSuffix.Value)
                         .Include(b => b.Contact)
                         .Select(b => b.Contact!.Ssn)
                         .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value} PsnSuffix {req.PsnSuffix}");
@@ -398,7 +398,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 {
                     // PS-2258: No PsnSuffix - search all beneficiaries for this badge number
                     beneficiarySSNs = ctx.Beneficiaries
-                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
+                        .Where(b => !b.IsDeleted && b.BadgeNumber == req.BadgeNumber.Value)
                         .Include(b => b.Contact)
                         .Select(b => b.Contact!.Ssn)
                         .TagWith($"MasterInquiry: Get SSN for all Beneficiaries with BadgeNumber {req.BadgeNumber.Value}");
@@ -676,6 +676,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         d.ContactInfo!.FullName,
                         // Left join to beneficiaries - will be null for employees
                         Beneficiaries = (from b in ctx.Beneficiaries
+                                         where !b.IsDeleted
                                          join bc in ctx.BeneficiaryContacts on b.BeneficiaryContactId equals bc.Id
                                          where b.DemographicId == d.Id
                                          select new { b.PsnSuffix, bc.ContactInfo.FullName }).ToList()

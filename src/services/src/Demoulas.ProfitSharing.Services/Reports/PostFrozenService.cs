@@ -767,7 +767,7 @@ public class PostFrozenService : IPostFrozenService
                 var beneInfo = (
                     from bc in ctx.BeneficiaryContacts
                     join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where !demographicQuery.Any(d => d.Ssn == bc.Ssn)
+                    where !b.IsDeleted && !demographicQuery.Any(d => d.Ssn == bc.Ssn)
                     select new
                     {
                         bc.Ssn,
