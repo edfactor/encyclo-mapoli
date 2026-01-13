@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Data.Entities.Audit;

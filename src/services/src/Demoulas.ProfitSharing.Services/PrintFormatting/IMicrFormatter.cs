@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.PrintFormatting;
+namespace Demoulas.ProfitSharing.Services.PrintFormatting;
 
 /// <summary>
 /// Formats check MICR (Magnetic Ink Character Recognition) lines for bank processing.

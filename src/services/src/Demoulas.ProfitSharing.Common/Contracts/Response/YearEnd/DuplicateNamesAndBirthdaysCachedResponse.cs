@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Demoulas.Common.Contracts.Caching;
 using Demoulas.Common.Contracts.Contracts.Response;
 

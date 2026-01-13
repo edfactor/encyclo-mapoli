@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 /// <summary>
 /// Represents a group of related cross-reference validations.

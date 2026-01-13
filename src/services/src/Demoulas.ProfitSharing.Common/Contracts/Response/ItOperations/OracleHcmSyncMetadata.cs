@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 
 /// <summary>
 /// Internal DTO for OracleHcm sync metadata (four timestamp fields).

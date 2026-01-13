@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 /// <summary>
 /// Simple wrapper for non-paginated list responses to provide a consistent envelope

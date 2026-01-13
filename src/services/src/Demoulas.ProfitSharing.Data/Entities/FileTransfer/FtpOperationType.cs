@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities.FileTransfer;
+namespace Demoulas.ProfitSharing.Data.Entities.FileTransfer;
 
 /// <summary>
 /// Represents the type of FTP operation performed during file transfer.

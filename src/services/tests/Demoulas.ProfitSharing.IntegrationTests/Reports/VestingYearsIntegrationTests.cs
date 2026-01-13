@@ -1,10 +1,10 @@
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
-using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 

@@ -1,4 +1,4 @@
-﻿
+
 namespace Demoulas.ProfitSharing.Data.Entities;
 
 public sealed class FrozenState

@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Extensions; // ToResultOrNotFound

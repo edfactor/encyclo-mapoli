@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 /// <summary>
 /// Record representing a single row in the Positive Pay CSV file.

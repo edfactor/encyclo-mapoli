@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Validation;
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.Validation;
 
 /// <summary>
 /// Request model for retrieving Profit Sharing Report validation data.

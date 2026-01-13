@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 /// <summary>
 /// Represents the validation status for a specific field cross-reference between reports.

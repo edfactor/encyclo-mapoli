@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Services.Middleware;

@@ -1,4 +1,4 @@
-﻿namespace YEMatch.Activities;
+namespace YEMatch.Activities;
 
 /// <summary>
 ///     Factory interface for creating and managing activities

@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 /// <summary>
 /// Request for the PROF-LETTER73 adhoc report - Employees with profits over 73.

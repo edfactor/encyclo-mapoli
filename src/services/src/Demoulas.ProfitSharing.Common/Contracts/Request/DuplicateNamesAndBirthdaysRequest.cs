@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 /// <summary>
 /// Request DTO for Duplicate Names and Birthdays report.

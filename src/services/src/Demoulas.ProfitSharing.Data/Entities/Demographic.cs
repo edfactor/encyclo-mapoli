@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
@@ -90,6 +90,21 @@ public sealed class Demographic : Member
 
     public char EmploymentStatusId { get; set; }
     public EmploymentStatus? EmploymentStatus { get; set; }
+
+    /// <summary>
+    /// Foreign key to the vesting schedule for this employee.
+    /// Determines which vesting table (Old Plan vs New Plan) applies.
+    /// NULL indicates employee is not enrolled.
+    /// </summary>
+    public int? VestingScheduleId { get; set; }
+    public VestingSchedule? VestingSchedule { get; set; }
+
+    /// <summary>
+    /// Indicates whether this employee has forfeited profit sharing funds.
+    /// When true, enrollment reflects "has forfeiture records" status (enrollments 3 or 4).
+    /// When false, enrollment reflects "has contributions" status (enrollments 1 or 2).
+    /// </summary>
+    public bool HasForfeited { get; set; }
 
     public List<PayProfit> PayProfits { get; set; } = [];
     public List<Beneficiary> Beneficiaries { get; set; } = [];

@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -33,7 +33,7 @@ public sealed class UpsertRmdsFactorEndpoint
     public override void Configure()
     {
         Post("rmds-factors");
-        
+
         Summary(s =>
         {
             s.Summary = "Add or Update RMD Factor";

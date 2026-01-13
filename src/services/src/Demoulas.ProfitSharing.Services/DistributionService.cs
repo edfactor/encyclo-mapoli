@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;

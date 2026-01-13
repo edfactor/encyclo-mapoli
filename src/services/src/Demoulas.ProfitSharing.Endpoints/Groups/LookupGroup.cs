@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Api.Groups;
+using Demoulas.Common.Api.Groups;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
 

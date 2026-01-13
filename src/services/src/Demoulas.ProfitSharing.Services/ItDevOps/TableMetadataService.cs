@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Data.Interfaces;

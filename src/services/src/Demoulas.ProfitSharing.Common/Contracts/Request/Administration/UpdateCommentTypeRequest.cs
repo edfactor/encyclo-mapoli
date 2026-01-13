@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
 
 public sealed record UpdateCommentTypeRequest
 {

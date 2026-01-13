@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 
 public sealed record UpdateAnnuityRateRequest
 {

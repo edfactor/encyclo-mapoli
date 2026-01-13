@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 

@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Caching.Interfaces;
+using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Services.Caching.HostedServices;

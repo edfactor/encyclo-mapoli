@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 public class AtomFeedResponse<TContext> where TContext : DeltaContextBase
 {

@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 /// <summary>
 /// Cumulative totals for Account History Report

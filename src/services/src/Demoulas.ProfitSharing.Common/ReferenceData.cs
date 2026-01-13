@@ -1,11 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Common;
+namespace Demoulas.ProfitSharing.Common;
 
 public static class ReferenceData
 {
-    // Vesting Schedule Percent by year
-    public static readonly List<byte> OlderVestingSchedule = [0, 0, 20, 40, 60, 80, 100];
-    public static readonly List<byte> NewerVestingSchedule = [0, 20, 40, 60, 80, 100];
-
     public static readonly short SmartTransitionYear = 2025;
 
     public const short MinimumHoursForContribution = 1000;

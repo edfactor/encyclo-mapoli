@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
 
 public record NavigationRequestDto
 {

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;

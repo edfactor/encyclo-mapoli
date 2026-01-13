@@ -1,4 +1,4 @@
-﻿
+
 namespace Demoulas.ProfitSharing.Data.Entities.Virtual;
 
 public sealed class ProfitShareTotal

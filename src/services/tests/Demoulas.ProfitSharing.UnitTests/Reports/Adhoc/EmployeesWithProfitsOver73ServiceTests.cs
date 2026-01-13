@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -471,7 +471,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
 
         // Assert - Document expected behavior
         expectedRmd.ShouldBe(3773.58m, "RMD should use AwayFromZero rounding for financial calculations");
-        
+
         // Verify midpoint case: 0.5 rounds UP (away from zero)
         decimal midpointBalance = 265.00m;
         decimal midpointFactor = 2m;

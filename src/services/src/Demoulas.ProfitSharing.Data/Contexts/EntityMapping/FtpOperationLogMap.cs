@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.FileTransfer;
+using Demoulas.ProfitSharing.Data.Entities.FileTransfer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

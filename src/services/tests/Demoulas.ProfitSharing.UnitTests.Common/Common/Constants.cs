@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Microsoft.EntityFrameworkCore;
 using Moq;

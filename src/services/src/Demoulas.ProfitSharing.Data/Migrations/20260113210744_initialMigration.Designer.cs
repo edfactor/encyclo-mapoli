@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20251222223034_protectComments")]
-    partial class protectComments
+    [Migration("20260113210744_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,10 +26,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("BANK_ACCOUNT_SEQ")
+                .HasMin(1L);
+
+            modelBuilder.HasSequence<int>("BANK_SEQ")
+                .HasMin(1L);
+
             modelBuilder.HasSequence<int>("FAKE_SSN_SEQ")
                 .StartsAt(666000000L)
                 .HasMin(666000000L)
                 .HasMax(666999999L);
+
+            modelBuilder.HasSequence<int>("PROFIT_SHARE_CHECK_NUMBER_SEQ")
+                .HasMin(1L);
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.AnnuityRate", b =>
                 {
@@ -85,6 +94,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_ANNUITY_RATE_YEAR_AGE");
 
                     b.ToTable("ANNUITY_RATE", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.AnnuityRateConfig", b =>
+                {
+                    b.Property<short>("Year")
+                        .HasPrecision(4)
+                        .HasColumnType("NUMBER(4)")
+                        .HasColumnName("YEAR");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<byte>("MaximumAge")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("MAXIMUM_AGE");
+
+                    b.Property<byte>("MinimumAge")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("MINIMUM_AGE");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.HasKey("Year")
+                        .HasName("PK_ANNUITY_RATE_CONFIG");
+
+                    b.ToTable("ANNUITY_RATE_CONFIG", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.AuditEvent", b =>
@@ -367,6 +416,285 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("REPORT_CHECKSUM", (string)null);
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Bank", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID")
+                        .HasDefaultValueSql("BANK_SEQ.NEXTVAL");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("CITY");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("CREATEDBY");
+
+                    b.Property<DateTime?>("FedAchChangeDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FEDACH_CHANGE_DATE");
+
+                    b.Property<string>("FedwireLocation")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("FEDWIRE_LOCATION");
+
+                    b.Property<DateTime?>("FedwireRevisionDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FEDWIRE_REVISION_DATE");
+
+                    b.Property<string>("FedwireTelegraphicName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("FEDWIRE_TELEGRAPHIC_NAME");
+
+                    b.Property<bool>("IsDisabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IS_DISABLED");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("MODIFIEDBY");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("NAME");
+
+                    b.Property<string>("OfficeType")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("OFFICE_TYPE");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
+                        .HasColumnName("PHONE");
+
+                    b.Property<string>("RoutingNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("ROUTING_NUMBER");
+
+                    b.Property<string>("ServicingFedAddress")
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("SERVICING_FED_ADDRESS");
+
+                    b.Property<string>("ServicingFedRoutingNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("SERVICING_FED_ROUTING_NUMBER");
+
+                    b.Property<string>("State")
+                        .HasMaxLength(2)
+                        .HasColumnType("NVARCHAR2(2)")
+                        .HasColumnName("STATE");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
+                        .HasColumnName("STATUS");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.HasKey("Id")
+                        .HasName("PK_BANK");
+
+                    b.HasIndex("IsDisabled")
+                        .HasDatabaseName("IX_BANK_IS_DISABLED");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_BANK_NAME");
+
+                    b.HasIndex("RoutingNumber")
+                        .HasDatabaseName("IX_BANK_ROUTING_NUMBER");
+
+                    b.ToTable("BANK", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            City = "Lake Success",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 13, 21, 7, 43, 27, DateTimeKind.Unspecified).AddTicks(9523), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = "SYSTEM",
+                            FedAchChangeDate = new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FedwireLocation = "Miami, FL",
+                            FedwireRevisionDate = new DateTime(2023, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FedwireTelegraphicName = "NEWTEK BANK, NA",
+                            IsDisabled = false,
+                            Name = "Newtek Bank, NA",
+                            OfficeType = "Main Office",
+                            Phone = "516-254-7586",
+                            RoutingNumber = "026004297",
+                            ServicingFedAddress = "100 Orchard Street, East Rutherford, NJ",
+                            ServicingFedRoutingNumber = "021001208",
+                            State = "NY",
+                            Status = "Active"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BankAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID")
+                        .HasDefaultValueSql("BANK_ACCOUNT_SEQ.NEXTVAL");
+
+                    b.Property<string>("AccountName")
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("ACCOUNT_NAME");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(34)
+                        .HasColumnType("NVARCHAR2(34)")
+                        .HasColumnName("ACCOUNT_NUMBER");
+
+                    b.Property<int>("BankId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("BANK_ID");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("CREATEDBY");
+
+                    b.Property<DateTime?>("DiscontinuedDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("DISCONTINUED_DATE");
+
+                    b.Property<DateTime?>("EffectiveDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("EFFECTIVE_DATE");
+
+                    b.Property<DateTime?>("FedAchChangeDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FED_ACH_CHANGE_DATE");
+
+                    b.Property<string>("FedwireLocation")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("FEDWIRE_LOCATION");
+
+                    b.Property<DateTime?>("FedwireRevisionDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FEDWIRE_REVISION_DATE");
+
+                    b.Property<string>("FedwireTelegraphicName")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("FEDWIRE_TELEGRAPHIC_NAME");
+
+                    b.Property<bool>("IsDisabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IS_DISABLED");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IS_PRIMARY");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("MODIFIEDBY");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("NVARCHAR2(1000)")
+                        .HasColumnName("NOTES");
+
+                    b.Property<string>("RoutingNumber")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("ROUTING_NUMBER");
+
+                    b.Property<string>("ServicingFedAddress")
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)")
+                        .HasColumnName("SERVICING_FED_ADDRESS");
+
+                    b.Property<string>("ServicingFedRoutingNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("SERVICING_FED_ROUTING_NUMBER");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.HasKey("Id")
+                        .HasName("PK_BANK_ACCOUNT");
+
+                    b.HasIndex("BankId")
+                        .HasDatabaseName("IX_BANK_ACCOUNT_BANK_ID");
+
+                    b.HasIndex("IsDisabled")
+                        .HasDatabaseName("IX_BANK_ACCOUNT_IS_DISABLED");
+
+                    b.HasIndex("RoutingNumber")
+                        .HasDatabaseName("IX_BANK_ACCOUNT_ROUTING_NUMBER");
+
+                    b.HasIndex("BankId", "IsPrimary")
+                        .HasDatabaseName("IX_BANK_ACCOUNT_BANK_PRIMARY");
+
+                    b.ToTable("BANK_ACCOUNT", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AccountName = "Profit Sharing Distribution Account",
+                            AccountNumber = "PLACEHOLDER",
+                            BankId = 1,
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 13, 21, 7, 43, 36, DateTimeKind.Unspecified).AddTicks(1311), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = "SYSTEM",
+                            IsDisabled = false,
+                            IsPrimary = true,
+                            RoutingNumber = "026004297"
+                        });
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
                 {
                     b.Property<int>("Id")
@@ -395,6 +723,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("ISDELETED");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
@@ -464,6 +796,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("DATE")
                         .HasColumnName("DATE_OF_BIRTH");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("ISDELETED");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
@@ -569,6 +905,79 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             Id = (byte)1,
                             Name = "Beneficiary"
                         });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.CheckRun.CheckRunWorkflow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("RAW(16)")
+                        .HasColumnName("ID");
+
+                    b.Property<int?>("CheckNumber")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("CHECKNUMBER");
+
+                    b.Property<string>("CheckRunDate")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(10)")
+                        .HasColumnName("CHECKRUNDATE");
+
+                    b.Property<string>("CreatedByUserName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("CREATEDBYUSERNAME");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
+                        .HasColumnName("CREATEDDATE");
+
+                    b.Property<int>("MaxReprintCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasDefaultValue(2)
+                        .HasColumnName("MAXREPRINTCOUNT");
+
+                    b.Property<string>("ModifiedByUserName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("MODIFIEDBYUSERNAME");
+
+                    b.Property<DateTimeOffset?>("ModifiedDate")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
+                        .HasColumnName("MODIFIEDDATE");
+
+                    b.Property<short>("ProfitYear")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("PROFITYEAR");
+
+                    b.Property<int>("ReprintCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasDefaultValue(0)
+                        .HasColumnName("REPRINTCOUNT");
+
+                    b.Property<int>("StepNumber")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("STEPNUMBER");
+
+                    b.Property<int>("StepStatus")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("STEPSTATUS");
+
+                    b.HasKey("Id")
+                        .HasName("PK_CHECK_RUN_WORKFLOW");
+
+                    b.HasIndex("CheckRunDate")
+                        .HasDatabaseName("IX_CHECK_RUN_WORKFLOW_RUN_DATE");
+
+                    b.HasIndex("ProfitYear")
+                        .HasDatabaseName("IX_CHECK_RUN_WORKFLOW_PROFIT_YEAR");
+
+                    b.HasIndex("ProfitYear", "StepStatus")
+                        .HasDatabaseName("IX_CHECK_RUN_WORKFLOW_YEAR_STATUS");
+
+                    b.ToTable("CHECK_RUN_WORKFLOW", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.CommentType", b =>
@@ -2284,6 +2693,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("GENDER_ID")
                         .HasComment("Gender");
 
+                    b.Property<bool>("HasForfeited")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("HAS_FORFEITED");
+
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("HIRE_DATE")
@@ -2345,6 +2758,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("USER_NAME")
                         .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
+                    b.Property<int?>("VestingScheduleId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("VESTING_SCHEDULE_ID");
+
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC");
 
@@ -2365,6 +2782,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("TerminationCodeId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_TERMINATIONCODEID");
+
+                    b.HasIndex("VestingScheduleId")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_VESTINGSCHEDULEID");
 
                     b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
                         .IsUnique()
@@ -3445,56 +3865,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Enrollment", b =>
-                {
-                    b.Property<byte>("Id")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ID");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(84)
-                        .HasColumnType("NVARCHAR2(84)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_ENROLLMENT");
-
-                    b.ToTable("ENROLLMENT", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (byte)0,
-                            Name = "Not Enrolled"
-                        },
-                        new
-                        {
-                            Id = (byte)1,
-                            Name = "Old vesting plan has Contributions (7 years to full vesting)"
-                        },
-                        new
-                        {
-                            Id = (byte)2,
-                            Name = "New vesting plan has Contributions (6 years to full vesting)"
-                        },
-                        new
-                        {
-                            Id = (byte)3,
-                            Name = "Old vesting plan has Forfeiture records"
-                        },
-                        new
-                        {
-                            Id = (byte)4,
-                            Name = "New vesting plan has Forfeiture records"
-                        },
-                        new
-                        {
-                            Id = (byte)9,
-                            Name = "Previous years enrollment is unknown. (History not previously tracked)"
-                        });
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ExcludedId", b =>
                 {
                     b.Property<int>("Id")
@@ -3573,6 +3943,135 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_FAKE_SSNS_SSN");
 
                     b.ToTable("FAKE_SSNS", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FileTransfer.FtpOperationLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("RAW(16)")
+                        .HasColumnName("ID");
+
+                    b.Property<Guid>("CheckRunWorkflowId")
+                        .HasColumnType("RAW(16)")
+                        .HasColumnName("CHECKRUNWORKFLOWID");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
+                        .HasColumnName("DESTINATION");
+
+                    b.Property<long>("DurationMs")
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("DURATIONMS");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("ERRORMESSAGE");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)")
+                        .HasColumnName("FILENAME");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("ISSUCCESS");
+
+                    b.Property<int>("OperationType")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("OPERATIONTYPE");
+
+                    b.Property<DateTimeOffset>("Timestamp")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
+                        .HasColumnName("TIMESTAMP");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("USERNAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_FTP_OPERATION_LOG");
+
+                    b.HasIndex("CheckRunWorkflowId")
+                        .HasDatabaseName("IX_FTP_OPERATION_LOG_WORKFLOW_ID");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_FTP_OPERATION_LOG_TIMESTAMP");
+
+                    b.ToTable("FTP_OPERATION_LOG", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FileTransferAudit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("RAW(16)")
+                        .HasColumnName("ID");
+
+                    b.Property<Guid?>("CheckRunWorkflowId")
+                        .HasColumnType("RAW(16)")
+                        .HasColumnName("CHECKRUNWORKFLOWID");
+
+                    b.Property<byte[]>("CsvContent")
+                        .HasColumnType("RAW(2000)")
+                        .HasColumnName("CSVCONTENT");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
+                        .HasColumnName("DESTINATION");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("ERRORMESSAGE");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)")
+                        .HasColumnName("FILENAME");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("FILESIZE");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("ISSUCCESS");
+
+                    b.Property<DateTimeOffset>("Timestamp")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
+                        .HasColumnName("TIMESTAMP");
+
+                    b.Property<long>("TransferDurationMs")
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("TRANSFERDURATIONMS");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("USERNAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_FILE_TRANSFER_AUDIT");
+
+                    b.HasIndex("CheckRunWorkflowId")
+                        .HasDatabaseName("IX_FILE_TRANSFER_AUDIT_WORKFLOW_ID");
+
+                    b.HasIndex("FileName")
+                        .HasDatabaseName("IX_FILE_TRANSFER_AUDIT_FILENAME");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_FILE_TRANSFER_AUDIT_TIMESTAMP");
+
+                    b.ToTable("FILE_TRANSFER_AUDIT", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FrozenState", b =>
@@ -3802,6 +4301,28 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_NAVIGATION_STATUS_ID");
 
                     b.ToTable("NAVIGATION", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationCustomSetting", b =>
+                {
+                    b.Property<short>("NavigationId")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("NAVIGATION_ID");
+
+                    b.Property<string>("Key")
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("KEY");
+
+                    b.Property<string>("ValueJson")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("VALUE_JSON");
+
+                    b.HasKey("NavigationId", "Key")
+                        .HasName("PK_NAVIGATION_CUSTOM_SETTING");
+
+                    b.ToTable("NAVIGATION_CUSTOM_SETTING", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationRole", b =>
@@ -4728,10 +5249,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("EMPLOYEE_TYPE_ID");
 
-                    b.Property<byte>("EnrollmentId")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ENROLLMENT_ID");
-
                     b.Property<decimal>("Etva")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
@@ -4801,9 +5318,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PAY_PROFIT_ZEROCONTRIBUTIONREASONID");
-
-                    b.HasIndex(new[] { "EnrollmentId" }, "IX_EnrollmentId")
-                        .HasDatabaseName("IX_PAY_PROFIT_ENROLLMENTID");
 
                     b.HasIndex(new[] { "ProfitYear" }, "IX_ProfitYear")
                         .HasDatabaseName("IX_PAY_PROFIT_PROFITYEAR");
@@ -5091,6 +5605,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("CHECK_RUN_DATE");
 
+                    b.Property<Guid?>("CheckRunWorkflowId")
+                        .HasColumnType("RAW(16)")
+                        .HasColumnName("CHECK_RUN_WORKFLOW_ID");
+
                     b.Property<DateTime?>("ClearDate")
                         .HasColumnType("DATE")
                         .HasColumnName("CLEAR_DATE");
@@ -5173,6 +5691,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("TaxCodeId")
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_TAXCODEID");
 
+                    b.HasIndex(new[] { "CheckRunWorkflowId" }, "IX_CHECK_RUN_WORKFLOW_ID")
+                        .HasDatabaseName("IX_PROFIT_SHARE_CHECK_CHECKRUNWORKFLOWID");
+
                     b.HasIndex(new[] { "CheckNumber", "IsVoided" }, "IX_CheckNumber_IsVoided")
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_CHECKNUMBER_ISVOIDED");
 
@@ -5184,6 +5705,161 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_SSN");
 
                     b.ToTable("PROFIT_SHARE_CHECK", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.RmdsFactorByAge", b =>
+                {
+                    b.Property<byte>("Age")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("AGE");
+
+                    b.Property<decimal>("Factor")
+                        .HasPrecision(4, 1)
+                        .HasColumnType("DECIMAL(4,1)")
+                        .HasColumnName("FACTOR");
+
+                    b.HasKey("Age")
+                        .HasName("PK_RMDS_FACTOR_BY_AGE");
+
+                    b.ToTable("RMDS_FACTOR_BY_AGE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Age = (byte)73,
+                            Factor = 26.5m
+                        },
+                        new
+                        {
+                            Age = (byte)74,
+                            Factor = 25.5m
+                        },
+                        new
+                        {
+                            Age = (byte)75,
+                            Factor = 24.6m
+                        },
+                        new
+                        {
+                            Age = (byte)76,
+                            Factor = 23.7m
+                        },
+                        new
+                        {
+                            Age = (byte)77,
+                            Factor = 22.9m
+                        },
+                        new
+                        {
+                            Age = (byte)78,
+                            Factor = 22.0m
+                        },
+                        new
+                        {
+                            Age = (byte)79,
+                            Factor = 21.1m
+                        },
+                        new
+                        {
+                            Age = (byte)80,
+                            Factor = 20.2m
+                        },
+                        new
+                        {
+                            Age = (byte)81,
+                            Factor = 19.4m
+                        },
+                        new
+                        {
+                            Age = (byte)82,
+                            Factor = 18.5m
+                        },
+                        new
+                        {
+                            Age = (byte)83,
+                            Factor = 17.7m
+                        },
+                        new
+                        {
+                            Age = (byte)84,
+                            Factor = 16.8m
+                        },
+                        new
+                        {
+                            Age = (byte)85,
+                            Factor = 16.0m
+                        },
+                        new
+                        {
+                            Age = (byte)86,
+                            Factor = 15.2m
+                        },
+                        new
+                        {
+                            Age = (byte)87,
+                            Factor = 14.4m
+                        },
+                        new
+                        {
+                            Age = (byte)88,
+                            Factor = 13.7m
+                        },
+                        new
+                        {
+                            Age = (byte)89,
+                            Factor = 12.9m
+                        },
+                        new
+                        {
+                            Age = (byte)90,
+                            Factor = 12.2m
+                        },
+                        new
+                        {
+                            Age = (byte)91,
+                            Factor = 11.5m
+                        },
+                        new
+                        {
+                            Age = (byte)92,
+                            Factor = 10.8m
+                        },
+                        new
+                        {
+                            Age = (byte)93,
+                            Factor = 10.1m
+                        },
+                        new
+                        {
+                            Age = (byte)94,
+                            Factor = 9.5m
+                        },
+                        new
+                        {
+                            Age = (byte)95,
+                            Factor = 8.9m
+                        },
+                        new
+                        {
+                            Age = (byte)96,
+                            Factor = 8.4m
+                        },
+                        new
+                        {
+                            Age = (byte)97,
+                            Factor = 7.8m
+                        },
+                        new
+                        {
+                            Age = (byte)98,
+                            Factor = 7.3m
+                        },
+                        new
+                        {
+                            Age = (byte)99,
+                            Factor = 6.8m
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.Job", b =>
@@ -5953,6 +6629,205 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.VestingSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_DATE");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
+                        .HasColumnName("DESCRIPTION");
+
+                    b.Property<string>("EffectiveDate")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(10)")
+                        .HasColumnName("EFFECTIVE_DATE");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("IS_ACTIVE");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_VESTING_SCHEDULE");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("UK_VESTING_SCHEDULE_NAME");
+
+                    b.ToTable("VESTING_SCHEDULE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedDate = new DateTime(2025, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "7-year vesting schedule with vesting starting at year 3. Used for employees whose first contribution was before 2007.",
+                            EffectiveDate = "1917-01-01",
+                            IsActive = true,
+                            Name = "Old Plan (Pre-2007)"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedDate = new DateTime(2025, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "6-year vesting schedule with vesting starting at year 2. Used for employees whose first contribution was 2007 or later.",
+                            EffectiveDate = "2007-01-01",
+                            IsActive = true,
+                            Name = "New Plan (2007+)"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.VestingScheduleDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    b.Property<decimal>("VestingPercent")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("DECIMAL(5,2)")
+                        .HasColumnName("VESTING_PERCENT");
+
+                    b.Property<int>("VestingScheduleId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("VESTING_SCHEDULE_ID");
+
+                    b.Property<int>("YearsOfService")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("YEARS_OF_SERVICE");
+
+                    b.HasKey("Id")
+                        .HasName("PK_VESTING_SCHEDULE_DETAIL");
+
+                    b.HasIndex("VestingScheduleId")
+                        .HasDatabaseName("IX_VESTING_SCHEDULE_DETAIL_VESTING_SCHEDULE_ID");
+
+                    b.HasIndex("VestingScheduleId", "YearsOfService")
+                        .IsUnique()
+                        .HasDatabaseName("UK_VSD_SCHEDULE_YEARS");
+
+                    b.ToTable("VESTING_SCHEDULE_DETAIL", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 2
+                        },
+                        new
+                        {
+                            Id = 4,
+                            VestingPercent = 20m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 3
+                        },
+                        new
+                        {
+                            Id = 5,
+                            VestingPercent = 40m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 4
+                        },
+                        new
+                        {
+                            Id = 6,
+                            VestingPercent = 60m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 5
+                        },
+                        new
+                        {
+                            Id = 7,
+                            VestingPercent = 80m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 6
+                        },
+                        new
+                        {
+                            Id = 8,
+                            VestingPercent = 100m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 7
+                        },
+                        new
+                        {
+                            Id = 9,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 0
+                        },
+                        new
+                        {
+                            Id = 10,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 1
+                        },
+                        new
+                        {
+                            Id = 11,
+                            VestingPercent = 20m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 2
+                        },
+                        new
+                        {
+                            Id = 12,
+                            VestingPercent = 40m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 3
+                        },
+                        new
+                        {
+                            Id = 13,
+                            VestingPercent = 60m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 4
+                        },
+                        new
+                        {
+                            Id = 14,
+                            VestingPercent = 80m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 5
+                        },
+                        new
+                        {
+                            Id = 15,
+                            VestingPercent = 100m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 6
+                        });
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotal", b =>
                 {
                     b.Property<int>("Ssn")
@@ -6556,6 +7431,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BankAccount", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Bank", "Bank")
+                        .WithMany("Accounts")
+                        .HasForeignKey("BankId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_BANK_ACCOUNT_BANK_BANKID");
+
+                    b.Navigation("Bank");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", "Contact")
@@ -6783,6 +7670,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_DEMOGRAPHIC_TERMINATIONCODES_TERMINATIONCODEID");
 
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.VestingSchedule", "VestingSchedule")
+                        .WithMany()
+                        .HasForeignKey("VestingScheduleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_DEMOGRAPHIC_VESTINGSCHEDULES_VESTINGSCHEDULEID");
+
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {
                             b1.Property<int>("DemographicId")
@@ -6940,6 +7833,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("PayFrequency");
 
                     b.Navigation("TerminationCode");
+
+                    b.Navigation("VestingSchedule");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicSsnChangeHistory", b =>
@@ -7231,6 +8126,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationCustomSetting", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", "Navigation")
+                        .WithMany("CustomSettings")
+                        .HasForeignKey("NavigationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NAVIGATION_CUSTOM_SETTING_NAVIGATION_NAVIGATIONID");
+
+                    b.Navigation("Navigation");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationTracking", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", "Navigation")
@@ -7274,13 +8181,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PAY_PROFIT_EMPLOYEE_TYPE_EMPLOYEETYPEID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Enrollment", "Enrollment")
-                        .WithMany()
-                        .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_PAY_PROFIT_ENROLLMENT_ENROLLMENTID");
-
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
                         .WithMany()
                         .HasForeignKey("ZeroContributionReasonId")
@@ -7292,8 +8192,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Demographic");
 
                     b.Navigation("EmployeeType");
-
-                    b.Navigation("Enrollment");
 
                     b.Navigation("ZeroContributionReason");
                 });
@@ -7344,6 +8242,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ProfitShareCheck", b =>
                 {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.CheckRun.CheckRunWorkflow", "CheckRunWorkflow")
+                        .WithMany()
+                        .HasForeignKey("CheckRunWorkflowId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_PROFIT_SHARE_CHECK_CHECK_RUN_WORKFLOW_CHECKRUNWORKFLOWID");
+
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", null)
                         .WithMany("Checks")
                         .HasForeignKey("DemographicId")
@@ -7357,6 +8261,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_PROFIT_SHARE_CHECK_TAXCODES_TAXCODEID");
+
+                    b.Navigation("CheckRunWorkflow");
 
                     b.Navigation("TaxCode");
                 });
@@ -7391,6 +8297,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("StartMethod");
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.VestingScheduleDetail", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.VestingSchedule", "VestingSchedule")
+                        .WithMany("Details")
+                        .HasForeignKey("VestingScheduleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_VSD_SCHEDULE");
+
+                    b.Navigation("VestingSchedule");
+                });
+
             modelBuilder.Entity("NAVIGATION_PREREQUISITES", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", null)
@@ -7423,6 +8341,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_NAVIGATION_ASSIGNED_ROLES_NAVIGATIONROLES_REQUIREDROLESID");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Bank", b =>
+                {
+                    b.Navigation("Accounts");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", b =>
@@ -7477,6 +8400,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
                 {
+                    b.Navigation("CustomSettings");
+
                     b.Navigation("Items");
 
                     b.Navigation("NavigationTrackings");
@@ -7517,6 +8442,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.TerminationCode", b =>
                 {
                     b.Navigation("Demographics");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.VestingSchedule", b =>
+                {
+                    b.Navigation("Details");
                 });
 #pragma warning restore 612, 618
         }

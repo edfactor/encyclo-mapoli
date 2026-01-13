@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 

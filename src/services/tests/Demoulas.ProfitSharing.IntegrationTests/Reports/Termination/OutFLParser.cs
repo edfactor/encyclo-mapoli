@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 
 /* Parses a line from the cobol output file "OUTFL".  It contains a dump of values which match Master Inquiry Screens. */
 public static class OutFLParser

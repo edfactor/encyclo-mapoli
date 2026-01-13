@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Demoulas.ProfitSharing.AppHost;

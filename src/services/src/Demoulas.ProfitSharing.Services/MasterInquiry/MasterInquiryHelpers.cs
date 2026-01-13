@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Data.Entities;

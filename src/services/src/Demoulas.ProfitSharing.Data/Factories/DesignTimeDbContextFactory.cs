@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 

@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Contracts;

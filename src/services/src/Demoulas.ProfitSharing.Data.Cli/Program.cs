@@ -1,4 +1,4 @@
-﻿using System.CommandLine;
+using System.CommandLine;
 using System.Text;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Contexts;

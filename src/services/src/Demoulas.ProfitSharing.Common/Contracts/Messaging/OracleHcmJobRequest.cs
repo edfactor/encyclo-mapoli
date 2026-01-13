@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Messaging;
+namespace Demoulas.ProfitSharing.Common.Contracts.Messaging;
 
 public sealed record OracleHcmJobRequest
 {

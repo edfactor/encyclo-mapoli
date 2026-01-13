@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.HostedServices;
+namespace Demoulas.ProfitSharing.Common.HostedServices;
 
 /// <summary>
 /// Configuration for the ProcessWatchdogService.

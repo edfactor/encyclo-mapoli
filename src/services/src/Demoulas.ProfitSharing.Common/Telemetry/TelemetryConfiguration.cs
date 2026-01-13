@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Telemetry;
+namespace Demoulas.ProfitSharing.Common.Telemetry;
 
 /// <summary>
 /// Configuration options for telemetry features

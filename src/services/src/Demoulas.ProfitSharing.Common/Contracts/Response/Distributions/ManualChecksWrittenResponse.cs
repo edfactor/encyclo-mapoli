@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 
 public sealed record ManualChecksWrittenResponse : DistributionsOnHoldResponse
 {

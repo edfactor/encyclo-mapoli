@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.Metrics;
+using System.Diagnostics.Metrics;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.Util.Extensions;

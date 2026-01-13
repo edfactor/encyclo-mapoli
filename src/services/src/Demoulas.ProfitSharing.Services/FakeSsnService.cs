@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;

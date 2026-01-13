@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Metrics;
+using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;

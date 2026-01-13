@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Resilience;

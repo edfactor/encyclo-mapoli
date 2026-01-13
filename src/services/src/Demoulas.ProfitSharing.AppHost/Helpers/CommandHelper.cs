@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.AppHost.Helpers;

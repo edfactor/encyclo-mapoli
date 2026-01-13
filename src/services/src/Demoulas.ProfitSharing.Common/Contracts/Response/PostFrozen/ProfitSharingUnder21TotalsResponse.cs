@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 

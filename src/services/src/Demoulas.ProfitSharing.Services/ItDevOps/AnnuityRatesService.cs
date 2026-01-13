@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;

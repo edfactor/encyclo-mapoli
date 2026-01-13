@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Demoulas.ProfitSharing.OracleHcm.HealthCheck;

@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 
 public record BeneficiaryTypeDto
 {

@@ -1,4 +1,5 @@
-﻿using Bogus;
+using Bogus;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
@@ -26,6 +27,40 @@ public sealed class PayProfitFaker : Faker<PayProfit>
 
             return currentDemographic;
         })
+        .FinishWith((f, o) =>
+        {
+            byte enrollmentId = f.PickRandom(
+                EnrollmentConstants.NotEnrolled,
+                EnrollmentConstants.OldVestingPlanHasContributions,
+                EnrollmentConstants.NewVestingPlanHasContributions,
+                EnrollmentConstants.OldVestingPlanHasForfeitureRecords,
+                EnrollmentConstants.NewVestingPlanHasForfeitureRecords,
+                EnrollmentConstants.Import_Status_Unknown);
+
+            switch (enrollmentId)
+            {
+                case EnrollmentConstants.OldVestingPlanHasContributions:
+                    currentDemographic.VestingScheduleId = VestingSchedule.Constants.OldPlan;
+                    currentDemographic.HasForfeited = false;
+                    break;
+                case EnrollmentConstants.NewVestingPlanHasContributions:
+                    currentDemographic.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+                    currentDemographic.HasForfeited = false;
+                    break;
+                case EnrollmentConstants.OldVestingPlanHasForfeitureRecords:
+                    currentDemographic.VestingScheduleId = VestingSchedule.Constants.OldPlan;
+                    currentDemographic.HasForfeited = true;
+                    break;
+                case EnrollmentConstants.NewVestingPlanHasForfeitureRecords:
+                    currentDemographic.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+                    currentDemographic.HasForfeited = true;
+                    break;
+                default:
+                    currentDemographic.VestingScheduleId = null;
+                    currentDemographic.HasForfeited = false;
+                    break;
+            }
+        })
         .RuleFor(pc => pc.DemographicId, (f, o) => currentDemographic.Id)
         .RuleFor(pc => pc.ProfitYear, (f, o) =>
         {
@@ -44,12 +79,6 @@ public sealed class PayProfitFaker : Faker<PayProfit>
         .RuleFor(pc => pc.WeeksWorkedYear, f => f.Random.Byte(min: 0, max: 53))
         .RuleFor(pc => pc.CurrentIncomeYear, f => f.Finance.Amount(min: 100, max: 1_200_000, decimals: 2))
         .RuleFor(pc => pc.Etva, f => f.Finance.Amount(min: 10, max: 2_000, decimals: 2))
-        .RuleFor(pc => pc.EnrollmentId, f => f.PickRandom(Enrollment.Constants.NotEnrolled,
-            Enrollment.Constants.OldVestingPlanHasContributions,
-            Enrollment.Constants.NewVestingPlanHasContributions,
-            Enrollment.Constants.OldVestingPlanHasForfeitureRecords,
-            Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
-            Enrollment.Constants.Import_Status_Unknown))
         .RuleFor(pc => pc.BeneficiaryTypeId, f => f.PickRandom(BeneficiaryType.Constants.Beneficiary,
             BeneficiaryType.Constants.Employee))
         .RuleFor(pc => pc.EmployeeTypeId, f => f.PickRandom(EmployeeType.Constants.NewLastYear,

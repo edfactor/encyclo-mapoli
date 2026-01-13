@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Quartz;

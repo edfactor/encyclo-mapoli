@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.HostedServices;
+using Demoulas.ProfitSharing.Common.HostedServices;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
