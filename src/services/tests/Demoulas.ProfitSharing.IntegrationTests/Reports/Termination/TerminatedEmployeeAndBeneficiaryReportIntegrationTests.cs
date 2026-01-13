@@ -1,15 +1,18 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 
+[SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBaseTest
 {
     public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
@@ -25,10 +28,10 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         DateOnly endDate = new(2024, 12, 31);
 
         // Set minimum level to Warning to avoid noisy logs during tests
-        ILoggerFactory _loggerFactory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning));
+        ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning));
 
         TerminatedEmployeeService mockService =
-            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory, CalendarService, YearEndService, TimeProvider);
+            new(DbFactory, TotalService, DemographicReaderService, loggerFactory, CalendarService, YearEndService, TimeProvider);
 
         TerminatedEmployeeAndBeneficiaryResponse data = await mockService.GetReportAsync(
             new FilterableStartAndEndDateRequest { SortBy = "Name", BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue },
@@ -42,7 +45,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         return actualText;
     }
-
+    
     [Fact]
     public async Task EnsureSmartReportMatchesReadyReport()
     {

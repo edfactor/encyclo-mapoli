@@ -248,7 +248,7 @@ GROUP BY pd.SSN";
  GROUP BY pd.SSN";
     }
 
-    private static string GetVestingRatioQuery(short profitYear, DateOnly asOfDate)
+    public static string GetVestingRatioQuery(short profitYear, DateOnly asOfDate)
     {
         var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
         var birthDate65 = asOfDate.AddYears(-65);

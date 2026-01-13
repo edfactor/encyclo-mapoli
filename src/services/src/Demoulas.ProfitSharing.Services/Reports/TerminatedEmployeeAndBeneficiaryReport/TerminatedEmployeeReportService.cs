@@ -42,7 +42,7 @@ public sealed class TerminatedEmployeeReportService
         ICalendarService calendarService,
         IYearEndService yearEndService,
         TimeProvider timeProvider
-       )
+    )
     {
         _factory = factory;
         _totalService = totalService;
@@ -319,7 +319,7 @@ public sealed class TerminatedEmployeeReportService
                 if (!hasForfeited && member.PsnSuffix == 0)
                 {
                     suggestedForfeit = member.EndingBalance - vestedBalance;
-                    
+
                     if (member.Evta > 0)
                     {
                         var conditional = member.EndingBalance - member.Evta;

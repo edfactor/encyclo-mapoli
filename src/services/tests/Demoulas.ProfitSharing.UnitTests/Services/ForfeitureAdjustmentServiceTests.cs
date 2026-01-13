@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
@@ -261,56 +262,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         var request = new ForfeitureAdjustmentUpdateRequest
         {
             BadgeNumber = _demographic1.BadgeNumber,
-            ProfitYear = 2025,
             ForfeitureAmount = 0m, // Invalid zero amount
-            ClassAction = false
-        };
-
-        // Act
-        var result = await service.UpdateForfeitureAdjustmentAsync(request, CancellationToken.None);
-
-        // Assert
-        result.IsError.ShouldBeTrue();
-        result.Error.ShouldNotBeNull();
-    }
-
-    [Fact]
-    [Description("PS-XXXX : Invalid profit year returns failure")]
-    public async Task UpdateForfeitureAdjustmentAsync_InvalidProfitYear_ReturnsFailure()
-    {
-        // Arrange
-        ScenarioDataContextFactory mockDbContextFactory = (ScenarioDataContextFactory)new ScenarioFactory
-        {
-            Demographics = [_demographic1]
-        }.BuildMocks();
-
-        var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
-        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new FrozenStateResponse
-            {
-                Id = 1,
-                ProfitYear = 2025,
-                IsActive = true,
-                AsOfDateTime = DateTimeOffset.UtcNow,
-                CreatedDateTime = DateTimeOffset.UtcNow
-            });
-
-        var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
-        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
-            .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
-
-        var service = new ForfeitureAdjustmentService(
-            mockDbContextFactory,
-            _totalService,
-            demographicReaderMock.Object,
-            TimeProvider.System
-        );
-
-        var request = new ForfeitureAdjustmentUpdateRequest
-        {
-            BadgeNumber = _demographic1.BadgeNumber,
-            ProfitYear = 1900, // Invalid year
-            ForfeitureAmount = 1000m,
             ClassAction = false
         };
 
@@ -357,7 +309,6 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         var request = new ForfeitureAdjustmentUpdateRequest
         {
             BadgeNumber = 999999, // Non-existent badge
-            ProfitYear = 2025,
             ForfeitureAmount = 1000m,
             ClassAction = false
         };
@@ -417,17 +368,20 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
+        // Forfeiture adjustment is always live (using wall clock year.)
+        var fixedTime = new DateTimeOffset(2025, 12, 15, 10, 30, 0, TimeSpan.Zero);
+        TimeProvider timeProvider = new FakeTimeProvider(fixedTime);
+
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
             _totalService,
             demographicReaderMock.Object,
-            TimeProvider.System
+            timeProvider
         );
 
         var request = new ForfeitureAdjustmentUpdateRequest
         {
             BadgeNumber = _demographic1.BadgeNumber,
-            ProfitYear = 2025,
             ForfeitureAmount = -1000m, // Un-forfeit (negative = un-forfeit)
             ClassAction = false,
             OffsettingProfitDetailId = forfeitureRecord.Id // Try to reverse this already-reversed record
@@ -490,7 +444,6 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         var request = new ForfeitureAdjustmentUpdateRequest
         {
             BadgeNumber = _demographic1.BadgeNumber,
-            ProfitYear = 2025,
             ForfeitureAmount = -1000m, // Un-forfeit (negative = un-forfeit)
             ClassAction = false,
             OffsettingProfitDetailId = forfeitureRecord.Id // This record has not been reversed
