@@ -120,11 +120,8 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             return Result<bool>.Failure(Error.ForfeitureAmountZero);
         }
 
-        // We can probably only do the wall clock year or the frozen year.
-        if (req.ProfitYear <= 0)
-        {
-            return Result<bool>.Failure(Error.InvalidProfitYear);
-        }
+        // We can only do the wall clock year
+        short profitYear = (short)_timeProvider.GetLocalYear();
 
         return await _dbContextFactory.UseWritableContext(async context =>
         {
@@ -137,7 +134,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     d.Ssn,
                     d.BadgeNumber,
                     d.StoreNumber,
-                    HasPayProfit = context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear)
+                    HasPayProfit = context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == profitYear)
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -181,7 +178,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
                 SearchBy.Ssn,
                 employeeData.Ssn,
-                req.ProfitYear,
+                profitYear,
                 cancellationToken);
 
             // If no vesting balance found, return failure
@@ -204,7 +201,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             var profitDetail = new ProfitDetail
             {
                 Ssn = employeeData.Ssn,
-                ProfitYear = req.ProfitYear,
+                ProfitYear = profitYear,
                 ProfitYearIteration = 0,
                 ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id, // Code 2 for forfeitures
                 Remark = remarkText,
@@ -220,12 +217,12 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             context.ProfitDetails.Add(profitDetail);
 
             var payProfit = await context.PayProfits.Include(p => p.Demographic)
-                .FirstOrDefaultAsync(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear, cancellationToken);
+                .FirstOrDefaultAsync(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == profitYear, cancellationToken);
 
             if (payProfit != null)
             {
                 // Get Calculated ETVA amount
-                var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, req.ProfitYear).Where(x => x.Ssn == payProfit.Demographic!.Ssn)
+                var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, profitYear).Where(x => x.Ssn == payProfit.Demographic!.Ssn)
                     .FirstOrDefaultAsync(cancellationToken);
 
                 // Default to zero if no totals found
@@ -243,18 +240,6 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 // The PY_PS_ETVA gets calculated then written and PY_PS_ENROLLED gets subtracted by two. So 3 becomes 1 and 4 becomes 2."
                 if (isForfeit)
                 {
-                    int wallClockYear = _timeProvider.GetLocalYear();
-                    if (req.ProfitYear <= wallClockYear - 2)
-                    {
-                        return Result<bool>.Failure(Error.Unexpected(
-                            $"Cannot update profit year {req.ProfitYear}. Only current year ({wallClockYear}) and previous year ({wallClockYear - 1}) are allowed."));
-                    }
-
-                    // Determine live year set - normally just current year, but includes previous year for special cases (YE)
-                    var liveYearSet = req.ProfitYear == wallClockYear - 1
-                        ? new[] { wallClockYear - 1, wallClockYear }
-                        : new[] { wallClockYear };
-
                     // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
                     byte newEnrollmentId = Enrollment.Constants.NotEnrolled;
                     if (payProfit.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions)
@@ -267,7 +252,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     }
 
                     await context.PayProfits
-                        .Where(pp => pp.DemographicId == employeeData.Id && liveYearSet.Contains(pp.ProfitYear))
+                        .Where(pp => pp.DemographicId == employeeData.Id && profitYear == pp.ProfitYear)
                         .ExecuteUpdateAsync(p => p
                                 .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
                                 .SetProperty(pp => pp.Etva, calculatedEtva) // Set recalculated ETVA
@@ -295,7 +280,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     }
 
                     await context.PayProfits
-                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
+                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == profitYear)
                         .ExecuteUpdateAsync(p => p
                                 .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
                                 .SetProperty(pp => pp.Etva, calculatedEtva) // Set recalculated ETVA
