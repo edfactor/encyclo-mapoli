@@ -18,6 +18,12 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
             .ValueGeneratedOnAdd()
             .HasColumnName("Id");
 
+        _ = builder.HasIndex(e => e.CheckRunWorkflowId, "IX_CHECK_RUN_WORKFLOW_ID");
+
+        _ = builder.Property(e => e.CheckRunWorkflowId)
+            .HasColumnName("CHECK_RUN_WORKFLOW_ID")
+            .HasColumnType("RAW(16)");
+
         _ = builder.HasIndex(e => new { e.CheckNumber, e.IsVoided }, "IX_CheckNumber_IsVoided");
 
         _ = builder.Property(e => e.CheckNumber)
@@ -119,5 +125,10 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
         _ = builder.HasOne(x => x.TaxCode)
             .WithMany()
             .HasForeignKey(t => t.TaxCodeId);
+
+        _ = builder.HasOne(x => x.CheckRunWorkflow)
+            .WithMany()
+            .HasForeignKey(x => x.CheckRunWorkflowId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

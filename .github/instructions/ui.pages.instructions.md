@@ -197,7 +197,8 @@ const MasterInquiry = () => {
 ```typescript
 const useMasterInquiry = () => {
   const [state, dispatch] = useReducer(masterInquiryReducer, initialState);
-  const [triggerSearch, { isLoading }] = useLazySearchProfitMasterInquiryQuery();
+  const [triggerSearch, { isLoading }] =
+    useLazySearchProfitMasterInquiryQuery();
   const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
   const { addAlert, clearAlerts } = useMissiveAlerts();
 
@@ -217,7 +218,7 @@ const useMasterInquiry = () => {
     searchResults: state.search.results,
     selectedMember: state.selection.selectedMember,
     executeSearch,
-    selectMember
+    selectMember,
     // ... other state/actions
   };
 };
@@ -402,17 +403,22 @@ import { DSMPaginatedGrid, ISortParams } from "smart-ui-library";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 
 const MyGrid: React.FC = () => {
-  const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
-    useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "badgeNumber",
-      initialSortDescending: false,
-      persistenceKey: GRID_KEYS.MY_GRID,
-      onPaginationChange: (pageNum, pageSz, sortParams) => {
-        // Trigger API call with pagination params
-        getData({ skip: pageNum * pageSz, take: pageSz, ...sortParams });
-      }
-    });
+  const {
+    pageNumber,
+    pageSize,
+    handlePageNumberChange,
+    handlePageSizeChange,
+    handleSortChange,
+  } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    persistenceKey: GRID_KEYS.MY_GRID,
+    onPaginationChange: (pageNum, pageSz, sortParams) => {
+      // Trigger API call with pagination params
+      getData({ skip: pageNum * pageSz, take: pageSz, ...sortParams });
+    },
+  });
 
   return (
     <DSMPaginatedGrid
@@ -421,19 +427,19 @@ const MyGrid: React.FC = () => {
       onSortChange={(update: ISortParams) => handleSortChange(update)}
       providedOptions={{
         rowData: data?.results || [],
-        columnDefs: columnDefs
+        columnDefs: columnDefs,
       }}
       pagination={{
         pageNumber,
         pageSize,
         sortParams: { sortBy: "badgeNumber", isSortDescending: false },
-        handlePageNumberChange,  // Pass directly - NO value - 1
+        handlePageNumberChange, // Pass directly - NO value - 1
         handlePageSizeChange,
-        handleSortChange
+        handleSortChange,
       }}
       heightConfig={{
         mode: "content-aware",
-        maxHeight: 600
+        maxHeight: 600,
       }}
       totalRecords={data?.total ?? 0}
       showPagination={!!data?.results?.length}
@@ -455,17 +461,35 @@ Use for small datasets that don't require pagination:
   maxHeight={300}
   providedOptions={{
     rowData: lookupData ?? [],
-    columnDefs: columnDefs
+    columnDefs: columnDefs,
   }}
 />
-
 ```
 
 **Grid Column Factory** (`utils/gridColumnFactory.ts`):
 
-- Provides factory functions for common column types
-- Ensures consistency across grids
-- Common factories: `createBadgeColumn`, `createNameColumn`, `createStoreColumn`, `createStateColumn`, `createZipColumn`, `createAddressColumn`
+**MANDATORY**: All grid column definitions MUST:
+
+1. **Be in separate `*Columns.tsx` files** (NEVER inline in component)
+2. **Use factory functions** from `gridColumnFactory.ts` for standard column types (dates, currency, yes/no, etc.)
+
+**Pattern**:
+
+```typescript
+// File: MyGridColumns.tsx
+export const GetMyGridColumns = (options) => [
+    createDateColumn({ field: "startDate", headerName: "Start Date" }),
+    createCurrencyColumn({ field: "amount", headerName: "Amount" }),
+    createYesOrNoColumn({ field: "isActive", headerName: "Active" }),
+    // Custom columns when factory doesn't apply
+    { field: "custom", headerName: "Custom", ... }
+];
+
+// File: MyComponent.tsx
+const columnDefs = useMemo(() => GetMyGridColumns({ ... }), [deps]);
+```
+
+**Available Factories**: `createBadgeColumn`, `createNameColumn`, `createStoreColumn`, `createStateColumn`, `createZipColumn`, `createAddressColumn`, `createDateColumn`, `createCurrencyColumn`, `createYesOrNoColumn`, `createHoursColumn`, `createPercentageColumn`, `createSSNColumn`, `createAgeColumn`, `createPhoneColumn`, `createPSNColumn`, `createTaxCodeColumn`, `createCityColumn`, `createCommentColumn`, `createStatusColumn`, `createCountColumn`, `createYearColumn`, `createPointsColumn`
 
 ---
 
@@ -580,8 +604,12 @@ Complex state or state shared across pages stored in Redux slices.
 
 ```typescript
 // Reading from Redux
-const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
-const currentMember = useSelector((state: RootState) => state.distribution.currentMember);
+const { profitSharingEdit, profitSharingUpdate } = useSelector(
+  (state: RootState) => state.yearsEnd
+);
+const currentMember = useSelector(
+  (state: RootState) => state.distribution.currentMember
+);
 
 // Dispatching actions
 const dispatch = useDispatch();
@@ -603,7 +631,8 @@ Server data automatically cached by RTK Query.
 
 ```typescript
 // Lazy query (manual trigger)
-const [triggerSearch, { data, isFetching, error }] = useLazySearchDistributionsQuery();
+const [triggerSearch, { data, isFetching, error }] =
+  useLazySearchDistributionsQuery();
 
 // Trigger
 await triggerSearch({ badgeNumber: 12345 });
@@ -636,7 +665,7 @@ const masterInquiryReducer = (state: State, action: Action): State => {
     case "SEARCH_SUCCESS":
       return {
         ...state,
-        search: { results: action.payload, isLoading: false }
+        search: { results: action.payload, isLoading: false },
       };
     case "SELECT_MEMBER":
       return { ...state, selection: { selectedMember: action.payload } };
@@ -718,7 +747,7 @@ const selectMember = useCallback(async (member: Member) => {
   // Second fetch: profit data (depends on member details)
   const profitData = await triggerProfitDetails({
     id: member.id,
-    memberType: member.memberType
+    memberType: member.memberType,
   }).unwrap();
   dispatch({ type: "PROFIT_DATA_SUCCESS", payload: profitData });
 }, []);
@@ -732,7 +761,11 @@ const selectMember = useCallback(async (member: Member) => {
 
 ```typescript
 useEffect(() => {
-  Promise.all([triggerStates().unwrap(), triggerTaxCodes().unwrap(), triggerMissives().unwrap()]);
+  Promise.all([
+    triggerStates().unwrap(),
+    triggerTaxCodes().unwrap(),
+    triggerMissives().unwrap(),
+  ]);
 }, []);
 ```
 
@@ -763,7 +796,7 @@ const fetchData = useCallback(
         pageNumber: page + 1, // API expects 1-based
         pageSize: size,
         sortBy: sort ?? sortBy,
-        isSortDescending: desc ?? isSortDescending
+        isSortDescending: desc ?? isSortDescending,
       },
       false
     );
@@ -821,13 +854,13 @@ const Grid: React.FC<GridProps> = ({
         pageNumber,
         pageSize,
         sortParams: { sortBy: "Created", isSortDescending: true },
-        handlePageNumberChange,  // Pass directly - NO value - 1
+        handlePageNumberChange, // Pass directly - NO value - 1
         handlePageSizeChange,
-        handleSortChange
+        handleSortChange,
       }}
       heightConfig={{
         mode: "content-aware",
-        maxHeight: 600
+        maxHeight: 600,
       }}
       totalRecords={data?.total ?? 0}
       showPagination={!!data?.results?.length}
@@ -848,11 +881,16 @@ getData: builder.query<
     isSortDescending?: boolean;
   }
 >({
-  query: ({ pageNumber = 1, pageSize = 10, sortBy = "Created", isSortDescending = true }) => ({
+  query: ({
+    pageNumber = 1,
+    pageSize = 10,
+    sortBy = "Created",
+    isSortDescending = true,
+  }) => ({
     url: "my-endpoint",
     method: "GET",
-    params: { pageNumber, pageSize, sortBy, isSortDescending }
-  })
+    params: { pageNumber, pageSize, sortBy, isSortDescending },
+  }),
 });
 ```
 

@@ -1,7 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.CheckRun;
-using Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
-using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -11,29 +9,25 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.CheckRun;
 
 /// <summary>
 /// Endpoint to start a new profit sharing check run.
-/// Orchestrates: workflow creation → file generation (MICR, DJDE, PositivePay) → FTP transfer → audit logging → status update.
+/// Generates a printer-ready file for explicit distribution ids.
 /// </summary>
-public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartRequest, Results<Ok<CheckRunWorkflowResponse>, NotFound, ProblemHttpResult>>
+public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartRequest, string>
 {
-    private readonly ICheckRunWorkflowService _workflowService;
-    private readonly ICheckRunOrchestrator _orchestrator;
+    private readonly ICheckRunPrintFileService _printFileService;
     private readonly ILogger<CheckRunStartEndpoint> _logger;
 
     public CheckRunStartEndpoint(
-        ICheckRunWorkflowService workflowService,
-        ICheckRunOrchestrator orchestrator,
+        ICheckRunPrintFileService printFileService,
         ILogger<CheckRunStartEndpoint> logger)
         : base(Navigation.Constants.CheckRun)
     {
-        _workflowService = workflowService;
-        _orchestrator = orchestrator;
+        _printFileService = printFileService;
         _logger = logger;
     }
 
@@ -43,104 +37,84 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
         Summary(s =>
         {
             s.Summary = "Start a new profit sharing check run";
-            s.Description = "Initiates complete check run workflow: creates workflow record, generates files (MICR, DJDE, PositivePay), transfers via FTP, logs operations, updates workflow status.";
+            s.Description = "Generates a printer-ready file for the specified DistributionIds (Xerox DJDE or standard output).";
             s.ExampleRequest = CheckRunStartRequest.RequestExample();
-            s.ResponseExamples = new Dictionary<int, object>
-            {
-                { 200, CheckRunWorkflowResponse.ResponseExample() }
-            };
             s.Responses[400] = "Bad Request. Invalid input parameters or validation errors.";
             s.Responses[500] = "Internal Server Error. Workflow execution failed.";
         });
         Group<CheckRunGroup>();
     }
 
-    public override Task<Results<Ok<CheckRunWorkflowResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
-        CheckRunStartRequest req,
-        CancellationToken ct)
+    public override async Task HandleAsync(CheckRunStartRequest req, CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
         {
-            // Step 1: Start new workflow (creates workflow record in Pending state)
-            var workflowResult = await _workflowService.StartNewRunAsync(
-                req.ProfitYear,
-                req.CheckRunDate,
-                req.CheckNumber,
-                req.UserName,
-                ct);
-            if (!workflowResult.IsSuccess)
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _printFileService.GenerateAsync(req, ct);
+
+            if (!result.IsSuccess)
             {
-                _logger.LogError("Failed to start new check run workflow: {Error} (correlation: {CorrelationId})",
-                    workflowResult.Error, HttpContext.TraceIdentifier);
-                return workflowResult.ToHttpResult(Error.Unexpected("Failed to start workflow"));
-            }
-
-            var runId = workflowResult.Value!.Id;
-            _logger.LogInformation("Check run workflow started with runId: {RunId} (correlation: {CorrelationId})",
-                runId, HttpContext.TraceIdentifier);
-
-            try
-            {
-                // Step 2: Execute complete check run orchestration (file generation + transfer)
-                var orchestrationResult = await _orchestrator.ExecuteCheckRunAsync(
-                    req.ProfitYear,
-                    req.CheckNumber.ToString(),
-                    req.UserName,
-                    runId,
-                    ct);
-
-                if (!orchestrationResult.IsSuccess)
+                if (result.Error?.ValidationErrors?.Count > 0)
                 {
-                    _logger.LogError("Check run orchestration failed for runId {RunId}: {Error} (correlation: {CorrelationId})",
-                        runId, orchestrationResult.Error, HttpContext.TraceIdentifier);
+                    foreach (var error in result.Error.ValidationErrors)
+                    {
+                        foreach (var message in error.Value)
+                        {
+                            AddError(error.Key, message);
+                        }
+                    }
 
-                    // Step 3a: Record failure in workflow
-                    await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserName, ct);
-
-                    return TypedResults.Problem(orchestrationResult.Error!.Description, statusCode: 500);
+                    ThrowError(result.Error.Description, 400);
+                    return;
                 }
 
-                // Step 3b: Record success in workflow
-                await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserName, ct);
-
-                // Step 4: Get updated workflow status
-                var finalWorkflowResult = await _workflowService.GetCurrentRunAsync(req.ProfitYear, ct);
-
-                // Record business metrics
-                EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                    new("operation", "check-run-start"),
-                    new("endpoint", nameof(CheckRunStartEndpoint)),
-                    new("profit_year", req.ProfitYear.ToString()),
-                    new("success", "true"));
-
-                _logger.LogInformation(
-                    "Check run completed successfully for profit year {ProfitYear}, runId: {RunId}, check number: {CheckNumber} (correlation: {CorrelationId})",
-                    req.ProfitYear, runId, req.CheckNumber, HttpContext.TraceIdentifier);
-
-                return finalWorkflowResult.IsSuccess
-                    ? TypedResults.Ok(finalWorkflowResult.Value!)
-                    : TypedResults.Problem(finalWorkflowResult.Error!.Description);
+                AddError("CheckRun", result.Error?.Description ?? "Failed to generate check run file.");
+                ThrowError(result.Error?.Description ?? "Failed to generate check run file.", 500);
+                return;
             }
-#pragma warning disable S2139 // Exception is logged with full context before rethrowing
-            catch (Exception ex)
-            {
-                _logger.LogError(ex,
-                    "Unexpected error during check run execution for runId {RunId}, profit year {ProfitYear} (correlation: {CorrelationId})",
-                    runId, req.ProfitYear, HttpContext.TraceIdentifier);
 
-                // Record failure in workflow
-                await _workflowService.RecordStepCompletionAsync(runId, stepNumber: 1, req.UserName, ct);
+            var response = result.Value!;
+            var memoryStream = new MemoryStream();
+            await using var writer = new StreamWriter(memoryStream);
+            await writer.WriteAsync(response.Content);
+            await writer.FlushAsync(ct);
+            memoryStream.Position = 0;
 
-                // Record business metrics (failure)
-                EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                    new("operation", "check-run-start"),
-                    new("endpoint", nameof(CheckRunStartEndpoint)),
-                    new("profit_year", req.ProfitYear.ToString()),
-                    new("success", "false"));
+            var fileSize = memoryStream.Length;
 
-                throw;
-            }
-#pragma warning restore S2139
-        });
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "check-run-print-file"),
+                new("endpoint", nameof(CheckRunStartEndpoint)),
+                new("profit_year", req.ProfitYear.ToString()),
+                new("printer_type", req.PrinterType.ToString()));
+
+            EndpointTelemetry.RequestSizeBytes.Record(fileSize,
+                new("direction", "response"),
+                new("endpoint.category", "check-run"));
+
+            _logger.LogInformation(
+                "Generated check run print file. ProfitYear={ProfitYear} RunId={RunId} CheckCount={CheckCount} FileName={FileName} FileSize={FileSize} (correlation: {CorrelationId})",
+                req.ProfitYear,
+                response.RunId,
+                response.CheckCount,
+                response.FileName,
+                fileSize,
+                HttpContext.TraceIdentifier);
+
+            System.Net.Mime.ContentDisposition cd = new() { FileName = response.FileName, Inline = false };
+            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
+
+            await Send.StreamAsync(memoryStream, response.FileName, contentType: response.ContentType, cancellation: ct);
+
+            this.RecordResponseMetrics(HttpContext, _logger, new { FileSize = fileSize, response.FileName }, isSuccess: true);
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 }

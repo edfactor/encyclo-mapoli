@@ -70,6 +70,13 @@ public sealed record Error
     // File transfer errors
     public static Error FileTransferFailed => new(133, "File transfer operation failed");
 
+    // Bank management errors
+    public static Error BankNotFound => new(134, "Bank not found");
+    public static Error BankAccountNotFound => new(135, "Bank account not found");
+    public static Error MultiplePrimaryAccountsNotAllowed => new(136, "Only one primary account allowed per bank");
+    public static Error NoPrimaryAccountExists => new(137, "No primary account exists for this bank");
+    public static Error CannotDisablePrimaryAccount => new(138, "Cannot disable the primary account. Set another account as primary first");
+
     // Unexpected error wrapper (message captured). Prefer logging full exception separately.
     public static Error Unexpected(string message) => new(900, message);
 

@@ -1,9 +1,14 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities.CheckRun;
+
+namespace Demoulas.ProfitSharing.Data.Entities;
 
 public class ProfitShareCheck
 {
     public int Id { get; set; }
     public int CheckNumber { get; set; }
+
+    public Guid? CheckRunWorkflowId { get; set; }
+    public CheckRunWorkflow? CheckRunWorkflow { get; set; }
 
 
     public int Ssn { get; set; }

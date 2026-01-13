@@ -33,7 +33,7 @@
     <PackageVersion Include="NSwag.AspNetCore" Version="14.6.3" />
     <PackageVersion Include="NSwag.Generation.AspNetCore" Version="14.6.3" />
     <PackageVersion Include="NSwag.MSBuild" Version="14.6.3" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.11.10" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.12.5" />
     <!-- ========================================== -->
     <!-- Entity Framework Core & Oracle             -->
     <!-- ========================================== -->
@@ -42,7 +42,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.1" />
-    <PackageVersion Include="EFCore.NamingConventions" Version="10.0.0-rc.2" />
+    <PackageVersion Include="EFCore.NamingConventions" Version="10.0.0" />
     <PackageVersion Include="ErikEJ.EntityFrameworkCore.DgmlBuilder" Version="6.0.0" />
     <PackageVersion Include="Oracle.EntityFrameworkCore" Version="10.23.26000" />
     <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.26.0" />
@@ -131,7 +131,7 @@
     <!-- ========================================== -->
     <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.1" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.1.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.3.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2" />
     <!-- ========================================== -->
     <!-- Testing - Additional Tools                 -->
@@ -166,7 +166,7 @@
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
     <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.15.0" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.17.0.131074" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.18.0.131500" />
     <!-- ========================================== -->
     <!-- Build & Tooling                            -->
     <!-- ========================================== -->
