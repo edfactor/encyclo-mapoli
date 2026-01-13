@@ -23,10 +23,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("BANK_ACCOUNT_SEQ")
+                .HasMin(1L);
+
+            modelBuilder.HasSequence<int>("BANK_SEQ")
+                .HasMin(1L);
+
             modelBuilder.HasSequence<int>("FAKE_SSN_SEQ")
                 .StartsAt(666000000L)
                 .HasMin(666000000L)
                 .HasMax(666999999L);
+
+            modelBuilder.HasSequence<int>("PROFIT_SHARE_CHECK_NUMBER_SEQ")
+                .HasMin(1L);
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.AnnuityRate", b =>
                 {
@@ -402,6 +411,285 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IDX_REPORT_CHECKSUM_LOOKUP");
 
                     b.ToTable("REPORT_CHECKSUM", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Bank", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID")
+                        .HasDefaultValueSql("BANK_SEQ.NEXTVAL");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("CITY");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("CREATEDBY");
+
+                    b.Property<DateTime?>("FedAchChangeDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FEDACH_CHANGE_DATE");
+
+                    b.Property<string>("FedwireLocation")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("FEDWIRE_LOCATION");
+
+                    b.Property<DateTime?>("FedwireRevisionDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FEDWIRE_REVISION_DATE");
+
+                    b.Property<string>("FedwireTelegraphicName")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("FEDWIRE_TELEGRAPHIC_NAME");
+
+                    b.Property<bool>("IsDisabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IS_DISABLED");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("MODIFIEDBY");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("NAME");
+
+                    b.Property<string>("OfficeType")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("OFFICE_TYPE");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
+                        .HasColumnName("PHONE");
+
+                    b.Property<string>("RoutingNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("ROUTING_NUMBER");
+
+                    b.Property<string>("ServicingFedAddress")
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("SERVICING_FED_ADDRESS");
+
+                    b.Property<string>("ServicingFedRoutingNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("SERVICING_FED_ROUTING_NUMBER");
+
+                    b.Property<string>("State")
+                        .HasMaxLength(2)
+                        .HasColumnType("NVARCHAR2(2)")
+                        .HasColumnName("STATE");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
+                        .HasColumnName("STATUS");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.HasKey("Id")
+                        .HasName("PK_BANK");
+
+                    b.HasIndex("IsDisabled")
+                        .HasDatabaseName("IX_BANK_IS_DISABLED");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_BANK_NAME");
+
+                    b.HasIndex("RoutingNumber")
+                        .HasDatabaseName("IX_BANK_ROUTING_NUMBER");
+
+                    b.ToTable("BANK", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            City = "Lake Success",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 12, 19, 23, 7, 777, DateTimeKind.Unspecified).AddTicks(306), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = "SYSTEM",
+                            FedAchChangeDate = new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FedwireLocation = "Miami, FL",
+                            FedwireRevisionDate = new DateTime(2023, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FedwireTelegraphicName = "NEWTEK BANK, NA",
+                            IsDisabled = false,
+                            Name = "Newtek Bank, NA",
+                            OfficeType = "Main Office",
+                            Phone = "516-254-7586",
+                            RoutingNumber = "026004297",
+                            ServicingFedAddress = "100 Orchard Street, East Rutherford, NJ",
+                            ServicingFedRoutingNumber = "021001208",
+                            State = "NY",
+                            Status = "Active"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BankAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID")
+                        .HasDefaultValueSql("BANK_ACCOUNT_SEQ.NEXTVAL");
+
+                    b.Property<string>("AccountName")
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("ACCOUNT_NAME");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(34)
+                        .HasColumnType("NVARCHAR2(34)")
+                        .HasColumnName("ACCOUNT_NUMBER");
+
+                    b.Property<int>("BankId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("BANK_ID");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("CREATEDBY");
+
+                    b.Property<DateTime?>("DiscontinuedDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("DISCONTINUED_DATE");
+
+                    b.Property<DateTime?>("EffectiveDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("EFFECTIVE_DATE");
+
+                    b.Property<DateTime?>("FedAchChangeDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FED_ACH_CHANGE_DATE");
+
+                    b.Property<string>("FedwireLocation")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("FEDWIRE_LOCATION");
+
+                    b.Property<DateTime?>("FedwireRevisionDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("FEDWIRE_REVISION_DATE");
+
+                    b.Property<string>("FedwireTelegraphicName")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("FEDWIRE_TELEGRAPHIC_NAME");
+
+                    b.Property<bool>("IsDisabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IS_DISABLED");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IS_PRIMARY");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("MODIFIEDBY");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("NVARCHAR2(1000)")
+                        .HasColumnName("NOTES");
+
+                    b.Property<string>("RoutingNumber")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("ROUTING_NUMBER");
+
+                    b.Property<string>("ServicingFedAddress")
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)")
+                        .HasColumnName("SERVICING_FED_ADDRESS");
+
+                    b.Property<string>("ServicingFedRoutingNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
+                        .HasColumnName("SERVICING_FED_ROUTING_NUMBER");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.HasKey("Id")
+                        .HasName("PK_BANK_ACCOUNT");
+
+                    b.HasIndex("BankId")
+                        .HasDatabaseName("IX_BANK_ACCOUNT_BANK_ID");
+
+                    b.HasIndex("IsDisabled")
+                        .HasDatabaseName("IX_BANK_ACCOUNT_IS_DISABLED");
+
+                    b.HasIndex("RoutingNumber")
+                        .HasDatabaseName("IX_BANK_ACCOUNT_ROUTING_NUMBER");
+
+                    b.HasIndex("BankId", "IsPrimary")
+                        .HasDatabaseName("IX_BANK_ACCOUNT_BANK_PRIMARY");
+
+                    b.ToTable("BANK_ACCOUNT", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AccountName = "Profit Sharing Distribution Account",
+                            AccountNumber = "PLACEHOLDER",
+                            BankId = 1,
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 12, 19, 23, 7, 782, DateTimeKind.Unspecified).AddTicks(9075), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = "SYSTEM",
+                            IsDisabled = false,
+                            IsPrimary = true,
+                            RoutingNumber = "026004297"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
@@ -5360,6 +5648,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("CHECK_RUN_DATE");
 
+                    b.Property<Guid?>("CheckRunWorkflowId")
+                        .HasColumnType("RAW(16)")
+                        .HasColumnName("CHECK_RUN_WORKFLOW_ID");
+
                     b.Property<DateTime?>("ClearDate")
                         .HasColumnType("DATE")
                         .HasColumnName("CLEAR_DATE");
@@ -5441,6 +5733,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("TaxCodeId")
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_TAXCODEID");
+
+                    b.HasIndex(new[] { "CheckRunWorkflowId" }, "IX_CHECK_RUN_WORKFLOW_ID")
+                        .HasDatabaseName("IX_PROFIT_SHARE_CHECK_CHECKRUNWORKFLOWID");
 
                     b.HasIndex(new[] { "CheckNumber", "IsVoided" }, "IX_CheckNumber_IsVoided")
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_CHECKNUMBER_ISVOIDED");
@@ -6980,6 +7275,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BankAccount", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Bank", "Bank")
+                        .WithMany("Accounts")
+                        .HasForeignKey("BankId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_BANK_ACCOUNT_BANK_BANKID");
+
+                    b.Navigation("Bank");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", "Contact")
@@ -7780,6 +8087,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ProfitShareCheck", b =>
                 {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.CheckRun.CheckRunWorkflow", "CheckRunWorkflow")
+                        .WithMany()
+                        .HasForeignKey("CheckRunWorkflowId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_PROFIT_SHARE_CHECK_CHECK_RUN_WORKFLOW_CHECKRUNWORKFLOWID");
+
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", null)
                         .WithMany("Checks")
                         .HasForeignKey("DemographicId")
@@ -7793,6 +8106,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_PROFIT_SHARE_CHECK_TAXCODES_TAXCODEID");
+
+                    b.Navigation("CheckRunWorkflow");
 
                     b.Navigation("TaxCode");
                 });
@@ -7859,6 +8174,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_NAVIGATION_ASSIGNED_ROLES_NAVIGATIONROLES_REQUIREDROLESID");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Bank", b =>
+                {
+                    b.Navigation("Accounts");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", b =>

@@ -112,6 +112,7 @@ const ManageStateTaxes = lazy(() => import("../../pages/Administration/ManageSta
 const ManageAnnuityRates = lazy(() => import("../../pages/Administration/ManageAnnuityRates/ManageAnnuityRates"));
 const ManageRmdFactors = lazy(() => import("../../pages/Administration/ManageRmdFactors/ManageRmdFactors"));
 const ManageCommentTypes = lazy(() => import("../../pages/Administration/ManageCommentTypes/ManageCommentTypes"));
+const ManageBanks = lazy(() => import("../../pages/Administration/ManageBanks/ManageBanks"));
 const ProfitSharingAdjustments = lazy(
   () => import("../../pages/Administration/ProfitSharingAdjustments/ProfitSharingAdjustments")
 );
@@ -649,6 +650,17 @@ export function createRoutes(store: AppStore): RouteObject[] {
               requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
               <Suspense fallback={<PageLoadingFallback />}>
                 <ManageCommentTypes />
+              </Suspense>
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: ROUTES.MANAGE_BANKS,
+          element: (
+            <ProtectedRoute
+              requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <ManageBanks />
               </Suspense>
             </ProtectedRoute>
           )
