@@ -183,7 +183,6 @@ const BeneficiaryInquiryContent = () => {
         {hasSelectedMember && selectedMember && (
           <IndividualBeneficiaryView
             selectedMember={selectedMember}
-            memberType={memberType}
             memberDetails={memberDetails}
             isFetchingMemberDetails={isFetchingMemberDetails}
             profitYear={profitYear}

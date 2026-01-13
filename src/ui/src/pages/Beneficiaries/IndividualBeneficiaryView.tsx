@@ -2,6 +2,8 @@ import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiaryDto } from "
 import { Button } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
+import { BENEFICIARY_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import type { EmployeeDetails } from "../../types/employee/employee";
 import MasterInquiryMemberDetails from "../InquiriesAndAdjustments/MasterInquiry/MasterInquiryMemberDetails";
 import BeneficiaryRelationshipsGrids from "./BeneficiaryRelationshipsGrids";
@@ -9,7 +11,6 @@ import CreateBeneficiaryDialog from "./CreateBeneficiaryDialog";
 
 interface IndividualBeneficiaryViewProps {
   selectedMember: BeneficiaryDetail;
-  memberType: number | undefined;
   memberDetails: EmployeeDetails | null;
   isFetchingMemberDetails: boolean;
   profitYear: number;
@@ -29,6 +30,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
   const [change, setChange] = useState<number>(0);
   const [existingBeneficiaries, setExistingBeneficiaries] = useState<BeneficiaryDto[]>([]);
   const [triggerBeneficiaryDetail] = useLazyGetBeneficiaryDetailQuery();
+  const { addAlert } = useMissiveAlerts();
 
   // Calculate memberType based on psnSuffix: 0 = employee (type 1), else beneficiary (type 2)
   const calculatedMemberType = selectedMember.psnSuffix === 0 ? 1 : 2;
@@ -73,6 +75,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
         })
         .catch((error) => {
           console.error("Failed to fetch beneficiary details:", error);
+          addAlert(BENEFICIARY_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
         });
     },
     [triggerBeneficiaryDetail, onBeneficiarySelect]
