@@ -30,6 +30,7 @@ public class FrozenService : IFrozenService
     private readonly IServiceProvider _serviceProvider;
     private readonly IDistributedCache _distributedCache;
     private readonly INavigationService _navigationService;
+    private readonly TimeProvider _timeProvider;
     private readonly ILogger<FrozenService>? _logger;
 
     // Cache key pattern for frozen demographics endpoint - matches FastEndpoints output cache
@@ -40,6 +41,7 @@ public class FrozenService : IFrozenService
         IServiceProvider serviceProvider,
         IDistributedCache distributedCache,
         INavigationService navigationService,
+        TimeProvider timeProvider,
         ILogger<FrozenService>? logger = null)
     {
         _dataContextFactory = dataContextFactory;
@@ -47,6 +49,7 @@ public class FrozenService : IFrozenService
         _serviceProvider = serviceProvider;
         _distributedCache = distributedCache;
         _navigationService = navigationService;
+        _timeProvider = timeProvider;
         _logger = logger;
     }
 
@@ -250,7 +253,7 @@ public class FrozenService : IFrozenService
             return frozen ?? new FrozenStateResponse
             {
                 Id = 0,
-                ProfitYear = (short)DateTime.Today.Year,
+                ProfitYear = (short)_timeProvider.GetLocalNow().Year,
                 CreatedDateTime = ReferenceData.DsmMinValue.ToDateTime(TimeOnly.MinValue),
                 AsOfDateTime = DateTimeOffset.UtcNow,
                 IsActive = false
