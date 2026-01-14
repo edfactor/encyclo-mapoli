@@ -1,5 +1,6 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -156,7 +157,6 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             var memberData = await demographics
                 .Include(d => d.PayProfits)
-                .ThenInclude(pp => pp.Enrollment)
                 .Include(d => d.Department)
                 .Include(d => d.TerminationCode)
                 .Include(d => d.PayClassification)
@@ -191,6 +191,26 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     Gender = d.Gender != null ? d.Gender.Name : "N/A",
                     PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
 
+                    EnrollmentId = d.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : d.HasForfeited
+                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions,
+
+                    Enrollment = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : d.HasForfeited
+                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions),
+
                     CurrentPayProfit = d.PayProfits
                         .Select(x =>
                             new
@@ -198,8 +218,6 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                                 x.ProfitYear,
                                 x.CurrentHoursYear,
                                 x.Etva,
-                                x.EnrollmentId,
-                                x.Enrollment
                             })
                         .FirstOrDefault(x => x.ProfitYear == currentYear),
                     PreviousPayProfit = d.PayProfits
@@ -209,8 +227,6 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                                 x.ProfitYear,
                                 x.CurrentHoursYear,
                                 x.Etva,
-                                x.EnrollmentId,
-                                x.Enrollment,
                                 x.PsCertificateIssuedDate
                             })
                         .FirstOrDefault(x => x.ProfitYear == previousYear)
@@ -272,8 +288,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 FullTimeDate = memberData.FullTimeDate,
                 TerminationDate = memberData.TerminationDate,
                 StoreNumber = memberData.StoreNumber,
-                EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
-                Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
+                EnrollmentId = memberData.EnrollmentId,
+                Enrollment = memberData.Enrollment,
                 BadgeNumber = memberData.BadgeNumber,
                 PayFrequencyId = memberData.PayFrequencyId,
                 IsExecutive = memberData.IsExecutive,
@@ -352,6 +368,24 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
                     Gender = d.Gender != null ? d.Gender.Name : "N/A",
                     PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
+                    EnrollmentId = d.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : d.HasForfeited
+                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions,
+                    Enrollment = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : d.HasForfeited
+                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions),
                     // Optimize PayProfit queries - only fetch what we need for current/previous years
                     CurrentPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == currentYear)
@@ -359,9 +393,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                         {
                             x.ProfitYear,
                             x.CurrentHoursYear,
-                            x.Etva,
-                            x.EnrollmentId,
-                            Name = x.Enrollment != null ? x.Enrollment.Name : null
+                            x.Etva
                         }).FirstOrDefault(),
                     PreviousPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == previousYear)
@@ -370,8 +402,6 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                             x.ProfitYear,
                             x.CurrentHoursYear,
                             x.Etva,
-                            x.EnrollmentId,
-                            Name = x.Enrollment != null ? x.Enrollment.Name : null,
                             x.PsCertificateIssuedDate
                         }).FirstOrDefault()
                 })
@@ -433,8 +463,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     FullTimeDate = memberData.FullTimeDate,
                     TerminationDate = memberData.TerminationDate,
                     StoreNumber = memberData.StoreNumber,
-                    EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
-                    Enrollment = memberData.CurrentPayProfit?.Name,
+                    EnrollmentId = memberData.EnrollmentId,
+                    Enrollment = memberData.Enrollment,
                     BadgeNumber = memberData.BadgeNumber,
                     PayFrequencyId = memberData.PayFrequencyId,
                     CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
@@ -508,15 +538,31 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
                     Gender = d.Gender != null ? d.Gender.Name : "N/A",
                     PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
+                    EnrollmentId = d.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : d.HasForfeited
+                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions,
+                    Enrollment = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : d.HasForfeited
+                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions),
                     // Optimize PayProfit queries
                     CurrentPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == currentYear)
                         .Select(x => new
                         {
                             x.CurrentHoursYear,
-                            x.Etva,
-                            x.EnrollmentId,
-                            Name = x.Enrollment != null ? x.Enrollment.Name : null
+                            x.Etva
                         }).FirstOrDefault(),
                     PreviousPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == previousYear)
@@ -583,8 +629,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     FullTimeDate = memberData.FullTimeDate,
                     TerminationDate = memberData.TerminationDate,
                     StoreNumber = memberData.StoreNumber,
-                    EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
-                    Enrollment = memberData.CurrentPayProfit?.Name,
+                    EnrollmentId = memberData.EnrollmentId,
+                    Enrollment = memberData.Enrollment,
                     BadgeNumber = memberData.BadgeNumber,
                     PayFrequencyId = memberData.PayFrequencyId,
                     CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,

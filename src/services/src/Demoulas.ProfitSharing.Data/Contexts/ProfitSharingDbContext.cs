@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Data.Contexts.Contexts;
+using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
@@ -84,6 +84,9 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
 
     public virtual DbSet<HealthCheckStatusHistory> HealthCheckStatusHistories { get; set; }
     public virtual DbSet<RmdsFactorByAge> RmdsFactorsByAge { get; set; }
+
+    public virtual DbSet<VestingSchedule> VestingSchedules { get; set; }
+    public virtual DbSet<VestingScheduleDetail> VestingScheduleDetails { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

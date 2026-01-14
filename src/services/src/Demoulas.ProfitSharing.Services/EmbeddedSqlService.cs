@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
@@ -255,6 +255,9 @@ GROUP BY pd.SSN";
         var yearsOfCreditQuery = GetYearsOfServiceQuery(profitYear, asOfDate);
         var initialContributionYearQuery = GetInitialContributionYearQuery();
 
+        // PS-2464: Replaced 11-level nested CASE with JOIN to VESTING_SCHEDULE_DETAIL
+        // Uses ENROLLMENT.VESTING_SCHEDULE_ID to lookup vesting percentage from database tables
+        // Maintains exact business logic: beneficiaries 100%, age 65+ 100%, deceased 100%, forfeitures 100%, then vesting table
         var query = @$"
 SELECT m.SSN,
        m.DEMOGRAPHIC_ID,
@@ -266,18 +269,22 @@ SELECT m.SSN,
         AND m.initial_contr_year < {initialContributionFiveYearsAgo}
         AND m.date_of_birth < TO_DATE('{birthDate65.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')
         THEN 1 ELSE              
-  CASE WHEN m.ENROLLMENT_ID  IN (3, 4) THEN 1 ELSE --Otherwise, If enrollment has forfeitures, 100%
+  CASE WHEN m.HAS_FORFEITED = 1 THEN 1 ELSE --Otherwise, If employee has forfeiture records, 100%
   CASE WHEN m.IS_EMPLOYEE = 1 AND m.TERMINATION_CODE_ID = 'Z' AND TERMINATION_DATE<  TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')  THEN 1 ELSE --Otherwise, If deceased, mark for 100% vested
   CASE WHEN m.ZERO_CONTRIBUTION_REASON_ID = 6 THEN 1 ELSE --Otherwise, If zero contribution reason is 65 or over, first contribution more than 5 years ago, 100% vested
-  CASE WHEN m.YEARS_OF_SERVICE < 3 THEN 0 ELSE --Otherwise, If total years (including the present one) is 0, 1, or 2, 0% Vested
-  CASE WHEN m.YEARS_OF_SERVICE = 3 THEN .2 ELSE --Otherwise, If total years (including the present one) is 3, 20% Vested
-  CASE WHEN m.YEARS_OF_SERVICE = 4 THEN .4 ELSE --Otherwise, If total years (including the present one) is 4, 40% Vested
-  CASE WHEN m.YEARS_OF_SERVICE = 5 THEN .6 ELSE --Otherwise, If total years (including the present one) is 5, 60% Vested
-  CASE WHEN m.YEARS_OF_SERVICE = 6 THEN .8 ELSE --Otherwise, If total years (including the present one) is 6, 80% Vested
-  CASE WHEN m.YEARS_OF_SERVICE > 6 THEN 1 ELSE --Otherwise, If total years (including the present one) is more than 6, 100% Vested
-  0 END END END END END END END END END END END AS RATIO
+  -- PS-2464: Database-driven vesting lookup replaces hardcoded CASE ladder
+  NVL(m.VESTING_PERCENT, 0) / 100
+  END END END END END AS RATIO
 FROM (
-    SELECT d.ID AS DEMOGRAPHIC_ID, NULL AS BENEFICIARY_CONTACT_ID, d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.ENROLLMENT_ID, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, INITIAL_CONTR_YEAR, yos.YEARS + CASE WHEN pp.ENROLLMENT_ID = 2 THEN 1 ELSE 0 END AS YEARS_OF_SERVICE
+    SELECT d.ID AS DEMOGRAPHIC_ID, NULL AS BENEFICIARY_CONTACT_ID, d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, d.HAS_FORFEITED, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, INITIAL_CONTR_YEAR, 
+           yos.YEARS AS YEARS_OF_SERVICE,
+           -- PS-2464: Lookup vesting percentage from VESTING_SCHEDULE_DETAIL table
+           -- Join via d.VESTING_SCHEDULE_ID (from DEMOGRAPHIC), select max years <= actual years for accurate vesting percent
+           (SELECT MAX(vsd.VESTING_PERCENT)
+            FROM VESTING_SCHEDULE_DETAIL vsd
+            WHERE vsd.VESTING_SCHEDULE_ID = d.VESTING_SCHEDULE_ID
+              AND vsd.YEARS_OF_SERVICE <= yos.YEARS
+           ) AS VESTING_PERCENT
     FROM DEMOGRAPHIC d
     LEFT JOIN PAY_PROFIT pp ON d.ID = pp.DEMOGRAPHIC_ID AND pp.PROFIT_YEAR  = {profitYear}
     LEFT JOIN (
@@ -287,7 +294,7 @@ FROM (
         {initialContributionYearQuery}
     ) initcontrib on d.ssn = initcontrib.ssn 
     UNION ALL
-    SELECT NULL AS DEMOGRAPHIC_ID, bc.ID AS BENEFICIARY_CONTACT_ID, bc.SSN, bc.DATE_OF_BIRTH, 0 AS IS_EMPLOYEE, NULL AS TERMINATION_DATE, NULL AS ENROLLMENT_ID, NULL AS TERMINATION_CODE_ID, NULL AS ZERO_CONTRIBUTION_REASON_ID, 0 AS YEARS_OF_SERVICE, null as INITIAL_CONTR_YEAR
+    SELECT NULL AS DEMOGRAPHIC_ID, bc.ID AS BENEFICIARY_CONTACT_ID, bc.SSN, bc.DATE_OF_BIRTH, 0 AS IS_EMPLOYEE, NULL AS TERMINATION_DATE, 0 AS HAS_FORFEITED, NULL AS TERMINATION_CODE_ID, NULL AS ZERO_CONTRIBUTION_REASON_ID, 0 AS YEARS_OF_SERVICE, null as INITIAL_CONTR_YEAR, 1 AS VESTING_PERCENT
     FROM BENEFICIARY_CONTACT bc
     WHERE bc.SSN NOT IN (SELECT SSN FROM DEMOGRAPHIC)
 ) m

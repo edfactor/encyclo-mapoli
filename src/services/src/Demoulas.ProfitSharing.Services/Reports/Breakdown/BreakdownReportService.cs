@@ -1,5 +1,6 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -782,7 +783,15 @@ public sealed class BreakdownReportService : IBreakdownService
                 YearsInPlan = bal == null ? 0 : bal.YearsInPlan,
                 HireDate = d.HireDate,
                 TerminationDate = d.TerminationDate,
-                EnrollmentId = pp.EnrollmentId,
+                EnrollmentId = d.VestingScheduleId == null
+                    ? EnrollmentConstants.NotEnrolled
+                    : d.HasForfeited
+                        ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                            : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                        : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            ? EnrollmentConstants.OldVestingPlanHasContributions
+                            : EnrollmentConstants.NewVestingPlanHasContributions,
                 ProfitShareHours = pp.TotalHours,
                 Street1 = d.Address.Street,
                 City = d.Address.City,

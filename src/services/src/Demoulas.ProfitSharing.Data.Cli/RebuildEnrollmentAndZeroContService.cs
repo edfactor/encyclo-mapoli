@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Microsoft.EntityFrameworkCore;
@@ -67,12 +67,14 @@ internal sealed class RebuildEnrollmentAndZeroContService
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var minProfitYear = await ctx.PayProfits.MinAsync(x => x.ProfitYear, cancellationToken);
-            var enrollmentSum = await ctx.PayProfits
-                .Where(p => p.ProfitYear == minProfitYear)
-                .SumAsync(p => p.EnrollmentId, cancellationToken);
 
-            // Return the year if sum indicates rebuild needed, otherwise 0
-            return enrollmentSum == 0 ? minProfitYear : (short)0;
+            // Count how many Demographics have VestingScheduleId set for members with PayProfit records in this year
+            var vestingScheduleIdCount = await ctx.PayProfits
+                .Where(pp => pp.ProfitYear == minProfitYear)
+                .CountAsync(pp => pp.Demographic != null && pp.Demographic.VestingScheduleId.HasValue, cancellationToken);
+
+            // Return the year if rebuild needed (no VestingScheduleId set), otherwise 0
+            return vestingScheduleIdCount == 0 ? minProfitYear : (short)0;
         }, cancellationToken);
     }
 }

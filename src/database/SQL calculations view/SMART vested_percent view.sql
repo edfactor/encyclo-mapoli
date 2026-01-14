@@ -5,7 +5,14 @@ SELECT
     trunc(months_between(CURRENT_DATE, DATE_OF_BIRTH) / 12) age,
     TERMINATION_DATE,
     TERMINATION_CODE_ID,
-    ENROLLMENT_ID,
+    -- EnrollmentId computed from VestingScheduleId and HasForfeited (enrollment decomposition)
+    CASE 
+        WHEN d.VESTING_SCHEDULE_ID IS NULL THEN 0  -- NotEnrolled
+        WHEN d.HAS_FORFEITED = 1 THEN 
+            CASE WHEN d.VESTING_SCHEDULE_ID = 1 THEN 3 ELSE 5 END  -- Old/NewVestingPlanHasForfeitureRecords
+        ELSE 
+            CASE WHEN d.VESTING_SCHEDULE_ID = 1 THEN 1 ELSE 4 END  -- Old/NewVestingPlanHasContributions
+    END AS ENROLLMENT_ID,
     ZERO_CONTRIBUTION_REASON_ID,
     CURRENT_HOURS_YEAR,                        -- if you have over > 1000 your years gets a bump 
     nvl(years.years_in_plan,0) YEARS_IN_PLAN,  -- probably better named PRIOR_YEARS_IN_PLAN as it assumes the current profit_year is excluded
@@ -16,14 +23,14 @@ SELECT
         AND (TERMINATION_DATE IS NULL
             OR EXTRACT(YEAR FROM TERMINATION_DATE) >= EXTRACT(YEAR FROM CURRENT_DATE)) THEN
              1
-         WHEN ENROLLMENT_ID IN (3, 4) THEN
+         WHEN d.HAS_FORFEITED = 1 THEN
              1
          WHEN TERMINATION_CODE_ID = 'Z' THEN
              1
          WHEN ZERO_CONTRIBUTION_REASON_ID = 6 THEN
              1
          WHEN (
-                  CASE WHEN ENROLLMENT_ID = 2 THEN  -- The 2 means the newer plan which vests 1 year faster than the old plan.  
+                  CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN  -- The new plan vests 1 year faster than the old plan.  
                            1
                        ELSE
                            0
@@ -34,7 +41,7 @@ SELECT
                       END + YEARS_IN_PLAN) < 3 THEN
              0  -- if the total years is less than 3, then 0 is the vested percent.
          WHEN (
-                  CASE WHEN ENROLLMENT_ID = 2 THEN
+                  CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN
                            1
                        ELSE
                            0
@@ -45,7 +52,7 @@ SELECT
                       END + YEARS_IN_PLAN) = 3 THEN
              0.2
          WHEN (
-                  CASE WHEN ENROLLMENT_ID = 2 THEN
+                  CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN
                            1
                        ELSE
                            0
@@ -56,7 +63,7 @@ SELECT
                       END + YEARS_IN_PLAN) = 4 THEN
              0.4
          WHEN (
-                  CASE WHEN ENROLLMENT_ID = 2 THEN
+                  CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN
                            1
                        ELSE
                            0
@@ -67,7 +74,7 @@ SELECT
                       END + YEARS_IN_PLAN) = 5 THEN
              0.6
          WHEN (
-                  CASE WHEN ENROLLMENT_ID = 2 THEN
+                  CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN
                            1
                        ELSE
                            0
@@ -78,7 +85,7 @@ SELECT
                       END + YEARS_IN_PLAN) = 6 THEN
              0.8
          WHEN (
-                  CASE WHEN ENROLLMENT_ID = 2 THEN
+                  CASE WHEN d.VESTING_SCHEDULE_ID = 2 THEN
                            1
                        ELSE
                            0

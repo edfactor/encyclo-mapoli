@@ -535,7 +535,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = 1,
                             City = "Lake Success",
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 12, 19, 23, 7, 777, DateTimeKind.Unspecified).AddTicks(306), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 14, 18, 15, 21, 80, DateTimeKind.Unspecified).AddTicks(1352), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             FedAchChangeDate = new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FedwireLocation = "Miami, FL",
@@ -684,7 +684,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccountName = "Profit Sharing Distribution Account",
                             AccountNumber = "PLACEHOLDER",
                             BankId = 1,
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 12, 19, 23, 7, 782, DateTimeKind.Unspecified).AddTicks(9075), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 14, 18, 15, 21, 86, DateTimeKind.Unspecified).AddTicks(7282), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             IsDisabled = false,
                             IsPrimary = true,
@@ -2690,6 +2690,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("GENDER_ID")
                         .HasComment("Gender");
 
+                    b.Property<bool>("HasForfeited")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("HAS_FORFEITED");
+
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("HIRE_DATE")
@@ -2751,6 +2755,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("USER_NAME")
                         .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
+                    b.Property<int?>("VestingScheduleId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("VESTING_SCHEDULE_ID");
+
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC");
 
@@ -2771,6 +2779,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("TerminationCodeId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_TERMINATIONCODEID");
+
+                    b.HasIndex("VestingScheduleId")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_VESTINGSCHEDULEID");
 
                     b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
                         .IsUnique()
@@ -2875,6 +2886,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("FIRST_NAME")
                         .HasComment("FirstName from ContactInfo");
 
+                    b.Property<bool>("HasForfeited")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("HAS_FORFEITED");
+
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("HIRE_DATE")
@@ -2975,6 +2990,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("ValidTo")
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("VALID_TO");
+
+                    b.Property<int?>("VestingScheduleId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("VESTING_SCHEDULE_ID");
 
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC_HISTORY");
@@ -3848,56 +3867,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = "F",
                             Name = "FullTimeEightPaidHolidays"
-                        });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Enrollment", b =>
-                {
-                    b.Property<byte>("Id")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ID");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(84)
-                        .HasColumnType("NVARCHAR2(84)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_ENROLLMENT");
-
-                    b.ToTable("ENROLLMENT", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (byte)0,
-                            Name = "Not Enrolled"
-                        },
-                        new
-                        {
-                            Id = (byte)1,
-                            Name = "Old vesting plan has Contributions (7 years to full vesting)"
-                        },
-                        new
-                        {
-                            Id = (byte)2,
-                            Name = "New vesting plan has Contributions (6 years to full vesting)"
-                        },
-                        new
-                        {
-                            Id = (byte)3,
-                            Name = "Old vesting plan has Forfeiture records"
-                        },
-                        new
-                        {
-                            Id = (byte)4,
-                            Name = "New vesting plan has Forfeiture records"
-                        },
-                        new
-                        {
-                            Id = (byte)9,
-                            Name = "Previous years enrollment is unknown. (History not previously tracked)"
                         });
                 });
 
@@ -5285,10 +5254,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("EMPLOYEE_TYPE_ID");
 
-                    b.Property<byte>("EnrollmentId")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ENROLLMENT_ID");
-
                     b.Property<decimal>("Etva")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
@@ -5358,9 +5323,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PAY_PROFIT_ZEROCONTRIBUTIONREASONID");
-
-                    b.HasIndex(new[] { "EnrollmentId" }, "IX_EnrollmentId")
-                        .HasDatabaseName("IX_PAY_PROFIT_ENROLLMENTID");
 
                     b.HasIndex(new[] { "ProfitYear" }, "IX_ProfitYear")
                         .HasDatabaseName("IX_PAY_PROFIT_PROFITYEAR");
@@ -6672,6 +6634,205 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.VestingSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_DATE");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
+                        .HasColumnName("DESCRIPTION");
+
+                    b.Property<string>("EffectiveDate")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(10)")
+                        .HasColumnName("EFFECTIVE_DATE");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("IS_ACTIVE");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_VESTING_SCHEDULE");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("UK_VESTING_SCHEDULE_NAME");
+
+                    b.ToTable("VESTING_SCHEDULE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedDate = new DateTime(2025, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "7-year vesting schedule with vesting starting at year 3. Used for employees whose first contribution was before 2007.",
+                            EffectiveDate = "1917-01-01",
+                            IsActive = true,
+                            Name = "Old Plan (Pre-2007)"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedDate = new DateTime(2025, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "6-year vesting schedule with vesting starting at year 2. Used for employees whose first contribution was 2007 or later.",
+                            EffectiveDate = "2007-01-01",
+                            IsActive = true,
+                            Name = "New Plan (2007+)"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.VestingScheduleDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    b.Property<decimal>("VestingPercent")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("DECIMAL(5,2)")
+                        .HasColumnName("VESTING_PERCENT");
+
+                    b.Property<int>("VestingScheduleId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("VESTING_SCHEDULE_ID");
+
+                    b.Property<int>("YearsOfService")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("YEARS_OF_SERVICE");
+
+                    b.HasKey("Id")
+                        .HasName("PK_VESTING_SCHEDULE_DETAIL");
+
+                    b.HasIndex("VestingScheduleId")
+                        .HasDatabaseName("IX_VESTING_SCHEDULE_DETAIL_VESTING_SCHEDULE_ID");
+
+                    b.HasIndex("VestingScheduleId", "YearsOfService")
+                        .IsUnique()
+                        .HasDatabaseName("UK_VSD_SCHEDULE_YEARS");
+
+                    b.ToTable("VESTING_SCHEDULE_DETAIL", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 2
+                        },
+                        new
+                        {
+                            Id = 4,
+                            VestingPercent = 20m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 3
+                        },
+                        new
+                        {
+                            Id = 5,
+                            VestingPercent = 40m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 4
+                        },
+                        new
+                        {
+                            Id = 6,
+                            VestingPercent = 60m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 5
+                        },
+                        new
+                        {
+                            Id = 7,
+                            VestingPercent = 80m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 6
+                        },
+                        new
+                        {
+                            Id = 8,
+                            VestingPercent = 100m,
+                            VestingScheduleId = 1,
+                            YearsOfService = 7
+                        },
+                        new
+                        {
+                            Id = 9,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 0
+                        },
+                        new
+                        {
+                            Id = 10,
+                            VestingPercent = 0m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 1
+                        },
+                        new
+                        {
+                            Id = 11,
+                            VestingPercent = 20m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 2
+                        },
+                        new
+                        {
+                            Id = 12,
+                            VestingPercent = 40m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 3
+                        },
+                        new
+                        {
+                            Id = 13,
+                            VestingPercent = 60m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 4
+                        },
+                        new
+                        {
+                            Id = 14,
+                            VestingPercent = 80m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 5
+                        },
+                        new
+                        {
+                            Id = 15,
+                            VestingPercent = 100m,
+                            VestingScheduleId = 2,
+                            YearsOfService = 6
+                        });
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotal", b =>
                 {
                     b.Property<int>("Ssn")
@@ -7514,6 +7675,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_DEMOGRAPHIC_TERMINATIONCODES_TERMINATIONCODEID");
 
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.VestingSchedule", "VestingSchedule")
+                        .WithMany()
+                        .HasForeignKey("VestingScheduleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_DEMOGRAPHIC_VESTINGSCHEDULES_VESTINGSCHEDULEID");
+
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {
                             b1.Property<int>("DemographicId")
@@ -7671,6 +7838,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("PayFrequency");
 
                     b.Navigation("TerminationCode");
+
+                    b.Navigation("VestingSchedule");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicSsnChangeHistory", b =>
@@ -8017,13 +8186,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PAY_PROFIT_EMPLOYEE_TYPE_EMPLOYEETYPEID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Enrollment", "Enrollment")
-                        .WithMany()
-                        .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_PAY_PROFIT_ENROLLMENT_ENROLLMENTID");
-
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
                         .WithMany()
                         .HasForeignKey("ZeroContributionReasonId")
@@ -8035,8 +8197,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Demographic");
 
                     b.Navigation("EmployeeType");
-
-                    b.Navigation("Enrollment");
 
                     b.Navigation("ZeroContributionReason");
                 });
@@ -8140,6 +8300,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("JobType");
 
                     b.Navigation("StartMethod");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.VestingScheduleDetail", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.VestingSchedule", "VestingSchedule")
+                        .WithMany("Details")
+                        .HasForeignKey("VestingScheduleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_VSD_SCHEDULE");
+
+                    b.Navigation("VestingSchedule");
                 });
 
             modelBuilder.Entity("NAVIGATION_PREREQUISITES", b =>
@@ -8275,6 +8447,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.TerminationCode", b =>
                 {
                     b.Navigation("Demographics");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.VestingSchedule", b =>
+                {
+                    b.Navigation("Details");
                 });
 #pragma warning restore 612, 618
         }
