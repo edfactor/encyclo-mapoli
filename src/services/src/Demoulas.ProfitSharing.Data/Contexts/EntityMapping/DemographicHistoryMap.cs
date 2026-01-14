@@ -103,6 +103,12 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
         _ = builder.Property(e => e.EmploymentStatusId)
             .HasColumnName("EMPLOYMENT_STATUS_ID");
 
+        _ = builder.Property(e => e.VestingScheduleId)
+            .HasColumnName("VESTING_SCHEDULE_ID");
+
+        _ = builder.Property(e => e.HasForfeited)
+            .HasColumnName("HAS_FORFEITED");
+
         // ContactInfo fields
         _ = builder.Property(e => e.FirstName)
             .HasMaxLength(30)
