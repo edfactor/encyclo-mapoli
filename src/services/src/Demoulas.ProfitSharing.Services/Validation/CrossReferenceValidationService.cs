@@ -1,10 +1,12 @@
-﻿using Demoulas.ProfitSharing.Common;
+﻿using System.Text;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Renci.SshNet.Messages;
 
 namespace Demoulas.ProfitSharing.Services.Validation;
 
@@ -264,6 +266,114 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
             FailedValidations = failedValidations,
             PassedValidations = passedValidations
         };
+        return rslt;
+    }
+
+    public async Task<ValidationResponse> ValidateBreakoutReportGrandTotal(
+        short profitYear, 
+        int numberOfEmployees, 
+        decimal beginningBalance, 
+        decimal earningsTotal, 
+        decimal contributionsTotal,
+        decimal disbursementTotals,
+        decimal endingBalance,
+        CancellationToken cancellationToken = default
+        ) {
+
+        var currentValues = new Dictionary<string, decimal>
+        {
+            { "PAY444.BeginningBalanceTotal", beginningBalance},
+            { "PAY444.EarningsGrandTotal", earningsTotal  },
+            { "PAY444.ContributionGrandTotal", contributionsTotal }
+        };
+
+        // Execute validations in parallel for better performance
+        var beginningBalanceTask = ValidateSingleFieldAsync(
+            profitYear,
+            "PAY444",
+            "BeginningBalanceTotal",
+            currentValues,
+            cancellationToken);
+
+        var earningsTotalTask = ValidateSingleFieldAsync(
+            profitYear,
+            "PAY444",
+            "EarningsGrandTotal",
+            currentValues,
+            cancellationToken);
+
+        var contributionsTotalTask = ValidateSingleFieldAsync(
+            profitYear,
+            "PAY444",
+            "ContributionsGrandTotal",
+            currentValues,
+            cancellationToken);
+
+        await Task.WhenAll(beginningBalanceTask, earningsTotalTask, contributionsTotalTask);
+
+        var beginningBalanceValidation = await beginningBalanceTask;
+        var earningsTotalValidation = await earningsTotalTask;
+        var contributionsTotalValidation = await contributionsTotalTask;
+
+        var beginningBalanceValidationGroup = new CrossReferenceValidationGroup
+        {
+            GroupName = "Beginning Balance",
+            Description = "Validates beginning balance between Master Update and the breakdown report",
+            IsValid = beginningBalanceValidation.IsValid,
+            Validations = new List<CrossReferenceValidation>
+            {
+                beginningBalanceValidation
+            },
+            Summary = "Beginning balance validation.",
+            Priority = "High",
+            ValidationRule = "Store breakdown beginning balance should match archived values"
+        };
+
+        var earningsTotalValidationGroup = new CrossReferenceValidationGroup
+        {
+            GroupName = "Earnings Total",
+            Description = "Validates earnings total between Master Update and the breakdown report",
+            IsValid = earningsTotalValidation.IsValid,
+            Validations = new List<CrossReferenceValidation>
+            {
+                earningsTotalValidation
+            },
+            Summary = "Earnings total validation.",
+            Priority = "High",
+            ValidationRule = "Store breakdown earnings total should match archived values"
+        };
+
+        var contributionsTotalValidationGroup = new CrossReferenceValidationGroup
+        {
+            GroupName = "Contributions Total",
+            Description = "Validates contributions total between Master Update and the breakdown report",
+            IsValid = contributionsTotalValidation.IsValid,
+            Validations = new List<CrossReferenceValidation>
+            {
+                contributionsTotalValidation
+            },
+            Summary = "Contributions total validation.",
+            Priority = "High",
+            ValidationRule = "Store breakdown contributions total should match archived values"
+        };
+
+        var validationGroups = new List<CrossReferenceValidationGroup>() { beginningBalanceValidationGroup, earningsTotalValidationGroup, contributionsTotalValidationGroup };
+        int totalValidations, passedValidations, failedValidations;
+        List<string> criticalIssues, warnings;
+        SummarizeValidations(validationGroups, out totalValidations, out passedValidations, out failedValidations, out criticalIssues, out warnings);
+
+        var rslt = new ValidationResponse()
+        {
+            ProfitYear = profitYear,
+            Message = "Breakdown validations",
+            ValidationGroups = validationGroups,
+            CriticalIssues = criticalIssues,
+            Warnings = warnings,
+            TotalValidations = totalValidations,
+            FailedValidations = failedValidations,
+            PassedValidations = passedValidations
+        };
+
         return rslt;
     }
 

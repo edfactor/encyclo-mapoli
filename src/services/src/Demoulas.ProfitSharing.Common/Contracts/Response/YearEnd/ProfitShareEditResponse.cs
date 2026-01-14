@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -8,9 +9,13 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 /// </summary>
 public sealed record ProfitShareEditResponse : ReportResponseBase<ProfitShareEditMemberRecordResponse>
 {
+    [YearEndArchiveProperty]
     public required decimal BeginningBalanceTotal { get; set; }
+    [YearEndArchiveProperty]
     public required decimal ContributionGrandTotal { get; set; }
+    [YearEndArchiveProperty]
     public required decimal IncomingForfeitureGrandTotal { get; set; }
+    [YearEndArchiveProperty]
     public required decimal EarningsGrandTotal { get; set; }
 
     /// <summary>

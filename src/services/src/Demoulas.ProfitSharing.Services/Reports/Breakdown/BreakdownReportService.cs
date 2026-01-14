@@ -23,19 +23,22 @@ public sealed class BreakdownReportService : IBreakdownService
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
+    private readonly ICrossReferenceValidationService _crossReferenceValidationService;
 
     public BreakdownReportService(
         IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
-        IPayrollDuplicateSsnReportService duplicateSsnReportService)
+        IPayrollDuplicateSsnReportService duplicateSsnReportService,
+        ICrossReferenceValidationService crossReferenceValidationService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
         _duplicateSsnReportService = duplicateSsnReportService;
+        _crossReferenceValidationService = crossReferenceValidationService;
     }
 
     #region ── Helper DTOs ────────────────────────────────────────────────────────────────
@@ -287,6 +290,16 @@ public sealed class BreakdownReportService : IBreakdownService
                 var vestingRatio = vestingBySsn.GetValueOrDefault(e.Ssn, 0);
                 return endBal * vestingRatio;
             });
+
+            totals.CrossReferenceValidation = await _crossReferenceValidationService.ValidateBreakoutReportGrandTotal(
+                request.ProfitYear,
+                totals.TotalNumberEmployees,
+                totals.TotalBeginningBalances,
+                totals.TotalEarnings,
+                totals.TotalContributions,
+                totals.TotalDisbursements,
+                totals.TotalEndBalances,
+                cancellationToken);
 
             return totals;
         }, cancellationToken);

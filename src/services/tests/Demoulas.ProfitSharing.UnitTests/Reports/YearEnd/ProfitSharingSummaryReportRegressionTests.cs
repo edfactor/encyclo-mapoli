@@ -859,7 +859,8 @@ public class ProfitSharingSummaryReportRegressionTests
             new Mock<ICommitGuardOverride>().Object,
             new Mock<IServiceProvider>().Object,
             distributedCache,
-            new Mock<INavigationService>().Object);
+            new Mock<INavigationService>().Object,
+            new Mock<TimeProvider>().Object);
 
         var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());
         var totalService = new TotalService(mockFactory, mockCalendarService.Object, mockEmbeddedSql.Object, demographicReader);
