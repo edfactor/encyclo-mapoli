@@ -407,7 +407,8 @@ BEGIN
 -- Assign roles for YEAR END (YearEndGroup -> CanViewYearEndReports)
     assign_navigation_role(YEAR_END_MENU, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(YEAR_END_MENU, FINANCE_MANAGER);
-    assign_navigation_role(YEAR_END_MENU, HR_READONLY);  -- Parent must have this role for HR-ReadOnly users to see children 
+    assign_navigation_role(YEAR_END_MENU, HR_READONLY);  -- Parent must have this role for HR-ReadOnly users to see children
+    assign_navigation_role(YEAR_END_MENU, IT_DEVOPS);  -- Parent must have this role for IT-DevOps users to see children 
 -- Assign roles for BENEFICIARIES (BeneficiariesGroup -> CanMaintainBeneficiaries)
     assign_navigation_role(BENEFICIARIES_MENU, DISTRIBUTIONS_CLERK); 
     assign_navigation_role(BENEFICIARIES_MENU, HARDSHIP_ADMINISTRATOR); 
@@ -599,7 +600,7 @@ BEGIN
     -- assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS); -- REMOVED
     -- assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, IT_DEVOPS); -- REMOVED
     -- assign_navigation_role(RECONCILIATION_MENU, IT_DEVOPS); -- REMOVED
-    assign_navigation_role(YEAR_END_MENU, IT_DEVOPS);
+    -- assign_navigation_role(YEAR_END_MENU, IT_DEVOPS); -- MOVED to main YEAR_END role assignments section
     assign_navigation_role(DECEMBER_ACTIVITIES, IT_DEVOPS);
     assign_navigation_role(CLEANUP_REPORTS, IT_DEVOPS);
     assign_navigation_role(DEMOGRAPHIC_BADGES_NOT_IN_PAYPROFIT, IT_DEVOPS);
