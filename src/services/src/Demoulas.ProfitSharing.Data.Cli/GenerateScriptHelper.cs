@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Contexts;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -93,7 +94,7 @@ internal static class GenerateScriptHelper
                     sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
                 ]));
             factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
-            factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonWarehouseContext>("Warehouse"));
+            factoryRequests.Add(ContextFactoryRequest.Initialize<IDemoulasCommonWarehouseContext, DemoulasCommonWarehouseContext>("Warehouse"));
         });
         builder.AddProjectServices();
 
