@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
+﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

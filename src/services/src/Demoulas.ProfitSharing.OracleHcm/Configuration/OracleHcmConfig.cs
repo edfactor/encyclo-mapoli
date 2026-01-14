@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.OracleHcm.Configuration;
+﻿namespace Demoulas.ProfitSharing.OracleHcm.Configuration;
 
 /// <summary>
 /// Represents the configuration settings for the Oracle HCM integration.

@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;

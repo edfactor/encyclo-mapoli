@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using FluentValidation.Results;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;

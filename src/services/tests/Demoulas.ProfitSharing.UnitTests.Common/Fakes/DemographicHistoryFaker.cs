@@ -1,4 +1,4 @@
-using Bogus;
+﻿using Bogus;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
 

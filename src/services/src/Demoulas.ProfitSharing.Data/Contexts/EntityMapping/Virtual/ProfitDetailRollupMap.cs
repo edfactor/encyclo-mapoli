@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities.Virtual;
+﻿using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;

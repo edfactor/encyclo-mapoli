@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
 
 public static class Pay450Comparisons
 {

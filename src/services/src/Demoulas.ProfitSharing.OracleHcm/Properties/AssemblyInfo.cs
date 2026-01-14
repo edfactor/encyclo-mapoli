@@ -1,1 +1,1 @@
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Demoulas.ProfitSharing.UnitTests")]
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Demoulas.ProfitSharing.UnitTests")]

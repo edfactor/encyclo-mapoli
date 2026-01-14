@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+﻿namespace Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 
 /// <summary>
 /// Validates that all prerequisite navigations for a given navigation id are complete.

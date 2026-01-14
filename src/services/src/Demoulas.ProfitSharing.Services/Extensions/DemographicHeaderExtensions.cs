@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Services.Middleware;
+﻿using Demoulas.ProfitSharing.Services.Middleware;
 using Microsoft.AspNetCore.Builder;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;

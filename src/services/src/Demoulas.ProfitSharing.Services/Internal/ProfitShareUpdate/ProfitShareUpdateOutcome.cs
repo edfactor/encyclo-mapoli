@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 

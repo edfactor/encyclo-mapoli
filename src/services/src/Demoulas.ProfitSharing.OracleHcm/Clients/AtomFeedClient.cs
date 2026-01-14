@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;

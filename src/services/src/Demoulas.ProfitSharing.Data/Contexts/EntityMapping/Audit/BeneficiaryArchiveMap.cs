@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities.Audit;
+﻿using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

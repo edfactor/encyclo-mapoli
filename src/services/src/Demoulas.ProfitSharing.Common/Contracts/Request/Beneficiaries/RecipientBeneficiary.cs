@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 
 public sealed record RecipientBeneficiary
 {

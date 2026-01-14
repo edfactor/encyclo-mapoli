@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.Report;

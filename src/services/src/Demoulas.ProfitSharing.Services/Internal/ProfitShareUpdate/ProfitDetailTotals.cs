@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
+﻿namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 
 /// <summary>
 /// A single year of totals extracted from Profit Detail records.

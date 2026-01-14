@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Data.Entities.Scheduling;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.Scheduling;
 
 public sealed class Job
 {

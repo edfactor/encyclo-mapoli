@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Services.Caching;
+﻿namespace Demoulas.ProfitSharing.Services.Caching;
 
 /// <summary>
 /// Generic lookup cache interface for frequently accessed reference data.

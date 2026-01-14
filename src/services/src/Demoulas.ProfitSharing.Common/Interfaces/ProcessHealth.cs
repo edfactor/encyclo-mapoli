@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Interfaces;
+﻿namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 /// <summary>
 /// Represents the health status of a monitored process.

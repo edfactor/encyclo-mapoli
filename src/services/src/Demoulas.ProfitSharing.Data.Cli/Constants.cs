@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Data.Cli;
+﻿namespace Demoulas.ProfitSharing.Data.Cli;
 
 internal static class Constants
 {

@@ -1,4 +1,4 @@
-
+﻿
 
 namespace Demoulas.ProfitSharing.Common.Interfaces.Audit;
 

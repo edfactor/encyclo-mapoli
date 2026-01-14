@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Microsoft.EntityFrameworkCore;
 

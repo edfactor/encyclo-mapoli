@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 
 public sealed record RowCountResult
 {

@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 public class NavigationTracking
 {

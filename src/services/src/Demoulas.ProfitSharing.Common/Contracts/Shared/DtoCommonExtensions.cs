@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Shared;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 // Granular interfaces so DTOs can opt-in without altering existing property names/shapes.
 // Note: FirstName/LastName modeled as non-nullable to satisfy DTOs that mark them 'required'.

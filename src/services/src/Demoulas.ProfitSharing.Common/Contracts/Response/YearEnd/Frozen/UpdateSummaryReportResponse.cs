@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;

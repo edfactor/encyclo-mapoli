@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Data.Entities.Audit;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.Audit;
 
 public sealed class BeneficiaryContactArchive
 {

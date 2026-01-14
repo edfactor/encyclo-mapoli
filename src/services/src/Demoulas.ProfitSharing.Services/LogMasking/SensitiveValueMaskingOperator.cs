@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Microsoft.Extensions.Hosting;

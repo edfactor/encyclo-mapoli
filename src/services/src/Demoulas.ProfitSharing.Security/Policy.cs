@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Security;
+﻿namespace Demoulas.ProfitSharing.Security;
 
 /// <summary>
 /// Centralized policy names used by [Authorize(Policy = ...)] to guard business actions.

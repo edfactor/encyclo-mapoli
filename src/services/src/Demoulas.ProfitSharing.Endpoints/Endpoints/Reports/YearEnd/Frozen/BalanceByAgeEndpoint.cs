@@ -1,4 +1,4 @@
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
 // Result, Error
 using Demoulas.ProfitSharing.Common.Contracts.Request;

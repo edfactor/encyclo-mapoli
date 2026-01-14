@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 /// <summary>
 /// Validation result for a single field

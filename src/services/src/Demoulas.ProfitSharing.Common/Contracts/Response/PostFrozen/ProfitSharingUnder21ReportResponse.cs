@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 
 public sealed record ProfitSharingUnder21ReportResponse : ReportResponseBase<ProfitSharingUnder21ReportDetail>
 {

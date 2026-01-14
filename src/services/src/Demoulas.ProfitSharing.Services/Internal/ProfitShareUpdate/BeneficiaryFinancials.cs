@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
+﻿namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 
 /// <summary>
 ///     A summary of financial information about a Beneficiary

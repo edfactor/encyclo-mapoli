@@ -1,4 +1,4 @@
-
+﻿
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 
 public record MasterInquiryMemberRequest : ProfitYearRequest

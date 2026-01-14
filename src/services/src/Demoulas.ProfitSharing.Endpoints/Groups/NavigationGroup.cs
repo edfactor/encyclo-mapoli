@@ -1,4 +1,4 @@
-using Demoulas.Common.Api.Groups;
+﻿using Demoulas.Common.Api.Groups;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;

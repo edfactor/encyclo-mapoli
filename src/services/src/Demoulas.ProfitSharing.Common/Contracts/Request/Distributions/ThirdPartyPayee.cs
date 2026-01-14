@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 
 public sealed record ThirdPartyPayee
 {

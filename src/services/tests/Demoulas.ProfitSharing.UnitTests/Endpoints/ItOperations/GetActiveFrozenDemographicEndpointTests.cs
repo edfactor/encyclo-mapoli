@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 using Demoulas.ProfitSharing.Security;

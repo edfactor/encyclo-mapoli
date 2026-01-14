@@ -1,3 +1,3 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Shared;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 public interface INameParts : IFirstName, ILastName, IMiddleName;

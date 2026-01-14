@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 

@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
 
 /// <summary>Convenience constants for the response headers we’ll emit.</summary>
 public static class DemographicHeaders

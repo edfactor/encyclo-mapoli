@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Attributes;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;

@@ -1,4 +1,4 @@
-namespace YEMatch.SmartIntegrationTests;
+﻿namespace YEMatch.SmartIntegrationTests;
 
 public class IntPay444Test : BaseIntegrationTestActivity
 {
