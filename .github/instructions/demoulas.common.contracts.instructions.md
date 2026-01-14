@@ -1,8 +1,3 @@
----
-applyTo: "src/services/src/**/*.*"
-paths: "src/services/src/**/*.*"
----
-
 # Demoulas.Common.Contracts - Shared Contracts and Interfaces
 
 **Package:** `Demoulas.Common.Contracts`  
