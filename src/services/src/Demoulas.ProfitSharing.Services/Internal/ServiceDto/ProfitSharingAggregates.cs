@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 internal sealed record ProfitSharingAggregates
 {

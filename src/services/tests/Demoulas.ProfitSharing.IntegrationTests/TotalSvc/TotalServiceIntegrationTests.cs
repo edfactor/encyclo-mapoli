@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+﻿using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.TotalSvc;

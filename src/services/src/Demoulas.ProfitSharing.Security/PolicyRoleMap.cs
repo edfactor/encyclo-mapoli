@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Security;
+﻿namespace Demoulas.ProfitSharing.Security;
 
 /// <summary>
 /// Central map of authorization policies to allowed roles. Used by both runtime registration and Swagger enrichment.

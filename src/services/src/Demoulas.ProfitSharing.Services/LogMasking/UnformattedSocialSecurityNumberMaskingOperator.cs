@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Serilog.Enrichers.Sensitive;
 
 namespace Demoulas.ProfitSharing.Services.LogMasking;

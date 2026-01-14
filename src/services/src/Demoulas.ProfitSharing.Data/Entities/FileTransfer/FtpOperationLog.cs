@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Data.Entities.FileTransfer;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.FileTransfer;
 
 /// <summary>
 /// Audit log for FTP operations performed during check run workflow.

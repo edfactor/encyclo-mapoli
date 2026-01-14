@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Extensions;
+﻿namespace Demoulas.ProfitSharing.Common.Extensions;
 
 public static class DateOnlyExtensions
 {

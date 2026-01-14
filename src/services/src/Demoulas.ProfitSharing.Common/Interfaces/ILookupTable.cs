@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Interfaces;
+﻿namespace Demoulas.ProfitSharing.Common.Interfaces;
 /// <summary>
 /// Generic lookup table contract. (Constraint removed to allow string identifiers.)
 /// </summary>

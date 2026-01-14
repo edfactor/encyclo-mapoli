@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common;
+﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 

@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Report;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;

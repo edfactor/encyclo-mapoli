@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.CheckRun;
 
 /// <summary>
 /// Represents the status of a step in the check run workflow.

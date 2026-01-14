@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 /// <summary>
 ///     Values provided by user to guide how to update Earnings,Contributions and forfeiture points are updated for the new PS year

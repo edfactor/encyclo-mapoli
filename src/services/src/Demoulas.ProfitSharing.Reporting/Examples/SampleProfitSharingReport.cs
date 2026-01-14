@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Reporting.Core;
+﻿using Demoulas.ProfitSharing.Reporting.Core;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 

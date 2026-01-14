@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Adjustments;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Adjustments;
 
 /// <summary>
 /// Request to merge profit details from a source demographic to a target demographic

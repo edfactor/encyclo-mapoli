@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Security;
+﻿namespace Demoulas.ProfitSharing.Security;
 
 /// <summary>
 /// Centralized application role names that must match Okta role claims 1:1.

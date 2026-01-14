@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Data.Entities;
+﻿namespace Demoulas.ProfitSharing.Data.Entities;
 
 /// <summary>
 /// Required Minimum Distribution (RMD) life expectancy divisors by age.

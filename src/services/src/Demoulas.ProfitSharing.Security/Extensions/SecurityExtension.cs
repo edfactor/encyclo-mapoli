@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Configuration;
+﻿using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Authentication;

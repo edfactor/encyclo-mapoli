@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Demoulas.Common.Api.Utilities;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.ProfitSharing.Common;

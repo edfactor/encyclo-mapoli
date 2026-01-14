@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;

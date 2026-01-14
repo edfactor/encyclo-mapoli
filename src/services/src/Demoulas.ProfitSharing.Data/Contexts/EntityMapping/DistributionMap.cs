@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
+﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

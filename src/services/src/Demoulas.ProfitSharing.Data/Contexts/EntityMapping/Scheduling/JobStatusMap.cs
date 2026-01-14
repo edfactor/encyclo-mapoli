@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities.Scheduling;
+﻿using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

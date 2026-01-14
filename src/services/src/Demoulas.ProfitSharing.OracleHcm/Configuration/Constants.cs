@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.OracleHcm.Configuration;
+﻿namespace Demoulas.ProfitSharing.OracleHcm.Configuration;
 
 internal static class Constants
 {

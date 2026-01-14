@@ -1,4 +1,4 @@
-namespace YEMatch;
+﻿namespace YEMatch;
 
 /// <summary>
 ///     Configuration options for YEMatch testing framework

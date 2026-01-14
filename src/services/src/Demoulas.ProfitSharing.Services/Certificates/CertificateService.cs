@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;

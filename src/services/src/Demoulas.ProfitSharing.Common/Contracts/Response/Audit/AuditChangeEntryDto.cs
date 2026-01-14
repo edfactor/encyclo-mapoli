@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
 
 /// <summary>
 /// DTO for audit change entry information.

@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities.Virtual;
+﻿using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Services.Internal.Interfaces;

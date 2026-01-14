@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 

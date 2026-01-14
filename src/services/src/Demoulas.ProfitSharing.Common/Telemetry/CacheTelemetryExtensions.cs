@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Telemetry;
+﻿namespace Demoulas.ProfitSharing.Common.Telemetry;
 
 /// <summary>
 /// Extension methods for recording cache telemetry manually when not using CacheTelemetryWrapper.

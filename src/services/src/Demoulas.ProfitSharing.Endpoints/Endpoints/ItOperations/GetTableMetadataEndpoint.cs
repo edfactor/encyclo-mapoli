@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;

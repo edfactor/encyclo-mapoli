@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.Caching;
 using Microsoft.Extensions.Logging;

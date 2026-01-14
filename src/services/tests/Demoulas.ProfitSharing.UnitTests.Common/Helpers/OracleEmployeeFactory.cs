@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+﻿using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 

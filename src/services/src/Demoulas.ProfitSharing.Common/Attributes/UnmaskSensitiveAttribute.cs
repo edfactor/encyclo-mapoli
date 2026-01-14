@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Attributes;
+﻿namespace Demoulas.ProfitSharing.Common.Attributes;
 
 /// <summary>
 /// Apply to a DTO class or property to opt-out of masking (including default decimal masking).

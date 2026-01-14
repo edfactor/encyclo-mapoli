@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Interfaces;
+﻿namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 /// <summary>
 /// Interface for requests that include a badge number.

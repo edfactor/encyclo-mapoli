@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Demoulas.Common.Contracts.Configuration;
 using Microsoft.AspNetCore.Authentication;

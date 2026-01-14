@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;

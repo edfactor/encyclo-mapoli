@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;

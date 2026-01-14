@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Common.Validators;

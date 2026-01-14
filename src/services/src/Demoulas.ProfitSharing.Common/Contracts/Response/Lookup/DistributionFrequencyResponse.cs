@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 

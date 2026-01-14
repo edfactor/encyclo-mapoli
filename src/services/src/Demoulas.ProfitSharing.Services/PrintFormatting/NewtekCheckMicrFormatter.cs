@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Services.PrintFormatting;
+﻿namespace Demoulas.ProfitSharing.Services.PrintFormatting;
 
 /// <summary>
 /// MICR formatter for Newtek Bank checks.
