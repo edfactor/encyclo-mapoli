@@ -535,7 +535,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = 1,
                             City = "Lake Success",
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 13, 21, 7, 43, 27, DateTimeKind.Unspecified).AddTicks(9523), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 14, 17, 47, 55, 185, DateTimeKind.Unspecified).AddTicks(9021), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             FedAchChangeDate = new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FedwireLocation = "Miami, FL",
@@ -684,7 +684,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccountName = "Profit Sharing Distribution Account",
                             AccountNumber = "PLACEHOLDER",
                             BankId = 1,
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 13, 21, 7, 43, 36, DateTimeKind.Unspecified).AddTicks(1311), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 14, 17, 47, 55, 190, DateTimeKind.Unspecified).AddTicks(4566), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             IsDisabled = false,
                             IsPrimary = true,
@@ -2886,6 +2886,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("FIRST_NAME")
                         .HasComment("FirstName from ContactInfo");
 
+                    b.Property<bool>("HasForfeited")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("HASFORFEITED");
+
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("HIRE_DATE")
@@ -2986,6 +2990,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("ValidTo")
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("VALID_TO");
+
+                    b.Property<int?>("VestingScheduleId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("VESTINGSCHEDULEID");
 
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC_HISTORY");

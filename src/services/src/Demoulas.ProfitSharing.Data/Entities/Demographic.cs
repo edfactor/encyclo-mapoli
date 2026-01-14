@@ -140,6 +140,8 @@ public sealed class Demographic : Member
                demo1.EmploymentTypeId == demo2.EmploymentTypeId &&
                demo1.PayFrequencyId == demo2.PayFrequencyId &&
                demo1.TerminationCodeId == demo2.TerminationCodeId &&
-               demo1.EmploymentStatusId == demo2.EmploymentStatusId;
+               demo1.EmploymentStatusId == demo2.EmploymentStatusId &&
+               demo1.VestingScheduleId == demo2.VestingScheduleId &&
+               demo1.HasForfeited == demo2.HasForfeited;
     }
 }
