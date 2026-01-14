@@ -8,7 +8,7 @@
 
 Install 3rd Party Libraries:
 
-1. Visual Studio Professional 2026 (18.1.0) or higher installed - https://visualstudio.microsoft.com/downloads/
+1. Visual Studio Professional 2026 (18.2.0) or higher installed - https://visualstudio.microsoft.com/downloads/
 
    ![Workload](./setup_images/workload.PNG)
 
