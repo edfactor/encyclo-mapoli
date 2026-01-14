@@ -1,5 +1,6 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
@@ -206,7 +207,7 @@ public class PostFrozenService : IPostFrozenService
                     .Include(d => d.EmploymentStatus)
                     .Where(x => x.DateOfBirth >= birthDate21)
                 join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals bal.Ssn
-                join lyPpTbl in ctx.PayProfits.Include(pp => pp.Enrollment).Where(x => x.ProfitYear == request.ProfitYear - 1) on d.Id equals lyPpTbl.DemographicId into lyPpTmp
+                join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear - 1) on d.Id equals lyPpTbl.DemographicId into lyPpTmp
                 from lyPp in lyPpTmp.DefaultIfEmpty()
                 join tyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals tyPpTbl.DemographicId into tyPpTmp
                 from tyPp in tyPpTmp.DefaultIfEmpty()
@@ -229,7 +230,15 @@ public class PostFrozenService : IPostFrozenService
                     d.DateOfBirth, // Raw birth date - age will be calculated after query
                     EmploymentStatusId = d.EmploymentStatus!.Id,
                     CurrentBalance = (bal.CurrentBalance ?? 0),
-                    EnrollmentId = tyPp != null ? tyPp.Enrollment!.Name : "",
+                    EnrollmentName = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : d.HasForfeited
+                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions),
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                 }
             ).ToPaginationResultsAsync(sortRequest, cancellationToken: cancellationToken);
@@ -256,7 +265,7 @@ public class PostFrozenService : IPostFrozenService
                     Age = x.DateOfBirth.Age(), // Age calculation after database query
                     EmploymentStatusId = x.EmploymentStatusId,
                     CurrentBalance = x.CurrentBalance,
-                    EnrollmentId = x.EnrollmentId,
+                    EnrollmentId = x.EnrollmentName ?? string.Empty,
                     IsExecutive = x.IsExecutive
                 })
             };
@@ -352,7 +361,15 @@ public class PostFrozenService : IPostFrozenService
                     VestingPercentage = tyTot.VestingPercent * 100,
                     DateOfBirth = d.DateOfBirth,
                     Age = 0, //To be determined after materializing
-                    EnrollmentId = pp.EnrollmentId,
+                    EnrollmentId = d.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : d.HasForfeited
+                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions,
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                 }
             );
@@ -412,7 +429,15 @@ public class PostFrozenService : IPostFrozenService
                     HireDate = d.HireDate,
                     TerminationDate = d.TerminationDate,
                     Age = 0,
-                    EnrollmentId = pp.EnrollmentId,
+                    EnrollmentId = d.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : d.HasForfeited
+                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions,
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
                 }
             ).ToPaginationResultsAsync(request, cancellationToken);
@@ -767,7 +792,7 @@ public class PostFrozenService : IPostFrozenService
                 var beneInfo = (
                     from bc in ctx.BeneficiaryContacts
                     join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where !demographicQuery.Any(d => d.Ssn == bc.Ssn)
+                    where !b.IsDeleted && !demographicQuery.Any(d => d.Ssn == bc.Ssn)
                     select new
                     {
                         bc.Ssn,

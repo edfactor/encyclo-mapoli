@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.Common.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +16,6 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
 
         _ = builder.HasKey(e => new { e.DemographicId, e.ProfitYear });
 
-        _ = builder.HasIndex(e => e.EnrollmentId, "IX_EnrollmentId");
         _ = builder.HasIndex(e => e.ProfitYear, "IX_ProfitYear");
         // Composite index to support frequent filters by year and joins by demographic
         _ = builder.HasIndex(e => new { e.ProfitYear, e.DemographicId }, "IX_ProfitYear_DemographicId");
@@ -69,10 +68,6 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
         _ = builder.Property(e => e.ZeroContributionReasonId)
             .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
-
-        _ = builder.Property(e => e.EnrollmentId)
-            .HasColumnName("ENROLLMENT_ID");
-
         _ = builder.Property(e => e.BeneficiaryTypeId)
             .HasColumnName("BENEFICIARY_TYPE_ID");
 
@@ -94,11 +89,6 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
             .HasPrecision(9, 2)
             .HasColumnName("TOTAL_INCOME")
             .HasComputedColumnSql("INCOME_EXECUTIVE + CURRENT_INCOME_YEAR", stored: true);
-
-        _ = builder.HasOne(e => e.Enrollment)
-            .WithMany()
-            .HasForeignKey(p => p.EnrollmentId)
-            .OnDelete(DeleteBehavior.NoAction);
 
         _ = builder.HasOne(e => e.BeneficiaryType)
             .WithMany()

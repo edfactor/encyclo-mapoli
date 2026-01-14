@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Data.Contexts.Contexts;
+using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
@@ -52,7 +52,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<BeneficiaryContactArchive> BeneficiaryContactArchives { get; set; }
     public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
     public virtual DbSet<CheckRunWorkflow> CheckRunWorkflows { get; set; }
-    public virtual DbSet<Enrollment> Enrollments { get; set; }
+    // Enrollment entity removed - enrollment is now computed dynamically from vesting schedule and forfeiture status
     public virtual DbSet<PayProfit> PayProfits { get; set; }
     public virtual DbSet<Distribution> Distributions { get; set; }
     public virtual DbSet<DistributionFrequency> DistributionFrequencies { get; set; }
@@ -80,6 +80,8 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<StateTax> StateTaxes { get; set; }
     public virtual DbSet<State> States { get; set; }
     public virtual DbSet<RmdsFactorByAge> RmdsFactorsByAge { get; set; }
+    public virtual DbSet<VestingSchedule> VestingSchedules { get; set; }
+    public virtual DbSet<VestingScheduleDetail> VestingScheduleDetails { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

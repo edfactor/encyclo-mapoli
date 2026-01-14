@@ -1,9 +1,10 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -666,15 +667,23 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 EmploymentStatusId = pp.Demographic!.EmploymentStatusId,
                 TerminationDate = pp.Demographic!.TerminationDate,
                 Ssn = pp.Demographic!.Ssn,
-                FullName = pp.Demographic!.ContactInfo.FullName,
+                FullName = pp.Demographic!.ContactInfo!.FullName,
                 StoreNumber = pp.Demographic!.StoreNumber,
                 EmploymentTypeId = (char)pp.EmployeeTypeId,
-                EmploymentTypeName = et.Name,
+                EmploymentTypeName = et != null ? et.Name : string.Empty,
                 PointsEarned = pp.PointsEarned,
-                Years = yip.Years,
-                FirstContributionYear = fc.FirstContributionYear,
+                Years = yip != null ? yip.Years : (byte)0,
+                FirstContributionYear = fc != null ? fc.FirstContributionYear : (short?)null,
                 IsExecutive = pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly,
-                EnrollmentId = pp.EnrollmentId
+                EnrollmentId = pp.Demographic!.VestingScheduleId == null
+                    ? EnrollmentConstants.NotEnrolled
+                    : pp.Demographic!.HasForfeited
+                        ? pp.Demographic!.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                            : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                        : pp.Demographic!.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            ? EnrollmentConstants.OldVestingPlanHasContributions
+                            : EnrollmentConstants.NewVestingPlanHasContributions
             };
 
 

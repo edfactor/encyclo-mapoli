@@ -50,7 +50,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         var mockMasterInquiry = new Mock<IMasterInquiryService>();
         _mockAuditService = new Mock<IAuditService>();
         var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
-        var frozenService = new FrozenService(MockDbContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object);
+        var frozenService = new FrozenService(MockDbContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object, new Mock<TimeProvider>().Object);
         var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());
         var totalService = new TotalService(MockDbContextFactory, mockCalendarService.Object, mockEmbeddedSql.Object, demographicReader);
 

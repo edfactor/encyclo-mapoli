@@ -17,12 +17,14 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
     private readonly IAuditService _auditService;
     private readonly INavigationPrerequisiteValidator _navPrereqValidator;
     private readonly ILogger<ProfitMasterUpdateEndpoint> _logger;
+    private readonly IProfitShareEditService _editService;
 
     public ProfitMasterUpdateEndpoint(IProfitMasterService profitMasterUpdate,
         INavigationService navigationService,
         IAuditService auditService,
         INavigationPrerequisiteValidator navPrereqValidator,
-        ILogger<ProfitMasterUpdateEndpoint> logger)
+        ILogger<ProfitMasterUpdateEndpoint> logger,
+        IProfitShareEditService profitShareEditService)
         : base(Navigation.Constants.MasterUpdate)
     {
         _profitMasterService = profitMasterUpdate;
@@ -30,6 +32,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
         _auditService = auditService;
         _navPrereqValidator = navPrereqValidator;
         _logger = logger;
+        _editService = profitShareEditService;
     }
 
     public override void Configure()
@@ -67,6 +70,21 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             {
                 await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.Complete, cancellationToken);
                 return updateResponse;
+            },
+            ct);
+
+        await _auditService.ArchiveCompletedReportAsync("PAY444",
+            req.ProfitYear,
+            req,
+            isArchiveRequest: true,
+            async (_, __, cancellationToken) =>
+            {
+                // Additionally, run Profit Share Edit to archive the member transactions post-update
+                _logger.LogInformation(
+                    "Generating Profit Share Edit report post Master Update for year {ProfitYear}",
+                    req.ProfitYear);
+                return await _editService.ProfitShareEdit(req, cancellationToken);
+                
             },
             ct);
 

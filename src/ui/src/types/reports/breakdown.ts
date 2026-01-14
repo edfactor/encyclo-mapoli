@@ -1,4 +1,5 @@
 import type { PagedReportResponse, ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
+import { ValidationResponse } from "../validation";
 
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
   storeNumber?: number;
@@ -57,6 +58,7 @@ export interface BreakdownByStoreTotals {
   totalDisbursements: number;
   totalEndBalances: number;
   totalVestedBalance: number;
+  crossReferenceValidation: ValidationResponse;
 }
 
 export interface GrandTotalsByStoreResponseDto {

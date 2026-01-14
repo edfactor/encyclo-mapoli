@@ -1,6 +1,7 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -137,10 +138,15 @@ public class CleanupReportService : ICleanupReportService
                         x.BadgeNumber,
                         x.PayFrequencyId,
                         PsnSuffix = (short)0,
-                        EnrollmentId = x.PayProfits
-                            .Where(p => p.ProfitYear == latestYear)
-                            .Select(p => p.EnrollmentId)
-                            .FirstOrDefault()
+                        EnrollmentId = x.VestingScheduleId == null
+                            ? EnrollmentConstants.NotEnrolled
+                            : x.HasForfeited
+                                ? x.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                    ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                    : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                                : x.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                    ? EnrollmentConstants.OldVestingPlanHasContributions
+                                    : EnrollmentConstants.NewVestingPlanHasContributions
                     }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
@@ -149,7 +155,7 @@ public class CleanupReportService : ICleanupReportService
                         x.BadgeNumber,
                         PayFrequencyId = (byte)0,
                         x.PsnSuffix,
-                        EnrollmentId = Enrollment.Constants.Import_Status_Unknown
+                        EnrollmentId = EnrollmentConstants.Import_Status_Unknown
                     }))
                     .GroupBy(x => x.Ssn)
                     .Select(x => new
@@ -216,8 +222,8 @@ public class CleanupReportService : ICleanupReportService
                                 pd.MonthToDate,
                                 Date = pd.CreatedAtUtc,
                                 nameAndDob.DateOfBirth,
-                                HasForfeited = nameAndDob.EnrolledId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
-                                               nameAndDob.EnrolledId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
+                                HasForfeited = nameAndDob.EnrolledId == /*3*/ EnrollmentConstants.OldVestingPlanHasForfeitureRecords ||
+                                               nameAndDob.EnrolledId == /*4*/ EnrollmentConstants.NewVestingPlanHasForfeitureRecords,
                                 nameAndDob.PayFrequencyId
                             };
 

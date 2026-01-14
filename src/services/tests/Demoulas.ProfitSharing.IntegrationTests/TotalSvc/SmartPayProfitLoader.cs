@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Common.Constants;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,7 +26,23 @@ public static class SmartPayProfitLoader
 
             var result = await ctx.PayProfits
                 .Where(p => p.ProfitYear == profitYear && p.Demographic != null)
-                .Select(p => new { p.Demographic!.BadgeNumber, p.Demographic.Ssn, p.EnrollmentId, p.Demographic.PayFrequencyId, p.Demographic.TerminationDate, p.Demographic.TerminationCodeId })
+                .Select(p => new
+                {
+                    p.Demographic!.BadgeNumber,
+                    p.Demographic.Ssn,
+                    EnrollmentId = p.Demographic.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : p.Demographic.HasForfeited
+                            ? (p.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords)
+                            : (p.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions),
+                    p.Demographic.PayFrequencyId,
+                    p.Demographic.TerminationDate,
+                    p.Demographic.TerminationCodeId,
+                })
                 .ToListAsync();
 
             Dictionary<int, PayProfitData> payProfitData = result

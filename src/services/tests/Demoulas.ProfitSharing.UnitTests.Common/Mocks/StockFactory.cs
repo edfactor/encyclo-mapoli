@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 
@@ -94,7 +94,10 @@ public static class StockFactory
             PayProfits = [],
             Beneficiaries = [],
             Checks = [],
-            DistributionRequests = []
+            DistributionRequests = [],
+            // Set vesting schedule to get EnrollmentId = 2 (NewVestingPlanHasContributions)
+            VestingScheduleId = VestingSchedule.Constants.NewPlan,
+            HasForfeited = false
         };
 
         List<PayProfit> payprofits =
@@ -108,8 +111,8 @@ public static class StockFactory
                 CurrentIncomeYear = 0,
                 WeeksWorkedYear = 0,
                 PsCertificateIssuedDate = null,
-                EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions,
-                Enrollment = new Enrollment { Id = Enrollment.Constants.NewVestingPlanHasContributions, Name = "" },
+                // EnrollmentId is computed from Demographic.VestingScheduleId + HasForfeited
+                // Enrollment is also computed (read-only properties)
                 BeneficiaryTypeId = 0,
                 BeneficiaryType = null,
                 EmployeeTypeId = 0,
@@ -131,8 +134,8 @@ public static class StockFactory
                 CurrentIncomeYear = 0,
                 WeeksWorkedYear = 0,
                 PsCertificateIssuedDate = null,
-                EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions,
-                Enrollment = new Enrollment { Id = Enrollment.Constants.NewVestingPlanHasContributions, Name = "" },
+                // EnrollmentId is computed from Demographic.VestingScheduleId + HasForfeited
+                // Enrollment is also computed (read-only properties)
                 BeneficiaryTypeId = 0,
                 BeneficiaryType = null,
                 EmployeeTypeId = 0,

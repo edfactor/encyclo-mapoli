@@ -258,6 +258,8 @@ public class DemographicsServiceTests
                         EmploymentTypeId = demographic.EmploymentTypeId,
                         PayFrequencyId = demographic.PayFrequencyId,
                         EmploymentStatusId = demographic.EmploymentStatusId,
+                        VestingScheduleId = demographic.VestingScheduleId,
+                        HasForfeited = demographic.HasForfeited,
                         ValidFrom = DateTimeOffset.UtcNow,
                         ValidTo = new DateTimeOffset(new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc))
                     };
@@ -616,7 +618,7 @@ public class DemographicsServiceTests
             fakeSsnService.Object
         );
 
-        // Act 
+        // Act
         await service.MergeProfitDetailsToDemographic(sourceDemographic, targetDemographic, CancellationToken.None);
 
         // Assert

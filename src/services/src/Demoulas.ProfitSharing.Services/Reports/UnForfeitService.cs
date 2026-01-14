@@ -1,5 +1,6 @@
-﻿using System.Linq.Dynamic.Core;
+using System.Linq.Dynamic.Core;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -72,8 +73,6 @@ public sealed class UnforfeitService : IUnforfeitService
                     join d in activeDemographics on pd.Ssn equals d.Ssn
                     join ppYE in context.PayProfits
                         on new { d.Id, ProfitYear = profitYear } equals new { Id = ppYE.DemographicId, ppYE.ProfitYear }
-                    join enrollment in context.Enrollments
-                        on ppYE.EnrollmentId equals enrollment.Id
                     join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp
                     from yos in yosTmp.DefaultIfEmpty()
                     join vest in vestingServiceQuery on d.Ssn equals vest.Ssn into vestTmp
@@ -92,8 +91,24 @@ public sealed class UnforfeitService : IUnforfeitService
                         NetBalanceLastYear = vest != null ? vest.CurrentBalance ?? 0 : 0,
                         VestedBalanceLastYear = vest != null ? vest.VestedBalance ?? 0 : 0,
                         d.PayFrequencyId,
-                        ppYE.EnrollmentId,
-                        EnrollmentName = enrollment.Name,
+                        EnrollmentId = d.VestingScheduleId == null
+                            ? EnrollmentConstants.NotEnrolled
+                            : d.HasForfeited
+                                ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                    ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                    : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                                : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                    ? EnrollmentConstants.OldVestingPlanHasContributions
+                                    : EnrollmentConstants.NewVestingPlanHasContributions,
+                        EnrollmentName = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
+                            ? EnrollmentConstants.NotEnrolled
+                            : d.HasForfeited
+                                ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                    ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                    : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                                : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                    ? EnrollmentConstants.OldVestingPlanHasContributions
+                                    : EnrollmentConstants.NewVestingPlanHasContributions),
                         HoursProfitYear = ppYE.TotalHours,
                         WagesProfitYear = ppYE.TotalIncome
                     };
@@ -196,9 +211,9 @@ public sealed class UnforfeitService : IUnforfeitService
                                 SuggestedUnforfeiture =
                                     d.Id == maxProfitDetailId &&
                                     d.CommentType != null && d.CommentType == CommentType.Constants.Forfeit &&
-                                    (main.YearsOfService == 1 && main.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
-                                     || main.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords
-                                     || main.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+                                    (main.YearsOfService == 1 && main.EnrollmentId == EnrollmentConstants.NewVestingPlanHasContributions
+                                     || main.EnrollmentId == EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                     || main.EnrollmentId == EnrollmentConstants.NewVestingPlanHasForfeitureRecords)
                                         ? d.Forfeiture
                                         : null,
                                 ProfitDetailId = d.Id

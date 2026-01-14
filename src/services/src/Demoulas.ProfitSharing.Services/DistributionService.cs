@@ -47,7 +47,7 @@ public sealed class DistributionService : IDistributionService
                         join tax in ctx.TaxCodes on dist.TaxCodeId equals tax.Id
                         join demLj in demographic on dist.Ssn equals demLj.Ssn into demGroup
                         from dem in demGroup.DefaultIfEmpty()
-                        join benLj in ctx.Beneficiaries on dist.Ssn equals benLj.Contact!.Ssn into benGroup
+                        join benLj in ctx.Beneficiaries.Where(b => !b.IsDeleted) on dist.Ssn equals benLj.Contact!.Ssn into benGroup
                         from ben in benGroup.DefaultIfEmpty()
                         select new DistributionSearchQueryItem
                         {
@@ -81,7 +81,7 @@ public sealed class DistributionService : IDistributionService
             {
                 // Validate that SSN exists in either demographics or beneficiaries
                 var ssnExists = await demographic.AnyAsync(d => d.Ssn == searchSsn, cancellationToken) ||
-                               await ctx.Beneficiaries.AnyAsync(b => b.Contact!.Ssn == searchSsn, cancellationToken);
+                               await ctx.Beneficiaries.Where(b => !b.IsDeleted).AnyAsync(b => b.Contact!.Ssn == searchSsn, cancellationToken);
 
                 if (!ssnExists)
                 {
@@ -95,7 +95,7 @@ public sealed class DistributionService : IDistributionService
             {
                 if (request.PsnSuffix.HasValue)
                 {
-                    var ssn = await ctx.Beneficiaries.Where(x => x.BadgeNumber == request.BadgeNumber.Value && x.PsnSuffix == request.PsnSuffix.Value).Select(x => x.Contact!.Ssn).FirstOrDefaultAsync(cancellationToken);
+                    var ssn = await ctx.Beneficiaries.Where(x => !x.IsDeleted && x.BadgeNumber == request.BadgeNumber.Value && x.PsnSuffix == request.PsnSuffix.Value).Select(x => x.Contact!.Ssn).FirstOrDefaultAsync(cancellationToken);
                     if (ssn == default)
                     {
                         throw new InvalidOperationException("Badge number and PSN suffix combination not found.");

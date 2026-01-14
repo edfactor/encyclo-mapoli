@@ -38,4 +38,10 @@ public sealed class BeneficiaryContact : ModifiedBase
     public List<Beneficiary>? Beneficiaries { get; set; }
 
     public List<BeneficiarySsnChangeHistory> BeneficiarySsnChangeHistories { get; set; } = new();
+
+    /// <summary>
+    /// Soft delete flag. When true, the beneficiary contact is considered deleted
+    /// but remains in the database for historical/audit purposes.
+    /// </summary>
+    public bool IsDeleted { get; set; }
 }

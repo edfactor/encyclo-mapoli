@@ -96,6 +96,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
 
             // Query 5: Beneficiaries with projection (only load needed fields)
             var beneficiaries = await ctx.Beneficiaries
+                .Where(b => !b.IsDeleted)
                 .TagWith($"ForfeituresReport-Beneficiaries-{currentYear}")
                 .Where(b => b.Contact != null)
                 .Select(b => new

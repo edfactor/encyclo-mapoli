@@ -67,7 +67,7 @@ public class BeneficiaryService : IBeneficiaryService
             }
 
             // At this point, validation has confirmed these entities exist
-            var beneficiaryContact = (await ctx.BeneficiaryContacts.FirstOrDefaultAsync(x => x.Id == req.BeneficiaryContactId, cancellationToken))!;
+            var beneficiaryContact = (await ctx.BeneficiaryContacts.Where(x => !x.IsDeleted && x.Id == req.BeneficiaryContactId).FirstOrDefaultAsync(cancellationToken))!;
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             var demographic = (await demographicQuery.Where(x => x.BadgeNumber == req.EmployeeBadgeNumber).SingleOrDefaultAsync(cancellationToken))!;
 
@@ -195,7 +195,7 @@ public class BeneficiaryService : IBeneficiaryService
     {
         var resp = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            var beneficiary = await ctx.Beneficiaries.SingleAsync(x => x.Id == req.Id, cancellationToken);
+            var beneficiary = await ctx.Beneficiaries.Where(x => !x.IsDeleted && x.Id == req.Id).SingleAsync(cancellationToken);
 
             // Validate request using FluentValidation (including percentage sum validation)
             var updateBeneficiaryValidator = new UpdateBeneficiaryRequestValidator(this, beneficiary.BadgeNumber, beneficiary.Id);
@@ -285,7 +285,7 @@ public class BeneficiaryService : IBeneficiaryService
             throw new ValidationException(validationResult.Errors);
         }
 
-        var contact = await ctx.BeneficiaryContacts.Include(x => x.Address).Include(x => x.ContactInfo).SingleAsync(x => x.Id == beneficiaryContactId, cancellationToken);
+        var contact = await ctx.BeneficiaryContacts.Include(x => x.Address).Include(x => x.ContactInfo).Where(x => !x.IsDeleted && x.Id == beneficiaryContactId).SingleAsync(cancellationToken);
 
         if (req.ContactSsn.HasValue)
         {
@@ -454,30 +454,19 @@ public class BeneficiaryService : IBeneficiaryService
 
             if (await CanIDeleteThisBeneficiary(beneficiaryToDelete, ctx, cancellationToken))
             {
+                // Soft delete: Set IsDeleted flag instead of removing from database
+                beneficiaryToDelete.IsDeleted = true;
+
+                // Check if we should also soft delete the contact
                 var deleteContact = false;
                 if (beneficiaryToDelete.Contact != null)
                 {
                     deleteContact = await CanIDeleteThisBeneficiaryContact(id, beneficiaryToDelete!.Contact, ctx, cancellationToken);
-                }
-
-                ctx.Beneficiaries.Remove(beneficiaryToDelete);
-                if (deleteContact && beneficiaryToDelete.Contact != null)
-                {
-                    if (beneficiaryToDelete!.Contact.Address != null)
+                    
+                    if (deleteContact)
                     {
-                        ctx.Remove(beneficiaryToDelete!.Contact.Address);
+                        beneficiaryToDelete.Contact.IsDeleted = true;
                     }
-                    if (beneficiaryToDelete!.Contact.ContactInfo != null)
-                    {
-                        ctx.Remove(beneficiaryToDelete!.Contact.ContactInfo);
-                    }
-                    // Use RemoveRange for collections, not Remove
-                    if (beneficiaryToDelete!.Contact.BeneficiarySsnChangeHistories != null &&
-                        beneficiaryToDelete!.Contact.BeneficiarySsnChangeHistories.Any())
-                    {
-                        ctx.RemoveRange(beneficiaryToDelete!.Contact.BeneficiarySsnChangeHistories);
-                    }
-                    ctx.BeneficiaryContacts.Remove(beneficiaryToDelete.Contact);
                 }
             }
 
@@ -496,6 +485,7 @@ public class BeneficiaryService : IBeneficiaryService
                 .Include(x => x.Beneficiaries)
                 .Include(beneficiaryContact => beneficiaryContact.Address)
                 .Include(beneficiaryContact => beneficiaryContact.ContactInfo)
+                .Include(beneficiaryContact => beneficiaryContact.BeneficiarySsnChangeHistories)
                 .SingleAsync(x => x.Id == id, cancellation);
 
             var deleteContact = true;
@@ -506,21 +496,17 @@ public class BeneficiaryService : IBeneficiaryService
                 deleteContact = await CanIDeleteThisBeneficiary(firstBeneficiary, ctx, cancellation);
                 beneficiaryToDelete = firstBeneficiary;
             }
+            
             if (deleteContact)
             {
+                // Soft delete: Set IsDeleted flag instead of removing from database
                 if (beneficiaryToDelete != null)
                 {
-                    ctx.Beneficiaries.Remove(beneficiaryToDelete);
+                    beneficiaryToDelete.IsDeleted = true;
                 }
-                if (contactToDelete.Address != null)
-                {
-                    ctx.Remove(contactToDelete.Address);
-                }
-                if (contactToDelete.ContactInfo != null)
-                {
-                    ctx.Remove(contactToDelete.ContactInfo);
-                }
-                ctx.BeneficiaryContacts.Remove(contactToDelete);
+                
+                contactToDelete.IsDeleted = true;
+                
                 await ctx.SaveChangesAsync(cancellation);
                 await transaction.CommitAsync(cancellation);
             }
@@ -546,7 +532,7 @@ public class BeneficiaryService : IBeneficiaryService
 
     private static async Task<bool> CanIDeleteThisBeneficiaryContact(int beneficiaryId, BeneficiaryContact contact, ProfitSharingDbContext ctx, CancellationToken token)
     {
-        return !(await ctx.Beneficiaries.AnyAsync(b => b.BeneficiaryContactId == contact.Id && b.Id != beneficiaryId, token));
+        return !(await ctx.Beneficiaries.AnyAsync(b => !b.IsDeleted && b.BeneficiaryContactId == contact.Id && b.Id != beneficiaryId, token));
     }
     private static async Task<short> FindPsn(CreateBeneficiaryRequest req, ProfitSharingDbContext ctx, CancellationToken token)
     {
@@ -576,7 +562,8 @@ public class BeneficiaryService : IBeneficiaryService
 
         short currentMaxPsn = 0;
         var qry = (from bc in ctx.Beneficiaries
-                   where bc.BadgeNumber == req.EmployeeBadgeNumber
+                   where !bc.IsDeleted
+                      && bc.BadgeNumber == req.EmployeeBadgeNumber
                       && bc.PsnSuffix > minPsn
                       && bc.PsnSuffix < minPsn + psnRange
                    select bc.PsnSuffix);
@@ -601,7 +588,7 @@ public class BeneficiaryService : IBeneficiaryService
         {
             return await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var query = ctx.Beneficiaries.Where(x => x.BadgeNumber == badgeNumber);
+                var query = ctx.Beneficiaries.Where(x => !x.IsDeleted && x.BadgeNumber == badgeNumber);
 
                 if (beneficiaryIdToExclude.HasValue)
                 {
@@ -630,7 +617,7 @@ public class BeneficiaryService : IBeneficiaryService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var query = ctx.Beneficiaries.Where(x => x.BadgeNumber == badgeNumber);
+            var query = ctx.Beneficiaries.Where(x => !x.IsDeleted && x.BadgeNumber == badgeNumber);
 
             if (beneficiaryIdToExclude.HasValue)
             {

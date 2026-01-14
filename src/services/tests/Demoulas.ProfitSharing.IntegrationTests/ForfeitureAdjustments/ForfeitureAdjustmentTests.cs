@@ -1,6 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.Services;
+using Moq;
 using Shouldly;
 
 #pragma warning disable VSTHRD002 // Synchronous waits are safe in xUnit tests
@@ -33,7 +36,9 @@ public class ForfeitureAdjustmentTests : PristineBaseTest
         var employee = await GetEmployeeByBadgeAsync(badge);
         employee.PayProfit.Etva.ShouldBe(10.10m);
 
-        ForfeitureAdjustmentService fas = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider);
+        var mockAppUser = new Mock<IAppUser>();
+        var mockAuditService = new Mock<IAuditService>();
+        ForfeitureAdjustmentService fas = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
         SuggestedForfeitureAdjustmentRequest sfar = new() { Badge = badge };
         var res = (await fas.GetSuggestedForfeitureAmount(sfar)).Value!;
 
@@ -45,7 +50,9 @@ public class ForfeitureAdjustmentTests : PristineBaseTest
         var employee = GetEmployeeByBadgeAsync(badge).GetAwaiter().GetResult();
         employee.PayProfit.Etva.ShouldNotBe(0m);
 
-        ForfeitureAdjustmentService fas = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider);
+        var mockAppUser = new Mock<IAppUser>();
+        var mockAuditService = new Mock<IAuditService>();
+        ForfeitureAdjustmentService fas = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
         SuggestedForfeitureAdjustmentRequest sfar = new() { Badge = badge };
         var res = fas.GetSuggestedForfeitureAmount(sfar).GetAwaiter().GetResult().Value!;
 

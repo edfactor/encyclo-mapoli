@@ -53,6 +53,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
         // which excluded beneficiaries that never had distributions.
 
         IQueryable<Beneficiary> beneficiariesQuery = ctx.Beneficiaries
+            .Where(b => !b.IsDeleted)
             .Include(b => b.Contact)
             .ThenInclude(bc => bc!.ContactInfo)
             .TagWith("MasterInquiry: Get beneficiary");
@@ -135,6 +136,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var memberData = await ctx.Beneficiaries
+                .Where(b => !b.IsDeleted)
                 .Include(b => b.Contact)
                 .Where(b => b.Id == id)
                 .Select(b => new
@@ -196,7 +198,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
         {
             // EF Core 9: Optimize beneficiary query with better projection
             var membersQuery = ctx.Beneficiaries
-                .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
+                .Where(b => !b.IsDeleted && b.Contact != null && ssns.Contains(b.Contact.Ssn))
                 .TagWith("MasterInquiry: Get beneficiary details for SSNs");
 
             // Only filter by BadgeNumber if provided and not 0
@@ -264,7 +266,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
         {
             // EF Core 9: Optimize projection to fetch only needed data
             var members = await ctx.Beneficiaries
-                .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
+                .Where(b => !b.IsDeleted && b.Contact != null && ssns.Contains(b.Contact.Ssn))
                 .TagWith("MasterInquiry: Get all beneficiary details for SSNs")
                 .Select(b => new
                 {
@@ -325,7 +327,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
         {
             // ReadOnlyDbContext automatically handles AsNoTracking
             int ssnBene = await ctx.Beneficiaries
-                .Where(b => b.BadgeNumber == badgeNumber && b.PsnSuffix == psnSuffix)
+                .Where(b => !b.IsDeleted && b.BadgeNumber == badgeNumber && b.PsnSuffix == psnSuffix)
                 .Join(ctx.BeneficiaryContacts, b => b.BeneficiaryContactId, bc => bc.Id, (b, bc) => bc.Ssn)
                 .FirstOrDefaultAsync(cancellationToken);
 

@@ -246,7 +246,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         var beneficiaryRows = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.ContactInfo).Include(x => x.Demographic).ThenInclude(x => x!.ContactInfo).Include(x => x.Demographic).ThenInclude(x => x!.Address)
-                .Where(x => request.BadgeNumber == null || request.BadgeNumber == 0 || x.BadgeNumber == request.BadgeNumber);
+                .Where(x => !x.IsDeleted && (request.BadgeNumber == null || request.BadgeNumber == 0 || x.BadgeNumber == request.BadgeNumber));
 
             var prevBeneficiaries = await GetPreviousBeneficiaries(request, query, cancellationToken);
 
@@ -454,7 +454,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             var rows = await _dataContextFactory.UseReadOnlyContext(async context =>
             {
                 return await context.Beneficiaries
-                    .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
+                    .Where(x => !x.IsDeleted && x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
                     .Select(x => new
                     {
                         FullName = x.Contact!.ContactInfo!.FullName ?? string.Empty,
