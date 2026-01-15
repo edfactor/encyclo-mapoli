@@ -122,7 +122,6 @@ public class DemographicsServiceTests
 
         var service = new DemographicsService(
             scenarioFactory,
-            repositoryMock.Object,
             matchingServiceMock.Object,
             auditServiceMock.Object,
             historyServiceMock.Object,
@@ -281,7 +280,6 @@ public class DemographicsServiceTests
             .Setup(m => m.PrepareSsnUpdateCommands(It.IsAny<List<Demographic>>(), It.IsAny<Dictionary<long, Demographic>>()))
             .Returns(new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>()); var service = new DemographicsService(
             scenarioFactory,
-            repositoryMock.Object,
             matchingServiceMock.Object,
             auditServiceMock.Object,
             historyServiceMock.Object,
@@ -522,7 +520,6 @@ public class DemographicsServiceTests
 
         var service = new DemographicsService(
             scenarioFactory,
-            repositoryMock.Object,
             matchingServiceMock.Object,
             auditServiceMock.Object,
             historyServiceMock.Object,
@@ -609,7 +606,6 @@ public class DemographicsServiceTests
 
         var service = new DemographicsService(
             scenarioFactory,
-            repositoryMock.Object,
             matchingServiceMock.Object,
             auditServiceMock.Object,
             historyServiceMock.Object,

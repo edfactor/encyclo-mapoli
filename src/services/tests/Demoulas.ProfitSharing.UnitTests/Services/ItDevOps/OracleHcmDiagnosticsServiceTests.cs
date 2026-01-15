@@ -250,11 +250,6 @@ internal sealed class InMemoryProfitSharingDataContextFactory : IProfitSharingDa
     private ProfitSharingDbContext? _context;
     private readonly string _databaseName = Guid.NewGuid().ToString();
 
-    public Task<IProfitSharingDbContext> CreateDbContextAsync(CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult<IProfitSharingDbContext>(_context ??= CreateInMemoryContext());
-    }
-
     public Task<T> UseReadOnlyContext<T>(
             Func<ProfitSharingReadOnlyDbContext, Task<T>> operation,
             CancellationToken cancellationToken = default)

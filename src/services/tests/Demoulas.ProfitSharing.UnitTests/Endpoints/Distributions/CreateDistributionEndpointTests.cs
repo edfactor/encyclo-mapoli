@@ -18,10 +18,6 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Distributions;
 [Collection("Distribution Tests")]
 public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
 {
-    public CreateDistributionEndpointTests(ITestOutputHelper testOutputHelper)
-    {
-        // Constructor accepts ITestOutputHelper for xUnit framework compatibility
-    }
 
     /// <summary>
     /// Gets a valid badge number from the mocked demographics data

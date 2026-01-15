@@ -1,4 +1,4 @@
-using Demoulas.Common.Api.Extensions;
+﻿using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Contexts;
@@ -22,7 +22,6 @@ using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.AspNetCore;
-using QuestPDF;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
@@ -51,8 +50,6 @@ else
     builder.Configuration
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 }
-
-Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 // Configure logging - configuration read from SmartLogging section in appsettings
 LoggingConfig logConfig = new();

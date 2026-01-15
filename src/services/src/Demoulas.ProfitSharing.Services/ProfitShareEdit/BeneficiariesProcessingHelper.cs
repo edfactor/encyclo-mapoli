@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
@@ -10,7 +11,7 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 [SuppressMessage("ReSharper", "MergeConditionalExpression")]
 internal static class BeneficiariesProcessingHelper
 {
-    internal static async Task ProcessBeneficiaries(IProfitSharingDataContextFactory dbContextFactory, TotalService totalsService, List<MemberFinancials> members,
+    internal static async Task ProcessBeneficiaries(IProfitSharingDataContextFactory dbContextFactory, TotalService totalsService, IPayrollDuplicateSsnReportService duplicateSsnReportService, List<MemberFinancials> members,
         ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         // The BeginningBalance is the total balance from the previous year
@@ -35,8 +36,8 @@ internal static class BeneficiariesProcessingHelper
         }, cancellationToken);
 
 
-        Dictionary<int, ProfitDetailTotals> thisYearsTotalsBySSn =
-            await TotalService.GetProfitDetailTotalsForASingleYear(dbContextFactory, profitShareUpdateRequest.ProfitYear, [.. benes.Select(ef => ef.Ssn)], cancellationToken);
+        ILookup<int, ProfitDetailTotals> thisYearsTotalsBySsn =
+            await TotalService.GetProfitDetailTotalsForASingleYear(dbContextFactory, duplicateSsnReportService, profitShareUpdateRequest.ProfitYear, [.. benes.Select(ef => ef.Ssn)], cancellationToken);
 
         foreach (BeneficiaryFinancials bene in benes)
         {
@@ -53,7 +54,8 @@ internal static class BeneficiariesProcessingHelper
                 continue;
             }
 
-            MemberFinancials memb = ProcessBeneficiary(bene, thisYearsTotalsBySSn.GetValueOrDefault(bene.Ssn) ?? ProfitDetailTotals.Zero, profitShareUpdateRequest);
+            var totals = thisYearsTotalsBySsn[bene.Ssn].FirstOrDefault() ?? ProfitDetailTotals.Zero;
+            MemberFinancials memb = ProcessBeneficiary(bene, totals, profitShareUpdateRequest);
             if (!memb.IsAllZeros())
             {
                 members.Add(memb);

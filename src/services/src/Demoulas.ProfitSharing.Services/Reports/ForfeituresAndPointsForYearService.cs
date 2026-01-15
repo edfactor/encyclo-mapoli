@@ -110,7 +110,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
                 .ToListAsync(cancellationToken);
 
             // Build fast lookup dictionaries (in-memory, very fast)
-            var transactionsBySsn = transactionsInCurrentYear.ToDictionary(t => t.Ssn);
+            var transactionsBySsn = transactionsInCurrentYear.ToLookup(t => t.Ssn);
             var balancesByKey = currentBalances.ToDictionary(b => (b.Ssn, b.Id));
 
             // Compute totals (in-memory aggregation)
@@ -128,7 +128,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             {
                 employeeSsns.Add(emp.Ssn);
                 var balance = balancesByKey.GetValueOrDefault((emp.Ssn, emp.DemographicId));
-                var transaction = transactionsBySsn.GetValueOrDefault(emp.Ssn);
+                var transaction = transactionsBySsn[emp.Ssn].FirstOrDefault();
 
                 var member = ToMemberDetailsFromProjection(
                     emp.FullName!,

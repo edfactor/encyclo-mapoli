@@ -2,8 +2,6 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.Reports;
-using Microsoft.Extensions.Hosting;
-using Moq;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.QPAY129;
@@ -19,7 +17,6 @@ public class QPAY129Test : PristineBaseTest
             DbFactory,
             loggerFactory,
             CalendarService,
-            new Mock<IHostEnvironment>().Object,
             DemographicReaderService,
             TimeProvider.System);
     }

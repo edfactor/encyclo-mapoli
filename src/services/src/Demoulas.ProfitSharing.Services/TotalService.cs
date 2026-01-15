@@ -413,11 +413,20 @@ public sealed class TotalService : ITotalService
     /// Ignores any 0 records
     /// includes special handling for ClassActionFund and Military.
     /// </summary>
-    internal static Task<Dictionary<int, ProfitDetailTotals>> GetProfitDetailTotalsForASingleYear(IProfitSharingDataContextFactory dbFactory, short profitYear, HashSet<int> ssns,
+    internal static Task<ILookup<int, ProfitDetailTotals>> GetProfitDetailTotalsForASingleYear(
+        IProfitSharingDataContextFactory dbFactory,
+        IPayrollDuplicateSsnReportService duplicateSsnReportService,
+        short profitYear,
+        HashSet<int> ssns,
         CancellationToken cancellationToken)
     {
-        return dbFactory.UseReadOnlyContext(ctx =>
+        return dbFactory.UseReadOnlyContext(async ctx =>
         {
+            if (await duplicateSsnReportService.DuplicateSsnExistsAsync(cancellationToken))
+            {
+                throw new InvalidOperationException("Duplicate SSNs exist; profit detail totals require unique SSNs to avoid incorrect aggregation.");
+            }
+
             var query = ctx.ProfitDetails
                 .Where(pd => ssns.Contains(pd.Ssn))
                 .Where(pd => pd.ProfitYear == profitYear)
@@ -448,15 +457,16 @@ public sealed class TotalService : ITotalService
                         .Sum(pd => pd.Earnings)
                 });
 
-            return query.ToDictionaryAsync(k => k.Ssn, v => new ProfitDetailTotals
-                (v.DistributionsTotal,
+            var results = await query.ToListAsync(cancellationToken);
+            return results.ToLookup(
+                k => k.Ssn,
+                v => new ProfitDetailTotals(
+                    v.DistributionsTotal,
                     v.ForfeitsTotal,
                     v.AllocationsTotal,
                     v.PaidAllocationsTotal,
                     v.MilitaryTotal,
-                    v.ClassActionFundTotal
-                )
-                , cancellationToken);
+                    v.ClassActionFundTotal));
         }, cancellationToken);
     }
 }
