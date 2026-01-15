@@ -56,11 +56,13 @@ export interface BeneficiarySearchForm {
 }
 
 export interface BeneficiaryDetailAPIRequest extends SortedPaginationRequestDto {
+  id: number;
   badgeNumber: number;
   psnSuffix: number;
 }
 
 export interface BeneficiaryDetail {
+  id:number;
   badgeNumber: number;
   psnSuffix: number;
   fullName?: string | null;

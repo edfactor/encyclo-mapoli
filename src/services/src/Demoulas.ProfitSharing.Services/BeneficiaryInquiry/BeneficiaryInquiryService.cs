@@ -100,6 +100,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             Total = memberResults.Total,
             Results = memberResults.Results?.Select(m => new BeneficiarySearchFilterResponse
             {
+                Id =  m.Id,
                 BadgeNumber = m.BadgeNumber,
                 PsnSuffix = m.PsnSuffix,
                 FullName = m.FullName,
@@ -127,8 +128,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
         if (lastThree == 0)
         {
-            // e.g., 1200 -> 1000
-            return (num / PsnSuffixRoot) * PsnSuffixRoot;
+            // e.g., 1000 -> 0, 2000 -> 0 (parent is the employee)
+            return 0;
         }
         else if (lastThree % 100 == 0)
         {
@@ -151,7 +152,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     {
         int psnSuffix = request.PsnSuffix ?? 0;
         List<int> psns = new();
-        if (psnSuffix > PsnSuffixRoot)
+        // Check if this is a multi-level beneficiary (not a first-level x000)
+        if (psnSuffix > PsnSuffixRoot && psnSuffix % PsnSuffixRoot != 0)
         {
             int stepBack = StepBackNumber(psnSuffix);
             while (stepBack >= PsnSuffixRoot)
