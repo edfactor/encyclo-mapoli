@@ -23,15 +23,12 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
-
-    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, TotalService totalService, ICalendarService calendarService, IDemographicReaderService demographicReaderService, IPayrollDuplicateSsnReportService duplicateSsnReportService)
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, TotalService totalService, ICalendarService calendarService, IDemographicReaderService demographicReaderService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
-        _duplicateSsnReportService = duplicateSsnReportService;
     }
 
     public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
@@ -133,7 +130,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             _demographicReaderService, profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
-        await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, _totalService, _duplicateSsnReportService, members, profitShareUpdateRequest, cancellationToken);
+        await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, _totalService, members, profitShareUpdateRequest, cancellationToken);
 
         members = members.OrderBy(m => m.Name).ToList();
         // The PAY444 Report/Page does not show the zero event individuals, but the PAY447 needs the ZeroContribution records for the PAY447 report/page.

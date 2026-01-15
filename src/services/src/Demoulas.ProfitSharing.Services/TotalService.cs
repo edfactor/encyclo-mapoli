@@ -415,18 +415,12 @@ public sealed class TotalService : ITotalService
     /// </summary>
     internal static Task<ILookup<int, ProfitDetailTotals>> GetProfitDetailTotalsForASingleYear(
         IProfitSharingDataContextFactory dbFactory,
-        IPayrollDuplicateSsnReportService duplicateSsnReportService,
         short profitYear,
         HashSet<int> ssns,
         CancellationToken cancellationToken)
     {
         return dbFactory.UseReadOnlyContext(async ctx =>
         {
-            if (await duplicateSsnReportService.DuplicateSsnExistsAsync(cancellationToken))
-            {
-                throw new InvalidOperationException("Duplicate SSNs exist; profit detail totals require unique SSNs to avoid incorrect aggregation.");
-            }
-
             var query = ctx.ProfitDetails
                 .Where(pd => ssns.Contains(pd.Ssn))
                 .Where(pd => pd.ProfitYear == profitYear)
