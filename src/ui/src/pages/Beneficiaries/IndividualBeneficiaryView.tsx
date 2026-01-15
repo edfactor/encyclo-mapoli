@@ -1,5 +1,5 @@
 import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiaryDto } from "@/types";
-import { Button } from "@mui/material";
+import { Button, Box } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
 import BeneficiaryRelationshipsGrids from "./BeneficiaryRelationshipsGrids";
@@ -85,20 +85,23 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
         selectedMember={selectedMember}
         memberType={memberType || 0}
       />
-      <div
-        style={{
-          padding: "24px",
+      
+      <Box
+        sx={{
+          paddingX: "24px",
+          paddingTop: "24px",
+          paddingBottom: "16px",
           display: "flex",
-          justifyContent: "right",
+          justifyContent: "flex-start",
           alignItems: "center"
         }}>
         <Button
           variant="contained"
           color="primary"
           onClick={() => createOrUpdateBeneficiary(undefined)}>
-          Add Beneficiary
+          Add Beneficiary for {selectedMember.fullName}
         </Button>
-      </div>
+      </Box>
 
       <BeneficiaryRelationshipsGrids
         count={change}
