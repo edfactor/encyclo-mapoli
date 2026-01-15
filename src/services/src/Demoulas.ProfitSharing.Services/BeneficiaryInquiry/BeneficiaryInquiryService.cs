@@ -100,6 +100,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             Total = memberResults.Total,
             Results = memberResults.Results?.Select(m => new BeneficiarySearchFilterResponse
             {
+                Id =  m.Id,
                 BadgeNumber = m.BadgeNumber,
                 PsnSuffix = m.PsnSuffix,
                 FullName = m.FullName,

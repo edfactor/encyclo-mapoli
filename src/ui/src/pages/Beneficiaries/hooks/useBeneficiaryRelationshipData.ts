@@ -81,6 +81,7 @@ export const useBeneficiaryRelationshipData = ({
     if (!selectedMember?.psnSuffix && selectedMember.psnSuffix !== 0) return null;
 
     return {
+      id: selectedMember.id,
       badgeNumber: selectedMember.badgeNumber,
       psnSuffix: selectedMember.psnSuffix,
       isSortDescending: sortParams.isSortDescending,
@@ -88,7 +89,7 @@ export const useBeneficiaryRelationshipData = ({
       sortBy: sortParams.sortBy,
       take: pageSize
     };
-  }, [selectedMember?.badgeNumber, selectedMember?.psnSuffix, pageNumber, pageSize, sortParams]);
+  }, [selectedMember?.id, selectedMember?.badgeNumber, selectedMember?.psnSuffix, pageNumber, pageSize, sortParams]);
 
   /**
    * Fetches the relationship data from the API
