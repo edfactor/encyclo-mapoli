@@ -1,4 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { BeneficiaryDto } from "../../types";
 import {
   createCityColumn,
   createDateColumn,
@@ -7,9 +8,8 @@ import {
   createStateColumn,
   createZipColumn
 } from "../../utils/gridColumnFactory";
-import { BeneficiaryActionHandlers, BeneficiaryActionsCellRenderer } from "./BeneficiaryActions";
 import { BadgeCellRenderer } from "./BadgeCellRenderer";
-import { BeneficiaryDto } from "../../types";
+import { BeneficiaryActionHandlers, BeneficiaryActionsCellRenderer } from "./BeneficiaryActions";
 
 export const GetBeneficiariesListGridColumns = (
   percentageFieldRenderer: (percentage: number, id: number) => React.JSX.Element,
@@ -40,11 +40,11 @@ export const GetBeneficiariesListGridColumns = (
       headerName: "Percentage",
       field: "percentage",
       colId: "percentage",
-      maxWidth: 120,
+      maxWidth: 150,
       headerClass: "center-align",
       cellClass: "center-align",
       sortable: false,
-      resizable: true,
+      resizable: false,
       cellRenderer: (params: ICellRendererParams) => percentageFieldRenderer(params.data.percent, params.data.id)
     },
     {

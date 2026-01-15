@@ -49,6 +49,7 @@
 # - BITBUCKET_ACCESS_TOKEN: For tag updates via REST API
 # - JFROG_WORKSPACE_VARIABLE: NPM registry authentication
 # - ConnectionStrings_ProfitSharing_QA/UAT: Database connections
+# - CONNECTIONSTRINGS_WAREHOUSE: Warehouse database connection
 # - TEAMS_WEBHOOK_URL: Microsoft Teams notifications
 # - See repository settings for full list
 #
@@ -1042,6 +1043,10 @@ definitions:
             $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT            
           }
 
+          if ($env:CONNECTIONSTRINGS_WAREHOUSE) {
+            $env:ConnectionStrings:Warehouse = $env:CONNECTIONSTRINGS_WAREHOUSE
+          }
+
           if (-not $sourceSchema) {
             Write-Error "Source schema is undefined. Exiting."; exit 1
           }
@@ -1111,6 +1116,7 @@ definitions:
           $env:Action = "drop-recreate-db"
           $env:SourceSchema = "PROFITSHARE_STAGING"
           if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+          if ($env:CONNECTIONSTRINGS_WAREHOUSE) { $env:ConnectionStrings:Warehouse = $env:CONNECTIONSTRINGS_WAREHOUSE }
           Write-Host "Dropping & recreating UAT database (schema: $env:SourceSchema)"
           if (!(Test-Path .\dbcli\Demoulas.ProfitSharing.Data.Cli*)) { Write-Error "DB CLI artifact not found. Ensure 'Build DB CLI (artifact)' step ran."; exit 1 }
           .\dbcli\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --source-schema $env:SourceSchema
@@ -1128,6 +1134,7 @@ definitions:
           $env:Action = "import-from-ready"
           $env:SourceSchema = "PROFITSHARE_STAGING"
           if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+          if ($env:CONNECTIONSTRINGS_WAREHOUSE) { $env:ConnectionStrings:Warehouse = $env:CONNECTIONSTRINGS_WAREHOUSE }
           Write-Host "Importing data from READY into UAT schema: $env:SourceSchema"
           if (!(Test-Path .\dbcli\Demoulas.ProfitSharing.Data.Cli*)) { Write-Error "DB CLI artifact not found. Ensure 'Build DB CLI (artifact)' step ran."; exit 1 }
           .\dbcli\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $env:SourceSchema
@@ -1144,6 +1151,7 @@ definitions:
           $env:Environment = "UAT"
           $env:SourceSchema = "PROFITSHARE_STAGING"
           if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+          if ($env:CONNECTIONSTRINGS_WAREHOUSE) { $env:ConnectionStrings:Warehouse = $env:CONNECTIONSTRINGS_WAREHOUSE }
           $navigationFile = ".\src\database\ready_import\Navigations\add-uat-navigation-data.sql"
           Write-Host "Importing UAT navigation data using $navigationFile"
           if (!(Test-Path .\dbcli\Demoulas.ProfitSharing.Data.Cli*)) { Write-Error "DB CLI artifact not found. Ensure 'Build DB CLI (artifact)' step ran."; exit 1 }
@@ -1166,6 +1174,7 @@ definitions:
           if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
 
           if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+          if ($env:CONNECTIONSTRINGS_WAREHOUSE) { $env:ConnectionStrings:Warehouse = $env:CONNECTIONSTRINGS_WAREHOUSE }
 
           Write-Host "Validating UAT import for schema $env:SourceSchema and year $currentYear"
           .\output\Demoulas.ProfitSharing.Data.Cli validate-import --connection-name ProfitSharing --sql-file ".\src\database\ready_import\Import Validations.sql" --source-schema $env:SourceSchema --current-year $currentYear
