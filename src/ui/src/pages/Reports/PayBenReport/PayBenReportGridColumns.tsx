@@ -5,8 +5,7 @@ export const PayBenReportGridColumn = (): ColDef[] => {
   return [
     createPSNColumn({
       enableLinking: true,
-      linkingStyle: "badge-psn",
-      navigateFunction: () => {}
+      linkingStyle: "badge-psn"
     }),
     createSSNColumn({ minWidth: 170, sortable: false }),
     {

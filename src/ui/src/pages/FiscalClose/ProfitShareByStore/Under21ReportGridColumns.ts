@@ -9,12 +9,9 @@ import {
   createSSNColumn
 } from "utils/gridColumnFactory";
 
-export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export const GetUnder21ReportColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({
-      navigateFunction: navFunction,
-      renderAsLink: true
-    }),
+    createBadgeColumn({}),
     createNameColumn({
       field: "fullName"
     }),

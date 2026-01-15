@@ -121,13 +121,10 @@ const createValidatedNameCellRenderer = (validationData: ValidationResponse | nu
 };
 
 export const GetProfitSharingReportGridColumns = (
-  navFunction: (badgeNumber: string) => void,
   validationData: ValidationResponse | null = null
 ): ColDef[] => {
   return [
-    createBadgeColumn({
-      navigateFunction: navFunction
-    }),
+    createBadgeColumn({}),
     {
       ...createNameColumn({}),
       cellRenderer: createValidatedNameCellRenderer(validationData)

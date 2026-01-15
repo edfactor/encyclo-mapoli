@@ -11,15 +11,14 @@ import {
   createYesOrNoColumn
 } from "../../../utils/gridColumnFactory";
 
-export const GetPostFrozenUnder21ReportColumnDefs = (handleNavigation: (path: string) => void): ColDef[] => {
+export const GetPostFrozenUnder21ReportColumnDefs = (): ColDef[] => {
   return [
     createStoreColumn({
       field: "storeNumber",
       headerName: "Store"
     }),
     createBadgeColumn({
-      field: "badgeNumber",
-      navigateFunction: handleNavigation
+      field: "badgeNumber"
     }),
     {
       headerName: "First Name",

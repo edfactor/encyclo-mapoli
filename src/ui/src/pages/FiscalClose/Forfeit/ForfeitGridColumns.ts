@@ -10,19 +10,17 @@ import {
 import { ForfeituresCellRenderer } from "./ForfeituresCellRenderer";
 
 export interface ForfeitColumnsOptions {
-  navFunction: (badgeNumber: string) => void;
   onValidationClick?: (fieldName: string) => void;
 }
 
 export const GetProfitShareForfeitColumns = (options: ForfeitColumnsOptions): ColDef[] => {
-  const { navFunction, onValidationClick } = options;
+  const { onValidationClick } = options;
   return [
     createBadgeOrPSNColumn({
       headerName: "Badge/PSN",
       field: "badgeOrPsn",
       badgeField: "badgeNumber",
       psnField: "beneficiaryPsn",
-      navigateFunction: navFunction,
       enableLinking: true
     }),
     createNameColumn({

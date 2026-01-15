@@ -1,7 +1,6 @@
 import { Grid, Typography } from "@mui/material";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/AdhocApi";
 import { RootState } from "reduxstore/store";
 import { DSMPaginatedGrid } from "../../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
@@ -26,7 +25,6 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
   const [fetchStoreManagement, { isFetching }] = useLazyGetBreakdownByStoreQuery();
   const storeManagement = useSelector((state: RootState) => state.yearsEnd.storeManagementBreakdown);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
-  const navigate = useNavigate();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useDecemberFlowProfitYear();
 
@@ -73,13 +71,6 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
       ]
     )
   });
-
-  const handleNavigation = useCallback(
-    (path: string) => {
-      navigate(path);
-    },
-    [navigate]
-  );
 
   const fetchData = useCallback(() => {
     const params = {
@@ -128,7 +119,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
     onLoadingChange?.(isFetching);
   }, [isFetching, onLoadingChange]);
 
-  const columnDefs = useCallback(() => GetStoreManagementGridColumns(handleNavigation), [handleNavigation])();
+  const columnDefs = useMemo(() => GetStoreManagementGridColumns(), []);
 
   return (
     <Grid

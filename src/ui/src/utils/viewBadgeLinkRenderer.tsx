@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
-import Link from "@mui/material/Link";
 import { JSX } from "react";
+import { Link } from "react-router";
 
 export function viewBadgeLinkRenderer(
   badgeNumber: number,
@@ -36,9 +36,8 @@ export function viewBadgeLinkRenderer(
 
   if (navigateFunction === undefined) {
     return (
-      <Link
-        className="solid h-5 normal-case underline"
-        href={`/master-inquiry/${safeValue}`}>
+      <Link to={`/master-inquiry/${safeValue}`}
+        className="text-dsm-action solid h-5 normal-case underline">
         {displayValue}
       </Link>
     );

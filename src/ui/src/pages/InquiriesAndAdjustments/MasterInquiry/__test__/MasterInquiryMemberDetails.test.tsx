@@ -1,11 +1,16 @@
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
 import MasterInquiryMemberDetails from "../MasterInquiryMemberDetails";
 
 // Helper function to render components with MissiveAlertProvider
 const renderWithProvider = (component: React.ReactElement) => {
-  return render(<MissiveAlertProvider>{component}</MissiveAlertProvider>);
+  return render(
+    <MemoryRouter>
+      <MissiveAlertProvider>{component}</MissiveAlertProvider>
+    </MemoryRouter>
+  );
 };
 
 describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
@@ -339,17 +344,19 @@ describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
       />
     );
 
-    // Re-render with same props (must wrap in provider again)
+    // Re-render with same props (must wrap in provider and router again)
     rerender(
-      <MissiveAlertProvider>
-        <MasterInquiryMemberDetails
-          memberType={1}
-          id={1}
-          profitYear={2025}
-          memberDetails={mockEmployeeDetails}
-          isLoading={false}
-        />
-      </MissiveAlertProvider>
+      <MemoryRouter>
+        <MissiveAlertProvider>
+          <MasterInquiryMemberDetails
+            memberType={1}
+            id={1}
+            profitYear={2025}
+            memberDetails={mockEmployeeDetails}
+            isLoading={false}
+          />
+        </MissiveAlertProvider>
+      </MemoryRouter>
     );
 
     // Component should still be rendered correctly
