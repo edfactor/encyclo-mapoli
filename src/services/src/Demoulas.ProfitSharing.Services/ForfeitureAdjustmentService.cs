@@ -24,7 +24,6 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private readonly IAppUser _appUser;
     private readonly IAuditService _auditService;
 
-
     public ForfeitureAdjustmentService(
         IProfitSharingDataContextFactory dbContextFactory,
         TotalService totalService,
@@ -117,7 +116,11 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
         return await demographics
             .Where(d => ssnMaybe.HasValue && ssnMaybe.Value == d.Ssn || badgeMaybe.HasValue && badgeMaybe.Value == d.BadgeNumber)
-            .Select(d => new Employee { Demographic = d, PayProfit = d.PayProfits.FirstOrDefault(pp => pp.ProfitYear == profitYear)! })
+            .Select(d => new Employee
+            {
+                Demographic = d,
+                PayProfit = d.PayProfits.FirstOrDefault(pp => pp.ProfitYear == profitYear)!
+            })
             .FirstOrDefaultAsync(ct);
     }
 
@@ -307,12 +310,20 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             if (req.OffsettingProfitDetailId.HasValue)
             {
-                auditChanges.Add(new AuditChangeEntryInput { ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID", NewValue = req.OffsettingProfitDetailId.Value.ToString() });
+                auditChanges.Add(new AuditChangeEntryInput
+                {
+                    ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID",
+                    NewValue = req.OffsettingProfitDetailId.Value.ToString()
+                });
             }
 
             if (req.ClassAction)
             {
-                auditChanges.Add(new AuditChangeEntryInput { ColumnName = "CLASS_ACTION", NewValue = "true" });
+                auditChanges.Add(new AuditChangeEntryInput
+                {
+                    ColumnName = "CLASS_ACTION",
+                    NewValue = "true"
+                });
             }
 
             await _auditService.LogDataChangeAsync(
