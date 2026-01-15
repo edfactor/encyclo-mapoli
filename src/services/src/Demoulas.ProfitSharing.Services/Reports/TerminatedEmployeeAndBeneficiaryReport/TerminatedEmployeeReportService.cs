@@ -79,6 +79,7 @@ public sealed class TerminatedEmployeeReportService
         return result;
     }
 
+
     #region Report Dataset Creation
 
     /// <summary>
@@ -131,14 +132,15 @@ public sealed class TerminatedEmployeeReportService
                                 ? -x.Forfeiture
                                 : 0),
                         TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0),
-                        Distribution = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
-                                                  x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
-                                                  x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+                        Distribution = g.Sum(x =>
+                            x.ProfitCodeId == /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
+                            x.ProfitCodeId == /*3*/ ProfitCode.Constants.OutgoingDirectPayments.Id ||
+                            x.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+                                ? -x.Forfeiture
+                                : 0),
+                        BeneficiaryAllocation = g.Sum(x => x.ProfitCodeId == /*5*/ ProfitCode.Constants.OutgoingXferBeneficiary.Id
                             ? -x.Forfeiture
-                            : 0),
-                        BeneficiaryAllocation = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id
-                            ? -x.Forfeiture
-                            : x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id
+                            : x.ProfitCodeId == /*6*/ ProfitCode.Constants.IncomingQdroBeneficiary.Id
                                 ? x.Contribution
                                 : 0),
                         CurrentAmount = g.Sum(x => x.Contribution + x.Earnings +
@@ -173,6 +175,7 @@ public sealed class TerminatedEmployeeReportService
             "LastYearVestedBalances dictionary load",
             async () => await _totalService
                 .TotalVestingBalance(ctx, /*PayProfit Year*/lastCompletedYearEnd, /*Desired Year*/lastCompletedYearEnd, priorYearDateRange.FiscalEndDate)
+                .AsNoTracking() // if you do not have this, then EF overwrite thisYear with lastYear
                 .Where(x => ssns.Contains(x.Ssn))
                 .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken),
             dict => dict.Count);
@@ -211,17 +214,22 @@ public sealed class TerminatedEmployeeReportService
                     ? lastYearBalance.TotalAmount
                     : 0m;
 
-                // Get vesting balance and percentage from this year
-                // Use compound key (Ssn, Id) to look up the correct record
-                ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+                ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
 
                 // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
-                if (thisYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
+                if (lastYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
                 {
-                    thisYearVestedBalance = thisYearBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
+                    lastYearVestedBalance = lastYearVestedBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
                 }
 
-                decimal vestedBalance = thisYearVestedBalance?.VestedBalance ?? 0m;
+                decimal vestedBalance = Math.Round(lastYearVestedBalance?.VestedBalance ?? 0m, 2, MidpointRounding.AwayFromZero);
+
+                // QPAY066 bumps lastyears mount by subtracting distributions 
+                vestedBalance += transactionsThisYear.BeneficiaryAllocation;
+                vestedBalance += transactionsThisYear.Distribution;
+
+                decimal vestedRatio = lastYearVestedBalance?.VestingPercent ?? 0;
+
 
                 // Apply optional vested balance filter
                 if (req.VestedBalanceValue.HasValue && req.VestedBalanceOperator.HasValue)
@@ -242,16 +250,6 @@ public sealed class TerminatedEmployeeReportService
                         continue; // Skip this member - doesn't match vested balance criteria
                     }
                 }
-
-                ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
-
-                // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
-                if (lastYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
-                {
-                    lastYearVestedBalance = lastYearVestedBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
-                }
-
-                decimal vestedRatio = lastYearVestedBalance?.VestingPercent ?? 0;
 
                 // Create member record with all values
                 Member member = new()
@@ -303,17 +301,28 @@ public sealed class TerminatedEmployeeReportService
                     vestedRatio = 1;
                 }
 
+                var hasForfeited = enrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
+                                   enrollmentId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+
+                if (hasForfeited)
+                {
+                    vestedRatio = 1;
+                }
+
+                // This feels like a a last minute fudge
+                if (vestedRatio == 1)
+                {
+                    vestedBalance = member.EndingBalance;
+                }
+
                 // If there is no money, then the ratio is meaningless - follow how READY reports it as 0
-                if (member.EndingBalance == 0)
+                if (member.EndingBalance == 0 && vestedBalance == 0)
                 {
                     vestedRatio = 0;
                 }
 
                 // Calculate age if birthdate available
                 short? age = member.Birthday?.Age();
-
-                var hasForfeited = enrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
-                                   enrollmentId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
 
                 decimal? suggestedForfeit = null;
                 if (!hasForfeited && member.PsnSuffix == 0)

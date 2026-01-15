@@ -503,23 +503,15 @@ SELECT -- 2025
     PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- Pull the prior year hours as "last year"
     PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- Pull the prior year income as "last year"
     PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
-    CASE -- the 2025 cert.
-        WHEN PY_PROF_CERT = '1' THEN TO_DATE('12/31/' || last_year, 'MM/DD/YYYY')
-        ELSE NULL
-        END as PS_CERTIFICATE_ISSUED_DATE,
-    -- We will recompute this in RebuildEnrollmentAndZeroContService for most employees when we first run.
-    -- We leave it as a default as RebuildEnrollmentAndZeroContService might not recompute every employee
-    PY_PS_ENROLLED,
+    null as PS_CERTIFICATE_ISSUED_DATE,
+    PY_PS_ENROLLED as ENROLLMENT_ID, -- we blindly assume 2025 is same as 2026.  Gets less so as time passes.
     PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
     PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
-    -- We will re-compute this in RebuildEnrollmentAndZeroContService for most employees when we first run. We intensionally leave the old value
-    -- because there is special logic for when someone gets to 6 (retired) that they never go back to an earlier value
-    -- so 6 is sticky.
-    PY_PROF_ZEROCONT,
+    PY_PROF_ZEROCONT as ZERO_CONTRIBUTION_REASON_ID, -- we blindly assume 2026 is same as 2026. 
     NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
     NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
     PY_PROF_POINTS AS POINTS_EARNED,
-    PY_PRIOR_ETVA as ETVA
+    PY_PRIOR_ETVA as ETVA -- Holds ETVA Prior to Forfeit.
 FROM
     {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
             LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
@@ -541,17 +533,17 @@ INSERT INTO PAY_PROFIT
  INCOME_EXECUTIVE,
  POINTS_EARNED,
  ETVA)
-SELECT -- 2024 - mostly a place holder for holding the zero contr and enrollment - which are both used to compute vested balances
+SELECT -- 2024 - mostly a place holder for holding the zero contr and enrollment - which are both used to compute vested balances for end of 2024
        (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
        last_last_year AS PROFIT_YEAR,
        0 as CURRENT_HOURS_YEAR,
        0 AS CURRENT_INCOME_YEAR,
        0 AS WEEKS_WORKED_YEAR,
-       NULL,
-       0, -- having ZERO for all of 2024 triggers the RebuildEnrollmentAndZeroContService
+       NULL as PS_CERTIFICATE_ISSUED_DATE,
+       0 as ENROLLMENT_ID, -- having ZERO for all of 2024 triggers the RebuildEnrollmentAndZeroContService
        PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
        PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
-       0 as PY_PROF_ZEROCONT, 
+       0 as ZERO_CONTRIBUTION_REASON_ID, -- gets rebuilt at startup when all enrollment_ids are zero 
        0 AS HOURS_EXECUTIVE,
        0 AS INCOME_EXECUTIVE,
        0 AS POINTS_EARNED,
@@ -1664,11 +1656,13 @@ delete from ye_update_status;
 --  | 700010556 | BEIL, AUTUMN   | BENEFICIARY ONLY | $96,719.52     | NO           | Legitimate QDRO (Code 6) beneficiary                       |
 --  | 700010521 | MILLS, KRYSTAL | BENEFICIARY ONLY | $0.00          | YES          | SCRAMBLED: 19 employee contributions (2004-2024, $29,655)  |
 --  | 700010561 | RHODES, CRUZ   | BENEFICIARY ONLY | $0.00          | YES          | SCRAMBLED: 28 employee contributions (1992-2024, $101,536) |
+    
+-- The 2026 Jan 3 scramble has two bene's with employee contributions (bad);  700010510, 700010550
 
 --  Bad Beneficiaries, See https://demoulas.atlassian.net/browse/PS-1268
-delete from profit_detail where ssn IN ( 700010556, 700010521, 700010561 );
-delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561));
-delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561 );
+delete from profit_detail where ssn IN ( 700010556, 700010521, 700010561, 700010510 , 700010550 );
+delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561, 700010510 , 700010550));
+delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561, 700010510 , 700010550 );
 
 -- ============================================================================
 -- ANNUITY RATE SEED DATA (PS-1890)

@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -83,5 +82,12 @@ public abstract class PristineBaseTest
 
             return new Employee { Demographic = demographic, PayProfit = payProfit };
         });
+    }
+
+#pragma warning disable VSTHRD002
+
+    protected long BadgeToSsn(int badge)
+    {
+        return GetEmployeeByBadgeAsync(badge).GetAwaiter().GetResult().Demographic.Ssn;
     }
 }
