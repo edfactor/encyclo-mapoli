@@ -1,16 +1,12 @@
 ﻿using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -121,11 +117,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
         return await demographics
             .Where(d => ssnMaybe.HasValue && ssnMaybe.Value == d.Ssn || badgeMaybe.HasValue && badgeMaybe.Value == d.BadgeNumber)
-            .Select(d => new Employee
-            {
-                Demographic = d,
-                PayProfit = d.PayProfits.FirstOrDefault(pp => pp.ProfitYear == profitYear)!
-            })
+            .Select(d => new Employee { Demographic = d, PayProfit = d.PayProfits.FirstOrDefault(pp => pp.ProfitYear == profitYear)! })
             .FirstOrDefaultAsync(ct);
     }
 
@@ -315,20 +307,12 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             if (req.OffsettingProfitDetailId.HasValue)
             {
-                auditChanges.Add(new AuditChangeEntryInput
-                {
-                    ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID",
-                    NewValue = req.OffsettingProfitDetailId.Value.ToString()
-                });
+                auditChanges.Add(new AuditChangeEntryInput { ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID", NewValue = req.OffsettingProfitDetailId.Value.ToString() });
             }
 
             if (req.ClassAction)
             {
-                auditChanges.Add(new AuditChangeEntryInput
-                {
-                    ColumnName = "CLASS_ACTION",
-                    NewValue = "true"
-                });
+                auditChanges.Add(new AuditChangeEntryInput { ColumnName = "CLASS_ACTION", NewValue = "true" });
             }
 
             await _auditService.LogDataChangeAsync(
