@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Scheduling;
@@ -46,7 +46,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new EmploymentTypeMap());
         modelBuilder.ApplyConfiguration(new ExcludedIdMap());
         modelBuilder.ApplyConfiguration(new ExcludedIdTypeMap());
-        modelBuilder.ApplyConfiguration(new EnrollmentMap());
+        // EnrollmentMap removed - Enrollment entity no longer exists (enrollment computed dynamically)
         modelBuilder.ApplyConfiguration(new FileTransferAuditMap());
         modelBuilder.ApplyConfiguration(new FrozenStateMap());
         modelBuilder.ApplyConfiguration(new FtpOperationLogMap());
@@ -70,6 +70,8 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ProfitShareCheckMap());
         modelBuilder.ApplyConfiguration(new ReportChecksumMap());
         modelBuilder.ApplyConfiguration(new RmdsFactorByAgeMap());
+        modelBuilder.ApplyConfiguration(new VestingScheduleMap());
+        modelBuilder.ApplyConfiguration(new VestingScheduleDetailMap());
         modelBuilder.ApplyConfiguration(new StartMethodMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
         modelBuilder.ApplyConfiguration(new TaxCodeMap());

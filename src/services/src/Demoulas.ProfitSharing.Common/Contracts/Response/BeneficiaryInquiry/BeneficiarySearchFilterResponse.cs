@@ -6,6 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 
 public record BeneficiarySearchFilterResponse
 {
+    public int Id { get; set; }
     public int BadgeNumber { get; set; }
     public short PsnSuffix { get; set; }
     [MaskSensitive] public string? FullName { get; set; }

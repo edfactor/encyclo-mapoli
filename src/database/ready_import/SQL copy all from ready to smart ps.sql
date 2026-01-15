@@ -97,7 +97,8 @@ BEGIN
      GENDER_ID,
      PAY_FREQUENCY_ID,
      TERMINATION_CODE_ID,
-     EMPLOYMENT_STATUS_ID)
+     EMPLOYMENT_STATUS_ID,
+     HAS_FORFEITED)
     SELECT
         ROWNUM AS ORACLEHCMID,
                 DEM_SSN,
@@ -223,11 +224,14 @@ BEGIN
                     SELECT ID
                     FROM EMPLOYMENT_STATUS
                     WHERE ID=LOWER(PY_SCOD)
-                ) AS EMPLOYMENT_STATUS_ID
+                ) AS EMPLOYMENT_STATUS_ID,
+                /* HAS_FORFEITED: Default to 0 (false). Will be updated after PROFIT_DETAIL is loaded
+                   to identify employees who have forfeiture records. */
+                0 AS HAS_FORFEITED
     FROM {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS;
 
-    INSERT INTO DEMOGRAPHIC_HISTORY(DEMOGRAPHIC_ID, VALID_FROM, VALID_TO, ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME, CITY, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, MIDDLE_NAME, MOBILE_NUMBER, PHONE_NUMBER, POSTAL_CODE, STATE, STREET, STREET2)
-    SELECT ID, TO_TIMESTAMP('01-01-1900 00:00:00','MM-DD-YYYY HH24:MI:SS'), TO_TIMESTAMP('01-01-2100 00:00:00','MM-DD-YYYY HH24:MI:SS'), ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, sys_extract_utc(systimestamp), CITY, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, MIDDLE_NAME, MOBILE_NUMBER, PHONE_NUMBER, POSTAL_CODE, STATE, STREET, STREET2
+    INSERT INTO DEMOGRAPHIC_HISTORY(DEMOGRAPHIC_ID, VALID_FROM, VALID_TO, ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME, CITY, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, MIDDLE_NAME, MOBILE_NUMBER, PHONE_NUMBER, POSTAL_CODE, STATE, STREET, STREET2, HAS_FORFEITED, VESTING_SCHEDULE_ID)
+    SELECT ID, TO_TIMESTAMP('01-01-1900 00:00:00','MM-DD-YYYY HH24:MI:SS'), TO_TIMESTAMP('01-01-2100 00:00:00','MM-DD-YYYY HH24:MI:SS'), ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, sys_extract_utc(systimestamp), CITY, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, MIDDLE_NAME, MOBILE_NUMBER, PHONE_NUMBER, POSTAL_CODE, STATE, STREET, STREET2, HAS_FORFEITED, VESTING_SCHEDULE_ID
     FROM DEMOGRAPHIC;
 
     --------------------------------------------------------------------------------------
@@ -245,7 +249,8 @@ BEGIN
      POSTAL_CODE,
      PHONE_NUMBER,
      MOBILE_NUMBER,
-     EMAIL_ADDRESS)
+     EMAIL_ADDRESS,
+     ISDELETED)
     SELECT
         PYBEN.PYBEN_PAYSSN AS SSN,
         TRIM(SUBSTR(PYBEN.PYBEN_NAME, INSTR(PYBEN.PYBEN_NAME, ', ') + 2)) AS FIRSTNAME,
@@ -273,7 +278,8 @@ BEGIN
         LPAD(TO_CHAR(PYBEN.PYBEN_ZIP),5,'0') AS POSTAL_CODE,
         NULL AS PHONE_NUMBER, -- phone number isn't available
         NULL AS MOBILE_NUMBER,  -- mobile number isn't available
-        NULL AS EMAIL_ADDRESS  -- email isn't available
+        NULL AS EMAIL_ADDRESS,  -- email isn't available
+        0 AS ISDELETED  -- Default to not deleted
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN PYBEN;
 
@@ -283,7 +289,8 @@ BEGIN
      DEMOGRAPHIC_ID,
      BENEFICIARY_CONTACT_ID,
      RELATIONSHIP,
-     PERCENT)
+     PERCENT,
+     ISDELETED)
     SELECT
         TO_NUMBER(SUBSTR(LPAD(PYBEN.PYBEN_PSN, 11, 0), 8)) AS PSN_SUFFIX,
         TO_NUMBER(SUBSTR(LPAD(PYBEN_PSN,11,0),1,7)) AS BADGE_NUMBER,
@@ -296,7 +303,8 @@ BEGIN
 
         CASE WHEN PAYREL.PYREL_PERCENT IS NULL THEN 0
              ELSE PAYREL.PYREL_PERCENT
-            END AS PERCENT
+            END AS PERCENT,
+        0 AS ISDELETED  -- Default to not deleted
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN PYBEN
              INNER JOIN BENEFICIARY_CONTACT BC ON PYBEN.PYBEN_PAYSSN = BC.SSN
              LEFT join DEMOGRAPHIC d on PYBEN.PYBEN_PAYSSN = d.SSN
@@ -321,7 +329,6 @@ BEGIN
      CURRENT_INCOME_YEAR,
      WEEKS_WORKED_YEAR,
      PS_CERTIFICATE_ISSUED_DATE,
-     ENROLLMENT_ID,
      BENEFICIARY_TYPE_ID,
      EMPLOYEE_TYPE_ID,
      ZERO_CONTRIBUTION_REASON_ID,
@@ -336,7 +343,6 @@ BEGIN
         PY_PD AS CURRENT_INCOME_YEAR,
         PY_WEEKS_WORK AS WEEKS_WORKED_YEAR,
         null as PS_CERTIFICATE_ISSUED_DATE, -- Presuming an import is happening in year without a completed YE, so we use null 
-        PY_PS_ENROLLED AS ENROLLMENT_ID,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
         PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
@@ -355,7 +361,6 @@ BEGIN
      CURRENT_INCOME_YEAR,
      WEEKS_WORKED_YEAR,
      PS_CERTIFICATE_ISSUED_DATE,
-     ENROLLMENT_ID,
      BENEFICIARY_TYPE_ID,
      EMPLOYEE_TYPE_ID,
      ZERO_CONTRIBUTION_REASON_ID,
@@ -373,9 +378,8 @@ BEGIN
             WHEN PY_PROF_CERT = '1' THEN TO_DATE('12/31/' || last_year, 'MM/DD/YYYY')
             ELSE NULL
         END as PS_CERTIFICATE_ISSUED_DATE,
-        -- We will recompute this in RebuildEnrollmentAndZeroContService for most employees when we first run.
-        -- We leave it as a default as RebuildEnrollmentAndZeroContService might not recompute every employee
-        PY_PS_ENROLLED, 
+        -- Enrollment is now computed dynamically from vesting schedule and forfeiture status
+        -- No longer stored in PayProfit table
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
         -- We will re-compute this in RebuildEnrollmentAndZeroContService for most employees when we first run. We intensionally leave the old value
@@ -393,8 +397,64 @@ BEGIN
         PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
 
     ---------------------------------------------------------------
+    -- Check if we have data for last_year-1 (e.g., 2024 if last_year is 2025)
+    -- If not, seed empty rows for every demographic for that year
+    ---------------------------------------------------------------
+    BEGIN
+        DECLARE
+            prior_year NUMBER := last_year - 1;
+            prior_year_count NUMBER;
+        BEGIN
+            -- Check if we have any PAY_PROFIT data for prior_year
+            SELECT COUNT(*)
+            INTO prior_year_count
+            FROM PAY_PROFIT
+            WHERE PROFIT_YEAR = prior_year;
 
--- Migrate data into DISTRIBUTION_PAYEE table from {SOURCE_PROFITSHARE_SCHEMA}_PROFDIST
+            IF prior_year_count = 0 THEN
+                DBMS_OUTPUT.PUT_LINE('No PAY_PROFIT data found for year ' || prior_year || '. Seeding empty rows...');
+                
+                -- Insert empty rows for every demographic for prior_year
+                INSERT INTO PAY_PROFIT
+                (DEMOGRAPHIC_ID,
+                 PROFIT_YEAR,
+                 CURRENT_HOURS_YEAR,
+                 CURRENT_INCOME_YEAR,
+                 WEEKS_WORKED_YEAR,
+                 PS_CERTIFICATE_ISSUED_DATE,
+                 BENEFICIARY_TYPE_ID,
+                 EMPLOYEE_TYPE_ID,
+                 ZERO_CONTRIBUTION_REASON_ID,
+                 HOURS_EXECUTIVE,
+                 INCOME_EXECUTIVE,
+                 POINTS_EARNED,
+                 ETVA)
+                SELECT
+                    d.ID AS DEMOGRAPHIC_ID,
+                    prior_year AS PROFIT_YEAR,
+                    0 AS CURRENT_HOURS_YEAR,
+                    0 AS CURRENT_INCOME_YEAR,
+                    0 AS WEEKS_WORKED_YEAR,
+                    NULL AS PS_CERTIFICATE_ISSUED_DATE,
+                    1 AS BENEFICIARY_TYPE_ID,  -- Default value
+                    1 AS EMPLOYEE_TYPE_ID,     -- Default value
+                    NULL AS ZERO_CONTRIBUTION_REASON_ID,
+                    0 AS HOURS_EXECUTIVE,
+                    0 AS INCOME_EXECUTIVE,
+                    0 AS POINTS_EARNED,
+                    0 AS ETVA
+                FROM DEMOGRAPHIC d;
+                
+                DBMS_OUTPUT.PUT_LINE('Seeded ' || SQL%ROWCOUNT || ' empty PAY_PROFIT rows for year ' || prior_year);
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('PAY_PROFIT data already exists for year ' || prior_year || ' (' || prior_year_count || ' rows). Skipping seed.');
+            END IF;
+        END;
+    END;
+
+    ---------------------------------------------------------------
+
+-- Migrate data into DISTRIBUTION_PAYEE table from PROFITSHARE_PROFDIST
 -- Ensure that there are no duplicate entries based on unique PAYEE (SSN, NAME, and ADDRESS)
     INSERT INTO DISTRIBUTION_PAYEE (SSN, NAME, STREET, CITY, STATE, POSTAL_CODE, COUNTRY_ISO, MEMO)
     SELECT DISTINCT
@@ -410,7 +470,7 @@ BEGIN
     WHERE PROFDIST_PAYSSN IS NOT NULL;
 
 
-    -- Migrate data into DISTRIBUTION_THIRDPARTY_PAYEE table from {SOURCE_PROFITSHARE_SCHEMA}_PROFDIST
+    -- Migrate data into DISTRIBUTION_THIRDPARTY_PAYEE table from PROFITSHARE_PROFDIST
 -- Ensure that there are no duplicate entries based on unique third-party payee (SSN, NAME, and ADDRESS)
     INSERT INTO DISTRIBUTION_THIRDPARTY_PAYEE (PAYEE, NAME,  STREET, STREET2, CITY, STATE, POSTAL_CODE, COUNTRY_ISO, MEMO)
     SELECT DISTINCT
@@ -427,7 +487,7 @@ BEGIN
     WHERE (PROFDIST_3RDPAYTO IS NOT NULL AND TRIM(PROFDIST_3RDPAYTO) != '');
 
 
---LOAD DISTRIBUTION TABLE TO - "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
+--LOAD DISTRIBUTION TABLE TO - "YOUR CURRENT SCHEMA" FROM - PROFITSHARE
     INSERT INTO DISTRIBUTION
     (SSN,
      PAYMENT_SEQUENCE,
@@ -604,6 +664,17 @@ BEGIN
             END AS FOUR_DIGIT_YEAR
 
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_SS_DETAIL;
+
+    -- Update HAS_FORFEITED flag for employees with forfeiture records
+    -- This must run AFTER PROFIT_DETAIL is loaded
+    UPDATE DEMOGRAPHIC d
+    SET HAS_FORFEITED = 1
+    WHERE EXISTS (
+        SELECT 1
+        FROM PROFIT_DETAIL pd
+        WHERE pd.SSN = d.SSN
+          AND pd.REMARK LIKE 'FORFEIT%'
+    );
 
     ---------------------------------------------------------------------------------------------------------------------
 
@@ -808,8 +879,8 @@ UPDATE DEMOGRAPHIC_HISTORY dh
                         ));
                         
 INSERT INTO DEMOGRAPHIC_HISTORY
-      (DEMOGRAPHIC_ID, VALID_FROM,                         VALID_TO,           ORACLE_HCM_ID,   BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH,                         HIRE_DATE,                                  REHIRE_DATE,                                                                                       TERMINATION_DATE,                                                                                          DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
-SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS VALID_TO, d.ORACLE_HCM_ID, dp.DEM_BADGE, dp.PY_STOR,   TRIM(TO_CHAR(dp.PY_CLA)) AS PAY_CLASSIFICATION_ID, TO_DATE(TO_CHAR(dp.PY_DOB),'yyyymmdd'),TO_DATE(TO_CHAR(dp.PY_HIRE_DT),'yyyymmdd'), CASE WHEN dp.PY_REHIRE_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_REHIRE_DT),'yyyymmdd') END, CASE WHEN dp.PY_TERM_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_TERM_DT),'yyyymmdd') END, dp.PY_DP,   TRIM(dp.PY_FUL),    dp.PY_FREQ,       dp.PY_TERM,          dp.PY_SCOD,           SYSTIMESTAMP AT TIME ZONE 'UTC'
+      (DEMOGRAPHIC_ID, VALID_FROM,                         VALID_TO,           ORACLE_HCM_ID,   BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH,                         HIRE_DATE,                                  REHIRE_DATE,                                                                                       TERMINATION_DATE,                                                                                          DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME, HAS_FORFEITED, VESTING_SCHEDULE_ID)
+SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS VALID_TO, d.ORACLE_HCM_ID, dp.DEM_BADGE, dp.PY_STOR,   TRIM(TO_CHAR(dp.PY_CLA)) AS PAY_CLASSIFICATION_ID, TO_DATE(TO_CHAR(dp.PY_DOB),'yyyymmdd'),TO_DATE(TO_CHAR(dp.PY_HIRE_DT),'yyyymmdd'), CASE WHEN dp.PY_REHIRE_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_REHIRE_DT),'yyyymmdd') END, CASE WHEN dp.PY_TERM_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_TERM_DT),'yyyymmdd') END, dp.PY_DP,   TRIM(dp.PY_FUL),    dp.PY_FREQ,       dp.PY_TERM,          dp.PY_SCOD,           SYSTIMESTAMP AT TIME ZONE 'UTC', 0, NULL
   FROM DEMOGRAPHIC d
   JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMO_PROFSHARE dp ON d.BADGE_NUMBER = dp.DEM_BADGE
  WHERE  d.STORE_NUMBER != dp.PY_STOR OR
@@ -1491,7 +1562,6 @@ INSERT ALL
                          CURRENT_INCOME_YEAR,
                          WEEKS_WORKED_YEAR,
                          PS_CERTIFICATE_ISSUED_DATE,
-                         ENROLLMENT_ID,
                          BENEFICIARY_TYPE_ID,
                          EMPLOYEE_TYPE_ID,
                          ZERO_CONTRIBUTION_REASON_ID,
@@ -1506,7 +1576,6 @@ INSERT ALL
                                 0 AS CURRENT_INCOME_YEAR,
                                 0 AS WEEKS_WORKED_YEAR,
                                 NULL AS PS_CERTIFICATE_ISSUED_DATE,
-                                pp.ENROLLMENT_ID,
                                 pp.BENEFICIARY_TYPE_ID,
                                 pp.EMPLOYEE_TYPE_ID,
                                 pp.ZERO_CONTRIBUTION_REASON_ID,
@@ -1553,15 +1622,15 @@ delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561 );
 -- ============================================================================
 -- ANNUITY RATE SEED DATA (PS-1890)
 -- ============================================================================
--- Seed ANNUITY_RATE_CONFIG table with age ranges for years 2020-2026
+-- Seed ANNUITY_RATE_CONFIG table with age ranges for years 2020-2025
 -- This defines the expected age range (67-120) for annuity rate validation
 -- ============================================================================
 
 DECLARE
     v_count NUMBER;
 BEGIN
-    -- Seed config for years 2020-2026 (only if not already present)
-    FOR yr IN 2020..2026 LOOP
+    -- Seed config for years 2020-2025 (only if not already present)
+    FOR yr IN 2020..2025 LOOP
         SELECT COUNT(*) INTO v_count FROM ANNUITY_RATE_CONFIG WHERE YEAR = yr;
         IF v_count = 0 THEN
             INSERT INTO ANNUITY_RATE_CONFIG (YEAR, MINIMUM_AGE, MAXIMUM_AGE, USER_NAME, CREATED_AT_UTC, MODIFIED_AT_UTC)
@@ -1575,7 +1644,7 @@ END;
 
 
 -- ============================================================================
--- Copy annuity rates from 2024 to any missing years (2020-2026)
+-- Copy annuity rates from 2024 to any missing years (2020-2025)
 -- Uses 2024 as the source year since it has complete data
 -- Only copies if the target year has no rates defined yet (idempotent)
 -- ============================================================================
@@ -1586,7 +1655,7 @@ DECLARE
     v_rates_copied NUMBER := 0;
 BEGIN
     -- For each target year, copy rates from 2024 if not already present
-    FOR yr IN 2020..2026 LOOP
+    FOR yr IN 2020..2025 LOOP
         -- Skip the source year itself
         IF yr != v_source_year THEN
             -- Check if target year already has annuity rates

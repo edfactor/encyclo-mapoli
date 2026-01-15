@@ -1,4 +1,5 @@
-﻿using System.Data;
+using System.Data;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -15,14 +16,20 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
     private readonly ICalendarService _calendarService;
     private readonly ILogger _logger;
     private readonly TotalService _totalService;
+    private readonly Demoulas.ProfitSharing.Common.Interfaces.IVestingScheduleService _vestingScheduleService;
 
-
-    public PayProfitUpdateService(IProfitSharingDataContextFactory dataContextFactory, ILoggerFactory loggerFactory, ITotalService totalService, ICalendarService calendarService)
+    public PayProfitUpdateService(
+        IProfitSharingDataContextFactory dataContextFactory,
+        ILoggerFactory loggerFactory,
+        ITotalService totalService,
+        ICalendarService calendarService,
+        Demoulas.ProfitSharing.Common.Interfaces.IVestingScheduleService vestingScheduleService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _logger = loggerFactory.CreateLogger<PayProfitUpdateService>();
         _totalService = (TotalService)totalService;
+        _vestingScheduleService = vestingScheduleService;
     }
 
     public async Task SetZeroContributionReason(IQueryable<PayProfit> records, byte zeroContributionReasonId, CancellationToken cancellationToken)
@@ -96,7 +103,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
 
                 _logger.LogInformation("Computing enrollment status for {TotalEmployees} employees...", totalPayProfits);
                 var enrollmentComputationStopWatch = System.Diagnostics.Stopwatch.StartNew();
-                var enrollmentUpdates = new Dictionary<int, byte>();
+                var demographicEnrollmentUpdates = new Dictionary<int, (int? VestingScheduleId, bool HasForfeited)>();
 
                 foreach (var pp in allPayProfits)
                 {
@@ -110,32 +117,44 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                     byte newEnrollmentId = 0;
                     if (pds.Count > 0)
                     {
-                        var enrollmentSummarizer = new EnrollmentSummarizer();
-                        newEnrollmentId = enrollmentSummarizer.ComputeEnrollment(pp, years, pds);
+                        var enrollmentSummarizer = new EnrollmentSummarizer(_vestingScheduleService);
+                        newEnrollmentId = await enrollmentSummarizer.ComputeEnrollmentAsync(pp, years, pds, ct);
                     }
 
-                    if (pp.EnrollmentId != newEnrollmentId)
+                    // Convert new enrollment ID to (VestingScheduleId, HasForfeited) tuple
+                    var (newVestingScheduleId, newHasForfeited) = newEnrollmentId switch
                     {
-                        enrollmentUpdates[ssn] = newEnrollmentId;
+                        EnrollmentConstants.NotEnrolled => (null, false),
+                        EnrollmentConstants.OldVestingPlanHasContributions => (VestingSchedule.Constants.OldPlan, false),
+                        EnrollmentConstants.NewVestingPlanHasContributions => (VestingSchedule.Constants.NewPlan, false),
+                        EnrollmentConstants.OldVestingPlanHasForfeitureRecords => (VestingSchedule.Constants.OldPlan, true),
+                        EnrollmentConstants.NewVestingPlanHasForfeitureRecords => (VestingSchedule.Constants.NewPlan, true),
+                        _ => ((int?)null, false)
+                    };
+
+                    // Compare with current demographic state
+                    if (pp.Demographic!.VestingScheduleId != newVestingScheduleId || pp.Demographic.HasForfeited != newHasForfeited)
+                    {
+                        demographicEnrollmentUpdates[demographicId] = (newVestingScheduleId, newHasForfeited);
                     }
                 }
 
                 enrollmentComputationStopWatch.Stop();
 
                 _logger.LogInformation("Computed enrollment IDs in {LogicTime:mm\\:ss}. {UpdateCount} employees need updates.", enrollmentComputationStopWatch.Elapsed,
-                    enrollmentUpdates.Count);
+                    demographicEnrollmentUpdates.Count);
 
-                // Bulk update
-                if (enrollmentUpdates.Count > 0)
+                // Bulk update DEMOGRAPHIC table (not PAY_PROFIT)
+                if (demographicEnrollmentUpdates.Count > 0)
                 {
                     var bulkStopwatch = System.Diagnostics.Stopwatch.StartNew();
                     var oracleConnection = (ctx.Database.GetDbConnection() as OracleConnection)!;
 
-                    await EnsureTempEnrollmentUpdatesTableExistsAsync(oracleConnection, ct);
-                    await BulkUpdateEnrollmentIds(oracleConnection, profitYear, enrollmentUpdates, ct);
+                    await EnsureTempDemographicEnrollmentUpdatesTableExistsAsync(oracleConnection, ct);
+                    await BulkUpdateDemographicEnrollments(oracleConnection, demographicEnrollmentUpdates, ct);
                     bulkStopwatch.Stop();
 
-                    _logger.LogInformation("Bulk updated {UpdateCount} enrollment status in {BulkTime:mm\\:ss}", enrollmentUpdates.Count, bulkStopwatch.Elapsed);
+                    _logger.LogInformation("Bulk updated {UpdateCount} demographic enrollment status in {BulkTime:mm\\:ss}", demographicEnrollmentUpdates.Count, bulkStopwatch.Elapsed);
                 }
                 else
                 {
@@ -149,7 +168,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                     totalPayProfits,
                     dbStopwatch.Elapsed,
                     enrollmentComputationStopWatch.Elapsed,
-                    enrollmentUpdates.Count);
+                    demographicEnrollmentUpdates.Count);
 
                 // Mark year end as completed.    
                 YearEndUpdateStatus? yeus = await ctx.YearEndUpdateStatuses.FirstOrDefaultAsync(yeStatus => yeStatus.ProfitYear == profitYear);
@@ -163,11 +182,11 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
         }
     }
 
-    private static async Task EnsureTempEnrollmentUpdatesTableExistsAsync(OracleConnection conn, CancellationToken cancellation)
+    private static async Task EnsureTempDemographicEnrollmentUpdatesTableExistsAsync(OracleConnection conn, CancellationToken cancellation)
     {
         const string checkSql = @"
             SELECT COUNT(*) FROM all_tables 
-            WHERE table_name = 'TEMP_ENROLLMENT_UPDATES' AND owner = USER";
+            WHERE table_name = 'TEMP_DEMOGRAPHIC_ENROLLMENT_UPDATES' AND owner = USER";
 
         await using OracleCommand checkCmd = new(checkSql, conn);
         bool exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync(cancellation)) > 0;
@@ -175,10 +194,10 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
         if (!exists)
         {
             const string createSql = @"
-                CREATE GLOBAL TEMPORARY TABLE temp_enrollment_updates (
-                    ssn                NUMBER(9),
-                    profit_year        NUMBER(5),
-                    enrollment_id      NUMBER(3)
+                CREATE GLOBAL TEMPORARY TABLE temp_demographic_enrollment_updates (
+                    demographic_id           NUMBER(9),
+                    vesting_schedule_id      NUMBER(10),
+                    has_forfeited            NUMBER(1)
                 ) ON COMMIT DELETE ROWS";
 
             await using OracleCommand createCmd = new(createSql, conn);
@@ -186,41 +205,38 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
         }
     }
 
-    private static async Task BulkUpdateEnrollmentIds(OracleConnection connection,
-        short profitYear,
-        Dictionary<int, byte> enrollmentUpdates,
+    private static async Task BulkUpdateDemographicEnrollments(OracleConnection connection,
+        Dictionary<int, (int? VestingScheduleId, bool HasForfeited)> demographicEnrollmentUpdates,
         CancellationToken cancellation)
     {
         // Create DataTable for bulk insert
         using DataTable table = new();
-        table.Columns.Add("ssn", typeof(int));
-        table.Columns.Add("profit_year", typeof(short));
-        table.Columns.Add("enrollment_id", typeof(byte));
+        table.Columns.Add("demographic_id", typeof(int));
+        table.Columns.Add("vesting_schedule_id", typeof(int));
+        table.Columns.Add("has_forfeited", typeof(byte));
 
-        foreach ((int ssn, byte enrollmentId) in enrollmentUpdates)
+        foreach ((int demographicId, (int? vestingScheduleId, bool hasForfeited)) in demographicEnrollmentUpdates)
         {
-            table.Rows.Add(ssn, profitYear, enrollmentId);
+            table.Rows.Add(
+                demographicId,
+                vestingScheduleId.HasValue ? vestingScheduleId.Value : DBNull.Value,
+                hasForfeited ? (byte)1 : (byte)0);
         }
 
         // Bulk insert into temp table
-        using OracleBulkCopy bulkCopy = new(connection) { DestinationTableName = "temp_enrollment_updates" };
+        using OracleBulkCopy bulkCopy = new(connection) { DestinationTableName = "temp_demographic_enrollment_updates" };
         bulkCopy.WriteToServer(table);
 
-        // MERGE update using temp table
+        // MERGE update using temp table - updates DEMOGRAPHIC, not PAY_PROFIT
         await using OracleCommand cmd = connection.CreateCommand();
         cmd.CommandText = @"
-            MERGE INTO pay_profit tgt
-            USING (
-                SELECT tmp.enrollment_id, d.id as demographic_id, tmp.profit_year
-                FROM temp_enrollment_updates tmp
-                JOIN demographic d ON d.ssn = tmp.ssn
-            ) src
-            ON (
-                tgt.demographic_id = src.demographic_id
-                AND tgt.profit_year = src.profit_year
-            )
+            MERGE INTO demographic tgt
+            USING temp_demographic_enrollment_updates src
+            ON (tgt.id = src.demographic_id)
             WHEN MATCHED THEN UPDATE SET
-                tgt.enrollment_id = src.enrollment_id";
+                tgt.vesting_schedule_id = src.vesting_schedule_id,
+                tgt.has_forfeited = src.has_forfeited,
+                tgt.modified_at_utc = SYS_EXTRACT_UTC(SYSTIMESTAMP)";
 
         await cmd.ExecuteNonQueryAsync(cancellation);
     }

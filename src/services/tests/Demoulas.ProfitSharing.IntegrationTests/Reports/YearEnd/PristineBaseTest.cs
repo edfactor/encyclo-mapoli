@@ -1,7 +1,9 @@
-﻿using System.Reflection;
+using System.Reflection;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Services;
@@ -12,7 +14,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -30,6 +31,7 @@ public abstract class PristineBaseTest
     protected readonly IEmbeddedSqlService EmbeddedSqlService;
     protected readonly IHttpContextAccessor HttpContextAccessor = new HttpContextAccessor();
     protected readonly MemoryDistributedCache DistributedCache;
+    protected readonly IVestingScheduleService VestingScheduleService;
     protected readonly IPayProfitUpdateService PayProfitUpdateService;
     protected readonly YearEndService YearEndService;
     protected readonly IForfeitureAdjustmentService ForfeitureAdjustmentService;
@@ -44,14 +46,17 @@ public abstract class PristineBaseTest
         DistributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         CalendarService = new CalendarService(DbFactory, Aps, DistributedCache);
         FrozenService = new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache,
-            new Mock<INavigationService>().Object);
+            new Mock<INavigationService>().Object, TimeProvider.System);
         EmbeddedSqlService = new EmbeddedSqlService();
         DemographicReaderService = new DemographicReaderService(FrozenService, HttpContextAccessor);
         TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);
         TestOutputHelper = testOutputHelper;
-        PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService);
+        VestingScheduleService = new VestingScheduleService(DbFactory, DistributedCache);
+        PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService, VestingScheduleService);
         YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService, TimeProvider);
-        ForfeitureAdjustmentService = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider);
+        var mockAppUser = new Mock<IAppUser>();
+        var mockAuditService = new Mock<IAuditService>();
+        ForfeitureAdjustmentService = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
     }
 
     public static string ReadEmbeddedResource(string resourceName)
@@ -83,5 +88,12 @@ public abstract class PristineBaseTest
 
             return new Employee { Demographic = demographic, PayProfit = payProfit };
         });
+    }
+
+#pragma warning disable VSTHRD002
+
+    protected long BadgeToSsn(int badge)
+    {
+        return GetEmployeeByBadgeAsync(badge).GetAwaiter().GetResult().Demographic.Ssn;
     }
 }

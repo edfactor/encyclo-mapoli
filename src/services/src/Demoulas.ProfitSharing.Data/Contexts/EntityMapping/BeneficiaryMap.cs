@@ -45,5 +45,12 @@ internal sealed class BeneficiaryMap : ModifiedBaseMap<Beneficiary>
             .WithMany(p => p.Beneficiaries)
             .HasForeignKey(d => d.BeneficiaryContactId)
             .OnDelete(DeleteBehavior.NoAction);
+        
+        // was added w/o underscore... 
+        _ = builder.Property(x => x.IsDeleted)
+            .IsRequired()
+            .HasDefaultValue(false)
+            .HasColumnName("ISDELETED");
+
     }
 }

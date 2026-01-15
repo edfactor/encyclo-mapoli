@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -95,7 +95,8 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             {
                 ppi.ProfitYear = 3000;
                 ppi.Demographic!.Ssn = 4;
-                ppi.EnrollmentId = Enrollment.Constants.NotEnrolled; /*0*/
+                ppi.Demographic.VestingScheduleId = null;
+                ppi.Demographic.HasForfeited = false;
             }
 
             // This knocks all the profit details out of the way

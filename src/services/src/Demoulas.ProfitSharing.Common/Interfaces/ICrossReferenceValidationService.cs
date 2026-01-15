@@ -34,4 +34,6 @@ public interface ICrossReferenceValidationService
     Task<Result<ValidationResponse>> ValidateProfitSharingReport(short profitYear, string reportSuffix, bool isFrozen, CancellationToken cancellationToken = default);
 
     Task<ValidationResponse> ValidateForfeitureAndPointsReport(short profitYear, decimal distributionTotal, decimal forfeitTotal, CancellationToken cancellationToken = default);
+
+    Task<ValidationResponse> ValidateBreakoutReportGrandTotal(short profitYear, int numberOfEmployees, decimal beginningBalance, decimal earningsTotal, decimal contributionsTotal, decimal disbursementTotals, decimal endingBalance, CancellationToken cancellationToken = default);
 }
