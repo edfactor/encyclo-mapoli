@@ -1,5 +1,5 @@
 import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiaryDto } from "@/types";
-import { Button, Typography, Box } from "@mui/material";
+import { Button, Box } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
 import BeneficiaryRelationshipsGrids from "./BeneficiaryRelationshipsGrids";
