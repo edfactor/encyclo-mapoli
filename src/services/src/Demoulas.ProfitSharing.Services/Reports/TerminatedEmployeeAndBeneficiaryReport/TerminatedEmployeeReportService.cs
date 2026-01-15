@@ -19,12 +19,12 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 
 /// <summary>
 ///     Generates reports for terminated employees and their beneficiaries.
-///  
+///
 ///  The user provides a termination date range, which selects a subset of employees for the report.
-///  
+///
 ///  The report generates a 1 year look at how an employee's profit sharing account has changed.
 ///  The report always starts with the amounts at the beginning of the prior completed profit year
-///  and includes all transactions up to today.  
+///  and includes all transactions up to today.
 /// </summary>
 public sealed class TerminatedEmployeeReportService
 {
@@ -109,7 +109,7 @@ public sealed class TerminatedEmployeeReportService
         // after the last completed one.    So we add 1 year to the completed year end.
         int openProfitYear = lastCompletedYearEnd + 1;
 
-        // Load profit detail transactions for YDATE 
+        // Load profit detail transactions for YDATE
         var (profitDetailsDict, profitDetailsDuration) = await _logger.TimeAndLogAsync(
             "ProfitDetails dictionary load",
             async () =>
@@ -225,7 +225,7 @@ public sealed class TerminatedEmployeeReportService
 
                 decimal vestedBalance = Math.Round(lastYearVestedBalance?.VestedBalance ?? 0m, 2, MidpointRounding.AwayFromZero);
 
-                // QPAY066 bumps lastyears mount by subtracting distributions 
+                // QPAY066 bumps lastyears mount by subtracting distributions
                 vestedBalance += transactionsThisYear.BeneficiaryAllocation;
                 vestedBalance += transactionsThisYear.Distribution;
 
@@ -302,8 +302,8 @@ public sealed class TerminatedEmployeeReportService
                     vestedRatio = 1;
                 }
 
-                var hasForfeited = enrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
-                                   enrollmentId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+                var hasForfeited = enrollmentId == /*3*/ EnrollmentConstants.OldVestingPlanHasForfeitureRecords ||
+                                   enrollmentId == /*4*/ EnrollmentConstants.NewVestingPlanHasForfeitureRecords;
 
                 if (hasForfeited)
                 {
@@ -324,9 +324,6 @@ public sealed class TerminatedEmployeeReportService
 
                 // Calculate age if birthdate available
                 short? age = member.Birthday?.Age();
-
-                var hasForfeited = enrollmentId == /*3*/ EnrollmentConstants.OldVestingPlanHasForfeitureRecords ||
-                                   enrollmentId == /*4*/ EnrollmentConstants.NewVestingPlanHasForfeitureRecords;
 
                 decimal? suggestedForfeit = null;
                 if (!hasForfeited && member.PsnSuffix == 0)

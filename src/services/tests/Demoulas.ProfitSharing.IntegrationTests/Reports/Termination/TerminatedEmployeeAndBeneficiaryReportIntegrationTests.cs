@@ -1,16 +1,14 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
@@ -62,7 +60,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         actualText = actualText.Replace("\r\n", "\n").Replace("\n", "\r\n");
         return actualText;
     }
-    
+
     // This is used to validate the Vesting query informally
     [Fact]
     public async Task Anything()
