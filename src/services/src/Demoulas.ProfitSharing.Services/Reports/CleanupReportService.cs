@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Constants;
@@ -14,7 +14,6 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -45,8 +44,6 @@ public class CleanupReportService : ICleanupReportService
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
         ILoggerFactory factory,
         ICalendarService calendarService,
-        TotalService totalService,
-        IHostEnvironment host,
         IDemographicReaderService demographicReaderService,
         TimeProvider timeProvider)
     {

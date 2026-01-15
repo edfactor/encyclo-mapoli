@@ -64,7 +64,7 @@ internal static class EmployeeProcessorHelper
                 from et in employees
                 join balTbl in totalService.TotalVestingBalance(ctx, profitYear, priorYear, fiscalDates.FiscalEndDate) on et.Ssn equals balTbl.Ssn into balTmp
                 from bal in balTmp.DefaultIfEmpty()
-                join thisYr in TotalService.GetProfitDetailTotalsForASingleYear(ctx, profitYear, cancellationToken) on et.Ssn equals thisYr.Ssn into txThsYrEnum
+                join thisYr in TotalService.GetProfitDetailTotalsForASingleYear(ctx, profitYear) on et.Ssn equals thisYr.Ssn into txThsYrEnum
                 from txns in txThsYrEnum.DefaultIfEmpty()
                 select new EmployeeFinancials
                 {

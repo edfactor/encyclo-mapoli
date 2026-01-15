@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Api.Extensions;
+using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Contexts;
@@ -126,6 +126,9 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
         ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING]));
+
+
+
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<IDemoulasCommonWarehouseContext, DemoulasCommonWarehouseContext>("Warehouse"));
 });

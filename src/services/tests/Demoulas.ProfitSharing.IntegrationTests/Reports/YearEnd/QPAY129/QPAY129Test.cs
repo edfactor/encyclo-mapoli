@@ -19,7 +19,6 @@ public class QPAY129Test : PristineBaseTest
             DbFactory,
             loggerFactory,
             CalendarService,
-            TotalService,
             new Mock<IHostEnvironment>().Object,
             DemographicReaderService,
             TimeProvider.System);

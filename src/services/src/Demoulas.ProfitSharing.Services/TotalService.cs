@@ -376,8 +376,7 @@ public sealed class TotalService : ITotalService
     /// Ignores any 0 records
     /// includes special handling for ClassActionFund and Military.
     /// </summary>
-    internal static IQueryable<InternalProfitDetailTotalsBySsn> GetProfitDetailTotalsForASingleYear(IProfitSharingDbContext ctx, short profitYear,
-        CancellationToken cancellationToken)
+    internal static IQueryable<InternalProfitDetailTotalsBySsn> GetProfitDetailTotalsForASingleYear(IProfitSharingDbContext ctx, short profitYear)
     {
         return ctx.ProfitDetails
             .Where(pd => pd.ProfitYear == profitYear)
