@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -193,15 +193,14 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
         var profitYear = (short)DateTime.Today.Year;  // Use current year like the service does
 
-        var payProfit = await c.PayProfits.Include(p => p.Enrollment).FirstAsync(pp => pp.DemographicId == demo.Id);
+        var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id);
 
-        // Keep the existing enrollment and just ensure it has the right ID for the forfeiture records test
-        if (payProfit.Enrollment != null && payProfit.EnrollmentId != Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+        // Update Demographic to have NewVestingPlan with forfeiture (enrollment ID 4)
+        // EnrollmentId is now computed from Demographic.VestingScheduleId + HasForfeited
+        if (demo.VestingScheduleId != VestingSchedule.Constants.NewPlan || !demo.HasForfeited)
         {
-            // Update to use the NewVestingPlanHasForfeitureRecords enrollment (ID=4)
-            payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-            payProfit.Enrollment.Id = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-            payProfit.Enrollment.Name = "New Vesting Plan Has Forfeiture Records";
+            demo.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+            demo.HasForfeited = true;
         }
 
         payProfit.CurrentHoursYear = 1255.4m;

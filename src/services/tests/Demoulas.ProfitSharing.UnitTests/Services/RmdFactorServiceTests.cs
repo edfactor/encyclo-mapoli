@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
@@ -18,7 +18,7 @@ public sealed class RmdsFactorServiceTests : ApiTestBase<Api.Program>
 
     public RmdsFactorServiceTests()
     {
-        _rmdsService = this.ServiceProvider?.GetRequiredService<IRmdsFactorService>() 
+        _rmdsService = this.ServiceProvider?.GetRequiredService<IRmdsFactorService>()
             ?? throw new NullReferenceException("IRmdsFactorService not registered in DI container");
     }
 

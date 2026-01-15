@@ -10,7 +10,9 @@ public record ProfitShareUpdateTotals
     public decimal TotalContribution { get; set; }
     public decimal Earnings { get; set; }
     public decimal Earnings2 { get; set; }
+    [YearEndArchiveProperty]
     public decimal Forfeiture { get; set; }
+    [YearEndArchiveProperty]
     public decimal Distributions { get; set; }
     public decimal Military { get; set; }
     public decimal EndingBalance { get; set; }

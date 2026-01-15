@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
@@ -39,7 +40,15 @@ internal static class EmployeeProcessorHelper
                     x.frozenDemographics.BadgeNumber,
                     x.ppYE.Demographic!.Ssn,
                     Name = x.ppYE.Demographic.ContactInfo!.FullName,
-                    EnrolledId = x.ppYE.EnrollmentId,
+                    EnrolledId = x.frozenDemographics.VestingScheduleId == null
+                        ? EnrollmentConstants.NotEnrolled
+                        : x.frozenDemographics.HasForfeited
+                            ? x.frozenDemographics.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                            : x.frozenDemographics.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                ? EnrollmentConstants.OldVestingPlanHasContributions
+                                : EnrollmentConstants.NewVestingPlanHasContributions,
                     x.ppYE.EmployeeTypeId,
                     PointsEarned = (int)(x.ppYE.PointsEarned ?? 0),
                     x.ppYE.ZeroContributionReasonId,
@@ -86,7 +95,7 @@ internal static class EmployeeProcessorHelper
         List<MemberFinancials> members = new();
         foreach (EmployeeFinancials empl in employeeFinancialsList)
         {
-            if (empl.EnrolledId != /*0*/ Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId == /*1*/ EmployeeType.Constants.NewLastYear ||
+            if (empl.EnrolledId != /*0*/ EnrollmentConstants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId == /*1*/ EmployeeType.Constants.NewLastYear ||
                 empl.HasTransactionAmounts() || empl.ZeroContributionReasonId != /*0*/ ZeroContributionReason.Constants.Normal || empl.CurrentAmount != 0)
             {
                 var profitDetailTotals = new ProfitDetailTotals(empl.DistributionsTotal ?? 0, empl.ForfeitsTotal ?? 0,

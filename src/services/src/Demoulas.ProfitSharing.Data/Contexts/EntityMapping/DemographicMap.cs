@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.Common.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -128,6 +128,12 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         _ = builder.Property(e => e.EmploymentStatusId)
             .HasColumnName("EMPLOYMENT_STATUS_ID");
 
+        _ = builder.Property(e => e.VestingScheduleId)
+            .HasColumnName("VESTING_SCHEDULE_ID");
+
+        _ = builder.Property(e => e.HasForfeited)
+            .HasColumnName("HAS_FORFEITED");
+
         _ = builder.OwnsOne(e => e.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(56).HasColumnName("STREET").HasComment("Street").IsRequired();
@@ -206,6 +212,10 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         builder.HasOne(d => d.EmploymentStatus)
             .WithMany(p => p.Demographics)
             .HasForeignKey(d => d.EmploymentStatusId);
+
+        builder.HasOne(d => d.VestingSchedule)
+            .WithMany()
+            .HasForeignKey(d => d.VestingScheduleId);
 
         _ = builder.HasMany(d => d.Beneficiaries)
             .WithOne(p => p.Demographic)

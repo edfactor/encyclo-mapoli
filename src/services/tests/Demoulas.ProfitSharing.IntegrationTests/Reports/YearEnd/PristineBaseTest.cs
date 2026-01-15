@@ -1,7 +1,9 @@
-﻿using System.Reflection;
+using System.Reflection;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Services;
@@ -30,6 +32,7 @@ public abstract class PristineBaseTest
     protected readonly IEmbeddedSqlService EmbeddedSqlService;
     protected readonly IHttpContextAccessor HttpContextAccessor = new HttpContextAccessor();
     protected readonly MemoryDistributedCache DistributedCache;
+    protected readonly IVestingScheduleService VestingScheduleService;
     protected readonly IPayProfitUpdateService PayProfitUpdateService;
     protected readonly YearEndService YearEndService;
     protected readonly IForfeitureAdjustmentService ForfeitureAdjustmentService;
@@ -49,9 +52,12 @@ public abstract class PristineBaseTest
         DemographicReaderService = new DemographicReaderService(FrozenService, HttpContextAccessor);
         TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);
         TestOutputHelper = testOutputHelper;
-        PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService);
+        VestingScheduleService = new VestingScheduleService(DbFactory, DistributedCache);
+        PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService, VestingScheduleService);
         YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService, TimeProvider);
-        ForfeitureAdjustmentService = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider);
+        var mockAppUser = new Mock<IAppUser>();
+        var mockAuditService = new Mock<IAuditService>();
+        ForfeitureAdjustmentService = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
     }
 
     public static string ReadEmbeddedResource(string resourceName)

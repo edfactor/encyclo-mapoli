@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -17,6 +18,8 @@ public record BreakdownByStoreTotals
     public decimal TotalEndBalances { get; set; }
 
     public decimal TotalVestedBalance { get; set; }
+
+    public ValidationResponse? CrossReferenceValidation { get; set; }
 
     /// <summary>
     /// Example data for testing and API documentation.
