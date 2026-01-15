@@ -127,6 +127,8 @@ export interface ProfitShareMasterResponse {
   employeesEffected?: number;
   etvasEffected?: number;
   crossReferenceValidation?: MasterUpdateCrossReferenceValidationResponse;
+  updatedBy?: string | null;
+  updatedTime?: string | null;
 }
 
 export interface ProfitMasterParams {

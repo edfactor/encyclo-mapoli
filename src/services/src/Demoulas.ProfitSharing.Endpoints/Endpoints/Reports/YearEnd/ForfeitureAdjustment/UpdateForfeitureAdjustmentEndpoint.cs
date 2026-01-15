@@ -1,4 +1,4 @@
-﻿// Result, Error
+// Result, Error
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -51,6 +51,6 @@ public class UpdateForfeitureAdjustmentEndpoint : ProfitSharingEndpoint<Forfeitu
                 return TypedResults.Problem(pd.Detail);
             }
             return TypedResults.NoContent();
-        }, "operation:year-end-forfeiture-adjustment-update", $"badge_number:{req.BadgeNumber}", $"forfeiture_amount:{req.ForfeitureAmount}", $"class_action:{req.ClassAction}", $"profit_year:{req.ProfitYear}");
+        }, "operation:year-end-forfeiture-adjustment-update", $"badge_number:{req.BadgeNumber}", $"forfeiture_amount:{req.ForfeitureAmount}", $"class_action:{req.ClassAction}");
     }
 }

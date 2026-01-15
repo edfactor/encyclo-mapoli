@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -81,16 +81,9 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
                     .ExecuteUpdateAsync(
                         s => s
                             .SetProperty(p => p.Ssn, destinationSsn)
-                            .SetProperty(p => p.YearsOfServiceCredit, 
+                            .SetProperty(p => p.YearsOfServiceCredit,
                                 p => overlappingYears.Contains(p.ProfitYear) ? (sbyte)0 : p.YearsOfServiceCredit)
                             .SetProperty(p => p.ModifiedAtUtc, DateTimeOffset.UtcNow),
-                        cancellationToken);
-
-                // Set EnrollmentId to 0 for PayProfit records associated with sourceSsn
-                var payProfitRowsAffected = await ctx.PayProfits
-                    .Where(pp => pp.Demographic!.Ssn == sourceSsn)
-                    .ExecuteUpdateAsync(
-                        s => s.SetProperty(pp => pp.EnrollmentId, 0),
                         cancellationToken);
 
                 return Result<bool>.Success(true);

@@ -142,7 +142,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     TotalContributions = reportData.Sum(r => r.Contributions),
                     TotalEarnings = reportData.Sum(r => r.Earnings),
                     TotalForfeitures = reportData.Sum(r => r.Forfeitures),
-                    TotalWithdrawals = reportData.Sum(r => r.Withdrawals)
+                    TotalWithdrawals = reportData.Sum(r => r.Withdrawals),
+                    TotalVestedBalance = reportData.OrderByDescending(r => r.ProfitYear).First().EndingBalance
                 };
 
                 return BuildPaginatedResponsePreSorted(reportData, request, startYear, totalYearCount, cumulativeTotals);

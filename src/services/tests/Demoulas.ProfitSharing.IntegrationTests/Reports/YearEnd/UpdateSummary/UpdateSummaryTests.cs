@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Constants;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -300,11 +301,21 @@ public class UpdateSummaryTests : PristineBaseTest
             decimal has2021ClassActionSum = await ctx.ProfitDetails
                 .Where(pd => pd.Ssn == pp.Demographic!.Ssn && pd.ProfitYear == 2021 && pd.CommentType == CommentType.Constants.ClassAction).SumAsync(pd => pd.Earnings);
 
+            int enrollmentId = pp.Demographic.VestingScheduleId == null
+                ? EnrollmentConstants.NotEnrolled
+                : pp.Demographic.HasForfeited
+                    ? (pp.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                        : EnrollmentConstants.NewVestingPlanHasForfeitureRecords)
+                    : (pp.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        ? EnrollmentConstants.OldVestingPlanHasContributions
+                        : EnrollmentConstants.NewVestingPlanHasContributions);
+
             return GetRow(
                 has2021ClassActionSum,
                 profitYear,
                 age,
-                pp.EnrollmentId,
+                enrollmentId,
                 pp.CurrentHoursYear,
                 pp.HoursExecutive,
                 pp.Demographic.TerminationDate,

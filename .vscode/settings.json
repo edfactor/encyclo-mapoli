@@ -24,5 +24,8 @@
     "editor.formatOnSave": true
   },
   "snyk.advanced.organization": "18421683-5bf0-4f18-ae12-5bc64dd68c9e",
-  "snyk.advanced.autoSelectOrganization": true
+  "snyk.advanced.autoSelectOrganization": true,
+  "chat.tools.terminal.autoApprove": {
+    "py": true
+  }
 }

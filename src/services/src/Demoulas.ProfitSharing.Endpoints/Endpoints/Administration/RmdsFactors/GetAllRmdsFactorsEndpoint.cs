@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -42,7 +42,7 @@ public sealed class GetAllRmdsFactorsEndpoint
             s.Responses[200] = "Success - Returns list of all RMD factors by age (ordered by age)";
             s.Responses[403] = "Forbidden. Requires administrator access.";
         });
-        
+
         Group<AdministrationGroup>();
     }
 

@@ -75,7 +75,11 @@ public sealed class CreateDistributionRequestValidator : AbstractValidator<Creat
         RuleFor(x => x)
             .Must(x =>
             {
-                if (x.GrossAmount == 0) return true;
+                if (x.GrossAmount == 0)
+                {
+                    return true;
+                }
+
                 var expectedFederalTax = Math.Round(x.GrossAmount * x.FederalTaxPercentage / 100m, 2, MidpointRounding.AwayFromZero);
                 var difference = Math.Abs(x.FederalTaxAmount - expectedFederalTax);
                 return difference < 0.01m; // Allow for rounding differences
@@ -86,7 +90,11 @@ public sealed class CreateDistributionRequestValidator : AbstractValidator<Creat
         RuleFor(x => x)
             .Must(x =>
             {
-                if (x.GrossAmount == 0) return true;
+                if (x.GrossAmount == 0)
+                {
+                    return true;
+                }
+
                 var expectedStateTax = Math.Round(x.GrossAmount * x.StateTaxPercentage / 100m, 2, MidpointRounding.AwayFromZero);
                 var difference = Math.Abs(x.StateTaxAmount - expectedStateTax);
                 return difference < 0.01m; // Allow for rounding differences

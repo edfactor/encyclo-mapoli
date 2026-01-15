@@ -52,7 +52,7 @@ type ProfitShareEditUpdateAction =
   | { type: "SET_CHANGES_APPLIED"; payload: boolean }
   | { type: "SET_VALIDATION"; payload: Partial<ProfitShareEditUpdateState["validation"]> }
   | { type: "SET_STATUS"; payload: { updatedBy: string | null; updatedTime: string | null } }
-  | { type: "SAVE_SUCCESS" }
+  | { type: "SAVE_SUCCESS";  payload: { updatedBy: string | null; updatedTime: string | null } }
   | { type: "REVERT_SUCCESS" };
 
 // Reducer
@@ -83,6 +83,7 @@ const profitShareEditUpdateReducer = (
       return {
         ...state,
         changesApplied: true,
+        profitMasterStatus: action.payload,
         modals: { ...state.modals, saveModalOpen: false }
       };
     case "REVERT_SUCCESS":
@@ -186,7 +187,13 @@ export const useProfitShareEditUpdate = () => {
     try {
       const payload = await applyMaster(params).unwrap();
 
-      dispatch({ type: "SAVE_SUCCESS" });
+      dispatch({ 
+        type: "SAVE_SUCCESS",
+        payload: {
+            updatedBy: payload.updatedBy ?? null,
+            updatedTime: payload.updatedTime ?? null
+        }
+      });
 
       reduxDispatch(setProfitEditUpdateChangesAvailable(false));
       reduxDispatch(setProfitEditUpdateRevertChangesAvailable(true));

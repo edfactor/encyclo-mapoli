@@ -535,8 +535,8 @@ This package supports **net8.0, net9.0, and net10.0**. No framework-specific con
 
 ## Related Documentation
 
--   [Demoulas.Common.Api Instructions](./demoulas.common.api.instructions.md) - API implementation
--   [Demoulas.Common.Data Instructions](./demoulas.common.data.instructions.md) - Data access patterns
--   [Demoulas.Common.Logging Instructions](./demoulas.common.logging.instructions.md) - Logging configuration
--   [Security Instructions](./security.instructions.md) - Security best practices
--   [Code Review Instructions](./code-review.instructions.md) - Review standards
+-   [Demoulas.Common.Api Instructions](demoulas.common.api.instructions.md) - API implementation
+-   [Demoulas.Common.Data Instructions](demoulas.common.data.instructions.md) - Data access patterns
+-   [Demoulas.Common.Logging Instructions](demoulas.common.logging.instructions.md) - Logging configuration
+-   [Security Instructions](demoulas.common.security.instructions.md) - Security best practices
+-   [Code Review Instructions](code-review.instructions.md) - Review standards

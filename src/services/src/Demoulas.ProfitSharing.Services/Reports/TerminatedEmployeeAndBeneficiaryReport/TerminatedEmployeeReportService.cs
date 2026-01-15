@@ -1,5 +1,6 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -42,7 +43,7 @@ public sealed class TerminatedEmployeeReportService
         ICalendarService calendarService,
         IYearEndService yearEndService,
         TimeProvider timeProvider
-       )
+    )
     {
         _factory = factory;
         _totalService = totalService;
@@ -287,8 +288,8 @@ public sealed class TerminatedEmployeeReportService
                 }
 
                 // Apply vesting rules and adjustments
-                byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
-                    ? Enrollment.Constants.NotEnrolled
+                byte enrollmentId = member.EnrollmentId == EnrollmentConstants.NewVestingPlanHasContributions
+                    ? EnrollmentConstants.NotEnrolled
                     : member.EnrollmentId;
 
                 // If retired, then they get it all.
@@ -312,14 +313,14 @@ public sealed class TerminatedEmployeeReportService
                 // Calculate age if birthdate available
                 short? age = member.Birthday?.Age();
 
-                var hasForfeited = enrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
-                                   enrollmentId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+                var hasForfeited = enrollmentId == /*3*/ EnrollmentConstants.OldVestingPlanHasForfeitureRecords ||
+                                   enrollmentId == /*4*/ EnrollmentConstants.NewVestingPlanHasForfeitureRecords;
 
                 decimal? suggestedForfeit = null;
                 if (!hasForfeited && member.PsnSuffix == 0)
                 {
                     suggestedForfeit = member.EndingBalance - vestedBalance;
-                    
+
                     if (member.Evta > 0)
                     {
                         var conditional = member.EndingBalance - member.Evta;
@@ -510,39 +511,47 @@ public sealed class TerminatedEmployeeReportService
         short currentYear = (short)ageAsOfDate.Year;
 
         IQueryable<MemberSlice> query = from employee in terminatedEmployees
-            join payProfit in ctx.PayProfits.Where(pp => pp.ProfitYear == currentYear)
-                on employee.Demographic.Id equals payProfit.DemographicId into payProfitTmp
-            from payProfit in payProfitTmp.DefaultIfEmpty()
-            join yipTbl in _totalService.GetYearsOfService(ctx, currentYear, ageAsOfDate)
-                on employee.Demographic.Ssn equals yipTbl.Ssn into yipTmp
-            from yip in yipTmp.DefaultIfEmpty()
-            select new MemberSlice
-            {
-                Id = employee.Demographic.Id,
-                PsnSuffix = 0,
-                BadgeNumber = employee.Demographic.BadgeNumber,
-                Ssn = employee.Demographic.Ssn,
-                BirthDate = employee.Demographic.DateOfBirth,
-                HoursCurrentYear = payProfit != null ? payProfit.CurrentHoursYear : 0,
-                EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
-                FullName = employee.Demographic.ContactInfo.FullName,
-                FirstName = employee.Demographic.ContactInfo.FirstName,
-                LastName = employee.Demographic.ContactInfo.LastName,
-                YearsInPs = yip != null ? yip.Years : (byte)0,
-                TerminationDate = employee.Demographic.TerminationDate,
-                IncomeRegAndExecCurrentYear = payProfit != null ? payProfit.TotalIncome : 0,
-                TerminationCode = employee.Demographic.TerminationCodeId,
-                ZeroCont = employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
-                    ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
-                    : payProfit != null && payProfit.ZeroContributionReasonId != null
-                        ? payProfit.ZeroContributionReasonId
-                        : 0,
-                EnrollmentId = payProfit != null ? payProfit.EnrollmentId : (byte)0,
-                Etva = payProfit != null ? payProfit.Etva : 0,
-                IsOnlyBeneficiary = false,
-                IsBeneficiaryAndEmployee = false,
-                IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
-            };
+                                        join payProfit in ctx.PayProfits.Where(pp => pp.ProfitYear == currentYear)
+                                            on employee.Demographic.Id equals payProfit.DemographicId into payProfitTmp
+                                        from payProfit in payProfitTmp.DefaultIfEmpty()
+                                        join yipTbl in _totalService.GetYearsOfService(ctx, currentYear, ageAsOfDate)
+                                            on employee.Demographic.Ssn equals yipTbl.Ssn into yipTmp
+                                        from yip in yipTmp.DefaultIfEmpty()
+                                        select new MemberSlice
+                                        {
+                                            Id = employee.Demographic.Id,
+                                            PsnSuffix = 0,
+                                            BadgeNumber = employee.Demographic.BadgeNumber,
+                                            Ssn = employee.Demographic.Ssn,
+                                            BirthDate = employee.Demographic.DateOfBirth,
+                                            HoursCurrentYear = payProfit != null ? payProfit.CurrentHoursYear : 0,
+                                            EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
+                                            FullName = employee.Demographic.ContactInfo.FullName,
+                                            FirstName = employee.Demographic.ContactInfo.FirstName,
+                                            LastName = employee.Demographic.ContactInfo.LastName,
+                                            YearsInPs = yip != null ? yip.Years : (byte)0,
+                                            TerminationDate = employee.Demographic.TerminationDate,
+                                            IncomeRegAndExecCurrentYear = payProfit != null ? payProfit.TotalIncome : 0,
+                                            TerminationCode = employee.Demographic.TerminationCodeId,
+                                            ZeroCont = employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
+                                                ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
+                                                : payProfit != null && payProfit.ZeroContributionReasonId != null
+                                                    ? payProfit.ZeroContributionReasonId
+                                                    : 0,
+                                            EnrollmentId = employee.Demographic.VestingScheduleId == null
+                                                ? EnrollmentConstants.NotEnrolled
+                                                : employee.Demographic.HasForfeited
+                                                    ? (employee.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                                        ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                                        : EnrollmentConstants.NewVestingPlanHasForfeitureRecords)
+                                                    : (employee.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                                        ? EnrollmentConstants.OldVestingPlanHasContributions
+                                                        : EnrollmentConstants.NewVestingPlanHasContributions),
+                                            Etva = payProfit != null ? payProfit.Etva : 0,
+                                            IsOnlyBeneficiary = false,
+                                            IsBeneficiaryAndEmployee = false,
+                                            IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
+                                        };
 
         return query;
     }
@@ -615,13 +624,13 @@ public sealed class TerminatedEmployeeReportService
     {
         // Filter employees based on enrollment and years in plan
         IQueryable<MemberSlice> employees = terminatedWithContributions.Where(member =>
-            (member.EnrollmentId == Enrollment.Constants.NotEnrolled ||
-             member.EnrollmentId == Enrollment.Constants.OldVestingPlanHasContributions ||
-             member.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+            (member.EnrollmentId == EnrollmentConstants.NotEnrolled ||
+             member.EnrollmentId == EnrollmentConstants.OldVestingPlanHasContributions ||
+             member.EnrollmentId == EnrollmentConstants.OldVestingPlanHasForfeitureRecords)
             && member.YearsInPs > 2
             ||
-            (member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ||
-             member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+            (member.EnrollmentId == EnrollmentConstants.NewVestingPlanHasContributions ||
+             member.EnrollmentId == EnrollmentConstants.NewVestingPlanHasForfeitureRecords)
             && member.YearsInPs > 1);
 
         // Combine: all employees + beneficiaries (without deduplication at query level)
