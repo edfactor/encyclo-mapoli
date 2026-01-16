@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Attributes;
@@ -197,7 +197,14 @@ public sealed class YearEndService : IYearEndService
         const char empStatusTerminated = EmploymentStatus.Constants.Terminated; // 't'
 
         // Build the SQL - uses CTEs for clarity and to avoid repeated subqueries
-        string sql = @"
+        var pc0 = ProfitCode.Constants.IncomingContributions.Id;
+        var pc1 = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id;
+        var pc2 = ProfitCode.Constants.OutgoingForfeitures.Id;
+        var pc3 = ProfitCode.Constants.OutgoingDirectPayments.Id;
+        var pc5 = ProfitCode.Constants.OutgoingXferBeneficiary.Id;
+        var pc9 = ProfitCode.Constants.Outgoing100PercentVestedPayment.Id;
+        var minHours = ReferenceData.MinimumHoursForContribution;
+        string sql = $@"
 MERGE INTO pay_profit pp
 USING (
     WITH
@@ -205,17 +212,17 @@ USING (
     first_contrib AS (
         SELECT pd.ssn, MIN(pd.profit_year) AS first_year
         FROM profit_detail pd
-        WHERE pd.profit_code_id = 0
+        WHERE pd.profit_code_id = ${pc0}
           AND pd.contribution > 0
-          AND pd.profit_year_iteration = 0
+          AND pd.profit_year_iteration = ${ProfitCode.Constants.IncomingContributions.Id}
         GROUP BY pd.ssn
     ),
     -- Get prior year total balance for each SSN
     prior_balance AS (
         SELECT pd.ssn, SUM(
-            CASE WHEN pd.profit_code_id = 0 THEN pd.contribution ELSE 0 END
-            + CASE WHEN pd.profit_code_id = 0 THEN pd.earnings ELSE 0 END
-            - CASE WHEN pd.profit_code_id IN (1,2,3,5,9) THEN pd.forfeiture ELSE 0 END
+            CASE WHEN pd.profit_code_id = ${pc0} THEN pd.contribution ELSE 0 END
+            + CASE WHEN pd.profit_code_id = ${pc0} THEN pd.earnings ELSE 0 END
+            - CASE WHEN pd.profit_code_id IN (${pc1},${pc2},${pc3},${pc5},${pc9}) THEN pd.forfeiture ELSE 0 END
         ) AS total_balance
         FROM profit_detail pd
         WHERE pd.profit_year <= :priorYear
@@ -243,10 +250,10 @@ USING (
             FLOOR(MONTHS_BETWEEN(:fiscalEndDate, d.date_of_birth) / 12) AS age,
             -- Is terminated before fiscal end?
             CASE WHEN d.employment_status_id = :empStatusTerminated AND d.termination_date < :fiscalEndDate THEN 1 ELSE 0 END AS is_terminated,
-            -- Has minimum hours (>= 1000)?
-            CASE WHEN pp.total_hours >= 1000 THEN 1 ELSE 0 END AS has_min_hours,
-            -- Is eligible for processing (age >= 18 AND hours >= 1000) OR (age >= 64)
-            CASE WHEN (d.date_of_birth <= :minAge18BirthDate AND pp.total_hours >= 1000)
+            -- Has minimum hours (>= ${minHours})?
+            CASE WHEN pp.total_hours >= ${minHours} THEN 1 ELSE 0 END AS has_min_hours,
+            -- Is eligible for processing (age >= 18 AND hours >= ${minHours}) OR (age >= 64)
+            CASE WHEN (d.date_of_birth <= :minAge18BirthDate AND pp.total_hours >= ${minHours})
                       OR d.date_of_birth <= :minAge64BirthDate
                  THEN 1 ELSE 0 END AS is_eligible,
             -- Years since first contribution (with +1 if had balance last year)
