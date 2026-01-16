@@ -11,9 +11,14 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
 {
 
-    private readonly ProfitYearRequest _requestDto = new ProfitYearRequest()
+    private readonly FilterableStartAndEndDateRequest _requestDto = new()
     {
-        ProfitYear = 2023
+        BeginningDate = new DateOnly(2023, 01, 01),
+        EndingDate = new DateOnly(2023, 12, 31),
+        Skip = 0,
+        Take = 10,
+        SortBy = "BadgeNumber",
+        IsSortDescending = false
     };
 
     [Fact(DisplayName = "Unauthorized")]
@@ -23,7 +28,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         var response =
             await ApiClient
                 .POSTAsync<TerminatedEmployeesEndPoint,
-                    ProfitYearRequest, TerminatedEmployeeAndBeneficiaryResponse>(_requestDto);
+                    FilterableStartAndEndDateRequest, TerminatedEmployeeAndBeneficiaryResponse>(_requestDto);
 
         // Assert
         response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
