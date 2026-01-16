@@ -122,7 +122,7 @@ public class CleanupReportService : ICleanupReportService
                 }
 
                 // Always use live/now data
-                // This assumes all the payprofits for lastest year are available 
+                // This assumes all the payprofits for lastest year are available
                 var latestYear = await ctx.PayProfits.MaxAsync(p => p.ProfitYear, cancellationToken);
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 var nameAndDobQuery = demographics
@@ -135,15 +135,18 @@ public class CleanupReportService : ICleanupReportService
                         x.BadgeNumber,
                         x.PayFrequencyId,
                         PsnSuffix = (short)0,
-                        EnrollmentId = x.VestingScheduleId == null
-                            ? EnrollmentConstants.NotEnrolled
-                            : x.HasForfeited
-                                ? x.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                    ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
-                                    : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                                : x.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                    ? EnrollmentConstants.OldVestingPlanHasContributions
-                                    : EnrollmentConstants.NewVestingPlanHasContributions
+                        EnrollmentId = x.PayProfits
+                            .Where(p => p.ProfitYear == latestYear)
+                            .Select(p => p.VestingScheduleId == 0
+                                ? EnrollmentConstants.NotEnrolled
+                                : p.HasForfeited
+                                    ? p.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                        ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                                        : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                                    : p.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                        ? EnrollmentConstants.OldVestingPlanHasContributions
+                                        : EnrollmentConstants.NewVestingPlanHasContributions)
+                            .FirstOrDefault()
                     }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
@@ -189,7 +192,7 @@ public class CleanupReportService : ICleanupReportService
                                    (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                                     (!pd.CommentTypeId.HasValue ||
                                      !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                                  // PROFIT_DETAIL.profitYear <--- is the year selector 
+                                  // PROFIT_DETAIL.profitYear <--- is the year selector
                                   // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
                                   // PS-2275: MonthToDate=0 indicates year-level records that should always be included
                                   // COBOL only applies month filtering when START-MONTH > 0 OR END-MONTH > 0

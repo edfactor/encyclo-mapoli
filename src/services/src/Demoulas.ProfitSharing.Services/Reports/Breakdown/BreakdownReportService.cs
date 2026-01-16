@@ -648,18 +648,18 @@ public sealed class BreakdownReportService : IBreakdownService
 
         11-14-02  R MAISON  #196500 REMNVED SSN#'S ** Redacted **
            *                             AT LINES 2750 THRU 2790           *
-           *                             AS PER DON MULLIGAN       
+           *                             AS PER DON MULLIGAN
 
         02/18/04  DPRUGH   P#7790  ADDED ** Redacted ** TO THE 701 SECTION .    *
            *                             ALSO CLEANED UP THE SECTION BY    *
            *                             REMNVING THE COMMENTED OUT SSN'S  *
            *                             SINCE THEY ARE ALREADY NOTED IN   *
-           *                             THE COMMENT ABNVE THE SECTION  
+           *                             THE COMMENT ABNVE THE SECTION
          */
         // pensionerSsns now passed as parameter instead of queried here
 
         /*
-       
+
         *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
          | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
          | **700 – “Retired – Drawing Pension”**               | `B-TERM = "W"` (“W” is the retirement term-code).                                                        | `COMPUTE W-ST = WS-STR-VAL-PS-PENSION-RETIRED + 1000`                                                                                                  |
@@ -734,7 +734,7 @@ public sealed class BreakdownReportService : IBreakdownService
                                             : d.StoreNumber),
                 /* ── sort column used for certificates ───────────────────────── */
                 CertificateSort = d.EmploymentStatusId ==
-                        //Active 
+                        //Active
                         EmploymentStatus.Constants.Active || d.TerminationDate > fiscalEndDate ?
                      (d.DepartmentId == Department.Constants.Grocery && d.PayClassificationId == PayClassification.Constants.Manager ? 10
                       : d.DepartmentId == Department.Constants.Grocery && d.PayClassificationId == PayClassification.Constants.AssistantManager ? 20
@@ -787,13 +787,13 @@ public sealed class BreakdownReportService : IBreakdownService
                 YearsInPlan = bal == null ? 0 : bal.YearsInPlan,
                 HireDate = d.HireDate,
                 TerminationDate = d.TerminationDate,
-                EnrollmentId = d.VestingScheduleId == null
+                EnrollmentId = pp == null || pp.VestingScheduleId == 0
                     ? EnrollmentConstants.NotEnrolled
-                    : d.HasForfeited
-                        ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                    : pp.HasForfeited
+                        ? pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                             ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                             : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                        : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                             ? EnrollmentConstants.OldVestingPlanHasContributions
                             : EnrollmentConstants.NewVestingPlanHasContributions,
                 ProfitShareHours = pp.TotalHours,

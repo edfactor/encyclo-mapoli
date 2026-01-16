@@ -40,13 +40,13 @@ internal static class EmployeeProcessorHelper
                     x.frozenDemographics.BadgeNumber,
                     x.ppYE.Demographic!.Ssn,
                     Name = x.ppYE.Demographic.ContactInfo!.FullName,
-                    EnrolledId = x.frozenDemographics.VestingScheduleId == null
+                    EnrolledId = x.ppYE.VestingScheduleId == 0
                         ? EnrollmentConstants.NotEnrolled
-                        : x.frozenDemographics.HasForfeited
-                            ? x.frozenDemographics.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : x.ppYE.HasForfeited
+                            ? x.ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                 : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : x.frozenDemographics.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : x.ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasContributions
                                 : EnrollmentConstants.NewVestingPlanHasContributions,
                     x.ppYE.EmployeeTypeId,
@@ -80,7 +80,7 @@ internal static class EmployeeProcessorHelper
                     ZeroContributionReasonId = et.ZeroContributionReasonId,
                     PayFrequencyId = et.PayFrequencyId,
 
-                    // Transactions for this year. 
+                    // Transactions for this year.
                     DistributionsTotal = txns.DistributionsTotal,
                     ForfeitsTotal = txns.ForfeitsTotal,
                     AllocationsTotal = txns.AllocationsTotal,

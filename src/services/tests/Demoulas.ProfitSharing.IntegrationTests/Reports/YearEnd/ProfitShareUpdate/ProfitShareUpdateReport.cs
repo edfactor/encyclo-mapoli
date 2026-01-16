@@ -182,6 +182,7 @@ internal sealed class ProfitShareUpdateReport
     public void m850PrintTotals(ReportCounters reportCounters, ProfitShareUpdateTotals wsClientProfitShareUpdateTotals,
         long maxAllowedContribution)
     {
+        _ = reportCounters;
         ClientTot client_tot = new();
         client_tot.BEG_BAL_TOT = wsClientProfitShareUpdateTotals.BeginningBalance;
         client_tot.DIST1_TOT = wsClientProfitShareUpdateTotals.Distributions;
@@ -247,7 +248,7 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m1000AdjustmentReport(ProfitShareUpdateRequest profitShareUpdateRequest,
+    public static void m1000AdjustmentReport(ProfitShareUpdateRequest profitShareUpdateRequest,
         AdjustmentsSummaryDto adjustmentsApplied)
     {
         if (profitShareUpdateRequest.BadgeToAdjust == 0)
@@ -297,14 +298,16 @@ internal sealed class ProfitShareUpdateReport
         }
     }
 
-    private void WRITE2_advance2(object header4)
+    private static void WRITE2_advance2(object header4)
     {
+        _ = header4;
         // We dont currently support this second report.    We may have to.
         //throw new NotImplementedException()
     }
 
-    private void WRITE2_afterPage(Header1 header1)
+    private static void WRITE2_afterPage(Header1 header1)
     {
+        _ = header1;
         // We dont currently support this second report.    We may have to.
         // throw new NotImplementedException()
     }

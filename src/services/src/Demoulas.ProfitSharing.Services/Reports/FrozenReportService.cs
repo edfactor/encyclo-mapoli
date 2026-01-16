@@ -49,7 +49,7 @@ public class FrozenReportService : IFrozenReportService
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains the 
+    /// A task that represents the asynchronous operation. The task result contains the
     /// <see cref="DistributionsByAge"/> object, which includes the report details and aggregated data.
     /// </returns>
     public async Task<DistributionsByAge> GetDistributionsByAgeYearAsync(FrozenReportsByAgeRequest req,
@@ -186,15 +186,15 @@ public class FrozenReportService : IFrozenReportService
     /// Retrieves the contributions grouped by age for a specific profit year, based on the provided request.
     /// </summary>
     /// <param name="req">
-    /// The request containing the parameters for generating the contributions report, 
+    /// The request containing the parameters for generating the contributions report,
     /// including the profit year and report type (e.g., FullTime, PartTime, or Total).
     /// </param>
     /// <param name="cancellationToken">
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object, 
-    /// which includes details such as the report name, report date, total employees, distribution total amount, 
+    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object,
+    /// which includes details such as the report name, report date, total employees, distribution total amount,
     /// and a paginated response of contributions grouped by age.
     /// </returns>
     /// <exception cref="ArgumentNullException">
@@ -353,7 +353,7 @@ public class FrozenReportService : IFrozenReportService
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A <see cref="BalanceByAge"/> object containing the balance details grouped by age, 
+    /// A <see cref="BalanceByAge"/> object containing the balance details grouped by age,
     /// including totals and other relevant metrics.
     /// </returns>
     /// <remarks>
@@ -780,31 +780,31 @@ public class FrozenReportService : IFrozenReportService
                     m.StoreNumber,
                     m.IsEmployee,
                     IsExecutive = m.PayFrequencyId == PayFrequency.Constants.Monthly,
-                    BeforeEnrollmentId = demo != null
-                        ? demo.VestingScheduleId == null
+                    BeforeEnrollmentId = m.IsEmployee
+                        ? (lyPp == null || lyPp.VestingScheduleId == 0
                             ? EnrollmentConstants.NotEnrolled
-                            : demo.HasForfeited
-                                ? demo.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : lyPp.HasForfeited
+                                ? lyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                     : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                                : demo.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                : lyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasContributions
-                                    : EnrollmentConstants.NewVestingPlanHasContributions
-                        : (m.IsEmployee ? EnrollmentConstants.NotEnrolled : EnrollmentConstants.NewVestingPlanHasForfeitureRecords),
+                                    : EnrollmentConstants.NewVestingPlanHasContributions)
+                        : EnrollmentConstants.NewVestingPlanHasForfeitureRecords,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
                     BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : default(byte),
-                    AfterEnrollmentId = demo != null
-                        ? demo.VestingScheduleId == null
+                    AfterEnrollmentId = m.IsEmployee
+                        ? (pp == null || pp.VestingScheduleId == 0
                             ? EnrollmentConstants.NotEnrolled
-                            : demo.HasForfeited
-                                ? demo.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : pp.HasForfeited
+                                ? pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                     : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                                : demo.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasContributions
-                                    : EnrollmentConstants.NewVestingPlanHasContributions
-                        : (m.IsEmployee ? EnrollmentConstants.NotEnrolled : EnrollmentConstants.NewVestingPlanHasForfeitureRecords),
+                                    : EnrollmentConstants.NewVestingPlanHasContributions)
+                        : EnrollmentConstants.NewVestingPlanHasForfeitureRecords,
                     AfterProfitSharingAmount = bal.CurrentBalance,
                     AfterVestedProfitSharingAmount = bal.VestedBalance,
                     AfterYearsInPlan = bal.YearsInPlan
@@ -910,13 +910,13 @@ public class FrozenReportService : IFrozenReportService
                                      Loans = lBal_lj != null ? lBal_lj.TotalAmount : (decimal?)null,
                                      ProfitSharingAmount = psBal != null ? psBal.TotalAmount : (decimal?)null,
                                      GrossWages = pp != null ? pp.TotalIncome : 0m,
-                                     EnrollmentId = d.VestingScheduleId == null
+                                     EnrollmentId = pp.VestingScheduleId == 0
                                          ? (byte?)EnrollmentConstants.NotEnrolled
-                                         : d.HasForfeited
-                                             ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                         : pp.HasForfeited
+                                             ? pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                                  ? (byte?)EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                                  : (byte?)EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                                             : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                             : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                                  ? (byte?)EnrollmentConstants.OldVestingPlanHasContributions
                                                  : (byte?)EnrollmentConstants.NewVestingPlanHasContributions,
                                      d.PayFrequencyId,

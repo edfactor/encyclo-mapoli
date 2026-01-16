@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "10.0.1")
+                .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -535,7 +535,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = 1,
                             City = "Lake Success",
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 14, 18, 15, 21, 80, DateTimeKind.Unspecified).AddTicks(1352), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 16, 0, 18, 48, 696, DateTimeKind.Unspecified).AddTicks(9709), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             FedAchChangeDate = new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FedwireLocation = "Miami, FL",
@@ -684,7 +684,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccountName = "Profit Sharing Distribution Account",
                             AccountNumber = "PLACEHOLDER",
                             BankId = 1,
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 14, 18, 15, 21, 86, DateTimeKind.Unspecified).AddTicks(7282), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 16, 0, 18, 48, 701, DateTimeKind.Unspecified).AddTicks(6239), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             IsDisabled = false,
                             IsPrimary = true,
@@ -722,7 +722,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("DEMOGRAPHIC_ID");
 
                     b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(1)")
+                        .HasDefaultValue(false)
                         .HasColumnName("ISDELETED");
 
                     b.Property<DateTimeOffset?>("ModifiedAtUtc")
@@ -2690,10 +2692,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("GENDER_ID")
                         .HasComment("Gender");
 
-                    b.Property<bool>("HasForfeited")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("HAS_FORFEITED");
-
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("HIRE_DATE")
@@ -2755,10 +2753,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("USER_NAME")
                         .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
-                    b.Property<int?>("VestingScheduleId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("VESTING_SCHEDULE_ID");
-
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC");
 
@@ -2779,9 +2773,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("TerminationCodeId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_TERMINATIONCODEID");
-
-                    b.HasIndex("VestingScheduleId")
-                        .HasDatabaseName("IX_DEMOGRAPHIC_VESTINGSCHEDULEID");
 
                     b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
                         .IsUnique()
@@ -2886,10 +2877,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("FIRST_NAME")
                         .HasComment("FirstName from ContactInfo");
 
-                    b.Property<bool>("HasForfeited")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("HAS_FORFEITED");
-
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("DATE")
                         .HasColumnName("HIRE_DATE")
@@ -2990,10 +2977,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("ValidTo")
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("VALID_TO");
-
-                    b.Property<int?>("VestingScheduleId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("VESTING_SCHEDULE_ID");
 
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC_HISTORY");
@@ -5259,6 +5242,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("ETVA");
 
+                    b.Property<bool>("HasForfeited")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("HAS_FORFEITED");
+
                     b.Property<decimal>("HoursExecutive")
                         .HasPrecision(6, 2)
                         .HasColumnType("DECIMAL(6,2)")
@@ -5302,6 +5289,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(96)")
                         .HasColumnName("USER_NAME")
                         .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.Property<int>("VestingScheduleId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("VESTING_SCHEDULE_ID");
 
                     b.Property<byte>("WeeksWorkedYear")
                         .HasPrecision(2)
@@ -7675,12 +7666,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_DEMOGRAPHIC_TERMINATIONCODES_TERMINATIONCODEID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.VestingSchedule", "VestingSchedule")
-                        .WithMany()
-                        .HasForeignKey("VestingScheduleId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_DEMOGRAPHIC_VESTINGSCHEDULES_VESTINGSCHEDULEID");
-
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {
                             b1.Property<int>("DemographicId")
@@ -7838,8 +7823,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("PayFrequency");
 
                     b.Navigation("TerminationCode");
-
-                    b.Navigation("VestingSchedule");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicSsnChangeHistory", b =>

@@ -77,6 +77,8 @@ public class EnrollmentSummarizerTests
             ProfitYear = profitYear,
             ZeroContributionReasonId = zeroContributionReasonId,
             Etva = 0m,
+            VestingScheduleId = VestingSchedule.Constants.NewPlan,
+            HasForfeited = false,
             Demographic = new Demographic
             {
                 BadgeNumber = 12345,

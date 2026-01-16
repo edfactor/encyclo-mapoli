@@ -95,9 +95,7 @@ public static class StockFactory
             Beneficiaries = [],
             Checks = [],
             DistributionRequests = [],
-            // Set vesting schedule to get EnrollmentId = 2 (NewVestingPlanHasContributions)
-            VestingScheduleId = VestingSchedule.Constants.NewPlan,
-            HasForfeited = false
+            // Enrollment is now derived from PayProfit
         };
 
         List<PayProfit> payprofits =
@@ -111,8 +109,8 @@ public static class StockFactory
                 CurrentIncomeYear = 0,
                 WeeksWorkedYear = 0,
                 PsCertificateIssuedDate = null,
-                // EnrollmentId is computed from Demographic.VestingScheduleId + HasForfeited
-                // Enrollment is also computed (read-only properties)
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false,
                 BeneficiaryTypeId = 0,
                 BeneficiaryType = null,
                 EmployeeTypeId = 0,
@@ -134,8 +132,8 @@ public static class StockFactory
                 CurrentIncomeYear = 0,
                 WeeksWorkedYear = 0,
                 PsCertificateIssuedDate = null,
-                // EnrollmentId is computed from Demographic.VestingScheduleId + HasForfeited
-                // Enrollment is also computed (read-only properties)
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false,
                 BeneficiaryTypeId = 0,
                 BeneficiaryType = null,
                 EmployeeTypeId = 0,

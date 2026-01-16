@@ -97,9 +97,7 @@ BEGIN
      GENDER_ID,
      PAY_FREQUENCY_ID,
      TERMINATION_CODE_ID,
-    EMPLOYMENT_STATUS_ID,
-    HAS_FORFEITED,
-    VESTING_SCHEDULE_ID)
+    EMPLOYMENT_STATUS_ID)
     SELECT
         ROWNUM AS ORACLEHCMID,
                 DEM_SSN,
@@ -221,30 +219,15 @@ BEGIN
                     WHEN PY_TERM = ' ' THEN NULL
                     ELSE PY_TERM
                     END as termcd,
-                (
+                 (
                     SELECT ID
                     FROM EMPLOYMENT_STATUS
                     WHERE ID=LOWER(PY_SCOD)
-                ) AS EMPLOYMENT_STATUS_ID,
-                     /* HAS_FORFEITED: Default to 0 (false). Will be updated after PROFIT_DETAIL is loaded
-                         to identify employees who have forfeiture records. */
-                     0 AS HAS_FORFEITED,
-                     /*
-                         VESTING_SCHEDULE_ID: Seed from legacy PAYPROFIT.PY_PS_ENROLLED.
-                         Mapping aligns to enrollment constants:
-                            1/3 -> Old plan, 2/4 -> New plan, 0/NULL -> Not enrolled (NULL).
-                     */
-                     CASE
-                          WHEN pp.PY_PS_ENROLLED IN (1, 3) THEN 1
-                          WHEN pp.PY_PS_ENROLLED IN (2, 4) THEN 2
-                          ELSE NULL
-                     END AS VESTING_SCHEDULE_ID
-     FROM {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d
-     LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
-          ON pp.PAYPROF_BADGE = d.DEM_BADGE;
+                 ) AS EMPLOYMENT_STATUS_ID
+        FROM {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d;
 
-    INSERT INTO DEMOGRAPHIC_HISTORY(DEMOGRAPHIC_ID, VALID_FROM, VALID_TO, ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME, CITY, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, MIDDLE_NAME, MOBILE_NUMBER, PHONE_NUMBER, POSTAL_CODE, STATE, STREET, STREET2, HAS_FORFEITED, VESTING_SCHEDULE_ID)
-    SELECT ID, TO_TIMESTAMP('01-01-1900 00:00:00','MM-DD-YYYY HH24:MI:SS'), TO_TIMESTAMP('01-01-2100 00:00:00','MM-DD-YYYY HH24:MI:SS'), ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, sys_extract_utc(systimestamp), CITY, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, MIDDLE_NAME, MOBILE_NUMBER, PHONE_NUMBER, POSTAL_CODE, STATE, STREET, STREET2, HAS_FORFEITED, VESTING_SCHEDULE_ID
+    INSERT INTO DEMOGRAPHIC_HISTORY(DEMOGRAPHIC_ID, VALID_FROM, VALID_TO, ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME, CITY, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, MIDDLE_NAME, MOBILE_NUMBER, PHONE_NUMBER, POSTAL_CODE, STATE, STREET, STREET2)
+    SELECT ID, TO_TIMESTAMP('01-01-1900 00:00:00','MM-DD-YYYY HH24:MI:SS'), TO_TIMESTAMP('01-01-2100 00:00:00','MM-DD-YYYY HH24:MI:SS'), ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, sys_extract_utc(systimestamp), CITY, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, MIDDLE_NAME, MOBILE_NUMBER, PHONE_NUMBER, POSTAL_CODE, STATE, STREET, STREET2
     FROM DEMOGRAPHIC;
 
     --------------------------------------------------------------------------------------
@@ -342,6 +325,8 @@ BEGIN
      CURRENT_INCOME_YEAR,
      WEEKS_WORKED_YEAR,
      PS_CERTIFICATE_ISSUED_DATE,
+     VESTING_SCHEDULE_ID,
+     HAS_FORFEITED,
      BENEFICIARY_TYPE_ID,
      EMPLOYEE_TYPE_ID,
      ZERO_CONTRIBUTION_REASON_ID,
@@ -356,6 +341,15 @@ BEGIN
         PY_PD AS CURRENT_INCOME_YEAR,
         PY_WEEKS_WORK AS WEEKS_WORKED_YEAR,
         null as PS_CERTIFICATE_ISSUED_DATE, -- Presuming an import is happening in year without a completed YE, so we use null 
+        CASE
+            WHEN PY_PS_ENROLLED IN (1, 3) THEN 1
+            WHEN PY_PS_ENROLLED IN (2, 4) THEN 2
+            ELSE 0
+        END AS VESTING_SCHEDULE_ID,
+        CASE
+            WHEN PY_PS_ENROLLED IN (3, 4) THEN 1
+            ELSE 0
+        END AS HAS_FORFEITED,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
         PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
@@ -374,6 +368,8 @@ BEGIN
      CURRENT_INCOME_YEAR,
      WEEKS_WORKED_YEAR,
      PS_CERTIFICATE_ISSUED_DATE,
+     VESTING_SCHEDULE_ID,
+     HAS_FORFEITED,
      BENEFICIARY_TYPE_ID,
      EMPLOYEE_TYPE_ID,
      ZERO_CONTRIBUTION_REASON_ID,
@@ -391,8 +387,15 @@ BEGIN
             WHEN PY_PROF_CERT = '1' THEN TO_DATE('12/31/' || last_year, 'MM/DD/YYYY')
             ELSE NULL
         END as PS_CERTIFICATE_ISSUED_DATE,
-        -- Enrollment is now computed dynamically from vesting schedule and forfeiture status
-        -- No longer stored in PayProfit table
+        CASE
+            WHEN pp.PY_PS_ENROLLED IN (1, 3) THEN 1
+            WHEN pp.PY_PS_ENROLLED IN (2, 4) THEN 2
+            ELSE 0
+        END AS VESTING_SCHEDULE_ID,
+        CASE
+            WHEN pp.PY_PS_ENROLLED IN (3, 4) THEN 1
+            ELSE 0
+        END AS HAS_FORFEITED,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
         -- We will re-compute this in RebuildEnrollmentAndZeroContService for most employees when we first run. We intensionally leave the old value
@@ -435,6 +438,8 @@ BEGIN
                  CURRENT_INCOME_YEAR,
                  WEEKS_WORKED_YEAR,
                  PS_CERTIFICATE_ISSUED_DATE,
+                 VESTING_SCHEDULE_ID,
+                 HAS_FORFEITED,
                  BENEFICIARY_TYPE_ID,
                  EMPLOYEE_TYPE_ID,
                  ZERO_CONTRIBUTION_REASON_ID,
@@ -449,6 +454,8 @@ BEGIN
                     0 AS CURRENT_INCOME_YEAR,
                     0 AS WEEKS_WORKED_YEAR,
                     NULL AS PS_CERTIFICATE_ISSUED_DATE,
+                    NVL(ppy.VESTING_SCHEDULE_ID, 0) AS VESTING_SCHEDULE_ID,
+                    NVL(ppy.HAS_FORFEITED, 0) AS HAS_FORFEITED,
                     1 AS BENEFICIARY_TYPE_ID,  -- Default value
                     1 AS EMPLOYEE_TYPE_ID,     -- Default value
                     NULL AS ZERO_CONTRIBUTION_REASON_ID,
@@ -456,7 +463,10 @@ BEGIN
                     0 AS INCOME_EXECUTIVE,
                     0 AS POINTS_EARNED,
                     0 AS ETVA
-                FROM DEMOGRAPHIC d;
+                FROM DEMOGRAPHIC d
+                    LEFT JOIN PAY_PROFIT ppy
+                        ON ppy.DEMOGRAPHIC_ID = d.ID
+                        AND ppy.PROFIT_YEAR = last_year;
                 
                 DBMS_OUTPUT.PUT_LINE('Seeded ' || SQL%ROWCOUNT || ' empty PAY_PROFIT rows for year ' || prior_year);
             ELSE
@@ -678,17 +688,6 @@ BEGIN
 
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_SS_DETAIL;
 
-    -- Update HAS_FORFEITED flag for employees with forfeiture records
-    -- This must run AFTER PROFIT_DETAIL is loaded
-    UPDATE DEMOGRAPHIC d
-    SET HAS_FORFEITED = 1
-    WHERE EXISTS (
-        SELECT 1
-        FROM PROFIT_DETAIL pd
-        WHERE pd.SSN = d.SSN
-          AND pd.REMARK LIKE 'FORFEIT%'
-    );
-
     ---------------------------------------------------------------------------------------------------------------------
 
 -- Step 2: Insert data from legacy table to new table
@@ -892,8 +891,8 @@ UPDATE DEMOGRAPHIC_HISTORY dh
                         ));
                         
 INSERT INTO DEMOGRAPHIC_HISTORY
-      (DEMOGRAPHIC_ID, VALID_FROM,                         VALID_TO,           ORACLE_HCM_ID,   BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH,                         HIRE_DATE,                                  REHIRE_DATE,                                                                                       TERMINATION_DATE,                                                                                          DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME, HAS_FORFEITED, VESTING_SCHEDULE_ID)
-SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS VALID_TO, d.ORACLE_HCM_ID, dp.DEM_BADGE, dp.PY_STOR,   TRIM(TO_CHAR(dp.PY_CLA)) AS PAY_CLASSIFICATION_ID, TO_DATE(TO_CHAR(dp.PY_DOB),'yyyymmdd'),TO_DATE(TO_CHAR(dp.PY_HIRE_DT),'yyyymmdd'), CASE WHEN dp.PY_REHIRE_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_REHIRE_DT),'yyyymmdd') END, CASE WHEN dp.PY_TERM_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_TERM_DT),'yyyymmdd') END, dp.PY_DP,   TRIM(dp.PY_FUL),    dp.PY_FREQ,       dp.PY_TERM,          dp.PY_SCOD,           SYSTIMESTAMP AT TIME ZONE 'UTC', 0, NULL
+    (DEMOGRAPHIC_ID, VALID_FROM,                         VALID_TO,           ORACLE_HCM_ID,   BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH,                         HIRE_DATE,                                  REHIRE_DATE,                                                                                       TERMINATION_DATE,                                                                                          DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
+SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS VALID_TO, d.ORACLE_HCM_ID, dp.DEM_BADGE, dp.PY_STOR,   TRIM(TO_CHAR(dp.PY_CLA)) AS PAY_CLASSIFICATION_ID, TO_DATE(TO_CHAR(dp.PY_DOB),'yyyymmdd'),TO_DATE(TO_CHAR(dp.PY_HIRE_DT),'yyyymmdd'), CASE WHEN dp.PY_REHIRE_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_REHIRE_DT),'yyyymmdd') END, CASE WHEN dp.PY_TERM_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_TERM_DT),'yyyymmdd') END, dp.PY_DP,   TRIM(dp.PY_FUL),    dp.PY_FREQ,       dp.PY_TERM,          dp.PY_SCOD,           SYSTIMESTAMP AT TIME ZONE 'UTC'
   FROM DEMOGRAPHIC d
   JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMO_PROFSHARE dp ON d.BADGE_NUMBER = dp.DEM_BADGE
  WHERE  d.STORE_NUMBER != dp.PY_STOR OR
@@ -1164,35 +1163,6 @@ SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS
     UPDATE profit_detail pd
     SET comment_type_id = 24
     WHERE REMARK = '>64 & >5 100%';
-
--- ============================================================
--- READY BUG GUARD (PS-2464)
--- Members who turned 21 after 2007 and ONLY have V-ONLY vesting
--- records can be mis-enrolled as old plan (PY_PS_ENROLLED 1/3).
--- Re-assign to new plan (VESTING_SCHEDULE_ID = 2).
--- ============================================================
-        UPDATE demographic d
-        SET vesting_schedule_id = 2
-        WHERE d.vesting_schedule_id = 1
-            AND ADD_MONTHS(d.date_of_birth, 12 * 21) >= DATE '2008-01-01'
-            AND EXISTS (
-                    SELECT 1
-                    FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
-                    WHERE pp.PAYPROF_BADGE = d.badge_number
-                        AND pp.PY_PS_ENROLLED IN (1, 3)
-            )
-            AND EXISTS (
-                    SELECT 1
-                    FROM profit_detail pd
-                    WHERE pd.ssn = d.ssn
-                        AND pd.comment_type_id = 5
-            )
-            AND NOT EXISTS (
-                    SELECT 1
-                    FROM profit_detail pd
-                    WHERE pd.ssn = d.ssn
-                        AND (pd.comment_type_id IS NULL OR pd.comment_type_id <> 5)
-            );
 
 -- Handle basic allocation of YEARS_OF_SERVICE_CREDIT.  There is de-duplication happening 
 -- because some profit_years have multiple profit_code_id = 0 contributions
@@ -1604,6 +1574,8 @@ INSERT ALL
                          CURRENT_INCOME_YEAR,
                          WEEKS_WORKED_YEAR,
                          PS_CERTIFICATE_ISSUED_DATE,
+                         VESTING_SCHEDULE_ID,
+                         HAS_FORFEITED,
                          BENEFICIARY_TYPE_ID,
                          EMPLOYEE_TYPE_ID,
                          ZERO_CONTRIBUTION_REASON_ID,
@@ -1618,6 +1590,8 @@ INSERT ALL
                                 0 AS CURRENT_INCOME_YEAR,
                                 0 AS WEEKS_WORKED_YEAR,
                                 NULL AS PS_CERTIFICATE_ISSUED_DATE,
+                                pp.VESTING_SCHEDULE_ID,
+                                pp.HAS_FORFEITED,
                                 pp.BENEFICIARY_TYPE_ID,
                                 pp.EMPLOYEE_TYPE_ID,
                                 pp.ZERO_CONTRIBUTION_REASON_ID,

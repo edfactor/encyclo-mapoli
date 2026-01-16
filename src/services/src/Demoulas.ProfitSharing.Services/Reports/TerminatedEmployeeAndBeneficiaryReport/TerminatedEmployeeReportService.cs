@@ -19,12 +19,12 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 
 /// <summary>
 ///     Generates reports for terminated employees and their beneficiaries.
-///  
+///
 ///  The user provides a termination date range, which selects a subset of employees for the report.
-///  
+///
 ///  The report generates a 1 year look at how an employee's profit sharing account has changed.
 ///  The report always starts with the amounts at the beginning of the prior completed profit year
-///  and includes all transactions up to today.  
+///  and includes all transactions up to today.
 /// </summary>
 public sealed class TerminatedEmployeeReportService
 {
@@ -108,7 +108,7 @@ public sealed class TerminatedEmployeeReportService
         // after the last completed one.    So we add 1 year to the completed year end.
         int openProfitYear = lastCompletedYearEnd + 1;
 
-        // Load profit detail transactions for YDATE 
+        // Load profit detail transactions for YDATE
         var (profitDetailsBySsn, profitDetailsDuration) = await _logger.TimeAndLogAsync(
             "ProfitDetails dictionary load",
             async () =>
@@ -539,13 +539,13 @@ public sealed class TerminatedEmployeeReportService
                                                 : payProfit != null && payProfit.ZeroContributionReasonId != null
                                                     ? payProfit.ZeroContributionReasonId
                                                     : 0,
-                                            EnrollmentId = employee.Demographic.VestingScheduleId == null
+                                            EnrollmentId = payProfit == null || payProfit.VestingScheduleId == 0
                                                 ? EnrollmentConstants.NotEnrolled
-                                                : employee.Demographic.HasForfeited
-                                                    ? (employee.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                                : payProfit.HasForfeited
+                                                    ? (payProfit.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                                         ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                                         : EnrollmentConstants.NewVestingPlanHasForfeitureRecords)
-                                                    : (employee.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                                    : (payProfit.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                                         ? EnrollmentConstants.OldVestingPlanHasContributions
                                                         : EnrollmentConstants.NewVestingPlanHasContributions),
                                             Etva = payProfit != null ? payProfit.Etva : 0,
