@@ -8,12 +8,12 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
-public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEndpoint<ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>
+public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEndpoint<ProfitYearRequest, Results<FileStreamHttpResult, ProblemHttpResult>>
 {
     private readonly IPostFrozenService _postFrozenService;
     private readonly ILogger<NewProfitSharingLabelsForMailMergeEndpoint> _logger;
@@ -41,7 +41,7 @@ public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEn
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    protected override async Task<Results<FileStreamHttpResult, ProblemHttpResult>> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
         this.RecordRequestMetrics(HttpContext, _logger, req);
@@ -78,14 +78,7 @@ public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEn
             _logger.LogInformation("Year-end post-frozen new profit sharing labels for mail merge generated, {LineCount} lines, {FileSize} bytes (correlation: {CorrelationId})",
                 lineCount, memoryStream.Length, HttpContext.TraceIdentifier);
 
-            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
-            {
-                FileName = "NEWPROFLBL.txt",
-                Inline = false
-            };
-            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-            await Send.StreamAsync(memoryStream, "NEWPROFLBL.txt", contentType: "text/plain", cancellation: ct);
+            return TypedResults.File(memoryStream, "text/plain", "NEWPROFLBL.txt");
         }
         catch (Exception ex)
         {

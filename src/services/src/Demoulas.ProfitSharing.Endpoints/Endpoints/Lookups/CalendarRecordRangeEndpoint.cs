@@ -4,13 +4,10 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
@@ -20,7 +17,8 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
     private readonly ICalendarService _calendarService;
     private readonly ILogger<CalendarRecordRangeEndpoint> _logger;
 
-    public CalendarRecordRangeEndpoint(ICalendarService calendarService, ILogger<CalendarRecordRangeEndpoint> logger) : base(Navigation.Constants.Inquiries)
+    public CalendarRecordRangeEndpoint(ICalendarService calendarService, ILogger<CalendarRecordRangeEndpoint> logger)
+        : base(Navigation.Constants.Inquiries)
     {
         _calendarService = calendarService;
         _logger = logger;
@@ -50,17 +48,9 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
             s.Responses[404] = "Not Found. No accounting dates found for the specified years.";
         });
         Group<LookupGroup>();
-
-        // Output caching: Accounting calendar dates are stable reference data - excellent caching candidate
-        // Cache disabled in test environments to ensure test data freshness
-        if (!Env.IsTestEnvironment())
-        {
-            TimeSpan cacheDuration = TimeSpan.FromMinutes(10); // Moderate duration - reference data changes infrequently
-            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
-        }
     }
 
-    public override Task<Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>> ExecuteAsync(YearRangeRequest req, CancellationToken ct)
+    protected override Task<Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>> HandleRequestAsync(YearRangeRequest req, CancellationToken ct)
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
@@ -72,27 +62,24 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
             var start = await startTask;
             var end = await endTask;
 
-            // Record cache metrics
             var cacheStatus = HttpContext.Response.Headers.ContainsKey("X-Cache") ? "hit" : "miss";
             if (cacheStatus == "hit")
             {
                 EndpointTelemetry.CacheHitsTotal.Add(1,
                     new KeyValuePair<string, object?>("cache_type", "output-cache"),
-                    new KeyValuePair<string, object?>("endpoint", "CalendarRecordRangeEndpoint"));
+                    new KeyValuePair<string, object?>("endpoint", nameof(CalendarRecordRangeEndpoint)));
             }
             else
             {
                 EndpointTelemetry.CacheMissesTotal.Add(1,
                     new KeyValuePair<string, object?>("cache_type", "output-cache"),
-                    new KeyValuePair<string, object?>("endpoint", "CalendarRecordRangeEndpoint"));
+                    new KeyValuePair<string, object?>("endpoint", nameof(CalendarRecordRangeEndpoint)));
             }
 
-            // Record business metrics
             Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new KeyValuePair<string, object?>("operation", "calendar-range-lookup"),
                 new KeyValuePair<string, object?>("endpoint.category", "lookups"));
 
-            // Basic not-found semantics: if either side returns default dates (00/00) treat as not found.
             if (start.FiscalBeginDate == default || end.FiscalEndDate == default)
             {
                 _logger.LogWarning("Calendar year range lookup failed for years {BeginYear}-{EndYear}, cache status: {CacheStatus} (correlation: {CorrelationId})",

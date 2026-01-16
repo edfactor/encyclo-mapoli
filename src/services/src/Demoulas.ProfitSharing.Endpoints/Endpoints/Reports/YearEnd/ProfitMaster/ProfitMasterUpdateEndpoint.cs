@@ -49,7 +49,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
         Policies(Security.Policy.CanViewYearEndReports, Security.Policy.CanRunYearEndProcesses);
     }
 
-    public override async Task HandleAsync(ProfitShareUpdateRequest req, CancellationToken ct)
+    protected override async Task<ProfitMasterUpdateResponse> HandleRequestAsync(ProfitShareUpdateRequest req, CancellationToken ct)
     {
         // Validate prerequisites for Master Update before proceeding
         await _navPrereqValidator.ValidateAllCompleteAsync(Navigation.Constants.MasterUpdate, ct);
@@ -84,10 +84,10 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
                     "Generating Profit Share Edit report post Master Update for year {ProfitYear}",
                     req.ProfitYear);
                 return await _editService.ProfitShareEdit(req, cancellationToken);
-                
+
             },
             ct);
 
-        await Send.OkAsync(response, ct);
+        return response;
     }
 }

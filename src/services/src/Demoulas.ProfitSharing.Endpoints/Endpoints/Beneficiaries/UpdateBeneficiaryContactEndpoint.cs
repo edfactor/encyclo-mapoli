@@ -32,7 +32,7 @@ public class UpdateBeneficiaryContactEndpoint : ProfitSharingEndpoint<UpdateBene
         Group<BeneficiariesGroup>();
     }
 
-    public override async Task<Results<Ok<UpdateBeneficiaryContactResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(UpdateBeneficiaryContactRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<UpdateBeneficiaryContactResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(UpdateBeneficiaryContactRequest req, CancellationToken ct)
     {
         try
         {

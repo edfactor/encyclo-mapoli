@@ -1,14 +1,9 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.RmdsFactors;
 
@@ -30,15 +25,11 @@ public sealed class GetRmdsFactorByAgeEndpoint
     : ProfitSharingEndpoint<GetRmdsFactorByAgeRequest, Results<Ok<RmdsFactorDto>, NotFound, ProblemHttpResult>>
 {
     private readonly IRmdsFactorService _rmdsService;
-    private readonly ILogger<GetRmdsFactorByAgeEndpoint> _logger;
 
-    public GetRmdsFactorByAgeEndpoint(
-        IRmdsFactorService rmdsService,
-        ILogger<GetRmdsFactorByAgeEndpoint> logger)
+    public GetRmdsFactorByAgeEndpoint(IRmdsFactorService rmdsService)
         : base(Navigation.Constants.ManageRmdFactors)
     {
         _rmdsService = rmdsService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -59,43 +50,13 @@ public sealed class GetRmdsFactorByAgeEndpoint
         Group<AdministrationGroup>();
     }
 
-    public override async Task<Results<Ok<RmdsFactorDto>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<RmdsFactorDto>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         GetRmdsFactorByAgeRequest req,
         CancellationToken ct)
     {
-        using var activity = this.StartEndpointActivity(HttpContext);
-
-        try
-        {
-            this.RecordRequestMetrics(HttpContext, _logger, req);
-
-            var result = await _rmdsService.GetByAgeAsync(req.Age, ct);
-
-            if (result is null)
-            {
-                _logger.LogWarning(
-                    "RMD factor not found for age {Age} (correlation: {CorrelationId})",
-                    req.Age, HttpContext.TraceIdentifier);
-
-                return TypedResults.NotFound();
-            }
-
-            // Record business metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "get-rmds-factor-by-age"),
-                new("endpoint", nameof(GetRmdsFactorByAgeEndpoint)));
-
-            _logger.LogInformation(
-                "Retrieved RMD factor for age {Age}: Factor={Factor} (correlation: {CorrelationId})",
-                req.Age, result.Factor, HttpContext.TraceIdentifier);
-
-            this.RecordResponseMetrics(HttpContext, _logger, result);
-            return TypedResults.Ok(result);
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+        var result = await _rmdsService.GetByAgeAsync(req.Age, ct);
+        return result is null
+            ? TypedResults.NotFound()
+            : TypedResults.Ok(result);
     }
 }

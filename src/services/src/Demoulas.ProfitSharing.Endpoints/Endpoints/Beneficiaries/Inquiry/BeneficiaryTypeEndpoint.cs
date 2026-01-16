@@ -35,7 +35,7 @@ public class BeneficiaryTypeEndpoint : ProfitSharingEndpoint<BeneficiaryTypesReq
         Group<BeneficiaryTypeGroup>();
     }
 
-    public override async Task<BeneficiaryTypesResponseDto> ExecuteAsync(BeneficiaryTypesRequestDto req, CancellationToken ct)
+    protected override async Task<BeneficiaryTypesResponseDto> HandleRequestAsync(BeneficiaryTypesRequestDto req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

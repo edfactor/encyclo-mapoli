@@ -45,7 +45,7 @@ public sealed class UpdateDistributionEndpoint : ProfitSharingEndpoint<UpdateDis
         });
     }
 
-    public override async Task<Results<Ok<CreateOrUpdateDistributionResponse>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(UpdateDistributionRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<CreateOrUpdateDistributionResponse>, NotFound, BadRequest, ProblemHttpResult>> HandleRequestAsync(UpdateDistributionRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

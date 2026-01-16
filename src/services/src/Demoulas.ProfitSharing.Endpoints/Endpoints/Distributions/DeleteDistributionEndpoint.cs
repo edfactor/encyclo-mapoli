@@ -2,10 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
@@ -19,7 +16,8 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
     private readonly IDistributionService _distributionService;
     private readonly ILogger<DeleteDistributionEndpoint> _logger;
 
-    public DeleteDistributionEndpoint(IDistributionService distributionService, ILogger<DeleteDistributionEndpoint> logger) : base(Navigation.Constants.Distributions)
+    public DeleteDistributionEndpoint(IDistributionService distributionService, ILogger<DeleteDistributionEndpoint> logger)
+        : base(Navigation.Constants.Distributions)
     {
         _distributionService = distributionService;
         _logger = logger;
@@ -40,18 +38,12 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
         });
     }
 
-    public override Task<Results<Ok<bool>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(IdRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<bool>, NotFound, BadRequest, ProblemHttpResult>> HandleRequestAsync(
+        IdRequest req,
+        CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var result = await _distributionService.DeleteDistribution(req.Id, ct);
-
-            // Add business metrics for distribution deletion
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "distribution-deletion"),
-                new("endpoint", nameof(DeleteDistributionEndpoint)));
-
-            return result.ToHttpResultWithValidation(Error.DistributionNotFound);
-        });
+        var result = await _distributionService.DeleteDistribution(req.Id, ct);
+        _logger.LogInformation("Distribution delete requested for id {DistributionId}", req.Id);
+        return result.ToHttpResultWithValidation(Error.DistributionNotFound);
     }
 }

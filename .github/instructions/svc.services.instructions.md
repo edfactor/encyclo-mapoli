@@ -1693,8 +1693,8 @@ public async Task<Result<ChecksumValidationResponse>> ValidateReportFieldsAsync(
 **Endpoint Consumption**:
 
 ```csharp
-public override async Task<Results<Ok<ChecksumValidationResponse>, NotFound, ProblemHttpResult>>
-    ExecuteAsync(ValidateReportRequest req, CancellationToken ct)
+protected override async Task<Results<Ok<ChecksumValidationResponse>, NotFound, ProblemHttpResult>>
+    HandleRequestAsync(ValidateReportRequest req, CancellationToken ct)
 {
     var result = await _validationService.ValidateReportFieldsAsync(
         req.ProfitYear,

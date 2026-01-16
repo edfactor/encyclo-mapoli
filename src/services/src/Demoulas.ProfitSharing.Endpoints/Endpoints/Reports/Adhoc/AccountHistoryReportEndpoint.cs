@@ -98,7 +98,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
         });
     }
 
-    public override async Task<Results<Ok<AccountHistoryReportPaginatedResponse>, ProblemHttpResult>> ExecuteAsync(AccountHistoryReportRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<AccountHistoryReportPaginatedResponse>, ProblemHttpResult>> HandleRequestAsync(AccountHistoryReportRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

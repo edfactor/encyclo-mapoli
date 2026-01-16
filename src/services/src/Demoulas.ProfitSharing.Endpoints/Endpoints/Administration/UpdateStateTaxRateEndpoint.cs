@@ -1,16 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
-using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Common.Validators;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
@@ -19,13 +14,11 @@ public sealed class UpdateStateTaxRateEndpoint : ProfitSharingEndpoint<UpdateSta
     private static readonly Error s_stateTaxNotFound = Error.EntityNotFound("State tax");
 
     private readonly IStateTaxRatesService _stateTaxRatesService;
-    private readonly ILogger<UpdateStateTaxRateEndpoint> _logger;
 
-    public UpdateStateTaxRateEndpoint(IStateTaxRatesService stateTaxRatesService, ILogger<UpdateStateTaxRateEndpoint> logger)
+    public UpdateStateTaxRateEndpoint(IStateTaxRatesService stateTaxRatesService)
         : base(Navigation.Constants.ManageStateTaxRates)
     {
         _stateTaxRatesService = stateTaxRatesService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -40,28 +33,9 @@ public sealed class UpdateStateTaxRateEndpoint : ProfitSharingEndpoint<UpdateSta
         Group<AdministrationGroup>();
     }
 
-    public override Task<Results<Ok<StateTaxRateDto>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(UpdateStateTaxRateRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<StateTaxRateDto>, NotFound, BadRequest, ProblemHttpResult>> HandleRequestAsync(UpdateStateTaxRateRequest req, CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var result = await _stateTaxRatesService.UpdateStateTaxRateAsync(req, ct);
-
-            try
-            {
-                EndpointTelemetry.BusinessOperationsTotal?.Add(1,
-                    new("operation", "state-tax-rate-update"),
-                    new("endpoint", nameof(UpdateStateTaxRateEndpoint)));
-
-                EndpointTelemetry.RecordCountsProcessed?.Record(1,
-                    new("record_type", "state-tax-rate"),
-                    new("endpoint", nameof(UpdateStateTaxRateEndpoint)));
-            }
-            catch
-            {
-                // Ignore telemetry errors in unit tests
-            }
-
-            return result.ToHttpResultWithValidation(s_stateTaxNotFound);
-        });
+        var result = await _stateTaxRatesService.UpdateStateTaxRateAsync(req, ct);
+        return result.ToHttpResultWithValidation(s_stateTaxNotFound);
     }
 }

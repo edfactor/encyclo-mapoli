@@ -61,7 +61,7 @@ public sealed class ValidateReportChecksumEndpoint
         Group<ValidationGroup>();
     }
 
-    public override async Task<Results<Ok<ChecksumValidationResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<ChecksumValidationResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         ValidateReportFieldsRequest req,
         CancellationToken ct)
     {

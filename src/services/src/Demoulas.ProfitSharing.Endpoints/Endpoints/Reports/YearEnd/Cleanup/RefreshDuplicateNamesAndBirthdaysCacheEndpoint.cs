@@ -39,7 +39,7 @@ public class RefreshDuplicateNamesAndBirthdaysCacheEndpoint : ProfitSharingEndpo
         Group<YearEndGroup>();
     }
 
-    public override async Task<Results<Ok<string>, ProblemHttpResult>> ExecuteAsync(EmptyRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<string>, ProblemHttpResult>> HandleRequestAsync(EmptyRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

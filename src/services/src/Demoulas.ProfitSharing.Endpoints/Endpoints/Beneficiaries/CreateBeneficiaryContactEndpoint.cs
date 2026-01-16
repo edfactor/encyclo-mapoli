@@ -41,7 +41,7 @@ public class CreateBeneficiaryContactEndpoint : ProfitSharingEndpoint<CreateBene
         Validator<CreateBeneficiaryContactRequestValidator>();
     }
 
-    public override async Task<Results<Ok<CreateBeneficiaryContactResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(CreateBeneficiaryContactRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<CreateBeneficiaryContactResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(CreateBeneficiaryContactRequest req, CancellationToken ct)
     {
         // Start activity for detailed tracing
         using var activity = EndpointTelemetry.ActivitySource.StartActivity("create_beneficiary_contact");

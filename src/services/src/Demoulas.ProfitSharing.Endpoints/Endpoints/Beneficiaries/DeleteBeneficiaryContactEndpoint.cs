@@ -27,7 +27,7 @@ public class DeleteBeneficiaryContactEndpoint : ProfitSharingEndpoint<IdRequest,
         Group<BeneficiariesGroup>();
     }
 
-    public override async Task<Results<Ok, ProblemHttpResult>> ExecuteAsync(IdRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok, ProblemHttpResult>> HandleRequestAsync(IdRequest req, CancellationToken ct)
     {
         try
         {

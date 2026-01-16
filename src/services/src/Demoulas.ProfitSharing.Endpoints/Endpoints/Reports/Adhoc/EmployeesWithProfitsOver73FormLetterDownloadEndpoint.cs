@@ -1,13 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 
@@ -18,15 +15,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 public sealed class EmployeesWithProfitsOver73FormLetterDownloadEndpoint : ProfitSharingEndpoint<EmployeesWithProfitsOver73Request, string>
 {
     private readonly IEmployeesWithProfitsOver73Service _employeesWithProfitsOver73Service;
-    private readonly ILogger<EmployeesWithProfitsOver73FormLetterDownloadEndpoint> _logger;
 
     public EmployeesWithProfitsOver73FormLetterDownloadEndpoint(
-        IEmployeesWithProfitsOver73Service employeesWithProfitsOver73Service,
-        ILogger<EmployeesWithProfitsOver73FormLetterDownloadEndpoint> logger)
+        IEmployeesWithProfitsOver73Service employeesWithProfitsOver73Service)
         : base(Navigation.Constants.AdhocProfLetter73)
     {
         _employeesWithProfitsOver73Service = employeesWithProfitsOver73Service;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -52,54 +46,26 @@ public sealed class EmployeesWithProfitsOver73FormLetterDownloadEndpoint : Profi
         Group<AdhocReportsGroup>();
     }
 
-    public override async Task HandleAsync(EmployeesWithProfitsOver73Request req, CancellationToken ct)
+    protected override async Task<string> HandleRequestAsync(EmployeesWithProfitsOver73Request req, CancellationToken ct)
     {
-        using var activity = this.StartEndpointActivity(HttpContext);
+        var formLetterContent = await _employeesWithProfitsOver73Service.GetEmployeesWithProfitsOver73FormLetterAsync(req, ct);
 
-        try
+        // Convert string to stream and send
+        var memoryStream = new MemoryStream();
+        await using (var writer = new StreamWriter(memoryStream, leaveOpen: false))
         {
-            this.RecordRequestMetrics(HttpContext, _logger, req);
+            await writer.WriteAsync(formLetterContent);
+            await writer.FlushAsync(ct);
+            memoryStream.Position = 0;
 
-            var formLetterContent = await _employeesWithProfitsOver73Service.GetEmployeesWithProfitsOver73FormLetterAsync(req, ct);
-
-            // Record form letter download metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "form-letter-download"),
-                new("endpoint", "EmployeesWithProfitsOver73FormLetterDownloadEndpoint"),
-                new("report_type", "over-73-rmd"));
-
-            var contentLength = formLetterContent?.Length ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(contentLength,
-                new("record_type", "letter-content-bytes"),
-                new("endpoint", "EmployeesWithProfitsOver73FormLetterDownloadEndpoint"));
-
-            _logger.LogInformation(
-                "Form letter download for employees over 73 generated, file size: {FileSize} bytes (correlation: {CorrelationId})",
-                contentLength,
-                HttpContext.TraceIdentifier);
-
-            // Convert string to stream and send
-            var memoryStream = new MemoryStream();
-            await using (var writer = new StreamWriter(memoryStream, leaveOpen: false))
-            {
-                await writer.WriteAsync(formLetterContent);
-                await writer.FlushAsync(ct);
-                memoryStream.Position = 0;
-
-                // Send stream as file download (FastEndpoints handles Content-Disposition)
-                await Send.StreamAsync(
-                    stream: memoryStream,
-                    fileName: "QPROF_OVER73.txt",
-                    contentType: "text/plain",
-                    cancellation: ct);
-            }
-
-            this.RecordResponseMetrics(HttpContext, _logger, formLetterContent ?? string.Empty);
+            // Send stream as file download (FastEndpoints handles Content-Disposition)
+            await Send.StreamAsync(
+                stream: memoryStream,
+                fileName: "QPROF_OVER73.txt",
+                contentType: "text/plain",
+                cancellation: ct);
         }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+
+        return string.Empty;
     }
 }

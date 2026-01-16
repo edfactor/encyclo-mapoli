@@ -1,25 +1,19 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
 
 public sealed class DistributionRunReportSummaryEndpoint : ProfitSharingResponseEndpoint<Results<Ok<DistributionRunReportSummaryResponse[]>, NotFound, ProblemHttpResult>>
 {
     private readonly IDistributionService _distributionService;
-    private readonly ILogger<DistributionRunReportSummaryEndpoint> _logger;
 
-    public DistributionRunReportSummaryEndpoint(IDistributionService distributionService, ILogger<DistributionRunReportSummaryEndpoint> logger) : base(Navigation.Constants.DistributionEditRunReport)
+    public DistributionRunReportSummaryEndpoint(IDistributionService distributionService) : base(Navigation.Constants.DistributionEditRunReport)
     {
         _distributionService = distributionService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -40,27 +34,9 @@ public sealed class DistributionRunReportSummaryEndpoint : ProfitSharingResponse
         Group<DistributionGroup>();
     }
 
-    public override Task<Results<Ok<DistributionRunReportSummaryResponse[]>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
+    protected override async Task<Results<Ok<DistributionRunReportSummaryResponse[]>, NotFound, ProblemHttpResult>> HandleRequestAsync(CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, new { }, async () =>
-        {
-            var result = await _distributionService.GetDistributionRunReportSummary(ct).ConfigureAwait(false);
-
-            // Record distribution run report metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new KeyValuePair<string, object?>("operation", "distribution-run-report-summary"),
-                new KeyValuePair<string, object?>("endpoint", "DistributionRunReportSummaryEndpoint"));
-
-            var recordCount = result.Value?.Length ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(recordCount,
-                new KeyValuePair<string, object?>("record_type", "distribution-runs"),
-                new KeyValuePair<string, object?>("endpoint", "DistributionRunReportSummaryEndpoint"));
-
-            _logger.LogInformation("Distribution run report summary retrieved, returned {Count} distribution runs (correlation: {CorrelationId})",
-                recordCount, HttpContext.TraceIdentifier);
-
-            return result
-                .ToHttpResult(Error.EntityNotFound("DistributionRun"));
-        }); // No sensitive fields accessed
+        var result = await _distributionService.GetDistributionRunReportSummary(ct);
+        return result.ToHttpResult(Error.EntityNotFound("DistributionRun"));
     }
 }

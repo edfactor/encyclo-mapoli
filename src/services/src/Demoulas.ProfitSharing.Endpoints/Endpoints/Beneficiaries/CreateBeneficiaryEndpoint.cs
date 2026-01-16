@@ -2,24 +2,19 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
 
 public class CreateBeneficiaryAndContactEndpoint : ProfitSharingEndpoint<CreateBeneficiaryRequest, Results<Ok<CreateBeneficiaryResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IBeneficiaryService _beneficiaryService;
-    private readonly ILogger<CreateBeneficiaryAndContactEndpoint> _logger;
 
-    public CreateBeneficiaryAndContactEndpoint(IBeneficiaryService beneficiaryService, ILogger<CreateBeneficiaryAndContactEndpoint> logger) : base(Navigation.Constants.Beneficiaries)
+    public CreateBeneficiaryAndContactEndpoint(IBeneficiaryService beneficiaryService) : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
-        _logger = logger;
     }
     public override void Configure()
     {
@@ -36,21 +31,11 @@ public class CreateBeneficiaryAndContactEndpoint : ProfitSharingEndpoint<CreateB
         Group<BeneficiariesGroup>();
     }
 
-    public override Task<Results<Ok<CreateBeneficiaryResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(CreateBeneficiaryRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<CreateBeneficiaryResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(
+        CreateBeneficiaryRequest req,
+        CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var created = await _beneficiaryService.CreateBeneficiary(req, ct);
-
-            // Record business metrics
-            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new KeyValuePair<string, object?>("operation", "create-beneficiary"),
-                new KeyValuePair<string, object?>("endpoint.category", "beneficiaries"));
-
-            _logger.LogInformation("Beneficiary created successfully, ID: {BeneficiaryId} (correlation: {CorrelationId})",
-                created.BeneficiaryId, HttpContext.TraceIdentifier);
-
-            return Result<CreateBeneficiaryResponse>.Success(created).ToHttpResult();
-        });
+        var result = await _beneficiaryService.CreateBeneficiary(req, ct);
+        return Result<CreateBeneficiaryResponse>.Success(result).ToHttpResult();
     }
 }

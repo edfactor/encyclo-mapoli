@@ -39,7 +39,7 @@ public sealed class ProfitControlSheetEndpoint : ProfitSharingEndpoint<ProfitYea
         Group<YearEndGroup>();
     }
 
-    public override async Task<ProfitControlSheetResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
+    protected override async Task<ProfitControlSheetResponse> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
         this.RecordRequestMetrics(HttpContext, _logger, req);

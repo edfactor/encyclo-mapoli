@@ -42,16 +42,9 @@ public class PayClassificationLookupEndpoint : ProfitSharingResultResponseEndpoi
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR}, {Role.FINANCEMANAGER}, {Role.DISTRIBUTIONSCLERK}, or {Role.HARDSHIPADMINISTRATOR}";
         });
         Group<LookupGroup>();
-
-        if (!Env.IsTestEnvironment())
-        {
-            // Specify caching duration and store it in metadata
-            TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
-            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
-        }
     }
 
-    public override async Task<Results<Ok<ListResponseDto<PayClassificationResponseDto>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
+    protected override async Task<Results<Ok<ListResponseDto<PayClassificationResponseDto>>, NotFound, ProblemHttpResult>> HandleRequestAsync(CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

@@ -1,22 +1,15 @@
-﻿using System.Diagnostics;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Demoulas.Common.Api.Endpoints;
 using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
-
-file static class EndpointActivity
-{
-    public static readonly ActivitySource Source = new("Demoulas.ProfitSharing.Endpoints");
-}
 
 /// <summary>
 /// Endpoints deriving from this class will automatically be able to return a CSV when the accept headers contain text/csv.
@@ -28,7 +21,7 @@ file static class EndpointActivity
 /// <typeparam name="ItemType">The type of the individual result items in the response.</typeparam>
 /// <typeparam name="MapType">A mapping class that converts from a dto to a CSV format</typeparam>
 public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, MapType>
-    : FastEndpoints.Endpoint<ReqType, RespType>, IHasNavigationId
+    : DemoulasEndpoint<ReqType, Results<Ok<RespType>, FileStreamHttpResult>>, IHasNavigationId
     where RespType : ReportResponseBase<ItemType>
     where ReqType : SortedPaginationRequestDto
     where ItemType : class
@@ -43,12 +36,6 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
 
     public override void Configure()
     {
-        if (!Env.IsTestEnvironment())
-        {
-            var cacheDuration = TimeSpan.FromMinutes(5);
-            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
-        }
-
         Description(b =>
             b.Produces<RespType>(200, "application/json", "text/csv"));
     }
@@ -65,39 +52,9 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
 
     public abstract string ReportFileName { get; }
 
-    public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
+    protected sealed override async Task<Results<Ok<RespType>, FileStreamHttpResult>> HandleRequestAsync(ReqType req, CancellationToken ct)
     {
-        string endpointName = GetType().Name;
-        using Activity? activity = Activity.Current is null
-            ? EndpointActivity.Source.StartActivity(endpointName, ActivityKind.Server)
-            : null;
-        if (activity is not null)
-        {
-            activity.DisplayName = endpointName;
-            activity.SetTag("endpoint.name", endpointName);
-            activity.SetTag("endpoint.class", GetType().FullName);
-            activity.SetTag("navigation.id", NavigationId);
-            if (HttpContext is not null)
-            {
-                activity.SetTag("http.route", HttpContext.Request?.Path.ToString());
-                activity.SetTag("http.method", HttpContext.Request?.Method);
-            }
-        }
-
         var httpContext = HttpContext ?? throw new InvalidOperationException("HttpContext is not available during endpoint execution.");
-        var services = httpContext.RequestServices;
-        var loggerFactory = services.GetService<ILoggerFactory>();
-        var logger = loggerFactory?.CreateLogger(endpointName);
-        var appUser = services.GetService<IAppUser>();
-        string userName = appUser?.UserName ?? "Unknown";
-        activity?.SetTag("enduser.id", userName);
-        using IDisposable? scope = logger?.BeginScope(new Dictionary<string, object?>
-        {
-            ["UserName"] = userName,
-            ["Endpoint"] = endpointName,
-            ["NavigationId"] = NavigationId,
-        });
-
         string acceptHeader = httpContext.Request.Headers.Accept.ToString().ToLower(CultureInfo.InvariantCulture);
 
         if (acceptHeader.Contains("text/csv"))
@@ -109,12 +66,11 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
 
         if (acceptHeader.Contains("text/csv"))
         {
-            await using MemoryStream csvData = await GenerateCsvStreamAsync(response, ct);
-            await Send.StreamAsync(csvData, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
-            return;
+            MemoryStream csvData = await GenerateCsvStreamAsync(response, ct);
+            return TypedResults.File(csvData, "text/csv", $"{ReportFileName}.csv");
         }
 
-        await Send.OkAsync(response, ct);
+        return TypedResults.Ok(response);
     }
 
     private async Task<MemoryStream> GenerateCsvStreamAsync(RespType report, CancellationToken cancellationToken)

@@ -2,10 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +14,10 @@ public class FreezeDemographicsEndpoint : ProfitSharingEndpoint<SetFrozenStateRe
     private readonly IAppUser _appUser;
     private readonly ILogger<FreezeDemographicsEndpoint> _logger;
 
-    public FreezeDemographicsEndpoint(IFrozenService frozenService, IAppUser appUser, ILogger<FreezeDemographicsEndpoint> logger) : base(Navigation.Constants.DemographicFreeze)
+    public FreezeDemographicsEndpoint(
+        IFrozenService frozenService,
+        IAppUser appUser,
+        ILogger<FreezeDemographicsEndpoint> logger) : base(Navigation.Constants.DemographicFreeze)
     {
         _frozenService = frozenService;
         _appUser = appUser;
@@ -37,32 +37,10 @@ public class FreezeDemographicsEndpoint : ProfitSharingEndpoint<SetFrozenStateRe
         Group<ItDevOpsGroup>();
     }
 
-    public override Task<FrozenStateResponse> ExecuteAsync(SetFrozenStateRequest req, CancellationToken ct)
+    protected override async Task<FrozenStateResponse> HandleRequestAsync(SetFrozenStateRequest req, CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var response = await _frozenService.FreezeDemographics(req.ProfitYear, req.AsOfDateTime, _appUser.UserName, ct);
-
-            // Business metrics (safe for unit tests)
-            try
-            {
-                EndpointTelemetry.BusinessOperationsTotal?.Add(1,
-                    new("operation", "freeze-demographics"),
-                    new("endpoint", "FreezeDemographicsEndpoint"));
-
-                EndpointTelemetry.RecordCountsProcessed?.Record(1,
-                    new("record_type", "demographics-frozen"),
-                    new("endpoint", "FreezeDemographicsEndpoint"));
-            }
-            catch
-            {
-                // Ignore telemetry errors in unit tests
-            }
-
-            _logger.LogInformation("Demographics frozen for ProfitYear: {ProfitYear}, AsOfDateTime: {AsOfDateTime}, User: {UserName}, FrozenId: {FrozenId} (correlation: {CorrelationId})",
-                req.ProfitYear, req.AsOfDateTime, _appUser.UserName, response?.Id, HttpContext?.TraceIdentifier ?? "test-correlation");
-
-            return response ?? new FrozenStateResponse { Id = 0 };
-        });
+        var result = await _frozenService.FreezeDemographics(req.ProfitYear, req.AsOfDateTime, _appUser.UserName, ct);
+        _logger.LogInformation("Freeze demographics executed for profit year {ProfitYear}", req.ProfitYear);
+        return result ?? new FrozenStateResponse { Id = 0 };
     }
 }

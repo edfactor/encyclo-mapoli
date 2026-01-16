@@ -1,24 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Audit;
 
 public sealed class GetAuditChangeEntryEndpoint : ProfitSharingEndpoint<GetAuditChangeEntryRequest, List<AuditChangeEntryDto>>
 {
     private readonly IAuditService _auditService;
-    private readonly ILogger<GetAuditChangeEntryEndpoint> _logger;
 
-    public GetAuditChangeEntryEndpoint(IAuditService auditService, ILogger<GetAuditChangeEntryEndpoint> logger)
+    public GetAuditChangeEntryEndpoint(IAuditService auditService)
         : base(Navigation.Constants.ItDevOps)
     {
         _auditService = auditService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -48,27 +42,10 @@ public sealed class GetAuditChangeEntryEndpoint : ProfitSharingEndpoint<GetAudit
         Group<AuditGroup>();
     }
 
-    public override Task<List<AuditChangeEntryDto>> ExecuteAsync(GetAuditChangeEntryRequest req, CancellationToken ct)
+    protected override async Task<List<AuditChangeEntryDto>> HandleRequestAsync(GetAuditChangeEntryRequest req, CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var response = await _auditService.GetAuditChangeEntriesAsync(req.Id, ct);
-
-            // Business metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "audit-change-entry-lookup"),
-                new("endpoint", "GetAuditChangeEntryEndpoint"));
-
-            var changeCount = response?.Count ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(changeCount,
-                new("record_type", "audit-change-entries"),
-                new("endpoint", "GetAuditChangeEntryEndpoint"));
-
-            _logger.LogInformation("Audit change entries retrieved for EventId: {EventId}, returned {ChangeCount} changes (correlation: {CorrelationId})",
-                req.Id, changeCount, HttpContext.TraceIdentifier);
-
-            return response ?? new List<AuditChangeEntryDto>();
-        });
+        var result = await _auditService.GetAuditChangeEntriesAsync(req.Id, ct);
+        return result ?? new List<AuditChangeEntryDto>();
     }
 }
 

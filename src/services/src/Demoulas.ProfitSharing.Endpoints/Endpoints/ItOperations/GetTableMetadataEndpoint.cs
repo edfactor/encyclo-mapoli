@@ -44,7 +44,7 @@ public class GetTableMetadataEndpoint : ProfitSharingResponseEndpoint<List<RowCo
         Group<ItDevOpsAllUsersGroup>();
     }
 
-    public override async Task<List<RowCountResult>> ExecuteAsync(CancellationToken ct)
+    protected override async Task<List<RowCountResult>> HandleRequestAsync(CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

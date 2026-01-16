@@ -2,25 +2,19 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
 
 public sealed class DistributionSearchEndpoint : ProfitSharingEndpoint<DistributionSearchRequest, PaginatedResponseDto<DistributionSearchResponse>>
 {
     private readonly IDistributionService _distributionService;
-    private readonly ILogger<DistributionSearchEndpoint> _logger;
 
-    public DistributionSearchEndpoint(IDistributionService distributionService, ILogger<DistributionSearchEndpoint> logger) : base(Navigation.Constants.Distributions)
+    public DistributionSearchEndpoint(IDistributionService distributionService) : base(Navigation.Constants.Distributions)
     {
         _distributionService = distributionService;
-        _logger = logger;
     }
     public override void Configure()
     {
@@ -52,26 +46,11 @@ public sealed class DistributionSearchEndpoint : ProfitSharingEndpoint<Distribut
         });
     }
 
-    public override Task<PaginatedResponseDto<DistributionSearchResponse>> ExecuteAsync(DistributionSearchRequest req, CancellationToken ct)
+    protected override async Task<PaginatedResponseDto<DistributionSearchResponse>> HandleRequestAsync(
+        DistributionSearchRequest req,
+        CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var response = await _distributionService.SearchAsync(req, ct);
-
-            // Business metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "distribution-search"),
-                new("endpoint", "DistributionSearchEndpoint"));
-
-            var resultCount = response?.Total ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
-                new("record_type", "distribution-search-results"),
-                new("endpoint", "DistributionSearchEndpoint"));
-
-            _logger.LogInformation("Distribution search completed for Badge: {BadgeNumber}, PSN Suffix: {PsnSuffix}, returned {ResultCount} results (correlation: {CorrelationId})",
-                req.BadgeNumber, req.PsnSuffix, resultCount, HttpContext.TraceIdentifier);
-
-            return response ?? new PaginatedResponseDto<DistributionSearchResponse>();
-        }, "SSN");
+        var result = await _distributionService.SearchAsync(req, ct);
+        return result ?? new PaginatedResponseDto<DistributionSearchResponse>();
     }
 }
