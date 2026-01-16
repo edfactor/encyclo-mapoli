@@ -45,7 +45,7 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
         Group<CheckRunGroup>();
     }
 
-    public override async Task HandleAsync(CheckRunStartRequest req, CancellationToken ct)
+    protected override async Task<string> HandleRequestAsync(CheckRunStartRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -68,12 +68,12 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
                     }
 
                     ThrowError(result.Error.Description, 400);
-                    return;
+                    return string.Empty;
                 }
 
                 AddError("CheckRun", result.Error?.Description ?? "Failed to generate check run file.");
                 ThrowError(result.Error?.Description ?? "Failed to generate check run file.", 500);
-                return;
+                return string.Empty;
             }
 
             var response = result.Value!;
@@ -110,6 +110,7 @@ public sealed class CheckRunStartEndpoint : ProfitSharingEndpoint<CheckRunStartR
             await Send.StreamAsync(memoryStream, response.FileName, contentType: response.ContentType, cancellation: ct);
 
             this.RecordResponseMetrics(HttpContext, _logger, new { FileSize = fileSize, response.FileName }, isSuccess: true);
+            return string.Empty;
         }
         catch (Exception ex)
         {

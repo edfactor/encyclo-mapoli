@@ -1,15 +1,10 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
@@ -20,13 +15,11 @@ public class GetDemographicSyncAuditEndpoint
     : ProfitSharingEndpoint<SortedPaginationRequestDto, Results<Ok<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>, NotFound, ProblemHttpResult>>
 {
     private readonly IOracleHcmDiagnosticsService _service;
-    private readonly ILogger<GetDemographicSyncAuditEndpoint> _logger;
 
-    public GetDemographicSyncAuditEndpoint(IOracleHcmDiagnosticsService service, ILogger<GetDemographicSyncAuditEndpoint> logger)
+    public GetDemographicSyncAuditEndpoint(IOracleHcmDiagnosticsService service)
         : base(Navigation.Constants.OracleHcmDiagnostics)
     {
         _service = service;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -64,27 +57,11 @@ public class GetDemographicSyncAuditEndpoint
         Group<AdministrationGroup>();
     }
 
-    public override Task<Results<Ok<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<PaginatedResponseDto<DemographicSyncAuditRecordResponse>>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         SortedPaginationRequestDto req,
         CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var result = await _service.GetDemographicSyncAuditAsync(req, ct);
-
-            if (result.IsSuccess)
-            {
-                EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                    new("operation", "demographic-sync-audit-query"),
-                    new("endpoint", nameof(GetDemographicSyncAuditEndpoint)));
-
-                var count = result.Value?.Results?.LongCount() ?? 0;
-                EndpointTelemetry.RecordCountsProcessed.Record(count,
-                    new("record_type", "demographic-sync-audit"),
-                    new("endpoint", nameof(GetDemographicSyncAuditEndpoint)));
-            }
-
-            return result.ToHttpResult();
-        });
+        var result = await _service.GetDemographicSyncAuditAsync(req, ct);
+        return result.ToHttpResult();
     }
 }

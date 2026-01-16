@@ -47,7 +47,7 @@ public class MasterInquiryMemberDetailsEndpoint : ProfitSharingEndpoint<MasterIn
         Group<MasterInquiryGroup>();
     }
 
-    public override async Task<Results<Ok<PaginatedResponseDto<MasterInquiryResponseDto>>, NotFound, ProblemHttpResult>> ExecuteAsync(MasterInquiryMemberDetailsRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<PaginatedResponseDto<MasterInquiryResponseDto>>, NotFound, ProblemHttpResult>> HandleRequestAsync(MasterInquiryMemberDetailsRequest req, CancellationToken ct)
     {
         try
         {
@@ -62,3 +62,4 @@ public class MasterInquiryMemberDetailsEndpoint : ProfitSharingEndpoint<MasterIn
         }
     }
 }
+// Moved to Endpoints/InquiriesAndAdjustments/Inquiries/MasterInquiryMemberDetailsEndpoint.cs

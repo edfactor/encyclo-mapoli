@@ -47,7 +47,7 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : ProfitSharingEnd
         Group<YearEndGroup>();
     }
 
-    public override async Task<Results<Ok<YearEndProfitSharingReportSummaryResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<YearEndProfitSharingReportSummaryResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(BadgeNumberRequest req, CancellationToken ct)
     {
         try
         {

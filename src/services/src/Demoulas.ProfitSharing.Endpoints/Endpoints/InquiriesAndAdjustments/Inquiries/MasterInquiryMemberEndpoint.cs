@@ -45,47 +45,11 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
                         BadgeNumber = 12345,
                         PsnSuffix = 1,
                         Ssn = "123456789".MaskSsn(),
-                        FirstName = "John",
-                        MiddleName = "J",
+                        FirstName = "Jane",
                         LastName = "Doe",
-                        Address = "123 Main St",
-                        AddressCity = "Lowell",
-                        AddressState = "MA",
-                        AddressZipCode = "01850",
-                        DateOfBirth = new DateOnly(1980,
-                            1,
-                            1),
-                        YearToDateProfitSharingHours = 1200.5m,
-                        YearsInPlan = 10,
-                        PercentageVested = 100m,
-                        EnrollmentId = 2,
-                        Enrollment = "Active",
-                        HireDate = new DateOnly(2010,
-                            5,
-                            1),
-                        TerminationDate = null,
-                        ReHireDate = null,
+                        MiddleName = "Q",
                         StoreNumber = 101,
-                        BeginPSAmount = 5000m,
-                        CurrentPSAmount = 15000m,
-                        BeginVestedAmount = 5000m,
-                        CurrentVestedAmount = 15000m,
-                        CurrentEtva = 1000m,
-                        PreviousEtva = 900m,
-                        Missives = new List<int>
-                        {
-                            1,
-                            2
-                        },
-                        EmploymentStatus = "Active",
-                        Department = "Grocery",
-                        PayClassification = "Unknown",
-                        Gender = "M",
-                        PhoneNumber = "603-555-5555",
-                        WorkLocation = "Store 4",
-                        ReceivedContributionsLastYear = false,
-                        FullTimeDate = default,
-                        TerminationReason = "Retired"
+                        EmploymentStatus = "Active"
                     }
                 }
             };
@@ -96,7 +60,7 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
         Group<MasterInquiryGroup>();
     }
 
-    public override async Task<Results<Ok<MemberProfitPlanDetails>, NotFound, ProblemHttpResult>> ExecuteAsync(MasterInquiryMemberRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<MemberProfitPlanDetails>, NotFound, ProblemHttpResult>> HandleRequestAsync(MasterInquiryMemberRequest req, CancellationToken ct)
     {
         try
         {
@@ -110,3 +74,4 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
         }
     }
 }
+// Moved to Endpoints/InquiriesAndAdjustments/Inquiries/MasterInquiryMemberEndpoint.cs

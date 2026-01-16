@@ -2,12 +2,8 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
 
@@ -15,13 +11,11 @@ public class BeneficiarySearchFilterEndpoint : ProfitSharingEndpoint<Beneficiary
 {
 
     private readonly IBeneficiaryInquiryService _beneficiaryService;
-    private readonly ILogger<BeneficiarySearchFilterEndpoint> _logger;
 
-    public BeneficiarySearchFilterEndpoint(IBeneficiaryInquiryService beneficiaryService, ILogger<BeneficiarySearchFilterEndpoint> logger)
+    public BeneficiarySearchFilterEndpoint(IBeneficiaryInquiryService beneficiaryService)
         : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -36,27 +30,12 @@ public class BeneficiarySearchFilterEndpoint : ProfitSharingEndpoint<Beneficiary
         Group<BeneficiariesGroup>();
     }
 
-    public override Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> ExecuteAsync(BeneficiarySearchFilterRequest req, CancellationToken ct)
+    protected override async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> HandleRequestAsync(
+        BeneficiarySearchFilterRequest req,
+        CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var response = await _beneficiaryService.BeneficiarySearchFilter(req, ct);
-
-            // Business metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "beneficiary-search-filter"),
-                new("endpoint", "BeneficiarySearchFilterEndpoint"));
-
-            var resultCount = response?.Total ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
-                new("record_type", "beneficiary-search-results"),
-                new("endpoint", "BeneficiarySearchFilterEndpoint"));
-
-            _logger.LogInformation("Beneficiary search filter completed for Badge: {BadgeNumber}, PSN Suffix: {PsnSuffix}, Name: {Name}, MemberType: {MemberType}, returned {ResultCount} results (correlation: {CorrelationId})",
-                req.BadgeNumber, req.PsnSuffix, req.Name, req.MemberType, resultCount, HttpContext.TraceIdentifier);
-
-            return response ?? new PaginatedResponseDto<BeneficiarySearchFilterResponse>();
-        }, "SSN");
+        var result = await _beneficiaryService.BeneficiarySearchFilter(req, ct);
+        return result ?? new PaginatedResponseDto<BeneficiarySearchFilterResponse>();
     }
 
 }

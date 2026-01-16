@@ -3,14 +3,11 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
@@ -18,13 +15,11 @@ public sealed class CertificatesReportEndpoint
     : ProfitSharingEndpoint<CerficatePrintRequest, Results<Ok<ReportResponseBase<CertificateReprintResponse>>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly ICertificateService _certificateService;
-    private readonly ILogger<CertificatesReportEndpoint> _logger;
 
-    public CertificatesReportEndpoint(ICertificateService certificateService, ILogger<CertificatesReportEndpoint> logger)
+    public CertificatesReportEndpoint(ICertificateService certificateService)
         : base(Navigation.Constants.PrintProfitCerts)
     {
         _certificateService = certificateService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -60,36 +55,11 @@ public sealed class CertificatesReportEndpoint
         Group<YearEndGroup>();
     }
 
-    public override Task<Results<Ok<ReportResponseBase<CertificateReprintResponse>>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<ReportResponseBase<CertificateReprintResponse>>, NotFound, BadRequest, ProblemHttpResult>> HandleRequestAsync(
         CerficatePrintRequest req,
         CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var result = await _certificateService.GetMembersWithBalanceActivityByStore(req, ct);
-
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "certificates_report"),
-                new("profit_year", req.ProfitYear.ToString()));
-
-            if (result.IsSuccess)
-            {
-                var response = result.Value;
-                var resultCount = response?.Response?.Results?.Count() ?? 0;
-                EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
-                    new("record_type", "post-frozen-certificates"),
-                    new("endpoint", nameof(CertificatesReportEndpoint)));
-
-                var badgeCount = req.BadgeNumbers?.Length ?? 0;
-                if (badgeCount > 0)
-                {
-                    EndpointTelemetry.RecordCountsProcessed.Record(badgeCount,
-                        new("operation", "certificates_report"),
-                        new("metric_type", "badge_numbers_requested"));
-                }
-            }
-
-            return result.ToHttpResultWithValidation();
-        });
+        var result = await _certificateService.GetMembersWithBalanceActivityByStore(req, ct);
+        return result.ToHttpResultWithValidation();
     }
 }

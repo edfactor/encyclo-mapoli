@@ -8,12 +8,12 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
-public sealed class ProfitSharingLabelsExportEndpoint : ProfitSharingEndpoint<ProfitYearRequest, PaginatedResponseDto<ProfitSharingLabelResponse>>
+public sealed class ProfitSharingLabelsExportEndpoint : ProfitSharingEndpoint<ProfitYearRequest, Results<FileStreamHttpResult, ProblemHttpResult>>
 {
     private readonly IPostFrozenService _postFrozenService;
     private readonly ILogger<ProfitSharingLabelsExportEndpoint> _logger;
@@ -41,7 +41,7 @@ public sealed class ProfitSharingLabelsExportEndpoint : ProfitSharingEndpoint<Pr
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    protected override async Task<Results<FileStreamHttpResult, ProblemHttpResult>> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
         this.RecordRequestMetrics(HttpContext, _logger, req);
@@ -82,14 +82,7 @@ public sealed class ProfitSharingLabelsExportEndpoint : ProfitSharingEndpoint<Pr
             _logger.LogInformation("Year-end post-frozen profit sharing labels export generated: {Lines} lines, {Size} bytes (correlation: {CorrelationId})",
                 lineCount, fileSizeBytes, HttpContext.TraceIdentifier);
 
-            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
-            {
-                FileName = "PROFLBL.txt",
-                Inline = false
-            };
-            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-            await Send.StreamAsync(memoryStream, "PROFLBL.txt", contentType: "text/plain", cancellation: ct);
+            return TypedResults.File(memoryStream, "text/plain", "PROFLBL.txt");
         }
         catch (Exception ex)
         {

@@ -1,11 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Common.Validators;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -46,23 +43,13 @@ public sealed class ProfitDetailReversalsEndpoint : ProfitSharingEndpoint<IdsReq
         });
     }
 
-    public override Task<Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(IdsRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(IdsRequest req, CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var result = await _profitDetailReversalsService.ReverseProfitDetailsAsync(req.Ids, ct);
-
-            // Record business operation metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "profit-detail-reversal"),
-                new("endpoint", nameof(ProfitDetailReversalsEndpoint)),
-                new("batch_size", req.Ids?.Length.ToString() ?? "0"));
-
-            // Convert Result<bool> to proper HTTP response
-            // Use implicit cast to ensure validation errors are properly included in the response
-            return result.IsSuccess
-                ? TypedResults.Ok(new IdsResponse { Ids = req.Ids ?? Array.Empty<int>() })
-                : (Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>)TypedResults.Problem(result.Error!);
-        });
+        _logger.LogInformation("Profit detail reversal requested for {Count} ids", req.Ids?.Length ?? 0);
+        var profitDetailIds = req.Ids ?? Array.Empty<int>();
+        var result = await _profitDetailReversalsService.ReverseProfitDetailsAsync(profitDetailIds, ct);
+        return result.IsSuccess
+            ? TypedResults.Ok(new IdsResponse { Ids = profitDetailIds })
+            : (Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>)TypedResults.Problem(result.Error!);
     }
 }

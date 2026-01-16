@@ -55,7 +55,7 @@ public sealed class ValidateAllocTransfersEndpoint
             .Produces(403));
     }
 
-    public override async Task<Results<Ok<CrossReferenceValidationGroup>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<CrossReferenceValidationGroup>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         YearRequest req,
         CancellationToken ct)
     {

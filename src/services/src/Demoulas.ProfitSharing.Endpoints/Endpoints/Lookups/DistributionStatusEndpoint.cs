@@ -44,16 +44,9 @@ public sealed class DistributionStatusEndpoint : ProfitSharingResultResponseEndp
             };
         });
         Group<LookupGroup>();
-
-        if (!Env.IsTestEnvironment())
-        {
-            // Specify caching duration and store it in metadata
-            TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
-            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
-        }
     }
 
-    public override async Task<Results<Ok<ListResponseDto<DistributionStatusResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
+    protected override async Task<Results<Ok<ListResponseDto<DistributionStatusResponse>>, NotFound, ProblemHttpResult>> HandleRequestAsync(CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

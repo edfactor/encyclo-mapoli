@@ -48,7 +48,7 @@ public sealed class EmployeesWithProfitsOver73Endpoint
         Group<AdhocReportsGroup>();
     }
 
-    public override async Task<Results<Ok<PaginatedResponseDto<EmployeesWithProfitsOver73DetailDto>>, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<PaginatedResponseDto<EmployeesWithProfitsOver73DetailDto>>, ProblemHttpResult>> HandleRequestAsync(
         EmployeesWithProfitsOver73Request req,
         CancellationToken ct)
     {

@@ -40,7 +40,7 @@ public class ProfitSharingUnder21TotalsEndpoint : ProfitSharingEndpoint<ProfitYe
         Group<YearEndGroup>();
     }
 
-    public override async Task<ProfitSharingUnder21TotalsResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
+    protected override async Task<ProfitSharingUnder21TotalsResponse> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
         this.RecordRequestMetrics(HttpContext, _logger, req);

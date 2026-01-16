@@ -1,15 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
@@ -21,13 +16,11 @@ public class GetOracleHcmSyncMetadataEndpoint
     : ProfitSharingEndpoint<EmptyRequest, Results<Ok<OracleHcmSyncMetadataResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IOracleHcmDiagnosticsService _service;
-    private readonly ILogger<GetOracleHcmSyncMetadataEndpoint> _logger;
 
-    public GetOracleHcmSyncMetadataEndpoint(IOracleHcmDiagnosticsService service, ILogger<GetOracleHcmSyncMetadataEndpoint> logger)
+    public GetOracleHcmSyncMetadataEndpoint(IOracleHcmDiagnosticsService service)
         : base(Navigation.Constants.OracleHcmDiagnostics)
     {
         _service = service;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -54,32 +47,21 @@ public class GetOracleHcmSyncMetadataEndpoint
         Group<AdministrationGroup>();
     }
 
-    public override Task<Results<Ok<OracleHcmSyncMetadataResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<OracleHcmSyncMetadataResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         EmptyRequest req,
         CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var result = await _service.GetOracleHcmSyncMetadataAsync(ct);
-
-            var responseResult = result.Match(
-                v => Result<OracleHcmSyncMetadataResponse>.Success(new OracleHcmSyncMetadataResponse
-                {
-                    DemographicCreatedAtUtc = v.DemographicCreatedAtUtc,
-                    DemographicModifiedAtUtc = v.DemographicModifiedAtUtc,
-                    PayProfitCreatedAtUtc = v.PayProfitCreatedAtUtc,
-                    PayProfitModifiedAtUtc = v.PayProfitModifiedAtUtc
-                }),
-                _ => Result<OracleHcmSyncMetadataResponse>.Failure(result.Error!));
-
-            if (responseResult.IsSuccess)
+        var result = await _service.GetOracleHcmSyncMetadataAsync(ct);
+        var responseResult = result.Match(
+            v => Result<OracleHcmSyncMetadataResponse>.Success(new OracleHcmSyncMetadataResponse
             {
-                EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                    new("operation", "oracleHcm-metadata-query"),
-                    new("endpoint", nameof(GetOracleHcmSyncMetadataEndpoint)));
-            }
+                DemographicCreatedAtUtc = v.DemographicCreatedAtUtc,
+                DemographicModifiedAtUtc = v.DemographicModifiedAtUtc,
+                PayProfitCreatedAtUtc = v.PayProfitCreatedAtUtc,
+                PayProfitModifiedAtUtc = v.PayProfitModifiedAtUtc
+            }),
+            _ => Result<OracleHcmSyncMetadataResponse>.Failure(result.Error!));
 
-            return responseResult.ToHttpResult();
-        });
+        return responseResult.ToHttpResult();
     }
 }

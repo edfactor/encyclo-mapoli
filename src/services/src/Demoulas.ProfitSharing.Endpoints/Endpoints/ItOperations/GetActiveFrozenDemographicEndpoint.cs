@@ -37,7 +37,7 @@ public class GetActiveFrozenDemographicEndpoint : ProfitSharingResponseEndpoint<
         Group<ItDevOpsAllUsersGroup>();
     }
 
-    public override async Task<FrozenStateResponse> ExecuteAsync(CancellationToken ct)
+    protected override async Task<FrozenStateResponse> HandleRequestAsync(CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

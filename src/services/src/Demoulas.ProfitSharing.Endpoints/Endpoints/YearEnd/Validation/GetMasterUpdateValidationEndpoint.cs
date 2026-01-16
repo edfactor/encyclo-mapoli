@@ -1,13 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.CrossReference;
 
@@ -19,15 +16,12 @@ public sealed class GetMasterUpdateValidationEndpoint
     : ProfitSharingEndpoint<YearRequest, Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly ICrossReferenceValidationService _crossReferenceValidationService;
-    private readonly ILogger<GetMasterUpdateValidationEndpoint> _logger;
 
     public GetMasterUpdateValidationEndpoint(
-        ICrossReferenceValidationService crossReferenceValidationService,
-        ILogger<GetMasterUpdateValidationEndpoint> logger)
+        ICrossReferenceValidationService crossReferenceValidationService)
         : base(Navigation.Constants.Unknown)
     {
         _crossReferenceValidationService = crossReferenceValidationService ?? throw new ArgumentNullException(nameof(crossReferenceValidationService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public override void Configure()
@@ -55,62 +49,22 @@ public sealed class GetMasterUpdateValidationEndpoint
             .WithTags("Validation"));
     }
 
-    public override Task<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         YearRequest req,
         CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var profitYear = req.ProfitYear;
+        var result = await _crossReferenceValidationService.ValidateMasterUpdateCrossReferencesAsync(
+            req.ProfitYear,
+            new Dictionary<string, decimal>(),
+            ct);
 
-            // Note: Year validation is handled by ProfitYearRequestValidator (2020 to current year + 1)
-            // This ensures requests are validated before reaching this point
-
-            // Get archived values without comparison - UI will do the comparison
-            // PS-1721: Now using ICrossReferenceValidationService with empty dictionary to get ExpectedValues
-            var result = await _crossReferenceValidationService.ValidateMasterUpdateCrossReferencesAsync(
-                profitYear,
-                new Dictionary<string, decimal>(), // Empty dictionary - we only want archived ExpectedValues
-                ct);
-
-            if (result.IsSuccess && result.Value != null)
-            {
-                // Record business metrics for successful validation retrieval
-                Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                    new KeyValuePair<string, object?>("operation", "master-update-validation-retrieval"),
-                    new KeyValuePair<string, object?>("endpoint", nameof(GetMasterUpdateValidationEndpoint)),
-                    new KeyValuePair<string, object?>("profit_year", profitYear));
-
-                // Record validation metrics
-                var validationGroupCount = result.Value.ValidationGroups.Count;
-                var validGroupCount = result.Value.ValidationGroups.Count(g => g.IsValid);
-
-                Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(
-                    validationGroupCount,
-                    new KeyValuePair<string, object?>("record_type", "validation-groups"),
-                    new KeyValuePair<string, object?>("endpoint", nameof(GetMasterUpdateValidationEndpoint)));
-            }
-
-            return result.Match<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>>(
-                success => TypedResults.Ok(success),
-                problemDetails =>
-                {
-                    // Check if this is a "not found" error (code 104)
-                    if (result.Error?.Code == 104)
-                    {
-                        _logger.LogWarning(
-                            "No archived reports found for profit year {ProfitYear}",
-                            profitYear);
-                        return TypedResults.NotFound();
-                    }
-
-                    return TypedResults.Problem(
-                        detail: result.Error?.Description ?? "Unknown validation error",
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        title: "Validation Error"
-                    );
-                }
-            );
-        });
+        return result.Match<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>>(
+            success => TypedResults.Ok(success),
+            _ => result.Error?.Code == 104
+                ? TypedResults.NotFound()
+                : TypedResults.Problem(
+                    detail: result.Error?.Description ?? "Unknown validation error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: "Validation Error"));
     }
 }

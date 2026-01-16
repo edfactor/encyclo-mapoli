@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using Demoulas.Common.Api.Endpoints;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
@@ -17,7 +18,7 @@ public interface IHasNavigationId
 /// </summary>
 /// <typeparam name="TRequest">The request DTO type.</typeparam>
 /// <typeparam name="TResponse">The response DTO type.</typeparam>
-public abstract class ProfitSharingEndpoint<TRequest, TResponse> : Endpoint<TRequest, TResponse>, IHasNavigationId
+public abstract class ProfitSharingEndpoint<TRequest, TResponse> : DemoulasEndpoint<TRequest, TResponse>, IHasNavigationId
     where TRequest : notnull
     where TResponse : notnull
 {
@@ -30,15 +31,13 @@ public abstract class ProfitSharingEndpoint<TRequest, TResponse> : Endpoint<TReq
     /// A short identifier representing the navigation/menu item for this endpoint.
     /// </summary>
     public short NavigationId { get; }
-
-    // Intentionally no HandleAsync override here to avoid conflicts with derived ExecuteAsync implementations.
 }
 
 /// <summary>
 /// Base endpoint for scenarios with a request and no response payload.
 /// </summary>
 /// <typeparam name="TRequest">The request DTO type.</typeparam>
-public abstract class ProfitSharingRequestEndpoint<TRequest> : Endpoint<TRequest>, IHasNavigationId
+public abstract class ProfitSharingRequestEndpoint<TRequest> : DemoulasEndpoint<TRequest>, IHasNavigationId
     where TRequest : notnull
 {
     protected ProfitSharingRequestEndpoint(short navigationId)
@@ -47,14 +46,13 @@ public abstract class ProfitSharingRequestEndpoint<TRequest> : Endpoint<TRequest
     }
 
     public short NavigationId { get; }
-    // Intentionally no HandleAsync override here to avoid conflicts with derived ExecuteAsync implementations.
 }
 
 /// <summary>
 /// Base endpoint for scenarios without a request but with a response payload.
 /// </summary>
 /// <typeparam name="TResponse">The response DTO type.</typeparam>
-public abstract class ProfitSharingResponseEndpoint<TResponse> : EndpointWithoutRequest<TResponse>, IHasNavigationId
+public abstract class ProfitSharingResponseEndpoint<TResponse> : DemoulasEndpointWithoutRequest<TResponse>, IHasNavigationId
     where TResponse : notnull
 {
     protected ProfitSharingResponseEndpoint(short navigationId)
@@ -63,7 +61,6 @@ public abstract class ProfitSharingResponseEndpoint<TResponse> : EndpointWithout
     }
 
     public short NavigationId { get; }
-    // Intentionally no HandleAsync override here to avoid conflicts with derived ExecuteAsync implementations.
 }
 
 /// <summary>
@@ -71,7 +68,7 @@ public abstract class ProfitSharingResponseEndpoint<TResponse> : EndpointWithout
 /// Provides a consistent HTTP union result shape using domain Result{T} mapping helpers.
 /// </summary>
 /// <typeparam name="TResponse">Concrete response DTO or collection DTO.</typeparam>
-public abstract class ProfitSharingResultResponseEndpoint<TResponse> : EndpointWithoutRequest<Results<Ok<TResponse>, NotFound, ProblemHttpResult>>, IHasNavigationId
+public abstract class ProfitSharingResultResponseEndpoint<TResponse> : DemoulasEndpointWithoutRequestResult<TResponse>, IHasNavigationId
     where TResponse : notnull
 {
     protected ProfitSharingResultResponseEndpoint(short navigationId)
@@ -85,7 +82,7 @@ public abstract class ProfitSharingResultResponseEndpoint<TResponse> : EndpointW
 /// <summary>
 /// Base endpoint for scenarios without a request and without a response payload.
 /// </summary>
-public abstract class ProfitSharingEndpoint : EndpointWithoutRequest, IHasNavigationId
+public abstract class ProfitSharingEndpoint : DemoulasEndpointWithoutRequest, IHasNavigationId
 {
     protected ProfitSharingEndpoint(short navigationId)
     {
@@ -93,5 +90,4 @@ public abstract class ProfitSharingEndpoint : EndpointWithoutRequest, IHasNaviga
     }
 
     public short NavigationId { get; }
-    // Intentionally no HandleAsync override here to avoid conflicts with derived ExecuteAsync implementations.
 }

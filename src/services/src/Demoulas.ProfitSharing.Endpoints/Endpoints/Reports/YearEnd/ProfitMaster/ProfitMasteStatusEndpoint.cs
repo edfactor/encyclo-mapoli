@@ -6,11 +6,12 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaster;
 
-public class ProfitMasterStatusEndpoint : ProfitSharingEndpoint<ProfitYearRequest, ProfitMasterUpdateResponse>
+public class ProfitMasterStatusEndpoint : ProfitSharingEndpoint<ProfitYearRequest, Results<Ok<ProfitMasterUpdateResponse>, NoContent, ProblemHttpResult>>
 {
     private readonly IProfitMasterService _profitMasterService;
     private readonly ILogger<ProfitMasterStatusEndpoint> _logger;
@@ -34,7 +35,7 @@ public class ProfitMasterStatusEndpoint : ProfitSharingEndpoint<ProfitYearReques
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<ProfitMasterUpdateResponse>, NoContent, ProblemHttpResult>> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -58,13 +59,11 @@ public class ProfitMasterStatusEndpoint : ProfitSharingEndpoint<ProfitYearReques
             {
                 _logger.LogInformation("No profit master status data found for year {ProfitYear} (correlation: {CorrelationId})",
                     req.ProfitYear, HttpContext.TraceIdentifier);
-                await Send.NoContentAsync(ct);
+                return TypedResults.NoContent();
             }
-            else
-            {
-                this.RecordResponseMetrics(HttpContext, _logger, response);
-                await Send.OkAsync(response, ct);
-            }
+
+            this.RecordResponseMetrics(HttpContext, _logger, response);
+            return TypedResults.Ok(response);
         }
         catch (Exception ex)
         {

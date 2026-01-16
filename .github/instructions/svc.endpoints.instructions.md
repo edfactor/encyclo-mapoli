@@ -69,7 +69,7 @@ FastEndpoints Middleware
     ↓
 TelemetryProcessor (Pre-Process)
     ↓
-Endpoint.ExecuteAsync()
+Endpoint.HandleRequestAsync()
     ├─ RecordRequestMetrics
     ├─ Call Service Layer (returns Result<T>)
     ├─ Record Business Metrics
@@ -126,7 +126,7 @@ public sealed class GetMemberEndpoint : ProfitSharingEndpoint<GetMemberRequest, 
         Group<MasterInquiryGroup>();
     }
 
-    public override Task<Results<Ok<MemberDetails>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override Task<Results<Ok<MemberDetails>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         GetMemberRequest req, CancellationToken ct)
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
@@ -276,7 +276,7 @@ All endpoints MUST implement telemetry using `TelemetryExtensions`.
 ### Pattern 1: ExecuteWithTelemetry (Recommended)
 
 ```csharp
-public override Task<Results<...>> ExecuteAsync(TRequest req, CancellationToken ct)
+protected override Task<Results<...>> HandleRequestAsync(TRequest req, CancellationToken ct)
 {
     return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
     {
@@ -300,7 +300,7 @@ public override Task<Results<...>> ExecuteAsync(TRequest req, CancellationToken 
 ### Pattern 2: Manual Telemetry (Advanced)
 
 ```csharp
-public override async Task HandleAsync(TRequest req, CancellationToken ct)
+protected override async Task<TResponse> HandleRequestAsync(TRequest req, CancellationToken ct)
 {
     using var activity = this.StartEndpointActivity(HttpContext);
     try
@@ -308,7 +308,7 @@ public override async Task HandleAsync(TRequest req, CancellationToken ct)
         this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn");
         var result = await _service.ProcessAsync(req, ct);
         this.RecordResponseMetrics(HttpContext, _logger, result);
-        await Send.OkAsync(result, ct);
+        return result;
     }
     catch (Exception ex)
     {
@@ -571,7 +571,7 @@ public sealed class MyFeatureEndpoint : ProfitSharingEndpoint<MyFeatureRequest, 
         Group<MyFeatureGroup>();
     }
 
-    public override Task<Results<Ok<MyFeatureResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override Task<Results<Ok<MyFeatureResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         MyFeatureRequest req, CancellationToken ct)
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>

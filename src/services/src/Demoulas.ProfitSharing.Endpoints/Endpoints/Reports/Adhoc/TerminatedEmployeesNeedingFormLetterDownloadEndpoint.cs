@@ -1,25 +1,20 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 
 public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : ProfitSharingEndpoint<TerminatedLettersRequest, string>
 {
     private readonly IAdhocTerminatedEmployeesService _adhocTerminatedEmployeesService;
-    private readonly ILogger<TerminatedEmployeesNeedingFormLetterDownloadEndpoint> _logger;
 
-    public TerminatedEmployeesNeedingFormLetterDownloadEndpoint(IAdhocTerminatedEmployeesService adhocTerminatedEmployeesService, ILogger<TerminatedEmployeesNeedingFormLetterDownloadEndpoint> logger) : base(Navigation.Constants.Unknown) //TBD
+    public TerminatedEmployeesNeedingFormLetterDownloadEndpoint(IAdhocTerminatedEmployeesService adhocTerminatedEmployeesService) : base(Navigation.Constants.Unknown) //TBD
     {
         _adhocTerminatedEmployeesService = adhocTerminatedEmployeesService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -34,56 +29,28 @@ public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : Profi
         Group<AdhocReportsGroup>();
     }
 
-    public override async Task HandleAsync(TerminatedLettersRequest req, CancellationToken ct)
+    protected override async Task<string> HandleRequestAsync(TerminatedLettersRequest req, CancellationToken ct)
     {
-        using var activity = this.StartEndpointActivity(HttpContext);
+        var response = await _adhocTerminatedEmployeesService.GetFormLetterForTerminatedEmployees(req, ct);
 
-        try
+        var memoryStream = new MemoryStream();
+        await using (var writer = new StreamWriter(memoryStream))
         {
-            this.RecordRequestMetrics(HttpContext, _logger, req);
+            await writer.WriteAsync(response);
+            await writer.FlushAsync(ct);
 
-            var response = await _adhocTerminatedEmployeesService.GetFormLetterForTerminatedEmployees(req, ct);
+            memoryStream.Position = 0;
 
-            // Record form letter download metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "form-letter-download"),
-                new("endpoint", "TerminatedEmployeesNeedingFormLetterDownloadEndpoint"),
-                new("file_type", "text"),
-                new("file_name", "QPROF003.txt"));
-
-            var responseLength = response?.Length ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(responseLength,
-                new("record_type", "letter-content-bytes"),
-                new("endpoint", "TerminatedEmployeesNeedingFormLetterDownloadEndpoint"));
-
-            _logger.LogInformation("Form letter download generated, file size: {FileSize} bytes (correlation: {CorrelationId})",
-                responseLength, HttpContext.TraceIdentifier);
-
-            var memoryStream = new MemoryStream();
-            await using (var writer = new StreamWriter(memoryStream))
+            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
             {
-                await writer.WriteAsync(response);
-                await writer.FlushAsync(ct);
+                FileName = "QPROF003.txt",
+                Inline = false
+            };
+            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
 
-                memoryStream.Position = 0;
-
-                System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
-                {
-                    FileName = "QPROF003.txt",
-                    Inline = false
-                };
-                HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-                // Record successful file download
-                this.RecordResponseMetrics(HttpContext, _logger, response ?? string.Empty);
-
-                await Send.StreamAsync(memoryStream, "QPROF003.txt", contentType: "text/plain", cancellation: ct);
-            }
+            await Send.StreamAsync(memoryStream, "QPROF003.txt", contentType: "text/plain", cancellation: ct);
         }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+
+        return string.Empty;
     }
 }

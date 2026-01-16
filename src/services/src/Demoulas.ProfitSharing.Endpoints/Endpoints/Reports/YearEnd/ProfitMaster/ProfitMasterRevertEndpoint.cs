@@ -34,11 +34,11 @@ public class ProfitMasterRevertEndpoint : ProfitSharingEndpoint<ProfitYearReques
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    protected override async Task<ProfitMasterRevertResponse> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
         var response = await _profitMasterService.Revert(req, ct);
         await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.InProgress, ct);
 
-        await Send.OkAsync(response, ct);
+        return response;
     }
 }

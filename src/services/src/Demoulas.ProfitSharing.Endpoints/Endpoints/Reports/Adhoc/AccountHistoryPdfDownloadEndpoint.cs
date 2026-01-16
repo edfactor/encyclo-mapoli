@@ -50,7 +50,7 @@ public sealed class AccountHistoryPdfDownloadEndpoint : ProfitSharingEndpoint<Ac
         });
     }
 
-    public override async Task<Results<FileStreamHttpResult, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<FileStreamHttpResult, ProblemHttpResult>> HandleRequestAsync(
         AccountHistoryReportRequest req,
         CancellationToken ct)
     {

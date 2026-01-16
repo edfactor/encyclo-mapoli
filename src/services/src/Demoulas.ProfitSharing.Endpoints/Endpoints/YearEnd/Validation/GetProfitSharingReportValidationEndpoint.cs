@@ -1,13 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Validation;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.CrossReference;
 
@@ -19,15 +16,12 @@ public sealed class GetProfitSharingReportValidationEndpoint
     : ProfitSharingEndpoint<ProfitSharingReportValidationRequest, Results<Ok<ValidationResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly ICrossReferenceValidationService _crossReferenceValidationService;
-    private readonly ILogger<GetProfitSharingReportValidationEndpoint> _logger;
 
     public GetProfitSharingReportValidationEndpoint(
-        ICrossReferenceValidationService crossReferenceValidationService,
-        ILogger<GetProfitSharingReportValidationEndpoint> logger)
+        ICrossReferenceValidationService crossReferenceValidationService)
         : base(Navigation.Constants.Unknown)
     {
         _crossReferenceValidationService = crossReferenceValidationService ?? throw new ArgumentNullException(nameof(crossReferenceValidationService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public override void Configure()
@@ -56,65 +50,23 @@ public sealed class GetProfitSharingReportValidationEndpoint
             .WithTags("Validation"));
     }
 
-    public override Task<Results<Ok<ValidationResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<ValidationResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         ProfitSharingReportValidationRequest req,
         CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var profitYear = req.ProfitYear;
-            var reportSuffix = req.ReportSuffix;
+        var result = await _crossReferenceValidationService.ValidateProfitSharingReport(
+            req.ProfitYear,
+            req.ReportSuffix,
+            req.UseFrozenData,
+            ct);
 
-            // Note: Year validation is handled by ProfitYearRequestValidator (2020 to current year + 1)
-            // Report suffix validation (1-8) should be handled by request validator
-
-            // Get validation data for the specified Profit Sharing Report
-            var result = await _crossReferenceValidationService.ValidateProfitSharingReport(
-                profitYear,
-                reportSuffix,
-                req.UseFrozenData,
-                ct);
-
-            if (result.IsSuccess && result.Value != null)
-            {
-                // Record business metrics for successful validation retrieval
-                Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                    new KeyValuePair<string, object?>("operation", "profit-sharing-report-validation-retrieval"),
-                    new KeyValuePair<string, object?>("endpoint", nameof(GetProfitSharingReportValidationEndpoint)),
-                    new KeyValuePair<string, object?>("profit_year", profitYear),
-                    new KeyValuePair<string, object?>("report_suffix", reportSuffix));
-
-                // Record validation metrics
-                var validationGroupCount = result.Value.ValidationGroups.Count;
-                var validGroupCount = result.Value.ValidationGroups.Count(g => g.IsValid);
-
-                Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(
-                    validationGroupCount,
-                    new KeyValuePair<string, object?>("record_type", "validation-groups"),
-                    new KeyValuePair<string, object?>("endpoint", nameof(GetProfitSharingReportValidationEndpoint)));
-            }
-
-            return result.Match<Results<Ok<ValidationResponse>, NotFound, ProblemHttpResult>>(
-                success => TypedResults.Ok(success),
-                problemDetails =>
-                {
-                    // Check if this is a "not found" error (code 104)
-                    if (result.Error?.Code == 104)
-                    {
-                        _logger.LogWarning(
-                            "No archived checksums found for profit year {ProfitYear} and report suffix {ReportSuffix}",
-                            profitYear,
-                            reportSuffix);
-                        return TypedResults.NotFound();
-                    }
-
-                    return TypedResults.Problem(
-                        detail: result.Error?.Description ?? "Unknown validation error",
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        title: "Validation Error"
-                    );
-                }
-            );
-        });
+        return result.Match<Results<Ok<ValidationResponse>, NotFound, ProblemHttpResult>>(
+            success => TypedResults.Ok(success),
+            _ => result.Error?.Code == 104
+                ? TypedResults.NotFound()
+                : TypedResults.Problem(
+                    detail: result.Error?.Description ?? "Unknown validation error",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: "Validation Error"));
     }
 }

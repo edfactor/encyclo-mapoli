@@ -2,25 +2,19 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Audit;
 
 public class AuditSearchEndpoint : ProfitSharingEndpoint<AuditSearchRequestDto, PaginatedResponseDto<AuditEventDto>>
 {
     private readonly IAuditService _auditService;
-    private readonly ILogger<AuditSearchEndpoint> _logger;
 
-    public AuditSearchEndpoint(IAuditService auditService, ILogger<AuditSearchEndpoint> logger)
+    public AuditSearchEndpoint(IAuditService auditService)
         : base(Navigation.Constants.ItDevOps)
     {
         _auditService = auditService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -35,26 +29,11 @@ public class AuditSearchEndpoint : ProfitSharingEndpoint<AuditSearchRequestDto, 
         Group<AuditGroup>();
     }
 
-    public override Task<PaginatedResponseDto<AuditEventDto>> ExecuteAsync(AuditSearchRequestDto req, CancellationToken ct)
+    protected override async Task<PaginatedResponseDto<AuditEventDto>> HandleRequestAsync(
+        AuditSearchRequestDto req,
+        CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var response = await _auditService.SearchAuditEventsAsync(req, ct);
-
-            // Business metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "audit-search"),
-                new("endpoint", "AuditSearchEndpoint"));
-
-            var resultCount = response?.Total ?? 0;
-            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
-                new("record_type", "audit-events"),
-                new("endpoint", "AuditSearchEndpoint"));
-
-            _logger.LogInformation("Audit search completed for Table: {TableName}, Operation: {Operation}, User: {UserName}, returned {ResultCount} results (correlation: {CorrelationId})",
-                req.TableName, req.Operation, req.UserName, resultCount, HttpContext.TraceIdentifier);
-
-            return response ?? new PaginatedResponseDto<AuditEventDto>();
-        });
+        var result = await _auditService.SearchAuditEventsAsync(req, ct);
+        return result ?? new PaginatedResponseDto<AuditEventDto>();
     }
 }
