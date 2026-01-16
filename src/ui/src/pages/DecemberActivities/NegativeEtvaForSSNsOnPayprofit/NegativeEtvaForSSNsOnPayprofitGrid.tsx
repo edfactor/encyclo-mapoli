@@ -1,5 +1,4 @@
-import { RefObject, useCallback, useMemo } from "react";
-import { Path, useNavigate } from "react-router-dom";
+import { RefObject, useMemo } from "react";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../constants";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
@@ -25,19 +24,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid = ({
   pagination,
   onSortChange
 }: NegativeEtvaForSSNsOnPayprofitGridProps) => {
-  const navigate = useNavigate();
-
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
-
-  const columnDefs = useMemo(
-    () => GetNegativeEtvaForSSNsOnPayProfitColumns(handleNavigationForButton),
-    [handleNavigationForButton]
-  );
+  const columnDefs = useMemo(() => GetNegativeEtvaForSSNsOnPayProfitColumns(), []);
 
   if (!showData || !data?.response) {
     return null;
