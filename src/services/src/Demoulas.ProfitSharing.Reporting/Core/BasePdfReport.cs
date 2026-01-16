@@ -1,4 +1,5 @@
-﻿using QuestPDF.Fluent;
+﻿using QuestPDF.Drawing;
+using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 
 namespace Demoulas.ProfitSharing.Reporting.Core;

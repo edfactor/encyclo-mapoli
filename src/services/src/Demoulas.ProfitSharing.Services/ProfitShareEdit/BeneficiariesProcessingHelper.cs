@@ -35,7 +35,7 @@ internal static class BeneficiariesProcessingHelper
         }, cancellationToken);
 
 
-        Dictionary<int, ProfitDetailTotals> thisYearsTotalsBySSn =
+        ILookup<int, ProfitDetailTotals> thisYearsTotalsBySsn =
             await TotalService.GetProfitDetailTotalsForASingleYear(dbContextFactory, profitShareUpdateRequest.ProfitYear, [.. benes.Select(ef => ef.Ssn)], cancellationToken);
 
         foreach (BeneficiaryFinancials bene in benes)
@@ -53,7 +53,8 @@ internal static class BeneficiariesProcessingHelper
                 continue;
             }
 
-            MemberFinancials memb = ProcessBeneficiary(bene, thisYearsTotalsBySSn.GetValueOrDefault(bene.Ssn) ?? ProfitDetailTotals.Zero, profitShareUpdateRequest);
+            var totals = thisYearsTotalsBySsn[bene.Ssn].FirstOrDefault() ?? ProfitDetailTotals.Zero;
+            MemberFinancials memb = ProcessBeneficiary(bene, totals, profitShareUpdateRequest);
             if (!memb.IsAllZeros())
             {
                 members.Add(memb);

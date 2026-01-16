@@ -675,13 +675,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 Years = yip != null ? yip.Years : (byte)0,
                 FirstContributionYear = fc != null ? fc.FirstContributionYear : (short?)null,
                 IsExecutive = pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly,
-                EnrollmentId = pp.Demographic!.VestingScheduleId == null
+                EnrollmentId = pp.VestingScheduleId == 0
                     ? EnrollmentConstants.NotEnrolled
-                    : pp.Demographic!.HasForfeited
-                        ? pp.Demographic!.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                    : pp.HasForfeited
+                        ? pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                             ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                             : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                        : pp.Demographic!.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                             ? EnrollmentConstants.OldVestingPlanHasContributions
                             : EnrollmentConstants.NewVestingPlanHasContributions
             };

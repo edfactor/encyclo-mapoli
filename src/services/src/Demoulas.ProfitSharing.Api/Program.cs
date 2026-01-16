@@ -22,7 +22,6 @@ using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.AspNetCore;
-using QuestPDF;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
@@ -51,8 +50,6 @@ else
     builder.Configuration
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 }
-
-Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 // Configure logging - configuration read from SmartLogging section in appsettings
 LoggingConfig logConfig = new();
@@ -126,6 +123,9 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
         ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING]));
+
+
+
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<IDemoulasCommonWarehouseContext, DemoulasCommonWarehouseContext>("Warehouse"));
 });

@@ -1,8 +1,8 @@
 import {
+  createBadgeOrPSNColumn,
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
-  createPSNColumn,
   createSSNColumn,
   createStatusColumn,
   createYearColumn
@@ -21,11 +21,12 @@ export const PayBeNextGridColumns = (): ColDef[] => {
   };
 
   return [
-    createPSNColumn({
-      headerName: "PSN",
-      field: "badgeNumber",
-      enableLinking: true,
-      linkingStyle: "badge-psn"
+    createBadgeOrPSNColumn({
+      headerName: "Badge/PSN",
+      field: "badgeOrPsn",
+      badgeField: "badgeNumber",
+      psnField: "beneficiaryPsn",
+      enableLinking: true
     }),
     createNameColumn({
       headerName: "Name",

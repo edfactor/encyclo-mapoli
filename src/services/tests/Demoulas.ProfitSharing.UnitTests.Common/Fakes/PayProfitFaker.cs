@@ -40,24 +40,24 @@ public sealed class PayProfitFaker : Faker<PayProfit>
             switch (enrollmentId)
             {
                 case EnrollmentConstants.OldVestingPlanHasContributions:
-                    currentDemographic.VestingScheduleId = VestingSchedule.Constants.OldPlan;
-                    currentDemographic.HasForfeited = false;
+                    o.VestingScheduleId = VestingSchedule.Constants.OldPlan;
+                    o.HasForfeited = false;
                     break;
                 case EnrollmentConstants.NewVestingPlanHasContributions:
-                    currentDemographic.VestingScheduleId = VestingSchedule.Constants.NewPlan;
-                    currentDemographic.HasForfeited = false;
+                    o.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+                    o.HasForfeited = false;
                     break;
                 case EnrollmentConstants.OldVestingPlanHasForfeitureRecords:
-                    currentDemographic.VestingScheduleId = VestingSchedule.Constants.OldPlan;
-                    currentDemographic.HasForfeited = true;
+                    o.VestingScheduleId = VestingSchedule.Constants.OldPlan;
+                    o.HasForfeited = true;
                     break;
                 case EnrollmentConstants.NewVestingPlanHasForfeitureRecords:
-                    currentDemographic.VestingScheduleId = VestingSchedule.Constants.NewPlan;
-                    currentDemographic.HasForfeited = true;
+                    o.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+                    o.HasForfeited = true;
                     break;
                 default:
-                    currentDemographic.VestingScheduleId = null;
-                    currentDemographic.HasForfeited = false;
+                    o.VestingScheduleId = 0;
+                    o.HasForfeited = false;
                     break;
             }
         })

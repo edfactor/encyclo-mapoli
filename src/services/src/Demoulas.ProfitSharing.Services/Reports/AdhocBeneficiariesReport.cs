@@ -57,9 +57,10 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
 
             var beneficiarySsns = pagedBeneficiaries.Results.Select(b => b.ContactSsn).ToHashSet();
 
-            var totalBalanceResult = await _totalService.GetTotalBalanceSet(ctx, req.ProfitYear)
+            var totalBalances = await _totalService.GetTotalBalanceSet(ctx, req.ProfitYear)
                 .Where(x => beneficiarySsns.Contains(x.Ssn))
-                .ToDictionaryAsync(x => x.Ssn, cancellationToken);
+                .ToListAsync(cancellationToken);
+            var totalBalanceBySsn = totalBalances.ToLookup(x => x.Ssn);
 
             // Fetch all relevant profit details for paged beneficiaries
             var allProfitDetails = await ctx.ProfitDetails
@@ -80,7 +81,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                         DateOnly.FromDateTime(pd.CreatedAtUtc.DateTime),
                         pd.Remark)).ToList();
 
-                totalBalanceResult.TryGetValue(b.ContactSsn, out var totalBalance);
+                var totalBalance = totalBalanceBySsn[b.ContactSsn].FirstOrDefault();
 
                 return new BeneficiaryReportDto(
                     b.PsnSuffix,
@@ -106,7 +107,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                     Results = filteredList!,
                     Total = pagedBeneficiaries.Total
                 },
-                TotalEndingBalance = totalBalanceResult.Values.Sum(x => x.TotalAmount ?? 0)
+                TotalEndingBalance = totalBalances.Sum(x => x.TotalAmount ?? 0)
             };
         }, cancellationToken);
     }

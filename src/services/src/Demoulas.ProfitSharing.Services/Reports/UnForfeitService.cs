@@ -91,22 +91,22 @@ public sealed class UnforfeitService : IUnforfeitService
                         NetBalanceLastYear = vest != null ? vest.CurrentBalance ?? 0 : 0,
                         VestedBalanceLastYear = vest != null ? vest.VestedBalance ?? 0 : 0,
                         d.PayFrequencyId,
-                        EnrollmentId = d.VestingScheduleId == null
+                        EnrollmentId = ppYE.VestingScheduleId == 0
                             ? EnrollmentConstants.NotEnrolled
-                            : d.HasForfeited
-                                ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : ppYE.HasForfeited
+                                ? ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                     : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                                : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                : ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasContributions
                                     : EnrollmentConstants.NewVestingPlanHasContributions,
-                        EnrollmentName = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
+                        EnrollmentName = EnrollmentConstants.GetDescription(ppYE.VestingScheduleId == 0
                             ? EnrollmentConstants.NotEnrolled
-                            : d.HasForfeited
-                                ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : ppYE.HasForfeited
+                                ? ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                     : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                                : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                : ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasContributions
                                     : EnrollmentConstants.NewVestingPlanHasContributions),
                         HoursProfitYear = ppYE.TotalHours,

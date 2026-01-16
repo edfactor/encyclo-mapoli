@@ -193,8 +193,7 @@ internal class PayrollSyncService
         {
             Demographic? demographic = await context.Demographics
                 .TagWith($"PayrollSync-GetDemographic-OracleHcmId:{oracleHcmId}-Year:{year}")
-                .Include(d => d.PayProfits.Where(p => p.ProfitYear >= year))
-                .Include(demographic => demographic.ContactInfo)
+                .Include(d => d.ContactInfo)
                 .FirstOrDefaultAsync(d => d.OracleHcmId == oracleHcmId, cancellationToken).ConfigureAwait(false);
 
             if (demographic == null)
@@ -202,14 +201,40 @@ internal class PayrollSyncService
                 return;
             }
 
-            PayProfit? payProfit = demographic.PayProfits.FirstOrDefault(p => p.ProfitYear == year);
+            PayProfit? payProfit = await context.PayProfits
+                .TagWith($"PayrollSync-GetPayProfit-OracleHcmId:{oracleHcmId}-Year:{year}")
+                .FirstOrDefaultAsync(pp => pp.DemographicId == demographic.Id && pp.ProfitYear == year, cancellationToken)
+                .ConfigureAwait(false);
 
             if (payProfit == null)
             {
+                var priorEnrollment = await context.PayProfits
+                    .TagWith($"PayrollSync-GetPayProfitEnrollment-OracleHcmId:{oracleHcmId}-Year:{year}")
+                    .Where(pp => pp.DemographicId == demographic.Id && pp.ProfitYear < year)
+                    .OrderByDescending(pp => pp.ProfitYear)
+                    .Select(pp => new
+                    {
+                        pp.VestingScheduleId,
+                        pp.HasForfeited
+                    })
+                    .FirstOrDefaultAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                int vestingScheduleId = priorEnrollment == null ? 0 : priorEnrollment.VestingScheduleId;
+                bool hasForfeited = priorEnrollment != null && priorEnrollment.HasForfeited;
+
                 // Create new PayProfit if it doesn't exist
                 // Question? shouldn't this be cloning all columns from the prior year (if it exists) to the new year?
-                payProfit = new PayProfit { ProfitYear = (short)year, DemographicId = demographic.Id, ModifiedAtUtc = DateTimeOffset.UtcNow, Etva = 0 };
-                demographic.PayProfits.Add(payProfit);
+                payProfit = new PayProfit
+                {
+                    ProfitYear = (short)year,
+                    DemographicId = demographic.Id,
+                    VestingScheduleId = vestingScheduleId,
+                    HasForfeited = hasForfeited,
+                    ModifiedAtUtc = DateTimeOffset.UtcNow,
+                    Etva = 0
+                };
+                context.PayProfits.Add(payProfit);
             }
 
             // Update PayProfit with accumulated totals

@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -47,7 +46,7 @@ public abstract class PristineBaseTest
         DistributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         CalendarService = new CalendarService(DbFactory, Aps, DistributedCache);
         FrozenService = new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache,
-            new Mock<INavigationService>().Object);
+            new Mock<INavigationService>().Object, TimeProvider.System);
         EmbeddedSqlService = new EmbeddedSqlService();
         DemographicReaderService = new DemographicReaderService(FrozenService, HttpContextAccessor);
         TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);
@@ -89,5 +88,12 @@ public abstract class PristineBaseTest
 
             return new Employee { Demographic = demographic, PayProfit = payProfit };
         });
+    }
+
+#pragma warning disable VSTHRD002
+
+    protected long BadgeToSsn(int badge)
+    {
+        return GetEmployeeByBadgeAsync(badge).GetAwaiter().GetResult().Demographic.Ssn;
     }
 }

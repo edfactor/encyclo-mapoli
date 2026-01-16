@@ -3,7 +3,6 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { Box, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { Path, useNavigate } from "react-router-dom";
 import { useLazyGetProfitSharingReportValidationQuery } from "reduxstore/api/ValidationApi";
 import {
   useLazyGetYearEndProfitSharingReportFrozenQuery,
@@ -38,7 +37,6 @@ const ReportGrid: React.FC<ReportGridProps> = ({
   onToggleExpand,
   profitYear
 }) => {
-  const navigate = useNavigate();
   const [triggerLive, { isFetching: isFetchingLive }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const [triggerFrozen, { isFetching: isFetchingFrozen }] = useLazyGetYearEndProfitSharingReportFrozenQuery();
   const [triggerValidation] = useLazyGetProfitSharingReportValidationQuery();
@@ -136,20 +134,13 @@ const ReportGrid: React.FC<ReportGridProps> = ({
     }
   }, [hasToken, isFrozen, params, profitYear, triggerValidation]);
 
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
-
   const sortEventHandler = (update: ISortParams) => {
     handleSortChange(update);
   };
 
   const columnDefs = useMemo(
-    () => GetProfitSharingReportGridColumns(handleNavigationForButton, validationData),
-    [handleNavigationForButton, validationData]
+    () => GetProfitSharingReportGridColumns(validationData),
+    [validationData]
   );
 
   const pinnedTopRowData = useMemo(() => {

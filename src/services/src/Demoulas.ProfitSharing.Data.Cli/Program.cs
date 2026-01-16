@@ -83,7 +83,7 @@ public sealed class Program
             rootCommand.Add(generateDgmlCommand);
             rootCommand.Add(generateMarkdownCommand);
             // Create the generate-upgrade-script command and add it so we can attach a handler below
-            var generateUpgradeScriptCmd = GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args ?? Array.Empty<string>(), commonOptions);
+            var generateUpgradeScriptCmd = GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(commonOptions);
             rootCommand.Add(generateUpgradeScriptCmd);
             rootCommand.Add(validateImportCommand);
             rootCommand.Add(runSqlCommandForNavigation);
@@ -336,7 +336,7 @@ public sealed class Program
     private static async Task<int> ExecuteGenerateUpgradeScript(IConfiguration configuration, string[] args)
     {
         _ = args;
-        var cmd = GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, new List<Option>
+        var cmd = GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(new List<Option>
         {
             new Option<string>("--output-file")
         });

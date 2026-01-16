@@ -85,7 +85,8 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             var totalBalances = await _totalService.GetTotalBalanceSet(ctx, request.ProfitYear)
                 .Where(tb => employeeSsns.Contains(tb.Ssn))
                 .Where(tb => tb.TotalAmount > 0) // Only include employees with positive balances
-                .ToDictionaryAsync(tb => tb.Ssn, cancellationToken);
+                .ToListAsync(cancellationToken);
+            var totalBalanceBySsn = totalBalances.ToLookup(tb => tb.Ssn);
 
             // Load all RMD factors from database (ages 73-99)
             var rmdFactors = await ctx.RmdsFactorsByAge
@@ -111,14 +112,15 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                     Ssn = g.Key,
                     TotalPayments = g.Sum(pd => Math.Abs(pd.Forfeiture)) // Forfeiture is negative for payments
                 })
-                .ToDictionaryAsync(x => x.Ssn, x => x.TotalPayments, cancellationToken);
+                .ToListAsync(cancellationToken);
+            var paymentsBySsn = paymentsInFiscalYear.ToLookup(x => x.Ssn);
 
             // Build detail records with pagination support
             var detailRecords = employeesOver73
-                .Where(e => totalBalances.ContainsKey(e.Ssn))
+                .Where(e => totalBalanceBySsn[e.Ssn].Any())
                 .Select(employee =>
                 {
-                    totalBalances.TryGetValue(employee.Ssn, out var balance);
+                    var balance = totalBalanceBySsn[employee.Ssn].FirstOrDefault();
                     var age = today.Year - employee.DateOfBirth.Year;
 
                     // Get RMD factor for this age (default to 0 if age not found)
@@ -129,7 +131,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                     var rmd = factor > 0 ? Math.Round((balance?.TotalAmount ?? 0) / factor, 2, MidpointRounding.AwayFromZero) : 0m;
 
                     // Get payments made in the fiscal year
-                    var paymentsInYear = paymentsInFiscalYear.TryGetValue(employee.Ssn, out var payments) ? payments : 0m;
+                    var paymentsInYear = paymentsBySsn[employee.Ssn].FirstOrDefault()?.TotalPayments ?? 0m;
 
                     // Calculate suggested RMD check amount based on de minimis threshold
                     var currentBalance = balance?.TotalAmount ?? 0;

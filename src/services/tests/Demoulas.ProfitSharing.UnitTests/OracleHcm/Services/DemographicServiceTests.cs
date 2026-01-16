@@ -122,7 +122,6 @@ public class DemographicsServiceTests
 
         var service = new DemographicsService(
             scenarioFactory,
-            repositoryMock.Object,
             matchingServiceMock.Object,
             auditServiceMock.Object,
             historyServiceMock.Object,
@@ -258,8 +257,6 @@ public class DemographicsServiceTests
                         EmploymentTypeId = demographic.EmploymentTypeId,
                         PayFrequencyId = demographic.PayFrequencyId,
                         EmploymentStatusId = demographic.EmploymentStatusId,
-                        VestingScheduleId = demographic.VestingScheduleId,
-                        HasForfeited = demographic.HasForfeited,
                         ValidFrom = DateTimeOffset.UtcNow,
                         ValidTo = new DateTimeOffset(new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc))
                     };
@@ -281,7 +278,6 @@ public class DemographicsServiceTests
             .Setup(m => m.PrepareSsnUpdateCommands(It.IsAny<List<Demographic>>(), It.IsAny<Dictionary<long, Demographic>>()))
             .Returns(new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>()); var service = new DemographicsService(
             scenarioFactory,
-            repositoryMock.Object,
             matchingServiceMock.Object,
             auditServiceMock.Object,
             historyServiceMock.Object,
@@ -522,7 +518,6 @@ public class DemographicsServiceTests
 
         var service = new DemographicsService(
             scenarioFactory,
-            repositoryMock.Object,
             matchingServiceMock.Object,
             auditServiceMock.Object,
             historyServiceMock.Object,
@@ -609,7 +604,6 @@ public class DemographicsServiceTests
 
         var service = new DemographicsService(
             scenarioFactory,
-            repositoryMock.Object,
             matchingServiceMock.Object,
             auditServiceMock.Object,
             historyServiceMock.Object,

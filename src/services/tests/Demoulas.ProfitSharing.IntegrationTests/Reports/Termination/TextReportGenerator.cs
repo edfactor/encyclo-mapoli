@@ -61,10 +61,10 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         string termDate = wsDoTerm == null || wsDoTerm == DateOnly.MinValue
             ? "".PadRight(6)
             : $"{wsDoTerm.Value.Year - 2000:00}{wsDoTerm.Value.Month:00}{wsDoTerm.Value.Day:00}";
-        string ageStr = age.HasValue ? $"{age:00}" : "";
+        string ageStr = age.HasValue ? $"{age}" : "";
         string wVestPertStr = wVestPert == 100 ? "100" : $"{wVestPert:00}";
 
-        string? name = Pay443Tests.RemoveMiddleInitial(r2EmployeeName!)?.PadRight(19).Substring(0, 19);
+        string? name = r2EmployeeName?.PadRight(19).Substring(0, 19);
 
         _reportWriter.WriteLine(r2BadgePsnNp.ToString().PadLeft(11) + " " + // fmt
                                 name + " " +
@@ -105,7 +105,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         _reportWriter.WriteLine("");
         _reportWriter.WriteLine("TOTALS".PadRight(6));
         _reportWriter.WriteLine(("AMOUNT IN PROFIT SHARING".PadRight(34) + totalProfitSharing.ToString("#,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
-        _reportWriter.WriteLine(("VESTED AMOUNT".PadRight(34) + totalVesting.ToString(" #,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
+        _reportWriter.WriteLine(("VESTED AMOUNT".PadRight(34) + totalVesting.ToString("#,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
         _reportWriter.WriteLine(("TOTAL FORFEITURES".PadRight(34) + totalForfeitures.ToString(" #,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
         // holding on to the misspelling of ALLOCTIONS to match the Ready system.
         _reportWriter.WriteLine(("TOTAL BENEFICIARY ALLOCTIONS".PadRight(34) + totalBeneficiaryAllocations.ToString("#,##0.00 ;#,##0.00-").PadLeft(14)).Trim());

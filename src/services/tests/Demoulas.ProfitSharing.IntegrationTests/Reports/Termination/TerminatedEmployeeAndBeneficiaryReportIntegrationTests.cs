@@ -1,8 +1,12 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Microsoft.EntityFrameworkCore;
@@ -38,14 +42,43 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
             CancellationToken.None);
 
         // READY sorts with "Mc" coming after "MC"
-        List<TerminatedEmployeeAndBeneficiaryDataResponseDto> sortedResults = data.Response.Results.OrderBy(x => x.Name, StringComparer.Ordinal).ToList();
+        List<TerminatedEmployeeAndBeneficiaryDataResponseDto> sortedAndMiddleInitialStripped =
+            data.Response.Results
+                .Select(x => x with { Name = Pay443Tests.RemoveMiddleInitial(x.Name) }).OrderBy(x => x.Name?.Trim(), StringComparer.Ordinal)
+                .ThenBy(x => x.PSN)
+                .ToList();
 
-        data = data with { Response = data.Response with { Results = sortedResults } };
+        data = data with { Response = data.Response with { Results = sortedAndMiddleInitialStripped } };
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
+        // Convert to Windows-style line endings
+        actualText = actualText.Replace("\r\n", "\n").Replace("\n", "\r\n");
         return actualText;
     }
-    
+
+    // This is used to validate the Vesting query informally
+    [Fact]
+    public async Task Validate2024VestedBalance()
+    {
+        var ssn = BadgeToSsn(700113);
+        short lastCompletedYearEnd = 2024;
+        var cancellationToken = CancellationToken.None;
+
+        CalendarResponseDto priorYearDateRange = await CalendarService.GetYearStartAndEndAccountingDatesAsync(lastCompletedYearEnd, cancellationToken);
+
+        await DbFactory.UseReadOnlyContext(async ctx =>
+        {
+            var tvb = await TotalService
+                .TotalVestingBalance(ctx, /*PayProfit Year*/lastCompletedYearEnd, /*Desired Year*/lastCompletedYearEnd, priorYearDateRange.FiscalEndDate)
+                .Where(x => x.Ssn == ssn)
+                .ToListAsync<ParticipantTotalVestingBalance>();
+
+            TestOutputHelper.WriteLine(JsonSerializer.Serialize(tvb));
+
+            tvb[0].VestedBalance.ShouldBe(422.06m);
+        });
+    }
+
     [Fact]
     public async Task EnsureSmartReportMatchesReadyReport()
     {

@@ -68,10 +68,10 @@ internal sealed class RebuildEnrollmentAndZeroContService
         {
             var minProfitYear = await ctx.PayProfits.MinAsync(x => x.ProfitYear, cancellationToken);
 
-            // Count how many Demographics have VestingScheduleId set for members with PayProfit records in this year
+            // Count how many PayProfit records have VestingScheduleId set for this year
             var vestingScheduleIdCount = await ctx.PayProfits
                 .Where(pp => pp.ProfitYear == minProfitYear)
-                .CountAsync(pp => pp.Demographic != null && pp.Demographic.VestingScheduleId.HasValue, cancellationToken);
+                .CountAsync(pp => pp.VestingScheduleId != 0, cancellationToken);
 
             // Return the year if rebuild needed (no VestingScheduleId set), otherwise 0
             return vestingScheduleIdCount == 0 ? minProfitYear : (short)0;

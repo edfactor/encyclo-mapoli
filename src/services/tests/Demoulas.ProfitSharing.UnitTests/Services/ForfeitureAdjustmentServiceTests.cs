@@ -74,15 +74,15 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         _payProfit1.DemographicId = _demographic1.Id;
         _payProfit1.ProfitYear = 2025;
         _payProfit1.Etva = 5000m;
-        _demographic1.VestingScheduleId = VestingSchedule.Constants.NewPlan;
-        _demographic1.HasForfeited = false;
+        _payProfit1.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+        _payProfit1.HasForfeited = false;
 
         _payProfit2 = payProfitFaker.Generate();
         _payProfit2.DemographicId = _demographic2.Id;
         _payProfit2.ProfitYear = 2025;
         _payProfit2.Etva = 3000m;
-        _demographic2.VestingScheduleId = VestingSchedule.Constants.NewPlan;
-        _demographic2.HasForfeited = false;
+        _payProfit2.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+        _payProfit2.HasForfeited = false;
     }
 
     #region GetSuggestedForfeitureAmount Tests
