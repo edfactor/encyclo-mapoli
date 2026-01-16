@@ -19,12 +19,12 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 
 /// <summary>
 ///     Generates reports for terminated employees and their beneficiaries.
-///  
+///
 ///  The user provides a termination date range, which selects a subset of employees for the report.
-///  
+///
 ///  The report generates a 1 year look at how an employee's profit sharing account has changed.
 ///  The report always starts with the amounts at the beginning of the prior completed profit year
-///  and includes all transactions up to today.  
+///  and includes all transactions up to today.
 /// </summary>
 public sealed class TerminatedEmployeeReportService
 {
@@ -108,8 +108,8 @@ public sealed class TerminatedEmployeeReportService
         // after the last completed one.    So we add 1 year to the completed year end.
         int openProfitYear = lastCompletedYearEnd + 1;
 
-        // Load profit detail transactions for YDATE 
-        var (profitDetailsDict, profitDetailsDuration) = await _logger.TimeAndLogAsync(
+        // Load profit detail transactions for YDATE
+        var (profitDetailsBySsn, profitDetailsDuration) = await _logger.TimeAndLogAsync(
             "ProfitDetails dictionary load",
             async () =>
             {
@@ -119,7 +119,7 @@ public sealed class TerminatedEmployeeReportService
 
                 // This grabs all transactions for the current year
                 // Group by SSN only since profit year is already filtered above
-                return await profitDetailsRaw
+                var profitDetails = await profitDetailsRaw
                     .GroupBy(pd => pd.Ssn)
                     .Select(g => new InternalProfitDetailDto
                     {
@@ -146,7 +146,9 @@ public sealed class TerminatedEmployeeReportService
                                                    (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
                                                    (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
                     })
-                    .ToDictionaryAsync(x => x.Ssn, cancellationToken);
+                    .ToListAsync(cancellationToken);
+
+                return profitDetails.ToLookup(x => x.Ssn);
             },
             dict => dict.Count);
 
@@ -163,11 +165,15 @@ public sealed class TerminatedEmployeeReportService
                 .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken),
             dict => dict.Count);
 
-        var (lastYearBalancesDict, lastYearDuration) = await _logger.TimeAndLogAsync(
+        var (lastYearBalancesBySsn, lastYearDuration) = await _logger.TimeAndLogAsync(
             "LastYearBalances dictionary load",
-            async () => await _totalService.GetTotalBalanceSet(ctx, lastCompletedYearEnd)
-                .Where(x => ssns.Contains(x.Ssn))
-                .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken),
+            async () =>
+            {
+                var lastYearBalances = await _totalService.GetTotalBalanceSet(ctx, lastCompletedYearEnd)
+                    .Where(x => ssns.Contains(x.Ssn))
+                    .ToListAsync(cancellationToken);
+                return lastYearBalances.ToLookup(x => x.Ssn);
+            },
             dict => dict.Count);
 
         var (lastYearVestedBalancesDict, vestedDuration) = await _logger.TimeAndLogAsync(
@@ -202,15 +208,10 @@ public sealed class TerminatedEmployeeReportService
                 }
 
                 // Get transactions for this member
-                if (!profitDetailsDict.TryGetValue(memberSlice.Ssn, out InternalProfitDetailDto? transactionsThisYear))
-                {
-                    transactionsThisYear = new InternalProfitDetailDto();
-                }
+                var transactionsThisYear = profitDetailsBySsn[memberSlice.Ssn].FirstOrDefault() ?? new InternalProfitDetailDto();
 
                 // Get beginning balance from last year
-                decimal? beginningAmount = lastYearBalancesDict.TryGetValue(memberSlice.Ssn, out ParticipantTotal? lastYearBalance)
-                    ? lastYearBalance.TotalAmount
-                    : 0m;
+                decimal? beginningAmount = lastYearBalancesBySsn[memberSlice.Ssn].FirstOrDefault()?.TotalAmount ?? 0m;
 
                 // Get vesting balance and percentage from this year
                 // Use compound key (Ssn, Id) to look up the correct record
@@ -538,13 +539,13 @@ public sealed class TerminatedEmployeeReportService
                                                 : payProfit != null && payProfit.ZeroContributionReasonId != null
                                                     ? payProfit.ZeroContributionReasonId
                                                     : 0,
-                                            EnrollmentId = employee.Demographic.VestingScheduleId == null
+                                            EnrollmentId = payProfit == null || payProfit.VestingScheduleId == 0
                                                 ? EnrollmentConstants.NotEnrolled
-                                                : employee.Demographic.HasForfeited
-                                                    ? (employee.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                                : payProfit.HasForfeited
+                                                    ? (payProfit.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                                         ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                                         : EnrollmentConstants.NewVestingPlanHasForfeitureRecords)
-                                                    : (employee.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                                    : (payProfit.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                                         ? EnrollmentConstants.OldVestingPlanHasContributions
                                                         : EnrollmentConstants.NewVestingPlanHasContributions),
                                             Etva = payProfit != null ? payProfit.Etva : 0,

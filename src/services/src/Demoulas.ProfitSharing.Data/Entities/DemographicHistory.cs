@@ -22,8 +22,6 @@ public sealed class DemographicHistory : IDoNotAudit
     public byte PayFrequencyId { get; set; }
     public char? TerminationCodeId { get; set; }
     public char EmploymentStatusId { get; set; }
-    public int? VestingScheduleId { get; set; }
-    public bool HasForfeited { get; set; }
 
     // ContactInfo fields (nullable - may not exist for pre-migration records)
     public string? FirstName { get; set; }
@@ -67,8 +65,6 @@ public sealed class DemographicHistory : IDoNotAudit
             PayFrequencyId = source.PayFrequencyId,
             TerminationCodeId = source.TerminationCodeId,
             EmploymentStatusId = source.EmploymentStatusId,
-            VestingScheduleId = source.VestingScheduleId,
-            HasForfeited = source.HasForfeited,
             // ContactInfo fields
             FirstName = source.ContactInfo.FirstName,
             LastName = source.ContactInfo.LastName,

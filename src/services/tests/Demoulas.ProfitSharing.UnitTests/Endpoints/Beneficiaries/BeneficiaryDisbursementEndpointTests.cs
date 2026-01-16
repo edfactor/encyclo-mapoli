@@ -13,9 +13,6 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Beneficiaries;
 [Collection("Beneficiary Tests")]
 public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
 {
-    public BeneficiaryDisbursementEndpointTests(ITestOutputHelper testOutputHelper) : base()
-    {
-    }
 
     [Fact(DisplayName = "BeneficiaryDisbursement - Should require authentication")]
     [Description("PS-292 : Should return unauthorized when no authentication token is provided")]

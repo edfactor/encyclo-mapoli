@@ -195,12 +195,11 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
         var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id);
 
-        // Update Demographic to have NewVestingPlan with forfeiture (enrollment ID 4)
-        // EnrollmentId is now computed from Demographic.VestingScheduleId + HasForfeited
-        if (demo.VestingScheduleId != VestingSchedule.Constants.NewPlan || !demo.HasForfeited)
+        // Update PayProfit to have NewVestingPlan with forfeiture (enrollment ID 4)
+        if (payProfit.VestingScheduleId != VestingSchedule.Constants.NewPlan || !payProfit.HasForfeited)
         {
-            demo.VestingScheduleId = VestingSchedule.Constants.NewPlan;
-            demo.HasForfeited = true;
+            payProfit.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+            payProfit.HasForfeited = true;
         }
 
         payProfit.CurrentHoursYear = 1255.4m;

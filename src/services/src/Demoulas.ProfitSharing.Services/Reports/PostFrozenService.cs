@@ -230,13 +230,13 @@ public class PostFrozenService : IPostFrozenService
                     d.DateOfBirth, // Raw birth date - age will be calculated after query
                     EmploymentStatusId = d.EmploymentStatus!.Id,
                     CurrentBalance = (bal.CurrentBalance ?? 0),
-                    EnrollmentName = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
+                    EnrollmentName = EnrollmentConstants.GetDescription(tyPp == null || tyPp.VestingScheduleId == 0
                         ? EnrollmentConstants.NotEnrolled
-                        : d.HasForfeited
-                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : tyPp.HasForfeited
+                            ? tyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                 : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : tyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasContributions
                                 : EnrollmentConstants.NewVestingPlanHasContributions),
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
@@ -344,6 +344,8 @@ public class PostFrozenService : IPostFrozenService
                     }
                 ) on d.Ssn equals tyPdGrpTbl.Ssn into tyPdGrpTmp
                 from tyPdGrp in tyPdGrpTmp.DefaultIfEmpty()
+                join tyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals tyPpTbl.DemographicId into tyPpTmp
+                from tyPp in tyPpTmp.DefaultIfEmpty()
                 where d.DateOfBirth > age21
                 orderby d.StoreNumber, d.ContactInfo.LastName, d.ContactInfo.FirstName
                 select new ProfitSharingUnder21BreakdownByStoreResponse()
@@ -361,13 +363,13 @@ public class PostFrozenService : IPostFrozenService
                     VestingPercentage = tyTot.VestingPercent * 100,
                     DateOfBirth = d.DateOfBirth,
                     Age = 0, //To be determined after materializing
-                    EnrollmentId = d.VestingScheduleId == null
+                    EnrollmentId = tyPp == null || tyPp.VestingScheduleId == 0
                         ? EnrollmentConstants.NotEnrolled
-                        : d.HasForfeited
-                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : tyPp.HasForfeited
+                            ? tyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                 : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : tyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasContributions
                                 : EnrollmentConstants.NewVestingPlanHasContributions,
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
@@ -408,6 +410,8 @@ public class PostFrozenService : IPostFrozenService
                 join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate)
                     on d.Ssn equals balTbl.Ssn into balTmp
                 from bal in balTmp.DefaultIfEmpty()
+                join tyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals tyPpTbl.DemographicId into tyPpTmp
+                from tyPp in tyPpTmp.DefaultIfEmpty()
                 where
                     d.TerminationCodeId != TerminationCode.Constants.Retired &&
                     (
@@ -429,13 +433,13 @@ public class PostFrozenService : IPostFrozenService
                     HireDate = d.HireDate,
                     TerminationDate = d.TerminationDate,
                     Age = 0,
-                    EnrollmentId = d.VestingScheduleId == null
+                    EnrollmentId = tyPp == null || tyPp.VestingScheduleId == 0
                         ? EnrollmentConstants.NotEnrolled
-                        : d.HasForfeited
-                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : tyPp.HasForfeited
+                            ? tyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                 : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : tyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasContributions
                                 : EnrollmentConstants.NewVestingPlanHasContributions,
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,

@@ -23,7 +23,6 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
-
     public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, TotalService totalService, ICalendarService calendarService, IDemographicReaderService demographicReaderService)
     {
         _dbContextFactory = dbContextFactory;

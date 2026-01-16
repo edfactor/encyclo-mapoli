@@ -160,6 +160,8 @@ public sealed class ScenarioFactory
                 ProfitYear = ProfitYear,
                 DemographicId = 21,
                 Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false,
                 CurrentHoursYear = 1200,
                 HoursExecutive = 0
             }

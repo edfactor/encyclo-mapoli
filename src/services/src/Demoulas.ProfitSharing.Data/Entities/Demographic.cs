@@ -91,21 +91,6 @@ public sealed class Demographic : Member
     public char EmploymentStatusId { get; set; }
     public EmploymentStatus? EmploymentStatus { get; set; }
 
-    /// <summary>
-    /// Foreign key to the vesting schedule for this employee.
-    /// Determines which vesting table (Old Plan vs New Plan) applies.
-    /// NULL indicates employee is not enrolled.
-    /// </summary>
-    public int? VestingScheduleId { get; set; }
-    public VestingSchedule? VestingSchedule { get; set; }
-
-    /// <summary>
-    /// Indicates whether this employee has forfeited profit sharing funds.
-    /// When true, enrollment reflects "has forfeiture records" status (enrollments 3 or 4).
-    /// When false, enrollment reflects "has contributions" status (enrollments 1 or 2).
-    /// </summary>
-    public bool HasForfeited { get; set; }
-
     public List<PayProfit> PayProfits { get; set; } = [];
     public List<Beneficiary> Beneficiaries { get; set; } = [];
 
@@ -140,8 +125,6 @@ public sealed class Demographic : Member
                demo1.EmploymentTypeId == demo2.EmploymentTypeId &&
                demo1.PayFrequencyId == demo2.PayFrequencyId &&
                demo1.TerminationCodeId == demo2.TerminationCodeId &&
-               demo1.EmploymentStatusId == demo2.EmploymentStatusId &&
-               demo1.VestingScheduleId == demo2.VestingScheduleId &&
-               demo1.HasForfeited == demo2.HasForfeited;
+               demo1.EmploymentStatusId == demo2.EmploymentStatusId;
     }
 }

@@ -17,10 +17,6 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ProfitDetails;
 [Collection("Profit Details Tests")]
 public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 {
-    public ProfitDetailReversalsEndpointTests(ITestOutputHelper testOutputHelper)
-    {
-        // Constructor accepts ITestOutputHelper for xUnit framework compatibility
-    }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found when profit details don't exist")]
     [Description("Should return 400 Bad Request when trying to reverse non-existent profit details")]

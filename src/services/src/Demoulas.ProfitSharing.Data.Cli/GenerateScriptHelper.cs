@@ -17,10 +17,7 @@ namespace Demoulas.ProfitSharing.Data.Cli;
 
 internal static class GenerateScriptHelper
 {
-    public static Command CreateGenerateUpgradeScriptCommand(
-        IConfiguration configuration,
-        string[] args,
-        List<Option> commonOptions)
+    public static Command CreateGenerateUpgradeScriptCommand(List<Option> commonOptions)
     {
         var generateScriptCommand = new Command("generate-upgrade-script", "Generate a SQL script to upgrade the database to the latest migration");
 

@@ -40,13 +40,13 @@ internal static class EmployeeProcessorHelper
                     x.frozenDemographics.BadgeNumber,
                     x.ppYE.Demographic!.Ssn,
                     Name = x.ppYE.Demographic.ContactInfo!.FullName,
-                    EnrolledId = x.frozenDemographics.VestingScheduleId == null
+                    EnrolledId = x.ppYE.VestingScheduleId == 0
                         ? EnrollmentConstants.NotEnrolled
-                        : x.frozenDemographics.HasForfeited
-                            ? x.frozenDemographics.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : x.ppYE.HasForfeited
+                            ? x.ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                 : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : x.frozenDemographics.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : x.ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasContributions
                                 : EnrollmentConstants.NewVestingPlanHasContributions,
                     x.ppYE.EmployeeTypeId,
@@ -64,7 +64,7 @@ internal static class EmployeeProcessorHelper
                 from et in employees
                 join balTbl in totalService.TotalVestingBalance(ctx, profitYear, priorYear, fiscalDates.FiscalEndDate) on et.Ssn equals balTbl.Ssn into balTmp
                 from bal in balTmp.DefaultIfEmpty()
-                join thisYr in TotalService.GetProfitDetailTotalsForASingleYear(ctx, profitYear, cancellationToken) on et.Ssn equals thisYr.Ssn into txThsYrEnum
+                join thisYr in TotalService.GetProfitDetailTotalsForASingleYear(ctx, profitYear) on et.Ssn equals thisYr.Ssn into txThsYrEnum
                 from txns in txThsYrEnum.DefaultIfEmpty()
                 select new EmployeeFinancials
                 {
@@ -80,7 +80,7 @@ internal static class EmployeeProcessorHelper
                     ZeroContributionReasonId = et.ZeroContributionReasonId,
                     PayFrequencyId = et.PayFrequencyId,
 
-                    // Transactions for this year. 
+                    // Transactions for this year.
                     DistributionsTotal = txns.DistributionsTotal,
                     ForfeitsTotal = txns.ForfeitsTotal,
                     AllocationsTotal = txns.AllocationsTotal,

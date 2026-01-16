@@ -11,7 +11,7 @@ public class ResourceManager
     private readonly ILogger _logger;
     private IResourceBuilder<ProjectResource>? _apiResourceBuilder;
 
-    public ResourceManager(IDistributedApplicationBuilder builder, ILogger logger)
+    public ResourceManager(ILogger logger)
     {
         _logger = logger;
     }

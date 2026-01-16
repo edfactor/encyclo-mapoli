@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigrations : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -255,8 +255,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PAY_FREQUENCY_ID = table.Column<byte>(type: "NUMBER(3)", maxLength: 1, nullable: false, comment: "PayFrequency"),
                     TERMINATION_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: true, comment: "TerminationCode"),
                     EMPLOYMENT_STATUS_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    VESTING_SCHEDULE_ID = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    HAS_FORFEITED = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "FirstName from ContactInfo"),
                     LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "LastName from ContactInfo"),
                     MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName from ContactInfo"),
@@ -1040,8 +1038,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PAY_FREQUENCY_ID = table.Column<byte>(type: "NUMBER(3)", maxLength: 1, nullable: false, comment: "PayFrequency"),
                     TERMINATION_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: true, comment: "TerminationCode"),
                     EMPLOYMENT_STATUS_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    VESTING_SCHEDULE_ID = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    HAS_FORFEITED = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
                     MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true),
@@ -1089,11 +1085,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         name: "FK_DEMOGRAPHIC_TERMINATIONCODES_TERMINATIONCODEID",
                         column: x => x.TERMINATION_CODE_ID,
                         principalTable: "TERMINATION_CODE",
-                        principalColumn: "ID");
-                    table.ForeignKey(
-                        name: "FK_DEMOGRAPHIC_VESTINGSCHEDULES_VESTINGSCHEDULEID",
-                        column: x => x.VESTING_SCHEDULE_ID,
-                        principalTable: "VESTING_SCHEDULE",
                         principalColumn: "ID");
                 });
 
@@ -1368,7 +1359,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
                     PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false),
-                    ISDELETED = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    ISDELETED = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
                     MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true),
@@ -1474,6 +1465,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ETVA = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     WEEKS_WORKED_YEAR = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
                     PS_CERTIFICATE_ISSUED_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
+                    VESTING_SCHEDULE_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    HAS_FORFEITED = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     BENEFICIARY_TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
                     EMPLOYEE_TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
                     ZERO_CONTRIBUTION_REASON_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
@@ -1562,7 +1555,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.InsertData(
                 table: "BANK",
                 columns: new[] { "ID", "CITY", "CREATED_AT_UTC", "CREATEDBY", "FEDACH_CHANGE_DATE", "FEDWIRE_LOCATION", "FEDWIRE_REVISION_DATE", "FEDWIRE_TELEGRAPHIC_NAME", "MODIFIED_AT_UTC", "MODIFIEDBY", "NAME", "OFFICE_TYPE", "PHONE", "ROUTING_NUMBER", "SERVICING_FED_ADDRESS", "SERVICING_FED_ROUTING_NUMBER", "STATE", "STATUS" },
-                values: new object[] { 1, "Lake Success", new DateTimeOffset(new DateTime(2026, 1, 14, 18, 15, 21, 80, DateTimeKind.Unspecified).AddTicks(1352), new TimeSpan(0, 0, 0, 0, 0)), "SYSTEM", new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified), "Miami, FL", new DateTime(2023, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified), "NEWTEK BANK, NA", null, null, "Newtek Bank, NA", "Main Office", "516-254-7586", "026004297", "100 Orchard Street, East Rutherford, NJ", "021001208", "NY", "Active" });
+                values: new object[] { 1, "Lake Success", new DateTimeOffset(new DateTime(2026, 1, 16, 0, 18, 48, 696, DateTimeKind.Unspecified).AddTicks(9709), new TimeSpan(0, 0, 0, 0, 0)), "SYSTEM", new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified), "Miami, FL", new DateTime(2023, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified), "NEWTEK BANK, NA", null, null, "Newtek Bank, NA", "Main Office", "516-254-7586", "026004297", "100 Orchard Street, East Rutherford, NJ", "021001208", "NY", "Active" });
 
             migrationBuilder.InsertData(
                 table: "BENEFICIARY_TYPE",
@@ -2391,7 +2384,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.InsertData(
                 table: "BANK_ACCOUNT",
                 columns: new[] { "ID", "ACCOUNT_NAME", "ACCOUNT_NUMBER", "BANK_ID", "CREATED_AT_UTC", "CREATEDBY", "DISCONTINUED_DATE", "EFFECTIVE_DATE", "FED_ACH_CHANGE_DATE", "FEDWIRE_LOCATION", "FEDWIRE_REVISION_DATE", "FEDWIRE_TELEGRAPHIC_NAME", "IS_PRIMARY", "MODIFIED_AT_UTC", "MODIFIEDBY", "NOTES", "ROUTING_NUMBER", "SERVICING_FED_ADDRESS", "SERVICING_FED_ROUTING_NUMBER" },
-                values: new object[] { 1, "Profit Sharing Distribution Account", "PLACEHOLDER", 1, new DateTimeOffset(new DateTime(2026, 1, 14, 18, 15, 21, 86, DateTimeKind.Unspecified).AddTicks(7282), new TimeSpan(0, 0, 0, 0, 0)), "SYSTEM", null, null, null, null, null, null, true, null, null, null, "026004297", null, null });
+                values: new object[] { 1, "Profit Sharing Distribution Account", "PLACEHOLDER", 1, new DateTimeOffset(new DateTime(2026, 1, 16, 0, 18, 48, 701, DateTimeKind.Unspecified).AddTicks(6239), new TimeSpan(0, 0, 0, 0, 0)), "SYSTEM", null, null, null, null, null, null, true, null, null, null, "026004297", null, null });
 
             migrationBuilder.InsertData(
                 table: "VESTING_SCHEDULE_DETAIL",
@@ -2617,11 +2610,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHIC_TERMINATIONDATE",
                 table: "DEMOGRAPHIC",
                 column: "TERMINATION_DATE");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHIC_VESTINGSCHEDULEID",
-                table: "DEMOGRAPHIC",
-                column: "VESTING_SCHEDULE_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_HISTORY_BADGENUMBER",
@@ -3130,6 +3118,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "TAX_CODE");
 
             migrationBuilder.DropTable(
+                name: "VESTING_SCHEDULE");
+
+            migrationBuilder.DropTable(
                 name: "NAVIGATION_STATUS");
 
             migrationBuilder.DropTable(
@@ -3155,9 +3146,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "TERMINATION_CODE");
-
-            migrationBuilder.DropTable(
-                name: "VESTING_SCHEDULE");
 
             migrationBuilder.DropSequence(
                 name: "BANK_ACCOUNT_SEQ");

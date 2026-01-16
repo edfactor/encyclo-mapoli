@@ -95,8 +95,8 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             {
                 ppi.ProfitYear = 3000;
                 ppi.Demographic!.Ssn = 4;
-                ppi.Demographic.VestingScheduleId = null;
-                ppi.Demographic.HasForfeited = false;
+                ppi.VestingScheduleId = 0;
+                ppi.HasForfeited = false;
             }
 
             // This knocks all the profit details out of the way

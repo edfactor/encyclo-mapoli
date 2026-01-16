@@ -149,9 +149,7 @@ public sealed class DemographicHistoryService : IDemographicHistoryService
                existing.Address.City != incoming.Address.City ||
                existing.Address.State != incoming.Address.State ||
                existing.Address.PostalCode != incoming.Address.PostalCode ||
-               existing.ContactInfo.EmailAddress != incoming.ContactInfo.EmailAddress ||
-               existing.VestingScheduleId != incoming.VestingScheduleId ||
-               existing.HasForfeited != incoming.HasForfeited;
+               existing.ContactInfo.EmailAddress != incoming.ContactInfo.EmailAddress;
     }
 
     private static DemographicHistory CreateHistoryRecord(Demographic demographic)

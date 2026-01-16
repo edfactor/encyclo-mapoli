@@ -131,27 +131,30 @@ public sealed class YearEndService : IYearEndService
 
             HashSet<int> employeeSsnSet = employees.Select(pp => pp.Demographic!.Ssn).ToHashSet();
 
-            Dictionary<int, decimal?> lastYearBalanceBySsn = await _totalService.GetTotalBalanceSet(ctx, (short)(profitYear - 1))
+            var lastYearBalances = await _totalService.GetTotalBalanceSet(ctx, (short)(profitYear - 1))
                 .Where(pp => employeeSsnSet.Contains(pp.Ssn!))
-                .ToDictionaryAsync(pt => pt.Ssn, pt => pt.TotalAmount, ct);
+                .ToListAsync(ct);
+            var lastYearBalanceBySsn = lastYearBalances.ToLookup(pt => pt.Ssn);
 
-            Dictionary<int, short> firstContributionYearBySsn = await ctx.ProfitDetails
+            var firstContributionYears = await ctx.ProfitDetails
                 .Where(pd => employeeSsnSet.Contains(pd.Ssn) &&
                              pd.ProfitCodeId == 0 &&
                              pd.Contribution > 0 &&
                              pd.ProfitYearIteration == 0)
                 .GroupBy(pd => pd.Ssn)
-                .ToDictionaryAsync(
-                    g => g.Key,
-                    g => g.Min(e => e.ProfitYear), ct);
+                .Select(g => new { Ssn = g.Key, FirstYear = g.Min(e => e.ProfitYear) })
+                .ToListAsync(ct);
+            var firstContributionYearBySsn = firstContributionYears.ToLookup(x => x.Ssn);
 
             Dictionary<int, YearEndChange> changes = [];
             foreach (PayProfitDto employee in employees)
             {
                 int ssn = employee.Demographic!.Ssn;
                 short age = CalculateAge(employee.Demographic!.DateOfBirth, fiscalEndDate);
-                short? firstYearContribution = firstContributionYearBySsn.TryGetValue(ssn, out short value) ? value : null;
-                decimal lastYearBalance = lastYearBalanceBySsn.TryGetValue(ssn, out decimal? value1) ? value1 ?? 0m : 0m;
+                short? firstYearContribution = firstContributionYearBySsn[ssn]
+                    .Select(x => (short?)x.FirstYear)
+                    .FirstOrDefault();
+                decimal lastYearBalance = lastYearBalanceBySsn[ssn].FirstOrDefault()?.TotalAmount ?? 0m;
 
                 YearEndChange change = YearEndChangeCalculator.ComputeChange(profitYear, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate, _timeProvider);
                 if (change.IsChanged(employee))

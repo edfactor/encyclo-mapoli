@@ -48,8 +48,15 @@ public sealed class PayProfit : ModifiedBase
     /// </summary>
     public DateOnly? PsCertificateIssuedDate { get; set; }
 
-    // EnrollmentId and Enrollment properties removed - use Demographic.EnrollmentId instead
-    // Enrollment is now stored on DEMOGRAPHIC table (VestingScheduleId + HasForfeited)
+    /// <summary>
+    /// Foreign key to the vesting schedule for this profit year.
+    /// </summary>
+    public required int VestingScheduleId { get; set; }
+
+    /// <summary>
+    /// Indicates whether this employee has forfeited profit sharing funds for the profit year.
+    /// </summary>
+    public required bool HasForfeited { get; set; }
 
     /// <summary>
     /// 0=Employee, 1=Beneficiary

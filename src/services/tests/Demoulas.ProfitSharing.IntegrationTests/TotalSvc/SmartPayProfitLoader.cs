@@ -30,13 +30,13 @@ public static class SmartPayProfitLoader
                 {
                     p.Demographic!.BadgeNumber,
                     p.Demographic.Ssn,
-                    EnrollmentId = p.Demographic.VestingScheduleId == null
+                    EnrollmentId = p.VestingScheduleId == 0
                         ? EnrollmentConstants.NotEnrolled
-                        : p.Demographic.HasForfeited
-                            ? (p.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : p.HasForfeited
+                            ? (p.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                 : EnrollmentConstants.NewVestingPlanHasForfeitureRecords)
-                            : (p.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : (p.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasContributions
                                 : EnrollmentConstants.NewVestingPlanHasContributions),
                     p.Demographic.PayFrequencyId,

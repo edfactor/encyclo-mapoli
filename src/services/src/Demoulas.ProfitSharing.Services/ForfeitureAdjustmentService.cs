@@ -252,14 +252,13 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 // The PY_PS_ETVA gets calculated then written and PY_PS_ENROLLED gets subtracted by two. So 3 becomes 1 and 4 becomes 2."
                 if (isForfeit)
                 {
-                    // For forfeit: Set HAS_FORFEITED flag on DEMOGRAPHIC
-                    // Enrollment is now computed from Demographic.VestingScheduleId + HasForfeited
+                    // For forfeit: Set HAS_FORFEITED flag on PAY_PROFIT for the target year
 #pragma warning disable DSMPS001 // ExecuteUpdateAsync is a bulk operation, not a query
-                    await context.Demographics
-                        .Where(d => d.Id == employeeData.Id)
-                        .ExecuteUpdateAsync(d => d
-                                .SetProperty(demo => demo.HasForfeited, true)
-                                .SetProperty(demo => demo.ModifiedAtUtc, DateTimeOffset.UtcNow),
+                    await context.PayProfits
+                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == profitYear)
+                        .ExecuteUpdateAsync(p => p
+                                .SetProperty(pp => pp.HasForfeited, true)
+                                .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
 #pragma warning restore DSMPS001
 
@@ -273,14 +272,13 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 }
                 else
                 {
-                    // For un-forfeit: Clear HAS_FORFEITED flag on DEMOGRAPHIC
-                    // Enrollment will revert from 3/4 back to 1/2 via computed property
+                    // For un-forfeit: Clear HAS_FORFEITED flag on PAY_PROFIT for the target year
 #pragma warning disable DSMPS001 // ExecuteUpdateAsync is a bulk operation, not a query
-                    await context.Demographics
-                        .Where(d => d.Id == employeeData.Id)
-                        .ExecuteUpdateAsync(d => d
-                                .SetProperty(demo => demo.HasForfeited, false)
-                                .SetProperty(demo => demo.ModifiedAtUtc, DateTimeOffset.UtcNow),
+                    await context.PayProfits
+                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == profitYear)
+                        .ExecuteUpdateAsync(p => p
+                                .SetProperty(pp => pp.HasForfeited, false)
+                                .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
 #pragma warning restore DSMPS001
 
