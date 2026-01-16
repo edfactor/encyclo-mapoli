@@ -58,7 +58,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
     // This is used to validate the Vesting query informally
     [Fact]
-    public async Task Anything()
+    public async Task Validate2024VestedBalance()
     {
         var ssn = BadgeToSsn(700113);
         short lastCompletedYearEnd = 2024;
@@ -74,12 +74,10 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                 .ToListAsync<ParticipantTotalVestingBalance>();
 
             TestOutputHelper.WriteLine(JsonSerializer.Serialize(tvb));
+
+            tvb[0].VestedBalance.ShouldBe(422.06m);
         });
-
-
-        true.ShouldBeTrue();
     }
-
 
     [Fact]
     public async Task EnsureSmartReportMatchesReadyReport()
