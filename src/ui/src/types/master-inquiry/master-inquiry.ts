@@ -130,7 +130,7 @@ export interface MasterInquiryResponseDto {
   transactionDate: string;
   currentIncomeYear: number;
   currentHoursYear: number;
-  employmentStatusId: string;
+  employmentStatusId?: string;
   employmentStatus?: string;
   badgesOfDuplicateSsns: number[];
 }
