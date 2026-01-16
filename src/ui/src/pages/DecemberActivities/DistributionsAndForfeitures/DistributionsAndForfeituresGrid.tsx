@@ -1,13 +1,14 @@
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { CircularProgress, Grid, IconButton, Typography } from "@mui/material";
+import { Grid, IconButton, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { ISortParams, numberToCurrency, TotalsGrid } from "smart-ui-library";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../constants";
+import { useCachedPrevious } from "../../../hooks/useCachedPrevious";
 import { useContentAwareGridHeight } from "../../../hooks/useContentAwareGridHeight";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
@@ -50,6 +51,12 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
+  const cachedDistributions = useCachedPrevious(distributionsAndForfeitures ?? null);
+  const displayResults = useMemo(
+    () => cachedDistributions?.response?.results ?? [],
+    [cachedDistributions]
+  );
+  const displayTotal = useMemo(() => cachedDistributions?.response?.total ?? 0, [cachedDistributions]);
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
@@ -115,7 +122,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
 
   // Use content-aware grid height utility hook - updated to use heightPercentage based on expand state
   const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: distributionsAndForfeitures?.response?.results?.length ?? 0,
+    rowCount: displayResults?.length ?? 0,
     heightPercentage: isGridExpanded ? 0.85 : 0.5
   });
 
@@ -211,9 +218,11 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   const sortEventHandler = (update: ISortParams) => handleSortChange(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
 
+  const hasDisplay = !!cachedDistributions?.response;
+
   return (
     <>
-      {distributionsAndForfeitures?.response && (
+      {hasDisplay && (
         <>
           <Grid
             container
@@ -221,7 +230,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             alignItems="center"
             marginBottom={2}>
             <Grid>
-              <ReportSummary report={distributionsAndForfeitures} />
+              <ReportSummary report={cachedDistributions} />
             </Grid>
             <Grid>
               {onToggleExpand && (
@@ -237,19 +246,19 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2">
             <div className="flex-1">
               <TotalsGrid
-                displayData={[[numberToCurrency(distributionsAndForfeitures.distributionTotal || 0)]]}
+                displayData={[[numberToCurrency(cachedDistributions?.distributionTotal || 0)]]}
                 leftColumnHeaders={["Distributions"]}
                 topRowHeaders={[]}
                 breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
             </div>
             <div className="relative flex-1">
               <TotalsGrid
-                displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
+                displayData={[[numberToCurrency(cachedDistributions?.stateTaxTotal || 0)]]}
                 leftColumnHeaders={["State Taxes"]}
                 topRowHeaders={[]}
                 breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
-              {distributionsAndForfeitures.stateTaxTotals &&
-                Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
+              {cachedDistributions?.stateTaxTotals &&
+                Object.keys(cachedDistributions?.stateTaxTotals ?? {}).length > 0 && (
                   <div
                     className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
                     onMouseEnter={stateTaxTooltip.handleOpen}
@@ -276,7 +285,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                             </tr>
                           </thead>
                           <tbody>
-                            {Object.entries(distributionsAndForfeitures.stateTaxTotals).map(
+                            {Object.entries(cachedDistributions.stateTaxTotals).map(
                               ([state, total], index, array) => (
                                 <tr key={state}>
                                   <td
@@ -299,20 +308,20 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </div>
             <div className="flex-1">
               <TotalsGrid
-                displayData={[[numberToCurrency(distributionsAndForfeitures.federalTaxTotal || 0)]]}
+                displayData={[[numberToCurrency(cachedDistributions?.federalTaxTotal || 0)]]}
                 leftColumnHeaders={["Federal Taxes"]}
                 topRowHeaders={[]}
                 breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
             </div>
             <div className="relative flex-1">
               <TotalsGrid
-                displayData={[[numberToCurrency(distributionsAndForfeitures.forfeitureTotal || 0)]]}
+                displayData={[[numberToCurrency(cachedDistributions?.forfeitureTotal || 0)]]}
                 leftColumnHeaders={["Forfeitures"]}
                 topRowHeaders={[]}
                 breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
-              {((distributionsAndForfeitures.forfeitureRegularTotal || 0) > 0 ||
-                (distributionsAndForfeitures.forfeitureAdministrativeTotal || 0) > 0 ||
-                (distributionsAndForfeitures.forfeitureClassActionTotal || 0) > 0) && (
+              {((cachedDistributions?.forfeitureRegularTotal || 0) > 0 ||
+                (cachedDistributions?.forfeitureAdministrativeTotal || 0) > 0 ||
+                (cachedDistributions?.forfeitureClassActionTotal || 0) > 0) && (
                 <div
                   className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
                   onMouseEnter={forfeitureTooltip.handleOpen}
@@ -340,31 +349,31 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                         </thead>
                         <tbody>
                           {[
-                            distributionsAndForfeitures.forfeitureRegularTotal && (
+                            cachedDistributions?.forfeitureRegularTotal && (
                               <tr key="regular">
                                 <td className="whitespace-nowrap border-b border-gray-100 px-2 py-2 text-left">
                                   Regular
                                 </td>
                                 <td className="whitespace-nowrap border-b border-gray-100 px-2 py-2 text-right">
-                                  {numberToCurrency(distributionsAndForfeitures.forfeitureRegularTotal)}
+                                  {numberToCurrency(cachedDistributions?.forfeitureRegularTotal)}
                                 </td>
                               </tr>
                             ),
-                            distributionsAndForfeitures.forfeitureAdministrativeTotal && (
+                            cachedDistributions?.forfeitureAdministrativeTotal && (
                               <tr key="administrative">
                                 <td className="whitespace-nowrap border-b border-gray-100 px-2 py-2 text-left">
                                   Administrative (A)
                                 </td>
                                 <td className="whitespace-nowrap border-b border-gray-100 px-2 py-2 text-right">
-                                  {numberToCurrency(distributionsAndForfeitures.forfeitureAdministrativeTotal)}
+                                  {numberToCurrency(cachedDistributions?.forfeitureAdministrativeTotal)}
                                 </td>
                               </tr>
                             ),
-                            distributionsAndForfeitures.forfeitureClassActionTotal && (
+                            cachedDistributions?.forfeitureClassActionTotal && (
                               <tr key="classaction">
                                 <td className="whitespace-nowrap px-2 py-2 text-left">Class Action (C)</td>
                                 <td className="whitespace-nowrap px-2 py-2 text-right">
-                                  {numberToCurrency(distributionsAndForfeitures.forfeitureClassActionTotal)}
+                                  {numberToCurrency(cachedDistributions?.forfeitureClassActionTotal)}
                                 </td>
                               </tr>
                             )
@@ -376,11 +385,11 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 </div>
               )}
             </div>
-            {distributionsAndForfeitures.hasUnattributedRecords && distributionsAndForfeitures.unattributedTotals && (
+            {cachedDistributions?.hasUnattributedRecords && cachedDistributions.unattributedTotals && (
               <div className="relative flex-1">
                 <div className="rounded border border-[#ffc107] bg-[#fff3cd]">
                   <TotalsGrid
-                    displayData={[[numberToCurrency(distributionsAndForfeitures.unattributedTotals.stateTax || 0)]]}
+                    displayData={[[numberToCurrency(cachedDistributions.unattributedTotals.stateTax || 0)]]}
                     leftColumnHeaders={["Unattributed State Taxes"]}
                     topRowHeaders={[]}
                     breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
@@ -425,7 +434,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                               Records Count
                             </td>
                             <td className="whitespace-nowrap border-b border-yellow-200 px-2 py-2 text-right text-yellow-900">
-                              {distributionsAndForfeitures.unattributedTotals.count}
+                              {cachedDistributions.unattributedTotals.count}
                             </td>
                           </tr>
                           <tr>
@@ -433,7 +442,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                               State Tax (Unattributed)
                             </td>
                             <td className="whitespace-nowrap border-b border-yellow-200 px-2 py-2 text-right text-yellow-900">
-                              {numberToCurrency(distributionsAndForfeitures.unattributedTotals.stateTax)}
+                              {numberToCurrency(cachedDistributions.unattributedTotals.stateTax)}
                             </td>
                           </tr>
                           <tr>
@@ -441,7 +450,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                               Federal Tax (Unattributed)
                             </td>
                             <td className="whitespace-nowrap border-b border-yellow-200 px-2 py-2 text-right text-yellow-900">
-                              {numberToCurrency(distributionsAndForfeitures.unattributedTotals.federalTax)}
+                              {numberToCurrency(cachedDistributions.unattributedTotals.federalTax)}
                             </td>
                           </tr>
                           <tr>
@@ -449,7 +458,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                               Net Proceeds (Unattributed)
                             </td>
                             <td className="whitespace-nowrap px-2 py-2 text-right text-yellow-900">
-                              {numberToCurrency(distributionsAndForfeitures.unattributedTotals.netProceeds)}
+                              {numberToCurrency(cachedDistributions.unattributedTotals.netProceeds)}
                             </td>
                           </tr>
                         </tbody>
@@ -461,48 +470,37 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             )}
           </div>
 
-          {isFetching ? (
-            <div className="flex flex-col items-center justify-center gap-4 py-16">
-              <CircularProgress />
-              <Typography
-                variant="body1"
-                color="textSecondary">
-                Searching...
-              </Typography>
-            </div>
-          ) : (
-            <DSMPaginatedGrid
-              preferenceKey={GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES}
-              data={distributionsAndForfeitures?.response.results ?? []}
-              columnDefs={columnDefs}
-              totalRecords={distributionsAndForfeitures?.response?.total ?? 0}
-              isLoading={false}
-              pagination={{
-                pageNumber,
-                pageSize,
-                sortParams,
-                handlePageNumberChange: (value: number) => {
-                  handlePageNumberChange(value);
-                  setInitialSearchLoaded(true);
-                },
-                handlePageSizeChange: (value: number) => {
-                  setInitialPageSize(value);
-                  handlePageSizeChange(value);
-                  setInitialSearchLoaded(true);
-                },
-                handleSortChange
-              }}
-              onSortChange={sortEventHandler}
-              heightConfig={{
-                mode: "content-aware",
-                maxHeight: gridMaxHeight
-              }}
-              gridOptions={{
-                suppressMultiSort: true
-              }}
-              showPagination={!!distributionsAndForfeitures && distributionsAndForfeitures.response?.total > 0}
-            />
-          )}
+          <DSMPaginatedGrid
+            preferenceKey={GRID_KEYS.DISTRIBUTIONS_AND_FORFEITURES}
+            data={displayResults}
+            columnDefs={columnDefs}
+            totalRecords={displayTotal}
+            isLoading={isFetching}
+            pagination={{
+              pageNumber,
+              pageSize,
+              sortParams,
+              handlePageNumberChange: (value: number) => {
+                handlePageNumberChange(value);
+                setInitialSearchLoaded(true);
+              },
+              handlePageSizeChange: (value: number) => {
+                setInitialPageSize(value);
+                handlePageSizeChange(value);
+                setInitialSearchLoaded(true);
+              },
+              handleSortChange
+            }}
+            onSortChange={sortEventHandler}
+            heightConfig={{
+              mode: "content-aware",
+              maxHeight: gridMaxHeight
+            }}
+            gridOptions={{
+              suppressMultiSort: true
+            }}
+            showPagination={displayTotal > 0}
+          />
         </>
       )}
     </>

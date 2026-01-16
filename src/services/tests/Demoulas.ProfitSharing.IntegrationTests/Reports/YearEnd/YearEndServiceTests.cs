@@ -34,7 +34,7 @@ public class YearEndServiceTests : PristineBaseTest
         Dictionary<int, YearEndChange> smartRowsBySsn = await DbFactory.UseWritableContext(async ctx =>
         {
             PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService, CalendarService, VestingScheduleService);
-            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService, TimeProvider.System);
+            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, _loggerFactory.CreateLogger<YearEndService>());
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);
 

@@ -638,7 +638,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentIncomeYear = x.CurrentIncomeYear,
                 CurrentHoursYear = x.CurrentHoursYear,
                 IsExecutive = x.IsExecutive,
-                EmploymentStatusId = x.EmploymentStatusId ?? '\0',
+                EmploymentStatusId = x.EmploymentStatusId,
                 IsAlreadyReversed = x.IsAlreadyReversed,
             }).ToList();
 

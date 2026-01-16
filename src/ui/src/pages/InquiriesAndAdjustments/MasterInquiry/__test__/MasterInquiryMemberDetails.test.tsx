@@ -1,16 +1,19 @@
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
 import MasterInquiryMemberDetails from "../MasterInquiryMemberDetails";
+// Mock Link from react-router-dom so tests do not require a Router
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
 
 // Helper function to render components with MissiveAlertProvider
 const renderWithProvider = (component: React.ReactElement) => {
-  return render(
-    <MemoryRouter>
-      <MissiveAlertProvider>{component}</MissiveAlertProvider>
-    </MemoryRouter>
-  );
+  return render(<MissiveAlertProvider>{component}</MissiveAlertProvider>);
 };
 
 describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
@@ -344,19 +347,17 @@ describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
       />
     );
 
-    // Re-render with same props (must wrap in provider and router again)
+    // Re-render with same props (wrap with provider)
     rerender(
-      <MemoryRouter>
-        <MissiveAlertProvider>
-          <MasterInquiryMemberDetails
-            memberType={1}
-            id={1}
-            profitYear={2025}
-            memberDetails={mockEmployeeDetails}
-            isLoading={false}
-          />
-        </MissiveAlertProvider>
-      </MemoryRouter>
+      <MissiveAlertProvider>
+        <MasterInquiryMemberDetails
+          memberType={1}
+          id={1}
+          profitYear={2025}
+          memberDetails={mockEmployeeDetails}
+          isLoading={false}
+        />
+      </MissiveAlertProvider>
     );
 
     // Component should still be rendered correctly

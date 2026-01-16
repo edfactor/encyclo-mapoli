@@ -42,7 +42,7 @@ public sealed record MasterInquiryResponseDto : IdRequest<int>, IIsExecutive, IP
     public DateTimeOffset TransactionDate { get; set; }
     public decimal CurrentIncomeYear { get; set; }
     public decimal CurrentHoursYear { get; set; }
-    public char EmploymentStatusId { get; set; }
+    public char? EmploymentStatusId { get; set; }
     public string? EmploymentStatus { get; set; }
     public bool IsExecutive { get; set; }
     public long? XFerQdroId { get; set; }

@@ -5,6 +5,7 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
+import { useCachedPrevious } from "../../../hooks/useCachedPrevious";
 import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../reduxstore/store";
 import useMasterInquiry from "./hooks/useMasterInquiry";
@@ -43,6 +44,11 @@ const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: Master
     selectMember,
     resetAll
   } = useMasterInquiry();
+
+  // Preserve previous data while loading to avoid UI flashing during pagination
+  const displaySearchResults = useCachedPrevious(searchResults ?? null);
+  const displayMemberDetails = useCachedPrevious(memberDetails ?? null);
+  const displayMemberProfitData = useCachedPrevious(memberProfitData ?? null);
 
   const handleToggleGridExpand = () => {
     if (!isGridExpanded) {
@@ -87,9 +93,9 @@ const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: Master
         </>
       )}
 
-      {showMemberGrid && searchResults && !isFetchingMembers && (
+      {showMemberGrid && (displaySearchResults || isFetchingMembers) && (
         <MasterInquiryMemberGrid
-          searchResults={searchResults}
+          searchResults={displaySearchResults ?? null}
           onMemberSelect={selectMember}
           memberGridPagination={memberGridPagination}
           onSortChange={memberGridPagination.handleSortChange}
@@ -99,16 +105,17 @@ const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: Master
         />
       )}
 
+      {/* Commented out: let the grid component show its own loading indicator
       {showMemberGrid && isFetchingMembers && (
         <Grid
           size={{ xs: 12 }}
           sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
           <CircularProgress />
         </Grid>
-      )}
+      )} */}
 
       {/* No Results Message */}
-      {searchResults && searchResults.total === 0 && !isSearching && !isFetchingMembers && (
+      {displaySearchResults && displaySearchResults.total === 0 && !isSearching && !isFetchingMembers && (
         <Grid
           size={{ xs: 12 }}
           sx={{ padding: "24px" }}>
@@ -124,12 +131,12 @@ const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: Master
             display: showMemberDetails ? "block" : "none",
             transition: "opacity 0.2s ease-in-out"
           }}>
-          {!isFetchingMemberDetails && memberDetails ? (
+          {!isFetchingMemberDetails && displayMemberDetails ? (
             <MasterInquiryMemberDetails
               memberType={selectedMember.memberType}
               id={selectedMember.id}
               profitYear={searchParams?.endProfitYear}
-              memberDetails={memberDetails}
+              memberDetails={displayMemberDetails}
               isLoading={isFetchingMemberDetails}
             />
           ) : (
@@ -150,9 +157,9 @@ const MasterInquiryContent = memo(({ isGridExpanded, setIsGridExpanded }: Master
             display: showProfitDetails ? "block" : "none",
             transition: "opacity 0.2s ease-in-out"
           }}>
-          {!isFetchingProfitData && memberProfitData ? (
+          {!isFetchingProfitData && displayMemberProfitData ? (
             <MasterInquiryGrid
-              profitData={memberProfitData}
+              profitData={displayMemberProfitData}
               isLoading={isFetchingProfitData}
               profitGridPagination={profitGridPagination}
               onSortChange={profitGridPagination.handleSortChange}

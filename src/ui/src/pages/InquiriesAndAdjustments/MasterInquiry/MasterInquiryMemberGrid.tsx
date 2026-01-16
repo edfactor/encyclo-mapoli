@@ -1,3 +1,4 @@
+import { useCachedPrevious } from "@/hooks/useCachedPrevious";
 import { useContentAwareGridHeight } from "@/hooks/useContentAwareGridHeight";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
@@ -24,7 +25,7 @@ interface SelectedMember {
 }
 
 interface MasterInquiryMemberGridProps {
-  searchResults: SearchResponse;
+  searchResults?: SearchResponse | null;
   onMemberSelect: (member: SelectedMember) => void;
   memberGridPagination: {
     pageNumber: number;
@@ -50,8 +51,14 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     onToggleExpand
   }: MasterInquiryMemberGridProps) => {
     // Use content-aware grid height - shrinks for small result sets
+    const cachedResults = useCachedPrevious(searchResults?.results ?? null);
+    const cachedTotal = useCachedPrevious(searchResults?.total ?? null);
+
+    const displayResults = useMemo(() => cachedResults ?? [], [cachedResults]);
+    const displayTotal = useMemo(() => cachedTotal ?? 0, [cachedTotal]);
+
     const gridMaxHeight = useContentAwareGridHeight({
-      rowCount: searchResults.results?.length ?? 0,
+      rowCount: displayResults?.length ?? 0,
       heightPercentage: isGridExpanded ? 0.85 : 0.5
     });
 
@@ -75,7 +82,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
         const i = path.lastIndexOf("/");
         const badgeNumberParameter = path.substring(i + 1);
 
-        const employee = searchResults.results.find((emp) => {
+        const employee = displayResults.find((emp) => {
           const badgeNumberPlusSuffix =
             emp.psnSuffix > 0
               ? `${emp.badgeNumber}${String(emp.psnSuffix).padStart(4, "0")}`
@@ -91,7 +98,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       };
 
       return GetMasterInquiryMemberGridColumns(handleNavigate);
-    }, [searchResults.results, onMemberSelect]);
+    }, [displayResults, onMemberSelect]);
 
     return (
       <Box sx={{ width: "100%", paddingTop: "24px" }}>
@@ -106,7 +113,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
           <Typography
             variant="h2"
             sx={{ color: "#0258A5" }}>
-            {`Search Results (${formatNumberWithComma(searchResults.total)} ${searchResults.total === 1 ? "Record" : "Records"})`}
+              {`Search Results (${formatNumberWithComma(displayTotal)} ${displayTotal === 1 ? "Record" : "Records"})`}
           </Typography>
           <IconButton
             onClick={onToggleExpand}
@@ -117,9 +124,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
         </Box>
         <DSMPaginatedGrid
           preferenceKey={GRID_KEYS.MASTER_INQUIRY_MEMBER}
-          data={searchResults.results.filter((row) => row && Object.keys(row).length > 0)}
+          data={displayResults.filter((row) => row && Object.keys(row).length > 0)}
           columnDefs={columns}
-          totalRecords={searchResults.total}
+          totalRecords={displayTotal}
           isLoading={isLoading}
           pagination={{
             pageNumber: memberGridPagination.pageNumber,
@@ -135,7 +142,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
             maxHeight: gridMaxHeight
           }}
           rowsPerPageOptions={[5, 10, 50, 100]}
-          showPagination={searchResults.total > 0}
+          showPagination={displayTotal > 0}
         />
       </Box>
     );
@@ -144,8 +151,8 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     // Custom comparison function
     // Only re-render if incoming props are different
     return (
-      prevProps.searchResults.results === nextProps.searchResults.results &&
-      prevProps.searchResults.total === nextProps.searchResults.total &&
+      prevProps.searchResults?.results === nextProps.searchResults?.results &&
+      prevProps.searchResults?.total === nextProps.searchResults?.total &&
       prevProps.memberGridPagination.pageNumber === nextProps.memberGridPagination.pageNumber &&
       prevProps.memberGridPagination.pageSize === nextProps.memberGridPagination.pageSize &&
       prevProps.memberGridPagination.sortParams === nextProps.memberGridPagination.sortParams &&
