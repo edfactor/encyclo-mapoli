@@ -6,6 +6,7 @@ import ReportSummary from "../../../../components/ReportSummary";
 import { GRID_KEYS } from "../../../../constants";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownGridColumns";
+import { useCachedPrevious } from "../../../../hooks/useCachedPrevious";
 
 interface Under21BreakdownGridProps {
   isLoading?: boolean;
@@ -23,6 +24,9 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   onPageChange
 }) => {
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
+  const cachedUnder21 = useCachedPrevious(under21Breakdown ?? null);
+  const displayResults = useMemo(() => cachedUnder21?.response?.results ?? [], [cachedUnder21]);
+  const displayTotal = useMemo(() => cachedUnder21?.response?.total ?? 0, [cachedUnder21]);
 
   const { sortParams, handleSortChange } = useGridPagination({
     initialPageSize: 25,
@@ -64,19 +68,19 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
     [pageNumber, pageSize, sortParams, onPageChange, handleSortChange, setInitialSearchLoaded]
   );
 
-  if (!under21Breakdown?.response) {
+  if (!cachedUnder21?.response) {
     return null;
   }
 
   return (
     <DSMPaginatedGrid
       preferenceKey={GRID_KEYS.UNDER_21_BREAKDOWN_REPORT}
-      data={under21Breakdown.response.results || []}
+      data={displayResults}
       columnDefs={columnDefs}
-      totalRecords={under21Breakdown.response.total || 0}
+      totalRecords={displayTotal}
       isLoading={isLoading}
       pagination={pagination}
-      beforeGrid={<ReportSummary report={under21Breakdown} />}
+      beforeGrid={<ReportSummary report={cachedUnder21} />}
     />
   );
 };

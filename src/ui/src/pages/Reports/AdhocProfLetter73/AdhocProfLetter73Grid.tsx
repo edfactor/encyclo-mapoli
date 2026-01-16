@@ -16,33 +16,36 @@ import {
   Typography
 } from "@mui/material";
 import { ColDef, SelectionChangedEvent } from "ag-grid-community";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import { useGridPagination } from "../../../hooks/useGridPagination";
+import type { AdhocProfLetter73Response } from "../../../reduxstore/api/AdhocProfLetter73Api";
 import { useLazyGetAdhocProfLetter73Query } from "../../../reduxstore/api/AdhocProfLetter73Api";
 import { AdhocProfLetter73FilterParams } from "./AdhocProfLetter73SearchFilter.tsx";
 import { useAdhocProfLetter73Print } from "./hooks/useAdhocProfLetter73Print";
 
 interface AdhocProfLetter73GridProps {
-  filterParams: AdhocProfLetter73FilterParams;
+  filterParams?: AdhocProfLetter73FilterParams | null;
   onLoadingChange?: (isLoading: boolean) => void;
   isGridExpanded?: boolean;
   onToggleExpand?: () => void;
+  // optional trigger used to request a fresh search from parent without unmounting
+  searchTrigger?: number;
 }
 
-const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
-  filterParams,
-  onLoadingChange,
-  isGridExpanded = false,
-  onToggleExpand
-}) => {
+const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
+  const { filterParams, onLoadingChange, isGridExpanded = false, onToggleExpand } = props;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [columnDefs, setColumnDefs] = useState<ColDef[]>([]);
   const [rowData, setRowData] = useState<Record<string, unknown>[]>([]);
   const [selectedRows, setSelectedRows] = useState<Record<string, unknown>[]>([]);
 
-  const profitYear = filterParams.profitYear?.getFullYear() || 0;
+  // Allow nullable filterParams; derive profitYear defensively
+  const profitYear = filterParams?.profitYear?.getFullYear() || 0;
+
+  // Keep last successful API response so we can display previous data while fetching
+  const lastApiRef = useRef<AdhocProfLetter73Response | null>(null);
 
   const {
     handlePrint,
@@ -53,7 +56,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
     printFormLetter,
     error: printError,
     clearError
-  } = useAdhocProfLetter73Print(filterParams, selectedRows);
+  } = useAdhocProfLetter73Print(filterParams ?? null, selectedRows);
 
   const [trigger, { data: apiData, isFetching, error, isError }] = useLazyGetAdhocProfLetter73Query();
 
@@ -62,7 +65,6 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
     setSelectedRows(selectedData);
   };
 
-  // Pagination hook with server-side sorting support
   const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
     useGridPagination({
       initialPageSize: 25,
@@ -70,11 +72,10 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
       initialSortDescending: false,
       persistenceKey: "ADHOC_PROF_LETTER73",
       onPaginationChange: (newPageNumber, newPageSize, newSortParams) => {
-        // Server-side pagination and sorting - trigger API call
         if (profitYear > 0) {
           trigger({
             profitYear,
-            DeMinimusValue: filterParams.DeMinimusValue,
+            DeMinimusValue: filterParams?.DeMinimusValue,
             skip: newPageNumber * newPageSize,
             take: newPageSize,
             sortBy: newSortParams.sortBy,
@@ -89,16 +90,15 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
     if (profitYear > 0) {
       const apiParams = {
         profitYear,
-        DeMinimusValue: filterParams.DeMinimusValue,
+        DeMinimusValue: filterParams?.DeMinimusValue,
         skip: pageNumber * pageSize,
         take: pageSize,
         sortBy: sortParams.sortBy,
         isSortDescending: sortParams.isSortDescending
       };
-      console.log("API params being sent to backend:", apiParams);
       trigger(apiParams);
     }
-  }, [profitYear, filterParams.DeMinimusValue, trigger, pageNumber, pageSize, sortParams]);
+  }, [profitYear, filterParams?.DeMinimusValue, trigger, pageNumber, pageSize, sortParams]);
 
   useEffect(() => {
     onLoadingChange?.(isFetching);
@@ -115,12 +115,16 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
   }, [isError, error, isFetching, apiData]);
 
   // Generate columns dynamically from API response - server-side sorting
+  // Build columns and update row data only when we receive a new API response.
+  // Preserve the last successful response in `lastApiRef` so the UI can continue
+  // showing previous results while a new fetch is in-flight.
   useEffect(() => {
-    if (apiData?.results && Array.isArray(apiData.results)) {
-      if (apiData.results.length > 0) {
-        // Get first row to determine structure
-        const sampleData = apiData.results[0];
+    if (apiData && Array.isArray(apiData.results)) {
+      // Save last response even when results are empty (explicit empty set)
+      lastApiRef.current = apiData as AdhocProfLetter73Response;
 
+      if (apiData.results.length > 0) {
+        const sampleData = apiData.results[0];
         if (sampleData) {
           const cols: ColDef[] = Object.keys(sampleData).map((key) => {
             const baseCol: ColDef = {
@@ -134,7 +138,6 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
               resizable: true
             };
 
-            // Add special formatting for Factor column
             if (key.toLowerCase() === "factor") {
               baseCol.headerName = "Factor";
               baseCol.type = "rightAligned";
@@ -146,7 +149,6 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
               };
             }
 
-            // Add special formatting for RMD column
             if (key.toLowerCase() === "rmd") {
               baseCol.headerName = "RMD";
               baseCol.type = "rightAligned";
@@ -164,7 +166,6 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
               };
             }
 
-            // Add special formatting for Balance column
             if (key.toLowerCase() === "balance") {
               baseCol.headerName = "Balance";
               baseCol.type = "rightAligned";
@@ -182,7 +183,6 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
               };
             }
 
-            // Add special formatting for PaymentsInProfitYear column
             if (key.toLowerCase() === "paymentsinprofityear") {
               baseCol.headerName = "Payments In Profit Year";
               baseCol.type = "rightAligned";
@@ -200,7 +200,6 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
               };
             }
 
-            // Add special formatting for SuggestRmdCheckAmount column
             if (key.toLowerCase() === "suggestrmdcheckamount") {
               baseCol.headerName = "Suggest RMD Check Amount";
               baseCol.type = "rightAligned";
@@ -221,7 +220,6 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
             return baseCol;
           });
 
-          // Add Print checkbox column
           cols.push({
             headerName: "Print",
             field: "print",
@@ -243,7 +241,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
           setRowData(apiData.results);
         }
       } else {
-        // No results - clear the grid
+        // Explicit empty result set; clear grid
         setColumnDefs([]);
         setRowData([]);
       }
@@ -309,52 +307,60 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = ({
             </Box>
           )}
 
-          {isFetching ? (
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              py={4}>
-              <CircularProgress />
-            </Box>
-          ) : apiData && !errorMessage ? (
-            columnDefs.length > 0 ? (
-              <DSMPaginatedGrid
-                preferenceKey="ADHOC_PROF_LETTER73"
-                data={rowData}
-                columnDefs={columnDefs}
-                totalRecords={apiData.total || rowData.length}
-                isLoading={isFetching}
-                pagination={{
-                  pageNumber,
-                  pageSize,
-                  sortParams,
-                  handlePageNumberChange,
-                  handlePageSizeChange,
-                  handleSortChange
-                }}
-                onSortChange={(update) => {
-                  handleSortChange({
-                    sortBy: update.sortBy,
-                    isSortDescending: update.isSortDescending
-                  });
-                }}
-                heightConfig={{
-                  mode: "content-aware",
-                  heightPercentage: isGridExpanded ? 0.85 : 0.4
-                }}
-                gridOptions={{
-                  rowSelection: "multiple",
-                  onSelectionChanged: handleSelectionChanged
-                }}
-                showPagination={rowData.length > 0}
-              />
-            ) : (
-              <Box sx={{ padding: "24px" }}>
-                <Typography>No data available for the selected profit year.</Typography>
-              </Box>
-            )
-          ) : null}
+          {(() => {
+            const displayApi = apiData ?? lastApiRef.current;
+            const displayRows = apiData ? rowData : displayApi?.results ?? [];
+
+            // If we're fetching and have no prior data, show spinner
+            if (isFetching && !displayApi) {
+              return (
+                <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+                  <CircularProgress />
+                </Box>
+              );
+            }
+
+            if (displayApi && !errorMessage) {
+              return columnDefs.length > 0 ? (
+                <DSMPaginatedGrid
+                  preferenceKey="ADHOC_PROF_LETTER73"
+                  data={displayRows}
+                  columnDefs={columnDefs}
+                  totalRecords={displayApi.total || displayRows.length}
+                  isLoading={isFetching}
+                  pagination={{
+                    pageNumber,
+                    pageSize,
+                    sortParams,
+                    handlePageNumberChange,
+                    handlePageSizeChange,
+                    handleSortChange
+                  }}
+                  onSortChange={(update) => {
+                    handleSortChange({
+                      sortBy: update.sortBy,
+                      isSortDescending: update.isSortDescending
+                    });
+                  }}
+                  heightConfig={{
+                    mode: "content-aware",
+                    heightPercentage: isGridExpanded ? 0.85 : 0.4
+                  }}
+                  gridOptions={{
+                    rowSelection: "multiple",
+                    onSelectionChanged: handleSelectionChanged
+                  }}
+                  showPagination={(displayRows?.length ?? 0) > 0}
+                />
+              ) : (
+                <Box sx={{ padding: "24px" }}>
+                  <Typography>No data available for the selected profit year.</Typography>
+                </Box>
+              );
+            }
+
+            return null;
+          })()}
 
           <Dialog
             open={isPrintDialogOpen}
