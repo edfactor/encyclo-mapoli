@@ -3,20 +3,22 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { Paged } from "smart-ui-library";
 import { setFrozenStateCollectionResponse, setFrozenStateResponse } from "../../reduxstore/slices/frozenSlice";
 import {
-  AnnuityRateDto,
-  AuditChangeEntryDto,
-  AuditEventDto,
-  AuditSearchRequestDto,
-  CurrentUserResponseDto,
-  FakeTimeStatusResponse,
-  FreezeDemographicsRequest,
-  FrozenStateResponse,
-  RowCountResult,
-  SetFakeTimeRequest,
-  SortedPaginationRequestDto,
-  StateTaxRateDto,
-  UpdateAnnuityRateRequest,
-  UpdateStateTaxRateRequest
+    AllUserFakeTimeResponse,
+    AnnuityRateDto,
+    AuditChangeEntryDto,
+    AuditEventDto,
+    AuditSearchRequestDto,
+    CurrentUserResponseDto,
+    FakeTimeStatusResponse,
+    FreezeDemographicsRequest,
+    FrozenStateResponse,
+    RowCountResult,
+    SetFakeTimeRequest,
+    SortedPaginationRequestDto,
+    StateTaxRateDto,
+    UpdateAnnuityRateRequest,
+    UpdateStateTaxRateRequest,
+    UserFakeTimeStatusResponse
 } from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
@@ -165,6 +167,32 @@ export const ItOperationsApi = createApi({
         method: "POST",
         body: request
       })
+    }),
+    // Per-user fake time endpoints
+    getMyFakeTime: builder.query<UserFakeTimeStatusResponse, void>({
+      query: () => ({
+        url: "my-fake-time",
+        method: "GET"
+      })
+    }),
+    setMyFakeTime: builder.mutation<UserFakeTimeStatusResponse, SetFakeTimeRequest>({
+      query: (request) => ({
+        url: "my-fake-time",
+        method: "POST",
+        body: request
+      })
+    }),
+    deleteMyFakeTime: builder.mutation<UserFakeTimeStatusResponse, void>({
+      query: () => ({
+        url: "my-fake-time",
+        method: "DELETE"
+      })
+    }),
+    getAllUserFakeTime: builder.query<AllUserFakeTimeResponse, void>({
+      query: () => ({
+        url: "itdevops/fake-time/users",
+        method: "GET"
+      })
     })
   })
 });
@@ -184,5 +212,12 @@ export const {
   useGetFakeTimeStatusQuery,
   useLazyGetFakeTimeStatusQuery,
   useSetFakeTimeMutation,
-  useValidateFakeTimeMutation
+  useValidateFakeTimeMutation,
+  // Per-user fake time hooks
+  useGetMyFakeTimeQuery,
+  useLazyGetMyFakeTimeQuery,
+  useSetMyFakeTimeMutation,
+  useDeleteMyFakeTimeMutation,
+  useGetAllUserFakeTimeQuery,
+  useLazyGetAllUserFakeTimeQuery
 } = ItOperationsApi;

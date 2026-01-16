@@ -226,6 +226,10 @@ public static class ServicesExtension
 
             // Register the initial configuration for status reporting
             _ = builder.Services.AddSingleton(fakeTimeConfig);
+
+            // Register per-user fake time services (only available in non-production)
+            _ = builder.Services.AddSingleton<IUserFakeTimeStorage, UserFakeTimeStorage>();
+            _ = builder.Services.AddScoped<IUserTimeService, UserTimeService>();
         }
 
         return builder;
