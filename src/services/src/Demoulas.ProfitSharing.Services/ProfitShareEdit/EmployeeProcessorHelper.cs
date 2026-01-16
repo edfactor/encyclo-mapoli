@@ -16,10 +16,10 @@ internal static class EmployeeProcessorHelper
 {
     public static async Task<(List<MemberFinancials>, bool)> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService,
         TotalService totalService, IDemographicReaderService demographicReaderService, ProfitShareUpdateRequest profitShareUpdateRequest,
-        AdjustmentsSummaryDto adjustmentsSummaryDto, CancellationToken cancellationToken)
+        AdjustmentsSummaryDto adjustmentsSummaryDto, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         bool employeeExceededMaxContribution = false;
-        short currentYear = (short)DateTime.Now.Year;
+        short currentYear = (short)timeProvider.GetLocalNow().Year;
         short profitYear = profitShareUpdateRequest.ProfitYear;
         short priorYear = (short)(profitShareUpdateRequest.ProfitYear - 1);
 

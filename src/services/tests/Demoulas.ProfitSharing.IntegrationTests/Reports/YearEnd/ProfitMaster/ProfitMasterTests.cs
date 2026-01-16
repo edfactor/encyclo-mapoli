@@ -32,7 +32,7 @@ public class ProfitMasterTests : PristineBaseTest
         // Arrange
         short profitYear = 2025;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
+        ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService, TimeProvider.System);
         ProfitShareEditService pses = new(psus, CalendarService);
         ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, TimeProvider.System);
 
@@ -101,7 +101,7 @@ public class ProfitMasterTests : PristineBaseTest
         // Arrange
         short profitYear = 2025;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
+        ProfitShareUpdateService psus = new(DbFactory, TotalService, CalendarService, DemographicReaderService, TimeProvider.System);
         ProfitShareEditService pses = new(psus, CalendarService);
         ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, TimeProvider.System);
 

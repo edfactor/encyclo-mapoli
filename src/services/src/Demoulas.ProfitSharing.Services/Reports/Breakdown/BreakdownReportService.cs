@@ -25,6 +25,7 @@ public sealed class BreakdownReportService : IBreakdownService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
     private readonly ICrossReferenceValidationService _crossReferenceValidationService;
+    private readonly TimeProvider _timeProvider;
 
     public BreakdownReportService(
         IProfitSharingDataContextFactory dataContextFactory,
@@ -32,7 +33,8 @@ public sealed class BreakdownReportService : IBreakdownService
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
         IPayrollDuplicateSsnReportService duplicateSsnReportService,
-        ICrossReferenceValidationService crossReferenceValidationService)
+        ICrossReferenceValidationService crossReferenceValidationService,
+        TimeProvider timeProvider)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
@@ -40,6 +42,7 @@ public sealed class BreakdownReportService : IBreakdownService
         _demographicReaderService = demographicReaderService;
         _duplicateSsnReportService = duplicateSsnReportService;
         _crossReferenceValidationService = crossReferenceValidationService;
+        _timeProvider = timeProvider;
     }
 
     #region ── Helper DTOs ────────────────────────────────────────────────────────────────
@@ -628,13 +631,14 @@ public sealed class BreakdownReportService : IBreakdownService
         ProfitSharingReadOnlyDbContext ctx, short profitYear, DateOnly fiscalEndDate)
     {
         /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
+        var asOfDate = DateOnly.FromDateTime(_timeProvider.GetUtcNow().DateTime);
         var balances =
             _totalService.TotalVestingBalance(
-                ctx, profitYear, DateTime.UtcNow.ToDateOnly());
+                ctx, profitYear, asOfDate);
 
         short priorYear = (short)(profitYear - 1);
         var lastYearBalances = _totalService
-            .TotalVestingBalance(ctx, priorYear, DateTime.UtcNow.ToDateOnly());
+            .TotalVestingBalance(ctx, priorYear, asOfDate);
 
         var etvaBalances =
             _totalService.GetTotalComputedEtva(ctx, profitYear);

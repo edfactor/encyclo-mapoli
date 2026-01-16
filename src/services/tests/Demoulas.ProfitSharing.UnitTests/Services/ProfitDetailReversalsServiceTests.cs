@@ -81,7 +81,7 @@ public class ProfitDetailReversalsServiceTests : ApiTestBase<Api.Program>
             FrozenStates = [new FrozenState { Id = 1, ProfitYear = 2024, AsOfDateTime = DateTimeOffset.UtcNow, CreatedDateTime = DateTimeOffset.UtcNow }]
         }.BuildMocks();
 
-        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object);
+        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object, TimeProvider.System);
 
         // Act - Try to reverse _profitDetail1 again
         var result = await service.ReverseProfitDetailsAsync([_profitDetail1.Id], CancellationToken.None);
@@ -115,7 +115,7 @@ public class ProfitDetailReversalsServiceTests : ApiTestBase<Api.Program>
             FrozenStates = [new FrozenState { Id = 1, ProfitYear = 2024, AsOfDateTime = DateTimeOffset.UtcNow, CreatedDateTime = DateTimeOffset.UtcNow }]
         }.BuildMocks();
 
-        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object);
+        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object, TimeProvider.System);
 
         // Act - Try to reverse both _profitDetail1 (already reversed) and _profitDetail2 (not reversed)
         var result = await service.ReverseProfitDetailsAsync([_profitDetail1.Id, _profitDetail2.Id], CancellationToken.None);
@@ -157,7 +157,7 @@ public class ProfitDetailReversalsServiceTests : ApiTestBase<Api.Program>
             FrozenStates = [new FrozenState { Id = 1, ProfitYear = 2024, AsOfDateTime = DateTimeOffset.UtcNow, CreatedDateTime = DateTimeOffset.UtcNow }]
         }.BuildMocks();
 
-        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object);
+        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object, TimeProvider.System);
 
         // Act - Try to reverse the reversal record (this should be allowed - reversal chains are OK)
         var result = await service.ReverseProfitDetailsAsync([reversalRecord.Id], CancellationToken.None);
@@ -184,7 +184,7 @@ public class ProfitDetailReversalsServiceTests : ApiTestBase<Api.Program>
             ProfitDetails = [_profitDetail1]
         }.BuildMocks();
 
-        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object);
+        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object, TimeProvider.System);
 
         // Act
         var result = await service.ReverseProfitDetailsAsync([], CancellationToken.None);
@@ -205,7 +205,7 @@ public class ProfitDetailReversalsServiceTests : ApiTestBase<Api.Program>
             ProfitDetails = [_profitDetail1]
         }.BuildMocks();
 
-        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object);
+        var service = new ProfitDetailReversalsService(mockDbContextFactory, _demographicReaderServiceMock.Object, _loggerMock.Object, TimeProvider.System);
 
         // Create array with more than 1000 IDs
         var tooManyIds = Enumerable.Range(1, 1001).ToArray();
