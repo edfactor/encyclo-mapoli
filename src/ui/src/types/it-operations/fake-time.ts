@@ -14,6 +14,12 @@ export interface FakeTimeStatusResponse {
   isAllowed: boolean;
 
   /**
+   * Whether runtime switching between real and fake time is supported.
+   * When true, fake time can be enabled/disabled via the API without restarting the application.
+   */
+  isRuntimeSwitchingEnabled: boolean;
+
+  /**
    * The current fake date/time when active (ISO 8601 format).
    * Null when fake time is not active.
    */

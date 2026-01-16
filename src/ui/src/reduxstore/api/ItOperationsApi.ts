@@ -152,6 +152,13 @@ export const ItOperationsApi = createApi({
         method: "GET"
       })
     }),
+    setFakeTime: builder.mutation<FakeTimeStatusResponse, SetFakeTimeRequest>({
+      query: (request) => ({
+        url: "itdevops/fake-time",
+        method: "POST",
+        body: request
+      })
+    }),
     validateFakeTime: builder.mutation<FakeTimeStatusResponse, SetFakeTimeRequest>({
       query: (request) => ({
         url: "itdevops/fake-time/validate",
@@ -176,5 +183,6 @@ export const {
   useLazyGetAuditChangesQuery,
   useGetFakeTimeStatusQuery,
   useLazyGetFakeTimeStatusQuery,
+  useSetFakeTimeMutation,
   useValidateFakeTimeMutation
 } = ItOperationsApi;

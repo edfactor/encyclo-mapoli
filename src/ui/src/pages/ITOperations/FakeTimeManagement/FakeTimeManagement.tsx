@@ -21,7 +21,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Page } from "smart-ui-library";
 import { PageErrorBoundary } from "../../../components/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
-import { useGetFakeTimeStatusQuery, useValidateFakeTimeMutation } from "../../../reduxstore/api/ItOperationsApi";
+import { useGetFakeTimeStatusQuery, useSetFakeTimeMutation, useValidateFakeTimeMutation } from "../../../reduxstore/api/ItOperationsApi";
 import { FakeTimeStatusResponse, SetFakeTimeRequest } from "../../../reduxstore/types";
 
 interface FakeTimeFormValues {
@@ -35,9 +35,12 @@ const defaultTimeZone = "Eastern Standard Time";
 
 const FakeTimeManagement = () => {
   const { data: status, isLoading, isFetching, refetch, error } = useGetFakeTimeStatusQuery();
+  const [setFakeTime, { isLoading: isApplying }] = useSetFakeTimeMutation();
   const [validateFakeTime, { isLoading: isValidating }] = useValidateFakeTimeMutation();
   const [validationResult, setValidationResult] = useState<FakeTimeStatusResponse | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [applyResult, setApplyResult] = useState<FakeTimeStatusResponse | null>(null);
+  const [applyError, setApplyError] = useState<string | null>(null);
 
   const {
     control,
@@ -71,6 +74,8 @@ const FakeTimeManagement = () => {
   const onValidate = async (formData: FakeTimeFormValues) => {
     setValidationError(null);
     setValidationResult(null);
+    setApplyError(null);
+    setApplyResult(null);
 
     const request: SetFakeTimeRequest = {
       enabled: formData.enabled,
@@ -87,9 +92,34 @@ const FakeTimeManagement = () => {
     }
   };
 
+  const onApply = async (formData: FakeTimeFormValues) => {
+    setValidationError(null);
+    setValidationResult(null);
+    setApplyError(null);
+    setApplyResult(null);
+
+    const request: SetFakeTimeRequest = {
+      enabled: formData.enabled,
+      fixedDateTime: formData.enabled ? formData.fixedDateTime : null,
+      timeZone: formData.timeZone || defaultTimeZone,
+      advanceTime: formData.advanceTime
+    };
+
+    try {
+      const result = await setFakeTime(request).unwrap();
+      setApplyResult(result);
+      // Refetch status to update the display
+      refetch();
+    } catch (err) {
+      setApplyError(err instanceof Error ? err.message : "Failed to apply fake time settings");
+    }
+  };
+
   const handleRefresh = () => {
     setValidationResult(null);
     setValidationError(null);
+    setApplyResult(null);
+    setApplyError(null);
     refetch();
   };
 
@@ -195,6 +225,16 @@ const FakeTimeManagement = () => {
                           Fake Time Allowed
                         </Typography>
                         <Typography variant="body1">{status.isAllowed ? "Yes" : "No"}</Typography>
+                      </Grid>
+                      <Grid size={{ xs: 6 }}>
+                        <Typography
+                          variant="body2"
+                          color="textSecondary">
+                          Runtime Switching
+                        </Typography>
+                        <Typography variant="body1">
+                          {status.isRuntimeSwitchingEnabled ? "Enabled" : "Disabled (restart required)"}
+                        </Typography>
                       </Grid>
                       <Grid size={{ xs: 12 }}>
                         <Typography
@@ -364,6 +404,17 @@ const FakeTimeManagement = () => {
                           startIcon={isValidating ? <CircularProgress size={16} /> : undefined}>
                           Validate Configuration
                         </Button>
+                        {status?.isRuntimeSwitchingEnabled && (
+                          <Button
+                            variant="contained"
+                            color="warning"
+                            sx={{ ml: 2 }}
+                            disabled={isApplying || !isDirty}
+                            onClick={handleSubmit(onApply)}
+                            startIcon={isApplying ? <CircularProgress size={16} /> : undefined}>
+                            Apply Now
+                          </Button>
+                        )}
                       </Grid>
                     </Grid>
                   </form>
@@ -374,6 +425,23 @@ const FakeTimeManagement = () => {
                     severity="error"
                     sx={{ mt: 2 }}>
                     {validationError}
+                  </Alert>
+                )}
+
+                {applyError && (
+                  <Alert
+                    severity="error"
+                    sx={{ mt: 2 }}>
+                    {applyError}
+                  </Alert>
+                )}
+
+                {applyResult && (
+                  <Alert
+                    severity={applyResult.isActive ? "warning" : "success"}
+                    sx={{ mt: 2 }}>
+                    <AlertTitle>{applyResult.isActive ? "Fake Time Activated" : "Fake Time Deactivated"}</AlertTitle>
+                    {applyResult.message}
                   </Alert>
                 )}
 
@@ -434,25 +502,60 @@ const FakeTimeManagement = () => {
                   simulating a specific date and time. This feature is{" "}
                   <strong>only available in non-production environments</strong>.
                 </Typography>
-                <Typography
-                  variant="body2"
-                  paragraph>
-                  <strong>Important:</strong> Fake time configuration is loaded at application startup and cannot be
-                  changed at runtime. To change the fake time settings:
-                </Typography>
-                <ol>
-                  <li>
-                    <Typography variant="body2">
-                      Edit the <code>FakeTime</code> section in <code>appsettings.json</code> or
-                      <code>
-                        appsettings.{"{"}Environment{"}"}.json
-                      </code>
+
+                {status?.isRuntimeSwitchingEnabled ? (
+                  <>
+                    <Alert
+                      severity="info"
+                      sx={{ mb: 2 }}>
+                      <AlertTitle>Runtime Switching Enabled</AlertTitle>
+                      You can enable or disable fake time instantly using the <strong>Apply Now</strong> button. No
+                      application restart is required.
+                    </Alert>
+                    <Typography
+                      variant="body2"
+                      paragraph>
+                      <strong>To change fake time settings:</strong>
                     </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body2">Restart the application</Typography>
-                  </li>
-                </ol>
+                    <ol>
+                      <li>
+                        <Typography variant="body2">Configure the desired date/time and options above</Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2">
+                          Click <strong>Validate Configuration</strong> to verify your settings
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2">
+                          Click <strong>Apply Now</strong> to activate the changes immediately
+                        </Typography>
+                      </li>
+                    </ol>
+                  </>
+                ) : (
+                  <>
+                    <Typography
+                      variant="body2"
+                      paragraph>
+                      <strong>Note:</strong> Runtime switching is not enabled. To change the fake time settings:
+                    </Typography>
+                    <ol>
+                      <li>
+                        <Typography variant="body2">
+                          Edit the <code>FakeTime</code> section in <code>appsettings.json</code> or
+                          <code>
+                            appsettings.{"{"}Environment{"}"}.json
+                          </code>
+                        </Typography>
+                      </li>
+                      <li>
+                        <Typography variant="body2">Restart the application</Typography>
+                      </li>
+                    </ol>
+                  </>
+                )}
+
                 <Typography
                   variant="body2"
                   paragraph>

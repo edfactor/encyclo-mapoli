@@ -168,6 +168,7 @@ public static class ServicesExtension
     /// <summary>
     /// Registers the appropriate <see cref="TimeProvider"/> based on configuration and environment.
     /// SECURITY: Fake time is only enabled in non-production environments when explicitly configured.
+    /// In non-production environments, a SwitchableTimeProvider is registered to allow runtime toggling.
     /// </summary>
     /// <param name="builder">The host application builder.</param>
     /// <returns>The builder for chaining.</returns>
@@ -179,36 +180,16 @@ public static class ServicesExtension
 
         // SECURITY: Never allow fake time in Production
         var isProduction = builder.Environment.IsProduction();
-        var useFakeTime = fakeTimeConfig.Enabled && !isProduction;
 
-        if (useFakeTime)
+        if (isProduction)
         {
-            // Validate configuration
-            var validationErrors = fakeTimeConfig.Validate();
-            if (validationErrors.Count > 0)
-            {
-                throw new InvalidOperationException(
-                    $"FakeTime configuration is invalid: {string.Join("; ", validationErrors)}");
-            }
-
-            _ = builder.Services.AddSingleton<TimeProvider>(sp =>
-            {
-                var logger = sp.GetService<ILogger<FakeTimeProvider>>();
-                return new FakeTimeProvider(fakeTimeConfig, logger);
-            });
-
-            // Also register the configuration so endpoints can report status
-            _ = builder.Services.AddSingleton(fakeTimeConfig);
-        }
-        else
-        {
-            // Use the real system time provider
+            // Production: Use the real system time provider (no switching allowed)
             _ = builder.Services.AddSingleton(TimeProvider.System);
 
             // Register a disabled configuration for status reporting
             _ = builder.Services.AddSingleton(new FakeTimeConfiguration { Enabled = false });
 
-            if (fakeTimeConfig.Enabled && isProduction)
+            if (fakeTimeConfig.Enabled)
             {
                 // Log a warning that fake time was requested but disabled in production
                 // This uses a temporary logger since DI isn't fully built yet
@@ -216,6 +197,35 @@ public static class ServicesExtension
                     "WARNING: FakeTime.Enabled is true but this is a Production environment. " +
                     "Fake time has been disabled for security reasons.");
             }
+        }
+        else
+        {
+            // Non-production: Use SwitchableTimeProvider to allow runtime toggling
+            if (fakeTimeConfig.Enabled)
+            {
+                // Validate configuration if fake time is pre-configured
+                var validationErrors = fakeTimeConfig.Validate();
+                if (validationErrors.Count > 0)
+                {
+                    throw new InvalidOperationException(
+                        $"FakeTime configuration is invalid: {string.Join("; ", validationErrors)}");
+                }
+            }
+
+            // Register the switchable provider - it will start with fake time if configured
+            _ = builder.Services.AddSingleton<SwitchableTimeProvider>(sp =>
+            {
+                var logger = sp.GetService<ILogger<SwitchableTimeProvider>>();
+                return fakeTimeConfig.Enabled
+                    ? new SwitchableTimeProvider(fakeTimeConfig, logger)
+                    : new SwitchableTimeProvider(logger);
+            });
+
+            // Register TimeProvider interface to resolve to the same instance
+            _ = builder.Services.AddSingleton<TimeProvider>(sp => sp.GetRequiredService<SwitchableTimeProvider>());
+
+            // Register the initial configuration for status reporting
+            _ = builder.Services.AddSingleton(fakeTimeConfig);
         }
 
         return builder;
