@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { RootState } from "reduxstore/store";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
@@ -20,19 +19,10 @@ const PostFrozenUnder21ReportGrid: React.FC<PostFrozenUnder21ReportGridProps> = 
   gridPagination
 }) => {
   const profitSharingUnder21Report = useSelector((state: RootState) => state.yearsEnd.profitSharingUnder21Report);
-  const navigate = useNavigate();
   const { pageNumber, pageSize, sortParams, handlePageNumberChange, handlePageSizeChange, handleSortChange } =
     gridPagination;
 
-  // Handle navigation for badge clicks
-  const handleNavigation = React.useCallback(
-    (path: string) => {
-      navigate(path);
-    },
-    [navigate]
-  );
-
-  const columnDefs = useMemo(() => GetPostFrozenUnder21ReportColumnDefs(handleNavigation), [handleNavigation]);
+  const columnDefs = useMemo(() => GetPostFrozenUnder21ReportColumnDefs(), []);
 
   // Create pagination object for DSMPaginatedGrid with proper sort normalization
   const pagination = useMemo(

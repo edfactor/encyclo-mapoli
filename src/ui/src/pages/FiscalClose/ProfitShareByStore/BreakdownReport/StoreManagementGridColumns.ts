@@ -1,11 +1,9 @@
 import { ColDef } from "ag-grid-community";
 import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "../../../../utils/gridColumnFactory";
 
-export const GetStoreManagementGridColumns = (handleNavigation: (badgeNumber: string) => void): ColDef[] => {
+export const GetStoreManagementGridColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({
-      navigateFunction: handleNavigation
-    }),
+    createBadgeColumn({}),
     createNameColumn({
       field: "fullName"
     }),
