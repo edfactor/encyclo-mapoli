@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Data.Services.Interfaces;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -37,6 +37,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using INavigationService = Demoulas.ProfitSharing.Common.Interfaces.Navigations.INavigationService;
+using NavigationService = Demoulas.ProfitSharing.Services.Navigations.NavigationService;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 

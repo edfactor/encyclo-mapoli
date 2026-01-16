@@ -1,12 +1,12 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using INavigationService = Demoulas.ProfitSharing.Common.Interfaces.Navigations.INavigationService;
 
 namespace Demoulas.ProfitSharing.Services.Navigations;
 

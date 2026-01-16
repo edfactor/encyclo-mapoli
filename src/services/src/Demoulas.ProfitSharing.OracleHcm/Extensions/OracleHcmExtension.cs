@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -8,7 +8,6 @@ using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Data.Repositories;
@@ -39,6 +38,7 @@ using Quartz.Spi;
 using AddressMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.AddressMapper;
 using ContactInfoMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.ContactInfoMapper;
 using DemographicMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.DemographicMapper;
+using INavigationService = Demoulas.ProfitSharing.Common.Interfaces.Navigations.INavigationService;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
 
