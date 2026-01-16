@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
+import { useCachedPrevious } from "../../../hooks/useCachedPrevious";
 import { closeDrawer, openDrawer, setFullscreen } from "../../../reduxstore/slices/generalSlice";
 import { RootState } from "../../../reduxstore/store";
 import AdhocProfLetter73Grid from "./AdhocProfLetter73Grid.tsx";
@@ -55,6 +56,10 @@ const AdhocProfLetter73: React.FC = () => {
     return <StatusDropdownActionNode />;
   };
 
+  // Cache last non-null filter params so the grid can continue showing
+  // previous results while a new search is in-flight.
+  const displayFilterParams = useCachedPrevious(filterParams ?? null) ?? null;
+
   return (
     <PageErrorBoundary pageName="Adhoc Prof Letter 73">
       <Page
@@ -80,11 +85,12 @@ const AdhocProfLetter73: React.FC = () => {
             </Grid>
           )}
 
-          {filterParams && (
+          {(filterParams || displayFilterParams) && (
             <Grid width="100%">
               <AdhocProfLetter73Grid
-                key={searchTrigger}
-                filterParams={filterParams}
+                // Pass trigger to request a fresh search without unmounting
+                searchTrigger={searchTrigger}
+                filterParams={filterParams ?? displayFilterParams}
                 onLoadingChange={handleLoadingChange}
                 isGridExpanded={isGridExpanded}
                 onToggleExpand={handleToggleGridExpand}

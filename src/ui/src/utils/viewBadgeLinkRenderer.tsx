@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import { JSX } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 export function viewBadgeLinkRenderer(
   badgeNumber: number,

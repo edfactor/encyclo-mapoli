@@ -112,8 +112,19 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 }) => {
   const currentData = isModal ? modalResults : gridData;
   const currentPagination = isModal ? modalGridPagination : mainGridPagination;
+
+  // Cache last non-null response so UI remains stable while paging/refreshing
+  const lastResponseRef = useRef<PagedReportResponse<ExecutiveHoursAndDollars> | null>(null);
+  useEffect(() => {
+    if (currentData != null) {
+      lastResponseRef.current = currentData;
+    }
+  }, [currentData]);
+
+  const displayCurrentData = currentData ?? lastResponseRef.current;
+
   const gridMaxHeight = useContentAwareGridHeight({
-    rowCount: currentData?.response?.results?.length ?? 0
+    rowCount: displayCurrentData?.response?.results?.length ?? 0
   });
   // Pass canEdit to column definitions - editing requires page status "In Progress" AND ExecutiveAdministrator role
   const columnDefs = useMemo(
@@ -138,7 +149,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       // Validate hours and dollars limits
       if (rowInQuestion.data.hoursExecutive > 4000) {
         // Find original value to restore
-        const originalRow = currentData?.response.results.find(
+        const originalRow = displayCurrentData?.response.results.find(
           (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
         );
         if (originalRow) {
@@ -151,7 +162,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 
       if (rowInQuestion.data.incomeExecutive > 20000000) {
         // Find original value to restore
-        const originalRow = currentData?.response.results.find(
+        const originalRow = displayCurrentData?.response.results.find(
           (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
         );
         if (originalRow) {
@@ -189,9 +200,9 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
         isEditingRef.current = false;
       }, 100);
     },
-    [isModal, currentData, updateExecutiveRow, canEdit]
+    [isModal, displayCurrentData, updateExecutiveRow, canEdit]
   );
-  const hasData = Boolean(currentData?.response?.results && currentData.response.results.length > 0);
+  const hasData = Boolean(displayCurrentData?.response?.results && displayCurrentData.response.results.length > 0);
   const isPaginationNeeded = hasData;
 
   // Create a mutable copy of the row data for the grid to allow in-place editing
@@ -199,30 +210,23 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   const isEditingRef = useRef(false);
   const dataInitializedRef = useRef(false);
 
-  // Initialize mutable row data when we first get data or when we get new search results
-  useEffect(() => {
-    if (currentData?.response?.results && !dataInitializedRef.current && !isEditingRef.current) {
-      setMutableRowData(currentData.response.results.map((row) => ({ ...row })));
-      dataInitializedRef.current = true;
-    } else if (!currentData?.response?.results && !isEditingRef.current) {
-      setMutableRowData([]);
-      dataInitializedRef.current = false;
-    }
-  }, [currentData]);
-
-  // Update mutable row data when combined data changes (e.g., when executives are added from modal)
+  // Initialize or refresh mutable row data whenever a new response arrives
+  // (unless the user is actively editing). This ensures the grid updates when
+  // paging changes even if the page size remains the same.
   const lastDataLengthRef = useRef<number>(0);
   useEffect(() => {
-    if (currentData?.response?.results && dataInitializedRef.current && !isEditingRef.current) {
-      const currentLength = currentData.response.results.length;
-      if (currentLength !== lastDataLengthRef.current) {
-        setMutableRowData(currentData.response.results.map((row) => ({ ...row })));
-        lastDataLengthRef.current = currentLength;
+    if (!isEditingRef.current) {
+      if (displayCurrentData?.response?.results) {
+        setMutableRowData(displayCurrentData.response.results.map((row) => ({ ...row })));
+        dataInitializedRef.current = true;
+        lastDataLengthRef.current = displayCurrentData.response.results.length;
+      } else {
+        setMutableRowData([]);
+        dataInitializedRef.current = false;
+        lastDataLengthRef.current = 0;
       }
-    } else if (currentData?.response?.results && dataInitializedRef.current) {
-      lastDataLengthRef.current = currentData.response.results.length;
     }
-  }, [currentData?.response?.results]);
+  }, [displayCurrentData]);
 
   // Don't render anything if we don't have data (for modal)
   // For main grid, the parent component controls visibility
@@ -238,9 +242,9 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             <div
               className="px-[24px]"
               style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              {gridData && <ReportSummary report={gridData} />}
+              {displayCurrentData && <ReportSummary report={displayCurrentData} />}
               <RenderAddExecutiveButton
-                reportReponse={gridData}
+                  reportReponse={displayCurrentData}
                 isModal={isModal}
                 onOpenModal={openModal}
                 isReadOnly={isReadOnly}
@@ -263,7 +267,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           preferenceKey={GRID_KEYS.MANAGE_EXECUTIVE_HOURS}
           data={mutableRowData}
           columnDefs={columnDefs}
-          totalRecords={currentData?.response?.total ?? 0}
+          totalRecords={displayCurrentData?.response?.total ?? 0}
           isLoading={isSearching}
           heightConfig={{ maxHeight: gridMaxHeight }}
           pagination={

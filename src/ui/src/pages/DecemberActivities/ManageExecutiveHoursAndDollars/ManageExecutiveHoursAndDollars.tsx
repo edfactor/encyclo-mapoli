@@ -1,5 +1,5 @@
 import { SaveOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
+import { Box, Button, Divider, Grid, Tooltip } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import PageErrorBoundary from "components/PageErrorBoundary";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
@@ -10,6 +10,7 @@ import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveA
 import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS } from "../../../constants";
+import { useCachedPrevious } from "../../../hooks/useCachedPrevious";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
 import { useIsReadOnlyByStatus } from "../../../hooks/useIsReadOnlyByStatus";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
@@ -83,6 +84,9 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
     isModalSearching
   } = hookData;
 
+  // Cache last non-null grid data so UI remains stable while searching
+  const displayGridData = useCachedPrevious(gridData ?? null) ?? null;
+
   const isReadOnly = useReadOnlyNavigation();
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
@@ -134,18 +138,13 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
         </DSMAccordion>
       </Grid>
 
-      {isSearching && (
-        <Grid
-          size={{ xs: 12 }}
-          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
-          <CircularProgress />
-        </Grid>
-      )}
-
-      {!isSearching && showGrid && (
+      {/* Render the grid while searching so it can display cached data and
+          its own loading indicator. Render when results exist or when a
+          search is in-flight but we have cached data to show. */}
+      {(showGrid || (isSearching && displayGridData)) && (
         <Grid width="100%">
           <ManageExecutiveHoursAndDollarsGrid
-            gridData={gridData}
+            gridData={displayGridData}
             modalResults={modalResults}
             isSearching={isSearching}
             isModalOpen={isModalOpen}
