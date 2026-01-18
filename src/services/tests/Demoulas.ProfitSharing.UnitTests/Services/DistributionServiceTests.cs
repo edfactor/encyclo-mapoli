@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
@@ -62,7 +62,7 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
     public async Task GetDistributionRunReportSummary_ShouldReturnResultPattern()
     {
         // Act
-        var result = await _distributionService.GetDistributionRunReportSummary(CancellationToken.None);
+        var result = await _distributionService.GetDistributionRunReportSummaryAsync(CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -82,7 +82,7 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var result = await _distributionService.GetDistributionsOnHold(request, CancellationToken.None);
+        var result = await _distributionService.GetDistributionsOnHoldAsync(request, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -102,7 +102,7 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var result = await _distributionService.GetDistributionsOnHold(validRequest, CancellationToken.None);
+        var result = await _distributionService.GetDistributionsOnHoldAsync(validRequest, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -121,7 +121,7 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var result = await _distributionService.GetManualCheckDistributions(request, CancellationToken.None);
+        var result = await _distributionService.GetManualCheckDistributionsAsync(request, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -140,7 +140,7 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var result = await _distributionService.GetManualCheckDistributions(validRequest, CancellationToken.None);
+        var result = await _distributionService.GetManualCheckDistributionsAsync(validRequest, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -160,7 +160,7 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var result = await _distributionService.GetDistributionRunReport(request, CancellationToken.None);
+        var result = await _distributionService.GetDistributionRunReportAsync(request, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -180,7 +180,7 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var result = await _distributionService.GetDistributionRunReport(request, CancellationToken.None);
+        var result = await _distributionService.GetDistributionRunReportAsync(request, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -200,7 +200,7 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var result = await _distributionService.GetDistributionRunReport(request, CancellationToken.None);
+        var result = await _distributionService.GetDistributionRunReportAsync(request, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -220,7 +220,7 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var result = await _distributionService.GetDistributionRunReport(request, CancellationToken.None);
+        var result = await _distributionService.GetDistributionRunReportAsync(request, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();

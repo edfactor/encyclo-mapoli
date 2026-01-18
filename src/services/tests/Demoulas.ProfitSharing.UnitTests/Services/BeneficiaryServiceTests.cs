@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
@@ -32,7 +32,7 @@ public sealed class BeneficiaryServiceTests : ApiTestBase<Program>
         req.Id = _beneficiary.Id;
         req.Relationship = "2nd Cousin";
 
-        await _service.UpdateBeneficiary(req, CancellationToken.None);
+        await _service.UpdateBeneficiaryAsync(req, CancellationToken.None);
         _beneficiary.Relationship.ShouldBe("2nd Cousin");
         _beneficiary.Contact.Ssn.ShouldBe(initialSsn);
     }

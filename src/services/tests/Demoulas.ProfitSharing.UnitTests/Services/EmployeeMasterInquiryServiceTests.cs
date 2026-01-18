@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -70,7 +70,7 @@ public sealed class EmployeeMasterInquiryServiceTests
 
         // Setup demographic reader to return MockDbSet.Object for async support
         var mockDemographicsDbSet = demographicsList.BuildMockDbSet();
-        _mockDemographicReader.Setup(r => r.BuildDemographicQuery(
+        _mockDemographicReader.Setup(r => r.BuildDemographicQueryAsync(
             It.IsAny<IProfitSharingDbContext>(), false))
             .ReturnsAsync(mockDemographicsDbSet.Object);
 
@@ -81,7 +81,7 @@ public sealed class EmployeeMasterInquiryServiceTests
 
         // Assert
         ssn.ShouldBe(expectedSsn);
-        _mockDemographicReader.Verify(r => r.BuildDemographicQuery(
+        _mockDemographicReader.Verify(r => r.BuildDemographicQueryAsync(
             It.IsAny<IProfitSharingDbContext>(), false), Times.Once);
     }
     [Fact]
@@ -107,7 +107,7 @@ public sealed class EmployeeMasterInquiryServiceTests
 
         // Setup demographic reader to return MockDbSet.Object for async support
         var mockDemographicsDbSet = demographicsList.BuildMockDbSet();
-        _mockDemographicReader.Setup(r => r.BuildDemographicQuery(
+        _mockDemographicReader.Setup(r => r.BuildDemographicQueryAsync(
             It.IsAny<IProfitSharingDbContext>(), false))
             .ReturnsAsync(mockDemographicsDbSet.Object);
 
@@ -133,7 +133,7 @@ public sealed class EmployeeMasterInquiryServiceTests
 
         // Setup demographic reader to return empty MockDbSet.Object for async support
         var mockDemographicsDbSet = demographicsList.BuildMockDbSet();
-        _mockDemographicReader.Setup(r => r.BuildDemographicQuery(
+        _mockDemographicReader.Setup(r => r.BuildDemographicQueryAsync(
             It.IsAny<IProfitSharingDbContext>(), false))
             .ReturnsAsync(mockDemographicsDbSet.Object);
 

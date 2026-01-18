@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Moq;
@@ -154,11 +154,11 @@ public class DistributionRunReportEndpointTests
         };
 
         // Act
-        await mockService.Object.GetDistributionRunReport(request, CancellationToken.None);
+        await mockService.Object.GetDistributionRunReportAsync(request, CancellationToken.None);
 
         // Assert
         mockService.Verify(
-            x => x.GetDistributionRunReport(
+            x => x.GetDistributionRunReportAsync(
                 It.Is<DistributionRunReportRequest>(req =>
                     req.DistributionFrequencies != null &&
                     req.DistributionFrequencies.Contains('Q') &&

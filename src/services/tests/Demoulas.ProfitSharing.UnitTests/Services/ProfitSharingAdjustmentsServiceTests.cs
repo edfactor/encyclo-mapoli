@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -71,8 +71,8 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         {
             ProfitYear = candidate.ProfitYear,
             BadgeNumber = candidate.BadgeNumber,
-            Rows = new[]
-            {
+            Rows =
+            [
                 new ProfitSharingAdjustmentRowRequest
                 {
                     ProfitDetailId = existingRow!.ProfitDetailId,
@@ -84,7 +84,7 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                     ActivityDate = existingRow.ActivityDate,
                     Comment = existingRow.Comment
                 }
-            }
+            ]
         }, CancellationToken.None);
 
         saveResult.IsSuccess.ShouldBeFalse();
@@ -107,8 +107,8 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
         {
             ProfitYear = candidate.ProfitYear,
             BadgeNumber = candidate.BadgeNumber,
-            Rows = new[]
-            {
+            Rows =
+            [
                 new ProfitSharingAdjustmentRowRequest
                 {
                     ProfitDetailId = null,
@@ -131,7 +131,7 @@ public sealed class ProfitSharingAdjustmentsServiceTests : ApiTestBase<Api.Progr
                     ActivityDate = null,
                     Comment = string.Empty
                 }
-            }
+            ]
         }, CancellationToken.None);
 
         saveResult.IsSuccess.ShouldBeFalse();

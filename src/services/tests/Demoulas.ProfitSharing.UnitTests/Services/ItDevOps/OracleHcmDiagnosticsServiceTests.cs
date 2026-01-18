@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Interfaces;
@@ -230,7 +230,7 @@ internal sealed class MockCommitGuardOverride : ICommitGuardOverride
 
     public IEnumerable<string> GetCurrentRoles()
     {
-        return new[] { Role.ITDEVOPS };
+        return [Role.ITDEVOPS];
     }
 
     private sealed class MockGuardScope : IDisposable

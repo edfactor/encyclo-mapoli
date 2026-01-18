@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts;
@@ -142,15 +142,15 @@ public class DistributionRunReportManualChecksEndpointTests
         var serviceResult = Result<PaginatedResponseDto<ManualChecksWrittenResponse>>.Success(paginatedResponse);
 
         mockService
-            .Setup(x => x.GetManualCheckDistributions(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetManualCheckDistributionsAsync(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(serviceResult);
 
         // Act
-        await mockService.Object.GetManualCheckDistributions(request, CancellationToken.None);
+        await mockService.Object.GetManualCheckDistributionsAsync(request, CancellationToken.None);
 
         // Assert
         mockService.Verify(
-            x => x.GetManualCheckDistributions(
+            x => x.GetManualCheckDistributionsAsync(
                 It.Is<SortedPaginationRequestDto>(req =>
                     req.Skip == 0 &&
                     req.Take == 50 &&
@@ -186,15 +186,15 @@ public class DistributionRunReportManualChecksEndpointTests
         var serviceResult = Result<PaginatedResponseDto<ManualChecksWrittenResponse>>.Success(paginatedResponse);
 
         mockService
-            .Setup(x => x.GetManualCheckDistributions(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetManualCheckDistributionsAsync(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(serviceResult);
 
         // Act
-        await mockService.Object.GetManualCheckDistributions(request, cancellationToken);
+        await mockService.Object.GetManualCheckDistributionsAsync(request, cancellationToken);
 
         // Assert
         mockService.Verify(
-            x => x.GetManualCheckDistributions(
+            x => x.GetManualCheckDistributionsAsync(
                 It.IsAny<SortedPaginationRequestDto>(),
                 It.Is<CancellationToken>(ct => ct == cancellationToken)),
             Times.Once);
@@ -217,17 +217,17 @@ public class DistributionRunReportManualChecksEndpointTests
         var expectedException = new InvalidOperationException("Database connection failed");
 
         mockService
-            .Setup(x => x.GetManualCheckDistributions(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetManualCheckDistributionsAsync(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(expectedException);
 
         // Act & Assert
         var thrownException = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await mockService.Object.GetManualCheckDistributions(request, CancellationToken.None));
+            async () => await mockService.Object.GetManualCheckDistributionsAsync(request, CancellationToken.None));
 
         thrownException.ShouldBe(expectedException);
 
         mockService.Verify(
-            x => x.GetManualCheckDistributions(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()),
+            x => x.GetManualCheckDistributionsAsync(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
