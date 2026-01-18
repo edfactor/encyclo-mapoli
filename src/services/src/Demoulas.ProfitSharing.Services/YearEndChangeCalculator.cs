@@ -191,22 +191,10 @@ internal static class YearEndChangeCalculator
 
         int yearsSinceFirst = CalculateYearsSinceFirstContribution(profitYear, firstContributionYear, currentBalance);
 
-        // Age 65+ with 5+ years vesting
+        // Age 65+ with 5+ years since first contribution (first day of 5th plan year or later)
         if (yearsSinceFirst >= ReferenceData.VestingYears && age >= ReferenceData.RetirementAge)
         {
             return ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested;
-        }
-
-        // Age 65+ with 4 years vesting (vesting next year)
-        if (yearsSinceFirst == (ReferenceData.VestingYears - 1) && age >= ReferenceData.RetirementAge)
-        {
-            return ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
-        }
-
-        // Age 64 with 4+ years vesting
-        if (yearsSinceFirst >= (ReferenceData.VestingYears - 1) && age == (ReferenceData.RetirementAge - 1))
-        {
-            return ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
         }
 
         return zeroCont;
@@ -214,15 +202,7 @@ internal static class YearEndChangeCalculator
 
     private static int CalculateYearsSinceFirstContribution(short profitYear, short? firstContributionYear, decimal currentBalance)
     {
-        int yearsSince = profitYear - (firstContributionYear ?? profitYear);
-
-        // COBOL PAY426.cbl lines 1273: Bump up years by 1 if employee had money last year
-        if (currentBalance > 0)
-        {
-            yearsSince++;
-        }
-
-        return yearsSince;
+        return profitYear - (firstContributionYear ?? profitYear);
     }
 
     #endregion
