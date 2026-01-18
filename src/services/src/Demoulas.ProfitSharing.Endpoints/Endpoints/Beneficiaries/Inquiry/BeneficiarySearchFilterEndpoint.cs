@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries.Inquiry;
 
 public class BeneficiarySearchFilterEndpoint : ProfitSharingEndpoint<BeneficiarySearchFilterRequest, PaginatedResponseDto<BeneficiarySearchFilterResponse>>
 {

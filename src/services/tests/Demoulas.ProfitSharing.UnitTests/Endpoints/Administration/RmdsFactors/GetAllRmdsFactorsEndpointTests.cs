@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.RmdsFactors;
 using Demoulas.ProfitSharing.Security;
@@ -7,7 +7,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Shouldly;
 
-namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Administration.RmdFactors;
+namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Administration.RmdsFactors;
 
 /// <summary>
 /// Unit tests for GetAllRmdFactorsEndpoint.

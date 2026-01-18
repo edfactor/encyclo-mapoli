@@ -1,7 +1,7 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.InquiriesAndAdjustments.Inquiries;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;

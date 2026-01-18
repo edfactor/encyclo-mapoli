@@ -1,13 +1,14 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
-// ToResultOrNotFound
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+// Result, Error
+// ToResultOrNotFound
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.InquiriesAndAdjustments.Inquiries;
 
 public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMemberRequest, Results<Ok<MemberProfitPlanDetails>, NotFound, ProblemHttpResult>>
 {
