@@ -68,7 +68,7 @@ public class FrozenReportService : IFrozenReportService
 
         var queryResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             var query = (from pd in ctx.ProfitDetails
                          join d in demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
@@ -211,7 +211,7 @@ public class FrozenReportService : IFrozenReportService
 
         var queryResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             var query = (from pd in ctx.ProfitDetails
                          join d in demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear
@@ -281,7 +281,7 @@ public class FrozenReportService : IFrozenReportService
 
         var queryResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             var query = (from pd in ctx.ProfitDetails
                          join d in demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear
@@ -371,7 +371,7 @@ public class FrozenReportService : IFrozenReportService
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
-            var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demo = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             var joinedQuery = from q in query
                               join d in demo on q.Ssn equals d.Ssn into demographics
@@ -477,7 +477,7 @@ public class FrozenReportService : IFrozenReportService
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
-            var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demo = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             var joinedQuery = from q in query
                               join d in demo on q.Ssn equals d.Ssn into demographics
@@ -612,7 +612,7 @@ public class FrozenReportService : IFrozenReportService
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
             var yearsInPlanQuery = _totalService.GetYearsOfService(ctx, req.ProfitYear, startEnd.FiscalEndDate);
-            var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demo = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             var joinedQuery = from q in query
                               join yip in yearsInPlanQuery on q.Ssn equals yip.Ssn
@@ -710,7 +710,7 @@ public class FrozenReportService : IFrozenReportService
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             //Get population of both employees and beneficiaries
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx, true);
             var demoBase = demographics.Select(x =>
                 new
                 {
@@ -884,7 +884,7 @@ public class FrozenReportService : IFrozenReportService
         {
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx, true);
 
                 // Query for PayProfit data for the requested year
                 var baseQuery = (from d in demographics
@@ -975,7 +975,7 @@ public class FrozenReportService : IFrozenReportService
                 DateOnly fiscalEndDate = (await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken)).FiscalEndDate;
                 ProfitControlSheetResponse response = new();
                 // Build composite key sets (Ssn, Id) to disambiguate potential duplicate SSNs with different Demographic/Beneficiary records.
-                var employeeKeys = await (await _demographicReaderService.BuildDemographicQuery(ctx, true))
+                var employeeKeys = await (await _demographicReaderService.BuildDemographicQueryAsync(ctx, true))
                     .Select(d => new { d.Ssn, d.Id })
                     .ToListAsync(cancellationToken);
                 var employeeKeySet = employeeKeys

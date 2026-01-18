@@ -52,7 +52,7 @@ public sealed class GetProfitSharingReportValidationEndpoint
         ProfitSharingReportValidationRequest req,
         CancellationToken ct)
     {
-        var result = await _crossReferenceValidationService.ValidateProfitSharingReport(
+        var result = await _crossReferenceValidationService.ValidateProfitSharingReportAsync(
             req.ProfitYear,
             req.ReportSuffix,
             req.UseFrozenData,

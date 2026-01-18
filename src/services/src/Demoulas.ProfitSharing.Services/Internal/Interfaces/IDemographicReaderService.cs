@@ -9,7 +9,7 @@ namespace Demoulas.ProfitSharing.Services.Internal.Interfaces;
 /// </summary>
 public interface IDemographicReaderService
 {
-    Task<IQueryable<Demographic>> BuildDemographicQuery(IProfitSharingDbContext ctx, bool useFrozenData = false);
+    Task<IQueryable<Demographic>> BuildDemographicQueryAsync(IProfitSharingDbContext ctx, bool useFrozenData = false);
     /// <summary>
     /// Builds a demographic query representing data as-of a specific point in time (ignores active frozen state).
     /// </summary>

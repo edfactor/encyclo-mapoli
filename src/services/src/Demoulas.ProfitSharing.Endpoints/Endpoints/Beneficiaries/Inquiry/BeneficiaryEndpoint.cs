@@ -31,7 +31,7 @@ public class BeneficiaryEndpoint : ProfitSharingEndpoint<BeneficiaryRequestDto, 
 
     protected override async Task<BeneficiaryResponse> HandleRequestAsync(BeneficiaryRequestDto req, CancellationToken ct)
     {
-        var result = await _beneficiaryService.GetBeneficiary(req, ct);
+        var result = await _beneficiaryService.GetBeneficiaryAsync(req, ct);
         return result ?? new BeneficiaryResponse();
     }
 

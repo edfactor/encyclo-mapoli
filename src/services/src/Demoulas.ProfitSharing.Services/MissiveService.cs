@@ -46,7 +46,7 @@ internal sealed class MissiveService : IMissiveService
             await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 // Pre-fetch demographics for all SSNs
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                 var dobList = await demographics
                     .Where(d => ssnSet.Contains(d.Ssn))
                     .Select(d => new { d.Ssn, d.DateOfBirth })

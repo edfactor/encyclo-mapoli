@@ -63,7 +63,7 @@ public class CleanupReportService : ICleanupReportService
         {
             var data = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                 var query = from dem in demographics
                         .Include(d => d.EmploymentStatus)
                             where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
@@ -124,7 +124,7 @@ public class CleanupReportService : ICleanupReportService
                 // Always use live/now data
                 // This assumes all the payprofits for lastest year are available
                 var latestYear = await ctx.PayProfits.MaxAsync(p => p.ProfitYear, cancellationToken);
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                 var nameAndDobQuery = demographics
                     .Include(d => d.PayProfits.Where(p => p.ProfitYear == latestYear))
                     .Select(x => new

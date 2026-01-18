@@ -37,6 +37,6 @@ public sealed class StateTaxEndpoint : ProfitSharingEndpoint<StateTaxLookupReque
 
     protected override Task<StateTaxLookupResponse> HandleRequestAsync(StateTaxLookupRequest req, CancellationToken ct)
     {
-        return _stateTaxLookupService.LookupStateTaxRate(req.State, ct);
+        return _stateTaxLookupService.LookupStateTaxRateAsync(req.State, ct);
     }
 }

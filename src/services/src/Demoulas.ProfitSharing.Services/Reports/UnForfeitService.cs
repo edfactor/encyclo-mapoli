@@ -56,7 +56,7 @@ public sealed class UnforfeitService : IUnforfeitService
 
                 IQueryable<ParticipantTotalYear>? yearsOfServiceQuery = _totalService.GetYearsOfService(context, profitYear, today);
                 IQueryable<ParticipantTotalVestingBalance>? vestingServiceQuery = _totalService.TotalVestingBalance(context, profitYear, today);
-                IQueryable<Demographic>? demo = await _demographicReaderService.BuildDemographicQuery(context);
+                IQueryable<Demographic>? demo = await _demographicReaderService.BuildDemographicQueryAsync(context);
 
                 // PERFORMANCE: Pre-filter demographics to reduce join volume
                 IQueryable<Demographic>? activeDemographics = demo

@@ -50,7 +50,7 @@ public sealed class UnmaskingService : IUnmaskingService
         // Fetch demographic data in single query
         var demographicData = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             return await demographicQuery
                 .TagWith($"UnmaskSsn-DemographicId:{demographicId}")

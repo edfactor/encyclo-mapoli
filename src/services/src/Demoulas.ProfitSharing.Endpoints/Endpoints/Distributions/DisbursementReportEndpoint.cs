@@ -39,7 +39,7 @@ public sealed class DisbursementReportEndpoint : ProfitSharingEndpoint<ProfitYea
         ProfitYearRequest req,
         CancellationToken ct)
     {
-        var result = await _distributionService.GetDisbursementReport(req, ct);
+        var result = await _distributionService.GetDisbursementReportAsync(req, ct);
         return result.ToHttpResult(Common.Contracts.Error.EntityNotFound("DisbursementReport"));
     }
 }

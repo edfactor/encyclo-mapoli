@@ -34,7 +34,7 @@ public class UpdateBeneficiaryContactEndpoint : ProfitSharingEndpoint<UpdateBene
     {
         try
         {
-            var updated = await _beneficiaryService.UpdateBeneficiaryContact(req, ct);
+            var updated = await _beneficiaryService.UpdateBeneficiaryContactAsync(req, ct);
             if (updated is null)
             {
                 return Result<UpdateBeneficiaryContactResponse>.Failure(Error.EntityNotFound("BeneficiaryContact")).ToHttpResult(Error.EntityNotFound("BeneficiaryContact"));

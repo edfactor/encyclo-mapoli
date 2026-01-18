@@ -70,7 +70,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     /// <param name="request">The beneficiary search filter request.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Paginated beneficiary results.</returns>
-    public async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilter(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken)
+    public async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilterAsync(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken)
     {
         // Call MasterInquiryService.GetMembersAsync to handle all member searches
         var masterInquiryRequest = new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest
@@ -239,9 +239,9 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     /// <param name="request">The beneficiary request containing badge number and PSN suffix.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Beneficiary response with current beneficiaries and beneficiary-of relationships.</returns>
-    public async Task<BeneficiaryResponse> GetBeneficiary(BeneficiaryRequestDto request, CancellationToken cancellationToken)
+    public async Task<BeneficiaryResponse> GetBeneficiaryAsync(BeneficiaryRequestDto request, CancellationToken cancellationToken)
     {
-        var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
+        var frozenStateResponse = await _frozenService.GetActiveFrozenDemographicAsync(cancellationToken);
         short yearEnd = frozenStateResponse.ProfitYear;
 
         var beneficiaryRows = await _dataContextFactory.UseReadOnlyContext(async context =>
@@ -442,9 +442,9 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     /// <param name="request">The beneficiary detail request.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Detailed beneficiary information including current balance.</returns>
-    public async Task<BeneficiaryDetailResponse> GetBeneficiaryDetail(BeneficiaryDetailRequest request, CancellationToken cancellationToken)
+    public async Task<BeneficiaryDetailResponse> GetBeneficiaryDetailAsync(BeneficiaryDetailRequest request, CancellationToken cancellationToken)
     {
-        var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
+        var frozenStateResponse = await _frozenService.GetActiveFrozenDemographicAsync(cancellationToken);
         short yearEnd = frozenStateResponse.ProfitYear;
 
         List<BeneficiaryDetailResponse> result;
@@ -530,7 +530,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     /// <param name="beneficiaryTypesRequestDto">The beneficiary types request.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Response containing list of beneficiary types.</returns>
-    public async Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypes(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellationToken)
+    public async Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypesAsync(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellationToken)
     {
         var result = await _dataContextFactory.UseReadOnlyContext(context =>
         {

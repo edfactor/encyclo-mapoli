@@ -9,5 +9,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IProfitShareEditService
 {
     // external method used by endpoints to return data to browser.   No SSN in this result.
-    Task<ProfitShareEditResponse> ProfitShareEdit(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
+    Task<ProfitShareEditResponse> ProfitShareEditAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
 }

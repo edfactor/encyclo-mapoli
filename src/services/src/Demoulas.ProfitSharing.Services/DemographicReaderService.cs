@@ -26,12 +26,12 @@ public sealed class DemographicReaderService : IDemographicReaderService
         _http = http;
     }
 
-    public async Task<IQueryable<Demographic>> BuildDemographicQuery(IProfitSharingDbContext ctx, bool useFrozenData = false)
+    public async Task<IQueryable<Demographic>> BuildDemographicQueryAsync(IProfitSharingDbContext ctx, bool useFrozenData = false)
     {
         if (useFrozenData)
         {
             // ---- FROZEN ------------------------------------------------------
-            _frozenState ??= await _frozenService.GetActiveFrozenDemographic();
+            _frozenState ??= await _frozenService.GetActiveFrozenDemographicAsync();
 
             if (_http.HttpContext != null)
             {

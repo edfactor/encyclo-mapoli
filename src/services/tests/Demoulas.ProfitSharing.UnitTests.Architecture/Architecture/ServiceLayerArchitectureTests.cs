@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Reflection;
-using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace Demoulas.ProfitSharing.UnitTests.Architecture.Architecture;
 
@@ -11,18 +10,18 @@ namespace Demoulas.ProfitSharing.UnitTests.Architecture.Architecture;
 [Collection("Architecture Tests")]
 public sealed class ServiceLayerArchitectureTests
 {
-    private static readonly System.Reflection.Assembly s_servicesAssembly = ProfitSharingArchitectureFixture.ServicesAssembly;
-    private static readonly System.Reflection.Assembly s_commonAssembly = ProfitSharingArchitectureFixture.CommonAssembly;
+    private static readonly System.Reflection.Assembly _servicesAssembly = ProfitSharingArchitectureFixture.ServicesAssembly;
+    private static readonly System.Reflection.Assembly _commonAssembly = ProfitSharingArchitectureFixture.CommonAssembly;
 
     // ===== EF CORE PATTERNS (from svc.services.instructions.md) =====
 
     [Fact]
-    [Description("PS-XXXX : Services must use IProfitSharingDataContextFactory pattern")]
+    [Description("Services must use IProfitSharingDataContextFactory pattern")]
     public void Services_MustUse_DataContextFactoryPattern()
     {
         // Get all service types
-        var serviceTypes = s_servicesAssembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract)
+        var serviceTypes = _servicesAssembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false })
             .Where(t => t.Name.EndsWith("Service", StringComparison.Ordinal))
             .Where(t => !t.Name.Contains("Extension", StringComparison.Ordinal)) // Extension classes exempt
             .Where(t => !t.Name.Contains("Helper", StringComparison.Ordinal)) // Helper classes exempt
@@ -60,12 +59,12 @@ public sealed class ServiceLayerArchitectureTests
     }
 
     [Fact]
-    [Description("PS-XXXX : Service methods should return Task or ValueTask for async operations")]
+    [Description("Service methods should return Task or ValueTask for async operations")]
     public void ServiceMethods_ShouldBe_AsyncForDataOperations()
     {
         // Get all service types
-        var serviceTypes = s_servicesAssembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract)
+        var serviceTypes = _servicesAssembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false })
             .Where(t => t.Name.EndsWith("Service", StringComparison.Ordinal))
             .ToList();
 
@@ -145,11 +144,11 @@ public sealed class ServiceLayerArchitectureTests
     // ===== INTERFACE PATTERNS (from svc.services.instructions.md) =====
 
     [Fact]
-    [Description("PS-XXXX : Public services must have corresponding interface")]
+    [Description("Public services must have corresponding interface")]
     public void PublicServices_ShouldHave_CorrespondingInterface()
     {
-        var serviceTypes = s_servicesAssembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && t.IsPublic)
+        var serviceTypes = _servicesAssembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
             .Where(t => t.Name.EndsWith("Service", StringComparison.Ordinal))
             .Where(t => !t.Name.Contains("Extension", StringComparison.Ordinal))
             .Where(t => !t.Name.Contains("Helper", StringComparison.Ordinal))
@@ -197,10 +196,10 @@ public sealed class ServiceLayerArchitectureTests
     // ===== RESULT PATTERN (from svc.services.instructions.md) =====
 
     [Fact]
-    [Description("PS-XXXX : Services should use Result<T> pattern for error handling")]
+    [Description("Services should use Result<T> pattern for error handling")]
     public void Services_ShouldUse_ResultPatternForErrors()
     {
-        var serviceInterfaces = s_commonAssembly.GetTypes()
+        var serviceInterfaces = _commonAssembly.GetTypes()
             .Where(t => t.IsInterface)
             .Where(t => t.Name.StartsWith("I", StringComparison.Ordinal) &&
                         t.Name.EndsWith("Service", StringComparison.Ordinal))
@@ -265,11 +264,11 @@ public sealed class ServiceLayerArchitectureTests
     // ===== NAMING CONVENTIONS (from instruction files) =====
 
     [Fact]
-    [Description("PS-XXXX : Async methods should have Async suffix")]
+    [Description("Async methods should have Async suffix")]
     public void AsyncMethods_ShouldHave_AsyncSuffix()
     {
-        var serviceTypes = s_servicesAssembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && t.IsPublic)
+        var serviceTypes = _servicesAssembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
             .Where(t => t.Name.EndsWith("Service", StringComparison.Ordinal))
             .ToList();
 
@@ -298,8 +297,8 @@ public sealed class ServiceLayerArchitectureTests
         }
 
         // Allow some flexibility - legacy methods may not follow convention
-        var totalAsyncMethods = s_servicesAssembly.GetTypes()
-            .Where(t => t.IsClass && t.IsPublic && t.Name.EndsWith("Service", StringComparison.Ordinal))
+        var totalAsyncMethods = _servicesAssembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsPublic: true } && t.Name.EndsWith("Service", StringComparison.Ordinal))
             .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
             .Count(m =>
             {
@@ -312,8 +311,8 @@ public sealed class ServiceLayerArchitectureTests
         var methodsWithSuffix = totalAsyncMethods - violations.Count;
         var percentageCorrect = totalAsyncMethods > 0 ? (double)methodsWithSuffix / totalAsyncMethods * 100 : 100;
 
-        // At least 55% should have Async suffix (tracking adoption - threshold will increase)
-        Assert.True(percentageCorrect >= 55,
+        // At least 75% should have Async suffix (tracking adoption - threshold will increase)
+        Assert.True(percentageCorrect >= 75,
             $"Only {percentageCorrect:F1}% of async methods have 'Async' suffix. " +
             $"Violations:\n{string.Join("\n", violations.Take(10))}...");
     }

@@ -132,7 +132,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 // NEW: Filter demographics to SSN set first, then group - much smaller dataset
                 // ORACLE LIMIT: Batch SSN list to avoid ORA-01795 (max 1000 items in IN clause)
                 _logger.LogInformation("TRACE: Starting optimized duplicate SSN detection");
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                 var duplicateSsns = new HashSet<int>();
 
                 const int oracleBatchSize = 1000;
@@ -177,7 +177,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     // ORACLE LIMIT: Use same batching as main path (unlikely to hit limit here, but consistent)
                     if (ssnList.Count > 0)
                     {
-                        var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+                        var demographicsForDup = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                         duplicateSsns = [];
 
                         var exactMatchBatches = ssnList.Chunk(oracleBatchSize).ToList();
@@ -373,7 +373,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             else if (req.MemberType == 1) // Employee only
             {
                 // For employees, query Demographics
-                var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographicsForDup = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                 ssnFromBadge = demographicsForDup
                     .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
                     .Select(d => d.Ssn)
@@ -404,7 +404,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         .TagWith($"MasterInquiry: Get SSN for all Beneficiaries with BadgeNumber {req.BadgeNumber.Value}");
                 }
 
-                var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographicsForDup = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                 var employeeSSNs = demographicsForDup
                     .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
                     .Select(d => d.Ssn)
@@ -660,7 +660,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 // OPTIMIZATION: Load demographics only if needed (when there are partner references)
                 if (demographics == null)
                 {
-                    demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+                    demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
                 }
 
                 // Single query to get both employees and beneficiaries

@@ -31,7 +31,7 @@ public class BeneficiaryDetailEndpoint : ProfitSharingEndpoint<BeneficiaryDetail
 
     protected override Task<BeneficiaryDetailResponse> HandleRequestAsync(BeneficiaryDetailRequest req, CancellationToken ct)
     {
-        return _beneficiaryService.GetBeneficiaryDetail(req, ct);
+        return _beneficiaryService.GetBeneficiaryDetailAsync(req, ct);
     }
 
 }

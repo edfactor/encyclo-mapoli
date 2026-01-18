@@ -40,7 +40,7 @@ public sealed class DistributionRunReportOnHoldEndpoint : ProfitSharingEndpoint<
         SortedPaginationRequestDto req,
         CancellationToken ct)
     {
-        var result = await _distributionService.GetDistributionsOnHold(req, ct);
+        var result = await _distributionService.GetDistributionsOnHoldAsync(req, ct);
         return result.ToHttpResult(Error.EntityNotFound("OnHoldDistributions"));
     }
 }

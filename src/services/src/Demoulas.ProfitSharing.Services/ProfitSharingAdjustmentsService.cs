@@ -61,7 +61,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 });
             }
 
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, useFrozenData: false);
 
             var demographic = await demographicQuery
                 .TagWith($"ProfitSharingAdjustments-Get-Demographic-{request.BadgeNumber}")
@@ -226,7 +226,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
         {
             var result = await _dbContextFactory.UseWritableContext(async ctx =>
             {
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
+                var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, useFrozenData: false);
 
                 var demographic = await demographicQuery
                     .TagWith($"ProfitSharingAdjustments-Save-Demographic-{request.BadgeNumber}")

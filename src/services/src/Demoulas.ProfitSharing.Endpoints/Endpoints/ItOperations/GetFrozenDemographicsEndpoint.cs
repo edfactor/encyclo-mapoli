@@ -57,7 +57,7 @@ public class GetFrozenDemographicsEndpoint : ProfitSharingEndpoint<SortedPaginat
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            var response = await _frozenService.GetFrozenDemographics(req, ct);
+            var response = await _frozenService.GetFrozenDemographicsAsync(req, ct);
 
             var cacheStatus = HttpContext.Response.Headers.ContainsKey("X-Cache") ? "hit" : "miss";
             if (cacheStatus == "hit")

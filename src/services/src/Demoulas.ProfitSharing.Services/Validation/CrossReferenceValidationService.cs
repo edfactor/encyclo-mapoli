@@ -148,7 +148,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         }
     }
 
-    public async Task<Result<ValidationResponse>> ValidateProfitSharingReport(short profitYear, string reportSuffix, bool isFrozen, CancellationToken cancellationToken = default)
+    public async Task<Result<ValidationResponse>> ValidateProfitSharingReportAsync(short profitYear, string reportSuffix, bool isFrozen, CancellationToken cancellationToken = default)
     {
         var checksumPrefix = reportSuffix switch
         {
@@ -206,7 +206,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         return Result<ValidationResponse>.Success(rslt);
     }
 
-    public async Task<ValidationResponse> ValidateForfeitureAndPointsReport(short profitYear, decimal distributionTotal, decimal forfeitTotal, CancellationToken cancellationToken = default)
+    public async Task<ValidationResponse> ValidateForfeitureAndPointsReportAsync(short profitYear, decimal distributionTotal, decimal forfeitTotal, CancellationToken cancellationToken = default)
     {
         var currentValues = new Dictionary<string, decimal>
         {
@@ -267,7 +267,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         return rslt;
     }
 
-    public async Task<ValidationResponse> ValidateBreakoutReportGrandTotal(
+    public async Task<ValidationResponse> ValidateBreakoutReportGrandTotalAsync(
         short profitYear,
         int numberOfEmployees,
         decimal beginningBalance,

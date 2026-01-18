@@ -39,7 +39,7 @@ public sealed class DistributionRunReportEndpoint : ProfitSharingEndpoint<Distri
         DistributionRunReportRequest req,
         CancellationToken ct)
     {
-        var result = await _distributionService.GetDistributionRunReport(req, ct);
+        var result = await _distributionService.GetDistributionRunReportAsync(req, ct);
         return result.ToHttpResult(Common.Contracts.Error.EntityNotFound("DistributionRunReport"));
     }
 }

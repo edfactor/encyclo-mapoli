@@ -31,7 +31,7 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
         {
             return await _dataContextFactory.UseWritableContext((Func<Data.Contexts.ProfitSharingDbContext, Task<Result<bool>>>)(async ctx =>
             {
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+                var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
                 HashSet<int> ssns = new() { sourceSsn, destinationSsn };
 
                 List<Demographic> source = await demographicQuery

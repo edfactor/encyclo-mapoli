@@ -58,7 +58,7 @@ public sealed class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDis
 
     protected override async Task<CreateOrUpdateDistributionResponse> HandleRequestAsync(CreateDistributionRequest req, CancellationToken ct)
     {
-        var result = await _distributionService.CreateDistribution(req, ct);
+        var result = await _distributionService.CreateDistributionAsync(req, ct);
         _logger.LogInformation("Distribution created with id {DistributionId}", result?.Id ?? 0);
         return result!;
     }

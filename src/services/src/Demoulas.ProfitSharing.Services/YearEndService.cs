@@ -77,7 +77,7 @@ public sealed class YearEndService : IYearEndService
           The "rebuild" argument is for rebuilding a prior year.   It rebuilds a year, but does not push the year values forward to the next year.  "rebuild" should only
           be used after importing scramble/uat/prod data to rebuild the prior Year End values.
     */
-    public async Task RunFinalYearEndUpdates(short profitYear, bool rebuild, CancellationToken ct)
+    public async Task RunFinalYearEndUpdatesAsync(short profitYear, bool rebuild, CancellationToken ct)
     {
         using var activity = Activity.Current?.Source.StartActivity("RunFinalYearEndUpdates");
         activity?.SetTag("profit_year", profitYear);
@@ -413,9 +413,9 @@ WHERE pp.employee_type_id != src.new_employee_type_id
         }
     }
 
-    public Task UpdateEnrollmentId(short profitYear, CancellationToken ct)
+    public Task UpdateEnrollmentIdAsync(short profitYear, CancellationToken ct)
     {
-        return _payProfitUpdateService.SetEnrollmentId(profitYear, ct);
+        return _payProfitUpdateService.SetEnrollmentIdAsync(profitYear, ct);
     }
 
     /// <summary>
@@ -425,7 +425,7 @@ WHERE pp.employee_type_id != src.new_employee_type_id
     /// Based on the Year_end_update_status table, independent of wall clock time.
     /// This function focuses on completed year-end status and does not check for active freeze state.
     /// </remarks>
-    public Task<short> GetCompletedYearEnd(CancellationToken ct)
+    public Task<short> GetCompletedYearEndAsync(CancellationToken ct)
     {
         return _profitSharingDataContextFactory.UseReadOnlyContext(
             async ctx =>
@@ -439,9 +439,9 @@ WHERE pp.employee_type_id != src.new_employee_type_id
             }, ct);
     }
 
-    public async Task<short> GetOpenProfitYear(CancellationToken ct)
+    public async Task<short> GetOpenProfitYearAsync(CancellationToken ct)
     {
-        var completedYearEnd = await GetCompletedYearEnd(ct);
+        var completedYearEnd = await GetCompletedYearEndAsync(ct);
         // consider looking into freeze - aka a freeze should exist for
         // compltedYearEnd + 1 or we are in trouble town.
         return (short)(completedYearEnd + 1);

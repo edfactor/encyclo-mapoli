@@ -112,7 +112,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private async Task<Employee?> FetchEmployee(IProfitSharingDbContext ctx, int? badgeMaybe, int? ssnMaybe, CancellationToken ct)
     {
         var profitYear = _timeProvider.GetLocalYear();
-        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+        var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
 
         return await demographics
             .Where(d => ssnMaybe.HasValue && ssnMaybe.Value == d.Ssn || badgeMaybe.HasValue && badgeMaybe.Value == d.BadgeNumber)
@@ -136,7 +136,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
         return await _dbContextFactory.UseWritableContext(async context =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(context, false);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(context, false);
             var employeeData = await demographics
                 .Where(d => d.BadgeNumber == req.BadgeNumber)
                 .Select(d => new

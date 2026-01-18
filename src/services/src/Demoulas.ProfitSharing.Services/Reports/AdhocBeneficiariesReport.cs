@@ -32,7 +32,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             var employeeSsns = demographicQuery.Select(d => d.Ssn);
             var baseQuery = ctx.Beneficiaries
                 .Where(b => !b.IsDeleted)

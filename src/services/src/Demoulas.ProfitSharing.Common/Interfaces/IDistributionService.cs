@@ -10,12 +10,12 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IDistributionService
 {
     Task<PaginatedResponseDto<DistributionSearchResponse>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken);
-    Task<CreateOrUpdateDistributionResponse> CreateDistribution(CreateDistributionRequest request, CancellationToken cancellationToken);
-    Task<Result<CreateOrUpdateDistributionResponse>> UpdateDistribution(UpdateDistributionRequest request, CancellationToken cancellationToken);
-    Task<Result<bool>> DeleteDistribution(int distributionId, CancellationToken cancellationToken);
-    Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken);
-    Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken);
-    Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken);
-    Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken);
-    Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReport(ProfitYearRequest request, CancellationToken cancellationToken);
+    Task<CreateOrUpdateDistributionResponse> CreateDistributionAsync(CreateDistributionRequest request, CancellationToken cancellationToken);
+    Task<Result<CreateOrUpdateDistributionResponse>> UpdateDistributionAsync(UpdateDistributionRequest request, CancellationToken cancellationToken);
+    Task<Result<bool>> DeleteDistributionAsync(int distributionId, CancellationToken cancellationToken);
+    Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummaryAsync(CancellationToken cancellationToken);
+    Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHoldAsync(SortedPaginationRequestDto request, CancellationToken cancellationToken);
+    Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributionsAsync(SortedPaginationRequestDto request, CancellationToken cancellationToken);
+    Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReportAsync(DistributionRunReportRequest request, CancellationToken cancellationToken);
+    Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReportAsync(ProfitYearRequest request, CancellationToken cancellationToken);
 }

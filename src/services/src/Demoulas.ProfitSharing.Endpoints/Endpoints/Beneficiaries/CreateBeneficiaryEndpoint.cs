@@ -34,7 +34,7 @@ public class CreateBeneficiaryAndContactEndpoint : ProfitSharingEndpoint<CreateB
         CreateBeneficiaryRequest req,
         CancellationToken ct)
     {
-        var result = await _beneficiaryService.CreateBeneficiary(req, ct);
+        var result = await _beneficiaryService.CreateBeneficiaryAsync(req, ct);
         return Result<CreateBeneficiaryResponse>.Success(result).ToHttpResult();
     }
 }

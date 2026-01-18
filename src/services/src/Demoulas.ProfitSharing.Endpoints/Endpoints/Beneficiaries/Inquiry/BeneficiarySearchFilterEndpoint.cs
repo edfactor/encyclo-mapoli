@@ -34,7 +34,7 @@ public class BeneficiarySearchFilterEndpoint : ProfitSharingEndpoint<Beneficiary
         BeneficiarySearchFilterRequest req,
         CancellationToken ct)
     {
-        var result = await _beneficiaryService.BeneficiarySearchFilter(req, ct);
+        var result = await _beneficiaryService.BeneficiarySearchFilterAsync(req, ct);
         return result ?? new PaginatedResponseDto<BeneficiarySearchFilterResponse>();
     }
 

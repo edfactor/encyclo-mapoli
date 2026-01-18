@@ -32,7 +32,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
             return _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
 
-                IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
                 return await GetDuplicateSsnQuery(demographics).AnyAsync(ct);
 
@@ -45,7 +45,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
             {
                 short cutoffYear = (short)(DateTime.UtcNow.Year - 5);
                 var cal = await _calendarService.GetYearStartAndEndAccountingDatesAsync(cutoffYear, ct);
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
                 var dupSsns = await GetDuplicateSsnQuery(demographics).ToHashSetAsync(ct);
 

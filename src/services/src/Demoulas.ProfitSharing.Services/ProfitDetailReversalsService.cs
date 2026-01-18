@@ -140,7 +140,7 @@ public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
                 }
 
                 // Phase 3: All validations passed, now process all records
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+                var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
                 var employeeSsns = await demographicQuery
                     .Where(d => profitDetails.Select(pd => pd.Ssn).Contains(d.Ssn))
                     .Select(d => d.Ssn)
