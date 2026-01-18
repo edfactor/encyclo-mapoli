@@ -36,7 +36,7 @@ export const NavigationStatusApi = createApi({
     }),
     updateNavigationStatus: builder.query<UpdateNavigationResponseDto, UpdateNavigationRequestDto>({
       query: (request) => ({
-        url: `/common/navigation`,
+        url: `/common/navigation/status`,
         method: "PUT",
         body: request
       }),
