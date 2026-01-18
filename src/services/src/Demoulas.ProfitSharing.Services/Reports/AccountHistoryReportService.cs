@@ -132,6 +132,15 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 cancellationToken)).ToList();
 
             var reportData = (await Task.WhenAll(tasks)).ToList();
+            var latestProfitYear = reportData.Count == 0
+                ? (short)startYear
+                : reportData.Max(r => r.ProfitYear);
+            var latestVestedBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
+                SearchBy.BadgeNumber,
+                badgeNumber,
+                latestProfitYear,
+                cancellationToken);
+            var totalVestedBalance = latestVestedBalance?.VestedBalance ?? 0m;
 
             // Build response - for year-based sort, data is already in correct order and paginated
             if (isYearBasedSort)
@@ -143,14 +152,14 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     TotalEarnings = reportData.Sum(r => r.Earnings),
                     TotalForfeitures = reportData.Sum(r => r.Forfeitures),
                     TotalWithdrawals = reportData.Sum(r => r.Withdrawals),
-                    TotalVestedBalance = reportData.OrderByDescending(r => r.ProfitYear).First().EndingBalance
+                    TotalVestedBalance = totalVestedBalance
                 };
 
                 return BuildPaginatedResponsePreSorted(reportData, request, startYear, totalYearCount, cumulativeTotals);
             }
 
             // For non-year sorting, apply sorting and pagination now
-            return BuildPaginatedResponse(reportData, request, startYear);
+            return BuildPaginatedResponse(reportData, request, startYear, totalVestedBalance);
         }, cancellationToken);
     }
 
@@ -229,7 +238,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
     private static AccountHistoryReportPaginatedResponse BuildPaginatedResponse(
         List<AccountHistoryReportResponse> reportData,
         AccountHistoryReportRequest request,
-        int startYear)
+        int startYear,
+        decimal totalVestedBalance)
     {
         // Apply sorting based on request parameters
         var sortBy = request.SortBy ?? "ProfitYear";
@@ -275,7 +285,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 TotalContributions = totalContributions,
                 TotalEarnings = totalEarnings,
                 TotalForfeitures = totalForfeitures,
-                TotalWithdrawals = totalWithdrawals
+                TotalWithdrawals = totalWithdrawals,
+                TotalVestedBalance = totalVestedBalance
             }
         };
     }
