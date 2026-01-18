@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Demoulas.Common.Contracts.Interfaces.Audit;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
@@ -99,6 +100,7 @@ public static class ServicesExtension
 
 
         _ = builder.Services.AddScoped<IProfitSharingAuditService, ProfitSharingProfitSharingAuditService>();
+        _ = builder.Services.AddScoped<IAuditService>(sp => sp.GetRequiredService<IProfitSharingAuditService>());
 
         _ = builder.Services.AddScoped<TotalService>();
 

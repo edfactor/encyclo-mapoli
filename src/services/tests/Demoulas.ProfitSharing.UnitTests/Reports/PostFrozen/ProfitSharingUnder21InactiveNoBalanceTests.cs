@@ -11,6 +11,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 
+[Collection("Year-End Tests")]
 public class ProfitSharingUnder21InactiveNoBalanceTests : ApiTestBase<Program>
 {
     [Fact(DisplayName = "PS-759 - Profit Sharing under 21 inactive/nobalance")]

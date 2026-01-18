@@ -9,6 +9,8 @@ public class NavigationFaker
     {
         // Common statuses
         var notStarted = new NavigationStatus { Id = NavigationStatusIds.NotStarted, Name = "Not Started" };
+        var inProgress = new NavigationStatus { Id = NavigationStatusIds.InProgress, Name = "In Progress" };
+        var onHold = new NavigationStatus { Id = NavigationStatusIds.OnHold, Name = "On Hold" };
         var complete = new NavigationStatus { Id = NavigationStatusIds.Complete, Name = "Complete" };
 
         // Common role sets (Ids follow NavigationRole.Contants; Names mirror Security.Role strings)
@@ -144,6 +146,20 @@ public class NavigationFaker
         if (masterUpdate != null && manageExecHours != null)
         {
             masterUpdate.PrerequisiteNavigations = new List<Navigation> { manageExecHours };
+        }
+
+        var ytdWagesExtract = list.FirstOrDefault(n => n.Id == 105);
+        if (ytdWagesExtract != null)
+        {
+            ytdWagesExtract.StatusId = NavigationStatusIds.InProgress;
+            ytdWagesExtract.NavigationStatus = inProgress;
+        }
+
+        var terminations = list.FirstOrDefault(n => n.Id == 145);
+        if (terminations != null)
+        {
+            terminations.StatusId = NavigationStatusIds.OnHold;
+            terminations.NavigationStatus = onHold;
         }
 
         return list;
