@@ -185,7 +185,6 @@ public sealed class YearEndService : IYearEndService
         const byte zcrUnder21 = ZeroContributionReason.Constants.Under21WithOver1Khours; // 1
         const byte zcrTerminated = ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested; // 2
         const byte zcr65Plus5Years = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested; // 6
-        const byte zcr64Vesting = ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay; // 7
 
         // Constants for EmployeeType
         const byte empTypeNotNew = EmployeeType.Constants.NotNewLastYear; // 0
@@ -254,10 +253,10 @@ USING (
             CASE WHEN (d.date_of_birth <= :minAge18BirthDate AND pp.total_hours >= ${minHours})
                       OR d.date_of_birth <= :minAge64BirthDate
                  THEN 1 ELSE 0 END AS is_eligible,
-            -- Years since first contribution (with +1 if had balance last year)
+            -- Years since first contribution (plan-year based)
             CASE
                 WHEN fc.first_year IS NULL THEN 0
-                ELSE :profitYear - fc.first_year + CASE WHEN NVL(pb.total_balance, 0) > 0 THEN 1 ELSE 0 END
+                ELSE :profitYear - fc.first_year
             END AS years_since_first
         FROM pay_profit pp
         JOIN demographic d ON pp.demographic_id = d.id
@@ -291,10 +290,6 @@ USING (
                 CASE
                     -- Age 65+ with 5+ years vesting
                     WHEN c.age >= :retirementAge AND c.years_since_first >= :vestingYears THEN :zcr65Plus5Years
-                    -- Age 65+ with 4 years vesting (vesting next year)
-                    WHEN c.age >= :retirementAge AND c.years_since_first = :vestingYearsMinus1 THEN :zcr64Vesting
-                    -- Age 64 with 4+ years vesting
-                    WHEN c.age = :retirementAgeMinus1 AND c.years_since_first >= :vestingYearsMinus1 THEN :zcr64Vesting
                     -- Terminated with >= 1000 hours
                     WHEN c.has_min_hours = 1 THEN :zcrTerminated
                     ELSE :zcrNormal
@@ -306,10 +301,6 @@ USING (
                     WHEN NVL(c.current_zcr, 0) >= :zcr65Plus5Years THEN NVL(c.current_zcr, :zcrNormal)
                     -- Age 65+ with 5+ years vesting
                     WHEN c.age >= :retirementAge AND c.years_since_first >= :vestingYears THEN :zcr65Plus5Years
-                    -- Age 65+ with 4 years vesting
-                    WHEN c.age >= :retirementAge AND c.years_since_first = :vestingYearsMinus1 THEN :zcr64Vesting
-                    -- Age 64 with 4+ years vesting
-                    WHEN c.age = :retirementAgeMinus1 AND c.years_since_first >= :vestingYearsMinus1 THEN :zcr64Vesting
                     ELSE :zcrNormal
                 END
             -- Active employees under 64
@@ -388,14 +379,12 @@ WHERE pp.employee_type_id != src.new_employee_type_id
             cmd.Parameters.Add(":zcrUnder21", OracleDbType.Byte).Value = zcrUnder21;
             cmd.Parameters.Add(":zcrTerminated", OracleDbType.Byte).Value = zcrTerminated;
             cmd.Parameters.Add(":zcr65Plus5Years", OracleDbType.Byte).Value = zcr65Plus5Years;
-            cmd.Parameters.Add(":zcr64Vesting", OracleDbType.Byte).Value = zcr64Vesting;
 
             // Business rule constants
             cmd.Parameters.Add(":minAgeForContribution", OracleDbType.Int16).Value = ReferenceData.MinimumAgeForContribution;
             cmd.Parameters.Add(":retirementAge", OracleDbType.Int16).Value = ReferenceData.RetirementAge;
             cmd.Parameters.Add(":retirementAgeMinus1", OracleDbType.Int16).Value = ReferenceData.RetirementAge - 1;
             cmd.Parameters.Add(":vestingYears", OracleDbType.Int16).Value = ReferenceData.VestingYears;
-            cmd.Parameters.Add(":vestingYearsMinus1", OracleDbType.Int16).Value = ReferenceData.VestingYears - 1;
 
             var sqlStopwatch = Stopwatch.StartNew();
             int rowsAffected = await cmd.ExecuteNonQueryAsync(ct);
@@ -454,7 +443,7 @@ WHERE pp.employee_type_id != src.new_employee_type_id
     {
         var completedYearEnd = await GetCompletedYearEnd(ct);
         // consider looking into freeze - aka a freeze should exist for
-        // compltedYearEnd + 1 or we are in trouble town. 
+        // compltedYearEnd + 1 or we are in trouble town.
         return (short)(completedYearEnd + 1);
     }
 }
