@@ -3,12 +3,6 @@ using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
 
@@ -65,7 +59,7 @@ public static class RateLimitingExtensions
                 string endpointName = httpContext.GetEndpoint()?.DisplayName ?? httpContext.Request.Path;
 
                 IAppUser? appUser = httpContext.RequestServices.GetService(typeof(IAppUser)) as IAppUser;
-                string userRole = string.Join(",", appUser?.GetUserAllRoles() ?? Array.Empty<string>());
+                string userRole = string.Join(",", appUser?.GetUserAllRoles() ?? new List<string>());
                 if (string.IsNullOrWhiteSpace(userRole))
                 {
                     userRole = httpContext.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
