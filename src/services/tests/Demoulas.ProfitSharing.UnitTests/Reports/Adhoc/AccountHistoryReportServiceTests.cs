@@ -27,7 +27,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.Adhoc;
 public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 {
     private readonly AccountHistoryReportService _service;
-    private readonly Mock<IAuditService> _mockAuditService;
+    private readonly Mock<IProfitSharingAuditService> _mockAuditService;
 
     public AccountHistoryReportServiceTests()
     {
@@ -47,7 +47,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         var mockEmbeddedSql = new Mock<IEmbeddedSqlService>();
         var mockAppUser = new Mock<IAppUser>();
         var mockMasterInquiry = new Mock<IMasterInquiryService>();
-        _mockAuditService = new Mock<IAuditService>();
+        _mockAuditService = new Mock<IProfitSharingAuditService>();
         var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         var frozenService = new FrozenService(MockDbContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object, new Mock<TimeProvider>().Object);
         var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());

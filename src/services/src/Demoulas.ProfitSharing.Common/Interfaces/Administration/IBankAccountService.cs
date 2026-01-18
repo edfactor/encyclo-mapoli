@@ -12,8 +12,8 @@ public interface IBankAccountService
     Task<Result<BankAccountDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<Result<BankAccountDto>> GetPrimaryAccountAsync(int bankId, CancellationToken cancellationToken = default);
     Task<Result<BankAccountDto>> GetByRoutingNumberAsync(string routingNumber, CancellationToken cancellationToken = default);
-    Task<Result<BankAccountDto>> CreateAsync(CreateBankAccountRequest request, IAuditService auditService, IAppUser appUser, CancellationToken cancellationToken = default);
-    Task<Result<BankAccountDto>> UpdateAsync(UpdateBankAccountRequest request, IAuditService auditService, IAppUser appUser, CancellationToken cancellationToken = default);
-    Task<Result<bool>> SetPrimaryAsync(int id, IAuditService auditService, IAppUser appUser, CancellationToken cancellationToken = default);
-    Task<Result<bool>> DisableAsync(int id, IAuditService auditService, IAppUser appUser, CancellationToken cancellationToken = default);
+    Task<Result<BankAccountDto>> CreateAsync(CreateBankAccountRequest request, IProfitSharingAuditService profitSharingAuditService, IAppUser appUser, CancellationToken cancellationToken = default);
+    Task<Result<BankAccountDto>> UpdateAsync(UpdateBankAccountRequest request, IProfitSharingAuditService profitSharingAuditService, IAppUser appUser, CancellationToken cancellationToken = default);
+    Task<Result<bool>> SetPrimaryAsync(int id, IProfitSharingAuditService profitSharingAuditService, IAppUser appUser, CancellationToken cancellationToken = default);
+    Task<Result<bool>> DisableAsync(int id, IProfitSharingAuditService profitSharingAuditService, IAppUser appUser, CancellationToken cancellationToken = default);
 }

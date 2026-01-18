@@ -15,14 +15,14 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
 {
     private readonly IProfitMasterService _profitMasterService;
     private readonly INavigationService _navigationService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly INavigationPrerequisiteValidator _navPrereqValidator;
     private readonly ILogger<ProfitMasterUpdateEndpoint> _logger;
     private readonly IProfitShareEditService _editService;
 
     public ProfitMasterUpdateEndpoint(IProfitMasterService profitMasterUpdate,
         INavigationService navigationService,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         INavigationPrerequisiteValidator navPrereqValidator,
         ILogger<ProfitMasterUpdateEndpoint> logger,
         IProfitShareEditService profitShareEditService)
@@ -30,7 +30,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
     {
         _profitMasterService = profitMasterUpdate;
         _navigationService = navigationService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _navPrereqValidator = navPrereqValidator;
         _logger = logger;
         _editService = profitShareEditService;
@@ -63,7 +63,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
         var updateResponse = await _profitMasterService.Update(req, ct);
 
         // Archive the completed Master Update
-        var response = await _auditService.ArchiveCompletedReportAsync("PAY444|PAY447",
+        var response = await _profitSharingAuditService.ArchiveCompletedReportAsync("PAY444|PAY447",
             req.ProfitYear,
             req,
             isArchiveRequest: true,
@@ -74,7 +74,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             },
             ct);
 
-        await _auditService.ArchiveCompletedReportAsync("PAY444",
+        await _profitSharingAuditService.ArchiveCompletedReportAsync("PAY444",
             req.ProfitYear,
             req,
             isArchiveRequest: true,

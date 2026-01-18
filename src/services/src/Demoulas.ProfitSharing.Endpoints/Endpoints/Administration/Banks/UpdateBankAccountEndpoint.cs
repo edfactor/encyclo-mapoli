@@ -13,17 +13,17 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.Banks;
 public sealed class UpdateBankAccountEndpoint : ProfitSharingEndpoint<UpdateBankAccountRequest, Results<Ok<BankAccountDto>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly IBankAccountService _bankAccountService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly IAppUser _appUser;
 
     public UpdateBankAccountEndpoint(
         IBankAccountService bankAccountService,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         IAppUser appUser)
         : base(Navigation.Constants.ManageBanks)
     {
         _bankAccountService = bankAccountService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _appUser = appUser;
     }
 
@@ -40,7 +40,7 @@ public sealed class UpdateBankAccountEndpoint : ProfitSharingEndpoint<UpdateBank
 
     protected override async Task<Results<Ok<BankAccountDto>, NotFound, BadRequest, ProblemHttpResult>> HandleRequestAsync(UpdateBankAccountRequest req, CancellationToken ct)
     {
-        var result = await _bankAccountService.UpdateAsync(req, _auditService, _appUser, ct);
+        var result = await _bankAccountService.UpdateAsync(req, _profitSharingAuditService, _appUser, ct);
         return result.ToHttpResultWithValidation(Error.BankAccountNotFound);
     }
 }

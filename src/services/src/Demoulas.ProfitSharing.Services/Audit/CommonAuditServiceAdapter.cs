@@ -3,17 +3,16 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Contracts.Response.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
-using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 
 namespace Demoulas.ProfitSharing.Services.Audit;
 
 public sealed class CommonAuditServiceAdapter : Demoulas.Common.Contracts.Interfaces.Audit.IAuditService
 {
-    private readonly Demoulas.ProfitSharing.Common.Interfaces.Audit.IAuditService _auditService;
+    private readonly Demoulas.ProfitSharing.Common.Interfaces.Audit.IProfitSharingAuditService _profitSharingAuditService;
 
-    public CommonAuditServiceAdapter(Demoulas.ProfitSharing.Common.Interfaces.Audit.IAuditService auditService)
+    public CommonAuditServiceAdapter(Demoulas.ProfitSharing.Common.Interfaces.Audit.IProfitSharingAuditService profitSharingAuditService)
     {
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     public async Task<PaginatedResponseDto<AuditEventResponse>> SearchAuditEventsAsync(
@@ -34,7 +33,7 @@ public sealed class CommonAuditServiceAdapter : Demoulas.Common.Contracts.Interf
             Take = request.Take
         };
 
-        var result = await _auditService.SearchAuditEventsAsync(mappedRequest, cancellationToken);
+        var result = await _profitSharingAuditService.SearchAuditEventsAsync(mappedRequest, cancellationToken);
         return new PaginatedResponseDto<AuditEventResponse>
         {
             Results = result.Results?.Select(MapAuditEvent).ToList() ?? [],
@@ -46,7 +45,7 @@ public sealed class CommonAuditServiceAdapter : Demoulas.Common.Contracts.Interf
         int auditEventId,
         CancellationToken cancellationToken)
     {
-        var result = await _auditService.GetAuditChangeEntriesAsync(auditEventId, cancellationToken);
+        var result = await _profitSharingAuditService.GetAuditChangeEntriesAsync(auditEventId, cancellationToken);
         return result.Select(MapAuditChangeEntry).ToList();
     }
 
@@ -57,7 +56,7 @@ public sealed class CommonAuditServiceAdapter : Demoulas.Common.Contracts.Interf
         string? details,
         CancellationToken cancellationToken = default)
     {
-        return _auditService.LogSensitiveDataAccessAsync(operationName, tableName, primaryKey, details, cancellationToken);
+        return _profitSharingAuditService.LogSensitiveDataAccessAsync(operationName, tableName, primaryKey, details, cancellationToken);
     }
 
     public Task<TResult> LogSensitiveDataAccessAsync<TResult>(
@@ -69,7 +68,7 @@ public sealed class CommonAuditServiceAdapter : Demoulas.Common.Contracts.Interf
         CancellationToken cancellationToken = default)
         where TResult : notnull
     {
-        return _auditService.LogSensitiveDataAccessAsync(operationName, tableName, primaryKey, details, operation, cancellationToken);
+        return _profitSharingAuditService.LogSensitiveDataAccessAsync(operationName, tableName, primaryKey, details, operation, cancellationToken);
     }
 
     public Task LogDataChangeAsync(
@@ -87,7 +86,7 @@ public sealed class CommonAuditServiceAdapter : Demoulas.Common.Contracts.Interf
             NewValue = change.NewValue
         }).ToList();
 
-        return _auditService.LogDataChangeAsync(operationName, tableName, auditOperation, primaryKey, mappedChanges, cancellationToken);
+        return _profitSharingAuditService.LogDataChangeAsync(operationName, tableName, auditOperation, primaryKey, mappedChanges, cancellationToken);
     }
 
     private static AuditEventResponse MapAuditEvent(AuditEventDto auditEvent)

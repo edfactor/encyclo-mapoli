@@ -10,7 +10,7 @@ using Shouldly;
 namespace Demoulas.ProfitSharing.UnitTests.Services.Audit;
 
 /// <summary>
-/// Unit tests for AuditService.SearchAuditEventsAsync method.
+/// Unit tests for ProfitSharingProfitSharingAuditService.SearchAuditEventsAsync method.
 /// 
 /// Tests all filter scenarios:
 /// - No filters (returns all events)
@@ -26,14 +26,14 @@ namespace Demoulas.ProfitSharing.UnitTests.Services.Audit;
 [Collection("SharedGlobalState")]
 public sealed class AuditServiceSearchTests : ApiTestBase<Program>
 {
-    private readonly IAuditService _service;
+    private readonly IProfitSharingAuditService _service;
     private readonly List<AuditEvent> _auditEvents;
 
     public AuditServiceSearchTests()
     {
         _auditEvents = CreateMockAuditEvents();
         MockDbContextFactory = new ScenarioFactory { AuditEvents = _auditEvents }.BuildMocks();
-        _service = ServiceProvider?.GetRequiredService<IAuditService>()!;
+        _service = ServiceProvider?.GetRequiredService<IProfitSharingAuditService>()!;
     }
 
     [Fact]

@@ -50,8 +50,8 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         Mock<ILogger<ExecutiveHoursAndDollarsEndpoint>> mockLogger = new();
         Mock<ICommitGuardOverride> mockCommitGuardOverride = new();
         ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
-        IAuditService mockAuditService = new AuditService(MockDbContextFactory, mockCommitGuardOverride.Object, appUser, mockHttpContextAccessor.Object, hostEnvironment);
-        _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockAuditService, mockLogger.Object);
+        IProfitSharingAuditService mockProfitSharingAuditService = new ProfitSharingProfitSharingAuditService(MockDbContextFactory, mockCommitGuardOverride.Object, appUser, mockHttpContextAccessor.Object, hostEnvironment);
+        _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockProfitSharingAuditService, mockLogger.Object);
     }
 
 

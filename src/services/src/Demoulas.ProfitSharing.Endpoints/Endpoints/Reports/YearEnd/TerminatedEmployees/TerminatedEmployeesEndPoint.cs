@@ -20,17 +20,17 @@ public class TerminatedEmployeesEndPoint
         TerminatedEmployeesEndPoint.TerminatedEmployeeCsvMap>
 {
     private readonly ITerminatedEmployeeService _terminatedEmployeeService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ILogger<TerminatedEmployeesEndPoint> _logger;
 
     public TerminatedEmployeesEndPoint(
         ITerminatedEmployeeService terminatedEmployeeService,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         ILogger<TerminatedEmployeesEndPoint> logger)
         : base(Navigation.Constants.Terminations)
     {
         _terminatedEmployeeService = terminatedEmployeeService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _logger = logger;
     }
 
@@ -87,7 +87,7 @@ public class TerminatedEmployeesEndPoint
 
         try
         {
-            var result = await _auditService.ArchiveCompletedReportAsync(ReportFileName,
+            var result = await _profitSharingAuditService.ArchiveCompletedReportAsync(ReportFileName,
                 (short)(req.EndingDate.Year + 1), //Report is run for the prior year.
                 req,
                 (archiveReq, _, cancellationToken) => _terminatedEmployeeService.GetReportAsync(archiveReq, cancellationToken),

@@ -18,19 +18,19 @@ public class UnforfeituresEndpoint :
     EndpointWithCsvBase<FilterableStartAndEndDateRequest, UnforfeituresResponse, UnforfeituresEndpoint.RehireProfitSharingResponseMap>
 {
     private readonly IUnforfeitService _reportService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ICalendarService _calendarService;
     private readonly ILogger<UnforfeituresEndpoint> _logger;
 
     public UnforfeituresEndpoint(
         IUnforfeitService reportService,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         ILogger<UnforfeituresEndpoint> logger,
         ICalendarService calendarService)
         : base(Navigation.Constants.Unforfeit)
     {
         _reportService = reportService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _logger = logger;
         _calendarService = calendarService;
     }
@@ -84,7 +84,7 @@ public class UnforfeituresEndpoint :
         } while (iteration++ < 7 && startDate >= req.EndingDate);
 
         // Database queries and business logic are timed inside the service layer
-        var result = await _auditService.ArchiveCompletedReportAsync(
+        var result = await _profitSharingAuditService.ArchiveCompletedReportAsync(
             "Rehire Forfeiture Adjustments Endpoint",
             (short)mostRecentProfitYear,
             req,

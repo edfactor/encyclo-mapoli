@@ -1,12 +1,10 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -24,20 +22,20 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ILogger<ProfitSharingAdjustmentsService> _logger;
     private readonly TimeProvider _timeProvider;
 
     public ProfitSharingAdjustmentsService(
         IProfitSharingDataContextFactory dbContextFactory,
         IDemographicReaderService demographicReaderService,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         ILogger<ProfitSharingAdjustmentsService> logger,
         TimeProvider? timeProvider = null)
     {
         _dbContextFactory = dbContextFactory;
         _demographicReaderService = demographicReaderService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
@@ -415,7 +413,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
                 if (insertedProfitDetail is not null)
                 {
-                    await _auditService.LogDataChangeAsync(
+                    await _profitSharingAuditService.LogDataChangeAsync(
                         operationName: "Create Profit Sharing Adjustment",
                         tableName: "PROFIT_DETAIL",
                         auditOperation: AuditEvent.AuditOperations.Create,

@@ -13,16 +13,16 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShare
 public sealed class YearEndProfitSharingSummaryReportEndpoint : ProfitSharingEndpoint<BadgeNumberRequest, Results<Ok<YearEndProfitSharingReportSummaryResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
 
     public YearEndProfitSharingSummaryReportEndpoint(
         IProfitSharingSummaryReportService cleanupReportService,
-        IAuditService auditService
+        IProfitSharingAuditService profitSharingAuditService
     )
         : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _cleanupReportService = cleanupReportService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     public override void Configure()
@@ -175,7 +175,7 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : ProfitSharingEnd
 
             var reportSuffix = req.UseFrozenData ? "_FROZEN" : "";
 
-            var data = await _auditService.ArchiveCompletedReportAsync(
+            var data = await _profitSharingAuditService.ArchiveCompletedReportAsync(
                 ReportNames.ProfitSharingSummary.ReportCode + reportSuffix,
                 req.ProfitYear,
                 req,

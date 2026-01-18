@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
@@ -6,21 +6,22 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Data.Contexts.Interfaces;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
+using Demoulas.Common.Data.Services.Service.Audit;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Services.Audit;
 
-public sealed class AuditService : IAuditService
+public sealed class ProfitSharingProfitSharingAuditService : AuditService<ProfitSharingDbContext, ProfitSharingReadOnlyDbContext>, IProfitSharingAuditService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICommitGuardOverride _guardOverride;
@@ -28,20 +29,19 @@ public sealed class AuditService : IAuditService
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly JsonSerializerOptions _maskingOptions;
 
-    public AuditService(IProfitSharingDataContextFactory dataContextFactory,
+    public ProfitSharingProfitSharingAuditService(IProfitSharingDataContextFactory dataContextFactory,
         ICommitGuardOverride guardOverride,
         IAppUser? appUser,
         IHttpContextAccessor httpContextAccessor,
-        IHostEnvironment hostEnvironment)
+        JsonSerializerOptions jsonSerializerOptions) : base(dataContextFactory, appUser, httpContextAccessor, jsonSerializerOptions)
     {
         _dataContextFactory = dataContextFactory;
         _guardOverride = guardOverride;
         _appUser = appUser;
         _httpContextAccessor = httpContextAccessor;
 
-        // Initialize masking serializer options
-        _maskingOptions = new JsonSerializerOptions(JsonSerializerOptions.Web);
-        _maskingOptions.Converters.Add(new MaskingJsonConverterFactory(hostEnvironment));
+        // Initialize masking serializer options from configured JSON settings
+        _maskingOptions = jsonSerializerOptions;
     }
 
     // Move all ArchiveCompletedReportAsync overloads so they are adjacent, per S4136

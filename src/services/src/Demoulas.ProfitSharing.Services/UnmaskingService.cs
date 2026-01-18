@@ -18,18 +18,18 @@ public sealed class UnmaskingService : IUnmaskingService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IAppUser _appUser;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
 
     public UnmaskingService(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
         IAppUser appUser,
-        IAuditService auditService)
+        IProfitSharingAuditService profitSharingAuditService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _appUser = appUser;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public sealed class UnmaskingService : IUnmaskingService
             return Result<string>.Failure(Error.EntityNotFound("Demographic"));
         }
 
-        var result = await _auditService.LogSensitiveDataAccessAsync(
+        var result = await _profitSharingAuditService.LogSensitiveDataAccessAsync(
             operationName: "Get Unmasked SSN",
             tableName: "Demographic",
             primaryKey: demographicData.BadgeNumber.ToString(),

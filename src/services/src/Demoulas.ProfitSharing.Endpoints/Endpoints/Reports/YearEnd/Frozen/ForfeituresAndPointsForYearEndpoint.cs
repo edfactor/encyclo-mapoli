@@ -15,17 +15,17 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<FrozenProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals, ForfeituresAndPointsForYearResponse, ForfeituresAndPointsForYearEndpoint.ForfeituresAndPointsForYearEndpointMapper>
 {
     private readonly IForfeituresAndPointsForYearService _forfeituresAndPointsForYearService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ILogger<ForfeituresAndPointsForYearEndpoint> _logger;
 
     public ForfeituresAndPointsForYearEndpoint(
         IForfeituresAndPointsForYearService forfeituresAndPointsForYearService,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         ILogger<ForfeituresAndPointsForYearEndpoint> logger)
         : base(Navigation.Constants.Forfeitures)
     {
         _forfeituresAndPointsForYearService = forfeituresAndPointsForYearService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _logger = logger;
     }
     public override string ReportFileName => "Forfeitures and Points for Year ( PAY443 )";
@@ -65,7 +65,7 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
             // When using frozen data, wrap in audit service to archive checksums for cross-report validation
             if (req.UseFrozenData)
             {
-                result = await _auditService.ArchiveCompletedReportAsync(
+                result = await _profitSharingAuditService.ArchiveCompletedReportAsync(
                     "PAY443",
                     req.ProfitYear,
                     req,

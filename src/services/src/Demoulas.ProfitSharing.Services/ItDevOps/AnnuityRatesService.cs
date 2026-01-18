@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
@@ -20,20 +19,20 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
     private static readonly Error _annuityRateNotFound = Error.EntityNotFound("Annuity rate");
 
     private readonly IProfitSharingDataContextFactory _contextFactory;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ICommitGuardOverride _commitGuardOverride;
     private readonly IAppUser _appUser;
     private readonly ILogger<AnnuityRatesService> _logger;
 
     public AnnuityRatesService(
         IProfitSharingDataContextFactory contextFactory,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         ICommitGuardOverride commitGuardOverride,
         IAppUser appUser,
         ILogger<AnnuityRatesService> logger)
     {
         _contextFactory = contextFactory;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _commitGuardOverride = commitGuardOverride;
         _appUser = appUser;
         _logger = logger;
@@ -194,7 +193,7 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
                         });
                     }
 
-                    await _auditService.LogDataChangeAsync(
+                    await _profitSharingAuditService.LogDataChangeAsync(
                         operationName: "Update Annuity Rate",
                         tableName: "ANNUITY_RATE",
                         auditOperation: AuditEvent.AuditOperations.Update,

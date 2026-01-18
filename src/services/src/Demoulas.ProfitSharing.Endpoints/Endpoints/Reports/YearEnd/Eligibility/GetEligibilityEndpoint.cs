@@ -16,18 +16,18 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
 {
     private readonly IGetEligibleEmployeesService _getEligibleEmployeesService;
     private readonly ILogger<GetEligibleEmployeesEndpoint> _logger;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     public override string ReportFileName { get; } = "GetEligibleEmployeesReport.csv";
 
     public GetEligibleEmployeesEndpoint(
         IGetEligibleEmployeesService getEligibleEmployeesService,
         ILogger<GetEligibleEmployeesEndpoint> logger,
-        IAuditService auditService)
+        IProfitSharingAuditService profitSharingAuditService)
         : base(Navigation.Constants.GetEligibleEmployees)
     {
         _getEligibleEmployeesService = getEligibleEmployeesService;
         _logger = logger;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     public override void Configure()
@@ -53,7 +53,7 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var result = await _auditService.ArchiveCompletedReportAsync(
+            var result = await _profitSharingAuditService.ArchiveCompletedReportAsync(
                 ReportFileName,
                 req.ProfitYear,
                 req,

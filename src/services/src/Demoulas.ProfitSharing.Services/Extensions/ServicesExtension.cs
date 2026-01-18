@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
@@ -8,8 +9,6 @@ using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
-using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.Common.Contracts.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Services.Administration;
 using Demoulas.ProfitSharing.Services.Audit;
@@ -39,6 +38,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
 using NavigationService = Demoulas.ProfitSharing.Services.Navigations.ProfitSharingNavigationService;
 
@@ -51,6 +51,12 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
+        _ = builder.Services.AddSingleton(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<HttpJsonOptions>>().Value;
+            return new JsonSerializerOptions(options.SerializerOptions);
+        });
+
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICheckRunWorkflowService, CheckRunWorkflowService>();
@@ -89,8 +95,8 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IEmployeesWithProfitsOver73Service, EmployeesWithProfitsOver73Service>();
 
 
-        _ = builder.Services.AddScoped<Demoulas.ProfitSharing.Common.Interfaces.Audit.IAuditService, AuditService>();
-        _ = builder.Services.AddScoped<Demoulas.Common.Contracts.Interfaces.Audit.IAuditService, CommonAuditServiceAdapter>();
+        _ = builder.Services.AddScoped<IProfitSharingAuditService, ProfitSharingProfitSharingAuditService>();
+
         _ = builder.Services.AddScoped<TotalService>();
 
         _ = builder.Services.AddScoped<ITerminatedEmployeeService, TerminatedEmployeeService>();

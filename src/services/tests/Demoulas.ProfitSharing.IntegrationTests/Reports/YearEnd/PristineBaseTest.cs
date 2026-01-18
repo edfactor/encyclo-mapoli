@@ -55,7 +55,7 @@ public abstract class PristineBaseTest
         PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService, VestingScheduleService);
         YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, NullLogger<YearEndService>.Instance);
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
         ForfeitureAdjustmentService = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
     }
 

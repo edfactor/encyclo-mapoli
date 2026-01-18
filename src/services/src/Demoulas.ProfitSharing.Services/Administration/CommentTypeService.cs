@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
@@ -19,20 +18,20 @@ public sealed class CommentTypeService : ICommentTypeService
     private static readonly Error s_commentTypeNotFound = Error.EntityNotFound("Comment type");
 
     private readonly IProfitSharingDataContextFactory _contextFactory;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ICommitGuardOverride _commitGuardOverride;
     private readonly IAppUser _appUser;
     private readonly ILogger<CommentTypeService> _logger;
 
     public CommentTypeService(
         IProfitSharingDataContextFactory contextFactory,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         ICommitGuardOverride commitGuardOverride,
         IAppUser appUser,
         ILogger<CommentTypeService> logger)
     {
         _contextFactory = contextFactory;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _commitGuardOverride = commitGuardOverride;
         _appUser = appUser;
         _logger = logger;
@@ -114,7 +113,7 @@ public sealed class CommentTypeService : ICommentTypeService
                 await ctx.SaveChangesAsync(cancellationToken);
 
                 // Audit log creation
-                await _auditService.LogDataChangeAsync(
+                await _profitSharingAuditService.LogDataChangeAsync(
                     operationName: "Create Comment Type",
                     tableName: "COMMENT_TYPE",
                     auditOperation: AuditEvent.AuditOperations.Create,
@@ -236,7 +235,7 @@ public sealed class CommentTypeService : ICommentTypeService
 
                 if (changes.Count > 0)
                 {
-                    await _auditService.LogDataChangeAsync(
+                    await _profitSharingAuditService.LogDataChangeAsync(
                         operationName: "Update Comment Type",
                         tableName: "COMMENT_TYPE",
                         auditOperation: AuditEvent.AuditOperations.Update,

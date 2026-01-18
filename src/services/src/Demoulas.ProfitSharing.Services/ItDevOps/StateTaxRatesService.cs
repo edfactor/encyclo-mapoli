@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Caching;
@@ -20,7 +19,7 @@ public sealed class StateTaxRatesService : IStateTaxRatesService
     private static readonly Error s_stateTaxNotFound = Error.EntityNotFound("State tax");
 
     private readonly IProfitSharingDataContextFactory _contextFactory;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ICommitGuardOverride _commitGuardOverride;
     private readonly IAppUser _appUser;
     private readonly StateTaxCache _stateTaxCache;
@@ -28,14 +27,14 @@ public sealed class StateTaxRatesService : IStateTaxRatesService
 
     public StateTaxRatesService(
         IProfitSharingDataContextFactory contextFactory,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         ICommitGuardOverride commitGuardOverride,
         IAppUser appUser,
         StateTaxCache stateTaxCache,
         ILogger<StateTaxRatesService> logger)
     {
         _contextFactory = contextFactory;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _commitGuardOverride = commitGuardOverride;
         _appUser = appUser;
         _stateTaxCache = stateTaxCache;
@@ -122,7 +121,7 @@ public sealed class StateTaxRatesService : IStateTaxRatesService
                     _logger.LogError(ex, "Failed to invalidate StateTaxCache after updating {Abbreviation}", abbreviation);
                 }
 
-                await _auditService.LogDataChangeAsync(
+                await _profitSharingAuditService.LogDataChangeAsync(
                     operationName: "Update State Tax Rate",
                     tableName: "STATE_TAX",
                     auditOperation: AuditEvent.AuditOperations.Update,

@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
@@ -22,7 +21,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TimeProvider _timeProvider;
     private readonly IAppUser _appUser;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
 
     public ForfeitureAdjustmentService(
         IProfitSharingDataContextFactory dbContextFactory,
@@ -30,14 +29,14 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         IDemographicReaderService demographicReaderService,
         TimeProvider timeProvider,
         IAppUser appUser,
-        IAuditService auditService)
+        IProfitSharingAuditService profitSharingAuditService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
         _timeProvider = timeProvider;
         _appUser = appUser;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     // Invoked by the 008-12 Forfeit Adjustment screen - the user wants to make a change, we figure out which (forfeit or unforfeit or neither) is appropriate.
@@ -324,7 +323,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 });
             }
 
-            await _auditService.LogDataChangeAsync(
+            await _profitSharingAuditService.LogDataChangeAsync(
                 operationName: isForfeit ? "Create Forfeiture" : "Create Unforfeiture",
                 tableName: "PROFIT_DETAIL",
                 auditOperation: AuditEvent.AuditOperations.Create,

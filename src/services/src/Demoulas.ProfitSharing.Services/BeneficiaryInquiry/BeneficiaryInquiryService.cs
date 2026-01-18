@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Time;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
@@ -100,7 +99,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             Total = memberResults.Total,
             Results = memberResults.Results?.Select(m => new BeneficiarySearchFilterResponse
             {
-                Id =  m.Id,
+                Id = m.Id,
                 BadgeNumber = m.BadgeNumber,
                 PsnSuffix = m.PsnSuffix,
                 FullName = m.FullName,

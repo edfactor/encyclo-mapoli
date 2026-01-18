@@ -20,17 +20,17 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<WagesCurrentYearRequ
 {
     private readonly IWagesService _reportService;
     private readonly ILogger<CurrentYearWagesEndpoint> _logger;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
 
     public CurrentYearWagesEndpoint(
         IWagesService reportService,
         ILogger<CurrentYearWagesEndpoint> logger,
-        IAuditService auditService
+        IProfitSharingAuditService profitSharingAuditService
     ) : base(Navigation.Constants.YTDWagesExtract)
     {
         _reportService = reportService;
         _logger = logger;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     public override void Configure()
@@ -77,7 +77,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<WagesCurrentYearRequ
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
             var reportSuffix = req.UseFrozenData ? "_FROZEN" : string.Empty;
-            var result = await _auditService.ArchiveCompletedReportAsync(
+            var result = await _profitSharingAuditService.ArchiveCompletedReportAsync(
                 ReportFileName + reportSuffix,
                 req.ProfitYear,
                 req,
