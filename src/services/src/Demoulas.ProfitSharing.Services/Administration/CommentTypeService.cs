@@ -1,8 +1,9 @@
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
@@ -15,7 +16,7 @@ namespace Demoulas.ProfitSharing.Services.Administration;
 
 public sealed class CommentTypeService : ICommentTypeService
 {
-    private static readonly Error s_commentTypeNotFound = Error.EntityNotFound("Comment type");
+    private static readonly Error _commentTypeNotFound = Error.EntityNotFound("Comment type");
 
     private readonly IProfitSharingDataContextFactory _contextFactory;
     private readonly IProfitSharingAuditService _profitSharingAuditService;
@@ -120,13 +121,13 @@ public sealed class CommentTypeService : ICommentTypeService
                     primaryKey: $"Id:{commentType.Id}",
                     changes:
                     [
-                        new AuditChangeEntryInput
+                        new AuditChangeEntryInputRequest
                         {
                             ColumnName = "NAME",
                             OriginalValue = null,
                             NewValue = trimmedName,
                         },
-                        new AuditChangeEntryInput
+                        new AuditChangeEntryInputRequest
                         {
                             ColumnName = "IS_PROTECTED",
                             OriginalValue = null,
@@ -180,7 +181,7 @@ public sealed class CommentTypeService : ICommentTypeService
 
                 if (commentType is null)
                 {
-                    return Result<CommentTypeDto>.Failure(s_commentTypeNotFound);
+                    return Result<CommentTypeDto>.Failure(_commentTypeNotFound);
                 }
 
                 // Validate one-way protection: Cannot remove protected flag once set
@@ -213,10 +214,10 @@ public sealed class CommentTypeService : ICommentTypeService
                 await ctx.SaveChangesAsync(cancellationToken);
 
                 // Build audit changes list
-                var changes = new List<AuditChangeEntryInput>();
+                var changes = new List<AuditChangeEntryInputRequest>();
                 if (originalName != trimmedName)
                 {
-                    changes.Add(new AuditChangeEntryInput
+                    changes.Add(new AuditChangeEntryInputRequest
                     {
                         ColumnName = "NAME",
                         OriginalValue = originalName,
@@ -225,7 +226,7 @@ public sealed class CommentTypeService : ICommentTypeService
                 }
                 if (originalIsProtected != request.IsProtected)
                 {
-                    changes.Add(new AuditChangeEntryInput
+                    changes.Add(new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_PROTECTED",
                         OriginalValue = originalIsProtected.ToString(),

@@ -2,22 +2,18 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
 using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.Common.Data.Services.Service.Audit;
 using Demoulas.ProfitSharing.Common.Attributes;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Audit;
 
@@ -78,7 +74,7 @@ public sealed class ProfitSharingProfitSharingAuditService : AuditService<Profit
 
         bool isArchiveRequest = false;
         _ = (_httpContextAccessor.HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
-                       bool.TryParse(archiveValue, out isArchiveRequest) && isArchiveRequest;
+            bool.TryParse(archiveValue, out isArchiveRequest) && isArchiveRequest;
 
         return ArchiveCompletedReportAsync(reportName, profitYear, request, isArchiveRequest, reportFunction, additionalChecksums, cancellationToken);
     }
@@ -135,7 +131,14 @@ public sealed class ProfitSharingProfitSharingAuditService : AuditService<Profit
         string archivedPayloadJson = JsonSerializer.Serialize(archivedPayload, JsonSerializerOptions.Web);
 
         var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = archivedPayloadJson } };
-        var auditEvent = new AuditEvent { TableName = reportName, Operation = AuditEvent.AuditOperations.Archive, UserName = userName, SessionId = sessionId, ChangesJson = entries };
+        var auditEvent = new AuditEvent
+        {
+            TableName = reportName,
+            Operation = AuditEvent.AuditOperations.Archive,
+            UserName = userName,
+            SessionId = sessionId,
+            ChangesJson = entries
+        };
 
         ReportChecksum checksum = new ReportChecksum
         {
@@ -160,281 +163,29 @@ public sealed class ProfitSharingProfitSharingAuditService : AuditService<Profit
         return response;
     }
 
-    public async Task LogSensitiveDataAccessAsync(
-        string operationName,
-        string tableName,
-        string? primaryKey,
-        string? details,
-        CancellationToken cancellationToken = default)
-    {
-        string userName = _appUser?.UserName ?? "Unknown";
-        string sessionId = GetSessionId(_httpContextAccessor.HttpContext);
-
-        var entries = new List<AuditChangeEntry>
-        {
-            new() { ColumnName = "Operation", NewValue = operationName },
-            new() { ColumnName = "Details", NewValue = details ?? "N/A" }
-        };
-
-        var auditEvent = new AuditEvent
-        {
-            TableName = tableName,
-            Operation = AuditEvent.AuditOperations.SensitiveAccess,
-            PrimaryKey = primaryKey,
-            UserName = userName,
-            SessionId = sessionId,
-            ChangesJson = entries,
-            CreatedAt = DateTimeOffset.UtcNow
-        };
-
-        using (_guardOverride.AllowFor(Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING))
-        {
-            await _dataContextFactory.UseWritableContext(async c =>
-            {
-                c.AuditEvents.Add(auditEvent);
-                await c.SaveChangesAsync(cancellationToken);
-            }, cancellationToken);
-        }
-    }
-
-    public async Task<TResult> LogSensitiveDataAccessAsync<TResult>(
-        string operationName,
-        string tableName,
-        string? primaryKey,
-        string? details,
+    public override async Task<TResult> LogSensitiveDataAccessAsync<TResult>(string operationName, string tableName, string? primaryKey, string? details,
         Func<CancellationToken, Task<TResult>> operation,
         CancellationToken cancellationToken = default)
-        where TResult : notnull
     {
-        var result = await operation(cancellationToken);
-
-        // Log access after successful operation
-        await LogSensitiveDataAccessAsync(
-            operationName,
-            tableName,
-            primaryKey,
-            details,
-            cancellationToken);
-
-        return result;
-    }
-
-    public async Task LogDataChangeAsync(
-        string operationName,
-        string tableName,
-        string auditOperation,
-        string? primaryKey,
-        IReadOnlyList<AuditChangeEntryInput> changes,
-        CancellationToken cancellationToken = default)
-    {
-        string userName = _appUser?.UserName ?? "Unknown";
-        string sessionId = GetSessionId(_httpContextAccessor.HttpContext);
-
-        var entries = new List<AuditChangeEntry>
-        {
-            new() { ColumnName = "Operation", NewValue = operationName }
-        };
-
-        if (changes.Count > 0)
-        {
-            entries.AddRange(changes.Select(c => new AuditChangeEntry
-            {
-                ColumnName = c.ColumnName,
-                OriginalValue = c.OriginalValue,
-                NewValue = c.NewValue
-            }));
-        }
-
-        var auditEvent = new AuditEvent
-        {
-            TableName = tableName,
-            Operation = string.IsNullOrWhiteSpace(auditOperation) ? AuditEvent.AuditOperations.Update : auditOperation,
-            PrimaryKey = primaryKey,
-            UserName = userName,
-            SessionId = sessionId,
-            ChangesJson = entries,
-            CreatedAt = DateTimeOffset.UtcNow
-        };
-
         using (_guardOverride.AllowFor(Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING))
         {
-            await _dataContextFactory.UseWritableContext(async c =>
-            {
-                c.AuditEvents.Add(auditEvent);
-                await c.SaveChangesAsync(cancellationToken);
-            }, cancellationToken);
+            return await base.LogSensitiveDataAccessAsync(operationName, tableName, primaryKey, details, operation, cancellationToken);
         }
     }
 
-    public Task<PaginatedResponseDto<AuditEventDto>> SearchAuditEventsAsync(
-        AuditSearchRequestDto request,
-        CancellationToken cancellationToken)
+
+    public override async Task LogDataChangeAsync(string operationName, string tableName, string auditOperation, string? primaryKey,
+        IReadOnlyList<AuditChangeEntryInputRequest> changes,
+        CancellationToken cancellationToken = default)
     {
-        return _dataContextFactory.UseReadOnlyContext(async context =>
+        using (_guardOverride.AllowFor(Role.ITDEVOPS, Role.AUDITOR, Role.HR_READONLY, Role.SSN_UNMASKING))
         {
-            var query = context.AuditEvents
-                .TagWith($"AuditSearch-GetEvents-Filters-Table:{request.TableName}-Operation:{request.Operation}-User:{request.UserName}")
-                .AsQueryable();
-
-            // Apply LIKE filters for string fields (using Contains for testability)
-            if (!string.IsNullOrWhiteSpace(request.TableName))
-            {
-                query = query.Where(e => e.TableName != null && e.TableName.Contains(request.TableName));
-            }
-
-            if (!string.IsNullOrWhiteSpace(request.Operation))
-            {
-                query = query.Where(e => e.Operation.Contains(request.Operation));
-            }
-
-            if (!string.IsNullOrWhiteSpace(request.UserName))
-            {
-                query = query.Where(e => e.UserName.Contains(request.UserName));
-            }
-
-            if (!string.IsNullOrWhiteSpace(request.SessionId))
-            {
-                query = query.Where(e => e.SessionId == request.SessionId);
-            }
-
-            // Apply date range filters
-            if (request.StartTime.HasValue)
-            {
-                query = query.Where(e => e.CreatedAt >= request.StartTime.Value);
-            }
-
-            if (request.EndTime.HasValue)
-            {
-                query = query.Where(e => e.CreatedAt <= request.EndTime.Value);
-            }
-
-            var sortReq = request with
-            {
-                SortBy = request.SortBy switch
-                {
-                    "auditEventId" => "Id",
-                    "" => "Id",
-                    null => "Id",
-                    _ => request.SortBy
-                }
-            };
-            var paginatedResults = await query.ToPaginationResultsAsync(sortReq, cancellationToken);
-
-            // Project to DTOs with ChangesJson handling after materialization
-            var dtos = paginatedResults.Results.Select(e => new AuditEventDto
-            {
-                AuditEventId = e.Id,
-                TableName = e.TableName,
-                Operation = e.Operation,
-                PrimaryKey = e.PrimaryKey,
-                UserName = e.UserName,
-                CreatedAt = e.CreatedAt,
-                // Only include ChangesJson when TableName is "NAVIGATION"
-                ChangesJson = e.TableName == "NAVIGATION"
-                    ? e.ChangesJson?.Select(c => new AuditChangeEntryDto
-                    {
-                        Id = c.Id,
-                        ColumnName = c.ColumnName,
-                        OriginalValue = SerializeJsonValue(c.OriginalValue),
-                        NewValue = SerializeJsonValue(c.NewValue)
-                    }).ToList()
-                    : null
-            }).ToList();
-
-            return new PaginatedResponseDto<AuditEventDto>
-            {
-                Results = dtos,
-                Total = paginatedResults.Total
-            };
-        }, cancellationToken);
-    }
-
-    public Task<List<AuditChangeEntryDto>> GetAuditChangeEntriesAsync(
-        int auditEventId,
-        CancellationToken cancellationToken)
-    {
-        return _dataContextFactory.UseReadOnlyContext(async context =>
-        {
-            var auditEvent = await context.AuditEvents
-                .TagWith($"AuditSearch-GetChangeEntries-EventId:{auditEventId}")
-                .FirstOrDefaultAsync(e => e.Id == auditEventId, cancellationToken);
-
-            if (auditEvent == null || auditEvent.ChangesJson == null)
-            {
-                return new List<AuditChangeEntryDto>();
-            }
-
-            return auditEvent.ChangesJson.Select(c => new AuditChangeEntryDto
-            {
-                Id = c.Id,
-                ColumnName = c.ColumnName,
-                OriginalValue = DeserializeArchivedPayload(c.OriginalValue),
-                NewValue = DeserializeArchivedPayload(c.NewValue)
-            }).ToList();
-        }, cancellationToken);
-    }
-
-    private string? DeserializeArchivedPayload(string? jsonValue)
-    {
-        if (string.IsNullOrWhiteSpace(jsonValue))
-        {
-            return null;
-        }
-
-        try
-        {
-            // Try to deserialize as ArchivedDataPayload
-            var payload = JsonSerializer.Deserialize<ArchivedDataPayload>(jsonValue, JsonSerializerOptions.Web);
-
-            if (payload == null)
-            {
-                return jsonValue;
-            }
-
-            // Get the Type from TypeName
-            var type = Type.GetType(payload.TypeName);
-
-            if (type == null)
-            {
-                // If type can't be resolved, return the RawData as formatted JSON with masking
-                return JsonSerializer.Serialize(payload.RawData, _maskingOptions);
-            }
-
-            // Deserialize RawData as the actual type
-            var deserializedObject = JsonSerializer.Deserialize(payload.RawData.GetRawText(), type, JsonSerializerOptions.Web);
-
-            // Serialize back with masking options for proper role-based masking
-            return JsonSerializer.Serialize(deserializedObject, _maskingOptions);
-        }
-        catch (JsonException)
-        {
-            // If it's not a valid ArchivedDataPayload, try to format as generic JSON
-            return SerializeJsonValue(jsonValue);
-        }
-    }
-
-    private static string? SerializeJsonValue(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        try
-        {
-            var jsonElement = JsonSerializer.Deserialize<JsonElement>(value);
-            // Serialize with indentation for better readability
-            return JsonSerializer.Serialize(jsonElement, new JsonSerializerOptions { WriteIndented = true });
-        }
-        catch (JsonException)
-        {
-            // If it's not valid JSON, return as-is (it's a plain string value)
-            return value;
+            await base.LogDataChangeAsync(operationName, tableName, auditOperation, primaryKey, changes, cancellationToken);
         }
     }
 
     public static IEnumerable<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> ToKeyValuePairs<TReport>(TReport obj, List<Func<TReport, (string, object)>> additionalChecksums)
-    where TReport : class
+        where TReport : class
     {
         var result = new List<KeyValuePair<string, decimal>>();
         var type = obj.GetType();
@@ -482,15 +233,15 @@ public sealed class ProfitSharingProfitSharingAuditService : AuditService<Profit
             }
 
             // Convert all numeric types to decimal for consistent hashing
-            var rawValue = prop.GetValue(obj);
-            var value = ConvertToDecimal(rawValue);
+            object? rawValue = prop.GetValue(obj);
+            decimal value = ConvertToDecimal(rawValue);
             result.Add(new KeyValuePair<string, decimal>(keyName, value));
         }
 
         foreach (var additionalChecksum in additionalChecksums)
         {
-            var (key, valueObj) = additionalChecksum(obj);
-            var value = ConvertToDecimal(valueObj);
+            (string key, object valueObj) = additionalChecksum(obj);
+            decimal value = ConvertToDecimal(valueObj);
             result.Add(new KeyValuePair<string, decimal>(key, value));
         }
 
@@ -499,7 +250,7 @@ public sealed class ProfitSharingProfitSharingAuditService : AuditService<Profit
 
         foreach (var kevValue in result)
         {
-            var hash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(kevValue.Value));
+            byte[] hash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(kevValue.Value));
             var kvp = new KeyValuePair<string, KeyValuePair<decimal, byte[]>>(kevValue.Key, new KeyValuePair<decimal, byte[]>(kevValue.Value, hash));
             materializedResult.Add(kvp);
         }
@@ -567,13 +318,13 @@ public sealed class ProfitSharingProfitSharingAuditService : AuditService<Profit
         }
 
         // First check HttpContext.Items (session created/retrieved in same request)
-        if (httpContext.Items.TryGetValue(Demoulas.ProfitSharing.Common.Constants.Telemetry.SessionIdKey, out var sessionIdObj) && sessionIdObj is string sessionId)
+        if (httpContext.Items.TryGetValue(Demoulas.ProfitSharing.Common.Constants.Telemetry.SessionIdKey, out object? sessionIdObj) && sessionIdObj is string sessionId)
         {
             return sessionId;
         }
 
         // Fallback to request cookies (for subsequent requests with existing session)
-        if (httpContext.Request.Cookies.TryGetValue(Demoulas.ProfitSharing.Common.Constants.Telemetry.SessionIdKey, out var cookieSessionId))
+        if (httpContext.Request.Cookies.TryGetValue(Demoulas.ProfitSharing.Common.Constants.Telemetry.SessionIdKey, out string? cookieSessionId))
         {
             return cookieSessionId;
         }

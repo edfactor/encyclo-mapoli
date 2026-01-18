@@ -31,6 +31,7 @@ using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+using Demoulas.ProfitSharing.Services.Serialization;
 using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.ProfitSharing.Services.Validators;
 using Demoulas.Util.Extensions;
@@ -38,7 +39,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
 using NavigationService = Demoulas.ProfitSharing.Services.Navigations.ProfitSharingNavigationService;
 
@@ -51,10 +51,13 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
-        _ = builder.Services.AddSingleton(sp =>
+        _ = builder.Services.AddSingleton<JsonSerializerOptions>(sp =>
         {
-            var options = sp.GetRequiredService<IOptions<HttpJsonOptions>>().Value;
-            return new JsonSerializerOptions(options.SerializerOptions);
+            IHostEnvironment hostEnvironment = sp.GetRequiredService<IHostEnvironment>();
+            var maskingOptions = new JsonSerializerOptions(JsonSerializerOptions.Web);
+            maskingOptions.Converters.Add(new MaskingJsonConverterFactory(hostEnvironment));
+
+            return maskingOptions;
         });
 
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();

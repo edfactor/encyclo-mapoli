@@ -1,7 +1,8 @@
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
 using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
@@ -294,20 +295,20 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             await context.SaveChangesAsync(cancellationToken);
 
             // Audit the forfeiture adjustment
-            var auditChanges = new List<AuditChangeEntryInput>
+            var auditChanges = new List<AuditChangeEntryInputRequest>
             {
-                new AuditChangeEntryInput { ColumnName = "SSN", NewValue = employeeData.Ssn.ToString() },
-                new AuditChangeEntryInput { ColumnName = "BADGE_NUMBER", NewValue = employeeData.BadgeNumber.ToString() },
-                new AuditChangeEntryInput { ColumnName = "PROFIT_YEAR", NewValue = profitYear.ToString() },
-                new AuditChangeEntryInput { ColumnName = "FORFEITURE_AMOUNT", NewValue = req.ForfeitureAmount.ToString("F2") },
-                new AuditChangeEntryInput { ColumnName = "OPERATION_TYPE", NewValue = isForfeit ? "FORFEIT" : "UNFORFEIT" },
-                new AuditChangeEntryInput { ColumnName = "COMMENT_TYPE", NewValue = commentType.Name },
-                new AuditChangeEntryInput { ColumnName = "HAS_FORFEITED", NewValue = isForfeit.ToString() },
+                new AuditChangeEntryInputRequest { ColumnName = "SSN", NewValue = employeeData.Ssn.ToString() },
+                new AuditChangeEntryInputRequest { ColumnName = "BADGE_NUMBER", NewValue = employeeData.BadgeNumber.ToString() },
+                new AuditChangeEntryInputRequest { ColumnName = "PROFIT_YEAR", NewValue = profitYear.ToString() },
+                new AuditChangeEntryInputRequest { ColumnName = "FORFEITURE_AMOUNT", NewValue = req.ForfeitureAmount.ToString("F2") },
+                new AuditChangeEntryInputRequest { ColumnName = "OPERATION_TYPE", NewValue = isForfeit ? "FORFEIT" : "UNFORFEIT" },
+                new AuditChangeEntryInputRequest { ColumnName = "COMMENT_TYPE", NewValue = commentType.Name },
+                new AuditChangeEntryInputRequest { ColumnName = "HAS_FORFEITED", NewValue = isForfeit.ToString() },
             };
 
             if (req.OffsettingProfitDetailId.HasValue)
             {
-                auditChanges.Add(new AuditChangeEntryInput
+                auditChanges.Add(new AuditChangeEntryInputRequest
                 {
                     ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID",
                     NewValue = req.OffsettingProfitDetailId.Value.ToString()
@@ -316,7 +317,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             if (req.ClassAction)
             {
-                auditChanges.Add(new AuditChangeEntryInput
+                auditChanges.Add(new AuditChangeEntryInputRequest
                 {
                     ColumnName = "CLASS_ACTION",
                     NewValue = "true"
@@ -340,7 +341,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         foreach (var req in requests)
         {
             var result = await UpdateForfeitureAdjustmentAsync(req, cancellationToken);
-            if (result.IsError && result.Error != null)
+            if (result is { IsError: true, Error: not null })
             {
                 return Result<bool>.Failure(result.Error);
             }

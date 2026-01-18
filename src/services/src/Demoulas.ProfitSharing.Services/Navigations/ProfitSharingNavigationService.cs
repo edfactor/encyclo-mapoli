@@ -1,5 +1,6 @@
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Services.Entities.Entities.Navigation;
+using Demoulas.Common.Data.Services.Service.Navigation;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;

@@ -1,10 +1,10 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Contracts.Interfaces.Audit;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Constants;
-using Demoulas.ProfitSharing.Common.Interfaces.Audit; // Add for IDoNotAudit
 using Demoulas.ProfitSharing.Data.Configuration;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;

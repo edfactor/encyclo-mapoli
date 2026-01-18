@@ -1,7 +1,8 @@
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
@@ -171,11 +172,11 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
 
                 try
                 {
-                    var changes = new List<AuditChangeEntryInput>(capacity: 2);
+                    var changes = new List<AuditChangeEntryInputRequest>(capacity: 2);
 
                     if (originalSingle != roundedSingle)
                     {
-                        changes.Add(new AuditChangeEntryInput
+                        changes.Add(new AuditChangeEntryInputRequest
                         {
                             ColumnName = "SINGLE_RATE",
                             OriginalValue = originalSingle.ToString("0.0000"),
@@ -185,7 +186,7 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
 
                     if (originalJoint != roundedJoint)
                     {
-                        changes.Add(new AuditChangeEntryInput
+                        changes.Add(new AuditChangeEntryInputRequest
                         {
                             ColumnName = "JOINT_RATE",
                             OriginalValue = originalJoint.ToString("0.0000"),

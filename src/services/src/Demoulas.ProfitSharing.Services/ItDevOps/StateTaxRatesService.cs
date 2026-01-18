@@ -1,7 +1,8 @@
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
@@ -16,7 +17,7 @@ namespace Demoulas.ProfitSharing.Services.ItDevOps;
 
 public sealed class StateTaxRatesService : IStateTaxRatesService
 {
-    private static readonly Error s_stateTaxNotFound = Error.EntityNotFound("State tax");
+    private static readonly Error _stateTaxNotFound = Error.EntityNotFound("State tax");
 
     private readonly IProfitSharingDataContextFactory _contextFactory;
     private readonly IProfitSharingAuditService _profitSharingAuditService;
@@ -91,7 +92,7 @@ public sealed class StateTaxRatesService : IStateTaxRatesService
 
                 if (stateTax is null)
                 {
-                    return Result<StateTaxRateDto>.Failure(s_stateTaxNotFound);
+                    return Result<StateTaxRateDto>.Failure(_stateTaxNotFound);
                 }
 
                 var originalRate = stateTax.Rate;
@@ -128,7 +129,7 @@ public sealed class StateTaxRatesService : IStateTaxRatesService
                     primaryKey: $"Abbreviation:{abbreviation}",
                     changes:
                     [
-                        new AuditChangeEntryInput
+                        new AuditChangeEntryInputRequest
                         {
                             ColumnName = "RATE",
                             OriginalValue = originalRate.ToString("0.00"),

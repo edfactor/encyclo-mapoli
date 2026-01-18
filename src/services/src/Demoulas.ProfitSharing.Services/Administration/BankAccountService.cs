@@ -1,7 +1,8 @@
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
 using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Administration;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
@@ -288,25 +289,25 @@ public sealed class BankAccountService : IBankAccountService
                 primaryKey: $"Id:{bankAccount.Id}",
                 changes:
                 [
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "BANK_ID",
                         OriginalValue = null,
                         NewValue = bankId.ToString(),
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "ROUTING_NUMBER",
                         OriginalValue = null,
                         NewValue = routingNumber,
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "ACCOUNT_NUMBER",
                         OriginalValue = null,
                         NewValue = accountNumber.MaskAccountNumber(),
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_PRIMARY",
                         OriginalValue = null,
@@ -424,19 +425,19 @@ public sealed class BankAccountService : IBankAccountService
                 primaryKey: $"Id:{bankAccount.Id}",
                 changes:
                 [
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "ROUTING_NUMBER",
                         OriginalValue = null, // Would need original values
                         NewValue = routingNumber,
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_PRIMARY",
                         OriginalValue = null,
                         NewValue = isPrimary.ToString(),
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_DISABLED",
                         OriginalValue = null,
@@ -513,7 +514,7 @@ public sealed class BankAccountService : IBankAccountService
                 primaryKey: $"Id:{bankAccount.Id}",
                 changes:
                 [
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_PRIMARY",
                         OriginalValue = "False",
@@ -564,7 +565,7 @@ public sealed class BankAccountService : IBankAccountService
                 primaryKey: $"Id:{bankAccount.Id}",
                 changes:
                 [
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_DISABLED",
                         OriginalValue = "False",
