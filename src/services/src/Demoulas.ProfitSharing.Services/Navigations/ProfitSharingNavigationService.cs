@@ -47,6 +47,13 @@ public sealed class ProfitSharingNavigationService : NavigationService
         return navigationList;
     }
 
+    protected override async Task<IEnumerable<NavigationStatus>> GetNavigationStatusListAsync(CancellationToken cancellationToken = new CancellationToken())
+    {
+        return await _dataContextFactory.UseReadOnlyContext(context =>
+                context.NavigationStatuses.ToListAsync(cancellationToken),
+            cancellationToken);
+    }
+
     private static async Task<bool> UpdateNavigationAsync(
         IProfitSharingDataContextFactory dataContextFactory,
         short navigationId,

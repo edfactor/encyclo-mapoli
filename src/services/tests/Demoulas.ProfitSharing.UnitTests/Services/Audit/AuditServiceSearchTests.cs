@@ -40,7 +40,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NoFilters_ReturnsAllEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestRequest()
+        var request = new AuditSearchRequest()
         {
             Skip = 0,
             Take = 100
@@ -59,7 +59,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithTableNameFilter_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestRequest
+        var request = new AuditSearchRequest
         {
             TableName = "NAVIGATION",
             Skip = 0,
@@ -80,7 +80,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithOperationFilter_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestRequest
+        var request = new AuditSearchRequest
         {
             Operation = "Update",  // Will match Update operations
             Skip = 0,
@@ -100,7 +100,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithUsernameFilter_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestRequest
+        var request = new AuditSearchRequest
         {
             UserName = "admin",  // Will match "admin.user" and "hr.admin"
             Skip = 0,
@@ -123,7 +123,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
         var startDate = DateTimeOffset.UtcNow.AddDays(-7);
         var endDate = DateTimeOffset.UtcNow.AddDays(-1);
 
-        var request = new AuditSearchRequestRequest
+        var request = new AuditSearchRequest
         {
             StartTime = startDate,
             EndTime = endDate,
@@ -143,7 +143,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithPagination_ReturnsCorrectPage()
     {
         // Arrange
-        var request = new AuditSearchRequestRequest
+        var request = new AuditSearchRequest
         {
             Skip = 2,
             Take = 3
@@ -162,7 +162,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NavigationTable_IncludesChangesJson()
     {
         // Arrange
-        var request = new AuditSearchRequestRequest
+        var request = new AuditSearchRequest
         {
             TableName = "NAVIGATION",
             Skip = 0,
@@ -182,7 +182,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NonNavigationTable_ExcludesChangesJson()
     {
         // Arrange
-        var request = new AuditSearchRequestRequest
+        var request = new AuditSearchRequest
         {
             TableName = "DEMOGRAPHIC",
             Skip = 0,
@@ -202,7 +202,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithMultipleFilters_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestRequest
+        var request = new AuditSearchRequest
         {
             TableName = "NAVIGATION",
             Operation = "Update",
@@ -228,7 +228,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NoMatches_ReturnsEmptyResults()
     {
         // Arrange
-        var request = new AuditSearchRequestRequest
+        var request = new AuditSearchRequest
         {
             TableName = "NONEXISTENT_TABLE_XYZ",
             Skip = 0,
