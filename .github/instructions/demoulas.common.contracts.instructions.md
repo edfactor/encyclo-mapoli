@@ -141,11 +141,11 @@ Service contract for audit logging and audit search.
 ```csharp
 public interface IAuditService
 {
-	Task<PaginatedResponseDto<AuditEventDto>> SearchAuditEventsAsync(
-		AuditSearchRequestDto request,
+	Task<PaginatedResponseDto<AuditEventResponse>> SearchAuditEventsAsync(
+		AuditSearchRequestRequest request,
 		CancellationToken cancellationToken);
 
-	Task<List<AuditChangeEntryDto>> GetAuditChangeEntriesAsync(
+	Task<List<AuditChangeEntryResponse>> GetAuditChangeEntriesAsync(
 		int auditEventId,
 		CancellationToken cancellationToken);
 
@@ -170,7 +170,7 @@ public interface IAuditService
 		string tableName,
 		string auditOperation,
 		string? primaryKey,
-		IReadOnlyList<AuditChangeEntryInput> changes,
+		IReadOnlyList<AuditChangeEntryInputRequest> changes,
 		CancellationToken cancellationToken = default);
 }
 ````
@@ -327,14 +327,14 @@ public class PaginatedResponseDto<T>
 
 ---
 
-### AuditSearchRequestDto
+### AuditSearchRequestRequest
 
 **Namespace:** `Demoulas.Common.Contracts.Contracts.Request.Audit`
 
 Search request with pagination and filters for audit events.
 
 ```csharp
-public sealed record AuditSearchRequestDto : SortedPaginationRequestDto
+public sealed record AuditSearchRequestRequest : SortedPaginationRequestDto
 {
 	public string? TableName { get; init; }
 	public string? Operation { get; init; }
@@ -356,12 +356,12 @@ public sealed record GetAuditChangeEntryRequest
 }
 ```
 
-### AuditChangeEntryInput
+### AuditChangeEntryInputRequest
 
 **Namespace:** `Demoulas.Common.Contracts.Contracts.Request.Audit`
 
 ```csharp
-public sealed record AuditChangeEntryInput
+public sealed record AuditChangeEntryInputRequest
 {
 	public string ColumnName { get; init; }
 	public string? OriginalValue { get; init; }
@@ -369,12 +369,12 @@ public sealed record AuditChangeEntryInput
 }
 ```
 
-### AuditEventDto
+### AuditEventResponse
 
 **Namespace:** `Demoulas.Common.Contracts.Contracts.Response.Audit`
 
 ```csharp
-public sealed record AuditEventDto
+public sealed record AuditEventResponse
 {
 	public long AuditEventId { get; init; }
 	public string? TableName { get; init; }
@@ -382,16 +382,16 @@ public sealed record AuditEventDto
 	public string? PrimaryKey { get; init; }
 	public string UserName { get; init; }
 	public DateTimeOffset CreatedAt { get; init; }
-	public List<AuditChangeEntryDto>? ChangesJson { get; init; }
+	public List<AuditChangeEntryResponse>? ChangesJson { get; init; }
 }
 ```
 
-### AuditChangeEntryDto
+### AuditChangeEntryResponse
 
 **Namespace:** `Demoulas.Common.Contracts.Contracts.Response.Audit`
 
 ```csharp
-public sealed record AuditChangeEntryDto
+public sealed record AuditChangeEntryResponse
 {
 	public long Id { get; init; }
 	public string ColumnName { get; init; }

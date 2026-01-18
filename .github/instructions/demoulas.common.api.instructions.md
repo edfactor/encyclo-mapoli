@@ -254,7 +254,7 @@ Audit endpoints are grouped under the `AuditGroup` route prefix and use `IAuditS
 **Notes:**
 
 - `ChangesJson` is only included for `TableName == "NAVIGATION"` in search results.
-- Use `AuditSearchRequestDto` and `GetAuditChangeEntryRequest` from contracts.
+- Use `AuditSearchRequestRequest` and `GetAuditChangeEntryRequest` from contracts.
 - Always return ProblemDetails for error responses (standard API behavior).
 
 ---

@@ -38,7 +38,7 @@ using Quartz.Spi;
 using AddressMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.AddressMapper;
 using ContactInfoMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.ContactInfoMapper;
 using DemographicMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.DemographicMapper;
-using INavigationService = Demoulas.ProfitSharing.Common.Interfaces.Navigations.INavigationService;
+using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
 

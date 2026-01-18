@@ -6,7 +6,7 @@ using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.Common.Data.Services.Entities.Entities.Navigation;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
@@ -621,7 +621,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// For backward compatibility, returns a fresh factory instance per call.
     /// Each test that needs isolation gets its own factory with 6,500+ fresh fake records.
     /// Use this for all test scenarios to prevent state pollution.
-    /// 
+    ///
     /// Optionally accepts ITestOutputHelper to enable per-test profiling output.
     /// </summary>
     public static IProfitSharingDataContextFactory InitializeForTesting()
@@ -706,7 +706,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// LAZY LOADING: Load additional beneficiaries on demand.
     /// By default, only 50 beneficiaries are generated at factory creation.
     /// Tests that need more can call this to lazily generate additional beneficiaries.
-    /// 
+    ///
     /// Example:
     ///   var factory = MockDataContextFactory.InitializeForTesting();
     ///   await factory.LoadAdditionalBeneficiariesAsync(250); // Load 250 more (total = 300)
@@ -814,7 +814,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 /// Static cache holder for MockDataContextFactory to avoid expensive factory recreation.
 /// The factory instantiation is expensive (~60-80s) due to 6,500+ fake records generation.
 /// Reusing a single instance across all tests provides ~50% test performance improvement.
-/// 
+///
 /// Thread-safe using double-checked locking pattern.
 /// </summary>
 internal static class MockDbContextFactoryCache

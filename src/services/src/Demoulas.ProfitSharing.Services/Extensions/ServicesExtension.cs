@@ -8,6 +8,8 @@ using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Contracts.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Services.Administration;
 using Demoulas.ProfitSharing.Services.Audit;
@@ -37,8 +39,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using INavigationService = Demoulas.ProfitSharing.Common.Interfaces.Navigations.INavigationService;
-using NavigationService = Demoulas.ProfitSharing.Services.Navigations.NavigationService;
+using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
+using NavigationService = Demoulas.ProfitSharing.Services.Navigations.ProfitSharingNavigationService;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -87,7 +89,8 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IEmployeesWithProfitsOver73Service, EmployeesWithProfitsOver73Service>();
 
 
-        _ = builder.Services.AddScoped<IAuditService, AuditService>();
+        _ = builder.Services.AddScoped<Demoulas.ProfitSharing.Common.Interfaces.Audit.IAuditService, AuditService>();
+        _ = builder.Services.AddScoped<Demoulas.Common.Contracts.Interfaces.Audit.IAuditService, CommonAuditServiceAdapter>();
         _ = builder.Services.AddScoped<TotalService>();
 
         _ = builder.Services.AddScoped<ITerminatedEmployeeService, TerminatedEmployeeService>();

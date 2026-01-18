@@ -15,7 +15,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using INavigationService = Demoulas.ProfitSharing.Common.Interfaces.Navigations.INavigationService;
+using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 

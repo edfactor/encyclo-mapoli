@@ -19,7 +19,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using INavigationService = Demoulas.ProfitSharing.Common.Interfaces.Navigations.INavigationService;
+using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.Adhoc;
 

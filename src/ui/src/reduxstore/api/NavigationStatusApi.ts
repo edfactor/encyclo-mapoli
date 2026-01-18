@@ -21,7 +21,7 @@ export const NavigationStatusApi = createApi({
   endpoints: (builder) => ({
     getNavigationStatus: builder.query<GetNavigationStatusResponseDto, GetNavigationStatusRequestDto>({
       query: (_request) => ({
-        url: `/navigation/status`,
+        url: `/common/navigation/status`,
         method: "GET"
       }),
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
@@ -36,7 +36,7 @@ export const NavigationStatusApi = createApi({
     }),
     updateNavigationStatus: builder.query<UpdateNavigationResponseDto, UpdateNavigationRequestDto>({
       query: (request) => ({
-        url: `/navigation`,
+        url: `/common/navigation`,
         method: "PUT",
         body: request
       }),

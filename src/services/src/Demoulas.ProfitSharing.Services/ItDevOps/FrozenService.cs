@@ -8,7 +8,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
@@ -98,7 +98,7 @@ public class FrozenService : IFrozenService
                 ModifiedAtUtc = dh.ValidFrom,
                 StoreNumber = dh.StoreNumber,
                 PayClassificationId = dh.PayClassificationId,
-                // We use the hot name and address info during the YE.  So if Mary changes her name leaves and move to Ohio on Feb 2, 
+                // We use the hot name and address info during the YE.  So if Mary changes her name leaves and move to Ohio on Feb 2,
                 // we use her current info to mail her her year end statement.
                 ContactInfo = d.ContactInfo,
                 // We dont use the address in the Fiscal Close, so we could probably use the dh version here - but for consistancy with

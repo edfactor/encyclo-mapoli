@@ -2,11 +2,12 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaster;
 
@@ -68,7 +69,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             isArchiveRequest: true,
             async (_, __, cancellationToken) =>
             {
-                await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.Complete, cancellationToken);
+                await _navigationService.UpdateNavigationAsync(Navigation.Constants.MasterUpdate, NavigationStatusIds.Complete, cancellationToken);
                 return updateResponse;
             },
             ct);

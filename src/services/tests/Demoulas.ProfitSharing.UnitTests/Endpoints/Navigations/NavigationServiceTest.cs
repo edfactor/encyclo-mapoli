@@ -1,6 +1,7 @@
+using Demoulas.Common.Contracts.Contracts.Response.Navigation;
 using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.Common.Data.Services.Service;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Navigations;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
@@ -8,9 +9,9 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
-using INavigationService = Demoulas.ProfitSharing.Common.Interfaces.Navigations.INavigationService;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
 
@@ -18,19 +19,19 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
 public class NavigationServiceTests : ApiTestBase<Program>
 {
     private readonly INavigationService _navigationService;
-    private readonly List<NavigationStatusDto> _navigationStatusList;
+    private readonly List<NavigationStatusResponse> _navigationStatusList;
 
     public NavigationServiceTests()
     {
         _navigationService = ServiceProvider?.GetRequiredService<INavigationService>()!;
 
 
-        _navigationStatusList = new List<NavigationStatusDto>()
+        _navigationStatusList = new List<NavigationStatusResponse>()
         {
-            new NavigationStatusDto() { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" },
-            new NavigationStatusDto() { Id = NavigationStatus.Constants.InProgress, Name = "In Progress" },
-            new NavigationStatusDto() { Id = NavigationStatus.Constants.OnHold, Name = "On Hold" },
-            new NavigationStatusDto() { Id = NavigationStatus.Constants.Complete, Name = "Complete" }
+            new NavigationStatusResponse { Id = NavigationStatusIds.NotStarted, Name = "Not Started" },
+            new NavigationStatusResponse { Id = NavigationStatusIds.InProgress, Name = "In Progress" },
+            new NavigationStatusResponse { Id = NavigationStatusIds.OnHold, Name = "On Hold" },
+            new NavigationStatusResponse { Id = NavigationStatusIds.Complete, Name = "Complete" }
         };
     }
 
@@ -44,8 +45,12 @@ public class NavigationServiceTests : ApiTestBase<Program>
 
         // Use MemoryDistributedCache which implements IDistributedCache for testing
         var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
-        var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
-        var response = await svc.GetNavigation(CancellationToken.None);
+        var svc = new ProfitSharingNavigationService(
+            MockDbContextFactory,
+            appUser.Object,
+            distributedCache,
+            NullLoggerFactory.Instance);
+        var response = await svc.GetNavigationAsync(CancellationToken.None);
         var navigation = response.Navigation ?? [];
 
         Assert.NotNull(navigation);
@@ -76,7 +81,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-1059: GetNavigationStatus")]
     public async Task GetNavigationStatus()
     {
-        var navigationStatus = await _navigationService.GetNavigationStatus(CancellationToken.None);
+        var navigationStatus = await _navigationService.GetNavigationStatusAsync(CancellationToken.None);
         Assert.NotNull(navigationStatus);
         navigationStatus.ShouldBeEquivalentTo(_navigationStatusList);
     }
@@ -86,7 +91,12 @@ public class NavigationServiceTests : ApiTestBase<Program>
     {
         IAppUser iAppUser = new Mock<IAppUser>().Object;
         var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
-        var success = await new NavigationService(MockDbContextFactory, iAppUser, distributedCache).UpdateNavigation(navigationId: 3, statusId: 1, cancellationToken: CancellationToken.None);
+        var success = await new ProfitSharingNavigationService(
+            MockDbContextFactory,
+            iAppUser,
+            distributedCache,
+            NullLoggerFactory.Instance)
+            .UpdateNavigationAsync(navigationId: 3, statusId: 1, cancellationToken: CancellationToken.None);
         Assert.True(success);
     }
 
@@ -99,10 +109,14 @@ public class NavigationServiceTests : ApiTestBase<Program>
             .Returns(new List<string> { Role.ITDEVOPS });
 
         var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
-        var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
+        var svc = new ProfitSharingNavigationService(
+            MockDbContextFactory,
+            appUser.Object,
+            distributedCache,
+            NullLoggerFactory.Instance);
 
         // Act: Get navigation items
-        var response = await svc.GetNavigation(CancellationToken.None);
+        var response = await svc.GetNavigationAsync(CancellationToken.None);
         var navigation = response.Navigation ?? [];
 
         // Assert: All navigation items should have IsReadOnly = true
@@ -126,10 +140,14 @@ public class NavigationServiceTests : ApiTestBase<Program>
             .Returns(new List<string> { Role.FINANCEMANAGER });
 
         var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
-        var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
+        var svc = new ProfitSharingNavigationService(
+            MockDbContextFactory,
+            appUser.Object,
+            distributedCache,
+            NullLoggerFactory.Instance);
 
         // Act: Get navigation items
-        var response = await svc.GetNavigation(CancellationToken.None);
+        var response = await svc.GetNavigationAsync(CancellationToken.None);
         var navigation = response.Navigation ?? [];
 
         // Assert: All navigation items should have IsReadOnly = false
@@ -153,10 +171,14 @@ public class NavigationServiceTests : ApiTestBase<Program>
             .Returns(new List<string> { Role.AUDITOR });
 
         var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
-        var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
+        var svc = new ProfitSharingNavigationService(
+            MockDbContextFactory,
+            appUser.Object,
+            distributedCache,
+            NullLoggerFactory.Instance);
 
         // Act: Get navigation items
-        var response = await svc.GetNavigation(CancellationToken.None);
+        var response = await svc.GetNavigationAsync(CancellationToken.None);
         var navigation = response.Navigation ?? [];
 
         // Assert: All navigation items should have IsReadOnly = true

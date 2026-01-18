@@ -1,15 +1,15 @@
 using Demoulas.Common.Data.Contexts.Contexts;
-using Demoulas.Common.Data.Services.Entities.Entities;
+using Demoulas.Common.Data.Services.Entities.Entities.Navigation;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.CheckRun;
 using Demoulas.ProfitSharing.Data.Entities.FileTransfer;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using AuditEvent = Demoulas.ProfitSharing.Data.Entities.Audit.AuditEvent;
 using Department = Demoulas.ProfitSharing.Data.Entities.Department;
 
 namespace Demoulas.ProfitSharing.Data.Contexts;

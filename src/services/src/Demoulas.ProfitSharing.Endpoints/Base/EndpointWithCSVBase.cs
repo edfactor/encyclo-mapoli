@@ -5,9 +5,6 @@ using CsvHelper.Configuration;
 using Demoulas.Common.Api.Endpoints;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.Util.Extensions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 

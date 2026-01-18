@@ -1,5 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+﻿using Demoulas.Common.Contracts.Contracts.Response.Navigation;
+using Demoulas.Common.Contracts.Interfaces;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
@@ -9,39 +9,35 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// </summary>
 internal sealed class NullNavigationService : INavigationService
 {
-    public Task<NavigationResponseDto> GetNavigation(CancellationToken cancellationToken)
+    public Task<NavigationResponseResponse> GetNavigationAsync(CancellationToken cancellationToken)
     {
-        return Task.FromResult(new NavigationResponseDto
+        return Task.FromResult(new NavigationResponseResponse
         {
-            Navigation = new List<NavigationDto>(),
-            CustomSettings = new Dictionary<string, object?>
-            {
-                [NavigationCustomSettingsKeys.TrackPageStatus] = true,
-                [NavigationCustomSettingsKeys.UseFrozenYear] = true
-            }
+            Navigation = new List<NavigationResponse>(),
+            CustomSettings = null
         });
     }
 
-    public NavigationDto GetNavigation(short navigationId)
+    public NavigationResponse GetNavigation(short navigationId)
     {
-        return new NavigationDto
+        return new NavigationResponse
         {
             Id = navigationId,
             Title = "N/A",
             StatusId = 0,
             StatusName = "N/A",
             ParentId = null,
-            Items = new List<NavigationDto>(),
+            Items = new List<NavigationResponse>(),
             IsReadOnly = false
         };
     }
 
-    public Task<List<NavigationStatusDto>> GetNavigationStatus(CancellationToken cancellationToken)
+    public Task<List<NavigationStatusResponse>> GetNavigationStatusAsync(CancellationToken cancellationToken)
     {
-        return Task.FromResult(new List<NavigationStatusDto>());
+        return Task.FromResult(new List<NavigationStatusResponse>());
     }
 
-    public Task<bool> UpdateNavigation(short navigationId, byte statusId, CancellationToken cancellationToken)
+    public Task<bool> UpdateNavigationAsync(short navigationId, byte statusId, CancellationToken cancellationToken)
     {
         // Always return success for background services - navigation status updates don't apply
         return Task.FromResult(true);

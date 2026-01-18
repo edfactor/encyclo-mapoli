@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
+﻿using Demoulas.Common.Data.Services.Entities.Entities.Navigation;
+using NavigationStatusIds = Demoulas.ProfitSharing.Common.Constants.NavigationStatusIds;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 
@@ -7,8 +8,8 @@ public class NavigationFaker
     public List<Navigation> DummyNavigationData()
     {
         // Common statuses
-        var notStarted = new NavigationStatus { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" };
-        var complete = new NavigationStatus { Id = NavigationStatus.Constants.Complete, Name = "Complete" };
+        var notStarted = new NavigationStatus { Id = NavigationStatusIds.NotStarted, Name = "Not Started" };
+        var complete = new NavigationStatus { Id = NavigationStatusIds.Complete, Name = "Complete" };
 
         // Common role sets (Ids follow NavigationRole.Contants; Names mirror Security.Role strings)
         var rolesInquiries = new List<NavigationRole>
@@ -137,7 +138,7 @@ public class NavigationFaker
         var masterUpdate = list.FirstOrDefault(n => n.Id == 111);
         if (manageExecHours != null)
         {
-            manageExecHours.StatusId = NavigationStatus.Constants.Complete;
+            manageExecHours.StatusId = NavigationStatusIds.Complete;
             manageExecHours.NavigationStatus = complete;
         }
         if (masterUpdate != null && manageExecHours != null)

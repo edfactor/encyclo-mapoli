@@ -2,7 +2,6 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.PayBen;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PayBen;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 

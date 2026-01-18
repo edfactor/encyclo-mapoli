@@ -16,19 +16,48 @@ This package provides database and data access utilities including bulk operatio
 2. [Database Context Configuration](#database-context-configuration)
 3. [Pagination Extensions](#pagination-extensions)
 4. [Navigation Service Pattern](#navigation-service-pattern)
+5. [Navigation Service Implementation](#navigation-service-implementation)
+6. [Audit Logging & Search](#audit-logging--search)
 
 ---
 
 ## Navigation Service Pattern
 
-Navigation reads use a provider factory to supply `IQueryable` sets. The service should not assume a `DbContext`.
+Navigation reads use an abstract retrieval hook; the service should not assume a `DbContext`.
 
 Rules:
 
-- Read data via a provider factory that returns `IQueryable` sets.
-- The provider must pre-shape navigation relationships (roles, status, custom settings, prerequisites).
+- Read data via `NavigationService.GetNavigationListAsync(...)` (abstract hook returning `IEnumerable<Navigation>`).
+- The retrieval implementation must pre-shape navigation relationships (roles, status, custom settings, prerequisites).
 - Write operations use per-method callbacks.
 - `IDistributedCache` may be null. Use an in-memory distributed cache fallback where needed.
+
+---
+
+## Navigation Service Implementation
+
+`NavigationService` builds a role-filtered navigation tree with caching and read-only role handling.
+
+**Rules:**
+
+- Build navigation trees from the results of `GetNavigationListAsync(...)` (no direct DbContext usage).
+- Filter navigations by the current user roles (case-insensitive, trimmed, deduplicated).
+- Enforce role inheritance: child required roles must not broaden parent roles; intersect when necessary.
+- Set `IsReadOnly` for all returned nodes when user has any read-only role in `NavigationRoles`.
+- Cache navigation trees by role combination and a version key; increment version on updates to invalidate all trees.
+- Cache navigation statuses separately; invalidate on update/reset.
+
+**Caching guidance:**
+
+- Navigation tree cache key includes role names and the version key (e.g., `navigation-tree-v{version}-{roleKey}`).
+- Status list cache key: `navigation-status-all`.
+- On update/reset, remove status cache and bump the version key to invalidate all trees.
+
+**Dependencies:**
+
+- `IAppUser` provides user roles.
+- `GetNavigationListAsync(...)` must include roles, statuses, custom settings, and prerequisites.
+- `IDistributedCache` may be null; fall back to `MemoryDistributedCache`.
 
 ---
 
@@ -44,7 +73,7 @@ Audit logging is implemented in `Demoulas.Common.Data.Services` and is designed 
 **Usage guidance:**
 
 1. **Sensitive data access:** wrap read operations with `IAuditService.LogSensitiveDataAccessAsync(...)` to capture who accessed protected data.
-2. **Data change events:** call `LogDataChangeAsync(...)` with a list of `AuditChangeEntryInput` fields for create/update/delete operations.
+2. **Data change events:** call `LogDataChangeAsync(...)` with a list of `AuditChangeEntryInputRequest` fields for create/update/delete operations.
 3. **Session correlation:** audit entries include a session ID derived from the request context for forensic reconstruction.
 4. **No PII leaks:** serialized audit payloads must respect masking rules (use the configured masking serializer options).
 

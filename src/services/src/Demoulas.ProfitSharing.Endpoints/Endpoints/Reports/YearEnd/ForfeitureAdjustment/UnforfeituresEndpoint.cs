@@ -1,4 +1,4 @@
-﻿using CsvHelper;
+using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
@@ -74,7 +73,7 @@ public class UnforfeituresEndpoint :
     public override async Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(FilterableStartAndEndDateRequest req, CancellationToken ct)
     {
         _logger.LogInformation("Generating unforfeitures report for {StartDate} to {EndDate}", req.BeginningDate, req.EndingDate);
-        var mostRecentProfitYear = req.EndingDate.Year + 1; // Get the profit year containing the ending date.   
+        var mostRecentProfitYear = req.EndingDate.Year + 1; // Get the profit year containing the ending date.
         DateOnly startDate;
         var iteration = 0;
         do
