@@ -14,7 +14,7 @@ public class BreakdownReportByStoreTests : PristineBaseTest
 
     public BreakdownReportByStoreTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _breakdownService = new BreakdownReportService(DbFactory, CalendarService, TotalService, DemographicReaderService, new Mock<IPayrollDuplicateSsnReportService>().Object, new Mock<ICrossReferenceValidationService>().Object);
+        _breakdownService = new BreakdownReportService(DbFactory, CalendarService, TotalService, DemographicReaderService, new Mock<IPayrollDuplicateSsnReportService>().Object, new Mock<ICrossReferenceValidationService>().Object, TimeProvider.System);
     }
 
     [Fact]

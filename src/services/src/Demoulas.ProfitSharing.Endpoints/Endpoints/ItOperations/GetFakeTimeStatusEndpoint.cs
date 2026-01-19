@@ -32,7 +32,8 @@ public sealed class GetFakeTimeStatusEndpoint : ProfitSharingResponseEndpoint<Fa
         {
             s.Summary = "Gets the current fake time status and configuration";
             s.Description = "Returns information about whether fake time is enabled, the current fake time if active, " +
-                "and configuration details. SECURITY: Fake time is never allowed in Production environments. " +
+                "configuration details, and whether runtime switching is supported. " +
+                "SECURITY: Fake time is never allowed in Production environments. " +
                 "This endpoint is accessible to all authenticated users for displaying the fake time banner.";
             s.ResponseExamples = new Dictionary<int, object>
             {
@@ -42,6 +43,7 @@ public sealed class GetFakeTimeStatusEndpoint : ProfitSharingResponseEndpoint<Fa
                     {
                         IsActive = true,
                         IsAllowed = true,
+                        IsRuntimeSwitchingEnabled = true,
                         CurrentFakeDateTime = "2025-12-15T10:00:00.0000000-05:00",
                         ConfiguredDateTime = "2025-12-15T10:00:00",
                         TimeZone = "Eastern Standard Time",
@@ -61,18 +63,29 @@ public sealed class GetFakeTimeStatusEndpoint : ProfitSharingResponseEndpoint<Fa
     {
         var isProduction = _hostEnvironment.IsProduction();
         var isFakeTimeActive = _timeProvider.IsFakeTime();
+        var isRuntimeSwitchingEnabled = _timeProvider.IsRuntimeSwitchingEnabled();
         var realNow = DateTimeOffset.Now;
 
         var response = new FakeTimeStatusResponse
         {
             IsActive = isFakeTimeActive,
             IsAllowed = !isProduction,
+            IsRuntimeSwitchingEnabled = isRuntimeSwitchingEnabled,
             ConfiguredDateTime = _fakeTimeConfig.FixedDateTime,
             TimeZone = _fakeTimeConfig.TimeZone,
             AdvanceTime = _fakeTimeConfig.AdvanceTime,
             Environment = _hostEnvironment.EnvironmentName,
             RealDateTime = realNow.ToString("O")
         };
+
+        // If using switchable provider, get the current configuration from it
+        var switchable = _timeProvider.AsSwitchable();
+        if (switchable?.CurrentConfiguration is not null)
+        {
+            response.ConfiguredDateTime = switchable.CurrentConfiguration.FixedDateTime;
+            response.TimeZone = switchable.CurrentConfiguration.TimeZone;
+            response.AdvanceTime = switchable.CurrentConfiguration.AdvanceTime;
+        }
 
         if (isFakeTimeActive)
         {

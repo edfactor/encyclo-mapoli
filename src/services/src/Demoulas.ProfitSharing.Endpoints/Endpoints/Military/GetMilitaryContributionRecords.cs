@@ -12,13 +12,15 @@ public class GetMilitaryContributionRecords : ProfitSharingEndpoint<GetMilitaryC
 {
     private readonly IMilitaryService _militaryService;
     private readonly IProfitSharingAuditService _profitSharingAuditService;
+    private readonly TimeProvider _timeProvider;
 
     private const string ReportName = "Get All Military Contribution Records";
 
-    public GetMilitaryContributionRecords(IMilitaryService militaryService, IProfitSharingAuditService profitSharingAuditService) : base(Navigation.Constants.MilitaryContributions)
+    public GetMilitaryContributionRecords(IMilitaryService militaryService, IProfitSharingAuditService profitSharingAuditService, TimeProvider timeProvider) : base(Navigation.Constants.MilitaryContributions)
     {
         _militaryService = militaryService;
         _profitSharingAuditService = profitSharingAuditService;
+        _timeProvider = timeProvider;
     }
 
     public override void Configure()
@@ -36,7 +38,7 @@ public class GetMilitaryContributionRecords : ProfitSharingEndpoint<GetMilitaryC
         GetMilitaryContributionRequest req,
         CancellationToken ct)
     {
-        var currentYear = (short)DateTimeOffset.UtcNow.Year;
+        var currentYear = (short)_timeProvider.GetUtcNow().Year;
         var result = await _profitSharingAuditService.ArchiveCompletedReportAsync(ReportName,
             currentYear,
             req,

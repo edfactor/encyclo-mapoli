@@ -331,4 +331,192 @@ public sealed class FakeTimeProviderTests
     }
 
     #endregion
+
+    #region SwitchableTimeProvider Tests
+
+    [Fact]
+    [Description("PS-XXXX : SwitchableTimeProvider starts with real time by default")]
+    public void SwitchableTimeProvider_StartsWithRealTime()
+    {
+        // Arrange & Act
+        var provider = new SwitchableTimeProvider();
+
+        // Assert
+        provider.IsFakeTimeActive.ShouldBeFalse();
+        provider.CurrentConfiguration.ShouldBeNull();
+
+        // Should be close to real time (within 1 second)
+        var realTime = DateTimeOffset.UtcNow;
+        var providerTime = provider.GetUtcNow();
+        (providerTime - realTime).TotalSeconds.ShouldBeLessThan(1);
+    }
+
+    [Fact]
+    [Description("PS-XXXX : SwitchableTimeProvider starts with fake time when configured")]
+    public void SwitchableTimeProvider_StartsWithFakeTime_WhenConfigured()
+    {
+        // Arrange
+        var config = new FakeTimeConfiguration
+        {
+            Enabled = true,
+            FixedDateTime = "2025-12-15T10:00:00",
+            AdvanceTime = false
+        };
+
+        // Act
+        var provider = new SwitchableTimeProvider(config);
+
+        // Assert
+        provider.IsFakeTimeActive.ShouldBeTrue();
+        provider.CurrentConfiguration.ShouldNotBeNull();
+        provider.CurrentConfiguration!.FixedDateTime.ShouldBe("2025-12-15T10:00:00");
+    }
+
+    [Fact]
+    [Description("PS-XXXX : SwitchableTimeProvider can activate fake time at runtime")]
+    public void SwitchableTimeProvider_CanActivateFakeTime()
+    {
+        // Arrange
+        var provider = new SwitchableTimeProvider();
+        provider.IsFakeTimeActive.ShouldBeFalse();
+
+        var config = new FakeTimeConfiguration
+        {
+            Enabled = true,
+            FixedDateTime = "2025-12-15T10:00:00",
+            AdvanceTime = false
+        };
+
+        // Act
+        var activated = provider.ActivateFakeTime(config);
+
+        // Assert
+        activated.ShouldBeTrue();
+        provider.IsFakeTimeActive.ShouldBeTrue();
+        provider.GetUtcNow().Year.ShouldBe(2025);
+        provider.GetUtcNow().Month.ShouldBe(12);
+        provider.GetUtcNow().Day.ShouldBe(15);
+    }
+
+    [Fact]
+    [Description("PS-XXXX : SwitchableTimeProvider can deactivate fake time at runtime")]
+    public void SwitchableTimeProvider_CanDeactivateFakeTime()
+    {
+        // Arrange
+        var config = new FakeTimeConfiguration
+        {
+            Enabled = true,
+            FixedDateTime = "2025-12-15T10:00:00",
+            AdvanceTime = false
+        };
+        var provider = new SwitchableTimeProvider(config);
+        provider.IsFakeTimeActive.ShouldBeTrue();
+
+        // Act
+        provider.DeactivateFakeTime();
+
+        // Assert
+        provider.IsFakeTimeActive.ShouldBeFalse();
+        provider.CurrentConfiguration.ShouldBeNull();
+
+        // Should be close to real time
+        var realTime = DateTimeOffset.UtcNow;
+        var providerTime = provider.GetUtcNow();
+        (providerTime - realTime).TotalSeconds.ShouldBeLessThan(1);
+    }
+
+    [Fact]
+    [Description("PS-XXXX : SwitchableTimeProvider rejects invalid configuration")]
+    public void SwitchableTimeProvider_RejectsInvalidConfiguration()
+    {
+        // Arrange
+        var provider = new SwitchableTimeProvider();
+        var invalidConfig = new FakeTimeConfiguration
+        {
+            Enabled = true,
+            FixedDateTime = "not-a-valid-date",
+            AdvanceTime = false
+        };
+
+        // Act
+        var activated = provider.ActivateFakeTime(invalidConfig);
+
+        // Assert
+        activated.ShouldBeFalse();
+        provider.IsFakeTimeActive.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Description("PS-XXXX : IsFakeTime extension works with SwitchableTimeProvider")]
+    public void IsFakeTime_Extension_WorksWithSwitchableProvider()
+    {
+        // Arrange
+        var provider = new SwitchableTimeProvider();
+
+        // Act & Assert - Real time
+        provider.IsFakeTime().ShouldBeFalse();
+
+        // Activate fake time
+        var config = new FakeTimeConfiguration
+        {
+            Enabled = true,
+            FixedDateTime = "2025-12-15T10:00:00"
+        };
+        provider.ActivateFakeTime(config);
+
+        // Act & Assert - Fake time
+        provider.IsFakeTime().ShouldBeTrue();
+
+        // Deactivate
+        provider.DeactivateFakeTime();
+
+        // Act & Assert - Real time again
+        provider.IsFakeTime().ShouldBeFalse();
+    }
+
+    [Fact]
+    [Description("PS-XXXX : IsRuntimeSwitchingEnabled extension returns true for SwitchableTimeProvider")]
+    public void IsRuntimeSwitchingEnabled_ReturnsTrue_ForSwitchableProvider()
+    {
+        // Arrange
+        TimeProvider switchableProvider = new SwitchableTimeProvider();
+        TimeProvider fakeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        TimeProvider systemProvider = TimeProvider.System;
+
+        // Act & Assert
+        switchableProvider.IsRuntimeSwitchingEnabled().ShouldBeTrue();
+        fakeProvider.IsRuntimeSwitchingEnabled().ShouldBeFalse();
+        systemProvider.IsRuntimeSwitchingEnabled().ShouldBeFalse();
+    }
+
+    [Fact]
+    [Description("PS-XXXX : AsSwitchable extension returns provider for SwitchableTimeProvider")]
+    public void AsSwitchable_ReturnsProvider_ForSwitchableProvider()
+    {
+        // Arrange
+        var switchable = new SwitchableTimeProvider();
+        TimeProvider timeProvider = switchable;
+
+        // Act
+        var result = timeProvider.AsSwitchable();
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeSameAs(switchable);
+    }
+
+    [Fact]
+    [Description("PS-XXXX : AsSwitchable extension returns null for non-switchable providers")]
+    public void AsSwitchable_ReturnsNull_ForNonSwitchableProviders()
+    {
+        // Arrange
+        TimeProvider fakeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        TimeProvider systemProvider = TimeProvider.System;
+
+        // Act & Assert
+        fakeProvider.AsSwitchable().ShouldBeNull();
+        systemProvider.AsSwitchable().ShouldBeNull();
+    }
+
+    #endregion
 }
