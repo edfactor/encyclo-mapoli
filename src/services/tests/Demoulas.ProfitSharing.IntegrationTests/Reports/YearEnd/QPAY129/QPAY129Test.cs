@@ -25,7 +25,7 @@ public class QPAY129Test : PristineBaseTest
     public async Task TestQPAY129()
     {
         // Arrange - Parse expected totals from READY report
-        string expectedReport = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R4-QPAY129").Trim();
+        string expectedReport = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R04-QPAY129").Trim();
         DistributionsAndForfeitureTotalsResponse expectedTotals = ReadyReportParser.ParseTotals(expectedReport);
 
         // Act - Get actual results from service
