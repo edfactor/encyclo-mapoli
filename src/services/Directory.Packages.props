@@ -33,7 +33,7 @@
     <PackageVersion Include="NSwag.AspNetCore" Version="14.6.3" />
     <PackageVersion Include="NSwag.Generation.AspNetCore" Version="14.6.3" />
     <PackageVersion Include="NSwag.MSBuild" Version="14.6.3" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.12.8" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.12.11" />
     <!-- ========================================== -->
     <!-- Entity Framework Core & Oracle             -->
     <!-- ========================================== -->
