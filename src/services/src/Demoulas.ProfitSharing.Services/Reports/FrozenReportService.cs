@@ -49,7 +49,7 @@ public class FrozenReportService : IFrozenReportService
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains the 
+    /// A task that represents the asynchronous operation. The task result contains the
     /// <see cref="DistributionsByAge"/> object, which includes the report details and aggregated data.
     /// </returns>
     public async Task<DistributionsByAge> GetDistributionsByAgeYearAsync(FrozenReportsByAgeRequest req,
@@ -68,7 +68,7 @@ public class FrozenReportService : IFrozenReportService
 
         var queryResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             var query = (from pd in ctx.ProfitDetails
                          join d in demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
@@ -186,15 +186,15 @@ public class FrozenReportService : IFrozenReportService
     /// Retrieves the contributions grouped by age for a specific profit year, based on the provided request.
     /// </summary>
     /// <param name="req">
-    /// The request containing the parameters for generating the contributions report, 
+    /// The request containing the parameters for generating the contributions report,
     /// including the profit year and report type (e.g., FullTime, PartTime, or Total).
     /// </param>
     /// <param name="cancellationToken">
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object, 
-    /// which includes details such as the report name, report date, total employees, distribution total amount, 
+    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object,
+    /// which includes details such as the report name, report date, total employees, distribution total amount,
     /// and a paginated response of contributions grouped by age.
     /// </returns>
     /// <exception cref="ArgumentNullException">
@@ -211,7 +211,7 @@ public class FrozenReportService : IFrozenReportService
 
         var queryResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             var query = (from pd in ctx.ProfitDetails
                          join d in demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear
@@ -281,7 +281,7 @@ public class FrozenReportService : IFrozenReportService
 
         var queryResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             var query = (from pd in ctx.ProfitDetails
                          join d in demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear
@@ -353,7 +353,7 @@ public class FrozenReportService : IFrozenReportService
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A <see cref="BalanceByAge"/> object containing the balance details grouped by age, 
+    /// A <see cref="BalanceByAge"/> object containing the balance details grouped by age,
     /// including totals and other relevant metrics.
     /// </returns>
     /// <remarks>
@@ -371,7 +371,7 @@ public class FrozenReportService : IFrozenReportService
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
-            var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demo = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             var joinedQuery = from q in query
                               join d in demo on q.Ssn equals d.Ssn into demographics
@@ -477,7 +477,7 @@ public class FrozenReportService : IFrozenReportService
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
-            var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demo = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             var joinedQuery = from q in query
                               join d in demo on q.Ssn equals d.Ssn into demographics
@@ -612,7 +612,7 @@ public class FrozenReportService : IFrozenReportService
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
             var yearsInPlanQuery = _totalService.GetYearsOfService(ctx, req.ProfitYear, startEnd.FiscalEndDate);
-            var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demo = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             var joinedQuery = from q in query
                               join yip in yearsInPlanQuery on q.Ssn equals yip.Ssn
@@ -710,7 +710,7 @@ public class FrozenReportService : IFrozenReportService
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             //Get population of both employees and beneficiaries
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx, true);
             var demoBase = demographics.Select(x =>
                 new
                 {
@@ -780,31 +780,31 @@ public class FrozenReportService : IFrozenReportService
                     m.StoreNumber,
                     m.IsEmployee,
                     IsExecutive = m.PayFrequencyId == PayFrequency.Constants.Monthly,
-                    BeforeEnrollmentId = demo != null
-                        ? demo.VestingScheduleId == null
+                    BeforeEnrollmentId = m.IsEmployee
+                        ? (lyPp == null || lyPp.VestingScheduleId == 0
                             ? EnrollmentConstants.NotEnrolled
-                            : demo.HasForfeited
-                                ? demo.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : lyPp.HasForfeited
+                                ? lyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                     : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                                : demo.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                : lyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasContributions
-                                    : EnrollmentConstants.NewVestingPlanHasContributions
-                        : (m.IsEmployee ? EnrollmentConstants.NotEnrolled : EnrollmentConstants.NewVestingPlanHasForfeitureRecords),
+                                    : EnrollmentConstants.NewVestingPlanHasContributions)
+                        : EnrollmentConstants.NewVestingPlanHasForfeitureRecords,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
                     BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : default(byte),
-                    AfterEnrollmentId = demo != null
-                        ? demo.VestingScheduleId == null
+                    AfterEnrollmentId = m.IsEmployee
+                        ? (pp == null || pp.VestingScheduleId == 0
                             ? EnrollmentConstants.NotEnrolled
-                            : demo.HasForfeited
-                                ? demo.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : pp.HasForfeited
+                                ? pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                     : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                                : demo.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasContributions
-                                    : EnrollmentConstants.NewVestingPlanHasContributions
-                        : (m.IsEmployee ? EnrollmentConstants.NotEnrolled : EnrollmentConstants.NewVestingPlanHasForfeitureRecords),
+                                    : EnrollmentConstants.NewVestingPlanHasContributions)
+                        : EnrollmentConstants.NewVestingPlanHasForfeitureRecords,
                     AfterProfitSharingAmount = bal.CurrentBalance,
                     AfterVestedProfitSharingAmount = bal.VestedBalance,
                     AfterYearsInPlan = bal.YearsInPlan
@@ -884,7 +884,7 @@ public class FrozenReportService : IFrozenReportService
         {
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx, true);
 
                 // Query for PayProfit data for the requested year
                 var baseQuery = (from d in demographics
@@ -910,13 +910,13 @@ public class FrozenReportService : IFrozenReportService
                                      Loans = lBal_lj != null ? lBal_lj.TotalAmount : (decimal?)null,
                                      ProfitSharingAmount = psBal != null ? psBal.TotalAmount : (decimal?)null,
                                      GrossWages = pp != null ? pp.TotalIncome : 0m,
-                                     EnrollmentId = d.VestingScheduleId == null
+                                     EnrollmentId = pp.VestingScheduleId == 0
                                          ? (byte?)EnrollmentConstants.NotEnrolled
-                                         : d.HasForfeited
-                                             ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                         : pp.HasForfeited
+                                             ? pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                                  ? (byte?)EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                                  : (byte?)EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                                             : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                                             : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                                  ? (byte?)EnrollmentConstants.OldVestingPlanHasContributions
                                                  : (byte?)EnrollmentConstants.NewVestingPlanHasContributions,
                                      d.PayFrequencyId,
@@ -975,7 +975,7 @@ public class FrozenReportService : IFrozenReportService
                 DateOnly fiscalEndDate = (await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken)).FiscalEndDate;
                 ProfitControlSheetResponse response = new();
                 // Build composite key sets (Ssn, Id) to disambiguate potential duplicate SSNs with different Demographic/Beneficiary records.
-                var employeeKeys = await (await _demographicReaderService.BuildDemographicQuery(ctx, true))
+                var employeeKeys = await (await _demographicReaderService.BuildDemographicQueryAsync(ctx, true))
                     .Select(d => new { d.Ssn, d.Id })
                     .ToListAsync(cancellationToken);
                 var employeeKeySet = employeeKeys

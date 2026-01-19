@@ -2,10 +2,8 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
 
@@ -32,11 +30,11 @@ public class UpdateBeneficiaryContactEndpoint : ProfitSharingEndpoint<UpdateBene
         Group<BeneficiariesGroup>();
     }
 
-    public override async Task<Results<Ok<UpdateBeneficiaryContactResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(UpdateBeneficiaryContactRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<UpdateBeneficiaryContactResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(UpdateBeneficiaryContactRequest req, CancellationToken ct)
     {
         try
         {
-            var updated = await _beneficiaryService.UpdateBeneficiaryContact(req, ct);
+            var updated = await _beneficiaryService.UpdateBeneficiaryContactAsync(req, ct);
             if (updated is null)
             {
                 return Result<UpdateBeneficiaryContactResponse>.Failure(Error.EntityNotFound("BeneficiaryContact")).ToHttpResult(Error.EntityNotFound("BeneficiaryContact"));

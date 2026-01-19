@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Demoulas.Common.Contracts.Contracts.Response;
+using System.Text;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -21,17 +20,20 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
     private readonly ICalendarService _calendarService;
+    private readonly TimeProvider _timeProvider;
 
     public EmployeesWithProfitsOver73Service(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
         TotalService totalService,
-        ICalendarService calendarService)
+        ICalendarService calendarService,
+        TimeProvider timeProvider)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
         _calendarService = calendarService;
+        _timeProvider = timeProvider;
     }
 
     public Task<ReportResponseBase<EmployeesWithProfitsOver73DetailDto>> GetEmployeesWithProfitsOver73Async(
@@ -46,10 +48,10 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             var fiscalEndDate = calendarInfo.FiscalEndDate;
 
             // Get all current demographics with contact info
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             // Calculate age threshold - employees must be over 73 years old
-            var today = DateOnly.FromDateTime(DateTime.Today);
+            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
             var ageThresholdDate = today.AddYears(-73);
 
             // Start with base query for employees over 73
@@ -85,7 +87,8 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             var totalBalances = await _totalService.GetTotalBalanceSet(ctx, request.ProfitYear)
                 .Where(tb => employeeSsns.Contains(tb.Ssn))
                 .Where(tb => tb.TotalAmount > 0) // Only include employees with positive balances
-                .ToDictionaryAsync(tb => tb.Ssn, cancellationToken);
+                .ToListAsync(cancellationToken);
+            var totalBalanceBySsn = totalBalances.ToLookup(tb => tb.Ssn);
 
             // Load all RMD factors from database (ages 73-99)
             var rmdFactors = await ctx.RmdsFactorsByAge
@@ -111,14 +114,15 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                     Ssn = g.Key,
                     TotalPayments = g.Sum(pd => Math.Abs(pd.Forfeiture)) // Forfeiture is negative for payments
                 })
-                .ToDictionaryAsync(x => x.Ssn, x => x.TotalPayments, cancellationToken);
+                .ToListAsync(cancellationToken);
+            var paymentsBySsn = paymentsInFiscalYear.ToLookup(x => x.Ssn);
 
             // Build detail records with pagination support
             var detailRecords = employeesOver73
-                .Where(e => totalBalances.ContainsKey(e.Ssn))
+                .Where(e => totalBalanceBySsn[e.Ssn].Any())
                 .Select(employee =>
                 {
-                    totalBalances.TryGetValue(employee.Ssn, out var balance);
+                    var balance = totalBalanceBySsn[employee.Ssn].FirstOrDefault();
                     var age = today.Year - employee.DateOfBirth.Year;
 
                     // Get RMD factor for this age (default to 0 if age not found)
@@ -129,7 +133,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                     var rmd = factor > 0 ? Math.Round((balance?.TotalAmount ?? 0) / factor, 2, MidpointRounding.AwayFromZero) : 0m;
 
                     // Get payments made in the fiscal year
-                    var paymentsInYear = paymentsInFiscalYear.TryGetValue(employee.Ssn, out var payments) ? payments : 0m;
+                    var paymentsInYear = paymentsBySsn[employee.Ssn].FirstOrDefault()?.TotalPayments ?? 0m;
 
                     // Calculate suggested RMD check amount based on de minimis threshold
                     var currentBalance = balance?.TotalAmount ?? 0;
@@ -184,7 +188,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
     }
 
 
-    private static string GenerateFormLettersForOver73Employees(ReportResponseBase<EmployeesWithProfitsOver73DetailDto> report)
+    private string GenerateFormLettersForOver73Employees(ReportResponseBase<EmployeesWithProfitsOver73DetailDto> report)
     {
 
         if (!report.Response.Results.Any())
@@ -200,7 +204,8 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             #region Beginning of letter
             letter.AppendLine();
             letter.AppendLine("DJDE JDE=QPS073,JDL=PAYROL,END,;");
-            letter.AppendLine($"{DateTime.Now.Month.ToString("MMMM")} {DateTime.Now.Year}");
+            var now = _timeProvider.GetLocalNow().DateTime;
+            letter.AppendLine($"{now.Month.ToString("MMMM")} {now.Year}");
             #endregion
 
             ////#region Return address

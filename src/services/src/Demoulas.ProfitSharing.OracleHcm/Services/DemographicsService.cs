@@ -32,7 +32,6 @@ public sealed class DemographicsService : IDemographicsServiceInternal
 
     public DemographicsService(
         IProfitSharingDataContextFactory dataContextFactory,
-        IDemographicsRepository repository,
         IDemographicMatchingService matchingService,
         IDemographicAuditService auditService,
         IDemographicHistoryService historyService,

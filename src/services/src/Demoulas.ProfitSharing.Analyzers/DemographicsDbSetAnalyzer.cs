@@ -14,7 +14,7 @@ namespace Demoulas.ProfitSharing.Analyzers
 
         private static readonly LocalizableString _title = "Use IDemographicReaderService for Demographic queries";
         private static readonly LocalizableString _messageFormat =
-            "Direct access to the Demographics DbSet or FrozenService.GetDemographicSnapshot is prohibited; use IDemographicReaderService.BuildDemographicQuery(...) instead";
+            "Direct access to the Demographics DbSet or FrozenService.GetDemographicSnapshot is prohibited; use IDemographicReaderService.BuildDemographicQueryAsync(...) instead";
         private static readonly LocalizableString _description =
             "Prevents direct calls to the Demographics DbSet or FrozenService.GetDemographicSnapshot to ensure navigation properties (e.g. ContactInfo, Address) are always included via the service.";
 

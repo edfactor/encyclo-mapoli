@@ -1,6 +1,5 @@
 import { Typography } from "@mui/material";
-import { useCallback, useMemo } from "react";
-import { Path, useNavigate } from "react-router-dom";
+import { useMemo } from "react";
 import { useLazyGetUnder21BreakdownByStoreQuery, useLazyGetUnder21TotalsQuery } from "reduxstore/api/YearsEndApi";
 import { DSMGrid } from "smart-ui-library";
 import { GRID_KEYS } from "../../../constants";
@@ -25,16 +24,7 @@ const sampleData = [
 ];
 
 const Under21ReportGrid = () => {
-  const navigate = useNavigate();
-
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
-
-  const columnDefs = useMemo(() => GetUnder21ReportColumns(handleNavigationForButton), [handleNavigationForButton]);
+  const columnDefs = useMemo(() => GetUnder21ReportColumns(), []);
 
   const [__, { isFetching: isTotalsFetching }] = useLazyGetUnder21TotalsQuery();
   const [___, { isFetching: isBreakdownFetching }] = useLazyGetUnder21BreakdownByStoreQuery();

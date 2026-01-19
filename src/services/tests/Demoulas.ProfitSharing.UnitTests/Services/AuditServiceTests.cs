@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Services.Audit;
 using Shouldly;
@@ -6,7 +6,7 @@ using Shouldly;
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
 /// <summary>
-/// Unit tests for AuditService.ToKeyValuePairs method to verify all primitive numeric types
+/// Unit tests for ProfitSharingAuditService.ToKeyValuePairs method to verify all primitive numeric types
 /// and their nullable versions are correctly archived with proper hashing.
 /// </summary>
 [Description("PS-XXXX : Verify all primitive numeric types are correctly archived")]
@@ -184,7 +184,7 @@ public sealed class AuditServiceTests
         };
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<ExplicitAttributeTestClass, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, []).ToList();
 
         // Assert
         result.ShouldNotBeEmpty();
@@ -238,7 +238,7 @@ public sealed class AuditServiceTests
         };
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<ExplicitAttributeTestClass, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, []).ToList();
 
         // Assert - all numeric types should be converted to decimal for hashing
         var byteEntry = result.First(kvp => kvp.Key == nameof(ExplicitAttributeTestClass.ByteValue));
@@ -270,7 +270,7 @@ public sealed class AuditServiceTests
         };
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<ExplicitAttributeTestClass, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, []).ToList();
 
         // Assert - null nullable properties should be stored as 0m
         var byteEntry = result.First(kvp => kvp.Key == nameof(ExplicitAttributeTestClass.NullableByteValue));
@@ -316,7 +316,7 @@ public sealed class AuditServiceTests
         };
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<ClassAttributeTestClass, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, []).ToList();
 
         // Assert
         result.ShouldNotBeEmpty();
@@ -356,7 +356,7 @@ public sealed class AuditServiceTests
         };
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<ReportResponseTestClass, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, []).ToList();
 
         // Assert
         result.Count.ShouldBe(5); // 5 properties with [YearEndArchiveProperty]
@@ -401,8 +401,8 @@ public sealed class AuditServiceTests
         var testObj2 = new ReportResponseTestClass { TotalAmount = 12345.67m };
 
         // Act
-        var result1 = AuditService.ToKeyValuePairs(testObj1, new List<Func<ReportResponseTestClass, (string, object)>>()).ToList();
-        var result2 = AuditService.ToKeyValuePairs(testObj2, new List<Func<ReportResponseTestClass, (string, object)>>()).ToList();
+        var result1 = ProfitSharingAuditService.ToKeyValuePairs(testObj1, []).ToList();
+        var result2 = ProfitSharingAuditService.ToKeyValuePairs(testObj2, []).ToList();
 
         // Assert
         var hash1 = result1.First(kvp => kvp.Key == nameof(ReportResponseTestClass.TotalAmount)).Value.Value;
@@ -419,8 +419,8 @@ public sealed class AuditServiceTests
         var testObj2 = new ReportResponseTestClass { TotalAmount = 98765.43m };
 
         // Act
-        var result1 = AuditService.ToKeyValuePairs(testObj1, new List<Func<ReportResponseTestClass, (string, object)>>()).ToList();
-        var result2 = AuditService.ToKeyValuePairs(testObj2, new List<Func<ReportResponseTestClass, (string, object)>>()).ToList();
+        var result1 = ProfitSharingAuditService.ToKeyValuePairs(testObj1, []).ToList();
+        var result2 = ProfitSharingAuditService.ToKeyValuePairs(testObj2, []).ToList();
 
         // Assert
         var hash1 = result1.First(kvp => kvp.Key == nameof(ReportResponseTestClass.TotalAmount)).Value.Value;
@@ -436,7 +436,7 @@ public sealed class AuditServiceTests
         var testObj = new ReportResponseTestClass { TotalAmount = 12345.67m };
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<ReportResponseTestClass, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, []).ToList();
 
         // Assert
         var hash = result.First(kvp => kvp.Key == nameof(ReportResponseTestClass.TotalAmount)).Value.Value;
@@ -454,7 +454,7 @@ public sealed class AuditServiceTests
         var testObj = new { Name = "Test", Value = 123 }; // Anonymous type with no attributes
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<object, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, new List<Func<object, (string, object)>>()).ToList();
 
         // Assert
         result.ShouldBeEmpty();
@@ -472,7 +472,7 @@ public sealed class AuditServiceTests
         };
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<ReportResponseTestClass, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, []).ToList();
 
         // Assert
         result.ShouldNotBeEmpty();
@@ -495,7 +495,7 @@ public sealed class AuditServiceTests
         };
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<ReportResponseTestClass, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, []).ToList();
 
         // Assert
         var totalAmount = result.First(kvp => kvp.Key == nameof(ReportResponseTestClass.TotalAmount));
@@ -516,7 +516,7 @@ public sealed class AuditServiceTests
         };
 
         // Act
-        var result = AuditService.ToKeyValuePairs(testObj, new List<Func<ExplicitAttributeTestClass, (string, object)>>()).ToList();
+        var result = ProfitSharingAuditService.ToKeyValuePairs(testObj, []).ToList();
 
         // Assert
         var longEntry = result.First(kvp => kvp.Key == nameof(ExplicitAttributeTestClass.LongValue));

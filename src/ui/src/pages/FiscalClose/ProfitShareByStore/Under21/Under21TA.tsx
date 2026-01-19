@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../../constants";
+import { useCachedPrevious } from "../../../../hooks/useCachedPrevious";
 import { useFakeTimeAwareYear } from "../../../../hooks/useFakeTimeAwareDate";
 import { useInitialLoad } from "../../../../hooks/useInitialLoad";
 import useNavigationYear from "../../../../hooks/useNavigationYear";
@@ -17,10 +18,10 @@ import Under21BreakdownGrid from "./Under21BreakdownGrid";
 import Under21Summary from "./Under21Summary";
 
 const Under21TA = () => {
-  const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
-  const [fetchUnder21BreakdownByStore, { isLoading: isInactiveLoading }] = useLazyGetUnder21BreakdownByStoreQuery();
+  const [fetchUnder21Totals, { isFetching: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
+  const [fetchUnder21BreakdownByStore, { isFetching: isInactiveLoading }] = useLazyGetUnder21BreakdownByStoreQuery();
   const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
-  const under21BreakdownByStore = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
+  const cachedTotals = useCachedPrevious(under21Totals ?? null);
   const [initialLoad, setInitialLoad] = useState(true);
   const { isLoaded: initialSearchLoaded, setLoaded: setInitialSearchLoaded } = useInitialLoad();
   const [pageNumber, setPageNumber] = useState<number>(0);
@@ -32,9 +33,8 @@ const Under21TA = () => {
   const profitYear = useNavigationYear();
   const currentYear = useFakeTimeAwareYear();
 
-  const isLoading = isTotalsLoading || isInactiveLoading;
-
-  const hasData = !!under21Totals && !!under21BreakdownByStore;
+  // Combined loading state is represented by the individual flags passed
+  // to child components (`isTotalsLoading` and `isInactiveLoading`).
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
@@ -128,12 +128,12 @@ const Under21TA = () => {
             </Grid>
           ) : (
             <>
-              {hasData && !isLoading && (
+              {cachedTotals && (
                 <Grid
                   width="100%"
                   paddingX="24px">
                   <Under21Summary
-                    totals={under21Totals}
+                    totals={cachedTotals}
                     isLoading={isTotalsLoading}
                     title="UNDER 21 (QPAY066TA-UNDR21)"
                   />

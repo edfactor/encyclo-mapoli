@@ -8,7 +8,7 @@ import {
   createZipColumn
 } from "../../../utils/gridColumnFactory";
 
-export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export const GetProfallGridColumns = (): ColDef[] => {
   return [
     createStoreColumn({
       minWidth: 80,
@@ -16,8 +16,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
     }),
     createBadgeColumn({
       headerName: "Badge",
-      alignment: "right",
-      navigateFunction: navFunction
+      alignment: "right"
     }),
     createNameColumn({
       field: "employeeName",

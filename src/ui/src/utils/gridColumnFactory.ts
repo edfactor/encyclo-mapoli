@@ -21,7 +21,7 @@ import {
   TaxCodeColumnOptions,
   YesOrNoColumnOptions
 } from "./columnFactoryTypes";
-import { viewBadgeLinkRenderer } from "./masterInquiryLink";
+import { viewBadgeLinkRenderer } from "./viewBadgeLinkRenderer";
 
 export const createAddressColumn = (options: StreetAddressColumnOptions = {}): ColDef => {
   const {
@@ -508,7 +508,7 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
     valueFormatter = (params) => {
       const value = params.value;
       // Only format if value is a valid date string (yyyyMMdd or yyyy-MM-dd)
-      if (!value) return "";
+      if (!value) return "";  
       // Accepts both string and Date
       if (typeof value === "string" && /^\d{8}$/.test(value)) {
         return yyyyMMDDToMMDDYYYY(value);
@@ -1166,7 +1166,6 @@ export const createPSNColumn = (options: PSNColumnOptions = {}): ColDef => {
     sortable = true,
     resizable = true,
     enableLinking = false,
-    navigateFunction,
     linkingStyle = "simple",
     valueFormatter
   } = options;
@@ -1188,7 +1187,7 @@ export const createPSNColumn = (options: PSNColumnOptions = {}): ColDef => {
     column.maxWidth = maxWidth;
   }
 
-  if (enableLinking && navigateFunction) {
+  if (enableLinking) {
     column.cellRenderer = (params: ICellRendererParams) => {
       if (linkingStyle === "badge-psn") {
         // For complex badge-psn linking (like in PayBenReport)
@@ -1226,7 +1225,6 @@ export const createBadgeOrPSNColumn = (
     sortable = true,
     resizable = true,
     enableLinking = false,
-    navigateFunction,
     valueFormatter
   } = options;
 
@@ -1247,7 +1245,7 @@ export const createBadgeOrPSNColumn = (
     column.maxWidth = maxWidth;
   }
 
-  if (enableLinking && navigateFunction) {
+  if (enableLinking) {
     column.cellRenderer = (params: ICellRendererParams) => {
       if (params.data[badgeField]) {
         return viewBadgeLinkRenderer(params.data[badgeField]);

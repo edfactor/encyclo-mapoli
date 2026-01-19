@@ -1,4 +1,4 @@
-﻿using CsvHelper;
+using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -6,10 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
@@ -21,15 +18,19 @@ public class UnforfeituresEndpoint :
     EndpointWithCsvBase<FilterableStartAndEndDateRequest, UnforfeituresResponse, UnforfeituresEndpoint.RehireProfitSharingResponseMap>
 {
     private readonly IUnforfeitService _reportService;
-    private readonly IAuditService _auditService;
-    private readonly ILogger<UnforfeituresEndpoint> _logger;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ICalendarService _calendarService;
+    private readonly ILogger<UnforfeituresEndpoint> _logger;
 
-    public UnforfeituresEndpoint(IUnforfeitService reportService, IAuditService auditService, ILogger<UnforfeituresEndpoint> logger, ICalendarService calendarService)
+    public UnforfeituresEndpoint(
+        IUnforfeitService reportService,
+        IProfitSharingAuditService profitSharingAuditService,
+        ILogger<UnforfeituresEndpoint> logger,
+        ICalendarService calendarService)
         : base(Navigation.Constants.Unforfeit)
     {
         _reportService = reportService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _logger = logger;
         _calendarService = calendarService;
     }
@@ -69,45 +70,28 @@ public class UnforfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-#pragma warning disable AsyncFixer01 // The method does use async/await inside ExecuteWithTelemetry lambda
     public override async Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(FilterableStartAndEndDateRequest req, CancellationToken ct)
-#pragma warning restore AsyncFixer01
     {
-        return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        _logger.LogInformation("Generating unforfeitures report for {StartDate} to {EndDate}", req.BeginningDate, req.EndingDate);
+        var mostRecentProfitYear = req.EndingDate.Year + 1; // Get the profit year containing the ending date.
+        DateOnly startDate;
+        var iteration = 0;
+        do
         {
-            var mostRecentProfitYear = req.EndingDate.Year + 1; // Get the profit year containing the ending date.   
-            DateOnly startDate;
-            var iteration = 0;
-            do
-            {
-                mostRecentProfitYear--;
-                var calendarResult = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)mostRecentProfitYear);
-                startDate = calendarResult.FiscalBeginDate;
-            } while (iteration++ < 7 && startDate >= req.EndingDate);
+            mostRecentProfitYear--;
+            var calendarResult = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)mostRecentProfitYear, ct);
+            startDate = calendarResult.FiscalBeginDate;
+        } while (iteration++ < 7 && startDate >= req.EndingDate);
 
+        // Database queries and business logic are timed inside the service layer
+        var result = await _profitSharingAuditService.ArchiveCompletedReportAsync(
+            "Rehire Forfeiture Adjustments Endpoint",
+            (short)mostRecentProfitYear,
+            req,
+            (archiveReq, _, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),
+            ct);
 
-            // Database queries and business logic are timed inside the service layer
-            var result = await _auditService.ArchiveCompletedReportAsync(
-                "Rehire Forfeiture Adjustments Endpoint",
-                (short)mostRecentProfitYear,
-                req,
-                (archiveReq, _, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),
-                ct);
-
-            // Record business operation for year-end unforfeitures report
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "year-end-unforfeitures-report"),
-                new("endpoint", nameof(UnforfeituresEndpoint)),
-                new("date_range", $"{req.BeginningDate:yyyy-MM-dd}_to_{req.EndingDate:yyyy-MM-dd}"));
-
-            _logger.LogInformation(
-                "Unforfeitures endpoint completed: {RecordCount} records for year {Year} (correlation: {CorrelationId})",
-                result.Response?.Results?.Count() ?? 0,
-                req.EndingDate.Year,
-                HttpContext?.TraceIdentifier ?? "unknown");
-
-            return result;
-        }, "Ssn", "BadgeNumber"); // Declare sensitive fields accessed
+        return result;
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<UnforfeituresResponse> report, CancellationToken cancellationToken)

@@ -92,6 +92,21 @@ export class Messages {
       message: "Please try again"
     }
   };
+  static readonly AnnuityRatesCreateSuccess: MessageUpdate = {
+    key: MessageKeys.AnnuityRatesSave,
+    message: {
+      type: "success",
+      title: "Annuity rates created successfully"
+    }
+  };
+  static readonly AnnuityRatesCreateError: MessageUpdate = {
+    key: MessageKeys.AnnuityRatesSave,
+    message: {
+      type: "error",
+      title: "Failed to create annuity rates",
+      message: "Please try again"
+    }
+  };
   static readonly RmdFactorsLoadError: MessageUpdate = {
     key: MessageKeys.RmdFactorsSave,
     message: {
@@ -163,7 +178,7 @@ export class Messages {
       message: "" // dynamic message added at dispatch time
     }
   };
-  
+
   // Bank management messages
   static readonly BanksSaveSuccess: MessageUpdate = {
     key: MessageKeys.BanksSave,

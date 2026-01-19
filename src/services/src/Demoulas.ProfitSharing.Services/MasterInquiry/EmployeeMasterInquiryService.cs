@@ -38,6 +38,25 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         _demographicReaderService = demographicReaderService;
     }
 
+    private static byte ResolveEnrollmentId(int? vestingScheduleId, bool hasForfeited)
+    {
+        if (!vestingScheduleId.HasValue || vestingScheduleId.Value == 0)
+        {
+            return EnrollmentConstants.NotEnrolled;
+        }
+
+        if (hasForfeited)
+        {
+            return vestingScheduleId.Value == VestingSchedule.Constants.OldPlan
+                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords;
+        }
+
+        return vestingScheduleId.Value == VestingSchedule.Constants.OldPlan
+            ? EnrollmentConstants.OldVestingPlanHasContributions
+            : EnrollmentConstants.NewVestingPlanHasContributions;
+    }
+
     public Task<IQueryable<MasterInquiryItem>> GetEmployeeInquiryQueryAsync(
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default)
@@ -60,7 +79,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
             req?.EndProfitYear, req?.PaymentType, req?.BadgeNumber);
 
         _logger.LogInformation("TRACE: About to call BuildDemographicQuery");
-        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx).ConfigureAwait(false);
+        var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx).ConfigureAwait(false);
         _logger.LogInformation("TRACE: BuildDemographicQuery completed");
 
         // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
@@ -154,7 +173,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
         return await _factory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             var memberData = await demographics
                 .Include(d => d.PayProfits)
                 .Include(d => d.Department)
@@ -191,32 +210,14 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     Gender = d.Gender != null ? d.Gender.Name : "N/A",
                     PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
 
-                    EnrollmentId = d.VestingScheduleId == null
-                        ? EnrollmentConstants.NotEnrolled
-                        : d.HasForfeited
-                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
-                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasContributions
-                                : EnrollmentConstants.NewVestingPlanHasContributions,
-
-                    Enrollment = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
-                        ? EnrollmentConstants.NotEnrolled
-                        : d.HasForfeited
-                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
-                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasContributions
-                                : EnrollmentConstants.NewVestingPlanHasContributions),
-
                     CurrentPayProfit = d.PayProfits
                         .Select(x =>
                             new
                             {
                                 x.ProfitYear,
                                 x.CurrentHoursYear,
+                                x.VestingScheduleId,
+                                x.HasForfeited,
                                 x.Etva,
                             })
                         .FirstOrDefault(x => x.ProfitYear == currentYear),
@@ -233,22 +234,17 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (memberData == null)
+            if (memberData is null)
             {
-                _logger.LogInformation("Employee not found for ID: {EmployeeId}", id);
-                return (0, new MemberDetails { Id = 0, FirstName = "", MiddleName = "", LastName = "" });
+                return (0, CreateEmptyMemberDetails());
             }
 
-            _logger.LogDebug("Retrieved employee details for ID: {EmployeeId}, Badge: {BadgeNumber}, SSN: {MaskedSsn}",
-                id, memberData.BadgeNumber, memberData.Ssn.MaskSsn());
+            var missivesDict = await _missiveService.DetermineMissivesForSsns([memberData.Ssn], currentYear, cancellationToken);
+            var missiveList = missivesDict.TryGetValue(memberData.Ssn, out var missives)
+                ? missives
+                : new List<int>();
 
-            var missives = await _missiveService.DetermineMissivesForSsns([memberData.Ssn], currentYear, cancellationToken);
-            var missiveList = missives.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
-
-            if (missiveList.Any())
-            {
-                _logger.LogDebug("Found {MissiveCount} missives for SSN: {MaskedSsn}", missiveList.Count, memberData.Ssn.MaskSsn());
-            }
+            _logger.LogDebug("Found {MissiveCount} missives for SSN: {MaskedSsn}", missiveList.Count, memberData.Ssn.MaskSsn());
 
             var duplicateSsns = await demographics
                     .GroupBy(d => d.Ssn)
@@ -267,6 +263,10 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 _logger.LogWarning("Duplicate SSN detected for Badge: {BadgeNumber}, SSN: {MaskedSsn}, Duplicate badges: {DuplicateBadges}",
                     memberData.BadgeNumber, memberData.Ssn.MaskSsn(), string.Join(", ", badgeNumbersOfDuplicates));
             }
+
+            var enrollmentId = ResolveEnrollmentId(memberData.CurrentPayProfit?.VestingScheduleId,
+                memberData.CurrentPayProfit?.HasForfeited ?? false);
+            var enrollmentName = EnrollmentConstants.GetDescription(enrollmentId);
 
             return (memberData.Ssn, new MemberDetails
             {
@@ -288,8 +288,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 FullTimeDate = memberData.FullTimeDate,
                 TerminationDate = memberData.TerminationDate,
                 StoreNumber = memberData.StoreNumber,
-                EnrollmentId = memberData.EnrollmentId,
-                Enrollment = memberData.Enrollment,
+                EnrollmentId = enrollmentId,
+                Enrollment = enrollmentName,
                 BadgeNumber = memberData.BadgeNumber,
                 PayFrequencyId = memberData.PayFrequencyId,
                 IsExecutive = memberData.IsExecutive,
@@ -325,7 +325,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
         return _factory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
             var query = demographics
@@ -368,24 +368,6 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
                     Gender = d.Gender != null ? d.Gender.Name : "N/A",
                     PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
-                    EnrollmentId = d.VestingScheduleId == null
-                        ? EnrollmentConstants.NotEnrolled
-                        : d.HasForfeited
-                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
-                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasContributions
-                                : EnrollmentConstants.NewVestingPlanHasContributions,
-                    Enrollment = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
-                        ? EnrollmentConstants.NotEnrolled
-                        : d.HasForfeited
-                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
-                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasContributions
-                                : EnrollmentConstants.NewVestingPlanHasContributions),
                     // Optimize PayProfit queries - only fetch what we need for current/previous years
                     CurrentPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == currentYear)
@@ -393,6 +375,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                         {
                             x.ProfitYear,
                             x.CurrentHoursYear,
+                            x.VestingScheduleId,
+                            x.HasForfeited,
                             x.Etva
                         }).FirstOrDefault(),
                     PreviousPayProfit = d.PayProfits
@@ -442,6 +426,10 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     ? badges.Where(b => b != memberData.BadgeNumber).ToList()
                     : new List<int>();
 
+                var enrollmentId = ResolveEnrollmentId(memberData.CurrentPayProfit?.VestingScheduleId,
+                    memberData.CurrentPayProfit?.HasForfeited ?? false);
+                var enrollmentName = EnrollmentConstants.GetDescription(enrollmentId);
+
                 detailsList.Add(new MemberDetails
                 {
                     IsEmployee = true,
@@ -463,8 +451,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     FullTimeDate = memberData.FullTimeDate,
                     TerminationDate = memberData.TerminationDate,
                     StoreNumber = memberData.StoreNumber,
-                    EnrollmentId = memberData.EnrollmentId,
-                    Enrollment = memberData.Enrollment,
+                    EnrollmentId = enrollmentId,
+                    Enrollment = enrollmentName,
                     BadgeNumber = memberData.BadgeNumber,
                     PayFrequencyId = memberData.PayFrequencyId,
                     CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
@@ -501,7 +489,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
         return _factory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
             var query = demographics
@@ -538,30 +526,14 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
                     Gender = d.Gender != null ? d.Gender.Name : "N/A",
                     PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
-                    EnrollmentId = d.VestingScheduleId == null
-                        ? EnrollmentConstants.NotEnrolled
-                        : d.HasForfeited
-                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
-                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasContributions
-                                : EnrollmentConstants.NewVestingPlanHasContributions,
-                    Enrollment = EnrollmentConstants.GetDescription(d.VestingScheduleId == null
-                        ? EnrollmentConstants.NotEnrolled
-                        : d.HasForfeited
-                            ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
-                                : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
-                                ? EnrollmentConstants.OldVestingPlanHasContributions
-                                : EnrollmentConstants.NewVestingPlanHasContributions),
                     // Optimize PayProfit queries
                     CurrentPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == currentYear)
                         .Select(x => new
                         {
                             x.CurrentHoursYear,
+                            x.VestingScheduleId,
+                            x.HasForfeited,
                             x.Etva
                         }).FirstOrDefault(),
                     PreviousPayProfit = d.PayProfits
@@ -608,6 +580,10 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     ? badges.Where(b => b != memberData.BadgeNumber).ToList()
                     : new List<int>();
 
+                var enrollmentId = ResolveEnrollmentId(memberData.CurrentPayProfit?.VestingScheduleId,
+                    memberData.CurrentPayProfit?.HasForfeited ?? false);
+                var enrollmentName = EnrollmentConstants.GetDescription(enrollmentId);
+
                 detailsList.Add(new MemberDetails
                 {
                     IsEmployee = true,
@@ -629,8 +605,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     FullTimeDate = memberData.FullTimeDate,
                     TerminationDate = memberData.TerminationDate,
                     StoreNumber = memberData.StoreNumber,
-                    EnrollmentId = memberData.EnrollmentId,
-                    Enrollment = memberData.Enrollment,
+                    EnrollmentId = enrollmentId,
+                    Enrollment = enrollmentName,
                     BadgeNumber = memberData.BadgeNumber,
                     PayFrequencyId = memberData.PayFrequencyId,
                     CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
@@ -660,7 +636,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
         return _factory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             // ReadOnlyDbContext automatically handles AsNoTracking
             int ssnEmpl = await demographics
                 .Where(d => d.BadgeNumber == badgeNumber)
@@ -678,5 +654,36 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
             return ssnEmpl;
         }, cancellationToken);
+    }
+
+    private static MemberDetails CreateEmptyMemberDetails()
+    {
+        return new MemberDetails
+        {
+            Id = 0,
+            IsEmployee = true,
+            BadgeNumber = 0,
+            PsnSuffix = 0,
+            PayFrequencyId = 0,
+            IsExecutive = false,
+            Ssn = 0.MaskSsn(),
+            FirstName = string.Empty,
+            MiddleName = null,
+            LastName = string.Empty,
+            Address = string.Empty,
+            AddressCity = string.Empty,
+            AddressState = string.Empty,
+            AddressZipCode = string.Empty,
+            Age = 0,
+            DateOfBirth = default,
+            YearToDateProfitSharingHours = 0,
+            EnrollmentId = EnrollmentConstants.NotEnrolled,
+            Enrollment = EnrollmentConstants.GetDescription(EnrollmentConstants.NotEnrolled),
+            StoreNumber = 0,
+            CurrentEtva = 0,
+            PreviousEtva = 0,
+            Missives = [],
+            BadgesOfDuplicateSsns = []
+        };
     }
 }

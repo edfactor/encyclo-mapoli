@@ -12,7 +12,28 @@ public static class TimeProviderExtensions
     /// <returns>True if the provider is a fake time provider; otherwise, false.</returns>
     public static bool IsFakeTime(this TimeProvider timeProvider)
     {
-        return timeProvider is FakeTimeProvider;
+        return timeProvider is FakeTimeProvider ||
+               (timeProvider is SwitchableTimeProvider switchable && switchable.IsFakeTimeActive);
+    }
+
+    /// <summary>
+    /// Gets whether the time provider supports runtime switching between real and fake time.
+    /// </summary>
+    /// <param name="timeProvider">The time provider to check.</param>
+    /// <returns>True if the provider supports runtime switching; otherwise, false.</returns>
+    public static bool IsRuntimeSwitchingEnabled(this TimeProvider timeProvider)
+    {
+        return timeProvider is SwitchableTimeProvider;
+    }
+
+    /// <summary>
+    /// Gets the switchable time provider if the provider supports runtime switching.
+    /// </summary>
+    /// <param name="timeProvider">The time provider to check.</param>
+    /// <returns>The switchable time provider, or null if runtime switching is not supported.</returns>
+    public static SwitchableTimeProvider? AsSwitchable(this TimeProvider timeProvider)
+    {
+        return timeProvider as SwitchableTimeProvider;
     }
 
     /// <summary>

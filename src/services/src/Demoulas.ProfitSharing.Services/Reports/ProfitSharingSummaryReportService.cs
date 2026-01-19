@@ -122,7 +122,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             // OPTIMIZATION: Fetch minimal employee data once with a lightweight DTO
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, req.UseFrozenData);
 
             // Get balance data once (instead of via ActiveSummary which builds full EmployeeWithBalance objects)
             var beginningBalanceYear = (short)(req.ProfitYear - 1);
@@ -314,7 +314,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             // Line N: Non-employee beneficiaries (from BeneficiaryContacts, NOT in Demographics)
             // Matches COBOL Report 10 logic - LEFT JOIN anti-join pattern
-            var demographicQueryForBeneficiaries = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographicQueryForBeneficiaries = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var beneData = await (
                 from bc in ctx.BeneficiaryContacts
                 join d in demographicQueryForBeneficiaries on bc.Ssn equals d.Ssn into demoJoin
@@ -573,7 +573,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             // Build optimized query that aggregates at database level without materializing individual records
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, req.UseFrozenData);
 
             // Get first contribution year lookup
             var firstContributionYearQuery = TotalService.GetFirstContributionYear(ctx, req.ProfitYear);
@@ -645,7 +645,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             .Include(p => p.Demographic)
             .ThenInclude(d => d!.ContactInfo);
 
-        var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
+        var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, req.UseFrozenData);
         basePayProfits = basePayProfits
             .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
 
@@ -675,13 +675,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 Years = yip != null ? yip.Years : (byte)0,
                 FirstContributionYear = fc != null ? fc.FirstContributionYear : (short?)null,
                 IsExecutive = pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly,
-                EnrollmentId = pp.Demographic!.VestingScheduleId == null
+                EnrollmentId = pp.VestingScheduleId == 0
                     ? EnrollmentConstants.NotEnrolled
-                    : pp.Demographic!.HasForfeited
-                        ? pp.Demographic!.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                    : pp.HasForfeited
+                        ? pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                             ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                             : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                        : pp.Demographic!.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                             ? EnrollmentConstants.OldVestingPlanHasContributions
                             : EnrollmentConstants.NewVestingPlanHasContributions
             };
@@ -717,7 +717,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear);
 
         // Build demographic query using the reader service (frozen data not needed for anti-join check)
-        var demographicQueryForAntiJoin = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
+        var demographicQueryForAntiJoin = await _demographicReaderService.BuildDemographicQueryAsync(ctx, useFrozenData: false);
 
         // We cannot call MaskSsn() inside an EF Core-translated query. Materialize the minimal data first
         // then apply MaskSsn() in-memory. Use LEFT JOIN with null check for anti-join pattern.

@@ -25,7 +25,7 @@ public class BeneficiaryDatabaseValidator : AbstractValidator<BeneficiaryDatabas
         RuleFor(x => x.EmployeeBadgeNumber)
             .MustAsync(async (model, badgeNumber, cancellationToken) =>
             {
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(model.Context, false);
+                var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(model.Context, false);
                 return await demographicQuery
                     .AnyAsync(x => x.BadgeNumber == badgeNumber, cancellationToken);
             })

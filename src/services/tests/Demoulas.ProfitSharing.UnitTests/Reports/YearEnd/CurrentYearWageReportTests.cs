@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -37,12 +37,12 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     {
         var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
         var logger = ServiceProvider!.GetRequiredService<ILogger<CurrentYearWagesEndpoint>>();
-        var auditService = ServiceProvider!.GetRequiredService<IAuditService>();
+        var auditService = ServiceProvider!.GetRequiredService<IProfitSharingAuditService>();
 
         // Mock IDemographicReaderService to return live demographics
         var mockDemographicReader = new Mock<IDemographicReaderService>();
         mockDemographicReader
-            .Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+            .Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync((IProfitSharingDbContext ctx, bool useFrozen) => ctx.Demographics);
 
         WagesService mockService = new WagesService(MockDbContextFactory, calendarService, mockDemographicReader.Object);

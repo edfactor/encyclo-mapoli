@@ -1,8 +1,9 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.CrossReference;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd.Validation;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
@@ -37,23 +38,23 @@ public class ValidationEndpointAuthorizationTests : ApiTestBase<Api.Program>
 
         // Act
         var request = new YearRequest { ProfitYear = TestYear };
-        var response = await ApiClient.GETAsync<GetMasterUpdateValidationEndpoint, YearRequest, MasterUpdateCrossReferenceValidationResponse>(request);
+        var response = await ApiClient.GetAsync($"api/validation/checksum/master-update/{request.ProfitYear}");
 
         // Assert
         response.ShouldNotBeNull();
 
         // Log actual status for debugging
-        _testOutputHelper.WriteLine($"Response Status: {response.Response.StatusCode}");
+        _testOutputHelper.WriteLine($"Response Status: {response.StatusCode}");
 
         // Accept both 200 (data exists) and 404 (no data for year) as valid authorized responses
-        var isAuthorized = response.Response.StatusCode == HttpStatusCode.OK ||
-                          response.Response.StatusCode == HttpStatusCode.NotFound;
+        var isAuthorized = response.StatusCode == HttpStatusCode.OK ||
+                          response.StatusCode == HttpStatusCode.NotFound;
 
-        isAuthorized.ShouldBeTrue($"Expected 200 or 404 but got {response.Response.StatusCode}. " +
+        isAuthorized.ShouldBeTrue($"Expected 200 or 404 but got {response.StatusCode}. " +
                                   $"User should be authorized with CanViewYearEndReports policy.");
 
         // Should NOT be Forbidden
-        response.Response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden,
+        response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden,
             "User with CanViewYearEndReports should not be forbidden");
     }
 
@@ -66,11 +67,11 @@ public class ValidationEndpointAuthorizationTests : ApiTestBase<Api.Program>
 
         // Act
         var request = new YearRequest { ProfitYear = TestYear };
-        var response = await ApiClient.GETAsync<GetMasterUpdateValidationEndpoint, YearRequest, MasterUpdateCrossReferenceValidationResponse>(request);
+        var response = await ApiClient.GetAsync($"api/validation/checksum/master-update/{request.ProfitYear}");
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden,
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden,
             "User without CanViewYearEndReports policy should be forbidden");
 
         _testOutputHelper.WriteLine($"✅ Correctly returned 403 Forbidden for unauthorized user");
@@ -85,17 +86,17 @@ public class ValidationEndpointAuthorizationTests : ApiTestBase<Api.Program>
 
         // Act
         var request = new YearRequest { ProfitYear = TestYear };
-        var response = await ApiClient.GETAsync<GetMasterUpdateValidationEndpoint, YearRequest, MasterUpdateCrossReferenceValidationResponse>(request);
+        var response = await ApiClient.GetAsync($"api/validation/checksum/master-update/{request.ProfitYear}");
 
         // Assert
         response.ShouldNotBeNull();
 
         // Accept both 200 (data exists) and 404 (no data for year) as valid authorized responses
-        var isAuthorized = response.Response.StatusCode == HttpStatusCode.OK ||
-                          response.Response.StatusCode == HttpStatusCode.NotFound;
+        var isAuthorized = response.StatusCode == HttpStatusCode.OK ||
+                  response.StatusCode == HttpStatusCode.NotFound;
 
-        isAuthorized.ShouldBeTrue($"Expected 200 or 404 but got {response.Response.StatusCode}");
-        response.Response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden);
+        isAuthorized.ShouldBeTrue($"Expected 200 or 404 but got {response.StatusCode}");
+        response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden);
 
         _testOutputHelper.WriteLine($"✅ User with multiple authorized roles can access endpoint");
     }
@@ -216,17 +217,17 @@ public class ValidationEndpointAuthorizationTests : ApiTestBase<Api.Program>
 
         // Act
         var request = new YearRequest { ProfitYear = invalidYear };
-        var response = await ApiClient.GETAsync<GetMasterUpdateValidationEndpoint, YearRequest, MasterUpdateCrossReferenceValidationResponse>(request);
+        var response = await ApiClient.GetAsync($"api/validation/checksum/master-update/{request.ProfitYear}");
 
         // Assert
         response.ShouldNotBeNull();
 
         // Should be either 400 (validation error) or 404 (not found)
         // NOT 403 (forbidden) - authorization should pass
-        response.Response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden,
+        response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden,
             "Should not be forbidden - user has proper authorization");
 
-        _testOutputHelper.WriteLine($"Response Status for invalid year: {response.Response.StatusCode}");
+        _testOutputHelper.WriteLine($"Response Status for invalid year: {response.StatusCode}");
     }
 
     [Fact]
@@ -239,14 +240,14 @@ public class ValidationEndpointAuthorizationTests : ApiTestBase<Api.Program>
 
         // Act
         var request = new YearRequest { ProfitYear = futureYear };
-        var response = await ApiClient.GETAsync<GetMasterUpdateValidationEndpoint, YearRequest, MasterUpdateCrossReferenceValidationResponse>(request);
+        var response = await ApiClient.GetAsync($"api/validation/checksum/master-update/{request.ProfitYear}");
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden,
+        response.StatusCode.ShouldNotBe(HttpStatusCode.Forbidden,
             "Authorized user should not get 403 even for future years");
 
-        _testOutputHelper.WriteLine($"Response Status for future year: {response.Response.StatusCode}");
+        _testOutputHelper.WriteLine($"Response Status for future year: {response.StatusCode}");
     }
 
     #endregion

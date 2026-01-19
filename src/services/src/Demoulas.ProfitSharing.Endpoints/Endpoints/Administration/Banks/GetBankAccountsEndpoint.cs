@@ -1,27 +1,18 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.Administration;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.Banks;
 
 public sealed class GetBankAccountsEndpoint : ProfitSharingEndpoint<EmptyRequest, Results<Ok<IReadOnlyList<BankAccountDto>>, NotFound, ProblemHttpResult>>
 {
     private readonly IBankAccountService _bankAccountService;
-    private readonly ILogger<GetBankAccountsEndpoint> _logger;
 
-    public GetBankAccountsEndpoint(IBankAccountService bankAccountService, ILogger<GetBankAccountsEndpoint> logger)
+    public GetBankAccountsEndpoint(IBankAccountService bankAccountService)
         : base(Navigation.Constants.ManageBanks)
     {
         _bankAccountService = bankAccountService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -34,32 +25,10 @@ public sealed class GetBankAccountsEndpoint : ProfitSharingEndpoint<EmptyRequest
         Group<AdministrationGroup>();
     }
 
-    public override Task<Results<Ok<IReadOnlyList<BankAccountDto>>, NotFound, ProblemHttpResult>> ExecuteAsync(EmptyRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<IReadOnlyList<BankAccountDto>>, NotFound, ProblemHttpResult>> HandleRequestAsync(EmptyRequest req, CancellationToken ct)
     {
         var bankId = Route<int>("bankId");
-
-        return this.ExecuteWithTelemetry(HttpContext, _logger, new { BankId = bankId }, async () =>
-        {
-            var result = await _bankAccountService.GetByBankIdAsync(bankId, includeDisabled: true, ct);
-
-            try
-            {
-                var count = result.Value?.Count ?? 0;
-
-                EndpointTelemetry.BusinessOperationsTotal?.Add(1,
-                    new("operation", "bank-accounts-list"),
-                    new("endpoint", nameof(GetBankAccountsEndpoint)));
-
-                EndpointTelemetry.RecordCountsProcessed?.Record(count,
-                    new("record_type", "bank-accounts"),
-                    new("endpoint", nameof(GetBankAccountsEndpoint)));
-            }
-            catch
-            {
-                // Ignore telemetry errors in unit tests
-            }
-
-            return result.ToHttpResult();
-        }, "AccountNumber"); // Mark account number as sensitive
+        var result = await _bankAccountService.GetByBankIdAsync(bankId, includeDisabled: true, ct);
+        return result.ToHttpResult();
     }
 }

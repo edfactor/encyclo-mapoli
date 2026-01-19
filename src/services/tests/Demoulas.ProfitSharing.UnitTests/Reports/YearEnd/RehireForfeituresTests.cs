@@ -34,10 +34,10 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     public RehireForfeituresTests()
     {
         IUnforfeitService mockService = ServiceProvider?.GetRequiredService<IUnforfeitService>()!;
-        IAuditService auditService = ServiceProvider?.GetRequiredService<IAuditService>()!;
+        IProfitSharingAuditService profitSharingAuditService = ServiceProvider?.GetRequiredService<IProfitSharingAuditService>()!;
         var logger = ServiceProvider?.GetRequiredService<ILogger<UnforfeituresEndpoint>>()!;
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        _endpoint = new UnforfeituresEndpoint(mockService, auditService, logger, calendarService);
+        _endpoint = new UnforfeituresEndpoint(mockService, profitSharingAuditService, logger, calendarService);
     }
 
 
@@ -195,12 +195,11 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
         var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id);
 
-        // Update Demographic to have NewVestingPlan with forfeiture (enrollment ID 4)
-        // EnrollmentId is now computed from Demographic.VestingScheduleId + HasForfeited
-        if (demo.VestingScheduleId != VestingSchedule.Constants.NewPlan || !demo.HasForfeited)
+        // Update PayProfit to have NewVestingPlan with forfeiture (enrollment ID 4)
+        if (payProfit.VestingScheduleId != VestingSchedule.Constants.NewPlan || !payProfit.HasForfeited)
         {
-            demo.VestingScheduleId = VestingSchedule.Constants.NewPlan;
-            demo.HasForfeited = true;
+            payProfit.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+            payProfit.HasForfeited = true;
         }
 
         payProfit.CurrentHoursYear = 1255.4m;

@@ -1,13 +1,13 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
@@ -22,7 +22,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TimeProvider _timeProvider;
     private readonly IAppUser _appUser;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
 
     public ForfeitureAdjustmentService(
         IProfitSharingDataContextFactory dbContextFactory,
@@ -30,14 +30,14 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         IDemographicReaderService demographicReaderService,
         TimeProvider timeProvider,
         IAppUser appUser,
-        IAuditService auditService)
+        IProfitSharingAuditService profitSharingAuditService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
         _timeProvider = timeProvider;
         _appUser = appUser;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     // Invoked by the 008-12 Forfeit Adjustment screen - the user wants to make a change, we figure out which (forfeit or unforfeit or neither) is appropriate.
@@ -112,7 +112,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private async Task<Employee?> FetchEmployee(IProfitSharingDbContext ctx, int? badgeMaybe, int? ssnMaybe, CancellationToken ct)
     {
         var profitYear = _timeProvider.GetLocalYear();
-        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+        var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
 
         return await demographics
             .Where(d => ssnMaybe.HasValue && ssnMaybe.Value == d.Ssn || badgeMaybe.HasValue && badgeMaybe.Value == d.BadgeNumber)
@@ -136,7 +136,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
         return await _dbContextFactory.UseWritableContext(async context =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(context, false);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(context, false);
             var employeeData = await demographics
                 .Where(d => d.BadgeNumber == req.BadgeNumber)
                 .Select(d => new
@@ -252,14 +252,13 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 // The PY_PS_ETVA gets calculated then written and PY_PS_ENROLLED gets subtracted by two. So 3 becomes 1 and 4 becomes 2."
                 if (isForfeit)
                 {
-                    // For forfeit: Set HAS_FORFEITED flag on DEMOGRAPHIC
-                    // Enrollment is now computed from Demographic.VestingScheduleId + HasForfeited
+                    // For forfeit: Set HAS_FORFEITED flag on PAY_PROFIT for the target year
 #pragma warning disable DSMPS001 // ExecuteUpdateAsync is a bulk operation, not a query
-                    await context.Demographics
-                        .Where(d => d.Id == employeeData.Id)
-                        .ExecuteUpdateAsync(d => d
-                                .SetProperty(demo => demo.HasForfeited, true)
-                                .SetProperty(demo => demo.ModifiedAtUtc, DateTimeOffset.UtcNow),
+                    await context.PayProfits
+                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == profitYear)
+                        .ExecuteUpdateAsync(p => p
+                                .SetProperty(pp => pp.HasForfeited, true)
+                                .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
 #pragma warning restore DSMPS001
 
@@ -273,14 +272,13 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 }
                 else
                 {
-                    // For un-forfeit: Clear HAS_FORFEITED flag on DEMOGRAPHIC
-                    // Enrollment will revert from 3/4 back to 1/2 via computed property
+                    // For un-forfeit: Clear HAS_FORFEITED flag on PAY_PROFIT for the target year
 #pragma warning disable DSMPS001 // ExecuteUpdateAsync is a bulk operation, not a query
-                    await context.Demographics
-                        .Where(d => d.Id == employeeData.Id)
-                        .ExecuteUpdateAsync(d => d
-                                .SetProperty(demo => demo.HasForfeited, false)
-                                .SetProperty(demo => demo.ModifiedAtUtc, DateTimeOffset.UtcNow),
+                    await context.PayProfits
+                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == profitYear)
+                        .ExecuteUpdateAsync(p => p
+                                .SetProperty(pp => pp.HasForfeited, false)
+                                .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
 #pragma warning restore DSMPS001
 
@@ -297,20 +295,20 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             await context.SaveChangesAsync(cancellationToken);
 
             // Audit the forfeiture adjustment
-            var auditChanges = new List<AuditChangeEntryInput>
+            var auditChanges = new List<AuditChangeEntryInputRequest>
             {
-                new AuditChangeEntryInput { ColumnName = "SSN", NewValue = employeeData.Ssn.ToString() },
-                new AuditChangeEntryInput { ColumnName = "BADGE_NUMBER", NewValue = employeeData.BadgeNumber.ToString() },
-                new AuditChangeEntryInput { ColumnName = "PROFIT_YEAR", NewValue = profitYear.ToString() },
-                new AuditChangeEntryInput { ColumnName = "FORFEITURE_AMOUNT", NewValue = req.ForfeitureAmount.ToString("F2") },
-                new AuditChangeEntryInput { ColumnName = "OPERATION_TYPE", NewValue = isForfeit ? "FORFEIT" : "UNFORFEIT" },
-                new AuditChangeEntryInput { ColumnName = "COMMENT_TYPE", NewValue = commentType.Name },
-                new AuditChangeEntryInput { ColumnName = "HAS_FORFEITED", NewValue = isForfeit.ToString() },
+                new AuditChangeEntryInputRequest { ColumnName = "SSN", NewValue = employeeData.Ssn.ToString() },
+                new AuditChangeEntryInputRequest { ColumnName = "BADGE_NUMBER", NewValue = employeeData.BadgeNumber.ToString() },
+                new AuditChangeEntryInputRequest { ColumnName = "PROFIT_YEAR", NewValue = profitYear.ToString() },
+                new AuditChangeEntryInputRequest { ColumnName = "FORFEITURE_AMOUNT", NewValue = req.ForfeitureAmount.ToString("F2") },
+                new AuditChangeEntryInputRequest { ColumnName = "OPERATION_TYPE", NewValue = isForfeit ? "FORFEIT" : "UNFORFEIT" },
+                new AuditChangeEntryInputRequest { ColumnName = "COMMENT_TYPE", NewValue = commentType.Name },
+                new AuditChangeEntryInputRequest { ColumnName = "HAS_FORFEITED", NewValue = isForfeit.ToString() },
             };
 
             if (req.OffsettingProfitDetailId.HasValue)
             {
-                auditChanges.Add(new AuditChangeEntryInput
+                auditChanges.Add(new AuditChangeEntryInputRequest
                 {
                     ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID",
                     NewValue = req.OffsettingProfitDetailId.Value.ToString()
@@ -319,14 +317,14 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             if (req.ClassAction)
             {
-                auditChanges.Add(new AuditChangeEntryInput
+                auditChanges.Add(new AuditChangeEntryInputRequest
                 {
                     ColumnName = "CLASS_ACTION",
                     NewValue = "true"
                 });
             }
 
-            await _auditService.LogDataChangeAsync(
+            await _profitSharingAuditService.LogDataChangeAsync(
                 operationName: isForfeit ? "Create Forfeiture" : "Create Unforfeiture",
                 tableName: "PROFIT_DETAIL",
                 auditOperation: AuditEvent.AuditOperations.Create,
@@ -343,7 +341,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         foreach (var req in requests)
         {
             var result = await UpdateForfeitureAdjustmentAsync(req, cancellationToken);
-            if (result.IsError && result.Error != null)
+            if (result is { IsError: true, Error: not null })
             {
                 return Result<bool>.Failure(result.Error);
             }

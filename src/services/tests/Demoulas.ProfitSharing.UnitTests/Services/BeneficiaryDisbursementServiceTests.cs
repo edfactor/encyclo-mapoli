@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -79,7 +79,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
 
         // Create mock IDemographicReaderService that returns Demographics from mock context
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
-        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+        demographicReaderMock.Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync(mockDbFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         // Get TotalService from DI (sealed class, cannot be mocked)
@@ -102,11 +102,11 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
+            Beneficiaries =
+            [
                 new() { PsnSuffix = 1, Percentage = 60.0m },
                 new() { PsnSuffix = 2, Percentage = 40.0m }
-            }
+            ]
         };
 
         // Act
@@ -126,11 +126,11 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
+            Beneficiaries =
+            [
                 new() { PsnSuffix = 1, Amount = 30000m },
                 new() { PsnSuffix = 2, Amount = 20000m }
-            }
+            ]
         };
 
         // Act
@@ -152,10 +152,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = true,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Percentage = 100.0m }
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Percentage = 100.0m }]
         };
 
         // Act
@@ -176,10 +173,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
             BadgeNumber = 999999, // Non-existent badge number
             PsnSuffix = 1,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Percentage = 100.0m }
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Percentage = 100.0m }]
         };
 
         // Act
@@ -199,10 +193,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = 999999, // Non-existent badge number
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Percentage = 100.0m }
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Percentage = 100.0m }]
         };
 
         // Act
@@ -224,10 +215,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = true, // Claiming deceased but employee is alive
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Percentage = 100.0m }
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Percentage = 100.0m }]
         };
 
         // Act
@@ -247,10 +235,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 999, Percentage = 100.0m } // Non-existent suffix
-            }
+            Beneficiaries = [new() { PsnSuffix = 999, Percentage = 100.0m }]
         };
 
         // Act
@@ -270,11 +255,11 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
+            Beneficiaries =
+            [
                 new() { PsnSuffix = 1, Percentage = 60.0m },
-                new() { PsnSuffix = 2, Percentage = 50.0m } // Total = 110%
-            }
+                new() { PsnSuffix = 2, Percentage = 50.0m }
+            ]
         };
 
         // Act
@@ -294,11 +279,11 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
+            Beneficiaries =
+            [
                 new() { PsnSuffix = 1, Percentage = 50.0m },
-                new() { PsnSuffix = 2, Amount = 25000m } // Mixed types
-            }
+                new() { PsnSuffix = 2, Amount = 25000m }
+            ]
         };
 
         // Act
@@ -318,10 +303,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Percentage = -10.0m } // Negative percentage
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Percentage = -10.0m }]
         };
 
         // Act
@@ -341,10 +323,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Amount = -5000m } // Negative amount
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Amount = -5000m }]
         };
 
         // Act
@@ -364,10 +343,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Amount = 150000m } // More than 100k balance
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Amount = 150000m }]
         };
 
         // Act
@@ -407,10 +383,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
             {
                 BadgeNumber = _disburser.demographic.BadgeNumber,
                 IsDeceased = false,
-                Beneficiaries = new List<RecipientBeneficiary>
-                {
-                    new() { PsnSuffix = 1, Amount = 25000m } // Exceeds non-ETVA (10k) by 15k, should trigger ETVA adjustment
-                }
+                Beneficiaries = [new() { PsnSuffix = 1, Amount = 25000m }]
             };
 
             // Act
@@ -445,11 +418,11 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
+            Beneficiaries =
+            [
                 new() { PsnSuffix = 1, Percentage = 0.0m }, // Zero percentage
                 new() { PsnSuffix = 2, Percentage = 100.0m }
-            }
+            ]
         };
 
         // Act
@@ -469,10 +442,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Percentage = 100.0m }
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Percentage = 100.0m }]
         };
 
         // Act
@@ -493,10 +463,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = true,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Amount = 50000m } // Only 50k out of 100k balance
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Amount = 50000m }]
         };
 
         // Act
@@ -520,7 +487,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>() // Empty list
+            Beneficiaries = [] // Empty list
         };
 
         // Act
@@ -540,11 +507,11 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
+            Beneficiaries =
+            [
                 new() { PsnSuffix = 1, Amount = null, Percentage = null }, // Both null should be treated as 0
                 new() { PsnSuffix = 2, Percentage = 100.0m }
-            }
+            ]
         };
 
         // Act
@@ -567,10 +534,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Amount = transferAmount } // _beneficiary1 is linked to _beneficiaryEmployee
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Amount = transferAmount }]
         };
 
         // Act
@@ -594,10 +558,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 2, Amount = 25000m } // _beneficiary2 is not an employee
-            }
+            Beneficiaries = [new() { PsnSuffix = 2, Amount = 25000m }]
         };
 
         // Act
@@ -619,10 +580,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Amount = 25000m }
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Amount = 25000m }]
         };
 
         // Act
@@ -643,11 +601,11 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
+            Beneficiaries =
+            [
                 new() { PsnSuffix = 1, Amount = 30000m }, // Employee beneficiary - specific amount
-                new() { PsnSuffix = 2, Amount = 20000m }  // Non-employee beneficiary - specific amount
-            }
+                new() { PsnSuffix = 2, Amount = 20000m }
+            ]
         };
 
         // Act
@@ -670,10 +628,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Amount = 100000m } // Exact balance amount
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Amount = 100000m }]
         };
 
         // Act
@@ -696,10 +651,7 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         {
             BadgeNumber = _disburser.demographic.BadgeNumber,
             IsDeceased = true,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Amount = 100000m } // Full balance for deceased
-            }
+            Beneficiaries = [new() { PsnSuffix = 1, Amount = 100000m }]
         };
 
         // Act

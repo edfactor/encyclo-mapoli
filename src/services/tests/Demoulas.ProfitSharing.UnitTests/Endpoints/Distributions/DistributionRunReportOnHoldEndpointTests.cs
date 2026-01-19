@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts;
@@ -138,15 +138,15 @@ public class DistributionRunReportOnHoldEndpointTests
         var serviceResult = Result<PaginatedResponseDto<DistributionsOnHoldResponse>>.Success(paginatedResponse);
 
         mockService
-            .Setup(x => x.GetDistributionsOnHold(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetDistributionsOnHoldAsync(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(serviceResult);
 
         // Act
-        await mockService.Object.GetDistributionsOnHold(request, CancellationToken.None);
+        await mockService.Object.GetDistributionsOnHoldAsync(request, CancellationToken.None);
 
         // Assert
         mockService.Verify(
-            x => x.GetDistributionsOnHold(
+            x => x.GetDistributionsOnHoldAsync(
                 It.Is<SortedPaginationRequestDto>(req =>
                     req.Skip == 0 &&
                     req.Take == 50 &&
@@ -182,15 +182,15 @@ public class DistributionRunReportOnHoldEndpointTests
         var serviceResult = Result<PaginatedResponseDto<DistributionsOnHoldResponse>>.Success(paginatedResponse);
 
         mockService
-            .Setup(x => x.GetDistributionsOnHold(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetDistributionsOnHoldAsync(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(serviceResult);
 
         // Act
-        await mockService.Object.GetDistributionsOnHold(request, cancellationToken);
+        await mockService.Object.GetDistributionsOnHoldAsync(request, cancellationToken);
 
         // Assert
         mockService.Verify(
-            x => x.GetDistributionsOnHold(
+            x => x.GetDistributionsOnHoldAsync(
                 It.IsAny<SortedPaginationRequestDto>(),
                 It.Is<CancellationToken>(ct => ct == cancellationToken)),
             Times.Once);
@@ -213,17 +213,17 @@ public class DistributionRunReportOnHoldEndpointTests
         var expectedException = new InvalidOperationException("Database connection failed");
 
         mockService
-            .Setup(x => x.GetDistributionsOnHold(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetDistributionsOnHoldAsync(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(expectedException);
 
         // Act & Assert
         var thrownException = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await mockService.Object.GetDistributionsOnHold(request, CancellationToken.None));
+            async () => await mockService.Object.GetDistributionsOnHoldAsync(request, CancellationToken.None));
 
         thrownException.ShouldBe(expectedException);
 
         mockService.Verify(
-            x => x.GetDistributionsOnHold(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()),
+            x => x.GetDistributionsOnHoldAsync(It.IsAny<SortedPaginationRequestDto>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

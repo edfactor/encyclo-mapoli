@@ -74,15 +74,15 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         _payProfit1.DemographicId = _demographic1.Id;
         _payProfit1.ProfitYear = 2025;
         _payProfit1.Etva = 5000m;
-        _demographic1.VestingScheduleId = VestingSchedule.Constants.NewPlan;
-        _demographic1.HasForfeited = false;
+        _payProfit1.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+        _payProfit1.HasForfeited = false;
 
         _payProfit2 = payProfitFaker.Generate();
         _payProfit2.DemographicId = _demographic2.Id;
         _payProfit2.ProfitYear = 2025;
         _payProfit2.Etva = 3000m;
-        _demographic2.VestingScheduleId = VestingSchedule.Constants.NewPlan;
-        _demographic2.HasForfeited = false;
+        _payProfit2.VestingScheduleId = VestingSchedule.Constants.NewPlan;
+        _payProfit2.HasForfeited = false;
     }
 
     #region GetSuggestedForfeitureAmount Tests
@@ -98,7 +98,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         }.BuildMocks();
 
         var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
-        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
+        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographicAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FrozenStateResponse
             {
                 Id = 1,
@@ -109,11 +109,11 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             });
 
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
-        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+        demographicReaderMock.Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -149,7 +149,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         }.BuildMocks();
 
         var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
-        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
+        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographicAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FrozenStateResponse
             {
                 Id = 1,
@@ -160,11 +160,11 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             });
 
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
-        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+        demographicReaderMock.Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -211,7 +211,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         }.BuildMocks();
 
         var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
-        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
+        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographicAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FrozenStateResponse
             {
                 Id = 1,
@@ -222,11 +222,11 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             });
 
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
-        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+        demographicReaderMock.Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -271,7 +271,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             MockDbContextFactory,
@@ -309,7 +309,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         }.BuildMocks();
 
         var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
-        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
+        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographicAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FrozenStateResponse
             {
                 Id = 1,
@@ -320,11 +320,11 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             });
 
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
-        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+        demographicReaderMock.Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -383,7 +383,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         }.BuildMocks();
 
         var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
-        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
+        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographicAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FrozenStateResponse
             {
                 Id = 1,
@@ -394,7 +394,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             });
 
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
-        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+        demographicReaderMock.Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         // Forfeiture adjustment is always live (using wall clock year.)
@@ -402,7 +402,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         TimeProvider timeProvider = new FakeTimeProvider(fixedTime);
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -454,7 +454,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         }.BuildMocks();
 
         var frozenServiceMock = new Mock<IFrozenService>(MockBehavior.Strict);
-        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
+        frozenServiceMock.Setup(f => f.GetActiveFrozenDemographicAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FrozenStateResponse
             {
                 Id = 1,
@@ -465,11 +465,11 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             });
 
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
-        demographicReaderMock.Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+        demographicReaderMock.Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -517,7 +517,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             MockDbContextFactory,

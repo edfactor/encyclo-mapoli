@@ -22,10 +22,6 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Distributions;
 [Collection("Distribution Tests")]
 public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 {
-    public UpdateDistributionEndpointTests(ITestOutputHelper testOutputHelper)
-    {
-        // Constructor accepts ITestOutputHelper for xUnit framework compatibility
-    }
 
     private const decimal HighVestedBalance = 1_000_000m;
 
@@ -44,7 +40,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
                 VestedBalance = HighVestedBalance,
                 CurrentBalance = HighVestedBalance,
                 VestingPercent = 1.0m,
-                YearsInPlan = (byte)40
+                YearsInPlan = 40
             });
             return;
         }
@@ -54,7 +50,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             match.VestedBalance = HighVestedBalance;
             match.CurrentBalance = Math.Max(match.CurrentBalance ?? 0m, HighVestedBalance);
             match.VestingPercent = 1.0m;
-            match.YearsInPlan = (byte)40;
+            match.YearsInPlan = 40;
         }
     }
 

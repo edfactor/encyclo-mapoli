@@ -14,7 +14,7 @@ public class BreakdownReportByStoreTests : PristineBaseTest
 
     public BreakdownReportByStoreTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _breakdownService = new BreakdownReportService(DbFactory, CalendarService, TotalService, DemographicReaderService, new Mock<IPayrollDuplicateSsnReportService>().Object);
+        _breakdownService = new BreakdownReportService(DbFactory, CalendarService, TotalService, DemographicReaderService, new Mock<IPayrollDuplicateSsnReportService>().Object, new Mock<ICrossReferenceValidationService>().Object, TimeProvider.System);
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public class BreakdownReportByStoreTests : PristineBaseTest
             pap.HeaderTemplate = pageNumber => $"""
                                                 QPAY066TA               PROFIT SHARING BREAKDOWN REPORT    DATE MAR 10, 2025  YEAR:   2024.0     PAGE:   {pageNumber:D5}
 
-                                                   STORE  
+                                                   STORE
                                                 """
                                                + store.StoreNumber + """
 

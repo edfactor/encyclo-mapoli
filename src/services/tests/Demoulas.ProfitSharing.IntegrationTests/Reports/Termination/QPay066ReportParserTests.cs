@@ -11,19 +11,19 @@ public class QPay066ReportParserTests
     public void ParseRecords_ShouldLoadFullReportWithEmployeesAndBeneficiaries()
     {
         // Arrange
-        string reportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        string reportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R03-QPAY066");
 
         // Act
         List<QPay066Record> records = QPay066ReportParser.ParseRecords(reportText);
 
         // Assert - Overall count
         records.ShouldNotBeEmpty();
-        records.Count.ShouldBeGreaterThan(490, "R3-QPAY066 should contain around 497 records (excluding headers)");
+        records.Count.ShouldBeGreaterThan(490, "R03-QPAY066 should contain around 497 records (excluding headers)");
 
         // Assert - Validate 3 employees (short badge numbers)
-        ValidateEmployee_707319_AcostaTheo(records);
-        ValidateEmployee_709150_AliAyla(records);
-        ValidateEmployee_701539_AliBella(records);
+        ValidateEmployee_705900_AcostaEvelyn(records);
+        ValidateEmployee_702043_AcostaGregory(records);
+        ValidateEmployee_706822_AcostaJaxon(records);
 
         // Assert - Validate 3 beneficiaries (long badge numbers with PSN suffix)
         ValidateBeneficiary_7039171000_AllenRaymond(records);
@@ -36,7 +36,7 @@ public class QPay066ReportParserTests
     public void ParseBadgeToVestedBalance_ShouldReturnCorrectDictionary()
     {
         // Arrange
-        string reportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        string reportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R03-QPAY066");
 
         // Act
         Dictionary<int, decimal> badgeToVested = QPay066ReportParser.ParseBadgeToVestedBalance(reportText);
@@ -47,8 +47,8 @@ public class QPay066ReportParserTests
         badgeToVested.Count.ShouldBeGreaterThan(400);
 
         // Spot check a few values
-        badgeToVested[707319].ShouldBe(2418.37m);
-        badgeToVested[709150].ShouldBe(1096.42m);
+        badgeToVested[705900].ShouldBe(1369.58m);
+        badgeToVested[702043].ShouldBe(43623.26m);
         badgeToVested[703917].ShouldBe(99801.68m); // Beneficiary - badge portion only
     }
 
@@ -57,17 +57,17 @@ public class QPay066ReportParserTests
     public void ParseTotals_ShouldExtractTotalsFromReport()
     {
         // Arrange
-        string reportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        string reportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R03-QPAY066");
 
         // Act
         QPay066Totals? totals = QPay066ReportParser.ParseTotals(reportText);
 
         // Assert
         totals.ShouldNotBeNull();
-        totals.AmountInProfitSharing.ShouldBe(24692640.86m);
-        totals.VestedAmount.ShouldBe(22666201.39m);
-        totals.TotalForfeitures.ShouldBe(-9439.79m);
-        totals.TotalBeneficiaryAllocations.ShouldBe(1349459.54m);
+        totals.AmountInProfitSharing.ShouldBe(12891661.35m);
+        totals.VestedAmount.ShouldBe(10898221.68m);
+        totals.TotalForfeitures.ShouldBe(-6637.75m);
+        totals.TotalBeneficiaryAllocations.ShouldBe(1729158.39m);
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class QPay066ReportParserTests
     public void ComputeTotals_ShouldMatchParsedTotals()
     {
         // Arrange
-        string reportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        string reportText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R03-QPAY066");
         List<QPay066Record> records = QPay066ReportParser.ParseRecords(reportText);
         QPay066Totals? parsedTotals = QPay066ReportParser.ParseTotals(reportText);
 
@@ -111,69 +111,69 @@ public class QPay066ReportParserTests
 
     #region Employee Validators (Short Badge Numbers)
 
-    private static void ValidateEmployee_707319_AcostaTheo(List<QPay066Record> records)
+    private static void ValidateEmployee_705900_AcostaEvelyn(List<QPay066Record> records)
     {
-        // Line 9:      707319 ACOSTA, THEO           6,045.93         0.00         0.00         0.00     6,045.93     2,418.37  251111  697.00  40  36
-        QPay066Record? record = records.FirstOrDefault(r => r.BadgeNumber == 707319);
+        // Line 7:      705900 ACOSTA, EVELYN         1,369.58         0.00         0.00         0.00     1,369.58     1,369.58  240406    0.00 100  27 4
+        QPay066Record? record = records.FirstOrDefault(r => r.BadgeNumber == 705900);
         record.ShouldNotBeNull();
 
-        record.BadgeNumber.ShouldBe(707319);
+        record.BadgeNumber.ShouldBe(705900);
         record.PsnSuffix.ShouldBe((short)0);
-        record.EmployeeName.ShouldBe("ACOSTA, THEO");
-        record.BeginningBalance.ShouldBe(6045.93m);
+        record.EmployeeName.ShouldBe("ACOSTA, EVELYN");
+        record.BeginningBalance.ShouldBe(1369.58m);
         record.BeneficiaryAllocation.ShouldBe(0.00m);
         record.DistributionAmount.ShouldBe(0.00m);
         record.Forfeit.ShouldBe(0.00m);
-        record.EndingBalance.ShouldBe(6045.93m);
-        record.VestedBalance.ShouldBe(2418.37m);
-        record.DateTerm.ShouldBe(new DateOnly(2025, 11, 11));
-        record.YtdVstPsHours.ShouldBe(697.00m);
-        record.VestedPercent.ShouldBe(40m);
-        record.Age.ShouldBe(36);
+        record.EndingBalance.ShouldBe(1369.58m);
+        record.VestedBalance.ShouldBe(1369.58m);
+        record.DateTerm.ShouldBe(new DateOnly(2024, 4, 6));
+        record.YtdVstPsHours.ShouldBe(0.00m);
+        record.VestedPercent.ShouldBe(100m);
+        record.Age.ShouldBe(27);
+        record.EnrollmentCode.ShouldBe('4');
+    }
+
+    private static void ValidateEmployee_702043_AcostaGregory(List<QPay066Record> records)
+    {
+        // Line 8:      702043 ACOSTA, GREGORY       43,623.26         0.00         0.00         0.00    43,623.26    43,623.26  241113    0.00 100  53
+        QPay066Record? record = records.FirstOrDefault(r => r.BadgeNumber == 702043);
+        record.ShouldNotBeNull();
+
+        record.BadgeNumber.ShouldBe(702043);
+        record.PsnSuffix.ShouldBe((short)0);
+        record.EmployeeName.ShouldBe("ACOSTA, GREGORY");
+        record.BeginningBalance.ShouldBe(43623.26m);
+        record.BeneficiaryAllocation.ShouldBe(0.00m);
+        record.DistributionAmount.ShouldBe(0.00m);
+        record.Forfeit.ShouldBe(0.00m);
+        record.EndingBalance.ShouldBe(43623.26m);
+        record.VestedBalance.ShouldBe(43623.26m);
+        record.DateTerm.ShouldBe(new DateOnly(2024, 11, 13));
+        record.YtdVstPsHours.ShouldBe(0.00m);
+        record.VestedPercent.ShouldBe(100m);
+        record.Age.ShouldBe(53);
         record.EnrollmentCode.ShouldBeNull();
     }
 
-    private static void ValidateEmployee_709150_AliAyla(List<QPay066Record> records)
+    private static void ValidateEmployee_706822_AcostaJaxon(List<QPay066Record> records)
     {
-        // Line 10:      709150 ALI, AYLA              5,482.11         0.00         0.00         0.00     5,482.11     1,096.42  250507  234.50  20  45
-        QPay066Record? record = records.FirstOrDefault(r => r.BadgeNumber == 709150);
+        // Line 9:      706822 ACOSTA, JAXON          4,062.52         0.00         0.00         0.00     4,062.52        52.93  241213    0.00  20  84
+        QPay066Record? record = records.FirstOrDefault(r => r.BadgeNumber == 706822);
         record.ShouldNotBeNull();
 
-        record.BadgeNumber.ShouldBe(709150);
+        record.BadgeNumber.ShouldBe(706822);
         record.PsnSuffix.ShouldBe((short)0);
-        record.EmployeeName.ShouldBe("ALI, AYLA");
-        record.BeginningBalance.ShouldBe(5482.11m);
+        record.EmployeeName.ShouldBe("ACOSTA, JAXON");
+        record.BeginningBalance.ShouldBe(4062.52m);
         record.BeneficiaryAllocation.ShouldBe(0.00m);
         record.DistributionAmount.ShouldBe(0.00m);
         record.Forfeit.ShouldBe(0.00m);
-        record.EndingBalance.ShouldBe(5482.11m);
-        record.VestedBalance.ShouldBe(1096.42m);
-        record.DateTerm.ShouldBe(new DateOnly(2025, 5, 7));
-        record.YtdVstPsHours.ShouldBe(234.50m);
+        record.EndingBalance.ShouldBe(4062.52m);
+        record.VestedBalance.ShouldBe(52.93m);
+        record.DateTerm.ShouldBe(new DateOnly(2024, 12, 13));
+        record.YtdVstPsHours.ShouldBe(0.00m);
         record.VestedPercent.ShouldBe(20m);
-        record.Age.ShouldBe(45);
-        record.EnrollmentCode.ShouldBeNull();
-    }
-
-    private static void ValidateEmployee_701539_AliBella(List<QPay066Record> records)
-    {
-        // Line 11:      701539 ALI, BELLA             5,692.59         0.00         0.00         0.00     5,692.59     2,277.04  250708  144.50  40  24
-        QPay066Record? record = records.FirstOrDefault(r => r.BadgeNumber == 701539);
-        record.ShouldNotBeNull();
-
-        record.BadgeNumber.ShouldBe(701539);
-        record.PsnSuffix.ShouldBe((short)0);
-        record.EmployeeName.ShouldBe("ALI, BELLA");
-        record.BeginningBalance.ShouldBe(5692.59m);
-        record.BeneficiaryAllocation.ShouldBe(0.00m);
-        record.DistributionAmount.ShouldBe(0.00m);
-        record.Forfeit.ShouldBe(0.00m);
-        record.EndingBalance.ShouldBe(5692.59m);
-        record.VestedBalance.ShouldBe(2277.04m);
-        record.DateTerm.ShouldBe(new DateOnly(2025, 7, 8));
-        record.YtdVstPsHours.ShouldBe(144.50m);
-        record.VestedPercent.ShouldBe(40m);
-        record.Age.ShouldBe(24);
+        record.Age.ShouldBe(84);
         record.EnrollmentCode.ShouldBeNull();
     }
 

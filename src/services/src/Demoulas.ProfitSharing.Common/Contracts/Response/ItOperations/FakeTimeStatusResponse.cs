@@ -20,6 +20,12 @@ public sealed class FakeTimeStatusResponse
     public bool IsAllowed { get; set; }
 
     /// <summary>
+    /// Gets or sets whether runtime switching between real and fake time is supported.
+    /// When true, fake time can be enabled/disabled via the API without restarting the application.
+    /// </summary>
+    public bool IsRuntimeSwitchingEnabled { get; set; }
+
+    /// <summary>
     /// Gets or sets the current fake date/time when active (ISO 8601 format).
     /// Null when fake time is not active.
     /// </summary>

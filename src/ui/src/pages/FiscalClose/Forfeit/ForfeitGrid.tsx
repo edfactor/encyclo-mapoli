@@ -3,7 +3,6 @@ import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
-import { Path, useNavigate } from "react-router-dom";
 import { numberToCurrency } from "smart-ui-library";
 import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import ReportSummary from "../../../components/ReportSummary";
@@ -27,15 +26,6 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   isGridExpanded = false,
   onToggleExpand
 }) => {
-  const navigate = useNavigate();
-
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
-
   const [dialogState, setDialogState] = useState<{
     isOpen: boolean;
     fieldName: string | null;
@@ -48,10 +38,9 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   const columnDefs = useMemo(
     () =>
       GetProfitShareForfeitColumns({
-        navFunction: handleNavigationForButton,
         onValidationClick: handleValidationClick
       }),
-    [handleNavigationForButton, handleValidationClick]
+    [handleValidationClick]
   );
 
   // Custom sort handler for compound sort on badgeOrPsn column

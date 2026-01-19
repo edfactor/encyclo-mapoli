@@ -1,9 +1,8 @@
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { Box, CircularProgress, Grid, IconButton, Typography } from "@mui/material";
+import { Grid, IconButton, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { Path, useNavigate } from "react-router-dom";
 import { useLazyGetProfitSharingReportValidationQuery } from "reduxstore/api/ValidationApi";
 import {
   useLazyGetYearEndProfitSharingReportFrozenQuery,
@@ -13,6 +12,7 @@ import { FilterParams } from "reduxstore/types";
 import { ISortParams } from "smart-ui-library";
 import { DSMPaginatedGrid } from "../../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
 import { GRID_KEYS } from "../../../../constants";
+import { useCachedPrevious } from "../../../../hooks/useCachedPrevious";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { RootState } from "../../../../reduxstore/store";
 import { ValidationResponse } from "../../../../types/validation/cross-reference-validation";
@@ -38,7 +38,6 @@ const ReportGrid: React.FC<ReportGridProps> = ({
   onToggleExpand,
   profitYear
 }) => {
-  const navigate = useNavigate();
   const [triggerLive, { isFetching: isFetchingLive }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const [triggerFrozen, { isFetching: isFetchingFrozen }] = useLazyGetYearEndProfitSharingReportFrozenQuery();
   const [triggerValidation] = useLazyGetProfitSharingReportValidationQuery();
@@ -49,6 +48,9 @@ const ReportGrid: React.FC<ReportGridProps> = ({
   const liveData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportLive);
   const frozenData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportFrozen);
   const data = isFrozen ? frozenData : liveData;
+  const cachedData = useCachedPrevious(data ?? null);
+  const displayResults = useMemo(() => cachedData?.response?.results ?? [], [cachedData]);
+  const displayTotal = useMemo(() => cachedData?.response?.total ?? 0, [cachedData]);
 
   const { pageNumber, pageSize, handlePageNumberChange, handlePageSizeChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
@@ -136,33 +138,26 @@ const ReportGrid: React.FC<ReportGridProps> = ({
     }
   }, [hasToken, isFrozen, params, profitYear, triggerValidation]);
 
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
-
   const sortEventHandler = (update: ISortParams) => {
     handleSortChange(update);
   };
 
   const columnDefs = useMemo(
-    () => GetProfitSharingReportGridColumns(handleNavigationForButton, validationData),
-    [handleNavigationForButton, validationData]
+    () => GetProfitSharingReportGridColumns(validationData),
+    [validationData]
   );
 
   const pinnedTopRowData = useMemo(() => {
-    if (!data) return [];
+    if (!cachedData) return [];
 
     return [
       {
-        fullName: `TOTAL EMPS: ${data.numberOfEmployees || 0}`,
-        wages: data.wagesTotal || 0,
-        hours: data.hoursTotal || 0,
-        points: data.pointsTotal || 0,
-        balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        fullName: `TOTAL EMPS: ${cachedData.numberOfEmployees || 0}`,
+        wages: cachedData.wagesTotal || 0,
+        hours: cachedData.hoursTotal || 0,
+        points: cachedData.pointsTotal || 0,
+        balance: cachedData.balanceTotal || 0,
+        isNew: cachedData.numberOfNewEmployees || 0,
         // Flag to identify pinned total row for cell renderers
         _isPinnedTotal: true
       },
@@ -186,7 +181,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
         terminationDate: null
       }
     ];
-  }, [data]);
+  }, [cachedData]);
 
   return (
     <>
@@ -200,7 +195,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
           <Typography
             variant="h2"
             sx={{ color: "#0258A5" }}>
-            {`${getReportTitle()} (${data?.response?.total || 0} records)`}
+            {`${getReportTitle()} (${displayTotal} records)`}
           </Typography>
         </Grid>
         <Grid>
@@ -215,21 +210,12 @@ const ReportGrid: React.FC<ReportGridProps> = ({
         </Grid>
       </Grid>
 
-      {isFetching ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          py={4}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <DSMPaginatedGrid
-          preferenceKey={GRID_KEYS.PAY426N_REPORT}
-          data={data?.response?.results || []}
-          columnDefs={columnDefs}
-          totalRecords={data?.response?.total || 0}
-          isLoading={isFetching}
+      <DSMPaginatedGrid
+        preferenceKey={GRID_KEYS.PAY426N_REPORT}
+        data={displayResults}
+        columnDefs={columnDefs}
+        totalRecords={displayTotal}
+        isLoading={isFetching}
           pagination={{
             pageNumber,
             pageSize,
@@ -263,9 +249,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({
               params.api.sizeColumnsToFit();
             }
           }}
-          showPagination={!!data && data.response.results.length > 0}
-        />
-      )}
+        showPagination={displayResults.length > 0}
+      />
     </>
   );
 };

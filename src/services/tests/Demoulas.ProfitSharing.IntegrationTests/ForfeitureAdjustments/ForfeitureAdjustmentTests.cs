@@ -37,7 +37,7 @@ public class ForfeitureAdjustmentTests : PristineBaseTest
         employee.PayProfit.Etva.ShouldBe(10.10m);
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
         ForfeitureAdjustmentService fas = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
         SuggestedForfeitureAdjustmentRequest sfar = new() { Badge = badge };
         var res = (await fas.GetSuggestedForfeitureAmount(sfar)).Value!;
@@ -51,7 +51,7 @@ public class ForfeitureAdjustmentTests : PristineBaseTest
         employee.PayProfit.Etva.ShouldNotBe(0m);
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
         ForfeitureAdjustmentService fas = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
         SuggestedForfeitureAdjustmentRequest sfar = new() { Badge = badge };
         var res = fas.GetSuggestedForfeitureAmount(sfar).GetAwaiter().GetResult().Value!;

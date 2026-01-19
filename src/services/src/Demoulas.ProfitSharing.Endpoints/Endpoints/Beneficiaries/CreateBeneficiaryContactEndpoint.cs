@@ -2,12 +2,9 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
@@ -41,7 +38,7 @@ public class CreateBeneficiaryContactEndpoint : ProfitSharingEndpoint<CreateBene
         Validator<CreateBeneficiaryContactRequestValidator>();
     }
 
-    public override async Task<Results<Ok<CreateBeneficiaryContactResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(CreateBeneficiaryContactRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<CreateBeneficiaryContactResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(CreateBeneficiaryContactRequest req, CancellationToken ct)
     {
         // Start activity for detailed tracing
         using var activity = EndpointTelemetry.ActivitySource.StartActivity("create_beneficiary_contact");
@@ -53,7 +50,7 @@ public class CreateBeneficiaryContactEndpoint : ProfitSharingEndpoint<CreateBene
             _logger.LogInformation("Creating beneficiary contact with SSN ending {SsnLastDigits}",
                 req.ContactSsn.ToString()[^4..]);
 
-            var result = await _beneficiaryService.CreateBeneficiaryContact(req, ct);
+            var result = await _beneficiaryService.CreateBeneficiaryContactAsync(req, ct);
 
             _logger.LogInformation("Successfully created beneficiary contact with ID {ContactId}", result.Id);
             activity?.SetTag("contact_id", result.Id.ToString());

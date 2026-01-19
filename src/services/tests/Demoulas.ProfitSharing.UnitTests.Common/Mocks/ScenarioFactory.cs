@@ -2,8 +2,8 @@
 using System.Reflection;
 using Demoulas.Common.Data.Services.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -160,6 +160,8 @@ public sealed class ScenarioFactory
                 ProfitYear = ProfitYear,
                 DemographicId = 21,
                 Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false,
                 CurrentHoursYear = 1200,
                 HoursExecutive = 0
             }

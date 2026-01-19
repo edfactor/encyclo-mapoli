@@ -176,7 +176,7 @@ public sealed class CheckRunPrintFileService : ICheckRunPrintFileService
 
             var ssns = distributions.Select(d => d.Ssn).Distinct().ToArray();
 
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(context);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(context);
 
             var demographics = await demographicQuery
                 .TagWith($"CheckRun-LoadDemographics-{request.ProfitYear}")

@@ -73,7 +73,7 @@ internal class EnrollmentSummarizer
 
         await ComputeVestingAsync(years, pp, ct);
 
-        return GetEnrolled(years);
+        return GetEnrolled();
     }
 
     // COBOL: 530_PC_VESTED
@@ -130,7 +130,7 @@ internal class EnrollmentSummarizer
     }
 
     // COBOL: 310-Get-Balance
-    public byte GetEnrolled(short years)
+    public byte GetEnrolled()
     {
         if (IsNewVestingRules && EnrollmentId == /*1*/ EnrollmentConstants.OldVestingPlanHasContributions)
         {

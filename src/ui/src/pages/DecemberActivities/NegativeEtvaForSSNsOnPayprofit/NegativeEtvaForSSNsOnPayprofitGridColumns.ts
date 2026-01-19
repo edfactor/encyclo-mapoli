@@ -2,13 +2,12 @@ import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { createBadgeColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
 
-export const GetNegativeEtvaForSSNsOnPayProfitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export const GetNegativeEtvaForSSNsOnPayProfitColumns = (): ColDef[] => {
   return [
     createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "left",
-      navigateFunction: navFunction
+      alignment: "left"
     }),
     createSSNColumn({ alignment: "left" }),
     {

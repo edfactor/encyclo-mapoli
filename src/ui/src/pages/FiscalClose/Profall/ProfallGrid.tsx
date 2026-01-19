@@ -1,7 +1,6 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Path, useNavigate } from "react-router-dom";
 import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
 
 import { useFakeTimeAwareYear } from "hooks/useFakeTimeAwareDate";
@@ -19,7 +18,6 @@ interface ProfallGridProps {
 }
 
 const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumberReset }) => {
-  const navigate = useNavigate();
   const profitSharingLabels = useSelector((state: RootState) => state.yearsEnd.profitSharingLabels);
   const securityState = useSelector((state: RootState) => state.security);
   const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
@@ -78,13 +76,6 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
     }
   }, [profitYear, securityState.token, fetchData]);
 
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
-
   useEffect(() => {
     if (pageNumberReset) {
       resetPagination();
@@ -92,7 +83,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
     }
   }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
-  const columnDefs = useMemo(() => GetProfallGridColumns(handleNavigationForButton), [handleNavigationForButton]);
+  const columnDefs = useMemo(() => GetProfallGridColumns(), []);
 
   const rowData = useMemo(() => {
     return profitSharingLabels?.results || [];

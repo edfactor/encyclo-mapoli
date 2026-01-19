@@ -1,4 +1,3 @@
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -16,10 +15,10 @@ internal static class EmployeeProcessorHelper
 {
     public static async Task<(List<MemberFinancials>, bool)> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService,
         TotalService totalService, IDemographicReaderService demographicReaderService, ProfitShareUpdateRequest profitShareUpdateRequest,
-        AdjustmentsSummaryDto adjustmentsSummaryDto, CancellationToken cancellationToken)
+        AdjustmentsSummaryDto adjustmentsSummaryDto, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         bool employeeExceededMaxContribution = false;
-        short currentYear = (short)DateTime.Now.Year;
+        short currentYear = (short)timeProvider.GetLocalNow().Year;
         short profitYear = profitShareUpdateRequest.ProfitYear;
         short priorYear = (short)(profitShareUpdateRequest.ProfitYear - 1);
 
@@ -27,7 +26,7 @@ internal static class EmployeeProcessorHelper
         CalendarResponseDto fiscalDates = await calendarService.GetYearStartAndEndAccountingDatesAsync(priorYear, cancellationToken);
         var employeeFinancialsList = await dbContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var frozenDemographicQuery = await demographicReaderService.BuildDemographicQuery(ctx, true);
+            var frozenDemographicQuery = await demographicReaderService.BuildDemographicQueryAsync(ctx, true);
             var employees = ctx.PayProfits
                 .Join(ctx.PayProfits,
                     ppYe => ppYe.DemographicId,
@@ -40,13 +39,13 @@ internal static class EmployeeProcessorHelper
                     x.frozenDemographics.BadgeNumber,
                     x.ppYE.Demographic!.Ssn,
                     Name = x.ppYE.Demographic.ContactInfo!.FullName,
-                    EnrolledId = x.frozenDemographics.VestingScheduleId == null
+                    EnrolledId = x.ppYE.VestingScheduleId == 0
                         ? EnrollmentConstants.NotEnrolled
-                        : x.frozenDemographics.HasForfeited
-                            ? x.frozenDemographics.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : x.ppYE.HasForfeited
+                            ? x.ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                                 : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                            : x.frozenDemographics.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            : x.ppYE.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                 ? EnrollmentConstants.OldVestingPlanHasContributions
                                 : EnrollmentConstants.NewVestingPlanHasContributions,
                     x.ppYE.EmployeeTypeId,
@@ -64,7 +63,7 @@ internal static class EmployeeProcessorHelper
                 from et in employees
                 join balTbl in totalService.TotalVestingBalance(ctx, profitYear, priorYear, fiscalDates.FiscalEndDate) on et.Ssn equals balTbl.Ssn into balTmp
                 from bal in balTmp.DefaultIfEmpty()
-                join thisYr in TotalService.GetProfitDetailTotalsForASingleYear(ctx, profitYear, cancellationToken) on et.Ssn equals thisYr.Ssn into txThsYrEnum
+                join thisYr in TotalService.GetProfitDetailTotalsForASingleYear(ctx, profitYear) on et.Ssn equals thisYr.Ssn into txThsYrEnum
                 from txns in txThsYrEnum.DefaultIfEmpty()
                 select new EmployeeFinancials
                 {
@@ -80,7 +79,7 @@ internal static class EmployeeProcessorHelper
                     ZeroContributionReasonId = et.ZeroContributionReasonId,
                     PayFrequencyId = et.PayFrequencyId,
 
-                    // Transactions for this year. 
+                    // Transactions for this year.
                     DistributionsTotal = txns.DistributionsTotal,
                     ForfeitsTotal = txns.ForfeitsTotal,
                     AllocationsTotal = txns.AllocationsTotal,

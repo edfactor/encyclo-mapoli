@@ -31,7 +31,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
         _calendarService = calendarService;
     }
 
-    public async Task<ProfitShareEditResponse> ProfitShareEdit(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<ProfitShareEditResponse> ProfitShareEditAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         var (records, beginningBalanceTotal, contributionGrandTotal, incomingForfeitureGrandTotal, earningsGrandTotal) =
             await ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
@@ -103,7 +103,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
         Task<(List<ProfitShareEditMemberRecord>, decimal BeginningBalanceTotal, decimal ContributionGrandTotal, decimal IncomingForfeitureGrandTotal, decimal EarningsGrandTotal)>
         ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        ProfitShareUpdateResult psur = await _profitShareUpdateService.ProfitShareUpdateInternal(profitShareUpdateRequest, cancellationToken);
+        ProfitShareUpdateResult psur = await _profitShareUpdateService.ProfitShareUpdateInternalAsync(profitShareUpdateRequest, cancellationToken);
 
         var beginningBalanceTotal = 0m;
         var contributionGrandTotal = 0m;
@@ -210,7 +210,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
         }
         else if (member.ZeroContributionReasonId == /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay)
         {
-            mrec.DisplayedZeroContStatus = 0; // See <code>IF P-ZEROCONT = "7"</code> in PAY477.cbl 
+            mrec.DisplayedZeroContStatus = 0; // See <code>IF P-ZEROCONT = "7"</code> in PAY477.cbl
             AddRecord(records, mrec);
         }
         else if (member.Contributions != 0 || member.AllEarnings != 0 || member.IncomingForfeitures != 0)

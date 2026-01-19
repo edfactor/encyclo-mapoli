@@ -26,7 +26,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
     private readonly IAppUser _user;
     private readonly IMasterInquiryService _employeeLookupService;
     private readonly ILogger<AccountHistoryReportService> _logger;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
 
     public AccountHistoryReportService(
         IProfitSharingDataContextFactory contextFactory,
@@ -35,7 +35,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         IAppUser user,
         IMasterInquiryService employeeLookupService,
         ILogger<AccountHistoryReportService> logger,
-        IAuditService auditService)
+        IProfitSharingAuditService profitSharingAuditService)
     {
         _contextFactory = contextFactory;
         _demographicReaderService = demographicReaderService;
@@ -43,7 +43,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         _user = user;
         _employeeLookupService = employeeLookupService;
         _logger = logger;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     public Task<AccountHistoryReportPaginatedResponse> GetAccountHistoryReportAsync(
@@ -58,7 +58,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         return _contextFactory.UseReadOnlyContext(async ctx =>
         {
             // Get member demographic information (single query)
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var demographic = await demographicQuery
                 .TagWith($"AccountHistoryReport-Demographics-{memberId}")
                 .FirstOrDefaultAsync(d => d.BadgeNumber == memberId, cancellationToken);
@@ -132,6 +132,15 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 cancellationToken)).ToList();
 
             var reportData = (await Task.WhenAll(tasks)).ToList();
+            var latestProfitYear = reportData.Count == 0
+                ? (short)startYear
+                : reportData.Max(r => r.ProfitYear);
+            var latestVestedBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
+                SearchBy.BadgeNumber,
+                badgeNumber,
+                latestProfitYear,
+                cancellationToken);
+            var totalVestedBalance = latestVestedBalance?.VestedBalance ?? 0m;
 
             // Build response - for year-based sort, data is already in correct order and paginated
             if (isYearBasedSort)
@@ -143,14 +152,14 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     TotalEarnings = reportData.Sum(r => r.Earnings),
                     TotalForfeitures = reportData.Sum(r => r.Forfeitures),
                     TotalWithdrawals = reportData.Sum(r => r.Withdrawals),
-                    TotalVestedBalance = reportData.OrderByDescending(r => r.ProfitYear).First().EndingBalance
+                    TotalVestedBalance = totalVestedBalance
                 };
 
                 return BuildPaginatedResponsePreSorted(reportData, request, startYear, totalYearCount, cumulativeTotals);
             }
 
             // For non-year sorting, apply sorting and pagination now
-            return BuildPaginatedResponse(reportData, request, startYear);
+            return BuildPaginatedResponse(reportData, request, startYear, totalVestedBalance);
         }, cancellationToken);
     }
 
@@ -229,7 +238,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
     private static AccountHistoryReportPaginatedResponse BuildPaginatedResponse(
         List<AccountHistoryReportResponse> reportData,
         AccountHistoryReportRequest request,
-        int startYear)
+        int startYear,
+        decimal totalVestedBalance)
     {
         // Apply sorting based on request parameters
         var sortBy = request.SortBy ?? "ProfitYear";
@@ -275,7 +285,8 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 TotalContributions = totalContributions,
                 TotalEarnings = totalEarnings,
                 TotalForfeitures = totalForfeitures,
-                TotalWithdrawals = totalWithdrawals
+                TotalWithdrawals = totalWithdrawals,
+                TotalVestedBalance = totalVestedBalance
             }
         };
     }
@@ -433,7 +444,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 pdfStream.Length);
 
             // Log audit event for PDF download tracking (PS-2284: Ensure audit tracking for Account History download)
-            await _auditService.LogSensitiveDataAccessAsync(
+            await _profitSharingAuditService.LogSensitiveDataAccessAsync(
                 operationName: "Account History PDF Download",
                 tableName: "AccountHistory",
                 primaryKey: $"Badge:{memberId}",

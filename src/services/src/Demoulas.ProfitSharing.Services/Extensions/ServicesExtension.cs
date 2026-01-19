@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Data.Services.Interfaces;
+using System.Text.Json;
+using Demoulas.Common.Contracts.Interfaces.Audit;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -30,6 +32,7 @@ using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+using Demoulas.ProfitSharing.Services.Serialization;
 using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.ProfitSharing.Services.Validators;
 using Demoulas.Util.Extensions;
@@ -37,6 +40,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
+using NavigationService = Demoulas.ProfitSharing.Services.Navigations.ProfitSharingNavigationService;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -47,6 +52,15 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
+        _ = builder.Services.AddSingleton<JsonSerializerOptions>(sp =>
+        {
+            IHostEnvironment hostEnvironment = sp.GetRequiredService<IHostEnvironment>();
+            var maskingOptions = new JsonSerializerOptions(JsonSerializerOptions.Web);
+            maskingOptions.Converters.Add(new MaskingJsonConverterFactory(hostEnvironment));
+
+            return maskingOptions;
+        });
+
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICheckRunWorkflowService, CheckRunWorkflowService>();
@@ -85,7 +99,9 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IEmployeesWithProfitsOver73Service, EmployeesWithProfitsOver73Service>();
 
 
-        _ = builder.Services.AddScoped<IAuditService, AuditService>();
+        _ = builder.Services.AddScoped<IProfitSharingAuditService, ProfitSharingAuditService>();
+        _ = builder.Services.AddScoped<IAuditService>(sp => sp.GetRequiredService<IProfitSharingAuditService>());
+
         _ = builder.Services.AddScoped<TotalService>();
 
         _ = builder.Services.AddScoped<ITerminatedEmployeeService, TerminatedEmployeeService>();
@@ -168,6 +184,7 @@ public static class ServicesExtension
     /// <summary>
     /// Registers the appropriate <see cref="TimeProvider"/> based on configuration and environment.
     /// SECURITY: Fake time is only enabled in non-production environments when explicitly configured.
+    /// In non-production environments, a SwitchableTimeProvider is registered to allow runtime toggling.
     /// </summary>
     /// <param name="builder">The host application builder.</param>
     /// <returns>The builder for chaining.</returns>
@@ -179,36 +196,16 @@ public static class ServicesExtension
 
         // SECURITY: Never allow fake time in Production
         var isProduction = builder.Environment.IsProduction();
-        var useFakeTime = fakeTimeConfig.Enabled && !isProduction;
 
-        if (useFakeTime)
+        if (isProduction)
         {
-            // Validate configuration
-            var validationErrors = fakeTimeConfig.Validate();
-            if (validationErrors.Count > 0)
-            {
-                throw new InvalidOperationException(
-                    $"FakeTime configuration is invalid: {string.Join("; ", validationErrors)}");
-            }
-
-            _ = builder.Services.AddSingleton<TimeProvider>(sp =>
-            {
-                var logger = sp.GetService<ILogger<FakeTimeProvider>>();
-                return new FakeTimeProvider(fakeTimeConfig, logger);
-            });
-
-            // Also register the configuration so endpoints can report status
-            _ = builder.Services.AddSingleton(fakeTimeConfig);
-        }
-        else
-        {
-            // Use the real system time provider
+            // Production: Use the real system time provider (no switching allowed)
             _ = builder.Services.AddSingleton(TimeProvider.System);
 
             // Register a disabled configuration for status reporting
             _ = builder.Services.AddSingleton(new FakeTimeConfiguration { Enabled = false });
 
-            if (fakeTimeConfig.Enabled && isProduction)
+            if (fakeTimeConfig.Enabled)
             {
                 // Log a warning that fake time was requested but disabled in production
                 // This uses a temporary logger since DI isn't fully built yet
@@ -216,6 +213,39 @@ public static class ServicesExtension
                     "WARNING: FakeTime.Enabled is true but this is a Production environment. " +
                     "Fake time has been disabled for security reasons.");
             }
+        }
+        else
+        {
+            // Non-production: Use SwitchableTimeProvider to allow runtime toggling
+            if (fakeTimeConfig.Enabled)
+            {
+                // Validate configuration if fake time is pre-configured
+                var validationErrors = fakeTimeConfig.Validate();
+                if (validationErrors.Count > 0)
+                {
+                    throw new InvalidOperationException(
+                        $"FakeTime configuration is invalid: {string.Join("; ", validationErrors)}");
+                }
+            }
+
+            // Register the switchable provider - it will start with fake time if configured
+            _ = builder.Services.AddSingleton<SwitchableTimeProvider>(sp =>
+            {
+                var logger = sp.GetService<ILogger<SwitchableTimeProvider>>();
+                return fakeTimeConfig.Enabled
+                    ? new SwitchableTimeProvider(fakeTimeConfig, logger)
+                    : new SwitchableTimeProvider(logger);
+            });
+
+            // Register TimeProvider interface to resolve to the same instance
+            _ = builder.Services.AddSingleton<TimeProvider>(sp => sp.GetRequiredService<SwitchableTimeProvider>());
+
+            // Register the initial configuration for status reporting
+            _ = builder.Services.AddSingleton(fakeTimeConfig);
+
+            // Register per-user fake time services (only available in non-production)
+            _ = builder.Services.AddSingleton<IUserFakeTimeStorage, UserFakeTimeStorage>();
+            _ = builder.Services.AddScoped<IUserTimeService, UserTimeService>();
         }
 
         return builder;

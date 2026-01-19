@@ -3,9 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.Logging;
@@ -40,7 +38,7 @@ public class NewProfitSharingLabelsEndpoint : ProfitSharingEndpoint<ProfitYearRe
         Group<YearEndGroup>();
     }
 
-    public sealed override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    protected sealed override async Task<PaginatedResponseDto<NewProfitSharingLabelResponse>> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
         this.RecordRequestMetrics(HttpContext, _logger, req);
@@ -65,14 +63,12 @@ public class NewProfitSharingLabelsEndpoint : ProfitSharingEndpoint<ProfitYearRe
             if (response != null)
             {
                 this.RecordResponseMetrics(HttpContext, _logger, response);
-                await Send.OkAsync(response, ct);
+                return response;
             }
-            else
-            {
-                var emptyResponse = new PaginatedResponseDto<NewProfitSharingLabelResponse> { Results = [] };
-                this.RecordResponseMetrics(HttpContext, _logger, emptyResponse);
-                await Send.OkAsync(emptyResponse, ct);
-            }
+
+            var emptyResponse = new PaginatedResponseDto<NewProfitSharingLabelResponse> { Results = [] };
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResponse);
+            return emptyResponse;
         }
         catch (Exception ex)
         {

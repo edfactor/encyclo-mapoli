@@ -34,13 +34,13 @@ public class YearEndServiceTests : PristineBaseTest
         Dictionary<int, YearEndChange> smartRowsBySsn = await DbFactory.UseWritableContext(async ctx =>
         {
             PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService, CalendarService, VestingScheduleService);
-            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService, TimeProvider.System);
+            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, _loggerFactory.CreateLogger<YearEndService>());
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);
 
             // ------- Act
             DbTransaction transaction = await c.BeginTransactionAsync(ct);
-            await yearEndService.RunFinalYearEndUpdates(profitYear, false, ct);
+            await yearEndService.RunFinalYearEndUpdatesAsync(profitYear, false, ct);
 
             // Read results BEFORE rollback (so changes are visible but not committed)
             // IMPORTANT: Use the same connection/transaction to see uncommitted changes

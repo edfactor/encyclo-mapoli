@@ -28,7 +28,7 @@ public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementSer
     {
         var rslt = await _dataContextFactory.UseWritableContext(async context =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(context, false);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(context, false);
             int disburserSsn = 0;
             var profitYear = _timeProvider.GetLocalYearAsShort();
             int disburserDemographicId = 0;

@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -40,7 +39,7 @@ public sealed class DistributionService : IDistributionService
     {
         var data = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographic = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var query = from dist in ctx.Distributions
                         join freq in ctx.DistributionFrequencies on dist.FrequencyId equals freq.Id
                         join status in ctx.DistributionStatuses on dist.StatusId equals status.Id
@@ -54,7 +53,7 @@ public sealed class DistributionService : IDistributionService
                             Id = dist.Id,
                             PaymentSequence = dist.PaymentSequence,
                             Ssn = dist.Ssn,
-                            BadgeNumber = dem != null ? (long?)dem.BadgeNumber : null,
+                            BadgeNumber = dem != null ? dem.BadgeNumber : null,
                             // FullName picks employee name if available, otherwise beneficiary name
                             FullName = dem != null && dem.ContactInfo.FullName != null
                                 ? dem.ContactInfo.FullName
@@ -72,8 +71,8 @@ public sealed class DistributionService : IDistributionService
                             StateTax = dist.StateTaxAmount,
                             CheckAmount = dist.CheckAmount,
                             IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly,
-                            DemographicId = dem != null ? (int?)dem.Id : null,
-                            BeneficiaryId = ben != null ? (int?)ben.Id : null
+                            DemographicId = dem != null ? dem.Id : null,
+                            BeneficiaryId = ben != null ? ben.Id : null
                         };
 
             int searchSsn;
@@ -227,7 +226,7 @@ public sealed class DistributionService : IDistributionService
         return result;
     }
 
-    public Task<CreateOrUpdateDistributionResponse> CreateDistribution(CreateDistributionRequest request, CancellationToken cancellationToken)
+    public Task<CreateOrUpdateDistributionResponse> CreateDistributionAsync(CreateDistributionRequest request, CancellationToken cancellationToken)
     {
         var validationResult = ValidateDistributionRequest(request);
         if (!validationResult.IsSuccess)
@@ -237,7 +236,7 @@ public sealed class DistributionService : IDistributionService
 
         return _dataContextFactory.UseWritableContext(async ctx =>
         {
-            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographic = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var dem = await demographic.Where(d => d.BadgeNumber == request.BadgeNumber).FirstOrDefaultAsync(cancellationToken);
             if (dem == null)
             {
@@ -361,7 +360,7 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<CreateOrUpdateDistributionResponse>> UpdateDistribution(UpdateDistributionRequest request, CancellationToken cancellationToken)
+    public async Task<Result<CreateOrUpdateDistributionResponse>> UpdateDistributionAsync(UpdateDistributionRequest request, CancellationToken cancellationToken)
     {
         var validationResult = ValidateDistributionRequest(request);
         if (!validationResult.IsSuccess)
@@ -380,7 +379,7 @@ public sealed class DistributionService : IDistributionService
             {
                 return Result<CreateOrUpdateDistributionResponse>.Failure(Error.DistributionNotFound);
             }
-            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographic = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var dem = await demographic.Where(d => d.BadgeNumber == request.BadgeNumber).FirstOrDefaultAsync(cancellationToken);
             if (dem == null)
             {
@@ -499,7 +498,7 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<bool>> DeleteDistribution(int distributionId, CancellationToken cancellationToken)
+    public async Task<Result<bool>> DeleteDistributionAsync(int distributionId, CancellationToken cancellationToken)
     {
         // Validate input parameters
         if (distributionId <= 0)
@@ -527,7 +526,7 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken)
+    public Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummaryAsync(CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -605,7 +604,7 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHoldAsync(SortedPaginationRequestDto request, CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -638,7 +637,7 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributionsAsync(SortedPaginationRequestDto request, CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -679,11 +678,11 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReportAsync(DistributionRunReportRequest request, CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var distributionQuery = GetDistributionExtract(ctx, request.DistributionFrequencies ?? Array.Empty<char>());
             var query = from dist in distributionQuery
                         join dem in demographicQuery.Include(x => x.PayClassification)
@@ -738,12 +737,12 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReport(ProfitYearRequest request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReportAsync(ProfitYearRequest request, CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var distributionQuery = GetDistributionExtract(ctx, new[] { DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Quarterly });
             var query = from dist in distributionQuery
                         join dem in demographicQuery on dist.Ssn equals dem.Ssn into demJoin

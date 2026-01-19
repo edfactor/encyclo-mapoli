@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -127,6 +127,8 @@ public class ProfitSharingSummaryReportRegressionTests
                 IncomeExecutive = 0,
                 PointsEarned = 400,
                 Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false,
                 TotalIncome = 40000,
                 TotalHours = 800
             },
@@ -141,7 +143,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 PointsEarned = 450,
                 TotalHours = 900,
                 TotalIncome = 45000,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 
@@ -206,6 +210,8 @@ public class ProfitSharingSummaryReportRegressionTests
                 IncomeExecutive = 0,
                 PointsEarned = 80,
                 Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false,
                 TotalIncome = 8000,
                 TotalHours = 500
             }
@@ -268,7 +274,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 0,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 
@@ -323,7 +331,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 250,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 
@@ -379,7 +389,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 120,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 
@@ -437,7 +449,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 0,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 
@@ -496,7 +510,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 0,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 
@@ -552,7 +568,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 0,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 
@@ -607,7 +625,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 0,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 
@@ -676,7 +696,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 500,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 
@@ -750,7 +772,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 100,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             },
             new PayProfit
             {
@@ -763,7 +787,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 0,
-                Etva = 0
+                Etva = 0,
+                VestingScheduleId = VestingSchedule.Constants.NewPlan,
+                HasForfeited = false
             }
         ];
 

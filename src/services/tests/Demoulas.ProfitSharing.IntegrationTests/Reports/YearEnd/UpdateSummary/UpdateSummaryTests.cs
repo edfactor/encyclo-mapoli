@@ -301,13 +301,13 @@ public class UpdateSummaryTests : PristineBaseTest
             decimal has2021ClassActionSum = await ctx.ProfitDetails
                 .Where(pd => pd.Ssn == pp.Demographic!.Ssn && pd.ProfitYear == 2021 && pd.CommentType == CommentType.Constants.ClassAction).SumAsync(pd => pd.Earnings);
 
-            int enrollmentId = pp.Demographic.VestingScheduleId == null
+            int enrollmentId = pp.VestingScheduleId == 0
                 ? EnrollmentConstants.NotEnrolled
-                : pp.Demographic.HasForfeited
-                    ? (pp.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                : pp.HasForfeited
+                    ? (pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                         ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                         : EnrollmentConstants.NewVestingPlanHasForfeitureRecords)
-                    : (pp.Demographic.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                    : (pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                         ? EnrollmentConstants.OldVestingPlanHasContributions
                         : EnrollmentConstants.NewVestingPlanHasContributions);
 

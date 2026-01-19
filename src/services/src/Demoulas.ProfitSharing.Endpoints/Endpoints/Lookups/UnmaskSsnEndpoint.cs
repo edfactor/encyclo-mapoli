@@ -1,13 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
@@ -19,15 +13,11 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 public sealed class UnmaskSsnEndpoint : ProfitSharingEndpoint<UnmaskSsnRequest, Results<Ok<UnmaskSsnResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IUnmaskingService _unmaskingService;
-    private readonly ILogger<UnmaskSsnEndpoint> _logger;
 
-    public UnmaskSsnEndpoint(
-        IUnmaskingService unmaskingService,
-        ILogger<UnmaskSsnEndpoint> logger)
+    public UnmaskSsnEndpoint(IUnmaskingService unmaskingService)
         : base(Navigation.Constants.Inquiries)
     {
         _unmaskingService = unmaskingService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -51,36 +41,14 @@ public sealed class UnmaskSsnEndpoint : ProfitSharingEndpoint<UnmaskSsnRequest, 
         Group<SsnUnmaskingGroup>();
     }
 
-    public override Task<Results<Ok<UnmaskSsnResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<UnmaskSsnResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(
         UnmaskSsnRequest req,
         CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry<UnmaskSsnRequest, Results<Ok<UnmaskSsnResponse>, NotFound, ProblemHttpResult>>(
-            HttpContext, _logger, req, async () =>
-        {
-            var ssnResult = await _unmaskingService.GetUnmaskedSsnAsync(req.DemographicId, ct);
-
-            // Handle not found case
-            if (!ssnResult.IsSuccess)
-            {
-                return TypedResults.NotFound();
-            }
-
-            // Record sensitive field access for compliance/audit
-            EndpointTelemetry.SensitiveFieldAccessTotal.Add(1,
-                new("field", "Ssn"),
-                new("endpoint", nameof(UnmaskSsnEndpoint)));
-
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "ssn-unmasking"),
-                new("endpoint", nameof(UnmaskSsnEndpoint)));
-
-            _logger.LogInformation("SSN unmasked for demographic ID {DemographicId} (correlation: {CorrelationId})",
-                req.DemographicId, HttpContext.TraceIdentifier);
-
-            var response = new UnmaskSsnResponse { UnmaskedSsn = ssnResult.Value! };
-            return TypedResults.Ok(response);
-        }, "Ssn");
+        var ssnResult = await _unmaskingService.GetUnmaskedSsnAsync(req.DemographicId, ct);
+        return !ssnResult.IsSuccess
+            ? TypedResults.NotFound()
+            : TypedResults.Ok(new UnmaskSsnResponse { UnmaskedSsn = ssnResult.Value! });
     }
 }
 

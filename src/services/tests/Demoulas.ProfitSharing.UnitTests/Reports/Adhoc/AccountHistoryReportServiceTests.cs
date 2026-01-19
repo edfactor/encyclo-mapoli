@@ -1,18 +1,16 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
-using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.Util.Extensions;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +19,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
+using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.Adhoc;
 
@@ -28,13 +27,13 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.Adhoc;
 public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
 {
     private readonly AccountHistoryReportService _service;
-    private readonly Mock<IAuditService> _mockAuditService;
+    private readonly Mock<IProfitSharingAuditService> _mockAuditService;
 
     public AccountHistoryReportServiceTests()
     {
         Mock<IDemographicReaderService> mockDemographicReader = new();
         mockDemographicReader
-            .Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+            .Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync((IProfitSharingDbContext ctx, bool _) => ctx.Demographics);
 
         var mockCalendarService = new Mock<ICalendarService>();
@@ -48,7 +47,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
         var mockEmbeddedSql = new Mock<IEmbeddedSqlService>();
         var mockAppUser = new Mock<IAppUser>();
         var mockMasterInquiry = new Mock<IMasterInquiryService>();
-        _mockAuditService = new Mock<IAuditService>();
+        _mockAuditService = new Mock<IProfitSharingAuditService>();
         var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         var frozenService = new FrozenService(MockDbContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object, new Mock<TimeProvider>().Object);
         var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());

@@ -57,6 +57,14 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
 
+        _ = builder.Property(e => e.VestingScheduleId)
+            .HasColumnName("VESTING_SCHEDULE_ID")
+            .IsRequired();
+
+        _ = builder.Property(e => e.HasForfeited)
+            .HasColumnName("HAS_FORFEITED")
+            .IsRequired();
+
         _ = builder.Property(e => e.IncomeExecutive)
             .HasColumnName("INCOME_EXECUTIVE")
             .HasPrecision(9, 2);

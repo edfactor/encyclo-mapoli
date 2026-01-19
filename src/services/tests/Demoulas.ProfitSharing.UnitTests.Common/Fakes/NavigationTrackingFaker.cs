@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.Common.Data.Services.Entities.Entities.Navigation;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 

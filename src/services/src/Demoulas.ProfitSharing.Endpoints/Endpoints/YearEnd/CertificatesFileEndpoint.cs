@@ -1,11 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
@@ -34,7 +31,7 @@ public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePr
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(CerficatePrintRequest req, CancellationToken ct)
+    protected override async Task<string> HandleRequestAsync(CerficatePrintRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -61,7 +58,7 @@ public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePr
                         }
                     }
                     ThrowError(result.Error.Description, 400);
-                    return;
+                    return string.Empty;
                 }
 
                 // Service error - return 500
@@ -70,7 +67,7 @@ public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePr
 
                 AddError("CertificateGeneration", result.Error?.Description ?? "Failed to generate certificate file.");
                 ThrowError(result.Error?.Description ?? "Failed to generate certificate file.", 500);
-                return;
+                return string.Empty;
             }
 
             var response = result.Value!;
@@ -104,6 +101,7 @@ public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePr
 
             // Record successful file download
             this.RecordResponseMetrics(HttpContext, _logger, new { FileSize = fileSize, FileName = "PAYCERT.txt" }, isSuccess: true);
+            return string.Empty;
         }
         catch (Exception ex)
         {

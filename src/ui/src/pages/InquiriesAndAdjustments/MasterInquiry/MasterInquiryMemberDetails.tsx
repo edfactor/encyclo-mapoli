@@ -8,8 +8,8 @@ import type { EmployeeDetails } from "../../../types/employee/employee";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../../utils/enrollmentUtil";
 import { formatPercentage } from "../../../utils/formatPercentage";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { formatPhoneNumber } from "../../../utils/phoneUtils";
+import { viewBadgeLinkRenderer } from "../../../utils/viewBadgeLinkRenderer";
 
 // Sometimes we get back end zip codes that are 1907 rather than 01907
 const formatZipCode = (zipCode: string): string => {

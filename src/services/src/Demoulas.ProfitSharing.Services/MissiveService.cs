@@ -46,7 +46,7 @@ internal sealed class MissiveService : IMissiveService
             await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 // Pre-fetch demographics for all SSNs
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                 var dobList = await demographics
                     .Where(d => ssnSet.Contains(d.Ssn))
                     .Select(d => new { d.Ssn, d.DateOfBirth })
@@ -93,8 +93,8 @@ internal sealed class MissiveService : IMissiveService
                     {
                         // Check if using New Vesting Plan (VestingScheduleId == 2) and has contributions (no forfeiture)
                         var hasVesting = empl.pp.TotalHours > minHours &&
-                                          empl.d.VestingScheduleId == VestingSchedule.Constants.NewPlan &&
-                                          !empl.d.HasForfeited;
+                                          empl.pp.VestingScheduleId == VestingSchedule.Constants.NewPlan &&
+                                          !empl.pp.HasForfeited;
                         if (hasVesting)
                         {
                             vestingIncreased.Add(empl.d.Ssn);

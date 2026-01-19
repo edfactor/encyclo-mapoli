@@ -1,12 +1,11 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ProfitDetails;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -24,20 +23,20 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ILogger<ProfitSharingAdjustmentsService> _logger;
     private readonly TimeProvider _timeProvider;
 
     public ProfitSharingAdjustmentsService(
         IProfitSharingDataContextFactory dbContextFactory,
         IDemographicReaderService demographicReaderService,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         ILogger<ProfitSharingAdjustmentsService> logger,
         TimeProvider? timeProvider = null)
     {
         _dbContextFactory = dbContextFactory;
         _demographicReaderService = demographicReaderService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
@@ -62,7 +61,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
                 });
             }
 
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, useFrozenData: false);
 
             var demographic = await demographicQuery
                 .TagWith($"ProfitSharingAdjustments-Get-Demographic-{request.BadgeNumber}")
@@ -227,7 +226,7 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
         {
             var result = await _dbContextFactory.UseWritableContext(async ctx =>
             {
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
+                var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, useFrozenData: false);
 
                 var demographic = await demographicQuery
                     .TagWith($"ProfitSharingAdjustments-Save-Demographic-{request.BadgeNumber}")
@@ -415,24 +414,24 @@ public sealed class ProfitSharingAdjustmentsService : IProfitSharingAdjustmentsS
 
                 if (insertedProfitDetail is not null)
                 {
-                    await _auditService.LogDataChangeAsync(
+                    await _profitSharingAuditService.LogDataChangeAsync(
                         operationName: "Create Profit Sharing Adjustment",
                         tableName: "PROFIT_DETAIL",
                         auditOperation: AuditEvent.AuditOperations.Create,
                         primaryKey: $"Id:{insertedProfitDetail.Id}",
                         changes:
                         [
-                            new AuditChangeEntryInput { ColumnName = "PROFIT_YEAR", NewValue = insertedProfitDetail.ProfitYear.ToString() },
-                            new AuditChangeEntryInput { ColumnName = "DISTRIBUTION_SEQUENCE", NewValue = insertedProfitDetail.DistributionSequence.ToString() },
-                            new AuditChangeEntryInput { ColumnName = "PROFIT_CODE_ID", NewValue = insertedProfitDetail.ProfitCodeId.ToString() },
-                            new AuditChangeEntryInput { ColumnName = "PROFIT_YEAR_ITERATION", NewValue = insertedProfitDetail.ProfitYearIteration.ToString() },
-                            new AuditChangeEntryInput { ColumnName = "CONTRIBUTION", NewValue = insertedProfitDetail.Contribution.ToString() },
-                            new AuditChangeEntryInput { ColumnName = "EARNINGS", NewValue = insertedProfitDetail.Earnings.ToString() },
-                            new AuditChangeEntryInput { ColumnName = "FORFEITURE", NewValue = insertedProfitDetail.Forfeiture.ToString() },
-                            new AuditChangeEntryInput { ColumnName = "MONTH_TO_DATE", NewValue = insertedProfitDetail.MonthToDate.ToString() },
-                            new AuditChangeEntryInput { ColumnName = "YEAR_TO_DATE", NewValue = insertedProfitDetail.YearToDate.ToString() },
-                            new AuditChangeEntryInput { ColumnName = "REMARK", NewValue = insertedProfitDetail.Remark },
-                            new AuditChangeEntryInput { ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID", NewValue = insertedProfitDetail.ReversedFromProfitDetailId?.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "PROFIT_YEAR", NewValue = insertedProfitDetail.ProfitYear.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "DISTRIBUTION_SEQUENCE", NewValue = insertedProfitDetail.DistributionSequence.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "PROFIT_CODE_ID", NewValue = insertedProfitDetail.ProfitCodeId.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "PROFIT_YEAR_ITERATION", NewValue = insertedProfitDetail.ProfitYearIteration.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "CONTRIBUTION", NewValue = insertedProfitDetail.Contribution.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "EARNINGS", NewValue = insertedProfitDetail.Earnings.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "FORFEITURE", NewValue = insertedProfitDetail.Forfeiture.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "MONTH_TO_DATE", NewValue = insertedProfitDetail.MonthToDate.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "YEAR_TO_DATE", NewValue = insertedProfitDetail.YearToDate.ToString() },
+                            new AuditChangeEntryInputRequest { ColumnName = "REMARK", NewValue = insertedProfitDetail.Remark },
+                            new AuditChangeEntryInputRequest { ColumnName = "REVERSED_FROM_PROFIT_DETAIL_ID", NewValue = insertedProfitDetail.ReversedFromProfitDetailId?.ToString() },
                         ],
                         cancellationToken: ct);
                 }

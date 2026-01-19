@@ -1,14 +1,8 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.RmdsFactors;
 
@@ -19,15 +13,11 @@ public sealed class UpsertRmdsFactorEndpoint
     : ProfitSharingEndpoint<RmdsFactorRequest, Results<Ok<RmdsFactorDto>, ProblemHttpResult>>
 {
     private readonly IRmdsFactorService _rmdsService;
-    private readonly ILogger<UpsertRmdsFactorEndpoint> _logger;
 
-    public UpsertRmdsFactorEndpoint(
-        IRmdsFactorService rmdsService,
-        ILogger<UpsertRmdsFactorEndpoint> logger)
+    public UpsertRmdsFactorEndpoint(IRmdsFactorService rmdsService)
         : base(Navigation.Constants.ManageRmdFactors)
     {
         _rmdsService = rmdsService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -48,34 +38,11 @@ public sealed class UpsertRmdsFactorEndpoint
         Group<AdministrationGroup>();
     }
 
-    public override async Task<Results<Ok<RmdsFactorDto>, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<RmdsFactorDto>, ProblemHttpResult>> HandleRequestAsync(
         RmdsFactorRequest req,
         CancellationToken ct)
     {
-        using var activity = this.StartEndpointActivity(HttpContext);
-
-        try
-        {
-            this.RecordRequestMetrics(HttpContext, _logger, req);
-
-            var result = await _rmdsService.UpsertAsync(req, ct);
-
-            // Record business metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "upsert-rmds-factor"),
-                new("endpoint", nameof(UpsertRmdsFactorEndpoint)));
-
-            _logger.LogInformation(
-                "Upserted RMD factor for age {Age}: Factor={Factor} (correlation: {CorrelationId})",
-                req.Age, req.Factor, HttpContext.TraceIdentifier);
-
-            this.RecordResponseMetrics(HttpContext, _logger, result);
-            return TypedResults.Ok(result);
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+        var result = await _rmdsService.UpsertAsync(req, ct);
+        return TypedResults.Ok(result);
     }
 }

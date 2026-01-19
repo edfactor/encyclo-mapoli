@@ -77,6 +77,8 @@ public class EnrollmentSummarizerTests
             ProfitYear = profitYear,
             ZeroContributionReasonId = zeroContributionReasonId,
             Etva = 0m,
+            VestingScheduleId = VestingSchedule.Constants.NewPlan,
+            HasForfeited = false,
             Demographic = new Demographic
             {
                 BadgeNumber = 12345,
@@ -136,7 +138,7 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(),
             yearsOfService: 3,
-            new List<ProfitDetail>(),
+            [],
             expectedEnrollment: 0,
             testContext: "No transactions");
     }
@@ -148,7 +150,7 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2006),
             yearsOfService: 3,
-            new List<ProfitDetail> { CreateContribution(profitYear: 2006) },
+            [CreateContribution(profitYear: 2006)],
             expectedEnrollment: 1,
             testContext: "Single contribution before 2007");
     }
@@ -160,7 +162,7 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2007),
             yearsOfService: 3,
-            new List<ProfitDetail> { CreateContribution(profitYear: 2007) },
+            [CreateContribution(profitYear: 2007)],
             expectedEnrollment: 2,
             testContext: "Single contribution in 2007");
     }
@@ -172,7 +174,7 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 2,
-            new List<ProfitDetail> { CreateContribution(profitYear: 2024, contributionAmount: 1500m) },
+            [CreateContribution(profitYear: 2024, contributionAmount: 1500m)],
             expectedEnrollment: 2,
             testContext: "Contribution in 2024");
     }
@@ -188,12 +190,11 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 4,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(profitYear: 2005),
                 CreateContribution(profitYear: 2006),
                 CreateContribution(profitYear: 2007)
-            },
+            ],
             expectedEnrollment: 2,
             testContext: "Old plan member upgrades to new plan in 2007");
     }
@@ -209,14 +210,13 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(
                     profitYear: 2020,
                     contributionAmount: 500m,
                     profitYearIteration: 1,
                     commentTypeId: CommentType.Constants.Military.Id)
-            },
+            ],
             expectedEnrollment: 2,
             testContext: "Military contribution after 2007");
     }
@@ -228,14 +228,13 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(
                     profitYear: 2005,
                     contributionAmount: 500m,
                     profitYearIteration: 1,
                     commentTypeId: CommentType.Constants.Military.Id)
-            },
+            ],
             expectedEnrollment: 1,
             testContext: "Military contribution before 2008");
     }
@@ -251,14 +250,13 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(
                     profitYear: 2024,
                     contributionAmount: 0,
                     zeroContributionReasonId: ZeroContributionReason.Constants.Under21WithOver1Khours,
                     commentTypeId: CommentType.Constants.VOnly)
-            },
+            ],
             expectedEnrollment: 1,  // Original returns 1 (old vesting plan)
             testContext: "Under 21 with V-only");
     }
@@ -270,14 +268,13 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(
                     profitYear: 2024,
                     contributionAmount: 0,
                     zeroContributionReasonId: ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested,
                     commentTypeId: CommentType.Constants.VOnly)
-            },
+            ],
             expectedEnrollment: 1,  // Original returns 1 (old vesting plan, not upgraded to new plan)
             testContext: "Terminated employee with V-only");
     }
@@ -289,13 +286,12 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 6,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(
                     profitYear: 2024,
                     contributionAmount: 2000m,
                     zeroContributionReasonId: ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
-            },
+            ],
             expectedEnrollment: 2,
             testContext: "65+ fully vested with contribution");
     }
@@ -311,11 +307,10 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 3,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(profitYear: 2005),
                 CreateForfeiture(profitYear: 2008, forfeitureAmount: -500m)
-            },
+            ],
             expectedEnrollment: 1,  // Original returns 1 (has contributions, not forfeiture plan)
             testContext: "Post-2006 forfeiture with old vesting");
     }
@@ -327,11 +322,10 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 3,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(profitYear: 2007),
                 CreateForfeiture(profitYear: 2010, forfeitureAmount: -500m)
-            },
+            ],
             expectedEnrollment: 2,  // Original returns 2 (new vesting plan with contributions)
             testContext: "Post-2006 forfeiture with new vesting");
     }
@@ -343,8 +337,7 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 3,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(profitYear: 2007),
                 new ProfitDetail
                 {
@@ -354,14 +347,9 @@ public class EnrollmentSummarizerTests
                     Earnings = 500m,
                     Forfeiture = 0
                 },
-                new ProfitDetail
-                {
-                    ProfitYear = 2010,
-                    ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures,
-                    Forfeiture = 500m,
-                    Earnings = 0
-                }
-            },
+
+                new ProfitDetail { ProfitYear = 2010, ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures, Forfeiture = 500m, Earnings = 0 }
+            ],
             expectedEnrollment: 2,
             testContext: "Class action forfeiture ignored");
     }
@@ -377,16 +365,10 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 2,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(profitYear: 2002),
-                new ProfitDetail
-                {
-                    ProfitYear = 2003,
-                    ProfitCodeId = 8,
-                    Contribution = 0
-                }
-            },
+                new ProfitDetail { ProfitYear = 2003, ProfitCodeId = 8, Contribution = 0 }
+            ],
             expectedEnrollment: 3,
             testContext: "2003 void problem");
     }
@@ -402,12 +384,11 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(profitYear: 2024, contributionAmount: 500m),
                 CreateContribution(profitYear: 2024, contributionAmount: 500m),
                 CreateContribution(profitYear: 2024, contributionAmount: 500m)
-            },
+            ],
             expectedEnrollment: 2,
             testContext: "Multiple contributions same year");
     }
@@ -419,12 +400,11 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 1,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(profitYear: 2023),
                 CreateContribution(profitYear: 2025, contributionAmount: 5000m),
                 CreateContribution(profitYear: 2026, contributionAmount: 5000m)
-            },
+            ],
             expectedEnrollment: 2,
             testContext: "Future transactions ignored");
     }
@@ -436,7 +416,7 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 0,
-            new List<ProfitDetail> { CreateContribution(profitYear: 2024) },
+            [CreateContribution(profitYear: 2024)],
             expectedEnrollment: 2,
             testContext: "Zero years with contribution");
     }
@@ -452,8 +432,7 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 10,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(profitYear: 2000, contributionAmount: 800m),
                 CreateContribution(profitYear: 2001, contributionAmount: 850m),
                 CreateContribution(profitYear: 2002, contributionAmount: 900m),
@@ -465,7 +444,7 @@ public class EnrollmentSummarizerTests
                 CreateContribution(profitYear: 2008, contributionAmount: 1200m),
                 CreateContribution(profitYear: 2020, contributionAmount: 2000m),
                 CreateContribution(profitYear: 2024, contributionAmount: 2500m)
-            },
+            ],
             expectedEnrollment: 2,
             testContext: "Long tenure with transitions");
     }
@@ -477,14 +456,13 @@ public class EnrollmentSummarizerTests
         return VerifyBothImplementationsMatchAsync(
             CreatePayProfit(2024),
             yearsOfService: 5,
-            new List<ProfitDetail>
-            {
+            [
                 CreateContribution(profitYear: 2010),
                 CreateContribution(profitYear: 2011),
                 CreateForfeiture(profitYear: 2012, forfeitureAmount: -1500m),
                 CreateContribution(profitYear: 2020, contributionAmount: 2000m),
                 CreateContribution(profitYear: 2024, contributionAmount: 2500m)
-            },
+            ],
             expectedEnrollment: 2,  // Original returns 2 (new vesting plan with contributions)
             testContext: "Forfeiture then return");
     }

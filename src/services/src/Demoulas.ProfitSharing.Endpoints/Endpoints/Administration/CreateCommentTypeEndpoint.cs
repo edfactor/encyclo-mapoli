@@ -1,26 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Administration;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration;
 
 public sealed class CreateCommentTypeEndpoint : ProfitSharingEndpoint<CreateCommentTypeRequest, Results<Ok<CommentTypeDto>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly ICommentTypeService _commentTypeService;
-    private readonly ILogger<CreateCommentTypeEndpoint> _logger;
 
-    public CreateCommentTypeEndpoint(ICommentTypeService commentTypeService, ILogger<CreateCommentTypeEndpoint> logger)
+    public CreateCommentTypeEndpoint(ICommentTypeService commentTypeService)
         : base(Navigation.Constants.ManageCommentTypes)
     {
         _commentTypeService = commentTypeService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -39,27 +31,11 @@ public sealed class CreateCommentTypeEndpoint : ProfitSharingEndpoint<CreateComm
         });
     }
 
-    public override Task<Results<Ok<CommentTypeDto>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(
+    protected override async Task<Results<Ok<CommentTypeDto>, NotFound, BadRequest, ProblemHttpResult>> HandleRequestAsync(
         CreateCommentTypeRequest req,
         CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
-        {
-            var result = await _commentTypeService.CreateCommentTypeAsync(req, ct);
-
-            // Record business metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "comment-type-create"),
-                new("endpoint", nameof(CreateCommentTypeEndpoint)));
-
-            if (result.IsSuccess)
-            {
-                _logger.LogInformation(
-                    "Comment type created: ID={Id}, Name='{Name}', IsProtected={IsProtected} (correlation: {CorrelationId})",
-                    result.Value!.Id, result.Value.Name, result.Value.IsProtected, HttpContext.TraceIdentifier);
-            }
-
-            return result.ToHttpResultWithValidation();
-        });
+        var result = await _commentTypeService.CreateCommentTypeAsync(req, ct);
+        return result.ToHttpResultWithValidation();
     }
 }

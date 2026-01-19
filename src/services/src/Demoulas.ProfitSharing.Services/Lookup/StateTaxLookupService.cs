@@ -16,7 +16,7 @@ public sealed class StateTaxLookupService : IStateTaxLookupService
         _logger = logger;
     }
 
-    public async Task<StateTaxLookupResponse> LookupStateTaxRate(string state, CancellationToken cancellationToken = default)
+    public async Task<StateTaxLookupResponse> LookupStateTaxRateAsync(string state, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(state))
         {

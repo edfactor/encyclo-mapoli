@@ -4,7 +4,6 @@ using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -14,9 +13,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
@@ -47,16 +46,16 @@ public abstract class PristineBaseTest
         DistributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         CalendarService = new CalendarService(DbFactory, Aps, DistributedCache);
         FrozenService = new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache,
-            new Mock<INavigationService>().Object);
+            new Mock<INavigationService>().Object, TimeProvider.System);
         EmbeddedSqlService = new EmbeddedSqlService();
         DemographicReaderService = new DemographicReaderService(FrozenService, HttpContextAccessor);
         TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);
         TestOutputHelper = testOutputHelper;
         VestingScheduleService = new VestingScheduleService(DbFactory, DistributedCache);
         PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService, VestingScheduleService);
-        YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService, TimeProvider);
+        YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, NullLogger<YearEndService>.Instance);
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
         ForfeitureAdjustmentService = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
     }
 
@@ -89,5 +88,12 @@ public abstract class PristineBaseTest
 
             return new Employee { Demographic = demographic, PayProfit = payProfit };
         });
+    }
+
+#pragma warning disable VSTHRD002
+
+    protected long BadgeToSsn(int badge)
+    {
+        return GetEmployeeByBadgeAsync(badge).GetAwaiter().GetResult().Demographic.Ssn;
     }
 }

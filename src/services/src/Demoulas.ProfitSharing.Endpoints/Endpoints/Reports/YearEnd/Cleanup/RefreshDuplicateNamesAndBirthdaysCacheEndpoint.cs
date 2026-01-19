@@ -1,12 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
@@ -39,7 +34,7 @@ public class RefreshDuplicateNamesAndBirthdaysCacheEndpoint : ProfitSharingEndpo
         Group<YearEndGroup>();
     }
 
-    public override async Task<Results<Ok<string>, ProblemHttpResult>> ExecuteAsync(EmptyRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<string>, ProblemHttpResult>> HandleRequestAsync(EmptyRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -34,7 +34,7 @@ public class BeneficiaryTests : ApiTestBase<Program>
         ProfitShareUpdateRequest req = new() { ProfitYear = 2024, EarningsPercent = 11 };
 
         // Act
-        ProfitShareEditResponse response = await _service.ProfitShareEdit(req, CancellationToken.None);
+        ProfitShareEditResponse response = await _service.ProfitShareEditAsync(req, CancellationToken.None);
 
         // Assert
         response.Response.ShouldNotBeNull();

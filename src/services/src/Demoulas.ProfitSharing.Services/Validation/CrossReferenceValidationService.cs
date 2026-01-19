@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
@@ -6,7 +5,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Renci.SshNet.Messages;
 
 namespace Demoulas.ProfitSharing.Services.Validation;
 
@@ -150,7 +148,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         }
     }
 
-    public async Task<Result<ValidationResponse>> ValidateProfitSharingReport(short profitYear, string reportSuffix, bool isFrozen, CancellationToken cancellationToken = default)
+    public async Task<Result<ValidationResponse>> ValidateProfitSharingReportAsync(short profitYear, string reportSuffix, bool isFrozen, CancellationToken cancellationToken = default)
     {
         var checksumPrefix = reportSuffix switch
         {
@@ -208,7 +206,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         return Result<ValidationResponse>.Success(rslt);
     }
 
-    public async Task<ValidationResponse> ValidateForfeitureAndPointsReport(short profitYear, decimal distributionTotal, decimal forfeitTotal, CancellationToken cancellationToken = default)
+    public async Task<ValidationResponse> ValidateForfeitureAndPointsReportAsync(short profitYear, decimal distributionTotal, decimal forfeitTotal, CancellationToken cancellationToken = default)
     {
         var currentValues = new Dictionary<string, decimal>
         {
@@ -269,16 +267,17 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         return rslt;
     }
 
-    public async Task<ValidationResponse> ValidateBreakoutReportGrandTotal(
-        short profitYear, 
-        int numberOfEmployees, 
-        decimal beginningBalance, 
-        decimal earningsTotal, 
+    public async Task<ValidationResponse> ValidateBreakoutReportGrandTotalAsync(
+        short profitYear,
+        int numberOfEmployees,
+        decimal beginningBalance,
+        decimal earningsTotal,
         decimal contributionsTotal,
         decimal disbursementTotals,
         decimal endingBalance,
         CancellationToken cancellationToken = default
-        ) {
+        )
+    {
 
         var currentValues = new Dictionary<string, decimal>
         {

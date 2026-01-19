@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -48,15 +48,15 @@ public class DistributionRunReportSummaryEndpointTests
         var serviceResult = Result<DistributionRunReportSummaryResponse[]>.Success(summaryResponses);
 
         mockService
-            .Setup(x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetDistributionRunReportSummaryAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(serviceResult);
 
         // Act
-        await mockService.Object.GetDistributionRunReportSummary(CancellationToken.None);
+        await mockService.Object.GetDistributionRunReportSummaryAsync(CancellationToken.None);
 
         // Assert
         mockService.Verify(
-            x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()),
+            x => x.GetDistributionRunReportSummaryAsync(It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -74,15 +74,15 @@ public class DistributionRunReportSummaryEndpointTests
         var serviceResult = Result<DistributionRunReportSummaryResponse[]>.Success(summaryResponses);
 
         mockService
-            .Setup(x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetDistributionRunReportSummaryAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(serviceResult);
 
         // Act
-        await mockService.Object.GetDistributionRunReportSummary(cancellationToken);
+        await mockService.Object.GetDistributionRunReportSummaryAsync(cancellationToken);
 
         // Assert
         mockService.Verify(
-            x => x.GetDistributionRunReportSummary(
+            x => x.GetDistributionRunReportSummaryAsync(
                 It.Is<CancellationToken>(ct => ct == cancellationToken)),
             Times.Once);
     }
@@ -97,17 +97,17 @@ public class DistributionRunReportSummaryEndpointTests
         var expectedException = new InvalidOperationException("Database connection failed");
 
         mockService
-            .Setup(x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetDistributionRunReportSummaryAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(expectedException);
 
         // Act & Assert
         var thrownException = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await mockService.Object.GetDistributionRunReportSummary(CancellationToken.None));
+            async () => await mockService.Object.GetDistributionRunReportSummaryAsync(CancellationToken.None));
 
         thrownException.ShouldBe(expectedException);
 
         mockService.Verify(
-            x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()),
+            x => x.GetDistributionRunReportSummaryAsync(It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -122,11 +122,11 @@ public class DistributionRunReportSummaryEndpointTests
         var serviceResult = Result<DistributionRunReportSummaryResponse[]>.Success(emptySummaryResponses);
 
         mockService
-            .Setup(x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetDistributionRunReportSummaryAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(serviceResult);
 
         // Act
-        var result = await mockService.Object.GetDistributionRunReportSummary(CancellationToken.None);
+        var result = await mockService.Object.GetDistributionRunReportSummaryAsync(CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -135,7 +135,7 @@ public class DistributionRunReportSummaryEndpointTests
         result.Value!.Length.ShouldBe(0);
 
         mockService.Verify(
-            x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()),
+            x => x.GetDistributionRunReportSummaryAsync(It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -183,11 +183,11 @@ public class DistributionRunReportSummaryEndpointTests
         var serviceResult = Result<DistributionRunReportSummaryResponse[]>.Success(summaryResponses);
 
         mockService
-            .Setup(x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetDistributionRunReportSummaryAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(serviceResult);
 
         // Act
-        var result = await mockService.Object.GetDistributionRunReportSummary(CancellationToken.None);
+        var result = await mockService.Object.GetDistributionRunReportSummaryAsync(CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -202,7 +202,7 @@ public class DistributionRunReportSummaryEndpointTests
         frequencies.ShouldContain('Y');
 
         mockService.Verify(
-            x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()),
+            x => x.GetDistributionRunReportSummaryAsync(It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

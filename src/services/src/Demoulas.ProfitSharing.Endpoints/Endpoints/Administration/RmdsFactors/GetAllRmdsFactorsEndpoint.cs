@@ -1,14 +1,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.RmdsFactors;
 
@@ -19,15 +12,11 @@ public sealed class GetAllRmdsFactorsEndpoint
     : ProfitSharingResponseEndpoint<Results<Ok<List<RmdsFactorDto>>, ProblemHttpResult>>
 {
     private readonly IRmdsFactorService _rmdsService;
-    private readonly ILogger<GetAllRmdsFactorsEndpoint> _logger;
 
-    public GetAllRmdsFactorsEndpoint(
-        IRmdsFactorService rmdsService,
-        ILogger<GetAllRmdsFactorsEndpoint> logger)
+    public GetAllRmdsFactorsEndpoint(IRmdsFactorService rmdsService)
         : base(Navigation.Constants.ManageRmdFactors)
     {
         _rmdsService = rmdsService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -46,35 +35,9 @@ public sealed class GetAllRmdsFactorsEndpoint
         Group<AdministrationGroup>();
     }
 
-    public override async Task<Results<Ok<List<RmdsFactorDto>>, ProblemHttpResult>> ExecuteAsync(
-        CancellationToken ct)
+    protected override async Task<Results<Ok<List<RmdsFactorDto>>, ProblemHttpResult>> HandleRequestAsync(CancellationToken ct)
     {
-        using var activity = this.StartEndpointActivity(HttpContext);
-
-        try
-        {
-            var result = await _rmdsService.GetAllAsync(ct);
-
-            // Record business metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "get-all-rmds-factors"),
-                new("endpoint", nameof(GetAllRmdsFactorsEndpoint)));
-
-            EndpointTelemetry.RecordCountsProcessed.Record(result.Count,
-                new("record_type", "rmds-factors"),
-                new("endpoint", nameof(GetAllRmdsFactorsEndpoint)));
-
-            _logger.LogInformation(
-                "Retrieved {Count} RMD factors (correlation: {CorrelationId})",
-                result.Count, HttpContext.TraceIdentifier);
-
-            this.RecordResponseMetrics(HttpContext, _logger, result);
-            return TypedResults.Ok(result);
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+        var result = await _rmdsService.GetAllAsync(ct);
+        return TypedResults.Ok(result);
     }
 }

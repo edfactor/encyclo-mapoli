@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -59,13 +59,13 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
 
         MockDbContextFactory = new ScenarioFactory
         {
-            Demographics = new List<Demographic>
-            {
+            Demographics =
+            [
                 earlyEmployee.demographic,
                 rangeEmployee1.demographic,
                 rangeEmployee2.demographic,
                 lateEmployee.demographic
-            }
+            ]
         }.BuildMocks();
 
         var request = new StartAndEndDateRequest
@@ -120,7 +120,7 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
 
         MockDbContextFactory = new ScenarioFactory
         {
-            Demographics = new List<Demographic> { employee.demographic }
+            Demographics = [employee.demographic]
         }.BuildMocks();
 
         var request = new StartAndEndDateRequest
@@ -167,11 +167,11 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
 
         MockDbContextFactory = new ScenarioFactory
         {
-            Demographics = new List<Demographic>
-            {
+            Demographics =
+            [
                 terminatedEmployee.demographic,
                 retiredEmployee.demographic
-            }
+            ]
         }.BuildMocks();
 
         var request = new StartAndEndDateRequest
@@ -206,7 +206,7 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
 
         MockDbContextFactory = new ScenarioFactory
         {
-            Demographics = new List<Demographic> { employee.demographic }
+            Demographics = [employee.demographic]
         }.BuildMocks();
 
         var request = new StartAndEndDateRequest

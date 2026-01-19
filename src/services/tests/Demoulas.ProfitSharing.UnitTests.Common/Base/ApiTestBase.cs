@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 
@@ -14,6 +15,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 ///   Tests within the same [Collection] share the factory, so they may pollute each other's data.
 ///   Implements IAsyncDisposable to clean up ServiceProvider and HTTP clients after test completion.
 /// </summary>
+[Collection("SharedGlobalState")]
 public class ApiTestBase<TStartup> : IAsyncDisposable where TStartup : class
 {
     /// <summary>

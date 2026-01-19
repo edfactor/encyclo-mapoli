@@ -2,13 +2,8 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
@@ -19,13 +14,11 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 /// </summary>
 public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<StateListResponse>>
 {
-    private readonly ILogger<StateListEndpoint> _logger;
     private readonly IStateService _stateService;
 
-    public StateListEndpoint(IStateService stateService, ILogger<StateListEndpoint> logger) : base(Navigation.Constants.Inquiries)
+    public StateListEndpoint(IStateService stateService) : base(Navigation.Constants.Inquiries)
     {
         _stateService = stateService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -56,24 +49,14 @@ public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<List
         Group<LookupGroup>();
     }
 
-    public override async Task<Results<Ok<ListResponseDto<StateListResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
+    protected override async Task<Results<Ok<ListResponseDto<StateListResponse>>, NotFound, ProblemHttpResult>> HandleRequestAsync(CancellationToken ct)
     {
-        return await this.ExecuteWithTelemetry(HttpContext, _logger, new { }, async () =>
+        var result = await _stateService.GetStatesAsync(ct);
+        var response = new ListResponseDto<StateListResponse>
         {
-            // Retrieve states from database via StateService
-            var states = await _stateService.GetStatesAsync(ct);
+            Items = result.ToList()
+        };
 
-            // Record business metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "state-list-lookup"),
-                new("endpoint", nameof(StateListEndpoint)));
-
-            var response = new ListResponseDto<StateListResponse>
-            {
-                Items = states.ToList()
-            };
-
-            return Result<ListResponseDto<StateListResponse>>.Success(response);
-        });
+        return Result<ListResponseDto<StateListResponse>>.Success(response).ToHttpResult();
     }
 }

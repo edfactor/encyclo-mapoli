@@ -33,7 +33,7 @@ public class WagesService : IWagesService
         var result = await _dataContextFactory.UseReadOnlyContext(async c =>
         {
             // Get demographics query (uses frozen data if UseFrozenData flag is true)
-            var demographics = await _demographicReaderService.BuildDemographicQuery(c, useFrozenData: request.UseFrozenData);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(c, useFrozenData: request.UseFrozenData);
 
             // Filter pay profits for the profit year and non-zero income
             var payProfitsForYear = c.PayProfits

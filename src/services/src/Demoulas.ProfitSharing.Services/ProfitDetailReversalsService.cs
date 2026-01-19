@@ -13,15 +13,18 @@ public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger<ProfitDetailReversalsService> _logger;
+    private readonly TimeProvider _timeProvider;
 
     public ProfitDetailReversalsService(
         IProfitSharingDataContextFactory dbContextFactory,
         IDemographicReaderService demographicReaderService,
-        ILogger<ProfitDetailReversalsService> logger)
+        ILogger<ProfitDetailReversalsService> logger,
+        TimeProvider timeProvider)
     {
         _dbContextFactory = dbContextFactory;
         _demographicReaderService = demographicReaderService;
         _logger = logger;
+        _timeProvider = timeProvider;
     }
 
     public async Task<Result<bool>> ReverseProfitDetailsAsync(int[] profitDetailIds, CancellationToken cancellationToken)
@@ -86,7 +89,7 @@ public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
 
                 // Get frozen year for validation
                 var maxFrozenYear = await ctx.FrozenStates.MaxAsync(fy => (int?)fy.ProfitYear, cancellationToken) ?? 0;
-                var currentDate = DateTime.Now;
+                var currentDate = _timeProvider.GetLocalNow().DateTime;
 
                 // Phase 2: Validate ALL records and collect issues
                 var validationErrors = new Dictionary<string, List<string>>();
@@ -140,7 +143,7 @@ public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
                 }
 
                 // Phase 3: All validations passed, now process all records
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+                var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
                 var employeeSsns = await demographicQuery
                     .Where(d => profitDetails.Select(pd => pd.Ssn).Contains(d.Ssn))
                     .Select(d => d.Ssn)

@@ -4,6 +4,6 @@ namespace Demoulas.ProfitSharing.Services;
 
 public interface IPayProfitUpdateService
 {
-    Task SetZeroContributionReason(IQueryable<PayProfit> records, byte zeroContributionReasonId, CancellationToken cancellationToken);
-    Task SetEnrollmentId(short profitYear, CancellationToken ct);
+    Task SetZeroContributionReasonAsync(IQueryable<PayProfit> records, byte zeroContributionReasonId, CancellationToken cancellationToken);
+    Task SetEnrollmentIdAsync(short profitYear, CancellationToken ct);
 }

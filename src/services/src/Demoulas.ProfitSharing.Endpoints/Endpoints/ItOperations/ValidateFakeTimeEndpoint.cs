@@ -1,15 +1,9 @@
-using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
-using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Common.Time;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
@@ -21,14 +15,10 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 public sealed class ValidateFakeTimeEndpoint : ProfitSharingEndpoint<SetFakeTimeRequest, FakeTimeStatusResponse>
 {
     private readonly IHostEnvironment _hostEnvironment;
-    private readonly ILogger<ValidateFakeTimeEndpoint> _logger;
 
-    public ValidateFakeTimeEndpoint(
-        IHostEnvironment hostEnvironment,
-        ILogger<ValidateFakeTimeEndpoint> logger) : base(Navigation.Constants.FakeTimeManagement)
+    public ValidateFakeTimeEndpoint(IHostEnvironment hostEnvironment) : base(Navigation.Constants.FakeTimeManagement)
     {
         _hostEnvironment = hostEnvironment;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -68,95 +58,71 @@ public sealed class ValidateFakeTimeEndpoint : ProfitSharingEndpoint<SetFakeTime
         Group<ItDevOpsGroup>();
     }
 
-    public override Task<FakeTimeStatusResponse> ExecuteAsync(SetFakeTimeRequest req, CancellationToken ct)
+    protected override Task<FakeTimeStatusResponse> HandleRequestAsync(SetFakeTimeRequest req, CancellationToken ct)
     {
-        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        var isProduction = _hostEnvironment.IsProduction();
+        var realNow = DateTimeOffset.Now;
+
+        if (isProduction)
         {
-            var isProduction = _hostEnvironment.IsProduction();
-            var realNow = DateTimeOffset.Now;
-
-            // Security check: Never allow in production
-            if (isProduction)
+            return Task.FromResult(new FakeTimeStatusResponse
             {
-                _logger.LogWarning(
-                    "Fake time configuration validation rejected - Production environment (correlation: {CorrelationId})",
-                    HttpContext.TraceIdentifier);
+                IsActive = false,
+                IsAllowed = false,
+                Environment = _hostEnvironment.EnvironmentName,
+                RealDateTime = realNow.ToString("O"),
+                Message = "SECURITY: Fake time is not allowed in Production environments. This request has been rejected."
+            });
+        }
 
-                return new FakeTimeStatusResponse
-                {
-                    IsActive = false,
-                    IsAllowed = false,
-                    Environment = _hostEnvironment.EnvironmentName,
-                    RealDateTime = realNow.ToString("O"),
-                    Message = "SECURITY: Fake time is not allowed in Production environments. This request has been rejected."
-                };
-            }
+        var proposedConfig = new FakeTimeConfiguration
+        {
+            Enabled = req.Enabled,
+            FixedDateTime = req.FixedDateTime,
+            TimeZone = req.TimeZone,
+            AdvanceTime = req.AdvanceTime
+        };
 
-            // Validate the proposed configuration
-            var proposedConfig = new FakeTimeConfiguration
+        var validationErrors = proposedConfig.Validate();
+
+        if (validationErrors.Count > 0)
+        {
+            return Task.FromResult(new FakeTimeStatusResponse
             {
-                Enabled = req.Enabled,
-                FixedDateTime = req.FixedDateTime,
-                TimeZone = req.TimeZone,
-                AdvanceTime = req.AdvanceTime
-            };
-
-            var validationErrors = proposedConfig.Validate();
-
-            if (validationErrors.Count > 0)
-            {
-                _logger.LogWarning(
-                    "Fake time configuration validation failed: {Errors} (correlation: {CorrelationId})",
-                    string.Join("; ", validationErrors), HttpContext.TraceIdentifier);
-
-                return new FakeTimeStatusResponse
-                {
-                    IsActive = false,
-                    IsAllowed = true,
-                    ConfiguredDateTime = req.FixedDateTime,
-                    TimeZone = req.TimeZone,
-                    AdvanceTime = req.AdvanceTime,
-                    Environment = _hostEnvironment.EnvironmentName,
-                    RealDateTime = realNow.ToString("O"),
-                    Message = $"Configuration validation failed: {string.Join("; ", validationErrors)}"
-                };
-            }
-
-            // Configuration is valid
-            var response = new FakeTimeStatusResponse
-            {
-                IsActive = false, // Not yet active - requires restart
+                IsActive = false,
                 IsAllowed = true,
                 ConfiguredDateTime = req.FixedDateTime,
-                TimeZone = req.TimeZone ?? TimeZoneInfo.Local.Id,
+                TimeZone = req.TimeZone,
                 AdvanceTime = req.AdvanceTime,
                 Environment = _hostEnvironment.EnvironmentName,
-                RealDateTime = realNow.ToString("O")
-            };
+                RealDateTime = realNow.ToString("O"),
+                Message = $"Configuration validation failed: {string.Join("; ", validationErrors)}"
+            });
+        }
 
-            if (req.Enabled)
-            {
-                var parsedTime = proposedConfig.GetParsedFixedDateTime();
-                var timeZone = proposedConfig.GetTimeZone();
-                response.Message = $"Configuration is valid. To enable fake time at {parsedTime:MMMM d, yyyy h:mm tt} ({timeZone.Id}), " +
-                    "update the FakeTime section in appsettings.json and restart the application.";
-            }
-            else
-            {
-                response.Message = "Configuration is valid. To disable fake time, set FakeTime.Enabled to false in appsettings.json and restart the application.";
-            }
+        var response = new FakeTimeStatusResponse
+        {
+            IsActive = false,
+            IsAllowed = true,
+            ConfiguredDateTime = req.FixedDateTime,
+            TimeZone = req.TimeZone ?? TimeZoneInfo.Local.Id,
+            AdvanceTime = req.AdvanceTime,
+            Environment = _hostEnvironment.EnvironmentName,
+            RealDateTime = realNow.ToString("O")
+        };
 
-            // Record telemetry
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "fake-time-config-validate"),
-                new("endpoint", nameof(ValidateFakeTimeEndpoint)),
-                new("proposed_enabled", req.Enabled.ToString().ToLowerInvariant()));
+        if (req.Enabled)
+        {
+            var parsedTime = proposedConfig.GetParsedFixedDateTime();
+            var timeZone = proposedConfig.GetTimeZone();
+            response.Message = $"Configuration is valid. To enable fake time at {parsedTime:MMMM d, yyyy h:mm tt} ({timeZone.Id}), " +
+                "update the FakeTime section in appsettings.json and restart the application.";
+        }
+        else
+        {
+            response.Message = "Configuration is valid. To disable fake time, set FakeTime.Enabled to false in appsettings.json and restart the application.";
+        }
 
-            _logger.LogInformation(
-                "Fake time configuration validated. Proposed Enabled: {Enabled}, DateTime: {DateTime}, TimeZone: {TimeZone} (correlation: {CorrelationId})",
-                req.Enabled, req.FixedDateTime ?? "not set", req.TimeZone ?? "system default", HttpContext.TraceIdentifier);
-
-            return await Task.FromResult(response);
-        });
+        return Task.FromResult(response);
     }
 }

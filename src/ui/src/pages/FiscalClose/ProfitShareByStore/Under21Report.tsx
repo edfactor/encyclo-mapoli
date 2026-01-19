@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
+import { useCachedPrevious } from "../../../hooks/useCachedPrevious";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { useInitialLoad } from "../../../hooks/useInitialLoad";
@@ -29,7 +30,7 @@ const Under21Report = () => {
 
   const profitYear = useDecemberFlowProfitYear();
   const isLoading = isBreakdownLoading || manualLoading;
-  const hasData = !!profitSharingUnder21Data;
+  const displayTotals = useCachedPrevious(profitSharingUnder21Data ?? null);
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
@@ -129,12 +130,12 @@ const Under21Report = () => {
             </Grid>
           ) : (
             <>
-              {hasData && !isLoading && (
+              {displayTotals && (
                 <Grid
                   width="100%"
                   paddingX="24px">
                   <Under21ReportTotals
-                    totals={profitSharingUnder21Data}
+                    totals={displayTotals}
                     isLoading={isLoading}
                     title="UNDER 21 REPORT (QPAY066-UNDR21)"
                   />

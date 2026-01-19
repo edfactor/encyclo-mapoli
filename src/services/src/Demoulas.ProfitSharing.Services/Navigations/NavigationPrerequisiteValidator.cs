@@ -1,6 +1,7 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
+﻿using Demoulas.Common.Contracts.Contracts.Response.Navigation;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using FluentValidation;
 using FluentValidation.Results;
 
@@ -18,7 +19,7 @@ public class NavigationPrerequisiteValidator : INavigationPrerequisiteValidator
     public async Task ValidateAllCompleteAsync(short navigationId, CancellationToken cancellationToken)
     {
         // Fetch full navigation (by roles) and locate the requested node.
-        var response = await _navigationService.GetNavigation(cancellationToken);
+        var response = await _navigationService.GetNavigationAsync(cancellationToken);
         var tree = response.Navigation ?? [];
         var node = FindNode(tree, navigationId);
         if (node == null)
@@ -27,15 +28,15 @@ public class NavigationPrerequisiteValidator : INavigationPrerequisiteValidator
         }
 
         var prereqs = node.PrerequisiteNavigations ?? new();
-        var incomplete = prereqs.Where(p => p.StatusId != NavigationStatus.Constants.Complete).ToList();
+        var incomplete = prereqs.Where(p => p.StatusId != NavigationStatusIds.Complete).ToList();
         if (incomplete.Count > 0)
         {
-            var failures = incomplete.Select(p => new ValidationFailure(p.Title, $"{p.Title} is '{p.StatusName}' but must be '{nameof(NavigationStatus.Constants.Complete)}'"));
-            throw new ValidationException($"Prerequisites not {nameof(NavigationStatus.Constants.Complete)} for {node.Title}", failures);
+            var failures = incomplete.Select(p => new ValidationFailure(p.Title, $"{p.Title} is '{p.StatusName}' but must be '{nameof(NavigationStatusIds.Complete)}'"));
+            throw new ValidationException($"Prerequisites not {nameof(NavigationStatusIds.Complete)} for {node.Title}", failures);
         }
     }
 
-    private static NavigationDto? FindNode(IEnumerable<NavigationDto> nodes, short id)
+    private static NavigationResponse? FindNode(IEnumerable<NavigationResponse> nodes, short id)
     {
         foreach (var n in nodes)
         {

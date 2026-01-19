@@ -1,7 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Adjustments;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
@@ -47,16 +45,16 @@ public sealed class MergeProfitDetailsEndpoint : ProfitSharingRequestEndpoint<Me
             };
         });
     }
-    public override async Task HandleAsync(MergeProfitDetailsRequest req, CancellationToken ct)
+    protected override async Task HandleRequestAsync(MergeProfitDetailsRequest req, CancellationToken ct)
     {
         try
         {
             await _mergeProfitDetailsService.MergeProfitDetailsToDemographic(req.SourceSsn, req.DestinationSsn, ct);
-            _logger.LogInformation("MergeProfitDetailsToDemographic successful - {SourcSsn} to {DestinationSsn}", req.SourceSsn.MaskSsn(), req.DestinationSsn.MaskSsn());
+            _logger.LogInformation("MergeProfitDetailsToDemographic successful");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "MergeProfitDetailsToDemographic failed - {SourcSsn} to {DestinationSsn}", req.SourceSsn.MaskSsn(), req.DestinationSsn.MaskSsn());
+            _logger.LogError(ex, "MergeProfitDetailsToDemographic failed");
         }
     }
 }

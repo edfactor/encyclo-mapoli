@@ -2,9 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.Logging;
@@ -39,7 +37,7 @@ public sealed class ProfitControlSheetEndpoint : ProfitSharingEndpoint<ProfitYea
         Group<YearEndGroup>();
     }
 
-    public override async Task<ProfitControlSheetResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
+    protected override async Task<ProfitControlSheetResponse> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
         this.RecordRequestMetrics(HttpContext, _logger, req);

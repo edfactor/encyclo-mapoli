@@ -386,3 +386,6 @@ test-results
 /src/ui/test-results.txt
 /src/ui/test-output.txt
 /cobol
+
+# Local AI configs
+.claude/settings.local.json

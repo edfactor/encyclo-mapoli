@@ -23,19 +23,21 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly TimeProvider _timeProvider;
 
-    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, TotalService totalService, ICalendarService calendarService, IDemographicReaderService demographicReaderService)
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, TotalService totalService, ICalendarService calendarService, IDemographicReaderService demographicReaderService, TimeProvider timeProvider)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
+        _timeProvider = timeProvider;
     }
 
-    public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<ProfitShareUpdateResponse> ProfitShareUpdateAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         ProfitShareUpdateOutcome result =
-            await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken, false);
+            await ProfitSharingUpdateAsync(profitShareUpdateRequest, cancellationToken, false);
 
         List<ProfitShareUpdateMemberResponse> members = result.MemberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
@@ -70,7 +72,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             AdjustmentsSummary = result.AdjustmentsSummaryData,
             ProfitShareUpdateTotals = result.ProfitShareUpdateTotals,
             ReportName = "Profit Sharing Update",
-            ReportDate = DateTimeOffset.UtcNow,
+            ReportDate = _timeProvider.GetUtcNow(),
             StartDate = calInfo.FiscalBeginDate,
             EndDate = calInfo.FiscalEndDate,
             Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest)
@@ -84,9 +86,9 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     /// <summary>
     ///     This is used by other services to access plan members with yearly contributions applied.
     /// </summary>
-    public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternalAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        var result = await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken, true);
+        var result = await ProfitSharingUpdateAsync(profitShareUpdateRequest, cancellationToken, true);
         List<ProfitShareUpdateMember> members = result.MemberFinancials.Select(m => new ProfitShareUpdateMember
         {
             IsEmployee = m.IsEmployee,
@@ -121,14 +123,14 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     ///
     /// The "includeZeroAmounts" is because PAY444 doesnt show members with no financial change, PAY447 does include members with changes to ZeroContributions.
     /// </summary>
-    public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken, bool includeZeroAmounts)
+    public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdateAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken, bool includeZeroAmounts)
     {
         // Values collected for an "Adjustment Report" that we do not yet generate (see https://demoulas.atlassian.net/browse/PS-900)
         AdjustmentsSummaryDto adjustmentsSummaryData = new();
 
         // Start off loading the employees.
         (List<MemberFinancials> members, bool employeeExceededMaxContribution) = await EmployeeProcessorHelper.ProcessEmployees(_dbContextFactory, _calendarService, _totalService,
-            _demographicReaderService, profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
+            _demographicReaderService, profitShareUpdateRequest, adjustmentsSummaryData, _timeProvider, cancellationToken);
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
         await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, _totalService, members, profitShareUpdateRequest, cancellationToken);

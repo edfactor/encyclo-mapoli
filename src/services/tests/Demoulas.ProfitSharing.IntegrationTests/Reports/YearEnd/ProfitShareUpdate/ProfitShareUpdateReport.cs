@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -36,11 +36,11 @@ internal sealed class ProfitShareUpdateReport
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService)
     {
         TotalService totalService = new(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
-        ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, demographicReaderService);
+        ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, demographicReaderService, TimeProvider.System);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, ProfitShareUpdateTotals totalsDto, bool _) =
-            await psu.ProfitSharingUpdate(profitShareUpdateRequest, CancellationToken.None, false);
+            await psu.ProfitSharingUpdateAsync(profitShareUpdateRequest, CancellationToken.None, false);
 
         // Sort like READY sorts, meaning "Mc" comes after "ME" (aka it is doing a pure ascii sort - lowercase characters are higher.)
         members = members
@@ -182,6 +182,7 @@ internal sealed class ProfitShareUpdateReport
     public void m850PrintTotals(ReportCounters reportCounters, ProfitShareUpdateTotals wsClientProfitShareUpdateTotals,
         long maxAllowedContribution)
     {
+        _ = reportCounters;
         ClientTot client_tot = new();
         client_tot.BEG_BAL_TOT = wsClientProfitShareUpdateTotals.BeginningBalance;
         client_tot.DIST1_TOT = wsClientProfitShareUpdateTotals.Distributions;
@@ -247,7 +248,7 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m1000AdjustmentReport(ProfitShareUpdateRequest profitShareUpdateRequest,
+    public static void m1000AdjustmentReport(ProfitShareUpdateRequest profitShareUpdateRequest,
         AdjustmentsSummaryDto adjustmentsApplied)
     {
         if (profitShareUpdateRequest.BadgeToAdjust == 0)
@@ -297,14 +298,16 @@ internal sealed class ProfitShareUpdateReport
         }
     }
 
-    private void WRITE2_advance2(object header4)
+    private static void WRITE2_advance2(object header4)
     {
+        _ = header4;
         // We dont currently support this second report.    We may have to.
         //throw new NotImplementedException()
     }
 
-    private void WRITE2_afterPage(Header1 header1)
+    private static void WRITE2_afterPage(Header1 header1)
     {
+        _ = header1;
         // We dont currently support this second report.    We may have to.
         // throw new NotImplementedException()
     }

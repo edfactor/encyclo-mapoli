@@ -22,7 +22,7 @@ Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
 
 // Create resource manager for API lifecycle management during database operations
-var resourceManager = new ResourceManager(builder, logger);
+var resourceManager = new ResourceManager(logger);
 
 var cliRunner = builder.AddExecutable("Database-Cli",
         "dotnet",

@@ -17,14 +17,17 @@ namespace Demoulas.ProfitSharing.Services.Reports
         private readonly IProfitSharingDataContextFactory _dataContextFactory;
         private readonly IDemographicReaderService _demographicReaderService;
         private readonly ICalendarService _calendarService;
+        private readonly TimeProvider _timeProvider;
 
         public PayrollDuplicateSsnReportService(IProfitSharingDataContextFactory dataContextFactory,
             IDemographicReaderService demographicReaderService,
-            ICalendarService calendarService)
+            ICalendarService calendarService,
+            TimeProvider timeProvider)
         {
             _dataContextFactory = dataContextFactory;
             _demographicReaderService = demographicReaderService;
             _calendarService = calendarService;
+            _timeProvider = timeProvider;
         }
 
         public Task<bool> DuplicateSsnExistsAsync(CancellationToken ct)
@@ -32,7 +35,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
             return _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
 
-                IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
                 return await GetDuplicateSsnQuery(demographics).AnyAsync(ct);
 
@@ -43,9 +46,9 @@ namespace Demoulas.ProfitSharing.Services.Reports
         {
             return _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                short cutoffYear = (short)(DateTime.UtcNow.Year - 5);
+                short cutoffYear = (short)(_timeProvider.GetUtcNow().Year - 5);
                 var cal = await _calendarService.GetYearStartAndEndAccountingDatesAsync(cutoffYear, ct);
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
                 var dupSsns = await GetDuplicateSsnQuery(demographics).ToHashSetAsync(ct);
 

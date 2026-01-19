@@ -3,7 +3,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
@@ -53,7 +52,7 @@ public class ProfitShareUpdateEndpoint
     public override async Task<ProfitShareUpdateResponse> GetResponse(ProfitShareUpdateRequest req, CancellationToken ct)
     {
         // Get the Master Update preview data with totals
-        var response = await _profitShareUpdateService.ProfitShareUpdate(req, ct);
+        var response = await _profitShareUpdateService.ProfitShareUpdateAsync(req, ct);
 
         // Perform cross-reference validation using the totals from the response
         _logger.LogInformation("Performing cross-reference validation for Master Update preview");

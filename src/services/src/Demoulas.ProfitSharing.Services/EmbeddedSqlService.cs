@@ -56,22 +56,22 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         var yearsOfServiceQuery = GetYearsOfServiceQuery(employeeYear, asOfDate);
 
         var query = $@"
-SELECT 
-    bal.Ssn, 
-    CASE 
-        WHEN vr.DEMOGRAPHIC_ID IS NULL 
-            THEN CASE WHEN vr.BENEFICIARY_CONTACT_ID IS NULL 
-                         THEN 0 
-                         ELSE vr.BENEFICIARY_CONTACT_ID 
+SELECT
+    bal.Ssn,
+    CASE
+        WHEN vr.DEMOGRAPHIC_ID IS NULL
+            THEN CASE WHEN vr.BENEFICIARY_CONTACT_ID IS NULL
+                         THEN 0
+                         ELSE vr.BENEFICIARY_CONTACT_ID
                   END
-        ELSE vr.DEMOGRAPHIC_ID 
+        ELSE vr.DEMOGRAPHIC_ID
     END AS ID,
-    
-    CASE 
+
+    CASE
         WHEN bal.TOTAL = 0 THEN 0
-        ELSE 
-            ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
-            + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT) - pdWrap.FORFEITURES) 
+        ELSE
+            ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO)
+            + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT) - pdWrap.FORFEITURES)
     END AS VESTEDBALANCE,
 
     bal.TOTAL AS CURRENTBALANCE,
@@ -95,7 +95,7 @@ LEFT JOIN (
            SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) AS PROF_6_CONTRIB,
            SUM(CASE WHEN pd.PROFIT_CODE_ID = 8 THEN pd.EARNINGS ELSE 0 END) AS PROF_8_EARNINGS,
            SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE ELSE 0 END) AS PROF_9_FORFEIT
-    FROM PROFIT_DETAIL pd 
+    FROM PROFIT_DETAIL pd
     WHERE pd.PROFIT_YEAR  <= {profitYear}
     GROUP BY pd.SSN
 ) pdWrap ON bal.SSN = pdWrap.SSN
@@ -112,12 +112,12 @@ LEFT JOIN (
         var balanceSubquery = GetBalanceSubquery(profitYear);
 
         string query = @$"/*-----------------------------------------------------------
-  Bind variables                                             
-    :p_profit_year      – Profit year being reported on       
-    :p_fiscal_end_date  – End-of-year date (same value used   
-                           when the report is built)          
-    :p_birthdate_21     – :p_fiscal_end_date – 21 years       
-    :p_min_hours        – ReferenceData.MinimumHoursForContribution                        
+  Bind variables
+    :p_profit_year      – Profit year being reported on
+    :p_fiscal_end_date  – End-of-year date (same value used
+                           when the report is built)
+    :p_birthdate_21     – :p_fiscal_end_date – 21 years
+    :p_min_hours        – ReferenceData.MinimumHoursForContribution
 -----------------------------------------------------------*/
 WITH balances AS (
     /* 1️⃣  History-to-date balance per participant --------*/
@@ -178,22 +178,22 @@ FROM   employees
     public IQueryable<ProfitDetailRollup> GetTransactionsBySsnForProfitYearForOracle(IProfitSharingDbContext ctx, short profitYear)
     {
         FormattableString query = @$"
-SELECT pd.SSN Ssn   ,  
+SELECT pd.SSN Ssn   ,
        Sum(pd.CONTRIBUTION) TOTAL_CONTRIBUTIONS,
        Sum(pd.EARNINGS ) TOTAL_EARNINGS,
-       Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE 
+       Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE
                                   WHEN {ProfitCode.Constants.OutgoingForfeitures.Id} THEN -pd.FORFEITURE
                                   ELSE 0
            END) TOTAL_FORFEITURES,
        Sum(CASE WHEN pd.PROFIT_CODE_ID  != {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE 0 END) TOTAL_PAYMENTS,
        Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id}, {ProfitCode.Constants.OutgoingDirectPayments.Id}, {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id}) THEN -pd.FORFEITURE ELSE 0 END) DISTRIBUTION,
        Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.OutgoingXferBeneficiary.Id} THEN -pd.FORFEITURE
-                                  WHEN {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION 
+                                  WHEN {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION
                                   ELSE 0 END) BENEFICIARY_ALLOCATION,
        Sum(pd.CONTRIBUTION + pd.EARNINGS + CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE -pd.FORFEITURE END) CURRENT_BALANCE,
        Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationMilitary} THEN pd.CONTRIBUTION ELSE 0 END) MILITARY_TOTAL,
        Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationClassActionFund} THEN pd.EARNINGS ELSE 0 END) CLASS_ACTION_FUND_TOTAL,
-       Sum(CASE WHEN (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id})) 
+       Sum(CASE WHEN (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id}))
                   OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingXferBeneficiary.Id})) THEN pd.FORFEITURE ELSE 0 END) PAID_ALLOCATIONS_TOTAL,
        -- This is the distributions total as used on PAY443, it is not used elsewhere.
        Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id},{ProfitCode.Constants.OutgoingDirectPayments.Id})
@@ -240,7 +240,7 @@ GROUP BY pd.SSN";
    --VestedEarnings
   + (
       SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) +
-      SUM(CASE WHEN pd.PROFIT_CODE_ID  = 8 THEN pd.EARNINGS  ELSE 0 END) + 
+      SUM(CASE WHEN pd.PROFIT_CODE_ID  = 8 THEN pd.EARNINGS  ELSE 0 END) +
       SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
     ) AS Total
   FROM PROFIT_DETAIL pd
@@ -266,9 +266,9 @@ SELECT m.SSN,
   CASE WHEN
         -- If employee is active and age > 65, then 100%
         (m.termination_date IS NULL OR m.termination_date > TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD') )
-        AND m.initial_contr_year < {initialContributionFiveYearsAgo}
-        AND m.date_of_birth < TO_DATE('{birthDate65.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')
-        THEN 1 ELSE              
+        AND m.initial_contr_year <= {initialContributionFiveYearsAgo}
+        AND m.date_of_birth <= TO_DATE('{birthDate65.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')
+        THEN 1 ELSE
   CASE WHEN m.HAS_FORFEITED = 1 THEN 1 ELSE --Otherwise, If employee has forfeiture records, 100%
   CASE WHEN m.IS_EMPLOYEE = 1 AND m.TERMINATION_CODE_ID = 'Z' AND TERMINATION_DATE<  TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')  THEN 1 ELSE --Otherwise, If deceased, mark for 100% vested
   CASE WHEN m.ZERO_CONTRIBUTION_REASON_ID = 6 THEN 1 ELSE --Otherwise, If zero contribution reason is 65 or over, first contribution more than 5 years ago, 100% vested
@@ -276,13 +276,13 @@ SELECT m.SSN,
   NVL(m.VESTING_PERCENT, 0) / 100
   END END END END END AS RATIO
 FROM (
-    SELECT d.ID AS DEMOGRAPHIC_ID, NULL AS BENEFICIARY_CONTACT_ID, d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, d.HAS_FORFEITED, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, INITIAL_CONTR_YEAR, 
+        SELECT d.ID AS DEMOGRAPHIC_ID, NULL AS BENEFICIARY_CONTACT_ID, d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.HAS_FORFEITED, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, INITIAL_CONTR_YEAR,
            yos.YEARS AS YEARS_OF_SERVICE,
            -- PS-2464: Lookup vesting percentage from VESTING_SCHEDULE_DETAIL table
-           -- Join via d.VESTING_SCHEDULE_ID (from DEMOGRAPHIC), select max years <= actual years for accurate vesting percent
+           -- Join via pp.VESTING_SCHEDULE_ID (from PAY_PROFIT), select max years <= actual years for accurate vesting percent
            (SELECT MAX(vsd.VESTING_PERCENT)
             FROM VESTING_SCHEDULE_DETAIL vsd
-            WHERE vsd.VESTING_SCHEDULE_ID = d.VESTING_SCHEDULE_ID
+            WHERE vsd.VESTING_SCHEDULE_ID = pp.VESTING_SCHEDULE_ID
               AND vsd.YEARS_OF_SERVICE <= yos.YEARS
            ) AS VESTING_PERCENT
     FROM DEMOGRAPHIC d
@@ -292,7 +292,7 @@ FROM (
     ) yos ON d.SSN = yos.SSN AND d.ID = yos.DEMOGRAPHIC_ID
     LEFT JOIN (
         {initialContributionYearQuery}
-    ) initcontrib on d.ssn = initcontrib.ssn 
+    ) initcontrib on d.ssn = initcontrib.ssn
     UNION ALL
     SELECT NULL AS DEMOGRAPHIC_ID, bc.ID AS BENEFICIARY_CONTACT_ID, bc.SSN, bc.DATE_OF_BIRTH, 0 AS IS_EMPLOYEE, NULL AS TERMINATION_DATE, 0 AS HAS_FORFEITED, NULL AS TERMINATION_CODE_ID, NULL AS ZERO_CONTRIBUTION_REASON_ID, 0 AS YEARS_OF_SERVICE, null as INITIAL_CONTR_YEAR, 1 AS VESTING_PERCENT
     FROM BENEFICIARY_CONTACT bc
@@ -308,7 +308,7 @@ FROM (
         string query = @$"
 SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
                + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
-                  AND ( NVL(MAX(pp.TOTAL_HOURS), 0) >= {ReferenceData.MinimumHoursForContribution} 
+                  AND ( NVL(MAX(pp.TOTAL_HOURS), 0) >= {ReferenceData.MinimumHoursForContribution}
                         AND MAX(d.DATE_OF_BIRTH) <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
                THEN 1 ELSE 0 END
                  AS YEARS

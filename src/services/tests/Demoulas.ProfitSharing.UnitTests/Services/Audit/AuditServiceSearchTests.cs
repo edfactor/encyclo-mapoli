@@ -1,7 +1,7 @@
-﻿using Bogus;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
+using Bogus;
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +10,7 @@ using Shouldly;
 namespace Demoulas.ProfitSharing.UnitTests.Services.Audit;
 
 /// <summary>
-/// Unit tests for AuditService.SearchAuditEventsAsync method.
+/// Unit tests for ProfitSharingAuditService.SearchAuditEventsAsync method.
 /// 
 /// Tests all filter scenarios:
 /// - No filters (returns all events)
@@ -26,21 +26,21 @@ namespace Demoulas.ProfitSharing.UnitTests.Services.Audit;
 [Collection("SharedGlobalState")]
 public sealed class AuditServiceSearchTests : ApiTestBase<Program>
 {
-    private readonly IAuditService _service;
+    private readonly IProfitSharingAuditService _service;
     private readonly List<AuditEvent> _auditEvents;
 
     public AuditServiceSearchTests()
     {
         _auditEvents = CreateMockAuditEvents();
         MockDbContextFactory = new ScenarioFactory { AuditEvents = _auditEvents }.BuildMocks();
-        _service = ServiceProvider?.GetRequiredService<IAuditService>()!;
+        _service = ServiceProvider?.GetRequiredService<IProfitSharingAuditService>()!;
     }
 
     [Fact]
     public async Task SearchAuditEvents_NoFilters_ReturnsAllEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest()
         {
             Skip = 0,
             Take = 100
@@ -59,7 +59,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithTableNameFilter_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "NAVIGATION",
             Skip = 0,
@@ -80,7 +80,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithOperationFilter_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             Operation = "Update",  // Will match Update operations
             Skip = 0,
@@ -100,7 +100,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithUsernameFilter_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             UserName = "admin",  // Will match "admin.user" and "hr.admin"
             Skip = 0,
@@ -123,7 +123,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
         var startDate = DateTimeOffset.UtcNow.AddDays(-7);
         var endDate = DateTimeOffset.UtcNow.AddDays(-1);
 
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             StartTime = startDate,
             EndTime = endDate,
@@ -143,7 +143,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithPagination_ReturnsCorrectPage()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             Skip = 2,
             Take = 3
@@ -162,7 +162,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NavigationTable_IncludesChangesJson()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "NAVIGATION",
             Skip = 0,
@@ -182,7 +182,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NonNavigationTable_ExcludesChangesJson()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "DEMOGRAPHIC",
             Skip = 0,
@@ -202,7 +202,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithMultipleFilters_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "NAVIGATION",
             Operation = "Update",
@@ -228,7 +228,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NoMatches_ReturnsEmptyResults()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "NONEXISTENT_TABLE_XYZ",
             Skip = 0,
@@ -266,23 +266,15 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             .RuleFor(e => e.PrimaryKey, f => f.Random.Int(1, 1000).ToString())
             .RuleFor(e => e.UserName, f => f.PickRandom("admin.user", "finance.manager", "it.devops"))
             .RuleFor(e => e.CreatedAt, f => f.Date.RecentOffset(days: 30))
-            .RuleFor(e => e.ChangesJson, f => new List<AuditChangeEntry>
-            {
+            .RuleFor(e => e.ChangesJson, f =>
+            [
                 new AuditChangeEntry
                 {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "StatusId",
-                    OriginalValue = f.Random.Int(1, 5).ToString(),
-                    NewValue = f.Random.Int(1, 5).ToString()
+                    Id = f.Random.Long(1, 10000), ColumnName = "StatusId", OriginalValue = f.Random.Int(1, 5).ToString(), NewValue = f.Random.Int(1, 5).ToString()
                 },
-                new AuditChangeEntry
-                {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "ModifiedDate",
-                    OriginalValue = f.Date.Past().ToString(),
-                    NewValue = f.Date.Recent().ToString()
-                }
-            })
+
+                new AuditChangeEntry { Id = f.Random.Long(1, 10000), ColumnName = "ModifiedDate", OriginalValue = f.Date.Past().ToString(), NewValue = f.Date.Recent().ToString() }
+            ])
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
         auditEvents.AddRange(navigationFaker.Generate(4));
@@ -296,16 +288,10 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             PrimaryKey = "999",
             UserName = "admin.user",
             CreatedAt = DateTimeOffset.UtcNow.AddDays(-5),
-            ChangesJson = new List<AuditChangeEntry>
-            {
-                new AuditChangeEntry
-                {
-                    Id = 1,
-                    ColumnName = "StatusId",
-                    OriginalValue = "1",
-                    NewValue = "2"
-                }
-            },
+            ChangesJson =
+            [
+                new AuditChangeEntry { Id = 1, ColumnName = "StatusId", OriginalValue = "1", NewValue = "2" }
+            ],
             ChangesHash = faker.Random.Hash()
         });
 
@@ -317,16 +303,10 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             .RuleFor(e => e.PrimaryKey, f => f.Random.Int(1, 10000).ToString())
             .RuleFor(e => e.UserName, f => f.PickRandom("hr.admin", "payroll.clerk", "admin.user"))
             .RuleFor(e => e.CreatedAt, f => f.Date.RecentOffset(days: 30))
-            .RuleFor(e => e.ChangesJson, f => new List<AuditChangeEntry>
-            {
-                new AuditChangeEntry
-                {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "LastName",
-                    OriginalValue = f.Name.LastName(),
-                    NewValue = f.Name.LastName()
-                }
-            })
+            .RuleFor(e => e.ChangesJson, f =>
+            [
+                new AuditChangeEntry { Id = f.Random.Long(1, 10000), ColumnName = "LastName", OriginalValue = f.Name.LastName(), NewValue = f.Name.LastName() }
+            ])
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
         auditEvents.AddRange(demographicFaker.Generate(4));
@@ -339,16 +319,13 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             .RuleFor(e => e.PrimaryKey, f => f.Random.Int(2020, 2025).ToString())
             .RuleFor(e => e.UserName, f => f.PickRandom("admin.user", "finance.manager"))
             .RuleFor(e => e.CreatedAt, f => f.Date.RecentOffset(days: 60))
-            .RuleFor(e => e.ChangesJson, f => new List<AuditChangeEntry>
-            {
+            .RuleFor(e => e.ChangesJson, f =>
+            [
                 new AuditChangeEntry
                 {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "Report",
-                    OriginalValue = null,
-                    NewValue = f.Random.Hash() // Simulating JSON payload
+                    Id = f.Random.Long(1, 10000), ColumnName = "Report", OriginalValue = null, NewValue = f.Random.Hash() // Simulating JSON payload
                 }
-            })
+            ])
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
         auditEvents.AddRange(archiveFaker.Generate(3));
@@ -361,16 +338,13 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             .RuleFor(e => e.PrimaryKey, f => f.Random.Int(1, 10000).ToString())
             .RuleFor(e => e.UserName, f => f.PickRandom("system.process", "batch.job"))
             .RuleFor(e => e.CreatedAt, f => f.Date.BetweenOffset(DateTimeOffset.UtcNow.AddDays(-90), DateTimeOffset.UtcNow.AddDays(-31)))
-            .RuleFor(e => e.ChangesJson, f => new List<AuditChangeEntry>
-            {
+            .RuleFor(e => e.ChangesJson, f =>
+            [
                 new AuditChangeEntry
                 {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "Amount",
-                    OriginalValue = f.Finance.Amount(0, 10000).ToString(),
-                    NewValue = f.Finance.Amount(0, 10000).ToString()
+                    Id = f.Random.Long(1, 10000), ColumnName = "Amount", OriginalValue = f.Finance.Amount(0, 10000).ToString(), NewValue = f.Finance.Amount(0, 10000).ToString()
                 }
-            })
+            ])
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
         auditEvents.AddRange(olderEventsFaker.Generate(3));

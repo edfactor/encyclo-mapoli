@@ -1,9 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
 
@@ -37,7 +35,7 @@ public class GetActiveFrozenDemographicEndpoint : ProfitSharingResponseEndpoint<
         Group<ItDevOpsAllUsersGroup>();
     }
 
-    public override async Task<FrozenStateResponse> ExecuteAsync(CancellationToken ct)
+    protected override async Task<FrozenStateResponse> HandleRequestAsync(CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -45,7 +43,7 @@ public class GetActiveFrozenDemographicEndpoint : ProfitSharingResponseEndpoint<
         {
             this.RecordRequestMetrics(HttpContext, _logger, new { });
 
-            var response = await _frozenService.GetActiveFrozenDemographic(ct);
+            var response = await _frozenService.GetActiveFrozenDemographicAsync(ct);
 
             // Business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

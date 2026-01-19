@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel;
+using System.Reflection;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Adjustments;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Adjustments;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
@@ -23,7 +26,60 @@ public class MergeProfitDetailsEndpointTests
     {
         _mergeProfitDetailsServiceMock = new Mock<IMergeProfitDetailsService>();
         _loggerMock = new Mock<ILogger<MergeProfitDetailsEndpoint>>();
-        _endpoint = new MergeProfitDetailsEndpoint(_mergeProfitDetailsServiceMock.Object, _loggerMock.Object);
+        _endpoint = CreateEndpoint(_mergeProfitDetailsServiceMock.Object, _loggerMock.Object);
+    }
+
+    private static MergeProfitDetailsEndpoint CreateEndpoint(
+        IMergeProfitDetailsService mergeProfitDetailsService,
+        ILogger<MergeProfitDetailsEndpoint> logger)
+    {
+        var endpoint = new MergeProfitDetailsEndpoint(mergeProfitDetailsService, logger);
+        var services = new ServiceCollection();
+        services.AddLogging();
+        if (logger is not null)
+        {
+            services.AddSingleton(logger);
+        }
+        SetHttpContext(endpoint, new DefaultHttpContext
+        {
+            RequestServices = services.BuildServiceProvider()
+        });
+        return endpoint;
+    }
+
+    private static void SetHttpContext(MergeProfitDetailsEndpoint endpoint, HttpContext httpContext)
+    {
+        var endpointType = endpoint.GetType();
+        var property = endpointType.GetProperty(
+            "HttpContext",
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (property is not null && property.SetMethod is not null)
+        {
+            property.SetValue(endpoint, httpContext);
+            return;
+        }
+
+        var fields = endpointType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        foreach (var field in fields)
+        {
+            if (typeof(HttpContext).IsAssignableFrom(field.FieldType))
+            {
+                field.SetValue(endpoint, httpContext);
+                return;
+            }
+        }
+    }
+
+    private static Task InvokeHandleRequestAsync(
+        MergeProfitDetailsEndpoint endpoint,
+        MergeProfitDetailsRequest request,
+        CancellationToken cancellationToken)
+    {
+        var method = endpoint.GetType().GetMethod(
+            "HandleRequestAsync",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        var task = (Task)method!.Invoke(endpoint, new object[] { request, cancellationToken })!;
+        return task;
     }
 
     #region Constructor and Setup Tests
@@ -33,7 +89,7 @@ public class MergeProfitDetailsEndpointTests
     public void Constructor_WithValidDependencies_ShouldInitializeCorrectly()
     {
         // Arrange & Act
-        var endpoint = new MergeProfitDetailsEndpoint(_mergeProfitDetailsServiceMock.Object, _loggerMock.Object);
+        var endpoint = CreateEndpoint(_mergeProfitDetailsServiceMock.Object, _loggerMock.Object);
 
         // Assert
         endpoint.ShouldNotBeNull();
@@ -46,7 +102,7 @@ public class MergeProfitDetailsEndpointTests
     {
         // Note: Constructor doesn't validate parameters - DI framework handles this
         // Arrange & Act
-        var endpoint = new MergeProfitDetailsEndpoint(null!, _loggerMock.Object);
+        var endpoint = CreateEndpoint(null!, _loggerMock.Object);
 
         // Assert
         endpoint.ShouldNotBeNull();
@@ -59,7 +115,7 @@ public class MergeProfitDetailsEndpointTests
     {
         // Note: Constructor doesn't validate parameters - DI framework handles this
         // Arrange & Act
-        var endpoint = new MergeProfitDetailsEndpoint(_mergeProfitDetailsServiceMock.Object, null!);
+        var endpoint = CreateEndpoint(_mergeProfitDetailsServiceMock.Object, null!);
 
         // Assert
         endpoint.ShouldNotBeNull();
@@ -71,11 +127,11 @@ public class MergeProfitDetailsEndpointTests
     public async Task HandleAsync_WithNullService_ShouldLogErrorButNotThrow()
     {
         // Arrange
-        var endpoint = new MergeProfitDetailsEndpoint(null!, _loggerMock.Object);
+        var endpoint = CreateEndpoint(null!, _loggerMock.Object);
         var request = CreateValidMergeProfitDetailsRequest(123456789, 987654321);
 
         // Act - Should not throw due to try-catch in endpoint
-        await endpoint.HandleAsync(request, CancellationToken.None);
+        await InvokeHandleRequestAsync(endpoint, request, CancellationToken.None);
 
         // Assert - Should have logged the error
         VerifyLoggerCalled(LogLevel.Error, "MergeProfitDetailsToDemographic failed");
@@ -101,7 +157,7 @@ public class MergeProfitDetailsEndpointTests
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
-        await _endpoint.HandleAsync(request, cancellationToken);
+        await InvokeHandleRequestAsync(_endpoint, request, cancellationToken);
 
         // Assert
         _mergeProfitDetailsServiceMock.Verify(x => x.MergeProfitDetailsToDemographic(
@@ -137,7 +193,7 @@ public class MergeProfitDetailsEndpointTests
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
-        await _endpoint.HandleAsync(request, cancellationToken);
+        await InvokeHandleRequestAsync(_endpoint, request, cancellationToken);
 
         // Assert
         _mergeProfitDetailsServiceMock.Verify(x => x.MergeProfitDetailsToDemographic(
@@ -164,7 +220,7 @@ public class MergeProfitDetailsEndpointTests
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
-        await _endpoint.HandleAsync(request, cancellationToken);
+        await InvokeHandleRequestAsync(_endpoint, request, cancellationToken);
 
         // Assert
         _mergeProfitDetailsServiceMock.Verify(x => x.MergeProfitDetailsToDemographic(
@@ -201,7 +257,7 @@ public class MergeProfitDetailsEndpointTests
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
-        await _endpoint.HandleAsync(request, CancellationToken.None);
+        await InvokeHandleRequestAsync(_endpoint, request, CancellationToken.None);
 
         // Assert
         _mergeProfitDetailsServiceMock.Verify(x => x.MergeProfitDetailsToDemographic(
@@ -227,7 +283,7 @@ public class MergeProfitDetailsEndpointTests
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
-        await _endpoint.HandleAsync(request, CancellationToken.None);
+        await InvokeHandleRequestAsync(_endpoint, request, CancellationToken.None);
 
         // Assert
         _mergeProfitDetailsServiceMock.Verify(x => x.MergeProfitDetailsToDemographic(
@@ -305,7 +361,7 @@ public class MergeProfitDetailsEndpointTests
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
-        await _endpoint.HandleAsync(request, CancellationToken.None);
+        await InvokeHandleRequestAsync(_endpoint, request, CancellationToken.None);
 
         // Assert
         serviceCallCount.ShouldBe(1);
@@ -338,7 +394,7 @@ public class MergeProfitDetailsEndpointTests
 
         // Act & Assert
         using var cancellationTokenSource = new CancellationTokenSource(timeout);
-        await _endpoint.HandleAsync(request, cancellationTokenSource.Token);
+        await InvokeHandleRequestAsync(_endpoint, request, cancellationTokenSource.Token);
 
         // If we reach here, the operation completed within the timeout
         Assert.True(true);
@@ -365,7 +421,7 @@ public class MergeProfitDetailsEndpointTests
             var sourceSsn = 100000000 + i;
             var destinationSsn = 200000000 + i;
             var request = CreateValidMergeProfitDetailsRequest(sourceSsn, destinationSsn);
-            tasks.Add(_endpoint.HandleAsync(request, CancellationToken.None));
+            tasks.Add(InvokeHandleRequestAsync(_endpoint, request, CancellationToken.None));
         }
 
         await Task.WhenAll(tasks);
@@ -397,7 +453,7 @@ public class MergeProfitDetailsEndpointTests
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
-        await _endpoint.HandleAsync(request, CancellationToken.None);
+        await InvokeHandleRequestAsync(_endpoint, request, CancellationToken.None);
 
         // Assert
         VerifyLoggerCalled(LogLevel.Information, "MergeProfitDetailsToDemographic successful");

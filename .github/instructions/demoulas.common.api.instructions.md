@@ -5,7 +5,7 @@ paths: "src/services/src/**/*.*"
 
 # Demoulas.Common.Api - REST API Development Package
 
-**Package:** `Demoulas.Common.Api`  
+**Package:** `Demoulas.Common.Api`
 **Namespace:** `Demoulas.Common.Api.Endpoints`, `Demoulas.Common.Api.Extensions`
 
 This package provides comprehensive utilities for building REST APIs with FastEndpoints, including automatic telemetry, exception handling, middleware, and Swagger documentation.
@@ -30,22 +30,22 @@ The Demoulas.Common.Api package provides a suite of base endpoint classes that a
 
 All Demoulas endpoint base classes:
 
--   **Automatically wrap your logic with telemetry** (distributed tracing, metrics, logging)
--   **Track sensitive field access** for audit and compliance
--   **Record request/response metrics** (size, timing, errors)
--   **Handle exceptions** with proper activity recording
--   **Support custom telemetry tags** via virtual methods
--   **Sealed HandleAsync** to enforce consistent telemetry wrapping
+- **Automatically wrap your logic with telemetry** (distributed tracing, metrics, logging)
+- **Track sensitive field access** for audit and compliance
+- **Record request/response metrics** (size, timing, errors)
+- **Handle exceptions** with proper activity recording
+- **Support custom telemetry tags** via virtual methods
+- **Sealed HandleAsync** to enforce consistent telemetry wrapping
 
 ### Available Base Classes
 
 | Base Class                                  | Request | Response                       | Use Case                              |
 | ------------------------------------------- | ------- | ------------------------------ | ------------------------------------- |
-| `DemoulasEndpoint<TRequest, TResponse>`     | ✓       | ✓                              | Standard request/response endpoints   |
-| `DemoulasRequestEndpoint<TRequest>`         | ✓       | ✗                              | Commands with no response payload     |
-| `DemoulasResponseEndpoint<TResponse>`       | ✗       | ✓                              | Queries without request body          |
-| `DemoulasResultResponseEndpoint<TResponse>` | ✗       | Results<Ok, NotFound, Problem> | Read-only endpoints with Result types |
-| `DemoulasEndpoint`                          | ✗       | ✗                              | Fire-and-forget operations            |
+| `DemoulasEndpoint<TRequest, TResponse>`     | Yes     | Yes                            | Standard request/response endpoints   |
+| `DemoulasRequestEndpoint<TRequest>`         | Yes     | No                             | Commands with no response payload     |
+| `DemoulasResponseEndpoint<TResponse>`       | No      | Yes                            | Queries without request body          |
+| `DemoulasResultResponseEndpoint<TResponse>` | No      | Results<Ok, NotFound, Problem> | Read-only endpoints with Result types |
+| `DemoulasEndpoint`                          | No      | No                             | Fire-and-forget operations            |
 
 ### DemoulasEndpoint<TRequest, TResponse>
 
@@ -69,31 +69,31 @@ protected virtual string[] GetSensitiveFields(TRequest request) => Array.Empty<s
 ```csharp
 public class GetCustomerEndpoint : DemoulasEndpoint<GetCustomerRequest, CustomerResponse>
 {
-    private readonly ICustomerService _customerService;
+	private readonly ICustomerService _customerService;
 
-    public GetCustomerEndpoint(ICustomerService customerService) =>
-        _customerService = customerService;
+	public GetCustomerEndpoint(ICustomerService customerService) =>
+		_customerService = customerService;
 
-    public override void Configure()
-    {
-        Get("/customers/{id}");
-        AllowAnonymous();
-    }
+	public override void Configure()
+	{
+		Get("/customers/{id}");
+		AllowAnonymous();
+	}
 
-    protected override async Task<CustomerResponse> HandleRequestAsync(
-        GetCustomerRequest req, CancellationToken ct)
-    {
-        var customer = await _customerService.GetByIdAsync(req.Id, ct);
-        return new CustomerResponse { /* ... */ };
-    }
+	protected override async Task<CustomerResponse> HandleRequestAsync(
+		GetCustomerRequest req, CancellationToken ct)
+	{
+		var customer = await _customerService.GetByIdAsync(req.Id, ct);
+		return new CustomerResponse { /* ... */ };
+	}
 
-    protected override string[] GetSensitiveFields(GetCustomerRequest request) =>
-        new[] { "SSN", "CreditCard" };
+	protected override string[] GetSensitiveFields(GetCustomerRequest request) =>
+		new[] { "SSN", "CreditCard" };
 
-    protected override void AddCustomTelemetryTags(Activity activity, GetCustomerRequest request)
-    {
-        activity.SetTag("customer.id", request.Id);
-    }
+	protected override void AddCustomTelemetryTags(Activity activity, GetCustomerRequest request)
+	{
+		activity.SetTag("customer.id", request.Id);
+	}
 }
 ```
 
@@ -130,36 +130,36 @@ Converts exceptions to HTTP ProblemDetails responses.
 ```csharp
 // General exceptions
 public static ProblemDetails ToProblemDetails(
-    this Exception ex, string? title = null, string? details = null,
-    string? instance = null, string? type = null, int? statusCode = null)
+	this Exception ex, string? title = null, string? details = null,
+	string? instance = null, string? type = null, int? statusCode = null)
 
 // Validation exceptions
 public static ValidationProblemDetails ToProblemDetails(
-    this ValidationException ex, string? title = null, string? details = null,
-    string? instance = null, string? type = null)
+	this ValidationException ex, string? title = null, string? details = null,
+	string? instance = null, string? type = null)
 ```
 
 **Status Code Mapping:**
 
--   ValidationException / ArgumentException → 400
--   KeyNotFoundException → 404
--   UnauthorizedAccessException → 401
--   NotImplementedException → 501
--   UniqueConstraintException / ReferenceConstraintException → 409
--   Others → 500
+- ValidationException / ArgumentException -> 400
+- KeyNotFoundException -> 404
+- UnauthorizedAccessException -> 401
+- NotImplementedException -> 501
+- UniqueConstraintException / ReferenceConstraintException -> 409
+- Others -> 500
 
 **Example:**
 
 ```csharp
 try
 {
-    // operation
+	// operation
 }
 catch (ValidationException ex)
 {
-    return BadRequest(ex.ToProblemDetails(
-        title: "Validation Failed",
-        instance: "/api/customers"));
+	return BadRequest(ex.ToProblemDetails(
+		title: "Validation Failed",
+		instance: "/api/customers"));
 }
 ```
 
@@ -196,30 +196,30 @@ Adds Swagger/OpenAPI documentation with security, versioning, and customization.
 
 ```csharp
 public static WebApplicationBuilder AddSwagger(
-    this WebApplicationBuilder builder,
-    int version = 1,
-    string title = "Demoulas Super Markets, Inc",
-    string? description = null,
-    ContactDetails? contactDetails = null,
-    Action<DocumentSettings>? tagDescriptions = null,
-    Action<AspNetCoreOpenApiDocumentGeneratorSettings>? documentSettingsAction = null,
-    Action<OktaSettings>? oktaSettingsAction = null,
-    List<IOperationProcessor>? operationProcessors = null,
-    bool excludeNonFastEndpoints = false,
-    ILogger? logger = null)
+	this WebApplicationBuilder builder,
+	int version = 1,
+	string title = "Demoulas Super Markets, Inc",
+	string? description = null,
+	ContactDetails? contactDetails = null,
+	Action<DocumentSettings>? tagDescriptions = null,
+	Action<AspNetCoreOpenApiDocumentGeneratorSettings>? documentSettingsAction = null,
+	Action<OktaSettings>? oktaSettingsAction = null,
+	List<IOperationProcessor>? operationProcessors = null,
+	bool excludeNonFastEndpoints = false,
+	ILogger? logger = null)
 ```
 
 **Example:**
 
 ```csharp
 builder.AddSwagger(
-    version: 2,
-    title: "Customer API",
-    contactDetails: new ContactDetails
-    {
-        Name = "Support Team",
-        Email = "support@example.com"
-    });
+	version: 2,
+	title: "Customer API",
+	contactDetails: new ContactDetails
+	{
+		Name = "Support Team",
+		Email = "support@example.com"
+	});
 ```
 
 ---
@@ -236,9 +236,26 @@ Configures comprehensive default settings including security, logging, telemetry
 
 ```csharp
 builder.ConfigureDefaultEndpoints(
-    addOktaSecurity: true,
-    meterNames: new[] { "MyApp.Metrics" });
+	addOktaSecurity: true,
+	meterNames: new[] { "MyApp.Metrics" });
 ```
+
+---
+
+## Audit Endpoints
+
+Audit endpoints are grouped under the `AuditGroup` route prefix and use `IAuditService`.
+
+**Routes:**
+
+- `GET /audit/search` - Search audit events with filters and pagination.
+- `GET /audit/changes/{id}` - Retrieve change entries for a specific audit event.
+
+**Notes:**
+
+- `ChangesJson` is only included for `TableName == "NAVIGATION"` in search results.
+- Use `AuditSearchRequestRequest` and `GetAuditChangeEntryRequest` from contracts.
+- Always return ProblemDetails for error responses (standard API behavior).
 
 ---
 
@@ -263,8 +280,8 @@ using FastEndpoints;
 
 **See Also:**
 
--   [Main Documentation](./demoulas.common.instructions.md)
--   [RESTful API Guidelines](./restful-api-guidelines.instructions.md)
--   [Data Extensions](./demoulas.common.data.instructions.md)
--   [Util Extensions](./demoulas.util.instructions.md)
--   [FastEndpoints Documentation](https://fast-endpoints.com/)
+- [Main Documentation](./demoulas.common.instructions.md)
+- [RESTful API Guidelines](./restful-api-guidelines.instructions.md)
+- [Data Extensions](./demoulas.common.data.instructions.md)
+- [Util Extensions](./demoulas.util.instructions.md)
+- [FastEndpoints Documentation](https://fast-endpoints.com/)

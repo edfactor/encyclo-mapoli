@@ -1,27 +1,20 @@
 // Result, Error
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 
 public class UpdateForfeitureAdjustmentEndpoint : ProfitSharingEndpoint<ForfeitureAdjustmentUpdateRequest, Results<NoContent, ProblemHttpResult>>
 {
     private readonly IForfeitureAdjustmentService _forfeitureAdjustmentService;
-    private readonly ILogger<UpdateForfeitureAdjustmentEndpoint> _logger;
 
-    public UpdateForfeitureAdjustmentEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService, ILogger<UpdateForfeitureAdjustmentEndpoint> logger)
+    public UpdateForfeitureAdjustmentEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService)
         : base(Navigation.Constants.ProfitShareForfeit)
     {
         _forfeitureAdjustmentService = forfeitureAdjustmentService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -38,19 +31,14 @@ public class UpdateForfeitureAdjustmentEndpoint : ProfitSharingEndpoint<Forfeitu
         });
         Group<AdhocReportsGroup>();
     }
-#pragma warning disable AsyncFixer01 // Method does use async/await inside ExecuteWithTelemetry lambda
-    public override async Task<Results<NoContent, ProblemHttpResult>> ExecuteAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken ct)
-#pragma warning restore AsyncFixer01
+    protected override async Task<Results<NoContent, ProblemHttpResult>> HandleRequestAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken ct)
     {
-        return await this.ExecuteWithTelemetry<ForfeitureAdjustmentUpdateRequest, Results<NoContent, ProblemHttpResult>>(HttpContext, _logger, req, async () =>
+        var result = await _forfeitureAdjustmentService.UpdateForfeitureAdjustmentAsync(req, ct);
+        if (result.IsError)
         {
-            var result = await _forfeitureAdjustmentService.UpdateForfeitureAdjustmentAsync(req, ct);
-            if (result.IsError)
-            {
-                Microsoft.AspNetCore.Mvc.ProblemDetails pd = result.Error!;
-                return TypedResults.Problem(pd.Detail);
-            }
-            return TypedResults.NoContent();
-        }, "operation:year-end-forfeiture-adjustment-update", $"badge_number:{req.BadgeNumber}", $"forfeiture_amount:{req.ForfeitureAmount}", $"class_action:{req.ClassAction}");
+            Microsoft.AspNetCore.Mvc.ProblemDetails pd = result.Error!;
+            return TypedResults.Problem(pd.Detail);
+        }
+        return TypedResults.NoContent();
     }
 }

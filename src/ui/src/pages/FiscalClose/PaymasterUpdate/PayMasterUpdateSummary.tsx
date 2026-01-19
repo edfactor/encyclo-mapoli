@@ -22,6 +22,7 @@ const PayMasterUpdateSummary = () => {
     summaryData,
     searchCompleted,
     isSearching,
+    isLoadingSummary,
     executeSearch,
     handleStatusChange,
     handleUpdate,
@@ -129,6 +130,7 @@ const PayMasterUpdateSummary = () => {
               gridPagination={gridPagination}
               pageNumberReset={pageNumberReset}
               setPageNumberReset={setPageNumberReset}
+              isLoading={isLoadingSummary}
             />
           )}
         </Grid>

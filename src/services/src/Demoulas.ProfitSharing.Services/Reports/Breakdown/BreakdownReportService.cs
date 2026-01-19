@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -25,6 +25,7 @@ public sealed class BreakdownReportService : IBreakdownService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
     private readonly ICrossReferenceValidationService _crossReferenceValidationService;
+    private readonly TimeProvider _timeProvider;
 
     public BreakdownReportService(
         IProfitSharingDataContextFactory dataContextFactory,
@@ -32,7 +33,8 @@ public sealed class BreakdownReportService : IBreakdownService
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
         IPayrollDuplicateSsnReportService duplicateSsnReportService,
-        ICrossReferenceValidationService crossReferenceValidationService)
+        ICrossReferenceValidationService crossReferenceValidationService,
+        TimeProvider timeProvider)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
@@ -40,6 +42,7 @@ public sealed class BreakdownReportService : IBreakdownService
         _demographicReaderService = demographicReaderService;
         _duplicateSsnReportService = duplicateSsnReportService;
         _crossReferenceValidationService = crossReferenceValidationService;
+        _timeProvider = timeProvider;
     }
 
     #region ── Helper DTOs ────────────────────────────────────────────────────────────────
@@ -83,6 +86,7 @@ public sealed class BreakdownReportService : IBreakdownService
 
     private sealed record EmployeeFinancialSnapshot(
         int Ssn,
+        int BadgeNumber,
         decimal BeginningBalance,
         ProfitDetailRollup Txn,
         decimal VestingRatio);
@@ -243,7 +247,7 @@ public sealed class BreakdownReportService : IBreakdownService
             }
 
             // Batch SSNs if > 5000 to avoid Oracle IN clause limit (10K is max, use 5K for safety)
-            var vestingBySsn = new Dictionary<int, decimal>();
+            var vestingByKey = new Dictionary<(int Ssn, int BadgeNumber), decimal>();
             const int batchSize = 5000;
             var ssnList = employeeSsns.ToList();
 
@@ -253,11 +257,14 @@ public sealed class BreakdownReportService : IBreakdownService
                 var batchVesting = await _totalService.GetVestingRatio(ctx, request.ProfitYear, calInfo.FiscalEndDate)
                     .TagWith($"GetTotalsByStore-Vesting-Batch{i / batchSize}-{request.ProfitYear}")
                     .Where(vr => batch.Contains(vr.Ssn))
-                    .ToDictionaryAsync(vr => vr.Ssn, vr => vr.Ratio, cancellationToken);
+                    .ToListAsync(cancellationToken);
 
-                foreach (var kvp in batchVesting)
+                var vestingBySsn = batchVesting.ToLookup(vr => vr.Ssn);
+
+                foreach (var employee in employees.Where(e => batch.Contains(e.Ssn)))
                 {
-                    vestingBySsn[kvp.Key] = kvp.Value;
+                    var ratio = vestingBySsn[employee.Ssn].FirstOrDefault()?.Ratio ?? 0m;
+                    vestingByKey[(employee.Ssn, employee.BadgeNumber)] = ratio;
                 }
             }
 
@@ -288,11 +295,11 @@ public sealed class BreakdownReportService : IBreakdownService
                            + e.Forfeitures
                            + e.Distributions
                            + (e.BeneficiaryAllocation ?? 0);
-                var vestingRatio = vestingBySsn.GetValueOrDefault(e.Ssn, 0);
+                var vestingRatio = vestingByKey.GetValueOrDefault((e.Ssn, e.BadgeNumber), 0);
                 return endBal * vestingRatio;
             });
 
-            totals.CrossReferenceValidation = await _crossReferenceValidationService.ValidateBreakoutReportGrandTotal(
+            totals.CrossReferenceValidation = await _crossReferenceValidationService.ValidateBreakoutReportGrandTotalAsync(
                 request.ProfitYear,
                 totals.TotalNumberEmployees,
                 totals.TotalBeginningBalances,
@@ -538,11 +545,11 @@ public sealed class BreakdownReportService : IBreakdownService
 
             var snapshots = await GetEmployeeFinancialSnapshotsAsync(
                 ctx, request.ProfitYear, employeeSsns, cancellationToken);
-            var snapshotBySsn = snapshots.ToDictionary(s => s.Ssn);
+            var snapshotByKey = snapshots.ToDictionary(s => (s.Ssn, s.BadgeNumber));
 
             // Build final response (sorting already done by GetPaginatedResults in SQL)
             var members = paginated.Results
-                .Select(d => BuildMemberYearSummary(d, snapshotBySsn.GetValueOrDefault(d.Ssn)))
+                .Select(d => BuildMemberYearSummary(d, snapshotByKey.GetValueOrDefault((d.Ssn, d.BadgeNumber))))
                 .ToList();
 
             return new ReportResponseBase<MemberYearSummaryDto>
@@ -624,13 +631,14 @@ public sealed class BreakdownReportService : IBreakdownService
         ProfitSharingReadOnlyDbContext ctx, short profitYear, DateOnly fiscalEndDate)
     {
         /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
+        var asOfDate = DateOnly.FromDateTime(_timeProvider.GetUtcNow().DateTime);
         var balances =
             _totalService.TotalVestingBalance(
-                ctx, profitYear, DateTime.UtcNow.ToDateOnly());
+                ctx, profitYear, asOfDate);
 
         short priorYear = (short)(profitYear - 1);
         var lastYearBalances = _totalService
-            .TotalVestingBalance(ctx, priorYear, DateTime.UtcNow.ToDateOnly());
+            .TotalVestingBalance(ctx, priorYear, asOfDate);
 
         var etvaBalances =
             _totalService.GetTotalComputedEtva(ctx, profitYear);
@@ -644,18 +652,18 @@ public sealed class BreakdownReportService : IBreakdownService
 
         11-14-02  R MAISON  #196500 REMNVED SSN#'S ** Redacted **
            *                             AT LINES 2750 THRU 2790           *
-           *                             AS PER DON MULLIGAN       
+           *                             AS PER DON MULLIGAN
 
         02/18/04  DPRUGH   P#7790  ADDED ** Redacted ** TO THE 701 SECTION .    *
            *                             ALSO CLEANED UP THE SECTION BY    *
            *                             REMNVING THE COMMENTED OUT SSN'S  *
            *                             SINCE THEY ARE ALREADY NOTED IN   *
-           *                             THE COMMENT ABNVE THE SECTION  
+           *                             THE COMMENT ABNVE THE SECTION
          */
         // pensionerSsns now passed as parameter instead of queried here
 
         /*
-       
+
         *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
          | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
          | **700 – “Retired – Drawing Pension”**               | `B-TERM = "W"` (“W” is the retirement term-code).                                                        | `COMPUTE W-ST = WS-STR-VAL-PS-PENSION-RETIRED + 1000`                                                                                                  |
@@ -670,7 +678,7 @@ public sealed class BreakdownReportService : IBreakdownService
           Terminated buckets (800–802) depend on pay-frequency plus the size/vesting of the participant’s profit-sharing balance.
            Monthly payroll (900) is simply anyone with FREQ = 2.
        */
-        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
         var pensionerSsns = from ei in ctx.ExcludedIds
                             where ei.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions
@@ -730,7 +738,7 @@ public sealed class BreakdownReportService : IBreakdownService
                                             : d.StoreNumber),
                 /* ── sort column used for certificates ───────────────────────── */
                 CertificateSort = d.EmploymentStatusId ==
-                        //Active 
+                        //Active
                         EmploymentStatus.Constants.Active || d.TerminationDate > fiscalEndDate ?
                      (d.DepartmentId == Department.Constants.Grocery && d.PayClassificationId == PayClassification.Constants.Manager ? 10
                       : d.DepartmentId == Department.Constants.Grocery && d.PayClassificationId == PayClassification.Constants.AssistantManager ? 20
@@ -783,13 +791,13 @@ public sealed class BreakdownReportService : IBreakdownService
                 YearsInPlan = bal == null ? 0 : bal.YearsInPlan,
                 HireDate = d.HireDate,
                 TerminationDate = d.TerminationDate,
-                EnrollmentId = d.VestingScheduleId == null
+                EnrollmentId = pp == null || pp.VestingScheduleId == 0
                     ? EnrollmentConstants.NotEnrolled
-                    : d.HasForfeited
-                        ? d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                    : pp.HasForfeited
+                        ? pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                             ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
                             : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
-                        : d.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                        : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                             ? EnrollmentConstants.OldVestingPlanHasContributions
                             : EnrollmentConstants.NewVestingPlanHasContributions,
                 ProfitShareHours = pp.TotalHours,
@@ -827,27 +835,38 @@ public sealed class BreakdownReportService : IBreakdownService
             .WithMessage("There are presently duplicate SSN's in the system, which will cause this process to fail.");
 
         // Dictionaries ----------------------------------------------------------------
-        var vestingBySsn = await _totalService.GetVestingRatio(ctx, profitYear, calInfo.FiscalEndDate)
+        var vestingRatios = await _totalService.GetVestingRatio(ctx, profitYear, calInfo.FiscalEndDate)
             .Where(vr => employeeSsns.Contains(vr.Ssn))
-            .ToDictionaryAsync(vr => vr.Ssn, vr => vr.Ratio, ct);
+            .ToListAsync(ct);
+        var vestingBySsn = vestingRatios.ToLookup(vr => vr.Ssn);
 
-        var balanceBySsnLastYear = await _totalService
+        var priorBalances = await _totalService
             .GetTotalBalanceSet(ctx, priorYear)
             .Where(tbs => employeeSsns.Contains(tbs.Ssn))
-            .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.TotalAmount ?? 0, ct);
+            .ToListAsync(ct);
+        var balanceBySsnLastYear = priorBalances.ToLookup(tbs => tbs.Ssn);
 
 
-        var txnsBySsn = await _totalService
+        var txns = await _totalService
             .GetTransactionsBySsnForProfitYearForOracle(ctx, profitYear)
             .Where(txn => employeeSsns.Contains(txn.Ssn))
-            .ToDictionaryAsync(txn => txn.Ssn, txn => txn, ct);
+            .ToListAsync(ct);
+        var txnsBySsn = txns.ToLookup(txn => txn.Ssn);
 
         // Snapshots -------------------------------------------------------------------
+        var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
+        var badgeNumberBySsn = await demographics
+            .Where(d => employeeSsns.Contains(d.Ssn))
+            .Select(d => new { d.Ssn, d.BadgeNumber })
+            .ToListAsync(ct);
+        var badgeNumberLookup = badgeNumberBySsn.ToLookup(d => d.Ssn);
+
         return employeeSsns.Select(ssn => new EmployeeFinancialSnapshot(
             ssn,
-            balanceBySsnLastYear.GetValueOrDefault(ssn),
-            txnsBySsn.GetValueOrDefault(ssn) ?? new ProfitDetailRollup(),
-            vestingBySsn.GetValueOrDefault(ssn))).ToList();
+            badgeNumberLookup[ssn].FirstOrDefault()?.BadgeNumber ?? 0,
+            balanceBySsnLastYear[ssn].FirstOrDefault()?.TotalAmount ?? 0m,
+            txnsBySsn[ssn].FirstOrDefault() ?? new ProfitDetailRollup(),
+            vestingBySsn[ssn].FirstOrDefault()?.Ratio ?? 0m)).ToList();
     }
 
     private static IQueryable<ActiveMemberDto> ApplyStoreManagementFilter(IQueryable<ActiveMemberDto> q) =>
@@ -910,7 +929,7 @@ public sealed class BreakdownReportService : IBreakdownService
         EmployeeFinancialSnapshot? snap)
     {
         // Fallback for missing snapshot (should not happen if dictionaries are aligned)
-        snap ??= new EmployeeFinancialSnapshot(member.Ssn, 0, new ProfitDetailRollup(), 0);
+        snap ??= new EmployeeFinancialSnapshot(member.Ssn, member.BadgeNumber, 0, new ProfitDetailRollup(), 0);
 
         return new MemberYearSummaryDto
         {

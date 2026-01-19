@@ -4,27 +4,25 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 
 public sealed class YearEndProfitSharingSummaryReportEndpoint : ProfitSharingEndpoint<BadgeNumberRequest, Results<Ok<YearEndProfitSharingReportSummaryResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
 
     public YearEndProfitSharingSummaryReportEndpoint(
         IProfitSharingSummaryReportService cleanupReportService,
-        IAuditService auditService
+        IProfitSharingAuditService profitSharingAuditService
     )
         : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _cleanupReportService = cleanupReportService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     public override void Configure()
@@ -47,7 +45,7 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : ProfitSharingEnd
         Group<YearEndGroup>();
     }
 
-    public override async Task<Results<Ok<YearEndProfitSharingReportSummaryResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<YearEndProfitSharingReportSummaryResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(BadgeNumberRequest req, CancellationToken ct)
     {
         try
         {
@@ -177,7 +175,7 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : ProfitSharingEnd
 
             var reportSuffix = req.UseFrozenData ? "_FROZEN" : "";
 
-            var data = await _auditService.ArchiveCompletedReportAsync(
+            var data = await _profitSharingAuditService.ArchiveCompletedReportAsync(
                 ReportNames.ProfitSharingSummary.ReportCode + reportSuffix,
                 req.ProfitYear,
                 req,

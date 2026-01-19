@@ -1,8 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
@@ -34,11 +34,11 @@ public class ProfitMasterRevertEndpoint : ProfitSharingEndpoint<ProfitYearReques
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    protected override async Task<ProfitMasterRevertResponse> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
-        var response = await _profitMasterService.Revert(req, ct);
-        await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.InProgress, ct);
+        var response = await _profitMasterService.RevertAsync(req, ct);
+        await _navigationService.UpdateNavigationAsync(Navigation.Constants.MasterUpdate, NavigationStatusIds.InProgress, ct);
 
-        await Send.OkAsync(response, ct);
+        return response;
     }
 }

@@ -8,9 +8,9 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 /// </summary>
 public interface IProfitMasterService
 {
-    Task<ProfitMasterUpdateResponse?> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken);
+    Task<ProfitMasterUpdateResponse?> StatusAsync(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken);
 
-    Task<ProfitMasterUpdateResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken ct);
+    Task<ProfitMasterUpdateResponse> UpdateAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken ct);
 
-    Task<ProfitMasterRevertResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken);
+    Task<ProfitMasterRevertResponse> RevertAsync(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken);
 }

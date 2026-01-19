@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.ProfitDetails;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.Corrections;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
@@ -17,11 +17,6 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ProfitDetails;
 [Collection("Profit Details Tests")]
 public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 {
-    public ProfitDetailReversalsEndpointTests(ITestOutputHelper testOutputHelper)
-    {
-        // Constructor accepts ITestOutputHelper for xUnit framework compatibility
-    }
-
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found when profit details don't exist")]
     [Description("Should return 400 Bad Request when trying to reverse non-existent profit details")]
     public async Task ProfitDetailReversals_WithNonExistentIds_ShouldReturnNotFound()

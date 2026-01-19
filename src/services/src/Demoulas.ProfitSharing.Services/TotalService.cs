@@ -133,7 +133,7 @@ public sealed class TotalService : ITotalService
     /// - PC 1: Outgoing Payments (Partial Withdrawal)
     /// - PC 3: Outgoing Direct Payments / Rollover Payments
     /// - PC 9: Outgoing Payment from 100% Vesting Amount (ETVA funds)
-    /// 
+    ///
     /// Created to fix PS-2424: Account History Report was showing cumulative instead of yearly withdrawals.
     /// </remarks>
     internal IQueryable<ParticipantTotalDto> GetYearlyDistributions(IProfitSharingDbContext ctx, short profitYear)
@@ -323,7 +323,7 @@ public sealed class TotalService : ITotalService
             case SearchBy.BadgeNumber:
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
                 {
-                    var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                    var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                     var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
                                       join d in demographics on t.Ssn equals d.Ssn
                                       where badgeNumberOrSsnCollection.Contains(d.BadgeNumber)
@@ -376,8 +376,7 @@ public sealed class TotalService : ITotalService
     /// Ignores any 0 records
     /// includes special handling for ClassActionFund and Military.
     /// </summary>
-    internal static IQueryable<InternalProfitDetailTotalsBySsn> GetProfitDetailTotalsForASingleYear(IProfitSharingDbContext ctx, short profitYear,
-        CancellationToken cancellationToken)
+    internal static IQueryable<InternalProfitDetailTotalsBySsn> GetProfitDetailTotalsForASingleYear(IProfitSharingDbContext ctx, short profitYear)
     {
         return ctx.ProfitDetails
             .Where(pd => pd.ProfitYear == profitYear)
@@ -414,10 +413,13 @@ public sealed class TotalService : ITotalService
     /// Ignores any 0 records
     /// includes special handling for ClassActionFund and Military.
     /// </summary>
-    internal static Task<Dictionary<int, ProfitDetailTotals>> GetProfitDetailTotalsForASingleYear(IProfitSharingDataContextFactory dbFactory, short profitYear, HashSet<int> ssns,
+    internal static Task<ILookup<int, ProfitDetailTotals>> GetProfitDetailTotalsForASingleYear(
+        IProfitSharingDataContextFactory dbFactory,
+        short profitYear,
+        HashSet<int> ssns,
         CancellationToken cancellationToken)
     {
-        return dbFactory.UseReadOnlyContext(ctx =>
+        return dbFactory.UseReadOnlyContext(async ctx =>
         {
             var query = ctx.ProfitDetails
                 .Where(pd => ssns.Contains(pd.Ssn))
@@ -449,15 +451,16 @@ public sealed class TotalService : ITotalService
                         .Sum(pd => pd.Earnings)
                 });
 
-            return query.ToDictionaryAsync(k => k.Ssn, v => new ProfitDetailTotals
-                (v.DistributionsTotal,
+            var results = await query.ToListAsync(cancellationToken);
+            return results.ToLookup(
+                k => k.Ssn,
+                v => new ProfitDetailTotals(
+                    v.DistributionsTotal,
                     v.ForfeitsTotal,
                     v.AllocationsTotal,
                     v.PaidAllocationsTotal,
                     v.MilitaryTotal,
-                    v.ClassActionFundTotal
-                )
-                , cancellationToken);
+                    v.ClassActionFundTotal));
         }, cancellationToken);
     }
 }

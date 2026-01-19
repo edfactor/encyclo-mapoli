@@ -37,7 +37,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, true);
 
             var baseQuery = ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
                 .Join(
