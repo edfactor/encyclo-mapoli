@@ -4,23 +4,21 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
 public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<DistributionsAndForfeituresRequest, Results<Ok<DistributionsAndForfeitureTotalsResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly ICleanupReportService _cleanupReportService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
 
-    public DistributionsAndForfeitureEndpoint(ICleanupReportService cleanupReportService, IAuditService auditService)
+    public DistributionsAndForfeitureEndpoint(ICleanupReportService cleanupReportService, IProfitSharingAuditService profitSharingAuditService)
         : base(Navigation.Constants.DistributionsAndForfeitures)
     {
         _cleanupReportService = cleanupReportService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     public override void Configure()
@@ -53,7 +51,7 @@ public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<Distribu
         }
 
         // Archive the successful result
-        var result = await _auditService.ArchiveCompletedReportAsync<DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(
+        var result = await _profitSharingAuditService.ArchiveCompletedReportAsync<DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(
             ReportNames.DistributionAndForfeitures.ReportCode,
             (short)profitYear,
             req,

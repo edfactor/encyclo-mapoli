@@ -35,16 +35,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Configure Serilog with structured logging
 builder.SetDefaultLoggerConfiguration(new LoggingConfig
 {
-    ProjectName = "MyApplication",
-    Namespace = "MyCompany.MyTeam",
+	ProjectName = "MyApplication",
+	Namespace = "MyCompany.MyTeam",
 
-    // SumoLogic integration
-    SumoLogic = new SumoLogicConfig
-    {
-        Url = builder.Configuration["SumoLogic:Url"]!,
-        BufferBaseFileName = "sumo-buffer",
-        UseSensitiveDataMasking = true
-    }
+	// SumoLogic integration
+	SumoLogic = new SumoLogicConfig
+	{
+		Url = builder.Configuration["SumoLogic:Url"]!,
+		BufferBaseFileName = "sumo-buffer",
+		UseSensitiveDataMasking = true
+	}
 });
 
 // Add OpenTelemetry with service defaults
@@ -68,13 +68,13 @@ Primary configuration object for logging setup.
 ```csharp
 public class LoggingConfig
 {
-    public string? ProjectName { get; set; }          // Application name
-    public string? Namespace { get; set; }            // Organizational namespace
-    public FileSystemLogConfig? FileSystem { get; set; }
-    public SumoLogicConfig? SumoLogic { get; set; }
-    public DynatraceConfig? Dynatrace { get; set; }
-    public bool UseSensitiveDataMasking { get; set; } = true;
-    public ushort? DestructureDepth { get; set; } = 3;
+	public string? ProjectName { get; set; }          // Application name
+	public string? Namespace { get; set; }            // Organizational namespace
+	public FileSystemLogConfig? FileSystem { get; set; }
+	public SumoLogicConfig? SumoLogic { get; set; }
+	public DynatraceConfig? Dynatrace { get; set; }
+	public bool UseSensitiveDataMasking { get; set; } = true;
+	public ushort? DestructureDepth { get; set; } = 3;
 }
 ```
 
@@ -85,10 +85,10 @@ Configure file-based logging (text and/or JSON).
 ```csharp
 public class FileSystemLogConfig
 {
-    public string? FilePath { get; set; }             // Base path for logs
-    public bool WriteTextLogs { get; set; } = true;
-    public bool WriteJsonLogs { get; set; } = false;  // Opt-in structured JSON
-    public int? RetainedFileCountLimit { get; set; } = 31;
+	public string? FilePath { get; set; }             // Base path for logs
+	public bool WriteTextLogs { get; set; } = true;
+	public bool WriteJsonLogs { get; set; } = false;  // Opt-in structured JSON
+	public int? RetainedFileCountLimit { get; set; } = 31;
 }
 ```
 
@@ -97,10 +97,10 @@ public class FileSystemLogConfig
 ```csharp
 FileSystem = new FileSystemLogConfig
 {
-    FilePath = "C:\\Logs\\MyApp",
-    WriteTextLogs = true,
-    WriteJsonLogs = true,  // Enable JSON for log aggregation
-    RetainedFileCountLimit = 90  // Keep 90 days of logs
+	FilePath = "C:\\Logs\\MyApp",
+	WriteTextLogs = true,
+	WriteJsonLogs = true,  // Enable JSON for log aggregation
+	RetainedFileCountLimit = 90  // Keep 90 days of logs
 }
 ```
 
@@ -117,13 +117,13 @@ Cloud-native log management with HTTP collector integration.
 ```csharp
 public class SumoLogicConfig
 {
-    public string Url { get; set; }                         // HTTP collector URL
-    public string? SourceName { get; set; }
-    public string? SourceCategory { get; set; }
-    public string? SourceHost { get; set; }
-    public string? BufferBaseFileName { get; set; }          // For buffered mode
-    public bool UseSensitiveDataMasking { get; set; } = true;
-    public Action<HttpClient>? ConfigureHttpClient { get; set; }  // Custom HTTP settings
+	public string Url { get; set; }                         // HTTP collector URL
+	public string? SourceName { get; set; }
+	public string? SourceCategory { get; set; }
+	public string? SourceHost { get; set; }
+	public string? BufferBaseFileName { get; set; }          // For buffered mode
+	public bool UseSensitiveDataMasking { get; set; } = true;
+	public Action<HttpClient>? ConfigureHttpClient { get; set; }  // Custom HTTP settings
 }
 ```
 
@@ -134,9 +134,9 @@ public class SumoLogicConfig
 ```csharp
 SumoLogic = new SumoLogicConfig
 {
-    Url = configuration["SumoLogic:Url"]!,
-    BufferBaseFileName = "sumo-buffer",  // Enables buffering
-    SourceCategory = "MyApp/Production"
+	Url = configuration["SumoLogic:Url"]!,
+	BufferBaseFileName = "sumo-buffer",  // Enables buffering
+	SourceCategory = "MyApp/Production"
 }
 ```
 
@@ -145,8 +145,8 @@ SumoLogic = new SumoLogicConfig
 ```csharp
 SumoLogic = new SumoLogicConfig
 {
-    Url = configuration["SumoLogic:Url"]!,
-    BufferBaseFileName = null  // Direct HTTP delivery
+	Url = configuration["SumoLogic:Url"]!,
+	BufferBaseFileName = null  // Direct HTTP delivery
 }
 ```
 
@@ -155,12 +155,12 @@ SumoLogic = new SumoLogicConfig
 ```csharp
 SumoLogic = new SumoLogicConfig
 {
-    Url = configuration["SumoLogic:Url"]!,
-    ConfigureHttpClient = client =>
-    {
-        client.Timeout = TimeSpan.FromSeconds(30);
-        client.DefaultRequestHeaders.Add("X-Custom-Header", "Value");
-    }
+	Url = configuration["SumoLogic:Url"]!,
+	ConfigureHttpClient = client =>
+	{
+		client.Timeout = TimeSpan.FromSeconds(30);
+		client.DefaultRequestHeaders.Add("X-Custom-Header", "Value");
+	}
 }
 ```
 
@@ -175,9 +175,9 @@ APM integration with custom attribute enrichment.
 ```csharp
 public class DynatraceConfig
 {
-    public string? EntityId { get; set; }                // Dynatrace entity ID
-    public bool UseFileIngestion { get; set; }           // OneAgent file ingestion
-    public Dictionary<string, string>? CustomAttributes { get; set; }
+	public string? EntityId { get; set; }                // Dynatrace entity ID
+	public bool UseFileIngestion { get; set; }           // OneAgent file ingestion
+	public Dictionary<string, string>? CustomAttributes { get; set; }
 }
 ```
 
@@ -186,14 +186,14 @@ public class DynatraceConfig
 ```csharp
 Dynatrace = new DynatraceConfig
 {
-    EntityId = "CUSTOM_DEVICE-ABC123",
-    UseFileIngestion = true,
-    CustomAttributes = new Dictionary<string, string>
-    {
-        ["dt.entity.custom_device"] = "CUSTOM_DEVICE-ABC123",
-        ["environment"] = "Production",
-        ["region"] = "US-East"
-    }
+	EntityId = "CUSTOM_DEVICE-ABC123",
+	UseFileIngestion = true,
+	CustomAttributes = new Dictionary<string, string>
+	{
+		["dt.entity.custom_device"] = "CUSTOM_DEVICE-ABC123",
+		["environment"] = "Production",
+		["region"] = "US-East"
+	}
 }
 ```
 
@@ -232,27 +232,27 @@ Prerequisites:
 
 #### Masked Data Types
 
--   **SSN:** `XXX-XX-1234` → `***MASKED***`
--   **Credit Cards:** `4111-1111-1111-1111` → `***MASKED***`
--   **Email Addresses:** `user@example.com` → `***MASKED***`
--   **IBAN:** `DE89370400440532013000` → `***MASKED***`
+-   **SSN:** `XXX-XX-1234` -> `***MASKED***`
+-   **Credit Cards:** `4111-1111-1111-1111` -> `***MASKED***`
+-   **Email Addresses:** `user@example.com` -> `***MASKED***`
+-   **IBAN:** `DE89370400440532013000` -> `***MASKED***`
 -   **Database Connections:**
-    -   Hostnames: `dbserver.company.com` → `***MASKED***`
-    -   Ports: `:1521` → `***MASKED***`
-    -   Service Names: `SERVICE_NAME=PROD` → `***MASKED***`
-    -   Oracle descriptors: `(DESCRIPTION=...)` → `***MASKED***`
+    -   Hostnames: `dbserver.company.com` -> `***MASKED***`
+    -   Ports: `:1521` -> `***MASKED***`
+    -   Service Names: `SERVICE_NAME=PROD` -> `***MASKED***`
+    -   Oracle descriptors: `(DESCRIPTION=...)` -> `***MASKED***`
 
 #### Configuration
 
 ```csharp
 builder.SetDefaultLoggerConfiguration(new LoggingConfig
 {
-    UseSensitiveDataMasking = true,  // Default
+	UseSensitiveDataMasking = true,  // Default
 
-    SumoLogic = new SumoLogicConfig
-    {
-        UseSensitiveDataMasking = true  // Per-sink override
-    }
+	SumoLogic = new SumoLogicConfig
+	{
+		UseSensitiveDataMasking = true  // Per-sink override
+	}
 });
 ```
 
@@ -262,13 +262,13 @@ Leverage `Serilog.Enrichers.Sensitive` for advanced masking:
 
 ```csharp
 Log.Logger = new LoggerConfiguration()
-    .Enrich.WithSensitiveDataMasking(options =>
-    {
-        options.MaskProperties.Add("Password");
-        options.MaskProperties.Add("ApiKey");
-        options.MaskingOperators.Add(new CustomMaskingOperator());
-    })
-    .CreateLogger();
+	.Enrich.WithSensitiveDataMasking(options =>
+	{
+		options.MaskProperties.Add("Password");
+		options.MaskProperties.Add("ApiKey");
+		options.MaskingOperators.Add(new CustomMaskingOperator());
+	})
+	.CreateLogger();
 ```
 
 ---
@@ -330,10 +330,10 @@ private static readonly ActivitySource ActivitySource = new("MyApp.Operations");
 
 public async Task ProcessOrderAsync(int orderId)
 {
-    using var activity = ActivitySource.StartActivity("ProcessOrder");
-    activity?.SetTag("order.id", orderId);
+	using var activity = ActivitySource.StartActivity("ProcessOrder");
+	activity?.SetTag("order.id", orderId);
 
-    await _orderService.ProcessAsync(orderId);
+	await _orderService.ProcessAsync(orderId);
 }
 ```
 
@@ -363,23 +363,23 @@ app.Run();
 
 ```csharp
 builder.Services.AddHealthChecks()
-    .AddCheck("Database", () =>
-    {
-        // Custom database health check
-        return HealthCheckResult.Healthy();
-    })
-    .AddCheck("Redis", () =>
-    {
-        // Custom Redis health check
-        return HealthCheckResult.Healthy();
-    });
+	.AddCheck("Database", () =>
+	{
+		// Custom database health check
+		return HealthCheckResult.Healthy();
+	})
+	.AddCheck("Redis", () =>
+	{
+		// Custom Redis health check
+		return HealthCheckResult.Healthy();
+	});
 ```
 
 ### Health Check UI (Optional)
 
 ```csharp
 builder.Services.AddHealthChecksUI()
-    .AddInMemoryStorage();
+	.AddInMemoryStorage();
 
 app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 ```
@@ -392,7 +392,7 @@ app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 
 1. **Configuration Object:**
 
-    - `ElasticSearchConfig` → `LoggingConfig`
+    - `ElasticSearchConfig` -> `LoggingConfig`
     - ElasticSearch removed (use SumoLogic or OpenTelemetry)
 
 2. **OpenTelemetry Setup:**
@@ -409,9 +409,9 @@ app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 // OLD - v1.x
 builder.Host.ConfigureLogging(new ElasticSearchConfig
 {
-    ApplicationName = "MyApp",
-    Uri = "https://es.company.com",
-    UseElasticSearch = true
+	ApplicationName = "MyApp",
+	Uri = "https://es.company.com",
+	UseElasticSearch = true
 });
 ```
 
@@ -421,13 +421,13 @@ builder.Host.ConfigureLogging(new ElasticSearchConfig
 // NEW - v2.0
 builder.SetDefaultLoggerConfiguration(new LoggingConfig
 {
-    ProjectName = "MyApp",
-    Namespace = "MyTeam",
+	ProjectName = "MyApp",
+	Namespace = "MyTeam",
 
-    SumoLogic = new SumoLogicConfig
-    {
-        Url = configuration["SumoLogic:Url"]!
-    }
+	SumoLogic = new SumoLogicConfig
+	{
+		Url = configuration["SumoLogic:Url"]!
+	}
 });
 
 builder.Services.AddServiceDefaults(builder.Configuration);
@@ -442,11 +442,11 @@ builder.Services.AddServiceDefaults(builder.Configuration);
 Use structured logging with named properties:
 
 ```csharp
-// ✅ GOOD - Structured
+// GOOD - Structured
 _logger.LogInformation("User {UserId} placed order {OrderId} for ${Amount:F2}",
-    userId, orderId, amount);
+	userId, orderId, amount);
 
-// ❌ BAD - String interpolation
+// BAD - String interpolation
 _logger.LogInformation($"User {userId} placed order {orderId} for ${amount}");
 ```
 
@@ -464,12 +464,12 @@ _logger.LogInformation($"User {userId} placed order {orderId} for ${amount}");
 ```csharp
 try
 {
-    await ProcessOrderAsync(orderId);
+	await ProcessOrderAsync(orderId);
 }
 catch (Exception ex)
 {
-    _logger.LogError(ex, "Failed to process order {OrderId}", orderId);
-    throw;
+	_logger.LogError(ex, "Failed to process order {OrderId}", orderId);
+	throw;
 }
 ```
 

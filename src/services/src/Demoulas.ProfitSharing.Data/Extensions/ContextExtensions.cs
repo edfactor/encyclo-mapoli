@@ -1,6 +1,7 @@
+using CommonAuditMaps = Demoulas.Common.Data.Services.Contexts.EntityMapping.Audit;
+using CommonNavigationMaps = Demoulas.Common.Data.Services.Contexts.EntityMapping.Navigations;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
-using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Scheduling;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new BankAccountMap());
         modelBuilder.ApplyConfiguration(new AnnuityRateMap());
         modelBuilder.ApplyConfiguration(new AnnuityRateConfigMap());
-        modelBuilder.ApplyConfiguration(new AuditEventMap());
+        modelBuilder.ApplyConfiguration(new CommonAuditMaps.AuditEventMap());
         modelBuilder.ApplyConfiguration(new CheckRunWorkflowMap());
         modelBuilder.ApplyConfiguration(new FakeSsnMap());
         modelBuilder.ApplyConfiguration(new DataImportRecordMap());
@@ -78,11 +79,11 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new TerminationCodeMap());
         modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
         modelBuilder.ApplyConfiguration(new YearEndUpdateStatusMapping());
-        modelBuilder.ApplyConfiguration(new NavigationMap());
-        modelBuilder.ApplyConfiguration(new NavigationStatusMap());
-        modelBuilder.ApplyConfiguration(new NavigationTrackingMap());
-        modelBuilder.ApplyConfiguration(new NavigationRoleMap());
-        modelBuilder.ApplyConfiguration(new NavigationCustomSettingMap());
+        modelBuilder.ApplyConfiguration(new CommonNavigationMaps.NavigationMap());
+        modelBuilder.ApplyConfiguration(new CommonNavigationMaps.NavigationStatusMap());
+        modelBuilder.ApplyConfiguration(new CommonNavigationMaps.NavigationTrackingMap());
+        modelBuilder.ApplyConfiguration(new CommonNavigationMaps.NavigationRoleMap());
+        modelBuilder.ApplyConfiguration(new CommonNavigationMaps.NavigationCustomSettingMap());
         modelBuilder.ApplyConfiguration(new StateMap());
 
         modelBuilder.HasSequence<int>("BANK_SEQ").StartsAt(1)

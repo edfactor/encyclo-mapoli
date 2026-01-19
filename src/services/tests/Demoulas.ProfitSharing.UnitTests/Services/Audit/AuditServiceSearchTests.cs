@@ -1,7 +1,7 @@
-﻿using Bogus;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
+using Bogus;
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +10,7 @@ using Shouldly;
 namespace Demoulas.ProfitSharing.UnitTests.Services.Audit;
 
 /// <summary>
-/// Unit tests for AuditService.SearchAuditEventsAsync method.
+/// Unit tests for ProfitSharingProfitSharingAuditService.SearchAuditEventsAsync method.
 /// 
 /// Tests all filter scenarios:
 /// - No filters (returns all events)
@@ -26,21 +26,21 @@ namespace Demoulas.ProfitSharing.UnitTests.Services.Audit;
 [Collection("SharedGlobalState")]
 public sealed class AuditServiceSearchTests : ApiTestBase<Program>
 {
-    private readonly IAuditService _service;
+    private readonly IProfitSharingAuditService _service;
     private readonly List<AuditEvent> _auditEvents;
 
     public AuditServiceSearchTests()
     {
         _auditEvents = CreateMockAuditEvents();
         MockDbContextFactory = new ScenarioFactory { AuditEvents = _auditEvents }.BuildMocks();
-        _service = ServiceProvider?.GetRequiredService<IAuditService>()!;
+        _service = ServiceProvider?.GetRequiredService<IProfitSharingAuditService>()!;
     }
 
     [Fact]
     public async Task SearchAuditEvents_NoFilters_ReturnsAllEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest()
         {
             Skip = 0,
             Take = 100
@@ -59,7 +59,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithTableNameFilter_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "NAVIGATION",
             Skip = 0,
@@ -80,7 +80,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithOperationFilter_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             Operation = "Update",  // Will match Update operations
             Skip = 0,
@@ -100,7 +100,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithUsernameFilter_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             UserName = "admin",  // Will match "admin.user" and "hr.admin"
             Skip = 0,
@@ -123,7 +123,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
         var startDate = DateTimeOffset.UtcNow.AddDays(-7);
         var endDate = DateTimeOffset.UtcNow.AddDays(-1);
 
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             StartTime = startDate,
             EndTime = endDate,
@@ -143,7 +143,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithPagination_ReturnsCorrectPage()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             Skip = 2,
             Take = 3
@@ -162,7 +162,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NavigationTable_IncludesChangesJson()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "NAVIGATION",
             Skip = 0,
@@ -182,7 +182,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NonNavigationTable_ExcludesChangesJson()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "DEMOGRAPHIC",
             Skip = 0,
@@ -202,7 +202,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_WithMultipleFilters_ReturnsMatchingEvents()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "NAVIGATION",
             Operation = "Update",
@@ -228,7 +228,7 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
     public async Task SearchAuditEvents_NoMatches_ReturnsEmptyResults()
     {
         // Arrange
-        var request = new AuditSearchRequestDto
+        var request = new AuditSearchRequest
         {
             TableName = "NONEXISTENT_TABLE_XYZ",
             Skip = 0,

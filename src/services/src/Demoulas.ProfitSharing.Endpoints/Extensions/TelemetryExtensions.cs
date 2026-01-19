@@ -5,8 +5,6 @@ using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.Util.Extensions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PayBen;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
@@ -99,10 +98,6 @@ namespace Demoulas.ProfitSharing.Api.Serialization;
 [JsonSerializable(typeof(StateTaxLookupResponse))]
 [JsonSerializable(typeof(CalendarResponseDto))]
 [JsonSerializable(typeof(CommentTypeResponse))]
-// Navigation
-[JsonSerializable(typeof(NavigationResponseDto))]
-[JsonSerializable(typeof(GetNavigationStatusResponseDto))]
-[JsonSerializable(typeof(UpdateNavigationStatusResponseDto))]
 // Military
 [JsonSerializable(typeof(MilitaryContributionResponse))]
 // IT Operations

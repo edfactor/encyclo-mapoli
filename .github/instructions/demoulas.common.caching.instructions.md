@@ -53,7 +53,7 @@ public abstract Task<IEnumerable<T>> GetDataToUpdateCacheAsync(CacheDataDictiona
 
 The cache key prefix for this service. Used to namespace cache entries.
 
-**Example:** `"PayClassification"`, `"StoreList"`, `"ProductCatalog"`
+**Example:** "PayClassification", "StoreList", "ProductCatalog"
 
 #### RefreshSeconds
 
@@ -131,8 +131,8 @@ Raised whenever a cache item is added, updated, or removed.
 ```csharp
 public class CacheItemChangedEventArgs : EventArgs
 {
-    public string Key { get; set; }
-    public string ChangeType { get; set; } // "Added", "Updated", "Removed"
+	public string Key { get; set; }
+	public string ChangeType { get; set; } // "Added", "Updated", "Removed"
 }
 ```
 
@@ -141,17 +141,17 @@ public class CacheItemChangedEventArgs : EventArgs
 ```csharp
 public class MyHostedService : BaseCacheHostedService<MyDataDto>
 {
-    public MyHostedService(/* dependencies */) : base(/* parameters */)
-    {
-        CacheItemChanged += OnCacheItemChanged;
-    }
+	public MyHostedService(/* dependencies */) : base(/* parameters */)
+	{
+		CacheItemChanged += OnCacheItemChanged;
+	}
 
-    private void OnCacheItemChanged(object? sender, CacheItemChangedEventArgs e)
-    {
-        _logger.LogInformation("Cache item {Key} was {ChangeType}", e.Key, e.ChangeType);
+	private void OnCacheItemChanged(object? sender, CacheItemChangedEventArgs e)
+	{
+		_logger.LogInformation("Cache item {Key} was {ChangeType}", e.Key, e.ChangeType);
 
-        // React to cache changes (e.g., notify connected clients)
-    }
+		// React to cache changes (e.g., notify connected clients)
+	}
 }
 ```
 
@@ -192,51 +192,51 @@ using Demoulas.Common.Caching;
 using Microsoft.Extensions.Caching.Distributed;
 
 public sealed class PayClassificationHostedService
-    : BaseCacheHostedService<PayClassificationDto>
+	: BaseCacheHostedService<PayClassificationDto>
 {
-    private readonly IPayrollContextFactory _contextFactory;
+	private readonly IPayrollContextFactory _contextFactory;
 
-    protected override string BaseKeyName => "PayClassification";
-    protected override ushort RefreshSeconds { get; set; } = 3600; // Hourly
+	protected override string BaseKeyName => "PayClassification";
+	protected override ushort RefreshSeconds { get; set; } = 3600; // Hourly
 
-    public PayClassificationHostedService(
-        IHostEnvironment hostEnvironment,
-        IDistributedCache distributedCache,
-        IPayrollContextFactory contextFactory)
-        : base(hostEnvironment, distributedCache)
-    {
-        _contextFactory = contextFactory;
-    }
+	public PayClassificationHostedService(
+		IHostEnvironment hostEnvironment,
+		IDistributedCache distributedCache,
+		IPayrollContextFactory contextFactory)
+		: base(hostEnvironment, distributedCache)
+	{
+		_contextFactory = contextFactory;
+	}
 
-    public override async Task<IEnumerable<PayClassificationDto>> GetInitialDataToCacheAsync(
-        CancellationToken cancellation = default)
-    {
-        return await FetchAllPayClassifications(cancellation);
-    }
+	public override async Task<IEnumerable<PayClassificationDto>> GetInitialDataToCacheAsync(
+		CancellationToken cancellation = default)
+	{
+		return await FetchAllPayClassifications(cancellation);
+	}
 
-    public override async Task<IEnumerable<PayClassificationDto>> GetDataToUpdateCacheAsync(
-        CacheDataDictionary cdd,
-        CancellationToken cancellation = default)
-    {
-        // Can use 'cdd' to check for changes before querying
-        return await FetchAllPayClassifications(cancellation);
-    }
+	public override async Task<IEnumerable<PayClassificationDto>> GetDataToUpdateCacheAsync(
+		CacheDataDictionary cdd,
+		CancellationToken cancellation = default)
+	{
+		// Can use 'cdd' to check for changes before querying
+		return await FetchAllPayClassifications(cancellation);
+	}
 
-    private async Task<IEnumerable<PayClassificationDto>> FetchAllPayClassifications(
-        CancellationToken cancellationToken)
-    {
-        return await _contextFactory.UseReadOnlyContext(context =>
-        {
-            return context.PayClassifications
-                .Select(c => new PayClassificationDto
-                {
-                    Id = c.Id,
-                    Code = c.Code,
-                    Description = c.Description
-                })
-                .ToListAsync(cancellationToken);
-        });
-    }
+	private async Task<IEnumerable<PayClassificationDto>> FetchAllPayClassifications(
+		CancellationToken cancellationToken)
+	{
+		return await _contextFactory.UseReadOnlyContext(context =>
+		{
+			return context.PayClassifications
+				.Select(c => new PayClassificationDto
+				{
+					Id = c.Id,
+					Code = c.Code,
+					Description = c.Description
+				})
+				.ToListAsync(cancellationToken);
+		});
+	}
 }
 ```
 
@@ -246,7 +246,7 @@ public sealed class PayClassificationHostedService
 // Program.cs or Startup.cs
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+	options.Configuration = builder.Configuration.GetConnectionString("Redis");
 });
 
 builder.Services.AddHostedService<PayClassificationHostedService>();
@@ -256,24 +256,24 @@ builder.Services.AddHostedService<PayClassificationHostedService>();
 
 ```csharp
 public override async Task<IEnumerable<StoreDto>> GetDataToUpdateCacheAsync(
-    CacheDataDictionary cdd,
-    CancellationToken cancellation = default)
+	CacheDataDictionary cdd,
+	CancellationToken cancellation = default)
 {
-    // Get only stores modified since last refresh
-    var lastRefresh = GetLastRefreshTime();
+	// Get only stores modified since last refresh
+	var lastRefresh = GetLastRefreshTime();
 
-    return await _contextFactory.UseReadOnlyContext(context =>
-    {
-        return context.Stores
-            .Where(s => s.ModifiedDate > lastRefresh)
-            .Select(s => new StoreDto
-            {
-                StoreId = s.StoreId,
-                Name = s.Name,
-                ModifiedDate = s.ModifiedDate
-            })
-            .ToListAsync(cancellation);
-    });
+	return await _contextFactory.UseReadOnlyContext(context =>
+	{
+		return context.Stores
+			.Where(s => s.ModifiedDate > lastRefresh)
+			.Select(s => new StoreDto
+			{
+				StoreId = s.StoreId,
+				Name = s.Name,
+				ModifiedDate = s.ModifiedDate
+			})
+			.ToListAsync(cancellation);
+	});
 }
 ```
 
@@ -282,25 +282,25 @@ public override async Task<IEnumerable<StoreDto>> GetDataToUpdateCacheAsync(
 ```csharp
 public class PayrollService
 {
-    private readonly IDistributedCache _cache;
+	private readonly IDistributedCache _cache;
 
-    public PayrollService(IDistributedCache cache)
-    {
-        _cache = cache;
-    }
+	public PayrollService(IDistributedCache cache)
+	{
+		_cache = cache;
+	}
 
-    public async Task<PayClassificationDto?> GetPayClassificationAsync(string code)
-    {
-        var cacheKey = $"PayClassification:{code}";
-        var cachedJson = await _cache.GetStringAsync(cacheKey);
+	public async Task<PayClassificationDto?> GetPayClassificationAsync(string code)
+	{
+		var cacheKey = $"PayClassification:{code}";
+		var cachedJson = await _cache.GetStringAsync(cacheKey);
 
-        if (cachedJson != null)
-        {
-            return JsonSerializer.Deserialize<PayClassificationDto>(cachedJson);
-        }
+		if (cachedJson != null)
+		{
+			return JsonSerializer.Deserialize<PayClassificationDto>(cachedJson);
+		}
 
-        return null;
-    }
+		return null;
+	}
 }
 ```
 
@@ -332,20 +332,20 @@ public class PayrollService
 
 ```csharp
 public override async Task<IEnumerable<T>> GetDataToUpdateCacheAsync(
-    CacheDataDictionary cdd,
-    CancellationToken cancellation = default)
+	CacheDataDictionary cdd,
+	CancellationToken cancellation = default)
 {
-    try
-    {
-        return await FetchData(cancellation);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Failed to refresh cache for {BaseKeyName}", BaseKeyName);
+	try
+	{
+		return await FetchData(cancellation);
+	}
+	catch (Exception ex)
+	{
+		_logger.LogError(ex, "Failed to refresh cache for {BaseKeyName}", BaseKeyName);
 
-        // Return empty to skip this refresh cycle
-        return Enumerable.Empty<T>();
-    }
+		// Return empty to skip this refresh cycle
+		return Enumerable.Empty<T>();
+	}
 }
 ```
 

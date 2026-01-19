@@ -3,7 +3,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;

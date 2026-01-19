@@ -1,6 +1,4 @@
 ﻿using Demoulas.Common.Api.Endpoints;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 

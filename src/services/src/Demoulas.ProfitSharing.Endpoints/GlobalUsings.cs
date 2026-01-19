@@ -1,5 +1,5 @@
 global using Demoulas.Common.Api.Extensions;
-global using Demoulas.ProfitSharing.Data.Entities.Navigations;
+global using Navigation = Demoulas.ProfitSharing.Common.Constants.Navigation;
 global using Demoulas.ProfitSharing.Common.Extensions;
 global using Demoulas.ProfitSharing.Endpoints.Extensions;
 global using FastEndpoints;

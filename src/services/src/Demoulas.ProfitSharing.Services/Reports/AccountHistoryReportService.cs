@@ -26,7 +26,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
     private readonly IAppUser _user;
     private readonly IMasterInquiryService _employeeLookupService;
     private readonly ILogger<AccountHistoryReportService> _logger;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
 
     public AccountHistoryReportService(
         IProfitSharingDataContextFactory contextFactory,
@@ -35,7 +35,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         IAppUser user,
         IMasterInquiryService employeeLookupService,
         ILogger<AccountHistoryReportService> logger,
-        IAuditService auditService)
+        IProfitSharingAuditService profitSharingAuditService)
     {
         _contextFactory = contextFactory;
         _demographicReaderService = demographicReaderService;
@@ -43,7 +43,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         _user = user;
         _employeeLookupService = employeeLookupService;
         _logger = logger;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
     }
 
     public Task<AccountHistoryReportPaginatedResponse> GetAccountHistoryReportAsync(
@@ -433,7 +433,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 pdfStream.Length);
 
             // Log audit event for PDF download tracking (PS-2284: Ensure audit tracking for Account History download)
-            await _auditService.LogSensitiveDataAccessAsync(
+            await _profitSharingAuditService.LogSensitiveDataAccessAsync(
                 operationName: "Account History PDF Download",
                 tableName: "AccountHistory",
                 primaryKey: $"Badge:{memberId}",

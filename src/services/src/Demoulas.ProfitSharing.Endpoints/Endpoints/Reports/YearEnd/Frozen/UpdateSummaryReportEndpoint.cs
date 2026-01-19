@@ -4,9 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
 
@@ -15,14 +13,14 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public sealed class UpdateSummaryReportEndpoint : EndpointWithCsvTotalsBase<FrozenProfitYearRequest, UpdateSummaryReportResponse, UpdateSummaryReportDetail, UpdateSummaryReportEndpoint.UpdateSummaryReportMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ILogger<UpdateSummaryReportEndpoint> _logger;
 
-    public UpdateSummaryReportEndpoint(IFrozenReportService frozenReportService, IAuditService auditService, ILogger<UpdateSummaryReportEndpoint> logger)
+    public UpdateSummaryReportEndpoint(IFrozenReportService frozenReportService, IProfitSharingAuditService profitSharingAuditService, ILogger<UpdateSummaryReportEndpoint> logger)
         : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _frozenReportService = frozenReportService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _logger = logger;
     }
 
@@ -59,7 +57,7 @@ public sealed class UpdateSummaryReportEndpoint : EndpointWithCsvTotalsBase<Froz
                 new("operation", "update_summary_report"),
                 new("profit_year", req.ProfitYear.ToString()));
 
-            var result = await _auditService.ArchiveCompletedReportAsync(ReportFileName, req.ProfitYear, req,
+            var result = await _profitSharingAuditService.ArchiveCompletedReportAsync(ReportFileName, req.ProfitYear, req,
                 (audit, _, cancellationToken) => _frozenReportService.GetUpdateSummaryReport(audit, cancellationToken),
                 ct);
 

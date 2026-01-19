@@ -5,23 +5,21 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
 public class GetMilitaryContributionRecords : ProfitSharingEndpoint<GetMilitaryContributionRequest, Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>
 {
     private readonly IMilitaryService _militaryService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly TimeProvider _timeProvider;
 
     private const string ReportName = "Get All Military Contribution Records";
 
-    public GetMilitaryContributionRecords(IMilitaryService militaryService, IAuditService auditService, TimeProvider timeProvider) : base(Navigation.Constants.MilitaryContributions)
+    public GetMilitaryContributionRecords(IMilitaryService militaryService, IProfitSharingAuditService profitSharingAuditService, TimeProvider timeProvider) : base(Navigation.Constants.MilitaryContributions)
     {
         _militaryService = militaryService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _timeProvider = timeProvider;
     }
 
@@ -41,7 +39,7 @@ public class GetMilitaryContributionRecords : ProfitSharingEndpoint<GetMilitaryC
         CancellationToken ct)
     {
         var currentYear = (short)_timeProvider.GetUtcNow().Year;
-        var result = await _auditService.ArchiveCompletedReportAsync(ReportName,
+        var result = await _profitSharingAuditService.ArchiveCompletedReportAsync(ReportName,
             currentYear,
             req,
             (archiveReq, isArchiveRequest, cancellationToken) => _militaryService.GetMilitaryServiceRecordAsync(archiveReq, isArchiveRequest, cancellationToken),

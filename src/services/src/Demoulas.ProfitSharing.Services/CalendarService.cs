@@ -1,12 +1,9 @@
-﻿using System.Text.Json;
-using Demoulas.Common.Contracts.Contracts.Response;
+using System.Text.Json;
 using Demoulas.Common.Data.Services.Interfaces;
-using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace Demoulas.ProfitSharing.Services;

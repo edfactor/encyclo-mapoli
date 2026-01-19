@@ -1,13 +1,13 @@
+using Demoulas.Common.Contracts.Contracts.Request.Audit;
 using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Services.Entities.Entities.Audit;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Audit;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Administration;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -217,7 +217,7 @@ public sealed class BankAccountService : IBankAccountService
         DateOnly? fedwireRevisionDate,
         string? notes,
         DateOnly? effectiveDate,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         IAppUser appUser,
         CancellationToken cancellationToken = default)
     {
@@ -282,32 +282,32 @@ public sealed class BankAccountService : IBankAccountService
                 .FirstAsync(b => b.Id == bankId, cancellationToken);
 
             // Audit log creation
-            await auditService.LogDataChangeAsync(
+            await profitSharingAuditService.LogDataChangeAsync(
                 operationName: "Create Bank Account",
                 tableName: "BANK_ACCOUNT",
                 auditOperation: AuditEvent.AuditOperations.Create,
                 primaryKey: $"Id:{bankAccount.Id}",
                 changes:
                 [
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "BANK_ID",
                         OriginalValue = null,
                         NewValue = bankId.ToString(),
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "ROUTING_NUMBER",
                         OriginalValue = null,
                         NewValue = routingNumber,
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "ACCOUNT_NUMBER",
                         OriginalValue = null,
                         NewValue = accountNumber.MaskAccountNumber(),
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_PRIMARY",
                         OriginalValue = null,
@@ -361,7 +361,7 @@ public sealed class BankAccountService : IBankAccountService
         string? notes,
         DateOnly? effectiveDate,
         DateOnly? discontinuedDate,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         IAppUser appUser,
         CancellationToken cancellationToken = default)
     {
@@ -418,26 +418,26 @@ public sealed class BankAccountService : IBankAccountService
             await ctx.SaveChangesAsync(cancellationToken);
 
             // Audit log update
-            await auditService.LogDataChangeAsync(
+            await profitSharingAuditService.LogDataChangeAsync(
                 operationName: "Update Bank Account",
                 tableName: "BANK_ACCOUNT",
                 auditOperation: AuditEvent.AuditOperations.Update,
                 primaryKey: $"Id:{bankAccount.Id}",
                 changes:
                 [
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "ROUTING_NUMBER",
                         OriginalValue = null, // Would need original values
                         NewValue = routingNumber,
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_PRIMARY",
                         OriginalValue = null,
                         NewValue = isPrimary.ToString(),
                     },
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_DISABLED",
                         OriginalValue = null,
@@ -475,7 +475,7 @@ public sealed class BankAccountService : IBankAccountService
         }, cancellationToken);
     }
 
-    public Task<Result<bool>> SetPrimaryAsync(int id, IAuditService auditService, IAppUser appUser, CancellationToken cancellationToken = default)
+    public Task<Result<bool>> SetPrimaryAsync(int id, IProfitSharingAuditService profitSharingAuditService, IAppUser appUser, CancellationToken cancellationToken = default)
     {
         return _contextFactory.UseWritableContext(async ctx =>
         {
@@ -507,14 +507,14 @@ public sealed class BankAccountService : IBankAccountService
             await ctx.SaveChangesAsync(cancellationToken);
 
             // Audit log set primary
-            await auditService.LogDataChangeAsync(
+            await profitSharingAuditService.LogDataChangeAsync(
                 operationName: "Set Primary Bank Account",
                 tableName: "BANK_ACCOUNT",
                 auditOperation: AuditEvent.AuditOperations.Update,
                 primaryKey: $"Id:{bankAccount.Id}",
                 changes:
                 [
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_PRIMARY",
                         OriginalValue = "False",
@@ -530,7 +530,7 @@ public sealed class BankAccountService : IBankAccountService
         }, cancellationToken);
     }
 
-    public Task<Result<bool>> DisableAsync(int id, IAuditService auditService, IAppUser appUser, CancellationToken cancellationToken = default)
+    public Task<Result<bool>> DisableAsync(int id, IProfitSharingAuditService profitSharingAuditService, IAppUser appUser, CancellationToken cancellationToken = default)
     {
         return _contextFactory.UseWritableContext(async ctx =>
         {
@@ -558,14 +558,14 @@ public sealed class BankAccountService : IBankAccountService
             await ctx.SaveChangesAsync(cancellationToken);
 
             // Audit log disable
-            await auditService.LogDataChangeAsync(
+            await profitSharingAuditService.LogDataChangeAsync(
                 operationName: "Disable Bank Account",
                 tableName: "BANK_ACCOUNT",
                 auditOperation: AuditEvent.AuditOperations.Update,
                 primaryKey: $"Id:{bankAccount.Id}",
                 changes:
                 [
-                    new AuditChangeEntryInput
+                    new AuditChangeEntryInputRequest
                     {
                         ColumnName = "IS_DISABLED",
                         OriginalValue = "False",
@@ -582,18 +582,18 @@ public sealed class BankAccountService : IBankAccountService
     }
 
     // Interface implementation methods (delegate to existing methods)
-    Task<Result<BankAccountDto>> IBankAccountService.CreateAsync(CreateBankAccountRequest request, IAuditService auditService, IAppUser appUser, CancellationToken cancellationToken)
+    Task<Result<BankAccountDto>> IBankAccountService.CreateAsync(CreateBankAccountRequest request, IProfitSharingAuditService profitSharingAuditService, IAppUser appUser, CancellationToken cancellationToken)
         => CreateAsync(request.BankId, request.RoutingNumber, request.AccountNumber, request.IsPrimary,
             request.ServicingFedRoutingNumber, request.ServicingFedAddress, request.FedwireTelegraphicName,
             request.FedwireLocation, request.FedAchChangeDate, request.FedwireRevisionDate,
-            request.Notes, request.EffectiveDate, auditService, appUser, cancellationToken);
+            request.Notes, request.EffectiveDate, profitSharingAuditService, appUser, cancellationToken);
 
-    Task<Result<BankAccountDto>> IBankAccountService.UpdateAsync(UpdateBankAccountRequest request, IAuditService auditService, IAppUser appUser, CancellationToken cancellationToken)
+    Task<Result<BankAccountDto>> IBankAccountService.UpdateAsync(UpdateBankAccountRequest request, IProfitSharingAuditService profitSharingAuditService, IAppUser appUser, CancellationToken cancellationToken)
         => UpdateAsync(request.Id, request.BankId, request.RoutingNumber, request.AccountNumber, request.IsPrimary, false,
             request.ServicingFedRoutingNumber, request.ServicingFedAddress, request.FedwireTelegraphicName,
             request.FedwireLocation, request.FedAchChangeDate, request.FedwireRevisionDate,
-            request.Notes, request.EffectiveDate, request.DiscontinuedDate, auditService, appUser, cancellationToken);
+            request.Notes, request.EffectiveDate, request.DiscontinuedDate, profitSharingAuditService, appUser, cancellationToken);
 
-    Task<Result<bool>> IBankAccountService.DisableAsync(int id, IAuditService auditService, IAppUser appUser, CancellationToken cancellationToken)
-        => DisableAsync(id, auditService, appUser, cancellationToken);
+    Task<Result<bool>> IBankAccountService.DisableAsync(int id, IProfitSharingAuditService profitSharingAuditService, IAppUser appUser, CancellationToken cancellationToken)
+        => DisableAsync(id, profitSharingAuditService, appUser, cancellationToken);
 }

@@ -4,7 +4,6 @@ using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -16,6 +15,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
@@ -55,7 +55,7 @@ public abstract class PristineBaseTest
         PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService, VestingScheduleService);
         YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, NullLogger<YearEndService>.Instance);
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
         ForfeitureAdjustmentService = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
     }
 

@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -9,7 +9,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Beneficiaries.Validators;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.Util.Extensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -462,7 +461,7 @@ public class BeneficiaryService : IBeneficiaryService
                 if (beneficiaryToDelete.Contact != null)
                 {
                     deleteContact = await CanIDeleteThisBeneficiaryContact(id, beneficiaryToDelete!.Contact, ctx, cancellationToken);
-                    
+
                     if (deleteContact)
                     {
                         beneficiaryToDelete.Contact.IsDeleted = true;
@@ -496,7 +495,7 @@ public class BeneficiaryService : IBeneficiaryService
                 deleteContact = await CanIDeleteThisBeneficiary(firstBeneficiary, ctx, cancellation);
                 beneficiaryToDelete = firstBeneficiary;
             }
-            
+
             if (deleteContact)
             {
                 // Soft delete: Set IsDeleted flag instead of removing from database
@@ -504,9 +503,9 @@ public class BeneficiaryService : IBeneficiaryService
                 {
                     beneficiaryToDelete.IsDeleted = true;
                 }
-                
+
                 contactToDelete.IsDeleted = true;
-                
+
                 await ctx.SaveChangesAsync(cancellation);
                 await transaction.CommitAsync(cancellation);
             }

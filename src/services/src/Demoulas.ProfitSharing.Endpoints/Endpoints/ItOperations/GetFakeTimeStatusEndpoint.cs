@@ -1,8 +1,6 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
 using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;

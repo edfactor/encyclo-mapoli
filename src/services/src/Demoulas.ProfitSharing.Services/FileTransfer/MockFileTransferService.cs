@@ -1,7 +1,5 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Interfaces.FileTransfer;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.FileTransfer;
 using Demoulas.ProfitSharing.Data.Interfaces;

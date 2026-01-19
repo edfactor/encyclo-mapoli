@@ -5,7 +5,7 @@ paths: "src/services/src/**/*.*"
 
 # Demoulas.Common.Data - Database and Data Access Utilities
 
-**Packages:** `Demoulas.Common.Data.Contexts`, `Demoulas.Common.Data.Services`  
+**Packages:** `Demoulas.Common.Data.Contexts`, `Demoulas.Common.Data.Services`
 **Namespace:** `Demoulas.Common.Data.Contexts.Extensions`, `Demoulas.Common.Data.Contexts.DTOs.Context`
 
 This package provides database and data access utilities including bulk operations, context configuration, and efficient pagination for Entity Framework Core with Oracle databases.
@@ -15,12 +15,73 @@ This package provides database and data access utilities including bulk operatio
 1. [DbContext Extensions](#dbcontext-extensions)
 2. [Database Context Configuration](#database-context-configuration)
 3. [Pagination Extensions](#pagination-extensions)
+4. [Navigation Service Pattern](#navigation-service-pattern)
+5. [Navigation Service Implementation](#navigation-service-implementation)
+6. [Audit Logging & Search](#audit-logging--search)
 
 ---
 
+## Navigation Service Pattern
+
+Navigation reads use an abstract retrieval hook; the service should not assume a `DbContext`.
+
+Rules:
+
+- Read data via `NavigationService.GetNavigationListAsync(...)` (abstract hook returning `IEnumerable<Navigation>`).
+- The retrieval implementation must pre-shape navigation relationships (roles, status, custom settings, prerequisites).
+- Write operations use per-method callbacks.
+- `IDistributedCache` may be null. Use an in-memory distributed cache fallback where needed.
+
+---
+
+## Navigation Service Implementation
+
+`NavigationService` builds a role-filtered navigation tree with caching and read-only role handling.
+
+**Rules:**
+
+- Build navigation trees from the results of `GetNavigationListAsync(...)` (no direct DbContext usage).
+- Filter navigations by the current user roles (case-insensitive, trimmed, deduplicated).
+- Enforce role inheritance: child required roles must not broaden parent roles; intersect when necessary.
+- Set `IsReadOnly` for all returned nodes when user has any read-only role in `NavigationRoles`.
+- Cache navigation trees by role combination and a version key; increment version on updates to invalidate all trees.
+- Cache navigation statuses separately; invalidate on update/reset.
+
+**Caching guidance:**
+
+- Navigation tree cache key includes role names and the version key (e.g., `navigation-tree-v{version}-{roleKey}`).
+- Status list cache key: `navigation-status-all`.
+- On update/reset, remove status cache and bump the version key to invalidate all trees.
+
+**Dependencies:**
+
+- `IAppUser` provides user roles.
+- `GetNavigationListAsync(...)` must include roles, statuses, custom settings, and prerequisites.
+- `IDistributedCache` may be null; fall back to `MemoryDistributedCache`.
+
+---
+
+## Audit Logging & Search
+
+Audit logging is implemented in `Demoulas.Common.Data.Services` and is designed for compliance and forensic analysis.
+
+**Key interfaces (data layer):**
+
+- `IAuditDbContext` and `IAuditDbContextFactory<TContext, TReadOnlyContext>` provide read/write contexts for audit entities.
+- `IAuditService` is used by services and endpoints to log data changes and sensitive data access.
+
+**Usage guidance:**
+
+1. **Sensitive data access:** wrap read operations with `IAuditService.LogSensitiveDataAccessAsync(...)` to capture who accessed protected data.
+2. **Data change events:** call `LogDataChangeAsync(...)` with a list of `AuditChangeEntryInputRequest` fields for create/update/delete operations.
+3. **Session correlation:** audit entries include a session ID derived from the request context for forensic reconstruction.
+4. **No PII leaks:** serialized audit payloads must respect masking rules (use the configured masking serializer options).
+
+**Do NOT** bypass the audit service when sensitive data access or integrity-critical changes are involved.
+
 ## DbContext Extensions
 
-**Namespace:** `Demoulas.Common.Data.Contexts.Extensions`  
+**Namespace:** `Demoulas.Common.Data.Contexts.Extensions`
 **Class:** `DbContextExtensions`
 
 ### BulkInsertAsync()
@@ -31,40 +92,40 @@ Bulk inserts a list of entities into the database asynchronously.
 
 ```csharp
 public static async Task BulkInsertAsync<T>(
-    this DbContext context,
-    List<T> itemsToInsert,
-    CancellationToken cancellationToken,
-    Dictionary<string, Type>? converterTypes = null,
-    Dictionary<string, Func<dynamic, dynamic>>? converters = null)
-    where T : class
+	this DbContext context,
+	List<T> itemsToInsert,
+	CancellationToken cancellationToken,
+	Dictionary<string, Type>? converterTypes = null,
+	Dictionary<string, Func<dynamic, dynamic>>? converters = null)
+	where T : class
 ```
 
 **Type Parameters:**
 
--   `T`: The entity type to bulk insert
+- `T`: The entity type to bulk insert
 
 **Parameters:**
 
--   `context` (DbContext): The database context
--   `itemsToInsert` (List<T>): The entities to insert
--   `cancellationToken` (CancellationToken): Cancellation token for the operation
--   `converterTypes` (Dictionary<string, Type>, optional): Column type conversions
--   `converters` (Dictionary<string, Func<dynamic, dynamic>>, optional): Custom value converters
+- `context` (DbContext): The database context
+- `itemsToInsert` (List<T>): The entities to insert
+- `cancellationToken` (CancellationToken): Cancellation token for the operation
+- `converterTypes` (Dictionary<string, Type>, optional): Column type conversions
+- `converters` (Dictionary<string, Func<dynamic, dynamic>>, optional): Custom value converters
 
 **Features:**
 
--   Manages database connection automatically
--   Supports column type conversions for schema compatibility
--   Supports custom value converters
--   Asynchronous operation with cancellation support
+- Manages database connection automatically
+- Supports column type conversions for schema compatibility
+- Supports custom value converters
+- Asynchronous operation with cancellation support
 
 **Example:**
 
 ```csharp
 var customers = new List<Customer>
 {
-    new Customer { Name = "John Doe", Email = "john@example.com" },
-    new Customer { Name = "Jane Smith", Email = "jane@example.com" }
+	new Customer { Name = "John Doe", Email = "john@example.com" },
+	new Customer { Name = "Jane Smith", Email = "jane@example.com" }
 };
 
 await dbContext.BulkInsertAsync(customers, cancellationToken);
@@ -74,7 +135,7 @@ await dbContext.BulkInsertAsync(customers, cancellationToken);
 
 ## Database Context Configuration
 
-**Namespace:** `Demoulas.Common.Data.Contexts.DTOs.Context`  
+**Namespace:** `Demoulas.Common.Data.Contexts.DTOs.Context`
 **Class:** `ContextFactoryRequest`
 
 ### Overview
@@ -89,25 +150,25 @@ Creates a new context factory request with customizable configuration options.
 
 ```csharp
 public static ContextFactoryRequest Initialize<TContext>(
-    string connectionName,
-    Action<OracleEntityFrameworkCoreSettings>? configureSettings = null,
-    Action<DbContextOptionsBuilder>? configureDbContextOptions = null,
-    Func<IServiceProvider, IEnumerable<IInterceptor>>? interceptorFactory = null,
-    IEnumerable<string>? denyCommitRoles = null)
-    where TContext : DbContext
+	string connectionName,
+	Action<OracleEntityFrameworkCoreSettings>? configureSettings = null,
+	Action<DbContextOptionsBuilder>? configureDbContextOptions = null,
+	Func<IServiceProvider, IEnumerable<IInterceptor>>? interceptorFactory = null,
+	IEnumerable<string>? denyCommitRoles = null)
+	where TContext : DbContext
 ```
 
 **Type Parameters:**
 
--   `TContext`: The type of DbContext to configure (must inherit from DbContext)
+- `TContext`: The type of DbContext to configure (must inherit from DbContext)
 
 **Parameters:**
 
--   `connectionName` (string, required): The name of the connection string in configuration
--   `configureSettings` (Action, optional): Delegate to configure Aspire Oracle settings (health checks, retries, etc.)
--   `configureDbContextOptions` (Action, optional): **Delegate to customize EF Core DbContextOptions**
--   `interceptorFactory` (Func, optional): Factory function to create custom EF Core interceptors
--   `denyCommitRoles` (IEnumerable<string>, optional): Roles that are denied write access to this context
+- `connectionName` (string, required): The name of the connection string in configuration
+- `configureSettings` (Action, optional): Delegate to configure Aspire Oracle settings (health checks, retries, etc.)
+- `configureDbContextOptions` (Action, optional): **Delegate to customize EF Core DbContextOptions**
+- `interceptorFactory` (Func, optional): Factory function to create custom EF Core interceptors
+- `denyCommitRoles` (IEnumerable<string>, optional): Roles that are denied write access to this context
 
 **Returns:** A configured `ContextFactoryRequest` instance
 
@@ -115,10 +176,10 @@ public static ContextFactoryRequest Initialize<TContext>(
 
 The `configureDbContextOptions` parameter allows you to customize EF Core behavior for your DbContext. This is essential when you need to:
 
--   Enable sensitive data logging or detailed errors for debugging
--   Configure query behavior (tracking, split queries, command timeouts)
--   Override default Oracle settings
--   Add additional EF Core features or optimizations
+- Enable sensitive data logging or detailed errors for debugging
+- Configure query behavior (tracking, split queries, command timeouts)
+- Override default Oracle settings
+- Add additional EF Core features or optimizations
 
 **Common Use Cases:**
 
@@ -126,77 +187,77 @@ The `configureDbContextOptions` parameter allows you to customize EF Core behavi
 
 ```csharp
 ContextFactoryRequest.Initialize<AppDbContext>(
-    connectionName: "AppDb",
-    configureDbContextOptions: options =>
-    {
-        options.EnableSensitiveDataLogging();  // Show parameter values in logs
-        options.EnableDetailedErrors();         // Show detailed error information
-    })
+	connectionName: "AppDb",
+	configureDbContextOptions: options =>
+	{
+		options.EnableSensitiveDataLogging();  // Show parameter values in logs
+		options.EnableDetailedErrors();         // Show detailed error information
+	})
 ```
 
 2. **Query Behavior Customization:**
 
 ```csharp
 ContextFactoryRequest.Initialize<AppReadOnlyDbContext>(
-    connectionName: "AppDb",
-    configureDbContextOptions: options =>
-    {
-        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        options.UseOracle(oracle =>
-            oracle.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-    })
+	connectionName: "AppDb",
+	configureDbContextOptions: options =>
+	{
+		options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+		options.UseOracle(oracle =>
+			oracle.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+	})
 ```
 
 3. **Command Timeout Configuration:**
 
 ```csharp
 ContextFactoryRequest.Initialize<AppDbContext>(
-    connectionName: "AppDb",
-    configureDbContextOptions: options =>
-    {
-        options.UseOracle(oracle => oracle.CommandTimeout(120)); // 2 minutes
-    })
+	connectionName: "AppDb",
+	configureDbContextOptions: options =>
+	{
+		options.UseOracle(oracle => oracle.CommandTimeout(120)); // 2 minutes
+	})
 ```
 
 4. **Comprehensive Configuration (All Parameters):**
 
 ```csharp
 ContextFactoryRequest.Initialize<AppDbContext>(
-    connectionName: "AppDb",
-    configureSettings: settings =>
-    {
-        settings.DisableHealthChecks = false;   // Enable health checks
-        settings.DisableRetry = false;          // Enable retries
-    },
-    configureDbContextOptions: options =>
-    {
-        options.EnableSensitiveDataLogging();
-        options.UseOracle(oracle =>
-        {
-            oracle.CommandTimeout(120);
-            oracle.EnableRetryOnFailure(maxRetryCount: 3);
-        });
-    },
-    interceptorFactory: serviceProvider =>
-    {
-        // Add custom interceptors
-        return new[] { new AuditInterceptor(), new PerformanceInterceptor() };
-    },
-    denyCommitRoles: new[] { "ReadOnlyUser", "Auditor" })
+	connectionName: "AppDb",
+	configureSettings: settings =>
+	{
+		settings.DisableHealthChecks = false;   // Enable health checks
+		settings.DisableRetry = false;          // Enable retries
+	},
+	configureDbContextOptions: options =>
+	{
+		options.EnableSensitiveDataLogging();
+		options.UseOracle(oracle =>
+		{
+			oracle.CommandTimeout(120);
+			oracle.EnableRetryOnFailure(maxRetryCount: 3);
+		});
+	},
+	interceptorFactory: serviceProvider =>
+	{
+		// Add custom interceptors
+		return new[] { new AuditInterceptor(), new PerformanceInterceptor() };
+	},
+	denyCommitRoles: new[] { "ReadOnlyUser", "Auditor" })
 ```
 
 **Important Notes:**
 
--   The library automatically applies default Oracle configurations (compatibility, naming conventions, interceptors)
--   The `configureDbContextOptions` parameter adds customizations **on top of** these defaults
--   Do not use `EnableSensitiveDataLogging()` in production environments as it may log sensitive information
--   For read-only contexts, the library automatically sets `QueryTrackingBehavior.NoTracking` unless overridden
+- The library automatically applies default Oracle configurations (compatibility, naming conventions, interceptors)
+- The `configureDbContextOptions` parameter adds customizations **on top of** these defaults
+- Do not use `EnableSensitiveDataLogging()` in production environments as it may log sensitive information
+- For read-only contexts, the library automatically sets `QueryTrackingBehavior.NoTracking` unless overridden
 
 ---
 
 ## Pagination Extensions
 
-**Namespace:** `Demoulas.Common.Data.Contexts.Extensions`  
+**Namespace:** `Demoulas.Common.Data.Contexts.Extensions`
 **Class:** `PaginationExtensions`
 
 ### ToPaginationResultsAsync()
@@ -208,43 +269,43 @@ Paginates EF Core query results with sorting, timeout support, and telemetry. Ru
 ```csharp
 // Basic pagination
 public static async Task<PaginatedResponseDto<TEntity>> ToPaginationResultsAsync<TEntity>(
-    this IQueryable<TEntity> source,
-    PaginationRequestDto request,
-    CancellationToken cancellationToken = default)
-    where TEntity : class
+	this IQueryable<TEntity> source,
+	PaginationRequestDto request,
+	CancellationToken cancellationToken = default)
+	where TEntity : class
 
 // With mapping/projection
 public static async Task<PaginatedResponseDto<TResult>> ToPaginationResultsAsync<TEntity, TResult>(
-    this IQueryable<TEntity> source,
-    PaginationRequestDto request,
-    Func<IQueryable<TEntity>, IQueryable<TResult>> mapper,
-    CancellationToken cancellationToken = default)
-    where TEntity : class
-    where TResult : class
+	this IQueryable<TEntity> source,
+	PaginationRequestDto request,
+	Func<IQueryable<TEntity>, IQueryable<TResult>> mapper,
+	CancellationToken cancellationToken = default)
+	where TEntity : class
+	where TResult : class
 ```
 
 **Type Parameters:**
 
--   `TEntity`: The database entity type
--   `TResult`: The result type (for mapping overload)
+- `TEntity`: The database entity type
+- `TResult`: The result type (for mapping overload)
 
 **Parameters:**
 
--   `source` (IQueryable<TEntity>): The source query
--   `request` (PaginationRequestDto): Pagination request with Skip, Take, and optional SortBy
--   `mapper` (Func, optional): A function to transform/project entities to results
--   `cancellationToken` (CancellationToken, optional): Cancellation token
+- `source` (IQueryable<TEntity>): The source query
+- `request` (PaginationRequestDto): Pagination request with Skip, Take, and optional SortBy
+- `mapper` (Func, optional): A function to transform/project entities to results
+- `cancellationToken` (CancellationToken, optional): Cancellation token
 
 **Returns:** A PaginatedResponseDto<T> containing results, total count, and metadata
 
 **Features:**
 
--   Automatic parallel execution (count and data queries run simultaneously)
--   Dynamic sorting with type-safe validation
--   Query timeout with graceful degradation
--   Result hashing for cache validation
--   OpenTelemetry integration
--   Support for both entity and mapped/projected results
+- Automatic parallel execution (count and data queries run simultaneously)
+- Dynamic sorting with type-safe validation
+- Query timeout with graceful degradation
+- Result hashing for cache validation
+- OpenTelemetry integration
+- Support for both entity and mapped/projected results
 
 **Example:**
 
@@ -252,36 +313,36 @@ public static async Task<PaginatedResponseDto<TResult>> ToPaginationResultsAsync
 // Simple pagination
 var request = new PaginationRequestDto { Skip = 0, Take = 20 };
 var result = await dbContext.Customers
-    .Where(c => c.IsActive)
-    .ToPaginationResultsAsync(request);
+	.Where(c => c.IsActive)
+	.ToPaginationResultsAsync(request);
 
 // With sorting
 var requestWithSort = new SortedPaginationRequestDto
 {
-    Skip = 0,
-    Take = 20,
-    SortBy = "LastName",
-    IsSortDescending = false
+	Skip = 0,
+	Take = 20,
+	SortBy = "LastName",
+	IsSortDescending = false
 };
 var sorted = await dbContext.Customers.ToPaginationResultsAsync(requestWithSort);
 
 // With projection to DTO
 var result = await dbContext.Customers
-    .Where(c => c.IsActive)
-    .ToPaginationResultsAsync(
-        request,
-        customers => customers.Select(c => new CustomerDto
-        {
-            Id = c.Id,
-            FullName = $"{c.FirstName} {c.LastName}"
-        }));
+	.Where(c => c.IsActive)
+	.ToPaginationResultsAsync(
+		request,
+		customers => customers.Select(c => new CustomerDto
+		{
+			Id = c.Id,
+			FullName = $"{c.FirstName} {c.LastName}"
+		}));
 
 // With timeout
 var timedRequest = new PaginationRequestDto
 {
-    Skip = 0,
-    Take = 20,
-    QueryTimeoutSeconds = 5
+	Skip = 0,
+	Take = 20,
+	QueryTimeoutSeconds = 5
 };
 var timedResult = await dbContext.Customers.ToPaginationResultsAsync(timedRequest);
 ```
@@ -310,7 +371,7 @@ using Microsoft.EntityFrameworkCore;
 
 **See Also:**
 
--   [Main Documentation](./demoulas.common.instructions.md)
--   [Util Extensions](./demoulas.util.instructions.md)
--   [API Extensions](./demoulas.common.api.instructions.md)
--   [Microsoft EF Core Documentation](https://learn.microsoft.com/en-us/ef/core/)
+- [Main Documentation](./demoulas.common.instructions.md)
+- [Util Extensions](./demoulas.util.instructions.md)
+- [API Extensions](./demoulas.common.api.instructions.md)
+- [Microsoft EF Core Documentation](https://learn.microsoft.com/en-us/ef/core/)

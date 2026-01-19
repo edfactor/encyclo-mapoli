@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
@@ -6,7 +5,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Renci.SshNet.Messages;
 
 namespace Demoulas.ProfitSharing.Services.Validation;
 
@@ -270,15 +268,16 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
     }
 
     public async Task<ValidationResponse> ValidateBreakoutReportGrandTotal(
-        short profitYear, 
-        int numberOfEmployees, 
-        decimal beginningBalance, 
-        decimal earningsTotal, 
+        short profitYear,
+        int numberOfEmployees,
+        decimal beginningBalance,
+        decimal earningsTotal,
         decimal contributionsTotal,
         decimal disbursementTotals,
         decimal endingBalance,
         CancellationToken cancellationToken = default
-        ) {
+        )
+    {
 
         var currentValues = new Dictionary<string, decimal>
         {

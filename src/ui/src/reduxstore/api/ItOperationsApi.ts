@@ -127,7 +127,7 @@ export const ItOperationsApi = createApi({
     }),
     searchAudit: builder.query<Paged<AuditEventDto>, AuditSearchRequestDto>({
       query: (params) => ({
-        url: "audit/search",
+        url: "common/audit/search",
         method: "GET",
         params: {
           tableName: params.tableName,
@@ -144,7 +144,7 @@ export const ItOperationsApi = createApi({
     }),
     getAuditChanges: builder.query<AuditChangeEntryDto[], number>({
       query: (auditEventId) => ({
-        url: `audit/changes/${auditEventId}`,
+        url: `common/audit/changes/${auditEventId}`,
         method: "GET"
       })
     }),
