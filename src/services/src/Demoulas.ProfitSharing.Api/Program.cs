@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Api.Extensions;
+using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Contexts;
@@ -138,7 +138,8 @@ void OktaSettingsAction(OktaSwaggerConfiguration settings)
 }
 
 builder.ConfigureDefaultEndpoints(meterNames: [],
-        activitySourceNames: [OracleHcmActivitySource.Instance.Name, "Demoulas.ProfitSharing.Endpoints"])
+        activitySourceNames: [OracleHcmActivitySource.Instance.Name, "Demoulas.ProfitSharing.Endpoints"]
+    , useNavigationEndpoints: true, useAuditEventEndpoints: true)
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, impersonationRole: Role.IMPERSONATION,
         swaggerAvailableRoles: new List<string>
         {

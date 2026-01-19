@@ -1,4 +1,4 @@
-﻿using System.CommandLine;
+using System.CommandLine;
 using System.Text;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -402,7 +402,9 @@ public sealed class Program
    DBMS_STATS.GATHER_SCHEMA_STATS('{sb.UserID}');
     END;";
 
+#pragma warning disable SCS0002
         await context.Database.ExecuteSqlRawAsync(gatherStats);
+#pragma warning restore SCS0002
         Console.WriteLine("Gathered schema stats");
 
         // Log Demographics table count
@@ -465,7 +467,9 @@ public sealed class Program
                     // Execute GRANT SELECT statement
                     // Quote table name for Oracle identifiers (required for names starting with underscores)
                     string grantSql = $"GRANT SELECT ON PROFITSHARE.\"{tableName}\" TO SELECT_PROFITSHARE_ROLE";
+#pragma warning disable SCS0002
                     await context.Database.ExecuteSqlRawAsync(grantSql);
+#pragma warning restore SCS0002
                     Console.WriteLine($"  ✓ Granted SELECT on PROFITSHARE.{tableName}");
                     successCount++;
                 }

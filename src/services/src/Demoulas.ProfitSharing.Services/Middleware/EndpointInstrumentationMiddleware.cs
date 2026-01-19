@@ -82,13 +82,16 @@ public sealed class EndpointInstrumentationMiddleware
         // Create new session ID (use correlation ID as base for traceability)
         var newSessionId = Guid.NewGuid().ToString("N").Substring(0, 20);
 
-        // Set secure session cookie (HttpOnly to prevent JavaScript access, Secure for HTTPS)
+        // Set secure session cookie (HttpOnly to prevent JavaScript access; Secure only over HTTPS)
+        var sessionTimeout = TimeSpan.FromHours(8);
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = context.Request.IsHttps,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.UtcNow.AddHours(8) // Standard 8-hour session timeout
+            Path = "/",
+            MaxAge = sessionTimeout,
+            Expires = DateTimeOffset.UtcNow.Add(sessionTimeout)
         };
 
         context.Response.Cookies.Append(Telemetry.SessionIdKey, newSessionId, cookieOptions);

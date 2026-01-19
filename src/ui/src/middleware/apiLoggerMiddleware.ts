@@ -11,6 +11,7 @@ type RequestTiming = {
   completed?: boolean;
 };
 const requestTimings = new Map<string, RequestTiming>();
+const sessionHistoryKey = "api_request_history";
 
 // Intercept actual fetch requests to capture timing and URLs
 const originalFetch = window.fetch.bind(window);
@@ -105,11 +106,33 @@ interface RequestHistoryEntry {
   duration: number;
 }
 
+function readSessionHistory(): RequestHistoryEntry[] {
+  try {
+    const stored = sessionStorage.getItem(sessionHistoryKey);
+    if (!stored) {
+      return [];
+    }
+
+    const parsed = JSON.parse(stored) as unknown;
+    return Array.isArray(parsed) ? (parsed as RequestHistoryEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeSessionHistory(history: RequestHistoryEntry[]): void {
+  try {
+    sessionStorage.setItem(sessionHistoryKey, JSON.stringify(history.slice(0, 50)));
+  } catch {
+    // Ignore storage write errors in dev/qa.
+  }
+}
+
 function updateSessionStorage(
   requestId: string,
   data: { url: string; method: string; status: number; duration: number }
 ) {
-  const history = JSON.parse(sessionStorage.getItem("api_request_history") || "[]") as RequestHistoryEntry[];
+  const history = readSessionHistory();
   const updatedHistory = history.map((entry) => {
     if (entry.requestId === requestId) {
       return {
@@ -124,7 +147,7 @@ function updateSessionStorage(
   });
 
   // Limit to 50 entries instead of no limit
-  sessionStorage.setItem("api_request_history", JSON.stringify(updatedHistory.slice(0, 50)));
+  writeSessionHistory(updatedHistory);
 }
 
 interface RtkQueryAction {
@@ -177,10 +200,10 @@ export const apiLoggerMiddleware: Middleware = () => (next) => (action: unknown)
         };
 
         // Add to history
-        const history = JSON.parse(sessionStorage.getItem("api_request_history") || "[]") as RequestHistoryEntry[];
+        const history = readSessionHistory();
         history.unshift(requestInfo);
         // Limit to exactly 50 entries
-        sessionStorage.setItem("api_request_history", JSON.stringify(history.slice(0, 50)));
+        writeSessionHistory(history);
       }
 
       // Handle completion actions (end of request)
@@ -228,5 +251,5 @@ export const apiLoggerMiddleware: Middleware = () => (next) => (action: unknown)
 
 // Helper function to get the API call history
 export function getApiCallHistory() {
-  return JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
+  return readSessionHistory();
 }
