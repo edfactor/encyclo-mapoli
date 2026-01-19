@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -88,7 +88,7 @@ public class FreezeDemographicsEndpointTests
         };
 
         _frozenServiceMock
-            .Setup(service => service.FreezeDemographics(request.ProfitYear, request.AsOfDateTime, expectedResponse.FrozenBy, It.IsAny<CancellationToken>()))
+            .Setup(service => service.FreezeDemographicsAsync(request.ProfitYear, request.AsOfDateTime, expectedResponse.FrozenBy, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act

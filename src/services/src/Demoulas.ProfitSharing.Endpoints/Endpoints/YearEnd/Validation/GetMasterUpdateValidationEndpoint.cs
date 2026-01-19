@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.CrossReference;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd.Validation;
 
 /// <summary>
 /// Endpoint for retrieving comprehensive cross-reference validation data for the Master Update page.

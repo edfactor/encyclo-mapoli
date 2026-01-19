@@ -43,7 +43,7 @@ public class GetActiveFrozenDemographicEndpoint : ProfitSharingResponseEndpoint<
         {
             this.RecordRequestMetrics(HttpContext, _logger, new { });
 
-            var response = await _frozenService.GetActiveFrozenDemographic(ct);
+            var response = await _frozenService.GetActiveFrozenDemographicAsync(ct);
 
             // Business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

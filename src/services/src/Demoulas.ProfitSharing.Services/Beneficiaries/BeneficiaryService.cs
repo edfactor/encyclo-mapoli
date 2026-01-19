@@ -40,7 +40,7 @@ public class BeneficiaryService : IBeneficiaryService
         _updateBeneficiaryContactValidator = new UpdateBeneficiaryContactRequestValidator();
         _databaseValidator = new BeneficiaryDatabaseValidator(demographicReaderService);
     }
-    public async Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
+    public async Task<CreateBeneficiaryResponse> CreateBeneficiaryAsync(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
         // Validate request using FluentValidation (including percentage sum validation)
         var validationResult = await _createBeneficiaryValidator.ValidateAsync(req, cancellationToken);
@@ -51,7 +51,7 @@ public class BeneficiaryService : IBeneficiaryService
 
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            // Validate database-dependent business rules 
+            // Validate database-dependent business rules
             var dbValidationModel = new BeneficiaryDatabaseValidationModel
             {
                 BeneficiaryContactId = req.BeneficiaryContactId,
@@ -67,7 +67,7 @@ public class BeneficiaryService : IBeneficiaryService
 
             // At this point, validation has confirmed these entities exist
             var beneficiaryContact = (await ctx.BeneficiaryContacts.Where(x => !x.IsDeleted && x.Id == req.BeneficiaryContactId).FirstOrDefaultAsync(cancellationToken))!;
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var demographic = (await demographicQuery.Where(x => x.BadgeNumber == req.EmployeeBadgeNumber).SingleOrDefaultAsync(cancellationToken))!;
 
             var psnSuffix = await FindPsn(req, ctx, cancellationToken);
@@ -107,7 +107,7 @@ public class BeneficiaryService : IBeneficiaryService
         return rslt;
     }
 
-    public async Task<CreateBeneficiaryContactResponse> CreateBeneficiaryContact(CreateBeneficiaryContactRequest req, CancellationToken cancellationToken)
+    public async Task<CreateBeneficiaryContactResponse> CreateBeneficiaryContactAsync(CreateBeneficiaryContactRequest req, CancellationToken cancellationToken)
     {
         // Validate request using FluentValidation
         var validationResult = await _createBeneficiaryContactValidator.ValidateAsync(req, cancellationToken);
@@ -190,7 +190,7 @@ public class BeneficiaryService : IBeneficiaryService
         return response;
     }
 
-    public async Task<UpdateBeneficiaryResponse> UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
+    public async Task<UpdateBeneficiaryResponse> UpdateBeneficiaryAsync(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
         var resp = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
@@ -249,7 +249,7 @@ public class BeneficiaryService : IBeneficiaryService
     }
 
 
-    public Task<UpdateBeneficiaryContactResponse> UpdateBeneficiaryContact(UpdateBeneficiaryContactRequest req, CancellationToken cancellationToken)
+    public Task<UpdateBeneficiaryContactResponse> UpdateBeneficiaryContactAsync(UpdateBeneficiaryContactRequest req, CancellationToken cancellationToken)
     {
         var response = _dataContextFactory.UseWritableContext(async (ctx) =>
         {
@@ -437,7 +437,7 @@ public class BeneficiaryService : IBeneficiaryService
         return contact;
     }
 
-    public async Task DeleteBeneficiary(int id, CancellationToken cancellationToken)
+    public async Task DeleteBeneficiaryAsync(int id, CancellationToken cancellationToken)
     {
         _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
@@ -476,7 +476,7 @@ public class BeneficiaryService : IBeneficiaryService
         }, cancellationToken);
     }
 
-    public async Task DeleteBeneficiaryContact(int id, CancellationToken cancellation)
+    public async Task DeleteBeneficiaryContactAsync(int id, CancellationToken cancellation)
     {
         _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {

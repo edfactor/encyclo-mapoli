@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.CrossReference;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd.Validation;
 
 /// <summary>
 /// Endpoint for retrieving validation data for Profit Sharing Summary Reports.
@@ -52,7 +52,7 @@ public sealed class GetProfitSharingReportValidationEndpoint
         ProfitSharingReportValidationRequest req,
         CancellationToken ct)
     {
-        var result = await _crossReferenceValidationService.ValidateProfitSharingReport(
+        var result = await _crossReferenceValidationService.ValidateProfitSharingReportAsync(
             req.ProfitYear,
             req.ReportSuffix,
             req.UseFrozenData,

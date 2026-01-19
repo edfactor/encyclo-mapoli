@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IFrozenService
 {
-    Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, string? userName = "Unknown", CancellationToken cancellationToken = default);
-    Task<PaginatedResponseDto<FrozenStateResponse>> GetFrozenDemographics(SortedPaginationRequestDto request, CancellationToken cancellationToken = default);
-    Task<FrozenStateResponse> GetActiveFrozenDemographic(CancellationToken cancellationToken = default);
+    Task<FrozenStateResponse> FreezeDemographicsAsync(short profitYear, DateTime asOfDateTime, string? userName = "Unknown", CancellationToken cancellationToken = default);
+    Task<PaginatedResponseDto<FrozenStateResponse>> GetFrozenDemographicsAsync(SortedPaginationRequestDto request, CancellationToken cancellationToken = default);
+    Task<FrozenStateResponse> GetActiveFrozenDemographicAsync(CancellationToken cancellationToken = default);
 }

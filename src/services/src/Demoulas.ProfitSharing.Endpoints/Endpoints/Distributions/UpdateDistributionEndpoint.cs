@@ -48,7 +48,7 @@ public sealed class UpdateDistributionEndpoint : ProfitSharingEndpoint<UpdateDis
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var result = await _distributionService.UpdateDistribution(req, ct);
+            var result = await _distributionService.UpdateDistributionAsync(req, ct);
 
             // Business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

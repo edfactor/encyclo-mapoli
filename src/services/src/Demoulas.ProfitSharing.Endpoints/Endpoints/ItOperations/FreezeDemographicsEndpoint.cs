@@ -39,7 +39,7 @@ public class FreezeDemographicsEndpoint : ProfitSharingEndpoint<SetFrozenStateRe
 
     protected override async Task<FrozenStateResponse> HandleRequestAsync(SetFrozenStateRequest req, CancellationToken ct)
     {
-        var result = await _frozenService.FreezeDemographics(req.ProfitYear, req.AsOfDateTime, _appUser.UserName, ct);
+        var result = await _frozenService.FreezeDemographicsAsync(req.ProfitYear, req.AsOfDateTime, _appUser.UserName, ct);
         _logger.LogInformation("Freeze demographics executed for profit year {ProfitYear}", req.ProfitYear);
         return result ?? new FrozenStateResponse { Id = 0 };
     }

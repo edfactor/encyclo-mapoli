@@ -6,6 +6,6 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IProfitShareUpdateService
 {
     // External access by Web app (no ssn)
-    Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
+    Task<ProfitShareUpdateResponse> ProfitShareUpdateAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
 
 }

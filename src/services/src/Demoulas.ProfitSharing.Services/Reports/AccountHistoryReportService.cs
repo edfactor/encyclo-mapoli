@@ -58,7 +58,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         return _contextFactory.UseReadOnlyContext(async ctx =>
         {
             // Get member demographic information (single query)
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var demographic = await demographicQuery
                 .TagWith($"AccountHistoryReport-Demographics-{memberId}")
                 .FirstOrDefaultAsync(d => d.BadgeNumber == memberId, cancellationToken);

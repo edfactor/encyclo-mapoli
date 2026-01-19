@@ -102,7 +102,7 @@ public sealed class TerminatedEmployeeReportService
 
         // COBOL Transaction Year Boundary: Does NOT process transactions after the entered year
         // This is the YDATE in Cobol.  in December it is the current year, in January it is the previous year.
-        var lastCompletedYearEnd = await _yearEndService.GetCompletedYearEnd(cancellationToken);
+        var lastCompletedYearEnd = await _yearEndService.GetCompletedYearEndAsync(cancellationToken);
 
         // We presume we are here working on the not yet completed year end.   Which is the next year end
         // after the last completed one.    So we add 1 year to the completed year end.
@@ -482,7 +482,7 @@ public sealed class TerminatedEmployeeReportService
         IProfitSharingDbContext ctx,
         FilterableStartAndEndDateRequest request)
     {
-        IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
         // BUSINESS RULE: Get employees who might have profit sharing activity.
         // READY includes employees based on activity rather than just HR termination status.
@@ -569,7 +569,7 @@ public sealed class TerminatedEmployeeReportService
             "Loading beneficiaries for date range {BeginningDate} to {EndingDate}",
             request.BeginningDate, request.EndingDate);
 
-        IQueryable<Demographic> demographicsQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
+        IQueryable<Demographic> demographicsQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
         // Load beneficiaries and their related employee demographics
         IQueryable<MemberSlice> query = ctx.Beneficiaries

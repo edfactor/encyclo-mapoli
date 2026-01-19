@@ -31,10 +31,10 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
         _demographicReaderService = demographicReaderService;
     }
 
-    public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<ProfitShareUpdateResponse> ProfitShareUpdateAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         ProfitShareUpdateOutcome result =
-            await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken, false);
+            await ProfitSharingUpdateAsync(profitShareUpdateRequest, cancellationToken, false);
 
         List<ProfitShareUpdateMemberResponse> members = result.MemberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
@@ -83,9 +83,9 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     /// <summary>
     ///     This is used by other services to access plan members with yearly contributions applied.
     /// </summary>
-    public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternalAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        var result = await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken, true);
+        var result = await ProfitSharingUpdateAsync(profitShareUpdateRequest, cancellationToken, true);
         List<ProfitShareUpdateMember> members = result.MemberFinancials.Select(m => new ProfitShareUpdateMember
         {
             IsEmployee = m.IsEmployee,
@@ -120,7 +120,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     ///
     /// The "includeZeroAmounts" is because PAY444 doesnt show members with no financial change, PAY447 does include members with changes to ZeroContributions.
     /// </summary>
-    public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken, bool includeZeroAmounts)
+    public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdateAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken, bool includeZeroAmounts)
     {
         // Values collected for an "Adjustment Report" that we do not yet generate (see https://demoulas.atlassian.net/browse/PS-900)
         AdjustmentsSummaryDto adjustmentsSummaryData = new();

@@ -45,7 +45,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             var fiscalEndDate = calendarInfo.FiscalEndDate;
 
             // Get all current demographics with contact info
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             // Calculate age threshold - employees must be over 73 years old
             var today = DateOnly.FromDateTime(DateTime.Today);

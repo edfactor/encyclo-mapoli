@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ProfitDetails;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.Corrections;
 
 public sealed class ProfitDetailReversalsEndpoint : ProfitSharingEndpoint<IdsRequest, Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>>
 {

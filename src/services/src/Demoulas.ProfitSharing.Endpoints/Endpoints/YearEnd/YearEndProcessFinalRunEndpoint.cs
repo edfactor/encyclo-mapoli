@@ -58,6 +58,6 @@ Use the 'rebuild' parameter to force recalculation even if already committed.";
 
     protected override Task HandleRequestAsync(YearRequestWithRebuild req, CancellationToken ct)
     {
-        return _yearEndService.RunFinalYearEndUpdates(req.ProfitYear, req.Rebuild, ct);
+        return _yearEndService.RunFinalYearEndUpdatesAsync(req.ProfitYear, req.Rebuild, ct);
     }
 }

@@ -106,7 +106,7 @@ public class ReportRunnerService : IReportRunnerService
             ["profitShareUpdate"] = async ct => await InvokeReport("profitShareUpdate", async () =>
             {
                 ProfitShareUpdateResponse result = await _profitShareUpdateService
-                    .ProfitShareUpdate(ProfitShareUpdateRequest.RequestExample(), ct);
+                    .ProfitShareUpdateAsync(ProfitShareUpdateRequest.RequestExample(), ct);
                 return (result.Response.Total, result.Response.Results.Count());
             }),
             ["unforfeit"] = async ct => await InvokeReport("unforfeit", async () =>

@@ -35,7 +35,7 @@ public sealed class DistributionRunReportSummaryEndpoint : ProfitSharingResponse
 
     protected override async Task<Results<Ok<DistributionRunReportSummaryResponse[]>, NotFound, ProblemHttpResult>> HandleRequestAsync(CancellationToken ct)
     {
-        var result = await _distributionService.GetDistributionRunReportSummary(ct);
+        var result = await _distributionService.GetDistributionRunReportSummaryAsync(ct);
         return result.ToHttpResult(Error.EntityNotFound("DistributionRun"));
     }
 }

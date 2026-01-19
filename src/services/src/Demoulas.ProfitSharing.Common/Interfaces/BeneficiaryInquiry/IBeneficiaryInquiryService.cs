@@ -6,8 +6,8 @@ namespace Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 
 public interface IBeneficiaryInquiryService
 {
-    Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilter(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken);
-    Task<BeneficiaryResponse> GetBeneficiary(BeneficiaryRequestDto request, CancellationToken cancellationToken);
-    Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypes(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellationToken);
-    Task<BeneficiaryDetailResponse> GetBeneficiaryDetail(BeneficiaryDetailRequest request, CancellationToken cancellationToken);
+    Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilterAsync(BeneficiarySearchFilterRequest request, CancellationToken cancellationToken);
+    Task<BeneficiaryResponse> GetBeneficiaryAsync(BeneficiaryRequestDto request, CancellationToken cancellationToken);
+    Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypesAsync(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellationToken);
+    Task<BeneficiaryDetailResponse> GetBeneficiaryDetailAsync(BeneficiaryDetailRequest request, CancellationToken cancellationToken);
 }

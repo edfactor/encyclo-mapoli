@@ -50,7 +50,7 @@ public class CreateBeneficiaryContactEndpoint : ProfitSharingEndpoint<CreateBene
             _logger.LogInformation("Creating beneficiary contact with SSN ending {SsnLastDigits}",
                 req.ContactSsn.ToString()[^4..]);
 
-            var result = await _beneficiaryService.CreateBeneficiaryContact(req, ct);
+            var result = await _beneficiaryService.CreateBeneficiaryContactAsync(req, ct);
 
             _logger.LogInformation("Successfully created beneficiary contact with ID {ContactId}", result.Id);
             activity?.SetTag("contact_id", result.Id.ToString());

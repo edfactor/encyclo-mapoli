@@ -40,7 +40,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                 }
             };
 
-            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var demographic = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var query = from d in demographic.Include(d => d.TerminationCode)
                         where d.TerminationDate != null
                            && d.TerminationDate.Value >= startDate
@@ -129,7 +129,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false /*Want letter to be sent to the most current address*/);
+            var demographic = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false /*Want letter to be sent to the most current address*/);
             var query = (from d in demographic
                     .Include(x => x.Address)
                     .Include(x => x.TerminationCode)

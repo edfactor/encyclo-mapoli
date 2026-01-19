@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Adjustments;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.Corrections;
 
 public sealed class SaveProfitSharingAdjustmentsEndpoint : ProfitSharingEndpoint<SaveProfitSharingAdjustmentsRequest, Results<Ok<GetProfitSharingAdjustmentsResponse>, NotFound, ProblemHttpResult>>
 {

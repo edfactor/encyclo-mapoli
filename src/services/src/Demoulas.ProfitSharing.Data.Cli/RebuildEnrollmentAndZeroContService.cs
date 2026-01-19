@@ -48,9 +48,9 @@ internal sealed class RebuildEnrollmentAndZeroContService
             _logger.LogInformation("Starting RebuildEnrollmentAndZeroCont service for profit year {ProfitYear}", profitYear);
 
             // Rebuilds the ZeroContr
-            await _yearEndService.RunFinalYearEndUpdates(profitYear, true, stoppingToken).ConfigureAwait(false);
+            await _yearEndService.RunFinalYearEndUpdatesAsync(profitYear, true, stoppingToken).ConfigureAwait(false);
             // Rebuilds the Enrollment Ids
-            await _payProfitUpdateService.SetEnrollmentId(profitYear, stoppingToken).ConfigureAwait(false);
+            await _payProfitUpdateService.SetEnrollmentIdAsync(profitYear, stoppingToken).ConfigureAwait(false);
 
             _logger.LogInformation("RebuildEnrollmentAndZeroCont completed successfully");
         }

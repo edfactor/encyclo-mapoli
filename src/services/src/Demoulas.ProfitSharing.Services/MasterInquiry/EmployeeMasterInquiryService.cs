@@ -79,7 +79,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
             req?.EndProfitYear, req?.PaymentType, req?.BadgeNumber);
 
         _logger.LogInformation("TRACE: About to call BuildDemographicQuery");
-        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx).ConfigureAwait(false);
+        var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx).ConfigureAwait(false);
         _logger.LogInformation("TRACE: BuildDemographicQuery completed");
 
         // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
@@ -173,7 +173,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
         return await _factory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             var memberData = await demographics
                 .Include(d => d.PayProfits)
                 .Include(d => d.Department)
@@ -325,7 +325,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
         return _factory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
             var query = demographics
@@ -489,7 +489,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
         return _factory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
             var query = demographics
@@ -636,7 +636,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
         return _factory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
             // ReadOnlyDbContext automatically handles AsNoTracking
             int ssnEmpl = await demographics
                 .Where(d => d.BadgeNumber == badgeNumber)

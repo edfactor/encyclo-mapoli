@@ -33,7 +33,7 @@ public class AccountHistoryReportServiceTests : ApiTestBase<Api.Program>
     {
         Mock<IDemographicReaderService> mockDemographicReader = new();
         mockDemographicReader
-            .Setup(d => d.BuildDemographicQuery(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
+            .Setup(d => d.BuildDemographicQueryAsync(It.IsAny<IProfitSharingDbContext>(), It.IsAny<bool>()))
             .ReturnsAsync((IProfitSharingDbContext ctx, bool _) => ctx.Demographics);
 
         var mockCalendarService = new Mock<ICalendarService>();

@@ -36,7 +36,7 @@ public class ProfitMasterRevertEndpoint : ProfitSharingEndpoint<ProfitYearReques
 
     protected override async Task<ProfitMasterRevertResponse> HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
-        var response = await _profitMasterService.Revert(req, ct);
+        var response = await _profitMasterService.RevertAsync(req, ct);
         await _navigationService.UpdateNavigationAsync(Navigation.Constants.MasterUpdate, NavigationStatusIds.InProgress, ct);
 
         return response;

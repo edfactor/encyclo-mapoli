@@ -75,7 +75,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
                 .ToListAsync(cancellationToken);
 
             // Query 4: Demographics joined with PayProfits with projection (only load needed fields)
-            IQueryable<Demographic> demographicExpression = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+            IQueryable<Demographic> demographicExpression = await _demographicReaderService.BuildDemographicQueryAsync(ctx, true);
             var employeeData = await (
                 from demo in demographicExpression
                 join pp in ctx.PayProfits on demo.Id equals pp.DemographicId
@@ -181,7 +181,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             PaginatedResponseDto<ForfeituresAndPointsForYearResponse> paginatedData =
                 await members.AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
 
-            var crossRefValidation = await _crossReferenceValidationService.ValidateForfeitureAndPointsReport(currentYear, distributionsTotal, forfeitsTotal, cancellationToken);
+            var crossRefValidation = await _crossReferenceValidationService.ValidateForfeitureAndPointsReportAsync(currentYear, distributionsTotal, forfeitsTotal, cancellationToken);
 
             return new ForfeituresAndPointsForYearResponseWithTotals
             {

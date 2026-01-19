@@ -266,23 +266,15 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             .RuleFor(e => e.PrimaryKey, f => f.Random.Int(1, 1000).ToString())
             .RuleFor(e => e.UserName, f => f.PickRandom("admin.user", "finance.manager", "it.devops"))
             .RuleFor(e => e.CreatedAt, f => f.Date.RecentOffset(days: 30))
-            .RuleFor(e => e.ChangesJson, f => new List<AuditChangeEntry>
-            {
+            .RuleFor(e => e.ChangesJson, f =>
+            [
                 new AuditChangeEntry
                 {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "StatusId",
-                    OriginalValue = f.Random.Int(1, 5).ToString(),
-                    NewValue = f.Random.Int(1, 5).ToString()
+                    Id = f.Random.Long(1, 10000), ColumnName = "StatusId", OriginalValue = f.Random.Int(1, 5).ToString(), NewValue = f.Random.Int(1, 5).ToString()
                 },
-                new AuditChangeEntry
-                {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "ModifiedDate",
-                    OriginalValue = f.Date.Past().ToString(),
-                    NewValue = f.Date.Recent().ToString()
-                }
-            })
+
+                new AuditChangeEntry { Id = f.Random.Long(1, 10000), ColumnName = "ModifiedDate", OriginalValue = f.Date.Past().ToString(), NewValue = f.Date.Recent().ToString() }
+            ])
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
         auditEvents.AddRange(navigationFaker.Generate(4));
@@ -296,16 +288,10 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             PrimaryKey = "999",
             UserName = "admin.user",
             CreatedAt = DateTimeOffset.UtcNow.AddDays(-5),
-            ChangesJson = new List<AuditChangeEntry>
-            {
-                new AuditChangeEntry
-                {
-                    Id = 1,
-                    ColumnName = "StatusId",
-                    OriginalValue = "1",
-                    NewValue = "2"
-                }
-            },
+            ChangesJson =
+            [
+                new AuditChangeEntry { Id = 1, ColumnName = "StatusId", OriginalValue = "1", NewValue = "2" }
+            ],
             ChangesHash = faker.Random.Hash()
         });
 
@@ -317,16 +303,10 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             .RuleFor(e => e.PrimaryKey, f => f.Random.Int(1, 10000).ToString())
             .RuleFor(e => e.UserName, f => f.PickRandom("hr.admin", "payroll.clerk", "admin.user"))
             .RuleFor(e => e.CreatedAt, f => f.Date.RecentOffset(days: 30))
-            .RuleFor(e => e.ChangesJson, f => new List<AuditChangeEntry>
-            {
-                new AuditChangeEntry
-                {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "LastName",
-                    OriginalValue = f.Name.LastName(),
-                    NewValue = f.Name.LastName()
-                }
-            })
+            .RuleFor(e => e.ChangesJson, f =>
+            [
+                new AuditChangeEntry { Id = f.Random.Long(1, 10000), ColumnName = "LastName", OriginalValue = f.Name.LastName(), NewValue = f.Name.LastName() }
+            ])
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
         auditEvents.AddRange(demographicFaker.Generate(4));
@@ -339,16 +319,13 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             .RuleFor(e => e.PrimaryKey, f => f.Random.Int(2020, 2025).ToString())
             .RuleFor(e => e.UserName, f => f.PickRandom("admin.user", "finance.manager"))
             .RuleFor(e => e.CreatedAt, f => f.Date.RecentOffset(days: 60))
-            .RuleFor(e => e.ChangesJson, f => new List<AuditChangeEntry>
-            {
+            .RuleFor(e => e.ChangesJson, f =>
+            [
                 new AuditChangeEntry
                 {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "Report",
-                    OriginalValue = null,
-                    NewValue = f.Random.Hash() // Simulating JSON payload
+                    Id = f.Random.Long(1, 10000), ColumnName = "Report", OriginalValue = null, NewValue = f.Random.Hash() // Simulating JSON payload
                 }
-            })
+            ])
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
         auditEvents.AddRange(archiveFaker.Generate(3));
@@ -361,16 +338,13 @@ public sealed class AuditServiceSearchTests : ApiTestBase<Program>
             .RuleFor(e => e.PrimaryKey, f => f.Random.Int(1, 10000).ToString())
             .RuleFor(e => e.UserName, f => f.PickRandom("system.process", "batch.job"))
             .RuleFor(e => e.CreatedAt, f => f.Date.BetweenOffset(DateTimeOffset.UtcNow.AddDays(-90), DateTimeOffset.UtcNow.AddDays(-31)))
-            .RuleFor(e => e.ChangesJson, f => new List<AuditChangeEntry>
-            {
+            .RuleFor(e => e.ChangesJson, f =>
+            [
                 new AuditChangeEntry
                 {
-                    Id = f.Random.Long(1, 10000),
-                    ColumnName = "Amount",
-                    OriginalValue = f.Finance.Amount(0, 10000).ToString(),
-                    NewValue = f.Finance.Amount(0, 10000).ToString()
+                    Id = f.Random.Long(1, 10000), ColumnName = "Amount", OriginalValue = f.Finance.Amount(0, 10000).ToString(), NewValue = f.Finance.Amount(0, 10000).ToString()
                 }
-            })
+            ])
             .RuleFor(e => e.ChangesHash, f => f.Random.Hash());
 
         auditEvents.AddRange(olderEventsFaker.Generate(3));

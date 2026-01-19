@@ -45,7 +45,7 @@ public class ProfitMasterService : IProfitMasterService
         _timeProvider = timeProvider;
     }
 
-    public async Task<ProfitMasterUpdateResponse?> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<ProfitMasterUpdateResponse?> StatusAsync(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         return await _dbFactory.UseReadOnlyContext(async ctx =>
         {
@@ -78,7 +78,7 @@ public class ProfitMasterService : IProfitMasterService
         }, cancellationToken);
     }
 
-    public async Task<ProfitMasterUpdateResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken ct)
+    public async Task<ProfitMasterUpdateResponse> UpdateAsync(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken ct)
     {
         return await _dbFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
@@ -90,7 +90,7 @@ public class ProfitMasterService : IProfitMasterService
                 .FirstOrDefaultAsync(ct);
 
             // Get active frozen year.
-            var frozenDemographicYear = (await _frozenService.GetActiveFrozenDemographic(ct)).ProfitYear;
+            var frozenDemographicYear = (await _frozenService.GetActiveFrozenDemographicAsync(ct)).ProfitYear;
 
             // lastestYearEndUpdateStatus == null only for first year ever, 2025.
             if (latestYearEndUpdateStatus != null && latestYearEndUpdateStatus.ProfitYear != frozenDemographicYear - 1)
@@ -116,15 +116,15 @@ public class ProfitMasterService : IProfitMasterService
 
             // This code only runs when the system is "FROZEN" which means in the beginning of a new year, and processing
             // last year's profit sharing.   We currently grab most profit sharing data from PayProfit using the prior year (aka profit year), but
-            // the hot ETVA is located in the PayProfit for the wall-clock year (aka profitYear+1) 
+            // the hot ETVA is located in the PayProfit for the wall-clock year (aka profitYear+1)
 
-            // Vocabulary;  "Now Year" or "wall clock year" or "profit year + 1" they are the same.  
-            //              "Profit Year" is simply the profit year. 
+            // Vocabulary;  "Now Year" or "wall clock year" or "profit year + 1" they are the same.
+            //              "Profit Year" is simply the profit year.
 
-            // This selection of which columns are from "profit year" vs "now year" is could change. 
+            // This selection of which columns are from "profit year" vs "now year" is could change.
 
             // This gist of why we care about two PAY_PROFIT rows, is that we need information from both when the wall clock year is not the profit year.
-            // EnrolledId               -> (either row?) which type of plan are they in 1,2 or are the out 3,4   (do we want now or at Fiscal Freeze?) 
+            // EnrolledId               -> (either row?) which type of plan are they in 1,2 or are the out 3,4   (do we want now or at Fiscal Freeze?)
             // PointsEarned             -> (profit year) set in PAY443/YearEndService.cs
             // ZeroContributionReasonId -> (profit year) set in PAY426/PayProfitUpdateService.cs
             // ETVA                     -> (profit year - write only!) - it becomes "last years ETVA" aka the ETVA when YE (this program) is run.
@@ -145,13 +145,13 @@ public class ProfitMasterService : IProfitMasterService
                   SELECT d.id AS demographic_id, pd.earnings
                   FROM profit_detail pd
                   JOIN demographic d ON pd.ssn = d.ssn
-                  WHERE pd.profit_code_id = /*8*/ {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} 
+                  WHERE pd.profit_code_id = /*8*/ {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id}
                     AND pd.profit_year = {openProfitYear}
-                    AND pd.comment_type_id = /* 23 '100% Earnings' */{CommentType.Constants.OneHundredPercentEarnings.Id} 
-                ) oq    
+                    AND pd.comment_type_id = /* 23 '100% Earnings' */{CommentType.Constants.OneHundredPercentEarnings.Id}
+                ) oq
                 ON (pp.demographic_id = oq.demographic_id AND pp.profit_year = {etvaHotProfitYear})
                 WHEN MATCHED THEN
-                  -- bump UP the ETVA by the amount of 100% earnings. 
+                  -- bump UP the ETVA by the amount of 100% earnings.
                   UPDATE SET pp.etva = pp.etva + oq.earnings";
             int etvasEffected = await ctx.Database.ExecuteSqlInterpolatedAsync(sqlAdjustEtva, ct);
 
@@ -165,14 +165,14 @@ public class ProfitMasterService : IProfitMasterService
                   FROM profit_detail pd
                   JOIN demographic d ON pd.ssn = d.ssn
                   JOIN pay_profit ppNow ON d.id = ppNow.demographic_id
-                  WHERE pd.profit_code_id = /*8*/ {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} 
+                  WHERE pd.profit_code_id = /*8*/ {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id}
                     AND pd.profit_year = {openProfitYear}
-                    AND pd.comment_type_id = /* 23 '100% Earnings' */{CommentType.Constants.OneHundredPercentEarnings.Id} 
+                    AND pd.comment_type_id = /* 23 '100% Earnings' */{CommentType.Constants.OneHundredPercentEarnings.Id}
                     AND ppNow.profit_year = {etvaHotProfitYear}
-                ) oq    
+                ) oq
                 ON (pp.demographic_id = oq.demographic_id AND pp.profit_year = {etvaPriorProfitYear})
                 WHEN MATCHED THEN
-                  -- copy now to last year 
+                  -- copy now to last year
                   UPDATE SET pp.etva = oq.etva";
             etvasEffected += await ctx.Database.ExecuteSqlInterpolatedAsync(sqlAdjustProfitYearEtva, ct);
 
@@ -247,9 +247,9 @@ public class ProfitMasterService : IProfitMasterService
         }).ToList();
     }
 
-    public async Task<ProfitMasterRevertResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken)
+    public async Task<ProfitMasterRevertResponse> RevertAsync(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken)
     {
-        var frozenDemographicYear = (await _frozenService.GetActiveFrozenDemographic(cancellationToken)).ProfitYear;
+        var frozenDemographicYear = (await _frozenService.GetActiveFrozenDemographicAsync(cancellationToken)).ProfitYear;
         // The ETVA value is always hot in the wall clock year.
         short etvaHotProfitYear = _timeProvider.GetLocalYearAsShort();
 

@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -40,7 +40,7 @@ internal sealed class ProfitShareUpdateReport
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, ProfitShareUpdateTotals totalsDto, bool _) =
-            await psu.ProfitSharingUpdate(profitShareUpdateRequest, CancellationToken.None, false);
+            await psu.ProfitSharingUpdateAsync(profitShareUpdateRequest, CancellationToken.None, false);
 
         // Sort like READY sorts, meaning "Mc" comes after "ME" (aka it is doing a pure ascii sort - lowercase characters are higher.)
         members = members

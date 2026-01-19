@@ -32,6 +32,6 @@ public sealed class YearEndSetEnrollmentEndpoint : ProfitSharingRequestEndpoint<
 
     protected override Task HandleRequestAsync(ProfitYearRequest req, CancellationToken ct)
     {
-        return _yearEndService.UpdateEnrollmentId(req.ProfitYear, ct);
+        return _yearEndService.UpdateEnrollmentIdAsync(req.ProfitYear, ct);
     }
 }

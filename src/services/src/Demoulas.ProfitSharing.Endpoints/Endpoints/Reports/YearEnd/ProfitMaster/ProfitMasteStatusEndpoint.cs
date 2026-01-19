@@ -40,7 +40,7 @@ public class ProfitMasterStatusEndpoint : ProfitSharingEndpoint<ProfitYearReques
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var response = await _profitMasterService.Status(req, ct);
+            var response = await _profitMasterService.StatusAsync(req, ct);
 
             // Record year-end profit master status metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

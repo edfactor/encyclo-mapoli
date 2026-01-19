@@ -296,7 +296,7 @@ public sealed class BreakdownReportService : IBreakdownService
                 return endBal * vestingRatio;
             });
 
-            totals.CrossReferenceValidation = await _crossReferenceValidationService.ValidateBreakoutReportGrandTotal(
+            totals.CrossReferenceValidation = await _crossReferenceValidationService.ValidateBreakoutReportGrandTotalAsync(
                 request.ProfitYear,
                 totals.TotalNumberEmployees,
                 totals.TotalBeginningBalances,
@@ -674,7 +674,7 @@ public sealed class BreakdownReportService : IBreakdownService
           Terminated buckets (800–802) depend on pay-frequency plus the size/vesting of the participant’s profit-sharing balance.
            Monthly payroll (900) is simply anyone with FREQ = 2.
        */
-        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
         var pensionerSsns = from ei in ctx.ExcludedIds
                             where ei.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions
@@ -850,7 +850,7 @@ public sealed class BreakdownReportService : IBreakdownService
         var txnsBySsn = txns.ToLookup(txn => txn.Ssn);
 
         // Snapshots -------------------------------------------------------------------
-        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
         var badgeNumberBySsn = await demographics
             .Where(d => employeeSsns.Contains(d.Ssn))
             .Select(d => new { d.Ssn, d.BadgeNumber })

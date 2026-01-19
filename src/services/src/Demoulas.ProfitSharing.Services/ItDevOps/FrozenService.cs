@@ -125,7 +125,7 @@ public class FrozenService : IFrozenService
     /// <param name="userName"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, string? userName = "Unknown", CancellationToken cancellationToken = default)
+    public async Task<FrozenStateResponse> FreezeDemographicsAsync(short profitYear, DateTime asOfDateTime, string? userName = "Unknown", CancellationToken cancellationToken = default)
     {
         var validator = new InlineValidator<short>();
 
@@ -216,7 +216,7 @@ public class FrozenService : IFrozenService
     /// A task that represents the asynchronous operation. The task result contains a list of
     /// <see cref="FrozenStateResponse"/> objects representing the frozen demographic states.
     /// </returns>
-    public Task<PaginatedResponseDto<FrozenStateResponse>> GetFrozenDemographics(SortedPaginationRequestDto request, CancellationToken cancellationToken = default)
+    public Task<PaginatedResponseDto<FrozenStateResponse>> GetFrozenDemographicsAsync(SortedPaginationRequestDto request, CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
@@ -233,7 +233,7 @@ public class FrozenService : IFrozenService
         }, cancellationToken);
     }
 
-    public Task<FrozenStateResponse> GetActiveFrozenDemographic(CancellationToken cancellationToken = default)
+    public Task<FrozenStateResponse> GetActiveFrozenDemographicAsync(CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {

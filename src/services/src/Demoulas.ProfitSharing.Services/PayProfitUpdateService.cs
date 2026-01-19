@@ -32,7 +32,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
         _vestingScheduleService = vestingScheduleService;
     }
 
-    public async Task SetZeroContributionReason(IQueryable<PayProfit> records, byte zeroContributionReasonId, CancellationToken cancellationToken)
+    public async Task SetZeroContributionReasonAsync(IQueryable<PayProfit> records, byte zeroContributionReasonId, CancellationToken cancellationToken)
     {
         using (_logger.BeginScope("Beginning Set Zero Contribution Reason to {0}", zeroContributionReasonId))
         {
@@ -42,7 +42,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
         }
     }
 
-    public async Task SetEnrollmentId(short profitYear, CancellationToken ct)
+    public async Task SetEnrollmentIdAsync(short profitYear, CancellationToken ct)
     {
         using (_logger.BeginScope("Setting EnrollmentId for ProfitYear {0}", profitYear))
         {

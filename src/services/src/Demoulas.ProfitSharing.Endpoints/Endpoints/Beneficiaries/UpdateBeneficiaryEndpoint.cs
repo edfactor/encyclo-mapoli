@@ -32,7 +32,7 @@ public sealed class UpdateBeneficiaryEndpoint : ProfitSharingEndpoint<UpdateBene
         UpdateBeneficiaryRequest req,
         CancellationToken ct)
     {
-        var result = await _beneficiaryService.UpdateBeneficiary(req, ct);
+        var result = await _beneficiaryService.UpdateBeneficiaryAsync(req, ct);
         return result is null
             ? Result<UpdateBeneficiaryResponse>.Failure(Error.EntityNotFound("Beneficiary"))
                 .ToHttpResult(Error.EntityNotFound("Beneficiary"))

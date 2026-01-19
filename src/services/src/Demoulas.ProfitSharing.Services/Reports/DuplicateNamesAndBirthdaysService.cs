@@ -57,7 +57,7 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 IQueryable<DemographicMatchDto> dupNameSlashDateOfBirth;
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                 // Fallback for mocked (in-memory) db context which does not support raw SQL
                 if (_host.IsTestEnvironment())
                 {
@@ -87,7 +87,7 @@ FROM FILTERED_DEMOGRAPHIC p1
          JOIN FILTERED_DEMOGRAPHIC p2
               ON p1.Id <> p2.Id /* Avoid self-joins and duplicate pairs */
                   AND SUBSTR(p1.FULL_NAME,1,1) = SUBSTR(p2.FULL_NAME,1,1) -- Eliminate by first letter before using more CPU intensive functions
-                  AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ )                  
+                  AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ )
                   AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3 /* Name similarity threshold */
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */";
 
@@ -152,7 +152,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     .ToHashSetAsync(cancellationToken);
 
                 // Get all SSNs that have change history (treat as fake/problematic)
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
                 var changedSsns = await demographics
                     .TagWith("GetChangedSsns-DuplicateNamesAndBirthdays")
                     .Where(d => d.DemographicSsnChangeHistories.Any())

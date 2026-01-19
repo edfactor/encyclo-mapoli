@@ -4,5 +4,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IStateTaxLookupService
 {
-    Task<StateTaxLookupResponse> LookupStateTaxRate(string state, CancellationToken cancellationToken = default);
+    Task<StateTaxLookupResponse> LookupStateTaxRateAsync(string state, CancellationToken cancellationToken = default);
 }

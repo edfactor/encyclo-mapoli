@@ -39,7 +39,7 @@ public sealed class DistributionRunReportManualChecksEndpoint : ProfitSharingEnd
         SortedPaginationRequestDto req,
         CancellationToken ct)
     {
-        var result = await _distributionService.GetManualCheckDistributions(req, ct);
+        var result = await _distributionService.GetManualCheckDistributionsAsync(req, ct);
         return result.ToHttpResult(Error.EntityNotFound("ManualCheckDistributions"));
     }
 }

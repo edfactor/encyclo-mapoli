@@ -28,7 +28,7 @@ public class DeleteBeneficiaryContactEndpoint : ProfitSharingEndpoint<IdRequest,
     {
         try
         {
-            await _beneficiaryService.DeleteBeneficiaryContact(req.Id, ct);
+            await _beneficiaryService.DeleteBeneficiaryContactAsync(req.Id, ct);
             return TypedResults.Ok();
         }
         catch (Exception ex)

@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries.Inquiry;
 
 public class BeneficiaryEndpoint : ProfitSharingEndpoint<BeneficiaryRequestDto, BeneficiaryResponse>
 {
@@ -31,7 +31,7 @@ public class BeneficiaryEndpoint : ProfitSharingEndpoint<BeneficiaryRequestDto, 
 
     protected override async Task<BeneficiaryResponse> HandleRequestAsync(BeneficiaryRequestDto req, CancellationToken ct)
     {
-        var result = await _beneficiaryService.GetBeneficiary(req, ct);
+        var result = await _beneficiaryService.GetBeneficiaryAsync(req, ct);
         return result ?? new BeneficiaryResponse();
     }
 

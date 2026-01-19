@@ -38,7 +38,7 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
         IdRequest req,
         CancellationToken ct)
     {
-        var result = await _distributionService.DeleteDistribution(req.Id, ct);
+        var result = await _distributionService.DeleteDistributionAsync(req.Id, ct);
         _logger.LogInformation("Distribution delete requested for id {DistributionId}", req.Id);
         return result.ToHttpResultWithValidation(Error.DistributionNotFound);
     }

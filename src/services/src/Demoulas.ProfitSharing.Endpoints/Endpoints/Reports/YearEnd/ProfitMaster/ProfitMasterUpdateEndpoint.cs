@@ -60,7 +60,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             "Executing Master Update (PAY444|PAY447) for year {ProfitYear}",
             req.ProfitYear);
 
-        var updateResponse = await _profitMasterService.Update(req, ct);
+        var updateResponse = await _profitMasterService.UpdateAsync(req, ct);
 
         // Archive the completed Master Update
         var response = await _profitSharingAuditService.ArchiveCompletedReportAsync("PAY444|PAY447",
@@ -84,7 +84,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
                 _logger.LogInformation(
                     "Generating Profit Share Edit report post Master Update for year {ProfitYear}",
                     req.ProfitYear);
-                return await _editService.ProfitShareEdit(req, cancellationToken);
+                return await _editService.ProfitShareEditAsync(req, cancellationToken);
 
             },
             ct);
