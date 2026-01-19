@@ -17,6 +17,22 @@ interface ApiRequest {
   duration: number;
 }
 
+const sessionHistoryKey = "api_request_history";
+
+const readApiHistory = (): ApiRequest[] => {
+  try {
+    const stored = sessionStorage.getItem(sessionHistoryKey);
+    if (!stored) {
+      return [];
+    }
+
+    const parsed = JSON.parse(stored) as unknown;
+    return Array.isArray(parsed) ? (parsed as ApiRequest[]) : [];
+  } catch {
+    return [];
+  }
+};
+
 const DevDebug = () => {
   const securityState = useSelector<RootState, SecurityState>((_state) => _state.security);
   const hasToken: boolean = !!useSelector((_state: RootState) => securityState.token);
@@ -30,7 +46,7 @@ const DevDebug = () => {
   // API History state - moved from callback to component level
   const [apiHistory, setApiHistory] = useState<ApiRequest[]>(() => {
     // Try to get history from session storage
-    return JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
+    return readApiHistory();
   });
 
   // Trigger the API calls when the component mounts
@@ -45,10 +61,7 @@ const DevDebug = () => {
   useEffect(() => {
     // Function to handle storage changes
     const handleStorageChange = () => {
-      const storedHistory = sessionStorage.getItem("api_request_history");
-      if (storedHistory) {
-        setApiHistory(JSON.parse(storedHistory));
-      }
+      setApiHistory(readApiHistory());
     };
 
     // Set up an interval to check session storage

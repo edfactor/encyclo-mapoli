@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Channels;
@@ -283,14 +284,13 @@ public static class OracleHcmExtension
             options.Retry.Delay = TimeSpan.FromMinutes(4); // was 2
 
             // Add jitter to retry delay (doubled base delay & exponential growth factor)
-            var random = new Random();
             options.Retry.DelayGenerator = args =>
             {
                 // base delay doubled (2s -> 4s)
                 var baseDelay = TimeSpan.FromSeconds(4);
                 // exponential component doubled by shifting power (+1) relative to previous implementation
                 var exponential = TimeSpan.FromMinutes(Math.Pow(2, args.AttemptNumber + 1));
-                var jitter = TimeSpan.FromMilliseconds(random.Next(0, 1000));
+                var jitter = TimeSpan.FromMilliseconds(RandomNumberGenerator.GetInt32(0, 1000));
                 return new ValueTask<TimeSpan?>(baseDelay + exponential + jitter);
             };
         }
