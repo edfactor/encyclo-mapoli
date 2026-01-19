@@ -10,7 +10,7 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { CellValueChangedEvent, ColDef, ValueFormatterParams, ValueParserParams } from "ag-grid-community";
+import { CellValueChangedEvent } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ApiMessageAlert, DSMGrid, Page } from "smart-ui-library";
@@ -24,8 +24,8 @@ import {
 } from "../../../reduxstore/api/ItOperationsApi";
 import { setMessage } from "../../../reduxstore/slices/messageSlice";
 import { AnnuityRateDto, AnnuityRateInputRequest } from "../../../reduxstore/types";
-import { mmDDYYFormat } from "../../../utils/dateUtils";
 import { Messages } from "../../../utils/messageDictonary";
+import { getCopyAnnuityRatesColumns, getManageAnnuityRatesColumns } from "./ManageAnnuityRatesGridColumns";
 
 type StagedAnnuityRateChange = {
   singleRate: number;
@@ -88,122 +88,8 @@ const ManageAnnuityRates = () => {
     setStagedRatesByKey({});
   }, [data]);
 
-  const columnDefs = useMemo<ColDef[]>(() => {
-    return [
-      {
-        headerName: "Year",
-        field: "year",
-        sortable: true,
-        filter: false,
-        editable: false,
-        width: 60
-      },
-      {
-        headerName: "Age",
-        field: "age",
-        sortable: true,
-        filter: false,
-        editable: false,
-        width: 55
-      },
-      {
-        headerName: "Single Rate",
-        field: "singleRate",
-        sortable: true,
-        filter: false,
-        editable: true,
-        width: 80,
-        valueParser: (params: ValueParserParams) => {
-          const parsed = Number.parseFloat(String(params.newValue ?? ""));
-          return Number.isFinite(parsed) ? parsed : params.oldValue;
-        },
-        valueFormatter: (params: ValueFormatterParams) => {
-          const value = params.value;
-          return typeof value === "number" && Number.isFinite(value) ? value.toFixed(4) : "";
-        }
-      },
-      {
-        headerName: "Joint Rate",
-        field: "jointRate",
-        sortable: true,
-        filter: false,
-        editable: true,
-        width: 80,
-        valueParser: (params: ValueParserParams) => {
-          const parsed = Number.parseFloat(String(params.newValue ?? ""));
-          return Number.isFinite(parsed) ? parsed : params.oldValue;
-        },
-        valueFormatter: (params: ValueFormatterParams) => {
-          const value = params.value;
-          return typeof value === "number" && Number.isFinite(value) ? value.toFixed(4) : "";
-        }
-      },
-      {
-        headerName: "User Modified",
-        field: "userModified",
-        sortable: true,
-        filter: false,
-        editable: false,
-        width: 150
-      },
-      {
-        headerName: "Date Modified",
-        field: "dateModified",
-        sortable: true,
-        filter: false,
-        editable: false,
-        width: 150,
-        valueFormatter: (params: ValueFormatterParams) => {
-          return params.value ? mmDDYYFormat(params.value) : "";
-        }
-      }
-    ];
-  }, []);
-
-  const copyColumnDefs = useMemo<ColDef[]>(() => {
-    return [
-      {
-        headerName: "Age",
-        field: "age",
-        sortable: true,
-        filter: false,
-        editable: false,
-        width: 70
-      },
-      {
-        headerName: "Single Rate",
-        field: "singleRate",
-        sortable: false,
-        filter: false,
-        editable: true,
-        width: 120,
-        valueParser: (params: ValueParserParams) => {
-          const parsed = Number.parseFloat(String(params.newValue ?? ""));
-          return Number.isFinite(parsed) ? parsed : params.oldValue;
-        },
-        valueFormatter: (params: ValueFormatterParams) => {
-          const value = params.value;
-          return typeof value === "number" && Number.isFinite(value) ? value.toFixed(4) : "";
-        }
-      },
-      {
-        headerName: "Joint Rate",
-        field: "jointRate",
-        sortable: false,
-        filter: false,
-        editable: true,
-        width: 120,
-        valueParser: (params: ValueParserParams) => {
-          const parsed = Number.parseFloat(String(params.newValue ?? ""));
-          return Number.isFinite(parsed) ? parsed : params.oldValue;
-        },
-        valueFormatter: (params: ValueFormatterParams) => {
-          const value = params.value;
-          return typeof value === "number" && Number.isFinite(value) ? value.toFixed(4) : "";
-        }
-      }
-    ];
-  }, []);
+  const columnDefs = useMemo(() => getManageAnnuityRatesColumns(), []);
+  const copyColumnDefs = useMemo(() => getCopyAnnuityRatesColumns(), []);
 
   const onCellValueChanged = (event: CellValueChangedEvent) => {
     const row = event.data as AnnuityRateDto | undefined;
