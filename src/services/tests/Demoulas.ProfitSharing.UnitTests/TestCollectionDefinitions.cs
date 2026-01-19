@@ -7,7 +7,7 @@
 /// </summary>
 ///
 // Collections that CAN run in parallel (independent endpoints with separate fixtures)
-[CollectionDefinition("Beneficiary Tests", DisableParallelization = false)]
+[CollectionDefinition("Beneficiary Tests", DisableParallelization = true)]
 public class BeneficiaryTestCollection { }
 
 [CollectionDefinition("Distribution Tests", DisableParallelization = false)]
