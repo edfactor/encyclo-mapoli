@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Net;
-using System.Net.Http.Json;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -8,6 +7,7 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.Corrections;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using FastEndpoints;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
@@ -17,11 +17,6 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ProfitDetails;
 [Collection("Profit Details Tests")]
 public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 {
-    private Task<HttpResponseMessage> PostReversalsAsync(IdsRequest request)
-    {
-        return ApiClient.PostAsJsonAsync("profitdetails/reversals", request);
-    }
-
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found when profit details don't exist")]
     [Description("Should return 400 Bad Request when trying to reverse non-existent profit details")]
     public async Task ProfitDetailReversals_WithNonExistentIds_ShouldReturnNotFound()
@@ -34,11 +29,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found for single non-existent ID")]
@@ -53,11 +48,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found for maximum batch size of non-existent IDs")]
@@ -73,11 +68,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should work with System Administrator role (not found case)")]
@@ -92,11 +87,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should require authentication")]
@@ -107,11 +102,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         var request = IdsRequest.RequestExample();
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Theory(DisplayName = "ProfitDetailReversals - Should require appropriate role")]
@@ -131,11 +126,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle validation errors for null IDs")]
@@ -150,11 +145,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle validation errors for empty IDs")]
@@ -169,11 +164,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle validation errors for oversized batch")]
@@ -189,11 +184,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle validation errors for non-positive IDs")]
@@ -208,11 +203,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle validation errors for duplicate IDs")]
@@ -227,11 +222,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle service not found errors")]
@@ -246,11 +241,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle concurrent requests with not found")]
@@ -265,9 +260,9 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         var request3 = new IdsRequest { Ids = new[] { 30, 31, 32 } };
 
         // Act
-        var task1 = PostReversalsAsync(request1);
-        var task2 = PostReversalsAsync(request2);
-        var task3 = PostReversalsAsync(request3);
+        var task1 = ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request1);
+        var task2 = ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request2);
+        var task3 = ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request3);
 
         var responses = await Task.WhenAll(task1, task2, task3);
 
@@ -278,7 +273,7 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         foreach (var response in responses)
         {
             response.ShouldNotBeNull();
-            response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+            response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         }
     }
 
@@ -300,11 +295,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Endpoint configuration should be correct")]
@@ -340,11 +335,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         // Note: In a real test environment with telemetry infrastructure,
         // we would verify that:
@@ -370,12 +365,12 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
         // In the test environment, non-existent IDs return 400 Bad Request (validation failure)
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found for non-existent correlation test")]
@@ -391,11 +386,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await PostReversalsAsync(request);
+        var response = await ApiClient.POSTAsync<ProfitDetailReversalsEndpoint, IdsRequest, IdsResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         // Note: In a successful scenario with existing profit details,
         // the response would maintain request-response correlation

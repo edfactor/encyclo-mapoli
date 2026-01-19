@@ -5,7 +5,7 @@
 /// Tests in the same collection run sequentially.
 /// Tests in different collections run in parallel (up to maxParallelThreads).
 /// </summary>
-/// 
+///
 // Collections that CAN run in parallel (independent endpoints with separate fixtures)
 [CollectionDefinition("Beneficiary Tests", DisableParallelization = false)]
 public class BeneficiaryTestCollection { }
@@ -22,10 +22,10 @@ public class ItOperationsTestCollection { }
 [CollectionDefinition("Navigation Tests", DisableParallelization = false)]
 public class NavigationTestCollection { }
 
-[CollectionDefinition("Lookup Tests", DisableParallelization = false)]
+[CollectionDefinition("Lookup Tests", DisableParallelization = true)]
 public class LookupTestCollection { }
 
-[CollectionDefinition("Profit Details Tests", DisableParallelization = false)]
+[CollectionDefinition("Profit Details Tests", DisableParallelization = true)]
 public class ProfitDetailsTestCollection { }
 
 [CollectionDefinition("Adjustments Tests", DisableParallelization = false)]
