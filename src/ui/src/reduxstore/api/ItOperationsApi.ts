@@ -7,6 +7,7 @@ import {
   AuditChangeEntryDto,
   AuditEventDto,
   AuditSearchRequestDto,
+  CreateAnnuityRatesRequest,
   CurrentUserResponseDto,
   FakeTimeStatusResponse,
   FreezeDemographicsRequest,
@@ -49,6 +50,13 @@ export const ItOperationsApi = createApi({
       query: (request) => ({
         url: "administration/annuity-rates",
         method: "PUT",
+        body: request
+      })
+    }),
+    createAnnuityRates: builder.mutation<AnnuityRateDto[], CreateAnnuityRatesRequest>({
+      query: (request) => ({
+        url: "administration/annuity-rates",
+        method: "POST",
         body: request
       })
     }),
@@ -165,6 +173,7 @@ export const ItOperationsApi = createApi({
 export const {
   useGetAnnuityRatesQuery,
   useUpdateAnnuityRateMutation,
+  useCreateAnnuityRatesMutation,
   useGetStateTaxRatesQuery,
   useUpdateStateTaxRateMutation,
   useLazyGetFrozenStateResponseQuery,

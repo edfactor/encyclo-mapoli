@@ -12,6 +12,8 @@ public interface IAnnuityRatesService
 
     Task<Result<AnnuityRateDto>> UpdateAnnuityRateAsync(UpdateAnnuityRateRequest request, CancellationToken cancellationToken);
 
+    Task<Result<IReadOnlyList<AnnuityRateDto>>> CreateAnnuityRatesAsync(CreateAnnuityRatesRequest request, CancellationToken cancellationToken);
+
     /// <summary>
     /// Checks which years have complete annuity rate data (all required ages defined).
     /// </summary>

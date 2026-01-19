@@ -1,4 +1,15 @@
-import { Box, Button, Divider, Grid } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  TextField,
+  Typography
+} from "@mui/material";
 import { CellValueChangedEvent, ColDef, ValueFormatterParams, ValueParserParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -6,9 +17,13 @@ import { ApiMessageAlert, DSMGrid, Page } from "smart-ui-library";
 import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, GRID_KEYS } from "../../../constants";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
-import { useGetAnnuityRatesQuery, useUpdateAnnuityRateMutation } from "../../../reduxstore/api/ItOperationsApi";
+import {
+  useCreateAnnuityRatesMutation,
+  useGetAnnuityRatesQuery,
+  useUpdateAnnuityRateMutation
+} from "../../../reduxstore/api/ItOperationsApi";
 import { setMessage } from "../../../reduxstore/slices/messageSlice";
-import { AnnuityRateDto } from "../../../reduxstore/types";
+import { AnnuityRateDto, AnnuityRateInputRequest } from "../../../reduxstore/types";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
 import { Messages } from "../../../utils/messageDictonary";
 
@@ -44,10 +59,15 @@ const ManageAnnuityRates = () => {
   const dispatch = useDispatch();
   const { data, isFetching, refetch } = useGetAnnuityRatesQuery({ sortBy: "Year", isSortDescending: true });
   const [updateAnnuityRate, { isLoading: isSaving }] = useUpdateAnnuityRateMutation();
+  const [createAnnuityRates, { isLoading: isCreating }] = useCreateAnnuityRatesMutation();
 
   const [rowData, setRowData] = useState<AnnuityRateDto[]>([]);
   const [originalRatesByKey, setOriginalRatesByKey] = useState<Record<string, StagedAnnuityRateChange>>({});
   const [stagedRatesByKey, setStagedRatesByKey] = useState<Record<string, StagedAnnuityRateChange>>({});
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [copyYear, setCopyYear] = useState<number | "">("");
+  const [copySourceYear, setCopySourceYear] = useState<number | null>(null);
+  const [copyRates, setCopyRates] = useState<AnnuityRateInputRequest[]>([]);
 
   const hasUnsavedChanges = Object.keys(stagedRatesByKey).length > 0;
   useUnsavedChangesGuard(hasUnsavedChanges);
@@ -135,6 +155,51 @@ const ManageAnnuityRates = () => {
         width: 150,
         valueFormatter: (params: ValueFormatterParams) => {
           return params.value ? mmDDYYFormat(params.value) : "";
+        }
+      }
+    ];
+  }, []);
+
+  const copyColumnDefs = useMemo<ColDef[]>(() => {
+    return [
+      {
+        headerName: "Age",
+        field: "age",
+        sortable: true,
+        filter: false,
+        editable: false,
+        width: 70
+      },
+      {
+        headerName: "Single Rate",
+        field: "singleRate",
+        sortable: false,
+        filter: false,
+        editable: true,
+        width: 120,
+        valueParser: (params: ValueParserParams) => {
+          const parsed = Number.parseFloat(String(params.newValue ?? ""));
+          return Number.isFinite(parsed) ? parsed : params.oldValue;
+        },
+        valueFormatter: (params: ValueFormatterParams) => {
+          const value = params.value;
+          return typeof value === "number" && Number.isFinite(value) ? value.toFixed(4) : "";
+        }
+      },
+      {
+        headerName: "Joint Rate",
+        field: "jointRate",
+        sortable: false,
+        filter: false,
+        editable: true,
+        width: 120,
+        valueParser: (params: ValueParserParams) => {
+          const parsed = Number.parseFloat(String(params.newValue ?? ""));
+          return Number.isFinite(parsed) ? parsed : params.oldValue;
+        },
+        valueFormatter: (params: ValueFormatterParams) => {
+          const value = params.value;
+          return typeof value === "number" && Number.isFinite(value) ? value.toFixed(4) : "";
         }
       }
     ];
@@ -280,6 +345,177 @@ const ManageAnnuityRates = () => {
     }
   };
 
+  const openCopyModal = () => {
+    if (!data || data.length === 0) {
+      dispatch(
+        setMessage({
+          ...Messages.AnnuityRatesSaveError,
+          message: {
+            ...Messages.AnnuityRatesSaveError.message,
+            message: "No prior year annuity rates are available to copy."
+          }
+        })
+      );
+      return;
+    }
+
+    const latestYear = Math.max(...data.map((rate) => rate.year));
+    const lastYearRates = data
+      .filter((rate) => rate.year === latestYear)
+      .sort((a, b) => a.age - b.age)
+      .map((rate) => ({
+        age: rate.age,
+        singleRate: rate.singleRate,
+        jointRate: rate.jointRate
+      }));
+
+    if (lastYearRates.length === 0) {
+      dispatch(
+        setMessage({
+          ...Messages.AnnuityRatesSaveError,
+          message: {
+            ...Messages.AnnuityRatesSaveError.message,
+            message: `No annuity rates were found for ${latestYear}.`
+          }
+        })
+      );
+      return;
+    }
+
+    setCopySourceYear(latestYear);
+    setCopyYear(latestYear + 1);
+    setCopyRates(lastYearRates.map((rate) => ({ ...rate })));
+    setIsCopyModalOpen(true);
+  };
+
+  const closeCopyModal = () => {
+    if (isCreating) return;
+    setIsCopyModalOpen(false);
+  };
+
+  const onCopyCellValueChanged = (event: CellValueChangedEvent) => {
+    const row = event.data as AnnuityRateInputRequest | undefined;
+    if (!row) return;
+
+    setCopyRates((prev) =>
+      prev.map((rate) =>
+        rate.age === row.age
+          ? {
+              ...rate,
+              singleRate: row.singleRate,
+              jointRate: row.jointRate
+            }
+          : rate
+      )
+    );
+  };
+
+  const saveCopiedRates = async () => {
+    const yearValue = typeof copyYear === "number" ? copyYear : Number.parseInt(String(copyYear), 10);
+
+    if (!Number.isFinite(yearValue) || yearValue < 1900 || yearValue > 2100) {
+      dispatch(
+        setMessage({
+          ...Messages.AnnuityRatesCreateError,
+          message: {
+            ...Messages.AnnuityRatesCreateError.message,
+            message: "Year must be between 1900 and 2100."
+          }
+        })
+      );
+      return;
+    }
+
+    if (!copyRates.length) {
+      dispatch(
+        setMessage({
+          ...Messages.AnnuityRatesCreateError,
+          message: {
+            ...Messages.AnnuityRatesCreateError.message,
+            message: "Rates are required."
+          }
+        })
+      );
+      return;
+    }
+
+    for (const rate of copyRates) {
+      if (rate.singleRate < 0 || rate.singleRate > 99.9999) {
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesCreateError,
+            message: {
+              ...Messages.AnnuityRatesCreateError.message,
+              message: `Single Rate must be between 0 and 99.9999 (age ${rate.age}).`
+            }
+          })
+        );
+        return;
+      }
+
+      if (hasMoreThanFourDecimals(rate.singleRate)) {
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesCreateError,
+            message: {
+              ...Messages.AnnuityRatesCreateError.message,
+              message: `Single Rate can have at most 4 decimal places (age ${rate.age}).`
+            }
+          })
+        );
+        return;
+      }
+
+      if (rate.jointRate < 0 || rate.jointRate > 99.9999) {
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesCreateError,
+            message: {
+              ...Messages.AnnuityRatesCreateError.message,
+              message: `Joint Rate must be between 0 and 99.9999 (age ${rate.age}).`
+            }
+          })
+        );
+        return;
+      }
+
+      if (hasMoreThanFourDecimals(rate.jointRate)) {
+        dispatch(
+          setMessage({
+            ...Messages.AnnuityRatesCreateError,
+            message: {
+              ...Messages.AnnuityRatesCreateError.message,
+              message: `Joint Rate can have at most 4 decimal places (age ${rate.age}).`
+            }
+          })
+        );
+        return;
+      }
+    }
+
+    try {
+      await createAnnuityRates({
+        year: yearValue,
+        rates: copyRates.map((rate) => ({
+          age: rate.age,
+          singleRate: normalizeRateToFourDecimals(rate.singleRate),
+          jointRate: normalizeRateToFourDecimals(rate.jointRate)
+        }))
+      }).unwrap();
+
+      setIsCopyModalOpen(false);
+      setCopyRates([]);
+      setCopySourceYear(null);
+      setCopyYear("");
+      await refetch();
+
+      dispatch(setMessage(Messages.AnnuityRatesCreateSuccess));
+    } catch (e) {
+      console.error("Failed to create annuity rates", e);
+      dispatch(setMessage(Messages.AnnuityRatesCreateError));
+    }
+  };
+
   return (
     <PageErrorBoundary pageName="Manage Annuity Rates">
       <Page label={CAPTIONS.MANAGE_ANNUITY_RATES}>
@@ -306,6 +542,12 @@ const ManageAnnuityRates = () => {
               <Box sx={{ flex: 1 }} />
 
               <Box sx={{ display: "flex", gap: 3, justifyContent: "flex-end" }}>
+                <Button
+                  variant="outlined"
+                  disabled={isSaving || isCreating}
+                  onClick={openCopyModal}>
+                  Copy From Last Year
+                </Button>
                 <Button
                   variant="contained"
                   disabled={!hasUnsavedChanges || isSaving}
@@ -339,6 +581,64 @@ const ManageAnnuityRates = () => {
           </Grid>
         </Grid>
       </Page>
+      <Dialog
+        open={isCopyModalOpen}
+        onClose={closeCopyModal}
+        maxWidth="md"
+        fullWidth>
+        <DialogTitle sx={{ fontWeight: "bold" }}>Copy Annuity Rates</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            {copySourceYear ? `Copying rates from ${copySourceYear}.` : "Select a year to copy rates from."}
+          </Typography>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+            <TextField
+              label="New Year"
+              value={copyYear}
+              onChange={(event) => {
+                const rawValue = event.target.value;
+                if (rawValue === "") {
+                  setCopyYear("");
+                  return;
+                }
+
+                if (/^\d+$/.test(rawValue)) {
+                  setCopyYear(Number.parseInt(rawValue, 10));
+                }
+              }}
+              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+              size="small"
+            />
+          </Box>
+          <DSMGrid
+            preferenceKey={`${GRID_KEYS.MANAGE_ANNUITY_RATES}-copy`}
+            isLoading={isCreating}
+            providedOptions={{
+              rowData: copyRates,
+              columnDefs: copyColumnDefs,
+              suppressMultiSort: true,
+              stopEditingWhenCellsLoseFocus: true,
+              enterNavigatesVertically: true,
+              enterNavigatesVerticallyAfterEdit: true,
+              onCellValueChanged: onCopyCellValueChanged
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ padding: "16px 24px" }}>
+          <Button
+            variant="outlined"
+            onClick={closeCopyModal}
+            disabled={isCreating}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={saveCopiedRates}
+            disabled={isCreating}>
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </PageErrorBoundary>
   );
 };

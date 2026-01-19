@@ -21,6 +21,23 @@ export interface UpdateAnnuityRateRequest {
 }
 
 /// <summary>
+/// Annuity rate input for bulk create.
+/// </summary>
+export interface AnnuityRateInputRequest {
+  age: number;
+  singleRate: number;
+  jointRate: number;
+}
+
+/// <summary>
+/// Request to create annuity rates for a year.
+/// </summary>
+export interface CreateAnnuityRatesRequest {
+  year: number;
+  rates: AnnuityRateInputRequest[];
+}
+
+/// <summary>
 /// Request to check which years have complete annuity rate data.
 /// </summary>
 export interface GetMissingAnnuityYearsRequest {
