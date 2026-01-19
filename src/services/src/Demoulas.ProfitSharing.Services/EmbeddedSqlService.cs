@@ -266,8 +266,8 @@ SELECT m.SSN,
   CASE WHEN
         -- If employee is active and age > 65, then 100%
         (m.termination_date IS NULL OR m.termination_date > TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD') )
-        AND m.initial_contr_year < {initialContributionFiveYearsAgo}
-        AND m.date_of_birth < TO_DATE('{birthDate65.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')
+        AND m.initial_contr_year <= {initialContributionFiveYearsAgo}
+        AND m.date_of_birth <= TO_DATE('{birthDate65.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')
         THEN 1 ELSE
   CASE WHEN m.HAS_FORFEITED = 1 THEN 1 ELSE --Otherwise, If employee has forfeiture records, 100%
   CASE WHEN m.IS_EMPLOYEE = 1 AND m.TERMINATION_CODE_ID = 'Z' AND TERMINATION_DATE<  TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')  THEN 1 ELSE --Otherwise, If deceased, mark for 100% vested
