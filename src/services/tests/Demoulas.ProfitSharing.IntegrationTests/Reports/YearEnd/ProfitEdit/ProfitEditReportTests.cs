@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -60,7 +60,7 @@ public class ProfitEditReportTests : PristineBaseTest
 
         // Act
         Stopwatch sw = Stopwatch.StartNew();
-        ProfitShareEditResponse r = await profitShareEditService.ProfitShareEdit(req, CancellationToken.None);
+        ProfitShareEditResponse r = await profitShareEditService.ProfitShareEditAsync(req, CancellationToken.None);
         List<ProfitShareEditMemberRecordResponse> smartResults = r.Response.Results.ToList();
         TestOutputHelper.WriteLine($"Edit {sw.Took()}");
 
