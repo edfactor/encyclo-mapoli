@@ -20,17 +20,20 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
     private readonly ICalendarService _calendarService;
+    private readonly TimeProvider _timeProvider;
 
     public EmployeesWithProfitsOver73Service(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
         TotalService totalService,
-        ICalendarService calendarService)
+        ICalendarService calendarService,
+        TimeProvider timeProvider)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
         _calendarService = calendarService;
+        _timeProvider = timeProvider;
     }
 
     public Task<ReportResponseBase<EmployeesWithProfitsOver73DetailDto>> GetEmployeesWithProfitsOver73Async(
@@ -48,7 +51,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             // Calculate age threshold - employees must be over 73 years old
-            var today = DateOnly.FromDateTime(DateTime.Today);
+            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
             var ageThresholdDate = today.AddYears(-73);
 
             // Start with base query for employees over 73
@@ -185,7 +188,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
     }
 
 
-    private static string GenerateFormLettersForOver73Employees(ReportResponseBase<EmployeesWithProfitsOver73DetailDto> report)
+    private string GenerateFormLettersForOver73Employees(ReportResponseBase<EmployeesWithProfitsOver73DetailDto> report)
     {
 
         if (!report.Response.Results.Any())
@@ -201,7 +204,8 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             #region Beginning of letter
             letter.AppendLine();
             letter.AppendLine("DJDE JDE=QPS073,JDL=PAYROL,END,;");
-            letter.AppendLine($"{DateTime.Now.Month.ToString("MMMM")} {DateTime.Now.Year}");
+            var now = _timeProvider.GetLocalNow().DateTime;
+            letter.AppendLine($"{now.Month.ToString("MMMM")} {now.Year}");
             #endregion
 
             ////#region Return address

@@ -14,6 +14,12 @@ export interface FakeTimeStatusResponse {
   isAllowed: boolean;
 
   /**
+   * Whether runtime switching between real and fake time is supported.
+   * When true, fake time can be enabled/disabled via the API without restarting the application.
+   */
+  isRuntimeSwitchingEnabled: boolean;
+
+  /**
    * The current fake date/time when active (ISO 8601 format).
    * Null when fake time is not active.
    */
@@ -48,6 +54,73 @@ export interface FakeTimeStatusResponse {
    * An informational message about the fake time status.
    */
   message?: string | null;
+}
+
+/**
+ * Response DTO for user-specific fake time status.
+ * This is per-user, independent of the global server time.
+ */
+export interface UserFakeTimeStatusResponse {
+  /**
+   * Whether the current user has fake time active.
+   */
+  isActive: boolean;
+
+  /**
+   * Whether per-user fake time is allowed in this environment.
+   * Always false in Production.
+   */
+  isAllowed: boolean;
+
+  /**
+   * The current fake date/time for this user, if active.
+   */
+  currentFakeDateTime?: string | null;
+
+  /**
+   * The configured fixed date/time string for this user.
+   */
+  configuredDateTime?: string | null;
+
+  /**
+   * The timezone being used for this user's fake time.
+   */
+  timeZone?: string | null;
+
+  /**
+   * Whether time advances from the configured start for this user.
+   */
+  advanceTime: boolean;
+
+  /**
+   * The current real system date/time for reference.
+   */
+  realDateTime: string;
+
+  /**
+   * The user ID this setting applies to.
+   */
+  userId?: string | null;
+
+  /**
+   * Human-readable message about the current state.
+   */
+  message?: string | null;
+}
+
+/**
+ * Response containing a list of all users with fake time settings.
+ */
+export interface AllUserFakeTimeResponse {
+  /**
+   * Total number of users with fake time settings.
+   */
+  totalUsers: number;
+
+  /**
+   * List of all user fake time settings.
+   */
+  users: UserFakeTimeStatusResponse[];
 }
 
 /**

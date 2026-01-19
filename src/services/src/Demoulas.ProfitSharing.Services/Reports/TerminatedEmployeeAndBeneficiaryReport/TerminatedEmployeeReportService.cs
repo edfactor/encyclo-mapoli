@@ -508,7 +508,7 @@ public sealed class TerminatedEmployeeReportService
         IQueryable<TerminatedEmployeeDto> terminatedEmployees)
     {
         // Terminations is always showing "Live" current information about employees/benes
-        var ageAsOfDate = DateTime.Now.ToDateOnly();
+        var ageAsOfDate = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
         short currentYear = (short)ageAsOfDate.Year;
 
         IQueryable<MemberSlice> query = from employee in terminatedEmployees
