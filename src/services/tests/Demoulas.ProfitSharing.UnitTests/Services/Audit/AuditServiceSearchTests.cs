@@ -10,7 +10,7 @@ using Shouldly;
 namespace Demoulas.ProfitSharing.UnitTests.Services.Audit;
 
 /// <summary>
-/// Unit tests for ProfitSharingProfitSharingAuditService.SearchAuditEventsAsync method.
+/// Unit tests for ProfitSharingAuditService.SearchAuditEventsAsync method.
 /// 
 /// Tests all filter scenarios:
 /// - No filters (returns all events)

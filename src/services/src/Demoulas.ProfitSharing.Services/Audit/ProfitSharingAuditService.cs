@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Services.Audit;
 
-public sealed class ProfitSharingProfitSharingAuditService : AuditService<ProfitSharingDbContext, ProfitSharingReadOnlyDbContext>, IProfitSharingAuditService
+public sealed class ProfitSharingAuditService : AuditService<ProfitSharingDbContext, ProfitSharingReadOnlyDbContext>, IProfitSharingAuditService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICommitGuardOverride _guardOverride;
@@ -25,7 +25,7 @@ public sealed class ProfitSharingProfitSharingAuditService : AuditService<Profit
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly JsonSerializerOptions _maskingOptions;
 
-    public ProfitSharingProfitSharingAuditService(IProfitSharingDataContextFactory dataContextFactory,
+    public ProfitSharingAuditService(IProfitSharingDataContextFactory dataContextFactory,
         ICommitGuardOverride guardOverride,
         IAppUser? appUser,
         IHttpContextAccessor httpContextAccessor,
