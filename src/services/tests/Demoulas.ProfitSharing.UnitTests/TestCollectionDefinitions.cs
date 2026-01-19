@@ -16,7 +16,7 @@ public class DistributionTestCollection { }
 [CollectionDefinition("Military Tests", DisableParallelization = false)]
 public class MilitaryTestCollection { }
 
-[CollectionDefinition("IT Operations Tests", DisableParallelization = false)]
+[CollectionDefinition("IT Operations Tests", DisableParallelization = true)]
 public class ItOperationsTestCollection { }
 
 [CollectionDefinition("Navigation Tests", DisableParallelization = false)]
