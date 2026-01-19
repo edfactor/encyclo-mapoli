@@ -71,6 +71,20 @@ export default defineConfig([
     }
   },
 
+  // Security slice must never persist auth state to storage
+  {
+    files: ["src/reduxstore/slices/securitySlice.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "CallExpression[callee.object.name=/^(localStorage|sessionStorage)$/]",
+          message: "Do not use localStorage/sessionStorage in securitySlice. Keep auth state in memory only."
+        }
+      ]
+    }
+  },
+
   // Test files with vitest/jest globals
   {
     files: [

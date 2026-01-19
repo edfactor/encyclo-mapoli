@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ImpersonationRoles } from "reduxstore/types";
 
+// SECURITY: Auth state must remain in-memory only. Never persist to localStorage/sessionStorage.
 export interface SecurityState {
   token: string | null;
   userGroups: string[];
