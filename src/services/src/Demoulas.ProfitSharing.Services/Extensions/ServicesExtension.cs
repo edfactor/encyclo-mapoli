@@ -99,7 +99,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IEmployeesWithProfitsOver73Service, EmployeesWithProfitsOver73Service>();
 
 
-        _ = builder.Services.AddScoped<IProfitSharingAuditService, ProfitSharingProfitSharingAuditService>();
+        _ = builder.Services.AddScoped<IProfitSharingAuditService, ProfitSharingAuditService>();
         _ = builder.Services.AddScoped<IAuditService>(sp => sp.GetRequiredService<IProfitSharingAuditService>());
 
         _ = builder.Services.AddScoped<TotalService>();

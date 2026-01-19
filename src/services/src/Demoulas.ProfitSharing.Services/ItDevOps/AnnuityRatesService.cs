@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,8 @@ namespace Demoulas.ProfitSharing.Services.ItDevOps;
 
 public sealed class AnnuityRatesService : IAnnuityRatesService
 {
+    private const byte MinimumAge = 67;
+    private const byte MaximumAge = 120;
     private const decimal MaxRate = 99.9999m;
     private static readonly Error _annuityRateNotFound = Error.EntityNotFound("Annuity rate");
 
@@ -216,6 +219,168 @@ public sealed class AnnuityRatesService : IAnnuityRatesService
                     DateModified = annuityRate.ModifiedAtUtc != null ? DateOnly.FromDateTime(annuityRate.ModifiedAtUtc.Value.DateTime) : null,
                     UserModified = annuityRate.UserName,
                 });
+            }, cancellationToken);
+        }
+    }
+
+    public async Task<Result<IReadOnlyList<AnnuityRateDto>>> CreateAnnuityRatesAsync(CreateAnnuityRatesRequest request, CancellationToken cancellationToken)
+    {
+        using (_commitGuardOverride.AllowFor(roles: Role.ITDEVOPS))
+        {
+            return await _contextFactory.UseWritableContext(async ctx =>
+            {
+                if (!IsValidYear(request.Year))
+                {
+                    return Result<IReadOnlyList<AnnuityRateDto>>.Failure(Error.Validation(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.Year)] = ["Year must be between 1900 and 2100."],
+                    }));
+                }
+
+                if (request.Rates is null || request.Rates.Count == 0)
+                {
+                    return Result<IReadOnlyList<AnnuityRateDto>>.Failure(Error.Validation(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.Rates)] = ["Rates are required."],
+                    }));
+                }
+
+                var ages = request.Rates.Select(r => r.Age).ToList();
+                if (ages.Count != ages.Distinct().Count())
+                {
+                    return Result<IReadOnlyList<AnnuityRateDto>>.Failure(Error.Validation(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.Rates)] = ["Rates must include each age between 67 and 120 exactly once."],
+                    }));
+                }
+
+                var minAge = ages.Min();
+                var maxAge = ages.Max();
+                var expectedCount = MaximumAge - MinimumAge + 1;
+                if (minAge != MinimumAge || maxAge != MaximumAge || ages.Count != expectedCount)
+                {
+                    return Result<IReadOnlyList<AnnuityRateDto>>.Failure(Error.Validation(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.Rates)] = ["Rates must include each age between 67 and 120 exactly once."],
+                    }));
+                }
+
+                var exists = await ctx.AnnuityRates
+                    .TagWith($"ItDevOps-CreateAnnuityRates-Exists-{request.Year}")
+                    .AnyAsync(x => x.Year == request.Year, cancellationToken);
+
+                if (exists)
+                {
+                    return Result<IReadOnlyList<AnnuityRateDto>>.Failure(Error.Validation(new Dictionary<string, string[]>
+                    {
+                        [nameof(request.Year)] = [$"Annuity rates already exist for year {request.Year}."],
+                    }));
+                }
+
+                var userName = _appUser.UserName ?? string.Empty;
+                var createdAt = DateTimeOffset.UtcNow;
+                var entities = new List<AnnuityRate>(request.Rates.Count);
+
+                foreach (var rate in request.Rates)
+                {
+                    if (rate.Age < MinimumAge || rate.Age > MaximumAge)
+                    {
+                        return Result<IReadOnlyList<AnnuityRateDto>>.Failure(Error.Validation(new Dictionary<string, string[]>
+                        {
+                            [nameof(request.Rates)] = ["Age must be between 67 and 120."],
+                        }));
+                    }
+
+                    var roundedSingle = Math.Round(rate.SingleRate, 4, MidpointRounding.AwayFromZero);
+                    if (roundedSingle != rate.SingleRate || roundedSingle < 0m || roundedSingle > MaxRate)
+                    {
+                        return Result<IReadOnlyList<AnnuityRateDto>>.Failure(Error.Validation(new Dictionary<string, string[]>
+                        {
+                            [nameof(request.Rates)] = [$"SingleRate must be between 0 and 99.9999 with up to 4 decimal places for age {rate.Age}."],
+                        }));
+                    }
+
+                    var roundedJoint = Math.Round(rate.JointRate, 4, MidpointRounding.AwayFromZero);
+                    if (roundedJoint != rate.JointRate || roundedJoint < 0m || roundedJoint > MaxRate)
+                    {
+                        return Result<IReadOnlyList<AnnuityRateDto>>.Failure(Error.Validation(new Dictionary<string, string[]>
+                        {
+                            [nameof(request.Rates)] = [$"JointRate must be between 0 and 99.9999 with up to 4 decimal places for age {rate.Age}."],
+                        }));
+                    }
+
+                    entities.Add(new AnnuityRate
+                    {
+                        Year = request.Year,
+                        Age = rate.Age,
+                        SingleRate = roundedSingle,
+                        JointRate = roundedJoint,
+                        CreatedAtUtc = createdAt,
+                        UserName = userName,
+                    });
+                }
+
+                ctx.AnnuityRates.AddRange(entities);
+                await ctx.SaveChangesAsync(cancellationToken);
+
+                try
+                {
+                    foreach (var rate in entities)
+                    {
+                        await _profitSharingAuditService.LogDataChangeAsync(
+                            operationName: "Create Annuity Rate",
+                            tableName: "ANNUITY_RATE",
+                            auditOperation: AuditEvent.AuditOperations.Create,
+                            primaryKey: $"Year:{rate.Year},Age:{rate.Age}",
+                            changes:
+                            [
+                                new AuditChangeEntryInputRequest
+                                {
+                                    ColumnName = "YEAR",
+                                    OriginalValue = null,
+                                    NewValue = rate.Year.ToString(),
+                                },
+                                new AuditChangeEntryInputRequest
+                                {
+                                    ColumnName = "AGE",
+                                    OriginalValue = null,
+                                    NewValue = rate.Age.ToString(),
+                                },
+                                new AuditChangeEntryInputRequest
+                                {
+                                    ColumnName = "SINGLE_RATE",
+                                    OriginalValue = null,
+                                    NewValue = rate.SingleRate.ToString("0.0000"),
+                                },
+                                new AuditChangeEntryInputRequest
+                                {
+                                    ColumnName = "JOINT_RATE",
+                                    OriginalValue = null,
+                                    NewValue = rate.JointRate.ToString("0.0000"),
+                                },
+                            ],
+                            cancellationToken);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to write audit log for ANNUITY_RATE create (Year={Year})", request.Year);
+                }
+
+                var response = entities
+                    .OrderBy(x => x.Age)
+                    .Select(x => new AnnuityRateDto
+                    {
+                        Year = x.Year,
+                        Age = x.Age,
+                        SingleRate = x.SingleRate,
+                        JointRate = x.JointRate,
+                        DateModified = x.ModifiedAtUtc != null ? DateOnly.FromDateTime(x.ModifiedAtUtc.Value.DateTime) : null,
+                        UserModified = x.UserName,
+                    })
+                    .ToList();
+
+                return Result<IReadOnlyList<AnnuityRateDto>>.Success(response);
             }, cancellationToken);
         }
     }

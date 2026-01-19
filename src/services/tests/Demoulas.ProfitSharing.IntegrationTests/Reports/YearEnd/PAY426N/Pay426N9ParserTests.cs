@@ -18,7 +18,7 @@ public class Pay426N9ParserTests : PristineBaseTest
     public void Parse_ShouldExtractAllLineItemsCorrectly()
     {
         // Arrange - load the golden file
-        string resourceName = "Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R8-PAY426N-9";
+        string resourceName = "Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R08-PAY426N-9";
         string reportText = ReadEmbeddedResource(resourceName).Trim();
 
         // Act - parse the report
