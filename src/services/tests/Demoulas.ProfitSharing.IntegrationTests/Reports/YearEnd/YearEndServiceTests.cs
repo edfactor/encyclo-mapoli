@@ -40,7 +40,7 @@ public class YearEndServiceTests : PristineBaseTest
 
             // ------- Act
             DbTransaction transaction = await c.BeginTransactionAsync(ct);
-            await yearEndService.RunFinalYearEndUpdates(profitYear, false, ct);
+            await yearEndService.RunFinalYearEndUpdatesAsync(profitYear, false, ct);
 
             // Read results BEFORE rollback (so changes are visible but not committed)
             // IMPORTANT: Use the same connection/transaction to see uncommitted changes

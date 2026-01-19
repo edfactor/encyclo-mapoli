@@ -1,15 +1,4 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  TextField,
-  Typography
-} from "@mui/material";
+import { Box, Button, Divider, Grid } from "@mui/material";
 import { CellValueChangedEvent } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -25,6 +14,7 @@ import {
 import { setMessage } from "../../../reduxstore/slices/messageSlice";
 import { AnnuityRateDto, AnnuityRateInputRequest } from "../../../reduxstore/types";
 import { Messages } from "../../../utils/messageDictonary";
+import ManageAnnuityRatesCopyModal from "./ManageAnnuityRatesCopyModal";
 import { getCopyAnnuityRatesColumns, getManageAnnuityRatesColumns } from "./ManageAnnuityRatesGridColumns";
 
 type StagedAnnuityRateChange = {
@@ -279,6 +269,17 @@ const ManageAnnuityRates = () => {
     setIsCopyModalOpen(false);
   };
 
+  const onCopyYearChange = (rawValue: string) => {
+    if (rawValue === "") {
+      setCopyYear("");
+      return;
+    }
+
+    if (/^\d+$/.test(rawValue)) {
+      setCopyYear(Number.parseInt(rawValue, 10));
+    }
+  };
+
   const onCopyCellValueChanged = (event: CellValueChangedEvent) => {
     const row = event.data as AnnuityRateInputRequest | undefined;
     if (!row) return;
@@ -467,64 +468,18 @@ const ManageAnnuityRates = () => {
           </Grid>
         </Grid>
       </Page>
-      <Dialog
-        open={isCopyModalOpen}
+      <ManageAnnuityRatesCopyModal
+        isOpen={isCopyModalOpen}
+        isCreating={isCreating}
+        copySourceYear={copySourceYear}
+        copyYear={copyYear}
+        copyRates={copyRates}
+        copyColumnDefs={copyColumnDefs}
         onClose={closeCopyModal}
-        maxWidth="md"
-        fullWidth>
-        <DialogTitle sx={{ fontWeight: "bold" }}>Copy Annuity Rates</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ mb: 2 }}>
-            {copySourceYear ? `Copying rates from ${copySourceYear}.` : "Select a year to copy rates from."}
-          </Typography>
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
-            <TextField
-              label="New Year"
-              value={copyYear}
-              onChange={(event) => {
-                const rawValue = event.target.value;
-                if (rawValue === "") {
-                  setCopyYear("");
-                  return;
-                }
-
-                if (/^\d+$/.test(rawValue)) {
-                  setCopyYear(Number.parseInt(rawValue, 10));
-                }
-              }}
-              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-              size="small"
-            />
-          </Box>
-          <DSMGrid
-            preferenceKey={`${GRID_KEYS.MANAGE_ANNUITY_RATES}-copy`}
-            isLoading={isCreating}
-            providedOptions={{
-              rowData: copyRates,
-              columnDefs: copyColumnDefs,
-              suppressMultiSort: true,
-              stopEditingWhenCellsLoseFocus: true,
-              enterNavigatesVertically: true,
-              enterNavigatesVerticallyAfterEdit: true,
-              onCellValueChanged: onCopyCellValueChanged
-            }}
-          />
-        </DialogContent>
-        <DialogActions sx={{ padding: "16px 24px" }}>
-          <Button
-            variant="outlined"
-            onClick={closeCopyModal}
-            disabled={isCreating}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={saveCopiedRates}
-            disabled={isCreating}>
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onCreate={saveCopiedRates}
+        onYearChange={onCopyYearChange}
+        onCellValueChanged={onCopyCellValueChanged}
+      />
     </PageErrorBoundary>
   );
 };

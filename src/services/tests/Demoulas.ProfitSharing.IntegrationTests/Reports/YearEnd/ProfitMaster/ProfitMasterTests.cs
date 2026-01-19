@@ -36,7 +36,7 @@ public class ProfitMasterTests : PristineBaseTest
         ProfitShareEditService pses = new(psus, CalendarService);
         ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, TimeProvider.System);
 
-        var frozenDemographicYear = (await FrozenService.GetActiveFrozenDemographic(CancellationToken.None)).ProfitYear;
+        var frozenDemographicYear = (await FrozenService.GetActiveFrozenDemographicAsync(CancellationToken.None)).ProfitYear;
         var maxYearEndStatusYear =
             await DbFactory.UseWritableContext(async ctx => await ctx.YearEndUpdateStatuses.Select(st => (short?)st.ProfitYear).MaxAsync(CancellationToken.None))!;
         bool needToRevert = (maxYearEndStatusYear == frozenDemographicYear);
@@ -46,7 +46,7 @@ public class ProfitMasterTests : PristineBaseTest
         {
             try
             {
-                var prs = await pms.Revert(
+                var prs = await pms.RevertAsync(
                     new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = 0, }, CancellationToken.None);
                 TestOutputHelper.WriteLine($"Revert {sw.Took()}, for transactionsRemoved:{prs.TransactionsRemoved}  etvasEffected:{prs.EtvasEffected}");
             }
@@ -71,7 +71,7 @@ public class ProfitMasterTests : PristineBaseTest
         });
 
         // Act
-        var psur = await pms.Update(
+        var psur = await pms.UpdateAsync(
             new ProfitShareUpdateRequest
             {
                 Skip = null,
@@ -105,7 +105,7 @@ public class ProfitMasterTests : PristineBaseTest
         ProfitShareEditService pses = new(psus, CalendarService);
         ProfitMasterService pms = new(pses, DbFactory, iAppUser, FrozenService, TimeProvider.System);
 
-        var frozenDemographicYear = (await FrozenService.GetActiveFrozenDemographic(CancellationToken.None)).ProfitYear;
+        var frozenDemographicYear = (await FrozenService.GetActiveFrozenDemographicAsync(CancellationToken.None)).ProfitYear;
         var maxYearEndStatusYear =
             await DbFactory.UseWritableContext(async ctx => await ctx.YearEndUpdateStatuses.Select(st => (short?)st.ProfitYear).MaxAsync(CancellationToken.None))!;
         bool needToRevert = (maxYearEndStatusYear == frozenDemographicYear);
@@ -114,7 +114,7 @@ public class ProfitMasterTests : PristineBaseTest
         {
             Stopwatch sw = Stopwatch.StartNew();
             // Act
-            var prs = await pms.Revert(
+            var prs = await pms.RevertAsync(
                 new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = profitYear, }, CancellationToken.None);
 
             sw.Stop();
