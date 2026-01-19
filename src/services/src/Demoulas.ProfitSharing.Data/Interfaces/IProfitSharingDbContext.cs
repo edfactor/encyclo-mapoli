@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.Common.Data.Services.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Demoulas.ProfitSharing.Data.Interfaces;
 
-public interface IProfitSharingDbContext
+public interface IProfitSharingDbContext : IAuditDbContext
 {
     DbSet<Bank> Banks { get; set; }
     DbSet<BankAccount> BankAccounts { get; set; }

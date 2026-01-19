@@ -5,9 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.Logging;
@@ -20,15 +18,15 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShare
 public class YearEndProfitSharingReportEndpoint : EndpointWithCsvTotalsBase<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportDetail, YearEndProfitSharingReportEndpoint.YearEndProfitSharingReportClassMap>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ILogger<YearEndProfitSharingReportEndpoint> _logger;
     private const string Report_Name = "Yearend Profit Sharing Report";
 
-    public YearEndProfitSharingReportEndpoint(IProfitSharingSummaryReportService cleanupReportService, IAuditService auditService, ILogger<YearEndProfitSharingReportEndpoint> logger)
+    public YearEndProfitSharingReportEndpoint(IProfitSharingSummaryReportService cleanupReportService, IProfitSharingAuditService profitSharingAuditService, ILogger<YearEndProfitSharingReportEndpoint> logger)
         : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _cleanupReportService = cleanupReportService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _logger = logger;
     }
 
@@ -72,7 +70,7 @@ public class YearEndProfitSharingReportEndpoint : EndpointWithCsvTotalsBase<Year
             // This endpoint accesses SSN data, so mark as sensitive
             this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn");
 
-            var response = await _auditService.ArchiveCompletedReportAsync(
+            var response = await _profitSharingAuditService.ArchiveCompletedReportAsync(
                 Report_Name,
                 req.ProfitYear,
                 req,

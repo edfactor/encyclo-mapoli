@@ -37,7 +37,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     {
         var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
         var logger = ServiceProvider!.GetRequiredService<ILogger<CurrentYearWagesEndpoint>>();
-        var auditService = ServiceProvider!.GetRequiredService<IAuditService>();
+        var auditService = ServiceProvider!.GetRequiredService<IProfitSharingAuditService>();
 
         // Mock IDemographicReaderService to return live demographics
         var mockDemographicReader = new Mock<IDemographicReaderService>();

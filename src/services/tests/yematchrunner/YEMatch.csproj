@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    
+
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace></RootNamespace>
@@ -25,6 +25,10 @@
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="SSH.NET" />
     <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

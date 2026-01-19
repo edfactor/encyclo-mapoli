@@ -1,7 +1,5 @@
 ﻿using Demoulas.Common.Api.Groups;
-using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
 

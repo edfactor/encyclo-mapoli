@@ -1,4 +1,5 @@
-﻿using System.Net;
+using System.Net;
+using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Interfaces;
@@ -21,7 +22,6 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
@@ -45,13 +45,14 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     {
         ICalendarService calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
         IAppUser? appUser = ServiceProvider!.GetService<IAppUser>();
-        IHostEnvironment hostEnvironment = ServiceProvider!.GetRequiredService<IHostEnvironment>();
+        JsonSerializerOptions jsonSerializerOptions = ServiceProvider!.GetRequiredService<JsonSerializerOptions>();
         Mock<IHttpContextAccessor> mockHttpContextAccessor = new();
         Mock<ILogger<ExecutiveHoursAndDollarsEndpoint>> mockLogger = new();
         Mock<ICommitGuardOverride> mockCommitGuardOverride = new();
         ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
-        IAuditService mockAuditService = new AuditService(MockDbContextFactory, mockCommitGuardOverride.Object, appUser, mockHttpContextAccessor.Object, hostEnvironment);
-        _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockAuditService, mockLogger.Object);
+        IProfitSharingAuditService mockProfitSharingAuditService =
+            new ProfitSharingProfitSharingAuditService(MockDbContextFactory, mockCommitGuardOverride.Object, appUser, mockHttpContextAccessor.Object, jsonSerializerOptions);
+        _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockProfitSharingAuditService, mockLogger.Object);
     }
 
 

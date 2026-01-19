@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Data.Services.Interfaces;
+using System.Text.Json;
+using Demoulas.Common.Contracts.Interfaces.Audit;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -30,6 +32,7 @@ using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+using Demoulas.ProfitSharing.Services.Serialization;
 using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.ProfitSharing.Services.Validators;
 using Demoulas.Util.Extensions;
@@ -37,6 +40,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
+using NavigationService = Demoulas.ProfitSharing.Services.Navigations.ProfitSharingNavigationService;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -47,6 +52,15 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
+        _ = builder.Services.AddSingleton<JsonSerializerOptions>(sp =>
+        {
+            IHostEnvironment hostEnvironment = sp.GetRequiredService<IHostEnvironment>();
+            var maskingOptions = new JsonSerializerOptions(JsonSerializerOptions.Web);
+            maskingOptions.Converters.Add(new MaskingJsonConverterFactory(hostEnvironment));
+
+            return maskingOptions;
+        });
+
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICheckRunWorkflowService, CheckRunWorkflowService>();
@@ -85,7 +99,9 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IEmployeesWithProfitsOver73Service, EmployeesWithProfitsOver73Service>();
 
 
-        _ = builder.Services.AddScoped<IAuditService, AuditService>();
+        _ = builder.Services.AddScoped<IProfitSharingAuditService, ProfitSharingProfitSharingAuditService>();
+        _ = builder.Services.AddScoped<IAuditService>(sp => sp.GetRequiredService<IProfitSharingAuditService>());
+
         _ = builder.Services.AddScoped<TotalService>();
 
         _ = builder.Services.AddScoped<ITerminatedEmployeeService, TerminatedEmployeeService>();

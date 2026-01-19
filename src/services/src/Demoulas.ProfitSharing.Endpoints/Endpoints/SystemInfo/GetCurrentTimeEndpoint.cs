@@ -1,6 +1,5 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.SystemInfo;
 using Demoulas.ProfitSharing.Common.Time;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
@@ -13,7 +12,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.SystemInfo;
 /// </summary>
 /// <remarks>
 /// GET /api/system/current-time
-/// 
+///
 /// Returns the server's current UTC and local time, time zone information,
 /// and whether fake time is active.
 /// </remarks>

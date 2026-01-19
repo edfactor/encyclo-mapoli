@@ -5,9 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.Logging;
@@ -19,14 +17,14 @@ public class ExecutiveHoursAndDollarsEndpoint :
     >
 {
     private readonly IExecutiveHoursAndDollarsService _reportService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly ILogger<ExecutiveHoursAndDollarsEndpoint> _logger;
 
-    public ExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService reportService, IAuditService auditService, ILogger<ExecutiveHoursAndDollarsEndpoint> logger)
+    public ExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService reportService, IProfitSharingAuditService profitSharingAuditService, ILogger<ExecutiveHoursAndDollarsEndpoint> logger)
         : base(Navigation.Constants.ManageExecutiveHours)
     {
         _reportService = reportService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _logger = logger;
     }
 
@@ -56,7 +54,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var result = await _auditService.ArchiveCompletedReportAsync(ReportFileName,
+            var result = await _profitSharingAuditService.ArchiveCompletedReportAsync(ReportFileName,
                 req.ProfitYear,
                 req,
                 (archiveReq, isArchiveRequest, cancellationToken) =>

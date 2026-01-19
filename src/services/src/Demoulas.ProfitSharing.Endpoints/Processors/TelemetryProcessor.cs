@@ -1,9 +1,6 @@
 ﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Processors;

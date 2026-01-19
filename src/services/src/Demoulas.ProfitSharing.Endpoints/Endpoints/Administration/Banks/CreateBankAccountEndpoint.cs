@@ -1,5 +1,4 @@
 using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
@@ -7,25 +6,23 @@ using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Validators.Administration;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.Banks;
 
 public sealed class CreateBankAccountEndpoint : ProfitSharingEndpoint<CreateBankAccountRequest, Results<Created<BankAccountDto>, BadRequest, ProblemHttpResult>>
 {
     private readonly IBankAccountService _bankAccountService;
-    private readonly IAuditService _auditService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
     private readonly IAppUser _appUser;
 
     public CreateBankAccountEndpoint(
         IBankAccountService bankAccountService,
-        IAuditService auditService,
+        IProfitSharingAuditService profitSharingAuditService,
         IAppUser appUser)
         : base(Navigation.Constants.ManageBanks)
     {
         _bankAccountService = bankAccountService;
-        _auditService = auditService;
+        _profitSharingAuditService = profitSharingAuditService;
         _appUser = appUser;
     }
 
@@ -42,7 +39,7 @@ public sealed class CreateBankAccountEndpoint : ProfitSharingEndpoint<CreateBank
 
     protected override async Task<Results<Created<BankAccountDto>, BadRequest, ProblemHttpResult>> HandleRequestAsync(CreateBankAccountRequest req, CancellationToken ct)
     {
-        var result = await _bankAccountService.CreateAsync(req, _auditService, _appUser, ct);
+        var result = await _bankAccountService.CreateAsync(req, _profitSharingAuditService, _appUser, ct);
         return result.Match<Results<Created<BankAccountDto>, BadRequest, ProblemHttpResult>>(
             success => TypedResults.Created($"/api/administration/banks/{success.BankId}/accounts/{success.Id}", success),
             error => error.Status == StatusCodes.Status400BadRequest

@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -54,7 +53,7 @@ public sealed class DistributionService : IDistributionService
                             Id = dist.Id,
                             PaymentSequence = dist.PaymentSequence,
                             Ssn = dist.Ssn,
-                            BadgeNumber = dem != null ? (long?)dem.BadgeNumber : null,
+                            BadgeNumber = dem != null ? dem.BadgeNumber : null,
                             // FullName picks employee name if available, otherwise beneficiary name
                             FullName = dem != null && dem.ContactInfo.FullName != null
                                 ? dem.ContactInfo.FullName
@@ -72,8 +71,8 @@ public sealed class DistributionService : IDistributionService
                             StateTax = dist.StateTaxAmount,
                             CheckAmount = dist.CheckAmount,
                             IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly,
-                            DemographicId = dem != null ? (int?)dem.Id : null,
-                            BeneficiaryId = ben != null ? (int?)ben.Id : null
+                            DemographicId = dem != null ? dem.Id : null,
+                            BeneficiaryId = ben != null ? ben.Id : null
                         };
 
             int searchSsn;

@@ -3,7 +3,6 @@ using Demoulas.Common.Api.Utilities;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.ProfitSharing.Common;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Demoulas.ProfitSharing.Endpoints.HealthCheck;

@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Demoulas.Common.Contracts.Contracts.Response;
+using System.Text;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;

@@ -113,7 +113,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -164,7 +164,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -226,7 +226,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -271,7 +271,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             MockDbContextFactory,
@@ -324,7 +324,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -402,7 +402,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         TimeProvider timeProvider = new FakeTimeProvider(fixedTime);
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -469,7 +469,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
             .ReturnsAsync(mockDbContextFactory.ProfitSharingDbContext.Object.Demographics.AsQueryable());
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             mockDbContextFactory,
@@ -517,7 +517,7 @@ public class ForfeitureAdjustmentServiceTests : ApiTestBase<Api.Program>
         var demographicReaderMock = new Mock<IDemographicReaderService>(MockBehavior.Strict);
 
         var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IAuditService>();
+        var mockAuditService = new Mock<IProfitSharingAuditService>();
 
         var service = new ForfeitureAdjustmentService(
             MockDbContextFactory,
