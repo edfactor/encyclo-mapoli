@@ -55,7 +55,7 @@ export const GetProfitShareForfeitColumns = (options: ForfeitColumnsOptions): Co
       field: "spacer",
       sortable: false,
       resizable: false,
-      suppressMenu: true,
+      suppressHeaderMenuButton: true,
       filter: false,
       editable: false,
       flex: 1,
