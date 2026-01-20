@@ -37,7 +37,7 @@ public static class PdfUtilities
                             .Element(c => ComposeHeaderTextBlock(c, reportTitle));
 
                         // Right: Company address
-                        row.ConstantItem(160).Element(ComposeCompanyAddressBlock);
+                        row.ConstantItem(200).Element(ComposeCompanyAddressBlock);
                     });
             }
             else
