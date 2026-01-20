@@ -476,19 +476,39 @@ export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
     column.valueGetter = valueGetter;
   } else {
     column.valueGetter = (params) => {
-      if (params.data?.[field] && typeof params.data?.[field] === "number" && params.data?.[field] == 0) {
-        return "N/A";
-      } else if (params.data?.[field] && typeof params.data?.[field] === "string") {
-        const age = params.data?.[field];
-        // If age is >= 125 (default Oracle date 1/1/1900), display empty string
-        const ageNumber = typeof age === "string" ? parseInt(age, 10) : age;
-        if (!isNaN(ageNumber) && ageNumber >= 125) {
+      const value = params.data?.[field];
+
+      if (typeof value === "number") {
+        if (value === 0) {
+          return "N/A";
+        }
+
+        return value;
+      }
+
+      if (typeof value === "string") {
+        const trimmedValue = value.trim();
+
+        if (!trimmedValue) {
           return "";
         }
-      } else {
+
+        const ageNumber = parseInt(trimmedValue, 10);
+
+        if (!isNaN(ageNumber)) {
+          // If age is >= 125 (default Oracle date 1/1/1900), display empty string
+          if (ageNumber >= 125) {
+            return "";
+          }
+
+          return ageNumber;
+        }
+
         // This will be used for masked values also
-        return params.data?.[field];
+        return value;
       }
+
+      return value;
     };
   }
 
