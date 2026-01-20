@@ -109,14 +109,6 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IFrozenService, FrozenService>();
         _ = builder.Services.AddScoped<IStoreService, StoreService>();
         
-        // Register Common.Data.Services Store Service for warehouse store lookups  
-        _ = builder.Services.AddScoped<Demoulas.Common.Data.Services.Interfaces.IStoreService, Demoulas.Common.Data.Services.Service.StoreService>();
-        _ = builder.Services.AddScoped<Demoulas.Common.Data.Services.Interfaces.IStoreDbContext>(sp => 
-            sp.GetRequiredService<IDemoulasCommonWarehouseContext>());
-        
-        // Store Lookup Service - Real implementation using Common.Data.Services
-        _ = builder.Services.AddScoped<IStoreLookupService, StoreLookupService>();
-
         _ = builder.Services.AddSingleton<IFakeSsnService, FakeSsnService>();
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
@@ -160,6 +152,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IDistributionFrequencyLookupService, DistributionFrequencyLookupService>();
         _ = builder.Services.AddScoped<IDistributionStatusLookupService, DistributionStatusLookupService>();
         _ = builder.Services.AddScoped<ITaxCodeLookupService, TaxCodeLookupService>();
+        _ = builder.Services.AddScoped<IStoreLookupService, StoreLookupService>();
         _ = builder.Services.AddScoped<IStateService, StateService>();
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
         _ = builder.Services.AddScoped<IBeneficiaryDisbursementService, BeneficiaryDisbursementService>();
