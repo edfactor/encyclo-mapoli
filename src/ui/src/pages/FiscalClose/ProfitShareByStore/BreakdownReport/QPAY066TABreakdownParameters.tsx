@@ -1,8 +1,8 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
+import { Autocomplete, FormLabel, Grid, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   clearBreakdownByStore,
   clearBreakdownByStoreManagement,
@@ -10,6 +10,8 @@ import {
   clearBreakdownGrandTotals,
   setBreakdownByStoreQueryParams
 } from "reduxstore/slices/yearsEndSlice";
+import { useGetStoresQuery } from "reduxstore/api/LookupsApi";
+import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DuplicateSsnGuard from "../../../../components/DuplicateSsnGuard";
@@ -40,32 +42,40 @@ const schema = yup.object().shape({
 });
 
 interface QPAY066TABreakdownParametersProps {
-  activeTab: "all" | "stores" | "summaries" | "totals";
   onStoreChange?: (store: number | null) => void;
   onReset?: () => void;
   isLoading?: boolean;
+  onSearch?: () => void;
 }
 
 const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> = ({
-  activeTab,
   onStoreChange,
   onReset,
-  isLoading = false
+  isLoading = false,
+  onSearch
 }) => {
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
+  
+  // Fetch stores from API
+  const { data: apiStores, isError: isStoresError, isLoading: isStoresLoading } = useGetStoresQuery(undefined, {
+    skip: !hasToken
+  });
 
-  const [employeeStatuses] = useState<OptionItem[]>([
+  // Combine blank entry, "All Stores", and API-fetched stores
+  const stores: OptionItem[] = [
+    { id: 0, label: "" },
+    { id: -1, label: "All Stores" },
     { id: 700, label: "700 - Retired - Drawing Pension" },
     { id: 701, label: "701 - Active - Drawing Pension" },
     { id: 800, label: "800 - Terminated" },
     { id: 801, label: "801 - Terminated w/ Zero Balance" },
     { id: 802, label: "802 - Terminated w/ Balance but No Vesting" },
-    { id: 900, label: "900 - Monthly Payroll" }
-  ]);
-
-  const [viewAllStoreTotals, setViewAllStoreTotals] = useState<boolean>(false);
+    { id: 900, label: "900 - Monthly Payroll" },
+    ...(apiStores || [])
+  ];
 
   useEffect(() => {
     if (!isLoading) {
@@ -76,7 +86,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   const {
     control,
     handleSubmit,
-
+    getValues,
     reset,
     setValue
   } = useForm<BreakdownSearchParams>({
@@ -84,7 +94,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     defaultValues: {
       store: null,
       employeeStatus: "",
-      badgeId: null,
+      badgeId: undefined,
       employeeName: "",
       sortBy: "badgeNumber",
       isSortDescending: true
@@ -94,6 +104,11 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   const employeeStatus = useWatch({
     control,
     name: "employeeStatus"
+  });
+
+  const store = useWatch({
+    control,
+    name: "store"
   });
 
   useEffect(() => {
@@ -108,19 +123,30 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   const validateAndSubmit = handleSubmit((data) => {
     if (!isSubmitting) {
       setIsSubmitting(true);
-      console.log("Form data being submitted:", data);
-
+      
+      // Explicitly filter badge number - only include if it's a positive number
+      const badgeNumber = data.badgeId && typeof data.badgeId === 'number' && data.badgeId > 0 
+        ? data.badgeId 
+        : undefined;
+      
+      // Explicitly filter employee name - only include if it's a non-empty string
+      const employeeName = data.employeeName && typeof data.employeeName === 'string' && data.employeeName.trim() !== ""
+        ? data.employeeName.trim()
+        : undefined;
+      
       // Always submit regardless of isValid to enable searching with any combination
-      if (onStoreChange && data.store) {
-        onStoreChange(data.store);
+      if (onStoreChange) {
+        onStoreChange(data.store ?? null);
       }
 
+      // Set the query params with explicit undefined values (like reset does)
+      // Don't clear the data stores - let the normal dependency mechanism handle the refetch
       dispatch(
         setBreakdownByStoreQueryParams({
           profitYear: profitYear,
-          storeNumber: data.store ?? undefined,
-          badgeNumber: data.badgeId ?? undefined,
-          employeeName: data.employeeName,
+          storeNumber: data.store !== null && data.store !== undefined ? data.store : undefined,
+          badgeNumber: badgeNumber,
+          employeeName: employeeName,
           pagination: {
             take: 25,
             skip: 0,
@@ -129,6 +155,11 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
           }
         })
       );
+
+      // Trigger refetch in grids - this ensures grids refetch even if queryParams don't change
+      if (onSearch) {
+        onSearch();
+      }
     }
   });
 
@@ -136,7 +167,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     reset({
       store: null,
       employeeStatus: "",
-      badgeId: null,
+      badgeId: undefined,
       employeeName: "",
       sortBy: "badgeNumber",
       isSortDescending: true
@@ -146,6 +177,22 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     dispatch(clearBreakdownByStoreTotals());
     dispatch(clearBreakdownGrandTotals());
 
+    // Clear the query params to remove any filters
+    dispatch(
+      setBreakdownByStoreQueryParams({
+        profitYear: profitYear,
+        storeNumber: undefined,
+        badgeNumber: undefined,
+        employeeName: undefined,
+        pagination: {
+          take: 25,
+          skip: 0,
+          sortBy: "badgeNumber",
+          isSortDescending: true
+        }
+      })
+    );
+
     if (onStoreChange) {
       onStoreChange(null);
     }
@@ -153,14 +200,6 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     // allow parent to clear grids
     if (onReset) {
       onReset();
-    }
-  };
-
-  const getGridSizes = () => {
-    if (activeTab === "all" || activeTab === "stores") {
-      return { xs: 12, sm: 6, md: 3 };
-    } else {
-      return { xs: 12, sm: 6, md: 4 };
     }
   };
 
@@ -176,155 +215,169 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
         paddingX="24px"
         alignItems="flex-end"
         spacing={1.5}>
-        <Grid size={getGridSizes()}>
+        {isStoresError && (
+          <Grid size={{ xs: 12 }}>
+            <TextField
+              fullWidth
+              size="small"
+              error
+              disabled
+              value="Unable to load store information. Please try again later."
+              sx={{
+                '& .MuiInputBase-root': {
+                  backgroundColor: '#ffebee',
+                  color: '#d32f2f'
+                }
+              }}
+            />
+          </Grid>
+        )}
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <FormLabel>Store</FormLabel>
           <Controller
             name="store"
             control={control}
             render={({ field }) => (
+              <Autocomplete
+                size="small"
+                fullWidth
+                disabled={isStoresError || isStoresLoading}
+                options={stores}
+                getOptionLabel={(option) => {
+                  if (typeof option === "string") return option;
+                  if (typeof option === "number") {
+                    const found = stores.find(s => s.id === option);
+                    return found ? found.label : String(option);
+                  }
+                  return option.label || "";
+                }}
+                isOptionEqualToValue={(option, value) => {
+                  if (!value) return false;
+                  if (typeof value === "number") return option.id === value;
+                  return option.id === value.id;
+                }}
+                value={field.value === null || field.value === undefined || field.value === 0 ? null : 
+                  stores.find(s => s.id === field.value) || null}
+                onChange={(_e, newValue) => {
+                  // Handle clear/null/blank selection
+                  if (newValue === null || newValue === undefined || (typeof newValue === 'object' && newValue.id === 0)) {
+                    field.onChange(null);
+                    if (onStoreChange) {
+                      onStoreChange(null);
+                    }
+                    return;
+                  }
+
+                  // Handle object selection from dropdown
+                  const selectedId = typeof newValue === 'object' ? newValue.id : Number(newValue);
+                  
+                  // Handle "All Stores" selection (value -1)
+                  if (selectedId === -1) {
+                    field.onChange(-1);
+                    // Clear badge and employee name filters when All Stores is selected
+                    setValue("badgeId", undefined);
+                    setValue("employeeName", "");
+                    if (onStoreChange) {
+                      onStoreChange(-1);
+                    }
+                    return;
+                  }
+
+                  field.onChange(selectedId);
+                  if (onStoreChange) {
+                    onStoreChange(selectedId);
+                  }
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    placeholder="Type to search or select"
+                  />
+                )}
+              />
+            )}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Controller
+            name="badgeId"
+            control={control}
+            render={({ field }) => (
               <>
-                <FormLabel
-                  htmlFor="store-input"
-                  sx={{ display: "block", marginBottom: "8px" }}>
-                  Store
-                </FormLabel>
+                <FormLabel htmlFor="badge-id">Badge Number</FormLabel>
                 <TextField
-                  id="store-input"
+                  id="badge-id"
                   {...field}
                   size="small"
                   fullWidth
                   type="number"
-                  value={field.value || ""}
-                  disabled={activeTab === "summaries" && viewAllStoreTotals}
-                  inputProps={{
-                    min: 1,
-                    step: 1
+                  disabled={store === -1 || store === null}
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      backgroundColor: (store === -1 || store === null) ? '#f5f5f5' : 'white'
+                    }
                   }}
+                  value={field.value ?? ""}
                   onChange={(e) => {
-                    const inputValue = e.target.value;
-
-                    // Allow empty string for clearing the field
-                    if (inputValue === "") {
-                      field.onChange("");
-                      return;
-                    }
-
-                    const numericValue = Number(inputValue);
-
-                    // Only allow positive numbers (greater than 0)
-                    if (numericValue > 0 && Number.isInteger(numericValue)) {
-                      field.onChange(numericValue);
-
-                      // Clear the "View All Store Totals" checkbox when user enters a store number
-                      if (viewAllStoreTotals) {
-                        setViewAllStoreTotals(false);
-                      }
-
-                      if (onStoreChange) {
-                        onStoreChange(numericValue);
-                      }
-                    }
+                    const value = e.target.value;
+                    // Convert empty string to undefined, otherwise parse as number
+                    const numValue = value === "" || value === null ? undefined : Number(value);
+                    field.onChange(numValue === 0 ? undefined : numValue);
                   }}
-                  onKeyDown={(e) => {
-                    // Prevent entering negative sign, decimal point, and 'e'
-                    if (e.key === "-" || e.key === "." || e.key === "e" || e.key === "E") {
-                      e.preventDefault();
+                  onBlur={(e) => {
+                    // On blur, if the field is empty, explicitly set to undefined
+                    const value = e.target.value;
+                    if (value === "" || value === null || value === undefined) {
+                      field.onChange(undefined);
+                      // Immediately update Redux to clear the badge filter
+                      dispatch(
+                        setBreakdownByStoreQueryParams({
+                          profitYear: profitYear,
+                          storeNumber: getValues("store") ?? undefined,
+                          badgeNumber: undefined,
+                          employeeName: getValues("employeeName") || undefined,
+                          pagination: {
+                            take: 25,
+                            skip: 0,
+                            sortBy: getValues("sortBy"),
+                            isSortDescending: getValues("isSortDescending")
+                          }
+                        })
+                      );
                     }
+                    field.onBlur();
                   }}
                 />
-                {activeTab === "summaries" && (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={viewAllStoreTotals}
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          setViewAllStoreTotals(isChecked);
-
-                          if (isChecked) {
-                            // Clear and disable store field when checkbox is checked
-                            setValue("store", null);
-                            if (onStoreChange) {
-                              onStoreChange(-1);
-                            }
-                          }
-                        }}
-                      />
-                    }
-                    label="View All Store Totals"
-                  />
-                )}
               </>
             )}
           />
         </Grid>
 
-        {(activeTab === "all" || activeTab === "stores") && (
-          <>
-            <Grid size={getGridSizes()}>
-              <Controller
-                name="employeeStatus"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <FormLabel htmlFor="status-select">Employee Status</FormLabel>
-                    <Select
-                      id="status-select"
-                      {...field}
-                      size="small"
-                      fullWidth>
-                      <MenuItem value="">
-                        <em>Clear Selection</em>
-                      </MenuItem>
-                      {employeeStatuses.map((status) => (
-                        <MenuItem
-                          key={status.id}
-                          value={status.id}>
-                          {status.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </>
-                )}
-              />
-            </Grid>
-
-            <Grid size={getGridSizes()}>
-              <Controller
-                name="badgeId"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <FormLabel htmlFor="badge-id">Badge Number</FormLabel>
-                    <TextField
-                      id="badge-id"
-                      {...field}
-                      size="small"
-                      fullWidth
-                    />
-                  </>
-                )}
-              />
-            </Grid>
-
-            <Grid size={getGridSizes()}>
-              <Controller
-                name="employeeName"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <FormLabel htmlFor="employee-name">Employee Name</FormLabel>
-                    <TextField
-                      id="employee-name"
-                      {...field}
-                      size="small"
-                      fullWidth
-                    />
-                  </>
-                )}
-              />
-            </Grid>
-          </>
-        )}
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Controller
+            name="employeeName"
+            control={control}
+            render={({ field }) => (
+              <>
+                <FormLabel htmlFor="employee-name">Employee Name</FormLabel>
+                <TextField
+                  id="employee-name"
+                  {...field}
+                  size="small"
+                  fullWidth
+                  disabled={store === -1 || store === null}
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      backgroundColor: (store === -1 || store === null) ? '#f5f5f5' : 'white'
+                    }
+                  }}
+                />
+              </>
+            )}
+          />
+        </Grid>
       </Grid>
 
       <Grid

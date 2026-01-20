@@ -112,28 +112,38 @@ public sealed class BreakdownReportService : IBreakdownService
     #endregion
 
     public Task<GrandTotalsByStoreResponseDto> GetGrandTotals(
-     YearRequest request,
+     GrandTotalsByStoreRequest request,
      CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
 
-            // Aggregate per-store and per-vesting-bucket sums in a SINGLE database query
+            // Get active store IDs for the "Other" category
+            // Active stores are retail stores (1-140) that aren't in the specific buckets (700, 701, 800, 801, 802, 900)
+            var activeStoreIds = StoreTypes.RetailStores
+                .Where(s => s < 700 || s > 900) // Exclude profit sharing report stores
+                .Select(s => (short)s)
+                .ToHashSet();
+
+            // Aggregate per-store and per-vesting-bucket COUNTS in a SINGLE database query
             var baseQuery = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate);
 
-            // Single query that gets all aggregations needed
+            // Apply Under 21 filter if requested (PS-2442: Filter for under 21 participants in grand totals)
+            if (request.Under21Participants)
+            {
+                // Calculate age using the fiscal end date and filter for participants under 21
+                // Age is calculated server-side from DateOfBirth relative to the fiscal end date
+                DateOnly under21Date = calInfo.FiscalEndDate.AddYears(-21);
+
+                baseQuery = baseQuery.Where(e => e.DateOfBirth > under21Date);
+            }
+
+            // Single query that gets all aggregations needed - COUNT participants instead of SUM balances
             var aggregatedData = await baseQuery
                 .Select(m => new
                 {
                     m.StoreNumber,
-                    VestingRatio = (m.VestedPercent ?? 0m),
-                    EndBalance = (m.BeginningBalance ?? 0m)
-                                + m.Earnings
-                                + m.Contributions
-                                + m.Forfeitures
-                                + m.Distributions
-                                + (m.BeneficiaryAllocation ?? 0m),
                     m.Ssn,
                     // Compute bucket in SQL to enable single-query aggregation
                     VestingBucket = m.VestedPercent == 1m ? "100% Vested"
@@ -147,14 +157,14 @@ public sealed class BreakdownReportService : IBreakdownService
             var ssns = aggregatedData.Select(x => x.Ssn).Distinct().ToHashSet();
             ThrowIfInvalidSsns(ssns);
 
-            // Group in memory (data is already loaded and small after aggregation)
+            // Group in memory - COUNT participants instead of SUM balances
             var perStoreTotals = aggregatedData
                 .GroupBy(p => p.StoreNumber)
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.EndBalance));
+                .ToDictionary(g => g.Key, g => g.Count());
 
             var perStoreBuckets = aggregatedData
                 .GroupBy(p => (p.StoreNumber, p.VestingBucket))
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.EndBalance));
+                .ToDictionary(g => g.Key, g => g.Count());
 
             var storeKeys = new HashSet<short>(new short[] { 700, 701, 800, 801, 802, 900 });
             var categories = new[] { "Grand Total", "100% Vested", "Partially Vested", "Not Vested" };
@@ -167,26 +177,27 @@ public sealed class BreakdownReportService : IBreakdownService
                 {
                     Category = label,
                     Store700 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(700, out var s700) ? s700 : 0m)
-                        : (perStoreBuckets.TryGetValue((700, label), out var b700) ? b700 : 0m),
+                        ? (perStoreTotals.TryGetValue(700, out var s700) ? s700 : 0)
+                        : (perStoreBuckets.TryGetValue((700, label), out var b700) ? b700 : 0),
                     Store701 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(701, out var s701) ? s701 : 0m)
-                        : (perStoreBuckets.TryGetValue((701, label), out var b701) ? b701 : 0m),
+                        ? (perStoreTotals.TryGetValue(701, out var s701) ? s701 : 0)
+                        : (perStoreBuckets.TryGetValue((701, label), out var b701) ? b701 : 0),
                     Store800 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(800, out var s800) ? s800 : 0m)
-                        : (perStoreBuckets.TryGetValue((800, label), out var b800) ? b800 : 0m),
+                        ? (perStoreTotals.TryGetValue(800, out var s800) ? s800 : 0)
+                        : (perStoreBuckets.TryGetValue((800, label), out var b800) ? b800 : 0),
                     Store801 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(801, out var s801) ? s801 : 0m)
-                        : (perStoreBuckets.TryGetValue((801, label), out var b801) ? b801 : 0m),
+                        ? (perStoreTotals.TryGetValue(801, out var s801) ? s801 : 0)
+                        : (perStoreBuckets.TryGetValue((801, label), out var b801) ? b801 : 0),
                     Store802 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(802, out var s802) ? s802 : 0m)
-                        : (perStoreBuckets.TryGetValue((802, label), out var b802) ? b802 : 0m),
+                        ? (perStoreTotals.TryGetValue(802, out var s802) ? s802 : 0)
+                        : (perStoreBuckets.TryGetValue((802, label), out var b802) ? b802 : 0),
                     Store900 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(900, out var s900) ? s900 : 0m)
-                        : (perStoreBuckets.TryGetValue((900, label), out var b900) ? b900 : 0m),
+                        ? (perStoreTotals.TryGetValue(900, out var s900) ? s900 : 0)
+                        : (perStoreBuckets.TryGetValue((900, label), out var b900) ? b900 : 0),
+                    // Other category: use active store IDs (retail stores 1-140, excluding special buckets)
                     StoreOther = label == "Grand Total"
-                        ? perStoreTotals.Where(p => !storeKeys.Contains(p.Key)).Sum(p => p.Value)
-                        : perStoreBuckets.Where(p => !storeKeys.Contains(p.Key.StoreNumber) && p.Key.VestingBucket == label).Sum(p => p.Value)
+                        ? perStoreTotals.Where(p => activeStoreIds.Contains(p.Key)).Sum(p => p.Value)
+                        : perStoreBuckets.Where(p => activeStoreIds.Contains(p.Key.StoreNumber) && p.Key.VestingBucket == label).Sum(p => p.Value)
                 };
 
                 row = row with

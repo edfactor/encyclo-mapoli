@@ -1,4 +1,6 @@
-import { Grid, Typography } from "@mui/material";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import { Grid, Typography, IconButton } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/AdhocApi";
@@ -14,13 +16,19 @@ interface AssociatesGridProps {
   pageNumberReset: boolean;
   setPageNumberReset: (reset: boolean) => void;
   onLoadingChange?: (isLoading: boolean) => void;
+  refetchTrigger?: number;
+  isGridExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const AssociatesGrid: React.FC<AssociatesGridProps> = ({
   store,
   pageNumberReset,
   setPageNumberReset,
-  onLoadingChange
+  onLoadingChange,
+  refetchTrigger,
+  isGridExpanded = false,
+  onToggleExpand
 }) => {
   const [fetchBreakdownByStore, { isFetching }] = useLazyGetBreakdownByStoreQuery();
   const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
@@ -46,10 +54,10 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
         if (hasToken) {
           const params = {
             profitYear: queryParams?.profitYear || profitYear,
-            storeNumber: store,
+            storeNumber: store || undefined,
             storeManagement: false,
-            badgeNumber: queryParams?.badgeNumber,
-            employeeName: queryParams?.employeeName,
+            badgeNumber: queryParams?.badgeNumber && queryParams.badgeNumber > 0 ? queryParams.badgeNumber : undefined,
+            employeeName: queryParams?.employeeName && queryParams.employeeName.trim() !== "" ? queryParams.employeeName : undefined,
             pagination: {
               skip: pageNum * pageSz,
               take: pageSz,
@@ -75,10 +83,10 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
   const fetchData = useCallback(() => {
     const params = {
       profitYear: queryParams?.profitYear || profitYear,
-      storeNumber: store,
+      storeNumber: store || undefined,
       storeManagement: false,
-      badgeNumber: queryParams?.badgeNumber,
-      employeeName: queryParams?.employeeName,
+      badgeNumber: queryParams?.badgeNumber && queryParams.badgeNumber > 0 ? queryParams.badgeNumber : undefined,
+      employeeName: queryParams?.employeeName && queryParams.employeeName.trim() !== "" ? queryParams.employeeName : undefined,
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
@@ -107,6 +115,28 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
     fetchData();
   }, [fetchData]);
 
+  // Refetch when trigger changes - directly call the API with current params
+  useEffect(() => {
+    if (refetchTrigger !== undefined && refetchTrigger > 0) {
+      if (hasToken) {
+        const params = {
+          profitYear: queryParams?.profitYear || profitYear,
+          storeNumber: store || undefined,
+          storeManagement: false,
+          badgeNumber: queryParams?.badgeNumber && queryParams.badgeNumber > 0 ? queryParams.badgeNumber : undefined,
+          employeeName: queryParams?.employeeName && queryParams.employeeName.trim() !== "" ? queryParams.employeeName : undefined,
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        };
+        fetchBreakdownByStore(params);
+      }
+    }
+  }, [refetchTrigger, hasToken, queryParams, profitYear, store, pageNumber, pageSize, sortParams, fetchBreakdownByStore]);
+
   useEffect(() => {
     if (pageNumberReset) {
       resetPagination();
@@ -126,13 +156,6 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
       container
       direction="column"
       width="100%">
-      <Grid paddingX="24px">
-        <Typography
-          variant="h6"
-          sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          Associates
-        </Typography>
-      </Grid>
       <Grid width="100%">
         <DSMPaginatedGrid
           preferenceKey={`${GRID_KEYS.BREAKDOWN_REPORT_ASSOCIATES_PREFIX}${store}`}
@@ -149,6 +172,27 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
             handleSortChange
           }}
           showPagination={breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0}
+          header={
+            <Typography
+              variant="h6"
+              sx={{ color: "#0258A5", marginBottom: "16px", paddingX: "24px" }}>
+              Associates
+            </Typography>
+          }
+          headerActions={
+            onToggleExpand && (
+              <IconButton
+                onClick={onToggleExpand}
+                sx={{ zIndex: 1 }}>
+                {isGridExpanded ? <FullscreenExitIcon /> : <FullscreenIcon />}
+              </IconButton>
+            )
+          }
+          heightConfig={{
+            mode: "content-aware",
+            heightPercentage: isGridExpanded ? 0.85 : 0.4,
+            isExpanded: isGridExpanded
+          }}
         />
       </Grid>
     </Grid>

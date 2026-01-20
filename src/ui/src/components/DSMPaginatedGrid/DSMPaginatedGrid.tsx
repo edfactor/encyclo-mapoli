@@ -39,6 +39,8 @@ export interface ContentAwareHeightConfig {
   maxHeight?: number;
   /** Number of pinned rows (top and bottom combined) to add to row count calculation. Default: 0 */
   pinnedRowCount?: number;
+  /** Whether the grid is in expanded/fullscreen mode. When true, uses viewport-based calculation without caps. */
+  isExpanded?: boolean;
 }
 
 /**

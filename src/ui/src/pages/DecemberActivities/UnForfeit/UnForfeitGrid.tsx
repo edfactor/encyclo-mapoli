@@ -230,7 +230,9 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
         }
         heightConfig={{
           mode: "content-aware",
-          heightPercentage: isGridExpanded ? 0.85 : 0.4
+          heightPercentage: isGridExpanded ? 0.85 : 0.4,
+          isExpanded: isGridExpanded,
+          rowHeight: 40
         }}
         gridOptions={{
           getRowClass: (params) => ((params.data as { isDetail?: boolean })?.isDetail ? "detail-row" : ""),

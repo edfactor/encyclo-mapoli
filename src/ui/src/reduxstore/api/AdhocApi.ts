@@ -573,12 +573,13 @@ export const AdhocApi = createApi({
         }
       }
     }),
-    getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
+    getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest & { under21Participants?: boolean }>({
       query: (params) => ({
         url: "ad-hoc/stores/breakdown/totals",
         method: "GET",
         params: {
-          profitYear: params.profitYear
+          profitYear: params.profitYear,
+          ...(params.under21Participants !== undefined && { Under21Participants: params.under21Participants })
         }
       }),
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {

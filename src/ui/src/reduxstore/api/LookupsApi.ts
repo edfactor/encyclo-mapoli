@@ -101,6 +101,18 @@ export const LookupsApi = createApi({
       transformResponse: (response: { items: TaxCodeResponse[] }) => {
         return response.items;
       }
+    }),
+    getStores: builder.query<Array<{ id: number; label: string }>, void>({
+      query: () => ({
+        url: "/lookup/stores",
+        method: "GET"
+      }),
+      transformResponse: (response: { items: Array<{ storeId: number; city: string; state: string }> }) => {
+        return response.items.map(store => ({
+          id: store.storeId,
+          label: `${store.storeId} - ${store.city}, ${store.state}`
+        }));
+      }
     })
   })
 });
@@ -112,5 +124,6 @@ export const {
   useLazyGetDuplicateSsnExistsQuery,
   useLazyGetStateTaxQuery,
   useGetStatesQuery,
-  useGetTaxCodesQuery
+  useGetTaxCodesQuery,
+  useGetStoresQuery
 } = LookupsApi;

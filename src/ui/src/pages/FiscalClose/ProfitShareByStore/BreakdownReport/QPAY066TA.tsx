@@ -1,133 +1,100 @@
 import PageErrorBoundary from "@/components/PageErrorBoundary";
-import { Divider, Grid, Tab, Tabs } from "@mui/material";
-import { useCallback, useState } from "react";
+import { Divider, Grid } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../../constants";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { useLazyGetBreakdownGrandTotalsQuery } from "../../../../reduxstore/api/AdhocApi";
+import { RootState } from "../../../../reduxstore/store";
 import QPAY066TABreakdownParameters from "./QPAY066TABreakdownParameters";
+import AllEmployeesContent from "./AllEmployeesContent";
+import Under21Content from "./Under21Content";
 import StoreContent from "./StoreContent";
-import SummariesContent from "./SummariesContent";
 import TotalsContent from "./TotalsContent";
 
 const QPAY066TA = () => {
-  const [tabValue, setTabValue] = useState(0);
   const [store, setStore] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const tabs = ["ALL", "STORE", "TOTALS", "SUMMARIES"];
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const [isAnyGridExpanded, setIsAnyGridExpanded] = useState(false);
+  
+  const profitYear = useDecemberFlowProfitYear();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const [getBreakdownGrandTotals] = useLazyGetBreakdownGrandTotalsQuery();
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
+  // Fetch grand totals when store === -1 (for the grids)
+  // TotalsContent will fetch breakdown totals after this completes
+  useEffect(() => {
+    if (hasToken && store === -1) {
+      getBreakdownGrandTotals({
+        profitYear: profitYear
+      });
+    }
+  }, [store, profitYear, getBreakdownGrandTotals, hasToken]);
 
   const handleReset = useCallback(() => {
     setStore(null);
-    setTabValue(0);
+    setRefetchTrigger(0);
   }, []);
 
   const handleLoadingChange = useCallback((loading: boolean) => {
     setIsLoading(loading);
   }, []);
+  
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
 
-  const getActiveTab = (): "all" | "stores" | "summaries" | "totals" => {
-    switch (tabValue) {
-      case 0:
-        return "all";
-      case 1:
-        return "stores";
-      case 2:
-        return "summaries";
-      case 3:
-        return "totals";
-      default:
-        return "all";
-    }
-  };
 
-  const renderContent = () => {
-    switch (tabValue) {
-      case 0:
-        return (
-          <Grid
-            container
-            width="100%"
-            direction="column"
-            spacing={4}>
-            <StoreContent
-              store={store}
-              onLoadingChange={handleLoadingChange}
-            />
-            <TotalsContent
-              store={store}
-              onLoadingChange={handleLoadingChange}
-            />
-            <SummariesContent />
-          </Grid>
-        );
-      case 1:
-        return (
-          <StoreContent
-            store={store}
-            onLoadingChange={handleLoadingChange}
-          />
-        );
-      case 2:
-        return (
-          <TotalsContent
-            store={store}
-            onLoadingChange={handleLoadingChange}
-          />
-        );
-      case 3:
-        return <SummariesContent />;
-      default:
-        return null;
-    }
-  };
 
   return (
     <PageErrorBoundary pageName="QPAY066TA Breakdown Report">
       <Page
-        label={CAPTIONS.BREAKDOWN_REPORT}
-        actionNode={renderActionNode()}>
+        label={isAnyGridExpanded ? "" : CAPTIONS.BREAKDOWN_REPORT}
+        actionNode={isAnyGridExpanded ? undefined : renderActionNode()}>
         <Grid
           container
           rowSpacing="24px">
-          <Grid width="100%">
-            <Divider />
-          </Grid>
+          {!isAnyGridExpanded && (
+            <Grid width="100%">
+              <Divider />
+            </Grid>
+          )}
 
-          <Grid width="100%">
-            <DSMAccordion title="Filter">
-              <QPAY066TABreakdownParameters
-                activeTab={getActiveTab()}
-                onStoreChange={(newStore) => setStore(newStore)}
-                onReset={handleReset}
-                isLoading={isLoading}
-              />
-            </DSMAccordion>
-          </Grid>
-
-          <Grid width="100%">
-            <Tabs
-              value={tabValue}
-              onChange={handleTabChange}
-              aria-label="pay share by store tabs"
-              sx={{ marginLeft: "24px" }}>
-              {tabs.map((tab, index) => (
-                <Tab
-                  key={index}
-                  label={tab}
-                  id={`tab-${index}`}
-                  aria-controls={`tabpanel-${index}`}
+          {!isAnyGridExpanded && (
+            <Grid width="100%">
+              <DSMAccordion title="Filter">
+                <QPAY066TABreakdownParameters
+                  onStoreChange={(newStore) => setStore(newStore)}
+                  onReset={handleReset}
+                  isLoading={isLoading}
+                  onSearch={() => setRefetchTrigger(prev => prev + 1)}
                 />
-              ))}
-            </Tabs>
-          </Grid>
+              </DSMAccordion>
+            </Grid>
+          )}
 
-          {store && <Grid width="100%">{renderContent()}</Grid>}
+          {!isAnyGridExpanded && store !== null && (store === -1 || store > 0) && (
+            <TotalsContent store={store} onLoadingChange={handleLoadingChange} />
+          )}
+
+          {!isAnyGridExpanded && store === -1 && (
+            <>
+              <AllEmployeesContent />
+              <Under21Content />
+            </>
+          )}
+
+          {store !== null && store > 0 && (
+            <StoreContent
+              store={store}
+              onLoadingChange={handleLoadingChange}
+              refetchTrigger={refetchTrigger}
+              onGridExpandChange={setIsAnyGridExpanded}
+            />
+          )}
         </Grid>
       </Page>
     </PageErrorBoundary>
