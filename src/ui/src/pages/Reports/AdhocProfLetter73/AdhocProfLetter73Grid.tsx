@@ -35,7 +35,7 @@ interface AdhocProfLetter73GridProps {
 }
 
 const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
-  const { filterParams, onLoadingChange, isGridExpanded = false, onToggleExpand } = props;
+  const { filterParams, onLoadingChange, isGridExpanded = false, onToggleExpand, searchTrigger } = props;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [columnDefs, setColumnDefs] = useState<ColDef[]>([]);
   const [rowData, setRowData] = useState<Record<string, unknown>[]>([]);
@@ -85,7 +85,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
       }
     });
 
-  // Trigger API call when profitYear or DeMinimusValue changes (initial load)
+  // Trigger API call when profitYear, DeMinimusValue, or searchTrigger changes (initial load and re-search)
   useEffect(() => {
     if (profitYear > 0) {
       const apiParams = {
@@ -98,7 +98,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
       };
       trigger(apiParams);
     }
-  }, [profitYear, filterParams?.DeMinimusValue, trigger, pageNumber, pageSize, sortParams]);
+  }, [profitYear, filterParams?.DeMinimusValue, trigger, pageNumber, pageSize, sortParams, searchTrigger]);
 
   useEffect(() => {
     onLoadingChange?.(isFetching);

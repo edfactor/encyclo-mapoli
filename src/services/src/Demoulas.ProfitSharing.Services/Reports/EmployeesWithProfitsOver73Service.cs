@@ -1,4 +1,5 @@
 using System.Text;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -85,7 +86,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                         d.TerminationDate,
                         d.EmploymentStatusId,
                         EmploymentStatusName = d.EmploymentStatus != null ? d.EmploymentStatus.Name : string.Empty,
-                        TotalAmount = tb.TotalAmount
+                        TotalAmount = tb.TotalAmount.HasValue ? tb.TotalAmount.Value : 0m
                     })
                 .TagWith($"GetEmployeesOver73WithBalances-{request.ProfitYear}")
                 .ToListAsync(cancellationToken);
@@ -114,7 +115,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                 .ToDictionaryAsync(r => (int)r.Age, r => r.Factor, cancellationToken);
 
             // Get payment profit codes (codes that represent distributions/payments)
-            var paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
+            byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
             // Calculate payments within fiscal year for these employees
             // Payment records are in PROFIT_DETAIL where:
@@ -143,7 +144,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                     var age = today.Year - employee.DateOfBirth.Year;
 
                     // Get RMD factor for this age (default to 0 if age not found)
-                    var factor = rmdFactors.TryGetValue(age, out var f) ? f : 0m;
+                    decimal factor = rmdFactors.GetValueOrDefault(age, 0m);
 
                     // Calculate RMD: Balance ÷ Factor (protect against divide by zero)
                     // IMPORTANT: Parentheses around (balance?.TotalAmount ?? 0) ensure correct order of operations
@@ -214,7 +215,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
         }
 
         var letter = new StringBuilder();
-        var space7 = new string(' ', 7);
+        string space7 = new string(' ', 7);
 
         foreach (EmployeesWithProfitsOver73DetailDto emp in report.Response.Results)
         {
