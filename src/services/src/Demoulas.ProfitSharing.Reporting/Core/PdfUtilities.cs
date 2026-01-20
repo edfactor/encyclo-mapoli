@@ -1,4 +1,4 @@
-﻿using QuestPDF.Fluent;
+using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 
 namespace Demoulas.ProfitSharing.Reporting.Core;
@@ -28,7 +28,7 @@ public static class PdfUtilities
                     .Row(row =>
                     {
                         // Left: Logo
-                        row.ConstantItem(130).Element(c => ComposeLogoImage(c));
+                        row.ConstantItem(130).Element(ComposeLogoImage);
 
                         // Center: Title and generated date
                         row.RelativeItem()
@@ -37,7 +37,7 @@ public static class PdfUtilities
                             .Element(c => ComposeHeaderTextBlock(c, reportTitle));
 
                         // Right: Company address
-                        row.ConstantItem(160).Element(c => ComposeCompanyAddressBlock(c));
+                        row.ConstantItem(200).Element(ComposeCompanyAddressBlock);
                     });
             }
             else
@@ -101,7 +101,7 @@ public static class PdfUtilities
     {
         container.AlignMiddle().AlignRight().Column(column =>
         {
-            column.Item().AlignRight().Text("DEMOULAS SUPERMARKETS, INC.").FontSize(PdfReportConfiguration.FontSizes.FooterSize).Bold();
+            column.Item().AlignRight().Text("DEMOULAS PROFIT SHARING PLAN & TRUST").FontSize(PdfReportConfiguration.FontSizes.FooterSize).Bold();
             column.Item().AlignRight().Text("875 EAST STREET").FontSize(PdfReportConfiguration.FontSizes.FooterSize).Bold();
             column.Item().AlignRight().Text("TEWKSBURY, MA 01876-1495").FontSize(PdfReportConfiguration.FontSizes.FooterSize).Bold();
             column.Item().AlignRight().Text("PHONE 978-851-8000").FontSize(PdfReportConfiguration.FontSizes.FooterSize).Bold();
@@ -132,13 +132,15 @@ public static class PdfUtilities
             .FontSize(PdfReportConfiguration.FontSizes.LabelSize)
             .Bold()
             .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
-    }    /// <summary>
-         /// Creates a simple key-value pair display (label and value)
-         /// </summary>
-         /// <param name="container">IContainer to add pair to</param>
-         /// <param name="label">Label/key text</param>
-         /// <param name="value">Value text</param>
-         /// <param name="bold">Whether to bold the value</param>
+    }
+
+    /// <summary>
+    /// Creates a simple key-value pair display (label and value)
+    /// </summary>
+    /// <param name="container">IContainer to add pair to</param>
+    /// <param name="label">Label/key text</param>
+    /// <param name="value">Value text</param>
+    /// <param name="bold">Whether to bold the value</param>
     public static void ComposeKeyValuePair(
         this IContainer container,
         string label,
@@ -263,18 +265,6 @@ public static class PdfUtilities
     }
 
     /// <summary>
-    /// Creates a horizontal divider line
-    /// </summary>
-    /// <param name="container">IContainer to add divider to</param>
-    /// <param name="thickness">Line thickness (default 1)</param>
-    public static void ComposeDivider(this IContainer container, float thickness = 1)
-    {
-        container.PaddingVertical(PdfReportConfiguration.Spacing.SmallGap)
-            .Height(thickness)
-            .Background(PdfReportConfiguration.BrandColors.BorderGray);
-    }
-
-    /// <summary>
     /// Creates a section spacing element
     /// </summary>
     /// <param name="container">IContainer to add spacing to</param>
@@ -289,14 +279,6 @@ public static class PdfUtilities
     public static string ToCurrencyString(this decimal value)
     {
         return value.ToString("C2");
-    }
-
-    /// <summary>
-    /// Formats a nullable decimal value as currency string or empty
-    /// </summary>
-    public static string ToCurrencyStringOrEmpty(this decimal? value)
-    {
-        return value?.ToString("C2") ?? "-";
     }
 
     /// <summary>
@@ -315,81 +297,5 @@ public static class PdfUtilities
         }
 
         return text[..(maxLength - 3)] + "...";
-    }
-
-    /// <summary>
-    /// Composes a professional cover page with company branding
-    /// </summary>
-    public static void ComposeCoverPageHeader(this IContainer container)
-    {
-        container.Column(column =>
-        {
-            // Logo (max height to allow aspect ratio preservation)
-            column.Item().MaxHeight(45).Element(ComposeLogoImage);
-
-            // Company name with brand color
-            column.Item().PaddingVertical(PdfReportConfiguration.Spacing.StandardGap)
-                .Text("Demoulas Supermarkets, Inc.")
-                .FontSize(20)
-                .Bold()
-                .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue);
-
-            // Department
-            column.Item().PaddingVertical(PdfReportConfiguration.Spacing.SmallGap)
-                .Text("Profit Sharing Program")
-                .FontSize(14)
-                .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
-        });
-    }
-
-    /// <summary>
-    /// Composes a professional title section for reports
-    /// </summary>
-    public static void ComposeCoverPageTitle(this IContainer container, string title)
-    {
-        container.Column(column =>
-        {
-            column.Item().Height(PdfReportConfiguration.Spacing.CoverPageGap);
-
-            column.Item().PaddingVertical(PdfReportConfiguration.Spacing.StandardGap)
-                .Text(title)
-                .FontSize(24)
-                .Bold()
-                .FontColor(PdfReportConfiguration.BrandColors.DemoulasBlue);
-
-            column.Item().Height(2).PaddingVertical(PdfReportConfiguration.Spacing.StandardGap)
-                .Background(PdfReportConfiguration.BrandColors.DemoulasBlue);
-        });
-    }
-
-    /// <summary>
-    /// Composes cover page metadata (date, prepared for, etc.)
-    /// </summary>
-    public static void ComposeCoverPageMetadata(this IContainer container, string label, string value)
-    {
-        container.Row(row =>
-        {
-            row.ConstantItem(120)
-                .Text(label + ":")
-                .FontSize(11)
-                .Bold()
-                .FontColor(PdfReportConfiguration.BrandColors.TextDarkGray);
-
-            row.RelativeItem()
-                .PaddingLeft(PdfReportConfiguration.Spacing.StandardGap)
-                .Text(value)
-                .FontSize(11)
-                .FontColor(PdfReportConfiguration.BrandColors.TextBlack);
-        });
-    }
-
-    /// <summary>
-    /// Composes a decorative divider for cover pages
-    /// </summary>
-    public static void ComposeCoverPageDivider(this IContainer container)
-    {
-        container.PaddingVertical(PdfReportConfiguration.Spacing.LargeGap)
-            .Height(2)
-            .Background(PdfReportConfiguration.BrandColors.BorderGray);
     }
 }
