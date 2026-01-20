@@ -508,7 +508,7 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
     valueFormatter = (params) => {
       const value = params.value;
       // Only format if value is a valid date string (yyyyMMdd or yyyy-MM-dd)
-      if (!value) return "";  
+      if (!value) return "";
       // Accepts both string and Date
       if (typeof value === "string" && /^\d{8}$/.test(value)) {
         return yyyyMMDDToMMDDYYYY(value);

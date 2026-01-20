@@ -27,9 +27,7 @@ const PostFrozenUnder21ReportGrid: React.FC<PostFrozenUnder21ReportGridProps> = 
 
   // Keep a ref to the last successful report so we can continue showing the
   // previous page while a new page is being fetched (avoids content clearing).
-  const lastReportRef = useRef<ProfitSharingUnder21ReportResponse | null>(
-    profitSharingUnder21Report ?? null
-  );
+  const lastReportRef = useRef<ProfitSharingUnder21ReportResponse | null>(profitSharingUnder21Report ?? null);
 
   useEffect(() => {
     if (profitSharingUnder21Report && profitSharingUnder21Report.response) {

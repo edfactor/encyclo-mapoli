@@ -3,23 +3,23 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { Paged } from "smart-ui-library";
 import { setFrozenStateCollectionResponse, setFrozenStateResponse } from "../../reduxstore/slices/frozenSlice";
 import {
-    AllUserFakeTimeResponse,
-    AnnuityRateDto,
-    AuditChangeEntryDto,
-    AuditEventDto,
-    AuditSearchRequestDto,
-    CurrentUserResponseDto,
-    CreateAnnuityRatesRequest,
-    FakeTimeStatusResponse,
-    FreezeDemographicsRequest,
-    FrozenStateResponse,
-    RowCountResult,
-    SetFakeTimeRequest,
-    SortedPaginationRequestDto,
-    StateTaxRateDto,
-    UpdateAnnuityRateRequest,
-    UpdateStateTaxRateRequest,
-    UserFakeTimeStatusResponse
+  AllUserFakeTimeResponse,
+  AnnuityRateDto,
+  AuditChangeEntryDto,
+  AuditEventDto,
+  AuditSearchRequestDto,
+  CurrentUserResponseDto,
+  CreateAnnuityRatesRequest,
+  FakeTimeStatusResponse,
+  FreezeDemographicsRequest,
+  FrozenStateResponse,
+  RowCountResult,
+  SetFakeTimeRequest,
+  SortedPaginationRequestDto,
+  StateTaxRateDto,
+  UpdateAnnuityRateRequest,
+  UpdateStateTaxRateRequest,
+  UserFakeTimeStatusResponse
 } from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 

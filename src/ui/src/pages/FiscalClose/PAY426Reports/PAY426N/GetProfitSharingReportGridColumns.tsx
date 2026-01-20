@@ -120,9 +120,7 @@ const createValidatedNameCellRenderer = (validationData: ValidationResponse | nu
   };
 };
 
-export const GetProfitSharingReportGridColumns = (
-  validationData: ValidationResponse | null = null
-): ColDef[] => {
+export const GetProfitSharingReportGridColumns = (validationData: ValidationResponse | null = null): ColDef[] => {
   return [
     createBadgeColumn({}),
     {
