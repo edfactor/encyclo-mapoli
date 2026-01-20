@@ -15,7 +15,7 @@
     "lint:api": "powershell -ExecutionPolicy Bypass -File ../../scripts/Lint-Api.ps1",
     "prettier": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
     "test": "vitest --coverage",
-    "test:windows": "vitest --coverage --run --pool=threads --poolOptions.threads.singleThread",
+    "test:windows": "node -e \"require('fs').mkdirSync('coverage/.tmp', { recursive: true })\" && vitest --coverage --run",
     "e2e": "playwright test --workers=2",
     "e2e:watch": "playwright test --watch",
     "e2e:ui": "playwright test --ui",
