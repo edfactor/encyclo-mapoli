@@ -60,7 +60,7 @@ export const BeneficiariesApi = createApi({
     }),
     getBeneficiarytypes: builder.query<BeneficiaryTypesResponseDto, BeneficiaryTypesRequestDto>({
       query: (request) => ({
-        url: `/beneficiaryType`,
+        url: "/beneficiary-types",
         method: "GET",
         params: request
       }),

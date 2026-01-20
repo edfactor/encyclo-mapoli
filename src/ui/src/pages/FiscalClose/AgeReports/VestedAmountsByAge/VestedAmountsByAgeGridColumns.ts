@@ -20,6 +20,13 @@ export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName
         field: amountColName
       }),
       flex: 2
-    } as ColDef
+    } as ColDef,
+    {
+      headerName: "",
+      field: "",
+      flex: 1,
+      sortable: false,
+      filter: false
+    }
   ];
 };

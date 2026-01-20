@@ -22,7 +22,7 @@ public class MasterInquiryFilteredDetailsEndpoint : ProfitSharingEndpoint<Master
 
     public override void Configure()
     {
-        Post("master-inquiry/member/details");
+        Post("members/details");
         Summary(s =>
         {
             s.Summary = "Get paginated profit details filtered by member type, year, and month.";

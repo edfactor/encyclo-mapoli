@@ -24,7 +24,7 @@ export const DistributionApi = createApi({
       query: (params) => {
         const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
         return {
-          url: "/distribution/search",
+          url: "/distributions/search",
           method: "POST",
           body: requestData,
           // Pass params through meta so middleware can access it
@@ -34,21 +34,21 @@ export const DistributionApi = createApi({
     }),
     createDistribution: builder.mutation<CreateOrUpdateDistributionResponse, CreateDistributionRequest>({
       query: (request) => ({
-        url: "/distribution",
+        url: "/distributions",
         method: "POST",
         body: request
       })
     }),
     updateDistribution: builder.mutation<CreateOrUpdateDistributionResponse, EditDistributionRequest>({
       query: (request) => ({
-        url: "/distribution",
+        url: "/distributions",
         method: "PUT",
         body: request
       })
     }),
     deleteDistribution: builder.mutation<boolean, number>({
       query: (id) => ({
-        url: `/distribution/${id}`,
+        url: `/distributions/${id}`,
         method: "DELETE"
       })
     })

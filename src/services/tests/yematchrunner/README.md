@@ -8,15 +8,13 @@ https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/272007173/READY+SMART+Year
 
 Go to the checkout directory of the project and add your credentials for READY;
 
-$ dotnet user-secrets set "YEMatchHost:Username" myusernam
-$ dotnet user-secrets set "YEMatchHost:Password" 'mypasswd'
+$ dotnet user-secrets set "YEMatchHost:Username" "<READY_USERNAME>"
+$ dotnet user-secrets set "YEMatchHost:Password" "<READY_PASSWORD>"
 
 Also set the connection strings for READY and SMART databases
 
-$ dotnet user-secrets set SmartConnectionString "Data Source= (DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = tdcexa-scan1.mainoffice.demoulas.corp)(PORT = 1521)) ) (CONNECT_DATA = (SERVICE_NAME = test10d) (SERVER = DEDICATED)));User Id=smartUser;Password=smartPass"
-$ dotnet user-secrets set ReadyConnectionString "Data Source= (DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL =
-TCP)(HOST = tdcexa-scan1.mainoffice.demoulas.corp)(PORT = 1521)) ) (CONNECT_DATA = (SERVICE_NAME = test10d) (SERVER = DEDICATED)));User
-Id=readyUser;Password=readyPass"
+$ dotnet user-secrets set SmartConnectionString "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=<DB_HOST>)(PORT=<DB_PORT>)))(CONNECT_DATA=(SERVICE_NAME=<DB_SERVICE>)(SERVER=DEDICATED)));User Id=<SMART_DB_USER>;Password=<SMART_DB_PASSWORD>"
+$ dotnet user-secrets set ReadyConnectionString "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=<DB_HOST>)(PORT=<DB_PORT>)))(CONNECT_DATA=(SERVICE_NAME=<DB_SERVICE>)(SERVER=DEDICATED)));User Id=<READY_DB_USER>;Password=<READY_DB_PASSWORD>"
 
 You can configure the "log" directory that YE match uses;
 

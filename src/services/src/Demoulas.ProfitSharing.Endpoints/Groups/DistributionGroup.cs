@@ -22,6 +22,6 @@ public sealed class DistributionGroup : GroupBase
             ep.Policies(Policy.CanViewDistributions);
         });
     }
-    protected override string Route => "distribution";
-    protected override string RouteName => "Distribution";
+    protected override string Route => "distributions";
+    protected override string RouteName => "Distributions";
 }

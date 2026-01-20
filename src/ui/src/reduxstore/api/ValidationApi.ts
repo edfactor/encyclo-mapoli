@@ -65,7 +65,7 @@ export const validationApi = createApi({
      * ```
      */
     getBalanceValidation: builder.query<CrossReferenceValidationGroup | null, number>({
-      query: (profitYear) => `../balance-validation/alloc-transfers/${profitYear}`, // Note: profitYear is a parameter value, not a path segment
+      query: (profitYear) => `balance-validation/alloc-transfers/${profitYear}`, // Note: profitYear is a parameter value, not a path segment
       // Handle 404 gracefully - no validation data available for this year
       transformErrorResponse: (response) => {
         if (response.status === 404) {
