@@ -112,7 +112,10 @@ const YTDWagesGrid = ({
           !isGridExpanded ? (
             <>
               <div style={{ marginTop: "-18px" }}>
-                <ReportSummary report={clonedData} />
+                <ReportSummary
+                  report={clonedData}
+                  variant="compact"
+                />
               </div>
               <div style={{ marginTop: "4px", marginBottom: "12px" }}>
                 <Typography
