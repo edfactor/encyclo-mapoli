@@ -27,7 +27,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<DuplicateN
 
     public override void Configure()
     {
-        Get("yearend/duplicate-names-and-birthdays");
+        Get("year-end/duplicate-names-and-birthdays");
         Policies(Security.Policy.CanViewDuplicateNamesAndBirthdays);  // Override group policy with stricter endpoint policy
         Summary(s =>
         {
