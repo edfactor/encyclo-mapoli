@@ -60,6 +60,22 @@ const YTDWagesGrid = ({
     );
   }, [clonedData?.response?.results, clonedData?.totalIncomeCurrentYearWages]);
 
+  const formatHoursTotal = (value: number | string) => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value.toFixed(2);
+    }
+
+    return value;
+  };
+
+  const formatIncomeTotal = (value: number | string) => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return numberToCurrency(value);
+    }
+
+    return value;
+  };
+
   if (!showData || !clonedData?.response) {
     return null;
   }
@@ -99,7 +115,7 @@ const YTDWagesGrid = ({
                 <Typography
                   variant="body2"
                   sx={{ fontWeight: "bold" }}>
-                  Total Hours {totalHours.toFixed(2)} &nbsp;&nbsp;&nbsp; Total Income {numberToCurrency(totalIncome)}
+                  Total Hours {formatHoursTotal(totalHours)} &nbsp;&nbsp;&nbsp; Total Income {formatIncomeTotal(totalIncome)}
                 </Typography>
               </div>
             </>
