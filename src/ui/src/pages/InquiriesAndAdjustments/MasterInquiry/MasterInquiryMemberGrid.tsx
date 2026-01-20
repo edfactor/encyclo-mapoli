@@ -113,7 +113,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
           <Typography
             variant="h2"
             sx={{ color: "#0258A5" }}>
-              {`Search Results (${formatNumberWithComma(displayTotal)} ${displayTotal === 1 ? "Record" : "Records"})`}
+            {`Search Results (${formatNumberWithComma(displayTotal)} ${displayTotal === 1 ? "Record" : "Records"})`}
           </Typography>
           <IconButton
             onClick={onToggleExpand}

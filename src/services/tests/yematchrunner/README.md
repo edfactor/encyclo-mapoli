@@ -13,9 +13,9 @@ $ dotnet user-secrets set "YEMatchHost:Password" 'mypasswd'
 
 Also set the connection strings for READY and SMART databases
 
-$ dotnet user-secrets set SmartConnectionString "Data Source= (DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = tdcexa-scan1)(PORT = 1521)) ) (CONNECT_DATA = (SERVICE_NAME = test10d) (SERVER = DEDICATED)));User Id=smartUser;Password=smartPass"
+$ dotnet user-secrets set SmartConnectionString "Data Source= (DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = tdcexa-scan1.mainoffice.demoulas.corp)(PORT = 1521)) ) (CONNECT_DATA = (SERVICE_NAME = test10d) (SERVER = DEDICATED)));User Id=smartUser;Password=smartPass"
 $ dotnet user-secrets set ReadyConnectionString "Data Source= (DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL =
-TCP)(HOST = tdcexa-scan1)(PORT = 1521)) ) (CONNECT_DATA = (SERVICE_NAME = test10d) (SERVER = DEDICATED)));User
+TCP)(HOST = tdcexa-scan1.mainoffice.demoulas.corp)(PORT = 1521)) ) (CONNECT_DATA = (SERVICE_NAME = test10d) (SERVER = DEDICATED)));User
 Id=readyUser;Password=readyPass"
 
 You can configure the "log" directory that YE match uses;

@@ -9,9 +9,9 @@ vi.mock("smart-ui-library", () => ({
       <div data-testid="grid-data">{JSON.stringify(providedOptions?.rowData)}</div>
     </div>
   )),
-  Pagination: vi.fn(({ pageNumber, pageSize, recordCount }) => (
+  Pagination: vi.fn(({ defaultPagination, recordCount }) => (
     <div data-testid="pagination">
-      Page {pageNumber} - Size {pageSize} - Total {recordCount}
+      Page {defaultPagination?.skip} - Size {defaultPagination?.take} - Total {recordCount}
     </div>
   ))
 }));

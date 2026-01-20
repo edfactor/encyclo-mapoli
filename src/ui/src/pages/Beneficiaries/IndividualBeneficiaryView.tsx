@@ -101,7 +101,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
         memberDetails={memberDetails}
         isLoading={isFetchingMemberDetails}
       />
-      
+
       <Box
         sx={{
           paddingX: "24px",

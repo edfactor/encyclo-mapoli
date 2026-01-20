@@ -160,7 +160,7 @@ export const validateEffectiveDate = (value: Date | undefined | null): string =>
 export const handleRoutingNumberInput = (value: string): string => {
   // Only allow numeric input
   const numericValue = value.replace(/\D/g, "");
-  
+
   // Limit to 9 digits
   return numericValue.slice(0, 9);
 };

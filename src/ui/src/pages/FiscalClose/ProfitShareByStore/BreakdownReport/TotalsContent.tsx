@@ -21,7 +21,7 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store, onLoadingChange })
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   // Use the API hook to fetch data
   const [getBreakdownByStoreTotals, { isFetching }] = useLazyGetBreakdownByStoreTotalsQuery();
-  
+
   // State for managing validation dialog
   const [dialogState, setDialogState] = useState<{
     isOpen: boolean;
@@ -30,16 +30,17 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store, onLoadingChange })
   }>({ isOpen: false, fieldName: null, groupName: null });
 
   // Helper function to find a validation group by name
-  const getValidationGroup = useCallback((groupName: string): CrossReferenceValidationGroup | null => {
-    if (!breakdownByStoreTotals?.crossReferenceValidation?.validationGroups) {
-      return null;
-    }
-    return (
-      breakdownByStoreTotals.crossReferenceValidation.validationGroups.find(
-        (g) => g.groupName === groupName
-      ) || null
-    );
-  }, [breakdownByStoreTotals?.crossReferenceValidation?.validationGroups]);
+  const getValidationGroup = useCallback(
+    (groupName: string): CrossReferenceValidationGroup | null => {
+      if (!breakdownByStoreTotals?.crossReferenceValidation?.validationGroups) {
+        return null;
+      }
+      return (
+        breakdownByStoreTotals.crossReferenceValidation.validationGroups.find((g) => g.groupName === groupName) || null
+      );
+    },
+    [breakdownByStoreTotals?.crossReferenceValidation?.validationGroups]
+  );
 
   // Handler to open validation dialog
   const handleValidationClick = useCallback((groupName: string, fieldName: string) => {

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useDispatch } from "react-redux";
 import {
-    useCreateBankMutation,
-    useDisableBankMutation,
-    useGetAllBanksQuery,
-    useUpdateBankMutation
+  useCreateBankMutation,
+  useDisableBankMutation,
+  useGetAllBanksQuery,
+  useUpdateBankMutation
 } from "../../../../reduxstore/api/administrationApi";
 import { setMessage } from "../../../../reduxstore/slices/messageSlice";
 import { BankDto, CreateBankRequest, UpdateBankRequest } from "../../../../types/administration/banks";
@@ -171,12 +171,13 @@ export function useManageBanks() {
   // Initialize maps when data loads
   useEffect(() => {
     // Only update if banks actually changed (not just re-rendered)
-    const banksChanged = banks.length !== prevBanksRef.current.length ||
+    const banksChanged =
+      banks.length !== prevBanksRef.current.length ||
       banks.some((bank, idx) => bank.id !== prevBanksRef.current[idx]?.id);
-    
+
     if (banksChanged) {
       prevBanksRef.current = banks;
-      
+
       if (banks.length > 0) {
         dispatchAction({ type: "INITIALIZE_BANKS", payload: banks });
       }
@@ -189,7 +190,7 @@ export function useManageBanks() {
       const staged = state.editState.stagedBanksById[Number(id)];
       const original = state.editState.originalBanksById[Number(id)];
       if (!original) return false;
-      
+
       return (
         staged.name !== original.name ||
         staged.officeType !== original.officeType ||
@@ -221,7 +222,7 @@ export function useManageBanks() {
           const staged = state.editState.stagedBanksById[Number(id)];
           const original = state.editState.originalBanksById[Number(id)];
           if (!original) return false;
-          
+
           return (
             staged.name !== original.name ||
             staged.officeType !== original.officeType ||
@@ -261,28 +262,34 @@ export function useManageBanks() {
     dispatchAction({ type: "DISCARD_CHANGES" });
   }, []);
 
-  const handleCreateBank = useCallback(async (request: CreateBankRequest) => {
-    try {
-      await createBank(request).unwrap();
-      await refetch();
-      dispatchAction({ type: "CLOSE_CREATE_DIALOG" });
-      dispatch(setMessage(Messages.BankCreatedSuccess));
-    } catch (error) {
-      console.error("Error creating bank:", error);
-      dispatch(setMessage(Messages.BankCreateError));
-    }
-  }, [createBank, refetch, dispatch]);
+  const handleCreateBank = useCallback(
+    async (request: CreateBankRequest) => {
+      try {
+        await createBank(request).unwrap();
+        await refetch();
+        dispatchAction({ type: "CLOSE_CREATE_DIALOG" });
+        dispatch(setMessage(Messages.BankCreatedSuccess));
+      } catch (error) {
+        console.error("Error creating bank:", error);
+        dispatch(setMessage(Messages.BankCreateError));
+      }
+    },
+    [createBank, refetch, dispatch]
+  );
 
-  const handleDisableBank = useCallback(async (bankId: number) => {
-    try {
-      await disableBank(bankId).unwrap();
-      await refetch();
-      dispatch(setMessage(Messages.BankDisabledSuccess));
-    } catch (error) {
-      console.error("Error disabling bank:", error);
-      dispatch(setMessage(Messages.BankDisableError));
-    }
-  }, [disableBank, refetch, dispatch]);
+  const handleDisableBank = useCallback(
+    async (bankId: number) => {
+      try {
+        await disableBank(bankId).unwrap();
+        await refetch();
+        dispatch(setMessage(Messages.BankDisabledSuccess));
+      } catch (error) {
+        console.error("Error disabling bank:", error);
+        dispatch(setMessage(Messages.BankDisableError));
+      }
+    },
+    [disableBank, refetch, dispatch]
+  );
 
   const setActiveTab = useCallback((tab: number, selectedBank?: { id: number; name: string } | null) => {
     dispatchAction({ type: "SET_ACTIVE_TAB", payload: { tab, selectedBank } });

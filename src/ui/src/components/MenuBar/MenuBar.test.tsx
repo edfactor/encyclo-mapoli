@@ -212,9 +212,10 @@ describe("MenuBar with PageSearch", () => {
   it("should apply correct CSS classes for layout", () => {
     renderMenuBar();
 
-    // Check menubar has flex layout
-    const menubar = document.querySelector(".menubar");
-    expect(menubar?.classList.contains("menubar")).toBe(true);
+    // Check menubar has flex layout (now uses Tailwind classes instead of .menubar)
+    const menubar = document.querySelector(".fixed.flex.w-full");
+    expect(menubar).toBeDefined();
+    expect(menubar?.classList.contains("bg-dsm-secondary")).toBe(true);
 
     // Check right container has correct classes
     const rightContainer = document.querySelector(".flex.items-center.gap-4");

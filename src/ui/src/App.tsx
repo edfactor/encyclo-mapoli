@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetMissivesQuery } from "reduxstore/api/LookupsApi";
 import { colors, themeOptions, ToastServiceProvider } from "smart-ui-library";
-import "smart-ui-library/dist/smart-ui-library.css";
 import { initializeAgGrid } from "../agGridConfig";
 import Router from "./components/router/Router";
 import { OktaProvider, useOktaInstance } from "./Okta/OktaProvider";

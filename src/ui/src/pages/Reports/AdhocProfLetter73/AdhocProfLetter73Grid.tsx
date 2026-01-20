@@ -309,12 +309,16 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
 
           {(() => {
             const displayApi = apiData ?? lastApiRef.current;
-            const displayRows = apiData ? rowData : displayApi?.results ?? [];
+            const displayRows = apiData ? rowData : (displayApi?.results ?? []);
 
             // If we're fetching and have no prior data, show spinner
             if (isFetching && !displayApi) {
               return (
-                <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  py={4}>
                   <CircularProgress />
                 </Box>
               );
