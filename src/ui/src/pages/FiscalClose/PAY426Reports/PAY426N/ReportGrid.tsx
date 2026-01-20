@@ -142,10 +142,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({
     handleSortChange(update);
   };
 
-  const columnDefs = useMemo(
-    () => GetProfitSharingReportGridColumns(validationData),
-    [validationData]
-  );
+  const columnDefs = useMemo(() => GetProfitSharingReportGridColumns(validationData), [validationData]);
 
   const pinnedTopRowData = useMemo(() => {
     if (!cachedData) return [];
@@ -216,39 +213,39 @@ const ReportGrid: React.FC<ReportGridProps> = ({
         columnDefs={columnDefs}
         totalRecords={displayTotal}
         isLoading={isFetching}
-          pagination={{
-            pageNumber,
-            pageSize,
-            sortParams: { sortBy: "fullName", isSortDescending: false },
-            handlePageNumberChange,
-            handlePageSizeChange,
-            handleSortChange
-          }}
-          onSortChange={sortEventHandler}
-          heightConfig={{
-            mode: "content-aware",
-            heightPercentage: isGridExpanded ? 0.85 : 0.65,
-            minHeight: 200,
-            pinnedRowCount: 2 // Account for 2 pinned top rows (totals + "No Wages")
-          }}
-          gridOptions={{
-            pinnedTopRowData: pinnedTopRowData,
-            getRowStyle: (params) => {
-              if (params.node.rowPinned) {
-                return { background: "#f3f4f6" }; // Light grey background for pinned rows
-              }
-              return undefined;
-            },
-            onGridReady: (params) => {
-              setTimeout(() => params.api.sizeColumnsToFit(), 100);
-            },
-            onFirstDataRendered: (params) => {
-              params.api.sizeColumnsToFit();
-            },
-            onGridSizeChanged: (params) => {
-              params.api.sizeColumnsToFit();
+        pagination={{
+          pageNumber,
+          pageSize,
+          sortParams: { sortBy: "fullName", isSortDescending: false },
+          handlePageNumberChange,
+          handlePageSizeChange,
+          handleSortChange
+        }}
+        onSortChange={sortEventHandler}
+        heightConfig={{
+          mode: "content-aware",
+          heightPercentage: isGridExpanded ? 0.85 : 0.65,
+          minHeight: 200,
+          pinnedRowCount: 2 // Account for 2 pinned top rows (totals + "No Wages")
+        }}
+        gridOptions={{
+          pinnedTopRowData: pinnedTopRowData,
+          getRowStyle: (params) => {
+            if (params.node.rowPinned) {
+              return { background: "#f3f4f6" }; // Light grey background for pinned rows
             }
-          }}
+            return undefined;
+          },
+          onGridReady: (params) => {
+            setTimeout(() => params.api.sizeColumnsToFit(), 100);
+          },
+          onFirstDataRendered: (params) => {
+            params.api.sizeColumnsToFit();
+          },
+          onGridSizeChanged: (params) => {
+            params.api.sizeColumnsToFit();
+          }
+        }}
         showPagination={displayResults.length > 0}
       />
     </>

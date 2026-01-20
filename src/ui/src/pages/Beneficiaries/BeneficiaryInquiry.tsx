@@ -51,7 +51,7 @@ const BeneficiaryInquiryContent = () => {
       if (data) {
         // Calculate memberType: psnSuffix 0 = employee (type 1), else beneficiary (type 2)
         const calculatedMemberType = data.psnSuffix === 0 ? 1 : 2;
-        
+
         // Fetch member details for MasterInquiryMemberDetails component
         setIsFetchingMemberDetails(true);
         triggerMemberDetails({ memberType: calculatedMemberType, id: data.id, profitYear })

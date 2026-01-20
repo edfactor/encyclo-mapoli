@@ -10,24 +10,28 @@ vi.mock("smart-ui-library", () => ({
       <div data-testid="grid-data">{JSON.stringify(providedOptions?.rowData)}</div>
     </div>
   )),
-  Pagination: vi.fn(({ pageNumber, pageSize, recordCount, setPageNumber, setPageSize }) => (
+  Pagination: vi.fn(({ defaultPagination, recordCount, onPaginationChanged }) => (
     <div data-testid="pagination">
       <button
         data-testid="prev-page"
-        onClick={() => setPageNumber(pageNumber - 1)}>
+        onClick={() =>
+          onPaginationChanged?.({ skip: (defaultPagination?.skip ?? 1) - 1, take: defaultPagination?.take ?? 25 })
+        }>
         Prev
       </button>
       <span data-testid="page-info">
-        Page {pageNumber} - Size {pageSize} - Total {recordCount}
+        Page {defaultPagination?.skip} - Size {defaultPagination?.take} - Total {recordCount}
       </span>
       <button
         data-testid="next-page"
-        onClick={() => setPageNumber(pageNumber + 1)}>
+        onClick={() =>
+          onPaginationChanged?.({ skip: (defaultPagination?.skip ?? 0) + 1, take: defaultPagination?.take ?? 25 })
+        }>
         Next
       </button>
       <button
         data-testid="size-50"
-        onClick={() => setPageSize(50)}>
+        onClick={() => onPaginationChanged?.({ skip: defaultPagination?.skip ?? 0, take: 50 })}>
         50 per page
       </button>
     </div>
@@ -167,9 +171,9 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
       const nextBtn = screen.getByTestId("next-page");
       nextBtn.click();
 
-      // DSMPaginatedGrid wraps setPageNumber to call handlePageNumberChange(value - 1)
-      // When mock Pagination calls setPageNumber(1), it triggers handlePageNumberChange(0)
-      expect(mockPagination.handlePageNumberChange).toHaveBeenCalledWith(0);
+      // Clicking "next" from page 0 sends skip=1 to DSMPaginatedGrid
+      // DSMPaginatedGrid passes the skip value directly to handlePageNumberChange
+      expect(mockPagination.handlePageNumberChange).toHaveBeenCalledWith(1);
     });
 
     it("should call pagination handler when page size changes", () => {
@@ -178,7 +182,7 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
       const sizeBtn = screen.getByTestId("size-50");
       sizeBtn.click();
 
-      // DSMPaginatedGrid passes handlePageSizeChange directly as setPageSize
+      // DSMPaginatedGrid passes the new page size to handlePageSizeChange
       expect(mockPagination.handlePageSizeChange).toHaveBeenCalledWith(50);
     });
   });
