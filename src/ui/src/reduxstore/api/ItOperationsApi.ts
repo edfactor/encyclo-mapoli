@@ -3,23 +3,23 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { Paged } from "smart-ui-library";
 import { setFrozenStateCollectionResponse, setFrozenStateResponse } from "../../reduxstore/slices/frozenSlice";
 import {
-    AllUserFakeTimeResponse,
-    AnnuityRateDto,
-    AuditChangeEntryDto,
-    AuditEventDto,
-    AuditSearchRequestDto,
-    CurrentUserResponseDto,
-    CreateAnnuityRatesRequest,
-    FakeTimeStatusResponse,
-    FreezeDemographicsRequest,
-    FrozenStateResponse,
-    RowCountResult,
-    SetFakeTimeRequest,
-    SortedPaginationRequestDto,
-    StateTaxRateDto,
-    UpdateAnnuityRateRequest,
-    UpdateStateTaxRateRequest,
-    UserFakeTimeStatusResponse
+  AllUserFakeTimeResponse,
+  AnnuityRateDto,
+  AuditChangeEntryDto,
+  AuditEventDto,
+  AuditSearchRequestDto,
+  CreateAnnuityRatesRequest,
+  CurrentUserResponseDto,
+  FakeTimeStatusResponse,
+  FreezeDemographicsRequest,
+  FrozenStateResponse,
+  RowCountResult,
+  SetFakeTimeRequest,
+  SortedPaginationRequestDto,
+  StateTaxRateDto,
+  UpdateAnnuityRateRequest,
+  UpdateStateTaxRateRequest,
+  UserFakeTimeStatusResponse
 } from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
@@ -77,7 +77,7 @@ export const ItOperationsApi = createApi({
     }),
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({
-        url: `itdevops/frozen/active`,
+        url: "it-devops/frozen/active",
         method: "GET"
       }),
       providesTags: ["FrozenState"],
@@ -93,7 +93,7 @@ export const ItOperationsApi = createApi({
     }),
     getHistoricalFrozenStateResponse: builder.query<Paged<FrozenStateResponse>, SortedPaginationRequestDto>({
       query: (params) => ({
-        url: `itdevops/frozen`,
+        url: "it-devops/frozen",
         method: "GET",
         params: {
           take: params.take,
@@ -115,7 +115,7 @@ export const ItOperationsApi = createApi({
     }),
     freezeDemographics: builder.mutation<void, FreezeDemographicsRequest>({
       query: (request) => ({
-        url: "itdevops/freeze",
+        url: "it-devops/freeze",
         method: "POST",
         body: request
       }),
@@ -123,7 +123,7 @@ export const ItOperationsApi = createApi({
     }),
     getMetadata: builder.query<RowCountResult[], void>({
       query: () => ({
-        url: `itdevops/metadata`,
+        url: "it-devops/metadata",
         method: "GET"
       })
     }),
@@ -158,20 +158,20 @@ export const ItOperationsApi = createApi({
     }),
     getFakeTimeStatus: builder.query<FakeTimeStatusResponse, void>({
       query: () => ({
-        url: "itdevops/fake-time/status",
+        url: "it-devops/fake-time/status",
         method: "GET"
       })
     }),
     setFakeTime: builder.mutation<FakeTimeStatusResponse, SetFakeTimeRequest>({
       query: (request) => ({
-        url: "itdevops/fake-time",
+        url: "it-devops/fake-time",
         method: "POST",
         body: request
       })
     }),
     validateFakeTime: builder.mutation<FakeTimeStatusResponse, SetFakeTimeRequest>({
       query: (request) => ({
-        url: "itdevops/fake-time/validate",
+        url: "it-devops/fake-time/validate",
         method: "POST",
         body: request
       })
@@ -198,7 +198,7 @@ export const ItOperationsApi = createApi({
     }),
     getAllUserFakeTime: builder.query<AllUserFakeTimeResponse, void>({
       query: () => ({
-        url: "itdevops/fake-time/users",
+        url: "it-devops/fake-time/users",
         method: "GET"
       })
     })

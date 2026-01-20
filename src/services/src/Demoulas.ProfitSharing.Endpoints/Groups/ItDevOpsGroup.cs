@@ -7,8 +7,8 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class ItDevOpsGroup : GroupBase
 {
-    protected override string Route => "itdevops";
-    protected override string RouteName => "ItDevOps";
+    protected override string Route => "it-devops";
+    protected override string RouteName => "IT DevOps";
 
     public ItDevOpsGroup()
     {

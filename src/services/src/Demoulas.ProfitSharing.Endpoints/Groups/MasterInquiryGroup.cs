@@ -7,7 +7,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class MasterInquiryGroup : GroupBase
 {
-    protected override string Route => "master";
+    protected override string Route => "master-inquiry";
     protected override string RouteName => "Master Inquiry";
 
     public MasterInquiryGroup()

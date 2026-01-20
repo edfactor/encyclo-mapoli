@@ -21,7 +21,7 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
 
     public override void Configure()
     {
-        Delete("{Id}");
+        Delete("{id}");
         Group<DistributionGroup>();
         Policies(Security.Policy.CanManageDistributions); // Override group policy - delete requires manage permission
         Summary(s =>

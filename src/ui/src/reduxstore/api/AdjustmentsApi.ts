@@ -1,9 +1,9 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   MergeProfitsDetailRequest,
   ReverseProfitDetailsRequest,
   ReverseProfitDetailsResponse
 } from "@/types/adjustment/adjustment";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -40,7 +40,7 @@ export const AdjustmentsApi = createApi({
       query: (request) => {
         const { onlyNetworkToastErrors, ...requestData } = request;
         return {
-          url: "profitdetails/reversals",
+          url: "profit-details/reversals",
           method: "POST",
           body: requestData,
           meta: { onlyNetworkToastErrors }

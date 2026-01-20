@@ -22,7 +22,7 @@ public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRe
 
     public override void Configure()
     {
-        Post("master-inquiry/search");
+        Post("search");
         Summary(s =>
         {
             s.Summary = "Search for profit sharing members with filters and pagination.";

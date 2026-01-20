@@ -7,7 +7,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class YearEndGroup : GroupBase
 {
-    protected override string Route => "yearend";
+    protected override string Route => "year-end";
     protected override string RouteName => "Year End";
 
     public YearEndGroup()

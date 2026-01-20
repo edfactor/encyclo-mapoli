@@ -6,8 +6,8 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class AdhocReportsGroup : GroupBase
 {
-    protected override string Route => "adhoc";
-    protected override string RouteName => "Adhoc Reports";
+    protected override string Route => "ad-hoc";
+    protected override string RouteName => "Ad Hoc Reports";
 
     public AdhocReportsGroup()
     {

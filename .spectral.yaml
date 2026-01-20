@@ -54,7 +54,7 @@ rules:
     then:
       function: pattern
       functionOptions:
-        match: ^\/([a-z0-9]+(-[a-z0-9]+)*(\/{[a-zA-Z0-9_]+})?)*$
+        match: ^\/([a-z0-9]+(-[a-z0-9]+)*|{[a-zA-Z0-9_]+})(\/([a-z0-9]+(-[a-z0-9]+)*|{[a-zA-Z0-9_]+}))*$
 
   # [MUST] Pluralize Resource Names [134]
   path-plural-resources:

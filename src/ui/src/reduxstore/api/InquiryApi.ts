@@ -25,7 +25,7 @@ export const InquiryApi = createApi({
     // Master Inquiry API endpoints
     searchProfitMasterInquiry: builder.query<Paged<EmployeeDetails>, MasterInquiryRequest>({
       query: (params) => ({
-        url: "master/master-inquiry/search",
+        url: "master-inquiry/search",
         method: "POST",
         body: {
           badgeNumber: params.badgeNumber,
@@ -79,7 +79,7 @@ export const InquiryApi = createApi({
     }),
     getProfitMasterInquiryMember: builder.query<EmployeeDetails, MasterInquiryMemberRequest>({
       query: (params) => ({
-        url: "master/master-inquiry/member",
+        url: "master-inquiry/members",
         method: "POST",
         body: params
       }),
@@ -107,7 +107,7 @@ export const InquiryApi = createApi({
       { memberType: number; id: number; skip?: number; take?: number; sortBy?: string; isSortDescending?: boolean }
     >({
       query: ({ memberType, id, ...pagination }) => ({
-        url: `master/master-inquiry/member/${memberType}/${id}/details`, // Note: memberType and id are parameter values, kept as-is from API call
+        url: `master-inquiry/members/${memberType}/${id}/details`, // Note: memberType and id are parameter values, kept as-is from API call
         method: "GET",
         params: pagination
       }),
@@ -166,7 +166,7 @@ export const InquiryApi = createApi({
       }
     >({
       query: ({ memberType, ...pagination }) => ({
-        url: `master/master-inquiry/member/details`,
+        url: "master-inquiry/members/details",
         method: "POST",
         body: {
           memberType,
@@ -176,7 +176,7 @@ export const InquiryApi = createApi({
     }),
     getProfitMasterInquiryGrouping: builder.query<Paged<GroupedProfitSummaryDto>, MasterInquiryRequest>({
       query: (params) => ({
-        url: `master/master-inquiry/grouping`,
+        url: "master-inquiry/grouping",
         method: "POST",
         body: {
           badgeNumber: params.badgeNumber ? Number(params.badgeNumber?.toString().substring(0, 6)) : undefined,

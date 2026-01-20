@@ -6,8 +6,8 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class PayServicesGroup : GroupBase
 {
-    protected override string RouteName => "PayServices";
-    protected override string Route => "payservices";
+    protected override string RouteName => "Pay Services";
+    protected override string Route => "pay-services";
 
     public PayServicesGroup()
     {
