@@ -1,7 +1,7 @@
 import { ValidationIcon, ValidationResultsDialog } from "@/components/ValidationIcon";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { numberToCurrency } from "smart-ui-library";
 import DSMPaginatedGrid from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
@@ -103,45 +103,65 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
               validationGroup={searchResults?.crossReferenceValidation?.validationGroups[0]}
               fieldName={dialogState.fieldName}
             />
-            <div className="sticky top-0 z-10 flex bg-white">
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell className="text-center align-middle">Profit Sharing Amount</TableCell>
-                    <TableCell className="text-center align-middle">Distribution Amount</TableCell>
-                    <TableCell className="text-center align-middle">Allocation To</TableCell>
-                    <TableCell className="text-center align-middle">Allocation From</TableCell>
-                    <TableCell className="text-center align-middle">Earning Points</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="text-center align-middle">
-                      {numberToCurrency(searchResults.totalProfitSharingBalance || 0)}
-                    </TableCell>
-                    <TableCell className="text-center align-middle">
-                      <ValidationIcon
-                        validationGroup={searchResults.crossReferenceValidation?.validationGroups[0]}
-                        fieldName="QPAY129_DistributionTotals"
-                        onClick={() => {
-                          setDialogState({
-                            isOpen: !dialogState.isOpen,
-                            fieldName: "QPAY129_DistributionTotals"
-                          });
-                        }}
-                      />
-                      {numberToCurrency(searchResults.distributionTotals || 0)}
-                    </TableCell>
-                    <TableCell className="text-center align-middle">
-                      {numberToCurrency(searchResults.allocationToTotals || 0)}
-                    </TableCell>
-                    <TableCell className="text-center align-middle">
-                      {numberToCurrency(searchResults.allocationsFromTotals || 0)}
-                    </TableCell>
-                    <TableCell className="text-center align-middle">{totalEarningPoints.toLocaleString()}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+            <div className="sticky top-0 z-10 bg-white">
+              <Typography
+                variant="h6"
+                sx={{ mb: 1, px: 3 }}>
+                Totals
+              </Typography>
+              {/* One-off inline styles for this simple table. If we reuse this pattern, move to a shared CSS module. */}
+              <style>{`
+                .forfeit-totals-table {
+                  width: 100%;
+                  border-collapse: collapse;
+                }
+                .forfeit-totals-table thead tr {
+                  background-color: #E8E8E8;
+                }
+                .forfeit-totals-table th,
+                .forfeit-totals-table td {
+                  padding: 0.5rem 1rem;
+                  text-align: right;
+                  font-size: 0.875rem;
+                }
+                .forfeit-totals-table th {
+                  font-weight: 500;
+                }
+              `}</style>
+              <div className="rounded border border-gray-300 mx-3">
+                <table className="forfeit-totals-table">
+                  <thead>
+                    <tr>
+                      <th>Profit Sharing Amount</th>
+                      <th>Distribution Amount</th>
+                      <th>Allocation To</th>
+                      <th>Allocation From</th>
+                      <th>Earning Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{numberToCurrency(searchResults.totalProfitSharingBalance || 0)}</td>
+                      <td>
+                        <ValidationIcon
+                          validationGroup={searchResults.crossReferenceValidation?.validationGroups[0]}
+                          fieldName="QPAY129_DistributionTotals"
+                          onClick={() => {
+                            setDialogState({
+                              isOpen: !dialogState.isOpen,
+                              fieldName: "QPAY129_DistributionTotals"
+                            });
+                          }}
+                        />
+                        {numberToCurrency(searchResults.distributionTotals || 0)}
+                      </td>
+                      <td>{numberToCurrency(searchResults.allocationToTotals || 0)}</td>
+                      <td>{numberToCurrency(searchResults.allocationsFromTotals || 0)}</td>
+                      <td>{totalEarningPoints.toLocaleString()}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </>
         ) : (
