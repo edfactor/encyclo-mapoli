@@ -60,6 +60,25 @@ const YTDWagesGrid = ({
     );
   }, [clonedData?.response?.results, clonedData?.totalIncomeCurrentYearWages]);
 
+  const formatHoursTotal = (value: number | string) => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    return value;
+  };
+
+  const formatIncomeTotal = (value: number | string) => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return numberToCurrency(value);
+    }
+
+    return value;
+  };
+
   if (!showData || !clonedData?.response) {
     return null;
   }
@@ -93,14 +112,52 @@ const YTDWagesGrid = ({
           !isGridExpanded ? (
             <>
               <div style={{ marginTop: "-18px" }}>
-                <ReportSummary report={clonedData} />
+                <ReportSummary
+                  report={clonedData}
+                  variant="compact"
+                />
               </div>
-              <div style={{ marginTop: "4px", marginBottom: "8px", paddingLeft: "24px" }}>
+              <div style={{ marginTop: "4px", marginBottom: "12px" }}>
                 <Typography
-                  variant="body2"
-                  sx={{ fontWeight: "bold" }}>
-                  Total Hours {totalHours.toFixed(2)} &nbsp;&nbsp;&nbsp; Total Income {numberToCurrency(totalIncome)}
+                  variant="h6"
+                  sx={{ mb: 1, px: 3 }}>
+                  Totals
                 </Typography>
+                {/* One-off inline styles for this simple table. If we reuse this pattern, move to a shared CSS module. */}
+                <style>{`
+                  .ytd-wages-totals-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                  }
+                  .ytd-wages-totals-table thead tr {
+                    background-color: #E8E8E8;
+                  }
+                  .ytd-wages-totals-table th,
+                  .ytd-wages-totals-table td {
+                    padding: 0.5rem 1rem;
+                    text-align: right;
+                    font-size: 0.875rem;
+                  }
+                  .ytd-wages-totals-table th {
+                    font-weight: 500;
+                  }
+                `}</style>
+                <div className="mx-3 rounded border border-gray-300">
+                  <table className="ytd-wages-totals-table">
+                    <thead>
+                      <tr>
+                        <th>Total Income</th>
+                        <th>Total Hours</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{formatIncomeTotal(totalIncome)}</td>
+                        <td>{formatHoursTotal(totalHours)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </>
           ) : undefined
