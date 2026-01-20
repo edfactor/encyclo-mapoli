@@ -63,32 +63,50 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                 query = query.Where(d => request.BadgeNumbers.Contains(d.BadgeNumber));
             }
 
-            // Query for employees over 73 with all required fields
-            var employeesOver73 = await query
-                .Select(d => new
-                {
-                    d.Ssn,
-                    d.BadgeNumber,
-                    FullName = d.ContactInfo.FullName,
-                    Address = d.Address.Street,
-                    City = d.Address.City,
-                    State = d.Address.State,
-                    Zip = d.Address.PostalCode,
-                    d.DateOfBirth,
-                    d.TerminationDate,
-                    d.EmploymentStatusId,
-                    EmploymentStatusName = d.EmploymentStatus != null ? d.EmploymentStatus.Name : string.Empty
-                })
+            // Get total balances for these employees (SQL join to avoid large IN lists)
+            var totalBalanceQuery = _totalService.GetTotalBalanceSet(ctx, request.ProfitYear)
+                .TagWith($"GetTotalBalances-Over73-{request.ProfitYear}")
+                .Where(tb => tb.TotalAmount > 0);
+
+            // Query for employees over 73 with positive balances and all required fields
+            var employeesOver73 = await (
+                    from d in query
+                    join tb in totalBalanceQuery on d.Ssn equals tb.Ssn
+                    select new
+                    {
+                        d.Ssn,
+                        d.BadgeNumber,
+                        FullName = d.ContactInfo.FullName,
+                        Address = d.Address.Street,
+                        City = d.Address.City,
+                        State = d.Address.State,
+                        Zip = d.Address.PostalCode,
+                        d.DateOfBirth,
+                        d.TerminationDate,
+                        d.EmploymentStatusId,
+                        EmploymentStatusName = d.EmploymentStatus != null ? d.EmploymentStatus.Name : string.Empty,
+                        TotalAmount = tb.TotalAmount
+                    })
+                .TagWith($"GetEmployeesOver73WithBalances-{request.ProfitYear}")
                 .ToListAsync(cancellationToken);
+
+            if (employeesOver73.Count == 0)
+            {
+                return new ReportResponseBase<EmployeesWithProfitsOver73DetailDto>
+                {
+                    ReportName = "PROF-LETTER73: Employees with Profits Over Age 73",
+                    ReportDate = DateTimeOffset.UtcNow,
+                    StartDate = fiscalStartDate,
+                    EndDate = fiscalEndDate,
+                    Response = new PaginatedResponseDto<EmployeesWithProfitsOver73DetailDto>(request)
+                    {
+                        Results = [],
+                        Total = 0
+                    }
+                };
+            }
 
             var employeeSsns = employeesOver73.Select(e => e.Ssn).ToHashSet();
-
-            // Get total balances for these employees
-            var totalBalances = await _totalService.GetTotalBalanceSet(ctx, request.ProfitYear)
-                .Where(tb => employeeSsns.Contains(tb.Ssn))
-                .Where(tb => tb.TotalAmount > 0) // Only include employees with positive balances
-                .ToListAsync(cancellationToken);
-            var totalBalanceBySsn = totalBalances.ToLookup(tb => tb.Ssn);
 
             // Load all RMD factors from database (ages 73-99)
             var rmdFactors = await ctx.RmdsFactorsByAge
@@ -119,10 +137,9 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
 
             // Build detail records with pagination support
             var detailRecords = employeesOver73
-                .Where(e => totalBalanceBySsn[e.Ssn].Any())
                 .Select(employee =>
                 {
-                    var balance = totalBalanceBySsn[employee.Ssn].FirstOrDefault();
+                    var balance = employee.TotalAmount;
                     var age = today.Year - employee.DateOfBirth.Year;
 
                     // Get RMD factor for this age (default to 0 if age not found)
@@ -130,13 +147,13 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
 
                     // Calculate RMD: Balance ÷ Factor (protect against divide by zero)
                     // IMPORTANT: Parentheses around (balance?.TotalAmount ?? 0) ensure correct order of operations
-                    var rmd = factor > 0 ? Math.Round((balance?.TotalAmount ?? 0) / factor, 2, MidpointRounding.AwayFromZero) : 0m;
+                    var rmd = factor > 0 ? Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero) : 0m;
 
                     // Get payments made in the fiscal year
                     var paymentsInYear = paymentsBySsn[employee.Ssn].FirstOrDefault()?.TotalPayments ?? 0m;
 
                     // Calculate suggested RMD check amount based on de minimis threshold
-                    var currentBalance = balance?.TotalAmount ?? 0;
+                    var currentBalance = balance;
                     var suggestRmdCheckAmount = currentBalance <= request.DeMinimusValue
                         ? currentBalance  // De minimis: liquidate entire account
                         : Math.Max(0, rmd - paymentsInYear);  // Above threshold: RMD minus payments already received
