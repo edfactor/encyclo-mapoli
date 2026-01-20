@@ -53,14 +53,14 @@ export const AdhocProfLetter73Api = createApi({
         }
 
         return {
-          url: `/adhoc/prof-letter73?${queryParams.toString()}`,
+          url: `/ad-hoc/prof-letter73?${queryParams.toString()}`,
           method: "GET"
         };
       }
     }),
     downloadAdhocProfLetter73FormLetter: builder.query<Blob, AdhocProfLetter73FormLetterRequest>({
       query: (params) => ({
-        url: "/adhoc/prof-letter73/download-form-letter",
+        url: "/ad-hoc/prof-letter73/download-form-letter",
         method: "GET",
         params: {
           profitYear: params.profitYear,
