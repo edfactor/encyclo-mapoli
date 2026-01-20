@@ -8,6 +8,7 @@ export enum MessageKeys {
   UnforfeitSave = "UnforfeitSave",
   MilitaryContribution = "MilitaryContribution",
   StateTaxRatesSave = "StateTaxRatesSave",
+  TaxCodesSave = "TaxCodesSave",
   AnnuityRatesSave = "AnnuityRatesSave",
   RmdFactorsSave = "RmdFactorsSave",
   BanksSave = "BanksSave",
@@ -74,6 +75,21 @@ export class Messages {
     message: {
       type: "error",
       title: "Failed to save state tax rates",
+      message: "Please try again"
+    }
+  };
+  static readonly TaxCodesSaveSuccess: MessageUpdate = {
+    key: MessageKeys.TaxCodesSave,
+    message: {
+      type: "success",
+      title: "Tax codes saved successfully"
+    }
+  };
+  static readonly TaxCodesSaveError: MessageUpdate = {
+    key: MessageKeys.TaxCodesSave,
+    message: {
+      type: "error",
+      title: "Failed to save tax codes",
       message: "Please try again"
     }
   };

@@ -7,6 +7,7 @@ import {
   ProfitYearRequest,
   StateListResponse,
   StateTaxLookupResponse,
+  TaxCodeLookupRequest,
   TaxCodeResponse,
   YearRangeRequest
 } from "../types";
@@ -93,10 +94,14 @@ export const LookupsApi = createApi({
         return response.items;
       }
     }),
-    getTaxCodes: builder.query<TaxCodeResponse[], void>({
-      query: () => ({
+    getTaxCodes: builder.query<TaxCodeResponse[], TaxCodeLookupRequest | void>({
+      query: (request) => ({
         url: "/lookup/tax-codes",
-        method: "GET"
+        method: "GET",
+        params: {
+          availableForDistribution: request?.availableForDistribution,
+          availableForForfeiture: request?.availableForForfeiture
+        }
       }),
       transformResponse: (response: { items: TaxCodeResponse[] }) => {
         return response.items;

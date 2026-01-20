@@ -2,6 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, TextField, Typography } from "@mui/material";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
+import { useGetTaxCodesQuery } from "reduxstore/api/LookupsApi";
 import * as yup from "yup";
 import { DistributionSearchResponse, EditDistributionRequest } from "../../../types";
 
@@ -85,6 +86,9 @@ const schema = yup.object().shape({
 
 const EditDistributionForm = forwardRef<EditDistributionFormRef, EditDistributionFormProps>(
   ({ distribution, stateTaxRate, onSubmit, age, vestedAmount }, ref) => {
+    const { data: taxCodesData, isLoading: isLoadingTaxCodes } = useGetTaxCodesQuery({
+      availableForDistribution: true
+    });
     const {
       control,
       handleSubmit,
@@ -359,11 +363,16 @@ const EditDistributionForm = forwardRef<EditDistributionFormRef, EditDistributio
                   fullWidth
                   size="small"
                   variant="outlined"
+                  disabled={isLoadingTaxCodes}
                   error={!!errors.taxCode}
                   helperText={errors.taxCode?.message}>
-                  <MenuItem value="1">1 - Direct rollover to IRA</MenuItem>
-                  <MenuItem value="3">3 - Direct rollover</MenuItem>
-                  <MenuItem value="7">7 - Normal distribution</MenuItem>
+                  {taxCodesData?.map((taxCode) => (
+                    <MenuItem
+                      key={taxCode.id}
+                      value={taxCode.id}>
+                      {taxCode.id} - {taxCode.name}
+                    </MenuItem>
+                  ))}
                 </TextField>
               )}
             />

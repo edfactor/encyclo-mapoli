@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
@@ -21,7 +22,8 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var response = await ApiClient.GETAsync<TaxCodeEndpoint, ListResponseDto<TaxCodeResponse>>();
+        var response = await ApiClient.GETAsync<TaxCodeEndpoint, TaxCodeLookupRequest, ListResponseDto<TaxCodeResponse>>(
+            new TaxCodeLookupRequest());
 
         // Assert
         response.ShouldNotBeNull();
@@ -37,7 +39,8 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var response = await ApiClient.GETAsync<TaxCodeEndpoint, ListResponseDto<TaxCodeResponse>>();
+        var response = await ApiClient.GETAsync<TaxCodeEndpoint, TaxCodeLookupRequest, ListResponseDto<TaxCodeResponse>>(
+            new TaxCodeLookupRequest());
 
         // Assert
         response.Result.ShouldNotBeNull();
@@ -54,7 +57,8 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var response = await ApiClient.GETAsync<TaxCodeEndpoint, ListResponseDto<TaxCodeResponse>>();
+        var response = await ApiClient.GETAsync<TaxCodeEndpoint, TaxCodeLookupRequest, ListResponseDto<TaxCodeResponse>>(
+            new TaxCodeLookupRequest());
 
         // Assert
         var firstItem = response.Result!.Items[0];
@@ -70,7 +74,8 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var response = await ApiClient.GETAsync<TaxCodeEndpoint, ListResponseDto<TaxCodeResponse>>();
+        var response = await ApiClient.GETAsync<TaxCodeEndpoint, TaxCodeLookupRequest, ListResponseDto<TaxCodeResponse>>(
+            new TaxCodeLookupRequest());
 
         // Assert
         var items = response.Result!.Items;
@@ -88,7 +93,8 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
-        var response = await ApiClient.GETAsync<TaxCodeEndpoint, ListResponseDto<TaxCodeResponse>>();
+        var response = await ApiClient.GETAsync<TaxCodeEndpoint, TaxCodeLookupRequest, ListResponseDto<TaxCodeResponse>>(
+            new TaxCodeLookupRequest());
 
         // Assert
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
@@ -103,7 +109,8 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.AUDITOR);
 
         // Act
-        var response = await ApiClient.GETAsync<TaxCodeEndpoint, ListResponseDto<TaxCodeResponse>>();
+        var response = await ApiClient.GETAsync<TaxCodeEndpoint, TaxCodeLookupRequest, ListResponseDto<TaxCodeResponse>>(
+            new TaxCodeLookupRequest());
 
         // Assert
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
@@ -118,7 +125,8 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var response = await ApiClient.GETAsync<TaxCodeEndpoint, ListResponseDto<TaxCodeResponse>>();
+        var response = await ApiClient.GETAsync<TaxCodeEndpoint, TaxCodeLookupRequest, ListResponseDto<TaxCodeResponse>>(
+            new TaxCodeLookupRequest());
 
         // Assert
         response.Result!.Count.ShouldBe(response.Result.Items.Count);
@@ -132,7 +140,8 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var response = await ApiClient.GETAsync<TaxCodeEndpoint, ListResponseDto<TaxCodeResponse>>();
+        var response = await ApiClient.GETAsync<TaxCodeEndpoint, TaxCodeLookupRequest, ListResponseDto<TaxCodeResponse>>(
+            new TaxCodeLookupRequest());
 
         // Assert
         var ids = response.Result!.Items.Select(x => x.Id).ToList();
@@ -149,7 +158,8 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var response = await ApiClient.GETAsync<TaxCodeEndpoint, ListResponseDto<TaxCodeResponse>>();
+        var response = await ApiClient.GETAsync<TaxCodeEndpoint, TaxCodeLookupRequest, ListResponseDto<TaxCodeResponse>>(
+            new TaxCodeLookupRequest());
 
         // Assert
         var taxCodeIds = response.Result!.Items.Select(x => x.Id).ToList();

@@ -137,6 +137,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IAnnuityRateValidator, AnnuityRateValidator>();
         _ = builder.Services.AddScoped<IRmdsFactorService, RmdsFactorService>();
         _ = builder.Services.AddScoped<ICommentTypeService, CommentTypeService>();
+        _ = builder.Services.AddScoped<ITaxCodeService, TaxCodeService>();
         _ = builder.Services.AddScoped<IBankService, BankService>();
         _ = builder.Services.AddScoped<IBankAccountService, BankAccountService>();
         _ = builder.Services.AddSingleton<IVestingScheduleService, VestingScheduleService>();
