@@ -79,8 +79,8 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
   );
 
   return (
-    <div className="menubar fixed z-[2] w-full overflow-visible">
-      <div className="navbuttons ml-2">
+    <div className="fixed top-[104px] z-[2] flex w-full items-center justify-between overflow-visible bg-dsm-secondary pr-4 text-white shadow-[0px_2px_4px_-1px_rgba(0,0,0,0.2),0px_4px_5px_0px_rgba(0,0,0,0.14),0px_1px_10px_0px_rgba(0,0,0,0.12)] [&_button]:flex [&_button]:items-center [&_button]:justify-center [&_button]:gap-2 [&_button]:px-4 [&_button]:py-[9px] [&_button]:font-lato [&_button]:text-base [&_button]:font-normal [&_button]:uppercase [&_button]:leading-normal [&_button]:text-white">
+      <div className="ml-2 flex items-center gap-0.5">
         <NavButton
           isUnderlined={homeTabSelected}
           onClick={handleHomeClick}

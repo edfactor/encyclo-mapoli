@@ -56,7 +56,9 @@ export const WelcomeDisplay: React.FC<WelcomeDisplayProps> = ({
       className="relative z-10 text-2xl font-normal text-dsm-grey"
       onClick={() => setOpenPopover((prev) => !prev)}
       ref={anchorRef}>
-      <div id="welcome-user">
+      <div
+        id="welcome-user"
+        className="flex cursor-pointer items-center">
         <Avatar
           sx={{
             marginRight: 3,
@@ -67,7 +69,7 @@ export const WelcomeDisplay: React.FC<WelcomeDisplayProps> = ({
           }}>
           {avatarText}
         </Avatar>
-        <div className="username">
+        <div className="font-lato text-base font-normal text-dsm-grey">
           {formattedUsername}
           {additionalInfo}
         </div>
