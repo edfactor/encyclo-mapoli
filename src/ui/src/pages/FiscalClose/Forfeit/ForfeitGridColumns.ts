@@ -33,6 +33,7 @@ export const GetProfitShareForfeitColumns = (options: ForfeitColumnsOptions): Co
         field: "forfeitures"
       }),
       {
+        headerClass: "left-align",
         cellRenderer: ForfeituresCellRenderer,
         cellRendererParams: {
           onValidationClick
