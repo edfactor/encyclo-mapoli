@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
@@ -15,7 +15,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "TaxCode - Should return success with ADMINISTRATOR role")]
-    [Description("PS-#### : Returns list of tax codes for administrator")]
+    [Description("Returns list of tax codes for administrator")]
     public async Task Get_ReturnsSuccess_WithAdministratorRole()
     {
         // Arrange
@@ -32,7 +32,7 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "TaxCode - Should return list with items")]
-    [Description("PS-#### : Returns non-empty list of tax codes")]
+    [Description("Returns non-empty list of tax codes")]
     public async Task Get_ReturnsListWithItems_WhenCalled()
     {
         // Arrange
@@ -50,7 +50,7 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "TaxCode - Should return items with required properties")]
-    [Description("PS-#### : Each tax code has Id and Name")]
+    [Description("Each tax code has Id and Name")]
     public async Task Get_ReturnsItemsWithRequiredProperties_WhenCalled()
     {
         // Arrange
@@ -66,9 +66,9 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
         firstItem.Name.ShouldNotBeNullOrWhiteSpace();
     }
 
-    [Fact(DisplayName = "TaxCode - Should return items ordered by name")]
-    [Description("PS-#### : Tax codes are sorted alphabetically by name")]
-    public async Task Get_ReturnsItemsOrderedByName_WhenCalled()
+    [Fact(DisplayName = "TaxCode - Should return items ordered by id then name")]
+    [Description("Tax codes are sorted by id, then name")]
+    public async Task Get_ReturnsItemsOrderedByIdThenName_WhenCalled()
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
@@ -79,14 +79,18 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         var items = response.Result!.Items;
-        var sortedNames = items.Select(x => x.Name).OrderBy(x => x).ToList();
-        var actualNames = items.Select(x => x.Name).ToList();
+        var sortedItems = items
+            .OrderBy(x => x.Id)
+            .ThenBy(x => x.Name)
+            .Select(x => (x.Id, x.Name))
+            .ToList();
+        var actualItems = items.Select(x => (x.Id, x.Name)).ToList();
 
-        actualNames.ShouldBe(sortedNames);
+        actualItems.ShouldBe(sortedItems);
     }
 
     [Fact(DisplayName = "TaxCode - Should work with FINANCEMANAGER role")]
-    [Description("PS-#### : Allows access with finance manager role")]
+    [Description("Allows access with finance manager role")]
     public async Task Get_ReturnsSuccess_WithFinanceManagerRole()
     {
         // Arrange
@@ -102,7 +106,7 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "TaxCode - Should work with AUDITOR role")]
-    [Description("PS-#### : Allows access with auditor role")]
+    [Description("Allows access with auditor role")]
     public async Task Get_ReturnsSuccess_WithAuditorRole()
     {
         // Arrange
@@ -118,7 +122,7 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "TaxCode - Count should match Items length")]
-    [Description("PS-#### : Count property equals number of items in list")]
+    [Description("Count property equals number of items in list")]
     public async Task Get_CountMatchesItemsLength_WhenCalled()
     {
         // Arrange
@@ -133,7 +137,7 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "TaxCode - Should return unique IDs")]
-    [Description("PS-#### : Each tax code has a unique ID")]
+    [Description("Each tax code has a unique ID")]
     public async Task Get_ReturnsUniqueIds_WhenCalled()
     {
         // Arrange
@@ -151,7 +155,7 @@ public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "TaxCode - Should contain expected tax codes")]
-    [Description("PS-#### : Response should contain standard tax codes like A, B, M")]
+    [Description("Response should contain standard tax codes like A, B, M")]
     public async Task Get_ContainsStandardTaxCodes_WhenCalled()
     {
         // Arrange
