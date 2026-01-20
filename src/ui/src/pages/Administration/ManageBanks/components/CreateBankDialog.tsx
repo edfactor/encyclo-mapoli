@@ -1,13 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Stack,
-  TextField
-} from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { CreateBankRequest } from "../../../../types/administration/banks";
@@ -28,21 +20,9 @@ interface CreateBankFormData {
 }
 
 const validationSchema = yup.object().shape({
-  name: yup
-    .string()
-    .required("Bank name is required")
-    .trim()
-    .max(100, "Bank name must not exceed 100 characters"),
-  officeType: yup
-    .string()
-    .trim()
-    .max(50, "Office type must not exceed 50 characters")
-    .default(""),
-  city: yup
-    .string()
-    .trim()
-    .max(50, "City must not exceed 50 characters")
-    .default(""),
+  name: yup.string().required("Bank name is required").trim().max(100, "Bank name must not exceed 100 characters"),
+  officeType: yup.string().trim().max(50, "Office type must not exceed 50 characters").default(""),
+  city: yup.string().trim().max(50, "City must not exceed 50 characters").default(""),
   state: yup
     .string()
     .trim()
@@ -50,16 +30,8 @@ const validationSchema = yup.object().shape({
     .matches(/^[A-Z]{0,2}$/, "State must be a 2-letter code")
     .max(2, "State must be a 2-letter code")
     .default(""),
-  phone: yup
-    .string()
-    .trim()
-    .max(20, "Phone must not exceed 20 characters")
-    .default(""),
-  status: yup
-    .string()
-    .trim()
-    .max(50, "Status must not exceed 50 characters")
-    .default("")
+  phone: yup.string().trim().max(20, "Phone must not exceed 20 characters").default(""),
+  status: yup.string().trim().max(50, "Status must not exceed 50 characters").default("")
 });
 
 const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) => {
@@ -89,7 +61,7 @@ const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) =>
       phone: data.phone.trim() || null,
       status: data.status.trim() || null
     });
-    
+
     reset();
   };
 
@@ -99,11 +71,19 @@ const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) =>
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth>
       <DialogTitle>Create New Bank</DialogTitle>
       <DialogContent>
-        <form onSubmit={handleSubmit(onSubmit)} id="create-bank-form">
-          <Stack spacing={2} sx={{ mt: 1 }}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          id="create-bank-form">
+          <Stack
+            spacing={2}
+            sx={{ mt: 1 }}>
             <Controller
               name="name"
               control={control}
@@ -194,7 +174,9 @@ const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) =>
         </form>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} disabled={isSubmitting}>
+        <Button
+          onClick={handleClose}
+          disabled={isSubmitting}>
           Cancel
         </Button>
         <Button
@@ -202,8 +184,7 @@ const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) =>
           form="create-bank-form"
           variant="contained"
           color="primary"
-          disabled={isSubmitting}
-        >
+          disabled={isSubmitting}>
           {isSubmitting ? "Creating..." : "Create"}
         </Button>
       </DialogActions>

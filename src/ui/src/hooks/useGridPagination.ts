@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { clearPaginationState, loadPaginationState, savePaginationState } from "../utils/gridPersistence";
+import { getGridPreferences, removeGridPreference, updateGridPreferences } from "smart-ui-library";
 
 export interface SortParams {
   sortBy: string;
@@ -32,9 +32,18 @@ export interface UseGridPaginationConfig {
    * Optional key for persisting pagination state to localStorage.
    * If provided, pagination state (page number, page size, sort) will be
    * saved and restored across sessions.
+   * Uses smart-ui-library's unified grid preferences storage.
    * Use the same key as DSMGrid's preferenceKey for consistency.
    */
   persistenceKey?: string;
+}
+
+/** Shape of pagination data stored in grid preferences */
+interface PersistedPaginationState {
+  pageNumber: number;
+  pageSize: number;
+  sortBy: string;
+  isSortDescending: boolean;
 }
 
 /*
@@ -49,7 +58,12 @@ export const useGridPagination = ({
   persistenceKey
 }: UseGridPaginationConfig): GridPaginationState & GridPaginationActions => {
   // Load persisted state if persistenceKey is provided
-  const persistedState = persistenceKey ? loadPaginationState(persistenceKey) : null;
+  // Uses smart-ui-library's unified grid preferences storage
+  const persistedState = useMemo(() => {
+    if (!persistenceKey) return null;
+    const prefs = getGridPreferences(persistenceKey);
+    return prefs?.pagination as PersistedPaginationState | undefined;
+  }, [persistenceKey]);
 
   // Debug: Log what we're loading from localStorage
   if (persistenceKey && process.env.NODE_ENV === "development") {
@@ -89,13 +103,16 @@ export const useGridPagination = ({
   );
 
   // Persist state to localStorage when it changes (if persistenceKey is provided)
+  // Uses smart-ui-library's unified grid preferences storage (merges with columnState)
   useEffect(() => {
     if (persistenceKey) {
-      savePaginationState(persistenceKey, {
-        pageNumber,
-        pageSize,
-        sortBy,
-        isSortDescending
+      updateGridPreferences(persistenceKey, {
+        pagination: {
+          pageNumber,
+          pageSize,
+          sortBy,
+          isSortDescending
+        }
       });
     }
   }, [persistenceKey, pageNumber, pageSize, sortBy, isSortDescending]);
@@ -161,13 +178,13 @@ export const useGridPagination = ({
 
     // Clear persisted pagination state when resetting (preserves column state)
     if (persistenceKey) {
-      clearPaginationState(persistenceKey);
+      removeGridPreference(persistenceKey, "pagination");
     }
   }, [initialPageSize, initialSortBy, initialSortDescending, persistenceKey]);
 
   const clearPersistedState = useCallback(() => {
     if (persistenceKey) {
-      clearPaginationState(persistenceKey);
+      removeGridPreference(persistenceKey, "pagination");
     }
   }, [persistenceKey]);
 

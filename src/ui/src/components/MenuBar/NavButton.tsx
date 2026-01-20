@@ -12,7 +12,7 @@ const NavButton: FC<MyProps> = ({ isUnderlined, label, onClick, disabled }) => {
     <span
       className={`${
         isUnderlined
-          ? "border-0 border-b-2 border-solid border-gray-300"
+          ? "border-0 border-b-2 border-solid border-white"
           : "border-0 border-b-2 border-solid border-transparent"
       }`}>
       <Button

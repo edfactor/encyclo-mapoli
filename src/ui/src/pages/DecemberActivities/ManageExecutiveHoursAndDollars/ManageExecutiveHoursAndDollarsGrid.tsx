@@ -244,7 +244,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
               style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               {displayCurrentData && <ReportSummary report={displayCurrentData} />}
               <RenderAddExecutiveButton
-                  reportReponse={displayCurrentData}
+                reportReponse={displayCurrentData}
                 isModal={isModal}
                 onOpenModal={openModal}
                 isReadOnly={isReadOnly}

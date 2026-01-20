@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useDispatch } from "react-redux";
 import {
-    useCreateBankAccountMutation,
-    useDisableBankAccountMutation,
-    useGetBankAccountsQuery,
-    useSetPrimaryBankAccountMutation,
-    useUpdateBankAccountMutation
+  useCreateBankAccountMutation,
+  useDisableBankAccountMutation,
+  useGetBankAccountsQuery,
+  useSetPrimaryBankAccountMutation,
+  useUpdateBankAccountMutation
 } from "../../../../reduxstore/api/administrationApi";
 import { setMessage } from "../../../../reduxstore/slices/messageSlice";
-import { BankAccountDto, CreateBankAccountRequest, UpdateBankAccountRequest } from "../../../../types/administration/banks";
+import {
+  BankAccountDto,
+  CreateBankAccountRequest,
+  UpdateBankAccountRequest
+} from "../../../../types/administration/banks";
 import { validateAccountNumber, validateRoutingNumber } from "../../../../utils/bankValidation";
 import { Messages } from "../../../../utils/messageDictonary";
 
@@ -182,7 +186,11 @@ function manageBankAccountsReducer(
 export function useManageBankAccounts(bankId: number | null) {
   const dispatch = useDispatch();
   const [state, dispatchAction] = useReducer(manageBankAccountsReducer, initialState);
-  const { data: accounts = [], isLoading, refetch } = useGetBankAccountsQuery(bankId!, {
+  const {
+    data: accounts = [],
+    isLoading,
+    refetch
+  } = useGetBankAccountsQuery(bankId!, {
     skip: bankId === null
   });
   const [createAccount] = useCreateBankAccountMutation();
@@ -194,12 +202,13 @@ export function useManageBankAccounts(bankId: number | null) {
   // Initialize maps when data loads
   useEffect(() => {
     // Only update if accounts actually changed (not just re-rendered)
-    const accountsChanged = accounts.length !== prevAccountsRef.current.length ||
+    const accountsChanged =
+      accounts.length !== prevAccountsRef.current.length ||
       accounts.some((acc, idx) => acc.id !== prevAccountsRef.current[idx]?.id);
-    
+
     if (accountsChanged) {
       prevAccountsRef.current = accounts;
-      
+
       if (accounts.length > 0) {
         dispatchAction({ type: "INITIALIZE_ACCOUNTS", payload: accounts });
       } else {
@@ -215,10 +224,7 @@ export function useManageBankAccounts(bankId: number | null) {
       const original = state.editState.originalAccountsById[Number(id)];
       if (!original) return false;
 
-      return (
-        staged.routingNumber !== original.routingNumber ||
-        staged.accountNumber !== original.accountNumber
-      );
+      return staged.routingNumber !== original.routingNumber || staged.accountNumber !== original.accountNumber;
     });
   }, [state.editState.stagedAccountsById, state.editState.originalAccountsById]);
 
@@ -261,14 +267,16 @@ export function useManageBankAccounts(bankId: number | null) {
     });
 
     if (hasErrors) {
-      dispatch(setMessage({
-        key: "BankAccountsSave",
-        message: {
-          type: "error",
-          title: "Validation Error",
-          message: "Please fix validation errors before saving."
-        }
-      }));
+      dispatch(
+        setMessage({
+          key: "BankAccountsSave",
+          message: {
+            type: "error",
+            title: "Validation Error",
+            message: "Please fix validation errors before saving."
+          }
+        })
+      );
       return;
     }
 
@@ -280,10 +288,7 @@ export function useManageBankAccounts(bankId: number | null) {
           const original = state.editState.originalAccountsById[Number(id)];
           if (!original) return false;
 
-          return (
-            staged.routingNumber !== original.routingNumber ||
-            staged.accountNumber !== original.accountNumber
-          );
+          return staged.routingNumber !== original.routingNumber || staged.accountNumber !== original.accountNumber;
         })
         .map((id) => state.editState.stagedAccountsById[Number(id)]);
 
@@ -305,45 +310,62 @@ export function useManageBankAccounts(bankId: number | null) {
       dispatchAction({ type: "SAVE_FAILURE" });
       dispatch(setMessage(Messages.BankAccountsSaveError));
     }
-  }, [state.editState.stagedAccountsById, state.editState.originalAccountsById, state.editState.validationErrors, updateAccount, refetch, accounts, dispatch]);
+  }, [
+    state.editState.stagedAccountsById,
+    state.editState.originalAccountsById,
+    state.editState.validationErrors,
+    updateAccount,
+    refetch,
+    accounts,
+    dispatch
+  ]);
 
   const handleDiscard = useCallback(() => {
     dispatchAction({ type: "DISCARD_CHANGES" });
   }, []);
 
-  const handleCreateAccount = useCallback(async (request: CreateBankAccountRequest) => {
-    try {
-      await createAccount(request).unwrap();
-      await refetch();
-      dispatchAction({ type: "CLOSE_CREATE_DIALOG" });
-      dispatch(setMessage(Messages.BankAccountCreatedSuccess));
-    } catch (error) {
-      console.error("Error creating bank account:", error);
-      dispatch(setMessage(Messages.BankAccountCreateError));
-    }
-  }, [createAccount, refetch, dispatch]);
+  const handleCreateAccount = useCallback(
+    async (request: CreateBankAccountRequest) => {
+      try {
+        await createAccount(request).unwrap();
+        await refetch();
+        dispatchAction({ type: "CLOSE_CREATE_DIALOG" });
+        dispatch(setMessage(Messages.BankAccountCreatedSuccess));
+      } catch (error) {
+        console.error("Error creating bank account:", error);
+        dispatch(setMessage(Messages.BankAccountCreateError));
+      }
+    },
+    [createAccount, refetch, dispatch]
+  );
 
-  const handleDisableAccount = useCallback(async (accountId: number) => {
-    try {
-      await disableAccount(accountId).unwrap();
-      await refetch();
-      dispatch(setMessage(Messages.BankAccountDisabledSuccess));
-    } catch (error) {
-      console.error("Error disabling bank account:", error);
-      dispatch(setMessage(Messages.BankAccountDisableError));
-    }
-  }, [disableAccount, refetch, dispatch]);
+  const handleDisableAccount = useCallback(
+    async (accountId: number) => {
+      try {
+        await disableAccount(accountId).unwrap();
+        await refetch();
+        dispatch(setMessage(Messages.BankAccountDisabledSuccess));
+      } catch (error) {
+        console.error("Error disabling bank account:", error);
+        dispatch(setMessage(Messages.BankAccountDisableError));
+      }
+    },
+    [disableAccount, refetch, dispatch]
+  );
 
-  const handleSetPrimary = useCallback(async (accountId: number) => {
-    try {
-      await setPrimary(accountId).unwrap();
-      await refetch();
-      dispatch(setMessage(Messages.BankAccountSetPrimarySuccess));
-    } catch (error) {
-      console.error("Error setting primary account:", error);
-      dispatch(setMessage(Messages.BankAccountSetPrimaryError));
-    }
-  }, [setPrimary, refetch, dispatch]);
+  const handleSetPrimary = useCallback(
+    async (accountId: number) => {
+      try {
+        await setPrimary(accountId).unwrap();
+        await refetch();
+        dispatch(setMessage(Messages.BankAccountSetPrimarySuccess));
+      } catch (error) {
+        console.error("Error setting primary account:", error);
+        dispatch(setMessage(Messages.BankAccountSetPrimaryError));
+      }
+    },
+    [setPrimary, refetch, dispatch]
+  );
 
   const openCreateDialog = useCallback(() => {
     dispatchAction({ type: "OPEN_CREATE_DIALOG" });

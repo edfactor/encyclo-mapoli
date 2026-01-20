@@ -6,9 +6,6 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DSMPaginatedGrid } from "../DSMPaginatedGrid";
 
-// Store references to mock callbacks for assertions
-let mockSetPageNumber: ((value: number) => void) | null = null;
-
 interface DSMGridProps {
   providedOptions?: { rowData?: unknown[]; columnDefs?: ColDef[] };
   isLoading?: boolean;
@@ -18,10 +15,8 @@ interface DSMGridProps {
 }
 
 interface MockPaginationProps {
-  pageNumber?: number;
-  setPageNumber?: (value: number) => void;
-  pageSize?: number;
-  setPageSize?: (value: number) => void;
+  defaultPagination?: { skip: number; take: number };
+  onPaginationChanged?: (params: { skip: number; take: number }) => void;
   recordCount?: number;
   rowsPerPageOptions?: number[];
 }
@@ -44,43 +39,32 @@ vi.mock("smart-ui-library", () => ({
       )}
     </div>
   ),
-  Pagination: ({
-    pageNumber,
-    setPageNumber,
-    pageSize,
-    setPageSize,
-    recordCount,
-    rowsPerPageOptions
-  }: MockPaginationProps) => {
-    // Capture the callbacks for testing
-    mockSetPageNumber = setPageNumber ?? null;
-    // Note: setPageSize is available but not captured as tests don't currently assert on it
-
+  Pagination: ({ defaultPagination, onPaginationChanged, recordCount, rowsPerPageOptions }: MockPaginationProps) => {
     return (
       <div data-testid="pagination">
-        <span data-testid="page-number">{pageNumber}</span>
-        <span data-testid="page-size">{pageSize}</span>
+        <span data-testid="page-number">{defaultPagination?.skip}</span>
+        <span data-testid="page-size">{defaultPagination?.take}</span>
         <span data-testid="record-count">{recordCount}</span>
         <span data-testid="rows-per-page-options">{rowsPerPageOptions?.join(",") ?? "default"}</span>
-        {/* Buttons to simulate user clicking pagination controls */}
+        {/* Buttons to simulate user clicking pagination controls - these simulate page number changes */}
         <button
           data-testid="go-to-page-1"
-          onClick={() => setPageNumber?.(1)}>
+          onClick={() => onPaginationChanged?.({ skip: 0, take: defaultPagination?.take ?? 25 })}>
           Go to Page 1
         </button>
         <button
           data-testid="go-to-page-2"
-          onClick={() => setPageNumber?.(2)}>
+          onClick={() => onPaginationChanged?.({ skip: 1, take: defaultPagination?.take ?? 25 })}>
           Go to Page 2
         </button>
         <button
           data-testid="go-to-page-5"
-          onClick={() => setPageNumber?.(5)}>
+          onClick={() => onPaginationChanged?.({ skip: 4, take: defaultPagination?.take ?? 25 })}>
           Go to Page 5
         </button>
         <button
           data-testid="set-page-size-50"
-          onClick={() => setPageSize?.(50)}>
+          onClick={() => onPaginationChanged?.({ skip: defaultPagination?.skip ?? 0, take: 50 })}>
           Set Page Size 50
         </button>
       </div>
@@ -128,7 +112,6 @@ describe("DSMPaginatedGrid", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSetPageNumber = null;
   });
 
   afterEach(() => {
@@ -345,14 +328,15 @@ describe("DSMPaginatedGrid", () => {
    * This means when Pagination component calls setPageNumber(1), the parent's
    * handlePageNumberChange should receive 0.
    *
-   * IMPORTANT: Parent components should NEVER subtract 1 from handlePageNumberChange.
-   * The DSMPaginatedGrid handles this conversion internally.
+   * With the new Pagination interface (smart-ui-library 6.x), skip is already 0-based.
+   * DSMPaginatedGrid passes pageNumber directly as skip and receives skip directly back.
    */
-  describe("Page Number Conversion (1-based to 0-based) - REGRESSION TESTS", () => {
-    it("should convert page 1 (UI) to page 0 (API) when user clicks Page 1", async () => {
+  describe("Pagination State Passthrough - REGRESSION TESTS", () => {
+    it("should call handlePageNumberChange when navigating to page 0 from a different page", async () => {
       const user = userEvent.setup();
       const handlePageNumberChange = vi.fn();
-      const pagination = createMockPagination({ handlePageNumberChange });
+      // Start on page 5 so clicking "go to page 1" (skip=0) triggers a change
+      const pagination = createMockPagination({ handlePageNumberChange, pageNumber: 5 });
 
       render(
         <DSMPaginatedGrid
@@ -365,19 +349,18 @@ describe("DSMPaginatedGrid", () => {
         />
       );
 
-      // Simulate user clicking "Go to Page 1" in Pagination component
-      // Pagination uses 1-based page numbers (Page 1 = first page)
+      // Click "Go to Page 1" which sends skip=0
       await user.click(screen.getByTestId("go-to-page-1"));
 
-      // handlePageNumberChange should receive 0 (0-based API format)
+      // handlePageNumberChange should receive 0 (the skip value)
       expect(handlePageNumberChange).toHaveBeenCalledTimes(1);
       expect(handlePageNumberChange).toHaveBeenCalledWith(0);
     });
 
-    it("should convert page 2 (UI) to page 1 (API) when user clicks Page 2", async () => {
+    it("should call handlePageNumberChange when navigating to page 1 from page 0", async () => {
       const user = userEvent.setup();
       const handlePageNumberChange = vi.fn();
-      const pagination = createMockPagination({ handlePageNumberChange });
+      const pagination = createMockPagination({ handlePageNumberChange, pageNumber: 0 });
 
       render(
         <DSMPaginatedGrid
@@ -390,18 +373,18 @@ describe("DSMPaginatedGrid", () => {
         />
       );
 
-      // User clicks "Go to Page 2" (1-based)
+      // Click "Go to Page 2" which sends skip=1
       await user.click(screen.getByTestId("go-to-page-2"));
 
-      // API should receive 1 (0-based)
+      // handlePageNumberChange should receive 1 (the skip value)
       expect(handlePageNumberChange).toHaveBeenCalledTimes(1);
       expect(handlePageNumberChange).toHaveBeenCalledWith(1);
     });
 
-    it("should convert page 5 (UI) to page 4 (API) when user clicks Page 5", async () => {
+    it("should call handlePageNumberChange when navigating to page 4 from page 0", async () => {
       const user = userEvent.setup();
       const handlePageNumberChange = vi.fn();
-      const pagination = createMockPagination({ handlePageNumberChange });
+      const pagination = createMockPagination({ handlePageNumberChange, pageNumber: 0 });
 
       render(
         <DSMPaginatedGrid
@@ -414,15 +397,15 @@ describe("DSMPaginatedGrid", () => {
         />
       );
 
-      // User clicks "Go to Page 5" (1-based)
+      // Click "Go to Page 5" which sends skip=4
       await user.click(screen.getByTestId("go-to-page-5"));
 
-      // API should receive 4 (0-based)
+      // handlePageNumberChange should receive 4 (the skip value)
       expect(handlePageNumberChange).toHaveBeenCalledTimes(1);
       expect(handlePageNumberChange).toHaveBeenCalledWith(4);
     });
 
-    it("should pass pageNumber directly to Pagination (no conversion on display)", () => {
+    it("should pass pageNumber directly to Pagination as skip (no conversion)", () => {
       const pagination = createMockPagination({ pageNumber: 3 });
 
       render(
@@ -436,12 +419,11 @@ describe("DSMPaginatedGrid", () => {
         />
       );
 
-      // pageNumber from state (0-based: 3) should be passed directly to Pagination
-      // The Pagination component itself handles display conversion
+      // pageNumber from state (3) should be passed directly as skip to Pagination
       expect(screen.getByTestId("page-number")).toHaveTextContent("3");
     });
 
-    it("should call handlePageSizeChange directly without conversion", async () => {
+    it("should call handlePageSizeChange when page size changes", async () => {
       const user = userEvent.setup();
       const handlePageSizeChange = vi.fn();
       const pagination = createMockPagination({ handlePageSizeChange });
@@ -465,9 +447,11 @@ describe("DSMPaginatedGrid", () => {
       expect(handlePageSizeChange).toHaveBeenCalledWith(50);
     });
 
-    it("should capture the correct setPageNumber callback in Pagination", () => {
+    it("should not call handlePageNumberChange when clicking same page", async () => {
+      const user = userEvent.setup();
       const handlePageNumberChange = vi.fn();
-      const pagination = createMockPagination({ handlePageNumberChange });
+      // Start on page 0
+      const pagination = createMockPagination({ handlePageNumberChange, pageNumber: 0 });
 
       render(
         <DSMPaginatedGrid
@@ -480,24 +464,18 @@ describe("DSMPaginatedGrid", () => {
         />
       );
 
-      // Verify the mock captured the callback
-      expect(mockSetPageNumber).toBeDefined();
+      // Click "Go to Page 1" which sends skip=0 - same as current page
+      await user.click(screen.getByTestId("go-to-page-1"));
 
-      // Directly call the callback with various values to verify the conversion
-      mockSetPageNumber!(1); // UI page 1
-      expect(handlePageNumberChange).toHaveBeenLastCalledWith(0);
-
-      mockSetPageNumber!(10); // UI page 10
-      expect(handlePageNumberChange).toHaveBeenLastCalledWith(9);
-
-      mockSetPageNumber!(100); // UI page 100
-      expect(handlePageNumberChange).toHaveBeenLastCalledWith(99);
+      // handlePageNumberChange should NOT be called since page hasn't changed
+      expect(handlePageNumberChange).not.toHaveBeenCalled();
     });
 
-    it("should maintain consistent conversion across multiple page changes", async () => {
+    it("should handle multiple page changes correctly", async () => {
       const user = userEvent.setup();
       const handlePageNumberChange = vi.fn();
-      const pagination = createMockPagination({ handlePageNumberChange });
+      // Start on page 3 so all navigations trigger changes
+      const pagination = createMockPagination({ handlePageNumberChange, pageNumber: 3 });
 
       render(
         <DSMPaginatedGrid
@@ -510,10 +488,10 @@ describe("DSMPaginatedGrid", () => {
         />
       );
 
-      // Simulate multiple page navigations
-      await user.click(screen.getByTestId("go-to-page-1")); // 1 -> 0
-      await user.click(screen.getByTestId("go-to-page-5")); // 5 -> 4
-      await user.click(screen.getByTestId("go-to-page-2")); // 2 -> 1
+      // Navigate to different pages
+      await user.click(screen.getByTestId("go-to-page-1")); // skip=0
+      await user.click(screen.getByTestId("go-to-page-5")); // skip=4
+      await user.click(screen.getByTestId("go-to-page-2")); // skip=1
 
       expect(handlePageNumberChange).toHaveBeenCalledTimes(3);
       expect(handlePageNumberChange).toHaveBeenNthCalledWith(1, 0);

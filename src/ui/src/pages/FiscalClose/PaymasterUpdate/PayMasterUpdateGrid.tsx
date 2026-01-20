@@ -99,13 +99,16 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
       )}
       {summaryData?.response && summaryData.response.results.length > 0 && (
         <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePageNumberChange(value - 1);
-          }}
-          pageSize={pageSize}
-          setPageSize={handlePageSizeChange}
           recordCount={summaryData.response.total}
+          defaultPagination={{ skip: pageNumber, take: pageSize }}
+          onPaginationChanged={(params) => {
+            if (params.take !== pageSize) {
+              handlePageSizeChange(params.take);
+            }
+            if (params.skip !== pageNumber) {
+              handlePageNumberChange(params.skip);
+            }
+          }}
         />
       )}
     </>

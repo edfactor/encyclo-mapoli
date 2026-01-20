@@ -1,9 +1,32 @@
-import { defineConfig } from "vitest/config";
+import { defineConfig, Plugin } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
+/**
+ * Plugin to rewrite explicit .js imports from smart-ui-library for @mui/x-date-pickers submodules.
+ * The bundled smart-ui-library uses explicit .js extensions which Vite can't resolve directly.
+ * This plugin transforms the code to remove the /index.js suffix.
+ */
+const resolveMuiDatePickersPlugin = (): Plugin => ({
+  name: "resolve-mui-date-pickers",
+  enforce: "pre",
+  transform(code, id) {
+    // Only transform smart-ui-library bundle
+    if (id.includes("smart-ui-library") && id.endsWith(".js")) {
+      // Rewrite explicit /index.js imports to bare module paths
+      const transformed = code
+        .replace(/@mui\/x-date-pickers\/AdapterDateFnsV3\/index\.js/g, "@mui/x-date-pickers/AdapterDateFnsV3")
+        .replace(/@mui\/x-date-pickers\/LocalizationProvider\/index\.js/g, "@mui/x-date-pickers/LocalizationProvider");
+      if (transformed !== code) {
+        return { code: transformed, map: null };
+      }
+    }
+    return null;
+  }
+});
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), resolveMuiDatePickersPlugin()],
   test: {
     globals: true,
     environment: "jsdom",
@@ -37,7 +60,15 @@ export default defineConfig({
     // Handle server-side dependencies that need special resolution
     server: {
       deps: {
-        inline: ["smart-ui-library"]
+        inline: ["smart-ui-library", "@mui/x-date-pickers"]
+      }
+    },
+    // Force resolution of problematic deep imports
+    deps: {
+      optimizer: {
+        web: {
+          include: ["smart-ui-library", "@mui/x-date-pickers"]
+        }
       }
     }
   },
@@ -54,7 +85,16 @@ export default defineConfig({
       styles: path.resolve(__dirname, "./src/styles"),
       // Fix for ES module directory import issue with MUI date pickers
       "@mui/x-date-pickers/AdapterDateFnsV3": "@mui/x-date-pickers/AdapterDateFnsV3/index.js",
-      "@mui/x-date-pickers/AdapterDayjs": "@mui/x-date-pickers/AdapterDayjs/index.js"
+      "@mui/x-date-pickers/AdapterDayjs": "@mui/x-date-pickers/AdapterDayjs/index.js",
+      // Fix for smart-ui-library explicit .js imports in bundled code
+      "@mui/x-date-pickers/AdapterDateFnsV3/index.js": path.resolve(
+        __dirname,
+        "node_modules/@mui/x-date-pickers/AdapterDateFnsV3/index.js"
+      ),
+      "@mui/x-date-pickers/LocalizationProvider/index.js": path.resolve(
+        __dirname,
+        "node_modules/@mui/x-date-pickers/LocalizationProvider/index.js"
+      )
     },
     // Add conditions to help with ES module resolution
     conditions: ["node", "import", "module", "browser", "default"]
