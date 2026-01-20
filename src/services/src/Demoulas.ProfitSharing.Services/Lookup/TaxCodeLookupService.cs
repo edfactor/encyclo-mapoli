@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -28,7 +28,8 @@ public sealed class TaxCodeLookupService(IProfitSharingDataContextFactory factor
             }
 
             var items = await query
-                .OrderBy(x => x.Name)
+                .OrderBy(x => x.Id)
+                .ThenBy(x => x.Name)
                 .Select(x => new TaxCodeResponse { Id = x.Id, Name = x.Name })
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
