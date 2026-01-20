@@ -94,6 +94,14 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
         mode: "content-aware",
         heightPercentage: isGridExpanded ? 0.85 : 0.4
       }}
+      gridOptions={{
+        onFirstDataRendered: (params) => {
+          params.api.sizeColumnsToFit();
+        },
+        onGridSizeChanged: (params) => {
+          params.api.sizeColumnsToFit();
+        }
+      }}
       beforeGrid={
         !isGridExpanded ? (
           <>
@@ -128,7 +136,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
                   font-weight: 500;
                 }
               `}</style>
-              <div className="rounded border border-gray-300 mx-3">
+              <div className="mx-3 rounded border border-gray-300">
                 <table className="forfeit-totals-table">
                   <thead>
                     <tr>
