@@ -35,9 +35,14 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
   const isFakeTimeBannerVisible = hasToken && fakeTimeStatus?.isActive;
   const fakeTimeBannerHeight = 24; // Approximate height of fake time banner in pixels
 
-  // Adjust positions when fake time banner is visible
-  const appBannerTop = isFakeTimeBannerVisible ? 52 + fakeTimeBannerHeight : 52;
-  const contentMarginTop = isFakeTimeBannerVisible ? 110 + fakeTimeBannerHeight : 110;
+  // EnvironmentBanner only renders for non-production environments
+  const showsEnvironmentBanner = environmentMode && environmentMode !== "production";
+  const envBannerHeight = showsEnvironmentBanner ? 52 : 0;
+
+  // Adjust positions based on which banners are visible
+  const appBannerTop = envBannerHeight + (isFakeTimeBannerVisible ? fakeTimeBannerHeight : 0);
+  const menuBarTop = appBannerTop + 52; // 52px is app banner height
+  const contentMarginTop = menuBarTop + 44; // 44px is approximate menu bar height
 
   return (
     <div
