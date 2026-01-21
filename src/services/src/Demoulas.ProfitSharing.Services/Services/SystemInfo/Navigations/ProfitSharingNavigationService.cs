@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NavigationStatusIds = Demoulas.ProfitSharing.Common.Constants.NavigationStatusIds;
 
-namespace Demoulas.ProfitSharing.Services.Navigations;
+namespace Demoulas.ProfitSharing.Services.Services.SystemInfo.Navigations;
 
 public sealed class ProfitSharingNavigationService : NavigationService
 {

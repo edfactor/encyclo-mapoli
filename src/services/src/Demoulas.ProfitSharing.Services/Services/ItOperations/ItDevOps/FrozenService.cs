@@ -16,7 +16,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.ItDevOps;
+namespace Demoulas.ProfitSharing.Services.Services.ItOperations.ItDevOps;
 
 /// <summary>
 /// This service contains logic related to getting temporal data for tables with ValidFrom and ValidTo.

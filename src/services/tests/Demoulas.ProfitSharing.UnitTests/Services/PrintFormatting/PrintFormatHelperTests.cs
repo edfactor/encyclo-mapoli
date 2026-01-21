@@ -1,8 +1,7 @@
 using System.ComponentModel;
 using System.Text;
-using Demoulas.ProfitSharing.Services.PrintFormatting;
+using Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services.PrintFormatting;
 

@@ -8,8 +8,9 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 
-namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
+namespace Demoulas.ProfitSharing.Services.Services.Adjustments.ProfitShareEdit;
 
 /// <summary>
 ///     Does the Year And application of Earnings and Contributions to all employees and beneficiaries.

@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Reports;
+namespace Demoulas.ProfitSharing.Services.Services.Reports;
 
 // Builds the data which is presented in the PAY443 report in READY
 

@@ -7,9 +7,10 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
+namespace Demoulas.ProfitSharing.Services.Services.Adjustments.ProfitShareEdit;
 
 internal static class EmployeeProcessorHelper
 {

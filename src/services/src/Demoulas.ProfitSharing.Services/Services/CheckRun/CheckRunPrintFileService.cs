@@ -5,11 +5,11 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.PrintFormatting;
+using Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.CheckRun;
+namespace Demoulas.ProfitSharing.Services.Services.CheckRun;
 
 public sealed class CheckRunPrintFileService : ICheckRunPrintFileService
 {

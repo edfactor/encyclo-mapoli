@@ -7,7 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Reports;
+namespace Demoulas.ProfitSharing.Services.Services.Reports;
 
 public class PayBenReportService : IPayBenReportService
 {

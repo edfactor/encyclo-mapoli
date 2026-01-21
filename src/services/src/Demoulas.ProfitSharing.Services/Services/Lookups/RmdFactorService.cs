@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.Lookups;
 
 /// <summary>
 /// Service for managing RMD (Required Minimum Distribution) factor data.

@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.Adjustments;
 
 public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
 {

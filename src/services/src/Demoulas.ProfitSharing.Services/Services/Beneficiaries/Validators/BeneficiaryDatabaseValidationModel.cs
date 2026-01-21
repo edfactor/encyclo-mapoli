@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Contexts;
 
-namespace Demoulas.ProfitSharing.Services.Beneficiaries.Validators;
+namespace Demoulas.ProfitSharing.Services.Services.Beneficiaries.Validators;
 
 /// <summary>
 /// Model for database-dependent beneficiary validation.

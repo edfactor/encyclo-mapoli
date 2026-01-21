@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.MasterInquiry;
+using Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.MasterInquiry;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;

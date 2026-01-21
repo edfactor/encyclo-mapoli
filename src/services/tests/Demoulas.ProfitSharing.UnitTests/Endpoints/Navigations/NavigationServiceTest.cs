@@ -1,9 +1,8 @@
 using Demoulas.Common.Contracts.Contracts.Response.Navigation;
 using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Navigations;
+using Demoulas.ProfitSharing.Services.Services.SystemInfo.Navigations;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Microsoft.Extensions.Caching.Distributed;

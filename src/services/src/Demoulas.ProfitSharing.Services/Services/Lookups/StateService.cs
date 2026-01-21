@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Lookup;
+namespace Demoulas.ProfitSharing.Services.Services.Lookups;
 
 /// <summary>
 /// Service for retrieving state information from the database, including states

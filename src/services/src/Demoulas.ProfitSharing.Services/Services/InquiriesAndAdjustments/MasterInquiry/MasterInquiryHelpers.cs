@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.MasterInquiry;
+namespace Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.MasterInquiry;
 
 /// <summary>
 /// Utility methods for master inquiry operations including filtering and sorting.

@@ -1,11 +1,6 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using ArchUnitNET.Domain;
 using ArchUnitNET.Fluent;
-using ArchUnitNET.Loader;
-using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Services;
-using Microsoft.EntityFrameworkCore;
 using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace Demoulas.ProfitSharing.UnitTests.Architecture.Architecture;

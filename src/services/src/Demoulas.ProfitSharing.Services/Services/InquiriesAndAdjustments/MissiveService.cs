@@ -10,7 +10,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments;
 
 internal sealed class MissiveService : IMissiveService
 {

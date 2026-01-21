@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.Lookups;
 
 public sealed class PayClassificationService : IPayClassificationService
 {

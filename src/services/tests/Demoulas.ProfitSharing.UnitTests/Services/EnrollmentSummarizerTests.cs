@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Services.EnrollmentFlag;
+using Demoulas.ProfitSharing.Services.Services.Lookups.EnrollmentFlag;
 using Moq;
 using Shouldly;
 

@@ -7,11 +7,11 @@ using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.PrintFormatting;
+using Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace Demoulas.ProfitSharing.Services.Reports;
+namespace Demoulas.ProfitSharing.Services.Services.Reports;
 
 public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 {

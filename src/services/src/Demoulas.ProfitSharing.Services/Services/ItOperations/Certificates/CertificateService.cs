@@ -9,11 +9,11 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
-using Demoulas.ProfitSharing.Services.PrintFormatting;
+using Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace Demoulas.ProfitSharing.Services.Certificates;
+namespace Demoulas.ProfitSharing.Services.Services.ItOperations.Certificates;
 
 public sealed class CertificateService : ICertificateService
 {

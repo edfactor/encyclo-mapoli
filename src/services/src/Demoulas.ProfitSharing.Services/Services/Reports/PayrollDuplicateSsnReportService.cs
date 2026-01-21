@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Reports
+namespace Demoulas.ProfitSharing.Services.Services.Reports
 {
     public class PayrollDuplicateSsnReportService : IPayrollDuplicateSsnReportService
     {

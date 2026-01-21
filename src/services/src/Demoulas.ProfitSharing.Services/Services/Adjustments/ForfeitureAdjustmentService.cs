@@ -11,9 +11,10 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.Adjustments;
 
 public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 {

@@ -15,7 +15,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+namespace Demoulas.ProfitSharing.Services.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
 /// <summary>
 ///     Generates reports for terminated employees and their beneficiaries.

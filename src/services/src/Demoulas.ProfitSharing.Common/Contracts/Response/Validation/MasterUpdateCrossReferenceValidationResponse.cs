@@ -1,5 +1,3 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
-
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 /// <summary>

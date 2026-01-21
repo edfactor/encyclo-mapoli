@@ -16,7 +16,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Reports;
+namespace Demoulas.ProfitSharing.Services.Services.Reports;
 
 public class PostFrozenService : IPostFrozenService
 {

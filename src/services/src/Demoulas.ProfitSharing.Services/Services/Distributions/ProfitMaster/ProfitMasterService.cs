@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.Services.ProfitMaster;
+namespace Demoulas.ProfitSharing.Services.Services.Distributions.ProfitMaster;
 
 #pragma warning disable AsyncFixer01
 

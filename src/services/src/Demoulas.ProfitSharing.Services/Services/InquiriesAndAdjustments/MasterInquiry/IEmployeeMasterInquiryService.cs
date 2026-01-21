@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Data.Contexts;
 
-namespace Demoulas.ProfitSharing.Services.MasterInquiry;
+namespace Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.MasterInquiry;
 
 /// <summary>
 /// Service for employee/demographic master inquiry operations.

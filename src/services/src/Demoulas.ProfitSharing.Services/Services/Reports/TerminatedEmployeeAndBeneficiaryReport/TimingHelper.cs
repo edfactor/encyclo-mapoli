@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+namespace Demoulas.ProfitSharing.Services.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
 /// <summary>
 ///     Helper for timing async operations with automatic logging

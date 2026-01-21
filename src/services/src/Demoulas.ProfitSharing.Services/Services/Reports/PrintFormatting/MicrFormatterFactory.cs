@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace Demoulas.ProfitSharing.Services.PrintFormatting;
+namespace Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
 
 /// <summary>
 /// Factory implementation for creating bank-specific MICR formatters.

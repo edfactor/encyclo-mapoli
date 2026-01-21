@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.MasterInquiry;
+namespace Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.MasterInquiry;
 
 /// <summary>
 /// Service for beneficiary-specific master inquiry operations.

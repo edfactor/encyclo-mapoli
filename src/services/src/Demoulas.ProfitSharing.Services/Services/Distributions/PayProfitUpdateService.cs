@@ -3,12 +3,13 @@ using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.EnrollmentFlag;
+using Demoulas.ProfitSharing.Services.Services.Lookups.EnrollmentFlag;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.Distributions;
 
 public sealed class PayProfitUpdateService : IPayProfitUpdateService
 {

@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Data.Entities.FileTransfer;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.FileTransfer;
+namespace Demoulas.ProfitSharing.Services.Services.ItOperations.FileTransfer;
 
 /// <summary>
 /// Mock implementation of file transfer service for development and testing.

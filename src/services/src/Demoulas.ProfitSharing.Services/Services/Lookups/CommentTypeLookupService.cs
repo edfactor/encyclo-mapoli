@@ -1,10 +1,11 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response; //  ListResponseDto
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+//  ListResponseDto
 
-namespace Demoulas.ProfitSharing.Services.Lookup;
+namespace Demoulas.ProfitSharing.Services.Services.Lookups;
 
 public sealed class CommentTypeLookupService(IProfitSharingDataContextFactory factory) : ICommentTypeLookupService
 {

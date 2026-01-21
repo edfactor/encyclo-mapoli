@@ -16,7 +16,7 @@ using Demoulas.Util.Extensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Reports;
+namespace Demoulas.ProfitSharing.Services.Services.Reports;
 
 public sealed class UnforfeitService : IUnforfeitService
 {

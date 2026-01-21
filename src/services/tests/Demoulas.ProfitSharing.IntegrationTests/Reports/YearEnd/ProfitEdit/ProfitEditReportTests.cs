@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitMaster;
-using Demoulas.ProfitSharing.Services.ProfitShareEdit;
+using Demoulas.ProfitSharing.Services.Services.Adjustments.ProfitShareEdit;
 using Shouldly;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously

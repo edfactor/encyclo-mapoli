@@ -7,12 +7,13 @@ using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Beneficiaries.Validators;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Services.Beneficiaries.Validators;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Beneficiaries;
+namespace Demoulas.ProfitSharing.Services.Services.Beneficiaries;
 
 public class BeneficiaryService : IBeneficiaryService
 {

@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Demoulas.ProfitSharing.Services.PrintFormatting;
+namespace Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
 
 public static class PrintFormatHelper
 {

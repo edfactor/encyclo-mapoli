@@ -11,7 +11,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Military;
+namespace Demoulas.ProfitSharing.Services.Services.Military;
 
 public class MilitaryService : IMilitaryService
 {
