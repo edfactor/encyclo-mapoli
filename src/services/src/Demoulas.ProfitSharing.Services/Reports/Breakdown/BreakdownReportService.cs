@@ -360,11 +360,184 @@ public sealed class BreakdownReportService : IBreakdownService
         return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasBalanceActivity, applyQPAY066A1Filter: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
+    /// <summary>
+    /// Retrieves terminated employees with current balance not vested plus qualifying beneficiaries.
+    /// Logic:
+    /// 1. Employees terminated during current fiscal year with vesting percentage &lt; 20%
+    /// 2. Beneficiaries who are NOT also employees (by SSN match)
+    /// 3. Beneficiaries must have a vested amount OR profit detail records with profit_code_id 5 or 6
+    /// </summary>
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithCurrentBalanceNotVestedByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasCurrentBalanceNotVested, applyQPAY066A1Filter: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+
+            // Build the base employee query with financial data
+            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate);
+
+            // 1. Filter to terminated employees within the fiscal year with vesting < 20%
+            var terminatedEmployeesQuery = employeesBase
+                .Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
+                .Where(e => e.TerminationDate.HasValue &&
+                            e.TerminationDate.Value >= calInfo.FiscalBeginDate &&
+                            e.TerminationDate.Value <= calInfo.FiscalEndDate)
+                .Where(e => (e.VestedPercent ?? 0) < 0.20m);
+
+            // Apply optional store filter
+            if (request.StoreNumber.HasValue)
+            {
+                terminatedEmployeesQuery = terminatedEmployeesQuery.Where(q => q.StoreNumber == request.StoreNumber.Value);
+            }
+
+            // Apply optional filters
+            if (request.BadgeNumber > 0)
+            {
+                terminatedEmployeesQuery = terminatedEmployeesQuery.Where(e => e.BadgeNumber == request.BadgeNumber);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.EmployeeName))
+            {
+                var pattern = $"%{request.EmployeeName.ToUpperInvariant()}%";
+                terminatedEmployeesQuery = terminatedEmployeesQuery.Where(x => EF.Functions.Like(x.FullName.ToUpper(), pattern));
+            }
+
+            // Materialize employees to memory (to avoid Oracle UNION type issues)
+            var terminatedEmployees = await terminatedEmployeesQuery.ToListAsync(cancellationToken);
+            var employeeSsnSet = terminatedEmployees.Select(e => e.Ssn).ToHashSet();
+
+            // 2. Get beneficiaries who are NOT also in the employee list
+            // Beneficiary profit codes: OutgoingXferBeneficiary (5) and IncomingQdroBeneficiary (6)
+            var beneficiaryProfitCodes = new[] { ProfitCode.Constants.OutgoingXferBeneficiary.Id, ProfitCode.Constants.IncomingQdroBeneficiary.Id };
+
+            // Get SSNs of beneficiaries who have profit detail records with code 5 or 6 in the profit year
+            var ssnsWithBeneficiaryProfitDetails = await ctx.ProfitDetails
+                .Where(pd => pd.ProfitYear == request.ProfitYear && beneficiaryProfitCodes.Contains(pd.ProfitCodeId))
+                .Select(pd => pd.Ssn)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+            var ssnsWithBeneficiaryProfitDetailsSet = ssnsWithBeneficiaryProfitDetails.ToHashSet();
+
+            // Get vesting balances for beneficiaries
+            var asOfDate = DateOnly.FromDateTime(_timeProvider.GetUtcNow().DateTime);
+            var vestingBalances = await _totalService
+                .TotalVestingBalance(ctx, request.ProfitYear, asOfDate)
+                .Where(vb => vb.VestedBalance > 0)
+                .Select(vb => vb.Ssn)
+                .ToListAsync(cancellationToken);
+            var ssnsWithVestedAmount = vestingBalances.ToHashSet();
+
+            // Query beneficiaries: exclude those who are employees, include only those with vested amount or profit codes 5/6
+            var beneficiaryQueryBase = ctx.Beneficiaries
+                .Where(b => !b.IsDeleted)
+                .Include(b => b.Contact)
+                .ThenInclude(c => c!.ContactInfo);
+
+            // Materialize beneficiaries to memory (separate query to avoid Oracle UNION type issues)
+            var beneficiaryData = await beneficiaryQueryBase
+                .Where(b => !employeeSsnSet.Contains(b.Contact!.Ssn))
+                .Where(b => ssnsWithVestedAmount.Contains(b.Contact!.Ssn) ||
+                            ssnsWithBeneficiaryProfitDetailsSet.Contains(b.Contact!.Ssn))
+                .Select(b => new
+                {
+                    b.BadgeNumber,
+                    ContactSsn = b.Contact!.Ssn,
+                    ContactDateOfBirth = b.Contact.DateOfBirth,
+                    ContactFullName = b.Contact.ContactInfo.FullName,
+                    ContactStreet = b.Contact.Address.Street,
+                    ContactCity = b.Contact.Address.City,
+                    ContactState = b.Contact.Address.State,
+                    ContactPostalCode = b.Contact.Address.PostalCode
+                })
+                .ToListAsync(cancellationToken);
+
+            // Apply optional store filter (beneficiaries are store 800)
+            if (request.StoreNumber.HasValue && request.StoreNumber.Value != 800)
+            {
+                beneficiaryData.Clear(); // Clear if filtering to a different store
+            }
+
+            // Convert beneficiaries to ActiveMemberDto in memory
+            var beneficiaries = beneficiaryData.Select(b => new ActiveMemberDto
+            {
+                BadgeNumber = b.BadgeNumber,
+                StoreNumber = 800, // Beneficiaries go to store 800 bucket
+                FullName = b.ContactFullName ?? string.Empty,
+                Ssn = b.ContactSsn,
+                DateOfBirth = b.ContactDateOfBirth,
+                PayClassificationId = string.Empty,
+                EmploymentStatusId = EmploymentStatus.Constants.Terminated,
+                DepartmentId = 0,
+                PayFrequencyId = 0,
+                TerminationCodeId = null,
+                DepartmentName = string.Empty,
+                PayClassificationName = string.Empty,
+                CurrentBalance = 0,
+                VestedBalance = 0,
+                VestedPercent = 0,
+                EtvaBalance = 0,
+                YearsInPlan = 0,
+                HireDate = DateOnly.MinValue,
+                TerminationDate = null,
+                EnrollmentId = EnrollmentConstants.NotEnrolled,
+                ProfitShareHours = 0,
+                Street1 = b.ContactStreet,
+                City = b.ContactCity,
+                State = b.ContactState,
+                PostalCode = b.ContactPostalCode,
+                BeginningBalance = 0,
+                Earnings = 0,
+                Distributions = 0,
+                Contributions = 0,
+                Forfeitures = 0,
+                BeneficiaryAllocation = 0,
+                CertificateSort = 0
+            }).ToList();
+
+            // Combine employees and beneficiaries in memory
+            var combined = terminatedEmployees.Concat(beneficiaries).ToList();
+
+            // Apply sorting and pagination in memory
+            var ordered = combined
+                .OrderBy(e => e.StoreNumber)
+                .ThenBy(e => e.FullName)
+                .ToList();
+
+            var total = ordered.Count;
+            var results = ordered
+                .Skip(request.Skip ?? 0)
+                .Take(request.Take ?? 25)
+                .ToList();
+
+            // Validate SSNs
+            var resultSsns = results.Select(r => r.Ssn).ToHashSet();
+            ThrowIfInvalidSsns(resultSsns);
+
+            // Get financial snapshots for the results
+            var snapshots = await GetEmployeeFinancialSnapshotsAsync(
+                ctx, request.ProfitYear, resultSsns, cancellationToken);
+            var snapshotByKey = snapshots.ToDictionary(s => (s.Ssn, s.BadgeNumber));
+
+            // Build final response
+            var members = results
+                .Select(d => BuildMemberYearSummary(d, snapshotByKey.GetValueOrDefault((d.Ssn, d.BadgeNumber))))
+                .ToList();
+
+            return new ReportResponseBase<MemberYearSummaryDto>
+            {
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = calInfo.FiscalBeginDate,
+                EndDate = calInfo.FiscalEndDate,
+                ReportName = $"Terminated Members with Current Balance Not Vested for {request.ProfitYear}",
+                Response = new PaginatedResponseDto<MemberYearSummaryDto>
+                {
+                    Results = members,
+                    Total = total
+                }
+            };
+        }, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(
