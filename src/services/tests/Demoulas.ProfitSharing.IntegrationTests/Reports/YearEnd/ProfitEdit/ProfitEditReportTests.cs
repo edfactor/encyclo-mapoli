@@ -95,7 +95,7 @@ public class ProfitEditReportTests : PristineBaseTest
         for (int i = 0; i < onlyReady.Count; i++)
         {
             TestOutputHelper.WriteLine($"ONLY READY PAY447 {onlyReady[i]}");
-            if (i > 5)
+            if (i > 50)
             {
                 break;
             }
@@ -104,7 +104,7 @@ public class ProfitEditReportTests : PristineBaseTest
         for (int i = 0; i < onlySmart.Count; i++)
         {
             TestOutputHelper.WriteLine($"ONLY SMART PAY447 {onlySmart[i]}");
-            if (i > 5)
+            if (i > 50)
             {
                 break;
             }
@@ -162,11 +162,4 @@ public class ProfitEditReportTests : PristineBaseTest
         return value;
     }
 
-    public static string LoadExpectedReport(string resourceName)
-    {
-        using Stream? stream = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream($"Demoulas.ProfitSharing.IntegrationTests.Resources.{resourceName}");
-        using StreamReader reader = new(stream!);
-        return reader.ReadToEnd();
-    }
 }

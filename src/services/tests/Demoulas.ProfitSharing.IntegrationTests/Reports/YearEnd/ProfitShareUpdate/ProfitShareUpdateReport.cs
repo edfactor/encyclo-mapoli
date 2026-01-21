@@ -34,7 +34,7 @@ internal sealed class ProfitShareUpdateReport
     public DateTime TodaysDateTime { get; set; }
     public List<string> ReportLines { get; set; } = [];
 
-    public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService)
+    public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService, YearEndService  yearEndService)
     {
         TotalService totalService = new(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, demographicReaderService, TimeProvider.System);

@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.IntegrationTests.TotalSvc;
 using Demoulas.ProfitSharing.Services.Services.Reports;
 using Microsoft.EntityFrameworkCore;
@@ -103,7 +104,7 @@ public class UpdateSummaryTests : PristineBaseTest
             HashSet<string> commonBadges = new() { "700173", "700569", "700655", "702489", "706161" };
 
             // Get ETVA values for both Ready and Smart
-            List<int> badgesForEtva = comparisons.Select(vci => int.Parse(ExtractBadge(vci.Actual.BadgeAndStore))).ToList();
+            List<int> badgesForEtva = comparisons.Where(f=>!IsBene(f.Actual)).Select(vci => int.Parse(ExtractBadge(vci.Actual.BadgeAndStore))).ToList();
             Dictionary<int, decimal> readyEtvaByBadge = await ReadyPayProfitLoader.GetReadyEtvaByBadge(DbFactory.ConnectionString, badgesForEtva);
             Dictionary<int, decimal> smartEtvaByBadge = await GetSmartEtvaByBadge(badgesForEtva);
 
@@ -120,16 +121,21 @@ public class UpdateSummaryTests : PristineBaseTest
                 .ThenBy(c => ExtractBadge(c.Expected.BadgeAndStore))
                 .ToList();
 
-            foreach ((Pay450Record actual, Pay450Record expected) in sortedComparisons.Take(30))
+            foreach ((Pay450Record actual, Pay450Record expected) in sortedComparisons)
             {
-                string badge = ExtractBadge(expected.BadgeAndStore);
+                string psn = ExtractBadge(expected.BadgeAndStore);
                 // Highlight common badges in grey
-                string? cssClass = commonBadges.Contains(badge) ? "highlight" : null;
+                string? cssClass = commonBadges.Contains(psn) ? "highlight" : null;
 
-                int badgeInt = int.Parse(badge);
+                int badgeInt = 0;
+                if (!IsBene(expected))
+                {
+                    badgeInt = int.Parse(psn);
+                }
+
                 detailedTable.AddRow(
                     cssClass,
-                    badge,
+                    psn,
                     FormatDifferenceMoney(expected.BeforeAmount, actual.BeforeAmount),
                     FormatDifferenceMoney(expected.BeforeVested, actual.BeforeVested),
                     FormatDifference(expected.BeforeYears, actual.BeforeYears),
@@ -138,7 +144,7 @@ public class UpdateSummaryTests : PristineBaseTest
                     FormatDifferenceMoney(expected.AfterVested, actual.AfterVested),
                     FormatDifference(expected.AfterYears, actual.AfterYears),
                     FormatDifference(expected.AfterEnroll, actual.AfterEnroll),
-                    FormatDifferenceMoney(readyEtvaByBadge[badgeInt], smartEtvaByBadge[badgeInt])
+                    badgeInt == 0 ? "-" : FormatDifferenceMoney(readyEtvaByBadge[badgeInt], smartEtvaByBadge[badgeInt])
                 );
             }
 
@@ -175,15 +181,21 @@ public class UpdateSummaryTests : PristineBaseTest
     {
         return p with
         {
+            Name = Pay443Tests.RemoveMiddleInitial(p.Name)!,
             BeforeAmount = Math.Round(p.BeforeAmount, 2),
-            BeforeVested = Math.Round(p.BeforeVested, 2),
+            BeforeVested =  Math.Round(p.BeforeVested, 2),
             BeforeYears = badgeAndStore.Contains(p.BadgeAndStore) ? 0 : IfNullThenZero(p.BeforeYears),
-            BeforeEnroll = IfNullThenZero(p.BeforeEnroll),
+            BeforeEnroll = IsBene(p) ? 0 : IfNullThenZero(p.BeforeEnroll),
             AfterAmount = Math.Round(p.AfterAmount, 2),
             AfterVested = Math.Round(p.AfterVested, 2),
             AfterYears = badgeAndStore.Contains(p.BadgeAndStore) ? 0 : IfNullThenZero(p.AfterYears),
             AfterEnroll = IfNullThenZero(p.AfterEnroll)
         };
+    }
+
+    private static bool IsBene(Pay450Record pay450Record)
+    {
+        return !pay450Record.BadgeAndStore.Contains(' ');
     }
 
 
@@ -198,7 +210,7 @@ public class UpdateSummaryTests : PristineBaseTest
         int employee = 0;
         foreach (Pay450Record p in p1)
         {
-            if (p.BadgeAndStore.Contains(' '))
+            if (!IsBene(p))
             {
                 employee++;
             }
