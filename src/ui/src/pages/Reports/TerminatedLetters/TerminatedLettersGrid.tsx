@@ -1,20 +1,20 @@
 import { Print } from "@mui/icons-material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {
   Button,
+  ButtonGroup,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
-  InputLabel,
+  Menu,
   MenuItem,
-  Select,
   Tooltip,
   Typography
 } from "@mui/material";
 import { SelectionChangedEvent } from "ag-grid-community";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
 import { formatNumberWithComma, ISortParams } from "smart-ui-library";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
@@ -69,6 +69,21 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   const isPrintDisabled = selectedRows.length === 0;
   const printModeLabel = isXerox ? "Xerox" : "Default";
   const dialogTitle = `Print Preview - Terminated Letters (${printModeLabel})`;
+  const [printerMenuAnchorEl, setPrinterMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const isPrinterMenuOpen = Boolean(printerMenuAnchorEl);
+
+  const handleOpenPrinterMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setPrinterMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePrinterMenu = () => {
+    setPrinterMenuAnchorEl(null);
+  };
+
+  const handleSelectPrinter = (value: "default" | "xerox") => {
+    setIsXerox(value === "xerox");
+    handleClosePrinterMenu();
+  };
 
   const paginationProps = {
     pageNumber: gridPagination.pageNumber,
@@ -81,16 +96,28 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
 
   const renderPrintButton = () => {
     const button = (
-      <Button
+      <ButtonGroup
         variant="outlined"
         color="primary"
         size="medium"
-        startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
-        onClick={handlePrint}
-        disabled={isPrintDisabled || isDownloading}
-        sx={{ marginLeft: 2, marginRight: "20px" }}>
-        {isDownloading ? "Generating..." : "Print"}
-      </Button>
+        className="ml-2 mr-5">
+        <Button
+          startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
+          onClick={handlePrint}
+          disabled={isPrintDisabled || isDownloading}
+          className="whitespace-nowrap">
+          {isDownloading ? "Generating..." : "Print"}
+        </Button>
+        <Button
+          onClick={handleOpenPrinterMenu}
+          aria-label="Select printer"
+          aria-controls={isPrinterMenuOpen ? "terminated-letters-printer-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={isPrinterMenuOpen ? "true" : undefined}
+          className="min-w-0 px-2">
+          <ArrowDropDownIcon />
+        </Button>
+      </ButtonGroup>
     );
 
     if (isPrintDisabled) {
@@ -132,27 +159,22 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
                 EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS (
                 {formatNumberWithComma(reportData.response.total)} Records)
               </Typography>
-              <div className="flex items-center">
-                <FormControl
-                  size="small"
-                  sx={{ minWidth: 140 }}>
-                  <InputLabel id="terminated-letters-printer-label">Printer</InputLabel>
-                  <Select
-                    labelId="terminated-letters-printer-label"
-                    value={isXerox ? "xerox" : "default"}
-                    label="Printer"
-                    onChange={(event) => setIsXerox(event.target.value === "xerox")}
-                    sx={{ height: "40px" }}>
-                    <MenuItem value="default">Default</MenuItem>
-                    <MenuItem value="xerox">Xerox</MenuItem>
-                  </Select>
-                </FormControl>
-                {renderPrintButton()}
-              </div>
+              <div className="flex items-center">{renderPrintButton()}</div>
             </div>
           }
         />
       )}
+
+      <Menu
+        id="terminated-letters-printer-menu"
+        anchorEl={printerMenuAnchorEl}
+        open={isPrinterMenuOpen}
+        onClose={handleClosePrinterMenu}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}>
+        <MenuItem onClick={() => handleSelectPrinter("default")}>Default</MenuItem>
+        <MenuItem onClick={() => handleSelectPrinter("xerox")}>Xerox</MenuItem>
+      </Menu>
 
       <Dialog
         open={isPrintDialogOpen}
@@ -164,12 +186,12 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
           <pre className="whitespace-pre-wrap font-mono text-xs">{printContent}</pre>
         </DialogContent>
         <DialogActions sx={{ paddingRight: "25px" }}>
-          <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
           <Button
             onClick={() => printTerminatedLetters(printContent, dialogTitle)}
             variant="contained">
             Print
           </Button>
+          <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </div>
