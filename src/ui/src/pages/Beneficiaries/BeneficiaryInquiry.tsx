@@ -1,4 +1,4 @@
-import { Divider, Grid } from "@mui/material";
+import { Box, Button, Divider, Grid } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLazyBeneficiarySearchFilterQuery } from "reduxstore/api/BeneficiariesApi";
@@ -29,6 +29,9 @@ const BeneficiaryInquiryContent = () => {
   const [memberDetails, setMemberDetails] = useState<EmployeeDetails | null>(null);
   const [isFetchingMemberDetails, setIsFetchingMemberDetails] = useState(false);
   const [hasSelectedMember, setHasSelectedMember] = useState(false);
+  const [selectionHistory, setSelectionHistory] = useState<
+    { member: BeneficiaryDetail; details: EmployeeDetails | null }[]
+  >([]);
   const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiaryDetail>>();
   const [memberType, setMemberType] = useState<number | undefined>(undefined);
   const [beneficiarySearchFilterRequest, setBeneficiarySearchFilterRequest] = useState<
@@ -49,6 +52,9 @@ const BeneficiaryInquiryContent = () => {
   const onBadgeClick = useCallback(
     (data: BeneficiaryDetail) => {
       if (data) {
+        if (selectedMember && (selectedMember.id !== data.id || selectedMember.psnSuffix !== data.psnSuffix)) {
+          setSelectionHistory((prev) => [...prev, { member: selectedMember, details: memberDetails }]);
+        }
         // Calculate memberType: psnSuffix 0 = employee (type 1), else beneficiary (type 2)
         const calculatedMemberType = data.psnSuffix === 0 ? 1 : 2;
 
@@ -72,8 +78,23 @@ const BeneficiaryInquiryContent = () => {
           });
       }
     },
-    [triggerMemberDetails, profitYear]
+    [triggerMemberDetails, profitYear, selectedMember, memberDetails]
   );
+
+  const handleBackToPrevious = useCallback(() => {
+    setSelectionHistory((prev) => {
+      if (prev.length === 0) {
+        return prev;
+      }
+
+      const last = prev[prev.length - 1];
+      setSelectedMember(last.member);
+      setMemberDetails(last.details);
+      setHasSelectedMember(true);
+
+      return prev.slice(0, -1);
+    });
+  }, []);
 
   const onSearch = useCallback(
     (res: Paged<BeneficiaryDetail> | undefined) => {
@@ -132,6 +153,7 @@ const BeneficiaryInquiryContent = () => {
     setMemberDetails(null);
     setHasSelectedMember(false);
     setMemberType(undefined);
+    setSelectionHistory([]);
     clearAlerts();
     search.reset();
   }, [search, clearAlerts]);
@@ -156,6 +178,9 @@ const BeneficiaryInquiryContent = () => {
             onSearch={(req) => {
               setBeneficiarySearchFilterRequest(req);
               setSelectedMember(null);
+              setMemberDetails(null);
+              setHasSelectedMember(false);
+              setSelectionHistory([]);
               search.reset();
             }}
             onReset={handleReset}
@@ -182,16 +207,31 @@ const BeneficiaryInquiryContent = () => {
         )}
 
         {hasSelectedMember && selectedMember && (
-          <IndividualBeneficiaryView
-            selectedMember={selectedMember}
-            memberDetails={memberDetails}
-            isFetchingMemberDetails={isFetchingMemberDetails}
-            profitYear={profitYear}
-            onBeneficiarySelect={(beneficiary) => {
-              setSelectedMember(beneficiary);
-              setHasSelectedMember(true);
-            }}
-          />
+          <>
+            {selectionHistory.length > 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  paddingX: "24px",
+                  paddingTop: "16px"
+                }}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleBackToPrevious}>
+                  Back to previous member
+                </Button>
+              </Box>
+            )}
+            <IndividualBeneficiaryView
+              selectedMember={selectedMember}
+              memberDetails={memberDetails}
+              isFetchingMemberDetails={isFetchingMemberDetails}
+              profitYear={profitYear}
+              onBeneficiarySelect={onBadgeClick}
+            />
+          </>
         )}
       </Grid>
     </Grid>
