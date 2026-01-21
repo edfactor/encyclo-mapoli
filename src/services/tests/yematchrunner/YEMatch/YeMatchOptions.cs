@@ -5,12 +5,22 @@
 /// </summary>
 public class YeMatchOptions
 {
+    
     public const string SectionName = "YeMatch";
 
     /// <summary>
     ///     Base directory for test data and logs. Defaults to /tmp/ye
     /// </summary>
     public string BaseDataDirectory { get; set; } = "/tmp/ye";
+
+    /// <summary>
+    ///     READY schema name used for database connection string lookup.
+    ///     Connection strings are retrieved from user secrets using the pattern:
+    ///     YeMatch:{ReadySchemaName}:ReadyConnectionString
+    ///     YeMatch:{ReadySchemaName}:SmartConnectionString
+    ///     Examples: "tbherrmann", "mtpr3"
+    /// </summary>
+    public string ReadySchemaName { get; set; } = "tbherrmann";
 
     /// <summary>
     ///     READY SSH host configuration
@@ -94,7 +104,12 @@ public class YearEndDatesOptions
     ///     Profit sharing year
     /// </summary>
     public short ProfitYear { get; set; } = 2025;
-
+    
+    /// <summary>
+    ///     Profit sharing year
+    /// </summary>
+    public int ProfitYearCalendarYearEnd { get; set; } = 20251231;
+    
     /// <summary>
     ///     First Saturday date (YYMMDD format)
     /// </summary>
@@ -110,8 +125,12 @@ public class YearEndDatesOptions
     /// </summary>
     public string CutOffSaturday { get; set; } = "260103";
 
+    public string PriorProfitYearCalendarStart { get; set; } = "240101";
+
+    public string PriorProfitYearCalendarEnd { get; set; } = "241231";
+
     /// <summary>
-    ///     More than five years ago date (YYMMDD format)
+    ///     More than five years ago date (YYMMDD format), used for termination processing
     /// </summary>
     public string MoreThanFiveYears { get; set; } = "181231";
 }

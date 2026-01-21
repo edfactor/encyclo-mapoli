@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -163,7 +164,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         return new Outcome(aname, name, "", OutcomeStatus.Ok, str, null, true);
     }
 
-    public class StartAndEndDateRequestLocal : StartAndEndDateRequest
+    public class StartAndEndDateRequestLocal : FilterableStartAndEndDateRequest
     {
         public DateOnly BeginningDate { get; set; }
         public DateOnly EndingDate { get; set; }
@@ -234,7 +235,8 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
 
     private async Task<Outcome> A11_Profit_Sharing_YTD_Wages_Extract(ApiClient apiClient, string aname, string name)
     {
-        ReportResponseBaseOfWagesCurrentYearResponse? r = await apiClient.ReportsYearEndWagesCurrentYearWagesEndpointAsync(_profitYear, "", null, null, null, int.MaxValue, null);
+        ReportResponseBaseOfWagesCurrentYearResponse? r =
+            await apiClient.ReportsYearEndWagesCurrentYearWagesEndpointAsync(_profitYear, false, "", null, null, null, int.MaxValue, null);
         return Ok(aname, name, $"Record Count: {r.Response.Results.Count}");
     }
 
@@ -243,7 +245,18 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
         TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "IT-DevOps");
 
-        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/itdevops/freeze")
+#if false
+        // try to use the nswag approach
+        SetFrozenStateRequest setFrozenStateRequest = new();
+        setFrozenStateRequest.AsOfDateTime = DateTimeOffset.ParseExact(
+            "2026-01-03T00:00:00-04:00",
+            "yyyy-MM-ddTHH:mm:sszzz",
+            CultureInfo.InvariantCulture);
+         FrozenStateResponse fsr = await apiClient.ItOperationsFreezeDemographicsEndpointAsync(null, setFrozenStateRequest);
+#else
+
+        // bail and do it old school.
+        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/it-devops/freeze")
         {
             Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2026-01-03T00:00:00-04:00\"}"
                 , Encoding.UTF8, "application/json")
@@ -254,6 +267,8 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         response.EnsureSuccessStatusCode();
 
         string responseBody = await response.Content.ReadAsStringAsync();
+#endif
+
 
         //        return Ok(aname, name, "Freeze");
         return new Outcome(aname, name, "Freeze on SMART", OutcomeStatus.Ok, "", null, true);
@@ -274,9 +289,11 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         return NOP(aname, name);
     }
 
-    private Task<Outcome> A15_Profit_sharing_YTD_Wages_Extract(ApiClient apiClient, string aname, string name)
+    private async Task<Outcome> A15_Profit_sharing_YTD_Wages_Extract(ApiClient apiClient, string aname, string name)
     {
-        return A11_Profit_Sharing_YTD_Wages_Extract(apiClient, aname, name);
+        ReportResponseBaseOfWagesCurrentYearResponse? r =
+            await apiClient.ReportsYearEndWagesCurrentYearWagesEndpointAsync(_profitYear, true, "", null, null, null, int.MaxValue, null);
+        return Ok(aname, name, $"Record Count: {r.Response.Results.Count}");
     }
 
     private static async Task<Outcome> A16_READY_screen_008_09(ApiClient apiClient, string aname, string name)
@@ -342,7 +359,6 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
 
         //return Ok(aname, name, "Update enrollment");
         return new Outcome(aname, name, "Update enrollment on SMART", OutcomeStatus.Ok, "", null, true);
-
     }
 
     private async Task<Outcome> A19_Get_Eligible_Employees(ApiClient apiClient, string aname, string name)
@@ -443,7 +459,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
         TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "Finance-Manager");
 
-        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/update-enrollment")
+        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/enrollments")
         {
             Content = new StringContent("{ \"profitYear\": " + TestConstants.OpenProfitYear + "}", Encoding.UTF8, "application/json")
         };
@@ -474,8 +490,9 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
 
     private static async Task<Outcome> A27_Prof_Share_by_Store(ApiClient apiClient, string aname, string name)
     {
-        ReportResponseBaseOfMemberYearSummaryDto? r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, 1, null, null, 2025, "", null, null, null, null, null);
-        return Ok(aname, name, $"records returned = {r.Response.Results.Count}");
+        /* We dont capture this yet var r = */
+        await apiClient.ReportsYearEndBreakdownEndpointAsync(false, 1, null, null, 2025, "", null, null, null, null, null);
+        return Ok(aname, name, $"Something?");
     }
 
     private static async Task<Outcome> A28_Print_Profit_Certs(ApiClient apiClient, string aname, string name)

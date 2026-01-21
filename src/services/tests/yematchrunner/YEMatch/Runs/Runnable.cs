@@ -183,7 +183,7 @@ public abstract class Runnable
         }
     }
 
-    private async Task RunInternal(List<IActivity> activitiesToRun, string runTxtPath)
+    private async Task RunInternal(List<IActivity> activitiesToRun, string runTextPath)
     {
         Stopwatch wholeRunStopWatch = Stopwatch.StartNew();
         TimeSpan? expectedRunTime = GetExpectedRunTime();
@@ -377,17 +377,16 @@ public abstract class Runnable
             wholeRunElapsed.Hours, wholeRunElapsed.Minutes, wholeRunElapsed.Seconds);
         Console.WriteLine($"\nCompleted in {wholeRunElapsed.Hours}h {wholeRunElapsed.Minutes}m {wholeRunElapsed.Seconds}s");
 
-        // Copy run.txt to golden directory if it exists
-        string goldenDir = $"{ReadyActivity.OptionalLocalResourceBase}golden";
-        if (Directory.Exists(goldenDir))
-        {
-            string goldenRunTxt = Path.Combine(goldenDir, "run.txt");
-            File.Copy(runTxtPath, goldenRunTxt, overwrite: true);
-            Logger.LogInformation("Run output copied to golden directory: {GoldenPath}", goldenRunTxt);
-            Console.WriteLine($"Run output saved to: {goldenRunTxt}");
-        }
+        Completed(runTextPath);
 
         Process.Start("afplay", "/System/Library/Sounds/Submarine.aiff");
+    }
+    
+    /// <summary>
+    ///     Called when the run completes. Override in derived classes for custom completion behavior.
+    /// </summary>
+    protected virtual void Completed(string runTextPath)
+    {
     }
 
     /// <summary>

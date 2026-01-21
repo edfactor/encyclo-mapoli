@@ -12,7 +12,9 @@ internal static class TestActivityFactory
         SshClient? sshClient = null,
         SftpClient? sftpClient = null,
         bool isNewScramble = true,
-        ApiClient? apiClient = null)
+        ApiClient? apiClient = null,
+        string schemaName = "tbherrmann"
+        )
     {
         List<IActivity> activities =
         [
@@ -43,7 +45,7 @@ internal static class TestActivityFactory
         // Only add ReadyActivity if SSH clients are provided
         if (sshClient is not null && sftpClient is not null)
         {
-            activities.Add(new ReadyActivity(sshClient, sftpClient, "MasterInquiryDumper", "THA-8-10", "", dataDirectory));
+            activities.Add(new ReadyActivity(sshClient, sftpClient, "MasterInquiryDumper", "THA-8-10", "", dataDirectory, schemaName));
         }
 
         return activities;

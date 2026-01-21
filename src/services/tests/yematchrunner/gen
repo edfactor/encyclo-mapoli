@@ -8,3 +8,9 @@ nswag openapi2csclient /classname:ApiClient /namespace:YEMatch /input:https://lo
 # this makes the swagger endpoint names less wordy
 sed -i '' "s/DemoulasProfitSharingEndpointsEndpoints//g" YEMatch/SmartActivities/ApiClient.cs
 
+
+sed -i '' 's/list`1/list1/g' YEMatch/SmartActivities/ApiClient.cs
+
+sed -i '' 's/public abstract partial class/public class/g' YEMatch/SmartActivities/ApiClient.cs
+
+

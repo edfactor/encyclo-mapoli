@@ -24,8 +24,8 @@ public class UpdateNavigation : BaseActivity
     private async Task MarkComplete(short page)
     {
         ApiClient apiClient = ApiClient;
-        UpdateNavigationRequestDto req = new() { NavigationId = page, StatusId = 4 /* Complete */ };
-        UpdateNavigationStatusResponseDto res = await apiClient.NavigationsUpdateNavigationStatusEndpointAsync(null, req);
+        UpdateNavigationRequest req = new() { NavigationId = page, StatusId = 4 /* Complete */ };
+        UpdateNavigationStatusResponse res = await apiClient.DemoulasCommonApiEndpointsNavigationsUpdateNavigationStatusEndpointAsync(null, req);
         res.IsSuccessful.ShouldBeTrue();
     }
 }
