@@ -70,7 +70,13 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
                             zero_contribution_reason_id,
                             points_earned,
                             PS_CERTIFICATE_ISSUED_DATE,
-                            ENROLLMENT_ID
+                             CASE
+                            WHEN VESTING_SCHEDULE_ID = 1 AND HAS_FORFEITED = 0 THEN 1
+                            WHEN VESTING_SCHEDULE_ID = 2 AND HAS_FORFEITED = 0 THEN 2
+                            WHEN VESTING_SCHEDULE_ID = 1 AND HAS_FORFEITED = 1 THEN 3
+                            WHEN VESTING_SCHEDULE_ID = 2 AND HAS_FORFEITED = 1 THEN 4
+                            ELSE 0
+                        END AS PY_PS_ENROLLED  
                         FROM
                                  pay_profit pp
                             JOIN demographic d ON pp.demographic_id = d.id

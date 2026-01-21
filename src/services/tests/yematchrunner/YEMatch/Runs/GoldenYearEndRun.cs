@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Management;
 using Microsoft.Extensions.Logging;
 using YEMatch.Activities;
 using YEMatch.ReadyActivities;
@@ -26,14 +27,14 @@ public class GoldenYearEndRun : Runnable
     {
         // Generate the Golden files.  Run READY from Frozen to the YE Completed.
         await Run(Specify(
-            R00_BuildDatabase, // import obfuscated 
+            R00_BuildDatabase, // import obfuscated
             DropBadBenesReady,
             R01_CleanUpReports,
             R02_MilitaryAndRehire,
             R03_ProfTermination,
             R04_ProfShareLoanBalance,
             R05_ExtractExecutiveHoursAndDollars,
-            R06_ClearExecutiveHoursAndDollars,
+            // R06_ClearExecutiveHoursAndDollars  !!! We keep the exec hours and dollars on SMART by default!
             R07_ReadyScreen00809,
             R08_ProfitShareReport,
             R09_YEOraclePayrollProcessing, // does nothing
@@ -59,5 +60,19 @@ public class GoldenYearEndRun : Runnable
             R27_ProfShareByStore
         // R28_PrintProfitCerts -- This poops out over not having an input file
         ));
+    }
+
+    // The run.txt file keeps a copy of what READY command were run with what parameters and how long each took.
+    protected override void Completed(string runTextPath)
+    {
+        // Copy run.txt to golden directory if it exists
+        string goldenDir = $"{ReadyActivity.OptionalLocalResourceBase}golden";
+        if (Directory.Exists(goldenDir))
+        {
+            string goldenRunTxt = Path.Combine(goldenDir, "golden-run.txt");
+            File.Copy(runTextPath, goldenRunTxt, overwrite: true);
+            Logger.LogInformation("Run output copied to golden directory: {GoldenPath}", goldenRunTxt);
+            Console.WriteLine($"Run output saved to: {goldenRunTxt}");
+        }
     }
 }
