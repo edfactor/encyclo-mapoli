@@ -13,6 +13,9 @@ internal sealed class TaxCodeMap : IEntityTypeConfiguration<TaxCode>
 
         builder.Property(x => x.Id).IsRequired().ValueGeneratedNever().HasColumnName("ID");
         builder.Property(x => x.Name).IsRequired().HasMaxLength(128).HasColumnName("NAME");
+        builder.Property(x => x.IsAvailableForDistribution).HasColumnName("IS_AVAILABLE_DISTRIBUTION");
+        builder.Property(x => x.IsAvailableForForfeiture).HasColumnName("IS_AVAILABLE_FORFEITURE");
+        builder.Property(x => x.IsProtected).HasColumnName("ISPROTECTED");
         builder.HasData(GetPredefinedTaxCodes());
     }
 

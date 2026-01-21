@@ -9,7 +9,7 @@ using YEMatch.Activities;
 namespace YEMatch.ReadyActivities;
 
 [SuppressMessage("Major Code Smell", "S6966:Awaitable method should be used")]
-public class ReadyActivity(SshClient client, SftpClient sftpClient, string AName, string ksh, string _args, string dataDirectory) : IActivity
+public class ReadyActivity(SshClient client, SftpClient sftpClient, string AName, string ksh, string _args, string dataDirectory, string schemaName = "tbherrmann") : IActivity
 {
     public const string OptionalLocalResourceBase = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/";
     private const bool UpdateIntegrationTestResources = true;
@@ -40,8 +40,10 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, string AName
         Stopwatch stopwatch = Stopwatch.StartNew();
         SshCommand? result = null;
         // Translates the production paths to safe development paths
+        // WARNING!!! This assumes printers are disabled via ~/bin/lp and ~/bin/dcclp and these are early in the $PATH
+        // The schema-specific script (e.g., ~/settbherrmann or ~/setmtpr3) sets up environment variables for the target schema
         string rawCommand =
-            $". ~/setyematch;sed -e's|/production/|/dsmdev/data/PAYROLL/tmp-yematch/|g' jcl/{ksh}.ksh > jcl/YE-{ksh}.ksh;chmod +x jcl/YE-{ksh}.ksh;EJR YE-{ksh} {Args}";
+            $". ~/setyematch;. set{schemaName};. setpay;sed -e's|/production/|/dsmdev/data/PAYROLL/tmp-yematch/|g' jcl/{ksh}.ksh > jcl/YE-{ksh}.ksh;chmod +x jcl/YE-{ksh}.ksh;EJR YE-{ksh} {Args}";
         try
         {
             result = client.RunCommand(rawCommand);

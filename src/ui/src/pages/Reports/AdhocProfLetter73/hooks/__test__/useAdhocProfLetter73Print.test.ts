@@ -145,7 +145,8 @@ describe("useAdhocProfLetter73Print", () => {
     await waitFor(() => {
       expect(mockTriggerDownload).toHaveBeenCalledWith({
         profitYear: 2023,
-        badgeNumbers: ["123456", "789012"]
+        badgeNumbers: ["123456", "789012"],
+        isXerox: false
       });
     });
   });
@@ -195,7 +196,8 @@ describe("useAdhocProfLetter73Print", () => {
     await waitFor(() => {
       expect(mockTriggerDownload).toHaveBeenCalledWith({
         profitYear: 2023,
-        badgeNumbers: ["123456", "789012"]
+        badgeNumbers: ["123456", "789012"],
+        isXerox: false
       });
     });
   });

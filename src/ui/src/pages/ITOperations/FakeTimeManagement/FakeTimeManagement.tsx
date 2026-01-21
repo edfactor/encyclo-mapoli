@@ -2,26 +2,30 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
-    Alert,
-    AlertTitle,
-    Box,
-    Button,
-    Card,
-    CardContent,
-    Checkbox,
-    CircularProgress,
-    Divider,
-    FormControlLabel,
-    Grid,
-    TextField,
-    Typography
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  CircularProgress,
+  Divider,
+  FormControlLabel,
+  Grid,
+  TextField,
+  Typography
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Page } from "smart-ui-library";
 import { PageErrorBoundary } from "../../../components/PageErrorBoundary";
 import { CAPTIONS } from "../../../constants";
-import { useGetFakeTimeStatusQuery, useSetFakeTimeMutation, useValidateFakeTimeMutation } from "../../../reduxstore/api/ItOperationsApi";
+import {
+  useGetFakeTimeStatusQuery,
+  useSetFakeTimeMutation,
+  useValidateFakeTimeMutation
+} from "../../../reduxstore/api/ItOperationsApi";
 import { FakeTimeStatusResponse, SetFakeTimeRequest } from "../../../reduxstore/types";
 
 interface FakeTimeFormValues {

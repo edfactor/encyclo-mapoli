@@ -435,11 +435,16 @@ export function DSMPaginatedGrid<T = unknown>({
 
       {showPagination && (
         <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => handlePageNumberChange(value - 1)}
-          pageSize={pageSize}
-          setPageSize={handlePageSizeChange}
           recordCount={totalRecords}
+          defaultPagination={{ skip: pageNumber, take: pageSize }}
+          onPaginationChanged={(params) => {
+            if (params.take !== pageSize) {
+              handlePageSizeChange(params.take);
+            }
+            if (params.skip !== pageNumber) {
+              handlePageNumberChange(params.skip);
+            }
+          }}
           {...(rowsPerPageOptions && { rowsPerPageOptions })}
         />
       )}

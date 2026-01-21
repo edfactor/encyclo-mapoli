@@ -44,38 +44,46 @@ const ManageBanks = () => {
 
   return (
     <Page label={CAPTIONS.MANAGE_BANKS}>
-      <Stack spacing={2} sx={{ height: "100%" }}>
+      <Stack
+        spacing={2}
+        sx={{ height: "100%" }}>
         <Paper sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue, null)}>
+          <Tabs
+            value={activeTab}
+            onChange={(_, newValue) => setActiveTab(newValue, null)}>
             <Tab label="Banks" />
-            <Tab label="Bank Accounts" disabled={selectedBank === null} />
+            <Tab
+              label="Bank Accounts"
+              disabled={selectedBank === null}
+            />
           </Tabs>
         </Paper>
 
         {activeTab === 0 && (
-          <Stack spacing={2} sx={{ height: "100%" }}>
-            <Stack direction="row" spacing={2}>
+          <Stack
+            spacing={2}
+            sx={{ height: "100%" }}>
+            <Stack
+              direction="row"
+              spacing={2}>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={openCreateDialog}
-              >
+                onClick={openCreateDialog}>
                 Create New Bank
               </Button>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleSave}
-                disabled={!hasUnsavedChanges || isSaving}
-              >
+                disabled={!hasUnsavedChanges || isSaving}>
                 {isSaving ? "Saving..." : "Save Changes"}
               </Button>
               <Button
                 variant="outlined"
                 color="secondary"
                 onClick={handleDiscard}
-                disabled={!hasUnsavedChanges || isSaving}
-              >
+                disabled={!hasUnsavedChanges || isSaving}>
                 Discard Changes
               </Button>
             </Stack>
@@ -95,8 +103,8 @@ const ManageBanks = () => {
         )}
 
         {activeTab === 1 && (
-          <ManageBankAccounts 
-            bankId={selectedBank?.id ?? null} 
+          <ManageBankAccounts
+            bankId={selectedBank?.id ?? null}
             bankName={selectedBank?.name ?? null}
           />
         )}

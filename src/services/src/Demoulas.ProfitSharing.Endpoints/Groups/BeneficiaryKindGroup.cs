@@ -6,8 +6,8 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class BeneficiaryKindGroup : GroupBase
 {
-    protected override string Route => "beneficiaryKind";
-    protected override string RouteName => "Beneficiary Kind";
+    protected override string Route => "beneficiary-kinds";
+    protected override string RouteName => "Beneficiary Kinds";
 
     public BeneficiaryKindGroup()
     {

@@ -27,7 +27,7 @@ public sealed class GetFakeTimeStatusEndpoint : ProfitSharingResponseEndpoint<Fa
 
     public override void Configure()
     {
-        Get("itdevops/fake-time/status");
+        Get("it-devops/fake-time/status");
         Summary(s =>
         {
             s.Summary = "Gets the current fake time status and configuration";

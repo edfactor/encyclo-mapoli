@@ -16,7 +16,7 @@ public class DeleteBeneficiaryContactEndpoint : ProfitSharingEndpoint<IdRequest,
 
     public override void Configure()
     {
-        Delete("contact/{Id}");
+        Delete("contact/{id}");
         Summary(s =>
         {
             s.Summary = "Deletes a beneficiary contact";

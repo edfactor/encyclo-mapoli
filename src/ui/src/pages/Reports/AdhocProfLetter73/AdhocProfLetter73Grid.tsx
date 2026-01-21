@@ -1,10 +1,12 @@
 import { Print } from "@mui/icons-material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import {
   Alert,
   Box,
   Button,
+  ButtonGroup,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -12,6 +14,8 @@ import {
   DialogTitle,
   Grid,
   IconButton,
+  Menu,
+  MenuItem,
   Tooltip,
   Typography
 } from "@mui/material";
@@ -35,14 +39,32 @@ interface AdhocProfLetter73GridProps {
 }
 
 const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
-  const { filterParams, onLoadingChange, isGridExpanded = false, onToggleExpand } = props;
+  const { filterParams, onLoadingChange, isGridExpanded = false, onToggleExpand, searchTrigger } = props;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [columnDefs, setColumnDefs] = useState<ColDef[]>([]);
   const [rowData, setRowData] = useState<Record<string, unknown>[]>([]);
   const [selectedRows, setSelectedRows] = useState<Record<string, unknown>[]>([]);
+  const [isXerox, setIsXerox] = useState(false);
+  const [printerMenuAnchorEl, setPrinterMenuAnchorEl] = useState<null | HTMLElement>(null);
 
   // Allow nullable filterParams; derive profitYear defensively
   const profitYear = filterParams?.profitYear?.getFullYear() || 0;
+  const printModeLabel = isXerox ? "Xerox" : "Default";
+  const dialogTitle = `Print Preview - Prof Letter 73 (${printModeLabel})`;
+  const isPrinterMenuOpen = Boolean(printerMenuAnchorEl);
+
+  const handleOpenPrinterMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setPrinterMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePrinterMenu = () => {
+    setPrinterMenuAnchorEl(null);
+  };
+
+  const handleSelectPrinter = (value: "default" | "xerox") => {
+    setIsXerox(value === "xerox");
+    handleClosePrinterMenu();
+  };
 
   // Keep last successful API response so we can display previous data while fetching
   const lastApiRef = useRef<AdhocProfLetter73Response | null>(null);
@@ -56,7 +78,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
     printFormLetter,
     error: printError,
     clearError
-  } = useAdhocProfLetter73Print(filterParams ?? null, selectedRows);
+  } = useAdhocProfLetter73Print(filterParams ?? null, selectedRows, isXerox);
 
   const [trigger, { data: apiData, isFetching, error, isError }] = useLazyGetAdhocProfLetter73Query();
 
@@ -85,7 +107,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
       }
     });
 
-  // Trigger API call when profitYear or DeMinimusValue changes (initial load)
+  // Trigger API call when profitYear, DeMinimusValue, or searchTrigger changes (initial load and re-search)
   useEffect(() => {
     if (profitYear > 0) {
       const apiParams = {
@@ -98,7 +120,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
       };
       trigger(apiParams);
     }
-  }, [profitYear, filterParams?.DeMinimusValue, trigger, pageNumber, pageSize, sortParams]);
+  }, [profitYear, filterParams?.DeMinimusValue, trigger, pageNumber, pageSize, sortParams, searchTrigger]);
 
   useEffect(() => {
     onLoadingChange?.(isFetching);
@@ -278,16 +300,30 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
                 title={selectedRows.length === 0 ? "You must check at least one box" : "Print Prof Letter 73"}
                 placement="top">
                 <span>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="medium"
-                    startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
-                    onClick={handlePrint}
-                    disabled={isDownloading || selectedRows.length === 0}
-                    sx={{ marginLeft: 2, marginRight: "20px" }}>
-                    {isDownloading ? "Generating..." : "Print"}
-                  </Button>
+                  <div className="flex items-center">
+                    <ButtonGroup
+                      variant="outlined"
+                      color="primary"
+                      size="medium"
+                      className="ml-2 mr-5">
+                      <Button
+                        startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
+                        onClick={handlePrint}
+                        disabled={isDownloading || selectedRows.length === 0}
+                        className="whitespace-nowrap">
+                        {isDownloading ? "Generating..." : "Print"}
+                      </Button>
+                      <Button
+                        onClick={handleOpenPrinterMenu}
+                        aria-label="Select printer"
+                        aria-controls={isPrinterMenuOpen ? "adhoc-prof-letter73-printer-menu" : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={isPrinterMenuOpen ? "true" : undefined}
+                        className="min-w-0 px-2">
+                        <ArrowDropDownIcon />
+                      </Button>
+                    </ButtonGroup>
+                  </div>
                 </span>
               </Tooltip>
               {onToggleExpand && (
@@ -309,12 +345,16 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
 
           {(() => {
             const displayApi = apiData ?? lastApiRef.current;
-            const displayRows = apiData ? rowData : displayApi?.results ?? [];
+            const displayRows = apiData ? rowData : (displayApi?.results ?? []);
 
             // If we're fetching and have no prior data, show spinner
             if (isFetching && !displayApi) {
               return (
-                <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  py={4}>
                   <CircularProgress />
                 </Box>
               );
@@ -362,22 +402,33 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
             return null;
           })()}
 
+          <Menu
+            id="adhoc-prof-letter73-printer-menu"
+            anchorEl={printerMenuAnchorEl}
+            open={isPrinterMenuOpen}
+            onClose={handleClosePrinterMenu}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}>
+            <MenuItem onClick={() => handleSelectPrinter("default")}>Default</MenuItem>
+            <MenuItem onClick={() => handleSelectPrinter("xerox")}>Xerox</MenuItem>
+          </Menu>
+
           <Dialog
             open={isPrintDialogOpen}
             onClose={() => setIsPrintDialogOpen(false)}
             maxWidth="lg"
             fullWidth>
-            <DialogTitle>Print Preview - Prof Letter 73</DialogTitle>
+            <DialogTitle>{dialogTitle}</DialogTitle>
             <DialogContent>
-              <pre style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "12px" }}>{printContent}</pre>
+              <pre className="whitespace-pre-wrap font-mono text-xs">{printContent}</pre>
             </DialogContent>
             <DialogActions sx={{ paddingRight: "25px" }}>
-              <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
               <Button
-                onClick={() => printFormLetter(printContent)}
+                onClick={() => printFormLetter(printContent, dialogTitle)}
                 variant="contained">
                 Print
               </Button>
+              <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
             </DialogActions>
           </Dialog>
         </div>

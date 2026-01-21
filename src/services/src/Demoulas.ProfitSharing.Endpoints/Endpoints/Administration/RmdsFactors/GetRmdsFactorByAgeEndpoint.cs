@@ -23,7 +23,7 @@ public sealed class GetRmdsFactorByAgeEndpoint
 
     public override void Configure()
     {
-        Get("rmds-factors/{Age}");
+        Get("rmds-factors/{age}");
 
         Summary(s =>
         {

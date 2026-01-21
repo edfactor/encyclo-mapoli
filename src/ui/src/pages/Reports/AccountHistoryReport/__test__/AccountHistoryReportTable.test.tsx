@@ -9,8 +9,7 @@ interface DSMGridProps {
 }
 
 interface PaginationProps {
-  pageNumber?: number;
-  pageSize?: number;
+  defaultPagination?: { skip: number; take: number };
   recordCount?: number;
 }
 
@@ -19,9 +18,9 @@ vi.mock("smart-ui-library", () => ({
   DSMGrid: ({ providedOptions }: DSMGridProps) => (
     <div data-testid="dsm-grid">{providedOptions?.rowData?.length ?? 0} rows</div>
   ),
-  Pagination: ({ pageNumber, pageSize, recordCount }: PaginationProps) => (
+  Pagination: ({ defaultPagination, recordCount }: PaginationProps) => (
     <div data-testid="pagination">
-      Page {pageNumber}, Size {pageSize}, Total {recordCount}
+      Page {defaultPagination?.skip}, Size {defaultPagination?.take}, Total {recordCount}
     </div>
   )
 }));

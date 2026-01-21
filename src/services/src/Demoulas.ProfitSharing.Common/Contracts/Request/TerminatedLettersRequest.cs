@@ -7,6 +7,7 @@ public record TerminatedLettersRequest : ProfitYearRequest
     public bool? ExcludeZeroBalance { get; set; }
 
     public List<int>? BadgeNumbers { get; set; }
+    public bool IsXerox { get; set; }
 
     public static new TerminatedLettersRequest RequestExample()
     {
@@ -19,7 +20,8 @@ public record TerminatedLettersRequest : ProfitYearRequest
             Take = 10,
             SortBy = "BadgeNumber",
             IsSortDescending = false,
-            BadgeNumbers = new List<int> { 1234567, 2345678 }
+            BadgeNumbers = new List<int> { 1234567, 2345678 },
+            IsXerox = false
         };
     }
 }

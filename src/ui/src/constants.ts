@@ -78,6 +78,7 @@ export const ROUTES = {
   MANAGE_RMD_FACTORS: "manage-rmd-factors",
   MANAGE_COMMENT_TYPES: "manage-comment-types",
   MANAGE_BANKS: "manage-banks",
+  MANAGE_TAX_CODES: "manage-tax-codes",
   PROFIT_SHARING_ADJUSTMENTS: "profit-sharing-adjustments",
   AUDIT_SEARCH: "audit-search",
   ORACLE_HCM_DIAGNOSTICS: "oracle-hcm-diagnostics",
@@ -205,6 +206,9 @@ export const CAPTIONS = {
 
   MANAGE_COMMENT_TYPES: "Manage Comment Types",
   MANAGE_COMMENT_TYPES_SHORT: "Manage Comment Types",
+
+  MANAGE_TAX_CODES: "Manage Tax Codes",
+  MANAGE_TAX_CODES_SHORT: "Manage Tax Codes",
 
   PROFIT_SHARING_ADJUSTMENTS: "Profit Sharing Adjustments (008-22)",
   PROFIT_SHARING_ADJUSTMENTS_SHORT: "Profit Sharing Adjustments",
@@ -494,6 +498,7 @@ export const GRID_KEYS = {
   MANAGE_COMMENT_TYPES: "MANAGE-COMMENT-TYPES",
   MANAGE_BANKS: "MANAGE-BANKS",
   MANAGE_BANK_ACCOUNTS: "MANAGE-BANK-ACCOUNTS",
+  MANAGE_TAX_CODES: "MANAGE-TAX-CODES",
   PROFIT_SHARING_ADJUSTMENTS: "PROFIT-SHARING-ADJUSTMENTS",
 
   // Distributions

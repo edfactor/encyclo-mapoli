@@ -33,6 +33,7 @@ export const GetProfitShareForfeitColumns = (options: ForfeitColumnsOptions): Co
         field: "forfeitures"
       }),
       {
+        headerClass: "left-align",
         cellRenderer: ForfeituresCellRenderer,
         cellRendererParams: {
           onValidationClick
@@ -47,6 +48,18 @@ export const GetProfitShareForfeitColumns = (options: ForfeitColumnsOptions): Co
     createCountColumn({
       headerName: "Earnings Points",
       field: "earningPoints"
-    })
+    }),
+    {
+      headerName: "",
+      colId: "spacer",
+      field: "spacer",
+      sortable: false,
+      resizable: false,
+      suppressHeaderMenuButton: true,
+      filter: false,
+      editable: false,
+      flex: 1,
+      valueGetter: () => ""
+    }
   ];
 };

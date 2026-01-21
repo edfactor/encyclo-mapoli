@@ -5,8 +5,8 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class ProfitDetailsGroup : GroupBase
 {
-    protected override string RouteName => "ProfitDetails";
-    protected override string Route => "profitdetails";
+    protected override string RouteName => "Profit Details";
+    protected override string Route => "profit-details";
 
     public ProfitDetailsGroup()
     {

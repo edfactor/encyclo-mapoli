@@ -52,10 +52,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     (state: RootState) => state.yearsEnd
   );
   const cachedDistributions = useCachedPrevious(distributionsAndForfeitures ?? null);
-  const displayResults = useMemo(
-    () => cachedDistributions?.response?.results ?? [],
-    [cachedDistributions]
-  );
+  const displayResults = useMemo(() => cachedDistributions?.response?.results ?? [], [cachedDistributions]);
   const displayTotal = useMemo(() => cachedDistributions?.response?.total ?? 0, [cachedDistributions]);
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
@@ -285,20 +282,18 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                             </tr>
                           </thead>
                           <tbody>
-                            {Object.entries(cachedDistributions.stateTaxTotals).map(
-                              ([state, total], index, array) => (
-                                <tr key={state}>
-                                  <td
-                                    className={`whitespace-nowrap px-2 py-2 text-left ${index < array.length - 1 ? "border-b border-gray-100" : ""}`}>
-                                    {state}
-                                  </td>
-                                  <td
-                                    className={`whitespace-nowrap px-2 py-2 text-right ${index < array.length - 1 ? "border-b border-gray-100" : ""}`}>
-                                    {numberToCurrency(total as number)}
-                                  </td>
-                                </tr>
-                              )
-                            )}
+                            {Object.entries(cachedDistributions.stateTaxTotals).map(([state, total], index, array) => (
+                              <tr key={state}>
+                                <td
+                                  className={`whitespace-nowrap px-2 py-2 text-left ${index < array.length - 1 ? "border-b border-gray-100" : ""}`}>
+                                  {state}
+                                </td>
+                                <td
+                                  className={`whitespace-nowrap px-2 py-2 text-right ${index < array.length - 1 ? "border-b border-gray-100" : ""}`}>
+                                  {numberToCurrency(total as number)}
+                                </td>
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>

@@ -15,8 +15,8 @@ import { useGetFakeTimeStatusQuery } from "reduxstore/api/ItOperationsApi";
  */
 export const useFakeTimeAwareDate = (): Date => {
   const { data: fakeTimeStatus } = useGetFakeTimeStatusQuery(undefined, {
-    // Poll every 60 seconds to stay in sync with FakeTimeBanner
-    pollingInterval: 60000,
+    // Poll every 120 seconds to stay in sync with FakeTimeBanner
+    pollingInterval: 120000,
     // Skip if no token (handled by API internally)
     skip: false
   });
@@ -63,7 +63,7 @@ export const useFakeTimeAwareYear = (): number => {
  */
 export const useFakeTimeStatus = () => {
   const { data: fakeTimeStatus } = useGetFakeTimeStatusQuery(undefined, {
-    pollingInterval: 60000,
+    pollingInterval: 120000,
     skip: false
   });
 

@@ -1,0 +1,155 @@
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
+using Microsoft.EntityFrameworkCore;
+
+namespace Demoulas.ProfitSharing.Services.Services.Reports
+{
+    public class PayrollDuplicateSsnReportService : IPayrollDuplicateSsnReportService
+    {
+        private readonly IProfitSharingDataContextFactory _dataContextFactory;
+        private readonly IDemographicReaderService _demographicReaderService;
+        private readonly ICalendarService _calendarService;
+        private readonly TimeProvider _timeProvider;
+
+        public PayrollDuplicateSsnReportService(IProfitSharingDataContextFactory dataContextFactory,
+            IDemographicReaderService demographicReaderService,
+            ICalendarService calendarService,
+            TimeProvider timeProvider)
+        {
+            _dataContextFactory = dataContextFactory;
+            _demographicReaderService = demographicReaderService;
+            _calendarService = calendarService;
+            _timeProvider = timeProvider;
+        }
+
+        public Task<bool> DuplicateSsnExistsAsync(CancellationToken ct)
+        {
+            return _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+
+                IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
+
+                return await GetDuplicateSsnQuery(demographics).AnyAsync(ct);
+
+            }, ct);
+        }
+
+        public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(SortedPaginationRequestDto req, CancellationToken ct)
+        {
+            return _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                short cutoffYear = (short)(_timeProvider.GetUtcNow().Year - 5);
+                var cal = await _calendarService.GetYearStartAndEndAccountingDatesAsync(cutoffYear, ct);
+                var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
+
+                var dupSsns = await GetDuplicateSsnQuery(demographics).ToHashSetAsync(ct);
+
+                var sortTmp = req.SortBy?.ToLowerInvariant() switch
+                {
+                    "address" => "street,city,state,postalcode",
+                    _ => req.SortBy,
+                };
+
+                var sortReq = req with { SortBy = sortTmp };
+
+                var data = await demographics
+                    .Include(x => x.EmploymentStatus)
+                    .Where(dem => dupSsns.Contains(dem.Ssn))
+                    .OrderBy(d => d.Ssn)
+                    .Select(dem => new
+                    {
+                        dem.BadgeNumber,
+                        dem.Ssn,
+                        Name = dem.ContactInfo.FullName,
+                        dem.Address.Street,
+                        dem.Address.City,
+                        dem.Address.State,
+                        dem.Address.PostalCode,
+                        CountryIso = Country.Constants.Us,
+                        dem.HireDate,
+                        dem.TerminationDate,
+                        RehireDate = dem.ReHireDate,
+                        Status = dem.EmploymentStatusId,
+                        EmploymentStatusName = dem.EmploymentStatus!.Name,
+                        dem.StoreNumber,
+                        IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
+                        ProfitSharingRecords = dem.PayProfits.Count(pp => pp.ProfitYear >= cutoffYear),
+                        PayProfits = dem.PayProfits
+                            .Where(pp => pp.ProfitYear >= cutoffYear)
+                            .OrderByDescending(pp => pp.ProfitYear)
+                            .Select(pp => new PayProfitResponseDto
+                            {
+                                DemographicId = pp.DemographicId,
+                                ProfitYear = pp.ProfitYear,
+                                CurrentHoursYear = pp.CurrentHoursYear,
+                                CurrentIncomeYear = pp.CurrentIncomeYear,
+                                WeeksWorkedYear = pp.WeeksWorkedYear,
+                                LastUpdate = pp.ModifiedAtUtc == null ? pp.CreatedAtUtc : pp.ModifiedAtUtc.Value,
+                                PointsEarned = pp.PointsEarned
+                            }).ToList()
+                    })
+                    .ToPaginationResultsAsync(sortReq, ct);
+
+
+
+                DateTimeOffset endDate = DateTimeOffset.UtcNow;
+                if (data.Results.Any())
+                {
+                    endDate = data.Results.SelectMany(r => r.PayProfits.Select(p => p.LastUpdate)).Max();
+                }
+
+                return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
+                {
+                    ReportName = "Duplicate SSNs on Demographics",
+                    StartDate = cal.FiscalBeginDate,
+                    EndDate = endDate.ToDateOnly(),
+                    Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<PayrollDuplicateSsnResponseDto>
+                    {
+                        Total = data.Total,
+                        Results = data.Results.Select(x => new PayrollDuplicateSsnResponseDto()
+                        {
+                            BadgeNumber = x.BadgeNumber,
+                            Ssn = x.Ssn.MaskSsn(),
+                            Name = x.Name,
+                            Address = new AddressResponseDto
+                            {
+                                Street = x.Street,
+                                City = x.City,
+                                State = x.State,
+                                PostalCode = x.PostalCode,
+                                CountryIso = x.CountryIso
+                            },
+                            HireDate = x.HireDate,
+                            TerminationDate = x.TerminationDate,
+                            CurrentHourYears = x.PayProfits.OrderByDescending(x => x.LastUpdate).Select(x => x.CurrentHoursYear).FirstOrDefault(),
+                            RehireDate = x.RehireDate,
+                            Status = x.Status == EmploymentStatus.Constants.Active ? 'A' : 'T',
+                            EmploymentStatusName = x.EmploymentStatusName,
+                            StoreNumber = x.StoreNumber,
+                            ProfitSharingRecords = x.ProfitSharingRecords,
+                            PayProfits = x.PayProfits,
+                            IsExecutive = x.IsExecutive
+                        }).ToList()
+                    },
+                };
+            }, ct);
+        }
+
+
+        private static IQueryable<int> GetDuplicateSsnQuery(IQueryable<Demographic> demographics)
+        {
+            return demographics
+                .GroupBy(x => x.Ssn)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key);
+        }
+    }
+}

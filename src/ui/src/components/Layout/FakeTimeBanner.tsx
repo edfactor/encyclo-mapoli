@@ -14,10 +14,10 @@ import { RootState } from "../../reduxstore/store";
 export const FakeTimeBanner: React.FC = () => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
 
-  // Poll every 60 seconds to detect changes (requires app restart to change)
+  // Poll every 120 seconds to detect changes (requires app restart to change)
   // Skip API call if user is not authenticated
   const { data: fakeTimeStatus, isLoading } = useGetFakeTimeStatusQuery(undefined, {
-    pollingInterval: 60000,
+    pollingInterval: 120000,
     skip: !hasToken
   });
 

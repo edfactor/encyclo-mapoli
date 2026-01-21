@@ -22,7 +22,7 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
 
     public override void Configure()
     {
-        Post("master-inquiry/member");
+        Post("members");
         Summary(s =>
         {
             s.Summary = "Returns detailed information for a specific profit sharing member.";

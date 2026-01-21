@@ -148,7 +148,7 @@ export const YearsEndApi = createApi({
   endpoints: (builder) => ({
     updateExecutiveHoursAndDollars: builder.mutation({
       query: ({ ...rest }) => ({
-        url: `yearend/executive-hours`,
+        url: "year-end/executive-hours",
         method: "PUT",
         body: rest
       })
@@ -158,14 +158,14 @@ export const YearsEndApi = createApi({
     }),
     updateEnrollment: builder.mutation<void, ProfitYearRequest>({
       query: (params) => ({
-        url: `yearend/enrollments`,
+        url: "year-end/enrollments",
         method: "POST",
         body: params
       })
     }),
     getDuplicateSSNs: builder.query<PagedReportResponse<DuplicateSSNDetail>, DuplicateSSNsRequestDto>({
       query: (params) => ({
-        url: `yearend/duplicate-ssns`,
+        url: "year-end/duplicate-ssns",
         method: "GET",
         params: {
           take: params.pagination.take,
@@ -189,7 +189,7 @@ export const YearsEndApi = createApi({
       DemographicBadgesNotInPayprofitRequestDto
     >({
       query: (params) => ({
-        url: `yearend/demographic-badges-not-in-payprofit`,
+        url: "year-end/demographic-badges-not-in-payprofit",
         method: "GET",
         params: {
           take: params.pagination.take,
@@ -213,7 +213,7 @@ export const YearsEndApi = createApi({
       DistributionsAndForfeituresRequestDto & { archive?: boolean }
     >({
       query: (params) => {
-        const baseUrl = `yearend/distributions-and-forfeitures`;
+        const baseUrl = "year-end/distributions-and-forfeitures";
         const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
 
         return {
@@ -245,7 +245,7 @@ export const YearsEndApi = createApi({
       DuplicateNameAndBirthdayRequestDto
     >({
       query: (params) => ({
-        url: "yearend/duplicate-names-and-birthdays",
+        url: "year-end/duplicate-names-and-birthdays",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -267,7 +267,7 @@ export const YearsEndApi = createApi({
     }),
     refreshDuplicateNamesAndBirthdaysCache: builder.mutation<string, void>({
       query: () => ({
-        url: "yearend/duplicate-names-and-birthdays/refresh-cache",
+        url: "year-end/duplicate-names-and-birthdays/refresh-cache",
         method: "POST",
         body: {}
       })
@@ -281,7 +281,7 @@ export const YearsEndApi = createApi({
     }),
     getGrossWagesReport: builder.query<GrossWagesReportResponse, GrossWagesReportDto>({
       query: (params) => ({
-        url: "yearend/frozen/gross-wages",
+        url: "year-end/frozen/gross-wages",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -303,7 +303,7 @@ export const YearsEndApi = createApi({
     }),
     getUnForfeits: builder.query<PagedReportResponse<UnForfeit>, StartAndEndDateRequest & { archive?: boolean }>({
       query: (params) => {
-        const baseUrl = `yearend/unforfeitures/`;
+        const baseUrl = "year-end/unforfeitures/";
         const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
 
         return {
@@ -332,7 +332,7 @@ export const YearsEndApi = createApi({
     }),
     getMismatchedSSNsPayprofitAndDemoOnSameBadge: builder.query({
       query: (params) => ({
-        url: "yearend/mismatched-ssns-payprofit-and-demo-on-same-badge",
+        url: "year-end/mismatched-ssns-payprofit-and-demo-on-same-badge",
         method: "GET",
         params: {
           take: params.pagination.take,
@@ -354,7 +354,7 @@ export const YearsEndApi = createApi({
       NegativeEtvaForSSNsOnPayprofitRequestDto
     >({
       query: (params) => ({
-        url: "yearend/negative-evta-ssn",
+        url: "year-end/negative-evta-ssn",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -375,7 +375,7 @@ export const YearsEndApi = createApi({
     }),
     getPayprofitBadgeWithoutDemographics: builder.query({
       query: (params) => ({
-        url: "yearend/payprofit-badges-without-demographics",
+        url: "year-end/payprofit-badges-without-demographics",
         method: "GET",
         params: {
           take: params.pagination.take,
@@ -400,7 +400,7 @@ export const YearsEndApi = createApi({
       EmployeeWagesForYearRequestDto & { acceptHeader: string } & { archive?: boolean }
     >({
       query: (params) => ({
-        url: `yearend/wages-current-year${params.archive ? "?archive=true" : ""}`,
+        url: `year-end/wages-current-year${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -514,7 +514,7 @@ export const YearsEndApi = createApi({
       ExecutiveHoursAndDollarsRequestDto
     >({
       query: (params) => ({
-        url: "yearend/executive-hours-and-dollars",
+        url: "year-end/executive-hours-and-dollars",
         method: "GET",
         params: {
           take: params.pagination.take,
@@ -542,7 +542,7 @@ export const YearsEndApi = createApi({
       ExecutiveHoursAndDollarsRequestDto & { archive?: boolean }
     >({
       query: (params) => ({
-        url: `yearend/executive-hours-and-dollars${params.archive ? "?archive=true" : ""}`,
+        url: `year-end/executive-hours-and-dollars${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           take: params.pagination.take,
@@ -571,7 +571,7 @@ export const YearsEndApi = createApi({
       EligibleEmployeesRequestDto & { archive?: boolean }
     >({
       query: (params) => ({
-        url: `yearend/eligible-employees${params.archive ? "?archive=true" : ""}`,
+        url: `year-end/eligible-employees${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -593,7 +593,7 @@ export const YearsEndApi = createApi({
 
     getDistributionsByAge: builder.query<ProfitSharingDistributionsByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
-        url: "yearend/frozen/distributions-by-age",
+        url: "year-end/frozen/distributions-by-age",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -619,7 +619,7 @@ export const YearsEndApi = createApi({
         }
 
         return {
-          url: `yearend/frozen/contributions-by-age`,
+          url: "year-end/frozen/contributions-by-age",
           method: "GET",
           params: {
             profitYear: arg.profitYear,
@@ -646,7 +646,7 @@ export const YearsEndApi = createApi({
     }),
     getForfeituresByAge: builder.query<ForfeituresByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
-        url: "yearend/frozen/forfeitures-by-age",
+        url: "year-end/frozen/forfeitures-by-age",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -673,7 +673,7 @@ export const YearsEndApi = createApi({
       query: (params) => {
         const { suppressAllToastErrors, onlyNetworkToastErrors, archive } = params;
         return {
-          url: `yearend/frozen/forfeitures-and-points${archive ? "?archive=true" : ""}`,
+          url: `year-end/frozen/forfeitures-and-points${archive ? "?archive=true" : ""}`,
           method: "GET",
           params: {
             profitYear: params.profitYear,
@@ -697,7 +697,7 @@ export const YearsEndApi = createApi({
     }),
     getBalanceByAge: builder.query<BalanceByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
-        url: "yearend/frozen/balance-by-age",
+        url: "year-end/frozen/balance-by-age",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -715,7 +715,7 @@ export const YearsEndApi = createApi({
     }),
     getBalanceByYears: builder.query<BalanceByYears, FrozenReportsByAgeRequest>({
       query: (params) => ({
-        url: "yearend/frozen/balance-by-years",
+        url: "year-end/frozen/balance-by-years",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -733,7 +733,7 @@ export const YearsEndApi = createApi({
     }),
     getVestingAmountByAge: builder.query<VestedAmountsByAge, ProfitYearRequest & { acceptHeader: string }>({
       query: (params) => ({
-        url: "yearend/frozen/vested-amounts-by-age",
+        url: "year-end/frozen/vested-amounts-by-age",
         method: "GET",
         params: {
           profitYear: params.profitYear
@@ -796,7 +796,7 @@ export const YearsEndApi = createApi({
         }
 
         return {
-          url: `yearend/terminated-employees${params.archive === true ? "?archive=true" : ""}`,
+          url: `year-end/terminated-employees${params.archive === true ? "?archive=true" : ""}`,
           method: "POST",
           body
         };
@@ -812,7 +812,7 @@ export const YearsEndApi = createApi({
     }),
     getProfitShareUpdate: builder.query<ProfitShareUpdateResponse, ProfitShareUpdateRequest>({
       query: (params) => ({
-        url: "yearend/profit-sharing-update",
+        url: "year-end/profit-sharing-update",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -850,7 +850,7 @@ export const YearsEndApi = createApi({
     }),
     getProfitShareEdit: builder.query<ProfitShareEditResponse, ProfitShareUpdateRequest>({
       query: (params) => ({
-        url: "yearend/profit-share-edit",
+        url: "year-end/profit-share-edit",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -883,7 +883,7 @@ export const YearsEndApi = createApi({
     }),
     getProfitMasterStatus: builder.query<ProfitMasterStatus, ProfitYearRequest>({
       query: (params) => ({
-        url: "yearend/profit-master-status",
+        url: "year-end/profit-master-status",
         method: "GET",
         params: {
           profitYear: params.profitYear
@@ -902,7 +902,7 @@ export const YearsEndApi = createApi({
 
     getUnder21BreakdownByStore: builder.query<Under21BreakdownByStoreResponse, Under21BreakdownByStoreRequest>({
       query: (params) => ({
-        url: "yearend/post-frozen/under-21-breakdown-by-store",
+        url: "year-end/post-frozen/under-21-breakdown-by-store",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -925,7 +925,7 @@ export const YearsEndApi = createApi({
     }),
     getPostFrozenUnder21: builder.query<ProfitSharingUnder21ReportResponse, ProfitSharingUnder21ReportRequest>({
       query: (params) => ({
-        url: "yearend/post-frozen-under-21",
+        url: "year-end/post-frozen-under-21",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -948,7 +948,7 @@ export const YearsEndApi = createApi({
     }),
     getUnder21Inactive: builder.query<Under21InactiveResponse, Under21InactiveRequest>({
       query: (params) => ({
-        url: "yearend/post-frozen/under-21-inactive",
+        url: "year-end/post-frozen/under-21-inactive",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -972,7 +972,7 @@ export const YearsEndApi = createApi({
 
     getUnder21Totals: builder.query<Under21TotalsResponse, Under21TotalsRequest>({
       query: (params) => ({
-        url: "yearend/post-frozen/totals",
+        url: "year-end/post-frozen/totals",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -996,7 +996,7 @@ export const YearsEndApi = createApi({
 
     getMasterApply: builder.mutation<ProfitShareMasterResponse, ProfitShareMasterApplyRequest>({
       query: (params) => ({
-        url: "yearend/profit-master-update",
+        url: "year-end/profit-master-update",
         method: "POST",
         body: params
       }),
@@ -1012,7 +1012,7 @@ export const YearsEndApi = createApi({
     }),
     getMasterRevert: builder.query<ProfitShareMasterResponse, ProfitYearRequest>({
       query: (params) => ({
-        url: "yearend/profit-master-revert",
+        url: "year-end/profit-master-revert",
         method: "GET",
         params: params
       }),
@@ -1028,7 +1028,7 @@ export const YearsEndApi = createApi({
     }),
     getProfitSharingLabels: builder.query<Paged<ProfitSharingLabel>, ProfitSharingLabelsRequest>({
       query: (params) => ({
-        url: "yearend/post-frozen/profit-sharing-labels",
+        url: "year-end/post-frozen/profit-sharing-labels",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -1055,7 +1055,7 @@ export const YearsEndApi = createApi({
       query: (params) => {
         const { pagination, archive, ...rest } = params;
         return {
-          url: `yearend/yearend-profit-sharing-report${archive === true ? "/?archive=true" : ""}`,
+          url: `year-end/yearend-profit-sharing-report${archive === true ? "/?archive=true" : ""}`,
           method: "POST",
           body: {
             ...rest,
@@ -1085,7 +1085,7 @@ export const YearsEndApi = createApi({
       query: (params) => {
         const { pagination, archive, ...rest } = params;
         return {
-          url: `yearend/yearend-profit-sharing-report${archive === true ? "/?archive=true" : ""}`,
+          url: `year-end/yearend-profit-sharing-report${archive === true ? "/?archive=true" : ""}`,
           method: "POST",
           body: {
             ...rest,
@@ -1113,7 +1113,7 @@ export const YearsEndApi = createApi({
       BadgeNumberRequest & { archive?: boolean }
     >({
       query: (params) => ({
-        url: `yearend/yearend-profit-sharing-report-totals${params.archive === true ? "/?archive=true" : ""}`,
+        url: `year-end/yearend-profit-sharing-report-totals${params.archive === true ? "/?archive=true" : ""}`,
         method: "POST",
         body: {
           ...params
@@ -1147,7 +1147,7 @@ export const YearsEndApi = createApi({
       BadgeNumberRequest & { archive?: boolean }
     >({
       query: (params) => ({
-        url: `yearend/yearend-profit-sharing-summary-report${params.archive === true ? "?archive=true" : ""}`,
+        url: `year-end/yearend-profit-sharing-summary-report${params.archive === true ? "?archive=true" : ""}`,
         method: "POST",
         body: {
           useFrozenData: params.useFrozenData,
@@ -1175,7 +1175,7 @@ export const YearsEndApi = createApi({
     }),
     getUpdateSummary: builder.query<UpdateSummaryResponse, UpdateSummaryRequestWithArchive>({
       query: (params) => ({
-        url: `yearend/frozen/update-summary`,
+        url: "year-end/frozen/update-summary",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -1197,7 +1197,7 @@ export const YearsEndApi = createApi({
     }),
     getControlSheet: builder.query<ControlSheetResponse, ControlSheetRequest>({
       query: (params) => ({
-        url: `yearend/post-frozen/control-sheet`,
+        url: "year-end/post-frozen/control-sheet",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -1218,20 +1218,20 @@ export const YearsEndApi = createApi({
     }),
     finalizeReport: builder.mutation<void, { profitYear: number }>({
       query: (params) => ({
-        url: "yearend/final",
+        url: "year-end/final",
         method: "POST",
         body: params
       })
     }),
     payBenReport: builder.query<PayBenReportResponse, PayBenReportRequest>({
       query: (params) => ({
-        url: "yearend/payben-report",
+        url: "year-end/payben-report",
         params
       })
     }),
     getCertificatesReport: builder.query<CertificatesReportResponse, CertificatePrintRequest>({
       query: (params) => ({
-        url: "yearend/post-frozen/certificates",
+        url: "year-end/post-frozen/certificates",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -1255,12 +1255,13 @@ export const YearsEndApi = createApi({
     }),
     downloadCertificatesFile: builder.query<Blob, CertificateDownloadRequest>({
       query: (params) => ({
-        url: "yearend/post-frozen/certificates/download",
+        url: "year-end/post-frozen/certificates/download",
         method: "GET",
         params: {
           profitYear: params.profitYear,
           badgeNumbers: params.badgeNumbers,
-          ssns: params.ssns
+          ssns: params.ssns,
+          isXerox: params.isXerox
         },
         responseHandler: (response) => response.blob()
       })

@@ -195,6 +195,8 @@ builder.Host.UseDefaultServiceProvider(options =>
 
 WebApplication app = builder.Build();
 
+app.Services.TryAddOpenApiSecuritySchemeFixProcessor();
+
 // Initialize metrics (resolve version) then register gauges
 GlobalMeter.InitializeFromServices(app.Services);
 GlobalMeter.RegisterObservableGauges();

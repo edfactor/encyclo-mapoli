@@ -2,7 +2,7 @@ using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
-using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Services.Adjustments;
 using Moq;
 using Shouldly;
 

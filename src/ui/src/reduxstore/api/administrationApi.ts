@@ -8,6 +8,7 @@ import {
   UpdateBankAccountRequest,
   UpdateBankRequest
 } from "../../types/administration/banks";
+import { CreateTaxCodeRequest, TaxCodeAdminDto, UpdateTaxCodeRequest } from "../../types/administration/tax-codes";
 import {
   CommentTypeDto,
   CreateCommentTypeRequest,
@@ -23,7 +24,7 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const AdministrationApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "administrationApi",
-  tagTypes: ["CommentTypes", "RmdFactors", "Banks", "BankAccounts"],
+  tagTypes: ["CommentTypes", "RmdFactors", "Banks", "BankAccounts", "TaxCodes"],
   // Disable caching to prevent sensitive data from persisting in browser
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
@@ -80,6 +81,42 @@ export const AdministrationApi = createApi({
         body
       }),
       invalidatesTags: ["CommentTypes"]
+    }),
+    getTaxCodes: builder.query<TaxCodeAdminDto[], void>({
+      query: () => ({
+        url: "administration/tax-codes",
+        method: "GET"
+      }),
+      transformResponse: (response: TaxCodeAdminDto[] | { items: TaxCodeAdminDto[]; count: number }) => {
+        if (Array.isArray(response)) {
+          return response;
+        }
+        return response.items || [];
+      },
+      providesTags: ["TaxCodes"]
+    }),
+    createTaxCode: builder.mutation<TaxCodeAdminDto, CreateTaxCodeRequest>({
+      query: (body) => ({
+        url: "administration/tax-codes",
+        method: "POST",
+        body
+      }),
+      invalidatesTags: ["TaxCodes"]
+    }),
+    updateTaxCode: builder.mutation<TaxCodeAdminDto, UpdateTaxCodeRequest>({
+      query: (body) => ({
+        url: "administration/tax-codes",
+        method: "PUT",
+        body
+      }),
+      invalidatesTags: ["TaxCodes"]
+    }),
+    deleteTaxCode: builder.mutation<boolean, string>({
+      query: (id) => ({
+        url: `administration/tax-codes/${id}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: ["TaxCodes"]
     }),
 
     // RMD Factors endpoints
@@ -198,6 +235,10 @@ export const {
   useGetCommentTypesQuery,
   useCreateCommentTypeMutation,
   useUpdateCommentTypeMutation,
+  useGetTaxCodesQuery,
+  useCreateTaxCodeMutation,
+  useUpdateTaxCodeMutation,
+  useDeleteTaxCodeMutation,
   useGetRmdFactorsQuery,
   useUpdateRmdFactorMutation,
   useGetAllBanksQuery,

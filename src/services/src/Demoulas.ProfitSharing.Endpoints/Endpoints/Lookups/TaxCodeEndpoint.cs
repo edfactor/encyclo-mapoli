@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
+using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
-public sealed class TaxCodeEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<TaxCodeResponse>>
+public sealed class TaxCodeEndpoint : ProfitSharingEndpoint<TaxCodeLookupRequest, Results<Ok<ListResponseDto<TaxCodeResponse>>, NotFound, ProblemHttpResult>>
 {
     private readonly ITaxCodeLookupService _taxCodeLookupService;
     private readonly ILogger<TaxCodeEndpoint> _logger;
@@ -52,15 +53,17 @@ public sealed class TaxCodeEndpoint : ProfitSharingResultResponseEndpoint<ListRe
         Group<LookupGroup>();
     }
 
-    protected override async Task<Results<Ok<ListResponseDto<TaxCodeResponse>>, NotFound, ProblemHttpResult>> HandleRequestAsync(CancellationToken ct)
+    protected override async Task<Results<Ok<ListResponseDto<TaxCodeResponse>>, NotFound, ProblemHttpResult>> HandleRequestAsync(
+        TaxCodeLookupRequest req,
+        CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
         try
         {
-            this.RecordRequestMetrics(HttpContext, _logger, new { });
+            this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var dto = await _taxCodeLookupService.GetTaxCodesAsync(ct);
+            var dto = await _taxCodeLookupService.GetTaxCodesAsync(req, ct);
 
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "tax-code-lookup"),

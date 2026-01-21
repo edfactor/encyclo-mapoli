@@ -58,7 +58,7 @@ export const AdhocApi = createApi({
     getRecentlyTerminatedReport: builder.query<RecentlyTerminatedResponse, StartAndEndDateRequest>({
       query: (params) => {
         return {
-          url: "adhoc/terminated-employees-report",
+          url: "ad-hoc/terminated-employees-report",
           method: "GET",
           params: {
             profitYear: params.profitYear,
@@ -84,7 +84,7 @@ export const AdhocApi = createApi({
     getTerminatedLettersReport: builder.query<TerminatedLettersResponse, TerminatedLettersRequest>({
       query: (params) => {
         return {
-          url: "adhoc/terminated-employees-report-needing-letter",
+          url: "ad-hoc/terminated-employees-report-needing-letter",
           method: "GET",
           params: {
             profitYear: params.profitYear,
@@ -110,7 +110,7 @@ export const AdhocApi = createApi({
     }),
     getTerminatedLettersDownload: builder.query<Blob, TerminatedLettersRequest>({
       query: (params) => ({
-        url: "adhoc/terminated-employees-report-needing-letter/download",
+        url: "ad-hoc/terminated-employees-report-needing-letter/download",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -118,6 +118,7 @@ export const AdhocApi = createApi({
           endingDate: params.endingDate,
           excludeZeroBalance: params.excludeZeroBalance,
           badgeNumbers: params.badgeNumbers,
+          isXerox: params.isXerox,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -139,7 +140,7 @@ export const AdhocApi = createApi({
         const badge = badgeDigits.length > 0 ? Number.parseInt(badgeDigits, 10) : undefined;
 
         return {
-          url: "adhoc/forfeiture-adjustments",
+          url: "ad-hoc/forfeiture-adjustments",
           method: "POST",
           body: {
             ssn,
@@ -189,7 +190,7 @@ export const AdhocApi = createApi({
       query: (params) => {
         const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
         return {
-          url: "adhoc/forfeiture-adjustments/update",
+          url: "ad-hoc/forfeiture-adjustments/update",
           method: "PUT",
           body: requestData,
           // Pass params through meta so middleware can access it
@@ -201,7 +202,7 @@ export const AdhocApi = createApi({
     updateForfeitureAdjustmentBulk: builder.mutation<ForfeitureAdjustmentDetail[], ForfeitureAdjustmentUpdateRequest[]>(
       {
         query: (params) => ({
-          url: "adhoc/forfeiture-adjustments/bulk-update",
+          url: "ad-hoc/forfeiture-adjustments/bulk-update",
           method: "PUT",
           body: params
         })
@@ -210,7 +211,7 @@ export const AdhocApi = createApi({
 
     adhocBeneficiariesReport: builder.query<adhocBeneficiariesReportResponse, AdhocBeneficiariesReportRequest>({
       query: (params) => ({
-        url: "adhoc/beneficiaries-report",
+        url: "ad-hoc/beneficiaries-report",
         method: "GET",
         params: {
           isAlsoEmployee: params.isAlsoEmployee,
@@ -238,7 +239,7 @@ export const AdhocApi = createApi({
 
     getBreakdownByStore: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
       query: (params) => ({
-        url: "adhoc/stores/breakdown",
+        url: "ad-hoc/stores/breakdown",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -269,7 +270,7 @@ export const AdhocApi = createApi({
     }),
     getBreakdownByStoreInactive: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store/inactive",
+        url: "ad-hoc/breakdown-by-store/inactive",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -304,7 +305,7 @@ export const AdhocApi = createApi({
       BreakdownByStoreRequest
     >({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store/inactive/withvestedbalance",
+        url: "ad-hoc/breakdown-by-store/inactive/withvestedbalance",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -339,7 +340,7 @@ export const AdhocApi = createApi({
       BreakdownByStoreAndDateRangeRequest
     >({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store/terminated/withvestedbalance",
+        url: "ad-hoc/breakdown-by-store/terminated/withvestedbalance",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -376,7 +377,7 @@ export const AdhocApi = createApi({
       BreakdownByStoreAndDateRangeRequest
     >({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store/terminated/withcurrentbalance/notvested",
+        url: "ad-hoc/breakdown-by-store/terminated/withcurrentbalance/notvested",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -414,7 +415,7 @@ export const AdhocApi = createApi({
       BreakdownByStoreRequest
     >({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store/terminated/withbeneficiaryallocation",
+        url: "ad-hoc/breakdown-by-store/terminated/withbeneficiaryallocation",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -452,7 +453,7 @@ export const AdhocApi = createApi({
       BreakdownByStoreAndDateRangeRequest
     >({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store/terminated/withbalanceactivity",
+        url: "ad-hoc/breakdown-by-store/terminated/withbalanceactivity",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -489,7 +490,7 @@ export const AdhocApi = createApi({
       BreakdownByStoreRequest
     >({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store/retired/withbalanceactivity",
+        url: "ad-hoc/breakdown-by-store/retired/withbalanceactivity",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -524,7 +525,7 @@ export const AdhocApi = createApi({
 
     getBreakdownByStoreMonthly: builder.query<PagedReportResponse<BreakdownByStoreEmployee>, BreakdownByStoreRequest>({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store/monthly",
+        url: "ad-hoc/breakdown-by-store/monthly",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -552,7 +553,7 @@ export const AdhocApi = createApi({
 
     getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
       query: (params) => ({
-        url: `adhoc/stores/${params.storeNumber}/breakdown/totals`,
+        url: `ad-hoc/stores/${params.storeNumber}/breakdown/totals`,
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -575,7 +576,7 @@ export const AdhocApi = createApi({
     }),
     getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
       query: (params) => ({
-        url: `adhoc/stores/breakdown/totals`,
+        url: "ad-hoc/stores/breakdown/totals",
         method: "GET",
         params: {
           profitYear: params.profitYear
@@ -597,7 +598,7 @@ export const AdhocApi = createApi({
       QPAY066BTerminatedWithVestedBalanceRequest
     >({
       query: (params) => ({
-        url: "adhoc/breakdown-by-store/terminated/withcurrentbalance/notvested",
+        url: "ad-hoc/breakdown-by-store/terminated/withcurrentbalance/notvested",
         method: "GET",
         params: {
           profitYear: params.profitYear,
@@ -613,7 +614,7 @@ export const AdhocApi = createApi({
     getAccountHistoryReport: builder.query<AccountHistoryReportPaginatedResponse, AccountHistoryReportRequest>({
       query: (params) => {
         return {
-          url: "/adhoc/divorce-report",
+          url: "/ad-hoc/divorce-report",
           method: "POST",
           body: {
             badgeNumber: params.badgeNumber,
@@ -629,7 +630,7 @@ export const AdhocApi = createApi({
     }),
     downloadAccountHistoryReportPdf: builder.mutation<Blob, Omit<AccountHistoryReportRequest, "pagination">>({
       query: (params) => ({
-        url: "/adhoc/divorce-report/export-pdf",
+        url: "/ad-hoc/divorce-report/export-pdf",
         method: "POST",
         body: {
           badgeNumber: params.badgeNumber,

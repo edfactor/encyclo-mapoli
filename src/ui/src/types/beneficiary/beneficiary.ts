@@ -62,7 +62,7 @@ export interface BeneficiaryDetailAPIRequest extends SortedPaginationRequestDto 
 }
 
 export interface BeneficiaryDetail {
-  id:number;
+  id: number;
   badgeNumber: number;
   psnSuffix: number;
   fullName?: string | null;

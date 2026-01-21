@@ -13,6 +13,15 @@ public class YeMatchOptions
     public string BaseDataDirectory { get; set; } = "/tmp/ye";
 
     /// <summary>
+    ///     READY schema name used for database connection string lookup.
+    ///     Connection strings are retrieved from user secrets using the pattern:
+    ///     YeMatch:{ReadySchemaName}:ReadyConnectionString
+    ///     YeMatch:{ReadySchemaName}:SmartConnectionString
+    ///     Examples: "tbherrmann", "mtpr3"
+    /// </summary>
+    public string ReadySchemaName { get; set; } = "tbherrmann";
+
+    /// <summary>
     ///     READY SSH host configuration
     /// </summary>
     public ReadyHostOptions ReadyHost { get; set; } = new();
@@ -96,6 +105,11 @@ public class YearEndDatesOptions
     public short ProfitYear { get; set; } = 2025;
 
     /// <summary>
+    ///     Profit sharing year
+    /// </summary>
+    public int ProfitYearCalendarYearEnd { get; set; } = 20251231;
+
+    /// <summary>
     ///     First Saturday date (YYMMDD format)
     /// </summary>
     public string FirstSaturday { get; set; } = "250104";
@@ -110,8 +124,12 @@ public class YearEndDatesOptions
     /// </summary>
     public string CutOffSaturday { get; set; } = "260103";
 
+    public string PriorProfitYearCalendarStart { get; set; } = "240101";
+
+    public string PriorProfitYearCalendarEnd { get; set; } = "241231";
+
     /// <summary>
-    ///     More than five years ago date (YYMMDD format)
+    ///     More than five years ago date (YYMMDD format), used for termination processing
     /// </summary>
     public string MoreThanFiveYears { get; set; } = "181231";
 }
@@ -181,7 +199,7 @@ public class JwtOptions
     public string Audience { get; set; } = "https://localhost:7141";
 
     /// <summary>
-    ///     Token expiration time in seconds. Defaults to 3600 (1 hour).
+    ///     Token expiration time in seconds. Defaults to 36000 (10 hours).
     /// </summary>
-    public int ExpirationSeconds { get; set; } = 3600;
+    public int ExpirationSeconds { get; set; } = 36000;
 }

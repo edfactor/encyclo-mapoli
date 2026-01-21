@@ -3,10 +3,10 @@ import { IconButton, Stack, Tooltip } from "@mui/material";
 import { ColDef, ValueParserParams } from "ag-grid-community";
 import { BankDto } from "../../../types/administration/banks";
 import {
-    createCityColumn,
-    createPhoneColumn,
-    createStateColumn,
-    createYesOrNoColumn
+  createCityColumn,
+  createPhoneColumn,
+  createStateColumn,
+  createYesOrNoColumn
 } from "../../../utils/gridColumnFactory";
 
 interface GetManageBanksColumnsOptions {
@@ -14,9 +14,7 @@ interface GetManageBanksColumnsOptions {
   setActiveTab: (tab: number, bank: { id: number; name: string } | null) => void;
 }
 
-export const GetManageBanksColumns = (
-  options: GetManageBanksColumnsOptions
-): ColDef[] => {
+export const GetManageBanksColumns = (options: GetManageBanksColumnsOptions): ColDef[] => {
   const { handleDisableBank, setActiveTab } = options;
 
   return [
@@ -98,15 +96,16 @@ export const GetManageBanksColumns = (
       cellRenderer: (params: { data: BankDto }) => {
         const bank = params.data;
         return (
-          <Stack direction="row" spacing={0.5}>
+          <Stack
+            direction="row"
+            spacing={0.5}>
             <Tooltip title="Manage Accounts">
               <IconButton
                 size="small"
                 color="primary"
                 onClick={() => {
                   setActiveTab(1, { id: bank.id, name: bank.name });
-                }}
-              >
+                }}>
                 <AccountBalance fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -116,8 +115,7 @@ export const GetManageBanksColumns = (
                   size="small"
                   color="error"
                   disabled={bank.isDisabled}
-                  onClick={() => handleDisableBank(bank.id)}
-                >
+                  onClick={() => handleDisableBank(bank.id)}>
                   <Block fontSize="small" />
                 </IconButton>
               </span>

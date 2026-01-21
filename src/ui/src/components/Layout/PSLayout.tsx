@@ -29,15 +29,20 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
   // Check if fake time banner will be displayed (skip API call if not authenticated)
   const { data: fakeTimeStatus } = useGetFakeTimeStatusQuery(undefined, {
     skip: !hasToken,
-    pollingInterval: 60000
+    pollingInterval: 120000
   });
 
   const isFakeTimeBannerVisible = hasToken && fakeTimeStatus?.isActive;
   const fakeTimeBannerHeight = 24; // Approximate height of fake time banner in pixels
 
-  // Adjust positions when fake time banner is visible
-  const appBannerTop = isFakeTimeBannerVisible ? 52 + fakeTimeBannerHeight : 52;
-  const contentMarginTop = isFakeTimeBannerVisible ? 110 + fakeTimeBannerHeight : 110;
+  // EnvironmentBanner only renders for non-production environments
+  const showsEnvironmentBanner = environmentMode && environmentMode !== "production";
+  const envBannerHeight = showsEnvironmentBanner ? 52 : 0;
+
+  // Adjust positions based on which banners are visible
+  const appBannerTop = envBannerHeight + (isFakeTimeBannerVisible ? fakeTimeBannerHeight : 0);
+  const menuBarTop = appBannerTop + 52; // 52px is app banner height
+  const contentMarginTop = menuBarTop + 44; // 44px is approximate menu bar height
 
   return (
     <div
@@ -75,9 +80,11 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
               zIndex: 1000
             }}>
             <div
-              className="app-banner fixed w-full bg-white"
+              className="fixed flex h-[52px] w-full items-center justify-between bg-dsm-app-banner px-5 shadow-[0px_2px_4px_-1px_rgba(0,0,0,0.2),0px_4px_5px_0px_rgba(0,0,0,0.14),0px_1px_10px_0px_rgba(0,0,0,0.12)]"
               style={{ top: `${appBannerTop}px` }}>
-              <div className="text">{appTitle}</div>
+              <div className="font-lato text-[2rem] font-bold uppercase tracking-[0.4rem] text-[#db1532]">
+                {appTitle}
+              </div>
               <WelcomeDisplay {...welcomeDisplayProps} />
             </div>
           </Grid>

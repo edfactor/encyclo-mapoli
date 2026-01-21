@@ -1,5 +1,18 @@
 import PageErrorBoundary from "@/components/PageErrorBoundary";
-import { Alert, Button, Divider, Grid } from "@mui/material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import {
+  Alert,
+  Button,
+  ButtonGroup,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  Menu,
+  MenuItem
+} from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useFakeTimeAwareYear } from "hooks/useFakeTimeAwareDate";
 import useNavigationYear from "hooks/useNavigationYear";
@@ -7,7 +20,6 @@ import React, { useState } from "react";
 import { useGetMissingAnnuityYearsQuery } from "reduxstore/api/administrationApi";
 import { useLazyDownloadCertificatesFileQuery } from "reduxstore/api/YearsEndApi";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { downloadFileFromResponse } from "utils/fileDownload";
 import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import { CAPTIONS } from "../../../constants";
 import ReprintCertificatesFilterSection, { ReprintCertificatesFilterParams } from "./ReprintCertificatesFilterSection";
@@ -50,7 +62,17 @@ const ReprintCertificates: React.FC = () => {
   const [selectedBadgeNumbers, setSelectedBadgeNumbers] = useState<number[]>([]);
   const [errorDialog, setErrorDialog] = useState<{ title: string; message: string } | null>(null);
 
-  const [downloadCertificatesFile] = useLazyDownloadCertificatesFileQuery();
+  const [downloadCertificatesFile, { isFetching: isDownloading }] = useLazyDownloadCertificatesFileQuery();
+
+  const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
+  const [printContent, setPrintContent] = useState("");
+  const [printDialogTitle, setPrintDialogTitle] = useState("Print Preview - Profit Certificates");
+  const [isXerox, setIsXerox] = useState(false);
+  const [printerMenuAnchorEl, setPrinterMenuAnchorEl] = useState<null | HTMLElement>(null);
+
+  const printModeLabel = isXerox ? "Xerox" : "Default";
+  const printDialogTitleWithMode = `${printDialogTitle} (${printModeLabel})`;
+  const isPrinterMenuOpen = Boolean(printerMenuAnchorEl);
 
   const handleFilterChange = (params: ReprintCertificatesFilterParams) => {
     setFilterParams(params);
@@ -70,34 +92,32 @@ const ReprintCertificates: React.FC = () => {
     setSelectedBadgeNumbers(badgeNumbers);
   };
 
-  const handleTestPrint = async () => {
-    try {
-      const result = await downloadCertificatesFile({
-        profitYear: filterParams.profitYear,
-        badgeNumbers: selectedBadgeNumbers
-      });
+  const handleOpenPrinterMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setPrinterMenuAnchorEl(event.currentTarget);
+  };
 
-      if ("data" in result && result.data) {
-        await downloadFileFromResponse(Promise.resolve({ data: result.data }), "PAYCERT-TEST.txt");
-      }
-    } catch (error) {
-      console.error("Test print failed:", error);
-      setErrorDialog({
-        title: "Test Print Failed",
-        message: "Unable to generate the test print file. Please verify your selections and try again."
-      });
-    }
+  const handleClosePrinterMenu = () => {
+    setPrinterMenuAnchorEl(null);
+  };
+
+  const handleSelectPrinter = (value: "default" | "xerox") => {
+    setIsXerox(value === "xerox");
+    handleClosePrinterMenu();
   };
 
   const handlePrint = async () => {
     try {
       const result = await downloadCertificatesFile({
         profitYear: filterParams.profitYear,
-        badgeNumbers: selectedBadgeNumbers
+        badgeNumbers: selectedBadgeNumbers,
+        isXerox: isXerox
       });
 
       if ("data" in result && result.data) {
-        await downloadFileFromResponse(Promise.resolve({ data: result.data }), "PAYCERT.txt");
+        const text = await (result.data as Blob).text();
+        setPrintContent(text);
+        setPrintDialogTitle("Print Preview - Profit Certificates");
+        setIsPrintDialogOpen(true);
       }
     } catch (error) {
       console.error("Print failed:", error);
@@ -108,24 +128,86 @@ const ReprintCertificates: React.FC = () => {
     }
   };
 
+  const printCertificates = (content: string, title: string) => {
+    const escapeHtml = (text: string) => {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    };
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>${title}</title>
+            <style>
+              body {
+                font-family: monospace;
+                font-size: 12px;
+                white-space: pre-wrap;
+                margin: 20px;
+              }
+              @media print {
+                body { margin: 0; }
+                @page {
+                  margin: 0;
+                  size: auto;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            ${escapeHtml(content)}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      setTimeout(() => printWindow.close(), 1000);
+    } else {
+      setErrorDialog({
+        title: "Print Failed",
+        message: "Unable to open the print window. Please check your popup blocker settings."
+      });
+    }
+  };
+
   const renderActionNode = () => {
     return (
       <div className="flex h-10 items-center gap-2">
         <StatusDropdownActionNode />
-        <Button
-          onClick={handleTestPrint}
-          variant="outlined"
-          disabled={selectedBadgeNumbers.length === 0}
-          className="h-10 min-w-fit whitespace-nowrap">
-          TEST PRINT {selectedBadgeNumbers.length > 0 && `(${selectedBadgeNumbers.length})`}
-        </Button>
-        <Button
-          onClick={handlePrint}
+        <ButtonGroup
           variant="contained"
-          disabled={selectedBadgeNumbers.length === 0}
-          className="h-10 min-w-fit whitespace-nowrap">
-          PRINT {selectedBadgeNumbers.length > 0 && `(${selectedBadgeNumbers.length})`}
-        </Button>
+          className="h-10">
+          <Button
+            onClick={handlePrint}
+            disabled={selectedBadgeNumbers.length === 0 || isDownloading}
+            className="h-10 min-w-fit whitespace-nowrap">
+            {isDownloading
+              ? "Generating..."
+              : `PRINT ${selectedBadgeNumbers.length > 0 ? `(${selectedBadgeNumbers.length})` : ""}`}
+          </Button>
+          <Button
+            onClick={handleOpenPrinterMenu}
+            className="h-10 min-w-0 px-2"
+            aria-label="Select printer"
+            aria-controls={isPrinterMenuOpen ? "reprint-certificates-printer-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={isPrinterMenuOpen ? "true" : undefined}>
+            <ArrowDropDownIcon />
+          </Button>
+        </ButtonGroup>
+        <Menu
+          id="reprint-certificates-printer-menu"
+          anchorEl={printerMenuAnchorEl}
+          open={isPrinterMenuOpen}
+          onClose={handleClosePrinterMenu}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}>
+          <MenuItem onClick={() => handleSelectPrinter("default")}>Default</MenuItem>
+          <MenuItem onClick={() => handleSelectPrinter("xerox")}>Xerox</MenuItem>
+        </Menu>
       </div>
     );
   };
@@ -176,6 +258,24 @@ const ReprintCertificates: React.FC = () => {
           description={errorDialog?.message || "An error occurred"}
           onClose={() => setErrorDialog(null)}
         />
+        <Dialog
+          open={isPrintDialogOpen}
+          onClose={() => setIsPrintDialogOpen(false)}
+          maxWidth="md"
+          fullWidth>
+          <DialogTitle>{printDialogTitleWithMode}</DialogTitle>
+          <DialogContent>
+            <pre className="whitespace-pre-wrap font-mono text-xs">{printContent}</pre>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="contained"
+              onClick={() => printCertificates(printContent, printDialogTitleWithMode)}>
+              Print
+            </Button>
+            <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
       </Page>
     </PageErrorBoundary>
   );

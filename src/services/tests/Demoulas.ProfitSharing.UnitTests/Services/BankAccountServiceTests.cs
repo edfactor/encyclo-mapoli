@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
 using Demoulas.ProfitSharing.Common.Interfaces.Administration;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
