@@ -15,26 +15,26 @@ namespace Demoulas.ProfitSharing.Services.Lookup;
 public sealed class StoreLookupService : IStoreLookupService
 {
     private readonly IStoreService _commonStoreService;
-    private readonly IProfitSharingDataContextFactory _profitSharingDataContext;
+    private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
     public StoreLookupService(
         IStoreService commonStoreService,
-        IProfitSharingDataContextFactory profitSharingDataContext)
+        IProfitSharingDataContextFactory dataContextFactory)
     {
         _commonStoreService = commonStoreService;
-        _profitSharingDataContext = profitSharingDataContext;
+        _dataContextFactory = dataContextFactory;
     }
 
     public Task<List<StoreListResponse>> GetStoresAsync(
         StoreListRequest request,
         CancellationToken cancellationToken)
     {
-        return _profitSharingDataContext.UseWarehouseContext(async ctx =>
+        return _dataContextFactory.UseWarehouseContext(async ctx =>
         {
             // Build base query based on status filter
             IQueryable<StoreInformation> query = request.Status switch
             {
-                StoreStatusFilter.Unopened => await BuildUnopenedStoresQuery(cancellationToken),
+                StoreStatusFilter.Unopened => await BuildUnopenedStoresQuery(ctx, cancellationToken),
                 StoreStatusFilter.Active => _commonStoreService.GetActiveStoresQuery(ctx),
                 _ => _commonStoreService.GetAllStoresQuery(ctx)
             };
@@ -43,6 +43,13 @@ public sealed class StoreLookupService : IStoreLookupService
             if (request.StoreType == StoreTypeFilter.Retail)
             {
                 query = query.Where(s => s.StoreId < 899);
+            }
+
+            // Apply virtual stores filter
+            if (!request.IncludeVirtualStores)
+            {
+                // Virtual stores are typically in the 900+ range
+                query = query.Where(s => s.StoreId < 900);
             }
 
             // Execute query and get stores
@@ -56,51 +63,39 @@ public sealed class StoreLookupService : IStoreLookupService
         });
     }
 
-    public async Task<StoreListResponse?> GetStoreByIdAsync(
+    public Task<StoreListResponse?> GetStoreByIdAsync(
         int storeId,
         CancellationToken cancellationToken)
     {
-        // Get max batch date
-        var maxBatchDate = await _commonStoreService.GetMaxBatchDateAsync(
-            _warehouseContext,
-            cancellationToken: cancellationToken) ?? DateTime.UtcNow;
-
-        // Get single store
-        var store = await _commonStoreService
-            .GetStoreLocationQuery(_warehouseContext, (short)storeId)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (store == null)
+        return _dataContextFactory.UseWarehouseContext(async ctx =>
         {
-            return null;
-        }
+            // Get single store
+            var store = await _commonStoreService
+                .GetStoreLocationQuery(ctx, (short)storeId)
+                .FirstOrDefaultAsync(cancellationToken);
 
-        // Get departments for this store
-        var departments = await _commonStoreService
-            .GetStoreDepartmentsQuery(_warehouseContext, new[] { (short)storeId })
-            .Select(d => d.DepartmentId.ToString())
-            .ToListAsync(cancellationToken);
+            if (store == null)
+            {
+                return null;
+            }
 
-        var departmentsByStore = new Dictionary<short, List<string>>
-        {
-            { (short)storeId, departments }
-        };
-
-        return MapToStoreListResponse(store);
+            return MapToStoreListResponse(store);
+        });
     }
 
     private async Task<IQueryable<StoreInformation>> BuildUnopenedStoresQuery(
+        IDemoulasCommonWarehouseContext ctx,
         CancellationToken cancellationToken)
     {
         // Get list of unopened store IDs
         var unopenedStoreIds = await _commonStoreService
-            .GetUnopenedStoresQuery(_warehouseContext)
+            .GetUnopenedStoresQuery(ctx)
             .ToListAsync(cancellationToken);
 
         // Return query for these stores (or empty if none)
         return unopenedStoreIds.Any()
-            ? _commonStoreService.GetStoreLocationsByNumbersQuery(_warehouseContext, unopenedStoreIds)
-            : _warehouseContext.Stores.Where(s => false); // Empty query
+            ? _commonStoreService.GetStoreLocationsByNumbersQuery(ctx, unopenedStoreIds)
+            : ctx.Stores.Where(s => false); // Empty query
     }
 
     private static StoreListResponse MapToStoreListResponse(
