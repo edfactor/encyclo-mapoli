@@ -327,7 +327,7 @@ export const useTerminatedLetters = () => {
     }
   }, [state.selectedRows, triggerDownload, addAlert, isXerox]);
 
-  const printTerminatedLetters = useCallback((content: string, title: string) => {
+  const printTerminatedLetters = useCallback((content: string, title = "Print Preview") => {
     const printWindow = window.open("", "_blank");
     if (printWindow) {
       printWindow.document.write(`

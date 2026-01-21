@@ -5,7 +5,7 @@ import { AdhocProfLetter73FilterParams } from "../AdhocProfLetter73SearchFilter"
 export const useAdhocProfLetter73Print = (
   filterParams: AdhocProfLetter73FilterParams | null,
   selectedRows: Record<string, unknown>[],
-  isXerox: boolean
+  isXerox = false
 ) => {
   const [triggerDownload] = useLazyDownloadAdhocProfLetter73FormLetterQuery();
 
@@ -90,7 +90,7 @@ export const useAdhocProfLetter73Print = (
     }
   }, [filterParams, selectedRows, triggerDownload, isXerox]);
 
-  const printFormLetter = useCallback((content: string, title: string) => {
+  const printFormLetter = useCallback((content: string, title = "Print Preview") => {
     const escapeHtml = (text: string) => {
       const div = document.createElement("div");
       div.textContent = text;
